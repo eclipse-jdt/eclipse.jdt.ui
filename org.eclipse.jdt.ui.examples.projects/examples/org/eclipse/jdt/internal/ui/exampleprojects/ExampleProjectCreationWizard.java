@@ -43,8 +43,8 @@ import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 public class ExampleProjectCreationWizard extends Wizard implements INewWizard, IExecutableExtension {
 
-	private ExampleProjectCreationWizardPage[] fPages;
 	private IConfigurationElement fConfigElement;
+	private ExampleProjectCreationWizardPage fPage;
 
 	public ExampleProjectCreationWizard() {
 		super();
@@ -53,13 +53,11 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 		setNeedsProgressMonitor(true);
 	}
 	
-	private void initializeDefaultPageImageDescriptor() {
-		if (fConfigElement != null) {
-			String banner= fConfigElement.getAttribute("banner"); //$NON-NLS-1$
-			if (banner != null) {
-				ImageDescriptor desc= ExampleProjectsPlugin.getDefault().getImageDescriptor(banner);
-				setDefaultPageImageDescriptor(desc);
-			}
+	private void initializeDefaultPageImageDescriptor(IConfigurationElement pageConfigElement) {
+		String banner= pageConfigElement.getAttribute("banner"); //$NON-NLS-1$
+		if (banner != null) {
+			ImageDescriptor desc= ExampleProjectsPlugin.getDefault().getImageDescriptor(banner);
+			setDefaultPageImageDescriptor(desc);
 		}
 	}
 
@@ -68,18 +66,8 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 	 */	
 	public void addPages() {
 		super.addPages();
-		
-		IConfigurationElement[] children = fConfigElement.getChildren("projectsetup"); //$NON-NLS-1$
-		if (children == null || children.length == 0) {
-			ExampleProjectsPlugin.log("descriptor must contain one ore more projectsetup tags"); //$NON-NLS-1$
-			return;
-		}
-		
-		fPages=  new ExampleProjectCreationWizardPage[children.length];
-		
-		for (int i= 0; i < children.length; i++) {
-			fPages[i]= new ExampleProjectCreationWizardPage(i, children[i]);
-			addPage(fPages[i]);
+		if (fPage != null) {
+			addPage(fPage);
 		}
 	}
 	
@@ -87,21 +75,23 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 	 * @see Wizard#performFinish
 	 */		
 	public boolean performFinish() {
-		ExampleProjectCreationOperation runnable= new ExampleProjectCreationOperation(fPages, new ImportOverwriteQuery());
-		
-		IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
-		try {
-			getContainer().run(false, true, op);
-		} catch (InvocationTargetException e) {
-			handleException(e.getTargetException());
-			return false;
-		} catch  (InterruptedException e) {
-			return false;
-		}
-		BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
-		IResource res= runnable.getElementToOpen();
-		if (res != null) {
-			openResource(res);
+		if (fPage != null) {
+			ExampleProjectCreationOperation runnable= new ExampleProjectCreationOperation(fPage, new ImportOverwriteQuery());
+			
+			IRunnableWithProgress op= new WorkspaceModifyDelegatingOperation(runnable);
+			try {
+				getContainer().run(false, true, op);
+			} catch (InvocationTargetException e) {
+				handleException(e.getTargetException());
+				return false;
+			} catch  (InterruptedException e) {
+				return false;
+			}
+			BasicNewProjectResourceWizard.updatePerspective(fConfigElement);
+			IResource res= runnable.getElementToOpen();
+			if (res != null) {
+				openResource(res);
+			}
 		}
 		return true;
 	}
@@ -143,14 +133,20 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 		}
 	}	
 		
-	/**
+	/*
 	 * Stores the configuration element for the wizard.  The config element will be used
 	 * in <code>performFinish</code> to set the result perspective.
 	 */
 	public void setInitializationData(IConfigurationElement cfig, String propertyName, Object data) {
 		fConfigElement= cfig;
-		
-		initializeDefaultPageImageDescriptor();
+		IConfigurationElement[] children= cfig.getChildren("projectsetup"); //$NON-NLS-1$
+		if (children == null || children.length != 1) {
+			ExampleProjectsPlugin.log("descriptor must contain one project setup tag"); //$NON-NLS-1$
+		} else {
+			IConfigurationElement pageConfigElement= children[0];
+			fPage= new ExampleProjectCreationWizardPage(0, pageConfigElement);
+			initializeDefaultPageImageDescriptor(pageConfigElement);
+		}
 	}
 	
 	// overwrite dialog

@@ -20,38 +20,26 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IExtension;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IPluginDescriptor;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
+import org.eclipse.core.runtime.*;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-
 import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.wizards.datatransfer.ImportOperation;
 import org.eclipse.ui.wizards.datatransfer.ZipFileStructureProvider;
+import org.osgi.framework.Bundle;
 
 public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 
 	private IResource fElementToOpen;
 	
-	private ExampleProjectCreationWizardPage[] fPages;
+	private ExampleProjectCreationWizardPage fPage;
 	private IOverwriteQuery fOverwriteQuery;
 	
-	/**
+	/*
 	 * Constructor for ExampleProjectCreationOperation
 	 */
-	public ExampleProjectCreationOperation(ExampleProjectCreationWizardPage[] pages, IOverwriteQuery overwriteQuery) {
+	public ExampleProjectCreationOperation(ExampleProjectCreationWizardPage page, IOverwriteQuery overwriteQuery) {
 		fElementToOpen= null;
-		fPages= pages;
+		fPage= page;
 		fOverwriteQuery= overwriteQuery;
 	}
 	
@@ -63,12 +51,7 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			monitor.beginTask(ExampleProjectMessages.ExampleProjectCreationOperation_op_desc, fPages.length); 
-			IWorkspaceRoot root= ExampleProjectsPlugin.getWorkspace().getRoot();
-			
-			for (int i= 0; i < fPages.length; i++) {
-				createProject(root, fPages[i], new SubProgressMonitor(monitor, 1));
-			}
+			createProject(fPage, monitor);
 		} finally {
 			monitor.done();
 		}
@@ -79,8 +62,11 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 	}
 	
 
-	private void createProject(IWorkspaceRoot root, ExampleProjectCreationWizardPage page, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+	private void createProject(ExampleProjectCreationWizardPage page, IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+		IWorkspaceRoot root= ExampleProjectsPlugin.getWorkspace().getRoot();
 		IConfigurationElement desc= page.getConfigurationElement();
+		
+		String encoding= desc.getAttribute("encoding"); //$NON-NLS-1$
 		
 		IConfigurationElement[] imports= desc.getChildren("import"); //$NON-NLS-1$
 		IConfigurationElement[] natures= desc.getChildren("nature"); //$NON-NLS-1$
@@ -89,7 +75,7 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 		int nNatures= (natures == null) ? 0 : natures.length;
 		int nReferences= (references == null) ? 0 : references.length;
 		
-		monitor.beginTask(ExampleProjectMessages.ExampleProjectCreationOperation_op_desc_proj, nImports + 1); 
+		monitor.beginTask(ExampleProjectMessages.ExampleProjectCreationOperation_op_desc_proj, nImports + 2); 
 
 		String name= page.getName();
 		
@@ -102,7 +88,7 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 			referencedProjects[i]= root.getProject(references[i].getAttribute("id")); //$NON-NLS-1$
 		}		
 		
-		IProject proj= configNewProject(root, name, natureIds, referencedProjects, monitor);
+		IProject proj= configNewProject(root, name, natureIds, referencedProjects, encoding, monitor);
 			
 		for (int i= 0; i < nImports; i++) {
 			doImports(proj, imports[i], new SubProgressMonitor(monitor, 1));
@@ -118,7 +104,7 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 		
 	}
 	
-	private IProject configNewProject(IWorkspaceRoot root, String name, String[] natureIds, IProject[] referencedProjects, IProgressMonitor monitor) throws InvocationTargetException {
+	private IProject configNewProject(IWorkspaceRoot root, String name, String[] natureIds, IProject[] referencedProjects, String encoding, IProgressMonitor monitor) throws InvocationTargetException {
 		try {
 			IProject project= root.getProject(name);
 			if (!project.exists()) {
@@ -134,6 +120,10 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 			
 			project.setDescription(desc, new SubProgressMonitor(monitor, 1));
 
+			if (encoding != null) {
+				project.setDefaultCharset(encoding, new SubProgressMonitor(monitor, 1));
+			}
+			
 			return project;
 		} catch (CoreException e) {
 			throw new InvocationTargetException(e);
@@ -167,19 +157,14 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 		}
 	}
 	
-	private IPluginDescriptor getContributingPlugin(IConfigurationElement configurationElement) {
-		Object parent= configurationElement;
-		while(parent != null) {
-			if (parent instanceof IExtension)
-				return ((IExtension)parent).getDeclaringPluginDescriptor();
-			parent= ((IConfigurationElement)parent).getParent();
-		}
-		return null;
+	private Bundle getContributingPlugin(IConfigurationElement configurationElement) {
+		String namespace= configurationElement.getNamespace();
+		return Platform.getBundle(namespace);
 	}
 
-	private ZipFile getZipFileFromPluginDir(String pluginRelativePath, IPluginDescriptor pluginDescriptor) throws CoreException {
+	private ZipFile getZipFileFromPluginDir(String pluginRelativePath, Bundle pluginDescriptor) throws CoreException {
 		try {
-			URL starterURL= new URL(pluginDescriptor.getInstallURL(), pluginRelativePath);
+			URL starterURL= pluginDescriptor.getEntry(pluginRelativePath);
 			return new ZipFile(Platform.asLocalURL(starterURL).getFile());
 		} catch (IOException e) {
 			String message= pluginRelativePath + ": " + e.getMessage(); //$NON-NLS-1$

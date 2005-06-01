@@ -80,6 +80,7 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		
 		fTextControl= new Text(composite, SWT.SINGLE | SWT.BORDER);
 		fTextControl.setText(fProjectName);
+		fTextControl.setSelection(fProjectName.length());
 		fTextControl.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
 				if (!fTextControl.isDisposed()) {
@@ -89,8 +90,12 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		});
 		fTextControl.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		
+		fTextControl.setFocus();
+		
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
+		
+		validateText(fProjectName);
 	}
 
 	private void validateText(String text) {
@@ -121,7 +126,7 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		updateStatus(fCurrStatus);
 	}	
 
-	/**
+	/*
 	 * Updates the status line and the ok button depending on the status
 	 */
 	private void updateStatus(IStatus status) {
@@ -132,7 +137,7 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 		}
 	}
 
-	/**
+	/*
 	 * Applies the status to a dialog page
 	 */
 	private static void applyToStatusLine(DialogPage page, IStatus status) {
@@ -156,7 +161,7 @@ public class ExampleProjectCreationWizardPage extends WizardPage {
 	}
 	
 	/**
-	 * Returns the name entered by the user
+	 * @return Returns the name entered by the user
 	 */
 	public String getName() {
 		return fProjectName;

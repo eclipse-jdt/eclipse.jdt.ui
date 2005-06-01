@@ -14,10 +14,9 @@
       <import plugin="org.eclipse.ui.ide"/>
       <import plugin="org.eclipse.core.resources"/>
       <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.core.runtime.compatibility"/>
-      
+      <import plugin="org.eclipse.core.runtime"/>
    </requires>
-
+   <extension-point id="exampleProject" name="Example Project" schema="schema/exampleProject.exsd"/>
 
    <extension
          point="org.eclipse.ui.newWizards">
@@ -38,6 +37,8 @@
             %JUnitProjectExampleCreationWizard.description
          </description>
          <projectsetup
+         	   banner="icons/full/wizban/newjprjex_wiz.gif"
+         	   encoding="Cp1252"
                pagetitle="%JUnitProjectExampleCreationWizard.pagetitle"
                name="JUnit"
                label="%JUnitProjectExampleCreationWizard.label"

@@ -10,17 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.exampleprojects;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
-
 import org.eclipse.jface.resource.ImageDescriptor;
-
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 /**
@@ -34,37 +30,31 @@ public class ExampleProjectsPlugin extends AbstractUIPlugin {
 	/**
 	 * The constructor.
 	 */
-	public ExampleProjectsPlugin(IPluginDescriptor descriptor) {
-		super(descriptor);
+	public ExampleProjectsPlugin() {
 		fgPlugin= this;
 	}
 
-
 	/**
-	 * Returns the shared instance.
+	 * @return Returns the shared instance.
 	 */
 	public static ExampleProjectsPlugin getDefault() {
 		return fgPlugin;
 	}
 	
 	/**
-	 * Returns the workspace instance.
+	 * @return Returns the workspace instance.
 	 */
 	public static IWorkspace getWorkspace() {
 		return ResourcesPlugin.getWorkspace();
 	}
 
 	public ImageDescriptor getImageDescriptor(String name) {
-		try {
-			URL url= new URL(getDescriptor().getInstallURL(), name);
-			return ImageDescriptor.createFromURL(url);
-		} catch (MalformedURLException e) {
-			return ImageDescriptor.getMissingImageDescriptor();
-		}
+		URL url= ExampleProjectsPlugin.getDefault().getBundle().getEntry(name);
+		return ImageDescriptor.createFromURL(url);
 	}	
 	
 	public static String getPluginId() {
-		return getDefault().getDescriptor().getUniqueIdentifier();
+		return "org.eclipse.jdt.ui.examples.projects"; //$NON-NLS-1$
 	}	
 
 
