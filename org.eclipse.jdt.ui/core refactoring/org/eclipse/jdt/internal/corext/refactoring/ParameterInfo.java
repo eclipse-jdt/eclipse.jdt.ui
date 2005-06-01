@@ -160,7 +160,7 @@ public class ParameterInfo {
 			return typeName;
 	}
 	
-	private static boolean isVarargs(String typeName) {
+	public static boolean isVarargs(String typeName) {
 		return typeName.endsWith("..."); //$NON-NLS-1$
 	}
 

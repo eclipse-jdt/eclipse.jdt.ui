@@ -48,7 +48,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -532,55 +531,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 	}
 	
-
-	private static boolean isValidTypeName(String string, boolean isVoidAllowed){
-		if ("".equals(string.trim())) //speed up for a common case //$NON-NLS-1$
-			return false;
-		if (! string.trim().equals(string))
-			return false;
-		if (PrimitiveType.toCode(string) == PrimitiveType.VOID)
-			return isVoidAllowed;
-		if (! Checks.checkTypeName(string).hasFatalError())
-			return true;
-		if (isPrimitiveTypeName(string))
-			return true;
-		StringBuffer cuBuff= new StringBuffer();
-		cuBuff.append(CONST_CLASS_DECL);
-		int offset= cuBuff.length();
-		cuBuff.append(string)
-			  .append(CONST_ASSIGN)
-			  .append("null") //$NON-NLS-1$
-			  .append(CONST_CLOSE);
-		ASTParser p= ASTParser.newParser(AST.JLS3);
-		p.setSource(cuBuff.toString().toCharArray());
-		CompilationUnit cu= (CompilationUnit) p.createAST(null);
-		Selection selection= Selection.createFromStartLength(offset, string.length());
-		SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
-		cu.accept(analyzer);
-		ASTNode selected= analyzer.getFirstSelectedNode();
-		if (!(selected instanceof Type))
-			return false;
-		Type type= (Type)selected;
-		if (isVoidArrayType(type))
-			return false;
-		return string.equals(cuBuff.substring(type.getStartPosition(), ASTNodes.getExclusiveEnd(type)));
-	}
-
-	public static boolean isValidParameterTypeName(String string){
-		return isValidTypeName(string, false);
-	}
-	
-	private static boolean isVoidArrayType(Type type){
-		if (! type.isArrayType())
-			return false;
-		
-		ArrayType arrayType= (ArrayType)type;
-		if (! arrayType.getComponentType().isPrimitiveType())
-			return false;
-		PrimitiveType primitiveType= (PrimitiveType)arrayType.getComponentType();
-		return (primitiveType.getPrimitiveTypeCode() == PrimitiveType.VOID);
-	}
-	
 	public static boolean isValidExpression(String string){
 		String trimmed= string.trim();
 		if ("".equals(trimmed)) //speed up for a common case //$NON-NLS-1$
@@ -781,10 +731,6 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 	private void clearManagers() {
 		fChangeManager= null;
-	}
-	
-	private static boolean isPrimitiveTypeName(String typeName){
-		return PrimitiveType.toCode(typeName) != null;
 	}
 	
 	private RefactoringStatus checkVisibilityChanges() throws JavaModelException {

@@ -28,10 +28,13 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
+import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -173,13 +176,15 @@ public class ParameterEditDialog extends StatusDialog {
 	private IStatus validateType() {
 		if (fType == null)
 			return null;
-		String typeName= fType.getText();
-		if (typeName.length() == 0)
-			return createErrorStatus(RefactoringMessages.ParameterEditDialog_type_error);
-		if (ChangeSignatureRefactoring.isValidParameterTypeName(typeName))
+		String type= fType.getText();
+		
+		RefactoringStatus status= TypeContextChecker.checkParameterTypeSyntax(type, fContext.getCuHandle().getJavaProject());
+		if (status == null || status.isOK())
 			return createOkStatus();
-		String msg= Messages.format(RefactoringMessages.ParameterEditDialog_type_invalid, new String[]{typeName}); 
-		return createErrorStatus(msg); 
+		if (status.hasError())
+			return createErrorStatus(status.getEntryWithHighestSeverity().getMessage());
+		else
+			return createWarningStatus(status.getEntryWithHighestSeverity().getMessage());
 	}
 	
 	private IStatus validateName() {

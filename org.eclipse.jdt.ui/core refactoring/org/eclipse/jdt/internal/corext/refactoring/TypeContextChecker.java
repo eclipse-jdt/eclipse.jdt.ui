@@ -347,37 +347,7 @@ public class TypeContextChecker {
 		private RefactoringStatus checkParameterTypeSyntax(ParameterInfo info) {
 			if (! info.isAdded() && ! info.isTypeNameChanged())
 				return null;
-	
-			String newTypeName= ParameterInfo.stripEllipsis(info.getNewTypeName().trim()).trim();
-			
-			if ("".equals(newTypeName.trim())){ //$NON-NLS-1$
-				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_parameter_type, new String[]{info.getNewName()}); 
-				return RefactoringStatus.createFatalErrorStatus(msg);
-			}
-			
-			if (info.isNewVarargs() && ! JavaModelUtil.is50OrHigher(fMethod.getJavaProject())) {
-				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_no_vararg_below_50, new String[]{info.getNewName()}); 
-				return RefactoringStatus.createFatalErrorStatus(msg);
-			}
-			
-			List problemsCollector= new ArrayList(0);
-			Type parsedType= parseType(newTypeName, fMethod.getJavaProject(), problemsCollector);
-			boolean valid= parsedType != null;
-			if (valid && parsedType instanceof PrimitiveType)
-				valid= ! PrimitiveType.VOID.equals(((PrimitiveType) parsedType).getPrimitiveTypeCode());
-			if (! valid) {
-				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_type_name, new String[]{newTypeName}); 
-				return RefactoringStatus.createFatalErrorStatus(msg);
-			}
-			if (problemsCollector.size() == 0)
-				return null;
-			
-			RefactoringStatus result= new RefactoringStatus();
-			for (Iterator iter= problemsCollector.iterator(); iter.hasNext();) {
-				String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_type_syntax, new String[]{newTypeName, (String) iter.next()}); 
-				result.addError(msg);
-			}
-			return result;
+			return TypeContextChecker.checkParameterTypeSyntax(info.getNewTypeName(), fMethod.getJavaProject());
 		}
 		
 		private RefactoringStatus checkReturnTypeSyntax() {
@@ -403,43 +373,6 @@ public class TypeContextChecker {
 			return result;
 		}
 
-		private static Type parseType(String typeString, IJavaProject javaProject, List/*<IProblem>*/ problemsCollector) {
-			if ("".equals(typeString.trim())) //speed up for a common case //$NON-NLS-1$
-				return null;
-			if (! typeString.trim().equals(typeString))
-				return null;
-		
-			StringBuffer cuBuff= new StringBuffer();
-			cuBuff.append("interface A{"); //$NON-NLS-1$
-			int offset= cuBuff.length();
-			cuBuff.append(typeString).append(" m();}"); //$NON-NLS-1$
-		
-			ASTParser p= ASTParser.newParser(AST.JLS3);
-			p.setSource(cuBuff.toString().toCharArray());
-			p.setProject(javaProject);
-			CompilationUnit cu= (CompilationUnit) p.createAST(null);
-			Selection selection= Selection.createFromStartLength(offset, typeString.length());
-			SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
-			cu.accept(analyzer);
-			ASTNode selected= analyzer.getFirstSelectedNode();
-			if (!(selected instanceof Type))
-				return null;
-			Type type= (Type)selected;
-			if (MethodTypesSyntaxChecker.isVoidArrayType(type))
-				return null;
-			IProblem[] problems= ASTNodes.getProblems(type, ASTNodes.NODE_ONLY, ASTNodes.PROBLEMS);
-			if (problems.length > 0) {
-				for (int i= 0; i < problems.length; i++)
-					problemsCollector.add(problems[i].getMessage());
-			}
-			
-			String typeNodeRange= cuBuff.substring(type.getStartPosition(), ASTNodes.getExclusiveEnd(type));
-			if (typeString.equals(typeNodeRange))
-				return type;
-			else
-				return null;
-		}
-	
 		private static boolean isVoidArrayType(Type type){
 			if (! type.isArrayType())
 				return false;
@@ -451,6 +384,43 @@ public class TypeContextChecker {
 			return (primitiveType.getPrimitiveTypeCode() == PrimitiveType.VOID);
 		}
 	
+	}
+
+	private static Type parseType(String typeString, IJavaProject javaProject, List/*<IProblem>*/ problemsCollector) {
+		if ("".equals(typeString.trim())) //speed up for a common case //$NON-NLS-1$
+			return null;
+		if (! typeString.trim().equals(typeString))
+			return null;
+	
+		StringBuffer cuBuff= new StringBuffer();
+		cuBuff.append("interface A{"); //$NON-NLS-1$
+		int offset= cuBuff.length();
+		cuBuff.append(typeString).append(" m();}"); //$NON-NLS-1$
+	
+		ASTParser p= ASTParser.newParser(AST.JLS3);
+		p.setSource(cuBuff.toString().toCharArray());
+		p.setProject(javaProject);
+		CompilationUnit cu= (CompilationUnit) p.createAST(null);
+		Selection selection= Selection.createFromStartLength(offset, typeString.length());
+		SelectionAnalyzer analyzer= new SelectionAnalyzer(selection, false);
+		cu.accept(analyzer);
+		ASTNode selected= analyzer.getFirstSelectedNode();
+		if (!(selected instanceof Type))
+			return null;
+		Type type= (Type)selected;
+		if (MethodTypesSyntaxChecker.isVoidArrayType(type))
+			return null;
+		IProblem[] problems= ASTNodes.getProblems(type, ASTNodes.NODE_ONLY, ASTNodes.PROBLEMS);
+		if (problems.length > 0) {
+			for (int i= 0; i < problems.length; i++)
+				problemsCollector.add(problems[i].getMessage());
+		}
+		
+		String typeNodeRange= cuBuff.substring(type.getStartPosition(), ASTNodes.getExclusiveEnd(type));
+		if (typeString.equals(typeNodeRange))
+			return type;
+		else
+			return null;
 	}
 
 	private static ITypeBinding handleBug84585(ITypeBinding typeBinding) {
@@ -470,6 +440,39 @@ public class TypeContextChecker {
 	public static RefactoringStatus[] checkMethodTypesSyntax(IMethod method, List parameterInfos, ReturnTypeInfo returnTypeInfo) {
 		MethodTypesSyntaxChecker checker= new MethodTypesSyntaxChecker(method, parameterInfos, returnTypeInfo);
 		return checker.checkSyntax();
+	}
+	
+	public static RefactoringStatus checkParameterTypeSyntax(String type, IJavaProject project) {
+		String newTypeName= ParameterInfo.stripEllipsis(type.trim()).trim();
+		
+		if ("".equals(newTypeName.trim())){ //$NON-NLS-1$
+			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_parameter_type, new String[]{type}); 
+			return RefactoringStatus.createFatalErrorStatus(msg);
+		}
+		
+		if (ParameterInfo.isVarargs(type) && ! JavaModelUtil.is50OrHigher(project)) {
+			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_no_vararg_below_50, new String[]{type}); 
+			return RefactoringStatus.createFatalErrorStatus(msg);
+		}
+		
+		List problemsCollector= new ArrayList(0);
+		Type parsedType= parseType(newTypeName, project, problemsCollector);
+		boolean valid= parsedType != null;
+		if (valid && parsedType instanceof PrimitiveType)
+			valid= ! PrimitiveType.VOID.equals(((PrimitiveType) parsedType).getPrimitiveTypeCode());
+		if (! valid) {
+			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_type_name, new String[]{newTypeName}); 
+			return RefactoringStatus.createFatalErrorStatus(msg);
+		}
+		if (problemsCollector.size() == 0)
+			return null;
+		
+		RefactoringStatus result= new RefactoringStatus();
+		for (Iterator iter= problemsCollector.iterator(); iter.hasNext();) {
+			String msg= Messages.format(RefactoringCoreMessages.TypeContextChecker_invalid_type_syntax, new String[]{newTypeName, (String) iter.next()}); 
+			result.addError(msg);
+		}
+		return result;
 	}
 	
 	public static StubTypeContext createStubTypeContext(ICompilationUnit cu, CompilationUnit root, int focalPosition) throws CoreException {
