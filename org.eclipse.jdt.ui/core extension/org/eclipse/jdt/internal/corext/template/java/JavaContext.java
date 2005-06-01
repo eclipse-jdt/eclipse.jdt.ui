@@ -435,7 +435,8 @@ public class JavaContext extends CompilationUnitContext {
 		int memberDimensions= Signature.getArrayCount(memberTypeSig);
 		String elementTypeSig= Signature.getElementType(memberTypeSig);
 		
-		String fullName= Signature.toString(elementTypeSig);
+		String erasure= Signature.getTypeErasure(elementTypeSig);
+		String fullName= Signature.toString(erasure);
 		String memberPackage= Signature.getQualifier(fullName);
 		String memberTypeName= Signature.getSimpleName(fullName);
 
