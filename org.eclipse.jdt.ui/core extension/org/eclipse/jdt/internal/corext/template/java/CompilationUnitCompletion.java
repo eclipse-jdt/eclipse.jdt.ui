@@ -226,7 +226,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 				if (local != null)
 					names[i]= local;
 				else
-					names[i]= Signature.getSignatureSimpleName(sig);
+					names[i]= Signature.getSimpleName(Signature.getSignatureSimpleName(sig));
 			}
 			return names;
 		}
