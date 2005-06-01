@@ -14,6 +14,7 @@
 package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -302,6 +303,9 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 
 	private static class AddDelegateMethodsViewerSorter extends ViewerSorter {
 
+		private final BindingLabelProvider fProvider= new BindingLabelProvider();
+		private final Collator fCollator= Collator.getInstance();
+
 		public int category(Object element) {
 			if (element instanceof IBinding[])
 				return 0;
@@ -312,14 +316,14 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			String first= ""; //$NON-NLS-1$
 			String second= ""; //$NON-NLS-1$
 			if (object1 instanceof IBinding[])
-				first= Bindings.asString(((IBinding[]) object1)[1]);
+				first= fProvider.getText(((IBinding[]) object1)[1]);
 			else if (object1 instanceof IVariableBinding)
 				first= ((IBinding) object1).getName();
 			if (object2 instanceof IBinding[])
-				second= Bindings.asString(((IBinding[]) object2)[1]);
+				second= fProvider.getText(((IBinding[]) object2)[1]);
 			else if (object2 instanceof IVariableBinding)
 				second= ((IBinding) object2).getName();
-			return first.compareTo(second);
+			return fCollator.compare(first, second);
 		}
 	}
 
