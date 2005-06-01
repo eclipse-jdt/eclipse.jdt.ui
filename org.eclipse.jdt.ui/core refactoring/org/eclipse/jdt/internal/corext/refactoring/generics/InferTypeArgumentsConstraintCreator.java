@@ -295,11 +295,9 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	}
 
 	public void endVisit(TypeLiteral node) {
-		//TODO
-//		ITypeBinding typeBinding= node.resolveTypeBinding();
-//		ImmutableTypeVariable2 cv= fTCModel.makePlainTypeVariable(typeBinding);
-//		fTCModel.makeElementVariable(cv);
-//		setConstraintVariable(node, cv);
+		ITypeBinding typeBinding= node.resolveTypeBinding();
+		ImmutableTypeVariable2 cv= fTCModel.makeImmutableTypeVariable(typeBinding, node.getAST());
+		setConstraintVariable(node, cv);
 	}
 	
 	public void endVisit(MethodDeclaration node) {

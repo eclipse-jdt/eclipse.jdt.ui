@@ -496,8 +496,12 @@ public class InferTypeArgumentsTCModel {
 		
 		TType type= getBoxedType(typeBinding, ast);
 		ImmutableTypeVariable2 cv= new ImmutableTypeVariable2(type);
-		cv= (ImmutableTypeVariable2) storedCv(cv);
-		return cv;
+		ImmutableTypeVariable2 storedCv= (ImmutableTypeVariable2) storedCv(cv);
+		if (cv == storedCv) {
+			makeElementVariables(storedCv, type);
+			makeArrayElementVariable(storedCv);
+		}
+		return storedCv;
 	}
 	
 	public boolean isAGenericType(TType type) {
