@@ -18,8 +18,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -75,6 +77,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
@@ -909,7 +912,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		return new NullProgressMonitor();
 	}
 
-	protected void commitWorkingCopy(IProgressMonitor monitor, Object element, CompilationUnitInfo info, boolean overwrite) throws CoreException {
+	protected void commitWorkingCopy(IProgressMonitor monitor, Object element, final CompilationUnitInfo info, boolean overwrite) throws CoreException {
 
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
@@ -917,16 +920,26 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		monitor.beginTask("", 100); //$NON-NLS-1$
 
 		try {
-			IProgressMonitor subMonitor= getSubProgressMonitor(monitor, 50);
+			final IProgressMonitor subMonitor1= getSubProgressMonitor(monitor, 50);
 
 			try {
 				synchronized (info.fCopy) {
-					info.fCopy.reconcile(ICompilationUnit.NO_AST, false, null, subMonitor);
+					Platform.run(new ISafeRunnable() {
+						public void run() {
+							try {
+								info.fCopy.reconcile(ICompilationUnit.NO_AST, false, null, subMonitor1);
+							} catch (JavaModelException ex) {
+								handleException(ex);
+							}
+						}
+						public void handleException(Throwable ex) {
+							IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during reconcile while saving", ex);  //$NON-NLS-1$
+							JavaPlugin.getDefault().getLog().log(status);
+						}
+					});
 				}
-			} catch (JavaModelException ex) {
-				// Ignore: save anyway
 			} finally {
-				subMonitor.done();
+				subMonitor1.done();
 			}
 
 			IDocument document= info.fTextFileBuffer.getDocument();
@@ -935,11 +948,11 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			Assert.isTrue(resource instanceof IFile);
 			if (!resource.exists()) {
 				// underlying resource has been deleted, just recreate file, ignore the rest
-				subMonitor= getSubProgressMonitor(monitor, 50);
+				IProgressMonitor subMonitor2= getSubProgressMonitor(monitor, 50);
 				try {
-					createFileFromDocument(subMonitor, (IFile) resource, document);
+					createFileFromDocument(subMonitor2, (IFile) resource, document);
 				} finally {
-					subMonitor.done();
+					subMonitor2.done();
 				}
 				return;
 			}
@@ -947,10 +960,10 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			if (fSavePolicy != null)
 				fSavePolicy.preSave(info.fCopy);
 
+			IProgressMonitor subMonitor3= getSubProgressMonitor(monitor, 50);
 			try {
-				subMonitor= getSubProgressMonitor(monitor, 50);
 				fIsAboutToSave= true;
-				info.fCopy.commitWorkingCopy(overwrite, subMonitor);
+				info.fCopy.commitWorkingCopy(overwrite, subMonitor3);
 			} catch (CoreException x) {
 				// inform about the failure
 				fireElementStateChangeFailed(element);
@@ -961,7 +974,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				throw x;
 			} finally {
 				fIsAboutToSave= false;
-				subMonitor.done();
+				subMonitor3.done();
 			}
 
 			// If here, the dirty state of the editor will change to "not dirty".
