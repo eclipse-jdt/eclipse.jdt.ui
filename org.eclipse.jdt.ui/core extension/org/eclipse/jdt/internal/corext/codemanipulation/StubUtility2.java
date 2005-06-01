@@ -190,8 +190,11 @@ public final class StubUtility2 {
 			bodyStatement= ASTNodes.asFormattedString(invocation, 0, delimiter);
 		}
 
+		List prohibited= new ArrayList();
+		for (final Iterator iterator= parameters.iterator(); iterator.hasNext();)
+			prohibited.add(((SingleVariableDeclaration) iterator.next()).getName().getIdentifier());
 		String param= null;
-		List list= new ArrayList();
+		List list= new ArrayList(prohibited);
 		String[] excluded= null;
 		for (int i= 0; i < variableBindings.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
@@ -210,7 +213,7 @@ public final class StubUtility2 {
 			body.statements().add(todoNode);
 		}
 
-		list= new ArrayList();
+		list= new ArrayList(prohibited);
 		for (int i= 0; i < variableBindings.length; i++) {
 			excluded= new String[list.size()];
 			list.toArray(excluded);
@@ -881,13 +884,13 @@ public final class StubUtility2 {
 		return (IMethodBinding[]) toImplement.toArray(new IMethodBinding[toImplement.size()]);
 	}
 
-	public static IMethodBinding[] getVisibleConstructors(ITypeBinding binding, boolean existing) {
+	public static IMethodBinding[] getVisibleConstructors(ITypeBinding binding, boolean accountExisting, boolean proposeDefault) {
 		List constructorMethods= new ArrayList();
 		List existingConstructors= null;
 		ITypeBinding superType= binding.getSuperclass();
 		if (superType == null)
 			return new IMethodBinding[0];
-		if (existing) {
+		if (accountExisting) {
 			IMethodBinding[] methods= binding.getDeclaredMethods();
 			existingConstructors= new ArrayList(methods.length);
 			for (int index= 0; index < methods.length; index++) {
@@ -903,7 +906,7 @@ public final class StubUtility2 {
 		for (int index= 0; index < superMethods.length; index++) {
 			IMethodBinding method= superMethods[index];
 			if (method.isConstructor()) {
-				if (Bindings.isVisibleInHierarchy(method, binding.getPackage()) && !Bindings.containsSignatureEquivalentConstructor(methods, method))
+				if (Bindings.isVisibleInHierarchy(method, binding.getPackage()) && (!accountExisting || !Bindings.containsSignatureEquivalentConstructor(methods, method)))
 					constructorMethods.add(method);
 			}
 		}
@@ -914,7 +917,7 @@ public final class StubUtility2 {
 			while (superType.getSuperclass() != null)
 				superType= superType.getSuperclass();
 			IMethodBinding method= Bindings.findMethodInType(superType, "Object", new ITypeBinding[0]); //$NON-NLS-1$
-			if (!existing || !Bindings.containsSignatureEquivalentConstructor(methods, method))
+			if ((proposeDefault || (!accountExisting || existingConstructors.isEmpty())) && (!accountExisting || !Bindings.containsSignatureEquivalentConstructor(methods, method)))
 				constructorMethods.add(method);
 		}
 		return (IMethodBinding[]) constructorMethods.toArray(new IMethodBinding[constructorMethods.size()]);
