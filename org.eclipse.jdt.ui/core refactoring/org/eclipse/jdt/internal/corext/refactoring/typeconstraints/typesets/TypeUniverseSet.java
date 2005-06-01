@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets;
 
-import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
 public class TypeUniverseSet extends SubTypesOfSingleton {
 
@@ -19,9 +19,9 @@ public class TypeUniverseSet extends SubTypesOfSingleton {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.SubTypesSet#contains(org.eclipse.jdt.core.IType)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.SubTypesSet#contains(TType)
 	 */
-	public boolean contains(IType t) {
+	public boolean contains(TType t) {
 		return true;
 	}
 

@@ -51,7 +51,7 @@ public abstract class TypeSet implements ITypeSet {
 	}
 
 	/**
-	 * @return <code>true</code> iff this set represents the universe of ITypes
+	 * @return <code>true</code> iff this set represents the universe of TTypes
 	 */
 	abstract public boolean isUniverse();
 

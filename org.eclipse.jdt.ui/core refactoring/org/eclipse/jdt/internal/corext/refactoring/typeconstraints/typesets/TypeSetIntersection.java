@@ -88,7 +88,7 @@ public class TypeSetIntersection extends TypeSet {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(org.eclipse.jdt.core.IType)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(TType)
 	 */
 	public boolean contains(TType t) {
 		return fLHS.contains(t) && fRHS.contains(t);
@@ -230,13 +230,13 @@ public class TypeSetIntersection extends TypeSet {
 
 //		return new Iterator() {
 //			private Iterator fLHSIter= fLHS.iterator();
-//			private IType fNext= null;
+//			private TType fNext= null;
 //			public void remove() {
 //				throw new IllegalStateException("Unimplemented");
 //			}
 //			private void advance() {
 //				for(; fLHSIter.hasNext(); ) {
-//					IType t= (IType) fLHSIter.next();
+//					TType t= (TType) fLHSIter.next();
 //					if (fRHS.contains(t)) {
 //						fNext= t;
 //						break;
@@ -253,7 +253,7 @@ public class TypeSetIntersection extends TypeSet {
 //					advance();
 //				if (fNext == null)
 //					throw new NoSuchElementException("No more elements in TypeSetIntersection");
-//				IType result= fNext;
+//				TType result= fNext;
 //				fNext= null;
 //				return result;
 //			}

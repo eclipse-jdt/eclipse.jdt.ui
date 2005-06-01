@@ -69,7 +69,7 @@ public class SuperTypesOfSingleton extends TypeSet {
 //			TypeSet otherLowers= otherSub.lowerBound();
 //
 //			for(Iterator iter= otherLowers.iterator(); iter.hasNext(); ) {
-//				IType t= (IType) iter.next();
+//				TType t= (TType) iter.next();
 //
 //				if ()
 //			}
@@ -134,7 +134,7 @@ public class SuperTypesOfSingleton extends TypeSet {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(org.eclipse.jdt.core.IType)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(TType)
 	 */
 	public boolean contains(TType t) {
 		if (t.equals(fLowerBound))
@@ -185,9 +185,9 @@ public class SuperTypesOfSingleton extends TypeSet {
 //			//
 //			// If the lower bound is an array type, return the set of array types
 //			// { Array(superType(elementTypeOf(fUpperBound))) }
-//			boolean isArray= (fLowerBound instanceof ArrayIType);
-//			private Set/*<IType>*/ superTypes= sTypeHierarchy.getAllSupertypes(getElementTypeOf(fLowerBound));
-//			private Iterator/*<IType>*/ superTypeIter= superTypes.iterator();
+//			boolean isArray= (fLowerBound instanceof ArrayType);
+//			private Set/*<TType>*/ superTypes= sTypeHierarchy.getAllSupertypes(getElementTypeOf(fLowerBound));
+//			private Iterator/*<TType>*/ superTypeIter= superTypes.iterator();
 //			private int nDims= getDimsOf(fLowerBound);
 //			private int idx= (isArray ? -2 : -1);
 //			public void remove() { /*do nothing*/ }
@@ -196,7 +196,7 @@ public class SuperTypesOfSingleton extends TypeSet {
 //				int i=idx++;
 //				if (i < -1) return sJavaLangObject;
 //				if (i < 0) return fLowerBound;
-//				return makePossiblyArrayTypeFor((IType) superTypeIter.next(), nDims);
+//				return makePossiblyArrayTypeFor((TType) superTypeIter.next(), nDims);
 //			}
 //		};
 	}

@@ -20,7 +20,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TTypes;
 
 /**
- * A type-safe wrapper for Set<IType> that also adds IType-specific
+ * A type-safe wrapper for Set<TType> that also adds TType-specific
  * functionality, e.g. subTypes() and superTypes().
  */
 public class EnumeratedTypeSet extends TypeSet {
@@ -35,13 +35,13 @@ public class EnumeratedTypeSet extends TypeSet {
 	}
 
 	/**
-	 * Set containing the ITypes in this EnumeratedTypeSet.
+	 * Set containing the TTypes in this EnumeratedTypeSet.
 	 */
-	Set/*<IType>*/ fMembers= new LinkedHashSet();
+	Set/*<TType>*/ fMembers= new LinkedHashSet();
 
 	/**
 	 * Constructs a new EnumeratedTypeSet with the members of Set s in it.
-	 * All elements of s must be ITypes.
+	 * All elements of s must be TTypes.
 	 */
 	public EnumeratedTypeSet(Iterator types, TypeSetEnvironment typeSetEnvironment) {
 		super(typeSetEnvironment);
@@ -60,7 +60,7 @@ public class EnumeratedTypeSet extends TypeSet {
 	}
 
 	/**
-	 * Constructs a new EnumeratedTypeSet with the given single IType in it.
+	 * Constructs a new EnumeratedTypeSet with the given single TType in it.
 	 */
 	public EnumeratedTypeSet(TType t, TypeSetEnvironment typeSetEnvironment) {
 		super(typeSetEnvironment);
@@ -70,7 +70,7 @@ public class EnumeratedTypeSet extends TypeSet {
 	}
 
 	/**
-	 * @return <code>true</code> iff this set represents the universe of ITypes
+	 * @return <code>true</code> iff this set represents the universe of TTypes
 	 */
 	public boolean isUniverse() {
 		return false;
@@ -154,17 +154,7 @@ public class EnumeratedTypeSet extends TypeSet {
 		return getTypeSetEnvironment().createSubTypesSet(this);
 	}
 
-//	public static EnumeratedTypeSet makeArrayTypesForElements(TypeSet elemTypes) {
-//		EnumeratedTypeSet result= new EnumeratedTypeSet();
-//
-//		for(Iterator elemIter= elemTypes.iterator(); elemIter.hasNext(); ) {
-//			TType t= (TType) elemIter.next();
-//			result.add(ArrayType.makeArrayType(t, 1));
-//		}
-//		return result;
-//	}
-
-	public static EnumeratedTypeSet makeArrayTypesForElements(Iterator/*<IType>*/ elemTypes, TypeSetEnvironment typeSetEnvironment) {
+	public static EnumeratedTypeSet makeArrayTypesForElements(Iterator/*<TType>*/ elemTypes, TypeSetEnvironment typeSetEnvironment) {
 		EnumeratedTypeSet result= new EnumeratedTypeSet(typeSetEnvironment);
 
 		while (elemTypes.hasNext()) {
@@ -175,33 +165,6 @@ public class EnumeratedTypeSet extends TypeSet {
 		return result;
 	}
 
-//	public static EnumeratedTypeSet makeArrayTypesForElements(TType[] elemTypes) {
-//		EnumeratedTypeSet result= new EnumeratedTypeSet();
-//
-//		for(int i= 0; i < elemTypes.length; i++) {
-//			TType t= elemTypes[i];
-//			result.add(ArrayType.makeArrayType(t, 1));
-//		}
-//		return result;
-//	}
-//
-//	/**
-//	 * @param arrayTypes
-//	 * @param result
-//	 */
-//	public static EnumeratedTypeSet extractElementTypesFromArrays(TypeSet arrayTypes) {
-//		EnumeratedTypeSet result= new EnumeratedTypeSet();
-//
-//		for(Iterator arrayIter= arrayTypes.iterator(); arrayIter.hasNext(); ) {
-//			TType t= (TType) arrayIter.next();
-//			if (t.isJavaLangObject()) // java.lang.Object can appear here, since it's a supertype of all array types
-//				continue; // ignore it
-//			ArrayType at= (ArrayType) t;
-//			result.add(at.getArrayElementType());
-//		}
-//		return result;
-//	}
-//
 	/**
 	 * @return a new TypeSet representing the set of all super-types of the
 	 * types in the receiver

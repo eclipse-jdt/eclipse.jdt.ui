@@ -50,7 +50,7 @@ public class TypeSetUnion extends TypeSet {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(org.eclipse.jdt.core.IType)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(TType)
 	 */
 	public boolean contains(TType t) {
 		return fLHS.contains(t) || fRHS.contains(t);

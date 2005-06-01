@@ -134,7 +134,7 @@ public class SubTypesSet extends TypeSet {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(org.eclipse.jdt.core.IType)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#contains(TType)
 	 */
 	public boolean contains(TType t) {
 		if (fEnumCache != null) return fEnumCache.contains(t);
@@ -185,8 +185,8 @@ public class SubTypesSet extends TypeSet {
 	}
 
 	/**
-	 * Returns the element type of the given IType, if an array type, or the
-	 * given IType itself, otherwise.
+	 * Returns the element type of the given TType, if an array type, or the
+	 * given TType itself, otherwise.
 	 */
 	private TType getElementTypeOf(TType t) {
 		if (t instanceof ArrayType)

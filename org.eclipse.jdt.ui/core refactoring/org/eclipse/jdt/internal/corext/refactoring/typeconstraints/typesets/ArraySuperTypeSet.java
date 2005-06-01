@@ -37,7 +37,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#contains(org.eclipse.jdt.core.IType)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.ArrayTypeSet#contains(TType)
 	 */
 	public boolean contains(TType t) {
 		if (t.equals(getJavaLangObject())) return true;
