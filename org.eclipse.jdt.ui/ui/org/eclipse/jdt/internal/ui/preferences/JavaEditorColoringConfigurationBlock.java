@@ -315,6 +315,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	private final String fCommentsCategory= PreferencesMessages.JavaEditorPreferencePage_coloring_category_comments; 
 	
 	private ColorSelector fSyntaxForegroundColorEditor;
+	private Label fColorEditorLabel;
 	private Button fBoldCheckBox;
 	private Button fEnableCheckbox;
 	/**
@@ -496,6 +497,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		if (item == null) {
 			fEnableCheckbox.setEnabled(false);
 			fSyntaxForegroundColorEditor.getButton().setEnabled(false);
+			fColorEditorLabel.setEnabled(false);
 			fBoldCheckBox.setEnabled(false);
 			fItalicCheckBox.setEnabled(false);
 			fStrikethroughCheckBox.setEnabled(false);
@@ -513,12 +515,14 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			boolean enable= getPreferenceStore().getBoolean(((SemanticHighlightingColorListItem) item).getEnableKey());
 			fEnableCheckbox.setSelection(enable);
 			fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
+			fColorEditorLabel.setEnabled(enable);
 			fBoldCheckBox.setEnabled(enable);
 			fItalicCheckBox.setEnabled(enable);
 			fStrikethroughCheckBox.setEnabled(enable);
 			fUnderlineCheckBox.setEnabled(enable);
 		} else {
 			fSyntaxForegroundColorEditor.getButton().setEnabled(true);
+			fColorEditorLabel.setEnabled(true);
 			fBoldCheckBox.setEnabled(true);
 			fItalicCheckBox.setEnabled(true);
 			fStrikethroughCheckBox.setEnabled(true);
@@ -615,11 +619,11 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		gd.horizontalSpan= 2;
 		fEnableCheckbox.setLayoutData(gd);
 		
-		label= new Label(stylesComposite, SWT.LEFT);
-		label.setText(PreferencesMessages.JavaEditorPreferencePage_color); 
+		fColorEditorLabel= new Label(stylesComposite, SWT.LEFT);
+		fColorEditorLabel.setText(PreferencesMessages.JavaEditorPreferencePage_color); 
 		gd= new GridData(GridData.HORIZONTAL_ALIGN_BEGINNING);
 		gd.horizontalIndent= 20;
-		label.setLayoutData(gd);
+		fColorEditorLabel.setLayoutData(gd);
 	
 		fSyntaxForegroundColorEditor= new ColorSelector(stylesComposite);
 		Button foregroundColorButton= fSyntaxForegroundColorEditor.getButton();
@@ -730,6 +734,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 					getPreferenceStore().setValue(((SemanticHighlightingColorListItem) item).getEnableKey(), enable);
 					fEnableCheckbox.setSelection(enable);
 					fSyntaxForegroundColorEditor.getButton().setEnabled(enable);
+					fColorEditorLabel.setEnabled(enable);
 					fBoldCheckBox.setEnabled(enable);
 					fItalicCheckBox.setEnabled(enable);
 					fStrikethroughCheckBox.setEnabled(enable);
