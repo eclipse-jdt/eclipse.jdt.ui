@@ -38,6 +38,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Measurements of the {@link org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy}.
  * 
+ * FIXME: The test is currently excluded because it only takes 0..2ms.
+ * 
  * @since 3.1
  */
 
