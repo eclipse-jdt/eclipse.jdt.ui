@@ -104,7 +104,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 				public void dispose() {}
 			});
 			fTreeViewer.setLabelProvider(new LabelProvider());
-			fTreeViewer.getControl().setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, 0));
+			fTreeViewer.getControl().setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL | GridData.FILL_VERTICAL, SWT.DEFAULT));
 			fDefaultFocusManager.add(fTreeViewer.getControl());
 	    }
 		
@@ -248,7 +248,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 			
 			fInnerViewer.setLabelProvider(new LabelProvider());
 			
-			final GridData innerGd= createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, 0);
+			final GridData innerGd= createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, SWT.DEFAULT);
 			innerGd.heightHint= fPixelConverter.convertHeightInCharsToPixels(3);
 			fInnerViewer.getControl().setLayoutData(innerGd);
 			
@@ -256,7 +256,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
 			fOptionsViewer.setContentProvider(new ArrayContentProvider());
 			fOptionsViewer.setLabelProvider(new LabelProvider());
 			
-			final GridData optionsGd= createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, 0);
+			final GridData optionsGd= createGridData(numColumns, GridData.HORIZONTAL_ALIGN_FILL | GridData.FILL_VERTICAL, SWT.DEFAULT);
 			optionsGd.heightHint= fPixelConverter.convertHeightInCharsToPixels(3);
 			fOptionsViewer.getControl().setLayoutData(optionsGd);
 	        
@@ -407,7 +407,7 @@ public class WhiteSpaceTabPage extends ModifyDialogTabPage {
         public void createContents(int numColumns, Composite parent) {
              
             fPageBook= new PageBook(parent, SWT.NONE);
-            fPageBook.setLayoutData(createGridData(numColumns, GridData.FILL_BOTH, 0));
+            fPageBook.setLayoutData(createGridData(numColumns, GridData.FILL_BOTH, SWT.DEFAULT));
             
             fJavaElementComponent.createContents(numColumns, fPageBook);		
             fSyntaxComponent.createContents(numColumns, fPageBook);

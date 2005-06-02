@@ -47,7 +47,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.BuiltInProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
-import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 public class ModifyDialog extends StatusDialog {
     
@@ -131,6 +130,7 @@ public class ModifyDialog extends StatusDialog {
 		final Composite composite= (Composite)super.createDialogArea(parent);
 		
 		fTabFolder = new TabFolder(composite, SWT.NONE);
+		fTabFolder.setFont(composite.getFont());
 		fTabFolder.setLayoutData(new GridData(GridData.FILL_BOTH));
 
 		addTabPage(fTabFolder, FormatterMessages.ModifyDialog_tabpage_indentation_title, new IndentationTabPage(this, fWorkingValues)); 
@@ -165,12 +165,18 @@ public class ModifyDialog extends StatusDialog {
 	 * @see org.eclipse.jface.window.Window#getInitialSize()
 	 */
 	protected Point getInitialSize() {
+    	Point initialSize= super.getInitialSize();
         try {
-        	return new Point(fDialogSettings.getInt(DS_KEY_PREFERRED_WIDTH), fDialogSettings.getInt(DS_KEY_PREFERRED_HEIGHT));
+        	int lastWidth= fDialogSettings.getInt(DS_KEY_PREFERRED_WIDTH);
+        	if (initialSize.x > lastWidth)
+        		lastWidth= initialSize.x;
+        	int lastHeight= fDialogSettings.getInt(DS_KEY_PREFERRED_HEIGHT);
+        	if (initialSize.y > lastHeight)
+        		lastHeight= initialSize.x;
+       		return new Point(lastWidth, lastHeight);
         } catch (NumberFormatException ex) {
-        	PixelConverter converter= new PixelConverter(getShell());
-            return new Point(converter.convertWidthInCharsToPixels(160), converter.convertHeightInCharsToPixels(50));
         }
+        return initialSize;
 	}
 	
 	/* (non-Javadoc)

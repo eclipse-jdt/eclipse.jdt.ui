@@ -169,7 +169,8 @@ public abstract class ModifyDialogTabPage {
 
 			fCheckbox= new Button(composite, SWT.CHECK);
 			fCheckbox.setText(text);
-			fCheckbox.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL, 0));
+			fCheckbox.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL, SWT.DEFAULT));
+			fCheckbox.setFont(composite.getFont());
 			
 			updateWidget();
 
@@ -234,6 +235,7 @@ public abstract class ModifyDialogTabPage {
 			fItems= items;
 			createLabel(numColumns - 1, composite, text);
 			fCombo= new Combo(composite, SWT.SINGLE | SWT.READ_ONLY);
+			fCombo.setFont(composite.getFont());
 			fCombo.setItems(items);
 			
 			int max= 0;
@@ -312,6 +314,7 @@ public abstract class ModifyDialogTabPage {
 		    
 			fNumberLabel= createLabel(numColumns - 1, composite, text, GridData.FILL_HORIZONTAL);
 			fNumberText= new Text(composite, SWT.SINGLE | SWT.BORDER | SWT.RIGHT);
+			fNumberText.setFont(composite.getFont());
 
 			final int length= Integer.toString(maxValue).length() + 3; 
 			fNumberText.setLayoutData(createGridData(1, GridData.HORIZONTAL_ALIGN_END, fPixelConverter.convertWidthInCharsToPixels(length)));
@@ -560,8 +563,11 @@ public abstract class ModifyDialogTabPage {
 		}
 		
 		final SashForm fSashForm = new SashForm(parent, SWT.HORIZONTAL);
+		fSashForm.setFont(parent.getFont());
 		
 		final Composite settingsPane= new Composite(fSashForm, SWT.NONE);
+		settingsPane.setFont(fSashForm.getFont());
+		
 		final GridLayout layout= new GridLayout(numColumns, false);
 		layout.verticalSpacing= (int)(1.5 * fPixelConverter.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING));
 		layout.horizontalSpacing= fPixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
@@ -572,6 +578,7 @@ public abstract class ModifyDialogTabPage {
 
 		final Composite previewPane= new Composite(fSashForm, SWT.NONE);
 		previewPane.setLayout(createGridLayout(numColumns, true));
+		previewPane.setFont(fSashForm.getFont());
 		doCreatePreviewPane(previewPane, numColumns);
 
 		initializePage();
@@ -718,8 +725,9 @@ public abstract class ModifyDialogTabPage {
 	 */
 	protected static Label createLabel(int numColumns, Composite parent, String text, int gridDataStyle) {
 		final Label label= new Label(parent, SWT.WRAP);
+		label.setFont(parent.getFont());
 		label.setText(text);
-		label.setLayoutData(createGridData(numColumns, gridDataStyle, SWT.DEFAULT /*0*/));
+		label.setLayoutData(createGridData(numColumns, gridDataStyle, SWT.DEFAULT));
 		return label;
 	}
 
@@ -728,13 +736,16 @@ public abstract class ModifyDialogTabPage {
 	 */
 	protected Group createGroup(int numColumns, Composite parent, String text ) {
 		final Group group= new Group(parent, SWT.NONE);
-		group.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL, 0));
+		group.setFont(parent.getFont());
+		group.setLayoutData(createGridData(numColumns, GridData.FILL_HORIZONTAL, SWT.DEFAULT));
 		
 		final GridLayout layout= new GridLayout(numColumns, false);
 		layout.verticalSpacing=  fPixelConverter.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
 		layout.horizontalSpacing= fPixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
-		layout.marginHeight= fPixelConverter.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
-		layout.marginWidth= fPixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
+		layout.marginHeight=  fPixelConverter.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+
+		//layout.marginHeight= fPixelConverter.convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
+		//layout.marginWidth= fPixelConverter.convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_MARGIN);
 		
 		group.setLayout(layout);//createGridLayout(numColumns, true));
 		group.setText(text);
