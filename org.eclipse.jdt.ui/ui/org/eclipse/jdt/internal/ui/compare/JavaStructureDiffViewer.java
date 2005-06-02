@@ -87,10 +87,10 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 			if (children != null && children.length > 0) {
 				for (int i= 0; i < children.length; i++) {
 					o= children[i];
-					children= getSortedChildren(o);
-					if (children != null && children.length > 0) {
-						for (int j= 0; j < children.length; j++) {
-							o= children[j];
+					Object[] sortedChildren= getSortedChildren(o);
+					if (sortedChildren != null && sortedChildren.length > 0) {
+						for (int j= 0; j < sortedChildren.length; j++) {
+							o= sortedChildren[j];
 							if (o instanceof DiffNode) {
 								DiffNode dn= (DiffNode) o;
 								ITypedElement e= dn.getId();
