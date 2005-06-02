@@ -1105,7 +1105,7 @@ public class StubUtility {
 		return System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 	
-	private static String getLineDelimiterPreference(IProject project) {
+	public static String getLineDelimiterPreference(IProject project) {
 		IScopeContext[] scopeContext;
 		if (project != null) {
 			// project preference
@@ -1116,7 +1116,8 @@ public class StubUtility {
 		}
 		// workspace preference
 		scopeContext= new IScopeContext[] { new InstanceScope() };
-		return Platform.getPreferencesService().getString(Platform.PI_RUNTIME, Platform.PREF_LINE_SEPARATOR, null, scopeContext);
+		String platformDefault= System.getProperty("line.separator", "\n"); //$NON-NLS-1$ //$NON-NLS-2$
+		return Platform.getPreferencesService().getString(Platform.PI_RUNTIME, Platform.PREF_LINE_SEPARATOR, platformDefault, scopeContext);
 	}
 	
 
@@ -1124,7 +1125,9 @@ public class StubUtility {
 	 * Examines a string and returns the first line delimiter found.
 	 */
 	public static String getLineDelimiterUsed(IJavaElement elem) {
-		ICompilationUnit cu= (ICompilationUnit) elem.getAncestor(IJavaElement.COMPILATION_UNIT);
+		ICompilationUnit cu= null;
+		if (elem != null)
+			cu= (ICompilationUnit)elem.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (cu != null && cu.exists()) {
 			try {
 				IBuffer buf= cu.getBuffer();
