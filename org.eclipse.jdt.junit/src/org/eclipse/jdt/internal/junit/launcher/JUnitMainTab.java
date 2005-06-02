@@ -16,8 +16,11 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -73,6 +76,7 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 
+import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
@@ -539,7 +543,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 	private void validatePage() {
 		setErrorMessage(null);
 		setMessage(null);
-		
+
 		if (fTestContainerRadioButton.getSelection()) {
 			if (fContainerElement == null) {
 				setErrorMessage(JUnitMessages.JUnitMainTab_error_noContainer);
@@ -547,33 +551,39 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 			}
 			validateJavaProject(fContainerElement.getJavaProject());
 			return;
-		} 
-		
-		String projectName = fProjText.getText().trim();
+		}
+
+		String projectName= fProjText.getText().trim();
 		if (projectName.length() == 0) {
-			setErrorMessage(JUnitMessages.JUnitMainTab_error_projectnotdefined); 
+			setErrorMessage(JUnitMessages.JUnitMainTab_error_projectnotdefined);
 			return;
 		}
-			
-		IProject project = getWorkspaceRoot().getProject(projectName);
+
+		IStatus status= ResourcesPlugin.getWorkspace().validatePath(IPath.SEPARATOR + projectName, IResource.PROJECT);
+		if (!status.isOK()) {
+			setErrorMessage(Messages.format(JUnitMessages.JUnitMainTab_error_invalidProjectName, projectName));
+			return;
+		}
+
+		IProject project= getWorkspaceRoot().getProject(projectName);
 		if (!project.exists()) {
-			setErrorMessage(JUnitMessages.JUnitMainTab_error_projectnotexists); 
+			setErrorMessage(JUnitMessages.JUnitMainTab_error_projectnotexists);
 			return;
 		}
-		
+
 		try {
 			if (!project.hasNature(JavaCore.NATURE_ID)) {
-				setErrorMessage(JUnitMessages.JUnitMainTab_error_notJavaProject); 
+				setErrorMessage(JUnitMessages.JUnitMainTab_error_notJavaProject);
 				return;
 			}
-			String className = fTestText.getText().trim();
+			String className= fTestText.getText().trim();
 			if (className.length() == 0) {
-				setErrorMessage(JUnitMessages.JUnitMainTab_error_testnotdefined); 
+				setErrorMessage(JUnitMessages.JUnitMainTab_error_testnotdefined);
 				return;
 			}
 		} catch (Exception e) {
 		}
-		IJavaProject javaProject = JavaCore.create(project);
+		IJavaProject javaProject= JavaCore.create(project);
 		validateJavaProject(javaProject);
 	}
 
