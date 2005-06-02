@@ -88,6 +88,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -628,8 +629,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fNLSRefactoring.setIsEclipseNLS(fNLSRefactoring.detectIsEclipseNLS());
 			
 			NLSSubstitution.updateSubtitutions(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()), fNLSRefactoring.getAccessorClassName());
-			fIsEclipseNLS.setSelection(fNLSRefactoring.isEclipseNLS());
-			fIsEclipseNLS.setEnabled(willCreateAccessorClass());
+			if (fIsEclipseNLS != null) {
+				fIsEclipseNLS.setSelection(fNLSRefactoring.isEclipseNLS());
+				fIsEclipseNLS.setEnabled(willCreateAccessorClass());
+			}
 			validateKeys(true);
 		}
 	}
@@ -718,8 +721,10 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		NLSAccessorConfigurationDialog dialog= new NLSAccessorConfigurationDialog(getShell(), fNLSRefactoring);
 		if (dialog.open() == Window.OK) {
 			NLSSubstitution.updateSubtitutions(fSubstitutions, getProperties(fNLSRefactoring.getPropertyFileHandle()), fNLSRefactoring.getAccessorClassName());
-			fIsEclipseNLS.setSelection(fNLSRefactoring.isEclipseNLS());
-			fIsEclipseNLS.setEnabled(willCreateAccessorClass());
+			if (fIsEclipseNLS != null) {			
+				fIsEclipseNLS.setSelection(fNLSRefactoring.isEclipseNLS());
+				fIsEclipseNLS.setEnabled(willCreateAccessorClass());
+			}
 			validateKeys(true);
 			updateAccessorChoices();
 		}
@@ -888,19 +893,36 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		});
 	}
 	
+	private boolean isEclipseNLSAvailable() {
+		if (fNLSRefactoring == null || fNLSRefactoring.getCu() == null)
+			return false;
+		
+		IJavaProject jp= fNLSRefactoring.getCu().getJavaProject();
+		if (jp == null || !jp.exists())
+			return false;
+		
+		try {
+			return jp.findType("org.eclipse.osgi.util.NLS") != null; //$NON-NLS-1$
+		} catch (JavaModelException e) {
+			return false;
+		}
+	}
+	
 	private void createIsEclipseNLSCheckbox(Composite parent) {
-		fIsEclipseNLS= new Button(parent, SWT.CHECK);
-		fIsEclipseNLS.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fIsEclipseNLS.setText(NLSUIMessages.ExternalizeWizardPage_isEclipseNLSCheckbox); 
-		fIsEclipseNLS.setSelection(fNLSRefactoring.isEclipseNLS());
-		fIsEclipseNLS.setEnabled(willCreateAccessorClass());
-		fIsEclipseNLS.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				super.widgetDefaultSelected(e);
-				fNLSRefactoring.setIsEclipseNLS(fIsEclipseNLS.getSelection());
-				validateKeys(true);
-			}
-		});
+		if (fNLSRefactoring.isEclipseNLS() || isEclipseNLSAvailable()) {
+			fIsEclipseNLS= new Button(parent, SWT.CHECK);
+			fIsEclipseNLS.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			fIsEclipseNLS.setText(NLSUIMessages.ExternalizeWizardPage_isEclipseNLSCheckbox); 
+			fIsEclipseNLS.setSelection(fNLSRefactoring.isEclipseNLS());
+			fIsEclipseNLS.setEnabled(willCreateAccessorClass());
+			fIsEclipseNLS.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					super.widgetDefaultSelected(e);
+					fNLSRefactoring.setIsEclipseNLS(fIsEclipseNLS.getSelection());
+					validateKeys(true);
+				}
+			});
+		}
 	}
 
 	private void validateKeys(boolean refreshTable) {
