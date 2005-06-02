@@ -213,7 +213,7 @@ public class LocalCorrectionsSubProcessor {
 
 				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, cu, astRoot, binding, null, desc, 6, image);
 				for (int i= 0; i < uncaughtExceptions.length; i++) {
-					addExceptionTypeLinkProposals(proposal, uncaughtExceptions[i], proposal.getExceptionTypeGroupId(i));
+					addExceptionTypeLinkProposals(proposal, uncaughtExceptions[i], proposal.getExceptionTypeGroupId(i + nExistingExceptions));
 				}
 				proposal.setCommandId(ADD_EXCEPTION_TO_THROWS_ID);
 				proposals.add(proposal);
