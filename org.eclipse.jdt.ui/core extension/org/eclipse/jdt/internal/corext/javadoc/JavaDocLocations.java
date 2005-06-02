@@ -297,7 +297,7 @@ public class JavaDocLocations {
 				return null;
 			}
 			if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-				entry= JavaModelUtil.getClasspathEntryToEdit(root.getJavaProject(), entry.getPath(), root.getPath());
+				entry= getRealClasspathEntry(root.getJavaProject(), entry.getPath(), root.getPath());
 				if (entry == null) {
 					return null;
 				}
@@ -307,6 +307,22 @@ public class JavaDocLocations {
 			return getProjectJavadocLocation(root.getJavaProject());
 		}	
 	}
+	
+	private static IClasspathEntry getRealClasspathEntry(IJavaProject jproject, IPath containerPath, IPath libPath) throws JavaModelException {
+		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
+		if (container != null) {
+			IClasspathEntry[] entries= container.getClasspathEntries();
+			for (int i= 0; i < entries.length; i++) {
+				IClasspathEntry curr= entries[i];
+				IClasspathEntry resolved= JavaCore.getResolvedClasspathEntry(curr);
+				if (resolved != null && libPath.equals(resolved.getPath())) {
+					return curr; // return the real entry
+				}
+			}
+		}
+		return null; // not found
+	}
+	
 	
 	// loading for compatibility
 	
