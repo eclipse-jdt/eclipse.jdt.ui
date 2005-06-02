@@ -39,7 +39,7 @@ public class NLSSubstitution {
 	
 	private String fNewAccessorClassName;
 
-	private static String fPrefix= ""; //$NON-NLS-1$
+	private String fPrefix= ""; //$NON-NLS-1$
 
 
 	public NLSSubstitution(int state, String value, NLSElement element) {
@@ -248,11 +248,11 @@ public class NLSSubstitution {
 	}
 
 	/**
-	 * Prefix is valid for ALL Substitutions, that have changed into EXTERNALIZED state.
-	 * Should fix, shouldn't be a static variable
+	 * Sets the prefix.
 	 */
-	public static void setPrefix(String prefix) {
+	public void setPrefix(String prefix) {
 		fPrefix= prefix;
+		fCachedKey= null;
 	}
 
 	public boolean isConflicting(NLSSubstitution[] substitutions) {

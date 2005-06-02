@@ -51,7 +51,7 @@ public class NLSSourceModifierTest extends TestCase {
 
     protected void setUp() throws Exception {
         javaProject = ProjectTestSetup.getProject();
-        fSourceFolder = JavaProjectHelper.addSourceContainer(javaProject, "src");                
+        fSourceFolder = JavaProjectHelper.addSourceContainer(javaProject, "src");
     }
 
     protected void tearDown() throws Exception {        
@@ -74,8 +74,8 @@ public class NLSSourceModifierTest extends TestCase {
         
         CompilationUnit astRoot= createAST(cu);
         NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
-        NLSSubstitution.setPrefix("key.");
         nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
+        nlsSubstitutions[0].setPrefix("key.");
         nlsSubstitutions[0].generateKey(nlsSubstitutions);
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
@@ -103,7 +103,7 @@ public class NLSSourceModifierTest extends TestCase {
         
         CompilationUnit astRoot= createAST(cu);
         NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
-        NLSSubstitution.setPrefix("key.");
+        nlsSubstitutions[0].setPrefix("key.");
         nlsSubstitutions[0].setState(NLSSubstitution.IGNORED);
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
@@ -134,9 +134,10 @@ public class NLSSourceModifierTest extends TestCase {
         
         CompilationUnit astRoot= createAST(cu);
         NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
-        NLSSubstitution.setPrefix("key.");
         nlsSubstitutions[0].setState(NLSSubstitution.EXTERNALIZED);
+        nlsSubstitutions[0].setPrefix("key.");
         nlsSubstitutions[0].generateKey(nlsSubstitutions);
+        
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
         TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", false);
@@ -163,7 +164,7 @@ public class NLSSourceModifierTest extends TestCase {
         
         CompilationUnit astRoot= createAST(cu);
         NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
-        NLSSubstitution.setPrefix("key.");
+        nlsSubstitutions[0].setPrefix("key.");
         nlsSubstitutions[0].setState(NLSSubstitution.INTERNALIZED);
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
@@ -207,8 +208,8 @@ public class NLSSourceModifierTest extends TestCase {
         
         CompilationUnit astRoot= createAST(cu);
         NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
-        NLSSubstitution.setPrefix("key.");
         nlsSubstitutions[0].setValue("whatever");
+        nlsSubstitutions[0].setPrefix("key.");
         nlsSubstitutions[0].setState(NLSSubstitution.IGNORED);
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
@@ -248,9 +249,9 @@ public class NLSSourceModifierTest extends TestCase {
         
         CompilationUnit astRoot= createAST(cu);
         NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
-        NLSSubstitution.setPrefix("key.");
         nlsSubstitutions[0].setValue("whatever");
         nlsSubstitutions[0].setState(NLSSubstitution.INTERNALIZED);
+        nlsSubstitutions[0].setPrefix("key.");
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;
         TextChange change = (TextChange) NLSSourceModifier.create(cu, nlsSubstitutions, defaultSubst, pack, "Accessor", false);
@@ -288,6 +289,7 @@ public class NLSSourceModifierTest extends TestCase {
         
         CompilationUnit astRoot= createAST(cu);
         NLSSubstitution[] nlsSubstitutions = getSubstitutions(cu, astRoot);
+        nlsSubstitutions[0].setPrefix("key.");
         nlsSubstitutions[0].setKey("nls.0");        
         
         String defaultSubst= NLSRefactoring.DEFAULT_SUBST_PATTERN;

@@ -436,8 +436,11 @@ public class NLSRefactoring extends Refactoring {
 	}
 	
 	public void setPrefix(String prefix) {
-		fPrefix = prefix;
-		NLSSubstitution.setPrefix(prefix);
+		fPrefix= prefix;
+		if (fSubstitutions != null) {
+			for (int i= 0; i < fSubstitutions.length; i++)
+				fSubstitutions[i].setPrefix(prefix);
+		}
 	}
 
 	public void setAccessorClassName(String name) {
