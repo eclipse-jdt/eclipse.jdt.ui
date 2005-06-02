@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
@@ -111,6 +110,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -1596,8 +1596,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 
 	private int getTabSize() {
-		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
-		return preferences.getInt(CODE_FORMATTER_TAB_SIZE);
+		IJavaElement element= getInputJavaElement();
+		IJavaProject project= element == null ? null : element.getJavaProject();
+		return CodeFormatterUtil.getTabWidth(project);
 	}
 
 	private void startTabConversion() {
@@ -1623,8 +1624,14 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 
 	private boolean isTabConversionEnabled() {
-		IPreferenceStore store= getPreferenceStore();
-		return JavaCore.SPACE.equals(store.getString(SPACES_FOR_TABS));
+		IJavaElement element= getInputJavaElement();
+		IJavaProject project= element == null ? null : element.getJavaProject();
+		String option;
+		if (project == null)
+			option= JavaCore.getOption(SPACES_FOR_TABS);
+		else
+			option= project.getOption(SPACES_FOR_TABS, true);
+		return JavaCore.SPACE.equals(option);
 	}
 
 	public void dispose() {
