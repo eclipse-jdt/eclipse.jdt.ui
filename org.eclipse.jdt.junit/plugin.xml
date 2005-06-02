@@ -148,7 +148,7 @@
          point="org.eclipse.ui.popupMenus">
       <objectContribution
             objectClass="org.eclipse.jdt.core.ICompilationUnit"
-            nameFilter="AllTests.java"
+            nameFilter="*Tests.java"
             id="org.eclipse.jdt.junit.wizards.UpdateTestSuite">
          <action
                label="%UpdateSuiteAction.label"
