@@ -36,7 +36,6 @@ public final class WizardMessages extends NLS {
 	public static String NewTestCaseWizardPageOne_class_to_test_browse;
 	public static String NewTestCaseWizardPageOne_class_to_test_dialog_title;
 	public static String NewTestCaseWizardPageOne_class_to_test_dialog_message;
-	public static String NewTestCaseWizardPageOne_marker_message;
 	public static String NewTestCaseWizardPageOne_error_superclass_not_exist;
 	public static String NewTestCaseWizardPageOne_error_superclass_is_interface;
 	public static String NewTestCaseWizardPageOne_error_superclass_not_implementing_test_interface;

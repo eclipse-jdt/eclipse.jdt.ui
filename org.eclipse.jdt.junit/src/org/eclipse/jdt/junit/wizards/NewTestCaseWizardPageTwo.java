@@ -328,7 +328,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 						for (int j = 0; j < currMethods.length; j++) {
 							IMethod currMethod = currMethods[j];
 							int flags= currMethod.getFlags();
-							if (!Flags.isPrivate(flags)) {
+							if (!Flags.isPrivate(flags) && !Flags.isSynthetic(flags)) {
 								for (int k = 0; k < methods.size(); k++) {
 									IMethod m= ((IMethod)methods.get(k));
 									if (m.getElementName().equals(currMethod.getElementName())

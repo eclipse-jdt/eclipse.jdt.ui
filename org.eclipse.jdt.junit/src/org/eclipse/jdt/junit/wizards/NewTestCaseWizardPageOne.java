@@ -60,6 +60,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
@@ -95,7 +96,10 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	
 	/** Field ID of the class under test field. */
 	public final static String CLASS_UNDER_TEST= PAGE_NAME + ".classundertest"; //$NON-NLS-1$
-	
+
+	private final static String QUESTION_MARK_TAG= "Q"; //$NON-NLS-1$
+	private final static String OF_TAG= "Of"; //$NON-NLS-1$
+
 	private final static String TEST_SUFFIX= "Test"; //$NON-NLS-1$
 	private final static String SETUP= "setUp"; //$NON-NLS-1$
 	private final static String TEARDOWN= "tearDown"; //$NON-NLS-1$
@@ -487,7 +491,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	private void createConstructor(IType type, ImportsManager imports) throws JavaModelException {
 		ITypeHierarchy typeHierarchy= null;
 		IType[] superTypes= null;
-		String constr= ""; //$NON-NLS-1$
+		String content= ""; //$NON-NLS-1$
 		IMethod methodTemplate= null;
 		if (type.exists()) {
 			typeHierarchy= type.newSupertypeHierarchy(null);
@@ -503,30 +507,36 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			}
 		}
 		if (methodTemplate != null) {
-			GenStubSettings genStubSettings= JUnitStubUtility.getCodeGenerationSettings(type.getJavaProject());
-			genStubSettings.fCallSuper= true;				
-			genStubSettings.fMethodOverwrites= true;
-			constr= JUnitStubUtility.genStub(getTypeName(), methodTemplate, genStubSettings, imports);
+			GenStubSettings settings= JUnitStubUtility.getCodeGenerationSettings(type.getJavaProject());
+			settings.fCallSuper= true;				
+			settings.fMethodOverwrites= true;
+			content= JUnitStubUtility.genStub(getTypeName(), methodTemplate, settings, imports);
 		} else {
-			constr += "public "+getTypeName()+"(String name) {" + //$NON-NLS-1$  //$NON-NLS-2$ 
-					getLineDelimiter() +
-					"super(name);" + //$NON-NLS-1$ 
-					getLineDelimiter() +
-					"}" + //$NON-NLS-1$ 
-					getLineDelimiter() + getLineDelimiter();
+			final String delimiter= getLineDelimiter();
+			StringBuffer buffer= new StringBuffer(32);
+			buffer.append("public "); //$NON-NLS-1$
+			buffer.append(getTypeName());
+			buffer.append("("); //$NON-NLS-1$
+			buffer.append(imports.addImport("java.lang.String")); //$NON-NLS-1$
+			buffer.append(" name) {"); //$NON-NLS-1$
+			buffer.append(delimiter);
+			buffer.append("super(name);"); //$NON-NLS-1$
+			buffer.append(delimiter);
+			buffer.append("}"); //$NON-NLS-1$
+			buffer.append(delimiter);
+			content += buffer.toString();
 		}
-		type.createMethod(constr, null, true, null);	
+		type.createMethod(content, null, true, null);	
 	}
 
 	private void createMain(IType type) throws JavaModelException {
-		String mainMethod= fMethodStubsButtons.getMainMethod(getTypeName());
-		type.createMethod(mainMethod, null, false, null);	
+		type.createMethod(fMethodStubsButtons.getMainMethod(getTypeName()), null, false, null);	
 	}
 
 	private void createSetUp(IType type, ImportsManager imports) throws JavaModelException {
 		ITypeHierarchy typeHierarchy= null;
 		IType[] superTypes= null;
-		String setUp= ""; //$NON-NLS-1$
+		String content= ""; //$NON-NLS-1$
 		IMethod methodTemplate= null;
 		if (type.exists()) {
 			typeHierarchy= type.newSupertypeHierarchy(null);
@@ -542,27 +552,36 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			}
 		}
 		
-		GenStubSettings genStubSettings= JUnitStubUtility.getCodeGenerationSettings(type.getJavaProject());
+		GenStubSettings settings= JUnitStubUtility.getCodeGenerationSettings(type.getJavaProject());
 		if (methodTemplate != null) {
-			genStubSettings.fCallSuper= true;				
-			genStubSettings.fMethodOverwrites= true;
-			setUp= JUnitStubUtility.genStub(getTypeName(), methodTemplate, genStubSettings, imports);
+			settings.fCallSuper= true;
+			settings.fMethodOverwrites= true;
+			content= JUnitStubUtility.genStub(getTypeName(), methodTemplate, settings, imports);
 		} else {
-			if (genStubSettings.createComments)
-				setUp= "/**" + //$NON-NLS-1$
-					getLineDelimiter() + 
-					" * Sets up the fixture, for example, open a network connection." + //$NON-NLS-1$
-					getLineDelimiter() +
-					" * This method is called before a test is executed." + //$NON-NLS-1$
-					getLineDelimiter() +
-					" * @throws Exception" + //$NON-NLS-1$
-					getLineDelimiter() +
-					" */" + //$NON-NLS-1$
-					getLineDelimiter(); 
-			setUp+= "protected void "+SETUP+"() throws Exception {}" + //$NON-NLS-1$ //$NON-NLS-2$
-				getLineDelimiter() + getLineDelimiter(); 
+			final String delimiter= getLineDelimiter();
+			StringBuffer buffer= new StringBuffer();
+			if (settings.createComments) {
+				buffer.append("/**"); //$NON-NLS-1$
+				buffer.append(delimiter);
+				buffer.append(" * Sets up the fixture, for example, open a network connection."); //$NON-NLS-1$
+				buffer.append(delimiter);
+				buffer.append(" * This method is called before a test is executed."); //$NON-NLS-1$
+				buffer.append(delimiter);
+				buffer.append(delimiter);
+				buffer.append(" * @throws "); //$NON-NLS-1$
+				buffer.append(imports.addImport("java.lang.Exception")); //$NON-NLS-1$
+				buffer.append(delimiter);
+				buffer.append(" */"); //$NON-NLS-1$
+				buffer.append(delimiter);
+			}
+			buffer.append("protected void "); //$NON-NLS-1$
+			buffer.append(SETUP);
+			buffer.append("() throws "); //$NON-NLS-1$
+			buffer.append(imports.addImport("java.lang.Exception")); //$NON-NLS-1$
+			buffer.append(" {}"); //$NON-NLS-1$
+			buffer.append(delimiter);
 		}
-		type.createMethod(setUp, null, false, null);	
+		type.createMethod(content, null, false, null);
 	}
 	
 	private void createTearDown(IType type, ImportsManager imports) throws JavaModelException {
@@ -584,10 +603,10 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			}
 		}
 		if (methodTemplate != null) {
-			GenStubSettings genStubSettings= JUnitStubUtility.getCodeGenerationSettings(type.getJavaProject());
-			genStubSettings.fCallSuper= true;
-			genStubSettings.fMethodOverwrites= true;
-			tearDown= JUnitStubUtility.genStub(getTypeName(), methodTemplate, genStubSettings, imports);
+			GenStubSettings settings= JUnitStubUtility.getCodeGenerationSettings(type.getJavaProject());
+			settings.fCallSuper= true;
+			settings.fMethodOverwrites= true;
+			tearDown= JUnitStubUtility.genStub(getTypeName(), methodTemplate, settings, imports);
 			type.createMethod(tearDown, null, false, null);	
 		}				
 	}
@@ -606,18 +625,18 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		 * sum -> testSum
 		 * Sum -> testSum1
 		 */
-		List newMethodsNames= new ArrayList();				
+		List names= new ArrayList();				
 			for (int i = 0; i < methods.length; i++) {
-			IMethod testedMethod= methods[i];
-			String elementName= testedMethod.getElementName();
-			StringBuffer methodName= new StringBuffer(PREFIX).append(Character.toUpperCase(elementName.charAt(0))).append(elementName.substring(1));
-			StringBuffer newMethod= new StringBuffer();
+			IMethod method= methods[i];
+			String elementName= method.getElementName();
+			StringBuffer name= new StringBuffer(PREFIX).append(Character.toUpperCase(elementName.charAt(0))).append(elementName.substring(1));
+			StringBuffer buffer= new StringBuffer();
 	
-			if (overloadedMethods.contains(testedMethod)) {
-				appendMethodComment(newMethod, testedMethod);
-				String[] params= testedMethod.getParameterTypes();
-				appendParameterNamesToMethodName(methodName, params);
-			}
+			final boolean contains= overloadedMethods.contains(method);
+			if (contains)
+				appendParameterNamesToMethodName(name, method.getParameterTypes());
+
+			replaceIllegalCharacters(name);
 			/* Should I for examples have methods
 			 * 	void foo(java.lang.StringBuffer sb) {}
 			 *  void foo(mypackage1.StringBuffer sb) {}
@@ -627,24 +646,45 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			 *  testFooStringBuffer1()
 			 *  testFooStringBuffer2()
 			 */
-			if (newMethodsNames.contains(methodName.toString())) {
+			final String result= name.toString();
+			if (names.contains(result)) {
 				int suffix= 1;
-				while (newMethodsNames.contains(methodName.toString() + Integer.toString(suffix)))
+				while (names.contains(result + Integer.toString(suffix)))
 					suffix++;
-				methodName.append(Integer.toString(suffix));
+				name.append(Integer.toString(suffix));
 			}
-			newMethodsNames.add(methodName.toString());
-			newMethod.append("public ");//$NON-NLS-1$ 
+			names.add(result);
+			appendMethodComment(buffer, method);
+			buffer.append("public ");//$NON-NLS-1$ 
 			if (fPage2.getCreateFinalMethodStubsButtonSelection())
-				newMethod.append("final "); //$NON-NLS-1$
-			newMethod.append("void ");//$NON-NLS-1$ 
-			newMethod.append(methodName.toString());
-			newMethod.append("()");//$NON-NLS-1$ 
-			appendTestMethodBody(newMethod, testedMethod);
-			type.createMethod(newMethod.toString(), null, false, null);	
+				buffer.append("final "); //$NON-NLS-1$
+			buffer.append("void ");//$NON-NLS-1$ 
+			buffer.append(result);
+			buffer.append("()");//$NON-NLS-1$ 
+			try {
+				appendTestMethodBody(buffer, result, method);
+			} catch (CoreException exception) {
+				throw new JavaModelException(exception);
+			}
+			type.createMethod(buffer.toString(), null, false, null);	
 		}
 	}
-	
+
+	private void replaceIllegalCharacters(StringBuffer buffer) {
+		char character= 0;
+		for (int index= buffer.length() - 1; index >= 0; index--) {
+			character= buffer.charAt(index);
+			if (Character.isWhitespace(character))
+				buffer.deleteCharAt(index);
+			else if (character == '<')
+				buffer.replace(index, index + 1, OF_TAG);
+			else if (character == '?')
+				buffer.replace(index, index + 1, QUESTION_MARK_TAG);
+			else if (!Character.isJavaIdentifierPart(character))
+				buffer.deleteCharAt(index);
+		}
+	}
+
 	private String getLineDelimiter(){
 		IType classToTest= getClassUnderTest();
 		
@@ -653,50 +693,42 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		
 		return StubUtility.getLineDelimiterUsed(getPackageFragment());
 	}
-	
-	private void appendTestMethodBody(StringBuffer newMethod, IMethod testedMethod) {
-		newMethod.append("{"); //$NON-NLS-1$
-		if (fPage2.isCreateTasks()){
-			newMethod.append(getLineDelimiter());
-			newMethod.append("//"); //$NON-NLS-1$
-			newMethod.append(JUnitStubUtility.getTodoTaskTag(getPackageFragment().getJavaProject()));
-			newMethod.append(Messages.format(WizardMessages.NewTestCaseWizardPageOne_marker_message, testedMethod.getElementName())); 
-			newMethod.append(getLineDelimiter());		
+
+	private void appendTestMethodBody(StringBuffer buffer, String name, IMethod method) throws CoreException {
+		final String delimiter= getLineDelimiter();
+		buffer.append("{").append(delimiter); //$NON-NLS-1$
+		if (fPage2.isCreateTasks()) {
+			final String content= StubUtility.getMethodBodyContent(false, method.getJavaProject(), CLASS_UNDER_TEST, name, "", delimiter); //$NON-NLS-1$
+			if (content != null && content.length() > 0)
+				buffer.append(content);
 		}
-		newMethod.append("}").append(getLineDelimiter()).append(getLineDelimiter()); //$NON-NLS-1$
+		buffer.append(delimiter).append("}").append(delimiter).append(delimiter); //$NON-NLS-1$
 	}
 
-	private void appendParameterNamesToMethodName(StringBuffer methodName, String[] params) {
-		for (int i= 0; i < params.length; i++) {
-			String param= params[i];
-			methodName.append(Signature.getSimpleName(Signature.toString(Signature.getElementType(param))));
-			for (int j= 0, arrayCount= Signature.getArrayCount(param); j < arrayCount; j++) {
-				methodName.append("Array"); //$NON-NLS-1$
+	private void appendParameterNamesToMethodName(StringBuffer buffer, String[] parameters) {
+		for (int i= 0; i < parameters.length; i++) {
+			final StringBuffer buf= new StringBuffer(Signature.getSimpleName(Signature.toString(Signature.getElementType(parameters[i]))));
+			final char character= buf.charAt(0);
+			if (buf.length() > 0 && !Character.isUpperCase(character))
+				buf.setCharAt(0, Character.toUpperCase(character));
+			buffer.append(buf.toString());
+			for (int j= 0, arrayCount= Signature.getArrayCount(parameters[i]); j < arrayCount; j++) {
+				buffer.append("Array"); //$NON-NLS-1$
 			}
 		}
 	}
 
-	private void appendMethodComment(StringBuffer newMethod, IMethod method) throws JavaModelException {
-		String returnType= Signature.toString(method.getReturnType());
-		String body= Messages.format(WizardMessages.NewTestCaseWizardPageOne_comment_class_to_test, new String[]{returnType, method.getElementName()}); 
-		newMethod.append("/*");//$NON-NLS-1$
-		newMethod.append(getLineDelimiter());
-		newMethod.append(" * ");//$NON-NLS-1$
-		newMethod.append(body);
-		newMethod.append("(");//$NON-NLS-1$
-		String[] paramTypes= method.getParameterTypes();
-		if (paramTypes.length > 0) {
-			if (paramTypes.length > 1) {
-				for (int j= 0; j < paramTypes.length-1; j++) {
-					newMethod.append(Signature.toString(paramTypes[j])+", "); //$NON-NLS-1$
-				}
-			}
-			newMethod.append(Signature.toString(paramTypes[paramTypes.length-1]));
-		}
-		newMethod.append(")");//$NON-NLS-1$
-		newMethod.append(getLineDelimiter());
-		newMethod.append(" */");//$NON-NLS-1$
-		newMethod.append(getLineDelimiter()); 
+	private void appendMethodComment(StringBuffer buffer, IMethod method) throws JavaModelException {
+		final String delimiter= getLineDelimiter();
+		final StringBuffer buf= new StringBuffer(16);
+		JavaElementLabels.getMethodLabel(method, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.M_FULLY_QUALIFIED, buf);
+		buffer.append("/*");//$NON-NLS-1$
+		buffer.append(delimiter);
+		buffer.append(" * ");//$NON-NLS-1$
+		buffer.append(Messages.format(WizardMessages.NewTestCaseWizardPageOne_comment_class_to_test, buf.toString()));
+		buffer.append(delimiter);
+		buffer.append(" */");//$NON-NLS-1$
+		buffer.append(delimiter);
 	}
 
 	private List getOveloadedMethods(List allMethods) {
