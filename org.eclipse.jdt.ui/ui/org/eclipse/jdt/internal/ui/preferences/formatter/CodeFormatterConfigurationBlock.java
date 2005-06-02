@@ -75,15 +75,16 @@ public class CodeFormatterConfigurationBlock {
 			case ProfileManager.PROFILE_CREATED_EVENT:
 			case ProfileManager.SETTINGS_CHANGED_EVENT:
 				try {
-					ProfileStore.writeProfiles(fProfileManager.getSortedProfiles());
+					ProfileStore.writeProfiles(fProfileManager.getSortedProfiles()); // update profile store
 				} catch (CoreException x) {
 					JavaPlugin.log(x);
 				}
+				// fall through
+			case ProfileManager.SELECTION_CHANGED_EVENT:
+				fProfileManager.commitChanges(fCurrContext); // update formatter settings with curently selected profile 
 			}
 		}
 	}
-	
-	
 
 	private class ProfileComboController implements Observer, SelectionListener {
 		
@@ -401,6 +402,7 @@ public class CodeFormatterConfigurationBlock {
 	
 	private static Button createButton(Composite composite, String text, final int style) {
 		final Button button= new Button(composite, SWT.PUSH);
+		button.setFont(composite.getFont());
 		button.setText(text);
 
 		final GridData gd= new GridData(style);
@@ -415,6 +417,7 @@ public class CodeFormatterConfigurationBlock {
 		gd.widthHint= widthHint;
 
 		final Combo combo= new Combo(composite, SWT.DROP_DOWN | SWT.READ_ONLY );
+		combo.setFont(composite.getFont());
 		combo.setLayoutData(gd);
 		return combo;
 	}
@@ -425,6 +428,7 @@ public class CodeFormatterConfigurationBlock {
 		gd.widthHint= 0;
 
 		final Label label = new Label(composite, SWT.WRAP);
+		label.setFont(composite.getFont());
 		label.setText(text);
 		label.setLayoutData(gd);
 		return label;		
@@ -460,12 +464,7 @@ public class CodeFormatterConfigurationBlock {
 		return false;
 	}
 	
-	public boolean performOk(boolean enabled) {
-		if (enabled) {
-			fProfileManager.commitChanges(fCurrContext);
-		} else {
-			fProfileManager.clearAllSettings(fCurrContext);
-		}
+	public boolean performOk() {
 		return true;
 	}
 	
@@ -474,13 +473,20 @@ public class CodeFormatterConfigurationBlock {
 		if (profile != null) {
 			int defaultIndex= fProfileManager.getSortedProfiles().indexOf(profile);
 			if (defaultIndex != -1) {
-				fProfileCombo.select(defaultIndex);
 				fProfileManager.setSelected(profile);
 			}
 		}
 	}
 	
 	public void dispose() {
+	}
+
+	public void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
+		if (useProjectSpecificSettings) {
+			fProfileManager.commitChanges(fCurrContext);
+		} else {
+			fProfileManager.clearAllSettings(fCurrContext);
+		}
 	}
 	
 
