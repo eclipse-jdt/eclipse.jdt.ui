@@ -61,8 +61,11 @@ public class JavaReconciler extends MonoReconciler {
 		 * @see org.eclipse.ui.IPartListener#partActivated(org.eclipse.ui.IWorkbenchPart)
 		 */
 		public void partActivated(IWorkbenchPart part) {
-			if (part == fTextEditor && hasJavaModelChanged())
-				JavaReconciler.this.forceReconciling();
+			if (part == fTextEditor) {
+				if (hasJavaModelChanged())
+					JavaReconciler.this.forceReconciling();
+				setEditorActive(true);
+			}
 		}
 
 		/*
@@ -81,8 +84,10 @@ public class JavaReconciler extends MonoReconciler {
 		 * @see org.eclipse.ui.IPartListener#partDeactivated(org.eclipse.ui.IWorkbenchPart)
 		 */
 		public void partDeactivated(IWorkbenchPart part) {
-			if (part == fTextEditor)
+			if (part == fTextEditor) {
 				setJavaModelChanged(false);
+				setEditorActive(false);
+			}
 		}
 
 		/*
@@ -108,16 +113,21 @@ public class JavaReconciler extends MonoReconciler {
 		 * @see org.eclipse.swt.events.ShellListener#shellActivated(org.eclipse.swt.events.ShellEvent)
 		 */
 		public void shellActivated(ShellEvent e) {
-			if (!fControl.isDisposed() && fControl.isVisible() && hasJavaModelChanged())
-				JavaReconciler.this.forceReconciling();
+			if (!fControl.isDisposed() && fControl.isVisible()) {
+				if (hasJavaModelChanged())
+					JavaReconciler.this.forceReconciling();
+				setEditorActive(true);
+			}
 		}
 
 		/*
 		 * @see org.eclipse.swt.events.ShellListener#shellDeactivated(org.eclipse.swt.events.ShellEvent)
 		 */
 		public void shellDeactivated(ShellEvent e) {
-			if (!fControl.isDisposed() && fControl.isVisible())
+			if (!fControl.isDisposed() && fControl.isVisible()) {
 				setJavaModelChanged(false);
+				setEditorActive(false);
+			}
 		}
 	}
 
@@ -132,6 +142,8 @@ public class JavaReconciler extends MonoReconciler {
 		 */
 		public void elementChanged(ElementChangedEvent event) {
 			setJavaModelChanged(true);
+			if (!fIsReconciling && isEditorActive() )
+				JavaReconciler.this.forceReconciling();
 		}
 	}
 
@@ -177,7 +189,6 @@ public class JavaReconciler extends MonoReconciler {
 	private ShellListener fActivationListener;
 	/**
 	 * The mutex that keeps us from running multiple reconcilers on one editor.
-	 * TODO remove once we have ensured that there is only one reconciler per editor.
 	 */
 	private Object fMutex;
 	/**
@@ -191,10 +202,21 @@ public class JavaReconciler extends MonoReconciler {
 	 */
 	private volatile boolean fHasJavaModelChanged= true;
 	/**
+	 * Tells whether this reconciler's editor is active.
+	 * @since 3.1
+	 */
+	private volatile boolean fIsEditorActive= true;
+	/**
 	 * The resource change listener.
 	 * @since 3.0
 	 */
 	private IResourceChangeListener fResourceChangeListener;
+	/**
+	 * Tells whether a reconcile is in progress.
+	 * @since 3.1
+	 */
+	private volatile boolean fIsReconciling= false;
+	
 	private boolean fIninitalProcessDone= false;
 
 	/**
@@ -302,7 +324,6 @@ public class JavaReconciler extends MonoReconciler {
 	 * @see org.eclipse.jface.text.reconciler.MonoReconciler#initialProcess()
 	 */
 	protected void initialProcess() {
-		// TODO remove once we have ensured that there is only one reconciler per editor.
 		synchronized (fMutex) {
 			super.initialProcess();
 		}
@@ -313,9 +334,10 @@ public class JavaReconciler extends MonoReconciler {
 	 * @see org.eclipse.jface.text.reconciler.MonoReconciler#process(org.eclipse.jface.text.reconciler.DirtyRegion)
 	 */
 	protected void process(DirtyRegion dirtyRegion) {
-		// TODO remove once we have ensured that there is only one reconciler per editor.
 		synchronized (fMutex) {
+			fIsReconciling= true;
 			super.process(dirtyRegion);
+			fIsReconciling= false;
 		}
 	}
 
@@ -337,5 +359,26 @@ public class JavaReconciler extends MonoReconciler {
 	 */
 	private synchronized void setJavaModelChanged(boolean state) {
 		fHasJavaModelChanged= state;
+	}
+	
+	/**
+	 * Tells whether this reconciler's editor is active.
+	 *
+	 * @return <code>true</code> iff the editor is active
+	 * @since 3.1
+	 */
+	private synchronized boolean isEditorActive() {
+		return fIsEditorActive;
+	}
+
+	
+	/**
+	 * Sets whether this reconciler's editor is active.
+	 *
+	 * @param state <code>true</code> iff the editor is active
+	 * @since 3.1
+	 */
+	private synchronized void setEditorActive(boolean state) {
+		fIsEditorActive= state;
 	}
 }
