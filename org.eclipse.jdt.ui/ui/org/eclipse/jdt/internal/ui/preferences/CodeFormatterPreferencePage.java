@@ -65,6 +65,16 @@ public class CodeFormatterPreferencePage extends PropertyAndPreferencePage {
 	}
 	
 	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enableProjectSpecificSettings(boolean)
+	 */
+	protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
+		if (fConfigurationBlock != null) {
+			fConfigurationBlock.enableProjectSpecificSettings(useProjectSpecificSettings);
+		}
+		super.enableProjectSpecificSettings(useProjectSpecificSettings);
+	}
+	
+	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#getPreferencePageID()
 	 */
 	protected String getPreferencePageID() {
@@ -92,18 +102,17 @@ public class CodeFormatterPreferencePage extends PropertyAndPreferencePage {
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
-		super.performDefaults();
 		if (fConfigurationBlock != null) {
 			fConfigurationBlock.performDefaults();
 		}
+		super.performDefaults();
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		boolean enabled= !isProjectPreferencePage() || useProjectSettings();
-		if (fConfigurationBlock != null && !fConfigurationBlock.performOk(enabled)) {
+		if (fConfigurationBlock != null && !fConfigurationBlock.performOk()) {
 			return false;
 		}	
 		return super.performOk();
