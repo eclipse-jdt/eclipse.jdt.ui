@@ -83,6 +83,8 @@ public class NLSSubstitution {
 	}
 	
 	public String getKeyWithoutPrefix() {
+		if (fState == EXTERNALIZED && fPrefix != null && fKey != null && fKey.indexOf(fPrefix) == 0)
+			return fKey.substring(fPrefix.length());
 		return fKey;
 	}
 
@@ -279,7 +281,7 @@ public class NLSSubstitution {
 			
 			for (int i= 0; i < substitutions.length; i++) {
 				NLSSubstitution substitution= substitutions[i];
-				if ((substitution == this) || (substitution.fState != EXTERNALIZED))
+				if (substitution == this || substitution.fState != EXTERNALIZED)
 					continue;
 				try {
 					int value= Integer.parseInt(substitution.getKeyWithoutPrefix());
