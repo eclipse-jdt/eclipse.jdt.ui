@@ -17,7 +17,11 @@ import junit.framework.TestSuite;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.rules.FastPartitioner;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
+import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 import org.eclipse.jdt.internal.ui.text.JavaPairMatcher;
 
 public class PairMatcherTest extends TestCase {
@@ -33,7 +37,20 @@ public class PairMatcherTest extends TestCase {
 	}
 	
 	protected void setUp() {
-		fDocument= new Document("xx(yy(xx)yy)xx");
+		Document document= new Document("xx(yy(xx)yy)xx");
+		String[] types= new String[] {
+				IJavaPartitions.JAVA_DOC,
+				IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
+				IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
+				IJavaPartitions.JAVA_STRING,
+				IJavaPartitions.JAVA_CHARACTER,
+				IDocument.DEFAULT_CONTENT_TYPE
+		};
+		FastPartitioner partitioner= new FastPartitioner(new FastJavaPartitionScanner(), types);
+		partitioner.connect(document);
+		document.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, partitioner);
+
+		fDocument= document;
 		fPairMatcher= new JavaPairMatcher(new char[] { '(', ')' });
 	}
 	

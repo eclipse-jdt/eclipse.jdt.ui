@@ -10,19 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
-import java.io.IOException;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.ICharacterPairMatcher;
 
 import org.eclipse.jdt.core.JavaCore;
 
-/**
- * JavaPairMatcher.java
- */
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
 /**
  * Helper class for match pairs of characters.
  */
@@ -35,8 +33,6 @@ public class JavaPairMatcher implements ICharacterPairMatcher, ISourceVersionDep
 	protected int fStartPos;
 	protected int fEndPos;
 	protected int fAnchor;
-
-	protected JavaCodeReader fReader= new JavaCodeReader();
 	/**
 	 * Stores the source version state.
 	 * @since 3.1
@@ -79,20 +75,12 @@ public class JavaPairMatcher implements ICharacterPairMatcher, ISourceVersionDep
 	public void dispose() {
 		clear();
 		fDocument= null;
-		fReader= null;
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.source.ICharacterPairMatcher#clear()
 	 */
 	public void clear() {
-		if (fReader != null) {
-			try {
-				fReader.close();
-			} catch (IOException x) {
-				// ignore
-			}
-		}
 	}
 
 	protected boolean matchPairsAt() {
@@ -104,19 +92,12 @@ public class JavaPairMatcher implements ICharacterPairMatcher, ISourceVersionDep
 		fStartPos= -1;
 		fEndPos= -1;
 
-		// get the chars preceding and following the start position
+		// get the char preceding the start position
 		try {
 
 			char prevChar= fDocument.getChar(Math.max(fOffset - 1, 0));
-// modified behavior for http://dev.eclipse.org/bugs/show_bug.cgi?id=16879
-//			char nextChar= fDocument.getChar(fOffset);
-
 			// search for opening peer character next to the activation point
 			for (i= 0; i < fPairs.length; i= i + 2) {
-//				if (nextChar == fPairs[i]) {
-//					fStartPos= fOffset;
-//					pairIndex1= i;
-//				} else
 				if (prevChar == fPairs[i]) {
 					fStartPos= fOffset - 1;
 					pairIndex1= i;
@@ -129,10 +110,6 @@ public class JavaPairMatcher implements ICharacterPairMatcher, ISourceVersionDep
 					fEndPos= fOffset - 1;
 					pairIndex2= i;
 				}
-//				else if (nextChar == fPairs[i]) {
-//					fEndPos= fOffset;
-//					pairIndex2= i;
-//				}
 			}
 
 			if (fEndPos > -1) {
@@ -152,60 +129,35 @@ public class JavaPairMatcher implements ICharacterPairMatcher, ISourceVersionDep
 			}
 
 		} catch (BadLocationException x) {
-		} catch (IOException x) {
 		}
 
 		return false;
 	}
 
-	protected int searchForClosingPeer(int offset, int openingPeer, int closingPeer, IDocument document) throws IOException {
-		if (openingPeer == '<' && !(fHighlightAngularBrackets && isTypeParameterBracket(offset, document)))
+	protected int searchForClosingPeer(int offset, char openingPeer, char closingPeer, IDocument document) throws BadLocationException {
+		boolean useGenericsHeuristic= openingPeer == '<';
+		if (useGenericsHeuristic && !fHighlightAngularBrackets)
+			return -1;
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document, IJavaPartitions.JAVA_PARTITIONING, TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, false));
+		if (useGenericsHeuristic && !isTypeParameterBracket(offset, document, scanner))
 			return -1;
 
-		fReader.configureForwardReader(document, offset + 1, document.getLength(), true, true);
-
-		int stack= 1;
-		int c= fReader.read();
-		while (c != JavaCodeReader.EOF) {
-			if (c == openingPeer && c != closingPeer)
-				stack++;
-			else if (c == closingPeer)
-				stack--;
-
-			if (stack == 0)
-				return fReader.getOffset();
-
-			c= fReader.read();
-		}
-
-		return  -1;
+		return scanner.findClosingPeer(offset + 1, openingPeer, closingPeer);
 	}
 
 
-	protected int searchForOpeningPeer(int offset, int openingPeer, int closingPeer, IDocument document) throws IOException {
-		if (openingPeer == '<' && !fHighlightAngularBrackets)
+	protected int searchForOpeningPeer(int offset, char openingPeer, char closingPeer, IDocument document) throws BadLocationException {
+		boolean useGenericsHeuristic= openingPeer == '<';
+		if (useGenericsHeuristic && !fHighlightAngularBrackets)
 			return -1;
 
-		fReader.configureBackwardReader(document, offset, true, true);
-
-		int stack= 1;
-		int c= fReader.read();
-		while (c != JavaCodeReader.EOF) {
-			if (c == closingPeer && c != openingPeer)
-				stack++;
-			else if (c == openingPeer)
-				stack--;
-
-			if (stack == 0) {
-				if (closingPeer == '>' && !isTypeParameterBracket(fReader.getOffset(), document))
-					return -1;
-				return fReader.getOffset();
-			}
-
-			c= fReader.read();
-		}
-
-		return -1;
+		JavaHeuristicScanner scanner= new JavaHeuristicScanner(document, IJavaPartitions.JAVA_PARTITIONING, TextUtilities.getContentType(document, IJavaPartitions.JAVA_PARTITIONING, offset, false));
+		int peer= scanner.findOpeningPeer(offset - 1, openingPeer, closingPeer);
+		if (peer == JavaHeuristicScanner.NOT_FOUND)
+			return -1;
+		if (useGenericsHeuristic && !isTypeParameterBracket(peer, document, scanner))
+			return -1;
+		return peer;
 	}
 
 	/**
@@ -214,11 +166,12 @@ public class JavaPairMatcher implements ICharacterPairMatcher, ISourceVersionDep
 	 *
 	 * @param offset the offset of the opening bracket
 	 * @param document the document
+	 * @param scanner a java heuristic scanner on <code>document</code>
 	 * @return <code>true</code> if the bracket is part of a type parameter,
 	 *         <code>false</code> otherwise
 	 * @since 3.1
 	 */
-	private boolean isTypeParameterBracket(int offset, IDocument document) {
+	private boolean isTypeParameterBracket(int offset, IDocument document, JavaHeuristicScanner scanner) {
 		/*
 		 * type parameter come after braces (closing or opening), semicolons, or after
 		 * a Type name (heuristic: starts with capital character, or after a modifier
@@ -228,7 +181,6 @@ public class JavaPairMatcher implements ICharacterPairMatcher, ISourceVersionDep
 		try {
 			IRegion line= document.getLineInformationOfOffset(offset);
 
-			JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 			int prevToken= scanner.previousToken(offset - 1, line.getOffset());
 			int prevTokenOffset= scanner.getPosition() + 1;
 			String previous= prevToken == Symbols.TokenEOF ? null : document.get(prevTokenOffset, offset - prevTokenOffset).trim();
