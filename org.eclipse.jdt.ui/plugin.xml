@@ -4452,23 +4452,7 @@
               id="org.eclipse.jdt.internal.ui.text.spelling.DefaultSpellingEngine">
         </engine>
     </extension>
-    
-    <extension point="org.eclipse.ui.preferenceTransfer">
-	    <transfer
-	       id= "org.eclipse.jdt.ui.all_jdt"
-	       name= "%transferName"
-	       icon= "icons/full/obj16/occ_match.gif">   
-	       <mapping scope="instance">
-	          <entry node="org.eclipse.jdt.ui"/>
-   	          <entry node="org.eclipse.jdt.core"/>
-   	          <entry node="org.eclipse.jdt.junit"/>
-	       </mapping>
-		<description>
-			%transferDescription
-		</description>	       
-	    </transfer>
-    </extension>
-    
+        
     <extension point="org.eclipse.core.runtime.preferences">
         <initializer class="org.eclipse.jdt.internal.ui.JavaUIPreferenceInitializer"/>
     </extension>
