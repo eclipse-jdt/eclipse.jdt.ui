@@ -15,6 +15,8 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -66,7 +68,15 @@ class AccessorClassCreator {
 	}
 
 	private String createAccessorCUSource(IProgressMonitor pm) throws CoreException {
-		return CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, getUnformattedSource(pm), 0, null, null, fCu.getJavaProject());
+		IProject project= getFileHandle(fAccessorPath).getProject();
+		String lineDelimiter= StubUtility.getLineDelimiterPreference(project);
+		return CodeFormatterUtil.format(CodeFormatter.K_COMPILATION_UNIT, getUnformattedSource(pm), 0, null, lineDelimiter, fCu.getJavaProject());
+	}
+	
+	private static IFile getFileHandle(IPath filePath) {
+		if (filePath == null)
+			return null;
+		return ResourcesPlugin.getWorkspace().getRoot().getFile(filePath);
 	}
 
 	private String getUnformattedSource(IProgressMonitor pm) throws CoreException {
