@@ -39,10 +39,12 @@ public class IFileTypeInfo extends TypeInfo {
 	}
 	
 	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
 		if (!IFileTypeInfo.class.equals(obj.getClass()))
 			return false;
 		IFileTypeInfo other= (IFileTypeInfo)obj;
-		return fProject.equals(other.fProject) && equals(fFolder, other.fFolder) &&
+		return doEquals(other) && fProject.equals(other.fProject) && equals(fFolder, other.fFolder) &&
 			fFile.equals(other.fFile) && fExtension.equals(other.fExtension);
 	}
 	

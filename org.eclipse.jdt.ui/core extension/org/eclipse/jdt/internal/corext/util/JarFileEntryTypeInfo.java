@@ -44,12 +44,13 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 	}
 	
 	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
 		if (!JarFileEntryTypeInfo.class.equals(obj.getClass()))
 			return false;
 		JarFileEntryTypeInfo other= (JarFileEntryTypeInfo)obj;
-		if (!doEquals(other))
-			return false;
-		return fJar.equals(other.fJar) && fFileName.equals(other.fFileName) && fExtension.equals(other.fExtension);
+		return doEquals(other) && fJar.equals(other.fJar) && 
+			fFileName.equals(other.fFileName) && fExtension.equals(other.fExtension);
 	}
 	
 	public int getElementType() {

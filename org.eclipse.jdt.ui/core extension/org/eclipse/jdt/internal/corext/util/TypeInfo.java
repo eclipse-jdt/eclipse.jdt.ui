@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
 public abstract class TypeInfo {
@@ -217,24 +218,8 @@ public abstract class TypeInfo {
 	}
 
 	protected boolean doEquals(TypeInfo other) {
-		if (!fName.equals(other.fName) || !fPackage.equals(other.fPackage) || fModifiers != other.fModifiers)
-			return false;
-		char[][] otherEnclosingNames= other.fEnclosingNames;
-		if (fEnclosingNames == null || otherEnclosingNames == null)
-			return fEnclosingNames == otherEnclosingNames;
-		if (fEnclosingNames.length != otherEnclosingNames.length)
-			return false;
-		for (int i= 0; i < fEnclosingNames.length; i++) {
-			char[] name= fEnclosingNames[i];
-			char[] otherName= otherEnclosingNames[i];
-			if (name.length != otherName.length)
-				return false;
-			for (int n= 0; n < otherName.length; n++) {
-				if (name[n] != otherName[n])
-					return false;
-			}
-		}
-		return true;
+		return fName.equals(other.fName) && fPackage.equals(other.fPackage) 
+			&& fModifiers == other.fModifiers && CharOperation.equals(fEnclosingNames, other.fEnclosingNames);
 	}
 	
 	protected static boolean equals(String s1, String s2) {
