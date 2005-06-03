@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
+import java.util.Iterator;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -17,12 +19,15 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -280,6 +285,8 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
      */
     public void fillContextMenu(IMenuManager menu) {
         super.fillContextMenu(menu);
+        if (!canOperateOnSelection())
+        	return;
         String menuText= ActionMessages.BuildPath_label;
         IMenuManager subMenu= new MenuManager(menuText, MENU_ID);
         subMenu.addMenuListener(new IMenuListener() {
@@ -324,4 +331,16 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         return 0;
     }
     
+    private boolean canOperateOnSelection() {
+    	ISelection sel= fSite.getSelectionProvider().getSelection();
+    	if (!(sel instanceof IStructuredSelection))
+    		return false;
+    	IStructuredSelection selection= (IStructuredSelection)sel;
+    	for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (element instanceof IWorkingSet)
+				return false;
+		}
+    	return true;
+    }
 }
