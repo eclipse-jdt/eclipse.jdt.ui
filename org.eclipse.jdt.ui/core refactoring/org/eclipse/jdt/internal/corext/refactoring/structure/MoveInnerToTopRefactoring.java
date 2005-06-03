@@ -1526,22 +1526,24 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		return true;
 	}
 
-	private void updateParameterizedTypeReference(ITypeBinding[] parameters, ParameterizedType type, CompilationUnitRewrite targetRewrite, TextEditGroup group) {
+	private boolean updateParameterizedTypeReference(ITypeBinding[] parameters, ParameterizedType type, CompilationUnitRewrite targetRewrite, TextEditGroup group) {
 		if (!(type.getParent() instanceof ClassInstanceCreation)) {
 			final ListRewrite rewrite= targetRewrite.getASTRewrite().getListRewrite(type, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
+			final AST ast= targetRewrite.getRoot().getAST();
 			TypeParameter parameter= null;
 			for (int index= type.typeArguments().size(); index < parameters.length; index++) {
-				parameter= targetRewrite.getRoot().getAST().newTypeParameter();
-				parameter.setName(targetRewrite.getRoot().getAST().newSimpleName(parameters[index].getName()));
+				parameter= ast.newTypeParameter();
+				parameter.setName(ast.newSimpleName(parameters[index].getName()));
 				rewrite.insertLast(parameter, group);
 			}
 		}
+		return true;
 	}
 
 	private boolean updateReference(ITypeBinding[] parameters, ASTNode node, CompilationUnitRewrite rewrite, TextEditGroup group) {
 		if (node instanceof SimpleType && node.getParent() instanceof ParameterizedType)
-			updateParameterizedTypeReference(parameters, (ParameterizedType) node.getParent(), rewrite, group);
-		if (node instanceof QualifiedName)
+			return updateParameterizedTypeReference(parameters, (ParameterizedType) node.getParent(), rewrite, group);
+		else if (node instanceof QualifiedName)
 			return updateNameReference(parameters, (QualifiedName) node, rewrite, group);
 		else if (node instanceof SimpleType)
 			return updateNameReference(parameters, ((SimpleType) node).getName(), rewrite, group);
