@@ -163,6 +163,8 @@ public class UnresolvedElementsSubProcessor {
 					if (switchExp != null && switchExp.isEnum()) {
 						binding= switchExp;
 					}
+				} else if (locationInParent == SuperFieldAccess.NAME_PROPERTY) {
+					binding= declaringTypeBinding.getSuperclass();
 				}
 				break;
 			case ASTNode.QUALIFIED_NAME:
