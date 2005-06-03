@@ -132,6 +132,7 @@ abstract class AbstractConfigurationBlock implements IPreferenceConfigurationBlo
 				throw new NullPointerException();
 			if (fSections.add(section))
 				section.addExpansionListener(fListener);
+			makeScrollableCompositeAware(section);
 		}
 		
 		/**

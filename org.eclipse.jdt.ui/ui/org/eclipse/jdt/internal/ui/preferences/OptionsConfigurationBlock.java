@@ -464,6 +464,7 @@ public abstract class OptionsConfigurationBlock {
 			}
 		});
 		fExpandedComposites.add(excomposite);
+		makeScrollableCompositeAware(excomposite);
 		return excomposite;
 	}
 	
