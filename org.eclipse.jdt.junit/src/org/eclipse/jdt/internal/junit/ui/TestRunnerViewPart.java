@@ -285,6 +285,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/relaunch.gif")); //$NON-NLS-1$
 			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
 			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
+			setEnabled(false);
 		}
 		
 		public void run(){
@@ -611,6 +612,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 		fJUnitIsRunningLock.acquire();
 		getProgressService().schedule(fJUnitIsRunningJob);
 		fUpdateJob.schedule(REFRESH_INTERVAL);
+		fRerunLastTestAction.setEnabled(true);
 	}
 	
 	public void selectNextFailure() {
