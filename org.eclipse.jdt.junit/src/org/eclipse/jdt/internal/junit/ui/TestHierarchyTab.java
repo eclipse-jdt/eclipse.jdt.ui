@@ -228,6 +228,21 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener, ISele
 		setCurrentItem(treeItem);		
 	}
 
+	public void rerunTest(String testId) {
+		TreeItem treeItem= findTreeItem(testId);
+		if (treeItem == null)  
+			return;
+		setCurrentItem(treeItem);
+	}
+	
+	public void endRerunTest(String testId) {
+		TestRunInfo testInfo= fTestRunnerPart.getTestInfo(testId);
+		if (testInfo == null)
+			return;
+		
+		testStatusChanged(testInfo);
+	}
+	
 	private void updatePath(TreeItem parent) {
 		List newPath= new ArrayList();
 		while (parent != null) {

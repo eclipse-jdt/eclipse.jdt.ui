@@ -80,6 +80,18 @@ public abstract class TestRunTab {
 	}
 	
 	/**
+	 * A test has been rerun
+	 */
+	public void rerunTest(String testId) {
+	}
+
+	/**
+	 * A test has finished rerunning
+	 */
+	public void endRerunTest(String testId) {		
+	}
+	
+	/**
 	 * The status of a test has changed
 	 */
 	public void testStatusChanged(TestRunInfo newInfo) {

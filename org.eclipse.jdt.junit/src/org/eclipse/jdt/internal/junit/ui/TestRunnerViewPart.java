@@ -822,7 +822,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 	/*
 	 * @see ITestRunListener#testReran
 	 */
-	public void testReran(String testId, String className, String testName, int status, String trace) {
+	public void testReran(final String testId, String className, String testName, int status, String trace) {
 		if (status == ITestRunListener.STATUS_ERROR) {
 			String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_error, new String[]{testName, className}); 
 			postError(msg); 
@@ -835,6 +835,16 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 		}
 		TestRunInfo info= getTestInfo(testId);
 		updateTest(info, status);
+		postSyncRunnable(new Runnable() {
+			public void run() {
+				refreshCounters();
+				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
+					TestRunTab v= (TestRunTab) e.nextElement();
+					v.endRerunTest(testId);
+				}
+			}
+		});
+		
 		if (info.getTrace() == null || !info.getTrace().equals(trace)) {
 			info.setTrace(trace);
 			showFailure(info);
@@ -849,7 +859,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 		fFailureTrace.updateEnablement(info);
 	}
 	
-	private void updateTest(TestRunInfo info, final int status) {
+	private void updateTest(final TestRunInfo info, final int status) {
 		if (status == info.getStatus())
 			return;
 		if (info.getStatus() == ITestRunListener.STATUS_OK) {
@@ -873,17 +883,15 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 			}
 		}			
 		info.setStatus(status);	
-		final TestRunInfo finalInfo= info;
 		postSyncRunnable(new Runnable() {
 			public void run() {
 				//refreshCounters();
 				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
 					TestRunTab v= (TestRunTab) e.nextElement();
-					v.testStatusChanged(finalInfo);
+					v.testStatusChanged(info);
 				}
 			}
 		});
-		
 	}
 
 	
@@ -1484,6 +1492,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 
 	public void rerunTest(String testId, String className, String testName, String launchMode) {
 		DebugUITools.saveAndBuildBeforeLaunch();
+		postRerunTest(testId);
 		if (lastLaunchIsKeptAlive())
 			fTestRunnerClient.rerunTest(testId, className, testName);
 		else if (fLastLaunch != null) {
@@ -1518,6 +1527,19 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 				JUnitMessages.TestRunnerViewPart_cannotrerurn_message
 			); 
 		}
+	}
+
+	private void postRerunTest(final String testId) {
+		postSyncRunnable(new Runnable() {
+			public void run() {
+				if(isDisposed()) 
+					return;
+				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
+					TestRunTab v= (TestRunTab) e.nextElement();
+					v.rerunTest(testId);
+				}
+			}
+		});	
 	}
 	
 	public void warnOfContentChange() {
