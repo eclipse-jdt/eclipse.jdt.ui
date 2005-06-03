@@ -16,23 +16,26 @@ import java.util.Map;
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jface.text.Document;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
-import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jface.text.Document;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 
 public class NLSPropertyFileModifier {
@@ -42,7 +45,11 @@ public class NLSPropertyFileModifier {
 		String name= Messages.format(NLSMessages.NLSPropertyFileModifier_change_name, propertyFilePath.toString()); 
 		TextChange textChange= null;
 		if (!Checks.resourceExists(propertyFilePath)) {
-			textChange= new DocumentChange(name, new Document());
+			IProject project= getFileHandle(propertyFilePath).getProject();
+			String lineDelimiter= StubUtility.getLineDelimiterPreference(project);
+			Document document= new Document();
+			document.setInitialLineDelimiter(lineDelimiter);
+			textChange= new DocumentChange(name, document);
 			addChanges(textChange, nlsSubstitutions);
 			textChange.perform(new NullProgressMonitor());
 			return new CreateTextFileChange(propertyFilePath, textChange.getCurrentContent(new NullProgressMonitor()), "8859_1", "txt"); //$NON-NLS-1$ //$NON-NLS-2$
@@ -56,7 +63,13 @@ public class NLSPropertyFileModifier {
 	}
 
 	private static IFile getPropertyFile(IPath propertyFilePath) {
-		return (IFile) (ResourcesPlugin.getWorkspace().getRoot().findMember(propertyFilePath));
+		return (IFile) ResourcesPlugin.getWorkspace().getRoot().findMember(propertyFilePath);
+	}
+	
+	private static IFile getFileHandle(IPath propertyFilePath) {
+		if (propertyFilePath == null)
+			return null;
+		return ResourcesPlugin.getWorkspace().getRoot().getFile(propertyFilePath);
 	}
 
 	private static void addChanges(TextChange textChange, NLSSubstitution[] substitutions) throws CoreException {
