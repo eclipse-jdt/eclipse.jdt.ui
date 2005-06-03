@@ -22,6 +22,9 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubProgressMonitor;
+
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
@@ -62,12 +65,13 @@ public class InferTypeArgumentsConstraintsSolver {
 		fWorkList= new LinkedList();
 	}
 	
-	public void solveConstraints() {
+	public InferTypeArgumentsUpdate solveConstraints(SubProgressMonitor pm) {
+		pm.beginTask("", 2); //$NON-NLS-1$
 		fUpdate= new InferTypeArgumentsUpdate();
 		
 		ConstraintVariable2[] allConstraintVariables= fTCModel.getAllConstraintVariables();
 		if (allConstraintVariables.length == 0)
-			return;
+			return fUpdate;
 		
 		fTypeSetEnvironment= new TypeSetEnvironment(fTCModel.getTypeEnvironment());
 		ParametricStructureComputer parametricStructureComputer= new ParametricStructureComputer(allConstraintVariables, fTCModel);
@@ -104,10 +108,13 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 		
 		initializeTypeEstimates(allConstraintVariables);
+		if (pm.isCanceled())
+			throw new OperationCanceledException();
 		fWorkList.addAll(Arrays.asList(allConstraintVariables));
-		runSolver();
-		chooseTypes(allConstraintVariables);
+		runSolver(new SubProgressMonitor(pm, 1));
+		chooseTypes(allConstraintVariables, new SubProgressMonitor(pm, 1));
 		findCastsToRemove(fTCModel.getCastVariables());
+		return fUpdate;
 	}
 
 	private void initializeTypeEstimates(ConstraintVariable2[] allConstraintVariables) {
@@ -159,13 +166,18 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 	}
 
-	private void runSolver() {
+	private void runSolver(SubProgressMonitor pm) {
+		pm.beginTask("", fWorkList.size() * 3); //$NON-NLS-1$
 		while (! fWorkList.isEmpty()) {
 			// Get a variable whose type estimate has changed
 			ConstraintVariable2 cv= (ConstraintVariable2) fWorkList.removeFirst();
 			List/*<ITypeConstraint2>*/ usedIn= fTCModel.getUsedIn(cv);
 			processConstraints(usedIn, cv);
+			pm.worked(1);
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 		}
+		pm.done();
 	}
 	
 	/**
@@ -230,7 +242,8 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 	}
 
-	private void chooseTypes(ConstraintVariable2[] allConstraintVariables) {
+	private void chooseTypes(ConstraintVariable2[] allConstraintVariables, SubProgressMonitor pm) {
+		pm.beginTask("", allConstraintVariables.length); //$NON-NLS-1$
 		for (int i= 0; i < allConstraintVariables.length; i++) {
 			ConstraintVariable2 cv= allConstraintVariables[i];
 				
@@ -245,7 +258,12 @@ public class InferTypeArgumentsConstraintsSolver {
 				CollectionElementVariable2 elementCv= (CollectionElementVariable2) cv;
 				fUpdate.addDeclaration(elementCv);
 			}
+			
+			pm.worked(1);
+			if (pm.isCanceled())
+				throw new OperationCanceledException();
 		}
+		pm.done();
 	}
 
 	private TType chooseSingleType(TypeSet typeEstimate) {
@@ -309,10 +327,6 @@ public class InferTypeArgumentsConstraintsSolver {
 		}
 	}
 
-	public InferTypeArgumentsUpdate getUpdate() {
-		return fUpdate;
-	}
-	
 	public static TType getChosenType(ConstraintVariable2 cv) {
 		TType type= (TType) cv.getData(CHOSEN_TYPE);
 		if (type != null)

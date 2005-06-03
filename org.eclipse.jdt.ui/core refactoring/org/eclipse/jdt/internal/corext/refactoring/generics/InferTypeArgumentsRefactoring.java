@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.generics;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -144,7 +145,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	 */
 	public RefactoringStatus checkFinalConditions(final IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		HashMap/*<IJavaProject, List<JavaElement>>*/ projectsToElements= getJavaElementsPerProject(fElements);
-		pm.beginTask("", projectsToElements.size() + 1); //$NON-NLS-1$
+		pm.beginTask("", projectsToElements.size() + 2); //$NON-NLS-1$
 		final RefactoringStatus result= new RefactoringStatus();
 		try {
 			fTCModel= new InferTypeArgumentsTCModel();
@@ -155,47 +156,62 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 				IJavaProject project= (IJavaProject) entry.getKey();
 				List javaElementsList= (List) entry.getValue();
 				IJavaElement[] javaElements= (IJavaElement[]) javaElementsList.toArray(new IJavaElement[javaElementsList.size()]);
-				final ICompilationUnit[] cus= JavaModelUtil.getAllCompilationUnits(javaElements);
+				List cus= Arrays.asList(JavaModelUtil.getAllCompilationUnits(javaElements));
 				
-				final SubProgressMonitor projectMonitor= new SubProgressMonitor(pm, 1);
-				projectMonitor.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_calculating_dependencies); 
-				ASTParser parser= ASTParser.newParser(AST.JLS3);
-				parser.setProject(project);
-				parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
-				parser.setResolveBindings(true);
-				parser.createASTs(cus, new String[0], new ASTRequestor() {
-					public void acceptAST(final ICompilationUnit source, final CompilationUnit ast) {
-						projectMonitor.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_building); 
-						projectMonitor.subTask(source.getElementName());
-						ast.setProperty(RefactoringASTParser.SOURCE_PROPERTY, source);
-
-						Platform.run(new ISafeRunnable() {
-							public void run() throws Exception {
-								ast.accept(unitCollector);
-							}
-							public void handleException(Throwable exception) {
-								String cuName= JavaElementLabels.getElementLabel(source, JavaElementLabels.CU_QUALIFIED);
-								String msg= MessageFormat.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_internal_error, new Object[] {cuName});
-								JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null));
-								String msg2= MessageFormat.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_error_skipped, new Object[] {cuName});
-								result.addError(msg2, JavaStatusContext.create(source));
-							}
-						});
-						
-						fTCModel.newCu();
-					}
-					public void acceptBinding(String bindingKey, IBinding binding) {
-						//do nothing
-					}
-				}, projectMonitor);
+				int batchSize= 150;
+				int batches= ((cus.size()-1) / batchSize) + 1;
+				SubProgressMonitor projectMonitor= new SubProgressMonitor(pm, 1);
+				projectMonitor.beginTask("", batches); //$NON-NLS-1$
+				projectMonitor.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_building); 
+				for (int i= 0; i < batches; i++) {
+					List batch= cus.subList(i * batchSize, Math.min(cus.size(), (i + 1) * batchSize));
+					ICompilationUnit[] batchCus= (ICompilationUnit[]) batch.toArray(new ICompilationUnit[batch.size()]);
+					final SubProgressMonitor batchMonitor= new SubProgressMonitor(projectMonitor, 1);
+					batchMonitor.subTask(RefactoringCoreMessages.InferTypeArgumentsRefactoring_calculating_dependencies); 
+					
+					ASTParser parser= ASTParser.newParser(AST.JLS3);
+					parser.setProject(project);
+					parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+					parser.setResolveBindings(true);
+					parser.createASTs(batchCus, new String[0], new ASTRequestor() {
+						public void acceptAST(final ICompilationUnit source, final CompilationUnit ast) {
+							batchMonitor.subTask(source.getElementName());
+							ast.setProperty(RefactoringASTParser.SOURCE_PROPERTY, source);
+	
+							Platform.run(new ISafeRunnable() {
+								public void run() throws Exception {
+									ast.accept(unitCollector);
+								}
+								public void handleException(Throwable exception) {
+									String cuName= JavaElementLabels.getElementLabel(source, JavaElementLabels.CU_QUALIFIED);
+									String msg= MessageFormat.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_internal_error, new Object[] {cuName});
+									JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null));
+									String msg2= MessageFormat.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_error_skipped, new Object[] {cuName});
+									result.addError(msg2, JavaStatusContext.create(source));
+								}
+							});
+							
+							fTCModel.newCu();
+						}
+						public void acceptBinding(String bindingKey, IBinding binding) {
+							//do nothing
+						}
+					}, batchMonitor);
+				}
 				
 				projectMonitor.done();
 				fTCModel.newCu();
 			}
+			
+//			Display.getDefault().syncExec(new Runnable() {
+//				public void run() {
+//					MessageDialog.openInformation(Display.getCurrent().getActiveShell(), "Debugging...", "after constraint gen");
+//				}
+//			});
+			
 			pm.setTaskName(RefactoringCoreMessages.InferTypeArgumentsRefactoring_solving); 
 			InferTypeArgumentsConstraintsSolver solver= new InferTypeArgumentsConstraintsSolver(fTCModel);
-			solver.solveConstraints();
-			InferTypeArgumentsUpdate updates= solver.getUpdate();
+			InferTypeArgumentsUpdate updates= solver.solveConstraints(new SubProgressMonitor(pm, 1));
 			solver= null; //free caches
 			
 			fChangeManager= new TextChangeManager();
@@ -342,7 +358,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 				BindingKey bindingKey= new BindingKey(chosenType.getBindingKey());
 				typeArgument= rewrite.getImportRewrite().addImportFromSignature(bindingKey.internalToSignature(), rewrite.getAST());
 				ArrayList nestedTypeArgumentCvs= getTypeArgumentCvs(elementCv);
-				Type[] nestedTypeArguments= getTypeArguments(typeArgument, nestedTypeArgumentCvs, rewrite);
+				Type[] nestedTypeArguments= getTypeArguments(typeArgument, nestedTypeArgumentCvs, rewrite); //recursion
 				if (nestedTypeArguments != null) {
 					ParameterizedType parameterizedType= rewrite.getAST().newParameterizedType(typeArgument);
 					for (int j= 0; j < nestedTypeArguments.length; j++)
