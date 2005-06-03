@@ -35,6 +35,7 @@ import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -168,51 +169,82 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	}
 	
 	
-	public static int collectQuickFixableAnnotations(ITextEditor editor, int invocationLocation, boolean goToClosest, ArrayList resultingAnnotations) throws BadLocationException {
-		IRegion lineInfo= editor.getDocumentProvider().getDocument(editor.getEditorInput()).getLineInformationOfOffset(invocationLocation);
-		int rangeStart= lineInfo.getOffset();
-		int rangeEnd= rangeStart + lineInfo.getLength();
-
-		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(editor.getEditorInput());
-		
-		int bestOffset= Integer.MAX_VALUE;
-		Iterator iter= model.getAnnotationIterator();
-		while (iter.hasNext()) {
-			Annotation annot= (Annotation) iter.next();
-			if (JavaCorrectionProcessor.isQuickFixableType(annot)) {
-				Position pos= model.getPosition(annot);
-				if (pos != null && isInside(pos.offset, rangeStart, rangeEnd)) { // inside our range?
-					bestOffset= processAnnotation(annot, pos, invocationLocation, bestOffset, goToClosest, resultingAnnotations);
-				}
-			}
+	private static IRegion getRegionOfInterest(ITextEditor editor, int invocationLocation) throws BadLocationException {
+		IDocumentProvider documentProvider= editor.getDocumentProvider();
+		if (documentProvider == null) {
+			return null;
 		}
-		if (bestOffset == Integer.MAX_VALUE) {
+		IDocument document= documentProvider.getDocument(editor.getEditorInput());
+		if (document == null) {
+			return null;
+		}
+		return document.getLineInformationOfOffset(invocationLocation);
+	}
+	
+	public static int collectQuickFixableAnnotations(ITextEditor editor, int invocationLocation, boolean goToClosest, ArrayList resultingAnnotations) throws BadLocationException {
+		IAnnotationModel model= JavaUI.getDocumentProvider().getAnnotationModel(editor.getEditorInput());
+		if (model == null) {
 			return invocationLocation;
 		}
-		
-		return bestOffset;
+		Iterator iter= model.getAnnotationIterator();
+		if (goToClosest) {
+			IRegion lineInfo= getRegionOfInterest(editor, invocationLocation);
+			if (lineInfo == null) {
+				return invocationLocation;
+			}
+			int rangeStart= lineInfo.getOffset();
+			int rangeEnd= rangeStart + lineInfo.getLength();
+			
+			ArrayList allAnnotations= new ArrayList();
+			ArrayList allPositions= new ArrayList();
+			int bestOffset= Integer.MAX_VALUE;
+			while (iter.hasNext()) {
+				Annotation annot= (Annotation) iter.next();
+				if (JavaCorrectionProcessor.isQuickFixableType(annot)) {
+					Position pos= model.getPosition(annot);
+					if (pos != null && isInside(pos.offset, rangeStart, rangeEnd)) { // inside our range?
+						allAnnotations.add(annot);
+						allPositions.add(pos);
+						bestOffset= processAnnotation(annot, pos, invocationLocation, bestOffset);
+					}
+				}
+			}
+			if (bestOffset == Integer.MAX_VALUE) {
+				return invocationLocation;
+			}
+			for (int i= 0; i < allPositions.size(); i++) {
+				Position pos= (Position) allPositions.get(i);
+				if (isInside(bestOffset, pos.offset, pos.offset + pos.length)) {
+					resultingAnnotations.add(allAnnotations.get(i));
+				}
+			}
+			return bestOffset;
+		} else {
+			while (iter.hasNext()) {
+				Annotation annot= (Annotation) iter.next();
+				if (JavaCorrectionProcessor.isQuickFixableType(annot)) {
+					Position pos= model.getPosition(annot);
+					if (pos != null && isInside(invocationLocation, pos.offset, pos.offset + pos.length)) {
+						resultingAnnotations.add(annot);
+					}
+				}
+			}
+			return invocationLocation;
+		}
 	}
 
-	private static int processAnnotation(Annotation annot, Position pos, int invocationLocation, int bestOffset, boolean goToClosest, ArrayList resultingAnnotations) {
+	private static int processAnnotation(Annotation annot, Position pos, int invocationLocation, int bestOffset) {
 		int posBegin= pos.offset;
 		int posEnd= posBegin + pos.length;
 		if (isInside(invocationLocation, posBegin, posEnd)) { // covers invocation location?
-			if (bestOffset != invocationLocation) {
-				resultingAnnotations.clear();
-				bestOffset= invocationLocation;
-			}
-			resultingAnnotations.add(annot); // don't do the 'hasCorrections' test
-		} else if (goToClosest && bestOffset != invocationLocation) {
+			return invocationLocation;
+		} else if (bestOffset != invocationLocation) {
 			int newClosestPosition= computeBestOffset(posBegin, invocationLocation, bestOffset);
 			if (newClosestPosition != -1) { 
 				if (newClosestPosition != bestOffset) { // new best
 					if (JavaCorrectionProcessor.hasCorrections(annot)) { // only jump to it if there are proposals
-						resultingAnnotations.clear();
-						bestOffset= newClosestPosition;
-						resultingAnnotations.add(annot);
+						return newClosestPosition;
 					}
-				} else { // as good as previous, don't do the 'hasCorrections' test
-					resultingAnnotations.add(annot);
 				}
 			}
 		}
