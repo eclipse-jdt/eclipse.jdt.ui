@@ -19,8 +19,10 @@ import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -45,6 +47,13 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivale
 
 public class InferTypeArgumentsConstraintsSolver {
 
+	private static class TTypeComparator implements Comparator {
+		public int compare(Object o1, Object o2) {
+			return ((TType) o1).getPrettySignature().compareTo(((TType) o2).getPrettySignature());
+		}
+		public static TTypeComparator INSTANCE= new TTypeComparator();
+	}
+	
 	private final static String CHOSEN_TYPE= "chosenType"; //$NON-NLS-1$
 	
 	private final InferTypeArgumentsTCModel fTCModel;
@@ -292,28 +301,53 @@ public class InferTypeArgumentsConstraintsSolver {
 			} else if (interfaceCandidates.size() == 1) {
 				return (TType) interfaceCandidates.get(0);
 			} else {
-				TType[] interfaces= (TType[]) interfaceCandidates.toArray(new TType[interfaceCandidates.size()]);
-				HierarchyType firstInterface= (HierarchyType) interfaceCandidates.get(0);
-				IJavaProject javaProject= firstInterface.getJavaElementType().getJavaProject();
-				ITypeBinding[] interfaceBindings= TypeEnvironment.createTypeBindings(interfaces, javaProject);
-				
-				ArrayList nontaggingCandidates= new ArrayList();
-				for (int i= 0; i < interfaceBindings.length; i++) {
-					if (interfaceBindings[i].getDeclaredMethods().length != 0)
-						nontaggingCandidates.add(interfaces[i]);
-				}
-				class TTypeComparator implements Comparator {
-					public int compare(Object o1, Object o2) {
-						return ((TType) o1).getPrettySignature().compareTo(((TType) o2).getPrettySignature());
-					}
-				}
+				ArrayList nontaggingCandidates= getNonTaggingInterfaces(interfaceCandidates);
 				if (nontaggingCandidates.size() != 0) {
-					return (TType) Collections.min(nontaggingCandidates, new TTypeComparator());
+					return (TType) Collections.min(nontaggingCandidates, TTypeComparator.INSTANCE);
 				} else {
-					return (TType) Collections.min(interfaceCandidates, new TTypeComparator());
+					return (TType) Collections.min(interfaceCandidates, TTypeComparator.INSTANCE);
 				}
 			}
 		}
+	}
+
+	private static final int MAX_CACHE= 1024;
+	private Map/*<TType, Boolean>*/ fInterfaceTaggingCache= new LinkedHashMap(MAX_CACHE, 0.75f, true) {
+		private static final long serialVersionUID= 1L;
+		protected boolean removeEldestEntry(Map.Entry eldest) {
+			return size() > MAX_CACHE;
+		}
+	};
+	
+	private ArrayList getNonTaggingInterfaces(ArrayList interfaceCandidates) {
+		ArrayList unresolvedTypes= new ArrayList();
+		ArrayList nonTagging= new ArrayList();
+		
+		for (int i= 0; i < interfaceCandidates.size(); i++) {
+			TType interf= (TType) interfaceCandidates.get(i);
+			Object isTagging= fInterfaceTaggingCache.get(interf);
+			if (isTagging == null)
+				unresolvedTypes.add(interf);
+			else if (isTagging == Boolean.FALSE)
+				nonTagging.add(interf);
+		}
+		
+		if (unresolvedTypes.size() != 0) {
+			TType[] interfaces= (TType[]) unresolvedTypes.toArray(new TType[unresolvedTypes.size()]);
+			HierarchyType firstInterface= (HierarchyType) interfaces[0];
+			IJavaProject javaProject= firstInterface.getJavaElementType().getJavaProject();
+			ITypeBinding[] interfaceBindings= TypeEnvironment.createTypeBindings(interfaces, javaProject); //expensive...
+			for (int i= 0; i < interfaceBindings.length; i++) {
+				if (interfaceBindings[i].getDeclaredMethods().length == 0) {
+					fInterfaceTaggingCache.put(interfaces[i], Boolean.TRUE);
+				} else {
+					fInterfaceTaggingCache.put(interfaces[i], Boolean.FALSE);
+					nonTagging.add(interfaces[i]);
+				}
+			}
+		}
+		
+		return nonTagging;
 	}
 
 	private void findCastsToRemove(CastVariable2[] castVariables) {
