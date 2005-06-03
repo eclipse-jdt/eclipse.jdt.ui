@@ -71,7 +71,7 @@ public class RecentSettingsStore {
 				String projectName= curr.getName();
 				IProject project= root.getProject(projectName);
 				//make sure project has not been removed
-				if (project.exists()) {
+				if (project.isAccessible()) {
 					IJavaProject javaProject= JavaCore.create(project);
 					if (!fPerProjectSettings.containsKey(javaProject)) {
 						String hrefs= curr.get(HREF);
@@ -101,13 +101,15 @@ public class RecentSettingsStore {
 		IProject[] projects= root.getProjects();
 		for (int i= 0; i < projects.length; i++) {
 			IProject project= projects[i];
-			IJavaProject curr= JavaCore.create(project);
-			if (!fPerProjectSettings.containsKey(curr)) {
-				ProjectData data= new ProjectData();
-				data.setDestination(getDefaultDestination(curr));
-				data.setAntpath(getDefaultAntPath(curr));
-				data.setHRefs(""); //$NON-NLS-1$
-				fPerProjectSettings.put(curr, data);
+			if (project.isAccessible()) {
+				IJavaProject curr= JavaCore.create(project);
+				if (!fPerProjectSettings.containsKey(curr)) {
+					ProjectData data= new ProjectData();
+					data.setDestination(getDefaultDestination(curr));
+					data.setAntpath(getDefaultAntPath(curr));
+					data.setHRefs(""); //$NON-NLS-1$
+					fPerProjectSettings.put(curr, data);
+				}
 			}
 		}
 	}
