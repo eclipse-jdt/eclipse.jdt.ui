@@ -1,10 +1,10 @@
 package p;
 
 public class MultipleCallers_in {
-	private int fN;
 	public static MultipleCallers_in createMultipleCallers_in(int N) {
 		return new MultipleCallers_in(N);
 	}
+	private int fN;
 	public MultipleCallers_in(int N) {
 		fN= N;
 	}

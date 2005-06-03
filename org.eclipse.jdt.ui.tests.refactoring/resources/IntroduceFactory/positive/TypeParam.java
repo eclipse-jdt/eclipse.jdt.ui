@@ -8,11 +8,11 @@ public class TypeParam_in {
     }
 }
 class Cell<T> {
-    T fData;
-    public static <T> Cell<T> createCell(T t) {
+	public static <T> Cell<T> createCell(T t) {
 		return new Cell<T>(t);
 	}
+	T fData;
 	private /*[*/Cell/*]*/(T t) {
-        fData= t;
-    }
+		fData= t;
+	}
 }

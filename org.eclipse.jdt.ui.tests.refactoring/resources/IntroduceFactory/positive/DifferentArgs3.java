@@ -1,10 +1,10 @@
 package p;
 
 public class DifferentArgs3_in {
-	private int fN;
 	public static DifferentArgs3_in createDifferentArgs3_in(int N) {
 		return new DifferentArgs3_in(N);
 	}
+	private int fN;
 	public DifferentArgs3_in(int N) {
 		fN= N;
 	}

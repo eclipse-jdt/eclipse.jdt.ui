@@ -1,10 +1,10 @@
 package p;
 
 public class Names_in {
-	private int fN;
 	public static Names_in createThing(int N) {
 		return new Names_in(N);
 	}
+	private int fN;
 	private Names_in(int N) {
 		fN= N;
 	}

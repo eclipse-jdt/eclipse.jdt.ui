@@ -1,10 +1,10 @@
 package p;
 
 public class InstanceContext_in {
-	private int fN;
 	public static InstanceContext_in createInstanceContext_in(int N) {
 		return new InstanceContext_in(N);
 	}
+	private int fN;
 	public InstanceContext_in(int N) {
 		fN= N;
 	}

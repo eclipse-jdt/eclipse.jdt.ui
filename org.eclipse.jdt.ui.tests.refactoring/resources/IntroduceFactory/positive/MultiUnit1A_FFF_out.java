@@ -1,10 +1,10 @@
 package p;
 
 public class MultiUnit1A_in {
-	private int fN;
 	public static MultiUnit1A_in createMultiUnit1A_in(int N) {
 		return new MultiUnit1A_in(N);
 	}
+	private int fN;
 	private MultiUnit1A_in(int N) {
 		fN= N;
 	}

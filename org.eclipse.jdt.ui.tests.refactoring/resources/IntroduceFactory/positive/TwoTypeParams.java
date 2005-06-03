@@ -8,11 +8,11 @@ public class TwoTypeParams_in {
 	}
 }
 class Pair<T1,T2> {
-	T1 fLeft;
-	T2 fRight;
 	public static <T1, T2> Pair<T1, T2> createPair(T1 t1, T2 t2) {
 		return new Pair<T1, T2>(t1, t2);
 	}
+	T1 fLeft;
+	T2 fRight;
 	private /*[*/Pair/*]*/(T1 t1, T2 t2) {
 		fLeft= t1;
 		fRight= t2;

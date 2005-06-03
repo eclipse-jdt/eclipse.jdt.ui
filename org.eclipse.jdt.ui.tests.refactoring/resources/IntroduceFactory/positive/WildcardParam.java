@@ -9,10 +9,10 @@ public class WildcardParam_in {
 	}
 }
 class NumberCell<T extends Number> {
-	T fNum;
 	public static <T extends Number> NumberCell<T> createNumberCell(NumberCell<? extends T> other) {
 		return new NumberCell<T>(other);
 	}
+	T fNum;
 	public NumberCell(T n) {
 		fNum= n;
 	}

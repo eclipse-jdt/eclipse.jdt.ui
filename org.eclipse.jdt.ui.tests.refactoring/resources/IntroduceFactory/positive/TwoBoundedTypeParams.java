@@ -7,11 +7,11 @@ public class TwoBoundedTypeParams_in {
 	}
 }
 class Complex<TX extends Number, TY extends Number> {
-	TX fLeft;
-	TY fRight;
 	public static <TX extends Number, TY extends Number> Complex<TX, TY> createComplex(TX x, TY y) {
 		return new Complex<TX, TY>(x, y);
 	}
+	TX fLeft;
+	TY fRight;
 	private /*[*/Complex/*]*/(TX x, TY y) {
 		fLeft= x;
 		fRight= y;

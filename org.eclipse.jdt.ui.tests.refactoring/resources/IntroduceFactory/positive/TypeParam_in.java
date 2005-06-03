@@ -8,8 +8,8 @@ public class TypeParam_in {
     }
 }
 class Cell<T> {
-    T fData;
-    public /*[*/Cell/*]*/(T t) {
-        fData= t;
-    }
+	T fData;
+	public /*[*/Cell/*]*/(T t) {
+		fData= t;
+	}
 }

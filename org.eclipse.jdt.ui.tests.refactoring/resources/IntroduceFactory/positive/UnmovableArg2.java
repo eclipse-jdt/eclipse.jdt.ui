@@ -1,10 +1,10 @@
 package p;
 
 public class UnmovableArg2_in {
-	private int fN;
 	public static UnmovableArg2_in createUnmovableArg2_in(int N) {
 		return new UnmovableArg2_in(N);
 	}
+	private int fN;
 	public UnmovableArg2_in(int N) {
 		fN= N;
 	}

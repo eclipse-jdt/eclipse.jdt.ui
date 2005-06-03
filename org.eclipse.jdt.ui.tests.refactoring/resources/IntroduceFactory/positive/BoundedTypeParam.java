@@ -7,10 +7,10 @@ public class BoundedTypeParam_in {
 	}
 }
 class NumberCell<T extends Number> {
-	T fData;
 	public static <T extends Number> NumberCell<T> createNumberCell(T t) {
 		return new NumberCell<T>(t);
 	}
+	T fData;
 	private /*[*/NumberCell/*]*/(T t) {
 		fData= t;
 	}

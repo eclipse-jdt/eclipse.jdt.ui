@@ -1,10 +1,10 @@
 package p;
 
 public class DifferentSigs_in {
-	private int fN;
 	public static DifferentSigs_in createDifferentSigs_in(int N) {
 		return new DifferentSigs_in(N);
 	}
+	private int fN;
 	public DifferentSigs_in() {
 		this(10);
 	}
