@@ -432,6 +432,8 @@ public class PackageExplorerPart extends ViewPart
 		
 		//---- support for multiple elements in tree
 		
+		// TODO Use custome hash table and use comparator. Currently not an
+		// issue since the package explorer doesn't have a comparator
 		Map fAdditionalMappings= new HashMap();
 		protected void mapElement(Object element, Widget item) {
 			Widget existingItem= findItem(element);
@@ -473,18 +475,32 @@ public class PackageExplorerPart extends ViewPart
 			fAdditionalMappings.clear();
 			super.unmapAllElements();
 		}
-		public void remove(Object[] elements) {
-			super.remove(elements);
-			List stillExisting= new ArrayList();
-			do {
-				stillExisting.clear();
-				for (int i= 0; i < elements.length; i++) {
-					if (findItem(elements[i]) != null)
-						stillExisting.add(elements[i]);
+		protected void internalRemove(Object[] elements) {
+			IContentProvider cp= getContentProvider();
+			if (!(cp instanceof IMultiElementTreeContentProvider)) {
+				super.internalRemove(elements);
+				return;
+			}
+			Map stable= new HashMap();
+			for (int i= 0; i < elements.length; i++) {
+				List l= (List)fAdditionalMappings.get(elements[i]);
+				if (l != null) {
+					stable.put(elements[i], new Integer(l.size()));
 				}
-				if (stillExisting.size() > 0)
-					super.remove(stillExisting.toArray());
-			} while (stillExisting.size() > 0);
+			}
+			super.internalRemove(elements);
+			for (int i= 0; i < elements.length; i++) {
+				Object element= elements[i];
+				Integer size= (Integer)stable.get(element);
+				if (size != null) {
+					int loop= size.intValue();
+					Object[] toRemove= new Object[] {element};
+					while(loop > 0) {
+						super.internalRemove(toRemove);
+						loop--;
+					}
+				}
+			}
 		}
 		protected void internalRefresh(Object element, boolean updateLabels) {
 			List l= (List)fAdditionalMappings.get(element);
