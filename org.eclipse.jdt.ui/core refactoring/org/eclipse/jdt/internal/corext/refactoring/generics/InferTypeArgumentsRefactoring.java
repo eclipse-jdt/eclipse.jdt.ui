@@ -85,6 +85,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class InferTypeArgumentsRefactoring extends Refactoring {
 	
+	private static final boolean BUG_98165_core_wrong_source_range= true;
+	
 	private static final String REWRITTEN= "InferTypeArgumentsRefactoring.rewritten"; //$NON-NLS-1$
 	
 	private TextChangeManager fChangeManager;
@@ -408,7 +410,11 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	}
 
 	private void rewriteCastVariable(CastVariable2 castCv, CompilationUnitRewrite rewrite) {
-		CastExpression castExpression= (CastExpression) castCv.getRange().getNode(rewrite.getRoot());
+		ASTNode node= castCv.getRange().getNode(rewrite.getRoot());
+		if (! (node instanceof CastExpression) && BUG_98165_core_wrong_source_range)
+			return;
+		
+		CastExpression castExpression= (CastExpression) node;
 		Expression expression= castExpression.getExpression();
 		ASTNode nodeToReplace;
 		if (castExpression.getParent() instanceof ParenthesizedExpression)

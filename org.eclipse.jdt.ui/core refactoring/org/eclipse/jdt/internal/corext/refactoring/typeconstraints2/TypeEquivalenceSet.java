@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 public class TypeEquivalenceSet {
@@ -45,15 +46,24 @@ public class TypeEquivalenceSet {
 	}
 
 	public void addAll(ConstraintVariable2[] variables) {
-		List elements= Arrays.asList(fVariables);
-		ArrayList result= new ArrayList(fVariables.length + variables.length);
-		result.addAll(elements);
-		for (int i= 0; i < variables.length; i++) {
-			ConstraintVariable2 right= variables[i];
-			if (! result.contains(right))
-				result.add(right);
+		if (fVariables.length * variables.length > 100) {
+			LinkedHashSet result= new LinkedHashSet(fVariables.length + variables.length);
+			result.addAll(Arrays.asList(fVariables));
+			result.addAll(Arrays.asList(variables));
+			fVariables= (ConstraintVariable2[]) result.toArray(new ConstraintVariable2[result.size()]);
+			
+		} else {
+			List elements= Arrays.asList(fVariables);
+			ArrayList result= new ArrayList(fVariables.length + variables.length);
+			result.addAll(elements);
+			for (int i= 0; i < variables.length; i++) {
+				ConstraintVariable2 right= variables[i];
+				if (! result.contains(right))
+					result.add(right);
+			}
+			fVariables= (ConstraintVariable2[]) result.toArray(new ConstraintVariable2[result.size()]);
 		}
-		fVariables= (ConstraintVariable2[]) result.toArray(new ConstraintVariable2[result.size()]);
+		
 	}
 
 	public void setTypeEstimate(ITypeSet estimate) {

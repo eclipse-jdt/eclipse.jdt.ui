@@ -60,6 +60,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ArrayElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
@@ -394,15 +395,17 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		} else if ("getClass".equals(methodBinding.getName()) && methodBinding.getParameterTypes().length == 0) { //$NON-NLS-1$
 			//special case: see JLS3 4.3.2
 			ITypeBinding returnType= node.resolveTypeBinding();
-			ITypeBinding returnTypeDeclaration= returnType.getTypeDeclaration();
-			ParameterizedTypeVariable2 expressionCv= fTCModel.makeParameterizedTypeVariable(returnTypeDeclaration);
+			ParameterizedTypeVariable2 expressionCv= fTCModel.makeParameterizedTypeVariable(returnType);
 			setConstraintVariable(node, expressionCv);
-			
-			//type of expression 'e.getClass()' is '? extends X' where X is the static type of e
-			ITypeBinding capture= returnType.getTypeArguments()[0];
-			ImmutableTypeVariable2 captureType= fTCModel.makeImmutableTypeVariable(capture, node.getAST());
+			ITypeBinding returnTypeDeclaration= returnType.getTypeDeclaration();
 			ConstraintVariable2 classTypeVariable= fTCModel.getElementVariable(expressionCv, returnTypeDeclaration.getTypeParameters()[0]);
-			fTCModel.createSubtypeConstraint(classTypeVariable, captureType);
+			
+			//type of expression 'e.getClass()' is 'Class<? extends X>' where X is the static type of e
+			ITypeBinding capture= returnType.getTypeArguments()[0];
+			ITypeBinding wildcard= capture.getWildcard();
+			ImmutableTypeVariable2 wildcardType= fTCModel.makeImmutableTypeVariable(wildcard, node.getAST());
+			
+			fTCModel.createSubtypeConstraint(classTypeVariable, wildcardType);
 			
 		} else {
 			Map/*<String, IndependentTypeVariable2>*/ methodTypeVariables= createMethodTypeArguments(methodBinding);
@@ -426,7 +429,8 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			for (int i= 0; i < methodTypeParameters.length; i++) {
 				ITypeBinding methodTypeParameter= methodTypeParameters[i];
 				//TODO: typeVariable does not need a type binding - only used in equality constraints
-				IndependentTypeVariable2 typeVariableCv= fTCModel.makeIndependentTypeVariable(methodTypeParameter);
+				TypeVariable typeVariable= (TypeVariable) fTCModel.createTType(methodTypeParameter);
+				IndependentTypeVariable2 typeVariableCv= fTCModel.makeIndependentTypeVariable(typeVariable);
 				methodTypeVariables.put(methodTypeParameter.getKey(), typeVariableCv);
 			}
 		}

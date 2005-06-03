@@ -387,21 +387,6 @@ public class InferTypeArgumentsTCModel {
 		return storedCv;
 	}
 
-	public IndependentTypeVariable2 makeIndependentTypeVariable(ITypeBinding typeBinding) {
-		Assert.isTrue(! typeBinding.isPrimitive());
-		IndependentTypeVariable2 cv= new IndependentTypeVariable2(createTType(typeBinding));
-		IndependentTypeVariable2 storedCv= (IndependentTypeVariable2) storedCv(cv);
-		if (cv == storedCv) {
-			fCuScopedConstraintVariables.add(storedCv);
-//			if (isAGenericType(typeBinding)) // would lead to infinite recursion!
-//				makeElementVariables(storedCv, typeBinding);
-			makeArrayElementVariable(storedCv);
-			if (fStoreToString)
-				storedCv.setData(ConstraintVariable2.TO_STRING, "IndependentType(" + Bindings.asString(typeBinding) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		return storedCv;
-	}
-		
 	public IndependentTypeVariable2 makeIndependentTypeVariable(TypeVariable type) {
 		IndependentTypeVariable2 cv= new IndependentTypeVariable2(type);
 		IndependentTypeVariable2 storedCv= (IndependentTypeVariable2) storedCv(cv);
@@ -416,6 +401,8 @@ public class InferTypeArgumentsTCModel {
 	}
 		
 	public ParameterizedTypeVariable2 makeParameterizedTypeVariable(ITypeBinding typeBinding) {
+		Assert.isTrue(typeBinding.isParameterizedType() || typeBinding.isRawType() || typeBinding.isArray());
+		
 		TType type= createTType(typeBinding);
 		ParameterizedTypeVariable2 cv= new ParameterizedTypeVariable2(type);
 		ParameterizedTypeVariable2 storedCv= (ParameterizedTypeVariable2) storedCv(cv);
@@ -491,9 +478,7 @@ public class InferTypeArgumentsTCModel {
 	}
 	
 	public ImmutableTypeVariable2 makeImmutableTypeVariable(ITypeBinding typeBinding, AST ast) {
-		Assert.isTrue(! typeBinding.isWildcardType());
-		Assert.isTrue(! typeBinding.isTypeVariable());
-		
+//		Assert.isTrue(! typeBinding.isGenericType()); // see JDT/Core bug 80472
 		TType type= getBoxedType(typeBinding, ast);
 		ImmutableTypeVariable2 cv= new ImmutableTypeVariable2(type);
 		ImmutableTypeVariable2 storedCv= (ImmutableTypeVariable2) storedCv(cv);

@@ -24,6 +24,10 @@ public final class ExtendsWildcardType extends WildcardType {
 		return fBound.getErasure();
 	}
 	
+	public TType[] getSubTypes() {
+		return new TType[] { fBound };
+	}
+	
 	protected boolean doCanAssignTo(TType lhs) {
 		switch (lhs.getKind()) {
 			case ARRAY_TYPE: 

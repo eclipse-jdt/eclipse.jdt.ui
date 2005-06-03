@@ -117,8 +117,10 @@ public class EnumeratedTypeSet extends TypeSet {
 
 			result.addAll(this); // copy first since retainAll() modifies in-place
 			result.retainAll(s2);
-			result.initComplete();
-			return result;
+			if (result.size() > 0)
+				return result;
+			else
+				return getTypeSetEnvironment().getEmptyTypeSet();
 		}
 		return null;
 	}
@@ -161,7 +163,7 @@ public class EnumeratedTypeSet extends TypeSet {
 			TType t= (TType) elemTypes.next();
 			result.add(TTypes.createArrayType(t, 1));
 		}
-		result.initComplete();
+//		result.initComplete();
 		return result;
 	}
 
@@ -389,8 +391,10 @@ public class EnumeratedTypeSet extends TypeSet {
 				}
 			}
 		}
-		result.initComplete();
-		return result;
+		if (result.size() > 0)
+			return result;
+		else
+			return getTypeSetEnvironment().getEmptyTypeSet();
 	}
 
 	/* (non-Javadoc)
