@@ -111,7 +111,7 @@ public class ASTNodesInsertTest extends CoreTests {
 		
 		declaration= createNewMethod(ast, Modifier.STATIC, false);
 		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
-		assertEquals(1, insertionIndex); // before the normal method
+		assertEquals(0, insertionIndex); // before the normal field
 		
 		declaration= createNewMethod(ast, 0, true);
 		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
@@ -197,7 +197,7 @@ public class ASTNodesInsertTest extends CoreTests {
 
 		BodyDeclaration declaration= createNewField(ast, Modifier.PRIVATE);
 		int insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
-		assertEquals(2, insertionIndex); // after the static
+		assertEquals(2, insertionIndex); // before the method
 		
 		declaration= createNewField(ast, Modifier.STATIC);
 		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
@@ -224,6 +224,58 @@ public class ASTNodesInsertTest extends CoreTests {
 		assertEquals(5, insertionIndex); // after the inner	
 	}
 
+	public void testInsert4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1.ae", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1.ae;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int fInt;\n");
+		buf.append("    private int fInt1;\n");
+		buf.append("    private int fInt2;\n");
+		buf.append("\n");
+		buf.append("    private static final int THREE = 3;\n");
+		buf.append("    private static final int FOUR = 4;\n");
+		buf.append("    public void foo() {}\n");
+		buf.append("\n");
+		buf.append("}\n");
+		ICompilationUnit compilationUnit= pack1.createCompilationUnit("E.java", buf.toString(), false, null);		
+		
+		CompilationUnit astRoot= createAST(compilationUnit);
+
+		TypeDeclaration typeDecl= (TypeDeclaration) astRoot.types().get(0);
+		List bodyDecls= typeDecl.bodyDeclarations();
+		
+		AST ast = astRoot.getAST();
+
+		BodyDeclaration declaration= createNewField(ast, Modifier.PRIVATE);
+		int insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		assertEquals(3, insertionIndex); // after fInt2
+		
+		declaration= createNewField(ast, Modifier.STATIC);
+		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		assertEquals(0, insertionIndex); // before normal field
+	
+		declaration= createNewField(ast, Modifier.STATIC | Modifier.FINAL);
+		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		assertEquals(5, insertionIndex); // after the const
+		
+		declaration= createNewMethod(ast, Modifier.PRIVATE, false);
+		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		assertEquals(6, insertionIndex); // after the method
+		
+		declaration= createNewMethod(ast, Modifier.STATIC, false);
+		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		assertEquals(0, insertionIndex); // before the normal field
+		
+		declaration= createNewMethod(ast, 0, true);
+		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		assertEquals(5, insertionIndex); // after the constructor
+		
+		declaration= createNewType(ast, 0);
+		insertionIndex= ASTNodes.getInsertionIndex(declaration, bodyDecls);
+		assertEquals(0, insertionIndex); // after the inner	
+	}
+	
 	private FieldDeclaration createNewField(AST ast, int modifiers) {
 		VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 		fragment.setName(ast.newSimpleName("newField"));

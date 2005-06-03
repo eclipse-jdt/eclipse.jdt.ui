@@ -17,7 +17,6 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEdit;
@@ -66,6 +65,9 @@ import org.eclipse.jdt.core.dom.WhileStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 
 public class ASTNodes {
 
@@ -593,6 +595,45 @@ public class ASTNodes {
 				return 1;
 		}
 	}
+	
+	
+	private static int getOrderPreference(BodyDeclaration member, MembersOrderPreferenceCache store) {
+		int memberType= member.getNodeType();
+		int modifiers= member.getModifiers();
+
+		switch (memberType) {
+			case ASTNode.TYPE_DECLARATION:
+			case ASTNode.ENUM_DECLARATION :
+			case ASTNode.ANNOTATION_TYPE_DECLARATION :
+				return store.getCategoryIndex(MembersOrderPreferenceCache.TYPE_INDEX) * 2;
+			case ASTNode.FIELD_DECLARATION:
+				if (Modifier.isStatic(modifiers)) {
+					int index= store.getCategoryIndex(MembersOrderPreferenceCache.STATIC_FIELDS_INDEX) * 2;
+					if (Modifier.isFinal(modifiers)) {
+						return index; // first final static, then static
+					}
+					return index + 1;
+				}
+				return store.getCategoryIndex(MembersOrderPreferenceCache.FIELDS_INDEX) * 2;
+			case ASTNode.INITIALIZER:
+				if (Modifier.isStatic(modifiers)) {
+					return store.getCategoryIndex(MembersOrderPreferenceCache.STATIC_INIT_INDEX) * 2;
+				}
+				return store.getCategoryIndex(MembersOrderPreferenceCache.INIT_INDEX) * 2;
+			case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
+				return store.getCategoryIndex(MembersOrderPreferenceCache.METHOD_INDEX) * 2;
+			case ASTNode.METHOD_DECLARATION:
+				if (Modifier.isStatic(modifiers)) {
+					return store.getCategoryIndex(MembersOrderPreferenceCache.STATIC_METHODS_INDEX) * 2;
+				}
+				if (((MethodDeclaration) member).isConstructor()) {
+					return store.getCategoryIndex(MembersOrderPreferenceCache.CONSTRUCTORS_INDEX) * 2;
+				}
+				return store.getCategoryIndex(MembersOrderPreferenceCache.METHOD_INDEX) * 2;
+			default:
+				return 100;
+		}
+	}
 			
 	/**
 	 * Computes the insertion index to be used to add the given member to the
@@ -602,113 +643,37 @@ public class ASTNodes {
 	 * @return the insertion index to be used
 	 */
 	public static int getInsertionIndex(BodyDeclaration member, List container) {
-		int defaultIndex= container.size();
-		int memberType= member.getNodeType();
-		int memberModifiers= member.getModifiers();
+		int containerSize= container.size();
 		
-		switch (memberType) {
-			case ASTNode.TYPE_DECLARATION:
-			case ASTNode.ENUM_DECLARATION :
-			case ASTNode.ANNOTATION_TYPE_DECLARATION :
-			case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
-			case ASTNode.INITIALIZER: {
-				int insertPos= -1;
-				int i= 0;
-				for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
-					int nodeType= ((BodyDeclaration)iter.next()).getNodeType();
-					switch (nodeType) {
-						case ASTNode.TYPE_DECLARATION:
-						case ASTNode.INITIALIZER:
-						case ASTNode.ENUM_DECLARATION :
-						case ASTNode.ANNOTATION_TYPE_DECLARATION:
-						case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
-							if (nodeType == memberType)
-								insertPos= i + 1; // after a same kind
-							break;
-						default:
-							if (insertPos == -1)
-								insertPos= i; // before anything else
-					}
+		MembersOrderPreferenceCache orderStore= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
+		
+		int orderIndex= getOrderPreference(member, orderStore);
+		
+		int insertPos= containerSize;
+		int insertPosOrderIndex= -1;
+
+		for (int i= containerSize - 1; i >= 0; i--) {
+			int currOrderIndex= getOrderPreference((BodyDeclaration) container.get(i), orderStore);
+			if (orderIndex == currOrderIndex) {
+				if (insertPosOrderIndex != orderIndex) { // no perfect match yet
+					insertPos= i + 1; // after a same kind
+					insertPosOrderIndex= orderIndex; // perfect match
 				}
-				if (insertPos != -1)
-					return insertPos;
-				return defaultIndex;
-			}
-			case ASTNode.FIELD_DECLARATION: {
-				int normalFieldInsertPos= -1;
-				int staticFieldInsertPos= -1;
-				int finalStaticFieldInsertPos= -1;
-				int i= 0;
-				for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
-					ASTNode node= (ASTNode)iter.next();
-					int nodeType= node.getNodeType();
-					switch (nodeType) {
-						case ASTNode.FIELD_DECLARATION:
-							int modifiers=((FieldDeclaration) node).getModifiers();
-							normalFieldInsertPos= i + 1; // after the last normal field
-							if (Modifier.isStatic(modifiers)) {
-								staticFieldInsertPos= i + 1; // after the last static field
-								if (Modifier.isFinal(modifiers)) {
-									finalStaticFieldInsertPos= i + 1; // after the last static final field
-								} else if (finalStaticFieldInsertPos == -1) {
-									finalStaticFieldInsertPos= i; // before a static field
-								}
-							} else if (staticFieldInsertPos == -1) {
-								staticFieldInsertPos= i; // before a normal field
-							}
-							break;
-						case ASTNode.METHOD_DECLARATION:
-						case ASTNode.INITIALIZER:
-							if (normalFieldInsertPos == -1)
-								normalFieldInsertPos= i; // before methods or initializers
-							break;
+			} else if (insertPosOrderIndex != orderIndex) { // not yet a perfect match
+				if (currOrderIndex < orderIndex) { // we are bigger
+					if (insertPosOrderIndex == -1) {
+						insertPos= i + 1; // after
+						insertPosOrderIndex= currOrderIndex;
 					}
+				} else {
+					insertPos= i; // before
+					insertPosOrderIndex= currOrderIndex;
 				}
-				if (Modifier.isStatic(memberModifiers) && Modifier.isFinal(memberModifiers) && finalStaticFieldInsertPos != -1)
-					return finalStaticFieldInsertPos;
-				if (Modifier.isStatic(memberModifiers) && staticFieldInsertPos != -1)
-					return staticFieldInsertPos;
-				if (normalFieldInsertPos != -1)
-					return normalFieldInsertPos;
-				return defaultIndex;
-			}
-			case ASTNode.METHOD_DECLARATION: {
-				int normalMethodInsertPos= -1;
-				int constructorInsertPos= -1;
-				int staticMethodInsertPos= -1;
-				int i= 0;
-				for (Iterator iter= container.iterator(); iter.hasNext(); i++) {
-					ASTNode node= (ASTNode)iter.next();
-					int nodeType= node.getNodeType();
-					switch (nodeType) {
-						case ASTNode.METHOD_DECLARATION:
-							MethodDeclaration curr= (MethodDeclaration) node;
-							normalMethodInsertPos= i + 1; // after the last normal method
-							if (curr.isConstructor()) {
-								constructorInsertPos= i + 1; // after the last constructor
-							} else if (constructorInsertPos == -1) {
-								constructorInsertPos= i;
-							}
-							if (Modifier.isStatic(curr.getModifiers())) {
-								staticMethodInsertPos= i + 1; // after the last static method
-							} else if (staticMethodInsertPos == -1) {
-								staticMethodInsertPos= i; // before a normal method or constructor
-							}
-							break;
-					}
-				}
-				if (Modifier.isStatic(memberModifiers) && staticMethodInsertPos != -1)
-					return staticMethodInsertPos;
-				if ((((MethodDeclaration) member).isConstructor()) && constructorInsertPos != -1)
-					return constructorInsertPos;
-				if (normalMethodInsertPos != -1)
-					return normalMethodInsertPos;
-				return defaultIndex;
 			}
 		}
-		return defaultIndex;
+		return insertPos;
 	}
-	
+
 	public static SimpleName getLeftMostSimpleName(Name name) {
 		if (name instanceof SimpleName) {
 			return (SimpleName)name;
