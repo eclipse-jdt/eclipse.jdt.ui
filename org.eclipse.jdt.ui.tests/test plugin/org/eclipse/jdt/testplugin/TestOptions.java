@@ -25,6 +25,13 @@ import org.eclipse.jdt.internal.formatter.align.Alignment;
 
 public class TestOptions {
 	
+	/**
+	 * @deprecated use getDefaultOptions() instead
+	 */
+	public static Hashtable getFormatterOptions() {
+		return getDefaultOptions();
+	}
+	
 	public static Hashtable getDefaultOptions() {
 		Hashtable result= JavaCore.getDefaultOptions();
 		result.put(JavaCore.COMPILER_PB_LOCAL_VARIABLE_HIDING, JavaCore.IGNORE);
