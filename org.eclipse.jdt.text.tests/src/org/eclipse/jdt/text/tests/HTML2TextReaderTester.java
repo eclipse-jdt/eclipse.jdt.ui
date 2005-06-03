@@ -86,5 +86,11 @@ public class HTML2TextReaderTester extends TestCase {
 		verify(string, expected);
 	}
 	
+	public void testComments() throws Exception {
+		String string= "<!-- begin-user-doc -->no comment<!-- end-user-doc -->";
+		String expected= "no comment";
+		verify(string,expected);
+	}
+	
 }
 
