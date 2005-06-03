@@ -17,6 +17,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -485,7 +486,7 @@ class LinkedModeConfigurationBlock extends AbstractConfigurationBlock {
 		getPreferenceStore().propagate();
 		
 		try {
-			Platform.getPreferencesService().getRootNode().node(EditorsUI.PLUGIN_ID).flush();
+			Platform.getPreferencesService().getRootNode().node(InstanceScope.SCOPE).node(EditorsUI.PLUGIN_ID).flush();
 		} catch (BackingStoreException e) {
 			JavaPlugin.log(e);
 		}
