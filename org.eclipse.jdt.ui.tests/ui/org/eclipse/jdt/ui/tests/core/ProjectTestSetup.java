@@ -75,7 +75,7 @@ public class ProjectTestSetup extends TestSetup {
 		JavaProjectHelper.set15CompilerOptions(options);
 		fJProject.setOptions(options);
 		
-		JavaCore.setOptions(TestOptions.getFormatterOptions());
+		JavaCore.setOptions(TestOptions.getDefaultOptions());
 		TestOptions.initializeCodeGenerationOptions();
 		JavaPlugin.getDefault().getCodeTemplateStore().load();		
 	}

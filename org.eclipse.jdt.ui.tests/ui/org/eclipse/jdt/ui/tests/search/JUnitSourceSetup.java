@@ -66,7 +66,7 @@ public class JUnitSourceSetup extends TestSetup {
 		JavaProjectHelper.addToClasspath(fProject, jreLib);
 		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
 		JavaProjectHelper.addSourceContainerWithImport(fProject, SRC_CONTAINER, junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
-		JavaCore.setOptions(TestOptions.getFormatterOptions());
+		JavaCore.setOptions(TestOptions.getDefaultOptions());
 		TestOptions.initializeCodeGenerationOptions();
 		JavaPlugin.getDefault().getCodeTemplateStore().load();		
 	}

@@ -53,7 +53,7 @@ public class SurroundWithTestSetup extends TestSetup {
 	protected void setUp() throws Exception {
 		super.setUp();
 		
-		Hashtable options= TestOptions.getFormatterOptions();
+		Hashtable options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, "0");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");

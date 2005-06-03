@@ -61,7 +61,7 @@ public class ReturnTypeQuickFixTest extends QuickFixTest {
 	}
 
 	protected void setUp() throws Exception {
-		Hashtable options= TestOptions.getFormatterOptions();
+		Hashtable options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(JavaCore.COMPILER_PB_UNCHECKED_TYPE_OPERATION, JavaCore.IGNORE);

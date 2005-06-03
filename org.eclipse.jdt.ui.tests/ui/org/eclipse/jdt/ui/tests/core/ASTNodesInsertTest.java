@@ -67,7 +67,7 @@ public class ASTNodesInsertTest extends CoreTests {
 		fJProject1= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
-		Hashtable options= TestOptions.getFormatterOptions();
+		Hashtable options= TestOptions.getDefaultOptions();
 		JavaCore.setOptions(options);		
 	}
 

@@ -63,7 +63,7 @@ public class AddImportTest extends CoreTests {
 	protected void setUp() throws Exception {
 		fJProject1= ProjectTestSetup.getProject();
 		
-		Hashtable options= TestOptions.getFormatterOptions();
+		Hashtable options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_NUMBER_OF_EMPTY_LINES_TO_PRESERVE, String.valueOf(99));
 		JavaCore.setOptions(options);
 	}

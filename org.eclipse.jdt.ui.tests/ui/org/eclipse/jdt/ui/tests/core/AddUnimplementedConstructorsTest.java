@@ -136,7 +136,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	}
 
 	private void initCodeTemplates() {
-		Hashtable options= TestOptions.getFormatterOptions();
+		Hashtable options= TestOptions.getDefaultOptions();
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.SPACE);
 		options.put(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, "4");
 		options.put(DefaultCodeFormatterConstants.FORMATTER_LINE_SPLIT, "999");
