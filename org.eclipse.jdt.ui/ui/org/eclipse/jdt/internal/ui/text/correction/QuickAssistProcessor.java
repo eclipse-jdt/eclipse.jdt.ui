@@ -75,6 +75,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -196,7 +197,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return true;
 		}
 
-		ICompilationUnit cu= context.getCompilationUnit();
+		final ICompilationUnit cu= context.getCompilationUnit();
 		final ExtractTempRefactoring refactoring= ExtractTempRefactoring.create(cu, expression.getStartPosition(), expression.getLength());
 
 		//refactoring.setLeaveDirty(true);
@@ -211,7 +212,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 						if (!refactoring.checkFinalConditions(new NullProgressMonitor()).hasFatalError()) {
 							fChange= refactoring.createChange(new NullProgressMonitor());
 						} else {
-							fChange= new DocumentChange(getDisplayString(), new Document("")); //$NON-NLS-1$
+							String lineDelimiter= StubUtility.getLineDelimiterUsed(cu);
+							Document document= new Document(""); //$NON-NLS-1$
+							document.setInitialLineDelimiter(lineDelimiter);
+							fChange= new DocumentChange(getDisplayString(), document);
 						}
 					}
 				}
@@ -294,10 +298,10 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		
 		if (onFirstAccess) {
-			// replace assigment with var decl
+			// replace assignment with variable declaration
 			rewrite.replace(assignParent, rewrite.createMoveTarget(statement), null);
 		} else {
-			// different scopes -> remove assigments, set var initialzier
+			// different scopes -> remove assignments, set variable initializer
 			if (ASTNodes.isControlStatementBody(assignParent.getLocationInParent())) {
 				Block block= ast.newBlock();
 				rewrite.replace(assignParent, block, null);
@@ -944,12 +948,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			return false;
 		}
 		List arguments= method.arguments();
-		if (arguments.size() != 1) { //overloaded equals w/ more than 1 arg
+		if (arguments.size() != 1) { //overloaded equals w/ more than 1 argument
 			return false;
 		}
 		Expression right= (Expression) arguments.get(0);
 		ITypeBinding binding = right.resolveTypeBinding();
-		if (binding != null && !(binding.isClass() || binding.isInterface())) { //overloaded equals w/ non-class/interface arg or null
+		if (binding != null && !(binding.isClass() || binding.isInterface())) { //overloaded equals w/ non-class/interface argument or null
 			return false;
 		}
 		if (resultingCollections == null) {

@@ -37,6 +37,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -99,11 +100,16 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	private static TextChange createTextChange(String name, ICompilationUnit cu) {
 		if (!cu.getResource().exists()) {
 			DocumentChange change = null;
+			String lineDelimiter= StubUtility.getLineDelimiterUsed(cu);
 			try {
-				change= new DocumentChange(name, new Document(cu.getSource()));
+				Document document= new Document(cu.getSource());
+				document.setInitialLineDelimiter(lineDelimiter);
+				change= new DocumentChange(name, document);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
-				change= new DocumentChange(name, new Document("")); //$NON-NLS-1$
+				Document document= new Document(""); //$NON-NLS-1$
+				document.setInitialLineDelimiter(lineDelimiter);
+				change= new DocumentChange(name, document);
 			}
 			change.setEdit(new MultiTextEdit());
 			return change;
