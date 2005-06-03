@@ -557,7 +557,7 @@ public final class RefactoringAvailabilityTester {
 		final int type= member.getElementType();
 		if (type != IJavaElement.METHOD && type != IJavaElement.FIELD && type != IJavaElement.TYPE)
 			return false;
-		if (JdtFlags.isEnum(member))
+		if (JdtFlags.isEnum(member) && type != IJavaElement.TYPE)
 			return false;
 		final IType declaring= member.getDeclaringType();
 		if (declaring == null)
