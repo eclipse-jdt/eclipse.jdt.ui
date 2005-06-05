@@ -1245,7 +1245,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	    if ((fTypeKind == ANNOTATION_TYPE || fTypeKind == ENUM_TYPE) && !status.matches(IStatus.ERROR)) {
 	    	IPackageFragmentRoot root= getPackageFragmentRoot();
 	    	if (root != null && !JavaModelUtil.is50OrHigher(root.getJavaProject())) {
-				return new StatusInfo(IStatus.WARNING, Messages.format(NewWizardMessages.NewTypeWizardPage_warning_NotJDKCompliant, root.getJavaProject().getElementName()));  
+	    		// error as createType will fail otherwise (bug 96928)
+				return new StatusInfo(IStatus.ERROR, Messages.format(NewWizardMessages.NewTypeWizardPage_warning_NotJDKCompliant, root.getJavaProject().getElementName()));  
 	    	}
 	    	if (fTypeKind == ENUM_TYPE) {
 		    	try {
