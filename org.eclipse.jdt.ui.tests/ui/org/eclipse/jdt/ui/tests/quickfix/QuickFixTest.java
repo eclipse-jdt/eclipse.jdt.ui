@@ -126,12 +126,14 @@ public class QuickFixTest extends TestCase {
 	}
 	
 	
-	public static void assertExpectedExistInProposals(List actualProposals, String[] expecteds) throws CoreException {
+	public static void assertExpectedExistInProposals(List actualProposals, String[] expecteds) throws CoreException, BadLocationException {
 		ArrayList actuals= new ArrayList(actualProposals.size());
 		for (int i= 0; i < actualProposals.size(); i++) {
 			Object curr= actualProposals.get(i);
 			if (curr instanceof CUCorrectionProposal) {
 				actuals.add(getPreviewContent((CUCorrectionProposal) curr));
+			} else if (curr instanceof NewCUCompletionUsingWizardProposal) {
+				actuals.add(getWizardPreviewContent((NewCUCompletionUsingWizardProposal) curr));
 			}
 		}
 		StringAsserts.assertExpectedExistInProposals((String[]) actuals.toArray(new String[actuals.size()]), expecteds);

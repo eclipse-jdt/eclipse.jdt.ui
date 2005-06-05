@@ -78,7 +78,8 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		String newFileTemplate= "${package_declaration}\n\n${type_declaration}";
 		StubUtility.setCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, newFileTemplate, null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.TYPECOMMENT_ID, "", null);
-
+		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "", null);
+		
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 	}
 
@@ -359,6 +360,83 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 	
+	
+	public void testTypeInVarDeclWithWildcard() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(ArrayList<? extends Runnable> a) {\n");
+		buf.append("        XY v= a.get(0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu1);
+		ArrayList proposals= collectCorrections(cu1, astRoot);
+		assertCorrectLabels(proposals);
+		
+				
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(ArrayList<? extends Runnable> a) {\n");
+		buf.append("        Runnable v= a.get(0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class XY implements Runnable {\n");
+		buf.append("\n");
+		buf.append("    public void run() {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface XY extends Runnable {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public enum XY implements Runnable {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		String expected4= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("public class E {\n");
+		buf.append("    <XY> void foo(ArrayList<? extends Runnable> a) {\n");
+		buf.append("        XY v= a.get(0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected5= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("public class E<XY> {\n");
+		buf.append("    void foo(ArrayList<? extends Runnable> a) {\n");
+		buf.append("        XY v= a.get(0);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected6= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] { expected1, expected2, expected3, expected4, expected5, expected6 });
+	}
 	
 	public void testTypeInStatement() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

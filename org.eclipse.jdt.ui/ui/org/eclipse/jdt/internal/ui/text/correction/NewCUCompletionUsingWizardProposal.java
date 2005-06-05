@@ -33,9 +33,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.Type;
@@ -287,38 +286,24 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		AST ast= node.getAST();
 		ASTNode parent= node.getParent();
 		while (parent instanceof Type) {
+			node= parent;
 			parent= parent.getParent();
 		}
 		switch (parent.getNodeType()) {
 			case ASTNode.METHOD_DECLARATION:
-				MethodDeclaration decl= (MethodDeclaration) parent;
-				if (decl.thrownExceptions().contains(node)) {
+				if (node.getLocationInParent() == MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY) {
 					return ast.resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
 				}
 				break;
-			case ASTNode.INSTANCEOF_EXPRESSION:
-				InstanceofExpression instanceofExpression= (InstanceofExpression) parent;
-				return instanceofExpression.getLeftOperand().resolveTypeBinding();
-			case ASTNode.ARRAY_CREATION:
-				ArrayCreation creation= (ArrayCreation) parent;
-				if (creation.getInitializer() != null) {
-					return creation.getInitializer().resolveTypeBinding();
-				}
-				return ASTResolving.guessBindingForReference(parent);
 			case ASTNode.THROW_STATEMENT :
 				return ast.resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
-			case ASTNode.TYPE_LITERAL:
-			case ASTNode.CLASS_INSTANCE_CREATION:
-			case ASTNode.CAST_EXPRESSION:
-				return ASTResolving.guessBindingForReference(parent);
 			case ASTNode.SINGLE_VARIABLE_DECLARATION:
-				ASTNode parentParent= parent.getParent();
-				if (parentParent.getNodeType() == ASTNode.CATCH_CLAUSE) {
+				if (parent.getLocationInParent() == CatchClause.EXCEPTION_PROPERTY) {
 					return ast.resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
 				}
 				break;
 		}
-		return null;
+		return ASTResolving.guessBindingForTypeReference(node);
 	}
 
 
@@ -373,10 +358,16 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 
 		ITypeBinding superclass= getPossibleSuperTypeBinding(fNode);
 		if (superclass != null) {
-			if (superclass.isClass() || (fTypeKind == K_INTERFACE)) {
-				buf.append("</b> extends <b>"); //$NON-NLS-1$
+			if (superclass.isClass()) {
+				if (fTypeKind == K_CLASS) {
+					buf.append("</b> extends <b>"); //$NON-NLS-1$
+				}
 			} else {
-				buf.append("</b> implements <b>"); //$NON-NLS-1$
+				if (fTypeKind == K_INTERFACE) {
+					buf.append("</b> extends <b>"); //$NON-NLS-1$
+				} else {
+					buf.append("</b> implements <b>"); //$NON-NLS-1$
+				}
 			}
 			buf.append(superclass.getName());
 		}

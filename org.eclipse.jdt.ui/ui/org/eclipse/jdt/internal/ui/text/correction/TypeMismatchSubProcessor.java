@@ -19,6 +19,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -41,7 +42,6 @@ import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -69,6 +69,8 @@ public class TypeMismatchSubProcessor {
 		String castTypeName= args[1];
 
 		CompilationUnit astRoot= context.getASTRoot();
+		AST ast= astRoot.getAST();
+		
 		ASTNode selectedNode= problem.getCoveredNode(astRoot);
 		if (!(selectedNode instanceof Expression)) {
 			return;
@@ -123,17 +125,19 @@ public class TypeMismatchSubProcessor {
 			if (decl instanceof MethodDeclaration) {
 				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
 
+
 				currBinding= Bindings.normalizeTypeBinding(currBinding);
 				if (currBinding == null) {
-					currBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+					currBinding= ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+				}
+				if (currBinding.isWildcardType()) {
+					currBinding= ASTResolving.normalizeWildcardType(currBinding, true, ast);
 				}
 
-				ASTRewrite rewrite= ASTRewrite.create(methodDeclaration.getAST());
+				ASTRewrite rewrite= ASTRewrite.create(ast);
 				ImportRewrite imports= new ImportRewrite(cu);
 
-				String returnTypeName= imports.addImport(currBinding);
-
-				Type newReturnType= ASTNodeFactory.newType(astRoot.getAST(), returnTypeName);
+				Type newReturnType= imports.addImport(currBinding, ast);
 				rewrite.replace(methodDeclaration.getReturnType2(), newReturnType, null);
 
 				String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturntype_description, currBinding.getName());
@@ -143,7 +147,7 @@ public class TypeMismatchSubProcessor {
 
 				String returnKey= "return"; //$NON-NLS-1$
 				proposal.addLinkedPosition(rewrite.track(newReturnType), true, returnKey);
-				ITypeBinding[] typeSuggestions= ASTResolving.getRelaxingTypes(astRoot.getAST(), currBinding);
+				ITypeBinding[] typeSuggestions= ASTResolving.getRelaxingTypes(ast, currBinding);
 				for (int i= 0; i < typeSuggestions.length; i++) {
 					proposal.addLinkedPositionProposal(returnKey, typeSuggestions[i]);
 				}
@@ -154,7 +158,10 @@ public class TypeMismatchSubProcessor {
 		if (!nullOrVoid && receiverNode != null) {
 			currBinding= Bindings.normalizeTypeBinding(currBinding);
 			if (currBinding == null) {
-				currBinding= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+				currBinding= ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+			}
+			if (currBinding.isWildcardType()) {
+				currBinding= ASTResolving.normalizeWildcardType(currBinding, true, ast);
 			}
 			addChangeSenderTypeProposals(context, receiverNode, currBinding, true, 6, proposals);
 		}

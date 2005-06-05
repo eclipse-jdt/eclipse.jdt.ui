@@ -712,13 +712,26 @@ public class ModifierCorrectionSubProcessor {
 		if (target == null) {
 			return;
 		}
-		proposals.add(getSuppressWarningsProposal(context.getCompilationUnit(), target, warningToken, 1));
-	
 		if (!(target instanceof BodyDeclaration)) {
-			target= getParentAnnotationHolder(target.getParent());
-			if (target != null) {
-				proposals.add(getSuppressWarningsProposal(context.getCompilationUnit(), target, warningToken, 0));
+			switch (problem.getProblemId()) {
+				case IProblem.LocalVariableHidingLocalVariable:
+				case IProblem.LocalVariableHidingField:
+				case IProblem.FieldHidingLocalVariable:
+				case IProblem.FieldHidingField:
+				case IProblem.ArgumentHidingLocalVariable:
+				case IProblem.ArgumentHidingField:
+				case IProblem.UseAssertAsAnIdentifier:
+				case IProblem.UseEnumAsAnIdentifier:
+				case IProblem.UnusedPrivateField:
+				case IProblem.LocalVariableIsNeverUsed:
+				case IProblem.ArgumentIsNeverUsed:
+					proposals.add(getSuppressWarningsProposal(context.getCompilationUnit(), target, warningToken, -2));
+					break;
 			}
+			target= getParentAnnotationHolder(target.getParent());
+		}
+		if (target instanceof BodyDeclaration) {
+			proposals.add(getSuppressWarningsProposal(context.getCompilationUnit(), target, warningToken, -3));
 		}
 	}
 	

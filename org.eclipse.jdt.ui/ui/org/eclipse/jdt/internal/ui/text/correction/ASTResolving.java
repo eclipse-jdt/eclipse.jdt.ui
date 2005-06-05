@@ -368,7 +368,13 @@ public class ASTResolving {
 	}
 
     public static ITypeBinding guessBindingForTypeReference(ASTNode node) {
-    	return Bindings.normalizeTypeBinding(getPossibleTypeBinding(node));
+    	ITypeBinding binding= Bindings.normalizeTypeBinding(getPossibleTypeBinding(node));
+    	if (binding != null) {
+    		if (binding.isWildcardType()) {
+    			return normalizeWildcardType(binding, true, node.getAST());
+    		}
+    	}
+    	return binding;
     }
 
     private static ITypeBinding getPossibleTypeBinding(ASTNode node) {

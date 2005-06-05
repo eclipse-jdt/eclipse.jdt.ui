@@ -685,7 +685,11 @@ public class UnresolvedElementsSubProcessor {
 					AddTypeParameterProposal proposal= new AddTypeParameterProposal(cu, binding, root, name, null, rel);
 					proposals.add(proposal);
 				}
-				declaration= ASTResolving.findParentBodyDeclaration(declaration.getParent());
+				if (!Modifier.isStatic(declaration.getModifiers())) {
+					declaration= ASTResolving.findParentBodyDeclaration(declaration.getParent());
+				} else {
+					declaration= null;
+				}
 			}
 		}
 	}
@@ -1098,6 +1102,9 @@ public class UnresolvedElementsSubProcessor {
 				ITypeBinding newType= Bindings.normalizeTypeBinding(argTypes[idx]);
 				if (newType == null) {
 					newType= astRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+				}
+				if (newType.isWildcardType()) {
+					newType= ASTResolving.normalizeWildcardType(newType, true, astRoot.getAST());
 				}
 				if (!ASTResolving.isUseableTypeInContext(newType, methodDecl, false)) {
 					return;

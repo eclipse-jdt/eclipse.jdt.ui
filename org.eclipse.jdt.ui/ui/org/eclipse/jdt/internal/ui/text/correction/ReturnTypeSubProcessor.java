@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -52,6 +51,7 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
   */
@@ -142,21 +142,25 @@ public class ReturnTypeSubProcessor {
 			ReturnStatement returnStatement= (ReturnStatement) selectedNode;
 			Expression expr= returnStatement.getExpression();
 			if (expr != null) {
+				AST ast= astRoot.getAST();
+				
 				ITypeBinding binding= Bindings.normalizeTypeBinding(expr.resolveTypeBinding());
 				if (binding == null) {
-					binding= selectedNode.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+					binding= ast.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 				}
+				if (binding.isWildcardType()) {
+					binding= ASTResolving.normalizeWildcardType(binding, true, ast);
+				}
+				
 				MethodDeclaration methodDeclaration= (MethodDeclaration) decl;
 
-				AST ast= astRoot.getAST();
 				ASTRewrite rewrite= ASTRewrite.create(ast);
 
-				String label= Messages.format(CorrectionMessages.ReturnTypeSubProcessor_voidmethodreturns_description, binding.getName());
+				String label= Messages.format(CorrectionMessages.ReturnTypeSubProcessor_voidmethodreturns_description, BindingLabelProvider.getBindingLabel(binding, BindingLabelProvider.DEFAULT_TEXTFLAGS));
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
 
-				String returnTypeName= proposal.getImportRewrite().addImport(binding);
-				Type newReturnType= ASTNodeFactory.newType(ast, returnTypeName);
+				Type newReturnType= proposal.getImportRewrite().addImport(binding, ast);
 
 				if (methodDeclaration.isConstructor()) {
 					rewrite.set(methodDeclaration, MethodDeclaration.CONSTRUCTOR_PROPERTY, Boolean.FALSE, null);
@@ -211,25 +215,23 @@ public class ReturnTypeSubProcessor {
 			ReturnStatementCollector eval= new ReturnStatementCollector();
 			decl.accept(eval);
 
+			AST ast= astRoot.getAST();
+			
 			ITypeBinding typeBinding= eval.getTypeBinding(decl.getAST());
 			typeBinding= Bindings.normalizeTypeBinding(typeBinding);
-
-			AST ast= astRoot.getAST();
+			if (typeBinding == null) {
+				typeBinding= ast.resolveWellKnownType("void"); //$NON-NLS-1$
+			}
+			if (typeBinding.isWildcardType()) {
+				typeBinding= ASTResolving.normalizeWildcardType(typeBinding, true, ast);
+			}
+			
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 			ImportRewrite imports= new ImportRewrite(cu);
 
-			Type type;
-			String typeName;
-			if (typeBinding != null) {
-				typeName= imports.addImport(typeBinding);
-				type= ASTNodeFactory.newType(ast, typeName);
-			} else {
-				typeName= "void"; //$NON-NLS-1$
-				type= ast.newPrimitiveType(PrimitiveType.VOID);
-			}
+			Type type= imports.addImport(typeBinding, ast);
 
-
-			String label= Messages.format(CorrectionMessages.ReturnTypeSubProcessor_missingreturntype_description, typeName);
+			String label= Messages.format(CorrectionMessages.ReturnTypeSubProcessor_missingreturntype_description, BindingLabelProvider.getBindingLabel(typeBinding, BindingLabelProvider.DEFAULT_TEXTFLAGS));
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
 			proposal.setImportRewrite(imports);
@@ -251,7 +253,7 @@ public class ReturnTypeSubProcessor {
 			String key= "return_type"; //$NON-NLS-1$
 			proposal.addLinkedPosition(rewrite.track(type), true, key);
 			if (typeBinding != null) {
-				ITypeBinding[] bindings= ASTResolving.getRelaxingTypes(astRoot.getAST(), typeBinding);
+				ITypeBinding[] bindings= ASTResolving.getRelaxingTypes(ast, typeBinding);
 				for (int i= 0; i < bindings.length; i++) {
 					proposal.addLinkedPositionProposal(key, bindings[i]);
 				}
