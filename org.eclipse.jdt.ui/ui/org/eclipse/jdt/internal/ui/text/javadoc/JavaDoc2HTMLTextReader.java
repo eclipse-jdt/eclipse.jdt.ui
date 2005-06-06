@@ -330,7 +330,7 @@ public class JavaDoc2HTMLTextReader extends SubstitutionTextReader {
 	 * @see SubstitutionTextReaderr#computeSubstitution(int)
 	 */
 	protected String computeSubstitution(int c) throws IOException {
-		if (c == '@')
+		if (c == '@' && fWasWhiteSpace)
 			return processSimpleTag();
 
 		if (c == '{')
