@@ -651,19 +651,6 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	}
 
 	/**
-	 * Invalidate text presentation of positions with the given highlighting.
-	 *
-	 * @param highlighting The highlighting
-	 */
-	public void highlightingStyleChanged(Highlighting highlighting) {
-		for (int i= 0, n= fPositions.size(); i < n; i++) {
-			HighlightedPosition position= (HighlightedPosition) fPositions.get(i);
-			if (position.getHighlighting() == highlighting)
-				fSourceViewer.invalidateTextPresentation(position.getOffset(), position.getLength());
-		}
-	}
-
-	/**
 	 * Invalidate text presentation of all positions.
 	 */
 	private void invalidateTextPresentation() {
