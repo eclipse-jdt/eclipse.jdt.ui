@@ -16,8 +16,10 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
+import org.eclipse.core.runtime.jobs.IJobManager;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionEvent;
@@ -37,6 +39,7 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -223,6 +226,11 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		// takes care of working copies.
 		IRunnableWithProgress runnable= new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+				if (fgFirstTime) {
+					// Join the initalize after load job.
+					IJobManager manager= Platform.getJobManager();
+					manager.join(JavaCore.PLUGIN_ID, monitor);
+				}
 				TypeInfoHistory history= TypeInfoHistory.getInstance();
 				if (fgFirstTime || history.isEmpty()) {
 					monitor.beginTask(JavaUIMessages.TypeSelectionDialog_progress_consistency, 100);
