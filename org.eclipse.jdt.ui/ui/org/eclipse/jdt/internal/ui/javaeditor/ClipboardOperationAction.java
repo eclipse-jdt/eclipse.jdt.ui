@@ -425,6 +425,10 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				if (typeBinding.isArray()) {
 					typeBinding= typeBinding.getElementType();
 				}
+				if (typeBinding.isTypeVariable() || typeBinding.isCapture() || typeBinding.isWildcardType()) { // can be removed when bug 98473 is fixed
+					continue; 
+				}
+				
 				if (typeBinding.isMember() || typeBinding.isTopLevel()) {
 					String name= Bindings.getRawQualifiedName(typeBinding);
 					if (name.length() > 0) {
