@@ -29,13 +29,13 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.packageview.ClassPathContainer;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
-
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
 
 /**
  * Operation to remove source folders (of type <code>
  * IPackageFragmentRoot</code> from the classpath.
  * 
- * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#removeFromClasspath(List, IJavaProject, IProgressMonitor)
+ * @see org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier#removeFromClasspath(IRemoveLinkedFolderQuery, List, IJavaProject, IProgressMonitor)
  * @see org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation
  */
 public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
@@ -66,9 +66,7 @@ public class RemoveFromClasspathOperation extends ClasspathModifierOperation {
         List result= null;
         fException= null;
         try {
-            IJavaProject project= fInformationProvider.getJavaProject();
-            List elements= getSelectedElements();
-            result= removeFromClasspath(elements, project, monitor);
+            result= removeFromClasspath(fInformationProvider.getRemoveLinkedFolderQuery(), getSelectedElements(), fInformationProvider.getJavaProject(), monitor);
         } catch (CoreException e) {
             fException= e;
             result= null;

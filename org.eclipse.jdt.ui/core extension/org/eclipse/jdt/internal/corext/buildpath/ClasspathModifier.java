@@ -59,8 +59,9 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
 
 public class ClasspathModifier {
@@ -367,6 +368,7 @@ public class ClasspathModifier {
 	/**
 	 * Remove a list of elements to the build path.
 	 * 
+	 * @param query query to remove unused linked folders from the project
 	 * @param elements a list of elements to be removed from the build path. An element 
 	 * must either be of type <code>IJavaProject</code>, <code>IPackageFragmentRoot</code> or 
 	 * <code>ClassPathContainer</code>
@@ -377,7 +379,7 @@ public class ClasspathModifier {
 	 * @throws CoreException 
 	 * @throws OperationCanceledException 
 	 */
-	protected List removeFromClasspath(List elements, IJavaProject project, IProgressMonitor monitor) throws CoreException {
+	protected List removeFromClasspath(IRemoveLinkedFolderQuery query, List elements, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -399,8 +401,25 @@ public class ClasspathModifier {
 							if (res != null) {
 								resultElements.add(res);
 							}
-						} else
-							resultElements.add(removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1)));
+						} else {
+							final IResource resource= root.getCorrespondingResource();
+							if (resource instanceof IFolder) {
+								final IFolder folder= (IFolder) resource;
+								if (folder.isLinked()) {
+									final int result= query.doQuery(folder);
+									if (result != IRemoveLinkedFolderQuery.REMOVE_CANCEL) {
+										if (result == IRemoveLinkedFolderQuery.REMOVE_BUILD_PATH)
+											resultElements.add(removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1)));
+										else if (result == IRemoveLinkedFolderQuery.REMOVE_BUILD_PATH_AND_FOLDER) {
+											resultElements.add(removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1)));
+											folder.delete(true, true, new SubProgressMonitor(monitor, 1));
+										}
+									}
+								} else
+									resultElements.add(removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1)));
+							} else
+								resultElements.add(removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1)));
+						}
 					} else {
 						archiveRemoved= true;
 						ClassPathContainer container= (ClassPathContainer) element;
@@ -1222,10 +1241,12 @@ public class ClasspathModifier {
 			CPListElement elem= CPListElement.createFromExisting(entry, project);
 			existingEntries.remove(elem);
 			IResource resource;
+			final IWorkspaceRoot workspaceRoot= project.getProject().getWorkspace().getRoot();
+			final IPath path= root.getPath();
 			if (root.isArchive())
-				resource= project.getProject().getWorkspace().getRoot().getFile(root.getPath());
+				resource= workspaceRoot.getFile(path);
 			else
-				resource= project.getProject().getWorkspace().getRoot().getFolder(root.getPath());
+				resource= workspaceRoot.getFolder(path);
 			return resource;
 		} finally {
 			monitor.done();
@@ -1891,7 +1912,7 @@ public class ClasspathModifier {
 	 * @param newEntries
 	 * 
 	 * @see #addToClasspath(List, IJavaProject, OutputFolderQuery, IProgressMonitor)
-	 * @see #removeFromClasspath(List, IJavaProject, IProgressMonitor)
+	 * @see #removeFromClasspath(IRemoveLinkedFolderQuery, List, IJavaProject, IProgressMonitor)
 	 */
 	private void fireEvent(List newEntries) {
 		if (fListener != null)

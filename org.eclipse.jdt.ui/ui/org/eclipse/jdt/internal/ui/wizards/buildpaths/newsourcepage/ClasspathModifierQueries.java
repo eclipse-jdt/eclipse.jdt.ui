@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
+import java.text.MessageFormat;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
@@ -18,9 +19,18 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 
@@ -29,6 +39,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -46,7 +57,76 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.OutputLocationDialog;
  * the predefined queries.
  */
 public class ClasspathModifierQueries {
-    
+
+	/**
+	 * Dialog to prompt whether a linked folder should be deleted.
+	 * 
+	 * @see IRemoveLinkedFolderQuery
+	 */
+	private static class RemoveLinkedFolderDialog extends MessageDialog {
+
+		/** The remove status */
+		private int fRemoveStatus= IRemoveLinkedFolderQuery.REMOVE_BUILD_PATH_AND_FOLDER;
+
+		/** The remove build path and folder button */
+		private Button fRemoveBuildPathAndFolder;
+
+		/** The remove build path button */
+		private Button fRemoveBuildPath;
+
+		/**
+		 * Creates a new remove linked folder dialog.
+		 * 
+		 * @param shell the parent shell to use
+		 * @param folder the linked folder to remove
+		 */
+		private RemoveLinkedFolderDialog(final Shell shell, final IFolder folder) {
+			super(shell, NewWizardMessages.ClasspathModifierQueries_confirm_remove_linked_folder_label, null, MessageFormat.format(NewWizardMessages.ClasspathModifierQueries_confirm_remove_linked_folder_message, new Object[] { folder.getFullPath()}), MessageDialog.QUESTION, new String[] { IDialogConstants.YES_LABEL, IDialogConstants.NO_LABEL}, 0); // yes is the default
+			Assert.isTrue(folder.isLinked());
+		}
+
+		protected Control createCustomArea(final Composite parent) {
+
+			final Composite composite= new Composite(parent, SWT.NONE);
+			composite.setLayout(new GridLayout());
+
+			fRemoveBuildPathAndFolder= new Button(composite, SWT.RADIO);
+			fRemoveBuildPathAndFolder.addSelectionListener(selectionListener);
+
+			fRemoveBuildPathAndFolder.setText(NewWizardMessages.ClasspathModifierQueries_delete_linked_folder);
+			fRemoveBuildPathAndFolder.setFont(parent.getFont());
+
+			fRemoveBuildPath= new Button(composite, SWT.RADIO);
+			fRemoveBuildPath.addSelectionListener(selectionListener);
+
+			fRemoveBuildPath.setText(NewWizardMessages.ClasspathModifierQueries_do_not_delete_linked_folder);
+			fRemoveBuildPath.setFont(parent.getFont());
+
+			fRemoveBuildPathAndFolder.setSelection(fRemoveStatus == IRemoveLinkedFolderQuery.REMOVE_BUILD_PATH_AND_FOLDER);
+			fRemoveBuildPath.setSelection(fRemoveStatus == IRemoveLinkedFolderQuery.REMOVE_BUILD_PATH);
+
+			return composite;
+		}
+
+		private SelectionListener selectionListener= new SelectionAdapter() {
+
+			public final void widgetSelected(final SelectionEvent event) {
+				final Button button= (Button) event.widget;
+				if (button.getSelection())
+					fRemoveStatus= (button == fRemoveBuildPathAndFolder) ? IRemoveLinkedFolderQuery.REMOVE_BUILD_PATH_AND_FOLDER : IRemoveLinkedFolderQuery.REMOVE_BUILD_PATH;
+			}
+		};
+
+		/**
+		 * Returns the remove status.
+		 * 
+		 * @return the remove status, one of IRemoveLinkedFolderQuery#REMOVE_XXX
+		 */
+		public final int getRemoveStatus() {
+			return fRemoveStatus;
+		}
+	}
+
     /**
      * A validator for the output location that can be 
      * used to find out whether the entred location can be 
@@ -299,8 +379,31 @@ public class ClasspathModifierQueries {
     }
 
     /**
-     * Query to create a folder.
-     */
+	 * Query to determine whether a linked folder should be removed.
+	 */
+	public static interface IRemoveLinkedFolderQuery {
+
+		/** Remove status indicating that the removal should be cancelled */
+		public static final int REMOVE_CANCEL= 0;
+
+		/** Remove status indicating that the folder should be removed from the build path only */
+		public static final int REMOVE_BUILD_PATH= 1;
+
+		/** Remove status indicating that the folder should be removed from the build path and deleted */
+		public static final int REMOVE_BUILD_PATH_AND_FOLDER= 2;
+
+		/**
+		 * Query to determined whether the linked folder should be removed as well.
+		 * 
+		 * @param folder the linked folder to remove
+		 * @return a status code corresponding to one of the IRemoveLinkedFolderQuery#REMOVE_XXX constants
+		 */
+		public int doQuery(IFolder folder);
+	}
+
+    /**
+	 * Query to create a folder.
+	 */
     public static interface IFolderCreationQuery {
         /**
          * Query to create a folder.
@@ -401,7 +504,7 @@ public class ClasspathModifierQueries {
 							newOutputFolder= getValidPath(newOutputFolder, validator);
 							String message= Messages.format(NewWizardMessages.ClasspathModifier_ChangeOutputLocationDialog_project_outputLocation, newOutputFolder); 
 							fRemoveProject= true;
-							if (MessageDialog.openQuestion(sh, title, message)) {
+							if (MessageDialog.openConfirm(sh, title, message)) {
 								fOutputLocation= newOutputFolder;
 								result[0]= true;
 							}
@@ -667,7 +770,36 @@ public class ClasspathModifierQueries {
             }  
         };
     }
-    
+
+    /**
+	 * Shows the UI to prompt whether a linked folder which has been removed from the build path should be deleted as well.
+	 * 
+	 * @param shell The parent shell for the dialog, can be <code>null</code>
+	 * @return an <code>IRemoveLinkedFolderQuery</code> showing a dialog to prompt whether the linked folder should be deleted as well
+	 * 
+	 * @see IRemoveLinkedFolderQuery
+	 */
+	public static IRemoveLinkedFolderQuery getDefaultRemoveLinkedFolderQuery(final Shell shell) {
+		return new IRemoveLinkedFolderQuery() {
+
+			public final int doQuery(final IFolder folder) {
+				final int[] result= { IRemoveLinkedFolderQuery.REMOVE_BUILD_PATH};
+				Display.getDefault().syncExec(new Runnable() {
+
+					public final void run() {
+						final RemoveLinkedFolderDialog dialog= new RemoveLinkedFolderDialog((shell != null ? shell : JavaPlugin.getActiveWorkbenchShell()), folder);
+						final int status= dialog.open();
+						if (status == 0)
+							result[0]= dialog.getRemoveStatus();
+						else
+							result[0]= IRemoveLinkedFolderQuery.REMOVE_CANCEL;
+					}
+				});
+				return result[0];
+			}
+		};
+	}
+
     /**
      * Shows the UI to choose new classpath container classpath entries. See {@link IClasspathEntry#CPE_CONTAINER} for
      * details about container classpath entries.

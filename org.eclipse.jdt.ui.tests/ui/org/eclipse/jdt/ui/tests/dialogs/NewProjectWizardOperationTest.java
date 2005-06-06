@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 
@@ -1037,7 +1038,10 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
 
             public void deleteCreatedResources() {
             }
-            
+
+			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
+				return null;
+			}
         });
         operation.run(null);
         
@@ -1139,6 +1143,10 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
 
             public void deleteCreatedResources() {
             }
+
+			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
+				return null;
+			}
             
         });
         op.run(null);
@@ -1192,6 +1200,10 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
 
             public void deleteCreatedResources() {
             }
+
+			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
+				return null;
+			}
             
         });
         operation.run(null);
@@ -1336,4 +1348,11 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
      */
     public void deleteCreatedResources() {
     }
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider#getRemoveLinkedFolderQuery()
+	 */
+	public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
+		return null;
+	}
 }

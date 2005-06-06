@@ -70,6 +70,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -1065,12 +1066,10 @@ public class NewProjectWizardTest extends TestCase {
             }
 
             public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
-                // TODO Auto-generated method stub
                 return null;
             }
             
             public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {
-                // TODO Auto-generated method stub
                 return null;
             }
 
@@ -1085,9 +1084,12 @@ public class NewProjectWizardTest extends TestCase {
             }
 
             public void deleteCreatedResources() {
-                // TODO Auto-generated method stub
-                
+            	
             }
+
+			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
+				return null;
+			}
         };
         
         ClasspathModifierOperation op= null;

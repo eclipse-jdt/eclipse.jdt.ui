@@ -634,6 +634,10 @@ public final class NewWizardMessages extends NLS {
 	public static String AccessRulesDialog_severity_ignore;
 	public static String AccessRulesDialog_switch_dialog_title;
 	public static String AccessRulesDialog_switch_dialog_message;
+	public static String ClasspathModifierQueries_confirm_remove_linked_folder_label;
+	public static String ClasspathModifierQueries_confirm_remove_linked_folder_message;
+	public static String ClasspathModifierQueries_delete_linked_folder;
+	public static String ClasspathModifierQueries_do_not_delete_linked_folder;
 
 
 

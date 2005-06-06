@@ -66,6 +66,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
@@ -506,7 +507,17 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
     public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
         return ClasspathModifierQueries.getDefaultLinkQuery(getShell(), fCurrJProject, new Path(fOutputLocationField.getText()));
     }
-    
+
+	/**
+	 * Get a query to create a linked source folder.
+	 * 
+	 * @see IRemoveLinkedFolderQuery
+	 * @see org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider
+	 */
+	public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
+		return ClasspathModifierQueries.getDefaultRemoveLinkedFolderQuery(getShell());
+	}
+
     /**
      * Return an <code>IAddArchivesQuery</code>.
      * 

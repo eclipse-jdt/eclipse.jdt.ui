@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 
 
@@ -173,6 +174,18 @@ public interface IClasspathInformationProvider {
      * @see ClasspathModifierQueries#getDefaultFolderCreationQuery(Shell, Object)
      */
     public ILinkToQuery getLinkFolderQuery() throws JavaModelException;
+    
+    /**
+     * Method to retrieve an <code>IRemoveLinkedFolderQuery</code> from 
+     * the provider.
+     * 
+     * @return an <code>IRemoveLinkedFolderQuery</code>, must not be 
+     * <code>null</code>
+     * @throws JavaModelException
+     * 
+     * @see ClasspathModifierQueries#getDefaultRemoveLinkedFolderQuery(Shell)
+     */
+    public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException;
     
     /**
      * Method to retrieve an <code>IAddArchivesQuery</code> from 
