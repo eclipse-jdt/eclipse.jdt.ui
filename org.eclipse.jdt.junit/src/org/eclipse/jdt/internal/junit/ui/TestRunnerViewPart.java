@@ -58,6 +58,7 @@ import org.eclipse.swt.widgets.ToolBar;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
@@ -210,6 +211,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 	private Action fRerunLastFailedFirstAction;
 	private ScrollLockAction fScrollLockAction;
 	private ToggleOrientationAction[] fToggleOrientationActions;
+	private ActivateOnErrorAction fActivateOnErrorAction;
+	private IMenuListener fViewMenuListener;
 	
 	/**
 	 * The client side of the remote test runner
@@ -445,6 +448,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 			} catch (MalformedURLException e) {
 				// don't use any image
 			}
+			update();
+		}
+		public void update() {
 			setChecked(getShowOnErrorOnly());
 		}
 		public void run() {
@@ -964,6 +970,9 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 		fTestRunFailDirtyIcon.dispose();
 		if (fClipboard != null) 
 			fClipboard.dispose();
+		if (fViewMenuListener != null) {
+			getViewSite().getActionBars().getMenuManager().removeMenuListener(fViewMenuListener);
+		}
 	}
 
 	protected void start(final int total) {
@@ -1356,7 +1365,14 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 		for (int i = 0; i < fToggleOrientationActions.length; ++i)
 			viewMenu.add(fToggleOrientationActions[i]);
 		viewMenu.add(new Separator());
-		viewMenu.add(new ActivateOnErrorAction());
+		fActivateOnErrorAction= new ActivateOnErrorAction();
+		viewMenu.add(fActivateOnErrorAction);
+		fViewMenuListener= new IMenuListener() {
+			public void menuAboutToShow(IMenuManager manager) {
+				fActivateOnErrorAction.update();
+			}
+		};
+		viewMenu.addMenuListener(fViewMenuListener);
 		
 		fScrollLockAction.setChecked(!fAutoScroll);
 
