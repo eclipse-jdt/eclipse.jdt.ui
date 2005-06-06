@@ -1680,7 +1680,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 */
 	protected final ISourceViewer createSourceViewer(Composite parent, IVerticalRuler verticalRuler, int styles) {
 
-		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, getPreferenceStore());
+		IPreferenceStore store= getPreferenceStore();
+		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
 
 		JavaSourceViewer javaSourceViewer= null;
 		if (viewer instanceof JavaSourceViewer)
@@ -1690,7 +1691,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		 * This is a performance optimization to reduce the computation of
 		 * the text presentation triggered by {@link #setVisibleDocument(IDocument)}
 		 */
-		if (javaSourceViewer != null && isFoldingEnabled())
+		if (javaSourceViewer != null && isFoldingEnabled() && (store == null || !store.getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS)))
 			javaSourceViewer.prepareDelayedProjection();
 		
 		ProjectionViewer projectionViewer= (ProjectionViewer)viewer;
@@ -2206,7 +2207,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		if (sourceViewer instanceof JavaSourceViewer)
 			javaSourceViewer= (JavaSourceViewer)sourceViewer;
 		
-		if (javaSourceViewer != null && isFoldingEnabled())
+		IPreferenceStore store= getPreferenceStore();
+		if (javaSourceViewer != null && isFoldingEnabled() &&(store == null || !store.getBoolean(PreferenceConstants.EDITOR_SHOW_SEGMENTS)))
 			javaSourceViewer.prepareDelayedProjection();
 		
 		super.doSetInput(input);
