@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Map;
@@ -62,7 +63,10 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -95,6 +99,7 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 public class ReorgCorrectionsSubProcessor {
 
@@ -282,10 +287,46 @@ public class ReorgCorrectionsSubProcessor {
 		return null;
 	}
 
-	/**
-	 * 
-	 */
-	private static class ChangeTo50Compliance extends ChangeCorrectionProposal implements IWorkspaceRunnable {
+	private static final class OpenBuildPathCorrectionProposal extends ChangeCorrectionProposal {
+		private final IProject fProject;
+		private final IBinding fReferencedType;
+		private OpenBuildPathCorrectionProposal(IProject project, String label, int relevance, IBinding referencedType) {
+			super(label, null, relevance, null);
+			fProject= project;
+			fReferencedType= referencedType;
+			ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages();
+			setImage(images.getImage(IDE.SharedImages.IMG_OBJ_PROJECT));
+		}
+		public void apply(IDocument document) {
+			Map data= null;
+			if (fReferencedType != null) {
+				IJavaElement elem= fReferencedType.getJavaElement();
+				if (elem != null) {
+					IPackageFragmentRoot root= (IPackageFragmentRoot) elem.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					if (root != null) {
+						try {
+							IClasspathEntry entry= root.getRawClasspathEntry();
+							if (entry != null) {
+								data= new HashMap(1);
+								data.put(BuildPathsPropertyPage.DATA_REVEAL_ENTRY, entry);
+								if (entry.getEntryKind() != IClasspathEntry.CPE_CONTAINER) {
+									data.put(BuildPathsPropertyPage.DATA_REVEAL_ATTRIBUTE_KEY, CPListElement.ACCESSRULES);
+								}
+							}
+						} catch (JavaModelException e) {
+							// ignore
+						}
+					}
+				}
+			}
+			PreferencesUtil.createPropertyDialogOn(JavaPlugin.getActiveWorkbenchShell(), fProject, BuildPathsPropertyPage.PROP_ID, null, data).open();
+		}
+		public String getAdditionalProposalInfo() {
+			return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_description, fProject.getName());
+		}
+	}
+
+	private static final class ChangeTo50Compliance extends ChangeCorrectionProposal implements IWorkspaceRunnable {
 		
 		private final IJavaProject fProject;
 		private final boolean fChangeOnWorkspace;
@@ -455,20 +496,23 @@ public class ReorgCorrectionsSubProcessor {
 	}
 
 	public static void getIncorrectBuildPathProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
-		String name= CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_label;
-		ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages();
-		Image image= images.getImage(IDE.SharedImages.IMG_OBJ_PROJECT);
-		final IProject project= context.getCompilationUnit().getJavaProject().getProject();
-		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 5, image) {
-			public void apply(IDocument document) {
-				PreferencesUtil.createPropertyDialogOn(JavaPlugin.getActiveWorkbenchShell(), project, BuildPathsPropertyPage.PROP_ID, null, null).open();
-			}
-			
-			public String getAdditionalProposalInfo() {
-				return Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_description, project.getName());
-			}
-			
-		};
+		IProject project= context.getCompilationUnit().getJavaProject().getProject();
+		String label= CorrectionMessages.ReorgCorrectionsSubProcessor_configure_buildpath_label;
+		OpenBuildPathCorrectionProposal proposal= new OpenBuildPathCorrectionProposal(project, label, 5, null);
+		proposals.add(proposal);
+	}
+
+	public static void getAccessRulesProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		IBinding referencedElement= null;
+		ASTNode node= problem.getCoveredNode(context.getASTRoot());
+		if (node instanceof Type) {
+			referencedElement= ((Type) node).resolveBinding();
+		} else if (node instanceof Name) {
+			referencedElement= ((Name) node).resolveBinding();
+		}
+		IProject project= context.getCompilationUnit().getJavaProject().getProject();
+		String label= CorrectionMessages.ReorgCorrectionsSubProcessor_accessrules_description;
+		OpenBuildPathCorrectionProposal proposal= new OpenBuildPathCorrectionProposal(project, label, 5, referencedElement);
 		proposals.add(proposal);
 	}
 }

@@ -220,7 +220,7 @@ public class CPListElement {
 		return attribute;
 	}
 	
-	private CPListElementAttribute findAttributeElement(String key) {
+	public CPListElementAttribute findAttributeElement(String key) {
 		for (int i= 0; i < fChildren.size(); i++) {
 			Object curr= fChildren.get(i);
 			if (curr instanceof CPListElementAttribute) {

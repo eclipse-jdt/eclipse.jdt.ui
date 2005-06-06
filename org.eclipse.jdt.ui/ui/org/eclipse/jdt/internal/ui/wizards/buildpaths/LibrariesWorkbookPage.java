@@ -764,8 +764,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	/*
 	 * @see BuildPathBasePage#setSelection
 	 */	
-	public void setSelection(List selElements) {
+	public void setSelection(List selElements, boolean expand) {
 		fLibrariesList.selectElements(new StructuredSelection(selElements));
+		if (expand) {
+			for (int i= 0; i < selElements.size(); i++) {
+				fLibrariesList.expandElement(selElements.get(i), 1);
+			}
+		}
 	}	
 
 

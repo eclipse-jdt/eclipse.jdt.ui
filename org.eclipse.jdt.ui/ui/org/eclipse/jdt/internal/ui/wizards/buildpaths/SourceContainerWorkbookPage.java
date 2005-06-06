@@ -631,8 +631,13 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	/*
 	 * @see BuildPathBasePage#setSelection
 	 */	
-	public void setSelection(List selElements) {
+	public void setSelection(List selElements, boolean expand) {
 		fFoldersList.selectElements(new StructuredSelection(selElements));
+		if (expand) {
+			for (int i= 0; i < selElements.size(); i++) {
+				fFoldersList.expandElement(selElements.get(i), 1);
+			}
+		}
 	}	
 	
 	/* (non-Javadoc)

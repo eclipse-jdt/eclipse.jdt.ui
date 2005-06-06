@@ -127,6 +127,7 @@ public class BuildPathsBlock {
 	
 	private IStatusChangeListener fContext;
 	private Control fSWTWidget;	
+	private TabFolder fTabFolder;
 	
 	private int fPageIndex;
 	
@@ -273,7 +274,8 @@ public class BuildPathsBlock {
 			public void widgetSelected(SelectionEvent e) {
 				tabChanged(e.item);
 			}	
-		});		
+		});
+		fTabFolder= folder;
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.BUILD_PATH_BLOCK);				
 		Dialog.applyDialogFont(composite);
@@ -839,11 +841,59 @@ public class BuildPathsBlock {
 			if (fCurrPage != null) {
 				List selection= fCurrPage.getSelection();
 				if (!selection.isEmpty()) {
-					newPage.setSelection(selection);
+					newPage.setSelection(selection, false);
 				}
 			}
 			fCurrPage= newPage;
 			fPageIndex= tabItem.getParent().getSelectionIndex();
+		}
+	}
+	
+	private int getPageIndex(int entryKind) {
+		switch (entryKind) {
+			case IClasspathEntry.CPE_CONTAINER:
+			case IClasspathEntry.CPE_LIBRARY:
+			case IClasspathEntry.CPE_VARIABLE:
+				return 2;
+			case IClasspathEntry.CPE_PROJECT:
+				return 1;
+			case IClasspathEntry.CPE_SOURCE:
+				return 0;
+		}
+		return 0;
+	}
+	
+	private CPListElement findElement(IClasspathEntry entry) {
+		for (int i= 0, len= fClassPathList.getSize(); i < len; i++) {
+			CPListElement curr= (CPListElement) fClassPathList.getElement(i);
+			if (curr.getEntryKind() == entry.getEntryKind() && curr.getPath().equals(entry.getPath())) {
+				return curr;
+			}
+		}
+		return null;
+	}
+	
+	public void setElementToReveal(IClasspathEntry entry, String attributeKey) {
+		int pageIndex= getPageIndex(entry.getEntryKind());
+		if (fTabFolder == null) {
+			fPageIndex= pageIndex;
+		} else {
+			fTabFolder.setSelection(pageIndex);
+			CPListElement element= findElement(entry);
+			if (element != null) {
+				Object elementToSelect= element;
+				
+				if (attributeKey != null) {
+					Object attrib= element.findAttributeElement(attributeKey);
+					if (attrib != null) {
+						elementToSelect= attrib;
+					}
+				}
+				BuildPathBasePage page= (BuildPathBasePage) fTabFolder.getItem(pageIndex).getData();
+				List selection= new ArrayList(1);
+				selection.add(elementToSelect);
+				page.setSelection(selection, true);
+			}	
 		}
 	}
 }

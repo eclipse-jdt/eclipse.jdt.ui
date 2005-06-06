@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import java.util.Map;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -29,10 +31,11 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferencePageContainer;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
-import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
@@ -54,6 +57,9 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 		
 	private static final String PAGE_SETTINGS= "BuildPathsPropertyPage"; //$NON-NLS-1$
 	private static final String INDEX= "pageIndex"; //$NON-NLS-1$
+
+	public static final Object DATA_REVEAL_ENTRY= "select_classpath_entry"; //$NON-NLS-1$
+	public static final Object DATA_REVEAL_ATTRIBUTE_KEY= "select_classpath_attribute_key"; //$NON-NLS-1$
 		
 	private BuildPathsBlock fBuildPathsBlock;
 	
@@ -211,6 +217,24 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	public void statusChanged(IStatus status) {
 		setValid(!status.matches(IStatus.ERROR));
 		StatusUtil.applyToStatusLine(this, status);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.preference.PreferencePage#applyData(java.lang.Object)
+	 */
+	public void applyData(Object data) {
+		if (data instanceof Map) {
+			Map map= (Map) data;
+			Object selectedLibrary= map.get(DATA_REVEAL_ENTRY);
+			if (selectedLibrary instanceof IClasspathEntry) {
+				IClasspathEntry entry= (IClasspathEntry) selectedLibrary;
+				Object attr= map.get(DATA_REVEAL_ATTRIBUTE_KEY);
+				String attributeKey= attr instanceof String ? (String) attr : null;
+				if (fBuildPathsBlock != null) {
+					fBuildPathsBlock.setElementToReveal(entry, attributeKey);
+				}
+			}
+		}
 	}
 
 }

@@ -169,6 +169,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MissingOverrideAnnotation:
 			case IProblem.IsClassPathCorrect:
 			case IProblem.MethodReturnsVoid:
+			case IProblem.ForbiddenReference:
+			case IProblem.DiscouragedReference:
 			//case IProblem.NonGenericType:
 				return true;
 			default:
@@ -478,6 +480,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.IsClassPathCorrect:
 				ReorgCorrectionsSubProcessor.getIncorrectBuildPathProposals(context, problem, proposals);
 				break;
+			case IProblem.ForbiddenReference:
+			case IProblem.DiscouragedReference:
+				ReorgCorrectionsSubProcessor.getAccessRulesProposals(context, problem, proposals);
+				break;				
 			default:
 		}
 		if (JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {

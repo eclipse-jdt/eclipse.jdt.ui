@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 public abstract class BuildPathBasePage {
 	
 	public abstract List getSelection();
-	public abstract void setSelection(List selection);
+	public abstract void setSelection(List selection, boolean expand);
 	
 	public abstract boolean isEntryKind(int kind);
 			
@@ -42,7 +42,7 @@ public abstract class BuildPathBasePage {
 				}
 			}
 		}
-		setSelection(res);
+		setSelection(res, false);
 	}
 	
 	public static void fixNestingConflicts(List newEntries, List existing, Set modifiedSourceEntries) {

@@ -158,8 +158,13 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 	/*
 	 * @see BuildPathBasePage#setSelection
 	 */	
-	public void setSelection(List selElements) {
+	public void setSelection(List selElements, boolean expand) {
 		fProjectsList.selectElements(new StructuredSelection(selElements));
+		if (expand) {
+			for (int i= 0; i < selElements.size(); i++) {
+				fProjectsList.expandElement(selElements.get(i), 1);
+			}
+		}
 	}
 	
 	/* (non-Javadoc)
