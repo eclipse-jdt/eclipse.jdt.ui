@@ -526,8 +526,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		
 		} else if (typeBinding.isWildcardType()) {
 			ITypeBinding bound= typeBinding.getBound();
-			collectTypeVariables(bound, typeVariablesCollector);
-			
+			if (bound != null) {
+				collectTypeVariables(bound, typeVariablesCollector);
+			}		
 		}
 	}
 	

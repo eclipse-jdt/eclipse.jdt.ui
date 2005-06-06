@@ -42,7 +42,6 @@ public class ChangeSignatureTests extends RefactoringTest {
 	private static final Class clazz= ChangeSignatureTests.class;
 	private static final String REFACTORING_PATH= "ChangeSignature/";
 	
-	private static final boolean BUG_79976_CORE_GENERIC_RippleMethodFinder= true;
 	private static final boolean BUG_83691_CORE_JAVADOC_REF= true;
 	
 	private static final boolean RUN_CONSTRUCTOR_TEST= true;
@@ -1936,10 +1935,6 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 	
 	public void testGenerics01() throws Exception {
-		if (BUG_79976_CORE_GENERIC_RippleMethodFinder) {
-			printTestDisabledMessage("BUG_79976_CORE_GENERIC_RippleMethodFinder");
-			return;
-		}
 		String[] signature= {"QInteger;", "QE;"};
 		String[] newNames= {};
 		String[] newTypes= {};
@@ -1958,10 +1953,6 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 
 	public void testGenerics02() throws Exception {
-		if (BUG_79976_CORE_GENERIC_RippleMethodFinder) {
-			printTestDisabledMessage("BUG_79976_CORE_GENERIC_RippleMethodFinder");
-			return;
-		}
 		String[] signature= {"QT;", "QE;"};
 		String[] newNames= {"maps"};
 		String[] newTypes= {"java.util.List<HashMap>"};
@@ -2015,5 +2006,24 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}
 
+	
+		public void testGenerics05() throws Exception {
+			String[] signature= {"QClass;"};
+			String[] newNames= {};
+			String[] newTypes= {};
+			String[] newDefaultValues= {};
+			ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+			int[] newIndices= {};
+	
+			String[] oldParamNames= { "arg" };
+			String[] newParamNames= { "arg" };
+			String[] newParameterTypeNames= {"Class<?>"};
+			int[] permutation= {0};
+			int[] deletedIndices= {};
+			int newVisibility= Modifier.PUBLIC;
+			String newReturnTypeName= null;
+			helperDoAll("C", "test", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+		}
+	
 }
 

@@ -8,5 +8,5 @@ class A<E> {
 }
 
 class Sub<Q> extends A<Q> {
-	void m(Q q, Integer i, List<HashMap> maps) {}
+	void m(Integer i, Q q) {}
 }
