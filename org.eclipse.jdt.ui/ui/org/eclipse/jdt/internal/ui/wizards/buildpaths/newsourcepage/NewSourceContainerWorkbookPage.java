@@ -306,7 +306,7 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
     /* (non-Javadoc)
      * @see org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage#setSelection(java.util.List)
      */
-    public void setSelection(List selection) {
+    public void setSelection(List selection, boolean expand) {
 		// page switch
 		
         if (selection.size() == 0)
