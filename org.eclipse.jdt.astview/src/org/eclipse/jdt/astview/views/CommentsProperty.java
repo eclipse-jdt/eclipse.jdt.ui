@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.astview.views;
 
+import java.util.List;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -36,14 +38,16 @@ public class CommentsProperty extends ASTAttribute {
 	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getChildren()
 	 */
 	public Object[] getChildren() {
-		return fRoot.getCommentList().toArray();
+		List commentList= fRoot.getCommentList();
+		return (commentList == null ? EMPTY : commentList.toArray());
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.astview.views.ASTAttribute#getLabel()
 	 */
 	public String getLabel() {
-		return "> comments (" +  fRoot.getCommentList().size() + ")";  //$NON-NLS-1$//$NON-NLS-2$
+		List commentList= fRoot.getCommentList();
+		return "> comments (" +  (commentList == null ? 0 : commentList.size()) + ")";  //$NON-NLS-1$//$NON-NLS-2$
 	}
 
 	/* (non-Javadoc)
