@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.dom.TypeLiteral;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
@@ -402,6 +403,7 @@ public class ASTResolving {
 			}
 			return getPossibleReferenceBinding(parent);
         case ASTNode.TYPE_LITERAL:
+        	return ((TypeLiteral) parent).getType().resolveBinding();
         case ASTNode.CLASS_INSTANCE_CREATION:
         	return getPossibleReferenceBinding(parent);
         case ASTNode.TAG_ELEMENT:
@@ -746,6 +748,9 @@ public class ASTResolving {
 				} else {
 					kind= SimilarElementsRequestor.REF_TYPES;
 				}
+				break;
+			case ASTNode.TYPE_LITERAL:
+				kind= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
 				break;
 			default:
 		}
