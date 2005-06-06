@@ -634,6 +634,14 @@ public final class NewWizardMessages extends NLS {
 	public static String AccessRulesDialog_severity_ignore;
 	public static String AccessRulesDialog_switch_dialog_title;
 	public static String AccessRulesDialog_switch_dialog_message;
+	public static String JavaProjectWizardFirstPage_LayoutGroup_link_description;
+	public static String JavaProjectWizardFirstPage_JREGroup_title;
+	public static String JavaProjectWizardFirstPage_JREGroup_default_compliance;
+	public static String JavaProjectWizardFirstPage_JREGroup_link_description;
+	public static String JavaProjectWizardFirstPage_JREGroup_specific_compliance;
+	public static String JavaProjectWizardFirstPage_JREGroup_compliance_13;
+	public static String JavaProjectWizardFirstPage_JREGroup_compliance_14;
+	public static String JavaProjectWizardFirstPage_JREGroup_compliance_50;
 	public static String ClasspathModifierQueries_confirm_remove_linked_folder_label;
 	public static String ClasspathModifierQueries_confirm_remove_linked_folder_message;
 	public static String ClasspathModifierQueries_delete_linked_folder;

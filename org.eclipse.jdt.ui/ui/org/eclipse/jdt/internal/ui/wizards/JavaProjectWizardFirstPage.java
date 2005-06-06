@@ -25,12 +25,16 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.DirectoryDialog;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -39,11 +43,15 @@ import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.ComboDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter;
@@ -238,16 +246,17 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	/**
 	 * Request a project layout.
 	 */
-	private final class LayoutGroup implements Observer, IDialogFieldListener {
+	private final class LayoutGroup implements Observer, SelectionListener {
 
-		protected final SelectionButtonDialogField fStdRadio, fSrcBinRadio, fConfigureButton;
-		protected final Group fGroup;
+		private final SelectionButtonDialogField fStdRadio, fSrcBinRadio;
+		private final Group fGroup;
 		
 		public LayoutGroup(Composite composite) {
 			
 			fGroup= new Group(composite, SWT.NONE);
+			fGroup.setFont(composite.getFont());
 			fGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fGroup.setLayout(initGridLayout(new GridLayout(), true));
+			fGroup.setLayout(initGridLayout(new GridLayout(3, false), true));
 			fGroup.setText(NewWizardMessages.JavaProjectWizardFirstPage_LayoutGroup_title); 
 			
 			fStdRadio= new SelectionButtonDialogField(SWT.RADIO);
@@ -255,18 +264,17 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			
 			fSrcBinRadio= new SelectionButtonDialogField(SWT.RADIO);
 			fSrcBinRadio.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_LayoutGroup_option_separateFolders); 
-			
-			fStdRadio.doFillIntoGrid(fGroup, 1);
-			fSrcBinRadio.doFillIntoGrid(fGroup, 1);
-			
-			fConfigureButton= new SelectionButtonDialogField(SWT.PUSH);
-			fConfigureButton.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_LayoutGroup_configure); 
-			fConfigureButton.setDialogFieldListener(this);
 
+			fStdRadio.doFillIntoGrid(fGroup, 3);
+			LayoutUtil.setHorizontalGrabbing(fStdRadio.getSelectionButton(null));
 			
-			fConfigureButton.doFillIntoGrid(composite, 1);
-			fConfigureButton.getSelectionButton(null).setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_END));
+			fSrcBinRadio.doFillIntoGrid(fGroup, 2);
 			
+			Link link= new Link(fGroup, SWT.NONE);
+			link.setText(NewWizardMessages.JavaProjectWizardFirstPage_LayoutGroup_link_description);
+			link.setLayoutData(new GridData(GridData.END, GridData.END, false, false));
+			link.addSelectionListener(this);
+						
 			boolean useSrcBin= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ);
 			fSrcBinRadio.setSelection(useSrcBin);
 			fStdRadio.setSelection(!useSrcBin);
@@ -284,15 +292,113 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		}
 
 		/* (non-Javadoc)
+		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+		 */
+		public void widgetSelected(SelectionEvent e) {
+			widgetDefaultSelected(e);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+		 */
+		public void widgetDefaultSelected(SelectionEvent e) {
+			String id= NewJavaProjectPreferencePage.ID;
+			PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, null).open();
+		}
+	}
+	
+	private final class JREGroup implements Observer, SelectionListener, IDialogFieldListener {
+
+		private final SelectionButtonDialogField fUseDefaultJRE, fUseProjectJRE;
+		private final ComboDialogField fJRECombo;
+		private final Group fGroup;
+		
+		public JREGroup(Composite composite) {
+			
+			fGroup= new Group(composite, SWT.NONE);
+			fGroup.setFont(composite.getFont());
+			fGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			fGroup.setLayout(initGridLayout(new GridLayout(3, false), true));
+			fGroup.setText(NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_title); 
+			
+			//String compliance= "1.3";
+			//String text= Messages.format("Use default JRE and compliance", compliance);
+			
+			fUseDefaultJRE= new SelectionButtonDialogField(SWT.RADIO);
+			fUseDefaultJRE.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_default_compliance);
+			fUseDefaultJRE.doFillIntoGrid(fGroup, 2);
+			
+			Link link= new Link(fGroup, SWT.NONE);
+			link.setFont(fGroup.getFont());
+			link.setText(NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_link_description);
+			link.setLayoutData(new GridData(GridData.END, GridData.CENTER, true, false));
+			link.addSelectionListener(this);
+		
+			fUseProjectJRE= new SelectionButtonDialogField(SWT.RADIO);
+			fUseProjectJRE.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_specific_compliance);
+			fUseProjectJRE.doFillIntoGrid(fGroup, 1);
+			fUseProjectJRE.setDialogFieldListener(this);
+						
+			fJRECombo= new ComboDialogField(SWT.READ_ONLY);
+			fJRECombo.setItems(new String[] { NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_compliance_13, NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_compliance_14, NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_compliance_50 });
+			
+			String compliance= JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
+			if (JavaCore.VERSION_1_3.equals(compliance)) {
+				fJRECombo.selectItem(0);
+			} else if (JavaCore.VERSION_1_4.equals(compliance)) {
+				fJRECombo.selectItem(1);
+			} else {
+				fJRECombo.selectItem(2);
+			}
+
+			Combo comboControl= fJRECombo.getComboControl(fGroup);
+			comboControl.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false));
+			
+			DialogField.createEmptySpace(fGroup);
+			
+			fUseDefaultJRE.setSelection(true);
+			fJRECombo.setEnabled(fUseProjectJRE.isSelected());
+		}
+
+		public void update(Observable o, Object arg) {
+			final boolean detect= fDetectGroup.mustDetect();
+			fUseDefaultJRE.setEnabled(!detect);
+			fJRECombo.setEnabled(!detect);
+			fGroup.setEnabled(!detect);
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
+		 */
+		public void widgetSelected(SelectionEvent e) {
+			widgetDefaultSelected(e);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
+		 */
+		public void widgetDefaultSelected(SelectionEvent e) {
+			String jreID= "org.eclipse.jdt.debug.ui.preferences.VMPreferencePage"; //$NON-NLS-1$
+			String complianceId= CompliancePreferencePage.PREF_ID;
+			PreferencesUtil.createPreferenceDialogOn(getShell(), complianceId, new String[] { jreID, complianceId  }, null).open();
+		}
+
+		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
 		 */
 		public void dialogFieldChanged(DialogField field) {
-			if (field == fConfigureButton) {
-				String id= NewJavaProjectPreferencePage.ID;
-				PreferencesUtil.createPreferenceDialogOn(getShell(), id, new String[] { id }, null).open();
+			fJRECombo.setEnabled(fUseProjectJRE.isSelected());
+		}
+		
+		public String getJRECompliance() {
+			if (fUseProjectJRE.isSelected()) {
+				return fJRECombo.getText();
 			}
+			return null;
 		}
 	}
+
+	
 
 	/**
 	 * Show a warning when the project location contains files.
@@ -418,6 +524,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	private NameGroup fNameGroup;
 	private LocationGroup fLocationGroup;
 	private LayoutGroup fLayoutGroup;
+	private JREGroup fJREGroup;
 	private DetectGroup fDetectGroup;
 	private Validator fValidator;
 
@@ -454,12 +561,14 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		// create UI elements
 		fNameGroup= new NameGroup(composite, fInitialName);
 		fLocationGroup= new LocationGroup(composite);
+		fJREGroup= new JREGroup(composite);
 		fLayoutGroup= new LayoutGroup(composite);
 		fDetectGroup= new DetectGroup(composite);
 		
 		// establish connections
 		fNameGroup.addObserver(fLocationGroup);
 		fDetectGroup.addObserver(fLayoutGroup);
+		fDetectGroup.addObserver(fJREGroup);
 		fLocationGroup.addObserver(fDetectGroup);
 
 		// initialize all elements
@@ -518,6 +627,9 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		return fLayoutGroup.isSrcBin();
 	}
 	
+	public String getJRECompliance() {
+		return fJREGroup.getJRECompliance();
+	}
 	
 	/*
 	 * see @DialogPage.setVisible(boolean)

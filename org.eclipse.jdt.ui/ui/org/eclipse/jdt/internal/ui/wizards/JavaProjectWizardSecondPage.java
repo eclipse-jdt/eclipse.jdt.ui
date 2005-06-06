@@ -44,6 +44,10 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstallType;
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
@@ -192,7 +196,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				// configure the classpath entries, including the default jre library.
 				List cpEntries= new ArrayList();
 				cpEntries.add(JavaCore.newSourceEntry(projectPath.append(srcPath)));
-				cpEntries.addAll(Arrays.asList(PreferenceConstants.getDefaultJRELibrary()));
+				cpEntries.addAll(Arrays.asList(getDefaultClasspathEntry()));
 				entries= (IClasspathEntry[]) cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
 				
 				// configure the output location
@@ -201,7 +205,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				IPath projectPath= fCurrProject.getFullPath();
 				List cpEntries= new ArrayList();
 				cpEntries.add(JavaCore.newSourceEntry(projectPath));
-				cpEntries.addAll(Arrays.asList(PreferenceConstants.getDefaultJRELibrary()));
+				cpEntries.addAll(Arrays.asList(getDefaultClasspathEntry()));
 				entries= (IClasspathEntry[]) cpEntries.toArray(new IClasspathEntry[cpEntries.size()]);
 
 				outputLocation= projectPath;
@@ -216,6 +220,30 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		} finally {
 			monitor.done();
 		}
+	}
+	
+	private IClasspathEntry[] getDefaultClasspathEntry() {
+		IClasspathEntry[] defaultJRELibrary= PreferenceConstants.getDefaultJRELibrary();
+		String compliance= fFirstPage.getJRECompliance();
+		IPath jreContainerPath= new Path(JavaRuntime.JRE_CONTAINER);
+		if (compliance == null || defaultJRELibrary.length > 1 || !jreContainerPath.isPrefixOf(defaultJRELibrary[0].getPath())) {
+			// use default
+			return defaultJRELibrary;
+		}
+		// try to find a compatible JRE
+		IVMInstallType[] installTypes= JavaRuntime.getVMInstallTypes();
+		for (int i= 0; i < installTypes.length; i++) {
+			IVMInstall[] installs= installTypes[i].getVMInstalls();
+			for (int k= 0; k < installs.length; k++) {
+				IVMInstall inst= installs[k];
+				String version= inst.getJavaVersion();
+				if (version != null && version.startsWith(compliance)) { //$NON-NLS-1$
+					IPath newPath= jreContainerPath.append(inst.getVMInstallType().getId()).append(inst.getName());
+					return new IClasspathEntry[] { JavaCore.newContainerEntry(newPath) };
+				}
+			}
+		}
+		return defaultJRELibrary;
 	}
 	
 	private void rememberExistingFiles(IPath currProjectLocation) throws CoreException {
