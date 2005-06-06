@@ -34,6 +34,7 @@ import org.eclipse.jdt.ui.text.IJavaColorConstants;
 import org.eclipse.jdt.internal.ui.text.CombinedWordRule;
 import org.eclipse.jdt.internal.ui.text.JavaCommentScanner;
 import org.eclipse.jdt.internal.ui.text.JavaWhitespaceDetector;
+import org.eclipse.jdt.internal.ui.text.CombinedWordRule.CharacterBuffer;
 import org.eclipse.jdt.internal.ui.text.CombinedWordRule.WordMatcher;
 
 /**
@@ -117,8 +118,6 @@ public final class JavaDocScanner extends JavaCommentScanner {
 		}
 	}
 
-	private static String[] fgKeywords= {"@author", "@deprecated", "@exception", "@inheritDoc", "@param", "@return", "@see", "@serial", "@serialData", "@serialField", "@since", "@throws", "@version"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$
-
 	private static String[] fgTokenProperties= {
 		IJavaColorConstants.JAVADOC_KEYWORD,
 		IJavaColorConstants.JAVADOC_TAG,
@@ -187,10 +186,27 @@ public final class JavaDocScanner extends JavaCommentScanner {
 		List list= super.createMatchers();
 
 		// Add word rule for keywords.
-		WordMatcher matcher= new CombinedWordRule.WordMatcher();
-		IToken token= getToken(IJavaColorConstants.JAVADOC_KEYWORD);
-		for (int i= 0; i < fgKeywords.length; i++)
-			matcher.addWord(fgKeywords[i], token);
+		final IToken token= getToken(IJavaColorConstants.JAVADOC_KEYWORD);
+		WordMatcher matcher= new CombinedWordRule.WordMatcher() {
+			public IToken evaluate(ICharacterScanner scanner, CharacterBuffer word) {
+				int length= word.length();
+				if (length > 1 && word.charAt(0) == '@') {
+					int i= 0;
+					try {
+						for (; i <= length; i++)
+							scanner.unread();
+						int c= scanner.read();
+						i--;
+						if (c == '*' || Character.isWhitespace((char)c))
+							return token;
+					} finally {
+						for (; i >= 0; i--)
+							scanner.read();
+					}
+				}
+				return Token.UNDEFINED;
+			}
+		};
 		list.add(matcher);
 
 		return list;
