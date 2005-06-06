@@ -206,7 +206,9 @@ public class PackageExplorerPart extends ViewPart
 	private Menu fContextMenu;		
 	
 	private IMemento fMemento;
-	private ISelectionChangedListener fSelectionListener;
+	
+	private ISelection fLastOpenSelection;
+	private ISelectionChangedListener fPostSelectionListener;
 	
 	private String fWorkingSetName;
 	
@@ -846,7 +848,7 @@ public class PackageExplorerPart extends ViewPart
 		initKeyListener();
 			
 
-		fViewer.addPostSelectionChangedListener(fSelectionListener);
+		fViewer.addPostSelectionChangedListener(fPostSelectionListener);
 		
 		fViewer.addDoubleClickListener(new IDoubleClickListener() {
 			public void doubleClick(DoubleClickEvent event) {
@@ -857,6 +859,7 @@ public class PackageExplorerPart extends ViewPart
 		fViewer.addOpenListener(new IOpenListener() {
 			public void open(OpenEvent event) {
 				fActionSet.handleOpen(event);
+				fLastOpenSelection= event.getSelection();
 			}
 		});
 
@@ -1128,15 +1131,18 @@ public class PackageExplorerPart extends ViewPart
 	}
 
 	/**
-	 * Handles selection changed in viewer.
-	 * Updates global actions.
-	 * Links to editor (if option enabled)
+	 * Handles post selection changed in viewer.
+	 * 
+	 * Links to editor (if option enabled).
 	 */
-	private void handleSelectionChanged(SelectionChangedEvent event) {
-		IStructuredSelection selection= (IStructuredSelection) event.getSelection();
-		fActionSet.handleSelectionChanged(event);
-		if (isLinkingEnabled())
-			linkToEditor(selection);
+	private void handlePostSelectionChanged(SelectionChangedEvent event) {
+		ISelection selection= event.getSelection();
+		// If the selection is the same as the one that triggered the last
+		// open event then do nothing. The editor already got revealed.
+		if (isLinkingEnabled() && !selection.equals(fLastOpenSelection)) {
+			linkToEditor((IStructuredSelection)selection);
+		}
+		fLastOpenSelection= null;
 	}
 
 	public void selectReveal(ISelection selection) {
@@ -1500,7 +1506,7 @@ public class PackageExplorerPart extends ViewPart
 				fViewer.reveal(element);
 			} else {
 				try {
-					fViewer.removeSelectionChangedListener(fSelectionListener);						
+					fViewer.removePostSelectionChangedListener(fPostSelectionListener);						
 					fViewer.setSelection(newSelection, true);
 	
 					while (element != null && fViewer.getSelection().isEmpty()) {
@@ -1512,7 +1518,7 @@ public class PackageExplorerPart extends ViewPart
 						}
 					}
 				} finally {
-					fViewer.addSelectionChangedListener(fSelectionListener);
+					fViewer.addPostSelectionChangedListener(fPostSelectionListener);
 				}
 			}
 			return true;
@@ -1684,9 +1690,9 @@ public class PackageExplorerPart extends ViewPart
 	
 	public PackageExplorerPart() { 
 		initLinkingEnabled();
-		fSelectionListener= new ISelectionChangedListener() {
+		fPostSelectionListener= new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
-				handleSelectionChanged(event);
+				handlePostSelectionChanged(event);
 			}
 		};
 	}

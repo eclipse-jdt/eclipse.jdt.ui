@@ -28,7 +28,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.OpenEvent;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.TreeViewer;
 
 import org.eclipse.ui.IActionBars;
@@ -212,9 +211,6 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		menu.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS+"-end"));//$NON-NLS-1$		
-	}
-
-	/* package */ void handleSelectionChanged(SelectionChangedEvent event) {
 	}
 
 	//---- Context menu -------------------------------------------------------------------------
