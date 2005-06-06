@@ -55,6 +55,10 @@ public class ProblemNode extends ASTAttribute {
 		int offset= fProblem.getSourceStart();
 		int length= fProblem.getSourceEnd() + 1 - offset;
 		
+		if (fProblem.isError())
+			buf.append("E");
+		if (fProblem.isWarning())
+			buf.append("W");
 		buf.append('[').append(offset).append(", ").append(length).append(']').append(' '); //$NON-NLS-1$
 		buf.append(fProblem.getMessage()).append(' '); //$NON-NLS-1$
 		buf.append("(").append(getErrorCode(id)).append(") ");  //$NON-NLS-1$//$NON-NLS-2$
