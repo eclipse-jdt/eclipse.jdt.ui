@@ -90,6 +90,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor {
 
+	/** Number of compilation units to parse at once */
+	private static final int SIZE_BATCH= 1000;
+
 	/**
 	 * Returns a new ast node corresponding to the given type.
 	 * 
@@ -628,34 +631,45 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 									}
 								}
 							}
-							parser.setWorkingCopyOwner(fOwner);
-							parser.setResolveBindings(true);
-							parser.setProject(project);
-							parser.setCompilerOptions(RefactoringASTParser.getCompilerOptions(project));
+							final List batches= new ArrayList(units);
+							final int size= batches.size();
+							final int iterations= ((size - 1) / SIZE_BATCH) + 1;
 							final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
-							try {
-								subsubMonitor.beginTask("", units.size()); //$NON-NLS-1$
-								subsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
-								parser.createASTs((ICompilationUnit[]) units.toArray(new ICompilationUnit[units.size()]), new String[0], new ASTRequestor() {
+							subsubMonitor.beginTask("", iterations); //$NON-NLS-1$
+							subsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
+							final Map options= RefactoringASTParser.getCompilerOptions(project);
+							for (int index= 0; index < iterations; index++) {
+								final List iteration= batches.subList(index * SIZE_BATCH, Math.min(size, (index + 1) * SIZE_BATCH));
+								parser.setWorkingCopyOwner(fOwner);
+								parser.setResolveBindings(true);
+								parser.setProject(project);
+								parser.setCompilerOptions(options);
+								final IProgressMonitor subsubsubMonitor= new SubProgressMonitor(subsubMonitor, 1);
+								try {
+									final int count= iteration.size();
+									subsubsubMonitor.beginTask("", count); //$NON-NLS-1$
+									subsubsubMonitor.setTaskName(RefactoringCoreMessages.SuperTypeRefactoringProcessor_creating);
+									parser.createASTs((ICompilationUnit[]) iteration.toArray(new ICompilationUnit[count]), new String[0], new ASTRequestor() {
 
-									public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
-										try {
-											subsubMonitor.subTask(unit.getElementName());
-											if (!processed.contains(unit)) {
-												performFirstPass(creator, secondPass, groups, unit, node);
-												processed.add(unit);
+										public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
+											try {
+												subsubsubMonitor.subTask(unit.getElementName());
+												if (!processed.contains(unit)) {
+													performFirstPass(creator, secondPass, groups, unit, node);
+													processed.add(unit);
+												}
+											} finally {
+												subsubsubMonitor.worked(1);
 											}
-										} finally {
-											subsubMonitor.worked(1);
 										}
-									}
 
-									public final void acceptBinding(final String key, final IBinding binding) {
-										// Do nothing
-									}
-								}, subsubMonitor);
-							} finally {
-								subsubMonitor.done();
+										public final void acceptBinding(final String key, final IBinding binding) {
+											// Do nothing
+										}
+									}, subsubsubMonitor);
+								} finally {
+									subsubsubMonitor.done();
+								}
 							}
 						}
 					}
