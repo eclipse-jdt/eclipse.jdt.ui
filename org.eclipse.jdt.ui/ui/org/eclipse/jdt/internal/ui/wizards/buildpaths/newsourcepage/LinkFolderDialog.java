@@ -166,7 +166,7 @@ public class LinkFolderDialog extends StatusDialog {
             final String selectedDirectory = dialog.open();
             if (selectedDirectory != null) {
                 fLinkLocation.setText(selectedDirectory);
-                fFolderNameField.setText(selectedDirectory.substring(selectedDirectory.lastIndexOf('\\') + 1));
+                fFolderNameField.setText(selectedDirectory.substring(selectedDirectory.lastIndexOf(File.separatorChar) + 1));
                 JavaPlugin.getDefault().getDialogSettings().put(DIALOGSTORE_LAST_EXTERNAL_LOC, selectedDirectory);
             }
         }
