@@ -79,6 +79,10 @@ public class TypedElementSelectionValidator implements ISelectionStatusValidator
 		return (fRejectedElements != null) && fRejectedElements.contains(elem);
 	}
 	
+	protected boolean isSelectedValid(Object elem) {
+		return true;
+	}
+	
 	private boolean isValid(Object[] selection) {
 		if (selection.length == 0) {
 			return false;
@@ -90,7 +94,7 @@ public class TypedElementSelectionValidator implements ISelectionStatusValidator
 		
 		for (int i= 0; i < selection.length; i++) {
 			Object o= selection[i];	
-			if (!isOfAcceptedType(o) || isRejectedElement(o)) {
+			if (!isOfAcceptedType(o) || isRejectedElement(o) || !isSelectedValid(o)) {
 				return false;
 			}
 		}
