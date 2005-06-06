@@ -141,12 +141,22 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	protected Control createContents(Composite parent) {
 		fPixelConverter= new PixelConverter(parent);
 		setShell(parent.getShell());
-				
-		Composite commonComposite= createStyleTabContent(parent);
+		
+		Composite mainComp= new Composite(parent, SWT.NONE);
+		mainComp.setFont(parent.getFont());
+		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		mainComp.setLayout(layout);
+		
+		Composite commonComposite= createStyleTabContent(mainComp);
+		GridData gridData= new GridData(GridData.FILL, GridData.FILL, true, true);
+		gridData.heightHint= fPixelConverter.convertHeightInCharsToPixels(20);
+		commonComposite.setLayoutData(gridData);
 		
 		validateSettings(null, null, null);
 	
-		return commonComposite;
+		return mainComp;
 	}
 	
 	private Composite createStyleTabContent(Composite folder) {

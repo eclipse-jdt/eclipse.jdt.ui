@@ -97,11 +97,21 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		fPixelConverter= new PixelConverter(parent);
 		setShell(parent.getShell());
 		
+		Composite mainComp= new Composite(parent, SWT.NONE);
+		mainComp.setFont(parent.getFont());
+		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		mainComp.setLayout(layout);
+		
 		Composite othersComposite= createBuildPathTabContent(parent);
-
+		GridData gridData= new GridData(GridData.FILL, GridData.FILL, true, true);
+		gridData.heightHint= fPixelConverter.convertHeightInCharsToPixels(20);
+		othersComposite.setLayoutData(gridData);
+		
 		validateSettings(null, null, null);
 	
-		return othersComposite;
+		return mainComp;
 	}
 	
 
