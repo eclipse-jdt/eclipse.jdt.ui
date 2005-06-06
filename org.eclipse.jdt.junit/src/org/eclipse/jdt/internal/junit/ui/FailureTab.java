@@ -190,10 +190,9 @@ public class FailureTab extends TestRunTab implements IMenuListener, ISelectionP
 				manager.add(new Separator());
 				manager.add(new CopyFailureListAction(fRunnerViewPart, FailureTab.this, fClipboard));
 			}
-			manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-			manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$
 		}
-
+		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$
 	}		
 	
 	private TableItem getSelectedItem() {

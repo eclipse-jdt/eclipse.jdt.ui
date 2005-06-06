@@ -491,10 +491,9 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener, ISele
 			}
 			manager.add(new Separator());
 			manager.add(new ExpandAllAction());
-			manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
-			manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$
-
 		}
+		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$
 	}	
 	
 	private boolean testClassExists(String className) {
