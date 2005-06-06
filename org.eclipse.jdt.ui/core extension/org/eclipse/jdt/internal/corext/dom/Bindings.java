@@ -384,16 +384,16 @@ public class Bindings {
 	 * @return the method binding representing the method oevrriding the specified <code>method<code>
 	 */
 	public static IMethodBinding findOverriddenMethodInType(ITypeBinding type, IMethodBinding method) {
-		//return findMethodInType(type, method.getName(), method.getParameterTypes());
-		String methodName= method.getName();
-		IMethodBinding[] methods= type.getDeclaredMethods();
-		for (int i= 0; i < methods.length; i++) {
-			IMethodBinding curr= methods[i];
-			if (curr.getName().equals(methodName) && method.overrides(curr)) { // name check: see bug 98483
-				return curr;
-			}
-		}
-		return null;
+		return findMethodInType(type, method.getName(), method.getParameterTypes());
+//		String methodName= method.getName();
+//		IMethodBinding[] methods= type.getDeclaredMethods();
+//		for (int i= 0; i < methods.length; i++) {
+//			IMethodBinding curr= methods[i];
+//			if (curr.getName().equals(methodName) && method.overrides(curr)) { // name check: see bug 98483
+//				return curr;
+//			}
+//		}
+//		return null;
 	}
 
 	/**
