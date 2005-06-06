@@ -24,7 +24,6 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IKeyBindingService;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
@@ -47,7 +46,6 @@ import org.eclipse.jdt.internal.corext.buildpath.UnexcludeOperation;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -161,7 +159,6 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     
 	private Action createConfigureAction(IWorkbenchSite site) {
 		ConfigureBuildPathAction action= new ConfigureBuildPathAction(site);
-		ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages();
 		action.setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH);
 		action.setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH);
 		action.setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ConfigureBP_label); 
