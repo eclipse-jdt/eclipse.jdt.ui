@@ -33,7 +33,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	private int fSelectionStart;
 	private int fSelectionLength;
 	
-	private Color fBlue, fRed, fDarkGray, fYellow, fDarkGreen, fDarkRed;
+	private Color fBlue, fRed, fDarkGray, fYellow, fDarkGreen, fDarkRed, fLightRed;
 	private Font fBold;
 	
 	public ASTViewLabelProvider() {
@@ -48,6 +48,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		fYellow= display.getSystemColor(SWT.COLOR_YELLOW);
 		fDarkGreen= display.getSystemColor(SWT.COLOR_DARK_GREEN);
 		fDarkRed= display.getSystemColor(SWT.COLOR_DARK_RED);
+		fLightRed= new Color(display, 255, 190, 190);
 		
 		fBold= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
 	}
@@ -135,10 +136,32 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	 * @see org.eclipse.jface.viewers.IColorProvider#getBackground(java.lang.Object)
 	 */
 	public Color getBackground(Object element) {
+		if (isNotProperlyNested(element)) {
+			return fLightRed;
+		}
 		if (fSelectionStart != -1 && isInside(element)) {
 			return fYellow;
 		}
 		return null;
+	}
+	
+	private boolean isNotProperlyNested(Object element) {
+		if (element instanceof ASTNode) {
+			ASTNode node= (ASTNode) element;
+			int start= node.getStartPosition();
+			int end= start + node.getLength();
+			
+			ASTNode parent= node.getParent();
+			if (parent != null) {
+				int parentstart= parent.getStartPosition();
+				int parentend= start + parent.getLength();
+				
+				if (start < parentstart || end > parentend) {
+					return true;
+				}
+			}
+		}
+		return false;
 	}
 	
 	private boolean isInsideNode(ASTNode node) {
@@ -171,6 +194,11 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			return fBold;
 		}
 		return null;
+	}
+	
+	public void dispose() {
+		super.dispose();
+		fLightRed.dispose();
 	}
 	
 }
