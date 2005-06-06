@@ -93,10 +93,13 @@ public class FiltersDialog extends SelectionStatusDialog {
 		createTableLimit(parent);
 		// Create list viewer
 		Label l= new Label(parent, SWT.NONE);
+		l.setFont(parent.getFont());
 		l.setText(org.eclipse.jdt.internal.ui.search.SearchMessages.FiltersDialog_filters_label); 
 		
 		Table table = new Table(parent, SWT.CHECK | SWT.BORDER);
+		table.setFont(parent.getFont());
 		listViewer = new CheckboxTableViewer(table);
+		
 
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.minimumHeight= convertHeightInCharsToPixels(8);
@@ -116,8 +119,10 @@ public class FiltersDialog extends SelectionStatusDialog {
 		listViewer.setCheckedElements(fPage.getMatchFilters());
 
 		l= new Label(parent, SWT.NONE);
+		l.setFont(parent.getFont());
 		l.setText(org.eclipse.jdt.internal.ui.search.SearchMessages.FiltersDialog_description_label); 
 		final Text description = new Text(parent, SWT.LEFT | SWT.WRAP | SWT.MULTI | SWT.READ_ONLY | SWT.BORDER | SWT.V_SCROLL);
+		description.setFont(parent.getFont());
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.heightHint = convertHeightInCharsToPixels(3);
 		description.setLayoutData(data);

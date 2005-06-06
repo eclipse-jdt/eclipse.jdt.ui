@@ -64,6 +64,7 @@ class FiltersDialog extends StatusDialog {
         Composite superComposite = (Composite) super.createDialogArea(parent);
 
         Composite composite = new Composite(superComposite, SWT.NONE);
+        composite.setFont(superComposite.getFont());
         composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 
         GridLayout layout = new GridLayout();
@@ -76,8 +77,6 @@ class FiltersDialog extends StatusDialog {
         createNamesArea(composite);
         new Label(composite, SWT.NONE);         // Filler
         createMaxCallDepthArea(composite);
-
-        applyDialogFont(parent);
             
         updateUIFromFilter();
         
@@ -86,13 +85,17 @@ class FiltersDialog extends StatusDialog {
     
     private void createMaxCallDepthArea(Composite parent) {
         Composite composite= new Composite(parent, SWT.NONE);
+        composite.setFont(parent.getFont());
         GridLayout layout = new GridLayout();
         layout.numColumns = 2;
         composite.setLayout(layout);
 
-        new Label(composite, SWT.NONE).setText(CallHierarchyMessages.FiltersDialog_maxCallDepth); 
+        Label label= new Label(composite, SWT.NONE);
+        label.setFont(composite.getFont());
+		label.setText(CallHierarchyMessages.FiltersDialog_maxCallDepth);
         
         fMaxCallDepth = new Text(composite, SWT.SINGLE | SWT.BORDER);
+        fMaxCallDepth.setFont(composite.getFont());
         fMaxCallDepth.setTextLimit(6);
         fMaxCallDepth.addModifyListener(new ModifyListener() {
                 public void modifyText(ModifyEvent e) {
@@ -110,6 +113,7 @@ class FiltersDialog extends StatusDialog {
                 CallHierarchyMessages.FiltersDialog_filterOnNames, true); 
         
         fNames= new Text(parent, SWT.SINGLE | SWT.BORDER);
+        fNames.setFont(parent.getFont());
         fNames.addModifyListener(new ModifyListener() {
                 public void modifyText(ModifyEvent e) {
                     validateInput();
@@ -121,6 +125,7 @@ class FiltersDialog extends StatusDialog {
         fNames.setLayoutData(gridData);
         
         fNamesHelpText= new Label(parent, SWT.LEFT);
+        fNamesHelpText.setFont(parent.getFont());
         fNamesHelpText.setText(CallHierarchyMessages.FiltersDialog_filterOnNamesSubCaption); 
     }
 
@@ -136,7 +141,8 @@ class FiltersDialog extends StatusDialog {
      */
     private Button createCheckbox(Composite parent, String text, boolean grabRow) {
         Button button = new Button(parent, SWT.CHECK);
-
+        button.setFont(parent.getFont());
+        
         if (grabRow) {
             GridData gridData = new GridData(GridData.FILL_HORIZONTAL);
             button.setLayoutData(gridData);
