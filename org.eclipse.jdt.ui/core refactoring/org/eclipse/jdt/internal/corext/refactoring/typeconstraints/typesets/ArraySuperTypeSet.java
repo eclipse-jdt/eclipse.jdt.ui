@@ -53,7 +53,7 @@ public class ArraySuperTypeSet extends ArrayTypeSet {
 		for(Iterator iter= fElemTypeSet.iterator(); iter.hasNext(); ) {
 			TType elemType= (TType) iter.next();
 
-			if (elemType.canAssignTo(atElemType))
+			if (TTypes.canAssignTo(elemType, atElemType))
 				return true;
 		}
 		return false;

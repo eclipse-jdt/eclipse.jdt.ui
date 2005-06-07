@@ -40,7 +40,7 @@ public class SuperTypesSet extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
 	 */
 	public TypeSet makeClone() {
-		return new SuperTypesSet(fLowerBounds.makeClone(), getTypeSetEnvironment());
+		return this; //new SuperTypesSet(fLowerBounds.makeClone(), getTypeSetEnvironment());
 	}
 
 	/* (non-Javadoc)
@@ -73,7 +73,7 @@ public class SuperTypesSet extends TypeSet {
 				TType t1= this.fLowerBounds.anyMember();
 				TType t2= st2.fLowerBounds.anyMember();
 
-				if (t1.canAssignTo(t2))
+				if (TTypes.canAssignTo(t1, t2))
 					return new SuperTypesSet(st2.fLowerBounds, getTypeSetEnvironment());
 			} else if (fLowerBounds instanceof SubTypesSet) {
 				// xsect(superTypes(subTypes(A)), superTypes(A)) = superTypes(A)
@@ -90,7 +90,7 @@ public class SuperTypesSet extends TypeSet {
 				TType t1= this.fLowerBounds.anyMember();
 				TType t2= st2.uniqueLowerBound();
 
-				if (t1.canAssignTo(t2))
+				if (TTypes.canAssignTo(t1, t2))
 					return getTypeSetEnvironment().createSuperTypesOfSingleton(t2);
 			} else if (fLowerBounds instanceof SubTypesOfSingleton) {
 				// xsect(superTypes(subTypes(A)), superTypes(A)) = superTypes(A)
@@ -150,7 +150,7 @@ public class SuperTypesSet extends TypeSet {
 		for(Iterator lbIter= fLowerBounds /*.lowerBound() */.iterator(); lbIter.hasNext(); ) {
 			TType lb= (TType) lbIter.next();
 
-			if (lb.canAssignTo(t))
+			if (TTypes.canAssignTo(lb, t))
 				return true;
 		}
 		return false;
@@ -179,7 +179,7 @@ public class SuperTypesSet extends TypeSet {
 			for(Iterator lbIter= fLowerBounds /*.lowerBound()*/.iterator(); lbIter.hasNext(); ) {
 				TType lb= (TType) lbIter.next();
 
-				if (lb.canAssignTo(t)) {
+				if (TTypes.canAssignTo(lb, t)) {
 					found= true;
 					break;
 				}
@@ -286,7 +286,7 @@ public class SuperTypesSet extends TypeSet {
 				fEnumCache.add(lb);
 			}
 			if (anyLBIsIntfOrArray) fEnumCache.add(getJavaLangObject());
-			fEnumCache.initComplete();
+			//fEnumCache.initComplete();
 		}
 		return fEnumCache;
 	}

@@ -38,7 +38,7 @@ public class SuperTypesOfSingleton extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
 	 */
 	public TypeSet makeClone() {
-		return new SuperTypesOfSingleton(fLowerBound, getTypeSetEnvironment());
+		return this; //new SuperTypesOfSingleton(fLowerBound, getTypeSetEnvironment());
 	}
 
 	/* (non-Javadoc)
@@ -51,17 +51,17 @@ public class SuperTypesOfSingleton extends TypeSet {
 		if (other instanceof SuperTypesOfSingleton) {
 			SuperTypesOfSingleton otherSuper= (SuperTypesOfSingleton) other;
 
-			if (otherSuper.fLowerBound.canAssignTo(fLowerBound))
+			if (TTypes.canAssignTo(otherSuper.fLowerBound, fLowerBound))
 				return this;
-			if (fLowerBound.canAssignTo(otherSuper.fLowerBound))
+			if (TTypes.canAssignTo(fLowerBound, otherSuper.fLowerBound))
 				return otherSuper;
 		} else if (other.hasUniqueUpperBound()) {
 			TType otherUpper= other.uniqueUpperBound();
 
 			if (otherUpper.equals(fLowerBound))
 				return new SingletonTypeSet(fLowerBound, getTypeSetEnvironment());
-			if ((otherUpper != fLowerBound && otherUpper.canAssignTo(fLowerBound)) ||
-				! fLowerBound.canAssignTo(otherUpper))
+			if ((otherUpper != fLowerBound && TTypes.canAssignTo(otherUpper, fLowerBound)) ||
+					! TTypes.canAssignTo(fLowerBound, otherUpper))
 				return getTypeSetEnvironment().getEmptyTypeSet();
 		}
 //		else if (other instanceof SuperTypesSet) {
@@ -141,7 +141,7 @@ public class SuperTypesOfSingleton extends TypeSet {
 			return true;
 		if (t.equals(getJavaLangObject()))
 			return true;
-		return fLowerBound.canAssignTo(t);
+		return TTypes.canAssignTo(fLowerBound, t);
 	}
 
 	/* (non-Javadoc)
@@ -151,7 +151,7 @@ public class SuperTypesOfSingleton extends TypeSet {
 		// Optimization: if other is also a SubTypeOfSingleton, just compare bounds
 		if (other instanceof SuperTypesOfSingleton) {
 			SuperTypesOfSingleton otherSuper= (SuperTypesOfSingleton) other;
-			return fLowerBound.canAssignTo(otherSuper.fLowerBound);
+			return TTypes.canAssignTo(fLowerBound, otherSuper.fLowerBound);
 		}
 		// Optimization: if other is a SubTypesSet, just compare all its bounds to mine
 		if (other instanceof SuperTypesSet) {
@@ -160,7 +160,7 @@ public class SuperTypesOfSingleton extends TypeSet {
 
 			for(Iterator iter= otherLowerBounds.iterator(); iter.hasNext(); ) {
 				TType t= (TType) iter.next();
-				if (!fLowerBound.canAssignTo(t))
+				if (! TTypes.canAssignTo(fLowerBound, t))
 					return false;
 			}
 			return true;
@@ -169,7 +169,7 @@ public class SuperTypesOfSingleton extends TypeSet {
 		for(Iterator iter= other.iterator(); iter.hasNext(); ) {
 			TType t= (TType) iter.next();
 
-			if (!fLowerBound.canAssignTo(t))
+			if (! TTypes.canAssignTo(fLowerBound, t))
 				return false;
 		}
 		return true;

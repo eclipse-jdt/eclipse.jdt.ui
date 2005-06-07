@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets;
 import java.util.Iterator;
 
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TTypes;
 
 public class TypeSetIntersection extends TypeSet {
 	private TypeSet fLHS;
@@ -49,7 +50,7 @@ public class TypeSetIntersection extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
 	 */
 	public TypeSet makeClone() {
-		return new TypeSetIntersection(fLHS.makeClone(), fRHS.makeClone());
+		return this; //new TypeSetIntersection(fLHS.makeClone(), fRHS.makeClone());
 	}
 
 	/* (non-Javadoc)
@@ -151,9 +152,9 @@ public class TypeSetIntersection extends TypeSet {
 
 			if (lhsBound.equals(rhsBound))
 				return new SingletonTypeSet(lhsBound, getTypeSetEnvironment());
-			else if (lhsBound.canAssignTo(rhsBound))
+			else if (TTypes.canAssignTo(lhsBound, rhsBound))
 				return new SingletonTypeSet(rhsBound, getTypeSetEnvironment());
-			else if (rhsBound.canAssignTo(lhsBound))
+			else if (TTypes.canAssignTo(rhsBound, lhsBound))
 				return new SingletonTypeSet(lhsBound, getTypeSetEnvironment());
 		}
 		if (fEnumCache != null) return fEnumCache.lowerBound();

@@ -38,7 +38,7 @@ public class SingletonTypeSet extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
 	 */
 	public TypeSet makeClone() {
-		return new SingletonTypeSet(fType, getTypeSetEnvironment());
+		return this; //new SingletonTypeSet(fType, getTypeSetEnvironment());
 	}
 
 	/* (non-Javadoc)

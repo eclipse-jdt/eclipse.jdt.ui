@@ -13,14 +13,9 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 import java.util.Iterator;
 import java.util.Stack;
 
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.HierarchyType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 
-/**
- * Note: This class contains static helper methods to deal with
- * bindings from different clusters. They will be inlined as soon
- * as the compiler loop and subtyping-related queries on ITypeBindings
- * are implemented.  
- */
 public class TTypes {
 	
 	private static class AllSupertypesIterator implements Iterator {
@@ -48,11 +43,11 @@ public class TTypes {
 					if (type.isInterface())
 						fWorklist.push(type.getEnvironment().getJavaLangObject());
 				} else {
-					fWorklist.push(superclass);
+					fWorklist.push(superclass.getTypeDeclaration());
 				}
 				TType[] interfaces= type.getInterfaces();
 				for (int i= 0; i < interfaces.length; i++)
-					fWorklist.push(interfaces[i]);
+					fWorklist.push(interfaces[i].getTypeDeclaration());
 			}
 		}
 	
@@ -66,7 +61,7 @@ public class TTypes {
 		
 		public AllSubtypesIterator(TType type) {
 			fWorklist= new Stack();
-			fWorklist.push(type);
+			fWorklist.push(type.getTypeDeclaration());
 		}
 	
 		public boolean hasNext() {
@@ -77,7 +72,7 @@ public class TTypes {
 			TType result= (TType) fWorklist.pop();
 			TType[] subTypes= result.getSubTypes();
 			for (int i= 0; i < subTypes.length; i++)
-				fWorklist.push(subTypes[i]);
+				fWorklist.push(subTypes[i].getTypeDeclaration());
 			
 			return result;
 		}
@@ -108,4 +103,21 @@ public class TTypes {
 	public static Iterator getAllSuperTypesIterator(TType type) {
 		return new AllSupertypesIterator(type);
 	}
+	
+	/**
+	 * @param rhs
+	 * @param lhs
+	 * @return <code>true</code> iff an expression of type 'rhs' can be assigned to a variable of type 'lhs'.
+	 * Type arguments of generic / raw / parameterized types are <b>not</b> considered.
+	 */
+	public static boolean canAssignTo(TType rhs, TType lhs) {
+		if (rhs.isHierarchyType() && lhs.isHierarchyType()) {
+			HierarchyType rhsGeneric= (HierarchyType) rhs.getTypeDeclaration();
+			HierarchyType lhsGeneric= (HierarchyType) lhs.getTypeDeclaration();
+			return lhs.isJavaLangObject() || rhsGeneric.equals(lhsGeneric) || rhsGeneric.isSubType(lhsGeneric);
+		} else {
+			return rhs.canAssignTo(lhs);
+		}
+	}
+	
 }

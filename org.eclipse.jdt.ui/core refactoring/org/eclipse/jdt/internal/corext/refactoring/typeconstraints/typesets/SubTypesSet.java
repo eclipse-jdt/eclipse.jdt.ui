@@ -38,7 +38,7 @@ public class SubTypesSet extends TypeSet {
 	 * @see org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet#makeClone()
 	 */
 	public TypeSet makeClone() {
-		return new SubTypesSet(fUpperBounds.makeClone());
+		return this; //new SubTypesSet(fUpperBounds.makeClone());
 	}
 
 	/* (non-Javadoc)
@@ -70,7 +70,7 @@ public class SubTypesSet extends TypeSet {
 				TType t1= this.fUpperBounds.anyMember();
 				TType t2= st2.fUpperBounds.anyMember();
 
-				if (t2.canAssignTo(t1))
+				if (TTypes.canAssignTo(t2, t1))
 					return new SubTypesSet(st2.fUpperBounds);
 			} else if (fUpperBounds instanceof SubTypesSet) {
 				// xsect(subTypes(superTypes(A)), subTypes(A)) = subTypes(A)
@@ -87,7 +87,7 @@ public class SubTypesSet extends TypeSet {
 				TType t1= this.fUpperBounds.anyMember();
 				TType t2= st2.uniqueUpperBound();
 
-				if (t2.canAssignTo(t1))
+				if (TTypes.canAssignTo(t2, t1))
 					return getTypeSetEnvironment().createSubTypesOfSingleton(t2);
 			} else if (fUpperBounds instanceof SubTypesOfSingleton) {
 				// xsect(subTypes(superTypes(A)), subTypes(A)) = subTypes(A)
@@ -149,7 +149,7 @@ public class SubTypesSet extends TypeSet {
 		for(; ubIter.hasNext(); ) {
 			TType ub= (TType) ubIter.next();
 
-			if (t.canAssignTo(ub))
+			if (TTypes.canAssignTo(t, ub))
 				return true;
 		}
 		return false;
@@ -174,7 +174,7 @@ public class SubTypesSet extends TypeSet {
 			for(Iterator ubIter= fUpperBounds /*.upperBound() */.iterator(); ubIter.hasNext(); ) {
 				TType ub= (TType) ubIter.next();
 
-				if (t.canAssignTo(ub)) {
+				if (TTypes.canAssignTo(t, ub)) {
 					found= true;
 					break;
 				}
@@ -293,7 +293,7 @@ public class SubTypesSet extends TypeSet {
 				}
 				fEnumCache.add(ub);
 			}
-			fEnumCache.initComplete();
+//			fEnumCache.initComplete();
 		}
 		return fEnumCache;
 	}

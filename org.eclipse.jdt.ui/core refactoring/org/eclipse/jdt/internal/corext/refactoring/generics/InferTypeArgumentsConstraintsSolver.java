@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionEl
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstraint2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TTypes;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeEquivalenceSet;
 
 
@@ -355,7 +356,7 @@ public class InferTypeArgumentsConstraintsSolver {
 			CastVariable2 castCv= castVariables[i];
 			ConstraintVariable2 expressionVariable= castCv.getExpressionVariable();
 			TType chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(expressionVariable);
-			if (chosenType != null && chosenType.canAssignTo(castCv.getType())) {
+			if (chosenType != null && TTypes.canAssignTo(chosenType, castCv.getType())) {
 				fUpdate.addCastToRemove(castCv);
 			}
 		}

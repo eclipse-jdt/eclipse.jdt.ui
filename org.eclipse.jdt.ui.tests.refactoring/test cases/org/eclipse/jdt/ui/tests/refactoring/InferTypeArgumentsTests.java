@@ -184,6 +184,10 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 // -------------------------------------------------------------------------------
 	
 	
+	public void testCuGetClass() throws Exception {
+		performCuOK();
+	}
+	
 	public void testCuTypeLiteral() throws Exception {
 		performCuOK();
 	}

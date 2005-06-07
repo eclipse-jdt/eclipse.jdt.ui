@@ -355,6 +355,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			Type typeArgument;
 			TType chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(elementCv);
 			if (chosenType != null) {
+				if (chosenType.isWildcardType() && ! unboundedWildcardAllowed(baseType))
+					return null; // can't e.g. write "new ArrayList<?>()".
 				BindingKey bindingKey= new BindingKey(chosenType.getBindingKey());
 				typeArgument= rewrite.getImportRewrite().addImportFromSignature(bindingKey.internalToSignature(), rewrite.getAST());
 				ArrayList nestedTypeArgumentCvs= getTypeArgumentCvs(elementCv);

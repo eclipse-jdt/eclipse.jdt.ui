@@ -25,8 +25,8 @@ import java.util.Set;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.Paramet
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.WildcardType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ArrayElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
@@ -300,18 +301,18 @@ public class InferTypeArgumentsTCModel {
 		return type;
 	}
 	
-	private TType getBoxedType(ITypeBinding typeBinding, AST ast) {
+	private TType getBoxedType(ITypeBinding typeBinding, Expression expression) {
 		if (typeBinding == null)
 			return null;
 		
 		if (! typeBinding.isPrimitive())
 			return createTType(typeBinding);
 		
-		String primitiveName= typeBinding.getName();
-		if ("void".equals(primitiveName)) //$NON-NLS-1$
+		if (expression == null || ! expression.resolveBoxing())
 			return null;
 		
-		ITypeBinding boxed= ast.resolveWellKnownType(getBoxedTypeName(primitiveName));
+		String primitiveName= typeBinding.getName();
+		ITypeBinding boxed= expression.getAST().resolveWellKnownType(getBoxedTypeName(primitiveName));
 		return createTType(boxed);
 	}
 
@@ -344,8 +345,10 @@ public class InferTypeArgumentsTCModel {
 			return null;
 	}
 	
-	public VariableVariable2 makeVariableVariable(IVariableBinding variableBinding, AST ast) {
-		TType type= getBoxedType(variableBinding.getType(), ast);
+	public VariableVariable2 makeVariableVariable(IVariableBinding variableBinding) {
+		TType type= getBoxedType(variableBinding.getType(), /*no boxing*/null);
+		if (type == null)
+			return null;
 		VariableVariable2 cv= new VariableVariable2(type, variableBinding);
 		VariableVariable2 storedCv= (VariableVariable2) storedCv(cv);
 		if (storedCv == cv) {
@@ -359,8 +362,8 @@ public class InferTypeArgumentsTCModel {
 		return storedCv;
 	}
 
-	public VariableVariable2 makeDeclaredVariableVariable(IVariableBinding variableBinding, AST ast, ICompilationUnit cu) {
-		VariableVariable2 cv= makeVariableVariable(variableBinding, ast);
+	public VariableVariable2 makeDeclaredVariableVariable(IVariableBinding variableBinding, ICompilationUnit cu) {
+		VariableVariable2 cv= makeVariableVariable(variableBinding);
 		if (cv == null)
 			return null;
 		cv.setCompilationUnit(cu);
@@ -369,7 +372,7 @@ public class InferTypeArgumentsTCModel {
 	
 	public TypeVariable2 makeTypeVariable(Type type) {
 		ICompilationUnit cu= RefactoringASTParser.getCompilationUnit(type);
-		TType ttype= getBoxedType(type.resolveBinding(), type.getAST());
+		TType ttype= getBoxedType(type.resolveBinding(), /*no boxing*/null);
 		if (ttype == null)
 			return null;
 		
@@ -401,9 +404,13 @@ public class InferTypeArgumentsTCModel {
 	}
 		
 	public ParameterizedTypeVariable2 makeParameterizedTypeVariable(ITypeBinding typeBinding) {
-		Assert.isTrue(typeBinding.isParameterizedType() || typeBinding.isRawType() || typeBinding.isArray());
-		
 		TType type= createTType(typeBinding);
+		return makeParameterizedTypeVariable(type);
+	}
+
+	private ParameterizedTypeVariable2 makeParameterizedTypeVariable(TType type) {
+		Assert.isTrue(type.isParameterizedType() || type.isRawType() || type.isGenericType() || type.isArrayType());
+		
 		ParameterizedTypeVariable2 cv= new ParameterizedTypeVariable2(type);
 		ParameterizedTypeVariable2 storedCv= (ParameterizedTypeVariable2) storedCv(cv);
 		if (cv == storedCv) {
@@ -411,13 +418,13 @@ public class InferTypeArgumentsTCModel {
 			makeElementVariables(storedCv, type);
 			makeArrayElementVariable(storedCv);
 			if (fStoreToString)
-				storedCv.setData(ConstraintVariable2.TO_STRING, "ParameterizedType(" + Bindings.asString(typeBinding) + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+				storedCv.setData(ConstraintVariable2.TO_STRING, "ParameterizedType(" + type.getPrettySignature() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return storedCv;
 	}
 		
-	public ParameterTypeVariable2 makeParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, AST ast) {
-		TType type= getBoxedType(methodBinding.getParameterTypes() [parameterIndex], ast);
+	public ParameterTypeVariable2 makeParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex) {
+		TType type= getBoxedType(methodBinding.getParameterTypes() [parameterIndex], /*no boxing*/null);
 		if (type == null)
 			return null;
 		
@@ -442,16 +449,16 @@ public class InferTypeArgumentsTCModel {
 	 * @param cu
 	 * @return the ParameterTypeVariable2, or <code>null</code> 
 	 */
-	public ParameterTypeVariable2 makeDeclaredParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, AST ast, ICompilationUnit cu) {
-		ParameterTypeVariable2 cv= makeParameterTypeVariable(methodBinding, parameterIndex, ast);
+	public ParameterTypeVariable2 makeDeclaredParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex, ICompilationUnit cu) {
+		ParameterTypeVariable2 cv= makeParameterTypeVariable(methodBinding, parameterIndex);
 		if (cv == null)
 			return null;
 		cv.setCompilationUnit(cu);
 		return cv;
 	}
 
-	public ReturnTypeVariable2 makeReturnTypeVariable(IMethodBinding methodBinding, AST ast) {
-		TType returnType= getBoxedType(methodBinding.getReturnType(), ast);
+	public ReturnTypeVariable2 makeReturnTypeVariable(IMethodBinding methodBinding) {
+		TType returnType= getBoxedType(methodBinding.getReturnType(), /*no boxing*/null);
 		if (returnType == null)
 			return null;
 		
@@ -466,8 +473,8 @@ public class InferTypeArgumentsTCModel {
 		return storedCv;
 	}
 
-	public ReturnTypeVariable2 makeDeclaredReturnTypeVariable(IMethodBinding methodBinding, AST ast, ICompilationUnit cu) {
-		ReturnTypeVariable2 cv= makeReturnTypeVariable(methodBinding, ast);
+	public ReturnTypeVariable2 makeDeclaredReturnTypeVariable(IMethodBinding methodBinding, ICompilationUnit cu) {
+		ReturnTypeVariable2 cv= makeReturnTypeVariable(methodBinding);
 		if (cv == null)
 			return null;
 		
@@ -477,13 +484,19 @@ public class InferTypeArgumentsTCModel {
 		return cv;
 	}
 	
-	public ImmutableTypeVariable2 makeImmutableTypeVariable(ITypeBinding typeBinding, AST ast) {
+	public ImmutableTypeVariable2 makeImmutableTypeVariable(ITypeBinding typeBinding, Expression expression) {
 //		Assert.isTrue(! typeBinding.isGenericType()); // see JDT/Core bug 80472
-		TType type= getBoxedType(typeBinding, ast);
+		TType type= getBoxedType(typeBinding, expression);
+		if (type == null)
+			return null;
+		return makeImmutableTypeVariable(type);
+	}
+
+	private ImmutableTypeVariable2 makeImmutableTypeVariable(TType type) {
 		ImmutableTypeVariable2 cv= new ImmutableTypeVariable2(type);
 		ImmutableTypeVariable2 storedCv= (ImmutableTypeVariable2) storedCv(cv);
 		if (cv == storedCv) {
-			makeElementVariables(storedCv, type);
+			makeFixedElementVariables(storedCv, type);
 			makeArrayElementVariable(storedCv);
 		}
 		return storedCv;
@@ -607,6 +620,69 @@ public class InferTypeArgumentsTCModel {
 		makeElementVariablesFromSupertypes(expressionCv, supertype);
 	}
 
+	public void makeFixedElementVariables(ConstraintVariable2 expressionCv, TType type) {
+		if (isAGenericType(type)) {
+			GenericType genericType= (GenericType) type.getTypeDeclaration();
+			TType[] typeParameters= genericType.getTypeParameters();
+			TType[] typeArguments= null;
+			if (type.isParameterizedType())
+				typeArguments= ((ParameterizedType) type).getTypeArguments();
+			
+			for (int i= 0; i < typeParameters.length; i++) {
+				TypeVariable typeVariable= (TypeVariable) typeParameters[i];
+				CollectionElementVariable2 elementCv= makeElementVariable(expressionCv, typeVariable, i);
+				TType referenceTypeArgument;
+				if (typeArguments == null) { // raw type
+					referenceTypeArgument= typeVariable.getErasure();
+				} else {
+					referenceTypeArgument= typeArguments[i];
+				}
+				createEqualsConstraint(elementCv, makeImmutableTypeVariable(referenceTypeArgument));
+//				if (typeVariable.getBounds().length != 0) {
+//					//TODO: create subtype constraints for bounds
+//				}
+			}
+		}
+		makeFixedElementVariablesFromSupertypes(expressionCv, type.getTypeDeclaration());
+	}
+	
+	private void makeFixedElementVariablesFromSupertypes(ConstraintVariable2 expressionCv, TType type) {
+		TType superclass= type.getSuperclass();
+		if (superclass != null)
+			makeFixedSupertypeElementVariables(expressionCv, superclass);
+		
+		TType[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++)
+			makeFixedSupertypeElementVariables(expressionCv, interfaces[i]);
+	}
+	
+	private void makeFixedSupertypeElementVariables(ConstraintVariable2 expressionCv, TType supertype) {
+		if (supertype.isParameterizedType() || supertype.isRawType()) {
+			TType[] typeArguments= null;
+			if (supertype.isParameterizedType())
+				typeArguments= ((ParameterizedType) supertype).getTypeArguments();
+			
+			TypeVariable[] typeParameters= ((GenericType) supertype.getTypeDeclaration()).getTypeParameters();
+			for (int i= 0; i < typeParameters.length; i++) {
+				TypeVariable typeParameter= typeParameters[i];
+				TType referenceTypeArgument;
+				if (typeArguments == null) { // raw type
+					referenceTypeArgument= typeParameter.getErasure();
+				} else {
+					referenceTypeArgument= typeArguments[i];
+				}
+				if (referenceTypeArgument.isTypeVariable()) {
+					CollectionElementVariable2 referenceTypeArgumentCv= getElementVariable(expressionCv, (TypeVariable) referenceTypeArgument);
+					setElementVariable(expressionCv, referenceTypeArgumentCv, typeParameter);
+				} else {
+					CollectionElementVariable2 elementCv= makeElementVariable(expressionCv, typeParameter, CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX);
+					createEqualsConstraint(elementCv, makeImmutableTypeVariable(referenceTypeArgument));
+				}
+			}
+		}
+		makeFixedElementVariablesFromSupertypes(expressionCv, supertype);
+	}
+
 	/**
 	 * Create equality constraints between generic type variables of expressionCv and referenceCv.
 	 * For example, the generic interface <code>java.lang.Iterable&lt;E&gt;</code> defines a method
@@ -638,9 +714,26 @@ public class InferTypeArgumentsTCModel {
 					referenceTypeArgument= referenceTypeParameter.getErasure();
 				else
 					referenceTypeArgument= referenceTypeArguments[i];
-				ConstraintVariable2 referenceTypeArgumentCv= getElementTypeCv(referenceTypeArgument, expressionCv, methodTypeVariables);
-				CollectionElementVariable2 referenceTypeParametersCv= getElementVariable(referenceCv, referenceTypeParameter);
-				createEqualsConstraint(referenceTypeArgumentCv, referenceTypeParametersCv);
+				if (referenceTypeArgument.isTypeVariable()) {
+					ConstraintVariable2 referenceTypeArgumentCv= getElementTypeCv(referenceTypeArgument, expressionCv, methodTypeVariables);
+					CollectionElementVariable2 referenceTypeParametersCv= getElementVariable(referenceCv, referenceTypeParameter);
+					createEqualsConstraint(referenceTypeArgumentCv, referenceTypeParametersCv);
+				} else if (referenceTypeArgument.isWildcardType()) {
+					WildcardType wildcardType= (WildcardType) referenceTypeArgument;
+					ConstraintVariable2 referenceTypeArgumentCv= makeImmutableTypeVariable(wildcardType);
+					CollectionElementVariable2 referenceTypeParametersCv= getElementVariable(referenceCv, referenceTypeParameter);
+					createEqualsConstraint(referenceTypeArgumentCv, referenceTypeParametersCv);
+					
+//				} else if (referenceTypeArgument.isParameterizedType()) {
+//					//TODO: nested containers
+//					ParameterizedType parameterizedType= (ParameterizedType) referenceTypeArgument;
+//					ParameterizedTypeVariable2 parameterizedTypeCv= makeParameterizedTypeVariable(parameterizedType.getTypeDeclaration());
+//					CollectionElementVariable2 referenceTypeParametersCv= getElementVariable(referenceCv, referenceTypeParameter);
+//					createEqualsConstraint(parameterizedTypeCv, referenceTypeParametersCv);
+//					createElementEqualsConstraints(parameterizedTypeCv, referenceTypeParametersCv);
+				} else {
+					//TODO
+				}
 			}
 			
 		} else if (reference.isArrayType()) {
@@ -702,6 +795,9 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	public void createElementEqualsConstraints(ConstraintVariable2 cv, ConstraintVariable2 initializerCv) {
+		if (cv == null || initializerCv == null)
+			return;
+		
 		Map leftElements= getElementVariables(cv);
 		Map rightElements= getElementVariables(initializerCv);
 		for (Iterator leftIter= leftElements.entrySet().iterator(); leftIter.hasNext();) {

@@ -60,17 +60,17 @@ public class SubTypesOfSingleton extends TypeSet {
 		if (other instanceof SubTypesOfSingleton) {
 			SubTypesOfSingleton otherSub= (SubTypesOfSingleton) other;
 
-			if (otherSub.fUpperBound.canAssignTo(fUpperBound))
+			if (TTypes.canAssignTo(otherSub.fUpperBound, fUpperBound))
 				return otherSub; // .makeClone();
-			if (fUpperBound.canAssignTo(otherSub.fUpperBound))
+			if (TTypes.canAssignTo(fUpperBound, otherSub.fUpperBound))
 				return this; // makeClone();
 		} else if (other.hasUniqueLowerBound()) {
 			TType otherLower= other.uniqueLowerBound();
 
 			if (otherLower.equals(fUpperBound))
 				return new SingletonTypeSet(fUpperBound, getTypeSetEnvironment());
-			if (otherLower != fUpperBound && fUpperBound.canAssignTo(otherLower) ||
-				!otherLower.canAssignTo(fUpperBound))
+			if (otherLower != fUpperBound && TTypes.canAssignTo(fUpperBound, otherLower) ||
+					! TTypes.canAssignTo(otherLower, fUpperBound))
 				return getTypeSetEnvironment().getEmptyTypeSet();
 		}
 //		else if (other instanceof SubTypesSet) {
@@ -147,7 +147,7 @@ public class SubTypesOfSingleton extends TypeSet {
 	public boolean contains(TType t) {
 		if (t.equals(fUpperBound))
 			return true;
-		return t.canAssignTo(fUpperBound);
+		return TTypes.canAssignTo(t, fUpperBound);
 	}
 
 	/* (non-Javadoc)
@@ -160,7 +160,7 @@ public class SubTypesOfSingleton extends TypeSet {
 		// Optimization: if other is also a SubTypeOfSingleton, just compare bounds
 		if (other instanceof SubTypesOfSingleton) {
 			SubTypesOfSingleton otherSub= (SubTypesOfSingleton) other;
-			return otherSub.fUpperBound.canAssignTo(fUpperBound);
+			return TTypes.canAssignTo(otherSub.fUpperBound, fUpperBound);
 		}
 		// Optimization: if other is a SubTypesSet, just compare each of its bounds to mine
 		if (other instanceof SubTypesSet) {
@@ -169,7 +169,7 @@ public class SubTypesOfSingleton extends TypeSet {
 
 			for(Iterator iter= otherUpperBounds.iterator(); iter.hasNext(); ) {
 				TType t= (TType) iter.next();
-				if (!t.canAssignTo(fUpperBound))
+				if (! TTypes.canAssignTo(t, fUpperBound))
 					return false;
 			}
 			return true;
@@ -178,7 +178,7 @@ public class SubTypesOfSingleton extends TypeSet {
 		for(Iterator iter= other.iterator(); iter.hasNext(); ) {
 			TType t= (TType) iter.next();
 
-			if (!t.canAssignTo(fUpperBound))
+			if (! TTypes.canAssignTo(t, fUpperBound))
 				return false;
 		}
 		return true;
