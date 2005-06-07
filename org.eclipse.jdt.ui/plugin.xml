@@ -4067,6 +4067,14 @@
       </filter>
       <filter
             targetId="org.eclipse.jdt.ui.PackageExplorer"
+            name="%HideSyntheticMembers.label"
+            enabled="true"
+            description="%HideSyntheticMembers.description"
+            class="org.eclipse.jdt.internal.ui.filters.SyntheticMembersFilter"
+            id="org.eclipse.jdt.ui.PackageExplorer.SyntheticMembersFilter">
+      </filter>
+      <filter
+            targetId="org.eclipse.jdt.ui.PackageExplorer"
             name="%HideNonJavaProjects.label"
             enabled="false"
             description="%HideNonJavaProjects.description"
@@ -4205,6 +4213,14 @@
             class="org.eclipse.jdt.internal.ui.filters.ImportDeclarationFilter"
             id="org.eclipse.jdt.ui.MembersView.ImportDeclarationFilter">
       </filter>
+      <filter
+            targetId="org.eclipse.jdt.ui.MembersView"
+            name="%HideSyntheticMembers.label"
+            enabled="true"
+            description="%HideSyntheticMembers.description"
+            class="org.eclipse.jdt.internal.ui.filters.SyntheticMembersFilter"
+            id="org.eclipse.jdt.ui.MembersView.SyntheticMembersFilter">
+      </filter>
 <!-- Outline Page -->
       <filter
             targetId="org.eclipse.jdt.ui.JavaOutlinePage"
@@ -4221,6 +4237,14 @@
             description="%HideImportDeclaration.description"
             class="org.eclipse.jdt.internal.ui.filters.ImportDeclarationFilter"
             id="org.eclipse.jdt.ui.JavaOutlinePage.ImportDeclarationFilter">
+      </filter>
+      <filter
+            targetId="org.eclipse.jdt.ui.JavaOutlinePage"
+            name="%HideSyntheticMembers.label"
+            enabled="true"
+            description="%HideSyntheticMembers.description"
+            class="org.eclipse.jdt.internal.ui.filters.SyntheticMembersFilter"
+            id="org.eclipse.jdt.ui.JavaOutlinePage.SyntheticMembersFilter">
       </filter>
 <!-- Quick Outline -->
       <filter
@@ -4270,6 +4294,14 @@
             description="%HideLocalTypes.description"
             class="org.eclipse.jdt.internal.ui.filters.LocalTypesFilter"
             id="org.eclipse.jdt.internal.ui.text.QuickOutline.LocalTypesFilter">
+      </filter>
+      <filter
+            targetId="org.eclipse.jdt.internal.ui.text.QuickOutline"
+            name="%HideSyntheticMembers.label"
+            enabled="true"
+            description="%HideSyntheticMembers.description"
+            class="org.eclipse.jdt.internal.ui.filters.SyntheticMembersFilter"
+            id="org.eclipse.jdt.internal.ui.text.QuickOutline.SyntheticMembersFilter">
       </filter>
 <!-- Quick Hierarchy -->
       <filter
