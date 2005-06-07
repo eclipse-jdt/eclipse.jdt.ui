@@ -54,7 +54,14 @@
             category="org.eclipse.jdt.ui.preferences.JavaBasePreferencePage"
             class="org.eclipse.jdt.internal.junit.ui.JUnitPreferencePage"
             id="org.eclipse.jdt.junit.preferences">
+         <keywordReference id="org.eclipse.jdt.junit.JUnit"/>
       </page>
+   </extension>
+   <extension
+         point="org.eclipse.ui.keywords">
+      <keyword
+            id="org.eclipse.jdt.junit.JUnit"
+            label="%preferenceKeywords.general"/>
    </extension>
    <extension
          point="org.eclipse.debug.core.launchConfigurationTypes">
