@@ -14,14 +14,10 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.io.IOException;
 import java.io.Reader;
 
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavadocContentAccess;
 
@@ -32,65 +28,23 @@ import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 public class ProposalInfo {
 
 	private IJavaProject fJavaProject;
-	private char[] fPackageName;
-	private char[] fTypeName;
-	private char[] fMemberName;
-	private char[][] fParameterPackages;
-	private char[][] fParameterTypes;
-	private boolean fIsConstructor;
-
+	private String fFullTypeName;
 	private IMember fMember;
 
-	public ProposalInfo(IJavaProject jproject, char[] packName, char[] typeQualifiedName, char[] methodName, char[][] paramPackages, char[][] paramTypes, boolean isConstructor) {
+	public ProposalInfo(IJavaProject jproject, String fullyQualifiedTypeName) {
 		fJavaProject= jproject;
-		fPackageName= packName;
-		fTypeName= typeQualifiedName;
-		fMemberName= methodName;
-		fParameterPackages= paramPackages;
-		fParameterTypes= paramTypes;
-		fIsConstructor= isConstructor;
+		fFullTypeName= fullyQualifiedTypeName;
 	}
 
 	public ProposalInfo(IMember member) {
 		fMember= member;
 	}
 
-	public ProposalInfo(IJavaProject jproject, char[] packName, char[] typeQualifiedName) {
-		this(jproject, packName, typeQualifiedName, null, null, null, false);
-	}
-
-	private String getParameterSignature(int index) {
-		StringBuffer buf= new StringBuffer();
-		char[] pack= fParameterPackages[index];
-		if (pack != null && pack.length > 0) {
-			buf.append(pack);
-			buf.append('.');
-		}
-		buf.append(fParameterTypes[index]);
-		return Signature.createTypeSignature(buf.toString(), true);
-	}
-
 	private IMember getMember() throws JavaModelException {
 		if (fMember == null) {
-			IType type= fJavaProject.findType(new String(fPackageName), new String(fTypeName));
+			IType type= fJavaProject.findType(fFullTypeName);
 			if (type != null) {
-				if (fMemberName != null) {
-					String name= new String(fMemberName);
-					if (fParameterTypes != null) {
-						String[] paramTypes= new String[fParameterTypes.length];
-						for (int i= 0; i < fParameterTypes.length; i++) {
-							paramTypes[i]= getParameterSignature(i);
-						}
-						fMember= JavaModelUtil.findMethod(name, paramTypes, fIsConstructor, type);
-					} else {
-						IField field= type.getField(name);
-						if (field.exists()) {
-							fMember= field;
-						}
-					}
-				} else {
-					fMember= type;
-				}
+				fMember= type;
 			}
 		}
 		return fMember;

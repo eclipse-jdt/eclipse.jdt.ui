@@ -17,40 +17,36 @@ import java.util.List;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jdt.core.CompletionRequestor;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.WorkingCopyOwner;
-import org.eclipse.jdt.core.compiler.IProblem;
-
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.contentassist.IContentAssistSubjectControl;
 import org.eclipse.jface.contentassist.ISubjectControlContentAssistProcessor;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
+import org.eclipse.jdt.core.CompletionRequestor;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.compiler.IProblem;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.ProposalInfo;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
-
-import org.eclipse.jdt.ui.JavaElementLabels;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 
 public class CUPositionCompletionProcessor implements IContentAssistProcessor, ISubjectControlContentAssistProcessor {
@@ -248,36 +244,6 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 					getImage(descriptor), name, relevance));
 		}
 		
-		protected final void addAdjustedTypeCompletion(char[] packageName, char[] typeName, char[] completionName,
-				int start, int end, int relevance, ImageDescriptor descriptor) {
-			ProposalInfo proposalInfo= new ProposalInfo(getJavaProject(), packageName, typeName);
-			fProposals.add(createTypeCompletion(new String(packageName), new String(typeName), proposalInfo,
-					new String(completionName), start - fOffsetReduction, end - fOffsetReduction, relevance, descriptor));
-		}
-
-		private static JavaCompletionProposal createTypeCompletion(String containerName, String typeName, ProposalInfo proposalInfo,
-				String completion, int start, int end, int relevance, ImageDescriptor descriptor) {
-			String fullName= JavaModelUtil.concatenateName(containerName, typeName); // containername can be null
-			
-			StringBuffer buf= new StringBuffer(Signature.getSimpleName(fullName));
-			String typeQualifier= Signature.getQualifier(fullName);
-			buf.append(JavaElementLabels.CONCAT_STRING);
-			if (typeQualifier.length() > 0) {
-				buf.append(typeQualifier);
-			} else if (containerName != null) {
-				buf.append(JavaElementLabels.DEFAULT_PACKAGE);
-			}
-			String name= buf.toString();
-			
-			if (! "".equals(containerName) && typeName.equals(completion)) //$NON-NLS-1$
-				completion= containerName + '.' + completion; //since JDT core swallows java.lang and declaring cu's package
-			
-			JavaCompletionProposal proposal= new JavaTypeCompletionProposal(completion, /*insert fully qualified*/null,
-					start, end-start, getImage(descriptor), name, relevance, fullName);
-			proposal.setProposalInfo(proposalInfo);
-			return proposal;
-		}
-
 		private static Image getImage(ImageDescriptor descriptor) {
 			return (descriptor == null) ? null : CUPositionCompletionProcessor.IMAGE_DESC_REGISTRY.get(descriptor);
 		}

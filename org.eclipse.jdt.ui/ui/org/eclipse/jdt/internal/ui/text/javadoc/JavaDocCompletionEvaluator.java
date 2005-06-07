@@ -18,6 +18,8 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -26,7 +28,8 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.part.FileEditorInput;
 
-import org.eclipse.jdt.core.CompletionRequestorAdapter;
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.CompletionRequestor;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -37,16 +40,20 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.TypeFilter;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.TypeFilter;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.ProposalInfo;
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, IJavaDocTagConstants, IHtmlTagConstants {
 
@@ -379,26 +386,19 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 	private void evalTypeNameCompletions(IMember currElem, int wordStart, String arg) throws JavaModelException {
 		ICompilationUnit preparedCU= createPreparedCU(currElem, wordStart, fCurrentPos);
 		if (preparedCU != null) {
-			CompletionRequestorAdapter requestor= new CompletionRequestorAdapter() {
-				public void acceptClass(char[] packageName, char[] className, char[] completionName, int modifiers, int start, int end, int severity) {
-					if (TypeFilter.isFiltered(packageName, className)) {
-						return;
+			CompletionRequestor requestor= new CompletionRequestor() {
+				public void accept(CompletionProposal proposal) {
+					if (proposal.getKind() == CompletionProposal.TYPE_REF) {
+						String fullTypeName= new String(Signature.toCharArray(proposal.getSignature()));
+						if (TypeFilter.isFiltered(fullTypeName)) {
+							return;
+						}
+						
+						int start= proposal.getReplaceStart();
+						int end= proposal.getReplaceEnd();
+						char[] completion= proposal.getCompletion();
+						fResult.add(createSeeTypeCompletion(proposal.getFlags(), start, end, completion, fullTypeName, proposal.getRelevance()));
 					}
-					fResult.add(createSeeTypeCompletion(true, start, end, completionName, className, packageName, severity));
-				}
-
-				public void acceptInterface(char[] packageName, char[] interfaceName, char[] completionName, int modifiers, int start, int end, int severity) {
-					if (TypeFilter.isFiltered(packageName, interfaceName)) {
-						return;
-					}
-					fResult.add(createSeeTypeCompletion(false, start, end, completionName, interfaceName, packageName, severity));
-				}
-
-				public void acceptType(char[] packageName, char[] typeName, char[] completionName, int start, int end, int severity) {
-					if (TypeFilter.isFiltered(packageName, typeName)) {
-						return;
-					}
-					fResult.add(createSeeTypeCompletion(true, start, end, completionName, typeName, packageName, severity));
 				}
 			};
 			try {
@@ -407,7 +407,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 					// for top level types, we use a fake import statement and the current type is never suggested
 					IType type= (IType) currElem;
 					char[] name= type.getElementName().toCharArray();
-					fResult.add(createSeeTypeCompletion(type.isClass(), wordStart, fCurrentPos, name, name, JavaModelUtil.getTypeContainerName(type).toCharArray(), 50));
+					fResult.add(createSeeTypeCompletion(0, wordStart, fCurrentPos, name, JavaModelUtil.getFullyQualifiedName(type), 50));
 				}
 			} finally {
 				preparedCU.discardWorkingCopy();
@@ -473,26 +473,24 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		return proposal;
 	}
 
-	private JavaCompletionProposal createSeeTypeCompletion(boolean isClass, int start, int end, char[] completion, char[] typeName, char[] containerName, int severity) {
-		ProposalInfo proposalInfo= new ProposalInfo(fCompilationUnit.getJavaProject(), containerName, typeName);
+	private JavaCompletionProposal createSeeTypeCompletion(int flags, int start, int end, char[] completion, String fullTypeName, int severity) {
+		ProposalInfo proposalInfo= new ProposalInfo(fCompilationUnit.getJavaProject(), fullTypeName);
 		StringBuffer nameBuffer= new StringBuffer();
-		nameBuffer.append(typeName);
-		if (containerName != null) {
-			nameBuffer.append(" - "); //$NON-NLS-1$
-			if (containerName.length > 0) {
-				nameBuffer.append(containerName);
-			} else {
-				nameBuffer.append(JavaDocMessages.CompletionEvaluator_default_package);
-			}
+		String simpleName= Signature.getSimpleName(fullTypeName);
+		nameBuffer.append(simpleName);
+		if (simpleName.length() != fullTypeName.length()) {
+			nameBuffer.append(JavaElementLabels.CONCAT_STRING);
+			nameBuffer.append(Signature.getQualifier(fullTypeName));
 		}
-		String imageKey= isClass ? JavaPluginImages.IMG_OBJS_CLASS : JavaPluginImages.IMG_OBJS_INTERFACE;
+		ImageDescriptor desc= JavaElementImageProvider.getTypeImageDescriptor(false, false, flags, false);
+		Image image= JavaPlugin.getImageDescriptorRegistry().get(desc);
 
 		int compLen= completion.length;
 		if (compLen > 0 && completion[compLen - 1] == ';') {
 			compLen--; // remove the semicolon from import proposals
 		}
 
-		JavaCompletionProposal proposal= new JavaCompletionProposal(new String(completion, 0, compLen), start, end - start, JavaPluginImages.get(imageKey), nameBuffer.toString(), severity);
+		JavaCompletionProposal proposal= new JavaCompletionProposal(new String(completion, 0, compLen), start, end - start, image, nameBuffer.toString(), severity);
 		proposal.setProposalInfo(proposalInfo);
 		proposal.setTriggerCharacters( new char[] { '#' });
 		return proposal;
