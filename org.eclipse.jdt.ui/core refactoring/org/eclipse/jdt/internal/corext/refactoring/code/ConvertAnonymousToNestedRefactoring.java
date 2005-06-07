@@ -592,10 +592,8 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 					name= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, name);
 					if (name.equals(oldName))
 						name= NamingConventions.removePrefixAndSuffixForArgumentName(project, name);
-					if (!name.equals(oldName)) {
-						fieldName= NamingConventions.suggestFieldNames(project, "", name, 0, Flags.AccPrivate, (String[]) excludedFields.toArray(new String[excludedFields.size()]))[0]; //$NON-NLS-1$
-						excludedFields.add(fieldName);
-					}
+					fieldName= NamingConventions.suggestFieldNames(project, "", name, 0, Flags.AccPrivate, (String[]) excludedFields.toArray(new String[excludedFields.size()]))[0]; //$NON-NLS-1$
+					excludedFields.add(fieldName);
 					if (fSettings.useKeywordThis) {
 						FieldAccess access= ast.newFieldAccess();
 						access.setExpression(ast.newThisExpression());
@@ -642,29 +640,28 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 	}
 
     private void createFieldsForAccessedLocals(CompilationUnitRewrite rewrite, AbstractTypeDeclaration declaration) {
-        final IVariableBinding[] bindings= getUsedLocalVariables();
-        final IJavaProject project= rewrite.getCu().getJavaProject();
-        List excluded= new ArrayList();
-        final AST ast= fAnonymousInnerClassNode.getAST();
-        for (int index= 0; index < bindings.length; index++) {
+		final IVariableBinding[] bindings= getUsedLocalVariables();
+		final IJavaProject project= rewrite.getCu().getJavaProject();
+		List excluded= new ArrayList();
+		final AST ast= fAnonymousInnerClassNode.getAST();
+		for (int index= 0; index < bindings.length; index++) {
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
-            fragment.setExtraDimensions(0);
-            fragment.setInitializer(null); 
-            String name= bindings[index].getName();
-            String oldName= name;
+			fragment.setExtraDimensions(0);
+			fragment.setInitializer(null);
+			String name= bindings[index].getName();
+			String oldName= name;
 			name= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, name);
 			if (name.equals(oldName))
 				name= NamingConventions.removePrefixAndSuffixForArgumentName(project, name);
-			if (!name.equals(oldName))
-				name= NamingConventions.suggestFieldNames(project, "", name, 0, Flags.AccPrivate, (String[]) excluded.toArray(new String[excluded.size()]))[0]; //$NON-NLS-1$
+			name= NamingConventions.suggestFieldNames(project, "", name, 0, Flags.AccPrivate, (String[]) excluded.toArray(new String[excluded.size()]))[0]; //$NON-NLS-1$
 			fragment.setName(ast.newSimpleName(name));
 			excluded.add(name);
-            FieldDeclaration field= ast.newFieldDeclaration(fragment);
+			FieldDeclaration field= ast.newFieldDeclaration(fragment);
 			field.setType(rewrite.getImportRewrite().addImport(bindings[index].getType(), ast));
-            field.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE | Modifier.FINAL));
-            declaration.bodyDeclarations().add(findIndexOfLastField(declaration.bodyDeclarations()) + 1, field);
-        }
-    }
+			field.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE | Modifier.FINAL));
+			declaration.bodyDeclarations().add(findIndexOfLastField(declaration.bodyDeclarations()) + 1, field);
+		}
+	}
 
     private IVariableBinding[] getUsedLocalVariables() {
         final Set result= new HashSet(0);
@@ -697,49 +694,47 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     private void createNewConstructorIfNeeded(CompilationUnitRewrite rewrite, AbstractTypeDeclaration declaration) throws JavaModelException {
-        IVariableBinding[] bindings= getUsedLocalVariables();
+		IVariableBinding[] bindings= getUsedLocalVariables();
 
-        if (((ClassInstanceCreation) fAnonymousInnerClassNode.getParent()).arguments().isEmpty() && bindings.length == 0)
-            return;
+		if (((ClassInstanceCreation) fAnonymousInnerClassNode.getParent()).arguments().isEmpty() && bindings.length == 0)
+			return;
 
-        final AST ast= fAnonymousInnerClassNode.getAST();
+		final AST ast= fAnonymousInnerClassNode.getAST();
 		MethodDeclaration newConstructor= ast.newMethodDeclaration();
-        newConstructor.setConstructor(true);
-        newConstructor.setExtraDimensions(0);
-        newConstructor.setJavadoc(null);
-        newConstructor.modifiers().addAll(ASTNodeFactory.newModifiers(ast, fVisibility));
-        newConstructor.setName(ast.newSimpleName(fClassName));
-        addParametersToNewConstructor(newConstructor, rewrite);
-        int paramCount= newConstructor.parameters().size();
+		newConstructor.setConstructor(true);
+		newConstructor.setExtraDimensions(0);
+		newConstructor.setJavadoc(null);
+		newConstructor.modifiers().addAll(ASTNodeFactory.newModifiers(ast, fVisibility));
+		newConstructor.setName(ast.newSimpleName(fClassName));
+		addParametersToNewConstructor(newConstructor, rewrite);
+		int paramCount= newConstructor.parameters().size();
 
-        addParametersForLocalsUsedInInnerClass(rewrite, bindings, newConstructor);
+		addParametersForLocalsUsedInInnerClass(rewrite, bindings, newConstructor);
 
-        Block body= ast.newBlock();
-        SuperConstructorInvocation superConstructorInvocation= ast.newSuperConstructorInvocation();
-        for (int i= 0; i < paramCount; i++) {
-            SingleVariableDeclaration param= (SingleVariableDeclaration)newConstructor.parameters().get(i);
-            superConstructorInvocation.arguments().add(ast.newSimpleName(param.getName().getIdentifier()));
-        }
-        body.statements().add(superConstructorInvocation);
+		Block body= ast.newBlock();
+		SuperConstructorInvocation superConstructorInvocation= ast.newSuperConstructorInvocation();
+		for (int i= 0; i < paramCount; i++) {
+			SingleVariableDeclaration param= (SingleVariableDeclaration) newConstructor.parameters().get(i);
+			superConstructorInvocation.arguments().add(ast.newSimpleName(param.getName().getIdentifier()));
+		}
+		body.statements().add(superConstructorInvocation);
 
-        final IJavaProject project= fCu.getJavaProject();
+		final IJavaProject project= fCu.getJavaProject();
 		List excludedFields= new ArrayList();
 		List excludedParams= new ArrayList();
-        for (int index= 0; index < bindings.length; index++) {
-        	String name= bindings[index].getName();
-        	String fieldName= name;
-        	String paramName= name;
-            String oldName= name;
-            name= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, name);
-            if (name.equals(oldName))
-            	name= NamingConventions.removePrefixAndSuffixForArgumentName(project, name);
-			if (!name.equals(oldName)) {
-				fieldName= NamingConventions.suggestFieldNames(project, "", name, 0, Flags.AccPrivate, (String[]) excludedFields.toArray(new String[excludedFields.size()]))[0]; //$NON-NLS-1$
-				excludedFields.add(fieldName);
-				paramName= NamingConventions.suggestArgumentNames(project, "", name, 0, (String[]) excludedParams.toArray(new String[excludedParams.size()]))[0]; //$NON-NLS-1$
-				excludedParams.add(paramName);
-			}
-            Assignment assignmentExpression= ast.newAssignment();
+		for (int index= 0; index < bindings.length; index++) {
+			String name= bindings[index].getName();
+			String fieldName= name;
+			String paramName= name;
+			String oldName= name;
+			name= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, name);
+			if (name.equals(oldName))
+				name= NamingConventions.removePrefixAndSuffixForArgumentName(project, name);
+			fieldName= NamingConventions.suggestFieldNames(project, "", name, 0, Flags.AccPrivate, (String[]) excludedFields.toArray(new String[excludedFields.size()]))[0]; //$NON-NLS-1$
+			excludedFields.add(fieldName);
+			paramName= NamingConventions.suggestArgumentNames(project, "", name, 0, (String[]) excludedParams.toArray(new String[excludedParams.size()]))[0]; //$NON-NLS-1$
+			excludedParams.add(paramName);
+			Assignment assignmentExpression= ast.newAssignment();
 			assignmentExpression.setOperator(Assignment.Operator.ASSIGN);
 			if (fSettings.useKeywordThis || fieldName.equals(paramName)) {
 				FieldAccess access= ast.newFieldAccess();
@@ -751,31 +746,30 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			assignmentExpression.setRightHandSide(ast.newSimpleName(paramName));
 			ExpressionStatement assignmentStatement= ast.newExpressionStatement(assignmentExpression);
 			body.statements().add(assignmentStatement);
-        }
+		}
 
-        addFieldInitialization(rewrite, body);
+		addFieldInitialization(rewrite, body);
 
-        newConstructor.setBody(body);
+		newConstructor.setBody(body);
 
-        addExceptionsToNewConstructor(newConstructor);
-        declaration.bodyDeclarations().add(1 + bindings.length + findIndexOfLastField(fAnonymousInnerClassNode.bodyDeclarations()), newConstructor);
-    }
+		addExceptionsToNewConstructor(newConstructor);
+		declaration.bodyDeclarations().add(1 + bindings.length + findIndexOfLastField(fAnonymousInnerClassNode.bodyDeclarations()), newConstructor);
+	}
 
     private void addFieldInitialization(CompilationUnitRewrite rewrite, Block constructorBody) {
-    	final IJavaProject project= rewrite.getCu().getJavaProject();
-    	List excluded= new ArrayList();
-    	final AST ast= fAnonymousInnerClassNode.getAST();
-        for (Iterator iter= getFieldsToInitializeInConstructor().iterator(); iter.hasNext(); ) {
-            VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
+		final IJavaProject project= rewrite.getCu().getJavaProject();
+		List excluded= new ArrayList();
+		final AST ast= fAnonymousInnerClassNode.getAST();
+		for (Iterator iter= getFieldsToInitializeInConstructor().iterator(); iter.hasNext();) {
+			VariableDeclarationFragment fragment= (VariableDeclarationFragment) iter.next();
 			Assignment assignmentExpression= ast.newAssignment();
-            assignmentExpression.setOperator(Assignment.Operator.ASSIGN);
-            String name= fragment.getName().getIdentifier();
-            String oldName= name;
-            name= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, name);
-            if (name.equals(oldName))
-            	name= NamingConventions.removePrefixAndSuffixForArgumentName(project, name);
-			if (!name.equals(oldName))
-				name= NamingConventions.suggestFieldNames(project, "", name, 0, Flags.AccPrivate, (String[]) excluded.toArray(new String[excluded.size()]))[0]; //$NON-NLS-1$
+			assignmentExpression.setOperator(Assignment.Operator.ASSIGN);
+			String name= fragment.getName().getIdentifier();
+			String oldName= name;
+			name= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, name);
+			if (name.equals(oldName))
+				name= NamingConventions.removePrefixAndSuffixForArgumentName(project, name);
+			name= NamingConventions.suggestFieldNames(project, "", name, 0, Flags.AccPrivate, (String[]) excluded.toArray(new String[excluded.size()]))[0]; //$NON-NLS-1$
 			if (fSettings.useKeywordThis) {
 				FieldAccess access= ast.newFieldAccess();
 				access.setExpression(ast.newThisExpression());
@@ -784,14 +778,14 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 			} else
 				assignmentExpression.setLeftHandSide(ast.newSimpleName(name));
 			excluded.add(name);
-            Expression rhs= (Expression)rewrite.getASTRewrite().createCopyTarget(fragment.getInitializer());
-            assignmentExpression.setRightHandSide(rhs);
-            ExpressionStatement assignmentStatement= ast.newExpressionStatement(assignmentExpression);
-            constructorBody.statements().add(assignmentStatement);
-        }
-    }
+			Expression rhs= (Expression) rewrite.getASTRewrite().createCopyTarget(fragment.getInitializer());
+			assignmentExpression.setRightHandSide(rhs);
+			ExpressionStatement assignmentStatement= ast.newExpressionStatement(assignmentExpression);
+			constructorBody.statements().add(assignmentStatement);
+		}
+	}
 
-    //live List of VariableDeclarationFragments
+    // live List of VariableDeclarationFragments
     private List getFieldsToInitializeInConstructor() {
         List result= new ArrayList(0);
         for (Iterator iter= fAnonymousInnerClassNode.bodyDeclarations().iterator(); iter.hasNext(); ) {
@@ -894,8 +888,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		String name= NamingConventions.removePrefixAndSuffixForLocalVariableName(project, paramName);
 		if (name.equals(paramName))
 			name= NamingConventions.removePrefixAndSuffixForArgumentName(project, paramName);
-		if (!param.equals(paramName))
-			name= NamingConventions.suggestArgumentNames(project, "", name, 0, excluded)[0]; //$NON-NLS-1$
+		name= NamingConventions.suggestArgumentNames(project, "", name, 0, excluded)[0]; //$NON-NLS-1$
 		param.setName(fAnonymousInnerClassNode.getAST().newSimpleName(name));
 		param.setType(rewrite.getImportRewrite().addImport(paramType, fAnonymousInnerClassNode.getAST()));
 		return param;
