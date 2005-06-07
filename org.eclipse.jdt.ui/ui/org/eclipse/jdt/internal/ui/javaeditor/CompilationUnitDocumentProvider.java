@@ -946,6 +946,12 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			IResource resource= info.fCopy.getResource();
 
 			Assert.isTrue(resource instanceof IFile);
+
+			/* https://bugs.eclipse.org/bugs/show_bug.cgi?id=98327
+			 * Make sure file gets save in commit() if the underlying file has been deleted */
+			if (!resource.isSynchronized(IResource.DEPTH_ZERO) && isDeleted(element))
+				info.fTextFileBuffer.setDirty(true);
+
 			if (!resource.exists()) {
 				// underlying resource has been deleted, just recreate file, ignore the rest
 				IProgressMonitor subMonitor2= getSubProgressMonitor(monitor, 50);
