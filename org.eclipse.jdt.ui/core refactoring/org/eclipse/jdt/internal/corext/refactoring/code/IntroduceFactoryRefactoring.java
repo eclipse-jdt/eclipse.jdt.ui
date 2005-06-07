@@ -705,7 +705,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 
             newParm.setName(ast.newSimpleName(ctorOwnerTypeParms[i].getName()));
             for(int b=0; b < parmTypeBounds.length; b++) {
-            	if (!parmTypeBounds[b].isClass() || parmTypeBounds[b].getSuperclass() == null)
+            	if (parmTypeBounds[b].isClass() && parmTypeBounds[b].getSuperclass() == null)
             		continue;
 
             	Type newBound= fImportRewriter.addImport(parmTypeBounds[b], ast);

@@ -720,4 +720,8 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	public void test85465() throws Exception {
 		singleUnitBugHelper("Varargs1", true);
 	}
+
+	public void test97507() throws Exception {
+		singleUnitBugHelper("CtorTypeArgBounds", true);
+	}
 }
