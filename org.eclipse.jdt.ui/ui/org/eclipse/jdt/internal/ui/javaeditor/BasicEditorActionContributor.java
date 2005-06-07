@@ -109,4 +109,16 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 		// register actions that have a dynamic editor.
 		bars.setGlobalActionHandler(JdtActionConstants.CONTENT_ASSIST, fContentAssist);
 	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.BasicJavaEditorActionContributor#dispose()
+	 * @since 3.1
+	 */ 
+	public void dispose() {
+		if (fRetargetContentAssist != null) {
+			fRetargetContentAssist.dispose();
+			fRetargetContentAssist= null;
+		}
+		super.dispose();
+	}
 }

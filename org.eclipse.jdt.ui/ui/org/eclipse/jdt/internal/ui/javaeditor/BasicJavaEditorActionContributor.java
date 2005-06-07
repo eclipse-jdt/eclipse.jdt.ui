@@ -28,7 +28,6 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
@@ -138,8 +137,8 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		// register actions that have a dynamic editor.
 		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_NEXT_ANNOTATION, fNextAnnotation);
 		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, fPreviousAnnotation);
-		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextAnnotation);
-		bars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, fPreviousAnnotation);
+		bars.setGlobalActionHandler(ActionFactory.NEXT.getId(), fNextAnnotation);
+		bars.setGlobalActionHandler(ActionFactory.PREVIOUS.getId(), fPreviousAnnotation);
 		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.TOGGLE_MARK_OCCURRENCES, fToggleMarkOccurrencesAction);
 
@@ -237,6 +236,11 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			getPage().removePartListener((RetargetAction) e.next());
 		fPartListeners.clear();
 
+		if (fRetargetShowJavaDoc != null) {
+			fRetargetShowJavaDoc.dispose();
+			fRetargetShowJavaDoc= null;
+		}
+		
 		setActiveEditor(null);
 		super.dispose();
 	}
