@@ -53,6 +53,7 @@ import org.eclipse.ui.texteditor.AbstractTextEditor;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
@@ -399,6 +400,17 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 			initializeViewerColors();
 		}
 	}
+	
+	/*
+	 * @see org.eclipse.jface.text.ITextViewer#resetVisibleRegion()
+	 * @since 3.1
+	 */
+	public void resetVisibleRegion() {
+		super.resetVisibleRegion();
+		// re-enable folding if ProjectionViewer failed to due so
+		if (fPreferenceStore != null && fPreferenceStore.getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED) && !isProjectionMode())
+			enableProjection();
+	}
 
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewer#createControl(org.eclipse.swt.widgets.Composite, int)
@@ -477,7 +489,7 @@ public class JavaSourceViewer extends ProjectionViewer implements IPropertyChang
 	 * @return the reconciler or <code>null</code> if not set
 	 * @since 3.0
 	 */
-	Object getReconciler() {
+	IReconciler getReconciler() {
 		return fReconciler;
 	}
 
