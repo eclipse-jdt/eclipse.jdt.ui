@@ -109,12 +109,14 @@ public class ClasspathModifier {
 	protected List createLinkedSourceFolder(ILinkToQuery query, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		if (query.doQuery()) {
 			IFolder folder= query.getCreatedFolder();
-			List folderList= new ArrayList();
-			folderList.add(folder);
-			List root= addToClasspath(folderList, project, query.getOutputFolderQuery(), monitor);
-			if (root.size() == 0)
-				folder.delete(false, null);
-			return root;
+			if (folder != null) {
+				List folderList= new ArrayList();
+				folderList.add(folder);
+				List root= addToClasspath(folderList, project, query.getOutputFolderQuery(), monitor);
+				if (root.size() == 0)
+					folder.delete(false, null);
+				return root;
+			}
 		}
 		return new ArrayList();
 	}
