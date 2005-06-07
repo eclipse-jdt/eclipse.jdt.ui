@@ -45,6 +45,8 @@ import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -312,26 +314,25 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		private final SelectionButtonDialogField fUseDefaultJRE, fUseProjectJRE;
 		private final ComboDialogField fJRECombo;
 		private final Group fGroup;
+		private String[] fComplianceLabels;
 		
 		public JREGroup(Composite composite) {
+			fComplianceLabels= new String[] { NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_compliance_13, NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_compliance_14, NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_compliance_50 };
 			
 			fGroup= new Group(composite, SWT.NONE);
 			fGroup.setFont(composite.getFont());
 			fGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fGroup.setLayout(initGridLayout(new GridLayout(3, false), true));
 			fGroup.setText(NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_title); 
-			
-			//String compliance= "1.3";
-			//String text= Messages.format("Use default JRE and compliance", compliance);
-			
+						
 			fUseDefaultJRE= new SelectionButtonDialogField(SWT.RADIO);
-			fUseDefaultJRE.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_default_compliance);
+			fUseDefaultJRE.setLabelText(getDefaultComplianceLabel());
 			fUseDefaultJRE.doFillIntoGrid(fGroup, 2);
 			
 			Link link= new Link(fGroup, SWT.NONE);
 			link.setFont(fGroup.getFont());
 			link.setText(NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_link_description);
-			link.setLayoutData(new GridData(GridData.END, GridData.CENTER, true, false));
+			link.setLayoutData(new GridData(GridData.END, GridData.CENTER, false, false));
 			link.addSelectionListener(this);
 		
 			fUseProjectJRE= new SelectionButtonDialogField(SWT.RADIO);
@@ -340,24 +341,30 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			fUseProjectJRE.setDialogFieldListener(this);
 						
 			fJRECombo= new ComboDialogField(SWT.READ_ONLY);
-			fJRECombo.setItems(new String[] { NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_compliance_13, NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_compliance_14, NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_compliance_50 });
-			
-			String compliance= JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
-			if (JavaCore.VERSION_1_3.equals(compliance)) {
-				fJRECombo.selectItem(0);
-			} else if (JavaCore.VERSION_1_4.equals(compliance)) {
-				fJRECombo.selectItem(1);
-			} else {
-				fJRECombo.selectItem(2);
-			}
+			fJRECombo.setItems(fComplianceLabels);
+			fJRECombo.selectItem(getCurrentCompliance());
 
 			Combo comboControl= fJRECombo.getComboControl(fGroup);
-			comboControl.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false));
+			comboControl.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, true, false)); // make sure column 2 is grabing (but no fill)
 			
 			DialogField.createEmptySpace(fGroup);
 			
 			fUseDefaultJRE.setSelection(true);
 			fJRECombo.setEnabled(fUseProjectJRE.isSelected());
+		}
+
+		private String getCurrentCompliance() {
+			String compliance= JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
+			if (JavaCore.VERSION_1_3.equals(compliance)) {
+				return fComplianceLabels[0];
+			} else if (JavaCore.VERSION_1_4.equals(compliance)) {
+				return fComplianceLabels[1];
+			}
+			return fComplianceLabels[2];
+		}
+
+		private String getDefaultComplianceLabel() {
+			return Messages.format(NewWizardMessages.JREGroup_default_compliance, getCurrentCompliance());
 		}
 
 		public void update(Observable o, Object arg) {
@@ -381,6 +388,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			String jreID= "org.eclipse.jdt.debug.ui.preferences.VMPreferencePage"; //$NON-NLS-1$
 			String complianceId= CompliancePreferencePage.PREF_ID;
 			PreferencesUtil.createPreferenceDialogOn(getShell(), complianceId, new String[] { jreID, complianceId  }, null).open();
+			fUseDefaultJRE.setLabelText(getDefaultComplianceLabel());
 		}
 
 		/* (non-Javadoc)
