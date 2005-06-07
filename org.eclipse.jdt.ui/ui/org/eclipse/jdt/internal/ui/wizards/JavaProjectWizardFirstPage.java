@@ -364,7 +364,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		}
 
 		private String getDefaultComplianceLabel() {
-			return Messages.format(NewWizardMessages.JREGroup_default_compliance, getCurrentCompliance());
+			return Messages.format(NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_default_compliance, getCurrentCompliance());
 		}
 
 		public void update(Observable o, Object arg) {
