@@ -13,11 +13,9 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -56,7 +54,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -89,6 +86,17 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			return (IJavaCompletionProposal[])fProposals.toArray(new IJavaCompletionProposal[fProposals.size()]);
 		}
 	}
+	
+	public static interface ILinkedModeProposal extends IJavaCompletionProposal {
+		
+		/**
+		 * Called before linked mode is entered. The linked position group gives access to all linked
+		 * positions
+		 * @param group the linked position group
+		 */
+		public void setLinkedPositionGroup(LinkedPositionGroup group);
+	}
+	
 
 	private static class LinkedModeExitPolicy implements LinkedModeUI.IExitPolicy {
 
@@ -249,11 +257,10 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		Iterator iterator= fLinkGroups.values().iterator();
 		while (iterator.hasNext()) {
 			LinkedModeGroup curr= (LinkedModeGroup) iterator.next();
+			LinkedPositionGroup group= new LinkedPositionGroup();
+			
 			List positions= curr.fPositions;
-
 			if (!positions.isEmpty()) {
-				LinkedPositionGroup group= new LinkedPositionGroup();
-
 				IJavaCompletionProposal[] linkedModeProposals= curr.getProposals();
 				if (linkedModeProposals.length <= 1) {
 					for (int i= 0; i < positions.size(); i++) {
@@ -266,12 +273,12 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 					for (int i= 0; i < positions.size(); i++) {
 						ITrackedNodePosition pos= (ITrackedNodePosition) positions.get(i);
 						if (pos.getStartPosition() != -1) {
-							ProposalPosition proposalPosition= new ProposalPosition(document, pos.getStartPosition(), pos.getLength(), fPositionOrder.indexOf(pos), linkedModeProposals);
-							for (int j= 0; j < linkedModeProposals.length; j++) {
-								if (linkedModeProposals[j] instanceof LinkedModeProposal)
-									((LinkedModeProposal)linkedModeProposals[j]).addPosition(proposalPosition);
-							}
-							group.addPosition(proposalPosition);
+							group.addPosition(new ProposalPosition(document, pos.getStartPosition(), pos.getLength(), fPositionOrder.indexOf(pos), linkedModeProposals));
+						}
+					}
+					for (int i= 0; i < linkedModeProposals.length; i++) {
+						if (linkedModeProposals[i] instanceof ILinkedModeProposal) {
+							((ILinkedModeProposal) linkedModeProposals[i]).setLinkedPositionGroup(group);
 						}
 					}
 				}
@@ -319,18 +326,18 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			return null;
 	}
 
-	private static class LinkedModeProposal implements IJavaCompletionProposal, ICompletionProposalExtension2 {
+	private static class LinkedModeProposal implements ILinkedModeProposal, ICompletionProposalExtension2 {
 
 		private String fProposal;
 		private String fDisplayString;
 		private ITypeBinding fTypeProposal;
 		private ICompilationUnit fCompilationUnit;
-		/** The set of positions that share this proposal */
-		private Set fPositions;
+		private LinkedPositionGroup fLinkedPositionGroup; // null when not in linked mode
 
 		public LinkedModeProposal(String displayString, String proposal) {
 			fProposal= proposal;
 			fDisplayString= displayString;
+			fLinkedPositionGroup= null;
 		}
 
 		public LinkedModeProposal(ICompilationUnit unit, ITypeBinding typeProposal) {
@@ -339,10 +346,11 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			fCompilationUnit= unit;
 		}
 
-		public void addPosition(Position position) {
-			if (fPositions == null)
-				fPositions= new HashSet();
-			fPositions.add(position);
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.text.correction.LinkedCorrectionProposal.ILinkedModeProposal#setLinkedPositionGroup(org.eclipse.jface.text.link.LinkedPositionGroup)
+		 */
+		public void setLinkedPositionGroup(LinkedPositionGroup group) {
+			fLinkedPositionGroup= group;
 		}
 
 		private ImportsStructure getImportStructure() throws CoreException {
@@ -367,19 +375,6 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 				}
 				IRegion region= getReplaceRegion(viewer, offset);
 				document.replace(region.getOffset(), region.getLength(), replaceString);
-				
-				if (replaceString.length() == 0) {
-					int pos= region.getOffset(); // new end position after modification
-					int k= pos;
-					int documentLen= document.getLength();
-					while (k < documentLen && Strings.isIndentChar(document.getChar(k))) {
-						k++;
-					}
-					if (k != pos) {
-						document.replace(pos, k - pos, new String());
-					}
-				}
-
 				if (impStructure != null) {
 					impStructure.create(false, null);
 				}
@@ -394,9 +389,10 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 		 * Returns the registered position for a given offset.
 		 */
 		private Position getCurrentPosition(int offset) {
-			if (fPositions != null) {
-				for (Iterator it= fPositions.iterator(); it.hasNext();) {
-					Position position= (Position) it.next();
+			if (fLinkedPositionGroup != null) {
+				LinkedPosition[] positions= fLinkedPositionGroup.getPositions();
+				for (int i= 0; i < positions.length; i++) {
+					Position position= positions[i];
 					if (position.overlapsWith(offset, 0)) {
 						return position;
 					}

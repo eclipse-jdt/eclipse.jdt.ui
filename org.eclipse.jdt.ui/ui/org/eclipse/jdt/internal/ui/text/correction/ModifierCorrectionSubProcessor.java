@@ -17,8 +17,18 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.Point;
 
 import org.eclipse.jface.text.Assert;
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentEvent;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
+import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.link.LinkedPosition;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
 
 import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -75,11 +85,14 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.correction.LinkedCorrectionProposal.ILinkedModeProposal;
 
 /**
   */
@@ -645,32 +658,108 @@ public class ModifierCorrectionSubProcessor {
 
 	private static final String KEY_MODIFIER= "modifier"; //$NON-NLS-1$
 	
+	private static class ModifierLinkedModeProposal implements ILinkedModeProposal, ICompletionProposalExtension2 {
+
+		private LinkedPositionGroup fLinkedPositionGroup;
+		private final int fModifier;
+
+		public ModifierLinkedModeProposal(int modifier) {
+			fModifier= modifier;
+		}
+		
+		public void setLinkedPositionGroup(LinkedPositionGroup group) {
+			fLinkedPositionGroup= group;
+		}
+
+		public String getAdditionalProposalInfo() {
+			return getDisplayString();
+		}
+
+		public String getDisplayString() {
+			if (fModifier == 0) {
+				return CorrectionMessages.ModifierCorrectionSubProcessor_default_visibility_label;
+			} else {
+				return ModifierKeyword.fromFlagValue(fModifier).toString();
+			}
+		}
+
+		public Image getImage() {
+			return null;
+		}
+
+		private Position getCurrentPosition(int offset) {
+			if (fLinkedPositionGroup != null) {
+				LinkedPosition[] positions= fLinkedPositionGroup.getPositions();
+				for (int i= 0; i < positions.length; i++) {
+					Position position= positions[i];
+					if (position.overlapsWith(offset, 0)) {
+						return position;
+					}
+				}
+			}
+			return null;
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
+		 */
+		public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
+			Position currentPosition= getCurrentPosition(offset);
+			if (currentPosition == null)
+				return;
+			try {
+				IDocument document= viewer.getDocument();
+				int documentLen= document.getLength();
+
+				if (fModifier == 0) {
+
+					int end= currentPosition.offset + currentPosition.length; // current end position
+					int k= end;
+					while (k < documentLen && Strings.isIndentChar(document.getChar(k))) {
+						k++;
+					}
+					// first remove space then replace range (remove space can destoy empty positon)
+					document.replace(end, k - end, new String()); // remove extra spaces
+					document.replace(currentPosition.offset, currentPosition.length, new String());
+				} else {
+					// first then replace range the insert space (insert space can destoy empty positon)
+					document.replace(currentPosition.offset, currentPosition.length, ModifierKeyword.fromFlagValue(fModifier).toString());
+					int end= currentPosition.offset + currentPosition.length; // current end position
+					if (end < documentLen && !Character.isWhitespace(document.getChar(end))) {
+						document.replace(end, 0, String.valueOf(' ')); // insert extra space
+					}
+				}
+				
+			} catch (BadLocationException e) {
+				JavaPlugin.log(e);
+			}
+		}
+
+		public int getRelevance() { return 0; 	}
+		public IContextInformation getContextInformation() { return null; }
+		public void apply(IDocument document) {} // not called
+		public Point getSelection(IDocument document) { return null; }
+		public void selected(ITextViewer viewer, boolean smartToggle) {}
+		public void unselected(ITextViewer viewer) { }
+		public boolean validate(IDocument document, int offset, DocumentEvent event) { return false; }
+	}
+	
 	public static void installLinkedVisibilityProposals(LinkedCorrectionProposal proposal, ASTRewrite rewrite, List modifiers) {
 		ASTNode modifier= findVisibilityModifier(modifiers);
 		if (modifier != null) {
 			int selected= ((Modifier) modifier).getKeyword().toFlagValue();
 			proposal.addLinkedPosition(rewrite.track(modifier), false, KEY_MODIFIER);
-			addLinkedPositionProposal(proposal, selected);
+			proposal.addLinkedPositionProposal(KEY_MODIFIER, new ModifierLinkedModeProposal(selected));
 			
 			// add all others
 			int[] flagValues= { Modifier.PUBLIC, 0, Modifier.PROTECTED, Modifier.PRIVATE };
 			for (int i= 0; i < flagValues.length; i++) {
 				if (flagValues[i] != selected) {
-					addLinkedPositionProposal(proposal, flagValues[i]);
+					proposal.addLinkedPositionProposal(KEY_MODIFIER,  new ModifierLinkedModeProposal(flagValues[i]));
 				}
 			}
 		} 
 	}
-	
-	private static void addLinkedPositionProposal(LinkedCorrectionProposal proposal, int flag) {
-		if (flag == 0) {
-			proposal.addLinkedPositionProposal(KEY_MODIFIER, CorrectionMessages.ModifierCorrectionSubProcessor_default_visibility_label, new String(), null);
-		} else {
-			String displayString= ModifierKeyword.fromFlagValue(flag).toString();
-			proposal.addLinkedPositionProposal(KEY_MODIFIER, displayString, displayString, null);
-		}
-	}
-	
 	
 	private static Modifier findVisibilityModifier(List modifiers) {
 		for (int i= 0; i < modifiers.size(); i++) {
