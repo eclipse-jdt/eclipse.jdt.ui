@@ -252,6 +252,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 
 		private final SelectionButtonDialogField fStdRadio, fSrcBinRadio;
 		private final Group fGroup;
+		private final Link fPreferenceLink;
 		
 		public LayoutGroup(Composite composite) {
 			
@@ -272,10 +273,10 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			
 			fSrcBinRadio.doFillIntoGrid(fGroup, 2);
 			
-			Link link= new Link(fGroup, SWT.NONE);
-			link.setText(NewWizardMessages.JavaProjectWizardFirstPage_LayoutGroup_link_description);
-			link.setLayoutData(new GridData(GridData.END, GridData.END, false, false));
-			link.addSelectionListener(this);
+			fPreferenceLink= new Link(fGroup, SWT.NONE);
+			fPreferenceLink.setText(NewWizardMessages.JavaProjectWizardFirstPage_LayoutGroup_link_description);
+			fPreferenceLink.setLayoutData(new GridData(GridData.END, GridData.END, false, false));
+			fPreferenceLink.addSelectionListener(this);
 						
 			boolean useSrcBin= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.SRCBIN_FOLDERS_IN_NEWPROJ);
 			fSrcBinRadio.setSelection(useSrcBin);
@@ -286,6 +287,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			final boolean detect= fDetectGroup.mustDetect();
 			fStdRadio.setEnabled(!detect);
 			fSrcBinRadio.setEnabled(!detect);
+			fPreferenceLink.setEnabled(!detect);
 			fGroup.setEnabled(!detect);
 		}
 		
@@ -314,7 +316,8 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		private final SelectionButtonDialogField fUseDefaultJRE, fUseProjectJRE;
 		private final ComboDialogField fJRECombo;
 		private final Group fGroup;
-		private String[] fComplianceLabels;
+		private final String[] fComplianceLabels;
+		private final Link fPreferenceLink;
 		
 		public JREGroup(Composite composite) {
 			fComplianceLabels= new String[] { NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_compliance_13, NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_compliance_14, NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_compliance_50 };
@@ -329,11 +332,11 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			fUseDefaultJRE.setLabelText(getDefaultComplianceLabel());
 			fUseDefaultJRE.doFillIntoGrid(fGroup, 2);
 			
-			Link link= new Link(fGroup, SWT.NONE);
-			link.setFont(fGroup.getFont());
-			link.setText(NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_link_description);
-			link.setLayoutData(new GridData(GridData.END, GridData.CENTER, false, false));
-			link.addSelectionListener(this);
+			fPreferenceLink= new Link(fGroup, SWT.NONE);
+			fPreferenceLink.setFont(fGroup.getFont());
+			fPreferenceLink.setText(NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_link_description);
+			fPreferenceLink.setLayoutData(new GridData(GridData.END, GridData.CENTER, false, false));
+			fPreferenceLink.addSelectionListener(this);
 		
 			fUseProjectJRE= new SelectionButtonDialogField(SWT.RADIO);
 			fUseProjectJRE.setLabelText(NewWizardMessages.JavaProjectWizardFirstPage_JREGroup_specific_compliance);
@@ -368,9 +371,15 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		}
 
 		public void update(Observable o, Object arg) {
+			updateEnableState();
+		}
+
+		private void updateEnableState() {
 			final boolean detect= fDetectGroup.mustDetect();
 			fUseDefaultJRE.setEnabled(!detect);
-			fJRECombo.setEnabled(!detect);
+			fUseProjectJRE.setEnabled(!detect);
+			fJRECombo.setEnabled(!detect && fUseProjectJRE.isSelected());
+			fPreferenceLink.setEnabled(!detect);
 			fGroup.setEnabled(!detect);
 		}
 		
@@ -395,7 +404,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
 		 */
 		public void dialogFieldChanged(DialogField field) {
-			fJRECombo.setEnabled(fUseProjectJRE.isSelected());
+			updateEnableState();
 		}
 		
 		public String getJRECompliance() {
