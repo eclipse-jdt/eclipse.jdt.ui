@@ -154,6 +154,17 @@ public class SelectionButtonDialogField extends DialogField {
 		}
 	}		
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField#setLabelText(java.lang.String)
+	 */
+	public void setLabelText(String labeltext) {
+		fLabelText= labeltext;
+		if (isOkToUse(fButton)) {
+			fButton.setText(labeltext);
+		}
+	}
+	
+	
 	// ------ model access	
 	
 	/**
