@@ -281,7 +281,7 @@ public class UnresolvedElementsSubProcessor {
 			targetCU= cu;
 		}
 
-		if (!senderDeclBinding.isFromSource() || targetCU == null || !JavaModelUtil.isEditable(targetCU)) {
+		if (!senderDeclBinding.isFromSource() || targetCU == null) {
 			return;
 		}
 
