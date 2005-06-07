@@ -62,7 +62,7 @@ public abstract class HierarchyType extends TType {
 			if (value != null)
 				return value.booleanValue();
 			boolean isSub= doIsSubType(other);
-			value= new Boolean(isSub);
+			value= Boolean.valueOf(isSub);
 			cache.put(key, value);
 			return isSub;
 		}
