@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
@@ -930,6 +931,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 								info.fCopy.reconcile(ICompilationUnit.NO_AST, false, null, subMonitor1);
 							} catch (JavaModelException ex) {
 								handleException(ex);
+							} catch (OperationCanceledException ex) {
+								// do not log this
 							}
 						}
 						public void handleException(Throwable ex) {
