@@ -279,6 +279,10 @@ public abstract class ModifyDialogTabPage {
 			return ""; //$NON-NLS-1$
 		}
 		
+		public boolean hasValue(String value) {
+			return value.equals(getPreferences().get(getKey()));
+		}
+		
 		public Control getControl() {
 			return fCombo;
 		}
