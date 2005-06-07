@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.folding;
 
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
@@ -275,14 +276,19 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	 */
 	private static final class JavaElementPosition extends Position implements IProjectionPosition {
 
-		private final IMember fMember;
+		private IMember fMember;
 
 		public JavaElementPosition(int offset, int length, IMember member) {
 			super(offset, length);
 			Assert.isNotNull(member);
 			fMember= member;
 		}
-
+		
+		public void setMember(IMember member) {
+			Assert.isNotNull(member);
+			fMember= member;
+		}
+		
 		/*
 		 * @see org.eclipse.jface.text.source.projection.IProjectionPosition#computeFoldingRegions(org.eclipse.jface.text.IDocument)
 		 */
@@ -360,6 +366,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	}
 
 	private IDocument fCachedDocument;
+	private ProjectionAnnotationModel fCachedModel;
 
 	private ITextEditor fEditor;
 	private ProjectionViewer fViewer;
@@ -458,7 +465,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			if (fInput != null) {
 				ProjectionAnnotationModel model= (ProjectionAnnotationModel) fEditor.getAdapter(ProjectionAnnotationModel.class);
 				if (model != null) {
-
+					fCachedModel= model;
 					if (fInput instanceof ICompilationUnit) {
 						ICompilationUnit unit= (ICompilationUnit) fInput;
 						synchronized (unit) {
@@ -484,6 +491,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 
 		} finally {
 			fCachedDocument= null;
+			fCachedModel= null;
 			fAllowCollapsing= false;
 
 			fFirstType= null;
@@ -752,6 +760,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 
 			IDocumentProvider provider= fEditor.getDocumentProvider();
 			fCachedDocument= provider.getDocument(fEditor.getEditorInput());
+			fCachedModel= model;
 			fAllowCollapsing= false;
 
 			fFirstType= null;
@@ -810,7 +819,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 					deletions.add(((Tuple) list.get(i)).annotation);
 			}
 
-			match(model, deletions, additions, updates);
+			match(deletions, additions, updates);
 
 			Annotation[] removals= new Annotation[deletions.size()];
 			deletions.toArray(removals);
@@ -821,13 +830,22 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		} finally {
 			fCachedDocument= null;
 			fAllowCollapsing= true;
+			fCachedModel= null;
 
 			fFirstType= null;
 			fHasHeaderComment= false;
 		}
 	}
 
-	private void match(ProjectionAnnotationModel model, List deletions, Map additions, List changes) {
+	/**
+	 * Matches deleted annotations to changed or added ones. A deleted
+	 * annotation/position tuple that has a matching addition / change
+	 * is updated and marked as changed. The matching tuple is not added
+	 * (for additions) or marked as deletion instead (for changes). The
+	 * result is that more annotations are changed and fewer get
+	 * deleted/re-added.
+	 */
+	private void match(List deletions, Map additions, List changes) {
 		if (deletions.isEmpty() || (additions.isEmpty() && changes.isEmpty()))
 			return;
 
@@ -835,60 +853,82 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		List newChanges= new ArrayList();
 
 		Iterator deletionIterator= deletions.iterator();
-		outer: while (deletionIterator.hasNext()) {
+		while (deletionIterator.hasNext()) {
 			JavaProjectionAnnotation deleted= (JavaProjectionAnnotation) deletionIterator.next();
-			Position deletedPosition= model.getPosition(deleted);
+			Position deletedPosition= fCachedModel.getPosition(deleted);
 			if (deletedPosition == null)
 				continue;
+			
+			Tuple deletedTuple= new Tuple(deleted, deletedPosition);
 
-			Iterator changesIterator= changes.iterator();
-			while (changesIterator.hasNext()) {
-				JavaProjectionAnnotation changed= (JavaProjectionAnnotation) changesIterator.next();
-				if (deleted.isComment() == changed.isComment()) {
-					Position changedPosition= model.getPosition(changed);
-					if (changedPosition == null)
-						continue;
-
-					if (deletedPosition.getOffset() == changedPosition.getOffset()) {
-
-						deletedPosition.setLength(changedPosition.getLength());
-						deleted.setElement(changed.getElement());
-
-						deletionIterator.remove();
-						newChanges.add(deleted);
-
-						changesIterator.remove();
-						newDeletions.add(changed);
-
-						continue outer;
-					}
-				}
+			Tuple match= findMatch(deletedTuple, changes, null);
+			boolean addToDeletions= true; 
+			if (match == null) {
+				match= findMatch(deletedTuple, additions.keySet(), additions);
+				addToDeletions= false;
 			}
-
-			Iterator additionsIterator= additions.keySet().iterator();
-			while (additionsIterator.hasNext()) {
-				JavaProjectionAnnotation added= (JavaProjectionAnnotation) additionsIterator.next();
-				if (deleted.isComment() == added.isComment()) {
-					Position addedPosition= (Position) additions.get(added);
-
-					if (deletedPosition.getOffset() == addedPosition.getOffset()) {
-
-						deletedPosition.setLength(addedPosition.getLength());
-						deleted.setElement(added.getElement());
-
-						deletionIterator.remove();
-						newChanges.add(deleted);
-
-						additionsIterator.remove();
-
-						break;
-					}
+			
+			if (match != null) {
+				IJavaElement element= match.annotation.getElement();
+				deleted.setElement(element);
+				deletedPosition.setLength(match.position.getLength());
+				if (deletedPosition instanceof JavaElementPosition && element instanceof IMember) {
+					JavaElementPosition jep= (JavaElementPosition) deletedPosition;
+					jep.setMember((IMember) element);
 				}
+
+				deletionIterator.remove();
+				newChanges.add(deleted);
+
+				if (addToDeletions)
+					newDeletions.add(match.annotation);
 			}
 		}
 
 		deletions.addAll(newDeletions);
 		changes.addAll(newChanges);
+	}
+
+	/**
+	 * Finds a match for <code>tuple</code> in a collection of
+	 * annotations. The positions for the
+	 * <code>JavaProjectionAnnotation</code> instances in
+	 * <code>annotations</code> can be found in the passed
+	 * <code>positionMap</code> or <code>fCachedModel</code> if
+	 * <code>positionMap</code> is <code>null</code>.
+	 * <p>
+	 * A tuple is said to match another if their annotations have the
+	 * same comment flag and their position offsets are equal.
+	 * </p>
+	 * <p>
+	 * If a match is found, the annotation gets removed from
+	 * <code>annotations</code>.
+	 * </p>
+	 * 
+	 * @param tuple the tuple for which we want to find a match
+	 * @param annotations collection of
+	 *        <code>JavaProjectionAnnotation</code>
+	 * @param positionMap a <code>Map&lt;Annotation, Position&gt;</code>
+	 *        or <code>null</code>
+	 * @return a matching tuple or <code>null</code> for no match
+	 */
+	private Tuple findMatch(Tuple tuple, Collection annotations, Map positionMap) {
+		Iterator it= annotations.iterator();
+		while (it.hasNext()) {
+			JavaProjectionAnnotation annotation= (JavaProjectionAnnotation) it.next();
+			if (tuple.annotation.isComment() == annotation.isComment()) {
+				Position position= positionMap == null ? fCachedModel.getPosition(annotation) : (Position) positionMap.get(annotation);
+				if (position == null)
+					continue;
+
+				if (tuple.position.getOffset() == position.getOffset()) {
+					it.remove();
+					return new Tuple(annotation, position);
+				}
+			}
+		}
+		
+		return null;
 	}
 
 	private Map createAnnotationMap(IAnnotationModel model) {
