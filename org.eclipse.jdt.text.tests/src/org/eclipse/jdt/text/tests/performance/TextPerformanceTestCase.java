@@ -17,15 +17,14 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import junit.framework.TestCase;
+
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.test.performance.Dimension;
 import org.eclipse.test.performance.Performance;
 import org.eclipse.test.performance.PerformanceMeter;
-
 import org.eclipse.jdt.text.tests.JdtTextTestPlugin;
-
-import junit.framework.TestCase;
 
 /**
  * Superclass of Text performance test cases.
@@ -381,6 +380,15 @@ public class TextPerformanceTestCase extends TestCase {
 			fgKeyboardProbe.initialize();
 		}
 		return fgKeyboardProbe;
+	}
+	
+	/*
+	 * @see PerformanceTestCase#setComment(int, String)
+	 * @since 3.1
+	 */
+	protected final void explainDegradation(String explanation, PerformanceMeter performanceMeter) {
+		Performance performance= Performance.getDefault();
+		performance.setComment(performanceMeter, Performance.EXPLAINS_DEGRADATION_COMMENT, explanation);
 	}
 
 	/**

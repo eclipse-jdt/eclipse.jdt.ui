@@ -15,6 +15,7 @@ import junit.extensions.TestSetup;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 import org.eclipse.test.performance.Dimension;
+import org.eclipse.test.performance.PerformanceMeter;
 
 
 /**
@@ -80,6 +81,9 @@ public class OpenTextEditorStartupTest extends StartupPerformanceTestCase {
 	}
 	
 	public void testTextEditorStartup() {
-		measureStartup(createPerformanceMeterForSummary(SHORT_NAME, Dimension.ELAPSED_PROCESS));
+		PerformanceMeter perfMeter= createPerformanceMeterForSummary(SHORT_NAME, Dimension.ELAPSED_PROCESS);
+		explainDegradation("The startup with open Text editor performance has been slightly decreased due to lazy plug-in and class loading", perfMeter);
+		measureStartup(perfMeter);
+		
 	}
 }
