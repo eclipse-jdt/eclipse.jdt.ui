@@ -33,20 +33,20 @@ public final class ArrayType extends TType {
 		super.initialize(binding);
 		fElementType= elementType;
 		fDimensions= binding.getDimensions();
-		if (fElementType.isParameterizedType() || fElementType.isRawType()) {
-			fErasure= getEnvironment().create(binding.getErasure());
-		} else {
+		if (fElementType.isStandardType() || fElementType.isGenericType() || fElementType.isPrimitiveType()) {
 			fErasure= this;
+		} else {
+			fErasure= getEnvironment().create(binding.getErasure());
 		}
 	}
 
 	protected void initialize(TType elementType, int dimensions) {
 		fElementType= elementType;
 		fDimensions= dimensions;
-		if (fElementType.isParameterizedType() || fElementType.isRawType()) {
-			fErasure= getEnvironment().createArrayType(elementType.getErasure(), dimensions);
-		} else {
+		if (fElementType.isStandardType() || fElementType.isGenericType() || fElementType.isPrimitiveType()) {
 			fErasure= this;
+		} else {
+			fErasure= getEnvironment().createArrayType(elementType.getErasure(), dimensions);
 		}
 	}
 

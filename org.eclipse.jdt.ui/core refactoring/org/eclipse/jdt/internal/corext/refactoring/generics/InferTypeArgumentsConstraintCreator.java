@@ -59,8 +59,11 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.GenericType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ParameterizedType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeVariable;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.WildcardType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ArrayElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
@@ -69,6 +72,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.IndependentT
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ParameterizedTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ReturnTypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TTypes;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -568,15 +572,33 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 	private void doVisitMethodInvocationArguments(IMethodBinding methodBinding, List arguments, Expression receiver, Map methodTypeVariables, Type createdType) {
 		//TODO: connect generic method type parameters, e.g. <T> void take(T t, List<T> ts)
 		ITypeBinding[] declaredParameterTypes= methodBinding.getMethodDeclaration().getParameterTypes();
-		for (int i= 0; i < declaredParameterTypes.length; i++) {
+		int lastParamIdx= declaredParameterTypes.length - 1;
+		for (int i= 0; i < arguments.size(); i++) {
 			Expression arg= (Expression) arguments.get(i);
 			ConstraintVariable2 argCv= getConstraintVariable(arg);
 			if (argCv == null)
 				continue;
-			ITypeBinding declaredParameterType= declaredParameterTypes[i];
+			
+			TType declaredParameterType;
+			int iParam;
+			if (! methodBinding.isVarargs() || i < lastParamIdx) {
+				iParam= i;
+				declaredParameterType= fTCModel.createTType(declaredParameterTypes[iParam]);
+			} else { // isVararg() && i >= lastParamIdx
+				iParam= lastParamIdx;
+				declaredParameterType= fTCModel.createTType(declaredParameterTypes[iParam]);
+				if (i == lastParamIdx && canAssignToVararg(
+						fTCModel.createTType(arg.resolveTypeBinding()),
+						(org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType) declaredParameterType)) {
+					//OK: argument will not be packed into an array
+				} else {
+					declaredParameterType= ((org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType) declaredParameterType).getComponentType();
+				}
+			}
+			
 			if (declaredParameterType.isTypeVariable()) {
 				
-				ConstraintVariable2 methodTypeVariableCv= (ConstraintVariable2) methodTypeVariables.get(declaredParameterType.getKey());
+				ConstraintVariable2 methodTypeVariableCv= (ConstraintVariable2) methodTypeVariables.get(declaredParameterType.getBindingKey());
 				if (methodTypeVariableCv != null) {
 					// e.g. t in "<T> void take(T t, List<T> ts)"
 					fTCModel.createSubtypeConstraint(argCv, methodTypeVariableCv);
@@ -585,14 +607,14 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 					if (createdType != null) {
 						//e.g. Tuple<T1, T2>: constructor Tuple(T1 t1, T2 t2)
 						ConstraintVariable2 createdTypeCv= getConstraintVariable(createdType);
-						ConstraintVariable2 elementCv= fTCModel.getElementVariable(createdTypeCv, declaredParameterType);
+						ConstraintVariable2 elementCv= fTCModel.getElementVariable(createdTypeCv, (TypeVariable) declaredParameterType);
 						// [arg] <= Elem[createdType]:
 						fTCModel.createSubtypeConstraint(argCv, elementCv);
 					}
 					if (receiver != null) {
 						//e.g. "Collection<E>: boolean add(E o)"
 						ConstraintVariable2 expressionCv= getConstraintVariable(receiver);
-						ConstraintVariable2 elementCv= fTCModel.getElementVariable(expressionCv, declaredParameterType);
+						ConstraintVariable2 elementCv= fTCModel.getElementVariable(expressionCv, (TypeVariable) declaredParameterType);
 	
 						//	//TypeVariableConstraintVariable2 typeVariableCv= fTCModel.makeTypeVariableVariable(declaredParameterType);
 						//				ConstraintVariable2 elementCv= fTCModel.makeElementVariable(expressionCv, typeVariableCv);
@@ -609,32 +631,33 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 					}
 				}
 			} else if (declaredParameterType.isParameterizedType()) {
-				ITypeBinding[] typeArguments= declaredParameterType.getTypeArguments();
-				ITypeBinding[] typeParameters= declaredParameterType.getErasure().getTypeParameters();
+				TType[] typeArguments= ((ParameterizedType) declaredParameterType).getTypeArguments();
+				TypeVariable[] typeParameters= ((GenericType) declaredParameterType.getTypeDeclaration()).getTypeParameters();
 				for (int ta= 0; ta < typeArguments.length; ta++) {
-					ITypeBinding typeArgument= typeArguments[ta];
+					TType typeArgument= typeArguments[ta];
 					if (typeArgument.isWildcardType()) {
 						// Elem[arg] <= Elem[receiver]
-						ITypeBinding bound= typeArgument.getBound();
+						WildcardType wildcardTypeArgument= (WildcardType) typeArgument;
+						TType bound= wildcardTypeArgument.getBound();
 						if (bound != null && bound.isTypeVariable()) {
-							ConstraintVariable2 methodTypeVariableCv= (ConstraintVariable2) methodTypeVariables.get(bound.getKey());
+							ConstraintVariable2 methodTypeVariableCv= (ConstraintVariable2) methodTypeVariables.get(bound.getBindingKey());
 							if (methodTypeVariableCv != null) {
 								CollectionElementVariable2 argElementCv= fTCModel.getElementVariable(argCv, typeParameters[ta]);
 								//e.g. in Collections: <T ..> T min(Collection<? extends T> coll):
-								createBoundedWildcardConstraint(typeArgument, argElementCv, methodTypeVariableCv);
+								createWildcardConstraint(wildcardTypeArgument, argElementCv, methodTypeVariableCv);
 							} else {
 								if (createdType != null) {
 									CollectionElementVariable2 argElementCv= fTCModel.getElementVariable(argCv, typeParameters[ta]);
 									ConstraintVariable2 createdTypeCv= getConstraintVariable(createdType);
 									CollectionElementVariable2 elementCv= fTCModel.getElementVariable(createdTypeCv, typeParameters[ta]);
-									createBoundedWildcardConstraint(typeArgument, argElementCv, elementCv);
+									createWildcardConstraint(wildcardTypeArgument, argElementCv, elementCv);
 								}
 								if (receiver != null) {
 									//e.g. Collection<E>: boolean addAll(Collection<? extends E> c)
 									CollectionElementVariable2 argElementCv= fTCModel.getElementVariable(argCv, typeParameters[ta]);
 									ConstraintVariable2 expressionCv= getConstraintVariable(receiver);
 									CollectionElementVariable2 elementCv= fTCModel.getElementVariable(expressionCv, typeParameters[ta]);
-									createBoundedWildcardConstraint(typeArgument, argElementCv, elementCv);
+									createWildcardConstraint(wildcardTypeArgument, argElementCv, elementCv);
 								} else {
 									//TODO: ???
 								}
@@ -645,7 +668,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 						}
 						
 					} else if (typeArgument.isTypeVariable()) {
-						ConstraintVariable2 methodTypeVariableCv= (ConstraintVariable2) methodTypeVariables.get(typeArgument.getKey());
+						ConstraintVariable2 methodTypeVariableCv= (ConstraintVariable2) methodTypeVariables.get(typeArgument.getBindingKey());
 						if (methodTypeVariableCv != null) {
 							CollectionElementVariable2 argElementCv= fTCModel.getElementVariable(argCv, typeParameters[ta]);
 							//e.g. in Collections: <T> List<T> synchronizedList(List<T> list)
@@ -654,13 +677,13 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 							if (createdType != null) {
 								CollectionElementVariable2 argElementCv= fTCModel.getElementVariable(argCv, typeParameters[ta]);
 								ConstraintVariable2 createdTypeCv= getConstraintVariable(createdType);
-								ConstraintVariable2 elementCv= fTCModel.getElementVariable(createdTypeCv, typeArgument);
+								ConstraintVariable2 elementCv= fTCModel.getElementVariable(createdTypeCv, (TypeVariable) typeArgument);
 								fTCModel.createEqualsConstraint(argElementCv, elementCv);
 							}
 							if (receiver != null) {
 								CollectionElementVariable2 argElementCv= fTCModel.getElementVariable(argCv, typeParameters[ta]);
 								ConstraintVariable2 expressionCv= getConstraintVariable(receiver);
-								ConstraintVariable2 elementCv= fTCModel.getElementVariable(expressionCv, typeArgument);
+								ConstraintVariable2 elementCv= fTCModel.getElementVariable(expressionCv, (TypeVariable) typeArgument);
 								fTCModel.createEqualsConstraint(argElementCv, elementCv);
 							} else {
 								//TODO: ???
@@ -672,11 +695,11 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 					}
 				}
 				
-			} else if (declaredParameterType.isArray()) {
+			} else if (declaredParameterType.isArrayType()) {
 				//TODO: check methodBinding.isVarargs() !
-				ITypeBinding declaredElementType= declaredParameterType.getElementType();
+				TType declaredElementType= ((org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType) declaredParameterType).getElementType();
 				if (declaredElementType.isTypeVariable()) {
-					ConstraintVariable2 methodTypeVariableCv= (ConstraintVariable2) methodTypeVariables.get(declaredElementType.getKey());
+					ConstraintVariable2 methodTypeVariableCv= (ConstraintVariable2) methodTypeVariables.get(declaredElementType.getBindingKey());
 					if (methodTypeVariableCv != null) {
 						ArrayElementVariable2 argElementCv= fTCModel.getArrayElementVariable(argCv);
 						//e.g. in Arrays: <T> List<T> asList(T... a): //<T> List<T> asList(T[] a)
@@ -689,21 +712,21 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 				}
 
 			} else { //TODO: not else, but always? Other kinds of type references?
-				ITypeBinding parameterTypeBinding= declaredParameterTypes[i];
-				if (! fTCModel.isAGenericType(parameterTypeBinding))
+				if (! fTCModel.isAGenericType(declaredParameterType))
 					continue;
-				ParameterTypeVariable2 parameterTypeCv= fTCModel.makeParameterTypeVariable(methodBinding, i);
-				ConstraintVariable2 argumentCv= getConstraintVariable((ASTNode) arguments.get(i));
-				if (argumentCv == null)
-					continue;
+				ParameterTypeVariable2 parameterTypeCv= fTCModel.makeParameterTypeVariable(methodBinding, iParam);
 				// Elem[param] =^= Elem[arg]
-				fTCModel.createElementEqualsConstraints(parameterTypeCv, argumentCv);
+				fTCModel.createElementEqualsConstraints(parameterTypeCv, argCv);
 			}
 		}
 	}
 
-	private void createBoundedWildcardConstraint(ITypeBinding typeArgument, CollectionElementVariable2 argElementCv, ConstraintVariable2 paramElementCv) {
-		if (typeArgument.isUpperbound())
+	private boolean canAssignToVararg(TType rhs, org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType lhs) {
+		return TTypes.canAssignTo(rhs.getErasure(), lhs.getErasure());
+	}
+
+	private void createWildcardConstraint(WildcardType typeArgument, CollectionElementVariable2 argElementCv, ConstraintVariable2 paramElementCv) {
+		if (typeArgument.isExtendsWildcardType())
 			fTCModel.createSubtypeConstraint(argElementCv, paramElementCv);
 		else
 			fTCModel.createSubtypeConstraint(paramElementCv, argElementCv);

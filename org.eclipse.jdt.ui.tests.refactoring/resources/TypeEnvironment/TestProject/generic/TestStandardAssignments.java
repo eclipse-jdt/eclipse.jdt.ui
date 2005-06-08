@@ -74,6 +74,10 @@ public class TestStandardAssignments<T, U extends Number, V extends Serializable
 	U u= null;
 	V v= null;
 	
+	T[] t_array= null;
+	U[] u_array= null;
+	V[] v_array= null;
+	
 	Vector<T> vector_t= null;
 	Vector<U> vector_u= null;
 	Vector<V> vector_v= null;

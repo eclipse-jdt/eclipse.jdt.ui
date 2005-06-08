@@ -394,6 +394,10 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 //		performCuOK();
 	}
 	
+	public void testCuVarargs01() throws Exception {
+		performCuOK();
+	}
+	
 	public void testCuArrays01() throws Exception {
 		if (BUG_84422) {
 			printTestDisabledMessage("BUG_84422");
