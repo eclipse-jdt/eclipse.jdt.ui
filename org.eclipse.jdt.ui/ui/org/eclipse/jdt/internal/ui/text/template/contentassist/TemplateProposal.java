@@ -127,9 +127,9 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 			// ignore - not a case sensitive match then
 		}
 
-		// see org.eclipse.jdt.internal.ui.text.java.ResultCollector.getResults
+		// see CompletionProposalCollector.computeRelevance
 		// just under keywords, but better than packages
-		final int TEMPLATE_RELEVANCE= 2;
+		final int TEMPLATE_RELEVANCE= 1;
 		return base * 16 + TEMPLATE_RELEVANCE;
 	}
 
