@@ -492,7 +492,7 @@ public class InferTypeArgumentsTCModel {
 		return makeImmutableTypeVariable(type);
 	}
 
-	private ImmutableTypeVariable2 makeImmutableTypeVariable(TType type) {
+	public ImmutableTypeVariable2 makeImmutableTypeVariable(TType type) {
 		ImmutableTypeVariable2 cv= new ImmutableTypeVariable2(type);
 		ImmutableTypeVariable2 storedCv= (ImmutableTypeVariable2) storedCv(cv);
 		if (cv == storedCv) {
