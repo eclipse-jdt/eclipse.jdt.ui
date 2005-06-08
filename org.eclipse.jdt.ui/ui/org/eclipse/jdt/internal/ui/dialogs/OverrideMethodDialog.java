@@ -38,8 +38,11 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -262,19 +265,20 @@ public class OverrideMethodDialog extends SourceActionDialog {
 
 	private CompilationUnit fUnit= null;
 
-	public OverrideMethodDialog(Shell parent, CompilationUnitEditor editor, IType type, boolean isSubType) throws JavaModelException {
-		super(parent, new BindingLabelProvider(), new OverrideMethodContentProvider(), editor, type, false);
+	public OverrideMethodDialog(Shell shell, CompilationUnitEditor editor, IType type, boolean isSubType) throws JavaModelException {
+		super(shell, new BindingLabelProvider(), new OverrideMethodContentProvider(), editor, type, false);
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		fUnit= parser.parse(type.getCompilationUnit(), true);
 		ITypeBinding binding= null;
 		if (type.isAnonymous()) {
-			final IJavaElement element= type.getParent();
-			if (element instanceof IField) {
-				final IField field= (IField) element;
-				final EnumConstantDeclaration declaration= (EnumConstantDeclaration) NodeFinder.perform(fUnit, field.getSourceRange());
-				final AnonymousClassDeclaration decl= declaration.getAnonymousClassDeclaration();
-				if (decl != null)
-					binding= decl.resolveBinding();
+			final IJavaElement parent= type.getParent();
+			if (parent instanceof IField && Flags.isEnum(((IMember) parent).getFlags())) {
+				final EnumConstantDeclaration constant= (EnumConstantDeclaration) NodeFinder.perform(fUnit, ((ISourceReference) parent).getSourceRange());
+				if (constant != null) {
+					final AnonymousClassDeclaration declaration= constant.getAnonymousClassDeclaration();
+					if (declaration != null)
+						binding= declaration.resolveBinding();
+				}
 			} else {
 				final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), ClassInstanceCreation.class);
 				if (creation != null)
@@ -319,7 +323,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 
 		((OverrideMethodContentProvider) getContentProvider()).init(overridable, typesArrays);
 
-		setTitle(JavaUIMessages.OverrideMethodDialog_dialog_title); 
+		setTitle(JavaUIMessages.OverrideMethodDialog_dialog_title);
 		setMessage(null);
 		setValidator(new OverrideMethodValidator(overridable.length));
 		setSorter(sorter);

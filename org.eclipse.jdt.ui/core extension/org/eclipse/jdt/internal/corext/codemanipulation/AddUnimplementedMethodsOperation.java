@@ -33,9 +33,11 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
@@ -176,7 +178,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 			monitor= new NullProgressMonitor();
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
-			monitor.setTaskName(CodeGenerationMessages.AddUnimplementedMethodsOperation_description); 
+			monitor.setTaskName(CodeGenerationMessages.AddUnimplementedMethodsOperation_description);
 			fCreatedMethods.clear();
 			final ICompilationUnit unit= fType.getCompilationUnit();
 			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit, fUnit);
@@ -184,7 +186,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 			ListRewrite rewriter= null;
 			if (fType.isAnonymous()) {
 				final IJavaElement parent= fType.getParent();
-				if (parent instanceof IField) {
+				if (parent instanceof IField && Flags.isEnum(((IMember) parent).getFlags())) {
 					final EnumConstantDeclaration constant= (EnumConstantDeclaration) NodeFinder.perform(rewrite.getRoot(), ((ISourceReference) parent).getSourceRange());
 					if (constant != null) {
 						final AnonymousClassDeclaration declaration= constant.getAnonymousClassDeclaration();
@@ -194,13 +196,14 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 								rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
 						}
 					}
-				}
-				final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), ClassInstanceCreation.class);
-				if (creation != null) {
-					binding= creation.resolveTypeBinding();
-					final AnonymousClassDeclaration declaration= creation.getAnonymousClassDeclaration();
-					if (declaration != null)
-						rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+				} else {
+					final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), ClassInstanceCreation.class);
+					if (creation != null) {
+						binding= creation.resolveTypeBinding();
+						final AnonymousClassDeclaration declaration= creation.getAnonymousClassDeclaration();
+						if (declaration != null)
+							rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+					}
 				}
 			} else {
 				final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), AbstractTypeDeclaration.class);
