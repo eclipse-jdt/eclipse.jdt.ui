@@ -54,7 +54,6 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.progress.UIJob;
 
@@ -86,6 +85,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
@@ -195,7 +195,7 @@ public class TypeInfoViewer {
 		}
 	}
 	
-	protected static class TypeInfoLabelProvider extends LabelProvider {
+	protected static class TypeInfoLabelProvider {
 		
 		private Map fLib2Name= new HashMap();
 		private String[] fInstallLocations;
@@ -325,12 +325,11 @@ public class TypeInfoViewer {
 			result.append(getContainerName(type));
 			return result.toString();
 		}
-		public Image getImage(Object element) {
+		public ImageDescriptor getImageDescriptor(Object element) {
 			TypeInfo type= (TypeInfo)element;
 			int modifiers= type.getModifiers();
-			ImageDescriptor descriptor= JavaElementImageProvider.
-				getTypeImageDescriptor(type.isInnerType(), false, modifiers, false);
-			return JavaPlugin.getImageDescriptorRegistry().get(descriptor);
+			return JavaElementImageProvider.getTypeImageDescriptor(
+				type.isInnerType(), false, modifiers, false);
 		}
 		
 		private String getTypeContainerName(TypeInfo info) {
@@ -496,7 +495,7 @@ public class TypeInfoViewer {
 			TypeInfo type= null;
 			TypeInfo next= null;
 			List elements= new ArrayList();
-			List images= new ArrayList();
+			List imageDescriptors= new ArrayList();
 			List labels= new ArrayList();
 			
 			Set filteredHistory= new HashSet();
@@ -509,7 +508,7 @@ public class TypeInfoViewer {
 					next= (i == matchingTypes.length) ? null : matchingTypes[i];
 					filteredHistory.add(type);
 					elements.add(type);
-					images.add(fLabelProvider.getImage(type));
+					imageDescriptors.add(fLabelProvider.getImageDescriptor(type));
 					labels.add(fLabelProvider.getText(last, type, next));
 					last= type;
 					type= next;
@@ -518,7 +517,7 @@ public class TypeInfoViewer {
 			}
 			matchingTypes= null;
 			fViewer.fExpectedItemCount= elements.size();
-			fViewer.addHistory(fTicket, elements, images, labels);
+			fViewer.addHistory(fTicket, elements, imageDescriptors, labels);
 			
 			if ((fMode & INDEX) == 0) {
 				return;
@@ -539,7 +538,7 @@ public class TypeInfoViewer {
 			while (true) {
 				long startTime= System.currentTimeMillis();
 				elements.clear();
-				images.clear();
+				imageDescriptors.clear();
 				labels.clear();
 	            int delta = Math.min(nextIndex == 1 ? fViewer.getNumberOfVisibleItems() : 10, result.length - processed);
 				if (delta == 0)
@@ -549,13 +548,13 @@ public class TypeInfoViewer {
 					next= (nextIndex == result.length) ? null : result[nextIndex];
 					elements.add(type);
 					labels.add(fLabelProvider.getText(last, type, next));
-					images.add(fLabelProvider.getImage(type));
+					imageDescriptors.add(fLabelProvider.getImageDescriptor(type));
 					last= type;
 					type= next;
 					nextIndex++;
 					delta--;
 				}
-				fViewer.addAll(fTicket, elements, images, labels);
+				fViewer.addAll(fTicket, elements, imageDescriptors, labels);
 				long sleep= 100 - (System.currentTimeMillis() - startTime);
 				if (false)
 					System.out.println("Sleeping for: " + sleep); //$NON-NLS-1$
@@ -747,6 +746,8 @@ public class TypeInfoViewer {
 	private String[] fLastLabels;
 	
 	private TypeInfoLabelProvider fLabelProvider;
+	private ImageDescriptorRegistry fImageDescriptorRegistry;
+	
 	private Table fTable;
 	
 	private SyncJob fSyncJob;
@@ -773,7 +774,7 @@ public class TypeInfoViewer {
 	private static final TypeInfo[] EMTPY_TYPE_INFO_ARRAY= new TypeInfo[0];
 	// only needed when in virtual table mode
 	private static final TypeInfo DASH_LINE= new UnresolvableTypeInfo(null, null, null, 0, null);
-	
+
 	public TypeInfoViewer(Composite parent, int flags, Label progressLabel, IJavaSearchScope scope, int elementKind, String initialFilter) {
 		Assert.isNotNull(scope);
 		fDisplay= parent.getDisplay();
@@ -869,7 +870,7 @@ public class TypeInfoViewer {
 		// Access the image descriptor registry from the UI thread to make
 		// sure that first initialization takes place in UI thread. Otherwise
 		// it could happen in search job which will result in an invalid thread access.
-		JavaPlugin.getImageDescriptorRegistry();
+		fImageDescriptorRegistry= JavaPlugin.getImageDescriptorRegistry();
 		
 		fHistory= TypeInfoHistory.getInstance();
 		if (initialFilter != null && initialFilter.length() > 0)
@@ -1012,7 +1013,7 @@ public class TypeInfoViewer {
 			for (int i= 0; i < historyItems.length; i++) {
 				TypeInfo next= i == lastIndex ? null : historyItems[i + 1];
 				addSingleElement(type,
-					fLabelProvider.getImage(type),
+					fImageDescriptorRegistry.get(fLabelProvider.getImageDescriptor(type)),
 					fLabelProvider.getText(last, type, next));
 				last= type;
 				type= next;
@@ -1123,16 +1124,18 @@ public class TypeInfoViewer {
 		});
 	}
 
-	private void addHistory(int ticket, final List elements, final List images, final List labels) {
-		addAll(ticket, elements, images, labels);
+	private void addHistory(int ticket, final List elements, final List imageDescriptors, final List labels) {
+		addAll(ticket, elements, imageDescriptors, labels);
 	}
 	
-	private void addAll(int ticket, final List elements, final List images, final List labels) {
+	private void addAll(int ticket, final List elements, final List imageDescriptors, final List labels) {
 		syncExec(ticket, new Runnable() {
 			public void run() {
 				int size= elements.size();
 				for(int i= 0; i < size; i++) {
-					addSingleElement(elements.get(i), (Image)images.get(i), (String)labels.get(i));
+					addSingleElement(elements.get(i),
+						fImageDescriptorRegistry.get((ImageDescriptor)imageDescriptors.get(i)),
+						(String)labels.get(i));
 				}
 			}
 		});
@@ -1308,7 +1311,7 @@ public class TypeInfoViewer {
 			fillDashLine(item);
 		} else {
 			item.setData(type);
-			item.setImage(fLabelProvider.getImage(type));
+			item.setImage(fImageDescriptorRegistry.get(fLabelProvider.getImageDescriptor(type)));
 			item.setText(fLabelProvider.getText(
 				getTypeInfo(index - 1), 
 				type, 
