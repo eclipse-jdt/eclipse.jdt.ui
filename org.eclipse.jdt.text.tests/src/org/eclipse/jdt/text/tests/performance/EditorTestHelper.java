@@ -55,6 +55,7 @@ import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
 import org.eclipse.ui.IViewReference;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
@@ -155,15 +156,24 @@ public class EditorTestHelper {
 	}
 	
 	public static void closeEditor(IEditorPart editor) {
-		IWorkbenchPage page= getActivePage();
+		if (editor == null && editor.getSite() != null)
+			return;
+		
+		IWorkbenchPage page= editor.getSite().getPage();
 		if (page != null)
 			page.closeEditor(editor, false);
 	}
 	
 	public static void closeAllEditors() {
-		IWorkbenchPage page= getActivePage();
-		if (page != null)
-			page.closeAllEditors(false);
+		IWorkbenchWindow[] windows= PlatformUI.getWorkbench().getWorkbenchWindows();
+		for (int i= 0; i < windows.length; i++) {
+			IWorkbenchPage[] pages= windows[i].getPages();
+			for (int j= 0; j < pages.length; j++) {
+				IEditorReference[] editorReferences= pages[j].getEditorReferences();
+				for (int k= 0; k < editorReferences.length; k++)
+					closeEditor(editorReferences[k].getEditor(false));
+			}
+		}
 	}
 	
 	/**
