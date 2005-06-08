@@ -275,9 +275,12 @@ public class CPListElement {
 		if (hideOutputFolder && fEntryKind == IClasspathEntry.CPE_SOURCE) {
 			return getFilteredChildren(new String[] { OUTPUT });
 		}
-		if (fParentContainer != null && fEntryKind != IClasspathEntry.CPE_SOURCE) {
-			// don't show access rules for children of containers
-			//return getFilteredChildren(new String[] { ACCESSRULES, COMBINE_ACCESSRULES, NATIVE_LIB_PATH });
+		if (fParentContainer instanceof CPListElement) {
+			IPath jreContainerPath= new Path(JavaRuntime.JRE_CONTAINER);
+			if (jreContainerPath.isPrefixOf(((CPListElement) fParentContainer).getPath())) {
+				// don't show access rules and native path for containers (bug 98710)
+				return getFilteredChildren(new String[] { ACCESSRULES, COMBINE_ACCESSRULES, NATIVE_LIB_PATH });
+			}
 		}
 		if (fEntryKind == IClasspathEntry.CPE_PROJECT) {
 			return getFilteredChildren(new String[] { COMBINE_ACCESSRULES });
