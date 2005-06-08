@@ -33,6 +33,10 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstallType;
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -244,5 +248,18 @@ public class BuildPathSupport {
 		return result[0];
 	}
 
-	
+	public static IVMInstall findMatchingJREInstall(String compliance) {
+		IVMInstallType[] installTypes= JavaRuntime.getVMInstallTypes();
+		for (int i= 0; i < installTypes.length; i++) {
+			IVMInstall[] installs= installTypes[i].getVMInstalls();
+			for (int k= 0; k < installs.length; k++) {
+				IVMInstall inst= installs[k];
+				String version= inst.getJavaVersion();
+				if (version != null && version.startsWith(compliance)) {
+					return inst;
+				}
+			}
+		}
+		return null;
+	}
 }

@@ -45,7 +45,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -54,6 +53,7 @@ import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 
 /**
  * As addition to the JavaCapabilityConfigurationPage, the wizard does an
@@ -231,17 +231,10 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			return defaultJRELibrary;
 		}
 		// try to find a compatible JRE
-		IVMInstallType[] installTypes= JavaRuntime.getVMInstallTypes();
-		for (int i= 0; i < installTypes.length; i++) {
-			IVMInstall[] installs= installTypes[i].getVMInstalls();
-			for (int k= 0; k < installs.length; k++) {
-				IVMInstall inst= installs[k];
-				String version= inst.getJavaVersion();
-				if (version != null && version.startsWith(compliance)) { //$NON-NLS-1$
-					IPath newPath= jreContainerPath.append(inst.getVMInstallType().getId()).append(inst.getName());
-					return new IClasspathEntry[] { JavaCore.newContainerEntry(newPath) };
-				}
-			}
+		IVMInstall inst= BuildPathSupport.findMatchingJREInstall(compliance);
+		if (inst != null) {
+			IPath newPath= jreContainerPath.append(inst.getVMInstallType().getId()).append(inst.getName());
+			return new IClasspathEntry[] { JavaCore.newContainerEntry(newPath) };
 		}
 		return defaultJRELibrary;
 	}

@@ -68,7 +68,7 @@ public abstract class PropertyAndPreferencePage extends PreferencePage implement
 	private IProject fProject; // project or null
 	private Map fData; // page data
 	
-	private static final String DATA_NO_LINK= "PropertyAndPreferencePage.nolink"; //$NON-NLS-1$
+	public static final String DATA_NO_LINK= "PropertyAndPreferencePage.nolink"; //$NON-NLS-1$
 	
 	public PropertyAndPreferencePage() {
 		fBlockStatus= new StatusInfo();

@@ -646,6 +646,8 @@ public final class NewWizardMessages extends NLS {
 	public static String ClasspathModifierQueries_confirm_remove_linked_folder_message;
 	public static String ClasspathModifierQueries_delete_linked_folder;
 	public static String ClasspathModifierQueries_do_not_delete_linked_folder;
+	public static String EditVariableEntryDialog_filename_empty;
+	public static String JavaProjectWizardFirstPage_DetectGroup_jre_message;
 
 
 
