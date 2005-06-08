@@ -1,23 +1,6 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <?eclipse version="3.0"?>
-<plugin
-   id="org.eclipse.jdt.ui.examples.projects"
-   name="%pluginName"
-   version="3.1.0"
-   provider-name="%providerName"
-   class="org.eclipse.jdt.internal.ui.exampleprojects.ExampleProjectsPlugin">
-
-   <runtime>
-      <library name="jdtexamples.jar"/>
-   </runtime>
-   <requires>
-      <import plugin="org.eclipse.ui.ide"/>
-      <import plugin="org.eclipse.core.resources"/>
-      <import plugin="org.eclipse.ui"/>
-      <import plugin="org.eclipse.core.runtime"/>
-   </requires>
-   <extension-point id="exampleProject" name="Example Project" schema="schema/exampleProject.exsd"/>
-
+<plugin>
    <extension
          point="org.eclipse.ui.newWizards">
       <category
