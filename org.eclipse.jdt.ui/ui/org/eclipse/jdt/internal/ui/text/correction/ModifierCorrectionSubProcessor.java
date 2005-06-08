@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -788,38 +787,30 @@ public class ModifierCorrectionSubProcessor {
 		if (warningToken == null) {
 			return;
 		}
-		for (Iterator iter= proposals.iterator(); iter.hasNext();) {
+		/*for (Iterator iter= proposals.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof ICommandAccess && ADD_SUPPRESSWARNINGS_ID.equals(((ICommandAccess) element).getCommandId())) {
 				return; // only one at a time
 			}
-		}
+		}*/
 		
-		ASTNode node= context.getCoveringNode();
-		
-		ASTNode target= getParentAnnotationHolder(node);
-		if (target == null) {
+		ASTNode node= problem.getCoveringNode(context.getASTRoot());
+		if (node == null) {
 			return;
 		}
-		if (!(target instanceof BodyDeclaration)) {
-			switch (problem.getProblemId()) {
-				case IProblem.LocalVariableHidingLocalVariable:
-				case IProblem.LocalVariableHidingField:
-				case IProblem.FieldHidingLocalVariable:
-				case IProblem.FieldHidingField:
-				case IProblem.ArgumentHidingLocalVariable:
-				case IProblem.ArgumentHidingField:
-				case IProblem.UseAssertAsAnIdentifier:
-				case IProblem.UseEnumAsAnIdentifier:
-				case IProblem.UnusedPrivateField:
-				case IProblem.LocalVariableIsNeverUsed:
-				case IProblem.ArgumentIsNeverUsed:
-					proposals.add(getSuppressWarningsProposal(context.getCompilationUnit(), target, warningToken, -2));
-					break;
+		if (node.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
+			ASTNode parent= node.getParent();
+			if (parent.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
+				proposals.add(getSuppressWarningsProposal(context.getCompilationUnit(), parent.getParent(), warningToken, -2));
+				return;
 			}
-			target= getParentAnnotationHolder(target.getParent());
+		} else if (node.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY) {
+			proposals.add(getSuppressWarningsProposal(context.getCompilationUnit(), node, warningToken, -2));
+			return;
 		}
-		if (target instanceof BodyDeclaration) {
+		
+		ASTNode target= ASTResolving.findParentBodyDeclaration(node);
+		if (target != null) {
 			proposals.add(getSuppressWarningsProposal(context.getCompilationUnit(), target, warningToken, -3));
 		}
 	}
@@ -959,26 +950,4 @@ public class ModifierCorrectionSubProcessor {
 		}
 		return null;
 	}
-	
-	private static ASTNode getParentAnnotationHolder(ASTNode node) {
-		while (node != null) {
-			switch (node.getNodeType()) {
-				case ASTNode.SINGLE_VARIABLE_DECLARATION:
-				case ASTNode.VARIABLE_DECLARATION_STATEMENT:
-				case ASTNode.TYPE_DECLARATION:
-				case ASTNode.ANNOTATION_TYPE_DECLARATION:
-				case ASTNode.ENUM_DECLARATION:
-				case ASTNode.FIELD_DECLARATION:	
-				case ASTNode.INITIALIZER:
-				case ASTNode.METHOD_DECLARATION:
-				case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
-				case ASTNode.ENUM_CONSTANT_DECLARATION:
-					return node;
-			}
-			node= node.getParent();
-		}
-		return null;
-	}
-
-	
 }
