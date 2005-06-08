@@ -160,7 +160,10 @@ public class NLSHint {
 							ICompilationUnit bundleCU= (ICompilationUnit)type.getJavaElement().getAncestor(IJavaElement.COMPILATION_UNIT); 
 							if (fCache_CU == null || !fCache_CU.equals(bundleCU) || fCache_AST == null) {
 								fCache_CU= bundleCU;
-								fCache_AST=	JavaPlugin.getDefault().getASTProvider().getAST(fCache_CU, ASTProvider.WAIT_YES, null);
+								if (fCache_CU != null)
+									fCache_AST=	JavaPlugin.getDefault().getASTProvider().getAST(fCache_CU, ASTProvider.WAIT_YES, null);
+								else
+									fCache_AST= null;
 							}
 							bundleName = NLSHintHelper.getResourceBundleName(type, fCache_AST);
 						} catch (JavaModelException e) {
