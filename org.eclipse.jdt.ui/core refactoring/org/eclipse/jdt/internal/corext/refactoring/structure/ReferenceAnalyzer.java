@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MemberRef;
@@ -43,8 +44,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 	//---- Moved members are handled by the MovedMemberAnalyzer --------------
 
 	public boolean visit(TypeDeclaration node) {
-		if (isMovedMember(node.resolveBinding()))
-			return false;
+		ITypeBinding binding= node.resolveBinding();
+		if (binding != null) {
+			binding= binding.getTypeDeclaration();
+			if (isMovedMember(binding))
+				return false;
+		}
 		return super.visit(node);
 	}
 	
@@ -101,8 +106,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 	//---- method invocations ----------------------------------
 	
 	public boolean visit(MethodInvocation node) {
-		if (isMovedMember(node.resolveMethodBinding()))
-			rewrite(node, fTarget);
+		IMethodBinding binding= node.resolveMethodBinding();
+		if (binding != null) {
+			binding= binding.getMethodDeclaration();
+			if (isMovedMember(binding))
+				rewrite(node, fTarget);
+		}
 		return super.visit(node);
 	}
 	
