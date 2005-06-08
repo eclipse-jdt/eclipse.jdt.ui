@@ -91,7 +91,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor {
 
 	/** Number of compilation units to parse at once */
-	private static final int SIZE_BATCH= 1000;
+	private static final int SIZE_BATCH= 500;
 
 	/**
 	 * Returns a new ast node corresponding to the given type.
