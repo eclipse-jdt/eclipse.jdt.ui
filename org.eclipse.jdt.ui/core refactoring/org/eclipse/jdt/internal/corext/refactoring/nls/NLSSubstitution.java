@@ -27,7 +27,7 @@ public class NLSSubstitution {
 	/**
 	 * @since 3.1
 	 */
-	private String fCachedKey;
+	private String fCachedPrefixPlusKey;
 	private String fValue;
 
 	private int fInitialState;
@@ -48,7 +48,7 @@ public class NLSSubstitution {
 		fState= state;
 		fInitialState= state;
 		fInitialValue= value;
-		fCachedKey= null;
+		fCachedPrefixPlusKey= null;
 		Assert.isTrue(state == EXTERNALIZED || state == IGNORED || state == INTERNALIZED);
 	}
 
@@ -83,8 +83,6 @@ public class NLSSubstitution {
 	}
 	
 	public String getKeyWithoutPrefix() {
-		if (fState == EXTERNALIZED && fPrefix != null && fKey != null && fKey.indexOf(fPrefix) == 0)
-			return fKey.substring(fPrefix.length());
 		return fKey;
 	}
 
@@ -93,8 +91,8 @@ public class NLSSubstitution {
 	 * @return prefix + key when 
 	 */
 	public String getKey() {
-		if (fCachedKey == null) {
-			if ((fState == EXTERNALIZED) && hasStateChanged()) {
+		if ((fState == EXTERNALIZED) && hasStateChanged()) {
+			if (fCachedPrefixPlusKey == null) {
 				int length= 0;
 				if (fPrefix != null)
 					length= length + fPrefix.length(); 
@@ -103,18 +101,18 @@ public class NLSSubstitution {
 				StringBuffer sb= new StringBuffer(length);
 				sb.append(fPrefix);
 				sb.append(fKey);
-				fCachedKey= sb.toString();
-			} else
-				fCachedKey= fKey;
+				fCachedPrefixPlusKey= sb.toString();
+			}
+			return fCachedPrefixPlusKey;
 		}
-		return fCachedKey;
+		return fKey;
 	}
 
 	public void setKey(String key) {
 		if (fState != EXTERNALIZED) {
 			throw new IllegalStateException("Must be in Externalized State !"); //$NON-NLS-1$
 		}
-		fCachedKey= null;
+		fCachedPrefixPlusKey= null;
 		fKey= key;
 	}
 
@@ -145,7 +143,7 @@ public class NLSSubstitution {
 	}
 
 	public void setState(int state) {
-		fCachedKey= null;
+		fCachedPrefixPlusKey= null;
 		fState= state;
 	}
 	
@@ -254,7 +252,7 @@ public class NLSSubstitution {
 	 */
 	public void setPrefix(String prefix) {
 		fPrefix= prefix;
-		fCachedKey= null;
+		fCachedPrefixPlusKey= null;
 	}
 
 	public boolean isConflicting(NLSSubstitution[] substitutions) {
@@ -274,6 +272,12 @@ public class NLSSubstitution {
 		return false;
 	}
 
+	private String internalGetKeyWithoutPrefix() {
+		if (fState == EXTERNALIZED && fPrefix != null && fKey != null && fKey.indexOf(fPrefix) == 0)
+			return fKey.substring(fPrefix.length());
+		return fKey;
+	}
+
 	public void generateKey(NLSSubstitution[] substitutions) {
 		if (fState != EXTERNALIZED || ((fState == EXTERNALIZED) && hasStateChanged())) {
 			int min= Integer.MAX_VALUE;
@@ -284,7 +288,7 @@ public class NLSSubstitution {
 				if (substitution == this || substitution.fState != EXTERNALIZED)
 					continue;
 				try {
-					int value= Integer.parseInt(substitution.getKeyWithoutPrefix());
+					int value= Integer.parseInt(substitution.internalGetKeyWithoutPrefix());
 					min= Math.min(min, value);
 					max= Math.max(max, value);
 				} catch (NumberFormatException ex) {
@@ -292,7 +296,7 @@ public class NLSSubstitution {
 				}
 			}
 			
-			fCachedKey= null;
+			fCachedPrefixPlusKey= null;
 			if (min == Integer.MAX_VALUE)
 				fKey= createKey(0);
 			else if (min > 0)
@@ -315,7 +319,7 @@ public class NLSSubstitution {
 	public void revert() {
 		fState= fInitialState;
 		fKey= fInitialKey;
-		fCachedKey= null;
+		fCachedPrefixPlusKey= null;
 		fValue= fInitialValue;
 	}
 
