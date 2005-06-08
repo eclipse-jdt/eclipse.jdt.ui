@@ -79,8 +79,8 @@ public class BracketInserterTest extends TestCase {
 				"    void foo(String[] args) {\n" + 
 				"        \n" + 
 				"    }\n" + 
-				"    " +
-				"    HashMap hm= new HashMap();" +
+				"    \n" +
+				"    HashMap hm= new HashMap();\n" +
 				"}\n";
 	
 	// document offsets 
@@ -89,7 +89,7 @@ public class BracketInserterTest extends TestCase {
 	private static final int BRACKETS_OFFSET= 178;
 	private static final int MAIN_VOID_OFFSET= 161;
 	private static final int FOO_VOID_OFFSET= 207;
-	private static final int FIELD_OFFSET= 263;
+	private static final int FIELD_OFFSET= 264;
 	
 	public static Test suite() {
 		return new TestSuite(BracketInserterTest.class);
@@ -104,9 +104,6 @@ public class BracketInserterTest extends TestCase {
 	protected void setUp() throws Exception {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
-
-		setUpProject(JavaCore.VERSION_1_4);
-		setUpEditor();
 	}
 	
 	private void setUpProject(String sourceLevel) throws CoreException, JavaModelException {
@@ -139,7 +136,7 @@ public class BracketInserterTest extends TestCase {
 	}
 	
 	protected void tearDown() throws Exception {
-		EditorTestHelper.closeAllEditors();
+		EditorTestHelper.closeEditor(fEditor);
 		JavaProjectHelper.delete(fProject);
 
 		// reset to defaults
@@ -147,7 +144,8 @@ public class BracketInserterTest extends TestCase {
 		store.setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
 	}
 	
-	public void testInsertClosingParenthesis() throws BadLocationException {
+	public void testInsertClosingParenthesis() throws BadLocationException, JavaModelException, CoreException, JavaModelException, CoreException {
+		use14();
 		setCaret(BODY_OFFSET);
 		type('(');
 		
@@ -155,7 +153,8 @@ public class BracketInserterTest extends TestCase {
 		assertSingleLinkedPosition(BODY_OFFSET + 1);
 	}
 	
-	public void testDeletingParenthesis() {
+	public void testDeletingParenthesis() throws JavaModelException, CoreException {
+		use14();
 		setCaret(BODY_OFFSET);
 		type('(');
 		type(SWT.BS);
@@ -164,7 +163,8 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 	
-	public void testMultipleParenthesisInsertion() throws BadLocationException {
+	public void testMultipleParenthesisInsertion() throws BadLocationException, JavaModelException, CoreException {
+		use14();
 		setCaret(BODY_OFFSET);
 		type('(');
 		type('(');
@@ -179,7 +179,8 @@ public class BracketInserterTest extends TestCase {
 		assertTrue(model.isNested());
 	}
 	
-	public void testDeletingMultipleParenthesisInertion() throws BadLocationException {
+	public void testDeletingMultipleParenthesisInertion() throws BadLocationException, JavaModelException, CoreException {
+		use14();
 		setCaret(BODY_OFFSET);
 		type('(');
 		type('(');
@@ -215,7 +216,8 @@ public class BracketInserterTest extends TestCase {
 		assertFalse("no linked model must exist", LinkedModeModel.hasInstalledModel(fDocument));
 	}
 	
-	public void testNoInsertInsideText() throws BadLocationException {
+	public void testNoInsertInsideText() throws BadLocationException, JavaModelException, CoreException {
+		use14();
 		setCaret(ARGS_OFFSET);
 		type('(');
 		
@@ -224,7 +226,8 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 	
-	public void testInsertInsideBrackets() throws BadLocationException {
+	public void testInsertInsideBrackets() throws BadLocationException, JavaModelException, CoreException {
+		use14();
 		setCaret(BRACKETS_OFFSET);
 		type('(');
 		
@@ -232,7 +235,8 @@ public class BracketInserterTest extends TestCase {
 		assertSingleLinkedPosition(BRACKETS_OFFSET + 1);
 	}
 	
-	public void testPeerEntry() throws BadLocationException {
+	public void testPeerEntry() throws BadLocationException, JavaModelException, CoreException {
+		use14();
 		setCaret(BODY_OFFSET);
 		type('(');
 		typeAndRun(')');
@@ -243,7 +247,8 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 	
-	public void testMultiplePeerEntry() throws BadLocationException {
+	public void testMultiplePeerEntry() throws BadLocationException, JavaModelException, CoreException {
+		use14();
 		setCaret(BODY_OFFSET);
 		type('(');
 		type('(');
@@ -272,7 +277,8 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 	
-	public void testExitOnTab() throws BadLocationException {
+	public void testExitOnTab() throws BadLocationException, JavaModelException, CoreException {
+		use14();
 		setCaret(BODY_OFFSET);
 		type('(');
 		type('(');
@@ -305,7 +311,8 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 	
-	public void testExitOnReturn() throws BadLocationException {
+	public void testExitOnReturn() throws BadLocationException, JavaModelException, CoreException {
+		use14();
 		setCaret(BODY_OFFSET);
 		type('(');
 		type('(');
@@ -319,7 +326,8 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 	
-	public void testExitOnEsc() throws BadLocationException {
+	public void testExitOnEsc() throws BadLocationException, JavaModelException, CoreException {
+		use14();
 		setCaret(BODY_OFFSET);
 		type('(');
 		type('(');
@@ -333,7 +341,8 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 	
-	public void testInsertClosingQuote() throws BadLocationException {
+	public void testInsertClosingQuote() throws BadLocationException, JavaModelException, CoreException {
+		use14();
 		setCaret(BODY_OFFSET);
 		type('"');
 		
@@ -342,7 +351,8 @@ public class BracketInserterTest extends TestCase {
 		assertSingleLinkedPosition(BODY_OFFSET + 1);
 	}
 	
-	public void testPreferences() throws BadLocationException {
+	public void testPreferences() throws BadLocationException, JavaModelException, CoreException {
+		use14();
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, false);
 		
@@ -367,7 +377,8 @@ public class BracketInserterTest extends TestCase {
 		assertFalse(LinkedModeModel.hasInstalledModel(fDocument));
 	}
 	
-	public void testAngleBracketsIn14Project() throws BadLocationException {
+	public void testAngleBracketsIn14Project() throws BadLocationException, JavaModelException, CoreException {
+		use14();
 		setCaret(BODY_OFFSET);
 		type("Test<");
 		
@@ -432,9 +443,13 @@ public class BracketInserterTest extends TestCase {
 		assertEquals(0, position.getLength());
 	}
 	
-	private void use15() throws Exception, CoreException, JavaModelException {
-		tearDown();
+	private void use15() throws CoreException, JavaModelException {
 		setUpProject(JavaCore.VERSION_1_5);
+		setUpEditor();
+	}
+	
+	private void use14() throws CoreException, JavaModelException {
+		setUpProject(JavaCore.VERSION_1_4);
 		setUpEditor();
 	}
 	
