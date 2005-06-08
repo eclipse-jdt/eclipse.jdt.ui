@@ -66,7 +66,7 @@ public final class MethodProposalInfo extends MemberProposalInfo {
 			for (int i= 0; i < parameters.length; i++) {
 				parameters[i]= SignatureUtil.getLowerBound(parameters[i]);
 			}
-			boolean isConstructor= Signature.getReturnType(fProposal.getSignature()).length == 0;
+			boolean isConstructor= fProposal.isConstructor();
 
 			return findMethod(name, parameters, isConstructor, type);
 		}

@@ -174,12 +174,15 @@ public class CompletionProposalLabelProvider {
 		// parameters
 		nameBuffer.append('(');
 		appendUnboundedParameterList(nameBuffer, methodProposal);
-		nameBuffer.append(")  "); //$NON-NLS-1$
+		nameBuffer.append(")"); //$NON-NLS-1$
 
 		// return type
-		// TODO remove SignatureUtil.fix83600 call when bugs are fixed
-		char[] returnType= createTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
-		nameBuffer.append(returnType);
+		if (!methodProposal.isConstructor()) {
+			// TODO remove SignatureUtil.fix83600 call when bugs are fixed
+			char[] returnType= createTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
+			nameBuffer.append("  "); //$NON-NLS-1$
+			nameBuffer.append(returnType);
+		}
 
 		// declaring type
 		nameBuffer.append(" - "); //$NON-NLS-1$
