@@ -31,7 +31,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -45,7 +45,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
  * 
  * @since 3.1
  */
-public class ImplementOccurrencesFinder implements IOccurrencesFinder {
+public class ImplementOccurrencesFinder implements org.eclipse.jdt.internal.ui.search.IOccurrencesFinder {
 	
 	
 	private class MethodVisitor extends ASTVisitor {
@@ -83,7 +83,7 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 	
 	private ASTNode fStart;
 	private List fResult;
-	private Name fSelectedName;
+	private ASTNode fSelectedNode;
 	private ITypeBinding fSelectedType;
 	
 	public ImplementOccurrencesFinder() {
@@ -94,17 +94,16 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 		ASTNode node= NodeFinder.perform(root, offset, length);
 		if (!(node instanceof Name))
 			return SearchMessages.ImplementOccurrencesFinder_invalidTarget;  
-
-		fSelectedName= ASTNodes.getTopMostName((Name)node);
-		ASTNode parent= fSelectedName.getParent();
-		if (!(parent instanceof SimpleType))
-			return SearchMessages.ImplementOccurrencesFinder_invalidTarget;  
-
-		ASTNode typeDeclaration= parent.getParent();
+		
+		fSelectedNode= ASTNodes.getNormalizedNode(node);
+		if (!(fSelectedNode instanceof Type))
+			return SearchMessages.ImplementOccurrencesFinder_invalidTarget;
+		
+		ASTNode typeDeclaration= fSelectedNode.getParent();
 		if (!(typeDeclaration instanceof AbstractTypeDeclaration))
 			return SearchMessages.ImplementOccurrencesFinder_invalidTarget;  
 		
-		fSelectedType= fSelectedName.resolveTypeBinding();
+		fSelectedType= ((Type)fSelectedNode).resolveBinding();
 		if (fSelectedType == null)
 			return SearchMessages.ImplementOccurrencesFinder_invalidTarget;  
 
@@ -117,8 +116,8 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 	 */
 	public List perform() {
 		fStart.accept(new MethodVisitor());
-		if (fSelectedName != null)
-			fResult.add(fSelectedName);
+		if (fSelectedNode != null)
+			fResult.add(fSelectedNode);
 		
 		return fResult;
 	}
@@ -148,12 +147,12 @@ public class ImplementOccurrencesFinder implements IOccurrencesFinder {
 	}
 	
 	public String getPluralLabel(String elementName) {
-		String[] args= new String[] {ASTNodes.asString(fSelectedName), "{0}", elementName}; //$NON-NLS-1$
+		String[] args= new String[] {ASTNodes.asString(fSelectedNode), "{0}", elementName}; //$NON-NLS-1$
 		return Messages.format(SearchMessages.ImplementOccurrencesFinder_label_plural, args); 
 	}
 	
 	public String getSingularLabel(String elementName) {
-		String[] args= new String[] {ASTNodes.asString(fSelectedName), elementName}; //$NON-NLS-1$
+		String[] args= new String[] {ASTNodes.asString(fSelectedNode), elementName}; //$NON-NLS-1$
 		return Messages.format(SearchMessages.ImplementOccurrencesFinder_label_singular, args); 
 	}
 	
