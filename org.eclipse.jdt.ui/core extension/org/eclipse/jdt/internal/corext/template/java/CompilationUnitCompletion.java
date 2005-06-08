@@ -159,11 +159,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 					return false;
 
 				ITypeHierarchy hierarchy= implementor.newSupertypeHierarchy(null);
-				IType[] interfaces= hierarchy.getRootInterfaces();
-
-				for (int i= 0; i < interfaces.length; i++)
-					if (interfaces[i].equals(interfaze))
-						return true;
+				return hierarchy.contains(interfaze);
 			} catch (JavaModelException e) {
 				// ignore and return false
 			}			
