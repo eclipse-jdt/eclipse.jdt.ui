@@ -224,7 +224,7 @@ public class EditVariableEntryDialog extends StatusDialog {
 		
 		String fileName= fFileNameField.getText();
 		if (fileName.length() == 0) {
-			// no source attachment
+			status.setError(NewWizardMessages.EditVariableEntryDialog_filename_empty);
 			return status;
 		} else {
 			if (!Path.EMPTY.isValidPath(fileName)) {
