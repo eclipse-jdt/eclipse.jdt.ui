@@ -122,7 +122,7 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 					} else if (res == 1) {
 						fBuildPathsBlock.init(JavaCore.create(getProject()), null, null);
 					} else {
-						fBuildPathsBlock.initializeTimeStamps();
+						// keep unsaved
 					}
 				}
 			} else {
@@ -200,13 +200,15 @@ public class BuildPathsPropertyPage extends PropertyPage implements IStatusChang
 	public boolean performOk() {
 		if (fBuildPathsBlock != null) {
 			getSettings().put(INDEX, fBuildPathsBlock.getPageIndex());
-			IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
-				public void run(IProgressMonitor monitor)	throws CoreException, OperationCanceledException {
-					fBuildPathsBlock.configureJavaProject(monitor);
-				}
-			};
-			WorkbenchRunnableAdapter op= new WorkbenchRunnableAdapter(runnable);
-			op.runAsUserJob(PreferencesMessages.BuildPathsPropertyPage_job_title, null);  
+			if (fBuildPathsBlock.hasChangesInDialog()) {
+				IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
+					public void run(IProgressMonitor monitor)	throws CoreException, OperationCanceledException {
+						fBuildPathsBlock.configureJavaProject(monitor);
+					}
+				};
+				WorkbenchRunnableAdapter op= new WorkbenchRunnableAdapter(runnable);
+				op.runAsUserJob(PreferencesMessages.BuildPathsPropertyPage_job_title, null);
+			}
 		}
 		return true;
 	}
