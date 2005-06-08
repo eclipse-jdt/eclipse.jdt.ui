@@ -15,6 +15,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -78,41 +79,35 @@ class SmartTypingConfigurationBlock extends AbstractConfigurationBlock {
 	 * @return the control for the preference page
 	 */
 	public Control createControl(Composite parent) {
-		boolean useCollapsibleSections= false;
+		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		scrolled.setExpandHorizontal(true);
+		scrolled.setExpandVertical(true);
 		
-		SectionManager manager;
-		Composite control, body;
-		if (useCollapsibleSections) {
-			manager= new SectionManager(JavaPlugin.getDefault().getPreferenceStore(), "smart_typing_preference_dialog_last_open_section"); //$NON-NLS-1$
-			control= manager.createSectionComposite(parent);
-			body= control;
-		} else {
-			manager= null;
-			control= new ScrolledPageContent(parent, SWT.NONE);
-			body= ((ScrolledPageContent) control).getBody();
-			GridLayout layout= new GridLayout();
-			layout.numColumns= 1;
-			body.setLayout(layout);
-		}
+		Composite control= new Composite(scrolled, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		control.setLayout(layout);
 
 		Composite composite;
 		
-		composite= createSubsection(body, manager, PreferencesMessages.SmartTypingConfigurationBlock_autoclose_title); 
+		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_autoclose_title); 
 		addAutoclosingSection(composite);
 		
-		composite= createSubsection(body, manager, PreferencesMessages.SmartTypingConfigurationBlock_automove_title); 
+		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_automove_title); 
 		addAutopositionSection(composite);
 		
-		composite= createSubsection(body, manager, PreferencesMessages.SmartTypingConfigurationBlock_tabs_title); 
+		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_tabs_title); 
 		addTabSection(composite);
 
-		composite= createSubsection(body, manager, PreferencesMessages.SmartTypingConfigurationBlock_pasting_title); 
+		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_pasting_title); 
 		addPasteSection(composite);
 		
-		composite= createSubsection(body, manager, PreferencesMessages.SmartTypingConfigurationBlock_strings_title); 
+		composite= createSubsection(control, null, PreferencesMessages.SmartTypingConfigurationBlock_strings_title); 
 		addStringsSection(composite);
-		
-		return control;
+
+		scrolled.setContent(control);
+		final Point size= control.computeSize(SWT.DEFAULT, SWT.DEFAULT);
+		scrolled.setMinSize(size.x, size.y);
+		return scrolled;
 	}
 
 	private void addStringsSection(Composite composite) {
