@@ -27,8 +27,8 @@ public class NLSSubstitutionTest extends TestCase {
 	
 	public void testGeneratedKey() {
 		NLSSubstitution[] substitutions = {
-				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "0", "v1", null, null),
-				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "2", "v2", null, null)
+				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "key.0", "v1", null, null),
+				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "key.2", "v2", null, null)
 				};
 		setPrefix("key.", substitutions);
 		
@@ -36,23 +36,23 @@ public class NLSSubstitutionTest extends TestCase {
 		subs.setState(NLSSubstitution.EXTERNALIZED);
 	    subs.setPrefix("key.");
 		subs.generateKey(substitutions);
-		assertEquals(subs.getKey(), "key.3");
+		assertEquals("key.3", subs.getKey());
 	}
 	
 	public void testGeneratedKey2() {
 		NLSSubstitution[] substitutions = {
-				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "0", "v1", null, null),
+				new NLSSubstitution(NLSSubstitution.EXTERNALIZED, "key.0", "v1", null, null),
 				new NLSSubstitution(NLSSubstitution.INTERNALIZED, "v2", null)
 				};
 		substitutions[1].setState(NLSSubstitution.EXTERNALIZED);
-		substitutions[1].generateKey(substitutions);
 		setPrefix("key.", substitutions);
+		substitutions[1].generateKey(substitutions);
 			
 		NLSSubstitution subs = new NLSSubstitution(NLSSubstitution.IGNORED, "v1", null);
 		subs.setState(NLSSubstitution.EXTERNALIZED);
 	    subs.setPrefix("key.");
 		subs.generateKey(substitutions);
-		assertEquals(subs.getKey(), "key.2");
+		assertEquals("key.2", subs.getKey());
 	}
 	
 	public void testGetKeyWithoutPrefix() {
