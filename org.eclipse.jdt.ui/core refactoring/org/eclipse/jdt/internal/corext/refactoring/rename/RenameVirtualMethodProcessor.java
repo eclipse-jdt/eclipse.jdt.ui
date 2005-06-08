@@ -108,7 +108,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			pm.beginTask("", 9); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 
-			result.merge(super.checkFinalConditions(new SubProgressMonitor(pm, 1), checkContext));
+			result.merge(super.checkFinalConditions(new SubProgressMonitor(pm, 7), checkContext));
 			if (result.hasFatalError())
 				return result;
 
@@ -120,7 +120,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 				if (isSpecialCase())
 					result.addError(RefactoringCoreMessages.RenameMethodInInterfaceRefactoring_special_case); 
 				pm.worked(1);
-				IMethod[] relatedMethods= relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 4), method, name);
+				IMethod[] relatedMethods= relatedTypeDeclaresMethodName(new SubProgressMonitor(pm, 1), method, name);
 				for (int i= 0; i < relatedMethods.length; i++) {
 					IMethod relatedMethod= relatedMethods[i];
 					RefactoringStatusContext context= JavaStatusContext.create(relatedMethod);
@@ -133,7 +133,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 						new String[]{method.getElementName(), "UnsatisfiedLinkError"})); //$NON-NLS-1$
 				}
 	
-				IMethod[] hierarchyMethods= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 2), hierarchy, method, name);
+				IMethod[] hierarchyMethods= hierarchyDeclaresMethodName(new SubProgressMonitor(pm, 1), hierarchy, method, name);
 				for (int i= 0; i < hierarchyMethods.length; i++) {
 					IMethod hierarchyMethod= hierarchyMethods[i];
 					RefactoringStatusContext context= JavaStatusContext.create(hierarchyMethod);

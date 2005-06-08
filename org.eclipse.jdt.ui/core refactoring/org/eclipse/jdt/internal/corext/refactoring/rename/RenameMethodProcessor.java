@@ -196,7 +196,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try{
 			RefactoringStatus result= new RefactoringStatus();
-			pm.beginTask("", 19); //$NON-NLS-1$
+			pm.beginTask("", 9); //$NON-NLS-1$
 			// TODO workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=40367
 			if (!Checks.isAvailable(fMethod)) {
 				result.addFatalError(RefactoringCoreMessages.RenameMethodProcessor_is_binary, JavaStatusContext.create(fMethod)); 
@@ -207,15 +207,14 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				return result;
 			pm.setTaskName(RefactoringCoreMessages.RenameMethodRefactoring_taskName_checkingPreconditions); 
 			result.merge(checkNewElementName(getNewElementName()));
-			pm.worked(1);
 			
 			boolean mustAnalyzeShadowing;
-			IMethod[] newNameMethods= searchForDeclarationsOfClashingMethods(new SubProgressMonitor(pm, 2));
+			IMethod[] newNameMethods= searchForDeclarationsOfClashingMethods(new SubProgressMonitor(pm, 1));
 			if (newNameMethods.length == 0) {
 				mustAnalyzeShadowing= false;
-				pm.worked(2);
+				pm.worked(1);
 			} else {
-				IType[] outerTypes= searchForOuterTypesOfReferences(newNameMethods, new SubProgressMonitor(pm, 3));
+				IType[] outerTypes= searchForOuterTypesOfReferences(newNameMethods, new SubProgressMonitor(pm, 1));
 				if (outerTypes.length > 0) {
 					//There exists a reference to a clashing method, where the reference is in a nested type.
 					//That nested type could be a type in a ripple method's hierarchy, which could
@@ -250,14 +249,13 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				}
 			}
 			
-			initializeMethodsToRename(new SubProgressMonitor(pm, 3));
+			initializeMethodsToRename(new SubProgressMonitor(pm, 1));
 			pm.setTaskName(RefactoringCoreMessages.RenameMethodRefactoring_taskName_searchingForReferences); 
-			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 4), result);	
+			fOccurrences= getOccurrences(new SubProgressMonitor(pm, 3), result);	
 			pm.setTaskName(RefactoringCoreMessages.RenameMethodRefactoring_taskName_checkingPreconditions); 
 			
 			if (fUpdateReferences)
 				result.merge(checkRelatedMethods());
-			pm.worked(1);
 			
 			result.merge(analyzeCompilationUnits()); //removes CUs with syntax errors
 			pm.worked(1);
@@ -265,7 +263,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			if (result.hasFatalError())
 				return result;
 			
-			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 3), result);
+			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
 			if (fUpdateReferences & mustAnalyzeShadowing)
 				result.merge(analyzeRenameChanges(new SubProgressMonitor(pm, 1)));
 			else
@@ -340,11 +338,10 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 	
 	/** */
-	SearchPattern createOccurrenceSearchPattern(IProgressMonitor pm) {
+	SearchPattern createOccurrenceSearchPattern() {
 		HashSet methods= new HashSet(fMethodsToRename);
 		methods.add(fMethod);
 		IMethod[] ms= (IMethod[]) methods.toArray(new IMethod[methods.size()]);
-		pm.done();
 		return RefactoringSearchEngine.createOrPattern(ms, IJavaSearchConstants.ALL_OCCURRENCES);
 	}
 
@@ -356,10 +353,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	 * XXX made protected to allow overriding and working around bug 39700
 	 */
 	protected SearchResultGroup[] getOccurrences(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
-		pm.beginTask("", 2);	 //$NON-NLS-1$
-		SearchPattern pattern= createOccurrenceSearchPattern(new SubProgressMonitor(pm, 1));
+		SearchPattern pattern= createOccurrenceSearchPattern();
 		return RefactoringSearchEngine.search(pattern, createRefactoringScope(),
-			new MethodOccurenceCollector(getMethod().getElementName()), new SubProgressMonitor(pm, 1), status);	
+			new MethodOccurenceCollector(getMethod().getElementName()), pm, status);	
 	}
 
 	private RefactoringStatus checkRelatedMethods() throws CoreException { 
