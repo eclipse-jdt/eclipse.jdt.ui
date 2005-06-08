@@ -416,6 +416,50 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, expected);
 	}
 
+	public void testNoAssignment() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\r\n" + 
+				"import java.util.Collection;\r\n" + 
+				"import java.util.Iterator;\r\n" + 
+				"public class A {\r\n" + 
+				"	public A() {\r\n" + 
+				"		Collection<Collection<String>> cc= null;\r\n" + 
+				"		for (final Iterator<Collection<String>> outer= cc.iterator(); outer.hasNext();) {\r\n" + 
+				"			for (final Iterator<String> inner= outer.next().iterator(); inner.hasNext();) {\r\n" + 
+				"				System.out.println(inner.next());\r\n" + 
+				"			}\r\n" + 
+				"		}\r\n" + 
+				"	}\r\n" + 
+				"}");
+		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, unit);
+
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\r\n" + 
+				"import java.util.Collection;\r\n" + 
+				"import java.util.Iterator;\r\n" + 
+				"public class A {\r\n" + 
+				"	public A() {\r\n" + 
+				"		Collection<Collection<String>> cc= null;\r\n" + 
+				"		for (Collection<String> element : cc) {\r\n" + 
+				"			for (final Iterator<String> inner= element.iterator(); inner.hasNext();) {\r\n" + 
+				"				System.out.println(inner.next());\r\n" + 
+				"			}\r\n" + 
+				"		}\r\n" + 
+				"	}\r\n" + 
+				"}");
+		String expected= buf.toString();
+		assertEqualString(preview, expected);
+	}
+
 	public void testOutsideAssignment1() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -456,31 +500,6 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 				"			test= iterator.next();\r\n" + 
 				"			String backup= test;\r\n" + 
 				"			System.out.println(backup);\r\n" + 
-				"		}\r\n" + 
-				"	}\r\n" + 
-				"}");
-		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
-
-		List proposals= fetchConvertingProposal(buf, unit);
-
-		assertNull(fConvertLoopProposal);
-
-		assertCorrectLabels(proposals);
-	}
-
-	public void testNoAssignment() throws Exception {
-		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test;\r\n" + 
-				"import java.util.Collection;\r\n" + 
-				"import java.util.Iterator;\r\n" + 
-				"public class A {\r\n" + 
-				"	public A() {\r\n" + 
-				"		Collection<Collection<String>> cc= null;\r\n" + 
-				"		for (final Iterator<Collection<String>> outer= cc.iterator(); outer.hasNext();) {\r\n" + 
-				"			for (final Iterator<String> inner= outer.next().iterator(); outer.hasNext();) {\r\n" + 
-				"				System.out.println(inner.next());\r\n" + 
-				"			}\r\n" + 
 				"		}\r\n" + 
 				"	}\r\n" + 
 				"}");
