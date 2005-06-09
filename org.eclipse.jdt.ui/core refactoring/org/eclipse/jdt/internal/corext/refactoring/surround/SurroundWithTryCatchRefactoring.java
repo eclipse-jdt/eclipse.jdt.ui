@@ -73,6 +73,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.SelectionAwareSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -256,9 +257,10 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 				}
 				CompilationUnit root= (CompilationUnit)statement.getRoot();
 				int extendedStart= root.getExtendedStartPosition(statement);
-				if (extendedStart != statement.getStartPosition()) {
-					// we have a leading comment
+				// we have a leading comment and the comment is covered by the selection
+				if (extendedStart != statement.getStartPosition() && extendedStart >= fSelection.getOffset()) {
 					String commentToken= document.get(extendedStart, statement.getStartPosition() - extendedStart);
+					commentToken= Strings.trimTrailingTabsAndSpaces(commentToken);
 					Type type= statement.getType();
 					String typeName= document.get(type.getStartPosition(), type.getLength());
 					copy.setType((Type)fRewriter.createStringPlaceholder(commentToken + typeName, type.getNodeType()));
