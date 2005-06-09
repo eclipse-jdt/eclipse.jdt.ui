@@ -783,6 +783,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InferTypeArgumentsRefactoring_removeCast;
 	public static String InferTypeArgumentsRefactoring_internal_error;
 	public static String InferTypeArgumentsRefactoring_error_skipped;
+	public static String InferTypeArgumentsRefactoring_error_in_cu_skipped;
 	
 	public static String QualifiedNameSearchResult_change_name;
 	public static String ASTData_update_imports;

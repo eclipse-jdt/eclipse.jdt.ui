@@ -12,6 +12,6 @@ class Top<TC> {
     <TM> void method(TC cTop, TM mTop) {}
 }
 
-class Ex<C> extends Top<C> {
-    <M> void method(C cEx, M mEx) {}
+class Ex<C extends String> extends Top<C> {
+    <M extends Integer> void method(C cEx, M mEx) {}
 }

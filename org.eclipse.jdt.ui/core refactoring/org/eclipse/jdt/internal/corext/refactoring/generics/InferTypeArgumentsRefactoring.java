@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -58,6 +59,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -180,6 +182,15 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	
 							Platform.run(new ISafeRunnable() {
 								public void run() throws Exception {
+									IProblem[] problems= ast.getProblems();
+									for (int p= 0; p < problems.length; p++) {
+										if (problems[p].isError()) {
+											String cuName= JavaElementLabels.getElementLabel(source, JavaElementLabels.CU_QUALIFIED);
+											String msg= MessageFormat.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_error_in_cu_skipped, new Object[] {cuName});
+											result.addError(msg, JavaStatusContext.create(source, new SourceRange(problems[p])));
+											return;
+										}
+									}
 									ast.accept(unitCollector);
 								}
 								public void handleException(Throwable exception) {
