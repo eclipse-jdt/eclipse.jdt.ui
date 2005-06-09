@@ -320,7 +320,7 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isExtractTempAvailable(final JavaTextSelection selection) {
 		final ASTNode[] nodes= selection.resolveSelectedNodes();
-		return (selection.resolveInMethodBody() || selection.resolveInClassInitializer()) && (Checks.isExtractableExpression(nodes, selection.resolveCoveringNode()) || (nodes.length == 1 && nodes[0] instanceof ExpressionStatement));
+		return (selection.resolveInMethodBody() || selection.resolveInClassInitializer()) && (Checks.isExtractableExpression(nodes, selection.resolveCoveringNode()) || (nodes != null && nodes.length == 1 && nodes[0] instanceof ExpressionStatement));
 	}
 
 	public static boolean isGeneralizeTypeAvailable(final IJavaElement element) throws JavaModelException {
