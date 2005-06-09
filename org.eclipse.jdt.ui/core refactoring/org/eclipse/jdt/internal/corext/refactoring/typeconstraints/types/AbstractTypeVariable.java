@@ -54,7 +54,7 @@ public abstract class AbstractTypeVariable extends TType {
 	}
 	
 	public final TType[] getSubTypes() {
-		return (TType[]) fBounds.clone();
+		return EMPTY_TYPE_ARRAY;
 	}
 	
 	protected final boolean checkAssignmentBound(TType rhs) {

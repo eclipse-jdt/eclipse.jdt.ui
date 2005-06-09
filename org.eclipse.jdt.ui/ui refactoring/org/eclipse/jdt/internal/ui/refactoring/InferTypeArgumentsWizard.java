@@ -129,9 +129,11 @@ public class InferTypeArgumentsWizard extends RefactoringWizard {
 			fSettings= getDialogSettings().getSection(DIALOG_SETTING_SECTION);
 			if (fSettings == null) {
 				fSettings= getDialogSettings().addNewSection(DIALOG_SETTING_SECTION);
-				fSettings.put(ASSUME_CLONE_RETURNS_SAME_TYPE, false);
+				fSettings.put(ASSUME_CLONE_RETURNS_SAME_TYPE, true);
+				fSettings.put(LEAVE_UNCONSTRAINED_RAW, true);
 			}
 			fRefactoring.setAssumeCloneReturnsSameType(fSettings.getBoolean(ASSUME_CLONE_RETURNS_SAME_TYPE));
+			fRefactoring.setLeaveUnconstrainedRaw(fSettings.getBoolean(LEAVE_UNCONSTRAINED_RAW));
 		}
 		
 		

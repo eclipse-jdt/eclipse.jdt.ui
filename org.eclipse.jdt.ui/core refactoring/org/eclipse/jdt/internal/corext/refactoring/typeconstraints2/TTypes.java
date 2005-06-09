@@ -13,8 +13,10 @@ package org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;
 import java.util.Iterator;
 import java.util.Stack;
 
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.AbstractTypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.HierarchyType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeVariable;
 
 public class TTypes {
 	
@@ -37,7 +39,15 @@ public class TTypes {
 		}
 	
 		private void pushSupertypes(TType type) {
-			if (! type.isJavaLangObject()) {
+			if (type.isJavaLangObject())
+				return;
+			
+			if (type.isTypeVariable() || type.isCaptureType()) {
+				TType[] bounds= ((AbstractTypeVariable) type).getBounds();
+				for (int i= 0; i < bounds.length; i++)
+					fWorklist.push(bounds[i].getTypeDeclaration());
+			
+			} else {
 				TType superclass= type.getSuperclass();
 				if (superclass == null) {
 					if (type.isInterface())
@@ -115,6 +125,17 @@ public class TTypes {
 			HierarchyType rhsGeneric= (HierarchyType) rhs.getTypeDeclaration();
 			HierarchyType lhsGeneric= (HierarchyType) lhs.getTypeDeclaration();
 			return lhs.isJavaLangObject() || rhsGeneric.equals(lhsGeneric) || rhsGeneric.isSubType(lhsGeneric);
+			
+		} else if (rhs.isTypeVariable()) {
+			if (rhs.canAssignTo(lhs))
+				return true;
+			TType[] bounds= ((TypeVariable) rhs).getBounds();
+			for (int i= 0; i < bounds.length; i++) {
+				if (canAssignTo(bounds[i], lhs))
+					return true;
+			}
+			return lhs.isJavaLangObject();
+			
 		} else {
 			return rhs.canAssignTo(lhs);
 		}

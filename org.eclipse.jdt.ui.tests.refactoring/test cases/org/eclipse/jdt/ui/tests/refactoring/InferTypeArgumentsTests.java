@@ -50,7 +50,7 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	private static final Class clazz= InferTypeArgumentsTests.class;
 	private static final String REFACTORING_PATH= "InferTypeArguments/";
 
-	private boolean fAssumeCloneReturnsSameType= false;
+	private boolean fAssumeCloneReturnsSameType= true;
 	private boolean fLeaveUnconstrainedRaw= true;
 	
 	public static Test suite() {
@@ -184,6 +184,10 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 // -------------------------------------------------------------------------------
 	
 	
+	public void testCuTypeParams9() throws Exception {
+		performCuOK();
+	}
+	
 	public void testCuExistingParameterized01() throws Exception {
 		performCuOK();
 	}
@@ -249,6 +253,8 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	}
 	
 	public void testJUnit() throws Exception {
+		fAssumeCloneReturnsSameType= false;
+		fLeaveUnconstrainedRaw= true;
 		IJavaProject javaProject= JavaProjectHelper.createJavaProject("InferTypeArguments", "bin");
 		try {
 			IPackageFragmentRoot jdk= JavaProjectHelper.addRTJar(javaProject);
