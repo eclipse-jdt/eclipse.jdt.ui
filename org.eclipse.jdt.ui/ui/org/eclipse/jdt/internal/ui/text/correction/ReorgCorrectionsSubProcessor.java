@@ -85,7 +85,6 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 
 import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -99,6 +98,7 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 public class ReorgCorrectionsSubProcessor {
@@ -343,24 +343,11 @@ public class ReorgCorrectionsSubProcessor {
 		}
 		
 		private boolean is50VMInstall(IVMInstall install) {
-			String version= install.getJavaVersion();
-			if (version != null && version.startsWith("1.5")) { //$NON-NLS-1$
-				return true;
-			}
-			return false;
+			return BuildPathSupport.hasMatchingCompliance(install, JavaCore.VERSION_1_5);
 		}
 		
 		private IVMInstall find50VMInstall() {
-			IVMInstallType[] installTypes= JavaRuntime.getVMInstallTypes();
-			for (int i= 0; i < installTypes.length; i++) {
-				IVMInstall[] installs= installTypes[i].getVMInstalls();
-				for (int k= 0; k < installs.length; k++) {
-					if (is50VMInstall(installs[k])) {
-						return installs[k];
-					}
-				}
-			}
-			return null;
+			return BuildPathSupport.findMatchingJREInstall(JavaCore.VERSION_1_5);
 		}
 		
 		public void run(IProgressMonitor monitor) throws CoreException {

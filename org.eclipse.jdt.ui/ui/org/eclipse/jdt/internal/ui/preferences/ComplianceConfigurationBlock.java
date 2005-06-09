@@ -34,6 +34,9 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -316,8 +319,17 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private void validateJRE50Status() {
 		if (fJRE50InfoText != null && !fJRE50InfoText.isDisposed()) {
+			boolean isVisible= false;
 			String compliance= getValue(PREF_COMPLIANCE);
-			fJRE50InfoText.setVisible(VERSION_1_5.equals(compliance) && (BuildPathSupport.findMatchingJREInstall(VERSION_1_5) == null));
+			if (VERSION_1_5.equals(compliance)) {
+				if (fProject != null) { // project specific settings: only test if a 50 JRE is installed
+					isVisible= BuildPathSupport.findMatchingJREInstall(VERSION_1_5) == null;
+				} else {
+					IVMInstall defaultVMInstall= JavaRuntime.getDefaultVMInstall();
+					isVisible= (defaultVMInstall == null) || !BuildPathSupport.hasMatchingCompliance(defaultVMInstall, VERSION_1_5);
+				}
+			}
+			fJRE50InfoText.setVisible(isVisible);
 		}
 	}
 	

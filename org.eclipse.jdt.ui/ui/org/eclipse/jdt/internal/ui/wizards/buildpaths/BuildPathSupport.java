@@ -257,13 +257,19 @@ public class BuildPathSupport {
 		for (int i= 0; i < installTypes.length; i++) {
 			IVMInstall[] installs= installTypes[i].getVMInstalls();
 			for (int k= 0; k < installs.length; k++) {
-				IVMInstall inst= installs[k];
-				String version= inst.getJavaVersion();
-				if (version != null && version.startsWith(compliance)) {
-					return inst;
+				if (hasMatchingCompliance(installs[k], compliance)) {
+					return installs[k];
 				}
 			}
 		}
 		return null;
+	}
+	
+	public static boolean hasMatchingCompliance(IVMInstall inst, String compliance) {
+		String version= inst.getJavaVersion();
+		if (version != null && version.startsWith(compliance)) {
+			return true;
+		}
+		return false;
 	}
 }
