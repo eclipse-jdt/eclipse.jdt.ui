@@ -24,10 +24,13 @@
 		<copy todir="${dest}/icons">
 			<fileset dir="icons" />
 		</copy>
-			<copy todir="${dest}/archive">
+		<copy todir="${dest}/META-INF">
+			<fileset dir="META-INF" />
+		</copy>		
+		<copy todir="${dest}/archive">
 			<fileset dir="archive" />
 		</copy>
-			<copy todir="${dest}/doc-html">
+		<copy todir="${dest}/doc-html">
 			<fileset dir="doc-html" />
 		</copy>
 		<zip zipfile="${dest}/jdtexamplessrc.zip">
