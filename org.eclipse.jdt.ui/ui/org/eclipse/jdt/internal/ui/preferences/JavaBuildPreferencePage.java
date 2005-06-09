@@ -35,7 +35,7 @@ public class JavaBuildPreferencePage extends PropertyAndPreferencePage {
 
 	public JavaBuildPreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.JavaBuildPreferencePage_description); 
+		//setDescription(PreferencesMessages.JavaBuildPreferencePage_description); 
 		
 		// only used when page is shown programatically
 		setTitle(PreferencesMessages.JavaBuildPreferencePage_title);		 

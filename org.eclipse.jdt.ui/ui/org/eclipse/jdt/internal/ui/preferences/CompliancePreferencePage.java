@@ -35,7 +35,7 @@ public class CompliancePreferencePage extends PropertyAndPreferencePage {
 
 	public CompliancePreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.CompliancePreferencePage_description); 
+		//setDescription(PreferencesMessages.CompliancePreferencePage_description); 
 		
 		// only used when page is shown programatically
 		setTitle(PreferencesMessages.CompliancePreferencePage_title);		 

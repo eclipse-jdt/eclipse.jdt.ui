@@ -104,7 +104,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		layout.marginWidth= 0;
 		mainComp.setLayout(layout);
 		
-		Composite othersComposite= createBuildPathTabContent(parent);
+		Composite othersComposite= createBuildPathTabContent(mainComp);
 		GridData gridData= new GridData(GridData.FILL, GridData.FILL, true, true);
 		gridData.heightHint= fPixelConverter.convertHeightInCharsToPixels(20);
 		othersComposite.setLayoutData(gridData);
