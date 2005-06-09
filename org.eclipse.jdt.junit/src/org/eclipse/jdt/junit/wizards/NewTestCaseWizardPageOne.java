@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionEvent;
@@ -244,7 +245,15 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 		
-		Composite composite= new Composite(parent, SWT.NONE);
+		final ScrolledComposite scroller= new ScrolledComposite(parent, SWT.V_SCROLL);
+		scroller.setFont(parent.getFont());
+		scroller.setLayoutData(new GridData(GridData.FILL_BOTH));
+		scroller.setExpandVertical(true);
+		scroller.setExpandHorizontal(true);
+		
+		final Composite composite= new Composite(scroller, SWT.NONE);
+		composite.setFont(scroller.getFont());
+		scroller.setContent(composite);
 		
 		int nColumns= 4;
 		
@@ -262,7 +271,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		createSeparator(composite, nColumns);
 		createClassUnderTestControls(composite, nColumns);
 		
-		setControl(composite);
+		setControl(scroller);
 			
 		//set default and focus
 		String classUnderTest= getClassUnderTestText();
@@ -270,7 +279,8 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			setTypeName(Signature.getSimpleName(classUnderTest)+TEST_SUFFIX, true);
 		}
 		restoreWidgetValues();
-		Dialog.applyDialogFont(composite);
+		Dialog.applyDialogFont(scroller);
+		scroller.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJUnitHelpContextIds.NEW_TESTCASE_WIZARD_PAGE);	
 
 	}
