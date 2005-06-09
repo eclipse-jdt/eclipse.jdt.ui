@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -68,6 +67,33 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 
 	/** The identifier of this processor */
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.useSuperTypeProcessor"; //$NON-NLS-1$
+
+	/**
+	 * Finds the type with the given fully qualified name (generic type parameters included) in the hierarchy.
+	 * 
+	 * @param type The hierarchy type to find the super type in
+	 * @param name The fully qualified name of the super type
+	 * @return The found super type, or <code>null</code>
+	 */
+	protected static ITypeBinding findTypeInHierarchy(final ITypeBinding type, final String name) {
+		if (type.isArray() || type.isPrimitive())
+			return null;
+		if (name.equals(type.getTypeDeclaration().getQualifiedName()))
+			return type;
+		final ITypeBinding binding= type.getSuperclass();
+		if (binding != null) {
+			final ITypeBinding result= findTypeInHierarchy(binding, name);
+			if (result != null)
+				return result;
+		}
+		final ITypeBinding[] bindings= type.getInterfaces();
+		for (int index= 0; index < bindings.length; index++) {
+			final ITypeBinding result= findTypeInHierarchy(bindings[index], name);
+			if (result != null)
+				return result;
+		}
+		return null;
+	}
 
 	/** The text change manager */
 	private TextChangeManager fChangeManager= null;
@@ -199,7 +225,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 							if (subDeclaration != null) {
 								final ITypeBinding subBinding= subDeclaration.resolveBinding();
 								if (subBinding != null) {
-									final ITypeBinding superBinding= Bindings.findTypeInHierarchy(subBinding, fSuperType.getFullyQualifiedName('.'));
+									final ITypeBinding superBinding= findTypeInHierarchy(subBinding, fSuperType.getFullyQualifiedName('.'));
 									if (superBinding != null) {
 										solveSuperTypeConstraints(subRewrite.getCu(), subRewrite.getRoot(), fSubType, subBinding, superBinding, new SubProgressMonitor(monitor, 1), status);
 										if (!status.hasFatalError()) {
