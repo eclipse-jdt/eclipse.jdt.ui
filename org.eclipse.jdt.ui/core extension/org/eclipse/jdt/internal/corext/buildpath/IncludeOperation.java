@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -113,12 +114,16 @@ public class IncludeOperation extends ClasspathModifierOperation {
      * false</code> otherwise
      * @throws JavaModelException
      */
-    private boolean isValidFolder(IResource resource, IJavaProject project) throws JavaModelException {
-        if (project.isOnClasspath(project) && resource.getProjectRelativePath().segmentCount() == 1 && 
-                ClasspathModifier.getFragmentRoot(resource, project, null).equals(ClasspathModifier.getFragmentRoot(project.getResource(), project, null))) 
-            return true;
-        return false;
-    }
+	private boolean isValidFolder(IResource resource, IJavaProject project) throws JavaModelException {
+		if (project.isOnClasspath(project) && resource.getProjectRelativePath().segmentCount() == 1) {
+			IPackageFragmentRoot root1= ClasspathModifier.getFragmentRoot(resource, project, null);
+			IPackageFragmentRoot root2= ClasspathModifier.getFragmentRoot(project.getResource(), project, null);
+			if (root1 != null && root1.equals(root2)) {
+				return true;
+			}
+		}
+		return false;
+	}
     
     /**
      * Get a description for this operation. The description depends on 

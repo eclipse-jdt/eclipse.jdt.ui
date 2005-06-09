@@ -283,7 +283,10 @@ public class ClasspathModifier {
 				List result= new ArrayList(addedEntries.size());
 				for (int i= 0; i < addedEntries.size(); i++) {
 					IClasspathEntry entry= ((CPListElement) addedEntries.get(i)).getClasspathEntry();
-					result.add(project.findPackageFragmentRoot(entry.getPath()));
+					IJavaElement elem= project.findPackageFragmentRoot(entry.getPath());
+					if (elem != null) {
+						result.add(elem);
+					}
 				}
 				monitor.worked(1);
 				return result;
@@ -356,7 +359,10 @@ public class ClasspathModifier {
 			List result= new ArrayList(addedEntries.size());
 			for (int i= 0; i < resources.size(); i++) {
 				IResource res= (IResource) resources.get(i);
-				result.add(project.getPackageFragmentRoot(res));
+				IJavaElement elem= project.getPackageFragmentRoot(res);
+				if (elem != null) {
+					result.add(elem);
+				}
 			}
 					
 			monitor.worked(1);
@@ -392,17 +398,15 @@ public class ClasspathModifier {
 			boolean archiveRemoved= false;
 			for (int i= 0; i < elements.size(); i++) {
 				Object element= elements.get(i);
+				Object res= null;
 				if (element instanceof IJavaProject) {
-					resultElements.add(removeFromClasspath(project, existingEntries, new SubProgressMonitor(monitor, 1)));
-				} else
+					res= removeFromClasspath(project, existingEntries, new SubProgressMonitor(monitor, 1));
+				} else {
 					if (element instanceof IPackageFragmentRoot) {
 						IPackageFragmentRoot root= (IPackageFragmentRoot) element;
 						if (root.getKind() == IPackageFragmentRoot.K_BINARY) {
 							archiveRemoved= true;
-							IResource res= removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1));
-							if (res != null) {
-								resultElements.add(res);
-							}
+							res= removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1));
 						} else {
 							final IResource resource= root.getCorrespondingResource();
 							if (resource instanceof IFolder) {
@@ -410,23 +414,30 @@ public class ClasspathModifier {
 								if (folder.isLinked()) {
 									final int result= query.doQuery(folder);
 									if (result != IRemoveLinkedFolderQuery.REMOVE_CANCEL) {
-										if (result == IRemoveLinkedFolderQuery.REMOVE_BUILD_PATH)
-											resultElements.add(removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1)));
-										else if (result == IRemoveLinkedFolderQuery.REMOVE_BUILD_PATH_AND_FOLDER) {
-											resultElements.add(removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1)));
+										if (result == IRemoveLinkedFolderQuery.REMOVE_BUILD_PATH) {
+											res= removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1));
+										} else if (result == IRemoveLinkedFolderQuery.REMOVE_BUILD_PATH_AND_FOLDER) {
+											res= removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1));
 											folder.delete(true, true, new SubProgressMonitor(monitor, 1));
 										}
 									}
-								} else
-									resultElements.add(removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1)));
-							} else
-								resultElements.add(removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1)));
+								} else {
+									res= removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1));
+								}
+							} else {
+								res= removeFromClasspath(root, existingEntries, project, new SubProgressMonitor(monitor, 1));
+							}
 						}
 					} else {
 						archiveRemoved= true;
 						ClassPathContainer container= (ClassPathContainer) element;
 						existingEntries.remove(CPListElement.createFromExisting(container.getClasspathEntry(), project));
 					}
+				}
+				if (res != null) {
+					resultElements.add(res);
+				}
+				
 			}
 
 			updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 1));
@@ -476,9 +487,10 @@ public class ClasspathModifier {
 				}
 				resources.add(resource);
 				IPackageFragmentRoot root= getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 1));
-				CPListElement entry= getClasspathEntry(existingEntries, root);
-
-				include(resource, entry, project, new SubProgressMonitor(monitor, 1));
+				if (root != null) {
+					CPListElement entry= getClasspathEntry(existingEntries, root);
+					include(resource, entry, project, new SubProgressMonitor(monitor, 1));
+				}
 			}
 
 			updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 4));
@@ -595,9 +607,10 @@ public class ClasspathModifier {
 			for (int i= 0; i < elements.size(); i++) {
 				IResource resource= (IResource) elements.get(i);
 				IPackageFragmentRoot root= getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 1));
-				CPListElement entry= getClasspathEntry(entries, root);
-
-				unExclude(resource, entry, project, new SubProgressMonitor(monitor, 1));
+				if (root != null) {
+					CPListElement entry= getClasspathEntry(entries, root);
+					unExclude(resource, entry, project, new SubProgressMonitor(monitor, 1));
+				}
 			}
 
 			updateClasspath(entries, project, new SubProgressMonitor(monitor, 4));
@@ -625,14 +638,15 @@ public class ClasspathModifier {
 			monitor= new NullProgressMonitor();
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_EditInclusionExclusionFilters, 4); 
-			CPListElement entry;
 			List existingEntries= getExistingEntries(project);
-			entry= getListElement(element.getPath(), existingEntries);
-			if (query.doQuery(entry, false)) {
-				entry.setAttribute(CPListElement.INCLUSION, query.getInclusionPattern());
-				entry.setAttribute(CPListElement.EXCLUSION, query.getExclusionPattern());
-				updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 4));
-				return element;
+			CPListElement entry= getListElement(element.getPath(), existingEntries);
+			if (entry != null) {
+				if (query.doQuery(entry, false)) {
+					entry.setAttribute(CPListElement.INCLUSION, query.getInclusionPattern());
+					entry.setAttribute(CPListElement.EXCLUSION, query.getExclusionPattern());
+					updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 4));
+					return element;
+				}
 			}
 		} finally {
 			monitor.done();
@@ -992,6 +1006,9 @@ public class ClasspathModifier {
 		if (resource.getFullPath().equals(project.getPath()))
 			return false;
 		IPackageFragmentRoot root= getFragmentRoot(resource, project, null);
+		if (root == null) {
+			return true;
+		}
 		IPath path= resource.getFullPath().removeFirstSegments(root.getPath().segmentCount());
 		IClasspathEntry entry= root.getRawClasspathEntry();
 		if (entry == null)
@@ -1115,8 +1132,11 @@ public class ClasspathModifier {
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ExamineInputFilters, 4); 
 			IPackageFragmentRoot root= getFragmentRoot(resource, project, new SubProgressMonitor(monitor, 4));
-			IClasspathEntry entry= root.getRawClasspathEntry();
-			return entry.getInclusionPatterns().length == 0;
+			if (root != null) {
+				IClasspathEntry entry= root.getRawClasspathEntry();
+				return entry.getInclusionPatterns().length == 0;
+			}
+			return true;
 		} finally {
 			monitor.done();
 		}
@@ -1219,7 +1239,9 @@ public class ClasspathModifier {
 	 */
 	private IJavaProject removeFromClasspath(IJavaProject project, List existingEntries, IProgressMonitor monitor) throws CoreException {
 		CPListElement elem= getListElement(project.getPath(), existingEntries);
-		existingEntries.remove(elem);
+		if (elem != null) {
+			existingEntries.remove(elem);
+		}
 		return project;
 	}
 
@@ -1232,7 +1254,7 @@ public class ClasspathModifier {
 	 * @param project the Java project
 	 * @param monitor progress monitor, can be <code>null</code>
 	 * @return returns the <code>IResource</code> that has been removed from the build path; 
-	 * is of type <code>IFile</code> if the root was an archive, otherwise <code>IFolder</code>
+	 * is of type <code>IFile</code> if the root was an archive, otherwise <code>IFolder</code> or <code>null<code> for external archives.
 	 */
 	private IResource removeFromClasspath(IPackageFragmentRoot root, List existingEntries, IJavaProject project, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
@@ -1242,14 +1264,7 @@ public class ClasspathModifier {
 			IClasspathEntry entry= root.getRawClasspathEntry();
 			CPListElement elem= CPListElement.createFromExisting(entry, project);
 			existingEntries.remove(elem);
-			IResource resource;
-			final IWorkspaceRoot workspaceRoot= project.getProject().getWorkspace().getRoot();
-			final IPath path= root.getPath();
-			if (root.isArchive())
-				resource= workspaceRoot.getFile(path);
-			else
-				resource= workspaceRoot.getFolder(path);
-			return resource;
+			return elem.getResource();
 		} finally {
 			monitor.done();
 		}
@@ -1608,11 +1623,13 @@ public class ClasspathModifier {
 			else
 				path= ((IJavaElement) element).getPath();
 			IResource resource= getResource(path, project);
-			IJavaElement elem= JavaCore.create(resource);
-			if (elem != null && project.isOnClasspath(elem))
-				result.add(elem);
-			else
-				result.add(resource);
+			if (resource != null) {
+				IJavaElement elem= JavaCore.create(resource);
+				if (elem != null && project.isOnClasspath(elem))
+					result.add(elem);
+				else
+					result.add(resource);
+			}
 
 		}
 		return result;
@@ -1884,10 +1901,12 @@ public class ClasspathModifier {
 		}
 	}
 
-	public boolean isExternalArchiveOrLibrary(CPListElement entry, IJavaProject project) {
+	private boolean isExternalArchiveOrLibrary(CPListElement entry, IJavaProject project) {
 		if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY || entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
-			if (entry.getPath().matchingFirstSegments(project.getPath()) != 1)
-				return true;
+			if (entry.getResource() instanceof IFolder) {
+				return false;
+			}
+			return true;
 		}
 		return false;
 	}
