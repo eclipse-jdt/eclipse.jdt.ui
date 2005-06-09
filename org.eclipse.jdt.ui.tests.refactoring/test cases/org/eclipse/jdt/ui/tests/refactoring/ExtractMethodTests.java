@@ -1745,6 +1745,34 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		genericTest();
 	}
 	
+	public void test1113() throws Exception {
+		genericTest();
+	}
+	
+	public void test1114() throws Exception {
+		genericTest();
+	}
+	
+	public void test1115() throws Exception {
+		genericTest();
+	}
+	
+	public void test1116() throws Exception {
+		genericTest();
+	}
+	
+	public void test1117() throws Exception {
+		genericTest();
+	}
+	
+	public void test1118() throws Exception {
+		genericTest();
+	}
+	
+	public void test1119() throws Exception {
+		genericTest();
+	}
+	
 	//---- Test enums ---------------------------------
 	
 	public void test1150() throws Exception {

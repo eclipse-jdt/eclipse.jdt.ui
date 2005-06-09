@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -108,6 +109,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class ExtractMethodRefactoring extends Refactoring {
 
 	private ICompilationUnit fCUnit;
+	private CompilationUnit fRoot;
 	private ImportRewrite fImportRewriter;
 	private int fSelectionStart;
 	private int fSelectionLength;
@@ -230,9 +232,9 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (result.hasFatalError())
 			return result;
 		
-		CompilationUnit root= new RefactoringASTParser(AST.JLS3).parse(fCUnit, true, pm);
-		fAST= root.getAST();
-		root.accept(createVisitor());
+		fRoot= new RefactoringASTParser(AST.JLS3).parse(fCUnit, true, pm);
+		fAST= fRoot.getAST();
+		fRoot.accept(createVisitor());
 		
 		result.merge(fAnalyzer.checkInitialConditions(fImportRewriter));
 		if (result.hasFatalError())
@@ -716,13 +718,14 @@ public class ExtractMethodRefactoring extends Refactoring {
 		if (Modifier.isStatic(fAnalyzer.getEnclosingBodyDeclaration().getModifiers()) || fAnalyzer.getForceStatic()) {
 			modifiers|= Modifier.STATIC;
 		}
-		ITypeBinding[] typeVariables= fAnalyzer.getTypeVariables();
+		ITypeBinding[] typeVariables= computeLocalTypeVariables();
 		List typeParameters= result.typeParameters();
 		for (int i= 0; i < typeVariables.length; i++) {
 			TypeParameter parameter= fAST.newTypeParameter();
 			parameter.setName(fAST.newSimpleName(typeVariables[i].getName()));
 			typeParameters.add(parameter);
 		}
+		
 		result.modifiers().addAll(ASTNodeFactory.newModifiers(fAST, modifiers));
 		result.setReturnType2((Type)ASTNode.copySubtree(fAST, fAnalyzer.getReturnType()));
 		result.setName(fAST.newSimpleName(name));
@@ -759,6 +762,37 @@ public class ExtractMethodRefactoring extends Refactoring {
 		}
 		
 		return result;
+	}
+	
+	private ITypeBinding[] computeLocalTypeVariables() {
+		List result= new ArrayList(Arrays.asList(fAnalyzer.getTypeVariables()));
+		for (int i= 0; i < fParameterInfos.size(); i++) {
+			ParameterInfo info= (ParameterInfo)fParameterInfos.get(i);
+			processVariable(result, info.getOldBinding());
+		}
+		IVariableBinding[] methodLocals= fAnalyzer.getMethodLocals();
+		for (int i= 0; i < methodLocals.length; i++) {
+			processVariable(result, methodLocals[i]);
+		}
+		return (ITypeBinding[])result.toArray(new ITypeBinding[result.size()]);
+	}
+
+	private void processVariable(List result, IVariableBinding variable) {
+		if (variable == null)
+			return;
+		ITypeBinding binding= variable.getType();
+		if (binding != null && binding.isParameterizedType()) {
+			ITypeBinding[] typeArgs= binding.getTypeArguments();
+			for (int args= 0; args < typeArgs.length; args++) {
+				ITypeBinding arg= typeArgs[args];
+				if (arg.isTypeVariable() && !result.contains(arg)) {
+					ASTNode decl= fRoot.findDeclaringNode(arg);
+					if (decl != null && decl.getParent() instanceof MethodDeclaration) {
+						result.add(arg);
+					}
+				}
+			}
+		}
 	}
 	
 	private Block createMethodBody(MethodDeclaration method, ASTNode[] selectedNodes, TextEditGroup substitute) throws BadLocationException, CoreException {
