@@ -348,7 +348,7 @@ public class IndentAction extends TextEditorAction {
 		
 		int firstNonWS= scanner.findNonWhitespaceForwardInAnyPartition(start, end);
 		if (firstNonWS == JavaHeuristicScanner.NOT_FOUND)
-			return " "; //$NON-NLS-1$
+			return document.get(start, end - start);
 		StringBuffer buf= new StringBuffer();
 		String indentation= document.get(start, firstNonWS - start);
 		buf.append(indentation);
