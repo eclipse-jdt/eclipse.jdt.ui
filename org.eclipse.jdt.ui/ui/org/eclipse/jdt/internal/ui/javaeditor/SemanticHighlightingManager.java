@@ -545,8 +545,16 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			}
 		}
 		
-		if (changed && fReconciler != null)
-			fReconciler.refresh();
+		if (changed) {
+			if (fReconciler == null) {
+				// hard coded for previewer on preference page
+				List oldpositions= new ArrayList();
+				fPresenter.addAllPositions(oldpositions);
+				fPresenter.updatePresentation(null, createHardcodedPositions(), (HighlightedPosition[]) oldpositions.toArray(new HighlightedPosition[oldpositions.size()]));
+			} else {
+				fReconciler.refresh();
+			}
+		}
 	}
 
 	private void adaptToEnablementChange(Highlighting highlighting, PropertyChangeEvent event) {
