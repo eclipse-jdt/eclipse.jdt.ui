@@ -1166,8 +1166,13 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		return new String[] { getNameForEnclosingInstanceConstructorParameter()};
 	}
 
-	private ASTNode getNewQualifiedNameNode(ITypeBinding[] parameters, AST ast) {
-		if (parameters != null && parameters.length > 0) {
+	private ASTNode getNewQualifiedNameNode(ITypeBinding[] parameters, Name name) {
+		final AST ast= name.getAST();
+		boolean raw= false;
+		final ITypeBinding binding= name.resolveTypeBinding();
+		if (binding != null && binding.isRawType())
+			raw= true;
+		if (parameters != null && parameters.length > 0 && !raw) {
 			final ParameterizedType type= ast.newParameterizedType(ast.newSimpleType(ast.newName(fTypeComponents)));
 			for (int index= 0; index < parameters.length; index++)
 				type.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameters[index].getName())));
@@ -1176,8 +1181,13 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		return ast.newName(fTypeComponents);
 	}
 
-	private ASTNode getNewUnqualifiedTypeNode(ITypeBinding[] parameters, AST ast) {
-		if (parameters != null && parameters.length > 0) {
+	private ASTNode getNewUnqualifiedTypeNode(ITypeBinding[] parameters, Name name) {
+		final AST ast= name.getAST();
+		boolean raw= false;
+		final ITypeBinding binding= name.resolveTypeBinding();
+		if (binding != null && binding.isRawType())
+			raw= true;
+		if (parameters != null && parameters.length > 0 && !raw) {
 			final ParameterizedType type= ast.newParameterizedType(ast.newSimpleType(ast.newSimpleName(fType.getElementName())));
 			for (int index= 0; index < parameters.length; index++)
 				type.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameters[index].getName())));
@@ -1517,11 +1527,11 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 
 	private boolean updateNameReference(ITypeBinding[] parameters, Name name, CompilationUnitRewrite targetRewrite, TextEditGroup group) {
 		if (ASTNodes.asString(name).equals(fType.getFullyQualifiedName('.'))) {
-			targetRewrite.getASTRewrite().replace(name, getNewQualifiedNameNode(parameters, name.getAST()), group);
+			targetRewrite.getASTRewrite().replace(name, getNewQualifiedNameNode(parameters, name), group);
 			targetRewrite.getImportRemover().registerRemovedNode(name);
 			return true;
 		}
-		targetRewrite.getASTRewrite().replace(name, getNewUnqualifiedTypeNode(parameters, name.getAST()), group);
+		targetRewrite.getASTRewrite().replace(name, getNewUnqualifiedTypeNode(parameters, name), group);
 		targetRewrite.getImportRemover().registerRemovedNode(name);
 		return true;
 	}
