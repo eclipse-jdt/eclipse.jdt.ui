@@ -33,6 +33,7 @@ import org.eclipse.ui.texteditor.ITextEditorExtension3;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
@@ -241,16 +242,12 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	private String createTypeTags(IDocument document, DocumentCommand command, String indentation, String lineDelimiter, IType type)
 		throws CoreException, BadLocationException
 	{
-		IRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset, false);
-		ISourceRange sourceRange= type.getSourceRange();
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=55325
-		// don't add parameters if the member already has a comment
-		if (document.get(sourceRange.getOffset(), sourceRange.getLength()).lastIndexOf("/**", type.getNameRange().getOffset() - sourceRange.getOffset()) + sourceRange.getOffset() != partition.getOffset()) //$NON-NLS-1$
-			return null;
-
 		String[] typeParamNames= StubUtility.getTypeParameterNames(type.getTypeParameters());
 		String comment= CodeGeneration.getTypeComment(type.getCompilationUnit(), type.getTypeQualifiedName('.'), typeParamNames, lineDelimiter);
 		if (comment != null) {
+			boolean javadocComment= comment.startsWith("/**"); //$NON-NLS-1$
+			if (!isFirstComment(document, command, type, javadocComment)) //$NON-NLS-1$
+				return null;
 			return prepareTemplateComment(comment.trim(), indentation, type.getJavaProject(), lineDelimiter);
 		}
 		return null;
@@ -260,26 +257,41 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 		throws CoreException, BadLocationException
 	{
 		IRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset, false);
-		ISourceRange sourceRange= method.getSourceRange();
-		if (sourceRange == null || sourceRange.getOffset() != partition.getOffset())
-			return null;
-
-		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=55325
-		// don't add parameters if the member already has a javadoc comment
-		if (document.get(sourceRange.getOffset(), sourceRange.getLength()).lastIndexOf("/**", method.getNameRange().getOffset() - sourceRange.getOffset()) + sourceRange.getOffset() != partition.getOffset()) //$NON-NLS-1$
-			return null;
-
 		IMethod inheritedMethod= getInheritedMethod(method);
 		String comment= CodeGeneration.getMethodComment(method, inheritedMethod, lineDelimiter);
 		if (comment != null) {
 			comment= comment.trim();
 			boolean javadocComment= comment.startsWith("/**"); //$NON-NLS-1$
+			if (!isFirstComment(document, command, method, javadocComment))
+				return null;
 			boolean isJavaDoc= partition.getLength() >= 3 && document.get(partition.getOffset(), 3).equals("/**"); //$NON-NLS-1$
 			if (javadocComment == isJavaDoc) {
 				return prepareTemplateComment(comment, indentation, method.getJavaProject(), lineDelimiter);
 			}
 		}
 		return null;
+	}
+
+	/**
+	 * Returns <code>true</code> if the comment being inserted at
+	 * <code>command.offset</code> is the first comment (the first
+	 * javadoc comment if <code>ignoreJavadoc</code> is
+	 * <code>true</code>) of the given member.
+	 * <p>
+	 * see also https://bugs.eclipse.org/bugs/show_bug.cgi?id=55325 (don't add parameters if the member already has a comment)
+	 * </p>
+	 */
+	private boolean isFirstComment(IDocument document, DocumentCommand command, IMember member, boolean ignoreNonJavadoc) throws BadLocationException, JavaModelException {
+		IRegion partition= TextUtilities.getPartition(document, fPartitioning, command.offset, false);
+		ISourceRange sourceRange= member.getSourceRange();
+		if (sourceRange == null || sourceRange.getOffset() != partition.getOffset())
+			return false;
+		int srcOffset= sourceRange.getOffset();
+		int srcLength= sourceRange.getLength();
+		int nameRelativeOffset= member.getNameRange().getOffset() - srcOffset;
+		int partitionRelativeOffset= partition.getOffset() - srcOffset;
+		String token= ignoreNonJavadoc ? "/**" :  "/*"; //$NON-NLS-1$ //$NON-NLS-2$
+		return document.get(srcOffset, srcLength).lastIndexOf(token, nameRelativeOffset) == partitionRelativeOffset; //$NON-NLS-1$
 	}
 
 	/**
