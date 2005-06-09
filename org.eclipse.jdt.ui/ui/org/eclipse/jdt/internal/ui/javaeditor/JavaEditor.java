@@ -1683,6 +1683,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		IPreferenceStore store= getPreferenceStore();
 		ISourceViewer viewer= createJavaSourceViewer(parent, verticalRuler, getOverviewRuler(), isOverviewRulerVisible(), styles, store);
 
+		JavaUIHelp.setHelp(this, viewer.getTextWidget(), IJavaHelpContextIds.JAVA_EDITOR);
+		
 		JavaSourceViewer javaSourceViewer= null;
 		if (viewer instanceof JavaSourceViewer)
 			javaSourceViewer= (JavaSourceViewer)viewer;

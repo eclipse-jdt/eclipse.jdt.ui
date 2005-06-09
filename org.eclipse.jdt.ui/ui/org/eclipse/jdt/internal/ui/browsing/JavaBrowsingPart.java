@@ -380,6 +380,8 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 		getViewSite().getPage().addPartListener(fPartListener);
 
 		fillActionBars(getViewSite().getActionBars());
+		
+		setHelp();
 	}
 
 	/**
@@ -928,6 +930,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			selection= new StructuredSelection(input);
 		}
 		selectionChanged(null, selection);
+	}
+
+	protected final void setHelp() {
+		JavaUIHelp.setHelp(fViewer, getHelpContextId());
 	}
 
 	/**

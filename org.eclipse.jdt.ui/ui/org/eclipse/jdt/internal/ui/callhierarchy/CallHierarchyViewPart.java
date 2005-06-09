@@ -60,6 +60,7 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.PageBook;
@@ -354,7 +355,9 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 		initDragAndDrop();
 
         showPage(PAGE_EMPTY);
-
+        
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(fPagebook, IJavaHelpContextIds.CALL_HIERARCHY_VIEW);
+        
         fSelectionProviderMediator = new CallHierarchySelectionProvider(new StructuredViewer[] {
                     fCallHierarchyViewer, fLocationViewer
                 });
