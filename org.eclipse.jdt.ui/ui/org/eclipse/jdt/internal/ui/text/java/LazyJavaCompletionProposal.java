@@ -313,8 +313,9 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 		// but: if there is a selection, replace it!
 		Point selection= viewer.getSelectedRange();
 		fToggleEating= (stateMask & SWT.MOD1) != 0;
-		if (insertCompletion() ^ fToggleEating)
-			setReplacementLength(selection.x + selection.y - getReplacementOffset());
+		int newLength= selection.x + selection.y - getReplacementOffset();
+		if ((insertCompletion() ^ fToggleEating) && newLength >= 0)
+			setReplacementLength(newLength);
 
 		apply(document, trigger, offset);
 		fToggleEating= false;
