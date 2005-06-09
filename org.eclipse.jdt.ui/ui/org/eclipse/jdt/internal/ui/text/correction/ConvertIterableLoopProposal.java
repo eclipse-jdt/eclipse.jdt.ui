@@ -129,26 +129,29 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 		fAst= statement.getAST();
 	}
 
-	private String[] computeElementNames() {
+	private List computeElementNames() {
+		final List names= new ArrayList();
 		final IJavaProject project= getCompilationUnit().getJavaProject();
-		String[] full= StubUtility.getLocalNameSuggestions(project, GROUP_ELEMENT, 0, getExcludedNames());
-		for (int index= 0; index < full.length; index++)
-			addLinkedPositionProposal(GROUP_ELEMENT, full[index], null);
-		String[] shortened= StubUtility.getLocalNameSuggestions(project, GROUP_ELEMENT.substring(0, 1), 0, getExcludedNames());
-		for (int index= 0; index < full.length; index++)
-			addLinkedPositionProposal(GROUP_ELEMENT, shortened[index], null);
-		return full;
+		String name= GROUP_ELEMENT;
+		final ITypeBinding binding= fIterator.getType();
+		if (binding != null && binding.isParameterizedType())
+			name= binding.getTypeArguments()[0].getName();
+		final List excluded= getExcludedNames();
+		final String[] suggestions= StubUtility.getLocalNameSuggestions(project, name, 0, (String[]) excluded.toArray(new String[excluded.size()]));
+		for (int index= 0; index < suggestions.length; index++)
+			names.add(suggestions[index]);
+		return names;
 	}
 
-	private String[] getExcludedNames() {
+	private List getExcludedNames() {
 		final CompilationUnit unit= (CompilationUnit) fStatement.getRoot();
 		final IBinding[] before= (new ScopeAnalyzer(unit)).getDeclarationsInScope(fStatement.getStartPosition(), ScopeAnalyzer.VARIABLES);
 		final IBinding[] after= (new ScopeAnalyzer(unit)).getDeclarationsAfter(fStatement.getStartPosition() + fStatement.getLength(), ScopeAnalyzer.VARIABLES);
-		final String[] names= new String[before.length + after.length];
+		final List names= new ArrayList();
 		for (int index= 0; index < before.length; index++)
-			names[index]= before[index].getName();
+			names.add(before[index].getName());
 		for (int index= 0; index < after.length; index++)
-			names[index + before.length]= after[index].getName();
+			names.add(after[index].getName());
 		return names;
 	}
 
@@ -185,15 +188,18 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 	protected final ASTRewrite getRewrite() throws CoreException {
 		final ASTRewrite rewrite= ASTRewrite.create(fAst);
 		final EnhancedForStatement statement= fAst.newEnhancedForStatement();
-
+		final List names= computeElementNames();
 		String name= GROUP_ELEMENT;
-		if (fElement != null)
+		if (fElement != null) {
 			name= fElement.getName();
-		else {
-			final String[] names= computeElementNames();
-			if (names != null && names.length > 0)
-				name= names[0];
+			if (!names.contains(name))
+				names.add(0, name);
+		} else {
+			if (!names.isEmpty())
+				name= (String) names.get(0);
 		}
+		for (final Iterator iterator= names.iterator(); iterator.hasNext();)
+			addLinkedPositionProposal(GROUP_ELEMENT, (String) iterator.next(), null);
 		final Statement body= fStatement.getBody();
 		if (body != null) {
 			if (body instanceof Block) {

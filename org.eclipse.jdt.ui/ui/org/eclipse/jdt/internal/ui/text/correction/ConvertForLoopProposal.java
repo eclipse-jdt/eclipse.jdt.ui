@@ -422,57 +422,60 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 		AST ast= fOldForStatement.getAST();
 		fEnhancedForStatement= ast.newEnhancedForStatement();
 		ASTNode theBody= rewrite.createMoveTarget(fOldForStatement.getBody());
-		fEnhancedForStatement.setBody((Statement)theBody);
+		fEnhancedForStatement.setBody((Statement) theBody);
 		fEnhancedForStatement.setExpression(createExpression(rewrite));
 		fEnhancedForStatement.setParameter(fParameterDeclaration);
 		addLinkedPosition(rewrite.track(fParameterDeclaration.getName()), true, ConvertForLoopProposal.ELEMENT_KEY_REFERENCE);
 
-		addProposalsForElement();
+		String name= fParameterDeclaration.getName().getIdentifier();
+
+		List proposals= getProposalsForElement();
+		if (!proposals.contains(name))
+			proposals.add(0, name);
+
+		for (Iterator iterator= proposals.iterator(); iterator.hasNext();)
+			addLinkedPositionProposal(ConvertForLoopProposal.ELEMENT_KEY_REFERENCE, (String) iterator.next(), null);
 
 		rewrite.replace(fOldForStatement, fEnhancedForStatement, null);
 	}
 
 	private Expression createExpression(ASTRewrite rewrite) {
-		if (fCollectionIsMethodCall){
+		if (fCollectionIsMethodCall) {
 			MethodInvocation methodCall= (MethodInvocation) rewrite.createMoveTarget(fMethodInvocation);
 			return methodCall;
-		}
-		else return fCollectionName;
+		} else
+			return fCollectionName;
 	}
 
-	private String[] addProposalsForElement() {
+	private List getProposalsForElement() {
+		List list= new ArrayList();
 		ICompilationUnit icu= getCompilationUnit();
 		IJavaProject javaProject= icu.getJavaProject();
 		int dimensions= fOldCollectionTypeBinding.getDimensions() - 1;
-		String[] proposals= StubUtility.getLocalNameSuggestions(javaProject, ConvertForLoopProposal.ELEMENT_KEY_REFERENCE,
-			dimensions, getUsedVariableNames());
+		final List used= getUsedVariableNames();
+		String type= fOldCollectionTypeBinding.getName();
+		if (fOldCollectionTypeBinding.isArray())
+			type= fOldCollectionTypeBinding.getElementType().getName();
+		String[] proposals= StubUtility.getLocalNameSuggestions(javaProject, type, dimensions, (String[]) used.toArray(new String[used.size()]));
 		for (int i= 0; i < proposals.length; i++) {
-			String proposal= proposals[i];
-			addLinkedPositionProposal(ConvertForLoopProposal.ELEMENT_KEY_REFERENCE, proposal, null);
+			list.add(proposals[i]);
 		}
-		// my hack for the shortname version of the original proposals
-		String[] shortProposals= StubUtility.getLocalNameSuggestions(javaProject, ELEMENT_KEY_REFERENCE.substring(0, 1),
-			dimensions, getUsedVariableNames());
-		for (int i= 0; i < proposals.length; i++) {
-			String proposal= shortProposals[i];
-			addLinkedPositionProposal(ConvertForLoopProposal.ELEMENT_KEY_REFERENCE, proposal, null);
-		}
-		return proposals;
+		return list;
 	}
 
-	private String[] getUsedVariableNames() {
+	private List getUsedVariableNames() {
 		CompilationUnit root= (CompilationUnit)fOldForStatement.getRoot();
 		IBinding[] varsBefore= (new ScopeAnalyzer(root)).getDeclarationsInScope(fOldForStatement.getStartPosition(),
 			ScopeAnalyzer.VARIABLES);
 		IBinding[] varsAfter= (new ScopeAnalyzer(root)).getDeclarationsAfter(fOldForStatement.getStartPosition()
 			+ fOldForStatement.getLength(), ScopeAnalyzer.VARIABLES);
 
-		String[] names= new String[varsBefore.length + varsAfter.length];
+		List names= new ArrayList();
 		for (int i= 0; i < varsBefore.length; i++) {
-			names[i]= varsBefore[i].getName();
+			names.add(varsBefore[i].getName());
 		}
 		for (int i= 0; i < varsAfter.length; i++) {
-			names[i + varsBefore.length]= varsAfter[i].getName();
+			names.add(varsAfter[i].getName());
 		}
 		return names;
 	}
