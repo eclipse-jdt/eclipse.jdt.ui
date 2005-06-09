@@ -483,20 +483,33 @@ public class JavaElementLabels {
 			buf.append('(');
 			if (getFlag(flags, M_PARAMETER_TYPES | M_PARAMETER_NAMES)) {
 				String[] types= null;
+				int nParams= 0;
+				boolean renderVarargs= false;
 				if (getFlag(flags, M_PARAMETER_TYPES)) {
 					if (resolvedKey != null) {
 						types= Signature.getParameterTypes(resolvedKey.internalToSignature());
 					} else {
 						types= method.getParameterTypes();
 					}
+					nParams= types.length;
+					renderVarargs= method.exists() && Flags.isVarargs(method.getFlags());
 				}
-				String[] names= (getFlag(flags, M_PARAMETER_NAMES) && method.exists()) ? method.getParameterNames() : null;
-				int nParams= types != null ? types.length : names.length;
-				boolean renderVarargs= (types != null) && method.exists() && Flags.isVarargs(method.getFlags());
+				String[] names= null;
+				if (getFlag(flags, M_PARAMETER_NAMES) && method.exists()) {
+					names= method.getParameterNames();
+					if (types == null) {
+						nParams= names.length;
+					} else {
+						if (nParams != names.length) { // bug 99137
+							JavaPlugin.logErrorMessage("JavaElementLabels: Number of param types(" + nParams + ") != number of names(" + names.length + "): " + method.getElementName());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+							names= null; // no names rendered
+						}
+					}
+				}
 				
 				for (int i= 0; i < nParams; i++) {
 					if (i > 0) {
-						buf.append(COMMA_STRING); //$NON-NLS-1$
+						buf.append(COMMA_STRING);
 					}
 					if (types != null) {
 						String paramSig= types[i];
