@@ -232,6 +232,10 @@ public abstract class OptionsConfigurationBlock {
 		fExpandedComposites= new ArrayList();
 	}
 	
+	protected final IWorkbenchPreferenceContainer getPreferenceContainer() {
+		return fContainer;
+	}
+	
 	protected static Key getKey(String plugin, String key) {
 		return new Key(plugin, key);
 	}

@@ -18,6 +18,8 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.resources.IProject;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -25,9 +27,9 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Link;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-
+import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -35,6 +37,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 
 /**
   */
@@ -92,6 +95,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final int IDX_INLINE_JSR_BYTECODE= 5;
 
 	private IStatus fComplianceStatus;
+
+	private Link fJRE50InfoText;
 
 	public ComplianceConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
 		super(context, project, getKeys(), container);
@@ -241,24 +246,42 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_inline_jsr_bytecode_label; 
 		addCheckBox(group, label, PREF_CODEGEN_INLINE_JSR_BYTECODE, enableDisableValues, 0);	
 		
+		fJRE50InfoText= new Link(compComposite, SWT.WRAP);
+		fJRE50InfoText.setText(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info);
+		fJRE50InfoText.setFont(compComposite.getFont());
+		fJRE50InfoText.addSelectionListener(new SelectionListener() {
+			public void widgetDefaultSelected(SelectionEvent e) {
+				openJREInstallPreferencePage();
+			}
+			public void widgetSelected(SelectionEvent e) {
+				openJREInstallPreferencePage();
+			}
+		});
+		GridData gd= new GridData(GridData.FILL, GridData.FILL, true, true);
+		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(50);
+		fJRE50InfoText.setLayoutData(gd);
+		validateJRE50Status();
+		
 		return sc1;
 	}
 	
-	
+	protected final void openJREInstallPreferencePage() {
+		String jreID= BuildPathSupport.JRE_PREF_PAGE_ID;
+		if (fProject == null && getPreferenceContainer() != null) {
+			getPreferenceContainer().openPage(jreID, null);
+		} else {
+			PreferencesUtil.createPreferenceDialogOn(getShell(), jreID, new String[] { jreID }, null).open();
+		}
+		validateJRE50Status();
+	}
+
 	/* (non-javadoc)
 	 * Update fields and validate.
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */	
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
-		
 		if (changedKey != null) {
 			if (INTR_DEFAULT_COMPLIANCE.equals(changedKey)) {
-				if (VERSION_1_5.equals(newValue)) {
-					MessageDialog.openWarning(getShell(), 
-						"Compiler Settings",  //$NON-NLS-1$
-						"Please note that the J2SE 5.0 support is still under development."); //$NON-NLS-1$
-				}
-				
 				updateComplianceEnableState();
 				updateComplianceDefaultSettings(true, null);
 				fComplianceStatus= validateCompliance();
@@ -268,6 +291,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			    updateComplianceEnableState();
 				updateComplianceDefaultSettings(USER_CONF.equals(oldDefault), oldValue);
 				fComplianceStatus= validateCompliance();
+				validateJRE50Status();
 			} else if (PREF_SOURCE_COMPATIBILITY.equals(changedKey)) {
 				updateAssertEnumAsIdentifierEnableState();
 				fComplianceStatus= validateCompliance();
@@ -285,12 +309,18 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 			updateAssertEnumAsIdentifierEnableState();
 			updateInlineJSREnableState();
 			fComplianceStatus= validateCompliance();
+			validateJRE50Status();
 		}		
 		fContext.statusChanged(fComplianceStatus);
 	}
 	
-
-
+	private void validateJRE50Status() {
+		if (fJRE50InfoText != null && !fJRE50InfoText.isDisposed()) {
+			String compliance= getValue(PREF_COMPLIANCE);
+			fJRE50InfoText.setVisible(VERSION_1_5.equals(compliance) && (BuildPathSupport.findMatchingJREInstall(VERSION_1_5) == null));
+		}
+	}
+	
 	private IStatus validateCompliance() {
 		StatusInfo status= new StatusInfo();
 		String compliance= getValue(PREF_COMPLIANCE);

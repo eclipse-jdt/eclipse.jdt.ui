@@ -72,8 +72,6 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  * The first page of the <code>SimpleProjectWizard</code>.
  */
 public class JavaProjectWizardFirstPage extends WizardPage {
-
-	private static final String JRE_PREF_PAGE_ID= "org.eclipse.jdt.debug.ui.preferences.VMPreferencePage"; //$NON-NLS-1$
 	
 	/**
 	 * Request a project name. Fires an event whenever the text field is
@@ -406,7 +404,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
 		 */
 		public void widgetDefaultSelected(SelectionEvent e) {
-			String jreID= JRE_PREF_PAGE_ID;
+			String jreID= BuildPathSupport.JRE_PREF_PAGE_ID;
 			String complianceId= CompliancePreferencePage.PREF_ID;
 			Map data= new HashMap();
 			data.put(PropertyAndPreferencePage.DATA_NO_LINK, Boolean.TRUE);
@@ -545,7 +543,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		 * @see org.eclipse.swt.events.SelectionListener#widgetDefaultSelected(org.eclipse.swt.events.SelectionEvent)
 		 */
 		public void widgetDefaultSelected(SelectionEvent e) {
-			String jreID= JRE_PREF_PAGE_ID;
+			String jreID= BuildPathSupport.JRE_PREF_PAGE_ID;
 			PreferencesUtil.createPreferenceDialogOn(getShell(), jreID, new String[] { jreID  }, null).open();
 			handleComplianceChange();
 			fJREGroup.handlePossibleComplianceChange();

@@ -36,7 +36,7 @@ public class ImportOrganizePreferencePage extends PropertyAndPreferencePage {
 
 	public ImportOrganizePreferencePage() {
 		setPreferenceStore(JavaPlugin.getDefault().getPreferenceStore());
-		setDescription(PreferencesMessages.ImportOrganizePreferencePage_description); 
+		//setDescription(PreferencesMessages.ImportOrganizePreferencePage_description); 
 		
 		// only used when page is shown programatically
 		setTitle(PreferencesMessages.ImportOrganizePreferencePage_title);		 
