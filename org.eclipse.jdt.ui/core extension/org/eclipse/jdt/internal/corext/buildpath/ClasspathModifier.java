@@ -144,19 +144,21 @@ public class ClasspathModifier {
 	protected List createFolder(IFolderCreationQuery folderQuery, OutputFolderQuery outputQuery, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		if (folderQuery.doQuery()) {
 			IFolder folder= folderQuery.getCreatedFolder();
-			List folderList= new ArrayList();
-			folderList.add(folder);
-			if (folderQuery.isSourceFolder()) {
-				List root= addToClasspath(folderList, project, outputQuery, monitor);
-				if (root.size() == 0)
-					folder.delete(false, null);
-				return root;
-			} else {
-				List entries= getExistingEntries(project);
-				exclude(folder.getFullPath(), entries, new ArrayList(), project, monitor);
-				updateClasspath(entries, project, null);
+			if (folder != null) {
+				List folderList= new ArrayList();
+				folderList.add(folder);
+				if (folderQuery.isSourceFolder()) {
+					List root= addToClasspath(folderList, project, outputQuery, monitor);
+					if (root.size() == 0)
+						folder.delete(false, null);
+					return root;
+				} else {
+					List entries= getExistingEntries(project);
+					exclude(folder.getFullPath(), entries, new ArrayList(), project, monitor);
+					updateClasspath(entries, project, null);
+				}
+				return folderList;
 			}
-			return folderList;
 		}
 		return new ArrayList();
 	}
@@ -236,7 +238,9 @@ public class ClasspathModifier {
 						root= project;
 					else
 						root= project.findPackageFragmentRoot(entry.getPath());
-					result.add(root);
+					if (root != null) {
+						result.add(root);
+					}
 				}
 
 				return result;
@@ -529,7 +533,9 @@ public class ClasspathModifier {
 				CPListElement entry= getClasspathEntry(existingEntries, root);
 
 				IResource resource= exclude(javaElement, entry, project, new SubProgressMonitor(monitor, 1));
-				resources.add(resource);
+				if (resource != null) {
+					resources.add(resource);
+				}
 			}
 
 			updateClasspath(existingEntries, project, new SubProgressMonitor(monitor, 4));

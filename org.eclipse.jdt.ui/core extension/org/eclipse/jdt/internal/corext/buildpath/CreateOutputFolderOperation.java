@@ -22,6 +22,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
 
 /**
@@ -61,7 +62,10 @@ public class CreateOutputFolderOperation extends ClasspathModifierOperation {
             IPackageFragmentRoot root= (IPackageFragmentRoot)getSelectedElements().get(0);
             IJavaProject project= fInformationProvider.getJavaProject();
             IOutputLocationQuery query= fInformationProvider.getOutputLocationQuery();
-            result.add(createOutputFolder(root, query, project, monitor));
+            CPListElementAttribute res= createOutputFolder(root, query, project, monitor);
+            if (res != null) {
+            	result.add(res);
+            }
         } catch (CoreException e) {
             fException= e;
             result= null;
