@@ -580,9 +580,9 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 			 	if (viewer instanceof ITextViewerExtension5) {
 
 			 		ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
-			 		IRegion widgetRange= extension.modelRange2WidgetRange(new Region(fRememberedStyleRange.start, fRememberedStyleRange.length));
-			 		if (widgetRange != null)
-			 			viewer2.invalidateTextPresentation(widgetRange.getOffset(), widgetRange.getLength());
+			 		IRegion modelRange= extension.widgetRange2ModelRange(new Region(fRememberedStyleRange.start, fRememberedStyleRange.length));
+			 		if (modelRange != null)
+			 			viewer2.invalidateTextPresentation(modelRange.getOffset(), modelRange.getLength());
 
 			 	} else {
 					viewer2.invalidateTextPresentation(fRememberedStyleRange.start + viewer.getVisibleRegion().getOffset(), fRememberedStyleRange.length);
