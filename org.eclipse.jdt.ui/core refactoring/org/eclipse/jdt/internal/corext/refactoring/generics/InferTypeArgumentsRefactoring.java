@@ -368,6 +368,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			if (chosenType != null) {
 				if (chosenType.isWildcardType() && ! unboundedWildcardAllowed(baseType))
 					return null; // can't e.g. write "new ArrayList<?>()".
+				if (chosenType.isParameterizedType()) // workaround for bug 99124
+					chosenType= chosenType.getTypeDeclaration();
 				BindingKey bindingKey= new BindingKey(chosenType.getBindingKey());
 				typeArgument= rewrite.getImportRewrite().addImportFromSignature(bindingKey.internalToSignature(), rewrite.getAST());
 				ArrayList nestedTypeArgumentCvs= getTypeArgumentCvs(elementCv);
