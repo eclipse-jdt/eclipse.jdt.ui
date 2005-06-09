@@ -62,14 +62,15 @@ public abstract class TypeInfo {
 	public abstract String getPath();
 	
 	/**
-	 * Returns the <tt>IJavaElement</tt> this type info stands for.
+	 * Returns the container (class file or CU) this type info is contained
+	 * in.
 	 *  
 	 * @param scope the scope used to resolve the <tt>IJavaElement</tt>.
-	 * @return the <tt>IJavaElement</tt> this info stands for.
+	 * @return the container this type info is contained in.
 	 * @throws JavaModelException if an error occurs while access the Java
 	 * model.
 	 */
-	protected abstract IJavaElement getJavaElement(IJavaSearchScope scope) throws JavaModelException;
+	protected abstract IJavaElement getContainer(IJavaSearchScope scope) throws JavaModelException;
 	
 	/**
 	 * Returns the package fragment root path of this type info.
@@ -209,7 +210,7 @@ public abstract class TypeInfo {
 	 * Returns null if the type could not be resolved
 	 */	
 	public IType resolveType(IJavaSearchScope scope) throws JavaModelException {
-		IJavaElement elem = getJavaElement(scope);
+		IJavaElement elem = getContainer(scope);
 		if (elem instanceof ICompilationUnit)
 			return JavaModelUtil.findTypeInCompilationUnit((ICompilationUnit)elem, getTypeQualifiedName());
 		else if (elem instanceof IClassFile)

@@ -40,7 +40,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -106,8 +106,8 @@ public class TypeInfoHistory {
 		for (Iterator iter= keys.iterator(); iter.hasNext();) {
 			TypeInfo type= (TypeInfo)iter.next();
 			try {
-				IJavaElement element= type.getJavaElement(scope);
-				if (element == null || !element.exists())
+				IType jType= type.resolveType(scope);
+				if (jType == null || !jType.exists())
 					fHistroy.remove(type);
 			} catch (JavaModelException e) {
 				fHistroy.remove(type);

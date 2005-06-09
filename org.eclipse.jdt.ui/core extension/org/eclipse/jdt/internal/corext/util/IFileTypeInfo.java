@@ -52,7 +52,7 @@ public class IFileTypeInfo extends TypeInfo {
 		return TypeInfo.IFILE_TYPE_INFO;
 	}
 	
-	protected IJavaElement getJavaElement(IJavaSearchScope scope) {
+	protected IJavaElement getContainer(IJavaSearchScope scope) {
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		IPath path= new Path(getPath());
 		IResource resource= root.findMember(path);

@@ -69,7 +69,7 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 		return fExtension;
 	}
 	
-	protected IJavaElement getJavaElement(IJavaSearchScope scope) throws JavaModelException {
+	protected IJavaElement getContainer(IJavaSearchScope scope) throws JavaModelException {
 		IJavaModel jmodel= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 		IPath[] enclosedPaths= scope.enclosingProjectsAndJars();
 

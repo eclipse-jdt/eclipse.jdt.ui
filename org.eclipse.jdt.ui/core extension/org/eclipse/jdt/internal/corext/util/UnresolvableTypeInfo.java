@@ -52,7 +52,7 @@ public class UnresolvableTypeInfo extends TypeInfo {
 		return fPath;
 	}
 	
-	protected IJavaElement getJavaElement(IJavaSearchScope scope) {
+	protected IJavaElement getContainer(IJavaSearchScope scope) {
 		return null;
 	}
 }
