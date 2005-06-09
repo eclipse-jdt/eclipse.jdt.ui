@@ -294,6 +294,13 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		fCompletionOverwritesRadioButton.setText(PreferencesMessages.JavaEditorPreferencePage_completionOverwrites); 
 		fCompletionOverwritesRadioButton.setLayoutData(new GridData());
 		fCompletionOverwritesRadioButton.addSelectionListener(completionSelectionListener);
+		
+		Label label= new Label(completionComposite, SWT.NONE);
+		label.setText(PreferencesMessages.JavaEditorPreferencePage_completionToggleHint);
+		GridData gd= new GridData();
+		gd.horizontalIndent= 20;
+		gd.horizontalSpan= 2;
+		label.setLayoutData(gd);
 	}
 	
 	public void initialize() {
@@ -303,7 +310,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	private void initializeFields() {
 		boolean completionInserts= getBooleanValue(PREF_CODEASSIST_INSERT_COMPLETION);
 		fCompletionInsertsRadioButton.setSelection(completionInserts);
-		fCompletionOverwritesRadioButton.setSelection(! completionInserts);
+		fCompletionOverwritesRadioButton.setSelection(!completionInserts);
 		
 		updateAutoactivationControls();
  	}

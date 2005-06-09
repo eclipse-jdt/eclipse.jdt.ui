@@ -140,6 +140,7 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_automaticallyAddImportInsteadOfQualifiedName;
 	public static String JavaEditorPreferencePage_completionInserts;
 	public static String JavaEditorPreferencePage_completionOverwrites;
+	public static String JavaEditorPreferencePage_completionToggleHint;
 	public static String JavaEditorPreferencePage_fillArgumentNamesOnMethodCompletion;
 	public static String JavaEditorPreferencePage_guessArgumentNamesOnMethodCompletion;
 	public static String JavaEditorPreferencePage_autoActivationDelay;
