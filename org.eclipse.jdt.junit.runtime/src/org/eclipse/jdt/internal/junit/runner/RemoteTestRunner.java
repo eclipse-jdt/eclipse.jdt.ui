@@ -27,6 +27,8 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.net.Socket;
+import java.util.Iterator;
+import java.util.List;
 import java.util.Vector;
 import junit.extensions.TestDecorator;
 import junit.framework.AssertionFailedError;
@@ -641,11 +643,38 @@ public class RemoteTestRunner implements TestListener {
 				sendTree(suite.testAt(i));		
 			}				
 		}
+        else if (isJUnit4TestSuiteAdapter(test)) {
+        	notifyTestTreeEntry(getTestId(test)+ ',' + escapeComma(getTestName(test).trim()) + ',' + true + ',' +  test.countTestCases());
+			List tests = (List) callJUnit4GetterMethod(test, "getTests"); //$NON-NLS-1$
+			for (Iterator iter = tests.iterator(); iter.hasNext();) {
+				Test child = (Test) iter.next();
+				sendTree(child);
+			}
+        }
 		else {
 			notifyTestTreeEntry(getTestId(test)+ ',' + escapeComma(getTestName(test).trim()) + ',' + false + ',' +  test.countTestCases());
 		}
 	}
-	
+
+	private Object callJUnit4GetterMethod(Test test, String methodName) {
+		Object result;
+		try {
+			Method method = test.getClass().getMethod(methodName, new Class[0]);
+			result = method.invoke(test, new Object[0]);
+		} catch (Exception e) {
+			runFailed(JUnitMessages.getString("RemoteTestRunner.junit4"), e); //$NON-NLS-1$
+			result = null;
+		}
+		return result;
+	}
+
+	private boolean isJUnit4TestSuiteAdapter(Test test) {
+		return test.getClass().getName().equals("junit.framework.JUnit4TestAdapter"); //$NON-NLS-1$
+	}
+
+	private boolean isJUnit4TestCaseAdapter(Test test) {
+		return test.getClass().getName().equals("junit.framework.JUnit4TestCaseAdapter"); //$NON-NLS-1$
+	}	
 	private String escapeComma(String s) {
 		if ((s.indexOf(',') < 0) && (s.indexOf('\\') < 0))
 			return s;
@@ -672,6 +701,10 @@ public class RemoteTestRunner implements TestListener {
 	}
 	
 	private String getTestName(Test test) {
+		if (isJUnit4TestCaseAdapter(test)) {
+			Method method = (Method) callJUnit4GetterMethod(test, "getTestMethod"); //$NON-NLS-1$
+			return JUnitMessages.getFormattedString("RemoteTestRunner.testName", new String[] {method.getName(), method.getDeclaringClass().getName()}); //$NON-NLS-1$			
+		}
 		if (test instanceof TestCase) {
 			TestCase testCase= (TestCase) test;
 			return JUnitMessages.getFormattedString("RemoteTestRunner.testName", new String[] {testCase.getName(),  test.getClass().getName()}); //$NON-NLS-1$
@@ -681,6 +714,10 @@ public class RemoteTestRunner implements TestListener {
 			if (suite.getName() != null)
 				return suite.getName();
 			return getClass().getName();
+		}
+		if (isJUnit4TestSuiteAdapter(test)) {
+			Class testClass = (Class) callJUnit4GetterMethod(test, "getTestClass"); //$NON-NLS-1$
+			return testClass.getName();
 		}
 		return test.toString();
 	}
@@ -802,7 +839,7 @@ public class RemoteTestRunner implements TestListener {
 	}
 
 	private void notifyTestStarted(Test test) {
-		sendMessage(MessageIds.TEST_START + getTestId(test) + ','+test.toString());
+		sendMessage(MessageIds.TEST_START + getTestId(test) + ','+getTestName(test));
 		fWriter.flush();
 	}
 
