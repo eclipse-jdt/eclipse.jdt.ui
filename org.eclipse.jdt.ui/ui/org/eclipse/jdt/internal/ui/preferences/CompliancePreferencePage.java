@@ -98,6 +98,15 @@ public class CompliancePreferencePage extends PropertyAndPreferencePage {
 		super.enableProjectSpecificSettings(useProjectSpecificSettings);
 	}
 	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enablePreferenceContent(boolean)
+	 */
+	protected void enablePreferenceContent(boolean enable) {
+		if (fConfigurationBlock != null) {
+			fConfigurationBlock.enablePreferenceContent(enable);
+		}
+	}
+	
 	/*
 	 * @see org.eclipse.jface.preference.IPreferencePage#performDefaults()
 	 */

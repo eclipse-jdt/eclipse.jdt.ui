@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.ArrayList;
 import java.util.Arrays;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IProject;
@@ -29,6 +30,8 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 import org.eclipse.swt.widgets.Link;
 
+import org.eclipse.jface.dialogs.ControlEnableState;
+
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
@@ -37,6 +40,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.JavaRuntime;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
@@ -100,10 +104,13 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private IStatus fComplianceStatus;
 
 	private Link fJRE50InfoText;
+	private Composite fControlsComposite;
+	private ControlEnableState fBlockEnableState;
 
 	public ComplianceConfigurationBlock(IStatusChangeListener context, IProject project, IWorkbenchPreferenceContainer container) {
 		super(context, project, getKeys(), container);
-		
+
+		fBlockEnableState= null;
 		fComplianceControls= new ArrayList();
 			
 		fComplianceStatus= new StatusInfo();
@@ -150,6 +157,21 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		return complianceComposite;
 	}
 	
+	public void enablePreferenceContent(boolean enable) {
+		if (fControlsComposite != null && !fControlsComposite.isDisposed()) {
+			if (enable) {
+				if (fBlockEnableState != null) {
+					fBlockEnableState.restore();
+					fBlockEnableState= null;
+				}
+			} else {
+				if (fBlockEnableState == null) {
+					fBlockEnableState= ControlEnableState.disable(fControlsComposite);
+				}
+			}
+		}
+	}
+	
 	private Composite createComplianceTabContent(Composite folder) {
 
 
@@ -161,21 +183,28 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		};
 
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
-		
-		Composite compComposite= sc1.getBody();
-		
+		Composite composite= sc1.getBody();
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
+		composite.setLayout(layout);
+		
+		fControlsComposite= new Composite(composite, SWT.NONE);
+		fControlsComposite.setFont(composite.getFont());
+		
+		layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
 		layout.numColumns= 1;
-		compComposite.setLayout(layout);
+		fControlsComposite.setLayout(layout);
 
 		int nColumns= 3;
 
 		layout= new GridLayout();
 		layout.numColumns= nColumns;
 
-		Group group= new Group(compComposite, SWT.NONE);
+		Group group= new Group(fControlsComposite, SWT.NONE);
+		group.setFont(fControlsComposite.getFont());
 		group.setText(PreferencesMessages.ComplianceConfigurationBlock_compliance_group_label); 
 		group.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, false));
 		group.setLayout(layout);
@@ -226,7 +255,8 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		layout= new GridLayout();
 		layout.numColumns= nColumns;
 
-		group= new Group(compComposite, SWT.NONE);
+		group= new Group(fControlsComposite, SWT.NONE);
+		group.setFont(fControlsComposite.getFont());
 		group.setText(PreferencesMessages.ComplianceConfigurationBlock_classfiles_group_label); 
 		group.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		group.setLayout(layout);
@@ -249,9 +279,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_inline_jsr_bytecode_label; 
 		addCheckBox(group, label, PREF_CODEGEN_INLINE_JSR_BYTECODE, enableDisableValues, 0);	
 		
-		fJRE50InfoText= new Link(compComposite, SWT.WRAP);
+		fJRE50InfoText= new Link(composite, SWT.WRAP);
 		fJRE50InfoText.setText(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info);
-		fJRE50InfoText.setFont(compComposite.getFont());
+		fJRE50InfoText.setFont(composite.getFont());
 		fJRE50InfoText.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
 				openJREInstallPreferencePage();
@@ -320,10 +350,15 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private void validateJRE50Status() {
 		if (fJRE50InfoText != null && !fJRE50InfoText.isDisposed()) {
 			boolean isVisible= false;
-			String compliance= getValue(PREF_COMPLIANCE);
+			String compliance= getStoredValue(PREF_COMPLIANCE); // get actual value
 			if (VERSION_1_5.equals(compliance)) {
 				if (fProject != null) { // project specific settings: only test if a 50 JRE is installed
-					isVisible= BuildPathSupport.findMatchingJREInstall(VERSION_1_5) == null;
+					try {
+						IVMInstall install= JavaRuntime.getVMInstall(JavaCore.create(fProject));
+						isVisible= (install == null) || !BuildPathSupport.hasMatchingCompliance(install, VERSION_1_5);
+					} catch (CoreException e) {
+						JavaPlugin.log(e);
+					}
 				} else {
 					IVMInstall defaultVMInstall= JavaRuntime.getDefaultVMInstall();
 					isVisible= (defaultVMInstall == null) || !BuildPathSupport.hasMatchingCompliance(defaultVMInstall, VERSION_1_5);
@@ -372,6 +407,14 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		return status;
 	}
 	
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#useProjectSpecificSettings(boolean)
+	 */
+	public void useProjectSpecificSettings(boolean enable) {
+		super.useProjectSpecificSettings(enable);
+		validateJRE50Status();
+	}
 		
 	/*
 	 * Update the compliance controls' enable state

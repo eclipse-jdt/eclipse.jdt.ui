@@ -553,6 +553,7 @@ public abstract class OptionsConfigurationBlock {
 		return key.getStoredValue(fLookupOrder, false, fManager);
 	}
 	
+	
 	protected boolean getBooleanValue(Key key) {
 		return Boolean.valueOf(getValue(key)).booleanValue();
 	}
@@ -568,6 +569,15 @@ public abstract class OptionsConfigurationBlock {
 	
 	protected String setValue(Key key, boolean value) {
 		return setValue(key, String.valueOf(value));
+	}
+
+	/**
+	 * Retuens the value as actually stored in the preference store.
+	 * @param key
+	 * @return the value as actually stored in the preference store.
+	 */
+	protected String getStoredValue(Key key) {
+		return key.getStoredValue(fLookupOrder, false, fManager);
 	}
 	
 	/* (non-javadoc)
