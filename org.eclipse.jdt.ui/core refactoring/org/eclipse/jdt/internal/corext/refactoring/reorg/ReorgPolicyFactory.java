@@ -820,17 +820,6 @@ public class ReorgPolicyFactory {
 		}	
 		
 		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
-
-			IJavaElement[] elements= getJavaElements();
-			for (int i= 0; i < elements.length; i++) {
-				IJavaElement parent= destination.getParent();
-				while (parent != null) {
-					if (parent.equals(elements[i]))
-						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
-					parent= parent.getParent();
-				}
-			}
-
 			return recursiveVerifyDestination(destination);
 		}
 		
@@ -2091,6 +2080,16 @@ public class ReorgPolicyFactory {
 			return new RefactoringParticipant[0];
 		}
 		protected RefactoringStatus verifyDestination(IJavaElement destination) throws JavaModelException {
+			IJavaElement[] elements= getJavaElements();
+			for (int i= 0; i < elements.length; i++) {
+				IJavaElement parent= destination.getParent();
+				while (parent != null) {
+					if (parent.equals(elements[i]))
+						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ReorgPolicyFactory_cannot);
+					parent= parent.getParent();
+				}
+			}
+
 			RefactoringStatus superStatus= super.verifyDestination(destination);
 			if (superStatus.hasFatalError())
 				return superStatus;
