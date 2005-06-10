@@ -62,6 +62,7 @@ import org.eclipse.jdt.ui.actions.JdtActionConstants;
 import org.eclipse.jdt.ui.actions.OpenAction;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
@@ -499,5 +500,13 @@ public class SourceView extends AbstractInfoView implements IMenuListener {
 			StyledText styledText= fViewer.getTextWidget();
 			styledText.setFont(font);
 		}
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getHelpContextId()
+	 * @since 3.1
+	 */
+	protected String getHelpContextId() {
+		return IJavaHelpContextIds.SOURCE_VIEW;
 	}
 }

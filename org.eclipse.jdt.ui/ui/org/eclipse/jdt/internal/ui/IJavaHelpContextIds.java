@@ -242,6 +242,8 @@ public interface IJavaHelpContextIds {
 	public static final String PACKAGES_BROWSING_VIEW= PREFIX + "packages_browsing_view_context"; //$NON-NLS-1$
 	public static final String TYPES_VIEW= PREFIX + "types_view_context"; //$NON-NLS-1$
 	public static final String MEMBERS_VIEW= PREFIX + "members_view_context"; //$NON-NLS-1$
+	public static final String JAVADOC_VIEW= PREFIX + "javadoc_view_context"; //$NON-NLS-1$
+	public static final String SOURCE_VIEW= PREFIX + "source_view_context"; //$NON-NLS-1$
 
 	// Preference/Property pages
 	public static final String APPEARANCE_PREFERENCE_PAGE= 			PREFIX + "appearance_preference_page_context"; //$NON-NLS-1$

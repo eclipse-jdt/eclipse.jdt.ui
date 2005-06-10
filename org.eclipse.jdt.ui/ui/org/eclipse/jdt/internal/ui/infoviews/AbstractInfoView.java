@@ -37,6 +37,7 @@ import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
@@ -156,6 +157,14 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 */
 	abstract Control getControl();
 
+	/**
+	 * Returns the context ID for the Help system
+	 *
+	 * @return	the string used as ID for the Help context
+	 * @since 3.1
+	 */
+	abstract protected String getHelpContextId();
+
 	/*
 	 * @see IWorkbenchPart#createPartControl(org.eclipse.swt.widgets.Composite)
 	 */
@@ -166,6 +175,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 		createContextMenu();
 		createActions();
 		fillActionBars(getViewSite().getActionBars());
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), getHelpContextId());
 	}
 
 	/**

@@ -67,6 +67,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavadocContentAccess;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
@@ -543,5 +544,13 @@ public class JavadocView extends AbstractInfoView {
 			return fBrowser;
 		else
 			return fText;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.infoviews.AbstractInfoView#getHelpContextId()
+	 * @since 3.1
+	 */
+	protected String getHelpContextId() {
+		return IJavaHelpContextIds.JAVADOC_VIEW;
 	}
 }
