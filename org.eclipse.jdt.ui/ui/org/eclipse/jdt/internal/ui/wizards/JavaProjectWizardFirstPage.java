@@ -27,7 +27,6 @@ import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
@@ -661,17 +660,10 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	public void createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		final ScrolledComposite scroller= new ScrolledComposite(parent, SWT.V_SCROLL);
-		scroller.setFont(parent.getFont());
-		scroller.setLayoutData(new GridData(GridData.FILL_BOTH));
-		scroller.setExpandVertical(true);
-		scroller.setExpandHorizontal(true);
-		
-		final Composite composite= new Composite(scroller, SWT.NULL);
-		composite.setFont(scroller.getFont());
+		final Composite composite= new Composite(parent, SWT.NULL);
+		composite.setFont(parent.getFont());
 		composite.setLayout(initGridLayout(new GridLayout(1, false), true));
-		// composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
-		scroller.setContent(composite);
+		composite.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
 
 		// create UI elements
 		fNameGroup= new NameGroup(composite, fInitialName);
@@ -694,10 +686,9 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		fNameGroup.addObserver(fValidator);
 		fLocationGroup.addObserver(fValidator);
 
-		setControl(scroller);
-		Dialog.applyDialogFont(scroller);
-		scroller.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-	}
+		setControl(composite);
+		Dialog.applyDialogFont(composite);
+	}	
 
 	/**
 	 * Returns the current project location path as entered by the user, or its
