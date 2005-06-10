@@ -104,9 +104,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		return rewrite.getImportRewrite().addImportFromSignature(new BindingKey(type.getBindingKey()).internalToSignature(), rewrite.getAST());
 	}
 
-	/** The type environment */
-	protected TypeEnvironment fEnvironment= new TypeEnvironment();
-
 	/** Should type occurrences on instanceof's also be rewritten? */
 	protected boolean fInstanceOf= false;
 
@@ -568,7 +565,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		Assert.isNotNull(monitor);
 		Assert.isNotNull(status);
 		int level= 3;
-		final SuperTypeConstraintsModel model= new SuperTypeConstraintsModel(fEnvironment, fEnvironment.create(subBinding), fEnvironment.create(superBinding));
+		TypeEnvironment environment= new TypeEnvironment();
+		final SuperTypeConstraintsModel model= new SuperTypeConstraintsModel(environment, environment.create(subBinding), environment.create(superBinding));
 		final SuperTypeConstraintsCreator creator= new SuperTypeConstraintsCreator(model, fInstanceOf);
 		try {
 			monitor.beginTask("", 3); //$NON-NLS-1$
@@ -724,7 +722,6 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 					subMonitor.done();
 				}
 			} finally {
-				fEnvironment= null;
 				model.endCreation();
 				model.setCompliance(level);
 			}
