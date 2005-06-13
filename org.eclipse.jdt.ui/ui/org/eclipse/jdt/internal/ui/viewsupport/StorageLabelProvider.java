@@ -26,6 +26,7 @@ import org.eclipse.jface.viewers.LabelProvider;
 
 import org.eclipse.ui.IEditorRegistry;
 import org.eclipse.ui.IFileEditorMapping;
+import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.PlatformUI;
 
 /**
@@ -77,8 +78,6 @@ public class StorageLabelProvider extends LabelProvider {
 			}
 			fJarImageMap= null;
 		}
-		if (fDefaultImage != null)
-			fDefaultImage.dispose();
 		fDefaultImage= null;
 	}
 	
@@ -130,7 +129,7 @@ public class StorageLabelProvider extends LabelProvider {
 	
 	private Image getDefaultImage() {
 		if (fDefaultImage == null)
-			fDefaultImage= getEditorRegistry().getImageDescriptor((String)null).createImage();
+			fDefaultImage= PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJ_FILE);
 		return fDefaultImage;
 	}
 }
