@@ -18,6 +18,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -40,8 +41,10 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.ui.actions.WorkspaceModifyDelegatingOperation;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.launching.IVMInstall;
@@ -323,6 +326,13 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				updateProject(new SubProgressMonitor(monitor, 1));
 			}
 			configureJavaProject(new SubProgressMonitor(monitor, 2));
+			String compliance= fFirstPage.getJRECompliance();
+			if (compliance != null) {
+				IJavaProject project= JavaCore.create(fCurrProject);
+				Map options= project.getOptions(false);
+				JavaModelUtil.setCompilanceOptions(options, compliance);
+				project.setOptions(options);
+			}
 		} finally {
 			monitor.done();
 			fCurrProject= null;

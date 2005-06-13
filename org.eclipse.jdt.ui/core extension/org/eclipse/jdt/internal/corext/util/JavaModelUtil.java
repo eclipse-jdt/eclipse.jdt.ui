@@ -1136,12 +1136,33 @@ public final class JavaModelUtil {
 	 * Sets all compliance settings in the given map to 5.0
 	 */
 	public static void set50CompilanceOptions(Map map) {
-		map.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
-		map.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
-		map.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
-		map.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
-		map.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.ERROR);
+		setCompilanceOptions(map, JavaCore.VERSION_1_5);
 	}
+	
+	public static void setCompilanceOptions(Map map, String compliance) {
+		if (JavaCore.VERSION_1_5.equals(compliance)) {
+			map.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
+			map.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
+			map.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
+			map.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+			map.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.ERROR);
+		} else if (JavaCore.VERSION_1_4.equals(compliance)) {
+			map.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_4);
+			map.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_3);
+			map.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_2);
+			map.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.WARNING);
+			map.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.WARNING);
+		} else if (JavaCore.VERSION_1_3.equals(compliance)) {
+			map.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_3);
+			map.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_3);
+			map.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_1);
+			map.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.IGNORE);
+			map.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.IGNORE);
+		} else {
+			throw new IllegalArgumentException("Unsupported compliance: " + compliance); //$NON-NLS-1$
+		}
+	}
+	
 	
 	public static boolean is50OrHigher(IJavaProject project) {
 		return JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
