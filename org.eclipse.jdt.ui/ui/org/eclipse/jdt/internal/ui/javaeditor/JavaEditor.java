@@ -2009,8 +2009,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					if (name != null && name.length() > 0) {
 						String content= reference.getSource();
 						if (content != null) {
-							offset= range.getOffset() + content.indexOf(name);
-							length= name.length();
+							int packageKeyWordIndex = content.lastIndexOf("package"); //$NON-NLS-1$
+							if (packageKeyWordIndex != -1) {
+								offset= range.getOffset() + content.indexOf(name, packageKeyWordIndex + 7);
+								length= name.length();
+							}
 						}
 					}
 				}
