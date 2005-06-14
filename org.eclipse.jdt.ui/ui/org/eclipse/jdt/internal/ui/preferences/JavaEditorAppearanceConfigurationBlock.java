@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.List;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.ColorSelector;
@@ -38,6 +39,8 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 
 /**
  * Configures Java Editor hover preferences.
@@ -93,7 +96,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	}
 
 	/**
-	 * Creates page for hover preferences.
+	 * Creates page for appearance preferences.
 	 * 
 	 * @param parent the parent composite
 	 * @return the control for the preference page
@@ -101,7 +104,41 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	public Control createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
+		createHeader(parent);
+		
 		return createAppearancePage(parent);
+	}
+
+	private void createHeader(Composite contents) {
+		final Shell shell= contents.getShell();
+		String text= PreferencesMessages.JavaEditorPreferencePage_link; 
+		Link link= new Link(contents, SWT.NONE);
+		link.setText(text);
+		link.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				PreferencesUtil.createPreferenceDialogOn(shell, "org.eclipse.ui.preferencePages.GeneralTextEditor", null, null); //$NON-NLS-1$
+			}
+		});
+		// TODO replace by link-specific tooltips when
+		// bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=88866 gets fixed
+		link.setToolTipText(PreferencesMessages.JavaEditorPreferencePage_link_tooltip); 
+		
+		
+		GridData gridData= new GridData(SWT.FILL, SWT.BEGINNING, true, false);
+		gridData.widthHint= 150; // only expand further if anyone else requires it
+		link.setLayoutData(gridData);
+		
+		addFiller(contents);
+	}
+	
+	private void addFiller(Composite composite) {
+		PixelConverter pixelConverter= new PixelConverter(composite);
+		
+		Label filler= new Label(composite, SWT.LEFT );
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		gd.horizontalSpan= 2;
+		gd.heightHint= pixelConverter.convertHeightInCharsToPixels(1) / 2;
+		filler.setLayoutData(gd);
 	}
 	
 	/**
