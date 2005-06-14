@@ -173,7 +173,9 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	 */	
 	public void restoreState(IMemento memento) {
 		String workingSetName= memento.getString(TAG_WORKING_SET_NAME);
-		IWorkingSet ws= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
+		IWorkingSet ws= null;
+		if (workingSetName != null && workingSetName.length() > 0)
+			ws= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
 		setWorkingSet(ws, false);
 	}
 	
