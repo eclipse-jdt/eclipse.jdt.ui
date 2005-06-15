@@ -36,13 +36,12 @@ public class FileTool {
 	/**
 	 * A buffer.
 	 */
-	private static byte[] buffer = new byte[8192];
+	private static byte[] fgBuffer = new byte[8192];
 	/**
 	 * Unzips the given zip file to the given destination directory
 	 * extracting only those entries the pass through the given
 	 * filter.
 	 * 
-	 * @param filter filters out unwanted zip entries
 	 * @param zipFile the zip file to unzip
 	 * @param dstDir the destination directory
 	 */
@@ -147,9 +146,9 @@ public class FileTool {
 	public static void transferData(InputStream source, OutputStream destination) throws IOException {
 		int bytesRead = 0;
 		while(bytesRead != -1){
-			bytesRead = source.read(buffer, 0, buffer.length);
+			bytesRead = source.read(fgBuffer, 0, fgBuffer.length);
 			if(bytesRead != -1){
-				destination.write(buffer, 0, bytesRead);
+				destination.write(fgBuffer, 0, bytesRead);
 			}
 		}
 	}
