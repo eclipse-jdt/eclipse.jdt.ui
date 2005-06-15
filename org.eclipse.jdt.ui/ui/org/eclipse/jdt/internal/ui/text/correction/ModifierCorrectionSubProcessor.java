@@ -801,17 +801,17 @@ public class ModifierCorrectionSubProcessor {
 		if (node.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY) {
 			ASTNode parent= node.getParent();
 			if (parent.getLocationInParent() == VariableDeclarationStatement.FRAGMENTS_PROPERTY) {
-				proposals.add(getSuppressWarningsProposal(context.getCompilationUnit(), parent.getParent(), warningToken, -2));
+				addSuppressWarningsProposal(context.getCompilationUnit(), parent.getParent(), warningToken, -2, proposals);
 				return;
 			}
 		} else if (node.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY) {
-			proposals.add(getSuppressWarningsProposal(context.getCompilationUnit(), node, warningToken, -2));
+			addSuppressWarningsProposal(context.getCompilationUnit(), node.getParent(), warningToken, -2, proposals);
 			return;
 		}
 		
 		ASTNode target= ASTResolving.findParentBodyDeclaration(node);
 		if (target != null) {
-			proposals.add(getSuppressWarningsProposal(context.getCompilationUnit(), target, warningToken, -3));
+			addSuppressWarningsProposal(context.getCompilationUnit(), target, warningToken, -3, proposals);
 		}
 	}
 	
@@ -822,7 +822,7 @@ public class ModifierCorrectionSubProcessor {
 		return new String();
 	}
 	
-	private static ASTRewriteCorrectionProposal getSuppressWarningsProposal(ICompilationUnit cu, ASTNode node, String warningToken, int relevance) {
+	private static void addSuppressWarningsProposal(ICompilationUnit cu, ASTNode node, String warningToken, int relevance, Collection proposals) {
 
 		ChildListPropertyDescriptor property= null;
 		String name;
@@ -868,7 +868,8 @@ public class ModifierCorrectionSubProcessor {
 				name= ((EnumConstantDeclaration) node).getName().getIdentifier();
 				break;
 			default:
-				name= "Unknown"; //$NON-NLS-1$
+				JavaPlugin.logErrorMessage("SuppressWarning quick fix: wrong node kind: " + node.getNodeType()); //$NON-NLS-1$
+				return;
 		}
 		
 		AST ast= node.getAST();
@@ -908,7 +909,7 @@ public class ModifierCorrectionSubProcessor {
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ANNOTATION);
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance, image);
 		proposal.setCommandId(ADD_SUPPRESSWARNINGS_ID);
-		return proposal;
+		proposals.add(proposal);
 	}
 	
 	private static boolean addSuppressArgument(ASTRewrite rewrite, Expression value, StringLiteral newStringLiteral) {
