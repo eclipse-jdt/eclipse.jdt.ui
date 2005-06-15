@@ -571,7 +571,7 @@ public class JavaIndenter {
 
 			case Symbols.TokenEOF:
 				// trap when hitting start of document
-				return 0;
+				return JavaHeuristicScanner.NOT_FOUND;
 
 			case Symbols.TokenEQUAL:
 				// indent assignments
