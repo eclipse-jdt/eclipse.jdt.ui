@@ -39,12 +39,14 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -162,12 +164,27 @@ public final class MemberVisibilityAdjustor {
 					ModifierRewrite.create(rewrite, declaration).setVisibility(visibility, group);
 				else {
 					final VariableDeclarationFragment newFragment= rewrite.getAST().newVariableDeclarationFragment();
-					newFragment.setName((SimpleName) ASTNode.copySubtree(rewrite.getAST(), fragment.getName()));
+					newFragment.setName((SimpleName) rewrite.createCopyTarget(fragment.getName()));
 					final FieldDeclaration newDeclaration= rewrite.getAST().newFieldDeclaration(newFragment);
-					newDeclaration.setType((Type) ASTNode.copySubtree(rewrite.getAST(), declaration.getType()));
+					newDeclaration.setType((Type) rewrite.createCopyTarget(declaration.getType()));
+					IExtendedModifier extended= null;
+					for (final Iterator iterator= declaration.modifiers().iterator(); iterator.hasNext();) {
+						extended= (IExtendedModifier) iterator.next();
+						if (extended.isModifier()) {
+							final Modifier modifier= (Modifier) extended;
+							final int flag= modifier.getKeyword().toFlagValue();
+							if ((flag & (Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE)) != 0)
+								continue;
+						}
+						newDeclaration.modifiers().add(rewrite.createCopyTarget((ASTNode) extended));
+					}
+					ModifierRewrite.create(rewrite, newDeclaration).setVisibility(visibility, group);
 					final AbstractTypeDeclaration type= (AbstractTypeDeclaration) declaration.getParent();
 					rewrite.getListRewrite(type, type.getBodyDeclarationsProperty()).insertAfter(newDeclaration, declaration, null);
-					rewrite.getListRewrite(declaration, FieldDeclaration.FRAGMENTS_PROPERTY).remove(fragment, group);
+					final ListRewrite list= rewrite.getListRewrite(declaration, FieldDeclaration.FRAGMENTS_PROPERTY);
+					list.remove(fragment, group);
+					if (list.getRewrittenList().isEmpty())
+						rewrite.remove(declaration, null);
 				}
 				if (status != null)
 					adjustor.fStatus.merge(status);
