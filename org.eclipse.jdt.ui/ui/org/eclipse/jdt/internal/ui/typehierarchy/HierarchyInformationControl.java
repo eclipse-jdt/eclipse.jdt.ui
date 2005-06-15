@@ -172,21 +172,18 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			return true;
 		}
 		
-		IMethod[] methods= type.findMethods(fFocus);
-		if (methods != null && methods.length > 0) {
-			try {
+		try {
+			IMethod method= JavaModelUtil.findMethod2(fFocus, type.getMethods());
+			if (method != null) {
 				// check visibility
 				IPackageFragment pack= (IPackageFragment) fFocus.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
-				for (int i= 0; i < methods.length; i++) {
-					IMethod curr= methods[i];
-					if (JavaModelUtil.isVisibleInHierarchy(curr, pack)) {
-						return true;
-					}
+				if (JavaModelUtil.isVisibleInHierarchy(method, pack)) {
+					return true;
 				}
-			} catch (JavaModelException e) {
-				// ignore
-				JavaPlugin.log(e);
 			}
+		} catch (JavaModelException e) {
+			// ignore
+			JavaPlugin.log(e);
 		}
 		return false;			
 		
@@ -375,9 +372,11 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	protected Object getSelectedElement() {
 		Object selectedElement= super.getSelectedElement();
 		if (selectedElement instanceof IType && fFocus != null) {
-			IMethod[] methods= ((IType) selectedElement).findMethods(fFocus);
-			if (methods != null && methods.length > 0) {
-				return methods[0];
+			IType type= (IType) selectedElement;
+			try {
+				return JavaModelUtil.findMethod2(fFocus, type.getMethods());
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
 			}
 		}
 		return selectedElement;
