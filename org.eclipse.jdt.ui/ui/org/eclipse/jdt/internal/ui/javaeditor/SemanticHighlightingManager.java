@@ -303,11 +303,8 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 
 		fPreferenceStore.addPropertyChangeListener(this);
 
-		if (isEnabled()) {
+		if (isEnabled())
 			enable();
-			if (fReconciler != null)
-				fReconciler.refresh();
-		}
 	}
 
 	/**
@@ -496,63 +493,49 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 		if (!isEnabled())
 			return;
 
-		String property= event.getProperty();
-		boolean changed= false;
-		
 		for (int i= 0, n= fSemanticHighlightings.length; i < n; i++) {
 			SemanticHighlighting semanticHighlighting= fSemanticHighlightings[i];
 
 			String colorKey= SemanticHighlightings.getColorPreferenceKey(semanticHighlighting);
-			if (colorKey.equals(property)) {
+			if (colorKey.equals(event.getProperty())) {
 				adaptToTextForegroundChange(fHighlightings[i], event);
-				changed= true;
+				fPresenter.highlightingStyleChanged(fHighlightings[i]);
 				continue;
 			}
 
 			String boldKey= SemanticHighlightings.getBoldPreferenceKey(semanticHighlighting);
-			if (boldKey.equals(property)) {
+			if (boldKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fHighlightings[i], event, SWT.BOLD);
-				changed= true;
+				fPresenter.highlightingStyleChanged(fHighlightings[i]);
 				continue;
 			}
 
 			String italicKey= SemanticHighlightings.getItalicPreferenceKey(semanticHighlighting);
-			if (italicKey.equals(property)) {
+			if (italicKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fHighlightings[i], event, SWT.ITALIC);
-				changed= true;
+				fPresenter.highlightingStyleChanged(fHighlightings[i]);
 				continue;
 			}
 
 			String strikethroughKey= SemanticHighlightings.getStrikethroughPreferenceKey(semanticHighlighting);
-			if (strikethroughKey.equals(property)) {
+			if (strikethroughKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fHighlightings[i], event, TextAttribute.STRIKETHROUGH);
-				changed= true;
+				fPresenter.highlightingStyleChanged(fHighlightings[i]);
 				continue;
 			}
 
 			String underlineKey= SemanticHighlightings.getUnderlinePreferenceKey(semanticHighlighting);
-			if (underlineKey.equals(property)) {
+			if (underlineKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fHighlightings[i], event, TextAttribute.UNDERLINE);
-				changed= true;
+				fPresenter.highlightingStyleChanged(fHighlightings[i]);
 				continue;
 			}
 
 			String enabledKey= SemanticHighlightings.getEnabledPreferenceKey(semanticHighlighting);
-			if (enabledKey.equals(property)) {
+			if (enabledKey.equals(event.getProperty())) {
 				adaptToEnablementChange(fHighlightings[i], event);
-				changed= true;
+				fPresenter.highlightingStyleChanged(fHighlightings[i]);
 				continue;
-			}
-		}
-		
-		if (changed) {
-			if (fReconciler == null) {
-				// hard coded for previewer on preference page
-				List oldpositions= new ArrayList();
-				fPresenter.addAllPositions(oldpositions);
-				fPresenter.updatePresentation(null, createHardcodedPositions(), (HighlightedPosition[]) oldpositions.toArray(new HighlightedPosition[oldpositions.size()]));
-			} else {
-				fReconciler.refresh();
 			}
 		}
 	}
