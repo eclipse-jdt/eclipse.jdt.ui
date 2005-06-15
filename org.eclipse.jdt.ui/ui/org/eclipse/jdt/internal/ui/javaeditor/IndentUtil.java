@@ -131,9 +131,6 @@ public final class IndentUtil {
 		if (numberOfLines < 1)
 			return new IndentResult(null);
 		
-		if (numberOfLines == 1)
-			return indentLines(document, lines, project, result);
-		
 		result= reuseOrCreateToken(result, numberOfLines);
 		result.hasChanged= false;
 		
