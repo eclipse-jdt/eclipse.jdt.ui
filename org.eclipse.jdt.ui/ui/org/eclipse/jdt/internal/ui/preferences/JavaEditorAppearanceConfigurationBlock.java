@@ -104,9 +104,13 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 	public Control createControl(Composite parent) {
 		initializeDialogUnits(parent);
 
-		createHeader(parent);
+		Composite composite= new Composite(parent, SWT.NONE);
+		composite.setLayout(new GridLayout());
 		
-		return createAppearancePage(parent);
+		createHeader(composite);
+		createAppearancePage(composite);
+		
+		return composite;
 	}
 
 	private void createHeader(Composite contents) {
