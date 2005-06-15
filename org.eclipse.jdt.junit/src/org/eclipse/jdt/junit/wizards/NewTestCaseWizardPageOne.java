@@ -646,13 +646,14 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			 *  testFooStringBuffer1()
 			 *  testFooStringBuffer2()
 			 */
-			final String result= name.toString();
+			String result= name.toString();
 			if (names.contains(result)) {
 				int suffix= 1;
 				while (names.contains(result + Integer.toString(suffix)))
 					suffix++;
 				name.append(Integer.toString(suffix));
 			}
+			result= name.toString();
 			names.add(result);
 			appendMethodComment(buffer, method);
 			buffer.append("public ");//$NON-NLS-1$ 
