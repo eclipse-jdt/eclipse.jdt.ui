@@ -34,8 +34,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.wizard.IWizardPage;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
@@ -155,9 +153,11 @@ public class UseSupertypeWizard extends RefactoringWizard{
 
 		private void updateUpdateLabels() {
 			IType selectedType= getSelectedSupertype();
-			Change change= getRefactoringWizard().getChange();
-			if (change instanceof CompositeChange){
-				fFileCount.put(selectedType, new Integer(((CompositeChange)change).getChildren().length));
+			final int count= ((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().getChanges();
+			fFileCount.put(selectedType, new Integer(count));
+			if (count == 0) {
+				setMessage(RefactoringMessages.UseSupertypeInputPage_No_updates, IMessageProvider.INFORMATION); 
+				setPageComplete(false);
 			}
 			fTableViewer.refresh();
 			if (noSupertypeCanBeUsed()){
@@ -192,8 +192,8 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			boolean superFinish= super.performFinish();
 			if (! superFinish)
 				return false;
-			Change c= getRefactoringWizard().getChange();
-			if (c instanceof CompositeChange && ((CompositeChange)c).getChildren().length == 0) {
+			final int count= ((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().getChanges();
+			if (count == 0) {
 				updateUpdateLabels();
 				return false;
 			}
@@ -245,6 +245,5 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			if (visible && fTableViewer != null)
 				fTableViewer.getTable().setFocus();
 		}
-
 	}
 }

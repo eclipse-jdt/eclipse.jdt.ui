@@ -98,6 +98,9 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	/** The text change manager */
 	private TextChangeManager fChangeManager= null;
 
+	/** The number of files affected by the last change generation */
+	private int fChanges= 0;
+
 	/** The subtype to replace */
 	private final IType fSubType;
 
@@ -175,11 +178,14 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	public final Change createChange(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		try {
+			fChanges= 0;
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
 			final TextChange[] changes= fChangeManager.getAllChanges();
-			if (changes != null && changes.length != 0)
+			if (changes != null && changes.length != 0) {
+				fChanges= changes.length;
 				return new DynamicValidationStateChange(RefactoringCoreMessages.UseSupertypeWherePossibleRefactoring_name, fChangeManager.getAllChanges());
+			}
 		} finally {
 			monitor.done();
 		}
@@ -259,6 +265,15 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 */
 	protected final SuperTypeConstraintsSolver createContraintSolver(final SuperTypeConstraintsModel model) {
 		return new SuperTypeConstraintsSolver(model);
+	}
+
+	/**
+	 * Returns the number of files that are affected from the last change generation.
+	 * 
+	 * @return The number of files which are affected
+	 */
+	public final int getChanges() {
+		return fChanges;
 	}
 
 	/*
