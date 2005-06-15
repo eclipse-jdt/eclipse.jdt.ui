@@ -312,7 +312,7 @@ public class TypeEnvironment {
 		ArrayType result= (ArrayType)arrayTypes.get(elementType);
 		if (result != null)
 			return result;
-		result= new ArrayType(this);
+		result= new ArrayType(this, BindingKey.createArrayTypeBindingKey(elementType.getBindingKey(), dimensions));
 		arrayTypes.put(elementType, result);
 		result.initialize(elementType, dimensions);
 		return result;
