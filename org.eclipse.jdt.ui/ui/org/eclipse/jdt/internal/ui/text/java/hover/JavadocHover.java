@@ -49,6 +49,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 		| JavaElementLabels.M_PRE_RETURNTYPE | JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_EXCEPTIONS
 		| JavaElementLabels.F_PRE_TYPE_SIGNATURE | JavaElementLabels.M_PRE_TYPE_PARAMETERS | JavaElementLabels.T_TYPE_PARAMETERS
 		| JavaElementLabels.USE_RESOLVED;
+	private final long LOCAL_VARIABLE_FLAGS= LABEL_FLAGS & ~JavaElementLabels.F_FULLY_QUALIFIED | JavaElementLabels.F_POST_QUALIFIED;
 
 
 	/**
@@ -139,7 +140,8 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	}
 
 	private String getInfoText(IJavaElement member) {
-		String label= JavaElementLabels.getElementLabel(member, LABEL_FLAGS);
+		long flags= member.getElementType() == IJavaElement.LOCAL_VARIABLE ? LOCAL_VARIABLE_FLAGS : LABEL_FLAGS;
+		String label= JavaElementLabels.getElementLabel(member, flags);
 		StringBuffer buf= new StringBuffer();
 		for (int i= 0; i < label.length(); i++) {
 			char ch= label.charAt(i);
