@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -549,11 +550,22 @@ public class SourceProvider {
 	}
 	
 	private IRegion createRange(List statements, int end) {
-		int start= ((ASTNode)statements.get(0)).getStartPosition();
-		ASTNode last= (ASTNode)statements.get(end);
-		int length = last.getStartPosition() - start + last.getLength();
-		IRegion range= new Region(start, length);
-		return range;
+		ASTNode first= (ASTNode)statements.get(0);
+		ASTNode root= first.getRoot();
+		if (root instanceof CompilationUnit) {
+			CompilationUnit unit= (CompilationUnit)root;
+			int start= unit.getExtendedStartPosition(first);
+			ASTNode last= (ASTNode)statements.get(end);
+			int length = unit.getExtendedStartPosition(last) - start + unit.getExtendedLength(last);
+			IRegion range= new Region(start, length);
+			return range;
+		} else {
+			int start= first.getStartPosition();
+			ASTNode last= (ASTNode)statements.get(end);
+			int length = last.getStartPosition() - start + last.getLength();
+			IRegion range= new Region(start, length);
+			return range;
+		}
 	}
 	
 	private String[] getBlocks(ICompilationUnit unit, RangeMarker[] markers) throws BadLocationException {
