@@ -439,6 +439,9 @@ public class PackageExplorerPart extends ViewPart
 		Map fAdditionalMappings= new HashMap();
 		protected void mapElement(Object element, Widget item) {
 			Widget existingItem= findItem(element);
+			// if the widget is part of the map managed in the tree
+			// simply call super since we might remap the element.
+			// See comment in StructuredViewer#associate
 			if (existingItem == null || existingItem == item) {
 				super.mapElement(element, item);
 			} else {
@@ -447,6 +450,7 @@ public class PackageExplorerPart extends ViewPart
 					l= new ArrayList();
 					fAdditionalMappings.put(element, l);
 				}
+				// Only add if not already part. See comment above
 				if (!l.contains(item)) {
 					l.add(item);
 					fResourceToItemsMapper.addToMap(element, (Item)item);
@@ -462,7 +466,11 @@ public class PackageExplorerPart extends ViewPart
 			if (findItem(element) == item) {
 				super.unmapElement(element, item);
 				if (l != null && l.size() >= 1) {
+					// Take the first item and store it into
+					// the normal map managed by the tree
 					Widget widget= (Widget)l.remove(0);
+					// we have to remove the item from the resource map here
+					// since the super call below maps it again
 					fResourceToItemsMapper.removeFromMap(element, (Item)widget);
 					super.mapElement(element, widget);
 				}
@@ -880,6 +888,16 @@ public class PackageExplorerPart extends ViewPart
 		
 		fFilterUpdater= new FilterUpdater(fViewer);
 		ResourcesPlugin.getWorkspace().addResourceChangeListener(fFilterUpdater);
+		
+		// Syncing the package explorer has to be done here. It can't be done
+		// when restoring the link state since the package explorers input isn't
+		// set yet.
+		if (isLinkingEnabled()) {
+			IEditorPart editor= getViewSite().getPage().getActiveEditor();
+			if (editor != null) {
+				editorActivated(editor);
+			}
+		}
 		
 		stats.endRun();
 	}
