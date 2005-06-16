@@ -12,9 +12,18 @@ package org.eclipse.jdt.internal.junit.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
-import org.eclipse.core.resources.IResource;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
@@ -23,17 +32,12 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.junit.Messages;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 import org.eclipse.jdt.junit.wizards.NewTestSuiteWizardPage;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.PlatformUI;
+import org.eclipse.jdt.internal.junit.Messages;
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
  * A wizard for creating test suites.
@@ -75,7 +79,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 						filename));  
 				if (saveUnsavedChanges) {
 					try {
-						PlatformUI.getWorkbench().getProgressService().busyCursorWhile(getRunnableSave(cu_ep));
+						getContainer().run(false, false, getRunnableSave(cu_ep));
 					} catch (Exception e) {
 						JUnitPlugin.log(e);
 					}
