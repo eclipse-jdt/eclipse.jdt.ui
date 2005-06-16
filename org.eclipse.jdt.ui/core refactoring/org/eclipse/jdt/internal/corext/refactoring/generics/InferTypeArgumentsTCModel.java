@@ -633,7 +633,7 @@ public class InferTypeArgumentsTCModel {
 				CollectionElementVariable2 elementCv= makeElementVariable(expressionCv, typeVariable, i);
 				TType referenceTypeArgument;
 				if (typeArguments == null) { // raw type
-					referenceTypeArgument= typeVariable.getErasure();
+					continue; // do not consider
 				} else {
 					referenceTypeArgument= typeArguments[i];
 				}
@@ -667,7 +667,7 @@ public class InferTypeArgumentsTCModel {
 				TypeVariable typeParameter= typeParameters[i];
 				TType referenceTypeArgument;
 				if (typeArguments == null) { // raw type
-					referenceTypeArgument= typeParameter.getErasure();
+					continue; // do not consider
 				} else {
 					referenceTypeArgument= typeArguments[i];
 				}

@@ -357,6 +357,10 @@ public class InferTypeArgumentsConstraintsSolver {
 			ConstraintVariable2 expressionVariable= castCv.getExpressionVariable();
 			TType chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(expressionVariable);
 			if (chosenType != null && TTypes.canAssignTo(chosenType, castCv.getType())) {
+				if (chosenType.equals(expressionVariable.getType()))
+					continue; // The type has not changed. Don't remove the cast, since it could be
+							   // there to get access to default-visible members or to
+							   // unify types of conditional expressions. 
 				fUpdate.addCastToRemove(castCv);
 			}
 		}

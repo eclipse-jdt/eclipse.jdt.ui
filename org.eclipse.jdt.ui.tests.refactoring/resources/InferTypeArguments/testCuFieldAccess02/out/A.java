@@ -21,7 +21,7 @@ class CellTest {
 		c1.t= booleanList;
 		c1.setT(booleanList);
 		Iterable<Boolean> t= c1.t;
-		Iterator<Boolean> iter= c1.t.iterator();
+		Iterator<Boolean> iter= (Iterator<Boolean>) c1.t.iterator();
 		Iterator<Boolean> iter2= c1.t.iterator();
 		boolean bool= c1.t.iterator().next();
 		

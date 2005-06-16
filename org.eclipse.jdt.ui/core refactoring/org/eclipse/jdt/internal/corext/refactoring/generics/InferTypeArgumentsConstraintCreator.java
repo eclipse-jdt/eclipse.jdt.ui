@@ -738,7 +738,13 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		Expression receiver= node.getExpression();
 		Type createdType= node.getType();
 		
-		ConstraintVariable2 typeCv= getConstraintVariable(createdType);
+		ConstraintVariable2 typeCv;
+		if (node.getAnonymousClassDeclaration() == null) {
+			typeCv= getConstraintVariable(createdType);
+		} else {
+			typeCv= fTCModel.makeImmutableTypeVariable(createdType.resolveBinding(), null);
+			setConstraintVariable(createdType, typeCv);
+		}
 		setConstraintVariable(node, typeCv);
 		
 		IMethodBinding methodBinding= node.resolveConstructorBinding();
