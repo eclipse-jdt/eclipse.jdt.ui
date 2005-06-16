@@ -16,6 +16,7 @@ import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -813,7 +814,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 			adjustor.setFailureSeverity(RefactoringStatus.WARNING);
 			adjustor.setStatus(status);
 			adjustor.adjustVisibility(new SubProgressMonitor(monitor, 1));
-			final Map parameters= new HashMap();
+			final Map parameters= new LinkedHashMap();
 			addTypeParameters(fSourceRewrite.getRoot(), fType, parameters);
 			final ITypeBinding[] bindings= new ITypeBinding[parameters.values().size()];
 			parameters.values().toArray(bindings);
@@ -1540,20 +1541,20 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		if (!(type.getParent() instanceof ClassInstanceCreation)) {
 			final ListRewrite rewrite= targetRewrite.getASTRewrite().getListRewrite(type, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
 			final AST ast= targetRewrite.getRoot().getAST();
-			TypeParameter parameter= null;
+			Type simpleType= null;
 			for (int index= type.typeArguments().size(); index < parameters.length; index++) {
-				parameter= ast.newTypeParameter();
-				parameter.setName(ast.newSimpleName(parameters[index].getName()));
-				rewrite.insertLast(parameter, group);
+				simpleType= ast.newSimpleType(ast.newSimpleName(parameters[index].getName()));
+				rewrite.insertLast(simpleType, group);
 			}
 		}
 		return true;
 	}
 
 	private boolean updateReference(ITypeBinding[] parameters, ASTNode node, CompilationUnitRewrite rewrite, TextEditGroup group) {
-		if (node instanceof SimpleType && node.getParent() instanceof ParameterizedType)
-			return updateParameterizedTypeReference(parameters, (ParameterizedType) node.getParent(), rewrite, group);
-		else if (node instanceof QualifiedName)
+		if (node.getLocationInParent() == ParameterizedType.TYPE_PROPERTY) {
+			updateParameterizedTypeReference(parameters, (ParameterizedType) node.getParent(), rewrite, group);
+			return updateNameReference(new ITypeBinding[] {}, ((SimpleType) node).getName(), rewrite, group);
+		} else if (node instanceof QualifiedName)
 			return updateNameReference(parameters, (QualifiedName) node, rewrite, group);
 		else if (node instanceof SimpleType)
 			return updateNameReference(parameters, ((SimpleType) node).getName(), rewrite, group);
