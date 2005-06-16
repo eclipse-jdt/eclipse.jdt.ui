@@ -540,6 +540,8 @@ public class UnresolvedElementsSubProcessor {
 			if (binding.isArray()) {
 				binding= binding.getElementType();
 			}
+			binding= binding.getTypeDeclaration();
+			
 			resolvedTypeName= binding.getQualifiedName();
 			proposals.add(createTypeRefChangeProposal(cu, resolvedTypeName, node, relevance + 2));
 		}
