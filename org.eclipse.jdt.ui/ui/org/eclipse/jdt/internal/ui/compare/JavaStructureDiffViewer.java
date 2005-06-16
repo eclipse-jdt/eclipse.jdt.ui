@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
+import java.util.Map;
 import java.util.ResourceBundle;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.widgets.*;
 
@@ -24,6 +27,9 @@ import org.eclipse.compare.structuremergeviewer.Differencer;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
 import org.eclipse.compare.structuremergeviewer.DiffNode;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 
 class JavaStructureDiffViewer extends StructureDiffViewer {
 	
@@ -119,7 +125,32 @@ class JavaStructureDiffViewer extends StructureDiffViewer {
 							     : false;
 		setSmartButtonVisible(fThreeWay);
 		
+		if (input != null) {
+			Map compilerOptions= getCompilerOptions(input.getAncestor());
+			if (compilerOptions == null)
+				compilerOptions= getCompilerOptions(input.getLeft());
+			if (compilerOptions == null)
+				compilerOptions= getCompilerOptions(input.getRight());
+			if (compilerOptions != null)
+				fStructureCreator.setDefaultCompilerOptions(compilerOptions);
+		}
+		
 		super.compareInputChanged(input);
+	}
+	
+	private Map getCompilerOptions(ITypedElement input) {
+		if (input instanceof IResourceProvider) {
+			IResource resource= ((IResourceProvider) input).getResource();
+			if (resource != null) {
+				IJavaElement element= JavaCore.create(resource);
+				if (element != null) {
+					IJavaProject javaProject= element.getJavaProject();
+					if (javaProject != null)
+						return javaProject.getOptions(true);
+				}
+			}
+		}
+		return null;
 	}
 	
 	/**

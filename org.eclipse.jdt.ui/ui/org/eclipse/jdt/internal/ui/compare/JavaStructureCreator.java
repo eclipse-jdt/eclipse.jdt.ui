@@ -33,6 +33,8 @@ import org.eclipse.compare.structuremergeviewer.*;
 
 public class JavaStructureCreator implements IStructureCreator {
 	
+	private Map fDefaultCompilerOptions;
+	
 	/**
 	 * RewriteInfos are used temporarily when rewriting the diff tree
 	 * in order to combine similar diff nodes ("smart folding").
@@ -91,6 +93,10 @@ public class JavaStructureCreator implements IStructureCreator {
 	public JavaStructureCreator() {
 	}
 	
+	void setDefaultCompilerOptions(Map compilerSettings) {
+		fDefaultCompilerOptions= compilerSettings;
+	}
+	
 	/**
 	 * Returns the name that appears in the enclosing pane title bar.
 	 */
@@ -141,6 +147,8 @@ public class JavaStructureCreator implements IStructureCreator {
 				}
 			}
 		}
+		if (compilerOptions == null)
+			compilerOptions= fDefaultCompilerOptions;
 		
 		if (doc != null) {
 			boolean isEditable= false;
