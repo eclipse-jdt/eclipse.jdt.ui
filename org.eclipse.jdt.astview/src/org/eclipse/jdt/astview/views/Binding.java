@@ -100,7 +100,7 @@ public class Binding extends ASTAttribute {
 					int typeKind= getTypeKind(typeBinding);
 					
 					boolean isRefType= isType(typeKind, REF_TYPE);
-					final boolean isNonPrimitive= isType(typeKind, REF_TYPE | VARIABLE_TYPE | WILDCARD_TYPE);
+					final boolean isNonPrimitive= ! isType(typeKind, PRIMITIVE_TYPE);
 					
 					StringBuffer kinds= new StringBuffer("KIND:"); //$NON-NLS-1$
 					if (typeBinding.isArray()) kinds.append(" isArray"); //$NON-NLS-1$
