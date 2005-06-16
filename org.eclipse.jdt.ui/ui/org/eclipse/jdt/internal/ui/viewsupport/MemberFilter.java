@@ -14,6 +14,7 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
@@ -84,7 +85,7 @@ public class MemberFilter extends ViewerFilter {
 				if (hasFilter(FILTER_STATIC) && (Flags.isStatic(flags) || isFieldInInterfaceOrAnnotation(member)) && memberType != IJavaElement.TYPE) {
 					return false;
 				}
-				if (hasFilter(FILTER_NONPUBLIC) && !Flags.isPublic(flags) && !isMemberInInterfaceOrAnnotation(member) && !isTopLevelType(member)) {
+				if (hasFilter(FILTER_NONPUBLIC) && !Flags.isPublic(flags) && !isMemberInInterfaceOrAnnotation(member) && !isTopLevelType(member) && !isEnumConstant(member)) {
 					return false;
 				}
 			}			
@@ -111,5 +112,9 @@ public class MemberFilter extends ViewerFilter {
 	private boolean isTopLevelType(IMember member) {
 		IType parent= member.getDeclaringType();
 		return parent == null;
-	}		
+	}
+	
+	private boolean isEnumConstant(IMember member) throws JavaModelException {
+		return (member.getElementType() == IJavaElement.FIELD) && ((IField)member).isEnumConstant();
+	}
 }
