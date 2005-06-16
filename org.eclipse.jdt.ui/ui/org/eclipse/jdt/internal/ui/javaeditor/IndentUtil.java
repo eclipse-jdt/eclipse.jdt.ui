@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITypedRegion;
@@ -26,7 +25,6 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.JavaIndenter;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
 
 
 /**
@@ -382,29 +380,7 @@ public final class IndentUtil {
 			ITypedRegion startingPartition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, false);
 			String type= partition.getType();
 			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
-				
-				// this is a hack
-				// what I'd want to do
-//				new JavaDocAutoIndentStrategy().indentLineAtOffset(document, offset);
-//				return;
-
-				int start= 0;
-				if (line > 0) {
-
-					IRegion previousLine= document.getLineInformation(line - 1);
-					start= previousLine.getOffset() + previousLine.getLength();
-				}
-
-				DocumentCommand command= new DocumentCommand() {};
-				// Newline is ok since the command is adjusted afterwards
-				command.text= "\n"; //$NON-NLS-1$
-				command.offset= start;
-				new JavaDocAutoIndentStrategy(IJavaPartitions.JAVA_PARTITIONING).customizeDocumentCommand(document, command);
-				int to= 1;
-				while (to < command.text.length() && Character.isWhitespace(command.text.charAt(to)))
-					to++;
-				indent= command.text.substring(1, to);
-				
+				indent= computeJavadocIndent(document, line, scanner);
 			} else if (!commentLines[lineIndex] && startingPartition.getOffset() == offset && startingPartition.getType().equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
 				
 				// line comment starting at position 0 -> indent inside
@@ -467,5 +443,36 @@ public final class IndentUtil {
 		}
 		
 		return false;
+	}
+	
+	/**
+	 * Computes and returns the indentation for a javadoc line. The line
+	 * must be inside a javadoc comment.
+	 * 
+	 * @param document the document
+	 * @param line the line in document
+	 * @param scanner the scanner
+	 * @return the indent, or <code>null</code> if not computable
+	 * @throws BadLocationException
+	 */
+	private static String computeJavadocIndent(IDocument document, int line, JavaHeuristicScanner scanner) throws BadLocationException {
+		if (line == 0)
+			return null;
+		
+		IRegion previousLine= document.getLineInformation(line - 1);
+		final int lineStart= previousLine.getOffset();
+		final int lineLength= previousLine.getLength();
+		final int end= lineStart + lineLength;
+		
+		int firstNonWS= scanner.findNonWhitespaceForwardInAnyPartition(lineStart, end);
+		if (firstNonWS == JavaHeuristicScanner.NOT_FOUND)
+			return document.get(lineStart, lineLength);
+		StringBuffer buf= new StringBuffer();
+		String indentation= document.get(lineStart, firstNonWS - lineStart);
+		buf.append(indentation);
+		if (document.getChar(firstNonWS) == '/')
+			// javadoc started on the previous line
+			buf.append(' ');
+		return buf.toString();
 	}
 }
