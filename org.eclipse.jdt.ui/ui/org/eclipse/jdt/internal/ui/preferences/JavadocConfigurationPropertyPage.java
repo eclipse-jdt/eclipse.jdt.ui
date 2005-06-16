@@ -164,7 +164,9 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	 * @see PreferencePage#performDefaults()
 	 */
 	protected void performDefaults() {
-		fJavadocConfigurationBlock.performDefaults();
+		if (fJavadocConfigurationBlock != null) {
+			fJavadocConfigurationBlock.performDefaults();
+		}
 		super.performDefaults();
 	}
 
@@ -172,25 +174,27 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 	 * @see org.eclipse.jface.preference.IPreferencePage#performOk()
 	 */
 	public boolean performOk() {
-		URL javadocLocation= fJavadocConfigurationBlock.getJavadocLocation();
-		if (javadocLocation == null && fInitalLocation == null || javadocLocation != null && javadocLocation.equals(fInitalLocation)) {
-			return true; // no change
+		if (fJavadocConfigurationBlock != null) {
+			URL javadocLocation= fJavadocConfigurationBlock.getJavadocLocation();
+			if (javadocLocation == null && fInitalLocation == null || javadocLocation != null && javadocLocation.equals(fInitalLocation)) {
+				return true; // no change
+			}
+			
+			
+			IJavaElement elem= getJavaElement();
+			try {
+				IRunnableWithProgress runnable= getRunnable(getShell(), elem, javadocLocation, fEntry, fContainerPath);
+				PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
+			} catch (InvocationTargetException e) {
+				String title= PreferencesMessages.SourceAttachmentPropertyPage_error_title; 
+				String message= PreferencesMessages.SourceAttachmentPropertyPage_error_message; 
+				ExceptionHandler.handle(e, getShell(), title, message);
+				return false;
+			} catch (InterruptedException e) {
+				// cancelled
+				return false;
+			}
 		}
-		
-		
-		IJavaElement elem= getJavaElement();
-		try {
-			IRunnableWithProgress runnable= getRunnable(getShell(), elem, javadocLocation, fEntry, fContainerPath);
-			PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
-		} catch (InvocationTargetException e) {
-			String title= PreferencesMessages.SourceAttachmentPropertyPage_error_title; 
-			String message= PreferencesMessages.SourceAttachmentPropertyPage_error_message; 
-			ExceptionHandler.handle(e, getShell(), title, message);
-			return false;
-		} catch (InterruptedException e) {
-			// cancelled
-			return false;
-		}	
 		return true;
 	}
 	
