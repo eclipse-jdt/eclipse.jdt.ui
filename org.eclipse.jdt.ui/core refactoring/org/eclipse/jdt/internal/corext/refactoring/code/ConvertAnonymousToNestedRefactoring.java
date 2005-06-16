@@ -681,17 +681,18 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
     }
 
     private boolean isBindingToTemp(IBinding binding) {
-        if (!(binding instanceof IVariableBinding))
-            return false;
-        if (!Modifier.isFinal(binding.getModifiers()))
-            return false;
-        ASTNode declaringNode= fCompilationUnitNode.findDeclaringNode(binding);
-        if (declaringNode == null)
-            return false;
-        if (ASTNodes.isParent(declaringNode, fAnonymousInnerClassNode))
-            return false;
-        return true;
-    }
+		if (!(binding instanceof IVariableBinding))
+			return false;
+		if (!Modifier.isFinal(binding.getModifiers()))
+			return false;
+		ASTNode declaringNode= fCompilationUnitNode.findDeclaringNode(binding);
+		if (declaringNode == null)
+			return false;
+		if (ASTNodes.isParent(declaringNode, fAnonymousInnerClassNode))
+			return false;
+		final IVariableBinding variable= (IVariableBinding) binding;
+		return !variable.isEnumConstant();
+	}
 
     private void createNewConstructorIfNeeded(CompilationUnitRewrite rewrite, AbstractTypeDeclaration declaration) throws JavaModelException {
 		IVariableBinding[] bindings= getUsedLocalVariables();
