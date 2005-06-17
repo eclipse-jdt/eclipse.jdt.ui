@@ -1717,23 +1717,23 @@ public class ClasspathModifier {
 	private IPath[] remove(IPath path, IPath[] paths, IProgressMonitor monitor) {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
-		IPath[] newPaths;
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_RemovePath, paths.length + 5); 
 			if (!contains(path, paths, new SubProgressMonitor(monitor, 5)))
 				return paths;
 
-			newPaths= new Path[paths.length - 1];
-			int j= 0;
+			ArrayList newPaths= new ArrayList();
 			for (int i= 0; i < paths.length; i++) {
 				monitor.worked(1);
 				if (!paths[i].equals(path))
-					newPaths[j++]= paths[i];
+					newPaths.add(paths[i]);
 			}
+			
+			return (IPath[]) newPaths.toArray(new IPath[newPaths.size()]);
 		} finally {
 			monitor.done();
 		}
-		return newPaths;
+
 	}
 
 	/**
