@@ -27,6 +27,7 @@ import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTarget;
+import org.eclipse.swt.dnd.DropTargetAdapter;
 import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
@@ -727,6 +728,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 			addDropAdapters(fAllViewers[i]);
 		}	
 		addDragAdapters(fMethodsViewer);
+		fMethodsViewer.addDropSupport(DND.DROP_NONE, new Transfer[0], new DropTargetAdapter());
 
 		//DND on empty hierarchy
 		DropTarget dropTarget = new DropTarget(fPagebook, DND.DROP_MOVE | DND.DROP_COPY | DND.DROP_LINK | DND.DROP_DEFAULT);
