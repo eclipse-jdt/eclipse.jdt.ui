@@ -23,7 +23,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -227,7 +226,7 @@ public class TypeInfoViewer {
 						processLibraryLocation(libLocations, label);
 					} else {
 						String filePath= installs[i].getInstallLocation().getAbsolutePath();
-						locations.add(Path.fromOSString(filePath).toString());
+						locations.add(filePath);
 						labels.add(label);
 					}
 				}
