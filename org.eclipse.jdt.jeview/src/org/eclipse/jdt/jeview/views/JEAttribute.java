@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.jeview.views;
 
-import org.eclipse.swt.graphics.Image;
 
 /**
  *
@@ -22,6 +21,5 @@ public abstract class JEAttribute {
 	public abstract JEAttribute getParent();
 	public abstract JEAttribute[] getChildren();
 	public abstract String getLabel();
-	public abstract Image getImage();
 		
 }

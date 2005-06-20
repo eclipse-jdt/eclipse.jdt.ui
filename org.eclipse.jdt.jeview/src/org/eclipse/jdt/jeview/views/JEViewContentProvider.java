@@ -18,6 +18,8 @@ import org.eclipse.jdt.core.IJavaElement;
 
 public class JEViewContentProvider implements ITreeContentProvider {
 
+	private JavaElement fRoot;
+
 	public Object[] getChildren(Object element) {
 		if (element instanceof JEAttribute)
 			return ((JEAttribute) element).getChildren();
@@ -37,20 +39,18 @@ public class JEViewContentProvider implements ITreeContentProvider {
 	}
 
 	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof JavaElement)
-			return getChildren(inputElement);
-		else if (inputElement instanceof IJavaElement)
-			return new Object[] {new JavaElement(null, (IJavaElement) inputElement)};
-		else
+		if (fRoot == null)
 			return JEAttribute.EMPTY;
+		else
+			return new Object[] { fRoot };
 	}
 
 	public void dispose() {
-		// do nothing
+		fRoot= null;
 	}
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		// do nothing
+		fRoot= new JavaElement(null, (IJavaElement) newInput);
 	}
 
 }

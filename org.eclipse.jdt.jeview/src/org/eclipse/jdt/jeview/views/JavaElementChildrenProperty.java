@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.jeview.views;
 
-import org.eclipse.swt.graphics.Image;
 
 public class JavaElementChildrenProperty extends JEAttribute {
 
@@ -55,11 +54,6 @@ public class JavaElementChildrenProperty extends JEAttribute {
 			count= String.valueOf(children.length);
 		}
 		return fName + " (" + count + ")";
-	}
-
-	@Override
-	public Image getImage() {
-		return null;
 	}
 
 }

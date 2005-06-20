@@ -44,10 +44,39 @@
         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
   </key>
   </extension>
+  
+  
   <extension
         point="org.eclipse.ui.perspectiveExtensions">
-     <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
-        <viewShortcut id="org.eclipse.jdt.jeview.views.JavaElementView"/>
-     </perspectiveExtension>
-  </extension> 
+      <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+            <viewShortcut id="org.eclipse.jdt.jeview.views.JavaElementView"/>
+      </perspectiveExtension>
+      
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaPerspective">
+         <showInPart
+               id="org.eclipse.jdt.jeview.views.JavaElementView">
+         </showInPart>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+         <showInPart
+               id="org.eclipse.jdt.jeview.views.JavaElementView">
+         </showInPart>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+         <showInPart
+               id="org.eclipse.jdt.jeview.views.JavaElementView">
+         </showInPart>
+      </perspectiveExtension>
+      <perspectiveExtension
+            targetID="org.eclipse.debug.ui.DebugPerspective">
+         <showInPart
+               id="org.eclipse.jdt.jeview.views.JavaElementView">
+         </showInPart>
+      </perspectiveExtension>
+  </extension>
+  
+  
 </plugin>

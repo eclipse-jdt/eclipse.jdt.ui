@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.jeview.views;
 
-import org.eclipse.swt.graphics.Image;
 
 public class JavaElementProperty extends JEAttribute {
 
@@ -66,11 +65,6 @@ public class JavaElementProperty extends JEAttribute {
 
 	protected Object computeValue() throws Exception {
 		return fValue;
-	}
-
-	@Override
-	public Image getImage() {
-		return null;
 	}
 
 }

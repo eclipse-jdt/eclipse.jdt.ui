@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.jeview.views;
 
-import org.eclipse.swt.graphics.Image;
 
 
 public class Error extends JEAttribute {
@@ -39,11 +38,6 @@ public class Error extends JEAttribute {
 	@Override
 	public String getLabel() {
 		return (fName == null ? "" : fName + ": ") + fException.toString();
-	}
-
-	@Override
-	public Image getImage() {
-		return null;
 	}
 
 }
