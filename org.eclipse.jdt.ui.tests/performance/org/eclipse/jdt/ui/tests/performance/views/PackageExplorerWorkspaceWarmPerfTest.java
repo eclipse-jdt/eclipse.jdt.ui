@@ -22,8 +22,6 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.test.performance.Dimension;
-
 import org.eclipse.jdt.ui.tests.performance.JdtPerformanceTestCase;
 
 public class PackageExplorerWorkspaceWarmPerfTest extends JdtPerformanceTestCase {
@@ -68,7 +66,6 @@ public class PackageExplorerWorkspaceWarmPerfTest extends JdtPerformanceTestCase
 	}
 
 	public void testOpen() throws Exception {
-		tagAsSummary("Open Package Explorer Workspace - Warm", Dimension.ELAPSED_PROCESS);
 		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();
 		page.close();

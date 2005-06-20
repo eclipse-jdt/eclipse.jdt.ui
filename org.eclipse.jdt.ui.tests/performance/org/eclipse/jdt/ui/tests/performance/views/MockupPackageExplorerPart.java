@@ -14,8 +14,6 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
-import org.eclipse.test.performance.Dimension;
-
 public final class MockupPackageExplorerPart extends PackageExplorerPart {
 
 	public static PackageExplorerColdPerfTest fgTest= null;
@@ -26,7 +24,6 @@ public final class MockupPackageExplorerPart extends PackageExplorerPart {
 
 	public final void createPartControl(Composite parent) {
 		if (fgTest != null) {
-			fgTest.tagAsGlobalSummary("Create Package Explorer", Dimension.ELAPSED_PROCESS);
 			fgTest.startMeasuring();
 		}
 		super.createPartControl(parent);

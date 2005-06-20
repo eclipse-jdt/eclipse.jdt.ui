@@ -33,9 +33,6 @@ import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
 
-import org.eclipse.test.performance.Dimension;
-import org.eclipse.test.performance.Performance;
-
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
@@ -82,8 +79,6 @@ public class PackageExplorerPerfTest extends JdtPerformanceTestCase {
 	}
 	
 	public void testOpen() throws Exception {
-		tagAsSummary("Open Package Explorer", Dimension.ELAPSED_PROCESS);
-		setComment(Performance.EXPLAINS_DEGRADATION_COMMENT, "The Open Package Explorer test performance has been slightly decreased due to lazy plugin and class loading");
 		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		IWorkbenchPage page= activeWorkbenchWindow.getActivePage();
 		page.close();
