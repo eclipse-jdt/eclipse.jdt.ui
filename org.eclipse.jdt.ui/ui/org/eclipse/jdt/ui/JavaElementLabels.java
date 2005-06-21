@@ -500,8 +500,10 @@ public class JavaElementLabels {
 					if (types == null) {
 						nParams= names.length;
 					} else {
-						if (nParams != names.length) { // bug 99137
-							JavaPlugin.logErrorMessage("JavaElementLabels: Number of param types(" + nParams + ") != number of names(" + names.length + "): " + method.getElementName());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
+						if (nParams != names.length) {
+							// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=99137 and
+							// https://bugs.eclipse.org/bugs/show_bug.cgi?id=101029
+							// JavaPlugin.logErrorMessage("JavaElementLabels: Number of param types(" + nParams + ") != number of names(" + names.length + "): " + method.getElementName());   //$NON-NLS-1$//$NON-NLS-2$//$NON-NLS-3$
 							names= null; // no names rendered
 						}
 					}
