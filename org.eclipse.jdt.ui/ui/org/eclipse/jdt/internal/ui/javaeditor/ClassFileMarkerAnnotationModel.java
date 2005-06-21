@@ -98,8 +98,22 @@ public class ClassFileMarkerAnnotationModel extends AbstractMarkerAnnotationMode
 	 * @see AbstractMarkerAnnotationModel#retrieveMarkers()
 	 */
 	protected IMarker[] retrieveMarkers() throws CoreException {
-		if (fMarkerResource != null)
-			return fMarkerResource.findMarkers(IMarker.MARKER, true, IResource.DEPTH_INFINITE);
+		if (fMarkerResource != null) {
+			IMarker[] workspaceMarkers= fWorkspace.getRoot().findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
+			IMarker[] resourceMarkers= fMarkerResource.findMarkers(IMarker.MARKER, true, IResource.DEPTH_ZERO);
+			int workspaceMarkersLength= workspaceMarkers.length;
+			if (workspaceMarkersLength == 0)
+				return resourceMarkers;
+			
+			int resourceMarkersLength= resourceMarkers.length;
+			if (resourceMarkersLength == 0)
+				return workspaceMarkers;
+			
+			IMarker[] result= new IMarker[resourceMarkersLength + workspaceMarkersLength];
+			System.arraycopy(resourceMarkers, 0, result, 0, resourceMarkersLength);
+			System.arraycopy(workspaceMarkers, 0, result, resourceMarkersLength, workspaceMarkersLength);
+			return result;
+		}
 		return null;
 	}
 
