@@ -153,7 +153,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	}
 
 	/**
-	 * Inititalized the page with the current selection
+	 * Initialized the page with the current selection
 	 * @param selection The selection
 	 */
 	public void init(IStructuredSelection selection) {
@@ -223,7 +223,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 	}
 
 	/**
-	 * Returns all status to be consider for the validation. Cleints can override.
+	 * Returns all status to be consider for the validation. Clients can override.
 	 * @return The list of status to consider for the validation.
 	 */
 	protected IStatus[] getStatusList() {
@@ -858,7 +858,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		
 		IType type= jproject.findType(classToTestName);
 		
-		// search in currrent package
+		// search in current package
 		if (type == null && pack != null && !pack.isDefaultPackage()) {
 			type= jproject.findType(pack.getElementName(), classToTestName);
 		}

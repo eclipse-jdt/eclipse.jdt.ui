@@ -207,7 +207,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			fClassesInSuiteStatus			
 		};
 		
-		// the most severe status will be displayed and the ok button enabled/disabled.
+		// the most severe status will be displayed and the OK button enabled/disabled.
 		updateStatus(status);
 	}
 
