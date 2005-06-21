@@ -2022,7 +2022,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 			int[] deletedIndices= {};
 			int newVisibility= Modifier.PUBLIC;
 			String newReturnTypeName= null;
-			helperDoAll("C", "test", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+			helperDoAll("I", "test", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 		}
 	
 }

@@ -83,6 +83,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -105,6 +106,7 @@ import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
@@ -622,6 +624,19 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			}
 			if (fTopMethod == null)
 				fTopMethod= fMethod;
+			if (! fTopMethod.equals(fMethod)) {
+				if (fTopMethod.getDeclaringType().isInterface()) {
+					RefactoringStatusContext context= JavaStatusContext.create(fTopMethod);
+					String message= Messages.format(RefactoringCoreMessages.MethodChecks_implements, 
+							new String[]{JavaElementUtil.createMethodSignature(fTopMethod), JavaModelUtil.getFullyQualifiedName(fTopMethod.getDeclaringType())});
+					return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE, fTopMethod);
+				} else {
+					RefactoringStatusContext context= JavaStatusContext.create(fTopMethod);
+					String message= Messages.format(RefactoringCoreMessages.MethodChecks_overrides, 
+							new String[]{JavaElementUtil.createMethodSignature(fTopMethod), JavaModelUtil.getFullyQualifiedName(fTopMethod.getDeclaringType())});
+					return RefactoringStatus.createStatus(RefactoringStatus.FATAL, message, context, Corext.getPluginId(), RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD, fTopMethod);
+				}
+			}
 
 			if (monitor.isCanceled())
 				throw new OperationCanceledException();

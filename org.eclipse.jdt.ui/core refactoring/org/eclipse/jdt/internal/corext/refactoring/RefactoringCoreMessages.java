@@ -222,6 +222,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String IntroduceParameterRefactoring_syntax_error;
 	public static String IntroduceParameterRefactoring_select;
 	public static String IntroduceParameterRefactoring_expression_in_method;
+	public static String IntroduceParameterRefactoring_cannot_introduce;
 	public static String IntroduceParameterRefactoring_no_binding;
 	public static String IntroduceParameterRefactoring_no_void;
 	public static String IntroduceParameterRefactoring_replace;

@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.BodyUpdater;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
@@ -134,8 +135,10 @@ public class IntroduceParameterRefactoring extends Refactoring {
 				if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
 					// second try:
 					fChangeSignatureRefactoring= ChangeSignatureRefactoring.create((IMethod) entry.getData());
-					if (fChangeSignatureRefactoring == null)
-						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method); 
+					if (fChangeSignatureRefactoring == null) {
+						String msg= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_cannot_introduce, entry.getMessage());
+						return RefactoringStatus.createFatalErrorStatus(msg);
+					} 
 					result= fChangeSignatureRefactoring.checkInitialConditions(new SubProgressMonitor(pm, 1));
 					if (result.hasFatalError())
 						return result;
