@@ -21,7 +21,7 @@
          </description>
          <projectsetup
          	   banner="icons/full/wizban/newjprjex_wiz.gif"
-         	   encoding="Cp1252"
+         	   encoding="ISO-8859-1"
                pagetitle="%JUnitProjectExampleCreationWizard.pagetitle"
                name="JUnit"
                label="%JUnitProjectExampleCreationWizard.label"
