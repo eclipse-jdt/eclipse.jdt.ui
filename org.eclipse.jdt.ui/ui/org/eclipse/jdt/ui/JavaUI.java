@@ -78,7 +78,7 @@ public final class JavaUI {
 	}
 	
 	/**
-	 * The id of the Java plugin (value <code>"org.eclipse.jdt.ui"</code>).
+	 * The id of the Java plug-in (value <code>"org.eclipse.jdt.ui"</code>).
 	 */	
 	public static final String ID_PLUGIN= "org.eclipse.jdt.ui"; //$NON-NLS-1$
 	

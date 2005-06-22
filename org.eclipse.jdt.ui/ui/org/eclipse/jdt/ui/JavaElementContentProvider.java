@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class JavaElementContentProvider extends StandardJavaElementContentProvider implements ITreeContentProvider, IElementChangedListener {
 	
-	/** The tree viwer */
+	/** The tree viewer */
 	protected TreeViewer fViewer;
 	/** The input object */
 	protected Object fInput;
@@ -145,7 +145,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			if (parent instanceof IPackageFragment) {
 				Object grandparent= internalGetParent(parent);
 				// 1GE8SI6: ITPJUI:WIN98 - Rename is not shown in Packages View
-				// avoid posting a refresh to an unvisible parent
+				// avoid posting a refresh to an invisible parent
 				if (parent.equals(fInput)) {
 					postRefresh(parent);
 				} else {
@@ -193,7 +193,7 @@ public class JavaElementContentProvider extends StandardJavaElementContentProvid
 			if (element instanceof IPackageFragment) {
 				IJavaElement parent= (IJavaElement)internalGetParent(element);
 				// 1GE8SI6: ITPJUI:WIN98 - Rename is not shown in Packages View
-				// avoid posting a refresh to an unvisible parent
+				// avoid posting a refresh to an invisible parent
 				if (element.equals(fInput)) {
 					postRefresh(element);
 				} else {

@@ -46,7 +46,7 @@ public interface IContextMenuConstants {
 	public static final String TARGET_ID_SUBTYPES_VIEW= JavaUI.ID_TYPE_HIERARCHY + ".subtypes"; //$NON-NLS-1$	
 
 	/**
-	 * Type hierarchy view part: pop-up menu target ID for the meber viewer
+	 * Type hierarchy view part: pop-up menu target ID for the member viewer
 	 * (value <code>"org.eclipse.jdt.ui.TypeHierarchy.members"</code>).
 	 * 
 	 * @since 2.0

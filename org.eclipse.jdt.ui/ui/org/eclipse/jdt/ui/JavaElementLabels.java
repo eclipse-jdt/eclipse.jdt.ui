@@ -162,19 +162,19 @@ public class JavaElementLabels {
 	public final static long T_POST_QUALIFIED= 1L << 20;
 	
 	/**
-	 * Type names contain type parameteters.
+	 * Type names contain type parameters.
 	 * e.g. <code>Map&lt;S, T&gt;</code>
 	 */
 	public final static long T_TYPE_PARAMETERS= 1L << 21;
 	
 	/**
-	 * Declarations (import container / declarartion, package declarartion) are qualified.
+	 * Declarations (import container / declaration, package declaration) are qualified.
 	 * e.g. <code>java.util.Vector.class/import container</code>
 	 */	
 	public final static long D_QUALIFIED= 1L << 24;
 	
 	/**
-	 * Declarations (import container / declarartion, package declarartion) are post qualified.
+	 * Declarations (import container / declaration, package declaration) are post qualified.
 	 * e.g. <code>import container - java.util.Vector.class</code>
 	 */	
 	public final static long D_POST_QUALIFIED= 1L << 25;	
@@ -254,7 +254,7 @@ public class JavaElementLabels {
 	public final static long PREPEND_ROOT_PATH= 1L << 44;
 
 	/**
-	 * Post qualify referenced package fragement roots. For example
+	 * Post qualify referenced package fragment roots. For example
 	 * <code>jdt.jar - org.eclipse.jdt.ui</code> if the jar is referenced
 	 * from another project.
 	 */
@@ -1117,7 +1117,7 @@ public class JavaElementLabels {
 	/**
 	 * Returns the label of a classpath container
 	 * @param containerPath The path of the container.
-	 * @param project The project the contaienr is resolved in.
+	 * @param project The project the container is resolved in.
 	 * @return Returns the label of the classpath container
 	 * @throws JavaModelException Thrown when the resolving of the container failed.
 	 */
