@@ -270,7 +270,7 @@ public class JarWriter {
 		// Test if directory exists
 		String path= file.getAbsolutePath();
 		int separatorIndex = path.lastIndexOf(File.separator);
-		if (separatorIndex == -1) // ie.- default dir, which is fine
+		if (separatorIndex == -1) // i.e.- default directory, which is fine
 			return true;
 		File directory= new File(path.substring(0, separatorIndex));
 		if (!directory.exists()) {

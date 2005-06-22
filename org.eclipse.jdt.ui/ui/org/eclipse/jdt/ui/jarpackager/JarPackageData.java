@@ -62,7 +62,7 @@ public class JarPackageData {
 
 	/*
 	 * Projects of which files are exported will be built if true
-	 * and autobuild is off.
+	 * and auto-build is off.
 	 */
 	private boolean fBuildIfNeeded;
 

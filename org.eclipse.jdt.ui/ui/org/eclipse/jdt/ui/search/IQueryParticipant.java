@@ -30,10 +30,10 @@ import org.eclipse.core.runtime.IProgressMonitor;
 public interface IQueryParticipant {
 	/**
 	 * Executes the search described by the given <code>querySpecification</code>. Matches are reported
-	 * to the given <code>requestor</code>.
+	 * to the given <code>requester</code>.
 	 * The interpretation of what a given Java search (e.g. "References to class Foo") means is up to the 
 	 * participant.
-	 * @param requestor The requestor to report matches to.
+	 * @param requestor The requester to report matches to.
 	 * @param querySpecification The specification of the query to run.
 	 * @param monitor A monitor to report progress on.
 	 * @throws CoreException Thrown when the search can not be executed

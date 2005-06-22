@@ -197,7 +197,7 @@ public class JarWriter2 {
 	 * 
 	 * @param jarEntry			the JarEntry to update
 	 * @param resource			the file to calculate 
-	 * @param readBuffer 		a shared read buffer to store temporarz data
+	 * @param readBuffer 		a shared read buffer to store temporary data
 	 * 
      * @throws	IOException		if an I/O error has occurred
 	 * @throws	CoreException 	if the resource can-t be accessed
@@ -281,7 +281,7 @@ public class JarWriter2 {
 		// Test if directory exists
 		String path= file.getAbsolutePath();
 		int separatorIndex = path.lastIndexOf(File.separator);
-		if (separatorIndex == -1) // ie.- default dir, which is fine
+		if (separatorIndex == -1) // i.e.- default directory, which is fine
 			return true;
 		File directory= new File(path.substring(0, separatorIndex));
 		if (!directory.exists()) {

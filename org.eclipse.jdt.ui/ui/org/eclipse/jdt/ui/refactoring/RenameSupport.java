@@ -126,7 +126,7 @@ public class RenameSupport {
 	 * @param parent a shell used as a parent for the error dialog.
 	 * @param context a {@link IRunnableContext} to execute the operation.
 	 * 
-	 * @throws InterruptedException if the operation has been cancelled by the
+	 * @throws InterruptedException if the operation has been canceled by the
 	 * user.
 	 * @throws InvocationTargetException if an error occurred while executing the
 	 * operation.
