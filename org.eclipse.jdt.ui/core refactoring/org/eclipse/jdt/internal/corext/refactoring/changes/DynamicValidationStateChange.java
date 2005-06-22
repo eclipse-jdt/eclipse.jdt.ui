@@ -35,8 +35,8 @@ public class DynamicValidationStateChange extends CompositeChange implements Wor
 	private RefactoringStatus fValidationState= null;
 	private long fTimeStamp;
 	
-	// 5 minutes
-	private static final long LIFE_TIME= 5 * 60 * 1000;
+	// 30 minutes
+	private static final long LIFE_TIME= 30 * 60 * 1000;
 	
 	public DynamicValidationStateChange(Change change) {
 		super(change.getName());
