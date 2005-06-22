@@ -203,8 +203,9 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	}
 
 	/**
-	 * Creates an annotation model derrived from the given class file editor input.
-	 * @param the editor input from which to query the annotations
+	 * Creates an annotation model derived from the given class file editor input.
+	 * 
+	 * @param classFileEditorInput the editor input from which to query the annotations
 	 * @return the created annotation model
 	 * @exception CoreException if the editor input could not be accessed
 	 */
