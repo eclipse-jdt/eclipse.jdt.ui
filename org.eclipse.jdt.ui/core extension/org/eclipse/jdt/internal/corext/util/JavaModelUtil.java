@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 
 import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -1170,9 +1171,9 @@ public final class JavaModelUtil {
 	
 	public static boolean is50OrHigherJRE(IJavaProject project) throws CoreException {
 		IVMInstall vmInstall= JavaRuntime.getVMInstall(project);
-		if (vmInstall == null)
-			return true; // assume 5.0
-		String javaVersion= vmInstall.getJavaVersion();
+		if (!(vmInstall instanceof IVMInstall2))
+			return true; // assume 5.0.
+		String javaVersion = ((IVMInstall2)vmInstall).getJavaVersion();
 		if (javaVersion == null)
 			return true; // assume 5.0
 		return javaVersion.startsWith(JavaCore.VERSION_1_5);

@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
 
@@ -266,7 +267,10 @@ public class BuildPathSupport {
 	}
 	
 	public static boolean hasMatchingCompliance(IVMInstall inst, String compliance) {
-		String version= inst.getJavaVersion();
+		if (!(inst instanceof IVMInstall2))
+			return false;
+		
+		String version= ((IVMInstall2) inst).getJavaVersion();
 		if (version != null && version.startsWith(compliance)) {
 			return true;
 		}
