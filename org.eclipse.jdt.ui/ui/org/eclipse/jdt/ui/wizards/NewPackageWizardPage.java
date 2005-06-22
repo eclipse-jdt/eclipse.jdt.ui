@@ -328,7 +328,7 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 	 * @param monitor a progress monitor to report progress. The progress
 	 * monitor must not be <code>null</code>
 	 * @throws CoreException Thrown if creating the package failed.
-	 * @throws InterruptedException Thrown when the operation has been cancelled.
+	 * @throws InterruptedException Thrown when the operation has been canceled.
 	 * @since 2.1
 	 */
 	public void createPackage(IProgressMonitor monitor) throws CoreException, InterruptedException {

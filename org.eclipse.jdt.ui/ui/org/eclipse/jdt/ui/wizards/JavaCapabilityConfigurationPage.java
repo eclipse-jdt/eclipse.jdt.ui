@@ -102,7 +102,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	}
 
 	/**
-	 * Initializes the page with the project and default classpaths.
+	 * Initializes the page with the project and default classpath.
 	 * <p>
 	 * The default classpath entries must correspond the the given project.
 	 * </p>
@@ -218,7 +218,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * @param monitor a progress monitor to report progress or <code>null</code> if
 	 * progress reporting is not desired
 	 * @throws CoreException Thrown when the configuring the Java project failed.
-	 * @throws InterruptedException Thrown when the operation has been cancelled.
+	 * @throws InterruptedException Thrown when the operation has been canceled.
 	 */
 	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, InterruptedException {
 		if (monitor == null) {

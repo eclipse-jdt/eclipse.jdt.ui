@@ -78,7 +78,7 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 			fModifierStatus,
 		};
 		
-		// the mode severe status will be displayed and the ok button enabled/disabled.
+		// the mode severe status will be displayed and the OK button enabled/disabled.
 		updateStatus(status);
 	}
 
@@ -93,7 +93,7 @@ public class NewAnnotationWizardPage extends NewTypeWizardPage {
 	}
 	
 	
-	// ------ ui --------
+	// ------ UI --------
 	
 	/*
 	 * @see WizardPage#createControl

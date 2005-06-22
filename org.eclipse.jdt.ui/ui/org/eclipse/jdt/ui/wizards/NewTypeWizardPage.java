@@ -318,7 +318,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private SelectionButtonDialogFieldGroup fOtherMdfButtons;
 	
 	private SelectionButtonDialogField fAddCommentButton;
-	private boolean fUseAddCommentButtonValue; // used for compatibilty: Wizards that don't show the comment button control
+	private boolean fUseAddCommentButtonValue; // used for compatibility: Wizards that don't show the comment button control
 	// will use the preferences settings
 	
 	private IType fCreatedType;
@@ -1730,7 +1730,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * 
 	 * @param monitor a progress monitor to report progress.
 	 * @throws CoreException Thrown when the creation failed.
-	 * @throws InterruptedException Thrown when the operation was cancelled.
+	 * @throws InterruptedException Thrown when the operation was canceled.
 	 */
 	public void createType(IProgressMonitor monitor) throws CoreException, InterruptedException {		
 		if (monitor == null) {
@@ -1909,7 +1909,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			IProblem curr= problems[i];
 			if (curr.getSourceEnd() < importsEnd) {
 				int id= curr.getID();
-				if (id == IProblem.UnusedImport || id == IProblem.NotVisibleType) { // not visibles hide unused -> remove both  	 
+				if (id == IProblem.UnusedImport || id == IProblem.NotVisibleType) { // not visible problems hide unused -> remove both  	 
 					String imp= problems[i].getArguments()[0];
 					res.add(imp);
 				}
@@ -2098,7 +2098,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	/**
 	 * Hook method that gets called from <code>createType</code> to retrieve 
 	 * a file comment. This default implementation returns the content of the 
-	 * 'file comment' template or <code>null</code> if no comment should ne created.
+	 * 'file comment' template or <code>null</code> if no comment should be created.
 	 * 
 	 * @param parentCU the parent compilation unit
 	 * @param lineDelimiter the line delimiter to use

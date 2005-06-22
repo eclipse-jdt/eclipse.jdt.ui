@@ -116,7 +116,7 @@ public final class BuildPathDialogAccess {
 	 * @param libraryName Name of of the library to which configured javadoc location belongs.
 	 * @param initialURL The initial URL or <code>null</code>.
 	 * @return Returns an array of size 1 that contains the resulting javadoc location or
-	 * <code>null</code> if the dialog has been cancelled. Note that the configured URL can be <code>null</code> when the user
+	 * <code>null</code> if the dialog has been canceled. Note that the configured URL can be <code>null</code> when the user
 	 * wishes to have no URL location specified.
 	 */
 	public static URL[] configureJavadocLocation(Shell shell, String libraryName, URL initialURL) {
@@ -169,7 +169,7 @@ public final class BuildPathDialogAccess {
 	 * Shows the UI for configuring a variable classpath entry. See {@link IClasspathEntry#CPE_VARIABLE} for
 	 * details about variable classpath entries.
 	 * The dialog returns the configured classpath entry path or <code>null</code> if the dialog has
-	 * been cancelled. The dialog does not apply any changes.
+	 * been canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @param initialEntryPath The initial variable classpath variable path or <code>null</code> to use
@@ -177,7 +177,7 @@ public final class BuildPathDialogAccess {
 	 * @param existingPaths An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
 	 * @return Returns the configures classpath entry path or <code>null</code> if the dialog has
-	 * been cancelled.
+	 * been canceled.
 	 */
 	public static IPath configureVariableEntry(Shell shell, IPath initialEntryPath, IPath[] existingPaths) {
 		if (existingPaths == null) {
@@ -195,13 +195,13 @@ public final class BuildPathDialogAccess {
 	 * Shows the UI for selecting new variable classpath entries. See {@link IClasspathEntry#CPE_VARIABLE} for
 	 * details about variable classpath entries.
 	 * The dialog returns an array of the selected variable entries or <code>null</code> if the dialog has
-	 * been cancelled. The dialog does not apply any changes.
+	 * been canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @param existingPaths An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
 	 * @return Returns an non empty array of the selected variable entries or <code>null</code> if the dialog has
-	 * been cancelled.
+	 * been canceled.
 	 */
 	public static IPath[] chooseVariableEntries(Shell shell, IPath[] existingPaths) {
 		if (existingPaths == null) {
@@ -218,7 +218,7 @@ public final class BuildPathDialogAccess {
 	 * Shows the UI to configure a classpath container classpath entry. See {@link IClasspathEntry#CPE_CONTAINER} for
 	 * details about container classpath entries.
 	 * The dialog returns the configured classpath entry or <code>null</code> if the dialog has
-	 * been cancelled. The dialog does not apply any changes.
+	 * been canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @param initialEntry The initial classpath container entry.
@@ -228,7 +228,7 @@ public final class BuildPathDialogAccess {
 	 * the classpath container dialog has been closed. See {@link IClasspathContainerPageExtension} for
 	 * more information.
 	 * @return Returns the configured classpath container entry or <code>null</code> if the dialog has
-	 * been cancelled by the user.
+	 * been canceled by the user.
 	 */
 	public static IClasspathEntry configureContainerEntry(Shell shell, IClasspathEntry initialEntry, IJavaProject project, IClasspathEntry[] currentClasspath) {
 		if (initialEntry == null || currentClasspath == null) {
@@ -249,7 +249,7 @@ public final class BuildPathDialogAccess {
 	 * Shows the UI to choose new classpath container classpath entries. See {@link IClasspathEntry#CPE_CONTAINER} for
 	 * details about container classpath entries.
 	 * The dialog returns the selected classpath entries or <code>null</code> if the dialog has
-	 * been cancelled. The dialog does not apply any changes.
+	 * been canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @param project The project the entry belongs to. The project does not have to exist and
@@ -259,7 +259,7 @@ public final class BuildPathDialogAccess {
 	 * the classpath container dialog has been closed. See {@link IClasspathContainerPageExtension} for
 	 * more information.
 	 * @return Returns the selected classpath container entries or <code>null</code> if the dialog has
-	 * been cancelled by the user.
+	 * been canceled by the user.
 	 */
 	public static IClasspathEntry[] chooseContainerEntries(Shell shell, IJavaProject project, IClasspathEntry[] currentClasspath) {
 		if (currentClasspath == null) {
@@ -277,14 +277,14 @@ public final class BuildPathDialogAccess {
 	/**
 	 * Shows the UI to configure a JAR or ZIP archive located in the workspace.
 	 * The dialog returns the configured classpath entry path or <code>null</code> if the dialog has
-	 * been cancelled. The dialog does not apply any changes.
+	 * been canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @param initialEntry The path of the initial archive entry 
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
 	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
-	 * been cancelled by the user.
+	 * been canceled by the user.
 	 */
 	public static IPath configureJAREntry(Shell shell, IPath initialEntry, IPath[] usedEntries) {
 		if (initialEntry == null || usedEntries == null) {
@@ -327,14 +327,14 @@ public final class BuildPathDialogAccess {
 	/**
 	 * Shows the UI to select new JAR or ZIP archive entries located in the workspace.
 	 * The dialog returns the selected entries or <code>null</code> if the dialog has
-	 * been cancelled. The dialog does not apply any changes.
+	 * been canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @param initialSelection The path of the element (container or archive) to initially select or <code>null</code> to not select an entry. 
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
 	 * @return Returns the new classpath container entry paths or <code>null</code> if the dialog has
-	 * been cancelled by the user.
+	 * been canceled by the user.
 	 */
 	public static IPath[] chooseJAREntries(Shell shell, IPath initialSelection, IPath[] usedEntries) {
 		if (usedEntries == null) {
@@ -377,12 +377,12 @@ public final class BuildPathDialogAccess {
 	/**
 	 * Shows the UI to configure an external JAR or ZIP archive.
 	 * The dialog returns the configured or <code>null</code> if the dialog has
-	 * been cancelled. The dialog does not apply any changes.
+	 * been canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @param initialEntry The path of the initial archive entry.
 	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
-	 * been cancelled by the user.
+	 * been canceled by the user.
 	 */
 	public static IPath configureExternalJAREntry(Shell shell, IPath initialEntry) {
 		if (initialEntry == null) {
@@ -409,11 +409,11 @@ public final class BuildPathDialogAccess {
 	/**
 	 * Shows the UI to select new external JAR or ZIP archive entries.
 	 * The dialog returns the selected entry paths or <code>null</code> if the dialog has
-	 * been cancelled. The dialog does not apply any changes.
+	 * been canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @return Returns the new classpath container entry paths or <code>null</code> if the dialog has
-	 * been cancelled by the user.
+	 * been canceled by the user.
 	 */
 	public static IPath[] chooseExternalJAREntries(Shell shell) {
 		String lastUsedPath= JavaPlugin.getDefault().getDialogSettings().get(IUIConstants.DIALOGSTORE_LASTEXTJAR);
@@ -445,14 +445,14 @@ public final class BuildPathDialogAccess {
 	/**
 	 * Shows the UI to select new class folders.
 	 * The dialog returns the selected classpath entry paths or <code>null</code> if the dialog has
-	 * been cancelled. The dialog does not apply any changes.
+	 * been canceled. The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @param initialSelection The path of the element to initially select or <code>null</code>.
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
 	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
-	 * been cancelled by the user.
+	 * been canceled by the user.
 	 */
 	public static IPath[] chooseClassFolderEntries(Shell shell, IPath initialSelection, IPath[] usedEntries) {
 		if (usedEntries == null) {
@@ -466,14 +466,14 @@ public final class BuildPathDialogAccess {
 	/**
 	 * Shows the UI to select new source folders.
 	 * The dialog returns the selected classpath entry paths or <code>null</code> if the dialog has
-	 * been cancelled. The dialog does not apply any changes.
+	 * been canceled The dialog does not apply any changes.
 	 * 
 	 * @param shell The parent shell for the dialog.
 	 * @param initialSelection The path of the element to initially select or <code>null</code>
 	 * @param usedEntries An array of paths that are already on the classpath and therefore should not be
 	 * selected again.
 	 * @return Returns the configured classpath container entry path or <code>null</code> if the dialog has
-	 * been cancelled by the user.
+	 * been canceled by the user.
 	 */
 	public static IPath[] chooseSourceFolderEntries(Shell shell, IPath initialSelection, IPath[] usedEntries) {
 		if (usedEntries == null) {

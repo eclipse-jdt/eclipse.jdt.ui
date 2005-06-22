@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 
 /**
  * Base class for wizard page responsible to create Java elements. The class
- * provides API to update the wizard's statis line and OK button according to
+ * provides API to update the wizard's status line and OK button according to
  * the value of a <code>IStatus</code> object.
  * 
  * <p>
@@ -63,7 +63,7 @@ public abstract class NewElementWizardPage extends WizardPage {
 	}	
 
 	/**
-	 * Updates the status line and the ok button according to the given status
+	 * Updates the status line and the OK button according to the given status
 	 * 
 	 * @param status status to apply
 	 */
@@ -76,7 +76,7 @@ public abstract class NewElementWizardPage extends WizardPage {
 	}
 	
 	/**
-	 * Updates the status line and the ok button according to the status evaluate from
+	 * Updates the status line and the OK button according to the status evaluate from
 	 * an array of status. The most severe error is taken.  In case that two status with 
 	 * the same severity exists, the status with lower index is taken.
 	 * 

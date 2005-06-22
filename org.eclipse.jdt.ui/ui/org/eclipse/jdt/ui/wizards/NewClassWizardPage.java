@@ -114,7 +114,7 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 			fSuperInterfacesStatus
 		};
 		
-		// the mode severe status will be displayed and the ok button enabled/disabled.
+		// the mode severe status will be displayed and the OK button enabled/disabled.
 		updateStatus(status);
 	}
 	
@@ -129,7 +129,7 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 	}
 	
 	
-	// ------ ui --------
+	// ------ UI --------
 	
 	/*
 	 * @see WizardPage#createControl

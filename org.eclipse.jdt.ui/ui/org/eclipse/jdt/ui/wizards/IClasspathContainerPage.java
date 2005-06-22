@@ -16,7 +16,7 @@ import org.eclipse.jdt.core.IClasspathEntry;
 
 /**
  * A classpath container page allows the user to create a new or edit an 
- * existing classpatch container entry.
+ * existing classpath container entry.
  * <p>
  * Clients should implement this interface and include the name of their 
  * class in an extension contributed to the jdt.ui's classpath container page 
@@ -41,7 +41,7 @@ public interface IClasspathContainerPage extends IWizardPage {
 	 * store the page result (new/changed classpath entry returned in 
 	 * getSelection) into its model.
 	 * 
-	 * @return if the operation was succesful. Only when returned
+	 * @return if the operation was successful. Only when returned
 	 * <code>true</code>, the wizard will close.
 	 */
 	public boolean finish();
@@ -61,7 +61,7 @@ public interface IClasspathContainerPage extends IWizardPage {
 	 * if a new entry should be created.
 	 * 
 	 * @param containerEntry the classpath entry to edit or <code>null</code>.
-	 * If unequals <code>null</code> then the classpath entry must be of
+	 * If not <code>null</code> then the classpath entry must be of
 	 * kind <code>IClasspathEntry.CPE_CONTAINER</code>
 	 */
 	public void setSelection(IClasspathEntry containerEntry);

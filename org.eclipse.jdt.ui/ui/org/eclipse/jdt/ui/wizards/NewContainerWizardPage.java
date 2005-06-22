@@ -438,7 +438,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 					}
 					return true;
 				} catch (JavaModelException e) {
-					JavaPlugin.log(e.getStatus()); // just log, no ui in validation
+					JavaPlugin.log(e.getStatus()); // just log, no UI in validation
 				}
 				return false;
 			}
@@ -451,7 +451,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 					try {
 						return (((IPackageFragmentRoot)element).getKind() == IPackageFragmentRoot.K_SOURCE);
 					} catch (JavaModelException e) {
-						JavaPlugin.log(e.getStatus()); // just log, no ui in validation
+						JavaPlugin.log(e.getStatus()); // just log, no UI in validation
 						return false;
 					}
 				}
