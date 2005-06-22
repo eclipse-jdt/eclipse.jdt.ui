@@ -85,7 +85,7 @@ public class ModifyParametersAction extends SelectionDispatchAction {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);
-			setEnabled(false);//no ui here - happens on selection changes
+			setEnabled(false);//no UI here - happens on selection changes
 		}
 	}
 

@@ -298,7 +298,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 	}
 
 	/**
-	 * Peform organize import on multiple compilation units. No editors are opened.
+	 * Perform organize import on multiple compilation units. No editors are opened.
 	 * @param cus The compilation units to run on
 	 */
 	public void runOnMultiple(final ICompilationUnit[] cus) {
@@ -319,7 +319,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), ActionMessages.OrganizeImportsAction_error_title, ActionMessages.OrganizeImportsAction_error_message); 
 		} catch (InterruptedException e) {
-			// cancelled by user
+			// Canceled by user
 		}		
 		
 	}
@@ -415,7 +415,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					String message= Messages.format(ActionMessages.OrganizeImportsAction_multi_error_unresolvable, cuLocation); 
 					status.add(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
 				} catch (OperationCanceledException e) {
-					// cancelled
+					// Canceled
 					monitor.setCanceled(true);
 				}
 			}

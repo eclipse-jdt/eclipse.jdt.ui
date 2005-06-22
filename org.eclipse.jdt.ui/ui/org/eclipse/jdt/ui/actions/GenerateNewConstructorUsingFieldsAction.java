@@ -353,7 +353,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			} catch (InvocationTargetException exception) {
 				ExceptionHandler.handle(exception, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_actionfailed); 
 			} catch (InterruptedException exception) {
-				// Do nothing. Operation has been cancelled by user.
+				// Do nothing. Operation has been canceled by user.
 			} finally {
 				if (target != null) {
 					target.endCompoundChange();

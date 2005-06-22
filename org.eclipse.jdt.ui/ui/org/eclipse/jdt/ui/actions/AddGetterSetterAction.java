@@ -355,9 +355,9 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		}
 	}
 
-	/*************************************************************************************
-	 * Creates a key used for hashmaps for a method signature
-	 * (gettersettername+arguments(fqn))
+	/**
+	 * Creates a key used in hash maps for a method signature
+	 * (gettersettername+arguments(fqn)).
 	 */
 	private static String createSignatureKey(String methodName, IField field) throws JavaModelException {
 		StringBuffer buffer= new StringBuffer();
@@ -409,7 +409,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		return (IField[]) list.toArray(new IField[list.size()]);
 	}
 
-	// returns a list of fields with only getter entires checked
+	// returns a list of fields with only getter entries checked
 	private static IField[] getGetterOnlyFields(Object[] result) {
 		Collection list= new ArrayList(0);
 		Object each= null;
@@ -494,7 +494,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		run(cu, type, getterFields, setterFields, getterSetterFields, EditorUtility.openInEditor(cu), unit, elementPosition);
 	}
 
-	// ---- Java Editior --------------------------------------------------------------
+	// ---- Java Editor --------------------------------------------------------------
 
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
@@ -558,7 +558,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			String message= ActionMessages.AddGetterSetterAction_error_actionfailed; 
 			ExceptionHandler.handle(e, getShell(), DIALOG_TITLE, message);
 		} catch (InterruptedException e) {
-			// operation cancelled
+			// operation canceled
 		} finally {
 			if (target != null) {
 				target.endCompoundChange();

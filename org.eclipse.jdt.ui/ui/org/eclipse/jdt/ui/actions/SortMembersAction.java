@@ -158,7 +158,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 		return false;
 	}
 
-	//---- Java Editior --------------------------------------------------------------
+	//---- Java Editor --------------------------------------------------------------
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction

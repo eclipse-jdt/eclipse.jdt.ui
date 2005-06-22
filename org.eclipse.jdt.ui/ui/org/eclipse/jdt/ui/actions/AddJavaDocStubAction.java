@@ -125,7 +125,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 		}
 	}
 	
-	//---- Java Editior --------------------------------------------------------------
+	//---- Java Editor --------------------------------------------------------------
 	
 	/* (non-Javadoc)
 	 * Method declared on SelectionDispatchAction
@@ -180,7 +180,7 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), getDialogTitle(), ActionMessages.AddJavaDocStubsAction_error_actionFailed); 
 		} catch (InterruptedException e) {
-			// operation cancelled
+			// operation canceled
 		}
 	}
 	

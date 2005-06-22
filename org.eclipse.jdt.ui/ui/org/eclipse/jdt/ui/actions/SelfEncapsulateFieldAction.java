@@ -96,7 +96,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);
-			setEnabled(false);//no ui
+			setEnabled(false);//no UI
 		}
 	}
 	
@@ -136,7 +136,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);
-			setEnabled(false);//no ui
+			setEnabled(false);//no UI
 		}
 	}
 	
@@ -156,7 +156,7 @@ public class SelfEncapsulateFieldAction extends SelectionDispatchAction {
 	//---- private helpers --------------------------------------------------------
 	
 	/*
-	 * Should be private. But got shipped in this state in 2.0 so chaning this is a
+	 * Should be private. But got shipped in this state in 2.0 so changing this is a
 	 * breaking API change.
 	 */
 	public void run(IField field) {

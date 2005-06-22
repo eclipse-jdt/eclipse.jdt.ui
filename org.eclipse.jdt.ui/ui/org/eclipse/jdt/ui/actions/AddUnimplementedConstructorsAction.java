@@ -562,7 +562,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		}
 	}
 
-	// ---- Java Editior --------------------------------------------------------------
+	// ---- Java Editor --------------------------------------------------------------
 
 	/*
 	 * (non-Javadoc) Method declared on SelectionDispatchAction

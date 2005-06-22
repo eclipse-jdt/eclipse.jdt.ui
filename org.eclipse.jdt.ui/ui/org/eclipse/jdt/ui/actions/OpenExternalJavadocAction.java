@@ -132,7 +132,7 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	}
 	
 	/*
-	 * No Java doc since the method isn't meant to be public but is
+	 * No Javadoc since the method isn't meant to be public but is
 	 * since the beginning
 	 */
 	public void run(IJavaElement element) {

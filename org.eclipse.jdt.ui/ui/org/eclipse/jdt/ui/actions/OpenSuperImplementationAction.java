@@ -116,7 +116,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 	}
 	
 	/*
-	 * No Java doc since the method isn't meant to be public but is
+	 * No Javadoc since the method isn't meant to be public but is
 	 * since the beginning
 	 */
 	public void run(IMethod method) {
@@ -171,7 +171,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 			int flags= method.getFlags();
 			if (!Flags.isStatic(flags) && !Flags.isPrivate(flags)) {
 				IType declaringType= method.getDeclaringType();
-				// if possible, make a check. don't care about working copies ect. In doubt, the action will be enabled.
+				// if possible, make a check. don't care about working copies etc. In doubt, the action will be enabled.
 				if (SuperTypeHierarchyCache.hasInCache(declaringType)) {
 					if (findSuperImplementation(declaringType, method) == null) {
 						return false;

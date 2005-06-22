@@ -90,7 +90,7 @@ public class ConvertNestedToTopAction extends SelectionDispatchAction {
 			// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253
 			if (!(e.getException() instanceof CharConversionException) && JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);
-			setEnabled(false);//no ui
+			setEnabled(false);//no UI
 		}
 	}
 

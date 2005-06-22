@@ -42,7 +42,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
  * </ul>
  * 
  * <p>
- * Note: This class is not intended to be subclassed outside the JDT UI plugin.
+ * Note: This class is not intended to be subclassed outside the JDT UI plug-in.
  * </p>
  * 
  * @since 2.0

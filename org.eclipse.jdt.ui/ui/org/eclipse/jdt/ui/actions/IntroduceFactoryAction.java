@@ -86,7 +86,7 @@ public class IntroduceFactoryAction extends SelectionDispatchAction {
 		} catch (JavaModelException e) {
 			if (JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);
-			setEnabled(false);//no ui here - happens on selection changes
+			setEnabled(false);//no UI here - happens on selection changes
 		}
 	}
 

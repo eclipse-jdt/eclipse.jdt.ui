@@ -90,7 +90,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 	 * @param viewerId a unique id of the viewer. Used as a key to to store 
 	 * the last used filter settings in the preference store
 	 * @param inViewMenu if <code>true</code> the actions are added to the view
-	 * menu. If <code>false</code> they are added to the toobar.
+	 * menu. If <code>false</code> they are added to the toolbar.
 	 * 
 	 * @since 2.1
 	 */
@@ -105,7 +105,7 @@ public class MemberFilterActionGroup extends ActionGroup {
 	 * @param viewerId a unique id of the viewer. Used as a key to to store 
 	 * the last used filter settings in the preference store
 	 * @param inViewMenu if <code>true</code> the actions are added to the view
-	 * menu. If <code>false</code> they are added to the toobar.
+	 * menu. If <code>false</code> they are added to the toolbar.
 	 * @param availableFilters Specifies which filter action should be contained. <code>FILTER_NONPUBLIC</code>,
 	 * <code>FILTER_STATIC</code>, <code>FILTER_FIELDS</code> and <code>FILTER_LOCALTYPES</code>
 	 * or a combination of these constants are possible values. Use <code>ALL_FILTERS</code> to select all available filters.

@@ -110,7 +110,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 		} catch (JavaModelException e) {
 			if (JavaModelUtil.isExceptionToBeLogged(e))
 				JavaPlugin.log(e);
-			setEnabled(false);//no ui - happens on selection changes
+			setEnabled(false);//no UI - happens on selection changes
 		}
 	}
 	
@@ -150,7 +150,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 				ActionMessages.FindStringsToExternalizeAction_error_message); 
 			return;
 		} catch(InterruptedException e) {
-			//ok
+			// OK
 			return;
 		}
 		showResults();

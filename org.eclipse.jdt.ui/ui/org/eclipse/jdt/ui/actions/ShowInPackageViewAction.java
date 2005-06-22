@@ -109,7 +109,7 @@ public class ShowInPackageViewAction extends SelectionDispatchAction {
 	}
 	
 	/*
-	 * No Java doc. The method should be internal but can't be changed since
+	 * No Javadoc. The method should be internal but can't be changed since
 	 * we shipped it with a public visibility 
 	 */
 	public void run(IJavaElement element) {

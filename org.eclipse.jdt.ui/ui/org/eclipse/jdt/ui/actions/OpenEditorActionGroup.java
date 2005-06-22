@@ -147,7 +147,7 @@ public class OpenEditorActionGroup extends ActionGroup {
 		if (!(resource instanceof IFile))
 			return; 
 
-		// Create a menu flyout.
+		// Create a menu.
 		IMenuManager submenu= new MenuManager(ActionMessages.OpenWithMenu_label); 
 		submenu.add(new OpenWithMenu(fSite.getPage(), (IFile) resource));
 
