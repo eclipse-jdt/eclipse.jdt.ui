@@ -1012,7 +1012,7 @@
          name="%javaDocumentSetupParticipant"
          point="org.eclipse.core.filebuffers.documentSetup">
       <participant
-            extensions="java"
+            contentTypeId="org.eclipse.jdt.core.javaSource"
             class="org.eclipse.jdt.internal.ui.javaeditor.JavaDocumentSetupParticipant">
       </participant>
    </extension>
@@ -1021,7 +1021,7 @@
          name="%javaDocumentFactory"
          point="org.eclipse.core.filebuffers.documentCreation">
       <factory
-            extensions="java"
+            contentTypeId="org.eclipse.jdt.core.javaSource"
             class="org.eclipse.jdt.internal.ui.javaeditor.JavaDocumentFactory">
       </factory>
    </extension>

@@ -15,17 +15,18 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
-import org.eclipse.ui.editors.text.FileDocumentProvider;
-
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
+
+import org.eclipse.ui.editors.text.FileDocumentProvider;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.IClassFile;
@@ -222,6 +223,14 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 		}
 
 		return null;
+	}
+
+	/*
+	 * @see org.eclipse.ui.editors.text.StorageDocumentProvider#createEmptyDocument()
+	 * @since 3.1
+	 */
+	protected IDocument createEmptyDocument() {
+		return new PartiallySynchronizedDocument();
 	}
 
 	/*
