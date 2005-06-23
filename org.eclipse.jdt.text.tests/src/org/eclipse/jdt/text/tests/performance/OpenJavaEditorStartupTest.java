@@ -68,7 +68,7 @@ public class OpenJavaEditorStartupTest extends StartupPerformanceTestCase {
 	
 	public void testJavaEditorStartup() {
 		PerformanceMeter perfMeter= createPerformanceMeterForSummary(SHORT_NAME, Dimension.ELAPSED_PROCESS);
-		explainDegradation("The startup with open Java editor performance has been slightly decreased due to lazy plug-in and class loading", perfMeter);
+		explainDegradation("The startup with open Java editor performance has been decreased due to lazy plug-in and class loading", perfMeter);
 		measureStartup(perfMeter);
 	}
 }

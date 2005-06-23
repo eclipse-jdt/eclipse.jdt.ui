@@ -82,7 +82,7 @@ public class OpenTextEditorStartupTest extends StartupPerformanceTestCase {
 	
 	public void testTextEditorStartup() {
 		PerformanceMeter perfMeter= createPerformanceMeterForSummary(SHORT_NAME, Dimension.ELAPSED_PROCESS);
-		explainDegradation("The startup with open Text editor performance has been slightly decreased due to lazy plug-in and class loading", perfMeter);
+		explainDegradation("The startup with open Text editor performance has been decreased due to lazy plug-in and class loading", perfMeter);
 		measureStartup(perfMeter);
 		
 	}
