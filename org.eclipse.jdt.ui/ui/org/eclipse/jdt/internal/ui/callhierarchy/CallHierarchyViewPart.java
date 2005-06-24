@@ -830,7 +830,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fHistoryDropDownAction = new HistoryDropDownAction(this);
         fHistoryDropDownAction.setEnabled(false);
         fCancelSearchAction = new CancelSearchAction(this);
-        setCancelEnabled(false);
+        fCancelSearchAction.setEnabled(false); //workaround for bug 101625
         fToggleOrientationActions = new ToggleOrientationAction[] {
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_VERTICAL),
                 new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL),
@@ -927,6 +927,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
      * @param enabled 
      */
     void setCancelEnabled(boolean enabled) {
-        fCancelSearchAction.setEnabled(enabled);
+//    	workaround for bug 101625: 
+//    	fCancelSearchAction.setEnabled(enabled);
     }
 }

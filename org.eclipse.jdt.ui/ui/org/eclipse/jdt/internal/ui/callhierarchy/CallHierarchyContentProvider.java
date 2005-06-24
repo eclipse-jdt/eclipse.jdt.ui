@@ -167,12 +167,15 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
      * Cancel all current jobs. 
      */
     void cancelJobs() {
+    	// prevent NPE of bug 101625:
+        /*
         if (fManager != null) {
         	fManager.cancel(null);
             if (fPart != null) {
                 fPart.setCancelEnabled(false);
             }
         }
+        */
     }
 
     /**
