@@ -99,7 +99,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 		/**
 		 * This comparator follows the contract defined in CompilationUnitSorter.sort.
 		 * @see Comparator#compare(java.lang.Object, java.lang.Object)
-		 * @see CompilationUnitSorter#sort(org.eclipse.jdt.core.ICompilationUnit, int[], java.util.Comparator, int, org.eclipse.core.runtime.IProgressMonitor)
+		 * @see CompilationUnitSorter#sort(int, org.eclipse.jdt.core.ICompilationUnit, int[], java.util.Comparator, int, org.eclipse.core.runtime.IProgressMonitor)
 		 */
 		public int compare(Object e1, Object e2) {
 			BodyDeclaration bodyDeclaration1= (BodyDeclaration) e1;
@@ -257,7 +257,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 	 * Runs the operation.
 	 */
 	public void run(IProgressMonitor monitor) throws CoreException {
-		CompilationUnitSorter.sort(fCompilationUnit, fPositions, new DefaultJavaElementComparator(), 0, monitor);
+		CompilationUnitSorter.sort(AST.JLS3, fCompilationUnit, fPositions, new DefaultJavaElementComparator(), 0, monitor);
 	}
 
 	/**
