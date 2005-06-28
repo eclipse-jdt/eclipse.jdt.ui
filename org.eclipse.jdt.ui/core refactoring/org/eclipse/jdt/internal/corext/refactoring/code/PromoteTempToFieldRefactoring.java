@@ -639,6 +639,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
             VariableDeclarationFragment firstFragmentAfter= (VariableDeclarationFragment)fragments.get(fragmentIndex + 1);
             VariableDeclarationFragment copyfirstFragmentAfter= (VariableDeclarationFragment)rewrite.createCopyTarget(firstFragmentAfter);
         	VariableDeclarationStatement statement= getAST().newVariableDeclarationStatement(copyfirstFragmentAfter);
+        	Type typeCopy= (Type) rewrite.createCopyTarget(tempDeclarationStatement.getType());
+			statement.setType(typeCopy);
         	for (int i= fragmentIndex + 2; i < fragments.size(); i++) {
         		VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(i);
                 VariableDeclarationFragment fragmentCopy= (VariableDeclarationFragment)rewrite.createCopyTarget(fragment);
