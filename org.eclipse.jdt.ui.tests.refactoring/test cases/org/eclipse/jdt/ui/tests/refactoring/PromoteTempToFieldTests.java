@@ -648,36 +648,4 @@ public class PromoteTempToFieldTests extends RefactoringTest{
 		passHelper(10, 21, 10, 21, "fM", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 	
-	public void testMultiVariableDeclFragment01() throws Exception {
-        int accessModifier= Modifier.PRIVATE;
-        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
-        boolean declareFinal= false;
-        boolean declareStatic= false;
-		passHelper(5, 23, 5, 23, "fA", declareStatic, declareFinal, initializeIn, accessModifier);
-	}
-	
-	public void testMultiVariableDeclFragment02() throws Exception {
-        int accessModifier= Modifier.PRIVATE;
-        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
-        boolean declareFinal= false;
-        boolean declareStatic= false;
-		passHelper(5, 29, 5, 29, "fB", declareStatic, declareFinal, initializeIn, accessModifier);
-	}
-	
-	public void testMultiVariableDeclFragment03() throws Exception {
-        int accessModifier= Modifier.PRIVATE;
-        int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
-        boolean declareFinal= false;
-        boolean declareStatic= false;
-		passHelper(5, 35, 5, 35, "fC", declareStatic, declareFinal, initializeIn, accessModifier);
-	}
-	
-	public void testMultiVariableDeclFragment04() throws Exception {
-		int accessModifier= Modifier.PRIVATE;
-		int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
-		boolean declareFinal= false;
-		boolean declareStatic= false;
-		passHelper(5, 41, 5, 41, "fD", declareStatic, declareFinal, initializeIn, accessModifier);
-	}
-	
 }
