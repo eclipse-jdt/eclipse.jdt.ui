@@ -8,26 +8,37 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
+
 package org.eclipse.jdt.jeview.views;
 
+import org.eclipse.jface.util.Assert;
 
 
-public class Error extends JEAttribute {
-	public static final String ERROR= "ERROR";
+public class Null extends JEAttribute {
 
 	private final JEAttribute fParent;
 	private final String fName;
-	private final Exception fException;
-
-	public Error(JEAttribute parent, String name, Exception exception) {
+	
+	public Null(JEAttribute parent, String name) {
+		Assert.isNotNull(parent);
+		Assert.isNotNull(name);
 		fParent= parent;
 		fName= name;
-		fException= exception;
 	}
 
 	@Override
 	public JEAttribute getParent() {
 		return fParent;
+	}
+
+	@Override
+	public JEAttribute[] getChildren() {
+		return EMPTY;
+	}
+
+	@Override
+	public String getLabel() {
+		return fName + ": null";
 	}
 
 	@Override
@@ -38,25 +49,11 @@ public class Error extends JEAttribute {
 			return false;
 		}
 		
-		Error other= (Error) obj;
-		if (fParent == null) {
-			if (other.fParent != null)
-				return false;
-		} else if (! fParent.equals(other.fParent)) {
+		Null other= (Null) obj;
+		if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		
-		if (fName == null) {
-			if (other.fName != null)
-				return false;
-		} else if (! fName.equals(other.fName)) {
-			return false;
-		}
-		
-		if (fException == null) {
-			if (other.fException != null)
-				return false;
-		} else if (! fException.equals(other.fException)) {
+		if (! fName.equals(other.fName)) {
 			return false;
 		}
 		
@@ -65,19 +62,6 @@ public class Error extends JEAttribute {
 	
 	@Override
 	public int hashCode() {
-		return (fParent != null ? fParent.hashCode() : 0)
-				+ (fName != null ? fName.hashCode() : 0)
-				+ (fException != null ? fException.hashCode() : 0);
+		return fParent.hashCode() + fName.hashCode();
 	}
-	
-	@Override
-	public JEAttribute[] getChildren() {
-		return EMPTY;
-	}
-
-	@Override
-	public String getLabel() {
-		return (fName == null ? "" : fName + ": ") + fException.toString();
-	}
-
 }

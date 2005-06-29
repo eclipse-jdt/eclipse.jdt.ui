@@ -11,6 +11,7 @@
 package org.eclipse.jdt.jeview.views;
 
 import java.util.ArrayList;
+import java.util.concurrent.Callable;
 
 import org.eclipse.core.resources.IResource;
 
@@ -36,8 +37,6 @@ public class JavaElement extends JEAttribute {
 	private final String fName; //can be null
 	private final IJavaElement fJavaElement; //can be null
 
-	private JEAttribute[] fChildren;
-	
 	public JavaElement(JEAttribute parent, String name, IJavaElement element) {
 		fParent= parent;
 		fName= name;
@@ -55,6 +54,46 @@ public class JavaElement extends JEAttribute {
 	
 	public IJavaElement getJavaElement() {
 		return fJavaElement;
+	}
+	
+	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null || !obj.getClass().equals(getClass())) {
+			return false;
+		}
+		
+		JavaElement other= (JavaElement) obj;
+		if (fParent == null) {
+			if (other.fParent != null)
+				return false;
+		} else if (! fParent.equals(other.fParent)) {
+			return false;
+		}
+		
+		if (fName == null) {
+			if (other.fName != null)
+				return false;
+		} else if (! fName.equals(other.fName)) {
+			return false;
+		}
+		
+		if (fJavaElement == null) {
+			if (other.fJavaElement != null)
+				return false;
+		} else if (! fJavaElement.equals(other.fJavaElement)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		return (fParent != null ? fParent.hashCode() : 0)
+				+ (fName != null ? fName.hashCode() : 0)
+				+ (fJavaElement != null ? fJavaElement.hashCode() : 0);
 	}
 
 	@Override
@@ -77,21 +116,16 @@ public class JavaElement extends JEAttribute {
 
 	@Override
 	public JEAttribute[] getChildren() {
-		if (fChildren != null)
-			return fChildren;
-		
-		if (fJavaElement == null) {
-			fChildren= EMPTY;
-			return fChildren;
-		}
+		if (fJavaElement == null)
+			return EMPTY;
 		
 		ArrayList<JEAttribute> result= new ArrayList<JEAttribute>();
-		
-		addJavaElementChildren(result, fJavaElement);
 		
 		if (fJavaElement instanceof IParent) {
 			addParentChildren(result, (IParent) fJavaElement);
 		}
+		
+		addJavaElementChildren(result, fJavaElement);
 		
 		if (fJavaElement instanceof IJavaModel) {
 			addJavaModelChildren(result, (IJavaModel) fJavaElement);
@@ -114,18 +148,11 @@ public class JavaElement extends JEAttribute {
 			addMemberChildren(result, (IMember) fJavaElement);
 		}
 		
-		fChildren= result.toArray(new JEAttribute[result.size()]);
-		return fChildren;
+		return result.toArray(new JEAttribute[result.size()]);
 		
 	}
 
 	private void addParentChildren(ArrayList<JEAttribute> result, final IParent parent) {
-		result.add(new JavaElementProperty(this, "hasChildren") {
-			@Override
-			public Object computeValue() throws JavaModelException {
-				return parent.hasChildren();
-			}
-		});
 		result.add(new JavaElementChildrenProperty(this, "children") {
 			@Override
 			public JEAttribute[] computeChildren() throws JavaModelException {
@@ -135,80 +162,15 @@ public class JavaElement extends JEAttribute {
 	}
 
 	private void addJavaElementChildren(ArrayList<JEAttribute> result, final IJavaElement javaElement) {
-		result.add(new JavaElementProperty(this, "elementName", javaElement.getElementName()));
-		result.add(new JavaElementProperty(this, "elementType", getElementTypeString(javaElement.getElementType())));
-		result.add(new JavaElementProperty(this, "handleIdentifier", javaElement.getHandleIdentifier()));
-		result.add(new JavaElementProperty(this, "exists", javaElement.exists()));
-		result.add(new JavaElementProperty(this, "isReadOnly", javaElement.isReadOnly()));
-		result.add(new JavaElementProperty(this, "isStructureKnown") {
-			@Override protected Object computeValue() throws JavaModelException {
-				return javaElement.isStructureKnown();
-			}
-		});
-		result.add(new JEResource(this, "resource", javaElement.getResource()));
 		result.add(new JavaElement(this, "parent", javaElement.getParent()));
-		result.add(new JEResource(this, "correspondingResource") {
-			@Override protected IResource computeResource() throws JavaModelException {
+		result.add(JEResource.create(this, "resource", javaElement.getResource()));
+		result.add(JEResource.compute(this, "correspondingResource", new Callable<IResource>() {
+			public IResource call() throws Exception {
 				return javaElement.getCorrespondingResource();
 			}
-		});
+		}));
 	}
 
-	private String getElementTypeString(int elementType) {
-		String name;
-		switch (elementType) {
-			case IJavaElement.JAVA_MODEL :
-				name= "IJavaModel";
-				break;
-			case IJavaElement.JAVA_PROJECT :
-				name= "IJavaProject";
-				break;
-			case IJavaElement.PACKAGE_FRAGMENT_ROOT :
-				name= "IPackageFragmentRoot";
-				break;
-			case IJavaElement.PACKAGE_FRAGMENT :
-				name= "IPackageFragment";
-				break;
-			case IJavaElement.COMPILATION_UNIT :
-				name= "ICompilationUnit";
-				break;
-			case IJavaElement.CLASS_FILE :
-				name= "IClassFile";
-				break;
-			case IJavaElement.TYPE :
-				name= "IType";
-				break;
-			case IJavaElement.FIELD :
-				name= "IField";
-				break;
-			case IJavaElement.METHOD :
-				name= "IMethod";
-				break;
-			case IJavaElement.INITIALIZER :
-				name= "IInitializer";
-				break;
-			case IJavaElement.PACKAGE_DECLARATION :
-				name= "IPackageDeclaration";
-				break;
-			case IJavaElement.IMPORT_CONTAINER :
-				name= "IImportContainer";
-				break;
-			case IJavaElement.IMPORT_DECLARATION :
-				name= "IImportDeclaration";
-				break;
-			case IJavaElement.LOCAL_VARIABLE :
-				name= "ILocalVariable";
-				break;
-			case IJavaElement.TYPE_PARAMETER :
-				name= "ITypeParameter";
-				break;
-			default :
-				name= "UNKNOWN";
-				break;
-		}
-		return elementType + " (" + name + ")";
-	}
-	
 	private void addJavaModelChildren(ArrayList<JEAttribute> result, final IJavaModel javaModel) {
 		result.add(new JavaElementChildrenProperty(this, "javaProjects") {
 			@Override

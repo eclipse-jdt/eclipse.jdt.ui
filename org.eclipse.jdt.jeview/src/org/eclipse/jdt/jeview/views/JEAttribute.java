@@ -21,5 +21,11 @@ public abstract class JEAttribute {
 	public abstract JEAttribute getParent();
 	public abstract JEAttribute[] getChildren();
 	public abstract String getLabel();
+	
+	@Override
+	public abstract boolean equals(Object obj);
+	
+	@Override
+	public abstract int hashCode();
 		
 }

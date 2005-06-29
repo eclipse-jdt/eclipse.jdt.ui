@@ -9,6 +9,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
@@ -32,6 +33,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
@@ -43,11 +45,18 @@ import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.actions.ActionFactory;
+import org.eclipse.ui.actions.ActionFactory.IWorkbenchAction;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
+
+import org.eclipse.ui.views.properties.IPropertySheetPage;
+import org.eclipse.ui.views.properties.IPropertySource;
+import org.eclipse.ui.views.properties.IPropertySourceProvider;
+import org.eclipse.ui.views.properties.PropertySheetPage;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IJavaElement;
@@ -60,21 +69,47 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 
 import org.eclipse.jdt.jeview.JEViewPlugin;
+import org.eclipse.jdt.jeview.properties.JavaElementProperties;
+import org.eclipse.jdt.jeview.properties.ResourceProperties;
 
 
 public class JavaElementView extends ViewPart implements IShowInSource, IShowInTarget {
 	private TreeViewer fViewer;
 	private DrillDownAdapter fDrillDownAdapter;
 	private Action fAction1;
-	private Action fAction2;
+	private Action fRefresh;
+	private IWorkbenchAction fProperties;
 	private Action fDoubleClickAction;
+	private PropertySheetPage fPropertySheetPage;
 
 	
-	private class JEViewSelectionProvider implements ISelectionProvider {
-		ListenerList fListeners= new ListenerList();
+	private static class JEViewSelectionProvider implements ISelectionProvider {
+		private final TreeViewer fViewer;
+		ListenerList fSelectionChangedListeners= new ListenerList();
 
+		public JEViewSelectionProvider(TreeViewer viewer) {
+			fViewer= viewer;
+			fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+				public void selectionChanged(SelectionChangedEvent event) {
+					fireSelectionChanged();
+				}
+			});
+		}
+
+		private void fireSelectionChanged() {
+			if (fSelectionChangedListeners != null) {
+				SelectionChangedEvent event= new SelectionChangedEvent(this, getSelection());
+				
+				Object[] listeners= fSelectionChangedListeners.getListeners();
+				for (int i= 0; i < listeners.length; i++) {
+					ISelectionChangedListener listener= (ISelectionChangedListener) listeners[i];
+					listener.selectionChanged(event);
+				}
+			}
+		}
+		
 		public void addSelectionChangedListener(ISelectionChangedListener listener) {
-			fListeners.add(listener);
+			fSelectionChangedListeners.add(listener);
 		}
 
 		public ISelection getSelection() {
@@ -94,7 +129,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		}
 
 		public void removeSelectionChangedListener(ISelectionChangedListener listener) {
-			fListeners.remove(listener);
+			fSelectionChangedListeners.remove(listener);
 		}
 
 		public void setSelection(ISelection selection) {
@@ -116,7 +151,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		makeActions();
 		hookContextMenu();
 		hookDoubleClickAction();
-		getSite().setSelectionProvider(new JEViewSelectionProvider());
+		getSite().setSelectionProvider(new JEViewSelectionProvider(fViewer));
 		contributeToActionBars();
 	}
 
@@ -155,26 +190,30 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		IActionBars bars = getViewSite().getActionBars();
 		fillLocalPullDown(bars.getMenuManager());
 		fillLocalToolBar(bars.getToolBarManager());
+		bars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fRefresh);
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
 		manager.add(fAction1);
 		manager.add(new Separator());
-		manager.add(fAction2);
+		manager.add(fRefresh);
 	}
 
 	private void fillContextMenu(IMenuManager manager) {
 		manager.add(fAction1);
-		manager.add(fAction2);
+		manager.add(fRefresh);
 		manager.add(new Separator());
 		fDrillDownAdapter.addNavigationActions(manager);
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+		manager.add(new Separator());
+		manager.add(fProperties);
+		manager.add(new Separator());
 	}
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(fAction1);
-		manager.add(fAction2);
+		manager.add(fRefresh);
 		manager.add(new Separator());
 		fDrillDownAdapter.addNavigationActions(manager);
 	}
@@ -189,15 +228,18 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		fAction1.setToolTipText("Reset View to JavaModel");
 		fAction1.setImageDescriptor(getJavaModelImageDescriptor());
 		
-		fAction2 = new Action() {
+		fRefresh = new Action() {
 			@Override public void run() {
-				showMessage("Action 2 executed");
+				fViewer.refresh();
 			}
 		};
-		fAction2.setText("Action 2");
-		fAction2.setToolTipText("Action 2 tooltip");
-		fAction2.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
+		fRefresh.setText("Refresh");
+		fRefresh.setToolTipText("Refresh");
+		fRefresh.setImageDescriptor(PlatformUI.getWorkbench().getSharedImages().
 				getImageDescriptor(ISharedImages.IMG_OBJS_INFO_TSK));
+		
+		fProperties= ActionFactory.PROPERTIES.create(getViewSite().getWorkbenchWindow());
+		
 		fDoubleClickAction = new Action() {
 			@Override public void run() {
 				ISelection selection = fViewer.getSelection();
@@ -284,6 +326,12 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				if (first instanceof IJavaElement) {
 					setInput((IJavaElement) first);
 					return true;
+				} else if (first instanceof IResource) {
+					IJavaElement input= JavaCore.create((IResource) first);
+					if (input != null) {
+						setInput(input);
+						return true;
+					}
 				}
 			}
 		}
@@ -316,5 +364,30 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 //			return ((JarEntryEditorInput)input).getStorage();
 		return null;
 	}
+	
+	@Override
+	public Object getAdapter(Class adapter) {
+		if (adapter == IPropertySheetPage.class) {
+			return getPropertySheetPage();
+		}
+		return super.getAdapter(adapter);
+	}
 
+	private PropertySheetPage getPropertySheetPage() {
+		if (fPropertySheetPage == null) {
+			final PropertySheetPage propertySheetPage= new PropertySheetPage();
+			propertySheetPage.setPropertySourceProvider(new IPropertySourceProvider() {
+				public IPropertySource getPropertySource(Object object) {
+					if (object instanceof IJavaElement)
+						return new JavaElementProperties((IJavaElement) object);
+					else if (object instanceof IResource)
+						return new ResourceProperties((IResource) object);
+					else
+						return null;
+				}
+			});
+			fPropertySheetPage= propertySheetPage;
+		}
+		return fPropertySheetPage;
+	}
 }

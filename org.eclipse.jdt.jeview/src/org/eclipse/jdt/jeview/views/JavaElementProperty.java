@@ -15,8 +15,7 @@ public class JavaElementProperty extends JEAttribute {
 
 	private final JEAttribute fParent;
 	private final String fName;
-	private Error[] fChildren;
-	private String fValue;
+	private final String fValue;
 
 	public JavaElementProperty(JEAttribute parent, String name) {
 		fParent= parent;
@@ -39,28 +38,65 @@ public class JavaElementProperty extends JEAttribute {
 	}
 
 	@Override
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null || !obj.getClass().equals(getClass())) {
+			return false;
+		}
+		
+		JavaElementProperty other= (JavaElementProperty) obj;
+		if (fParent == null) {
+			if (other.fParent != null)
+				return false;
+		} else if (! fParent.equals(other.fParent)) {
+			return false;
+		}
+		
+		if (fName == null) {
+			if (other.fName != null)
+				return false;
+		} else if (! fName.equals(other.fName)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		return (fParent != null ? fParent.hashCode() : 0)
+				+ (fName != null ? fName.hashCode() : 0);
+	}
+	
+	@Override
 	public JEAttribute[] getChildren() {
-		return fChildren == null ? EMPTY : fChildren;
+		if (fValue != null)
+			return EMPTY;
+		
+		try {
+			computeValue();
+			return EMPTY;
+		} catch (Exception e) {
+			return new Error[]{ new Error(this, "", e) };
+		}
 	}
 
 	@Override
 	public String getLabel() {
-		internalComputeValue();
-		if (fName == null)
-			return fValue;
-		else
-			return fName + ": " + fValue;
-	}
-
-	private void internalComputeValue() {
-		if (fValue == null) {
+		String value= fValue;
+		if (value == null) {
 			try {
-				fValue= String.valueOf(computeValue());
+				value= String.valueOf(computeValue());
 			} catch (Exception e) {
-				fChildren= new Error[] { new Error(this, "", e) };
-				fValue= Error.ERROR;
+				return Error.ERROR;
 			}
 		}
+		
+		if (fName == null)
+			return value;
+		else
+			return fName + ": " + value;
 	}
 
 	protected Object computeValue() throws Exception {

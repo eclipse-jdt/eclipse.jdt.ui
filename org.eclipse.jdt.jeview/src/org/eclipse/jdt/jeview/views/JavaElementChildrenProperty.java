@@ -11,11 +11,10 @@
 package org.eclipse.jdt.jeview.views;
 
 
-public class JavaElementChildrenProperty extends JEAttribute {
+public abstract class JavaElementChildrenProperty extends JEAttribute {
 
 	private final JEAttribute fParent;
 	private final String fName;
-	private JEAttribute[] fChildren;
 
 	public JavaElementChildrenProperty(JEAttribute parent, String name) {
 		fParent= parent;
@@ -28,21 +27,47 @@ public class JavaElementChildrenProperty extends JEAttribute {
 	}
 
 	@Override
-	public JEAttribute[] getChildren() {
-		if (fChildren != null)
-			return fChildren;
-		
-		try {
-			fChildren= computeChildren();
-		} catch (Exception e) {
-			fChildren= new JEAttribute[] {new Error(this, "", e)};
+	public boolean equals(Object obj) {
+		if (this == obj)
+			return true;
+		if (obj == null || !obj.getClass().equals(getClass())) {
+			return false;
 		}
-		return fChildren;
+		
+		JavaElementChildrenProperty other= (JavaElementChildrenProperty) obj;
+		if (fParent == null) {
+			if (other.fParent != null)
+				return false;
+		} else if (! fParent.equals(other.fParent)) {
+			return false;
+		}
+		
+		if (fName == null) {
+			if (other.fName != null)
+				return false;
+		} else if (! fName.equals(other.fName)) {
+			return false;
+		}
+		
+		return true;
+	}
+	
+	@Override
+	public int hashCode() {
+		return (fParent != null ? fParent.hashCode() : 0)
+				+ (fName != null ? fName.hashCode() : 0);
+	}
+	
+	@Override
+	public JEAttribute[] getChildren() {
+		try {
+			return computeChildren();
+		} catch (Exception e) {
+			return new JEAttribute[] {new Error(this, "", e)};
+		}
 	}
 
-	protected JEAttribute[] computeChildren() throws Exception {
-		return EMPTY;
-	}
+	protected abstract JEAttribute[] computeChildren() throws Exception;
 
 	@Override
 	public String getLabel() {
