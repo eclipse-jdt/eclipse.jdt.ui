@@ -25,7 +25,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 	 * @see org.eclipse.jdt.ui.text.java.IQuickFixProcessor#hasCorrections(org.eclipse.jdt.core.ICompilationUnit, int)
 	 */
 	public boolean hasCorrections(ICompilationUnit unit, int problemId) {
-		return IProblem.SuperclassNotFound == problemId || IProblem.ImportNotFound == problemId;
+		return IProblem.UndefinedType == problemId || IProblem.ImportNotFound == problemId;
 	}
 
 	/* (non-Javadoc)
@@ -41,6 +41,8 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 		ICompilationUnit unit= context.getCompilationUnit();
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation location= locations[i];
+			if (! hasCorrections(context.getCompilationUnit(), location.getProblemId()))
+				break; 
 			try {
 				String s= unit.getBuffer().getText(location.getOffset(), location.getLength());
 				if (s.equals("TestCase") //$NON-NLS-1$
