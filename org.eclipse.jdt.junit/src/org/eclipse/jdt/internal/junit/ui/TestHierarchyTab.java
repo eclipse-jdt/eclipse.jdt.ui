@@ -43,7 +43,6 @@ import org.eclipse.swt.custom.CTabItem;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -431,7 +430,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener, ISele
 				activate();
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
-				handleDoubleClick(null);
+				handleDefaultSelected(null);
 			}
 		});
 		
@@ -440,15 +439,9 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener, ISele
 				disposeIcons();
 			}
 		});
-
-		fTree.addMouseListener(new MouseAdapter() {
-			public void mouseDoubleClick(MouseEvent e) {
-				handleDoubleClick(e);
-			}
-		});
 	}
 	
-	void handleDoubleClick(MouseEvent e) {
+	void handleDefaultSelected(MouseEvent e) {
 		TestRunInfo testInfo= getTestInfo();
 		
 		if (testInfo == null)

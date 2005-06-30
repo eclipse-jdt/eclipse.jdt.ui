@@ -273,7 +273,7 @@ public class FailureTab extends TestRunTab implements IMenuListener, ISelectionP
 				activate();
 			}
 			public void widgetDefaultSelected(SelectionEvent e) {
-				handleDoubleClick(null);
+				handleDefaultSelected(null);
 			}
 		});
 		
@@ -284,9 +284,6 @@ public class FailureTab extends TestRunTab implements IMenuListener, ISelectionP
 		});
 
 		fTable.addMouseListener(new MouseAdapter() {
-			public void mouseDoubleClick(MouseEvent e){
-				handleDoubleClick(e);
-			}
 			public void mouseDown(MouseEvent e) {
 				activate();
 			}
@@ -296,7 +293,7 @@ public class FailureTab extends TestRunTab implements IMenuListener, ISelectionP
 		});
 	}
 	
-	void handleDoubleClick(MouseEvent e) {
+	void handleDefaultSelected(MouseEvent e) {
 		if (fTable.getSelectionCount() > 0) 
 			new OpenTestAction(fRunnerViewPart, getClassName(), getMethodName()).run();
 	}
