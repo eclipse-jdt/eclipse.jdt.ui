@@ -1014,6 +1014,8 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 			change= new CompilationUnitChange("", unit); //$NON-NLS-1$
 		final String source= change.getPreviewContent(new NullProgressMonitor());
 		final ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setProject(fType.getJavaProject());
+		parser.setResolveBindings(false);
 		parser.setSource(source.toCharArray());
 		final AbstractTypeDeclaration declaration= findTypeDeclaration(fType, (CompilationUnit) parser.createAST(null));
 		return source.substring(declaration.getStartPosition(), ASTNodes.getExclusiveEnd(declaration));
