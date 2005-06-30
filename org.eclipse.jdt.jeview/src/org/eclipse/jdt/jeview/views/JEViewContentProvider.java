@@ -35,8 +35,8 @@ public class JEViewContentProvider implements ITreeContentProvider {
 	}
 
 	public Object[] getElements(Object inputElement) {
-		if (inputElement instanceof JERoot)
-			return ((JERoot) inputElement).getChildren();
+		if (inputElement instanceof JEAttribute)
+			return ((JEAttribute) inputElement).getChildren();
 		return JEAttribute.EMPTY;
 	}
 

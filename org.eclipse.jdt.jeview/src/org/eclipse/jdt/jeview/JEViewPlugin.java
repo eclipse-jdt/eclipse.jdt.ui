@@ -20,13 +20,10 @@ public class JEViewPlugin extends AbstractUIPlugin {
 	}
 
 	public static String getPluginId() {
-		return "org.eclipse.jdt.astview"; //$NON-NLS-1$
+		return "org.eclipse.jdt.jeview"; //$NON-NLS-1$
 	}
 	
-	public void start(BundleContext context) throws Exception {
-		super.start(context);
-	}
-
+	@Override
 	public void stop(BundleContext context) throws Exception {
 		super.stop(context);
 		fDefault= null;

@@ -12,6 +12,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
@@ -23,6 +24,7 @@ import org.eclipse.jface.action.IToolBarManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.util.ListenerList;
@@ -36,6 +38,7 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.ITextSelection;
 
@@ -81,11 +84,15 @@ import org.eclipse.jdt.jeview.properties.ResourceProperties;
 public class JavaElementView extends ViewPart implements IShowInSource, IShowInTarget {
 	TreeViewer fViewer;
 	private DrillDownAdapter fDrillDownAdapter;
+	private JERoot fInput;
+	
 	private Action fResetAction;
 	private Action fCodeSelectAction;
+	private Action fCreateFromHandleAction;
 	private Action fRefreshAction;
 	private Action fPropertiesAction;
 	Action fDoubleClickAction;
+	
 	private PropertySheetPage fPropertySheetPage;
 
 	
@@ -150,7 +157,18 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	@Override
 	public void createPartControl(Composite parent) {
 		fViewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
-		fDrillDownAdapter = new DrillDownAdapter(fViewer);
+		fDrillDownAdapter = new DrillDownAdapter(fViewer) {
+			@Override
+			protected void updateNavigationButtons() {
+				super.updateNavigationButtons();
+				if (fViewer.getInput() instanceof JEAttribute && ! fViewer.getInput().equals(fInput)) {
+					setContentDescription(((JEAttribute) fViewer.getInput()).getLabel());
+				} else {
+					setContentDescription("");
+				}
+				
+			}
+		};
 		fViewer.setContentProvider(new JEViewContentProvider());
 		fViewer.setLabelProvider(new JEViewLabelProvider());
 		reset();
@@ -170,14 +188,15 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	}
 
 	void setInput(IJavaElement javaElement) {
-		JERoot input= new JERoot(javaElement);
-		fViewer.setInput(input);
+		fInput= new JERoot(javaElement);
+		fViewer.setInput(fInput);
 		ITreeContentProvider tcp= (ITreeContentProvider) fViewer.getContentProvider();
-		Object[] elements= tcp.getElements(input);
+		Object[] elements= tcp.getElements(fInput);
 		if (elements.length > 0) {
 			fViewer.setSelection(new StructuredSelection(elements[0]));
 			fViewer.setExpandedState(elements[0], true);
 		}
+		fDrillDownAdapter.reset();
 	}
 
 	private void hookContextMenu() {
@@ -202,6 +221,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 
 	private void fillLocalPullDown(IMenuManager manager) {
 		manager.add(fCodeSelectAction);
+		manager.add(fCreateFromHandleAction);
 		manager.add(fResetAction);
 		manager.add(new Separator());
 		manager.add(fRefreshAction);
@@ -212,11 +232,11 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		manager.add(fRefreshAction);
 		manager.add(new Separator());
 		fDrillDownAdapter.addNavigationActions(manager);
+		manager.add(new Separator());
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		manager.add(new Separator());
 		manager.add(fPropertiesAction);
-		manager.add(new Separator());
 	}
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
@@ -228,7 +248,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	}
 
 	private void makeActions() {
-		fCodeSelectAction= new Action("CodeSelect", JEPluginImages.IMG_SET_FOCUS) {
+		fCodeSelectAction= new Action("Set Input from Editor", JEPluginImages.IMG_SET_FOCUS) {
 			@Override public void run() {
 				IEditorPart editor= getSite().getPage().getActiveEditor();
 				IEditorInput input= editor.getEditorInput();
@@ -256,6 +276,17 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		fCodeSelectAction.setToolTipText("Set input from current editor's selection");
 		//TODO: getElementAt
 		
+		fCreateFromHandleAction= new Action("Create From Handle...") {
+			@Override public void run() {
+				InputDialog dialog= new InputDialog(getSite().getShell(), "Create Java Element From Handle Identifier", "Handle identifier:", "", null);
+				if (dialog.open() != Window.OK)
+					return;
+				String handleIdentifier= dialog.getValue();
+				IJavaElement javaElement= JavaCore.create(handleIdentifier);
+				setInput(javaElement);
+			}
+		};
+		
 		fResetAction= new Action("Reset View", getJavaModelImageDescriptor()) {
 			@Override public void run() {
 				reset();
@@ -265,7 +296,11 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		
 		fRefreshAction= new Action("Refresh", JEPluginImages.IMG_REFRESH) {
 			@Override public void run() {
-				fViewer.refresh();
+				BusyIndicator.showWhile(getSite().getShell().getDisplay(), new Runnable() {
+					public void run() {
+						fViewer.refresh();
+					}
+				});
 			}
 		};
 		fRefreshAction.setToolTipText("Refresh");
