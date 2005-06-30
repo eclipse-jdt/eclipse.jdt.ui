@@ -25,8 +25,8 @@ public class JavaElementProperties implements IPropertySource {
 	private IJavaElement fSource;
 	
 	// Property Descriptors
-	static private IPropertyDescriptor[] fgPropertyDescriptors= new IPropertyDescriptor[1];
-	{
+	private static final IPropertyDescriptor[] fgPropertyDescriptors= new IPropertyDescriptor[1];
+	static {
 		PropertyDescriptor descriptor;
 
 		// resource name
