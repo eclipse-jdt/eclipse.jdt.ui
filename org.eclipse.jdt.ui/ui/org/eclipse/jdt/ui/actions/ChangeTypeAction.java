@@ -131,7 +131,7 @@ public class ChangeTypeAction extends SelectionDispatchAction {
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
 	public void selectionChanged(ITextSelection selection) {
-		// Do nothing
+		setEnabled(true);
 	}
 
 	/**
