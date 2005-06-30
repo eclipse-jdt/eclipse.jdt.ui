@@ -816,7 +816,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 				performFilterNonRelevant();
 			}
 		};
-		fFilterNonRelevantAction.setChecked(fCreateBindings);
+		fFilterNonRelevantAction.setChecked(! fNonRelevantFilter.isShowNonRelevant());
 		fFilterNonRelevantAction.setToolTipText("Hide non-relevant binding attributes"); //$NON-NLS-1$
 		fFilterNonRelevantAction.setEnabled(true);
 
