@@ -36,6 +36,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -54,6 +55,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -66,16 +68,19 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal implements ICompletionProposalExtension4 {
 
-	private IType fDeclaringType;
+	private String fDeclarationSignature;
+	private IType fSuperType;
 
-	public AnonymousTypeCompletionProposal(IJavaProject jproject, ICompilationUnit cu, int start, int length, String constructorCompletion, String displayName, String declaringTypeName, int relevance) {
+	public AnonymousTypeCompletionProposal(IJavaProject jproject, ICompilationUnit cu, int start, int length, String constructorCompletion, String displayName, String declarationSignature, int relevance) {
 		super(constructorCompletion, cu, start, length, null, displayName, relevance);
-		Assert.isNotNull(declaringTypeName);
+		Assert.isNotNull(declarationSignature);
 		Assert.isNotNull(jproject);
 		Assert.isNotNull(cu);
 
-		fDeclaringType= getDeclaringType(jproject, declaringTypeName);
-		setImage(getImageForType(fDeclaringType));
+		fDeclarationSignature= declarationSignature;
+		fSuperType= getDeclaringType(jproject, SignatureUtil.stripSignatureToFQN(String.valueOf(declarationSignature)));
+
+		setImage(getImageForType(fSuperType));
 		setCursorPosition(constructorCompletion.indexOf('(') + 1);
 	}
 
@@ -83,11 +88,14 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		String lineDelim= "\n"; // Using newline is ok since source is used in dummy compilation unit //$NON-NLS-1$
 		buffer.append("class "); //$NON-NLS-1$
 		buffer.append(name);
-		if (fDeclaringType.isInterface())
+		if (fSuperType.isInterface())
 			buffer.append(" implements "); //$NON-NLS-1$
 		else
 			buffer.append(" extends "); //$NON-NLS-1$
-		buffer.append(fDeclaringType.getFullyQualifiedName('.'));
+		if (fDeclarationSignature != null)
+			buffer.append(Signature.toString(fDeclarationSignature));
+		else
+			buffer.append(fSuperType.getFullyQualifiedParameterizedName());
 		int start= buffer.length();
 		buffer.append("{"); //$NON-NLS-1$
 		buffer.append(lineDelim);
@@ -99,7 +107,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 	private boolean createStubs(StringBuffer buffer, ImportsStructure structure) throws CoreException {
 		if (structure == null)
 			return false;
-		if (fDeclaringType == null)
+		if (fSuperType == null)
 			return true;
 		ICompilationUnit copy= null;
 		try {
@@ -108,8 +116,8 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			final StringBuffer contents= new StringBuffer();
 			int start= 0;
 			int end= 0;
-			ISourceRange range= fDeclaringType.getSourceRange();
-			final boolean sameUnit= range != null && fCompilationUnit.equals(fDeclaringType.getCompilationUnit());
+			ISourceRange range= fSuperType.getSourceRange();
+			final boolean sameUnit= range != null && fCompilationUnit.equals(fSuperType.getCompilationUnit());
 			final StringBuffer dummy= new StringBuffer();
 			final int length= createDummy(name, dummy);
 			contents.append(fCompilationUnit.getBuffer().getContents());
@@ -146,9 +154,9 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 					binding= declaration.resolveBinding();
 					if (binding != null) {
 						IMethodBinding[] bindings= StubUtility2.getOverridableMethods(unit.getAST(), binding, true);
-						CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fDeclaringType.getJavaProject());
+						CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(fSuperType.getJavaProject());
 						String[] keys= null;
-						if (!fDeclaringType.isInterface() && !fDeclaringType.isAnnotation()) {
+						if (!fSuperType.isInterface() && !fSuperType.isAnnotation()) {
 							OverrideMethodDialog dialog= new OverrideMethodDialog(JavaPlugin.getActiveWorkbenchShell(), null, type, true);
 							dialog.setGenerateComment(false);
 							dialog.setElementPositionEnabled(false);
@@ -267,7 +275,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		IRegion region= document.getLineInformationOfOffset(getReplacementOffset());
 		int indent= Strings.computeIndentUnits(document.get(region.getOffset(), region.getLength()), project);
 
-		String replacement= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), 0, null, lineDelim, fDeclaringType.getJavaProject());
+		String replacement= CodeFormatterUtil.format(CodeFormatter.K_EXPRESSION, buf.toString(), 0, null, lineDelim, fSuperType.getJavaProject());
 		replacement= Strings.changeIndent(replacement, 0, project, CodeFormatterUtil.createIndentString(indent, project), lineDelim);
 		setReplacementString(replacement.substring(replacement.indexOf('(') + 1));
 
