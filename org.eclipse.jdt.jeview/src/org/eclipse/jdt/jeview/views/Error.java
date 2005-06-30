@@ -80,4 +80,8 @@ public class Error extends JEAttribute {
 		return (fName == null ? "" : fName + ": ") + fException.toString();
 	}
 
+	public Exception getException() {
+		return fException;
+	}
+
 }

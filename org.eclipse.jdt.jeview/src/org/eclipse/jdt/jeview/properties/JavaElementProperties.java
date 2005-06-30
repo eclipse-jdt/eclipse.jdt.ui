@@ -12,137 +12,463 @@
 package org.eclipse.jdt.jeview.properties;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.List;
+import java.util.Map.Entry;
+
+import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.ui.views.properties.IPropertyDescriptor;
 import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.PropertyDescriptor;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOpenable;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.jeview.JEViewPlugin;
 
 public class JavaElementProperties implements IPropertySource {
 	
-	private static final String C_JAVAELEMENT= "IJavaElement";
+	private static HashMap<String, Property> fgIdToProperty= new HashMap<String, Property>();
+	private static LinkedHashMap<Class<?>, List<Property>> fgTypeToProperty= new LinkedHashMap<Class<?>, List<Property>>();
 	
-	private static final String P_ELEMENT_NAME= "org.eclipse.jdt.jeview.elementName";
-	private static final String P_ELEMENT_TYPE= "org.eclipse.jdt.jeview.elementType";
-	private static final String P_EXISTS= "org.eclipse.jdt.jeview.exists";
-	private static final String P_READ_ONLY= "org.eclipse.jdt.jeview.readOnly";
-	private static final String P_STRUCTURE_KNOWN= "org.eclipse.jdt.jeview.structureKnown";
-	private static final String P_HANDLE_IDENTIFIER= "org.eclipse.jdt.jeview.handleIdentifier";
-	private static final String P_PATH= "org.eclipse.jdt.jeview.path";
 	
-	private static final String C_MEMBER= "IMember";
+	private static abstract class Property {
+		private final Class<?> fType;
+		private final String fName;
+		private final String fId;
+		private final PropertyDescriptor fDescriptor;
+		
+		public Property(Class<?> type, String name) {
+			fType= type;
+			fName= name;
+			fId= "org.eclipse.jdt.jeview." + type.getSimpleName() + "." + name;
+			fDescriptor= new PropertyDescriptor(fId, fName);
+			fDescriptor.setAlwaysIncompatible(true);
+			fDescriptor.setCategory(type.getSimpleName());
+		}
+
+		public abstract Object compute(IJavaElement javaElement) throws JavaModelException;
+
+		
+		public Class<?> getType() {
+			return fType;
+		}
+		
+		
+		public String getName() {
+			return fName;
+		}
+		
+		public String getId() {
+			return fId;
+		}
+		
+		public PropertyDescriptor getDescriptor() {
+			return fDescriptor;
+		}
+		
+	}
 	
-	private static final String P_FLAGS= "org.eclipse.jdt.jeview.flags";
-	private static final String P_NAME_RANGE= "org.eclipse.jdt.jeview.nameRange";
-	private static final String P_BINARY= "org.eclipse.jdt.jeview.binary";
-	
-	private static final String C_PARENT= "IParent";
-	
-	private static final String P_HAS_CHILDREN= "org.eclipse.jdt.jeview.hasChildren";
-	
-	protected IJavaElement fJavaElement;
-	
-	private static final ArrayList<IPropertyDescriptor> JAVA_ELEMENT_PROPERTY_DESCRIPTORS= new ArrayList<IPropertyDescriptor>();
 	static {
-		addJavaElementDescriptor(new PropertyDescriptor(P_ELEMENT_NAME, "elementName"));
-		addJavaElementDescriptor(new PropertyDescriptor(P_ELEMENT_TYPE, "elementType"));
-		addJavaElementDescriptor(new PropertyDescriptor(P_EXISTS, "exists"));
-		addJavaElementDescriptor(new PropertyDescriptor(P_READ_ONLY, "readOnly"));
-		addJavaElementDescriptor(new PropertyDescriptor(P_STRUCTURE_KNOWN, "structureKnown"));
-		addJavaElementDescriptor(new PropertyDescriptor(P_HANDLE_IDENTIFIER, "handleIdentifier"));
-		addJavaElementDescriptor(new PropertyDescriptor(P_PATH, "path"));
+		addProperty(new Property(IJavaElement.class, "elementName") {
+			@Override public Object compute(IJavaElement element) {
+				return element.getElementName();
+			}
+		});
+		addProperty(new Property(IJavaElement.class, "elementType") {
+			@Override public Object compute(IJavaElement element) {
+				return getElementTypeString(element.getElementType());
+			}
+		});
+		addProperty(new Property(IJavaElement.class, "exists") {
+			@Override public Object compute(IJavaElement element) {
+				return element.exists();
+			}
+		});
+		addProperty(new Property(IJavaElement.class, "isReadOnly") {
+			@Override public Object compute(IJavaElement element) {
+				return element.isReadOnly();
+			}
+		});
+		addProperty(new Property(IJavaElement.class, "isStructureKnown") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return element.isStructureKnown();
+			}
+		});
+		addProperty(new Property(IJavaElement.class, "handleIdentifier") {
+			@Override public Object compute(IJavaElement element) {
+				return element.getHandleIdentifier();
+			}
+		});
+		addProperty(new Property(IJavaElement.class, "path") {
+			@Override public Object compute(IJavaElement element) {
+				return element.getPath();
+			}
+		});
+		addProperty(new Property(IJavaElement.class, "schedulingRule") {
+			@Override public Object compute(IJavaElement element) {
+				return getSchedulingRuleString(element.getSchedulingRule());
+			}
+		});
+		
+		addProperty(new Property(IClassFile.class, "isClass") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IClassFile) element).isClass();
+			}
+		});
+		addProperty(new Property(IClassFile.class, "isInterface") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IClassFile) element).isInterface();
+			}
+		});
+		
+		addProperty(new Property(ICompilationUnit.class, "hasResourceChanged") {
+			@Override public Object compute(IJavaElement element) {
+				return ((ICompilationUnit) element).hasResourceChanged();
+			}
+		});
+		addProperty(new Property(ICompilationUnit.class, "isWorkingCopy") {
+			@Override public Object compute(IJavaElement element) {
+				return ((ICompilationUnit) element).isWorkingCopy();
+			}
+		});
+		
+		addProperty(new Property(IImportDeclaration.class, "flags") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return getFlagsString(((IImportDeclaration) element).getFlags());
+			}
+		});
+		addProperty(new Property(IImportDeclaration.class, "isOnDemand") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IImportDeclaration) element).isOnDemand();
+			}
+		});
+		
+		addProperty(new Property(IJavaProject.class, "hasBuildState") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IJavaProject) element).hasBuildState();
+			}
+		});
+		addProperty(new Property(IJavaProject.class, "getOutputLocation") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IJavaProject) element).getOutputLocation();
+			}
+		});
+		addProperty(new Property(IJavaProject.class, "readOutputLocation") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IJavaProject) element).readOutputLocation();
+			}
+		});
+		
+		addProperty(new Property(ILocalVariable.class, "nameRange") {
+			@Override public Object compute(IJavaElement element) {
+				return getNameRangeString(((ILocalVariable) element).getNameRange());
+			}
+		});
+		addProperty(new Property(ILocalVariable.class, "typeSignature") {
+			@Override public Object compute(IJavaElement element) {
+				return ((ILocalVariable) element).getTypeSignature();
+			}
+		});
+		
+		addProperty(new Property(IMember.class, "nameRange") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return getNameRangeString(((IMember) element).getNameRange());
+			}
+		});
+		addProperty(new Property(IMember.class, "flags") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return getFlagsString(((IMember) element).getFlags());
+			}
+		});
+		addProperty(new Property(IMember.class, "isBinary") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IMember) element).isBinary();
+			}
+		});
+		
+		addProperty(new Property(IField.class, "isResolved") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IField) element).isResolved();
+			}
+		});
+		addProperty(new Property(IField.class, "key") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IField) element).getKey();
+			}
+		});
+		addProperty(new Property(IField.class, "typeSignature") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IField) element).getTypeSignature();
+			}
+		});
+		addProperty(new Property(IField.class, "constant") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IField) element).getConstant();
+			}
+		});
+		addProperty(new Property(IField.class, "isEnumConstant") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IField) element).isEnumConstant();
+			}
+		});
+		
+		addProperty(new Property(IMethod.class, "isResolved") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IMethod) element).isResolved();
+			}
+		});
+		addProperty(new Property(IMethod.class, "key") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IMethod) element).getKey();
+			}
+		});
+		addProperty(new Property(IMethod.class, "numberOfParameters") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IMethod) element).getNumberOfParameters();
+			}
+		});
+		addProperty(new Property(IMethod.class, "signature") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IMethod) element).getSignature();
+			}
+		});
+		addProperty(new Property(IMethod.class, "returnType") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IMethod) element).getReturnType();
+			}
+		});
+		addProperty(new Property(IMethod.class, "isConstructor") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IMethod) element).isConstructor();
+			}
+		});
+		addProperty(new Property(IMethod.class, "isMainMethod") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IMethod) element).isMainMethod();
+			}
+		});
+		
+		addProperty(new Property(IType.class, "isResolved") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IType) element).isResolved();
+			}
+		});
+		addProperty(new Property(IType.class, "key") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IType) element).getKey();
+			}
+		});
+		addProperty(new Property(IType.class, "fullyQualifiedName") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IType) element).getFullyQualifiedName();
+			}
+		});
+		addProperty(new Property(IType.class, "fullyQualifiedName('*')") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IType) element).getFullyQualifiedName('*');
+			}
+		});
+		addProperty(new Property(IType.class, "fullyQualifiedParameterizedName") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IType) element).getFullyQualifiedParameterizedName();
+			}
+		});
+		addProperty(new Property(IType.class, "typeQualifiedName") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IType) element).getTypeQualifiedName();
+			}
+		});
+		addProperty(new Property(IType.class, "typeQualifiedName('*')") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IType) element).getTypeQualifiedName('*');
+			}
+		});
+		addProperty(new Property(IType.class, "isAnnotation") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IType) element).isAnnotation();
+			}
+		});
+		addProperty(new Property(IType.class, "isClass") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IType) element).isClass();
+			}
+		});
+		addProperty(new Property(IType.class, "isEnum") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IType) element).isEnum();
+			}
+		});
+		addProperty(new Property(IType.class, "isInterface") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IType) element).isInterface();
+			}
+		});
+		addProperty(new Property(IType.class, "isAnonymous") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IType) element).isAnonymous();
+			}
+		});
+		addProperty(new Property(IType.class, "isLocal") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IType) element).isLocal();
+			}
+		});
+		addProperty(new Property(IType.class, "isMember") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IType) element).isMember();
+			}
+		});
+		
+		addProperty(new Property(IPackageFragment.class, "containsJavaResources") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IPackageFragment) element).containsJavaResources();
+			}
+		});
+		addProperty(new Property(IPackageFragment.class, "kind") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return getPFRKindString(((IPackageFragment) element).getKind());
+			}
+		});
+		addProperty(new Property(IPackageFragment.class, "hasSubpackages") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IPackageFragment) element).hasSubpackages();
+			}
+		});
+		addProperty(new Property(IPackageFragment.class, "isDefaultPackage") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IPackageFragment) element).isDefaultPackage();
+			}
+		});
+		
+		addProperty(new Property(IPackageFragmentRoot.class, "kind") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return getPFRKindString(((IPackageFragmentRoot) element).getKind());
+			}
+		});
+		addProperty(new Property(IPackageFragmentRoot.class, "sourceAttachmentPath") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IPackageFragmentRoot) element).getSourceAttachmentPath();
+			}
+		});
+		addProperty(new Property(IPackageFragmentRoot.class, "sourceAttachmentRootPath") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IPackageFragmentRoot) element).getSourceAttachmentRootPath();
+			}
+		});
+		addProperty(new Property(IPackageFragmentRoot.class, "isArchive") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IPackageFragmentRoot) element).isArchive();
+			}
+		});
+		addProperty(new Property(IPackageFragmentRoot.class, "isExternal") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IPackageFragmentRoot) element).isExternal();
+			}
+		});
+		
+		addProperty(new Property(ITypeParameter.class, "nameRange") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return getNameRangeString(((ITypeParameter) element).getNameRange());
+			}
+		});
+		
+		
+		addProperty(new Property(IParent.class, "hasChildren") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IParent) element).hasChildren();
+			}
+		});
+		
+		addProperty(new Property(ISourceReference.class, "sourceRange") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((ISourceReference) element).getSourceRange();
+			}
+		});
+		
+		addProperty(new Property(IOpenable.class, "hasUnsavedChanges") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IOpenable) element).hasUnsavedChanges();
+			}
+		});
+		addProperty(new Property(IOpenable.class, "isConsistent") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return ((IOpenable) element).isConsistent();
+			}
+		});
+		addProperty(new Property(IOpenable.class, "isOpen") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IOpenable) element).isOpen();
+			}
+		});
 	}
 
-	private static void addJavaElementDescriptor(PropertyDescriptor descriptor) {
-		descriptor.setAlwaysIncompatible(true);
-		descriptor.setCategory(C_JAVAELEMENT);
-		JAVA_ELEMENT_PROPERTY_DESCRIPTORS.add(descriptor);
+	private static void addProperty(Property property) {
+		fgIdToProperty.put(property.getId(), property);
+		List<Property> properties= fgTypeToProperty.get(property.getType());
+		if (properties == null) {
+			properties= new ArrayList<Property>();
+			fgTypeToProperty.put(property.getType(), properties);
+		}
+		properties.add(property);
 	}
 	
-	private static final ArrayList<IPropertyDescriptor> MEMBER_PROPERTY_DESCRIPTORS= new ArrayList<IPropertyDescriptor>();
-	static {
-		addMemberDescriptor(new PropertyDescriptor(P_FLAGS, "flags"));
-		addMemberDescriptor(new PropertyDescriptor(P_NAME_RANGE, "nameRange"));
-		addMemberDescriptor(new PropertyDescriptor(P_BINARY, "binary"));
-	}
-	
-	private static void addMemberDescriptor(PropertyDescriptor descriptor) {
-		descriptor.setAlwaysIncompatible(true);
-		descriptor.setCategory(C_MEMBER);
-		MEMBER_PROPERTY_DESCRIPTORS.add(descriptor);
-	}
-	
-	private static final ArrayList<IPropertyDescriptor> PARENT_PROPERTY_DESCRIPTORS= new ArrayList<IPropertyDescriptor>();
-	static {
-		addParentDescriptor(new PropertyDescriptor(P_HAS_CHILDREN, "hasChildren"));
-	}
-	
-	private static void addParentDescriptor(PropertyDescriptor descriptor) {
-		descriptor.setAlwaysIncompatible(true);
-		descriptor.setCategory(C_PARENT);
-		PARENT_PROPERTY_DESCRIPTORS.add(descriptor);
-	}
+	protected IJavaElement fJavaElement;
 
 	public JavaElementProperties(IJavaElement javaElement) {
 		fJavaElement= javaElement;
 	}
 	
 	public IPropertyDescriptor[] getPropertyDescriptors() {
-		ArrayList<IPropertyDescriptor> result= new ArrayList<IPropertyDescriptor>(JAVA_ELEMENT_PROPERTY_DESCRIPTORS);
-		if (fJavaElement instanceof IMember)
-			result.addAll(MEMBER_PROPERTY_DESCRIPTORS);
-		if (fJavaElement instanceof IParent)
-			result.addAll(PARENT_PROPERTY_DESCRIPTORS);
-		
+		List<IPropertyDescriptor> result= new ArrayList<IPropertyDescriptor>();
+		for (Entry<Class<?>, List<Property>> entry : fgTypeToProperty.entrySet()) {
+			if (entry.getKey().isAssignableFrom(fJavaElement.getClass())) {
+				for (Property property : entry.getValue()) {
+					result.add(property.getDescriptor());
+				}
+			}
+		}
 		return result.toArray(new IPropertyDescriptor[result.size()]);
 	}
 	
-	public Object getPropertyValue(Object name) {
-		if (name.equals(P_ELEMENT_NAME)) {
-			return fJavaElement.getElementName();
-		} else 	if (name.equals(P_ELEMENT_TYPE)) {
-			return getElementTypeString(fJavaElement.getElementType());
-		} else 	if (name.equals(P_EXISTS)) {
-			return fJavaElement.exists();
-		} else 	if (name.equals(P_READ_ONLY)) {
-			return fJavaElement.isReadOnly();
-		} else 	if (name.equals(P_STRUCTURE_KNOWN)) {
-			return computeisStructureKnown();
-		} else 	if (name.equals(P_HANDLE_IDENTIFIER)) {
-			return fJavaElement.getHandleIdentifier();
-		} else 	if (name.equals(P_PATH)) {
-			return fJavaElement.getPath();
-		}
-		
-		if (fJavaElement instanceof IMember) {
-			IMember member= (IMember) fJavaElement;
-			if (name.equals(P_FLAGS)) {
-				return computeFlags(member);
-			} else if (name.equals(P_NAME_RANGE)) {
-				return computeNameRange(member);
-			} else if (name.equals(P_BINARY)) {
-				return member.isBinary();
+	public Object getPropertyValue(Object id) {
+		Property property= fgIdToProperty.get(id);
+		if (property == null) {
+			return null;
+		} else {
+			try {
+				return property.compute(fJavaElement);
+			} catch (JavaModelException e) {
+				if (e.isDoesNotExist()) {
+					return "JavaModelException: " + e.getLocalizedMessage();
+				} else {
+					JEViewPlugin.log("error calculating property '" + property.getType().getSimpleName() + '#' + property.getName() + '\'', e);
+					return "Error: " + e.getLocalizedMessage();
+				}
 			}
 		}
-		
-		if (fJavaElement instanceof IParent) {
-			IParent parent= (IParent) fJavaElement;
-			if (name.equals(P_HAS_CHILDREN)) {
-				return computeHasChildren(parent);
-			}
-		}
-		return null;
 	}
 
-	private String getElementTypeString(int elementType) {
+	static String getElementTypeString(int elementType) {
 		String name;
 		switch (elementType) {
 			case IJavaElement.JAVA_MODEL :
@@ -197,38 +523,13 @@ public class JavaElementProperties implements IPropertySource {
 		return elementType + " (" + name + ")";
 	}
 	
-	private Object computeisStructureKnown() {
-		try {
-			return fJavaElement.isStructureKnown();
-		} catch (JavaModelException e) {
-			JEViewPlugin.log("error calculating property", e);
-			return "Error: " + e.getLocalizedMessage();
-		}
-	}
-	
-	private Object computeNameRange(IMember member) {
-		try {
-			ISourceRange nameRange= member.getNameRange();
-			return nameRange.getOffset() + " + " + nameRange.getLength();
-		} catch (JavaModelException e) {
-			JEViewPlugin.log("error calculating property", e);
-			return "Error: " + e.getLocalizedMessage();
-		}
+	static String getNameRangeString(ISourceRange range) {
+		return range.getOffset() + " + " + range.getLength();
 	}
 
-	private Object computeFlags(IMember member) {
-		int flags;
-		try {
-			flags= member.getFlags();
-		} catch (JavaModelException e) {
-			JEViewPlugin.log("error calculating property", e);
-			return "Error: " + e.getLocalizedMessage();
-		}
-		return "0x" + Integer.toHexString(flags) + " (" + getFlagsString(flags) + ")";
-	}
-
-	private String getFlagsString(int flags) {
-		StringBuffer sb = new StringBuffer();
+	static String getFlagsString(int flags) {
+		StringBuffer sb = new StringBuffer().append("0x").append(Integer.toHexString(flags)).append(" (");
+		int prologLen= sb.length();
 		int rest= flags;
 		
 		rest&= ~ appendFlag(sb, flags, Flags.AccPublic, "public ");
@@ -250,15 +551,14 @@ public class JavaElementProperties implements IPropertySource {
 		
 		if (rest != 0)
 			sb.append("unknown:0x").append(Integer.toHexString(rest));
-		
 		int len = sb.length();
-		if (len == 0)
-			return ""; //$NON-NLS-1$
-		sb.setLength(len - 1);
+		if (len != prologLen)
+			sb.setLength(len - 1);
+		sb.append(")");
 		return sb.toString();
 	}
 	
-	private int appendFlag(StringBuffer sb, int flags, int flag, String name) {
+	private static int appendFlag(StringBuffer sb, int flags, int flag, String name) {
 		if ((flags & flag) != 0) {
 			sb.append(name);
 			return flag;
@@ -267,13 +567,28 @@ public class JavaElementProperties implements IPropertySource {
 		}
 	}
 
-	private Object computeHasChildren(IParent member) {
-		try {
-			return member.hasChildren();
-		} catch (JavaModelException e) {
-			JEViewPlugin.log("error calculating property", e);
-			return "Error: " + e.getLocalizedMessage();
-		}
+	static String getPFRKindString(int kind) {
+		StringBuffer sb = new StringBuffer().append("0x").append(Integer.toHexString(kind)).append(" (");
+		int prologLen= sb.length();
+		int rest= kind;
+		
+		rest&= ~ appendFlag(sb, kind, IPackageFragmentRoot.K_BINARY, "binary ");
+		rest&= ~ appendFlag(sb, kind, IPackageFragmentRoot.K_SOURCE, "source ");
+		
+		if (rest != 0)
+			sb.append("unknown:0x").append(Integer.toHexString(rest));
+		int len = sb.length();
+		if (len != prologLen)
+			sb.setLength(len - 1);
+		sb.append(")");
+		return sb.toString();
+	}
+	
+	static String getSchedulingRuleString(ISchedulingRule schedulingRule) {
+		if (schedulingRule == null)
+			return null;
+		else
+			return schedulingRule.getClass().getSimpleName() + ": " + schedulingRule.toString();
 	}
 	
 	public void setPropertyValue(Object name, Object value) {

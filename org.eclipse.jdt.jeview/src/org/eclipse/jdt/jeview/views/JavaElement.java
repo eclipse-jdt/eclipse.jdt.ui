@@ -11,17 +11,23 @@
 package org.eclipse.jdt.jeview.views;
 
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Map;
+import java.util.Map.Entry;
 import java.util.concurrent.Callable;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IInitializer;
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -127,33 +133,33 @@ public class JavaElement extends JEAttribute {
 		
 		addJavaElementChildren(result, fJavaElement);
 		
-		if (fJavaElement instanceof IJavaModel) {
+		if (fJavaElement instanceof IJavaModel)
 			addJavaModelChildren(result, (IJavaModel) fJavaElement);
-		} else if (fJavaElement instanceof IJavaProject) {
+		if (fJavaElement instanceof IJavaProject)
 			addJavaProjectChildren(result, (IJavaProject) fJavaElement);
-			
-		} else if (fJavaElement instanceof IType) {
+		if (fJavaElement instanceof IPackageFragmentRoot)
+			addPackageFragmentRootChildren(result, (IPackageFragmentRoot) fJavaElement);
+		if (fJavaElement instanceof IPackageFragment)
+			addPackageFragmentChildren(result, (IPackageFragment) fJavaElement);
+		
+		if (fJavaElement instanceof IClassFile)
+			addClassFileChildren(result, (IClassFile) fJavaElement);
+		if (fJavaElement instanceof ICompilationUnit)
+			addCompilationUnitChildren(result, (ICompilationUnit) fJavaElement);
+		
+		if (fJavaElement instanceof IType)
 			addTypeChildren(result, (IType) fJavaElement);
-			addMemberChildren(result, (IMember) fJavaElement);
-			
-		} else if (fJavaElement instanceof IMethod) {
+		if (fJavaElement instanceof IMethod)
 			addMethodChildren(result, (IMethod) fJavaElement);
+		if (fJavaElement instanceof IMember)
 			addMemberChildren(result, (IMember) fJavaElement);
-			
-		} else if (fJavaElement instanceof IField) {
-			addFieldChildren(result, (IField) fJavaElement);
-			addMemberChildren(result, (IMember) fJavaElement);
-			
-		} else if (fJavaElement instanceof IInitializer) {
-			addMemberChildren(result, (IMember) fJavaElement);
-		}
 		
 		return result.toArray(new JEAttribute[result.size()]);
 		
 	}
 
 	private void addParentChildren(ArrayList<JEAttribute> result, final IParent parent) {
-		result.add(new JavaElementChildrenProperty(this, "children") {
+		result.add(new JavaElementChildrenProperty(this, "CHILDREN") {
 			@Override
 			public JEAttribute[] computeChildren() throws JavaModelException {
 				return createJavaElements(this, parent.getChildren());
@@ -162,23 +168,31 @@ public class JavaElement extends JEAttribute {
 	}
 
 	private void addJavaElementChildren(ArrayList<JEAttribute> result, final IJavaElement javaElement) {
-		result.add(new JavaElement(this, "parent", javaElement.getParent()));
-		result.add(JEResource.create(this, "resource", javaElement.getResource()));
-		result.add(JEResource.compute(this, "correspondingResource", new Callable<IResource>() {
-			public IResource call() throws Exception {
+		result.add(new JavaElement(this, "PARENT", javaElement.getParent()));
+		result.add(new JavaElement(this, "PRIMARY ELEMENT", javaElement.getPrimaryElement()));
+		result.add(new JavaElement(this, "JAVA MODEL", javaElement.getJavaModel()));
+		result.add(new JavaElement(this, "JAVA PROJECT", javaElement.getJavaProject()));
+		result.add(JEResource.create(this, "RESOURCE", javaElement.getResource()));
+		result.add(JEResource.compute(this, "CORRESPONDING RESOURCE", new Callable<IResource>() {
+			public IResource call() throws JavaModelException {
 				return javaElement.getCorrespondingResource();
+			}
+		}));
+		result.add(JEResource.compute(this, "UNDERLYING RESOURCE", new Callable<IResource>() {
+			public IResource call() throws JavaModelException {
+				return javaElement.getUnderlyingResource();
 			}
 		}));
 	}
 
 	private void addJavaModelChildren(ArrayList<JEAttribute> result, final IJavaModel javaModel) {
-		result.add(new JavaElementChildrenProperty(this, "javaProjects") {
+		result.add(new JavaElementChildrenProperty(this, "JAVA PROJECTS") {
 			@Override
 			public JEAttribute[] computeChildren() throws JavaModelException {
 				return createJavaElements(this, javaModel.getJavaProjects());
 			}
 		});
-		result.add(new JavaElementChildrenProperty(this, "nonJavaResources") {
+		result.add(new JavaElementChildrenProperty(this, "NON JAVA RESOURCES") {
 			@Override
 			public JEAttribute[] computeChildren() throws JavaModelException {
 				return createResources(this, javaModel.getNonJavaResources());
@@ -187,38 +201,227 @@ public class JavaElement extends JEAttribute {
 	}
 
 	private void addJavaProjectChildren(ArrayList<JEAttribute> result, final IJavaProject project) {
-		result.add(new JavaElementChildrenProperty(this, "allPackageFragmentRoots") {
+		//TODO: IClassPathEntry
+		result.add(new JavaElementChildrenProperty(this, "ALL PACKAGE FRAGMENT ROOTS") {
 			@Override
-			protected JEAttribute[] computeChildren() throws Exception {
+			protected JEAttribute[] computeChildren() throws JavaModelException {
 				return createJavaElements(this, project.getAllPackageFragmentRoots());
 			}
 		});
-		result.add(new JavaElementChildrenProperty(this, "nonJavaResources") {
+		result.add(new JavaElementChildrenProperty(this, "PACKAGE FRAGMENT ROOTS") {
 			@Override
-			protected JEAttribute[] computeChildren() throws Exception {
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, project.getPackageFragmentRoots());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "PACKAGE FRAGMENTS") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, project.getPackageFragments());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "NON JAVA RESOURCES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
 				return createResources(this, project.getNonJavaResources());
+			}
+		});
+		result.add(JEResource.create(this, "PROJECT", project.getProject()));
+		result.add(new JavaElementChildrenProperty(this, "REQUIRED PROJECT NAMES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createStrings(this, project.getRequiredProjectNames());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "OPTIONS(FALSE)") {
+			@SuppressWarnings("unchecked")
+			@Override
+			protected JEAttribute[] computeChildren() {
+				return createOptions(this, project.getOptions(false));
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "OPTIONS(TRUE)") {
+			@SuppressWarnings("unchecked")
+			@Override
+			protected JEAttribute[] computeChildren() {
+				return createOptions(this, project.getOptions(true));
+			}
+		});
+	}
+	
+	private void addPackageFragmentRootChildren(ArrayList<JEAttribute> result, final IPackageFragmentRoot packageFragmentRoot) {
+		result.add(new JavaElementChildrenProperty(this, "NON JAVA RESOURCES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createResources(this, packageFragmentRoot.getNonJavaResources());
 			}
 		});
 	}
 
+	private void addPackageFragmentChildren(ArrayList<JEAttribute> result, final IPackageFragment packageFragment) {
+		result.add(new JavaElementChildrenProperty(this, "COMPILATION UNITS") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, packageFragment.getCompilationUnits());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "CLASS FILES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, packageFragment.getClassFiles());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "NON JAVA RESOURCES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createResources(this, packageFragment.getNonJavaResources());
+			}
+		});
+	}
+	
+	private void addClassFileChildren(ArrayList<JEAttribute> result, final IClassFile classFile) {
+		result.add(JavaElement.compute(this, "TYPE", new Callable<IJavaElement>() {
+			public IJavaElement call() throws JavaModelException {
+				return classFile.getType();
+			}
+		}));
+	}
+
+	private void addCompilationUnitChildren(ArrayList<JEAttribute> result, final ICompilationUnit compilationUnit) {
+		//TODO: WorkingCopyOwner
+		result.add(JavaElement.compute(this, "FIND PRIMARY TYPE", new Callable<IJavaElement>() {
+			public IJavaElement call() {
+				return compilationUnit.findPrimaryType();
+			}
+		}));
+		result.add(new JavaElement(this, "PRIMARY", compilationUnit.getPrimary()));
+		result.add(new JavaElementChildrenProperty(this, "TYPES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, compilationUnit.getTypes());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "ALL TYPES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, compilationUnit.getAllTypes());
+			}
+		});
+		result.add(new JavaElement(this, "IMPORT CONTAINER", compilationUnit.getImportContainer()));
+		result.add(new JavaElementChildrenProperty(this, "IMPORTS") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, compilationUnit.getImports());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "PACKAGE DECLARATIONS") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, compilationUnit.getPackageDeclarations());
+			}
+		});
+	}
+	
 	private void addMemberChildren(ArrayList<JEAttribute> result, final IMember member) {
-		result.add(new JavaElement(this, "classFile", member.getClassFile()));
-		result.add(new JavaElement(this, "compilationUnit", member.getCompilationUnit()));
+		result.add(new JavaElement(this, "CLASS FILE", member.getClassFile()));
+		result.add(new JavaElement(this, "COMPILATION UNIT", member.getCompilationUnit()));
+		result.add(new JavaElement(this, "DECLARING TYPE", member.getDeclaringType()));
 	}
 	
 	private void addTypeChildren(ArrayList<JEAttribute> result, final IType type) {
-		result.add(new JavaElementProperty(this, "isResolved", type.isResolved()));
-		result.add(new JavaElementProperty(this, "key", type.getKey()));
-	}
-
-	private void addFieldChildren(ArrayList<JEAttribute> result, final IField field) {
-		result.add(new JavaElementProperty(this, "isResolved", field.isResolved()));
-		result.add(new JavaElementProperty(this, "key", field.getKey()));
+		result.add(new JavaElementProperty(this, "IS RESOLVED", type.isResolved()));
+		result.add(new JavaElementProperty(this, "KEY", type.getKey()));
+		result.add(new JavaElement(this, "PACKAGE FRAGMENT", type.getPackageFragment()));
+		result.add(new JavaElementChildrenProperty(this, "TYPE PARAMETERS") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, type.getTypeParameters());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "TYPE PARAMETER SIGNATURES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createStrings(this, type.getTypeParameterSignatures());
+			}
+		});
+		
+		result.add(new JavaElementProperty(this, "SUPERCLASS NAME") {
+			@Override
+			protected Object computeValue() throws Exception {
+				return type.getSuperclassName();
+			}
+		});
+		
+		result.add(new JavaElementProperty(this, "SUPERCLASS TYPE SIGNATURE") {
+			@Override
+			protected Object computeValue() throws Exception {
+				return type.getSuperclassTypeSignature();
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "SUPER INTERFACE NAMES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createStrings(this, type.getSuperInterfaceNames());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "SUPER INTERFACE TYPE SIGNATURES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createStrings(this, type.getSuperInterfaceTypeSignatures());
+			}
+		});
+		
+		result.add(new JavaElementChildrenProperty(this, "FIELDS") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, type.getFields());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "INITIALIZERS") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, type.getInitializers());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "METHODS") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, type.getMethods());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "TYPES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, type.getTypes());
+			}
+		});
 	}
 
 	private void addMethodChildren(ArrayList<JEAttribute> result, final IMethod method) {
-		result.add(new JavaElementProperty(this, "isResolved", method.isResolved()));
-		result.add(new JavaElementProperty(this, "key", method.getKey()));
+		result.add(new JavaElementChildrenProperty(this, "EXCEPTION TYPES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createStrings(this, method.getExceptionTypes());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "PARAMETER NAMES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createStrings(this, method.getParameterNames());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "PARAMETER TYPES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createStrings(this, method.getParameterTypes());
+			}
+		});
+		result.add(new JavaElementChildrenProperty(this, "TYPE PARAMETERS") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createJavaElements(this, method.getTypeParameters());
+			}
+		});
 	}
 	
 	static JavaElement[] createJavaElements(JEAttribute parent, IJavaElement[] javaElements) {
@@ -239,6 +442,47 @@ public class JavaElement extends JEAttribute {
 				resourceChildren[i]= new JavaElementProperty(parent, "", resource);
 		}
 		return resourceChildren;
+	}
+
+	static JEAttribute[] createOptions(JEAttribute parent, Map<String, String> options) {
+		ArrayList<Entry<String, String>> entries= new ArrayList<Entry<String, String>>(options.entrySet());
+		Collections.sort(entries, new Comparator<Entry<String, String>>() {
+			public int compare(Entry<String, String> o1, Entry<String, String> o2) {
+				return o1.getKey().compareTo(o2.getKey());
+			}
+		});
+		
+		JEAttribute[] children= new JEAttribute[entries.size()];
+		for (int i= 0; i < entries.size(); i++) {
+			Entry<String, String> entry= entries.get(i);
+			children[i]= new JavaElementProperty(parent, entry.getKey(), entry.getValue());
+		}
+		return children;
+	}
+	
+	static JEAttribute[] createStrings(JEAttribute parent, String[] strings) {
+		JEAttribute[] children= new JEAttribute[strings.length];
+		for (int i= 0; i < strings.length; i++) {
+			children[i]= new JavaElementProperty(parent, null, strings[i]);
+		}
+		return children;
+	}
+
+	public static JEAttribute compute(JEAttribute parent, String name, Callable<IJavaElement> computer) {
+		try {
+			IJavaElement javaElement= computer.call();
+			return create(parent, name, javaElement);
+		} catch (Exception e) {
+			return new Error(parent, name, e);
+		}
+	}
+	
+	public static JEAttribute create(JEAttribute parent, String name, IJavaElement javaElement) {
+		if (javaElement == null) {
+			return new Null(parent, name);
+		} else {
+			return new JavaElement(parent, name, javaElement);
+		}
 	}
 
 }

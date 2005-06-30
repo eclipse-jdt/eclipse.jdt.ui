@@ -13,12 +13,8 @@ package org.eclipse.jdt.jeview.views;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.Viewer;
 
-import org.eclipse.jdt.core.IJavaElement;
-
 
 public class JEViewContentProvider implements ITreeContentProvider {
-
-	private JavaElement fRoot;
 
 	public Object[] getChildren(Object element) {
 		if (element instanceof JEAttribute)
@@ -39,18 +35,17 @@ public class JEViewContentProvider implements ITreeContentProvider {
 	}
 
 	public Object[] getElements(Object inputElement) {
-		if (fRoot == null)
-			return JEAttribute.EMPTY;
-		else
-			return new Object[] { fRoot };
+		if (inputElement instanceof JERoot)
+			return ((JERoot) inputElement).getChildren();
+		return JEAttribute.EMPTY;
 	}
 
 	public void dispose() {
-		fRoot= null;
+		// do nothing
 	}
 
 	public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-		fRoot= new JavaElement(null, (IJavaElement) newInput);
+		// do nothing
 	}
 
 }
