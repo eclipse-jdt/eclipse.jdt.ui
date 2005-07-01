@@ -16,6 +16,7 @@ import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.ISelection;
@@ -144,6 +145,7 @@ public class JUnitLaunchShortcut implements ILaunchShortcut {
 			"" //$NON-NLS-1$
 		);
 		String name= JavaElementLabels.getTextLabel(container, JavaElementLabels.ALL_FULLY_QUALIFIED);
+		name = name.substring(name.lastIndexOf(IPath.SEPARATOR) + 1);
 		if (config == null) {
 			config = createConfiguration(
 				container.getJavaProject(),
