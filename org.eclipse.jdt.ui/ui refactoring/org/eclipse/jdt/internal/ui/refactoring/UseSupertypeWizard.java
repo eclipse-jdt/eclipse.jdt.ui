@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring;
 
+import java.text.Collator;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -32,6 +33,8 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
@@ -124,6 +127,21 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			fTableLabelProvider= new UseSupertypeLabelProvider(fFileCount);
 			fTableViewer.setLabelProvider(fTableLabelProvider);
 			fTableViewer.setContentProvider(new ArrayContentProvider());
+			fTableViewer.setSorter(new ViewerSorter() {
+			
+				private final Collator fCollator= Collator.getInstance();
+				
+				public boolean isSorterProperty(Object element, String property) {
+					return true;
+				}
+			
+				public int compare(Viewer viewer, Object first, Object second) {
+					final IType left= (IType) first;
+					final IType right= (IType) second;
+					return fCollator.compare(left.getElementName(), right.getElementName());
+				}
+			
+			});
 			fTableViewer.addSelectionChangedListener(new ISelectionChangedListener(){
 				public void selectionChanged(SelectionChangedEvent event) {
 					IStructuredSelection ss= (IStructuredSelection)event.getSelection();
