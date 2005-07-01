@@ -208,8 +208,10 @@ public class FailureTab extends TestRunTab implements IMenuListener, ISelectionP
 			TableItem tableItem= items[i];
 			TestRunInfo info= getTestInfo(tableItem);		
 			if (info.getTestId().equals(testId)){
-				fTable.setSelection(new TableItem[] { tableItem });
-				fTable.showItem(tableItem);
+				if (fRunnerViewPart.isAutoScroll()) {
+					fTable.setSelection(new TableItem[] { tableItem });
+					fTable.showItem(tableItem);
+				}
 				return;
 			}
 		}
@@ -230,7 +232,8 @@ public class FailureTab extends TestRunTab implements IMenuListener, ISelectionP
 
 		TableItem tableItem= new TableItem(fTable, SWT.NONE);
 		updateTableItem(testInfo, tableItem);
-		fTable.showItem(tableItem);
+		if (fRunnerViewPart.isAutoScroll())
+			fTable.showItem(tableItem);
 	}
 
 	private void updateTableItem(TestRunInfo testInfo, TableItem tableItem) {
