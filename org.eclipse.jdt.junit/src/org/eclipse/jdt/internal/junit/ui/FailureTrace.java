@@ -12,18 +12,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringReader;
-import java.io.StringWriter;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
@@ -43,18 +34,17 @@ import org.eclipse.jface.util.OpenStrategy;
 /**
  * A pane that shows a stack trace of a failed test.
  */
-class FailureTrace implements IMenuListener {
-    private final Image fStackIcon= TestRunnerViewPart.createImage("obj16/stkfrm_obj.gif"); //$NON-NLS-1$
-    private final Image fExceptionIcon= TestRunnerViewPart.createImage("obj16/exc_catch.gif"); //$NON-NLS-1$
+public class FailureTrace implements IMenuListener {
+    private static final int MAX_LABEL_LENGTH = 256;
     
-    private static final String FRAME_PREFIX= "at "; //$NON-NLS-1$
+    static final String FRAME_PREFIX= "at "; //$NON-NLS-1$
 	private Table fTable;
 	private TestRunnerViewPart fTestRunner;
 	private String fInputTrace;
 	private final Clipboard fClipboard;
     private TestRunInfo fFailure;
     private CompareResultsAction fCompareAction;
-    
+	private final FailureTableDisplay fFailureTableDisplay;
 
 	public FailureTrace(Composite parent, Clipboard clipboard, TestRunnerViewPart testRunner, ToolBar toolBar) {
 		Assert.isNotNull(clipboard);
@@ -87,11 +77,7 @@ class FailureTrace implements IMenuListener {
 		
 		initMenu();
 		
-		parent.addDisposeListener(new DisposeListener() {
-			public void widgetDisposed(DisposeEvent e) {
-				disposeIcons();
-			}
-		});
+		fFailureTableDisplay = new FailureTableDisplay(fTable);
 	}
 	
 	private void initMenu() {
@@ -145,13 +131,6 @@ class FailureTrace implements IMenuListener {
 		return null;
 	}
 	
-	private void disposeIcons(){
-		if (fExceptionIcon != null && !fExceptionIcon.isDisposed()) 
-			fExceptionIcon.dispose();
-		if (fStackIcon != null && !fStackIcon.isDisposed()) 
-			fStackIcon.dispose();
-	}
-	
 	/**
 	 * Returns the composite used to present the trace
 	 * @return The composite
@@ -195,119 +174,33 @@ class FailureTrace implements IMenuListener {
 		trace= trace.trim();
 		fTable.setRedraw(false);
 		fTable.removeAll();
-		fillTable(filterStack(trace));
+		new TextualTrace(trace, getFilterPatterns()).display(
+				fFailureTableDisplay, MAX_LABEL_LENGTH);
 		fTable.setRedraw(true);
 	}
 
-	private void fillTable(String trace) {
-		StringReader stringReader= new StringReader(trace);
-		BufferedReader bufferedReader= new BufferedReader(stringReader);
-		String line;
-
-		try {	
-			// first line contains the thrown exception
-			line= bufferedReader.readLine();
-			if (line == null)
-				return;
-				
-			TableItem tableItem= new TableItem(fTable, SWT.NONE);
-			tableItem.setImage(fExceptionIcon);
-			String itemLabel= line.replace('\t', ' ');
-			final int labelLength= itemLabel.length();
-			final int MAX_LABEL_LENGTH= 256;
-			if (labelLength < MAX_LABEL_LENGTH) {
-				tableItem.setText(itemLabel);
-			} else {
-				// workaround for bug 74647: JUnit view truncates failure message
-				tableItem.setText(itemLabel.substring(0, MAX_LABEL_LENGTH));
-				int offset= MAX_LABEL_LENGTH;
-				while (offset < labelLength) {
-					int nextOffset= Math.min(labelLength, offset + MAX_LABEL_LENGTH);
-					tableItem= new TableItem(fTable, SWT.NONE);
-					tableItem.setText(itemLabel.substring(offset, nextOffset));
-					offset= nextOffset;
-				}
-			}
-			
-			// the stack frames of the trace
-			while ((line= bufferedReader.readLine()) != null) {
-				itemLabel= line.replace('\t', ' ');
-				tableItem= new TableItem(fTable, SWT.NONE);
-				// heuristic for detecting a stack frame - works for JDK
-				if ((itemLabel.indexOf(" at ") >= 0)) { //$NON-NLS-1$
-					tableItem.setImage(fStackIcon);
-				}
-				tableItem.setText(itemLabel);
-			}
-		} catch (IOException e) {
-			TableItem tableItem= new TableItem(fTable, SWT.NONE);
-			tableItem.setText(trace);
-		}			
+	private String[] getFilterPatterns() {
+		if (JUnitPreferencePage.getFilterStack())
+			return JUnitPreferencePage.getFilterPatterns();
+		return new String[0];
 	}
-	
+
 	/**
 	 * Shows other information than a stack trace.
 	 * @param text the informational message to be shown
 	 */
 	public void setInformation(String text) {
 		clear();
-		TableItem tableItem= new TableItem(fTable, SWT.NONE);
+		TableItem tableItem= fFailureTableDisplay.newTableItem();
 		tableItem.setText(text);
 	}
-	
+
 	/**
 	 * Clears the non-stack trace info
 	 */
 	public void clear() {
 		fTable.removeAll();
 		fInputTrace= null;
-	}
-	
-	private String filterStack(String stackTrace) {	
-		if (!JUnitPreferencePage.getFilterStack() || stackTrace == null) 
-			return stackTrace;
-			
-		StringWriter stringWriter= new StringWriter();
-		PrintWriter printWriter= new PrintWriter(stringWriter);
-		StringReader stringReader= new StringReader(stackTrace);
-		BufferedReader bufferedReader= new BufferedReader(stringReader);	
-			
-		String line;
-		String[] patterns= JUnitPreferencePage.getFilterPatterns();
-		try {	
-			while ((line= bufferedReader.readLine()) != null) {
-				if (!filterLine(patterns, line))
-					printWriter.println(line);
-			}
-		} catch (IOException e) {
-			return stackTrace; // return the stack unfiltered
-		}
-		return stringWriter.toString();
-	}
-	
-	private boolean filterLine(String[] patterns, String line) {
-		String pattern;
-		int len;
-		for (int i= (patterns.length - 1); i >= 0; --i) {
-			pattern= patterns[i];
-			len= pattern.length() - 1;
-			if (pattern.charAt(len) == '*') {
-				//strip trailing * from a package filter
-				pattern= pattern.substring(0, len);
-			} else if (Character.isUpperCase(pattern.charAt(0))) {
-				//class in the default package
-				pattern= FRAME_PREFIX + pattern + '.';
-			} else {
-				//class names start w/ an uppercase letter after the .
-				final int lastDotIndex= pattern.lastIndexOf('.');
-				if ((lastDotIndex != -1) && (lastDotIndex != len) && Character.isUpperCase(pattern.charAt(lastDotIndex + 1)))
-					pattern += '.'; //append . to a class filter
-			}
-
-			if (line.indexOf(pattern) > 0)
-				return true;
-		}		
-		return false;
 	}
 
     public TestRunInfo getFailedTest() {
@@ -317,4 +210,8 @@ class FailureTrace implements IMenuListener {
     public Shell getShell() {
         return fTable.getShell();
     }
+
+	public FailureTableDisplay getFailureTableDisplay() {
+		return fFailureTableDisplay;
+	}
 }

@@ -1594,4 +1594,8 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 		IPreferenceStore store= JUnitPlugin.getDefault().getPreferenceStore();
 		return store.getBoolean(JUnitPreferencesConstants.SHOW_ON_ERROR_ONLY);
 	}
+
+	public FailureTrace getFailureTrace() {
+		return fFailureTrace;
+	}
 }
