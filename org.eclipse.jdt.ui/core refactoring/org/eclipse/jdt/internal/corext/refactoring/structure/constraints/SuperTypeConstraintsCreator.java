@@ -739,11 +739,25 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 	}
 
 	/*
+	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.ImportDeclaration)
+	 */
+	public final boolean visit(final ImportDeclaration node) {
+		return false;
+	}
+
+	/*
 	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.MethodDeclaration)
 	 */
 	public final boolean visit(final MethodDeclaration node) {
 		fCurrentMethods.push(node);
 		return super.visit(node);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor#visit(org.eclipse.jdt.core.dom.PackageDeclaration)
+	 */
+	public final boolean visit(final PackageDeclaration node) {
+		return false;
 	}
 
 	/*
