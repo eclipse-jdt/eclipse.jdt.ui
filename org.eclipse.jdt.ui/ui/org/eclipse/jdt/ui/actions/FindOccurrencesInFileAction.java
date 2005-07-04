@@ -20,9 +20,12 @@ import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IViewSite;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.IPageSite;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
@@ -68,7 +71,6 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	 */
 	public FindOccurrencesInFileAction(IViewPart part) {
 		this(part.getSite());
-		fActionBars= part.getViewSite().getActionBars();
 	}
 	
 	/**
@@ -80,7 +82,6 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	 */
 	public FindOccurrencesInFileAction(Page page) {
 		this(page.getSite());
-		fActionBars= page.getSite().getActionBars();
 	}
  	
 	/**
@@ -103,6 +104,14 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	 */
 	public FindOccurrencesInFileAction(IWorkbenchSite site) {
 		super(site);
+		
+		if (site instanceof IViewSite)
+			fActionBars= ((IViewSite)site).getActionBars();
+		else if (site instanceof IEditorSite)
+			fActionBars= ((IEditorSite)site).getActionBars();
+		else if (site instanceof IPageSite)
+			fActionBars= ((IPageSite)site).getActionBars();
+		
 		ISelection selection= getSelection();
 		if (selection instanceof IStructuredSelection) {
 			setEnabled(getMember((IStructuredSelection)selection) != null);		
@@ -130,6 +139,13 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		Object o= selection.getFirstElement();
 		if (o instanceof IMember) {
 			IMember member= (IMember)o;
+			try {
+				if (member.getNameRange() == null)
+					return null;
+			} catch (JavaModelException ex) {
+				return null;
+			}
+			
 			IClassFile file= member.getClassFile();
 			if (file != null) {
 				try {
@@ -144,9 +160,6 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		return null;
 	}
 	
-	/* (non-JavaDoc)
-	 * Method declared in SelectionDispatchAction.
-	 */
 	public void run(IStructuredSelection selection) {
 		IMember member= getMember(selection);
 		if (!ActionUtil.isProcessable(getShell(), member))
@@ -163,9 +176,11 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 	}
 	
 	private static void showMessage(Shell shell, IActionBars actionBars, String msg) {
-		IStatusLineManager statusLine= actionBars.getStatusLineManager();
-		if (statusLine != null)
-			statusLine.setMessage(msg);
+		if (actionBars != null) {
+			IStatusLineManager statusLine= actionBars.getStatusLineManager();
+			if (statusLine != null)
+				statusLine.setMessage(msg);
+		}
 		shell.getDisplay().beep();
 	}
 	
