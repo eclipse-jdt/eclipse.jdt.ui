@@ -6,8 +6,8 @@
 		<property name="destdir" value="../../plugin-export" />
 		<property name="tempdir" value="../../tmp" />
 		<property name="plugin"  value="org.eclipse.jdt.jeview" />
-		<property name="version"  value="_1.0.0" />
-		<property name="destjar"  value="${destdir}/${plugin}${version}.jar" />
+		<property name="plugin_version"  value="_1.0.0" />
+		<property name="destjar"  value="${destdir}/${plugin}${plugin_version}.jar" />
 	</target>
 
 	<target name="build" depends="init">
