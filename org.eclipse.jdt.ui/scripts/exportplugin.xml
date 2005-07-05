@@ -3,12 +3,12 @@
 
 	<target name="init">
 		<tstamp/>
-		<property name="tempdir"	value="../../tmp" />
-		<property name="destdir"	value="../../plugin-export" />
-		<property name="plugin"		value="org.eclipse.jdt.ui" />
-		<property name="version"	value="_3.1.0" />
-		<property name="dest"		value="${destdir}/${plugin}${version}" />
-		<property name="destjar"	value="${destdir}/${plugin}${version}.jar" />
+		<property name="tempdir"		value="../../tmp" />
+		<property name="destdir"		value="../../plugin-export" />
+		<property name="plugin"			value="org.eclipse.jdt.ui" />
+		<property name="plugin_version"	value="_3.1.1" />
+		<property name="dest"			value="${destdir}/${plugin}${plugin_version}" />
+		<property name="destjar"		value="${destdir}/${plugin}${plugin_version}.jar" />
 	</target>
 
 	<target name="build" depends="init">
