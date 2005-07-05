@@ -11,31 +11,36 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
 import java.util.Set;
 
-import org.eclipse.swt.dnd.Clipboard;
-import org.eclipse.swt.dnd.FileTransfer;
-import org.eclipse.swt.dnd.Transfer;
-import org.eclipse.swt.dnd.TransferData;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRunnable;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.swt.dnd.Clipboard;
+import org.eclipse.swt.dnd.FileTransfer;
+import org.eclipse.swt.dnd.TextTransfer;
+import org.eclipse.swt.dnd.Transfer;
+import org.eclipse.swt.dnd.TransferData;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
@@ -45,10 +50,17 @@ import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.CopyFilesAndFoldersOperation;
 import org.eclipse.ui.actions.CopyProjectOperation;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.ResourceTransfer;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -56,6 +68,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -63,9 +76,9 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-
-import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -79,19 +92,18 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
+import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 public class PasteAction extends SelectionDispatchAction{
 
@@ -142,6 +154,10 @@ public class PasteAction extends SelectionDispatchAction{
 			result.add(paster);
 		
 		paster= new WorkingSetPaster(shell, fClipboard);
+		if (paster.canEnable(availableDataTypes))
+			result.add(paster);
+		
+		paster= new TextPaster(shell, fClipboard);
 		if (paster.canEnable(availableDataTypes))
 			result.add(paster);
 		return (Paster[]) result.toArray(new Paster[result.size()]);
@@ -227,10 +243,208 @@ public class PasteAction extends SelectionDispatchAction{
 			return null;
 		}
 	
+		protected final String getClipboardText(TransferData[] availableDataTypes) {
+			Transfer transfer= TextTransfer.getInstance();
+			if (isAvailable(transfer, availableDataTypes)) {
+				return (String) getContents(fClipboard2, transfer, getShell());
+			}
+			return null;
+		}
+
 		public abstract void paste(IJavaElement[] selectedJavaElements, IResource[] selectedResources, IWorkingSet[] selectedWorkingSets, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException;
 		public abstract boolean canEnable(TransferData[] availableTypes)  throws JavaModelException;
 		public abstract boolean canPasteOn(IJavaElement[] selectedJavaElements, IResource[] selectedResources, IWorkingSet[] selectedWorkingSets)  throws JavaModelException;
 	}
+    
+    private static class TextPaster extends Paster {
+
+		private static class CuParser {
+			private final IJavaProject fJavaProject;
+			private final String fText;
+			
+			private String fTypeName;
+			private String fPackageName;
+
+			public CuParser(IJavaProject javaProject, String text) {
+				fJavaProject= javaProject;
+				fText= text;
+			}
+
+			private void parseText() {
+				if (fPackageName != null)
+					return;
+				
+				fPackageName= IPackageFragment.DEFAULT_PACKAGE_NAME;
+				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				parser.setProject(fJavaProject);
+				parser.setSource(fText.toCharArray());
+				CompilationUnit unit= (CompilationUnit) parser.createAST(null);
+				
+				if (unit == null)
+					return;
+				
+				int typesCount= unit.types().size();
+				if (typesCount > 0) {
+					// get first most visible type:
+					int maxVisibility= Modifier.PRIVATE;
+					for (ListIterator iter= unit.types().listIterator(typesCount); iter.hasPrevious();) {
+						AbstractTypeDeclaration type= (AbstractTypeDeclaration) iter.previous();
+						int visibility= JdtFlags.getVisibilityCode(type);
+						if (! JdtFlags.isHigherVisibility(maxVisibility, visibility)) {
+							maxVisibility= visibility;
+							fTypeName= type.getName().getIdentifier();
+						}
+					}
+				}
+				if (fTypeName == null)
+					return;
+				
+				PackageDeclaration pack= unit.getPackage();
+				if (pack != null) {
+					fPackageName= pack.getName().getFullyQualifiedName();
+				}
+			}
+			
+			/**
+			 * @return the type name, or <code>null</code> iff the text could not be parsed
+			 */
+			public String getTypeName() {
+				parseText();
+				return fTypeName;
+			}
+
+			public String getPackageName() {
+				parseText();
+				return fPackageName;
+			}
+
+			public String getText() {
+				return fText;
+			}
+		}
+		
+		private IPackageFragment fDestinationPack;
+		private CuParser fCuParser;
+		private TransferData[] fAvailableTypes;
+		
+		protected TextPaster(Shell shell, Clipboard clipboard) {
+			super(shell, clipboard);
+		}
+		
+		public boolean canEnable(TransferData[] availableTypes) {
+			fAvailableTypes= availableTypes;
+			return PasteAction.isAvailable(TextTransfer.getInstance(), availableTypes);
+		}
+
+		public boolean canPasteOn(IJavaElement[] javaElements, IResource[] resources, IWorkingSet[] selectedWorkingSets) throws JavaModelException {
+			if (selectedWorkingSets.length != 0)
+				return false;
+			if (resources.length != 0)
+				return false; //alternative: create text file?
+			if (javaElements.length != 1)
+				return false;
+			
+			IJavaElement destination= javaElements[0];
+			String text= getClipboardText(fAvailableTypes);
+			fCuParser= new CuParser(destination.getJavaProject(), text);
+			
+			if (fCuParser.getTypeName() == null)
+				return false;
+			
+			switch (destination.getElementType()) {
+				case IJavaElement.JAVA_PROJECT :
+					IPackageFragmentRoot[] packageFragmentRoots= ((IJavaProject) destination).getPackageFragmentRoots();
+					for (int i= 0; i < packageFragmentRoots.length; i++) {
+						IPackageFragmentRoot packageFragmentRoot= packageFragmentRoots[i];
+						if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE) {
+							fDestinationPack= packageFragmentRoot.getPackageFragment(fCuParser.getPackageName());
+							if (isWritable(fDestinationPack))
+								return true;
+						}
+					}
+					return false;
+					
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT :
+					IPackageFragmentRoot packageFragmentRoot= (IPackageFragmentRoot) destination;
+					if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE) {
+						fDestinationPack= packageFragmentRoot.getPackageFragment(fCuParser.getPackageName());
+						return isWritable(fDestinationPack);
+					}
+					return false;
+					
+				case IJavaElement.PACKAGE_FRAGMENT :
+					fDestinationPack= (IPackageFragment) destination;
+					return isWritable(fDestinationPack);
+					
+				case IJavaElement.COMPILATION_UNIT :
+					fDestinationPack= (IPackageFragment) destination.getParent();
+					return isWritable(fDestinationPack);
+					
+				default:
+					return false;
+			}
+		}
+		
+		private boolean isWritable(IPackageFragment destinationPack) {
+			if (destinationPack.exists() && destinationPack.isReadOnly()) {
+				return false;
+			} else {
+				IPackageFragmentRoot packageFragmentRoot= JavaModelUtil.getPackageFragmentRoot(destinationPack);
+				try {
+					return packageFragmentRoot.exists() && ! packageFragmentRoot.isArchive() && ! packageFragmentRoot.isReadOnly()
+							&& packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE;
+				} catch (JavaModelException e) {
+					return false;
+				}
+			}
+		}
+
+		public void paste(IJavaElement[] javaElements, IResource[] resources, IWorkingSet[] selectedWorkingSets, TransferData[] availableTypes) throws JavaModelException, InterruptedException, InvocationTargetException{
+			if (! fDestinationPack.exists())
+				JavaModelUtil.getPackageFragmentRoot(fDestinationPack).createPackageFragment(fCuParser.getPackageName(), true, new NullProgressMonitor());
+			
+			final String cuName= fCuParser.getTypeName() + ".java"; //$NON-NLS-1$
+			final ICompilationUnit cu= fDestinationPack.getCompilationUnit(cuName);
+			boolean alreadyExists= cu.exists();
+			if (alreadyExists) {
+				String msg= MessageFormat.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] {cuName});
+				boolean overwrite= MessageDialog.openQuestion(getShell(), ReorgMessages.PasteAction_TextPaster_confirmOverwriting, msg);
+				if (! overwrite)
+					return;
+				
+				openCu(cu); //Open editor before overwriting to allow undo. 
+			}
+			
+			try {
+				JavaCore.run(new IWorkspaceRunnable() {
+					public void run(IProgressMonitor monitor) throws CoreException {
+						fDestinationPack.createCompilationUnit(cuName, fCuParser.getText(), true, new NullProgressMonitor()); //$NON-NLS-1$
+					}
+				}, null);
+				if (!alreadyExists)
+					openCu(cu);
+				if (!fDestinationPack.getElementName().equals(fCuParser.getPackageName())) {
+					JavaCore.run(new IWorkspaceRunnable() {
+						public void run(IProgressMonitor monitor) throws CoreException {
+							cu.createPackageDeclaration(fDestinationPack.getElementName(), new NullProgressMonitor());
+						}
+					}, null);
+				}
+			} catch (CoreException e) {
+				throw new JavaModelException(e);
+			}
+		}
+
+		private void openCu(ICompilationUnit cu) {
+			try {
+				EditorUtility.openInEditor(cu);
+			} catch (PartInitException e) {
+				JavaPlugin.log(e);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+		}
+    }
     
 	private static class WorkingSetPaster extends Paster {
 		protected WorkingSetPaster(Shell shell, Clipboard clipboard) {
@@ -673,7 +887,9 @@ public class PasteAction extends SelectionDispatchAction{
 				}
 			}
 
-			// returns AbstractTypeDeclaration, CompilationUnit or null
+			/**
+			 * @return an AbstractTypeDeclaration, a CompilationUnit, or null
+			 */ 
 			private ASTNode getDestinationNodeForSourceElement(IJavaElement destination, int kind, CompilationUnit unit) throws JavaModelException {
 				final IType ancestor= getAncestorType(destination);
 				if (ancestor != null)
