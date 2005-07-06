@@ -1593,33 +1593,31 @@ public class PullUpTests extends RefactoringTest {
 	}
 
 	public void testStaticImports1() throws Exception{
-		printTestDisabledMessage("disabled due to missing support for statically imported methods");
+		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
+		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
 		
-//		ICompilationUnit cuA= createCUfromTestFile(getPackageP(), "A");
-//		ICompilationUnit cuB= createCUfromTestFile(getPackageP(), "B");
-//		
-//		try{
-//			String[] methodNames= new String[]{"m"};
-//			String[][] signatures= new String[][]{new String[] {"QS;"}};
-//			
-//			IType type= getType(cuB, "B");
-//			IMethod[] methods= getMethods(type, methodNames, signatures);
-//			PullUpRefactoring ref= createRefactoring(methods);
-//			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
-//			setSuperclassAsTargetClass(ref);
-//	
-//			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
-//		
-//			RefactoringStatus result= performRefactoring(ref);
-//			assertTrue("precondition was supposed to pass", result == null || !result.hasError());
-//			
-//			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
-//			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
-//		} finally{
-//			performDummySearch();
-//			cuA.delete(false, null);
-//			cuB.delete(false, null);
-//		}
+		try{
+			String[] methodNames= new String[]{"m"};
+			String[][] signatures= new String[][]{new String[] {"QS;"}};
+			
+			IType type= getType(cuB, "B");
+			IMethod[] methods= getMethods(type, methodNames, signatures);
+			PullUpRefactoring ref= createRefactoring(methods);
+			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
+			setSuperclassAsTargetClass(ref);
+	
+			ref.setMethodsToDelete(getMethods(ref.getMatchingElements(new NullProgressMonitor(), false)));
+		
+			RefactoringStatus result= performRefactoring(ref);
+			assertTrue("precondition was supposed to pass", result == null || !result.hasError());
+			
+			assertEqualLines("A", cuA.getSource(), getFileContents(getOutputTestFileName("A")));
+			assertEqualLines("B", cuB.getSource(), getFileContents(getOutputTestFileName("B")));
+		} finally{
+			performDummySearch();
+			cuA.delete(false, null);
+			cuB.delete(false, null);
+		}
 	}
 
 	public void testGenerics0() throws Exception{
