@@ -29,8 +29,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 public class InlineConstantTests extends RefactoringTest {
-	private static final boolean BUG_84659_CORE_ANNOT_REF= true;
-
 	private static final Class clazz = InlineConstantTests.class;
 	private static final String REFACTORING_PATH = "InlineConstant/";
 
@@ -232,18 +230,10 @@ public class InlineConstantTests extends RefactoringTest {
 	}
 		
 	public void test18() throws Exception {
-		if (BUG_84659_CORE_ANNOT_REF) {
-			printTestDisabledMessage("BUG_84659_CORE_ANNOT_REF");
-			return;
-		}
 		helper1("p.Annot", 5, 18, 5, 18, true, true);
 	}
 		
 	public void test19() throws Exception {
-		if (BUG_84659_CORE_ANNOT_REF) {
-			printTestDisabledMessage("BUG_84659_CORE_ANNOT_REF");
-			return;
-		}
 		helper1("p.Test", 7, 36, 7, 36, true, false);
 	}
 		

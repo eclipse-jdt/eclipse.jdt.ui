@@ -1,7 +1,7 @@
 //7, 36 -> 7, 36  replaceAll == true, removeDeclaration == false
 package p;
 
-@Annot(Annot.DEFAULT)
+@Test.Annot(Test.Annot.DEFAULT)
 class Test {
 	@interface Annot {
 		public static final String DEFAULT= "John";
