@@ -236,6 +236,13 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 				comment= comment.substring(2); // remove '/*'
 			}
 		}
+		// trim leading spaces, but not new lines
+		int nonSpace= 0;
+		int len= comment.length();
+		while (nonSpace < len && Character.getType(comment.charAt(nonSpace)) == Character.SPACE_SEPARATOR)
+				nonSpace++;
+		comment= comment.substring(nonSpace);
+		
 		return Strings.changeIndent(comment, 0, project, indentation, lineDelimiter);
 	}
 
