@@ -11,10 +11,6 @@
 
 package org.eclipse.jdt.text.tests.performance;
 
-import org.eclipse.swt.events.PaintEvent;
-
-import org.eclipse.jface.text.source.AnnotationPainter;
-
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
