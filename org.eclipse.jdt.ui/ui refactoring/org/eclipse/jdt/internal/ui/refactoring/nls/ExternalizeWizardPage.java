@@ -204,7 +204,8 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 						}
 					}
 				}
-				validateKeys(true);
+				validateKeys(false);
+				fTableViewer.update(data, null);
 			}
 		}
 	}
