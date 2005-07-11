@@ -50,11 +50,8 @@ public class JavaContextType extends CompilationUnitContextType {
 				String[] bindings= resolveAll(context);
 				if (bindings.length > 0) {
 					mv.setValues(bindings);
-					MultiVariableGuess guess= jc.getMultiVariableGuess();
-					if (guess == null) {
-						guess= new MultiVariableGuess(mv);
-						jc.setMultiVariableGuess(guess);
-					}
+					MultiVariableGuess guess= new MultiVariableGuess(mv);
+					jc.setMultiVariableGuess(guess);
 				}
 				if (bindings.length > 1)
 					variable.setUnambiguous(false);
@@ -184,11 +181,8 @@ public class JavaContextType extends CompilationUnitContextType {
 				String[] bindings= resolveAll(context);
 				if (bindings.length > 0) {
 					mv.setValues(bindings);
-					MultiVariableGuess guess= jc.getMultiVariableGuess();
-					if (guess == null) {
-						guess= new MultiVariableGuess(mv);
-						jc.setMultiVariableGuess(guess);
-					}
+					MultiVariableGuess guess= new MultiVariableGuess(mv);
+					jc.setMultiVariableGuess(guess);
 				}
 				if (bindings.length > 1)
 					variable.setUnambiguous(false);
