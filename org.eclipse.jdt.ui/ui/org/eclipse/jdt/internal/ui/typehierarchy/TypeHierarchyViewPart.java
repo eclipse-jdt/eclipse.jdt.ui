@@ -81,10 +81,10 @@ import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.part.PageBook;
@@ -119,7 +119,6 @@ import org.eclipse.jdt.ui.actions.RefactorActionGroup;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.actions.NewWizardsActionGroup;
 import org.eclipse.jdt.internal.ui.actions.SelectAllAction;
@@ -220,7 +219,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 	private ToggleOrientationAction[] fToggleOrientationActions;
 	private EnableMemberFilterAction fEnableMemberFilterAction;
 	private ShowQualifiedTypeNamesAction fShowQualifiedTypeNamesAction;
-	private AddMethodStubAction fAddStubAction;
 	private FocusOnTypeAction fFocusOnTypeAction;
 	private FocusOnSelectionAction fFocusOnSelectionAction;
 	private CompositeActionGroup fActionGroups;
@@ -281,8 +279,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fFocusOnTypeAction= new FocusOnTypeAction(this);
 		
 		fPaneLabelProvider= new JavaUILabelProvider();
-		
-		fAddStubAction= new AddMethodStubAction();
+
 		fFocusOnSelectionAction= new FocusOnSelectionAction(this);	
 	
 		fPartListener= new IPartListener2() {
@@ -1033,11 +1030,6 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 		fActionGroups.setContext(new ActionContext(getSite().getSelectionProvider().getSelection()));
 		fActionGroups.fillContextMenu(menu);
 		fActionGroups.setContext(null);
-		if (fSelectedType != null &&  fAddStubAction.init(fSelectedType, fMethodsViewer.getSelection())) {
-			IMenuManager source= menu.findMenuUsingPath(GenerateActionGroup.MENU_ID);
-			if (source != null)
-				source.appendToGroup(GenerateActionGroup.GROUP_GENERATE, fAddStubAction);
-		}
 	}
 	
 	/*

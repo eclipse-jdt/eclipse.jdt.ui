@@ -22,18 +22,7 @@ public final class JavaUIMessages extends NLS {
 
 	public static String JavaPlugin_internal_error;
 	public static String JavaElementProperties_name;
-	
-	public static String AddMethodStubAction_label;
-	public static String AddMethodStubAction_detailed_implement;
-	public static String AddMethodStubAction_detailed_override;
-	public static String AddMethodStubAction_description;
-	public static String AddMethodStubAction_tooltip;
-	public static String AddMethodStubAction_error_title;
-	public static String AddMethodStubAction_QueryDialog_title;
-	public static String AddMethodStubAction_OverridesFinalDialog_message;
-	public static String AddMethodStubAction_OverridesPrivateDialog_message;
-	public static String AddMethodStubAction_ReplaceExistingDialog_message;
-	
+
 	public static String OpenTypeAction_description;
 	public static String OpenTypeAction_tooltip;
 	public static String OpenTypeAction_errorMessage;

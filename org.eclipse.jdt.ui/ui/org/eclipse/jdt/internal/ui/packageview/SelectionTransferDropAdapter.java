@@ -28,14 +28,12 @@ import org.eclipse.jface.viewers.StructuredViewer;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 
-import org.eclipse.jdt.internal.ui.actions.AddMethodStubAction;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgCopyStarter;
@@ -50,13 +48,11 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 	private JavaCopyProcessor fCopyProcessor;
 	private int fCanCopyElements;
 	private ISelection fSelection;
-	private AddMethodStubAction fAddMethodStubAction;
-	
+
 	private static final long DROP_TIME_DIFF_TRESHOLD= 150;
 
 	public SelectionTransferDropAdapter(StructuredViewer viewer) {
 		super(viewer, DND.FEEDBACK_SCROLL | DND.FEEDBACK_EXPAND);
-		fAddMethodStubAction= new AddMethodStubAction();
 	}
 
 	//---- TransferDropTargetListener interface ---------------------------------------
@@ -106,7 +102,6 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 				case DND.DROP_DEFAULT:	event.detail= handleValidateDefault(target, event); break;
 				case DND.DROP_COPY: 	event.detail= handleValidateCopy(target, event); break;
 				case DND.DROP_MOVE: 	event.detail= handleValidateMove(target, event); break;
-				case DND.DROP_LINK: 	event.detail= handleValidateLink(target, event); break;
 			}
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, PackagesMessages.SelectionTransferDropAdapter_error_title, PackagesMessages.SelectionTransferDropAdapter_error_message); 
@@ -137,7 +132,6 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 			switch(event.detail) {
 				case DND.DROP_MOVE: handleDropMove(target, event); break;
 				case DND.DROP_COPY: handleDropCopy(target, event); break;
-				case DND.DROP_LINK: handleDropLink(target, event); break;
 			}
 		} catch (JavaModelException e){
 			ExceptionHandler.handle(e, PackagesMessages.SelectionTransferDropAdapter_error_title, PackagesMessages.SelectionTransferDropAdapter_error_message); 
@@ -162,9 +156,6 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		}
 		if ((event.operations & DND.DROP_COPY) != 0) {
 			return handleValidateCopy(target, event);
-		}
-		if ((event.operations & DND.DROP_LINK) != 0) {
-			return handleValidateLink(target, event);
 		}
 		return DND.DROP_NONE;
 	}
@@ -195,19 +186,7 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		}
 		return fCanMoveElements == 2;
 	}
-	
-	private void handleDropLink(Object target, DropTargetEvent event) {
-		if (fAddMethodStubAction.init((IType)target, getSelection())) 
-			fAddMethodStubAction.run();
-	}
 
-	private int handleValidateLink(Object target, DropTargetEvent event) {
-		if (target instanceof IType && AddMethodStubAction.canActionBeAdded((IType)target, getSelection()))
-			return DND.DROP_LINK;
-		else		
-			return DND.DROP_NONE;
-	}
-	
 	private void handleDropMove(final Object target, DropTargetEvent event) throws JavaModelException, InvocationTargetException, InterruptedException{
 		IJavaElement[] javaElements= ReorgUtils.getJavaElements(fElements);
 		IResource[] resources= ReorgUtils.getResources(fElements);
