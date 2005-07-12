@@ -241,6 +241,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	 * @see ASTVisitor#visit(ClassInstanceCreation)
 	 */
 	public boolean visit(ClassInstanceCreation node) {
+		doVisitChildren(node.typeArguments());
 		doVisitNode(node.getType());
 		evalQualifyingExpression(node.getExpression(), null);
 		if (node.getAnonymousClassDeclaration() != null) {
@@ -255,6 +256,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 	 */
 	public boolean visit(MethodInvocation node) {
 		evalQualifyingExpression(node.getExpression(), node.getName());
+		doVisitChildren(node.typeArguments());
 		doVisitChildren(node.arguments());
 		return false;
 	}
@@ -268,6 +270,7 @@ public class ImportReferencesCollector extends GenericVisitor {
 		}
 		
 		evalQualifyingExpression(node.getExpression(), null);
+		doVisitChildren(node.typeArguments());
 		doVisitChildren(node.arguments());
 		return false;	
 	}		
