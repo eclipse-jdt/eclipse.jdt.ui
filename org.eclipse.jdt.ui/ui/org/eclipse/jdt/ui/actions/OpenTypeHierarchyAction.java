@@ -18,8 +18,9 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
@@ -34,12 +35,14 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.OpenTypeHierarchyUtil;
 
@@ -101,6 +104,11 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		if (selection.size() != 1)
 			return false;
 		Object input= selection.getFirstElement();
+		
+		
+		if (input instanceof LogicalPackage)
+			return true;
+		
 		if (!(input instanceof IJavaElement))
 			return false;
 		switch (((IJavaElement)input).getElementType()) {
@@ -150,6 +158,13 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 		if (selection.size() != 1)
 			return;
 		Object input= selection.getFirstElement();
+		
+		if (input instanceof LogicalPackage) {
+			IPackageFragment[] fragments= ((LogicalPackage)input).getFragments();
+			if (fragments.length == 0)
+				return;
+			input= fragments[0];
+		}
 
 		if (!(input instanceof IJavaElement)) {
 			IStatus status= createStatus(ActionMessages.OpenTypeHierarchyAction_messages_no_java_element); 
