@@ -22,6 +22,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class BindingLabels {
 
+	/** deprecated Use BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED) instead */
 	public static String getFullyQualified(IBinding binding) {
 		IJavaElement javaElement;
 		try {
