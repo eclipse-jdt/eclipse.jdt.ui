@@ -558,11 +558,15 @@ public class UnresolvedElementsSubProcessor {
 	}
 
 	private static CUCorrectionProposal createTypeRefChangeProposal(ICompilationUnit cu, String fullName, Name node, int relevance) throws CoreException {
-		ImportRewrite importRewrite= new ImportRewrite(cu);
-		importRewrite.setFindAmbiguosImports(true);
-		String simpleName= importRewrite.addImport(fullName);
+		ImportRewrite importRewrite= null;
+		String simpleName= fullName;
 		String packName= Signature.getQualifier(fullName);
-		String[] arg= { simpleName, packName };
+		if (packName.length() > 0) { // no imports for primitive types, type variables
+			importRewrite= new ImportRewrite(cu);
+			importRewrite.setFindAmbiguosImports(true);
+			simpleName= importRewrite.addImport(fullName);
+		}
+		
 		if (!isLikelyTypeName(simpleName)) {
 			relevance -= 2;
 		}
@@ -570,6 +574,7 @@ public class UnresolvedElementsSubProcessor {
 		CUCorrectionProposal proposal;
 		if (node.isSimpleName() && simpleName.equals(((SimpleName) node).getIdentifier())) { // import only
 			// import only
+			String[] arg= { simpleName, packName };
 			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_importtype_description, arg);
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);
 			proposal= new CUCorrectionProposal(label, cu, relevance + 100, image);
@@ -579,11 +584,14 @@ public class UnresolvedElementsSubProcessor {
 			if (packName.length() == 0) {
 				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changetype_nopack_description, simpleName);
 			} else {
+				String[] arg= { simpleName, packName };
 				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changetype_description, arg);
 			}
 			proposal= new RenameNodeCompletionProposal(label, cu, node.getStartPosition(), node.getLength(), simpleName, relevance); //$NON-NLS-1$
 		}
-		proposal.setImportRewrite(importRewrite);
+		if (importRewrite != null) {
+			proposal.setImportRewrite(importRewrite);
+		}
 		return proposal;
 	}
 

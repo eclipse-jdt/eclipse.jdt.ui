@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
@@ -284,11 +283,8 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		 }
 
 		AST ast= node.getAST();
+		node= ASTNodes.getNormalizedNode(node);
 		ASTNode parent= node.getParent();
-		while (parent instanceof Type) {
-			node= parent;
-			parent= parent.getParent();
-		}
 		switch (parent.getNodeType()) {
 			case ASTNode.METHOD_DECLARATION:
 				if (node.getLocationInParent() == MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY) {
