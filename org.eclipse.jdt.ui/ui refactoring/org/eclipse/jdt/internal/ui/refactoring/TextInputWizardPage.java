@@ -135,7 +135,10 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 			return;
 		}
 		
-		setPageComplete(validateTextField(text));
+		RefactoringStatus status= validateTextField(text);
+		if (status == null)
+			status= new RefactoringStatus();
+		setPageComplete(status);
 	}
 	
 	/**
