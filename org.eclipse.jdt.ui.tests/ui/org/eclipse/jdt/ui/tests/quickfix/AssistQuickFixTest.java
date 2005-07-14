@@ -455,7 +455,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");		
 		buf.append("    public void foo() {\n");
 		buf.append("        goo().iterator();\n");
-		buf.append("        Iterator iterator= null;\n");
+		buf.append("        Object iterator= null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
@@ -481,7 +481,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");		
 		buf.append("    public void foo() {\n");
 		buf.append("        iterator2 = goo().iterator();\n");
-		buf.append("        Iterator iterator= null;\n");
+		buf.append("        Object iterator= null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
@@ -499,7 +499,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("    }\n");		
 		buf.append("    public void foo() {\n");
 		buf.append("        Iterator iterator2 = goo().iterator();\n");
-		buf.append("        Iterator iterator= null;\n");
+		buf.append("        Object iterator= null;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
