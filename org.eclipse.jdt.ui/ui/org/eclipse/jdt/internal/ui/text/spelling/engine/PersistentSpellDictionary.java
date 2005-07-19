@@ -15,6 +15,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.net.URL;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 /**
  * Persistent modifiable word-list based dictionary.
  *
@@ -50,15 +52,20 @@ public class PersistentSpellDictionary extends AbstractSpellDictionary {
 		if (!isCorrect(word)) {
 
 			hashWord(word);
+			FileWriter writer= null;
 			try {
-
-				final FileWriter writer= new FileWriter(fLocation.getPath(), true);
+				writer= new FileWriter(fLocation.getPath(), true);
 				writer.write(word);
 				writer.write("\n"); //$NON-NLS-1$
-				writer.close();
 
 			} catch (IOException exception) {
-				// Do nothing
+				JavaPlugin.log(exception);
+			} finally {
+				try {
+					if (writer != null)
+						writer.close();
+				} catch (IOException e) {
+				}
 			}
 		}
 	}

@@ -56,6 +56,8 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 	/** Is the dictionary already loaded? */
 	private boolean fLoaded= false;
+	/** Must the dictionary be loaded? */
+	private boolean fMustLoad= true;
 
 	/**
 	 * Returns all candidates with the same phonetic hash.
@@ -199,7 +201,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 		try {
 
-			if (!fLoaded)
+			if (fMustLoad)
 				load(getURL());
 
 		} catch (MalformedURLException exception) {
@@ -336,7 +338,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 		try {
 
-			if (!fLoaded)
+			if (fMustLoad)
 				load(getURL());
 
 		} catch (MalformedURLException exception) {
@@ -387,6 +389,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 			} catch (IOException exception) {
 				JavaPlugin.log(exception);
 			} finally {
+				fMustLoad= false;
 				try {
 					if (stream != null)
 						stream.close();
