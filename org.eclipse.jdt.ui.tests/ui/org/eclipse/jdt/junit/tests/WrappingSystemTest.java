@@ -115,7 +115,7 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 	private void runTests(String prefixForErrorMessage,
 			int howManyNumbersInErrorString) throws CoreException,
 			JavaModelException, PartInitException {
-		JavaProjectHelper.addRTJar(fProject);
+		JavaProjectHelper.addRTJar13(fProject); // have to set up an 1.3 project to avoid requiring a 5.0 VM
 		JavaProjectHelper.addVariableEntry(fProject, new Path(
 				"JUNIT_HOME/junit.jar"), null, null);
 
