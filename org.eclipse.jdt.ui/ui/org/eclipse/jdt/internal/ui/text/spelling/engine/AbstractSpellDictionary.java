@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 /**
  * Partial implementation of a spell dictionary.
  *
@@ -383,7 +385,7 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 					return fLoaded= true;
 				}
 			} catch (IOException exception) {
-				// Do nothing
+				JavaPlugin.log(exception);
 			} finally {
 				try {
 					if (stream != null)
