@@ -680,10 +680,10 @@ public class ASTView extends ViewPart implements IShowInSource {
 				fDeleteAction.setEnabled(false);
 			}
 		});
-		//TODO: hook tray context menu with copy & delete actions, ...
 		
 		makeActions();
 		hookContextMenu();
+		hookTrayContextMenu();
 		contributeToActionBars();
 		getSite().setSelectionProvider(new ASTViewSelectionProvider());
 		
@@ -716,6 +716,22 @@ public class ASTView extends ViewPart implements IShowInSource {
 		getSite().registerContextMenu(menuMgr, fViewer);
 	}
 
+	private void hookTrayContextMenu() {
+		MenuManager menuMgr = new MenuManager("#TrayPopupMenu"); //$NON-NLS-1$
+		menuMgr.setRemoveAllWhenShown(true);
+		menuMgr.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager manager) {
+				manager.add(fCopyAction);
+				manager.add(fDeleteAction);
+				manager.add(new Separator());
+				manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+			}
+		});
+		Menu menu = menuMgr.createContextMenu(fTray.getControl());
+		fTray.getControl().setMenu(menu);
+		getSite().registerContextMenu("#TrayPopupMenu", menuMgr, fTray); //$NON-NLS-1$
+	}
+	
 	private void contributeToActionBars() {
 		IActionBars bars = getViewSite().getActionBars();
 		fillLocalPullDown(bars.getMenuManager());
