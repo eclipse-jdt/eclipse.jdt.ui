@@ -72,7 +72,7 @@ public abstract class SpellingEngine implements ISpellingEngine {
 		IPreferenceStore preferences= PreferenceConstants.getPreferenceStore();
 		if (collector != null) {
 			Locale locale= getLocale(preferences);
-			ISpellChecker checker= org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine.getInstance().createSpellChecker(locale, preferences);
+			ISpellChecker checker= SpellCheckEngine.getInstance().createSpellChecker(locale, preferences);
 			if (checker != null)
 				check(document, regions, checker, locale, collector, monitor);
 		}
@@ -96,7 +96,7 @@ public abstract class SpellingEngine implements ISpellingEngine {
 	 * @return The current locale of the spelling preferences
 	 */
 	private Locale getLocale(IPreferenceStore preferences) {
-		Locale defaultLocale= org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine.getDefaultLocale();
+		Locale defaultLocale= SpellCheckEngine.getDefaultLocale();
 		String locale= preferences.getString(ISpellCheckPreferenceKeys.SPELLING_LOCALE);
 		if (locale.equals(defaultLocale.toString()))
 			return defaultLocale;
