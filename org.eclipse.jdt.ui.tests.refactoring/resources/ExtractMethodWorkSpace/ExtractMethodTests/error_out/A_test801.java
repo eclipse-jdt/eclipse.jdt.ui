@@ -3,10 +3,10 @@ package error_out;
 public class A_test801 {
 	public void foo() {
 		List l;
-		extracted(l);
+		extracted();
 	}
 
-	protected void extracted(List l) {
+	protected void extracted() {
 		/*[*/g(l);/*]*/
 	}
 
