@@ -586,7 +586,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				break;
 			case IJavaElement.TYPE:
 				collapse= fAllowCollapsing && fCollapseInnerTypes && isInnerType((IType) element);
-				createProjection= true;
+				createProjection= ((IMember) element).getDeclaringType() != null;
 				break;
 			case IJavaElement.METHOD:
 				collapse= fAllowCollapsing && fCollapseMethods;
