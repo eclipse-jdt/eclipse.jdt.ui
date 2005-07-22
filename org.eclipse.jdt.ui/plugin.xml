@@ -2830,6 +2830,18 @@
             categoryId="org.eclipse.ui.category.navigate"
             id="org.eclipse.jdt.ui.edit.text.java.show.in.package.view">
       </command>
+      <command
+            name="%ActionDefinition.foldingCollapseMembers.name"
+            description="%ActionDefinition.foldingCollapseMembers.description"
+            categoryId="org.eclipse.ui.category.textEditor"
+            id="org.eclipse.jdt.ui.edit.text.java.folding.collapseMembers">
+      </command>
+      <command
+            name="%ActionDefinition.foldingCollapseComments.name"
+            description="%ActionDefinition.foldingCollapseComments.description"
+            categoryId="org.eclipse.ui.category.textEditor"
+            id="org.eclipse.jdt.ui.edit.text.java.folding.collapseComments">
+      </command>
 <!-- source -->
       <command
             name="%ActionDefinition.sourceQuickMenu.name"

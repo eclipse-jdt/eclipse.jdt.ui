@@ -631,4 +631,18 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * @since 3.0
 	 */
 	public static final String TOGGLE_MARK_OCCURRENCES= "org.eclipse.jdt.ui.edit.text.java.toggleMarkOccurrences"; //$NON-NLS-1$
+
+	/**
+	 * Action definition id of the collapse members action
+	 * (value: <code>"org.eclipse.jdt.ui.edit.text.java.folding.collapseMembers"</code>).
+	 * @since 3.2
+	 */
+	public static final String FOLDING_COLLAPSE_MEMBERS= "org.eclipse.jdt.ui.edit.text.java.folding.collapseMembers"; //$NON-NLS-1$
+
+	/**
+	 * Action definition id of the collapse comments action
+	 * (value: <code>"org.eclipse.jdt.ui.edit.text.java.folding.collapseComments"</code>).
+	 * @since 3.2
+	 */
+	public static final String FOLDING_COLLAPSE_COMMENTS= "org.eclipse.jdt.ui.edit.text.java.folding.collapseComments"; //$NON-NLS-1$
 }

@@ -195,6 +195,7 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider;
+import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProviderExtension;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -3667,6 +3668,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		foldingMenu.add(action);
 		action= getAction("FoldingExpandAll"); //$NON-NLS-1$
 		foldingMenu.add(action);
+		action= getAction("FoldingRestore"); //$NON-NLS-1$
+		foldingMenu.add(action);
+		action= getAction("FoldingCollapseMembers"); //$NON-NLS-1$
+		foldingMenu.add(action);
+		action= getAction("FoldingCollapseComments"); //$NON-NLS-1$
+		foldingMenu.add(action);
 	}
 
 	/*
@@ -3697,5 +3704,43 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		// since IResource is a more general way to compare java elements, we
 		// use this as the preferred class for comparing objects.
 		return new NonLocalUndoUserApprover(undoContext, this, new Object [] { getInputJavaElement() }, IResource.class);
+	}
+
+	/**
+	 * Resets the foldings structure according to the folding
+	 * preferences.
+	 * 
+	 * @since 3.2
+	 */
+	public void resetProjection() {
+		if (fProjectionModelUpdater != null) {
+			fProjectionModelUpdater.initialize();
+		}
+	}
+	
+	/**
+	 * Collapses all foldable members if supported by the folding
+	 * structure provider.
+	 * 
+	 * @since 3.2
+	 */
+	public void collapseMembers() {
+		if (fProjectionModelUpdater instanceof IJavaFoldingStructureProviderExtension) {
+			IJavaFoldingStructureProviderExtension extension= (IJavaFoldingStructureProviderExtension) fProjectionModelUpdater;
+			extension.collapseMembers();
+		}
+	}
+	
+	/**
+	 * Collapses all foldable comments if supported by the folding
+	 * structure provider.
+	 * 
+	 * @since 3.2
+	 */
+	public void collapseComments() {
+		if (fProjectionModelUpdater instanceof IJavaFoldingStructureProviderExtension) {
+			IJavaFoldingStructureProviderExtension extension= (IJavaFoldingStructureProviderExtension) fProjectionModelUpdater;
+			extension.collapseComments();
+		}
 	}
 }

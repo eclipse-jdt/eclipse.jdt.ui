@@ -60,6 +60,7 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider;
+import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProviderExtension;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;
@@ -74,7 +75,7 @@ import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
  *
  * @since 3.0
  */
-public class DefaultJavaFoldingStructureProvider implements IProjectionListener, IJavaFoldingStructureProvider {
+public class DefaultJavaFoldingStructureProvider implements IProjectionListener, IJavaFoldingStructureProvider, IJavaFoldingStructureProviderExtension {
 
 	private static final class JavaProjectionAnnotation extends ProjectionAnnotation {
 
@@ -123,6 +124,14 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		}
 	}
 
+	/**
+	 * Filter for annotations.
+	 * @since 3.2
+	 */
+	private static interface Filter {
+		boolean match(JavaProjectionAnnotation annotation);
+	}
+	
 	private class ElementChangedListener implements IElementChangedListener {
 
 		/*
@@ -383,6 +392,40 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	/* caches for header comment extraction. */
 	private IType fFirstType;
 	private boolean fHasHeaderComment;
+
+	/* filters */
+	/**
+	 * Member filter, matches nested members (but not top-level types).
+	 * @since 3.2
+	 */
+	private final Filter fMemberFilter = new Filter() {
+		public boolean match(JavaProjectionAnnotation annotation) {
+			if (!annotation.isCollapsed() && !annotation.isComment() && !annotation.isMarkedDeleted()) {
+				IJavaElement element= annotation.getElement();
+				if (element instanceof IMember) {
+					if (element.getElementType() != IJavaElement.TYPE || ((IMember) element).getDeclaringType() != null) {
+						annotation.markCollapsed();
+						return true;
+					}
+				}
+			}
+			return false;
+		}
+	};
+	
+	/**
+	 * Comment filter, matches comments.
+	 * @since 3.2
+	 */
+	private final Filter fCommentFilter = new Filter() {
+		public boolean match(JavaProjectionAnnotation annotation) {
+			if (!annotation.isCollapsed() && annotation.isComment() && !annotation.isMarkedDeleted()) {
+				annotation.markCollapsed();
+				return true;
+			}
+			return false;
+		}
+	};
 
 
 	public DefaultJavaFoldingStructureProvider() {
@@ -959,5 +1002,51 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			Collections.sort(list, comparator);
 		}
 		return map;
+	}
+	
+	/*
+	 * @see IJavaFoldingStructureProviderExtension#collapseMembers()
+	 * @since 3.2
+	 */
+	public void collapseMembers() {
+		collapseMatches(fMemberFilter);
+	}
+	
+	/*
+	 * @see IJavaFoldingStructureProviderExtension#collapseComments()
+	 * @since 3.2
+	 */
+	public void collapseComments() {
+		collapseMatches(fCommentFilter);
+	}
+
+	/**
+	 * Collapses all annotations matched by the passed filter.
+	 * 
+	 * @param filter the filter to use to select which annotations to collapse
+	 * @since 3.2
+	 */
+	private void collapseMatches(Filter filter) {
+		if (!isInstalled())
+			return;
+
+		ProjectionAnnotationModel model= (ProjectionAnnotationModel) fEditor.getAdapter(ProjectionAnnotationModel.class);
+		if (model == null)
+			return;
+		
+		List modified= new ArrayList();
+		Iterator iter= model.getAnnotationIterator();
+		while (iter.hasNext()) {
+			Object annotation= iter.next();
+			if (annotation instanceof JavaProjectionAnnotation) {
+				JavaProjectionAnnotation java= (JavaProjectionAnnotation) annotation;
+				
+				if (filter.match(java))
+					modified.add(java);
+				
+			}
+		}
+		
+		model.modifyAnnotations(null, null, (Annotation[]) modified.toArray(new Annotation[modified.size()]));
 	}
 }

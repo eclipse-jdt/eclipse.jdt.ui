@@ -24,7 +24,19 @@ import org.eclipse.ui.texteditor.ITextEditor;
  * <p>
  * Clients may implement this interface.
  * </p>
- *
+ * <p>
+ * In order to provide backward compatibility for clients of <code>IJavaFoldingStructureProvider</code>, extension
+ * interfaces are used to provide a means of evolution. The following extension interfaces exist:
+ * <ul>
+ * <li>{@link org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProviderExtension} since version 3.2 introducing
+ *		the following functions:
+ *			<ul>
+ *            <li>collapsing of comments and members</li>
+ *			</ul>
+ * </li>
+ * </ul>
+ * </p>
+ * 
  * @since 3.0
  */
 public interface IJavaFoldingStructureProvider {

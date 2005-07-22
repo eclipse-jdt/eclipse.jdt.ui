@@ -12,8 +12,7 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.ResourceBundle;
 
-import org.eclipse.swt.SWT;
-
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -23,15 +22,18 @@ import org.eclipse.jface.text.source.projection.IProjectionListener;
 import org.eclipse.jface.text.source.projection.ProjectionViewer;
 
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.editors.text.IFoldingCommandIds;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.ResourceAction;
 import org.eclipse.ui.texteditor.TextOperationAction;
 
+import org.eclipse.ui.editors.text.IFoldingCommandIds;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 
 /**
@@ -40,20 +42,40 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.0
  */
 public class FoldingActionGroup extends ActionGroup {
-	static abstract class PreferenceAction extends ResourceAction implements IUpdate {
+	private static abstract class PreferenceAction extends ResourceAction implements IUpdate {
 		PreferenceAction(ResourceBundle bundle, String prefix, int style) {
 			super(bundle, prefix, style);
 		}
 	}
 	
+	/**
+	 * @since 3.2
+	 */
+	private class FoldingAction extends PreferenceAction {
+
+		FoldingAction(ResourceBundle bundle, String prefix) {
+			super(bundle, prefix, IAction.AS_PUSH_BUTTON);
+		}
+
+		public void update() {
+			setEnabled(FoldingActionGroup.this.isEnabled() && fViewer.isProjectionMode());
+		}
+		
+	}
+	
 	private ProjectionViewer fViewer;
 	
-	private PreferenceAction fToggle;
-	private TextOperationAction fExpand;
-	private TextOperationAction fCollapse;
-	private TextOperationAction fExpandAll;
+	private final PreferenceAction fToggle;
+	private final TextOperationAction fExpand;
+	private final TextOperationAction fCollapse;
+	private final TextOperationAction fExpandAll;
+	private final PreferenceAction fRestoreDefaults;
+	private final FoldingAction fCollapseMembers;
+	private final FoldingAction fCollapseComments;
+	
+	private final IProjectionListener fProjectionListener;
 
-	private IProjectionListener fProjectionListener;
+
 	
 	/**
 	 * Creates a new projection action group for <code>editor</code>. If the
@@ -64,52 +86,95 @@ public class FoldingActionGroup extends ActionGroup {
 	 * @param viewer the viewer of the editor
 	 */
 	public FoldingActionGroup(final ITextEditor editor, ITextViewer viewer) {
-		if (viewer instanceof ProjectionViewer) {
-			fViewer= (ProjectionViewer) viewer;
-			
-			fProjectionListener= new IProjectionListener() {
-
-				public void projectionEnabled() {
-					update();
-				}
-
-				public void projectionDisabled() {
-					update();
-				}
-			};
-			
-			fViewer.addProjectionListener(fProjectionListener);
-			
-			fToggle= new PreferenceAction(FoldingMessages.getResourceBundle(), "Projection.Toggle.", SWT.TOGGLE) { //$NON-NLS-1$
-				public void run() {
-					IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
-					boolean current= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
-					store.setValue(PreferenceConstants.EDITOR_FOLDING_ENABLED, !current);
-				}
-
-				public void update() {
-					ITextOperationTarget target= (ITextOperationTarget) editor.getAdapter(ITextOperationTarget.class);
-						
-					boolean isEnabled= (target != null && target.canDoOperation(ProjectionViewer.TOGGLE));
-					setEnabled(isEnabled);
-				}
-			};
-			fToggle.setChecked(true);
-			fToggle.setActionDefinitionId(IFoldingCommandIds.FOLDING_TOGGLE);
-			editor.setAction("FoldingToggle", fToggle); //$NON-NLS-1$
-			
-			fExpandAll= new TextOperationAction(FoldingMessages.getResourceBundle(), "Projection.ExpandAll.", editor, ProjectionViewer.EXPAND_ALL, true); //$NON-NLS-1$
-			fExpandAll.setActionDefinitionId(IFoldingCommandIds.FOLDING_EXPAND_ALL);
-			editor.setAction("FoldingExpandAll", fExpandAll); //$NON-NLS-1$
-			
-			fExpand= new TextOperationAction(FoldingMessages.getResourceBundle(), "Projection.Expand.", editor, ProjectionViewer.EXPAND, true); //$NON-NLS-1$
-			fExpand.setActionDefinitionId(IFoldingCommandIds.FOLDING_EXPAND);
-			editor.setAction("FoldingExpand", fExpand); //$NON-NLS-1$
-			
-			fCollapse= new TextOperationAction(FoldingMessages.getResourceBundle(), "Projection.Collapse.", editor, ProjectionViewer.COLLAPSE, true); //$NON-NLS-1$
-			fCollapse.setActionDefinitionId(IFoldingCommandIds.FOLDING_COLLAPSE);
-			editor.setAction("FoldingCollapse", fCollapse); //$NON-NLS-1$
+		if (!(viewer instanceof ProjectionViewer)) {
+			fToggle= null;
+			fExpand= null;
+			fCollapse= null;
+			fExpandAll= null;
+			fRestoreDefaults= null;
+			fCollapseMembers= null;
+			fCollapseComments= null;
+			fProjectionListener= null;
+			return;
 		}
+		
+		fViewer= (ProjectionViewer) viewer;
+		
+		fProjectionListener= new IProjectionListener() {
+
+			public void projectionEnabled() {
+				update();
+			}
+
+			public void projectionDisabled() {
+				update();
+			}
+		};
+		
+		fViewer.addProjectionListener(fProjectionListener);
+		
+		fToggle= new PreferenceAction(FoldingMessages.getResourceBundle(), "Projection.Toggle.", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			public void run() {
+				IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
+				boolean current= store.getBoolean(PreferenceConstants.EDITOR_FOLDING_ENABLED);
+				store.setValue(PreferenceConstants.EDITOR_FOLDING_ENABLED, !current);
+			}
+
+			public void update() {
+				ITextOperationTarget target= (ITextOperationTarget) editor.getAdapter(ITextOperationTarget.class);
+					
+				boolean isEnabled= (target != null && target.canDoOperation(ProjectionViewer.TOGGLE));
+				setEnabled(isEnabled);
+			}
+		};
+		fToggle.setChecked(true);
+		fToggle.setActionDefinitionId(IFoldingCommandIds.FOLDING_TOGGLE);
+		editor.setAction("FoldingToggle", fToggle); //$NON-NLS-1$
+		
+		fExpandAll= new TextOperationAction(FoldingMessages.getResourceBundle(), "Projection.ExpandAll.", editor, ProjectionViewer.EXPAND_ALL, true); //$NON-NLS-1$
+		fExpandAll.setActionDefinitionId(IFoldingCommandIds.FOLDING_EXPAND_ALL);
+		editor.setAction("FoldingExpandAll", fExpandAll); //$NON-NLS-1$
+		
+		fExpand= new TextOperationAction(FoldingMessages.getResourceBundle(), "Projection.Expand.", editor, ProjectionViewer.EXPAND, true); //$NON-NLS-1$
+		fExpand.setActionDefinitionId(IFoldingCommandIds.FOLDING_EXPAND);
+		editor.setAction("FoldingExpand", fExpand); //$NON-NLS-1$
+		
+		fCollapse= new TextOperationAction(FoldingMessages.getResourceBundle(), "Projection.Collapse.", editor, ProjectionViewer.COLLAPSE, true); //$NON-NLS-1$
+		fCollapse.setActionDefinitionId(IFoldingCommandIds.FOLDING_COLLAPSE);
+		editor.setAction("FoldingCollapse", fCollapse); //$NON-NLS-1$
+		
+		fRestoreDefaults= new FoldingAction(FoldingMessages.getResourceBundle(), "Projection.Restore.") { //$NON-NLS-1$
+			public void run() {
+				if (editor instanceof JavaEditor) {
+					JavaEditor javaEditor= (JavaEditor) editor;
+					javaEditor.resetProjection();
+				}
+			}
+		};
+		fRestoreDefaults.setActionDefinitionId(IFoldingCommandIds.FOLDING_COLLAPSE_ALL);
+		editor.setAction("FoldingRestore", fRestoreDefaults); //$NON-NLS-1$
+		
+		fCollapseMembers= new FoldingAction(FoldingMessages.getResourceBundle(), "Projection.CollapseMembers.") { //$NON-NLS-1$
+			public void run() {
+				if (editor instanceof JavaEditor) {
+					JavaEditor javaEditor= (JavaEditor) editor;
+					javaEditor.collapseMembers();
+				}
+			}
+		};
+		fCollapseMembers.setActionDefinitionId(IJavaEditorActionDefinitionIds.FOLDING_COLLAPSE_MEMBERS);
+		editor.setAction("FoldingCollapseMembers", fCollapseMembers); //$NON-NLS-1$
+		
+		fCollapseComments= new FoldingAction(FoldingMessages.getResourceBundle(), "Projection.CollapseComments.") { //$NON-NLS-1$
+			public void run() {
+				if (editor instanceof JavaEditor) {
+					JavaEditor javaEditor= (JavaEditor) editor;
+					javaEditor.collapseComments();
+				}
+			}
+		};
+		fCollapseComments.setActionDefinitionId(IJavaEditorActionDefinitionIds.FOLDING_COLLAPSE_COMMENTS);
+		editor.setAction("FoldingCollapseComments", fCollapseComments); //$NON-NLS-1$
 	}
 	
 	/**
@@ -141,10 +206,13 @@ public class FoldingActionGroup extends ActionGroup {
 	protected void update() {
 		if (isEnabled()) {
 			fToggle.update();
-			fToggle.setChecked(fViewer.getProjectionAnnotationModel() != null);
+			fToggle.setChecked(fViewer.isProjectionMode());
 			fExpand.update();
 			fExpandAll.update();
 			fCollapse.update();
+			fRestoreDefaults.update();
+			fCollapseMembers.update();
+			fCollapseComments.update();
 		}
 	}
 	
@@ -160,6 +228,9 @@ public class FoldingActionGroup extends ActionGroup {
 			manager.add(fExpandAll);
 			manager.add(fExpand);
 			manager.add(fCollapse);
+			manager.add(fRestoreDefaults);
+			manager.add(fCollapseMembers);
+			manager.add(fCollapseComments);
 		}
 	}
 	
