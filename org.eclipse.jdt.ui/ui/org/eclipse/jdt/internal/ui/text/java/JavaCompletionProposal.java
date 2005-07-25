@@ -161,11 +161,6 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
-			// patch replacement length
-			int delta= offset - (fReplacementOffset + fReplacementLength);
-			if (delta > 0)
-				fReplacementLength += delta;
-
 			boolean isSmartTrigger= trigger == ';' && JavaPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_SEMICOLON)
 					|| trigger == '{' && JavaPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_OPENING_BRACE);
 
@@ -546,10 +541,12 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 
 		// don't eat if not in preferences, XOR with modifier key 1 (Ctrl)
 		// but: if there is a selection, replace it!
-		Point selection= viewer.getSelectedRange();
 		fToggleEating= (stateMask & SWT.MOD1) != 0;
-		if (insertCompletion() ^ fToggleEating)
-			fReplacementLength= selection.x + selection.y - fReplacementOffset;
+		if (insertCompletion() ^ fToggleEating) {
+			Point selection= viewer.getSelectedRange();
+			int selectionEnd= selection.x + selection.y;
+			fReplacementLength= Math.min(selectionEnd - fReplacementOffset, fReplacementLength);
+		}
 
 		apply(document, trigger, offset);
 		fToggleEating= false;

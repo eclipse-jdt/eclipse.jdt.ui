@@ -230,11 +230,6 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
-			// patch replacement length
-			int delta= offset - (getReplacementOffset() + getReplacementLength());
-			if (delta > 0)
-				setReplacementLength(getReplacementLength() + delta);
-	
 			boolean isSmartTrigger= isSmartTrigger(trigger);
 	
 			String replacement;
@@ -313,7 +308,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 		// but: if there is a selection, replace it!
 		Point selection= viewer.getSelectedRange();
 		fToggleEating= (stateMask & SWT.MOD1) != 0;
-		int newLength= selection.x + selection.y - getReplacementOffset();
+		int newLength= Math.min(selection.x + selection.y - getReplacementOffset(), getReplacementLength());
 		if ((insertCompletion() ^ fToggleEating) && newLength >= 0)
 			setReplacementLength(newLength);
 
