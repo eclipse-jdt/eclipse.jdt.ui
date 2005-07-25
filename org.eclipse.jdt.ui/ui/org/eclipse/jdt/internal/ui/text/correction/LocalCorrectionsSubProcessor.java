@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.InfixExpression;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -473,12 +474,23 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-	public static void addConstructorFromSuperclassProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+	public static void addConstructorFromSuperclassProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		if (!(selectedNode instanceof Name && selectedNode.getParent() instanceof TypeDeclaration)) {
+		if (selectedNode == null) {
 			return;
 		}
-		TypeDeclaration typeDeclaration= (TypeDeclaration) selectedNode.getParent();
+		
+		TypeDeclaration typeDeclaration= null;
+		if (selectedNode.getLocationInParent() == TypeDeclaration.NAME_PROPERTY) {
+			typeDeclaration= (TypeDeclaration) selectedNode.getParent();
+		} else {
+			BodyDeclaration declaration= ASTResolving.findParentBodyDeclaration(selectedNode);
+			if (declaration instanceof Initializer && problem.getProblemId() == IProblem.UnhandledExceptionInDefaultConstructor) {
+				addUncaughtExceptionProposals(context, problem, proposals);
+			}
+			return;
+		}
+		
 		ITypeBinding binding= typeDeclaration.resolveBinding();
 		if (binding == null || binding.getSuperclass() == null) {
 			return;
