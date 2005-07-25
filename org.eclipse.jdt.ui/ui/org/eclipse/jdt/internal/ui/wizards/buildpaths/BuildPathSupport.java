@@ -155,6 +155,25 @@ public class BuildPathSupport {
 			return fOriginal.getPath();
 		}
 	}
+
+	/**
+	 * Apply a modified classpath entry to the classpath. The classpath entry can also be from a classpath container.
+	 * @param shell If not null and the entry could not be found on the projects classpath, a dialog will ask to put the entry on the classpath
+	 * @param newEntry The modified entry. The entry's kind or path must be unchanged.
+	 * @param changedAttributes The attibutes that have changed. See {@link CPListElement} for constants values.
+	 * @param jproject Project where the entry belongs to
+	 * @param containerPath The path of the entry's parent container or <code>null</code> if the entry is not in a container
+	 * @param monitor The progress monitor to use
+	 * @throws CoreException
+	 */
+	public static void modifyClasspathEntry(Shell shell, IClasspathEntry newEntry, String[] changedAttributes, IJavaProject jproject, IPath containerPath, IProgressMonitor monitor) throws CoreException {
+		if (containerPath != null) {
+			updateContainerClasspath(jproject, containerPath, newEntry, changedAttributes, monitor);
+		} else {
+			updateProjectClasspath(shell, jproject, newEntry, changedAttributes, monitor);
+		}
+	}
+	
 	
 	/**
 	 * Apply a modified classpath entry to the classpath. The classpath entry can also be from a classpath container.
@@ -166,14 +185,10 @@ public class BuildPathSupport {
 	 * @throws CoreException
 	 */
 	public static void modifyClasspathEntry(Shell shell, IClasspathEntry newEntry, IJavaProject jproject, IPath containerPath, IProgressMonitor monitor) throws CoreException {
-		if (containerPath != null) {
-			updateContainerClasspath(jproject, containerPath, newEntry, monitor);
-		} else {
-			updateProjectClasspath(shell, jproject, newEntry, monitor);
-		}
+		modifyClasspathEntry(shell, newEntry, null, jproject, containerPath, monitor);
 	}
 
-	private static void updateContainerClasspath(IJavaProject jproject, IPath containerPath, IClasspathEntry newEntry, IProgressMonitor monitor) throws CoreException {
+	private static void updateContainerClasspath(IJavaProject jproject, IPath containerPath, IClasspathEntry newEntry, String[] changedAttributes, IProgressMonitor monitor) throws CoreException {
 		IClasspathContainer container= JavaCore.getClasspathContainer(containerPath, jproject);
 		if (container == null) {
 			throw new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, "Container " + containerPath + " cannot be resolved", null));  //$NON-NLS-1$//$NON-NLS-2$
@@ -183,7 +198,7 @@ public class BuildPathSupport {
 		for (int i= 0; i < entries.length; i++) {
 			IClasspathEntry curr= entries[i];
 			if (curr.getEntryKind() == newEntry.getEntryKind() && curr.getPath().equals(newEntry.getPath())) {
-				newEntries[i]= newEntry;
+				newEntries[i]= getUpdatedEntry(curr, newEntry, changedAttributes, jproject);
 			} else {
 				newEntries[i]= curr;
 			}
@@ -192,7 +207,19 @@ public class BuildPathSupport {
 		monitor.worked(1);
 	}
 
-	
+	private static IClasspathEntry getUpdatedEntry(IClasspathEntry currEntry, IClasspathEntry updatedEntry, String[] updatedAttributes, IJavaProject jproject) {
+		if (updatedAttributes == null) {
+			return updatedEntry; // used updated entry 'as is'
+		}
+		CPListElement currElem= CPListElement.createFromExisting(currEntry, jproject);
+		CPListElement newElem= CPListElement.createFromExisting(updatedEntry, jproject);
+		for (int i= 0; i < updatedAttributes.length; i++) {
+			String attrib= updatedAttributes[i];
+			currElem.setAttribute(attrib, newElem.getAttribute(attrib));
+		}
+		return currElem.getClasspathEntry();
+	}
+
 	/**
 	 * Request a container update.
 	 * @param jproject The project of the container
@@ -209,7 +236,7 @@ public class BuildPathSupport {
 		}
 	}
 
-	private static void updateProjectClasspath(Shell shell, IJavaProject jproject, IClasspathEntry newEntry, IProgressMonitor monitor) throws JavaModelException {
+	private static void updateProjectClasspath(Shell shell, IJavaProject jproject, IClasspathEntry newEntry, String[] changedAttributes, IProgressMonitor monitor) throws JavaModelException {
 		IClasspathEntry[] oldClasspath= jproject.getRawClasspath();
 		int nEntries= oldClasspath.length;
 		ArrayList newEntries= new ArrayList(nEntries + 1);
@@ -220,7 +247,7 @@ public class BuildPathSupport {
 			IClasspathEntry curr= oldClasspath[i];
 			if (curr.getEntryKind() == entryKind && curr.getPath().equals(jarPath)) {
 				// add modified entry
-				newEntries.add(newEntry);
+				newEntries.add(getUpdatedEntry(curr, newEntry, changedAttributes, jproject));
 				found= true;
 			} else {
 				newEntries.add(curr);

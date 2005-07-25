@@ -209,7 +209,8 @@ public class JavadocConfigurationPropertyPage extends PropertyPage implements IS
 						String loc= javadocLocation != null ? javadocLocation.toExternalForm() : null;
 						cpElem.setAttribute(CPListElement.JAVADOC, loc);
 						IClasspathEntry newEntry= cpElem.getClasspathEntry();
-						BuildPathSupport.modifyClasspathEntry(shell, newEntry, project, containerPath, monitor);
+						String[] changedAttributes= { CPListElement.JAVADOC };
+						BuildPathSupport.modifyClasspathEntry(shell, newEntry, changedAttributes, project, containerPath, monitor);
 					} else {
 						JavaUI.setProjectJavadocLocation(project, javadocLocation);
 					}

@@ -14,9 +14,12 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -296,7 +299,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 	private void removeEntry() {
 		List selElements= fLibrariesList.getSelectedElements();
-		HashSet containerEntriesToUpdate= new HashSet();
+		HashMap containerEntriesToUpdate= new HashMap();
 		for (int i= selElements.size() - 1; i >= 0 ; i--) {
 			Object elem= selElements.get(i);
 			if (elem instanceof CPListElementAttribute) {
@@ -310,7 +313,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				selElements.remove(i);
 				
 				if (attrib.getParent().getParentContainer() instanceof CPListElement) { // inside a container: apply changes right away
-					containerEntriesToUpdate.add(attrib.getParent());
+					CPListElement containerEntry= attrib.getParent();
+					HashSet changedAttributes= (HashSet) containerEntriesToUpdate.get(containerEntry);
+					if (changedAttributes == null) {
+						changedAttributes= new HashSet();
+						containerEntriesToUpdate.put(containerEntry, changedAttributes);
+					}
+					changedAttributes.add(key); // collect the changed attributes
 				}
 			}
 		}
@@ -320,10 +329,13 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		} else {
 			fLibrariesList.removeElements(selElements);
 		}
-		for (Iterator iter= containerEntriesToUpdate.iterator(); iter.hasNext();) {
-			CPListElement curr= (CPListElement) iter.next();
-			IClasspathEntry updatedEntry= curr.getClasspathEntry();
-			updateContainerEntry(updatedEntry, fCurrJProject, ((CPListElement) curr.getParentContainer()).getPath());
+		for (Iterator iter= containerEntriesToUpdate.entrySet().iterator(); iter.hasNext();) {
+			Map.Entry entry= (Entry) iter.next();
+			CPListElement curr= (CPListElement) entry.getKey();
+			HashSet attribs= (HashSet) entry.getValue();
+			String[] changedAttributes= (String[]) attribs.toArray(new String[attribs.size()]);
+			IClasspathEntry changedEntry= curr.getClasspathEntry();
+			updateContainerEntry(changedEntry, changedAttributes, fCurrJProject, ((CPListElement) curr.getParentContainer()).getPath());
 		}
 	}
 	
@@ -380,7 +392,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			IClasspathEntry result= BuildPathDialogAccess.configureSourceAttachment(getShell(), selElement.getClasspathEntry());
 			if (result != null) {
 				selElement.setAttribute(CPListElement.SOURCEATTACHMENT, result.getSourceAttachmentPath());
-				attributeUpdated(selElement);
+				String[] changedAttributes= { CPListElement.SOURCEATTACHMENT };
+				attributeUpdated(selElement, changedAttributes);
 				fLibrariesList.refresh(elem);
 				fLibrariesList.update(selElement); // image
 				fClassPathList.refresh(); // images
@@ -395,7 +408,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				if (result != null) {
 					URL newURL= result[0];
 					selElement.setAttribute(CPListElement.JAVADOC, newURL != null ? newURL.toExternalForm() : null);
-					attributeUpdated(selElement);
+					String[] changedAttributes= { CPListElement.JAVADOC };
+					attributeUpdated(selElement, changedAttributes);
 
 					fLibrariesList.refresh(elem);
 					fClassPathList.dialogFieldChanged(); // validate
@@ -408,7 +422,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			int res= dialog.open();
 			if (res == Window.OK || res == AccessRulesDialog.SWITCH_PAGE) {
 				selElement.setAttribute(CPListElement.ACCESSRULES, dialog.getAccessRules());
-				attributeUpdated(selElement);
+				String[] changedAttributes= { CPListElement.ACCESSRULES };
+				attributeUpdated(selElement, changedAttributes);
 				
 				fLibrariesList.refresh(elem);
 				fClassPathList.dialogFieldChanged(); // validate
@@ -421,7 +436,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			NativeLibrariesDialog dialog= new NativeLibrariesDialog(getShell(), selElement);
 			if (dialog.open() == Window.OK) {
 				selElement.setAttribute(CPListElement.NATIVE_LIB_PATH, dialog.getNativeLibraryPath());
-				attributeUpdated(selElement);
+				String[] changedAttributes= { CPListElement.NATIVE_LIB_PATH };
+				attributeUpdated(selElement, changedAttributes);
 				
 				fLibrariesList.refresh(elem);
 				fClassPathList.dialogFieldChanged(); // validate
@@ -429,19 +445,19 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		}
 	}
 	
-	private void attributeUpdated(CPListElement selElement) {
+	private void attributeUpdated(CPListElement selElement, String[] changedAttributes) {
 		Object parentContainer= selElement.getParentContainer();
 		if (parentContainer instanceof CPListElement) { // inside a container: apply changes right away
 			IClasspathEntry updatedEntry= selElement.getClasspathEntry();
-			updateContainerEntry(updatedEntry, fCurrJProject, ((CPListElement) parentContainer).getPath());
+			updateContainerEntry(updatedEntry, changedAttributes, fCurrJProject, ((CPListElement) parentContainer).getPath());
 		}
 	}
 
-	private void updateContainerEntry(final IClasspathEntry newEntry, final IJavaProject jproject, final IPath containerPath) {
+	private void updateContainerEntry(final IClasspathEntry newEntry, final String[] changedAttributes, final IJavaProject jproject, final IPath containerPath) {
 		try {
 			IWorkspaceRunnable runnable= new IWorkspaceRunnable() {
 				public void run(IProgressMonitor monitor) throws CoreException {				
-					BuildPathSupport.modifyClasspathEntry(null, newEntry, jproject, containerPath, monitor);
+					BuildPathSupport.modifyClasspathEntry(null, newEntry, changedAttributes, jproject, containerPath, monitor);
 				}
 			};
 			PlatformUI.getWorkbench().getProgressService().run(true, true, new WorkbenchRunnableAdapter(runnable));

@@ -64,7 +64,8 @@ public class JavadocLinkRef {
 			CPListElement element= CPListElement.createFromExisting(fClasspathEntry, fProject);
 			String location= url != null ? url.toExternalForm() : null;
 			element.setAttribute(CPListElement.JAVADOC, location);
-			BuildPathSupport.modifyClasspathEntry(null, element.getClasspathEntry(), fProject, fContainerPath, monitor);
+			String[] changedAttributes= { CPListElement.JAVADOC };
+			BuildPathSupport.modifyClasspathEntry(null, element.getClasspathEntry(), changedAttributes, fProject, fContainerPath, monitor);
 			fClasspathEntry= element.getClasspathEntry();
 		}
 	}

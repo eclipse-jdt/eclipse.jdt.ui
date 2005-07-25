@@ -577,7 +577,8 @@ public class SourceAttachmentBlock {
 		return new IRunnableWithProgress() {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException {				
 				try {
-					BuildPathSupport.modifyClasspathEntry(shell, newEntry, jproject, containerPath, monitor);
+					String[] changedAttributes= { CPListElement.SOURCEATTACHMENT };
+					BuildPathSupport.modifyClasspathEntry(shell, newEntry, changedAttributes, jproject, containerPath, monitor);
 				} catch (CoreException e) {
 					throw new InvocationTargetException(e);
 				}
