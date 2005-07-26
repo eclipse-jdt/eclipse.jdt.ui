@@ -623,18 +623,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	}
 
 	private boolean isInnerType(IType type) {
-
-		try {
-			return type.isMember();
-		} catch (JavaModelException x) {
-			IJavaElement parent= type.getParent();
-			if (parent != null) {
-				int parentType= parent.getElementType();
-				return (parentType != IJavaElement.COMPILATION_UNIT && parentType != IJavaElement.CLASS_FILE);
-			}
-		}
-
-		return false;
+		return type.getDeclaringType() != null;
 	}
 
 	/**
