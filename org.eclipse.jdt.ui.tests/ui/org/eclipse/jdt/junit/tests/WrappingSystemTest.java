@@ -61,19 +61,19 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 	}
 
 	public void test00characterizeSecondLine() throws Exception {
-		runTests("\\n", 1000);
+		runTests("\\n", 1000, 2);
 		String text = getText(1);
 		assertTrue(text, text.startsWith("Numbers"));
 	}
 
 	public void test01shouldWrapSecondLine() throws Exception {
-		runTests("\\n", 1000);
+		runTests("\\n", 1000, 2);
 		String text = getText(1);
 		assertTrue(text, text.length() < 300);
 	}
 
 	public void test02characterizeImages() throws Exception {
-		runTests("\\n", 0);
+		runTests("\\n", 0, 3);
 		assertEquals(getFailureDisplay().getExceptionIcon(), getImage(0));
 		assertEquals(null, getImage(1));
 		assertEquals(getFailureDisplay().getStackIcon(), getImage(2));
@@ -84,7 +84,7 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 	}
 
 	public void test03shouldWrapFirstLine() throws Exception {
-		runTests("", 1000);
+		runTests("", 1000, 1);
 		String text = getText(0);
 		assertTrue(text, text.length() < 300);
 	}
@@ -108,14 +108,22 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 		return getFailureDisplay().getTable();
 	}
 
-	private synchronized boolean hasNotTerminated() {
+	protected synchronized boolean hasNotTerminated() {
 		return !fLaunchHasTerminated;
 	}
 
-	private void runTests(String prefixForErrorMessage,
+	public void runTests(String prefixForErrorMessage,
+			int howManyNumbersInErrorString, int numExpectedTableItems)
+			throws CoreException, JavaModelException, PartInitException {
+		launchTests(prefixForErrorMessage, howManyNumbersInErrorString);
+		waitForTableToFill(numExpectedTableItems, 30000);
+	}
+
+	protected void launchTests(String prefixForErrorMessage,
 			int howManyNumbersInErrorString) throws CoreException,
-			JavaModelException, PartInitException {
-		JavaProjectHelper.addRTJar13(fProject); // have to set up an 1.3 project to avoid requiring a 5.0 VM
+			JavaModelException {
+		// have to set up an 1.3 project to avoid requiring a 5.0 VM
+		JavaProjectHelper.addRTJar13(fProject); 
 		JavaProjectHelper.addVariableEntry(fProject, new Path(
 				"JUNIT_HOME/junit.jar"), null, null);
 
@@ -127,9 +135,8 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 
 		String initialString = prefixForErrorMessage + "Numbers:";
 
-		String initializeString = "String errorString = \""
-									+ initialString
-									+ "\";";
+		String initializeString = "String errorString = \"" + initialString
+				+ "\";";
 
 		String contents = "public class LongTraceLines extends TestCase {\n"
 							+ "	public void testLongTraceLine() throws Exception {\n"
@@ -160,10 +167,30 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 				break;
 		}
 		ext.launch(new StructuredSelection(type), ILaunchManager.RUN_MODE);
+	}
 
-		while (hasNotTerminated() || getTable().getItemCount() == 0) {
-			PlatformUI.getWorkbench().getDisplay().readAndDispatch();
+	protected void waitForTableToFill(int numExpectedTableLines,
+			int millisecondTimeout) throws PartInitException {
+		long startTime = System.currentTimeMillis();
+		while (stillWaiting(numExpectedTableLines)) {
+			if (System.currentTimeMillis() - startTime > millisecondTimeout)
+				fail("Timeout waiting for " + numExpectedTableLines
+						+ " lines in table.");
+			dispatchEvents();
 		}
+	}
+
+	protected void dispatchEvents() {
+		PlatformUI.getWorkbench().getDisplay().readAndDispatch();
+	}
+
+	protected boolean stillWaiting(int numExpectedTableLines)
+			throws PartInitException {
+		return hasNotTerminated() || getNumTableItems() < numExpectedTableLines;
+	}
+
+	protected int getNumTableItems() throws PartInitException {
+		return getTable().getItemCount();
 	}
 
 	protected void setUp() throws Exception {
