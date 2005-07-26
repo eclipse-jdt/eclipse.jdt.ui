@@ -1,4 +1,4 @@
-package controlStatement_in;
+package controlStatement_out;
 
 public class TestEnhancedForOne {
 	public void main() {
