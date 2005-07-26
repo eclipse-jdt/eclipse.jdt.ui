@@ -798,5 +798,16 @@ public class JavaHeuristicScannerTest extends TestCase {
 		Assert.assertEquals("	", indent);
 	}
 	
+	public void testBlocksInCaseStatements() {
+		fDocument.set(
+				"		switch (i) {\n" + 
+				"			case 1:\n" + 
+				"				new Runnable() {\n" + 
+				"");
+		
+		String indent= fScanner.computeIndentation(fDocument.getLength()).toString();
+		Assert.assertEquals("					", indent);
+	}
+	
 }
 

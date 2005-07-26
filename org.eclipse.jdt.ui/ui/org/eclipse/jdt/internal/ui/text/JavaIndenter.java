@@ -658,7 +658,6 @@ public class JavaIndenter {
 					// exit on all block introducers
 					case Symbols.TokenIF:
 					case Symbols.TokenELSE:
-					case Symbols.TokenCOLON:
 					case Symbols.TokenCATCH:
 					case Symbols.TokenDO:
 					case Symbols.TokenWHILE:
