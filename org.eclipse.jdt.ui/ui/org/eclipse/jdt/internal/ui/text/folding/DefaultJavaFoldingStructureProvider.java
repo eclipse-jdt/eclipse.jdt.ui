@@ -578,6 +578,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		boolean createProjection= false;
 
 		boolean collapse= false;
+		boolean collapseCode= true;
 		switch (element.getElementType()) {
 
 			case IJavaElement.IMPORT_CONTAINER:
@@ -585,8 +586,9 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				createProjection= true;
 				break;
 			case IJavaElement.TYPE:
-				collapse= fAllowCollapsing && fCollapseInnerTypes && isInnerType((IType) element);
-				createProjection= ((IMember) element).getDeclaringType() != null;
+				collapseCode= isInnerType((IType) element);
+				collapse= fAllowCollapsing && fCollapseInnerTypes && collapseCode;
+				createProjection= true;
 				break;
 			case IJavaElement.METHOD:
 				collapse= fAllowCollapsing && fCollapseMethods;
@@ -610,10 +612,12 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 						map.put(new JavaProjectionAnnotation(element, commentCollapse, true), position);
 					}
 				}
-				// code
-				Position position= createProjectionPosition(regions[regions.length - 1], element);
-				if (position != null)
-					map.put(new JavaProjectionAnnotation(element, collapse, false), position);
+				// code - don't create a folding region for the main type
+				if (collapseCode) {
+					Position position= createProjectionPosition(regions[regions.length - 1], element);
+					if (position != null)
+						map.put(new JavaProjectionAnnotation(element, collapse, false), position);
+				}
 			}
 		}
 	}
