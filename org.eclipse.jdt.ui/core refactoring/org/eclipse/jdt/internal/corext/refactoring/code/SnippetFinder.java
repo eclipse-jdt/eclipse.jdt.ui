@@ -48,6 +48,19 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 		public void add(ASTNode node) {
 			fNodes.add(node);
 		}
+		public boolean hasCorrectNesting(ASTNode node) {
+			if (fNodes.size() == 0)
+				return true;
+			ASTNode parent= node.getParent();
+			if(((ASTNode)fNodes.get(0)).getParent() != parent)
+				return false;
+			// Here we know that we have two elements. In this case the
+			// parent must be a block or a switch statement. Otherwise a 
+			// snippet like "if (true) foo(); else foo();" would match 
+			// the pattern "foo(); foo();"
+			int nodeType= parent.getNodeType();
+			return nodeType == ASTNode.BLOCK || nodeType == ASTNode.SWITCH_STATEMENT;
+		}
 		public ASTNode[] getNodes() {
 			return (ASTNode[])fNodes.toArray(new ASTNode[fNodes.size()]);
 		}
@@ -201,7 +214,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 	private boolean matches(ASTNode node) {
 		if (isSnippetNode(node))
 			return false;
-		if (node.subtreeMatch(fMatcher, fSnippet[fIndex])) {
+		if (node.subtreeMatch(fMatcher, fSnippet[fIndex]) && fMatch.hasCorrectNesting(node)) {
 			fMatch.add(node);
 			fIndex++;
 			if (fIndex == fSnippet.length) {

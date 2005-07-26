@@ -1663,6 +1663,26 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		duplicatesTest();
 	}
 	
+	public void test965() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test966() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test967() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test968() throws Exception {
+		duplicatesTest();
+	}
+	
+	public void test969() throws Exception {
+		duplicatesTest();
+	}
+	
 	//---- Test code in initializers -----------------------------------------------
 	
 	public void test1000() throws Exception {

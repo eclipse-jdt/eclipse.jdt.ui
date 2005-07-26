@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -116,7 +117,6 @@ public class CallInliner {
 	
 	private int fInsertionIndex;
 	private ListRewrite fListRewrite;
-	private ASTNode fNodeForListRewrite;
 	
 	private boolean fNeedsStatement;
 	private ASTNode fTargetNode;
@@ -742,25 +742,22 @@ public class CallInliner {
 		int type= container.getNodeType();
 		if (type == ASTNode.BLOCK) { 
 			Block block= (Block)container;
-			if (block != fNodeForListRewrite) {
-				fListRewrite= fRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-				fNodeForListRewrite= block;
-			}
+			fListRewrite= fRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
 			fInsertionIndex= fListRewrite.getRewrittenList().indexOf(parentStatement);
 		} else if (type == ASTNode.SWITCH_STATEMENT) {
 			SwitchStatement switchStatement= (SwitchStatement)container;
-			if (switchStatement != fNodeForListRewrite) {
-				fListRewrite= fRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
-				fNodeForListRewrite= switchStatement;
-			}
+			fListRewrite= fRewrite.getListRewrite(switchStatement, SwitchStatement.STATEMENTS_PROPERTY);
 			fInsertionIndex= fListRewrite.getRewrittenList().indexOf(parentStatement);
-		} else if (isControlStatement(container)) {
+		} else if (isControlStatement(container) || type == ASTNode.LABELED_STATEMENT) {
 			fNeedsStatement= true;
 			if (nos > 1) {
 				Block block= fInvocation.getAST().newBlock();
 				fInsertionIndex= 0;
 				Statement currentStatement= null;
 				switch(type) {
+					case ASTNode.LABELED_STATEMENT:
+						currentStatement= ((LabeledStatement)container).getBody();
+						break;
 					case ASTNode.FOR_STATEMENT:
 						currentStatement= ((ForStatement)container).getBody();
 						break;
@@ -786,7 +783,6 @@ public class CallInliner {
 				Assert.isNotNull(currentStatement);
 				fRewrite.replace(currentStatement, block, null);
 				fListRewrite= fRewrite.getListRewrite(block, Block.STATEMENTS_PROPERTY);
-				fNodeForListRewrite= block;
 				// The method to be inlined is not the body of the control statement.
 				if (currentStatement != fTargetNode) {
 					fListRewrite.insertLast(fRewrite.createCopyTarget(currentStatement), null);
