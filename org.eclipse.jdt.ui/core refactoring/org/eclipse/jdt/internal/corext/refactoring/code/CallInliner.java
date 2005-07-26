@@ -57,6 +57,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.IfStatement;
+import org.eclipse.jdt.core.dom.LabeledStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -754,13 +755,16 @@ public class CallInliner {
 				fNodeForListRewrite= switchStatement;
 			}
 			fInsertionIndex= fListRewrite.getRewrittenList().indexOf(parentStatement);
-		} else if (isControlStatement(container)) {
+		} else if (isControlStatement(container) || type == ASTNode.LABELED_STATEMENT) {
 			fNeedsStatement= true;
 			if (nos > 1) {
 				Block block= fInvocation.getAST().newBlock();
 				fInsertionIndex= 0;
 				Statement currentStatement= null;
 				switch(type) {
+					case ASTNode.LABELED_STATEMENT:
+						currentStatement= ((LabeledStatement)container).getBody();
+						break;
 					case ASTNode.FOR_STATEMENT:
 						currentStatement= ((ForStatement)container).getBody();
 						break;

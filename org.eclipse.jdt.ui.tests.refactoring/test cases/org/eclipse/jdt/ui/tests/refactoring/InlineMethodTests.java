@@ -542,6 +542,14 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performControlStatementTest();
 	}
 
+	public void testLabelOne() throws Exception {
+		performControlStatementTest();
+	}
+	
+	public void testLabelTwo() throws Exception {
+		performControlStatementTest();
+	}
+	
 	/* *********************** Receiver Tests ******************************* */
 		
 	private void performReceiverTest() throws Exception {
