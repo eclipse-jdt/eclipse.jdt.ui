@@ -378,7 +378,6 @@ public class ContentProviderTests1 extends TestCase {
 		JavaProjectHelper.delete(fJProject1);
 		JavaProjectHelper.delete(fJProject2);
 		page.hideView(fMyPart);
-		fMyPart.dispose();
 		
 		if (fEnableAutoBuildAfterTesting)
 			JavaProjectHelper.setAutoBuilding(true);

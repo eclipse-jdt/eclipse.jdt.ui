@@ -536,17 +536,15 @@ public class PackagesViewDeltaTests extends TestCase {
 		fPage= fWorkbench.getActiveWorkbenchWindow().getActivePage();
 		assertNotNull(fPage);
 
-		//just testing to make sure my part can be created
-		IViewPart myPart= new MockPluginView();
-		assertNotNull(myPart);
-
-		myPart= fPage.showView("org.eclipse.jdt.ui.tests.browsing.MockPluginView"); //$NON-NLS-1$
+		MockPluginView.setListState(false);
+		IViewPart myPart= fPage.showView("org.eclipse.jdt.ui.tests.browsing.MockPluginView"); //$NON-NLS-1$
 		if (myPart instanceof MockPluginView) {
 			fMyPart= (MockPluginView) myPart;
 			fProvider= (ITreeContentProvider) fMyPart.getTreeViewer().getContentProvider();
 			JavaCore.removeElementChangedListener((IElementChangedListener) fProvider);
-		} else
+		} else {
 			assertTrue("Unable to get view", false); //$NON-NLS-1$
+		}
 
 		assertNotNull(fProvider);
 	}
@@ -559,7 +557,6 @@ public class PackagesViewDeltaTests extends TestCase {
 		JavaProjectHelper.delete(fJProject);
 		fProvider.inputChanged(null, null, null);
 		fPage.hideView(fMyPart);
-		fMyPart.dispose();
 
 		if (fEnableAutoBuildAfterTesting)
 			JavaProjectHelper.setAutoBuilding(true);

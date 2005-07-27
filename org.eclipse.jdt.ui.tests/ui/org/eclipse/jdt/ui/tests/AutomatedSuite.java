@@ -16,6 +16,7 @@ import junit.framework.TestSuite;
 import org.eclipse.jdt.testplugin.TestOptionsSetup;
 
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests;
+import org.eclipse.jdt.ui.tests.browsing.PackagesViewContentProviderTests2;
 import org.eclipse.jdt.ui.tests.browsing.PackagesViewDeltaTests;
 import org.eclipse.jdt.ui.tests.callhierarchy.CallHierarchyContentProviderTest;
 import org.eclipse.jdt.ui.tests.core.CoreTests;
@@ -54,6 +55,7 @@ public class AutomatedSuite extends TestSuite {
 		addTest(PackageExplorerTests.suite());
 		
 		addTest(PackagesViewContentProviderTests.suite());
+		addTest(PackagesViewContentProviderTests2.suite());
 		addTest(PackagesViewDeltaTests.suite());
 		
 		addTest(CallHierarchyContentProviderTest.suite());

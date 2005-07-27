@@ -433,11 +433,8 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		fPage= fWorkbench.getActiveWorkbenchWindow().getActivePage();
 		assertNotNull(fPage);
 		
-		//just testing to make sure my part can be created
-		IViewPart myPart= new MockPluginView();
-		((MockPluginView)myPart).setListState(true);
-
-		myPart= fPage.showView("org.eclipse.jdt.ui.tests.browsing.MockPluginView");//$NON-NLS-1$
+		MockPluginView.setListState(true);
+		IViewPart myPart= fPage.showView("org.eclipse.jdt.ui.tests.browsing.MockPluginView");//$NON-NLS-1$
 		if (myPart instanceof MockPluginView) {
 			fMyPart= (MockPluginView) myPart;
 			
@@ -445,7 +442,9 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 			//create map and set listener	
 			fProvider.inputChanged(null,null,fJProject2);
 			JavaCore.removeElementChangedListener((IElementChangedListener) fProvider);
-		} else assertTrue("Unable to get view",false);//$NON-NLS-1$
+		} else {
+			assertTrue("Unable to get view",false);//$NON-NLS-1$
+		}
 	
 		assertNotNull(fProvider);		
 	}
@@ -459,7 +458,6 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		JavaProjectHelper.delete(fJProject2);
 		fProvider.inputChanged(null, null, null);
 		fPage.hideView(fMyPart);
-		fMyPart.dispose();
 		
 		if (fEnableAutoBuildAfterTesting)
 			JavaProjectHelper.setAutoBuilding(true);

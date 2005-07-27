@@ -40,7 +40,9 @@ public class MockPluginView extends PackagesView {
 	private List fAddedParentObject;
 	private List fRefreshedObject;
 
-	private boolean fListState;
+	// We have to make this static since it must be set
+	// before we create an instance via showView.
+	private static boolean fgListState;
 	
 	public MockPluginView() {
 		super();
@@ -74,15 +76,15 @@ public class MockPluginView extends PackagesView {
 	 * @see org.eclipse.jdt.internal.ui.browsing.PackagesView#isInListState()
 	 */
 	protected boolean isInListState(){
-		return fListState;	
+		return fgListState;	
 	}
 	
 	/**
 	 * Set the view is in flat or hierarchical state.
 	 * @param state
 	 */
-	void setListState(boolean state){
-		fListState= state;	
+	static void setListState(boolean state){
+		fgListState= state;	
 	}
 	
 	public void clear() {
