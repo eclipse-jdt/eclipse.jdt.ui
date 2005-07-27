@@ -253,7 +253,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 
 
 	private static boolean isInside(int offset, int start, int end) {
-		return offset >= start && offset < end;
+		return offset == start || (offset > start && offset < end); // make sure to handle 0-length ranges
 	}
 
 	/**
