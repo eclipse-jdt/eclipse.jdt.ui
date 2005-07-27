@@ -2667,6 +2667,67 @@ public class ImportOrganizeTest extends CoreTests {
 		buf.append("}\n");
 		assertEqualString(cu.getSource(), buf.toString());
 	}
+	
+	public void testTypeArgumentImports() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("public class B {\n");
+		buf.append("	   public B() {\n");
+		buf.append("        <File> this(null);\n"); // constructor invocation
+		buf.append("    }\n");
+		buf.append("    public <T> B(T t) {\n");
+		buf.append("    }\n");
+		buf.append("    public <T> void foo(T t) {\n");
+		buf.append("        this.<Socket> foo(null);\n");  // method invocation
+		buf.append("        new<URL> B(null);\n");  // class instance creation
+		buf.append("    }\n");
+		buf.append("    class C extends B {\n");
+		buf.append("        public C() {\n");
+		buf.append("            <Vector> super(null);\n");  // super constructor invocation
+		buf.append("            super.<HashMap> foo(null);\n"); // super method invocation
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+
+		String[] order= new String[] { "", "#"};
+		IChooseImportQuery query= createQuery("B", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.io.File;\n");
+		buf.append("import java.net.Socket;\n");
+		buf.append("import java.net.URL;\n");
+		buf.append("import java.util.HashMap;\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");
+		buf.append("public class B {\n");
+		buf.append("	   public B() {\n");
+		buf.append("        <File> this(null);\n");
+		buf.append("    }\n");
+		buf.append("    public <T> B(T t) {\n");
+		buf.append("    }\n");
+		buf.append("    public <T> void foo(T t) {\n");
+		buf.append("        this.<Socket> foo(null);\n");
+		buf.append("        new<URL> B(null);\n");
+		buf.append("    }\n");
+		buf.append("    class C extends B {\n");
+		buf.append("        public C() {\n");
+		buf.append("            <Vector> super(null);\n");
+		buf.append("            super.<HashMap> foo(null);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
 
 	public void testAnnotationImports1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
