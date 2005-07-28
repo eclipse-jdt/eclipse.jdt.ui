@@ -11,6 +11,7 @@ public class JUnitJUnitTests {
 		suite.addTestSuite(WrappingSystemTest.class);
 		suite.addTestSuite(TestPriorization.class);
 		suite.addTestSuite(WrappingUnitTest.class);
+		suite.addTestSuite(TestTestSearchEngine.class);
 		//$JUnit-END$
 		return suite;
 	}
