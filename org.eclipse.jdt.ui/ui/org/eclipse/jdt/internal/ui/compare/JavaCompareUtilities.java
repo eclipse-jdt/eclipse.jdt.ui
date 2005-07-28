@@ -10,19 +10,22 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
-import java.io.*;
-import java.net.*;
-import java.util.*;
-
-import org.eclipse.swt.graphics.Image;
-
-import org.eclipse.compare.CompareConfiguration;
-import org.eclipse.compare.IEncodedStreamContentAccessor;
-import org.eclipse.compare.IStreamContentAccessor;
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.UnsupportedEncodingException;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.MissingResourceException;
+import java.util.ResourceBundle;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -32,14 +35,18 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentPartitioner;
 import org.eclipse.jface.text.rules.FastPartitioner;
 
+import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.compare.IEncodedStreamContentAccessor;
+import org.eclipse.compare.IStreamContentAccessor;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.JavaTextTools;
-
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -238,22 +245,8 @@ class JavaCompareUtilities {
 	}
 
 	static ImageDescriptor getImageDescriptor(String relativePath) {
-		
-		JavaPlugin plugin= JavaPlugin.getDefault();
-
-		URL installURL= null;
-		if (plugin != null)
-			installURL= plugin.getBundle().getEntry("/");  //$NON-NLS-1$
-					
-		if (installURL != null) {
-			try {
-				URL url= new URL(installURL, "icons/full/" + relativePath); //$NON-NLS-1$
-				return ImageDescriptor.createFromURL(url);
-			} catch (MalformedURLException e) {
-				Assert.isTrue(false);
-			}
-		}
-		return null;
+		IPath path= JavaPluginImages.ICONS_PATH.append(relativePath);
+		return JavaPluginImages.createImageDescriptor(JavaPlugin.getDefault().getBundle(), path, true);
 	}
 	
 	static boolean getBoolean(CompareConfiguration cc, String key, boolean dflt) {

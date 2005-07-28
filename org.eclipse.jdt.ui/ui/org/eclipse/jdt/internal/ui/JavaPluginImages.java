@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.HashMap;
 import java.util.Iterator;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.graphics.Image;
 
@@ -21,22 +24,18 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.resource.ImageRegistry;
 
+import org.osgi.framework.Bundle;
+
 
 /**
  * Bundle of most images used by the Java plug-in.
  */
 public class JavaPluginImages {
 
+	public static final IPath ICONS_PATH= new Path("$nl$/icons/full"); //$NON-NLS-1$
+	
 	private static final String NAME_PREFIX= "org.eclipse.jdt.ui."; //$NON-NLS-1$
 	private static final int    NAME_PREFIX_LENGTH= NAME_PREFIX.length();
-
-	private static URL fgIconBaseURL= null;
-	
-	// Determine display depth. If depth > 4 then we use high color images. Otherwise low color
-	// images are used
-	static {
-		fgIconBaseURL= JavaPlugin.getDefault().getBundle().getEntry("/icons/full/"); //$NON-NLS-1$
-	}
 	
 	// The plug-in registry
 	private static ImageRegistry fgImageRegistry= null;
@@ -494,22 +493,15 @@ public class JavaPluginImages {
 	//---- Helper methods to access icons on the file system --------------------------------------
 
 	private static void setImageDescriptors(IAction action, String type, String relPath) {
-		
-		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("d" + type, relPath)); //$NON-NLS-1$
-			if (id != null)
-				action.setDisabledImageDescriptor(id);
-		} catch (MalformedURLException e) {
-		}
+		ImageDescriptor id= create("d" + type, relPath, false); //$NON-NLS-1$
+		if (id != null)
+			action.setDisabledImageDescriptor(id);
 	
 		/*
-		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("c" + type, relPath)); //$NON-NLS-1$
-			if (id != null)
-				action.setHoverImageDescriptor(id);
-		} catch (MalformedURLException e) {
-		}
-		*/
+		 * id= create("c" + type, relPath, false); //$NON-NLS-1$
+		 * if (id != null)
+		 * 		action.setHoverImageDescriptor(id);
+		 */
 	
 		ImageDescriptor descriptor= create("e" + type, relPath); //$NON-NLS-1$
 		action.setHoverImageDescriptor(descriptor);
@@ -517,52 +509,67 @@ public class JavaPluginImages {
 	}
 	
 	private static ImageDescriptor createManaged(String prefix, String name) {
-		try {
-			ImageDescriptor result= ImageDescriptor.createFromURL(makeIconFileURL(prefix, name.substring(NAME_PREFIX_LENGTH)));
-			if (fgAvoidSWTErrorMap == null) {
-				fgAvoidSWTErrorMap= new HashMap();
-			}
-			fgAvoidSWTErrorMap.put(name, result);
-			if (fgImageRegistry != null) {
-				JavaPlugin.logErrorMessage("Image registry already defined"); //$NON-NLS-1$
-			}
-			return result;
-		} catch (MalformedURLException e) {
-			return ImageDescriptor.getMissingImageDescriptor();
+		ImageDescriptor result= create(prefix, name.substring(NAME_PREFIX_LENGTH), true);
+		
+		if (fgAvoidSWTErrorMap == null) {
+			fgAvoidSWTErrorMap= new HashMap();
 		}
+		fgAvoidSWTErrorMap.put(name, result);
+		if (fgImageRegistry != null) {
+			JavaPlugin.logErrorMessage("Image registry already defined"); //$NON-NLS-1$
+		}
+		return result;
 	}
 	
 	private static ImageDescriptor createManaged(String prefix, String name, String key) {
-		try {
-			ImageDescriptor result= ImageDescriptor.createFromURL(makeIconFileURL(prefix, name.substring(NAME_PREFIX_LENGTH)));
-			if (fgAvoidSWTErrorMap == null) {
-				fgAvoidSWTErrorMap= new HashMap();
-			}
-			fgAvoidSWTErrorMap.put(key, result);
-			if (fgImageRegistry != null) {
-				JavaPlugin.logErrorMessage("Image registry already defined"); //$NON-NLS-1$
-			}
-			return result;
-		} catch (MalformedURLException e) {
-			return ImageDescriptor.getMissingImageDescriptor();
+		ImageDescriptor result= create(prefix, name.substring(NAME_PREFIX_LENGTH), true);
+		
+		if (fgAvoidSWTErrorMap == null) {
+			fgAvoidSWTErrorMap= new HashMap();
 		}
+		fgAvoidSWTErrorMap.put(key, result);
+		if (fgImageRegistry != null) {
+			JavaPlugin.logErrorMessage("Image registry already defined"); //$NON-NLS-1$
+		}
+		return result;
 	}
 	
+	/*
+	 * Creates an image descriptor for the given prefix and name in the JDT UI bundle. The path can
+	 * contain variables like $NL$.
+	 * If no image could be found, <code>useMissingImageDescriptor</code> decides if either
+	 * the 'missing image descriptor' is returned or <code>null</code>.
+	 * or <code>null</code>.
+	 */
+	private static ImageDescriptor create(String prefix, String name, boolean useMissingImageDescriptor) {
+		IPath path= ICONS_PATH.append(prefix).append(name);
+		return createImageDescriptor(JavaPlugin.getDefault().getBundle(), path, useMissingImageDescriptor);
+	}
+	
+	/*
+	 * Creates an image descriptor for the given prefix and name in the JDT UI bundle. The path can
+	 * contain variables like $NL$.
+	 * If no image could be found, the 'missing image descriptor' is returned.
+	 */
 	private static ImageDescriptor create(String prefix, String name) {
-		try {
-			return ImageDescriptor.createFromURL(makeIconFileURL(prefix, name));
-		} catch (MalformedURLException e) {
+		return create(prefix, name, true);
+	}
+		
+	/*
+	 * Creates an image descriptor for the given path in a bundle. The path can contain variables
+	 * like $NL$.
+	 * If no image could be found, <code>useMissingImageDescriptor</code> decides if either
+	 * the 'missing image descriptor' is returned or <code>null</code>.
+	 * Added for 3.1.1.
+	 */
+	public static ImageDescriptor createImageDescriptor(Bundle bundle, IPath path, boolean useMissingImageDescriptor) {
+		URL url= Platform.find(bundle, path);
+		if (url != null) {
+			return ImageDescriptor.createFromURL(url);
+		}
+		if (useMissingImageDescriptor) {
 			return ImageDescriptor.getMissingImageDescriptor();
 		}
+		return null;
 	}
-	
-	private static URL makeIconFileURL(String prefix, String name) throws MalformedURLException {
-		if (fgIconBaseURL == null)
-			throw new MalformedURLException();
-			
-		StringBuffer buffer= new StringBuffer(prefix);
-		buffer.append('/');
-		buffer.append(name);
-		return new URL(fgIconBaseURL, buffer.toString());
-	}	
 }
