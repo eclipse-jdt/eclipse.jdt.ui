@@ -10,18 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
-import java.net.MalformedURLException;
-import java.net.URL;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.wizard.Wizard;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
+import org.osgi.framework.Bundle;
 
 public class OpenTypeWizardAction extends AbstractOpenWizardAction {
 
@@ -51,18 +51,12 @@ public class OpenTypeWizardAction extends AbstractOpenWizardAction {
 	}
 
 	private ImageDescriptor getIconFromConfig(IConfigurationElement config) {
-		try {
-			String iconName = config.getAttribute(ATT_ICON);
-			if (iconName != null) {
-				URL pluginInstallUrl = Platform.getBundle(config.getNamespace()).getEntry("/"); //$NON-NLS-1$			
-				return ImageDescriptor.createFromURL(new URL(pluginInstallUrl, iconName));
-			}
-			return null;
-		} catch (MalformedURLException exception) {
-			JavaPlugin.logErrorMessage("Unable to load wizard icon"); //$NON-NLS-1$
+		String iconName = config.getAttribute(ATT_ICON);
+		if (iconName != null) {
+			Bundle bundle= Platform.getBundle(config.getNamespace());	
+			return JavaPluginImages.createImageDescriptor(bundle, new Path(iconName), true);
 		}
-		return ImageDescriptor.getMissingImageDescriptor();
-		
+		return null;
 	}
 	
 	/* (non-Javadoc)
