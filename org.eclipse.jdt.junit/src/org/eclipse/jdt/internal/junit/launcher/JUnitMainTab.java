@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.junit.launcher;
 
  
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -40,7 +39,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -280,13 +278,7 @@ public class JUnitMainTab extends JUnitLaunchConfigurationTab {
 
 	
 	protected static Image createImage(String path) {
-		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL(path));
-			return id.createImage();
-		} catch (MalformedURLException e) {
-			// fall through
-		}  
-		return null;
+		return JUnitPlugin.getImageDescriptor(path).createImage();
 	}
 
 

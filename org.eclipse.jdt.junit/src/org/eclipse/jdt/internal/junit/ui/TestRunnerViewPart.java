@@ -17,7 +17,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
@@ -66,7 +65,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorActionBarContributor;
@@ -443,11 +441,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 	private class ActivateOnErrorAction extends Action {
 		public ActivateOnErrorAction() {
 			super(JUnitMessages.TestRunnerViewPart_activate_on_failure_only, IAction.AS_CHECK_BOX);
-			try {
-				setImageDescriptor(ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("obj16/failures.gif"))); //$NON-NLS-1$
-			} catch (MalformedURLException e) {
-				// don't use any image
-			}
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/failures.gif")); //$NON-NLS-1$
 			update();
 		}
 		public void update() {
@@ -1455,13 +1449,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 	}
 	
 	public static Image createImage(String path) {
-		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL(path));
-			return id.createImage();
-		} catch (MalformedURLException e) {
-			// fall through
-		}  
-		return null;
+		return JUnitPlugin.getImageDescriptor(path).createImage();
 	}
 
 	private boolean isDisposed() {

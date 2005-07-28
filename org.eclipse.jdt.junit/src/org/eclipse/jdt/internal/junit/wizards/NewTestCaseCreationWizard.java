@@ -10,11 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.wizards;
 
-import java.net.MalformedURLException;
-
 import org.eclipse.core.resources.IResource;
-
-import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jdt.core.IType;
 
@@ -38,12 +34,7 @@ public class NewTestCaseCreationWizard extends JUnitWizard {
 	}
 
 	protected void initializeDefaultPageImageDescriptor() {
-		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("wizban/newtest_wiz.gif")); //$NON-NLS-1$
-			setDefaultPageImageDescriptor(id);
-		} catch (MalformedURLException e) {
-			// Should not happen.  Ignore.
-		}
+		setDefaultPageImageDescriptor(JUnitPlugin.getImageDescriptor("wizban/newtest_wiz.gif")); //$NON-NLS-1$
 	}
 
 	/*

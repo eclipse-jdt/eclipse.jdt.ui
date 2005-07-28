@@ -14,10 +14,14 @@ import java.net.URL;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import org.osgi.framework.Bundle;
 
 /**
  * The main plugin class to be used in the desktop.
@@ -48,10 +52,16 @@ public class ExampleProjectsPlugin extends AbstractUIPlugin {
 		return ResourcesPlugin.getWorkspace();
 	}
 
-	public ImageDescriptor getImageDescriptor(String name) {
-		URL url= ExampleProjectsPlugin.getDefault().getBundle().getEntry(name);
-		return ImageDescriptor.createFromURL(url);
-	}	
+	/*
+	 * Since 3.1.1. Load from icon paths with $NL$
+	 */
+	public static ImageDescriptor createImageDescriptor(Bundle bundle, IPath path) {
+		URL url= Platform.find(bundle, path);
+		if (url != null) {
+			return ImageDescriptor.createFromURL(url);
+		}
+		return ImageDescriptor.getMissingImageDescriptor();
+	}
 	
 	public static String getPluginId() {
 		return "org.eclipse.jdt.ui.examples.projects"; //$NON-NLS-1$

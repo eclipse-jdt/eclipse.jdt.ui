@@ -14,7 +14,6 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.AbstractSet;
 import java.util.ArrayList;
@@ -22,35 +21,27 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchListener;
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
-import org.eclipse.jdt.junit.ITestRunListener;
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.resource.ImageDescriptor;
+
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -59,6 +50,28 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
+
+import org.eclipse.debug.core.DebugPlugin;
+import org.eclipse.debug.core.ILaunch;
+import org.eclipse.debug.core.ILaunchConfiguration;
+import org.eclipse.debug.core.ILaunchListener;
+import org.eclipse.debug.core.ILaunchManager;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+
+import org.eclipse.jdt.junit.ITestRunListener;
+
+import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+
+import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
 
 /**
@@ -83,7 +96,8 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 */
 	public final static String JUNIT_HOME= "JUNIT_HOME"; //$NON-NLS-1$
 
-	private static URL fgIconBaseURL;
+	private static final IPath ICONS_PATH= new Path("$nl$/icons/full"); //$NON-NLS-1$
+	
 
 	/**
 	 * Use to track new launches. We need to do this
@@ -107,12 +121,6 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 
 	public JUnitPlugin() {
 		fgPlugin= this;
-		String pathSuffix= "icons/full/"; //$NON-NLS-1$
-		try {
-			fgIconBaseURL= new URL(Platform.getBundle(PLUGIN_ID).getEntry("/"), pathSuffix); //$NON-NLS-1$
-		} catch (MalformedURLException e) {
-			// do nothing
-		}
 	}
 	
 	public static JUnitPlugin getDefault() {
@@ -159,20 +167,22 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		getDefault().getLog().log(status);
 	}
 
-	public static URL makeIconFileURL(String name) throws MalformedURLException {
-		if (JUnitPlugin.fgIconBaseURL == null)
-			throw new MalformedURLException();
-		return new URL(JUnitPlugin.fgIconBaseURL, name);
+	public static ImageDescriptor getImageDescriptor(String relativePath) {
+		IPath path= ICONS_PATH.append(relativePath);
+		return createImageDescriptor(getDefault().getBundle(), path);
 	}
-
-	static ImageDescriptor getImageDescriptor(String relativePath) {
-		try {
-			return ImageDescriptor.createFromURL(makeIconFileURL(relativePath));
-		} catch (MalformedURLException e) {
-			// should not happen
-			return ImageDescriptor.getMissingImageDescriptor();
+	
+	/*
+	 * Since 3.1.1. Load from icon paths with $NL$
+	 */
+	public static ImageDescriptor createImageDescriptor(Bundle bundle, IPath path) {
+		URL url= Platform.find(bundle, path);
+		if (url != null) {
+			return ImageDescriptor.createFromURL(url);
 		}
+		return ImageDescriptor.getMissingImageDescriptor();
 	}
+	
 
 	/*
 	 * @see ILaunchListener#launchRemoved(ILaunch)

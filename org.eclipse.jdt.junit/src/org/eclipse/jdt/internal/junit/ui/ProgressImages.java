@@ -10,26 +10,22 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
-import java.net.MalformedURLException;
-
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 
 /**
  * Manages a set of images that can show progress in the image itself.
  */
 public class ProgressImages {
-	static final int PROGRESS_STEPS= 9;
+	private static final int PROGRESS_STEPS= 9;
 	
-	static final String BASE= "prgss/"; //$NON-NLS-1$
-	static final String FAILURE= "ff"; //$NON-NLS-1$
-	static final String OK= "ss"; //$NON-NLS-1$
+	private static final String BASE= "prgss/"; //$NON-NLS-1$
+	private static final String FAILURE= "ff"; //$NON-NLS-1$
+	private static final String OK= "ss"; //$NON-NLS-1$
 	
-	Image[] fOKImages= new Image[PROGRESS_STEPS];
-	Image[] fFailureImages= new Image[PROGRESS_STEPS];
-	Image fMissingImage= null;
+	private Image[] fOKImages= new Image[PROGRESS_STEPS];
+	private Image[] fFailureImages= new Image[PROGRESS_STEPS];
 	
-	void load() {
+	private void load() {
 		if (isLoaded())
 			return;
 			
@@ -41,24 +37,13 @@ public class ProgressImages {
 		}
 	}
 
-	Image createImage(String name) {
-		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL(name));
-			return id.createImage();
-		} catch (MalformedURLException e) {
-			// fall through
-		}  
-		if (fMissingImage == null) 
-			fMissingImage= ImageDescriptor.getMissingImageDescriptor().createImage();
-		return fMissingImage;
+	private Image createImage(String name) {
+		return JUnitPlugin.getImageDescriptor(name).createImage();
 	}
 	
 	public void dispose() {
 		if (!isLoaded())
 			return; 
-			
-		if (fMissingImage != null)
-			fMissingImage.dispose();	
 				
 		for (int i= 0; i < PROGRESS_STEPS; i++) {
 			fOKImages[i].dispose();
@@ -82,7 +67,7 @@ public class ProgressImages {
 		return fFailureImages[index];
 	}
 	
-	boolean isLoaded() {
+	private boolean isLoaded() {
 		return fOKImages[0] != null;
 	}	
 }
