@@ -19,6 +19,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExecutableExtension;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.widgets.Display;
 
@@ -26,7 +28,6 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 
@@ -40,6 +41,7 @@ import org.eclipse.ui.dialogs.IOverwriteQuery;
 import org.eclipse.ui.ide.IDE;
 import org.eclipse.ui.wizards.newresource.BasicNewProjectResourceWizard;
 import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
+import org.osgi.framework.Bundle;
 
 public class ExampleProjectCreationWizard extends Wizard implements INewWizard, IExecutableExtension {
 
@@ -56,8 +58,8 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 	private void initializeDefaultPageImageDescriptor(IConfigurationElement pageConfigElement) {
 		String banner= pageConfigElement.getAttribute("banner"); //$NON-NLS-1$
 		if (banner != null) {
-			ImageDescriptor desc= ExampleProjectsPlugin.getDefault().getImageDescriptor(banner);
-			setDefaultPageImageDescriptor(desc);
+			Bundle bundle= Platform.getBundle(pageConfigElement.getNamespace());
+			setDefaultPageImageDescriptor(ExampleProjectsPlugin.createImageDescriptor(bundle, new Path(banner)));
 		}
 	}
 

@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
-import java.net.MalformedURLException;
-
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.swt.graphics.Image;
 
 /**
@@ -27,7 +24,6 @@ public class ProgressImages {
 	
 	Image[] fOKImages= new Image[PROGRESS_STEPS];
 	Image[] fFailureImages= new Image[PROGRESS_STEPS];
-	Image fMissingImage= null;
 	
 	void load() {
 		if (isLoaded())
@@ -41,24 +37,13 @@ public class ProgressImages {
 		}
 	}
 
-	Image createImage(String name) {
-		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL(name));
-			return id.createImage();
-		} catch (MalformedURLException e) {
-			// fall through
-		}  
-		if (fMissingImage == null) 
-			fMissingImage= ImageDescriptor.getMissingImageDescriptor().createImage();
-		return fMissingImage;
+	private Image createImage(String name) {
+		return JUnitPlugin.getImageDescriptor(name).createImage();
 	}
 	
 	public void dispose() {
 		if (!isLoaded())
 			return; 
-			
-		if (fMissingImage != null)
-			fMissingImage.dispose();	
 				
 		for (int i= 0; i < PROGRESS_STEPS; i++) {
 			fOKImages[i].dispose();

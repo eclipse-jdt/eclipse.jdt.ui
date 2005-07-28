@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.junit.wizards;
 
 import java.lang.reflect.InvocationTargetException;
-import java.net.MalformedURLException;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -20,7 +19,6 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.IEditorPart;
 
@@ -135,12 +133,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 	}
 	
 	protected void initializeDefaultPageImageDescriptor() {
-		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(JUnitPlugin.makeIconFileURL("wizban/newtest_wiz.gif")); //$NON-NLS-1$
-			setDefaultPageImageDescriptor(id);
-	} catch (MalformedURLException e) {
-			// Should not happen.  Ignore.
-		}
+		setDefaultPageImageDescriptor(JUnitPlugin.getImageDescriptor("wizban/newtest_wiz.gif")); //$NON-NLS-1$
 	}
 
 	public IRunnableWithProgress getRunnableSave(final IEditorPart cu_ep) {
