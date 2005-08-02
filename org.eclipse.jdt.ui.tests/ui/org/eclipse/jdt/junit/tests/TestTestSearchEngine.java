@@ -156,6 +156,19 @@ public class TestTestSearchEngine extends TestCase {
 			}, result);
 	}
 	
+	public void testSubPackage() throws Exception {
+		IPackageFragment p= fRoot.createPackageFragment("p", true, null);
+		ICompilationUnit test1= createCompilationUnit(p, 1);
+		
+		IPackageFragment q= fRoot.createPackageFragment("p.q", true, null);
+		createCompilationUnit(q, 2);
+		
+		IType[] result= TestSearchEngine.findTests(new Object[] {p});
+		assertEquals("Test case not found", new IType[] {
+				test1.getType("Test1")
+			}, result);
+	}
+	
 	protected void tearDown() throws Exception {
 		JavaProjectHelper.delete(fProject);
 		super.tearDown();
