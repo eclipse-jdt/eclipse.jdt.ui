@@ -696,10 +696,9 @@ public abstract class OptionsConfigurationBlock {
 			
 	
 	public void performDefaults() {
-		DefaultScope defaultScope= new DefaultScope();
 		for (int i= 0; i < fAllKeys.length; i++) {
 			Key curr= fAllKeys[i];
-			String defValue= curr.getStoredValue(defaultScope, null);
+			String defValue= curr.getStoredValue(fLookupOrder, true, fManager);
 			setValue(curr, defValue);
 		}
 		
