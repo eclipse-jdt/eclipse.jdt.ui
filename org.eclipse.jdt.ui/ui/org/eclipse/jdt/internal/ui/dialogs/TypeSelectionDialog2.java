@@ -224,7 +224,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	private void ensureConsistency() throws InvocationTargetException, InterruptedException {
 		// we only have to ensure histroy consistency here since the search engine
 		// takes care of working copies.
-		IRunnableWithProgress runnable= new IRunnableWithProgress() {
+		class ConsistencyRunnable implements IRunnableWithProgress {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				if (fgFirstTime) {
 					// Join the initalize after load job.
@@ -234,13 +234,21 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 				TypeInfoHistory history= TypeInfoHistory.getInstance();
 				if (fgFirstTime || history.isEmpty()) {
 					monitor.beginTask(JavaUIMessages.TypeSelectionDialog_progress_consistency, 100);
-					refreshSearchIndices(new SubProgressMonitor(monitor, 90));
-					history.checkConsistency(new SubProgressMonitor(monitor, 10));
+					if (history.needConsistencyCheck()) {
+						refreshSearchIndices(new SubProgressMonitor(monitor, 90));
+						history.checkConsistency(new SubProgressMonitor(monitor, 10));
+					} else {
+						refreshSearchIndices(monitor);
+					}
 					monitor.done();
 					fgFirstTime= false;
 				} else {
 					history.checkConsistency(monitor);
 				}
+			}
+			public boolean needsExecution() {
+				TypeInfoHistory history= TypeInfoHistory.getInstance();
+				return fgFirstTime || history.isEmpty() || history.needConsistencyCheck(); 
 			}
 			private void refreshSearchIndices(IProgressMonitor monitor) throws InvocationTargetException {
 				try {
@@ -258,7 +266,10 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 					throw new InvocationTargetException(e);
 				}
 			}
-		};
+		}
+		ConsistencyRunnable runnable= new ConsistencyRunnable();
+		if (!runnable.needsExecution())
+			return;
 		IRunnableContext context= fRunnableContext != null 
 			? fRunnableContext 
 			: PlatformUI.getWorkbench().getProgressService();
