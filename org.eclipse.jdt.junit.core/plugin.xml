@@ -10,7 +10,7 @@
          point="org.eclipse.ui.views">
       <view
             name="%View.label"
-            icon="icons/full/eview16/junit.gif"
+            icon="$nl$/icons/full/eview16/junit.gif"
             category="org.eclipse.jdt.ui.java"
             fastViewWidthRatio="0.40"
             class="org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart"
@@ -93,7 +93,7 @@
    <extension
          point="org.eclipse.debug.ui.launchConfigurationTypeImages">
       <launchConfigurationTypeImage
-            icon="icons/full/obj16/julaunch.gif"
+            icon="$nl$/icons/full/obj16/julaunch.gif"
             configTypeID="org.eclipse.jdt.junit.launchconfig"
             id="org.eclipse.jdt.junit.launchimage">
       </launchConfigurationTypeImage>
@@ -125,7 +125,7 @@
       </category>
       <wizard
             name="%TestCaseWizard.name"
-            icon="icons/full/etool16/new_testcase.gif"
+            icon="$nl$/icons/full/etool16/new_testcase.gif"
             category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
             id="org.eclipse.jdt.junit.wizards.NewTestCaseCreationWizard">
          <class
@@ -142,7 +142,7 @@
       </wizard>
       <wizard
             name="%TestSuiteWizard.name"
-            icon="icons/full/etool16/new_testsuite.gif"
+            icon="$nl$/icons/full/etool16/new_testsuite.gif"
             category="org.eclipse.jdt.ui.java/org.eclipse.jdt.junit"
             class="org.eclipse.jdt.internal.junit.wizards.NewTestSuiteCreationWizard"
             id="org.eclipse.jdt.junit.wizards.NewTestSuiteCreationWizard">
@@ -250,7 +250,7 @@
          point="org.eclipse.debug.ui.launchShortcuts">
       <shortcut
             label="%JUnitShortcut.label"
-            icon="icons/full/obj16/julaunch.gif"
+            icon="$nl$/icons/full/obj16/julaunch.gif"
             helpContextId="org.eclipse.jdt.junit.launch_shortcut"
             class="org.eclipse.jdt.internal.junit.launcher.JUnitLaunchShortcut"
             modes="run, debug"
