@@ -96,7 +96,7 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 			entry= JavaCore.newVariableEntry(
 				junitHome.append("junit.jar"),   //$NON-NLS-1$
 				//TODO: find a better solution than declaring a classpath variable
-				sourceHome.append("plugins/org.eclipse.jdt.source_3.1.0/src/org.junit_3.8.1/junitsrc.zip"),  //$NON-NLS-1$
+				sourceHome.append("plugins/org.eclipse.jdt.source_3.1.1/src/org.junit_3.8.1/junitsrc.zip"),  //$NON-NLS-1$
 				null
 			);
 		}
