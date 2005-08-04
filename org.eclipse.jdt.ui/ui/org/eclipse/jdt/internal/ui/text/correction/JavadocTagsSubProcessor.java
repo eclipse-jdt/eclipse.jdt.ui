@@ -372,7 +372,7 @@ public class JavadocTagsSubProcessor {
 			MethodDeclaration methodDecl= (MethodDeclaration) declaration;
 			IMethodBinding methodBinding= methodDecl.resolveBinding();
 			if (methodBinding != null) {
-				methodBinding= Bindings.findDeclarationInHierarchy(binding, methodBinding.getName(), methodBinding.getParameterTypes());
+				methodBinding= Bindings.findMethodDeclarationInHierarchy(binding, methodBinding);
 			}
 
 			String string= CodeGeneration.getMethodComment(cu, binding.getName(), methodDecl, methodBinding, String.valueOf('\n'));
