@@ -162,12 +162,16 @@ public final class RefactoringExecutionStarter {
 						if (element != null && MessageDialog.openQuestion(shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, message)) {
 
 							final IStructuredSelection selection= new StructuredSelection(element);
+							//TODO: should not hijack this ModifiyParametersAction.
+							// The action is set up on an editor, but we use it as if it were set up on a ViewPart.
+							boolean wasEnabled= action.isEnabled();
 							action.selectionChanged(selection);
 							if (action.isEnabled()) {
 								action.run(selection);
 							} else {
 								MessageDialog.openInformation(shell, ActionMessages.ModifyParameterAction_problem_title, ActionMessages.ModifyParameterAction_problem_message);
 							}
+							action.setEnabled(wasEnabled);
 						}
 						return;
 					}
