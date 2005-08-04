@@ -653,7 +653,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
         boolean declareFinal= false;
         boolean declareStatic= false;
-		passHelper(5, 23, 5, 23, "fA", declareStatic, declareFinal, initializeIn, accessModifier);
+		passHelper(6, 29, 6, 29, "fA", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 	
 	public void testMultiVariableDeclFragment02() throws Exception {
@@ -669,7 +669,7 @@ public class PromoteTempToFieldTests extends RefactoringTest{
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_METHOD;
         boolean declareFinal= false;
         boolean declareStatic= false;
-		passHelper(5, 35, 5, 35, "fC", declareStatic, declareFinal, initializeIn, accessModifier);
+		passHelper(5, 72, 5, 72, "fC", declareStatic, declareFinal, initializeIn, accessModifier);
 	}
 	
 	public void testMultiVariableDeclFragment04() throws Exception {
