@@ -391,7 +391,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	private static IMethodBinding findMethod(IMethodBinding methodBinding, ITypeBinding type) {
 		  if (methodBinding.getDeclaringClass().equals(type))
 			  return methodBinding;
-		  return Bindings.findOverriddenMethodInType(type, methodBinding);
+		  return Bindings.findMethodInType(type, methodBinding.getName(), methodBinding.getParameterTypes());
 	}
 
 	// copied from FullConstraintCreator

@@ -670,7 +670,7 @@ public class FullConstraintCreator extends ConstraintCreator{
 	protected static IMethodBinding findMethod(IMethodBinding methodBinding, ITypeBinding type) {
 		if (methodBinding.getDeclaringClass().equals(type))
 			return methodBinding;
-		return Bindings.findOverriddenMethodInType(type, methodBinding);
+		return Bindings.findMethodInType(type, methodBinding.getName(), methodBinding.getParameterTypes());
 	}
 
 	private static boolean isClassBinding(ITypeBinding typeBinding){

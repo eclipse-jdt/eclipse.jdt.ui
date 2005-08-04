@@ -236,7 +236,7 @@ public class ModifierCorrectionSubProcessor {
 		IMethodBinding overriddenInClass= null;
 		while (overriddenInClass == null && curr.getSuperclass() != null) {
 			curr= curr.getSuperclass();
-			overriddenInClass= Bindings.findOverriddenMethodInType(curr, method);
+			overriddenInClass= Bindings.findMethodInType(curr, method.getName(), method.getParameterTypes());
 		}
 		if (overriddenInClass != null) {
 			IMethodBinding overriddenDecl= overriddenInClass.getMethodDeclaration();

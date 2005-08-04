@@ -412,10 +412,13 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		if (returnTypeCv == null && ! hasParameterElementCvs)
 			return;
 		
+		String name= methodBinding.getName();
+		ITypeBinding[] parameterTypes= methodBinding.getParameterTypes();
+		
 		ITypeBinding[] allSuperTypes= Bindings.getAllSuperTypes(methodBinding.getDeclaringClass());
 		for (int i= 0; i < allSuperTypes.length; i++) {
 			ITypeBinding superType= allSuperTypes[i];
-			IMethodBinding superMethod= Bindings.findOverriddenMethodInType(superType, methodBinding);
+			IMethodBinding superMethod= Bindings.findMethodInType(superType, name, parameterTypes);
 			if (superMethod == null)
 				continue;
 			

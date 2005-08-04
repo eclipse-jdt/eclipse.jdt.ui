@@ -1686,7 +1686,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			if (methodBinding == null)
 				return;
 				
-			boolean isTopOfRipple= null == Bindings.findMethodDeclarationInHierarchy(typeBinding, methodBinding);
+			boolean isTopOfRipple= null == Bindings.findDeclarationInHierarchy(typeBinding, methodBinding.getName(), methodBinding.getParameterTypes());
 			//add tags: only iff top of ripple; change and remove: always.
 			//TODO: should have preference for adding tags in (overriding) methods (with template: todo, inheritDoc, ...)
 			
