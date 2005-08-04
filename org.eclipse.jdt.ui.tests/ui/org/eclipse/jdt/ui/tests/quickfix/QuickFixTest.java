@@ -128,16 +128,7 @@ public class QuickFixTest extends TestCase {
 	
 	
 	public static void assertExpectedExistInProposals(List actualProposals, String[] expecteds) throws CoreException, BadLocationException {
-		ArrayList actuals= new ArrayList(actualProposals.size());
-		for (int i= 0; i < actualProposals.size(); i++) {
-			Object curr= actualProposals.get(i);
-			if (curr instanceof CUCorrectionProposal) {
-				actuals.add(getPreviewContent((CUCorrectionProposal) curr));
-			} else if (curr instanceof NewCUCompletionUsingWizardProposal) {
-				actuals.add(getWizardPreviewContent((NewCUCompletionUsingWizardProposal) curr));
-			}
-		}
-		StringAsserts.assertExpectedExistInProposals((String[]) actuals.toArray(new String[actuals.size()]), expecteds);
+		StringAsserts.assertExpectedExistInProposals(getPreviewContents(actualProposals), expecteds);
 	}
 	
 	public static TypeDeclaration findTypeDeclaration(CompilationUnit astRoot, String simpleTypeName) {
@@ -321,6 +312,20 @@ public class QuickFixTest extends TestCase {
 		return (CompilationUnit) parser.createAST(null);
 	}
 	
+	
+	protected static String[] getPreviewContents(List proposals) throws CoreException, BadLocationException {
+		String[] res= new String[proposals.size()];
+		for (int i= 0; i < proposals.size(); i++) {
+			Object curr= proposals.get(i);
+			if (curr instanceof CUCorrectionProposal) {
+				res[i]= getPreviewContent((CUCorrectionProposal) curr);
+			} else if (curr instanceof NewCUCompletionUsingWizardProposal) {
+				res[i]= getWizardPreviewContent((NewCUCompletionUsingWizardProposal) curr);
+			}
+		}
+		return res;
+	}
+	
 	protected static String getPreviewContent(CUCorrectionProposal proposal) throws CoreException {
 		return proposal.getPreviewContent();
 	}
@@ -379,5 +384,60 @@ public class QuickFixTest extends TestCase {
 			}
 		}
 	}
+	
+	protected String getPreviewsInBufAppend(ICompilationUnit cu, List proposals) throws CoreException, BadLocationException {
+		StringBuffer buf= new StringBuffer();
+		String[] previewContents= getPreviewContents(proposals);
+		
+		buf.append("public void testX() throws Exception {\n");
+		buf.append("IPackageFragment pack1= fSourceFolder.createPackageFragment(\"").append(cu.getParent().getElementName()).append("\", false, null);\n");
+		buf.append("StringBuffer buf= new StringBuffer();\n");
+		wrapInBufAppend(cu.getBuffer().getContents(), buf);
+		buf.append("ICompilationUnit cu= pack1.createCompilationUnit(\"").append(cu.getElementName()).append("\", buf.toString(), false, null);\n\n");
+		buf.append("CompilationUnit astRoot= getASTRoot(cu);\n");
+		buf.append("ArrayList proposals= collectCorrections(cu, astRoot);\n\n");
+		buf.append("assertCorrectLabels(proposals);\n");
+		
+		buf.append("assertNumberOfProposals(proposals, ").append(previewContents.length).append(");\n\n");
+		buf.append("String[] expected= new String[").append(previewContents.length).append("];\n");
+		
+		for (int i= 0; i < previewContents.length; i++) {
+			String curr= previewContents[i];
+			if (curr == null) {
+				continue;
+			}
+			
+			buf.append("buf= new StringBuffer();\n");
+			wrapInBufAppend(curr, buf);
+			buf.append("expected[" + i + "]= buf.toString();\n\n");
+		}
+		
+		buf.append("assertExpectedExistInProposals(proposals, expected);\n");
+		buf.append("}\n");
+		return buf.toString();
+	}
+
+
+	private void wrapInBufAppend(String curr, StringBuffer buf) {
+		buf.append("buf.append(\"");
+		
+		int last= curr.length() - 1;
+		for (int k= 0; k <= last ; k++) {
+			char ch= curr.charAt(k);
+			if (ch == '\n') {
+				buf.append("\\n\");\n");
+				if (k < last) {
+					buf.append("buf.append(\"");
+				}
+			} else if (ch == '\t') {
+				buf.append("    "); // 4 spaces
+			} else if (ch == '"' || ch == '\\') {
+				buf.append('\\').append(ch);
+			} else {
+				buf.append(ch);
+			}
+		}
+	}
+	
 	
 }
