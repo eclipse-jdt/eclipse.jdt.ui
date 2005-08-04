@@ -336,6 +336,8 @@ public class Bindings {
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only 
 	 *  the name is matched and parameters are ignored.
 	 * @return the method binding representing the method
+	 * 
+	 * @deprecated use {@link #findOverriddenMethodInType(ITypeBinding, IMethodBinding)}
 	 */
 	public static IMethodBinding findMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
 		if (type.isPrimitive())
@@ -378,18 +380,26 @@ public class Bindings {
 	}
 	
 	/**
-	 * Finds the method in the given <code>type</code> that is overrideen by the specified <code>method<code> . Returns <code>null</code> if no such method exits.
+	 * Finds the method in the given <code>type</code> that is overridden by the specified <code>method<code>.
+	 * Returns <code>null</code> if no such method exits.
 	 * @param type The type to search the method in
 	 * @param method The specified method that would override the result
-	 * @return the method binding representing the method oevrriding the specified <code>method<code>
+	 * @return the method binding of the method that is overridden by the specified <code>method<code>, or <code>null</code>
 	 */
 	public static IMethodBinding findOverriddenMethodInType(ITypeBinding type, IMethodBinding method) {
-		return findMethodInType(type, method.getName(), method.getParameterTypes());
+		if (type.isPrimitive())
+			return null;
+		IMethodBinding[] methods= type.getDeclaredMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if (isSubsignature(method, methods[i]))
+				return methods[i];
+		}
+		return null;
 //		String methodName= method.getName();
 //		IMethodBinding[] methods= type.getDeclaredMethods();
 //		for (int i= 0; i < methods.length; i++) {
 //			IMethodBinding curr= methods[i];
-//			if (curr.getName().equals(methodName) && method.overrides(curr)) { // name check: see bug 98483
+//			if (curr.getName().equals(methodName) && method.overrides(curr)) { // name check: see bug 98483; overrides checks return types: see bug 105808.
 //				return curr;
 //			}
 //		}
@@ -559,10 +569,8 @@ public class Bindings {
 	public static IMethodBinding findMethodImplementation(IMethodBinding method, boolean testVisibility) {
 		ITypeBinding superClass= method.getDeclaringClass().getSuperclass();
 		
-		String methodName= method.getName();
-		ITypeBinding[] parameters= method.getParameterTypes();
 		while (superClass != null) {
-			IMethodBinding res= findMethodInType(superClass, methodName, parameters);
+			IMethodBinding res= findOverriddenMethodInType(superClass, method);
 			if (res != null) {
 				if (isVisibleInHierarchy(res, method.getDeclaringClass().getPackage())) {
 					return res;
@@ -586,33 +594,32 @@ public class Bindings {
 	}
 	
 	/**
-	 * Finds the declaration of a method specified by <code>methodName</code> and </code>parameters</code> in
+	 * Finds the declaration of a method in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
 	 * exists. If the method is defined in more than one super type only the first match is 
-	 * returned. First the super class is examined and than the implemented interfaces.
+	 * returned. First the implemented interfaces are examined and then the super class.
 	 * @param type The type to search the method in
-	 * @param methodName The name of the method to find
-	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
-	 * @return the method binding representing the method
+	 * @param methodBinding The binding of the method to find
+	 * @return the method binding representing the overridden method, or <code>null</code>
 	 */
-	public static IMethodBinding findDeclarationInHierarchy(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
+	public static IMethodBinding findMethodDeclarationInHierarchy(ITypeBinding type, IMethodBinding methodBinding) {
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
 			ITypeBinding curr= interfaces[i];
-			IMethodBinding method= findMethodInType(curr, methodName, parameters);
+			IMethodBinding method= findOverriddenMethodInType(curr, methodBinding);
 			if (method != null)
 				return method;
-			method= findDeclarationInHierarchy(interfaces[i], methodName, parameters);
+			method= findMethodDeclarationInHierarchy(interfaces[i], methodBinding);
 			if (method != null)
 				return method;
 		}
 		ITypeBinding superClass= type.getSuperclass();
 		if (superClass != null) {
-			IMethodBinding method= findMethodInType(superClass, methodName, parameters);
+			IMethodBinding method= findOverriddenMethodInType(superClass, methodBinding);
 			if (method != null)
 				return method;
 			
-			method= findDeclarationInHierarchy(superClass, methodName, parameters);
+			method= findMethodDeclarationInHierarchy(superClass, methodBinding);
 			if (method != null)
 				return method;			
 		}
@@ -692,6 +699,11 @@ public class Bindings {
 		return true;
 	}
 
+	/**
+	 * Tests whether the two methods are erasure-equivalent.
+	 * @deprecated use {@link #isSubsignature(IMethodBinding, IMethodBinding)}
+	 */
+	//TODO: rename to isErasureEquivalentMethod and change to two IMethodBinding parameters
 	public static boolean isEqualMethod(IMethodBinding method, String methodName, ITypeBinding[] parameters) {
 		if (!method.getName().equals(methodName))
 			return false;
@@ -703,9 +715,88 @@ public class Bindings {
 			if (!equals(methodParameters[i].getErasure(), parameters[i].getErasure()))
 				return false;
 		}
+		//Can't use this fix, since some clients assume that this method tests erasure equivalence:
+//		if (method.getTypeParameters().length == 0) {
+//			//a method without type parameters cannot be overridden by one that declares type parameters -> can be exact here
+//			for (int i= 0; i < parameters.length; i++) {
+//				if ( ! (equals(methodParameters[i], parameters[i])
+//						|| equals(methodParameters[i].getErasure(), parameters[i]))) // subsignature
+//					return false;
+//			}
+//		} else {
+//			//this will find all overridden methods, but may generate false positives in some cases:
+//			for (int i= 0; i < parameters.length; i++) {
+//				if (!equals(methodParameters[i].getErasure(), parameters[i].getErasure()))
+//					return false;
+//			}
+//		}
 		return true;
 	}
 
+	/**
+	 * @param m1
+	 * @param m2
+	 * @return <code>true</code> iff the method <code>m1</code> is a subsignature of the method <code>m2</code>.
+	 * 		This is one of the requirements for m1 to override m2.
+	 * 		Accessibility and return types are not taken into account.
+	 * 		Note that subsignature is <em>not</em> symmetric!
+	 */
+	public static boolean isSubsignature(IMethodBinding m1, IMethodBinding m2) {
+		//TODO: use IMethodBinding#isSubsignature(..) once it is tested and fixed (only erasure of m1's parameter types, considering type variable counts, doing type variable substitution
+		if (! m1.getName().equals(m2.getName()))
+			return false;
+			
+		ITypeBinding[] m1Parameters= m1.getParameterTypes();
+		ITypeBinding[] m2Parameters= m2.getParameterTypes();
+		if (m1Parameters.length != m2Parameters.length)
+			return false;
+		
+		ITypeBinding[] m1TypeParameters= m1.getTypeParameters();
+		ITypeBinding[] m2TypeParameters= m2.getTypeParameters();
+		if (m1TypeParameters.length != m2TypeParameters.length)
+			return false;
+		
+		if (m1TypeParameters.length != 0) {
+			//Note: this branch does not 100% adhere to the spec and may report some false positives.
+			// Full compliance would require major duplication of compiler code.
+			
+			//Compare erasures of type parameter bounds:
+			for (int i= 0; i < m1TypeParameters.length; i++) {
+				ITypeBinding[] m2TypeParameterBounds= m1TypeParameters[i].getTypeBounds();
+				ITypeBinding[] m1TypeParameterBounds= m2TypeParameters[i].getTypeBounds();
+				if (m1TypeParameterBounds.length != m2TypeParameterBounds.length)
+					return false;
+				for (int b= 0; b < m2TypeParameterBounds.length; b++) {
+					if (! equals(m1TypeParameterBounds[b].getErasure(), m2TypeParameterBounds[b].getErasure()))
+						return false;
+				}
+			}
+			//Compare erasures of parameter types:
+			for (int i= 0; i < m1Parameters.length; i++) {
+				if ( ! (equals(m2Parameters[i], m1Parameters[i])
+						|| equals(m2Parameters[i].getErasure(), m1Parameters[i].getErasure()))) // try to achieve effect of "rename type variables" 
+					return false;
+			}
+			return true;
+			
+		} else {
+			for (int i= 0; i < m1Parameters.length; i++) {
+				if ( ! (equals(m2Parameters[i], m1Parameters[i])
+						|| equals(m2Parameters[i].getErasure(), m1Parameters[i]))) // subsignature
+					return false;
+			}
+			return true;
+		}
+	}
+
+	/**
+	 * @param method
+	 * @param methodName
+	 * @param parameters
+	 * @return <code>true</code> iff the method
+	 * 		m1 (with name <code>methodName</code> and method parameters <code>parameters</code>)
+	 * 		is a subsignature of the method <code>m2</code>. Accessibility and return types are not taken into account.
+	 */
 	public static boolean isEqualMethod(IMethodBinding method, String methodName, String[] parameters) {
 		if (!method.getName().equals(methodName))
 			return false;

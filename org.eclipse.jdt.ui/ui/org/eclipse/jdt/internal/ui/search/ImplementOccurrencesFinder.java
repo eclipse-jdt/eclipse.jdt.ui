@@ -56,7 +56,7 @@ public class ImplementOccurrencesFinder implements org.eclipse.jdt.internal.ui.s
 		public boolean visit(MethodDeclaration node) {
 			IMethodBinding binding= node.resolveBinding();
 			if (binding != null) {
-				IMethodBinding method= Bindings.findMethodInHierarchy(fSelectedType, binding.getName(), binding.getParameterTypes());
+				IMethodBinding method= Bindings.findOverriddenMethodInHierarchy(fSelectedType, binding);
 				if (method != null)
 					fResult.add(node.getName());
 			}

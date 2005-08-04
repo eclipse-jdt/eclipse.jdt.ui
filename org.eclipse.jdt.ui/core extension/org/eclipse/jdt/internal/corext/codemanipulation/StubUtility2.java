@@ -609,7 +609,7 @@ public final class StubUtility2 {
 	private static IMethodBinding findMethodBinding(IMethodBinding method, List allMethods) {
 		for (int i= 0; i < allMethods.size(); i++) {
 			IMethodBinding curr= (IMethodBinding) allMethods.get(i);
-			if (Bindings.isEqualMethod(method, curr.getName(), curr.getParameterTypes())) {
+			if (Bindings.isSubsignature(method, curr)) {
 				return curr;
 			}
 		}
@@ -619,7 +619,7 @@ public final class StubUtility2 {
 	private static IMethodBinding findOverridingMethod(IMethodBinding method, List allMethods) {
 		for (int i= 0; i < allMethods.size(); i++) {
 			IMethodBinding curr= (IMethodBinding) allMethods.get(i);
-			if (Bindings.areOverriddenMethods(curr, method) || Bindings.isEqualMethod(curr, method.getName(), method.getParameterTypes()))
+			if (Bindings.areOverriddenMethods(curr, method) || Bindings.isSubsignature(curr, method))
 				return curr;
 		}
 		return null;
