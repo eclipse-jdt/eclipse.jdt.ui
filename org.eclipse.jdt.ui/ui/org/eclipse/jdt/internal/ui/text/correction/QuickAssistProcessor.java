@@ -1055,14 +1055,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		CompilationUnit astRoot= context.getASTRoot();
 
 		IMethodBinding binding= decl.resolveBinding();
-		String methodName= binding.getName();
 		ITypeBinding[] paramTypes= binding.getParameterTypes();
 
 		ITypeBinding[] superTypes= Bindings.getAllSuperTypes(binding.getDeclaringClass());
 		if (resultingCollections == null) {
 			for (int i= 0; i < superTypes.length; i++) {
 				ITypeBinding curr= superTypes[i];
-				if (curr.isFromSource() && Bindings.findMethodInType(curr, methodName, paramTypes) == null) {
+				if (curr.isFromSource() && Bindings.findOverriddenMethodInType(curr, binding) == null) {
 					return true;
 				}
 			}
@@ -1078,7 +1077,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		for (int i= 0; i < superTypes.length; i++) {
 			ITypeBinding curr= superTypes[i];
 			if (curr.isFromSource()) {
-				IMethodBinding method= Bindings.findMethodInType(curr, methodName, paramTypes);
+				IMethodBinding method= Bindings.findOverriddenMethodInType(curr, binding);
 				if (method == null) {
 					ITypeBinding typeDecl= curr.getTypeDeclaration();
 					ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, typeDecl);
