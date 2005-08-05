@@ -166,6 +166,17 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 			if (delta > 0)
 				fReplacementLength += delta;
 
+			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96059
+			// don't apply the proposal if for some reason we're not valid any longer
+			if (!validate(document, offset, null)) {
+				fCursorPosition= offset - fReplacementOffset;
+				if (trigger != '\0') {
+					document.replace(offset, 0, String.valueOf(trigger));
+					fCursorPosition++;
+				}
+				return;
+			}
+			
 			boolean isSmartTrigger= trigger == ';' && JavaPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_SEMICOLON)
 					|| trigger == '{' && JavaPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_OPENING_BRACE);
 
