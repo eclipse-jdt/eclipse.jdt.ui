@@ -154,7 +154,7 @@ public class EditorTestHelper {
 	public static void closeEditor(IEditorPart editor) {
 		IWorkbenchPartSite site;
 		IWorkbenchPage page;
-		if (editor != null && (site = editor.getSite()) != null && (page = site.getPage()) != null)
+		if (editor != null && (site= editor.getSite()) != null && (page= site.getPage()) != null)
 			page.closeEditor(editor, false);
 	}
 	
@@ -480,8 +480,8 @@ public class EditorTestHelper {
 	
 	public static void importFilesFromDirectory(File rootDir, IPath destPath, IProgressMonitor monitor) throws CoreException {		
 		try {
-			IImportStructureProvider structureProvider = FileSystemStructureProvider.INSTANCE;
-			List files = new ArrayList(100);
+			IImportStructureProvider structureProvider= FileSystemStructureProvider.INSTANCE;
+			List files= new ArrayList(100);
 			addJavaFiles(rootDir, files);
 			ImportOperation op= new ImportOperation(destPath, rootDir, structureProvider, new ImportOverwriteQuery(), files);
 			op.setCreateContainerStructure(false);
@@ -496,18 +496,18 @@ public class EditorTestHelper {
 	}
 
 	private static void addJavaFiles(File dir, List collection) throws IOException {
-		File[] files = dir.listFiles();
-		List subDirs = new ArrayList(2);
-		for (int i = 0; i < files.length; i++) {
+		File[] files= dir.listFiles();
+		List subDirs= new ArrayList(2);
+		for (int i= 0; i < files.length; i++) {
 			if (files[i].isFile()) {
 				collection.add(files[i]);
 			} else if (files[i].isDirectory()) {
 				subDirs.add(files[i]);
 			}
 		}
-		Iterator iter = subDirs.iterator();
+		Iterator iter= subDirs.iterator();
 		while (iter.hasNext()) {
-			File subDir = (File)iter.next();
+			File subDir= (File)iter.next();
 			addJavaFiles(subDir, collection);
 		}
 	}
