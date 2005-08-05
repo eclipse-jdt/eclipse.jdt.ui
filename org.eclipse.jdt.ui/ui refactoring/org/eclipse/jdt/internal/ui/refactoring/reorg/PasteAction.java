@@ -433,8 +433,8 @@ public class PasteAction extends SelectionDispatchAction{
 					}
 					if (!fDestinationPack.getElementName().equals(fCuParser.getPackageName())) {
 						cu.createPackageDeclaration(fDestinationPack.getElementName(), new SubProgressMonitor(pm, 1));
-						if (editorPart[0] != null)
-							editorPart[0].doSave(new SubProgressMonitor(pm, 1)); //avoid showing error marker
+						if (!alreadyExists && editorPart[0] != null)
+							editorPart[0].doSave(new SubProgressMonitor(pm, 1)); //avoid showing error marker due to missing/wrong package declaration
 						else
 							pm.worked(1);
 					} else {
