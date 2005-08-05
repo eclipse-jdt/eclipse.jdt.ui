@@ -34,18 +34,17 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.PrimitiveType.Code;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
@@ -53,6 +52,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.ChangeDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.RemoveDescription;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
 public class TypeMismatchSubProcessor {
@@ -67,7 +67,6 @@ public class TypeMismatchSubProcessor {
 		}
 
 		ICompilationUnit cu= context.getCompilationUnit();
-		String castTypeName= args[1];
 
 		CompilationUnit astRoot= context.getASTRoot();
 		AST ast= astRoot.getAST();
@@ -106,14 +105,12 @@ public class TypeMismatchSubProcessor {
 		} else {
 			// try to find the binding corresponding to 'castTypeName'
 			ITypeBinding guessedCastTypeBinding= ASTResolving.guessBindingForReference(nodeToCast);
-			if (guessedCastTypeBinding != null && castTypeName.equals(guessedCastTypeBinding.getQualifiedName())) {
-				castTypeBinding= guessedCastTypeBinding;
-			}
+			castTypeBinding= guessedCastTypeBinding;
 		}
 
 		ITypeBinding binding= nodeToCast.resolveTypeBinding();
-		if (binding == null || canCast(castTypeName, castTypeBinding, binding) || nodeToCast instanceof CastExpression) {
-			proposals.add(createCastProposal(context, castTypeName, castTypeBinding, nodeToCast, 7));
+		if (binding == null || binding.isCastCompatible(castTypeBinding) || nodeToCast instanceof CastExpression) {
+			proposals.add(createCastProposal(context, castTypeBinding, nodeToCast, 7));
 		}
 
 		ITypeBinding currBinding= nodeToCast.resolveTypeBinding();
@@ -235,53 +232,17 @@ public class TypeMismatchSubProcessor {
 		}
 	}
 
-	private static boolean canCast(String castTarget, ITypeBinding castTypeBinding, ITypeBinding bindingToCast) {
-		if (castTypeBinding != null) {
-			return bindingToCast.isCastCompatible(castTypeBinding);
-		}
-
-		bindingToCast= Bindings.normalizeTypeBinding(bindingToCast);
-		if (bindingToCast == null) {
-			return false;
-		}
-
-		int arrStart= castTarget.indexOf('[');
-		if (arrStart != -1) {
-			if (!bindingToCast.isArray()) {
-				return "java.lang.Object".equals(bindingToCast.getQualifiedName()); //$NON-NLS-1$
-			}
-			castTarget= castTarget.substring(0, arrStart);
-			bindingToCast= bindingToCast.getElementType();
-			if (bindingToCast.isPrimitive() && !castTarget.equals(bindingToCast.getName())) {
-				return false; // can't cast arrays of primitive types into each other
-			}
-		}
-
-		Code targetCode= PrimitiveType.toCode(castTarget);
-		if (bindingToCast.isPrimitive()) {
-			Code castCode= PrimitiveType.toCode(bindingToCast.getName());
-			if (castCode == targetCode) {
-				return true;
-			}
-			return (targetCode != null && targetCode != PrimitiveType.BOOLEAN && castCode != PrimitiveType.BOOLEAN);
-		} else {
-			return targetCode == null; // can not check
-		}
-	}
-
-	public static ASTRewriteCorrectionProposal createCastProposal(IInvocationContext context, String castType, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
+	public static ASTRewriteCorrectionProposal createCastProposal(IInvocationContext context, ITypeBinding castTypeBinding, Expression nodeToCast, int relevance) {
 		ICompilationUnit cu= context.getCompilationUnit();
 
 		String label;
+		String castType= BindingLabelProvider.getBindingLabel(castTypeBinding, JavaElementLabels.ALL_DEFAULT);
 		if (nodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
 			label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changecast_description, castType);
 		} else {
 			label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_addcast_description, castType);
 		}
-		if (castTypeBinding != null) {
-			return new CastCompletionProposal(label, cu, nodeToCast, castTypeBinding, relevance);
-		}
-		return new CastCompletionProposal(label, cu, nodeToCast, castType, relevance);
+		return new CastCompletionProposal(label, cu, nodeToCast, castTypeBinding, relevance);
 	}
 
 	public static void addIncompatibleReturnTypeProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws JavaModelException {

@@ -79,6 +79,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
@@ -90,6 +91,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.InsertDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.RemoveDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.SwapDescription;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 public class UnresolvedElementsSubProcessor {
@@ -537,14 +539,28 @@ public class UnresolvedElementsSubProcessor {
 		String resolvedTypeName= null;
 		ITypeBinding binding= ASTResolving.guessBindingForTypeReference(node);
 		if (binding != null) {
-			if (binding.isArray()) {
-				binding= binding.getElementType();
+			ITypeBinding simpleBinding= binding;
+			if (simpleBinding.isArray()) {
+				simpleBinding= simpleBinding.getElementType();
 			}
-			binding= binding.getTypeDeclaration();
+			simpleBinding= simpleBinding.getTypeDeclaration();
 			
-			resolvedTypeName= binding.getQualifiedName();
+			resolvedTypeName= simpleBinding.getQualifiedName();
 			proposals.add(createTypeRefChangeProposal(cu, resolvedTypeName, node, relevance + 2));
+
+			if (binding.isParameterizedType() && node.getParent() instanceof SimpleType && !(node.getParent().getParent() instanceof Type)) {
+				proposals.add(createTypeRefChangeFullProposal(cu, binding, node, relevance + 2));
+			}
+		} else {
+			ASTNode normalizedNode= ASTNodes.getNormalizedNode(node);
+			if (!(normalizedNode.getParent() instanceof Type) && node.getParent() != normalizedNode) {
+				ITypeBinding normBinding= ASTResolving.guessBindingForTypeReference(normalizedNode);
+				if (normBinding != null) { 
+					proposals.add(createTypeRefChangeFullProposal(cu, normBinding, normalizedNode, relevance + 2));
+				}
+			}
 		}
+
 		// add all similar elements
 		for (int i= 0; i < elements.length; i++) {
 			SimilarElement elem= elements[i];
@@ -556,7 +572,7 @@ public class UnresolvedElementsSubProcessor {
 			}
 		}
 	}
-
+		
 	private static CUCorrectionProposal createTypeRefChangeProposal(ICompilationUnit cu, String fullName, Name node, int relevance) throws CoreException {
 		ImportRewrite importRewrite= null;
 		String simpleName= fullName;
@@ -572,7 +588,7 @@ public class UnresolvedElementsSubProcessor {
 		}
 
 		CUCorrectionProposal proposal;
-		if (node.isSimpleName() && simpleName.equals(((SimpleName) node).getIdentifier())) { // import only
+		if (importRewrite != null && node.isSimpleName() && simpleName.equals(((SimpleName) node).getIdentifier())) { // import only
 			// import only
 			String[] arg= { simpleName, packName };
 			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_importtype_description, arg);
@@ -592,6 +608,16 @@ public class UnresolvedElementsSubProcessor {
 		if (importRewrite != null) {
 			proposal.setImportRewrite(importRewrite);
 		}
+		return proposal;
+	}
+	
+	private static CUCorrectionProposal createTypeRefChangeFullProposal(ICompilationUnit cu, ITypeBinding binding, ASTNode node, int relevance) throws CoreException {
+		ASTRewrite rewrite= ASTRewrite.create(node.getAST());
+		String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_change_full_type_description, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_DEFAULT));
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance + 3, image);
+		Type type= proposal.getImportRewrite().addImport(binding, node.getAST());
+		rewrite.replace(node, type, null);
 		return proposal;
 	}
 
@@ -1223,8 +1249,8 @@ public class UnresolvedElementsSubProcessor {
 			if (castType != null) {
 				ITypeBinding binding= nodeToCast.resolveTypeBinding();
 				if (binding == null || binding.isCastCompatible(castType)) {
-					String castTypeName= castType.getQualifiedName();
-					ASTRewriteCorrectionProposal proposal= TypeMismatchSubProcessor.createCastProposal(context, castTypeName, castType, nodeToCast, 6);
+					ASTRewriteCorrectionProposal proposal= TypeMismatchSubProcessor.createCastProposal(context, castType, nodeToCast, 6);
+					String castTypeName= BindingLabelProvider.getBindingLabel(castType, JavaElementLabels.ALL_DEFAULT);
 					String[] arg= new String[] { getArgumentName(cu, arguments, idx), castTypeName};
 					proposal.setDisplayName(Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_addargumentcast_description, arg));
 					proposals.add(proposal);
