@@ -3437,8 +3437,8 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_ORDER_PROPOSALS, false);
 		store.setDefault(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, true);
-		store.setDefault(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, false);
-		store.setDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
+		store.setDefault(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
+		store.setDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, false);
 		store.setDefault(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, false);
 
 		store.setDefault(PreferenceConstants.EDITOR_SMART_HOME_END, true);
