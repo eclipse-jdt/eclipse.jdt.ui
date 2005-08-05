@@ -89,9 +89,6 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 		    	
 		    	assertEquals(referencePoints.length, measuredPoints.length);
 		    	
-		    	printSample(System.out, reference);
-		    	printSample(System.out, measured);
-		    	
 		    	DataPoint[] data= new DataPoint[referencePoints.length];
 		    	for (int i= 0; i < measuredPoints.length; i++) {
 		    		DataPoint r= referencePoints[i];
