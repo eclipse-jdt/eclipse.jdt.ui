@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
@@ -53,6 +54,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
@@ -79,6 +81,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	private ICompilationUnit fCompilationUnit;
 	private int fTypeKind;
 	private IJavaElement fTypeContainer; // IType or IPackageFragment
+	private String fTypeNameWithParameters;
 
 	private boolean fShowDialog;
 
@@ -89,9 +92,10 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		fNode= node;
 		fTypeKind= typeKind;
 		fTypeContainer= typeContainer;
-
+		fTypeNameWithParameters= getTypeName(typeKind, node);
+		
 		String containerName= ASTNodes.getQualifier(node);
-		String typeName= ASTNodes.getSimpleNameIdentifier(node);
+		String typeName= fTypeNameWithParameters;
 		boolean isInnerType= typeContainer instanceof IType;
 		switch (typeKind) {
 		case K_CLASS:
@@ -163,6 +167,34 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		}
 		fShowDialog= true;
 	}
+	
+	private static String getTypeName(int typeKind, Name node) {
+		String name= ASTNodes.getSimpleNameIdentifier(node);
+		
+		if (typeKind == K_CLASS || typeKind == K_INTERFACE) {
+			ASTNode parent= node.getParent();
+			if (parent.getLocationInParent() == ParameterizedType.TYPE_PROPERTY) {
+				String typeArgBaseName= name.startsWith(String.valueOf('T')) ? String.valueOf('S') : String.valueOf('T'); // use 'S' or 'T'
+				
+				int nTypeArgs= ((ParameterizedType) parent.getParent()).typeArguments().size();
+				StringBuffer buf= new StringBuffer(name);
+				buf.append('<');
+				if (nTypeArgs == 1) {
+					buf.append(typeArgBaseName);
+				} else {
+					for (int i= 0; i < nTypeArgs; i++) {
+						if (i != 0)
+							buf.append(", "); //$NON-NLS-1$
+						buf.append(typeArgBaseName).append(i + 1);
+					}
+				}
+				buf.append('>');
+				return buf.toString();
+			}
+		}
+		return name;
+	}
+	
 
 	public void apply(IDocument document) {
 		NewElementWizard wizard= createWizard();
@@ -243,7 +275,8 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	 * @param page the wizard page.
 	 */
 	private void fillInWizardPageName(NewTypeWizardPage page) {
-		page.setTypeName(ASTNodes.getSimpleNameIdentifier(fNode), false);
+		// allow to edit when there are type parameters
+		page.setTypeName(fTypeNameWithParameters, fTypeNameWithParameters.indexOf('<') != -1);
 
 		boolean isInEnclosingType= fTypeContainer instanceof IType;
 		if (isInEnclosingType) {
@@ -267,10 +300,10 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 			}
 			if (type.isTopLevel() || type.isMember()) {
 				if (type.isClass() && (fTypeKind == K_CLASS)) {
-					page.setSuperClass(Bindings.getFullyQualifiedName(type), true);
+					page.setSuperClass(type.getQualifiedName(), true);
 				} else if (type.isInterface()) {
 					List superInterfaces= new ArrayList();
-					superInterfaces.add(Bindings.getFullyQualifiedName(type));
+					superInterfaces.add(type.getQualifiedName());
 					page.setSuperInterfaces(superInterfaces, true);
 				}
 			}
@@ -298,6 +331,11 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 					return ast.resolveWellKnownType("java.lang.Exception"); //$NON-NLS-1$
 				}
 				break;
+			case ASTNode.VARIABLE_DECLARATION_STATEMENT:
+			case ASTNode.FIELD_DECLARATION:
+				return null; // no guessing for LHS types, cannot be a supertype of a known type
+			case ASTNode.PARAMETERIZED_TYPE:
+				return null; // Inheritance doesn't help: A<X> z= new A<String>(); -> 
 		}
 		return ASTResolving.guessBindingForTypeReference(node);
 	}
@@ -350,13 +388,14 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 				buf.append("@interface <b>"); //$NON-NLS-1$
 				break;
 		}
-		buf.append(ASTNodes.getSimpleNameIdentifier(fNode));
+		nameToHTML(fTypeNameWithParameters, buf);
 
 		ITypeBinding superclass= getPossibleSuperTypeBinding(fNode);
 		if (superclass != null) {
 			if (superclass.isClass()) {
 				if (fTypeKind == K_CLASS) {
 					buf.append("</b> extends <b>"); //$NON-NLS-1$
+					nameToHTML(BindingLabelProvider.getBindingLabel(superclass, BindingLabelProvider.DEFAULT_TEXTFLAGS), buf);
 				}
 			} else {
 				if (fTypeKind == K_INTERFACE) {
@@ -364,11 +403,24 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 				} else {
 					buf.append("</b> implements <b>"); //$NON-NLS-1$
 				}
+				nameToHTML(BindingLabelProvider.getBindingLabel(superclass, BindingLabelProvider.DEFAULT_TEXTFLAGS), buf);
 			}
-			buf.append(superclass.getName());
 		}
 		buf.append("</b> {<br>}<br>"); //$NON-NLS-1$
 		return buf.toString();
+	}
+	
+	private void nameToHTML(String name, StringBuffer buf) {
+		for (int i= 0; i < name.length(); i++) {
+			char ch= name.charAt(i);
+			if (ch == '>') {
+				buf.append("&gt;"); //$NON-NLS-1$
+			} else if (ch == '<') {
+				buf.append("&lt;"); //$NON-NLS-1$
+			} else {
+				buf.append(ch);
+			}
+		}
 	}
 
 	/**

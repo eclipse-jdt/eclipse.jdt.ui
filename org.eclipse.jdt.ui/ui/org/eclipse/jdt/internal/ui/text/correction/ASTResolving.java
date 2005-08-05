@@ -449,7 +449,7 @@ public class ASTResolving {
 			case ASTNode.SINGLE_VARIABLE_DECLARATION:
 				SingleVariableDeclaration varDecl= (SingleVariableDeclaration) parent;
 				if (varDecl.getInitializer() != null) {
-					return varDecl.getInitializer().resolveTypeBinding();
+					return Bindings.normalizeTypeBinding(varDecl.getInitializer().resolveTypeBinding());
 				}
 				break;
 			case ASTNode.ARRAY_CREATION:
@@ -484,7 +484,7 @@ public class ASTResolving {
 		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) iter.next();
 			if (frag.getInitializer() != null) {
-				return frag.getInitializer().resolveTypeBinding();
+				return Bindings.normalizeTypeBinding(frag.getInitializer().resolveTypeBinding());
 			}
 		}
 		return null;
