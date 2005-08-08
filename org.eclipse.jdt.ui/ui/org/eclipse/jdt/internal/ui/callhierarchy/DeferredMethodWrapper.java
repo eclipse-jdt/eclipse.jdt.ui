@@ -17,12 +17,10 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.ui.progress.IElementCollector;
-import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.progress.IDeferredWorkbenchAdapter;
 
-class DeferredMethodWrapper implements IDeferredWorkbenchAdapter {
+public class DeferredMethodWrapper extends MethodWrapperWorkbenchAdapter implements IDeferredWorkbenchAdapter {
     private final CallHierarchyContentProvider fProvider;
-    private MethodWrapper fMethodWrapper;
 
     /**
      * A simple job scheduling rule for serializing jobs that shouldn't be run
@@ -54,16 +52,12 @@ class DeferredMethodWrapper implements IDeferredWorkbenchAdapter {
     }
 
     DeferredMethodWrapper(CallHierarchyContentProvider provider, MethodWrapper methodWrapper) {
-        fMethodWrapper = methodWrapper;
+    	super(methodWrapper);
         this.fProvider = provider;
     }
 
     private Object getCalls(IProgressMonitor monitor) {
-        return fMethodWrapper.getCalls(monitor);
-    }
-
-    private MethodWrapper getMethodWrapper() {
-        return fMethodWrapper;
+        return getMethodWrapper().getCalls(monitor);
     }
 
     /*
@@ -115,33 +109,6 @@ class DeferredMethodWrapper implements IDeferredWorkbenchAdapter {
         return this.fProvider.fetchChildren(((DeferredMethodWrapper) o).getMethodWrapper());
     }
 
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.ui.model.IWorkbenchAdapter#getImageDescriptor(java.lang.Object)
-     */
-    public ImageDescriptor getImageDescriptor(Object object) {
-        return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.ui.model.IWorkbenchAdapter#getLabel(java.lang.Object)
-     */
-    public String getLabel(Object o) {
-        return fMethodWrapper.getMember().getElementName();
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see org.eclipse.ui.model.IWorkbenchAdapter#getParent(java.lang.Object)
-     */
-    public Object getParent(Object o) {
-        return fMethodWrapper.getParent();
-    }
-
     /**
      * Returns an object which is an instance of the given class associated
      * with this object. Returns <code>null</code> if no such object can be
@@ -151,25 +118,5 @@ class DeferredMethodWrapper implements IDeferredWorkbenchAdapter {
         if (adapter == IDeferredWorkbenchAdapter.class)
             return this;
         return null;
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#equals(java.lang.Object)
-     */
-    public boolean equals(Object obj) {
-        //TODO: not symmetric: doesn't obey contract of Object#equals(Object).
-        //This class should probably be merged into MethodWrapper.
-        return fMethodWrapper.equals(obj);
-    }
-
-    /*
-     * (non-Javadoc)
-     * 
-     * @see java.lang.Object#hashCode()
-     */
-    public int hashCode() {
-        return fMethodWrapper.hashCode();
     }
 }

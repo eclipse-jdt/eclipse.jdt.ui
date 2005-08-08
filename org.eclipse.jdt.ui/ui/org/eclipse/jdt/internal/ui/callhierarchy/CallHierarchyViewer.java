@@ -126,6 +126,8 @@ class CallHierarchyViewer extends TreeViewer {
     }
     
     void cancelJobs() {
-        fContentProvider.cancelJobs();
+    	if (fPart == null)
+    		return;
+        fContentProvider.cancelJobs(fPart.getCurrentMethodWrapper());
     }
 }

@@ -113,6 +113,11 @@
             <adapter type="org.eclipse.ltk.internal.ui.refactoring.IChangeElementChildrenCreator"/>
 		</factory>
 		
+		<factory
+			class="org.eclipse.jdt.internal.ui.callhierarchy.MethodWrapperAdapterFactory"
+			adaptableType="org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper">
+			<adapter type="org.eclipse.ui.model.IWorkbenchAdapter"/>
+		</factory>
    </extension>     	
 
 

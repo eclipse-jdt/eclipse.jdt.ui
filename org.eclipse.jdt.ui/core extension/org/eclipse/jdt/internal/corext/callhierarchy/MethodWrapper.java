@@ -15,21 +15,23 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.PlatformObject;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
+import org.eclipse.jdt.internal.ui.callhierarchy.MethodWrapperWorkbenchAdapter;
+
 /**
  * This class represents the general parts of a method call (either to or from a
  * method).
  *
  */
-public abstract class MethodWrapper implements IAdaptable {
+public abstract class MethodWrapper extends PlatformObject {
     private Map fElements = null;
 
     /*
@@ -61,12 +63,12 @@ public abstract class MethodWrapper implements IAdaptable {
     }
 
     public Object getAdapter(Class adapter) {
-        if (adapter == IJavaElement.class) {
-            return getMember();
-        }
-
-        return null;
-    }
+		if (adapter == IJavaElement.class) {
+	        return getMember();
+	    } else {
+	    	return super.getAdapter(adapter);
+	    }
+	}
 
     /**
      * @return the child caller elements of this element
@@ -119,7 +121,12 @@ public abstract class MethodWrapper implements IAdaptable {
         if (oth == null) {
             return false;
         }
-
+        
+        if (oth instanceof MethodWrapperWorkbenchAdapter) {
+            //Note: A MethodWrapper is equal to a referring MethodWrapperWorkbenchAdapter and vice versa (bug 101677).
+        	oth= ((MethodWrapperWorkbenchAdapter) oth).getMethodWrapper();
+        }
+        
         if (oth.getClass() != getClass()) {
             return false;
         }
