@@ -26,7 +26,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
@@ -447,8 +446,7 @@ public class PasteAction extends SelectionDispatchAction{
 			if (context == null) {
 				context= new BusyIndicatorRunnableContext();
 			}
-			ISchedulingRule schedulingRule= fDestinationPack.getParent().getResource();
-			PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(op, schedulingRule), schedulingRule);
+			PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(op), null);
 			
 			if (editorPart[0] != null)
 				editorPart[0].getEditorSite().getPage().activate(editorPart[0]); //activate editor again, since runInUI restores previous active part
