@@ -235,7 +235,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 			if (delta > 0)
 				setReplacementLength(getReplacementLength() + delta);
 	
-			// see bug 96059
+			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96059
 			// don't apply the proposal if for some reason we're not valid any longer
 			if (!validate(document, offset, null)) {
 				setCursorPosition(offset - getReplacementOffset());
