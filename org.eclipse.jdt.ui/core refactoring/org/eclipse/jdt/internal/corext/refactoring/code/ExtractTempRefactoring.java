@@ -439,7 +439,7 @@ public class ExtractTempRefactoring extends Refactoring {
 		}
 		pm.worked(1);
 		if (fImportEdit != null)
-			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.ExtractTempRefactoring_update_imports, fImportEdit);
+			TextChangeCompatibility.addTextEdit(change, RefactoringCoreMessages.ExtractTempRefactoring_update_imports, fImportEdit.copy());
 		pm.worked(1);
 		addReplaceExpressionWithTemp(change);
 		pm.worked(1);
