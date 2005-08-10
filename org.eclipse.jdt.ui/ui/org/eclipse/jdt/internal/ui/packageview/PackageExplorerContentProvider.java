@@ -317,7 +317,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 				return;
 			}
 						
-			if (!getProvideMembers() && cu.isWorkingCopy()) {
+			if (!getProvideMembers() && cu.isWorkingCopy() && kind == IJavaElementDelta.CHANGED) {
 				return;
 			}
 			
