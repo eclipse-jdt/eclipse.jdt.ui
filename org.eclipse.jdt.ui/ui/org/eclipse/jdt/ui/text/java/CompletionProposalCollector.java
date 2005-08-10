@@ -38,7 +38,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
 
-import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -47,8 +46,8 @@ import org.eclipse.jdt.internal.ui.text.java.AnonymousTypeProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.FieldProposalInfo;
 import org.eclipse.jdt.internal.ui.text.java.GetterSetterCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.JavaMethodCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.MethodCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.MethodProposalInfo;
@@ -563,7 +562,6 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		if (fCompilationUnit == null || fJavaProject == null)
 			return null;
 
-		String declaringType= SignatureUtil.stripSignatureToFQN(String.valueOf(proposal.getDeclarationSignature()));
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
 		int length= getLength(proposal);
@@ -571,7 +569,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 
 		String label= fLabelProvider.createAnonymousTypeLabel(proposal);
 
-		JavaCompletionProposal javaProposal= new AnonymousTypeCompletionProposal(fJavaProject, fCompilationUnit, start, length, completion, label, declaringType, relevance);
+		JavaCompletionProposal javaProposal= new AnonymousTypeCompletionProposal(fJavaProject, fCompilationUnit, start, length, completion, label, String.valueOf(proposal.getDeclarationSignature()), relevance);
 		javaProposal.setProposalInfo(new AnonymousTypeProposalInfo(fJavaProject, proposal));
 		return javaProposal;
 	}
