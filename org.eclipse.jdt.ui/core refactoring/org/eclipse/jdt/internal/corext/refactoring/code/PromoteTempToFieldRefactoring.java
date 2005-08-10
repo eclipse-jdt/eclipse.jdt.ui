@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -639,6 +640,16 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
             VariableDeclarationFragment firstFragmentAfter= (VariableDeclarationFragment)fragments.get(fragmentIndex + 1);
             VariableDeclarationFragment copyfirstFragmentAfter= (VariableDeclarationFragment)rewrite.createCopyTarget(firstFragmentAfter);
         	VariableDeclarationStatement statement= getAST().newVariableDeclarationStatement(copyfirstFragmentAfter);
+         	Type type= (Type)rewrite.createCopyTarget(tempDeclarationStatement.getType());
+        	statement.setType(type);
+        	List modifiers= tempDeclarationStatement.modifiers();
+        	if (modifiers.size() > 0) {
+        		ListRewrite modifiersRewrite= rewrite.getListRewrite(tempDeclarationStatement, VariableDeclarationStatement.MODIFIERS2_PROPERTY);
+        		ASTNode firstModifier= (ASTNode) modifiers.get(0);
+				ASTNode lastModifier= (ASTNode) modifiers.get(modifiers.size() - 1);
+				ASTNode modifiersCopy= modifiersRewrite.createCopyTarget(firstModifier, lastModifier);
+	        	statement.modifiers().add(modifiersCopy);
+        	}
         	for (int i= fragmentIndex + 2; i < fragments.size(); i++) {
         		VariableDeclarationFragment fragment= (VariableDeclarationFragment)fragments.get(i);
                 VariableDeclarationFragment fragmentCopy= (VariableDeclarationFragment)rewrite.createCopyTarget(fragment);
