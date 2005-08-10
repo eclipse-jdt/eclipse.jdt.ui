@@ -475,10 +475,12 @@ public final class SuperTypeConstraintsModel {
 	 */
 	public final ConstraintVariable2 createTypeVariable(final Type type) {
 		ITypeBinding binding= type.resolveBinding();
-		if (binding.isArray())
-			binding= binding.getElementType();
-		if (isConstrainedType(binding))
-			return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(createTType(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(type), type)));
+		if (binding != null) {
+			if (binding.isArray())
+				binding= binding.getElementType();
+			if (isConstrainedType(binding))
+				return (ConstraintVariable2) fConstraintVariables.addExisting(new TypeVariable2(createTType(binding), new CompilationUnitRange(RefactoringASTParser.getCompilationUnit(type), type)));
+		}
 		return null;
 	}
 
