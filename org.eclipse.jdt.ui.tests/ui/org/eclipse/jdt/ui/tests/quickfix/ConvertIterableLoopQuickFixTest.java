@@ -138,6 +138,47 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		assertEqualString(preview, expected);
 	}
 
+	public void testEnumeration() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\r\n" + 
+				"import java.util.Enumeration;\r\n" + 
+				"import java.util.Vector;\r\n" + 
+				"public class A {\r\n" + 
+				"	Vector<String> c;\r\n" + 
+				"	public A() {\r\n" + 
+				"		for (Enumeration<String> e= c.elements(); e.hasMoreElements(); ) {\r\n" + 
+				"			String nextElement = e.nextElement();\r\n" + 
+				"			System.out.println(nextElement);\r\n" + 
+				"		}\r\n" + 
+				"	}\r\n" + 
+				"}");
+		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, unit);
+
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuffer();
+		buf.append("package test;\r\n" + 
+				"import java.util.Enumeration;\r\n" + 
+				"import java.util.Vector;\r\n" + 
+				"public class A {\r\n" + 
+				"	Vector<String> c;\r\n" + 
+				"	public A() {\r\n" + 
+				"		for (String nextElement : c) {\r\n" + 
+				"			System.out.println(nextElement);\r\n" + 
+				"		}\r\n" + 
+				"	}\r\n" + 
+				"}");
+		String expected= buf.toString();
+		assertEqualString(preview, expected);
+	}
+
 	public void testSplitAssignment() throws Exception {
 		IPackageFragment pack= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
