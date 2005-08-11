@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -106,7 +107,16 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 		ChildListPropertyDescriptor descriptor= null;
 		ASTNode node= NodeFinder.perform(unit, index + 1, 0);
 		if (node instanceof AnonymousClassDeclaration) {
-			binding= ((ClassInstanceCreation) node.getParent()).resolveTypeBinding();
+			switch(node.getParent().getNodeType()) {
+			case ASTNode.CLASS_INSTANCE_CREATION :
+				binding= ((ClassInstanceCreation) node.getParent()).resolveTypeBinding();
+				break;
+			case ASTNode.ENUM_CONSTANT_DECLARATION :
+				IMethodBinding methodBinding = ((EnumConstantDeclaration) node.getParent()).resolveConstructorBinding();
+				if (methodBinding != null) {
+					binding = methodBinding.getDeclaringClass();
+				}
+			}
 			descriptor= AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY;
 		} else if (node instanceof AbstractTypeDeclaration) {
 			final AbstractTypeDeclaration declaration= ((AbstractTypeDeclaration) node);
