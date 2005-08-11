@@ -63,7 +63,7 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 		
 		AST ast= node.getAST();
 		StringLiteral newLiteral= ast.newStringLiteral();
-		newLiteral.setEscapedValue(oldLiteral.getEscapedValue().toUpperCase());
+		newLiteral.setEscapedValue(toUpperCase(oldLiteral.getEscapedValue()));
 		
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		rewrite.replace(oldLiteral, newLiteral, null);
@@ -72,6 +72,25 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 		return true;
 	}
 	
+	private String toUpperCase(String escapedValue) {
+		int length= escapedValue.length();
+		StringBuffer buf= new StringBuffer(length);
+		boolean inEscape= false;
+		for (int i= 0; i < length; i++) {
+			char ch= escapedValue.charAt(i);
+			if (inEscape) {
+				buf.append(ch);
+				inEscape= false;
+			} else if (ch == '\\') {
+				buf.append(ch);
+				inEscape= true;
+			} else {
+				buf.append(Character.toUpperCase(ch));
+			}
+		}
+		return buf.toString();
+	}
+
 	private boolean getStringWrappedProposal(final IInvocationContext context, List result) throws CoreException {
 		int selectionOffset= context.getSelectionOffset();
 		int selectionLength= context.getSelectionLength();
