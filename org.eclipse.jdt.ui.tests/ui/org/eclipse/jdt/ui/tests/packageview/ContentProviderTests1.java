@@ -16,9 +16,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -41,6 +38,11 @@ import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.internal.ui.packageview.PackageExplorerContentProvider;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 /**
  * Tests for the PackageExplorerContentProvider.
@@ -259,6 +261,38 @@ public class ContentProviderTests1 extends TestCase {
 		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 		assertTrue("Correct refresh", fMyPart.getRemovedObject().contains(fCU2)); //$NON-NLS-1$
 		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+	}
+	
+	public void testAddWorkingCopyCU() throws Exception {
+		//test for bug 106452: Paste of source into container doesn't refresh package explorer
+		ICompilationUnit cu= fPack6.createCompilationUnit("New.java","class New {}", true, null);//$NON-NLS-1$//$NON-NLS-2$
+		cu.becomeWorkingCopy(null, null);
+		
+		try {
+			fMyPart.getTreeViewer().setInput(fJProject1.getJavaModel());
+			fMyPart.getTreeViewer().reveal(fCU2);
+			((PackageExplorerContentProvider) fMyPart.getTreeViewer().getContentProvider()).setProvideMembers(false);
+			
+			//force events from display			
+			while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
+			}
+			
+			IElementChangedListener listener= (IElementChangedListener) fProvider;
+			IJavaElementDelta delta= TestDelta.createCUDelta(new ICompilationUnit[] { cu }, fPack6, IJavaElementDelta.ADDED);
+			listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
+			
+			//force events from display			
+			while (fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch()) {
+			}
+
+			assertTrue("No add happened", ! fMyPart.hasAddHappened()); //$NON-NLS-1$
+			assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
+			assertEquals("One refresh", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+			assertEquals("Correct refresh", fMyPart.getRefreshedObject().get(0), fPack6); //$NON-NLS-1$
+			
+		} finally {
+			cu.discardWorkingCopy();
+		}
 	}
 	
 
