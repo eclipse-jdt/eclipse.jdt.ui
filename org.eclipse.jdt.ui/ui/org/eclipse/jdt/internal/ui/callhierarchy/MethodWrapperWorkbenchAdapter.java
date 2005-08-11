@@ -15,6 +15,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.model.IWorkbenchAdapter;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.callhierarchy.MethodWrapper;
 
 public class MethodWrapperWorkbenchAdapter implements IWorkbenchAdapter {
@@ -22,6 +23,7 @@ public class MethodWrapperWorkbenchAdapter implements IWorkbenchAdapter {
 	private final MethodWrapper fMethodWrapper;
 
 	public MethodWrapperWorkbenchAdapter(MethodWrapper methodWrapper) {
+		Assert.isNotNull(methodWrapper);
 		fMethodWrapper= methodWrapper;
 	}
 

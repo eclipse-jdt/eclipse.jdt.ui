@@ -19,6 +19,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.PlatformObject;
 
+import org.eclipse.ui.model.IWorkbenchAdapter;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 
@@ -65,8 +67,10 @@ public abstract class MethodWrapper extends PlatformObject {
     public Object getAdapter(Class adapter) {
 		if (adapter == IJavaElement.class) {
 	        return getMember();
+	    } else if (adapter == IWorkbenchAdapter.class){
+	    	return new MethodWrapperWorkbenchAdapter(this);
 	    } else {
-	    	return super.getAdapter(adapter);
+	    	return null;
 	    }
 	}
 
