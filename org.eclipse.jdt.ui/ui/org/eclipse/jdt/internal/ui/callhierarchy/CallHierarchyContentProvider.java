@@ -157,7 +157,12 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
      * @see org.eclipse.jface.viewers.IContentProvider#inputChanged(org.eclipse.jface.viewers.Viewer, java.lang.Object, java.lang.Object)
      */
     public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-        cancelJobs();
+    	if (oldInput instanceof TreeRoot) {
+    		Object root = ((TreeRoot) oldInput).getRoot();
+    		if (root instanceof MethodWrapper) {
+    			cancelJobs((MethodWrapper) root);
+    		}
+    	}
         if (viewer instanceof AbstractTreeViewer) {
             fManager = new DeferredTreeContentManager(this, (AbstractTreeViewer) viewer, fPart.getSite());
         }
@@ -166,16 +171,13 @@ public class CallHierarchyContentProvider implements ITreeContentProvider {
     /**
      * Cancel all current jobs. 
      */
-    void cancelJobs() {
-    	// prevent NPE of bug 101625:
-        /*
-        if (fManager != null) {
-        	fManager.cancel(null);
+    void cancelJobs(MethodWrapper wrapper) {
+        if (fManager != null && wrapper != null) {
+			fManager.cancel(wrapper);
             if (fPart != null) {
                 fPart.setCancelEnabled(false);
             }
         }
-        */
     }
 
     /**
