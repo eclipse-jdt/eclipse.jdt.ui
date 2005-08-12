@@ -56,6 +56,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.CopyFilesAndFoldersOperation;
 import org.eclipse.ui.actions.CopyProjectOperation;
 import org.eclipse.ui.part.ResourceTransfer;
+import org.eclipse.ui.wizards.newresource.BasicNewResourceWizard;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -439,6 +440,7 @@ public class PasteAction extends SelectionDispatchAction{
 					} else {
 						pm.worked(1);
 					}
+					BasicNewResourceWizard.selectAndReveal(cu.getResource(), PlatformUI.getWorkbench().getActiveWorkbenchWindow());
 				}
 			};
 			
