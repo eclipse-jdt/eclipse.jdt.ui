@@ -221,7 +221,7 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 
 					public final boolean visit(final MethodInvocation node) {
 						final IMethodBinding binding= node.resolveMethodBinding();
-						if (binding != null && binding.getName().equals("next")) { //$NON-NLS-1$
+						if (binding != null && (binding.getName().equals("next") || binding.getName().equals("nextElement"))) { //$NON-NLS-1$ //$NON-NLS-2$
 							final Expression expression= node.getExpression();
 							if (expression instanceof Name) {
 								final IBinding result= ((Name) expression).resolveBinding();
@@ -283,26 +283,32 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 
 							public final boolean visit(final MethodInvocation node) {
 								final IMethodBinding binding= node.resolveMethodBinding();
-								if (binding != null && binding.getName().equals("iterator")) { //$NON-NLS-1$
-									final Expression qualifier= node.getExpression();
-									if (qualifier != null) {
-										final ITypeBinding type= qualifier.resolveTypeBinding();
-										if (type != null) {
-											final ITypeBinding iterable= getSuperType(type, "java.lang.Iterable"); //$NON-NLS-1$
-											if (iterable != null) {
-												fExpression= qualifier;
-												if (qualifier instanceof Name) {
-													final Name name= (Name) qualifier;
-													fIterable= name.resolveBinding();
-												} else if (qualifier instanceof MethodInvocation) {
-													final MethodInvocation invocation= (MethodInvocation) qualifier;
-													fIterable= invocation.resolveMethodBinding();
-												} else if (qualifier instanceof FieldAccess) {
-													final FieldAccess access= (FieldAccess) qualifier;
-													fIterable= access.resolveFieldBinding();
+								if (binding != null) {
+									final ITypeBinding type= binding.getReturnType();
+									if (type != null) {
+									final String qualified= type.getQualifiedName();
+									if (qualified.startsWith("java.util.Enumeration<") || qualified.startsWith("java.util.Iterator<")) { //$NON-NLS-1$ //$NON-NLS-2$
+										final Expression qualifier= node.getExpression();
+										if (qualifier != null) {
+											final ITypeBinding resolved= qualifier.resolveTypeBinding();
+											if (resolved != null) {
+												final ITypeBinding iterable= getSuperType(resolved, "java.lang.Iterable"); //$NON-NLS-1$
+												if (iterable != null) {
+													fExpression= qualifier;
+													if (qualifier instanceof Name) {
+														final Name name= (Name) qualifier;
+														fIterable= name.resolveBinding();
+													} else if (qualifier instanceof MethodInvocation) {
+														final MethodInvocation invocation= (MethodInvocation) qualifier;
+														fIterable= invocation.resolveMethodBinding();
+													} else if (qualifier instanceof FieldAccess) {
+														final FieldAccess access= (FieldAccess) qualifier;
+														fIterable= access.resolveFieldBinding();
+													}
 												}
 											}
 										}
+									}
 									}
 								}
 								return true;
@@ -313,9 +319,14 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 								if (binding != null) {
 									final ITypeBinding type= binding.getType();
 									if (type != null) {
-										final ITypeBinding iterator= getSuperType(type, "java.util.Iterator"); //$NON-NLS-1$
+										ITypeBinding iterator= getSuperType(type, "java.util.Iterator"); //$NON-NLS-1$
 										if (iterator != null)
 											fIterator= binding;
+										else {
+											iterator= getSuperType(type, "java.util.Enumeration"); //$NON-NLS-1$
+											if (iterator != null)
+												fIterator= binding;
+										}
 									}
 								}
 								return true;
@@ -363,7 +374,7 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 						if (right instanceof MethodInvocation) {
 							final MethodInvocation invocation= (MethodInvocation) right;
 							final IMethodBinding binding= invocation.resolveMethodBinding();
-							if (binding != null && binding.getName().equals("next")) { //$NON-NLS-1$
+							if (binding != null && (binding.getName().equals("next") || binding.getName().equals("nextElement"))) { //$NON-NLS-1$ //$NON-NLS-2$
 								final Expression expression= invocation.getExpression();
 								if (expression instanceof Name) {
 									final Name qualifier= (Name) expression;
