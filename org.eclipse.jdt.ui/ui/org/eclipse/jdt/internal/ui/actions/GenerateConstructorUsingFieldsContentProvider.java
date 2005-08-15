@@ -135,6 +135,8 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 	}
 
 	public Object[] getInitiallySelectedElements() {
+		if (fSelected.isEmpty())
+			return getElements(null);
 		return fSelected.toArray();
 	}
 
