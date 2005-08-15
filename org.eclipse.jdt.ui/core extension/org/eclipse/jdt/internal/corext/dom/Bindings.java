@@ -734,8 +734,8 @@ public class Bindings {
 	}
 
 	/**
-	 * @param m1
-	 * @param m2
+	 * @param m1 overriding method
+	 * @param m2 overridden method
 	 * @return <code>true</code> iff the method <code>m1</code> is a subsignature of the method <code>m2</code>.
 	 * 		This is one of the requirements for m1 to override m2.
 	 * 		Accessibility and return types are not taken into account.
@@ -746,47 +746,104 @@ public class Bindings {
 		if (! m1.getName().equals(m2.getName()))
 			return false;
 			
-		ITypeBinding[] m1Parameters= m1.getParameterTypes();
-		ITypeBinding[] m2Parameters= m2.getParameterTypes();
-		if (m1Parameters.length != m2Parameters.length)
+		ITypeBinding[] m1Params= m1.getParameterTypes();
+		ITypeBinding[] m2Params= m2.getParameterTypes();
+		if (m1Params.length != m2Params.length)
 			return false;
 		
-		ITypeBinding[] m1TypeParameters= m1.getTypeParameters();
-		ITypeBinding[] m2TypeParameters= m2.getTypeParameters();
-		if (m1TypeParameters.length != m2TypeParameters.length)
+		ITypeBinding[] m1TypeParams= m1.getTypeParameters();
+		ITypeBinding[] m2TypeParams= m2.getTypeParameters();
+		if (m1TypeParams.length != m2TypeParams.length
+				&& m1TypeParams.length != 0) //non-generic m1 can override a generic m2
 			return false;
 		
-		if (m1TypeParameters.length != 0) {
+		//m1TypeParameters.length == (m2TypeParameters.length || 0)
+		if (m2TypeParams.length != 0) {
 			//Note: this branch does not 100% adhere to the spec and may report some false positives.
 			// Full compliance would require major duplication of compiler code.
 			
-			//Compare erasures of type parameter bounds:
-			for (int i= 0; i < m1TypeParameters.length; i++) {
-				ITypeBinding[] m2TypeParameterBounds= m1TypeParameters[i].getTypeBounds();
-				ITypeBinding[] m1TypeParameterBounds= m2TypeParameters[i].getTypeBounds();
-				if (m1TypeParameterBounds.length != m2TypeParameterBounds.length)
+			//Compare type parameter bounds:
+			for (int i= 0; i < m1TypeParams.length; i++) {
+				// loop over m1TypeParams, which either empty, or equally long as m2TypeParams
+				ITypeBinding[] m1Bounds= getTypeBoundsWithoutObject(m1TypeParams[i]);
+				ITypeBinding[] m2Bounds= getTypeBoundsWithoutObject(m2TypeParams[i]);
+				if (m1Bounds.length != m2Bounds.length)
 					return false;
-				for (int b= 0; b < m2TypeParameterBounds.length; b++) {
-					if (! equals(m1TypeParameterBounds[b].getErasure(), m2TypeParameterBounds[b].getErasure()))
+				for (int b= 0; b < m2Bounds.length; b++) {
+					ITypeBinding m1Bound= m1Bounds[b];
+					if (containsTypeVariables(m1Bound))
+						m1Bound= m1Bound.getErasure(); // try to achieve effect of "rename type variables":
+					else if (m1Bound.isRawType())
+						m1Bound= m1Bound.getTypeDeclaration();
+					if (! equals(m1Bound, m1Bounds[b].getErasure())) // can erase m2
 						return false;
 				}
 			}
-			//Compare erasures of parameter types:
-			for (int i= 0; i < m1Parameters.length; i++) {
-				if ( ! (equals(m2Parameters[i], m1Parameters[i])
-						|| equals(m2Parameters[i].getErasure(), m1Parameters[i].getErasure()))) // try to achieve effect of "rename type variables" 
+			//Compare parameter types:
+			if (equals(m2Params, m1Params))
+				return true;
+			for (int i= 0; i < m1Params.length; i++) {
+				ITypeBinding m1Param= m1Params[i];
+				if (containsTypeVariables(m1Param))
+					m1Param= m1Param.getErasure(); // try to achieve effect of "rename type variables"
+				else if (m1Param.isRawType())
+					m1Param= m1Param.getTypeDeclaration();
+				if (! (equals(m1Param, m2Params[i].getErasure()))) // can erase m2
 					return false;
 			}
 			return true;
 			
 		} else {
-			for (int i= 0; i < m1Parameters.length; i++) {
-				if ( ! (equals(m2Parameters[i], m1Parameters[i])
-						|| equals(m2Parameters[i].getErasure(), m1Parameters[i]))) // subsignature
+			// m1TypeParams.length == m2TypeParams.length == 0  
+			if (equals(m1Params, m2Params))
+				return true;
+			for (int i= 0; i < m1Params.length; i++) {
+				ITypeBinding m1Param= m1Params[i];
+				if (m1Param.isRawType())
+					m1Param= m1Param.getTypeDeclaration();
+				if (! (equals(m1Param, m2Params[i].getErasure()))) // can erase m2
 					return false;
 			}
 			return true;
 		}
+	}
+
+	private static boolean containsTypeVariables(ITypeBinding type) {
+		if (type.isTypeVariable())
+			return true;
+		if (type.isArray())
+			return containsTypeVariables(type.getElementType());
+		if (type.isCapture())
+			return containsTypeVariables(type.getWildcard());
+		if (type.isParameterizedType())
+			return containsTypeVariables(type.getTypeArguments());
+		if (type.isTypeVariable())
+			return containsTypeVariables(type.getTypeBounds());
+		if (type.isWildcardType() && type.getBound() != null)
+			return containsTypeVariables(type.getBound());
+		return false;
+	}
+
+	private static boolean containsTypeVariables(ITypeBinding[] types) {
+		for (int i= 0; i < types.length; i++)
+			if (containsTypeVariables(types[i]))
+				return true;
+		return false;
+	}
+
+	private static ITypeBinding[] getTypeBoundsWithoutObject(ITypeBinding typeParameter) {
+		ITypeBinding[] typeBounds= typeParameter.getTypeBounds();
+		int count= typeBounds.length;
+		if (count == 0)
+			return typeBounds;
+		if (! "java.lang.Object".equals(typeBounds[0].getQualifiedName())) //$NON-NLS-1$
+			return typeBounds;
+		
+		if (count == 1)
+			return new ITypeBinding[0];
+		ITypeBinding[] result= new ITypeBinding[count];
+		System.arraycopy(typeParameter, 1, result, 0, count - 1);
+		return result;
 	}
 
 	/**
