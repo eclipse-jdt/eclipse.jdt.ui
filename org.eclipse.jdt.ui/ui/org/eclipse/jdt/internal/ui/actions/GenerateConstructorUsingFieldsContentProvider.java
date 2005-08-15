@@ -10,10 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.text.Collator;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -66,16 +63,6 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 							fFields.add(binding);
 					}
 				}
-				final Collator collator= Collator.getInstance();
-				Collections.sort(fFields, new Comparator() {
-				
-					public int compare(Object object1, Object object2) {
-						final IVariableBinding first= (IVariableBinding) object1;
-						final IVariableBinding second= (IVariableBinding) object2;
-						return collator.compare(first.getName(), second.getName());
-					}
-				
-				});
 				for (Iterator iterator= selected.iterator(); iterator.hasNext();) {
 					field= (IField) iterator.next();
 					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, fUnit);
