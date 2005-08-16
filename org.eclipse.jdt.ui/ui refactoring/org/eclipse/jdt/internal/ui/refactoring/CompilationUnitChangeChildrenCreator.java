@@ -22,26 +22,25 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
-import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
+import org.eclipse.ltk.core.refactoring.AbstractTextEditChange;
+import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
+
+import org.eclipse.ltk.internal.ui.refactoring.TextEditChangeElement;
 import org.eclipse.ltk.internal.ui.refactoring.ChangeElement;
 import org.eclipse.ltk.internal.ui.refactoring.DefaultChangeElement;
 import org.eclipse.ltk.internal.ui.refactoring.IChangeElementChildrenCreator;
-import org.eclipse.ltk.internal.ui.refactoring.TextEditChangeElement;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-
 public class CompilationUnitChangeChildrenCreator implements IChangeElementChildrenCreator {
 
 	private static class OffsetComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
-			TextEditChangeGroup c1= (TextEditChangeGroup)o1;
-			TextEditChangeGroup c2= (TextEditChangeGroup)o2;
+			TextEditBasedChangeGroup c1= (TextEditBasedChangeGroup)o1;
+			TextEditBasedChangeGroup c2= (TextEditBasedChangeGroup)o2;
 			int p1= getOffset(c1);
 			int p2= getOffset(c2);
 			if (p1 < p2)
@@ -51,36 +50,38 @@ public class CompilationUnitChangeChildrenCreator implements IChangeElementChild
 			// same offset
 			return 0;	
 		}
-		private int getOffset(TextEditChangeGroup edit) {
+		private int getOffset(TextEditBasedChangeGroup edit) {
 			return edit.getRegion().getOffset();
 		}
 	}
 	
 	public void createChildren(DefaultChangeElement changeElement) {
-		CompilationUnitChange change= (CompilationUnitChange)changeElement.getChange();
-		ICompilationUnit cunit= change.getCompilationUnit();
-		List children= new ArrayList(5);
-		Map map= new HashMap(20);
-		TextEditChangeGroup[] changes= getSortedTextEditChanges(change);
-		for (int i= 0; i < changes.length; i++) {
-			TextEditChangeGroup tec= changes[i];
-			try {
-				IJavaElement element= getModifiedJavaElement(tec, cunit);
-				if (element.equals(cunit)) {
+		final AbstractTextEditChange change= (AbstractTextEditChange) changeElement.getChange();
+		ICompilationUnit cunit= (ICompilationUnit) change.getAdapter(ICompilationUnit.class);
+		if (cunit != null) {
+			List children= new ArrayList(5);
+			Map map= new HashMap(20);
+			TextEditBasedChangeGroup[] changes= getSortedChangeGroups(change);
+			for (int i= 0; i < changes.length; i++) {
+				TextEditBasedChangeGroup tec= changes[i];
+				try {
+					IJavaElement element= getModifiedJavaElement(tec, cunit);
+					if (element.equals(cunit)) {
+						children.add(new TextEditChangeElement(changeElement, tec));
+					} else {
+						PseudoJavaChangeElement pjce= getChangeElement(map, element, children, changeElement);
+						pjce.addChild(new TextEditChangeElement(pjce, tec));
+					}
+				} catch (JavaModelException e) {
 					children.add(new TextEditChangeElement(changeElement, tec));
-				} else {
-					PseudoJavaChangeElement pjce= getChangeElement(map, element, children, changeElement);
-					pjce.addChild(new TextEditChangeElement(pjce, tec));
 				}
-			} catch (JavaModelException e) {
-				children.add(new TextEditChangeElement(changeElement, tec));
 			}
+			changeElement.setChildren((ChangeElement[]) children.toArray(new ChangeElement[children.size()]));
 		}
-		changeElement.setChildren((ChangeElement[]) children.toArray(new ChangeElement[children.size()]));
 	}
 	
-	private TextEditChangeGroup[] getSortedTextEditChanges(TextChange change) {
-		TextEditChangeGroup[] edits= change.getTextEditChangeGroups();
+	private TextEditBasedChangeGroup[] getSortedChangeGroups(AbstractTextEditChange change) {
+		TextEditBasedChangeGroup[] edits= change.getChangeGroups();
 		List result= new ArrayList(edits.length);
 		for (int i= 0; i < edits.length; i++) {
 			if (!edits[i].getTextEditGroup().isEmpty())
@@ -88,10 +89,10 @@ public class CompilationUnitChangeChildrenCreator implements IChangeElementChild
 		}
 		Comparator comparator= new OffsetComparator();
 		Collections.sort(result, comparator);
-		return (TextEditChangeGroup[])result.toArray(new TextEditChangeGroup[result.size()]);
+		return (TextEditBasedChangeGroup[])result.toArray(new TextEditBasedChangeGroup[result.size()]);
 	}
 	
-	private IJavaElement getModifiedJavaElement(TextEditChangeGroup edit, ICompilationUnit cunit) throws JavaModelException {
+	private IJavaElement getModifiedJavaElement(TextEditBasedChangeGroup edit, ICompilationUnit cunit) throws JavaModelException {
 		IRegion range= edit.getRegion();
 		if (range.getOffset() == 0 && range.getLength() == 0)
 			return cunit;
@@ -133,7 +134,7 @@ public class CompilationUnitChangeChildrenCreator implements IChangeElementChild
 		return result;
 	}
 	
-	private boolean coveredBy(TextEditChangeGroup group, IRegion sourceRegion) {
+	private boolean coveredBy(TextEditBasedChangeGroup group, IRegion sourceRegion) {
 		int sLength= sourceRegion.getLength();
 		if (sLength == 0)
 			return false;
