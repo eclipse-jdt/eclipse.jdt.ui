@@ -49,7 +49,7 @@ import org.eclipse.jdt.testplugin.TestOptions;
 public class MethodOverrideTest extends CoreTests {
 
 	private static final Class THIS= MethodOverrideTest.class;
-	private static final boolean DEBUG_SHOWRESULTS= true;
+	private static final boolean DEBUG_SHOWRESULTS= false;
 	
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
@@ -312,11 +312,11 @@ public class MethodOverrideTest extends CoreTests {
 			
 			boolean overrideAnnotationResult= overrideAnnotation.booleanValue();
 			boolean testerOverrides= tester.isSubsignature(overriddenMethod, overriding);
+			boolean uiBindingsIsSubsignature= Bindings.isSubsignature(overridingBinding, overriddenBinding);
 			
 			if (DEBUG_SHOWRESULTS) {
 				boolean bindingOverrides= overridingBinding.getMethodDeclaration().overrides(overriddenBinding.getMethodDeclaration());
 				boolean bindingIsSubsignature= overridingBinding.isSubsignature(overriddenBinding);
-				boolean uiBindingsIsSubsignature= Bindings.isSubsignature(overridingBinding, overriddenBinding);
 
 				if (testerOverrides != overrideAnnotationResult || testerOverrides != bindingOverrides 
 						|| testerOverrides != bindingIsSubsignature || testerOverrides != uiBindingsIsSubsignature) { 
@@ -332,11 +332,11 @@ public class MethodOverrideTest extends CoreTests {
 				}
 			}
 			if (overrideAnnotationResult != testerOverrides) {
-				testerOverrides= tester.isSubsignature(overriddenMethod, overriding);
-
 				assertEquals(getDebugString(overridingBinding, overriddenBinding), overrideAnnotationResult, testerOverrides);
 			}
-			
+			/*if (overrideAnnotationResult != uiBindingsIsSubsignature) {
+				assertEquals(getDebugString(overridingBinding, overriddenBinding), overrideAnnotationResult, uiBindingsIsSubsignature);
+			}*/
 			
 		}
 	}
