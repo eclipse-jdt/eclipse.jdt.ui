@@ -49,7 +49,7 @@ import org.eclipse.jdt.testplugin.TestOptions;
 public class MethodOverrideTest extends CoreTests {
 
 	private static final Class THIS= MethodOverrideTest.class;
-	private static final boolean DEBUG_SHOWRESULTS= false;
+	private static final boolean DEBUG_SHOWRESULTS= true;
 	
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
@@ -119,6 +119,7 @@ public class MethodOverrideTest extends CoreTests {
 		buf.append("    public void o1_foo4(T... t) {}\n");
 		buf.append("    public void o1_foo5(A<T> s) {}\n");
 		buf.append("    public void o1_foo6(A<? super T> s) {}\n");
+		buf.append("    public void o1_foo7(T... t) {}\n");
 		buf.append("    public void o1_xoo1(T[] t) {}\n");
 		buf.append("    public void o1_xoo2(A<?> s) {}\n");
 		buf.append("    public void o1_xoo3(A<? extends T> s) {}\n");
@@ -131,6 +132,7 @@ public class MethodOverrideTest extends CoreTests {
 		buf.append("    @Override public void o1_foo4(S... t) {}\n");
 		buf.append("    @Override public void o1_foo5(A<S> s) {}\n");
 		buf.append("    @Override public void o1_foo6(A<? super S> s) {}\n");
+		buf.append("    @Override public void o1_foo7(S[] t) {}\n");
 		buf.append("    @Override public void o1_xoo1(S[][] t) {}\n");
 		buf.append("    @Override public void o1_xoo2(A<Object> s) {}\n");
 		buf.append("    @Override public void o1_xoo3(A<? super S> s) {}\n");
@@ -370,6 +372,9 @@ public class MethodOverrideTest extends CoreTests {
 		boolean hasProblems= false;
 		for (int i= 0; i < problems.length; i++) {
 			IProblem prob= problems[i];
+			if (prob.isWarning()) {
+				continue;
+			}
 			switch (prob.getID()) {
 				// ignored problems
 				case IProblem.MethodNameClash:
