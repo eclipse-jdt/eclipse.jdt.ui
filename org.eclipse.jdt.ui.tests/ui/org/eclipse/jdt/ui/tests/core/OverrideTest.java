@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import java.util.Arrays;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -23,6 +25,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -689,6 +692,87 @@ public class OverrideTest extends TestCase {
 		IMethodBinding testAdd= test.getMethods()[0].resolveBinding();
 		
 		assertNull(Bindings.findMethodDefininition(testAdd, true));
+	}
+	
+	public void test15Bug105669() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package override.test;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("class I extends Vector<Number> {\n");
+		buf.append("    static final long serialVersionUID= 1L;\n");
+		buf.append("    @Override\n");
+		buf.append("    public synchronized boolean addAll(Collection c) {\n");
+		buf.append("        return false;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= fPackage.createCompilationUnit("I.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= createAST(cu);
+		IProblem[] problems= astRoot.getProblems();
+		assertEquals(0, problems.length);
+		
+		TypeDeclaration i= (TypeDeclaration) astRoot.types().get(0);
+		IMethodBinding iaddAll= i.getMethods()[0].resolveBinding();
+		
+		IMethodBinding overridden= Bindings.findMethodDefininition(iaddAll, true).getMethodDeclaration();
+		ITypeBinding vector= i.getSuperclassType().resolveBinding().getTypeDeclaration();
+		
+		assertTrue(Arrays.asList(vector.getDeclaredMethods()).contains(overridden));
+	}
+	
+	public void test15Bug107105() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package override.test;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("\n");
+		buf.append("class A {\n");
+		buf.append("    <S extends Number & Serializable & Runnable > void foo2(S s) { }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class B extends A {\n");
+		buf.append("    @Override // should error\n");
+		buf.append("    <S extends Number & Runnable> void foo2(S s) { }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class C extends A {\n");
+		buf.append("    @Override // should error\n");
+		buf.append("    <S extends Number & Runnable & Cloneable> void foo2(S s) { }\n");
+		buf.append("}\n");
+		buf.append("\n");
+		buf.append("class D extends A {\n");
+		buf.append("    @Override // correct\n");
+		buf.append("    <S extends Number & Runnable & Serializable> void foo2(S s) { }\n");
+		buf.append("}\n");
+		buf.append("interface I extends Runnable, Serializable { }\n");
+		buf.append("class E extends A {\n");
+		buf.append("    @Override //should error\n");
+		buf.append("    <S extends Number & I> void foo2(S s) { }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= fPackage.createCompilationUnit("A.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= createAST(cu);
+//		IProblem[] problems= astRoot.getProblems();
+//		assertEquals(3, problems.length);
+		
+		TypeDeclaration a= (TypeDeclaration) astRoot.types().get(0);
+		IMethodBinding afoo= a.getMethods()[0].resolveBinding();
+		
+		TypeDeclaration b= (TypeDeclaration) astRoot.types().get(1);
+		IMethodBinding bfoo= b.getMethods()[0].resolveBinding();
+		
+		TypeDeclaration c= (TypeDeclaration) astRoot.types().get(2);
+		IMethodBinding cfoo= c.getMethods()[0].resolveBinding();
+		
+		TypeDeclaration d= (TypeDeclaration) astRoot.types().get(3);
+		IMethodBinding dfoo= d.getMethods()[0].resolveBinding();
+		
+		TypeDeclaration e= (TypeDeclaration) astRoot.types().get(5);
+		IMethodBinding efoo= e.getMethods()[0].resolveBinding();
+		
+		assertNull(Bindings.findMethodDefininition(bfoo, true));
+		assertNull(Bindings.findMethodDefininition(cfoo, true));
+		assertEquals(afoo, Bindings.findMethodDefininition(dfoo, true));
+		assertNull(Bindings.findMethodDefininition(efoo, true));
 	}
 	
 }

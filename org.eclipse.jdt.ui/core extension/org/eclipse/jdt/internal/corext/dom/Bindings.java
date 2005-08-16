@@ -14,6 +14,7 @@
 package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -764,20 +765,11 @@ public class Bindings {
 			
 			//Compare type parameter bounds:
 			for (int i= 0; i < m1TypeParams.length; i++) {
-				// loop over m1TypeParams, which either empty, or equally long as m2TypeParams
-				ITypeBinding[] m1Bounds= getTypeBoundsWithoutObject(m1TypeParams[i]);
-				ITypeBinding[] m2Bounds= getTypeBoundsWithoutObject(m2TypeParams[i]);
-				if (m1Bounds.length != m2Bounds.length)
+				// loop over m1TypeParams, which is either empty, or equally long as m2TypeParams
+				Set m1Bounds= getTypeBoundsForSubsignature(m1TypeParams[i]);
+				Set m2Bounds= getTypeBoundsForSubsignature(m2TypeParams[i]);
+				if (! m1Bounds.equals(m2Bounds))
 					return false;
-				for (int b= 0; b < m2Bounds.length; b++) {
-					ITypeBinding m1Bound= m1Bounds[b];
-					if (containsTypeVariables(m1Bound))
-						m1Bound= m1Bound.getErasure(); // try to achieve effect of "rename type variables":
-					else if (m1Bound.isRawType())
-						m1Bound= m1Bound.getTypeDeclaration();
-					if (! equals(m1Bound, m1Bounds[b].getErasure())) // can erase m2
-						return false;
-				}
 			}
 			//Compare parameter types:
 			if (equals(m2Params, m1Params))
@@ -831,18 +823,24 @@ public class Bindings {
 		return false;
 	}
 
-	private static ITypeBinding[] getTypeBoundsWithoutObject(ITypeBinding typeParameter) {
+	private static Set getTypeBoundsForSubsignature(ITypeBinding typeParameter) {
 		ITypeBinding[] typeBounds= typeParameter.getTypeBounds();
 		int count= typeBounds.length;
 		if (count == 0)
-			return typeBounds;
-		if (! "java.lang.Object".equals(typeBounds[0].getQualifiedName())) //$NON-NLS-1$
-			return typeBounds;
+			return Collections.EMPTY_SET;
 		
-		if (count == 1)
-			return new ITypeBinding[0];
-		ITypeBinding[] result= new ITypeBinding[count];
-		System.arraycopy(typeParameter, 1, result, 0, count - 1);
+		Set result= new HashSet(typeBounds.length);
+		for (int i= 0; i < typeBounds.length; i++) {
+			ITypeBinding bound= typeBounds[i];
+			if ("java.lang.Object".equals(typeBounds[0].getQualifiedName())) //$NON-NLS-1$
+				continue;
+			else if (containsTypeVariables(bound))
+				result.add(bound.getErasure()); // try to achieve effect of "rename type variables"
+			else if (bound.isRawType())
+				result.add(bound.getTypeDeclaration());
+			else
+				result.add(bound);
+		}
 		return result;
 	}
 
