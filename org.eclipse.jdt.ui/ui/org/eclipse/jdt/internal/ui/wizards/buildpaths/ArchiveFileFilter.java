@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -71,6 +72,9 @@ public class ArchiveFileFilter extends ViewerFilter {
 			if (!fRecursive) {
 				return true;
 			}
+			// Ignore closed projects
+			if (element instanceof IProject && !((IProject)element).isOpen())
+				return false;
 			try {
 				IResource[] resources= ((IContainer)element).members();
 				for (int i= 0; i < resources.length; i++) {
