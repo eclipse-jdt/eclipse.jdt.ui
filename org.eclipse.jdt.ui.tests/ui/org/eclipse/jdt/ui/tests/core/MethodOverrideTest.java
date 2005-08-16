@@ -49,7 +49,7 @@ import org.eclipse.jdt.testplugin.TestOptions;
 public class MethodOverrideTest extends CoreTests {
 
 	private static final Class THIS= MethodOverrideTest.class;
-	private static final boolean DEBUG_SHOWRESULTS= true;
+	private static final boolean DEBUG_SHOWRESULTS= false;
 	
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
@@ -279,16 +279,21 @@ public class MethodOverrideTest extends CoreTests {
 		CompilationUnit root= assertNoCompilationError(cu);
 		
 		IType[] types= cu.getTypes();
-		List typeDecls= root.types();
+		ITypeBinding[] typeBindings= new ITypeBinding[types.length];
+		
+		typeBindings[types.length - 1]= ((TypeDeclaration) root.types().get(types.length - 1)).resolveBinding();
+		for (int i= types.length - 2; i >= 0; i--) {
+			typeBindings[i]= typeBindings[i + 1].getSuperclass();
+		}
 		
 		IType overridingType= types[overridingIndex];
-		ITypeBinding overridingTypeBinding= ((TypeDeclaration) typeDecls.get(overridingIndex)).resolveBinding();
+		ITypeBinding overridingTypeBinding= typeBindings[overridingIndex];
 		assertSameType(overridingType, overridingTypeBinding);
 		
 		IType overriddenType= types[overriddenIndex];
-		ITypeBinding overriddenTypeBinding= ((TypeDeclaration) typeDecls.get(overriddenIndex)).resolveBinding();		
+ 		ITypeBinding overriddenTypeBinding= typeBindings[overriddenIndex];
 		assertSameType(overriddenType, overriddenTypeBinding);
-		
+				
 		IType focusType= types[focusIndex];
 		ITypeHierarchy hierarchy= focusType.newTypeHierarchy(null);
 		MethodOverrideTester tester= new MethodOverrideTester(focusType, hierarchy);
