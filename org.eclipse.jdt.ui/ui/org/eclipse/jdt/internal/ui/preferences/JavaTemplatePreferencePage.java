@@ -39,6 +39,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
+import org.eclipse.jdt.internal.ui.text.SimpleJavaSourceViewerConfiguration;
 import org.eclipse.jdt.internal.ui.text.template.preferences.TemplateVariableProcessor;
 
 public class JavaTemplatePreferencePage extends TemplatePreferencePage implements IWorkbenchPreferencePage {
@@ -99,7 +100,7 @@ public class JavaTemplatePreferencePage extends TemplatePreferencePage implement
 		tools.setupJavaDocumentPartitioner(document, IJavaPartitions.JAVA_PARTITIONING);
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		SourceViewer viewer= new JavaSourceViewer(parent, null, null, false, SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL, store);
-		TemplateEditorSourceViewerConfiguration configuration= new TemplateEditorSourceViewerConfiguration(tools.getColorManager(), store, null, fTemplateProcessor);
+		SimpleJavaSourceViewerConfiguration configuration= new SimpleJavaSourceViewerConfiguration(tools.getColorManager(), store, null, IJavaPartitions.JAVA_PARTITIONING, false);
 		viewer.configure(configuration);
 		viewer.setEditable(false);
 		viewer.setDocument(document);
