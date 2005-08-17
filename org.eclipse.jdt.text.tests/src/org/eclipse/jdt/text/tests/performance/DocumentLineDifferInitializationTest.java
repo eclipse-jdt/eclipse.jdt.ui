@@ -14,35 +14,35 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.test.performance.PerformanceMeter;
 import org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer;
 
-public class DocumentLineDifferInitializationText extends AbstractDocumentLineDifferTest {
-	private static final Class THIS= DocumentLineDifferInitializationText.class;
+public class DocumentLineDifferInitializationTest extends AbstractDocumentLineDifferTest {
+	private static final Class THIS= DocumentLineDifferInitializationTest.class;
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 
-
 	public void testInitializationWithNoChanges() throws Exception {
 		setUpFast();
-		runInitializationMeasurements(new Document(FAUST1));
+		runInitializationMeasurements(createDocument(FAUST1));
 	}
 
 	public void testInitializationWithFewChanges() throws Exception {
 		setUpFast();
-		runInitializationMeasurements(new Document(FAUST_FEW_CHANGES));
+		runInitializationMeasurements(createDocument(FAUST_FEW_CHANGES));
 	}
 
 	public void testInitializationWithManyChanges() throws Exception {
 		setUpSlow();
-		runInitializationMeasurements(new Document(SMALL_FAUST_MANY_CHANGES));
+		runInitializationMeasurements(createDocument(SMALL_FAUST_MANY_CHANGES));
 	}
 
 	public void testInitializationWithManyChangesButEqualSize() throws Exception {
 		setUpSlow();
-		runInitializationMeasurements(new Document(SMALL_FAUST_MANY_CHANGES_SAME_SIZE));
+		runInitializationMeasurements(createDocument(SMALL_FAUST_MANY_CHANGES_SAME_SIZE));
 	}
 	
 	protected void tearDown() throws Exception {
@@ -52,7 +52,11 @@ public class DocumentLineDifferInitializationText extends AbstractDocumentLineDi
 		super.tearDown();
 	}
 
-	private void runInitializationMeasurements(Document document) throws Exception {
+	protected IDocument createDocument(String contents) {
+		return new Document(contents);
+	}
+
+	private void runInitializationMeasurements(IDocument document) throws Exception {
 		PerformanceMeter meter= getNullPerformanceMeter();
 		int runs= getWarmUpRuns();
 		for (int run= 0; run < runs; run++)
@@ -64,7 +68,7 @@ public class DocumentLineDifferInitializationText extends AbstractDocumentLineDi
 			measureInitialization(meter, document);
 	}
 
-	private void measureInitialization(PerformanceMeter meter, Document document) throws InterruptedException {
+	private void measureInitialization(PerformanceMeter meter, IDocument document) throws InterruptedException {
 		DocumentLineDiffer differ= new DocumentLineDiffer();
 		setUpDiffer(differ);
 		BooleanFuture future= waitForSynchronization(differ);

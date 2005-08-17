@@ -42,7 +42,8 @@ public class PerformanceTestSuite extends TestSuite {
 		addTest(JavaFormatterProjectTest.suite());
 		addTest(ContentTypeTest.suite());
 		addTest(CodeCompletionPerformanceTest.suite());
-		addTest(DocumentLineDifferInitializationText.suite());
+		addTest(DocumentLineDifferInitializationTest.suite());
+		addTest(SynchronizedLineDifferInitializationTest.suite());
 		addTest(DocumentLineDifferModificationTest.suite());
 		addTest(new OpenJavaEditorTest.Setup(EmptyTestCase.suite(), false)); // the actual test runs in its own workbench (see test.xml)
 	}
