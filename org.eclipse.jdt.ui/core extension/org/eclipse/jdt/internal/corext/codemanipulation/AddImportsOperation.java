@@ -325,7 +325,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 				}
 			}
 			if (doc.getChar(nameStart + containerLen) == '.') {
-				return nameStart + containerLen;
+				return nameStart + containerLen + 1;
 			}
 		}
 		return nameStart;
