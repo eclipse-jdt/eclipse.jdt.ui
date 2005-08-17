@@ -27,6 +27,14 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 	 * @see ClasspathVariableInitializer#initialize(String)
 	 */
 	public void initialize(String variable) {
+		if (JUnitPlugin.JUNIT_HOME.equals(variable)) {
+			initializeHome();
+		} else if (JUnitPlugin.JUNIT_SRC_HOME.equals(variable)) {
+			initializeSource();
+		}
+	}
+
+	private void initializeHome() {
 		Bundle bundle= Platform.getBundle("org.junit"); //$NON-NLS-1$
 		if (bundle == null) {
 			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
@@ -45,6 +53,38 @@ public class JUnitHomeInitializer extends ClasspathVariableInitializer {
 			JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_HOME, Path.fromOSString(fullPath), null);
 		} catch (JavaModelException e1) {
 			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_HOME, null);
+		}
+	}
+	
+	private void initializeSource() {
+		Bundle bundle= Platform.getBundle("org.junit"); //$NON-NLS-1$
+		if (bundle == null) {
+			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, null);
+			return;
+		}
+		String version= (String)bundle.getHeaders().get("Bundle-Version"); //$NON-NLS-1$
+		if (version == null) {
+			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, null);
+			return;
+		}
+		bundle= Platform.getBundle("org.eclipse.jdt.source"); //$NON-NLS-1$
+		if (bundle == null) {
+			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, null);
+			return;
+		}
+		URL local= null;
+		try {
+			local= Platform.asLocalURL(bundle.getEntry("/")); //$NON-NLS-1$
+		} catch (IOException e) {
+			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, null);
+			return;
+		}
+		try {
+			String fullPath= new File(local.getPath()).getAbsolutePath() 
+				+ File.separator + "src" + File.separator + "org.junit_" + version;   //$NON-NLS-1$ //$NON-NLS-2$
+			JavaCore.setClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, Path.fromOSString(fullPath), null);
+		} catch (JavaModelException e1) {
+			JavaCore.removeClasspathVariable(JUnitPlugin.JUNIT_SRC_HOME, null);
 		}
 	}
 }

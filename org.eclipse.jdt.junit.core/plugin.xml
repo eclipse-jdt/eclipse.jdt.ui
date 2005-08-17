@@ -293,6 +293,10 @@
             variable="JUNIT_HOME"
             class="org.eclipse.jdt.internal.junit.ui.JUnitHomeInitializer">
       </classpathVariableInitializer>
+      <classpathVariableInitializer
+            variable="JUNIT_SRC_HOME"
+            class="org.eclipse.jdt.internal.junit.ui.JUnitHomeInitializer">
+      </classpathVariableInitializer>
    </extension>
    <extension
          point="org.eclipse.jdt.ui.quickFixProcessors">

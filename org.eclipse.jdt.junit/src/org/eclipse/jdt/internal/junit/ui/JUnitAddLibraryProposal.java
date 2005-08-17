@@ -76,29 +76,22 @@ public final class JUnitAddLibraryProposal implements IJavaCompletionProposal {
 			int length= fContext.getSelectionLength();
 			String s= document.get(offset, length);
 			document.replace(offset, length, s);
-		} catch (JavaModelException e) {
+		} catch (CoreException e) {
 			ErrorDialog.openError(JUnitPlugin.getActiveWorkbenchShell(), JUnitMessages.JUnitAddLibraryProposal_title, JUnitMessages.JUnitAddLibraryProposal_cannotAdd, e.getStatus());  
-
 		} catch (BadLocationException e) {
 			//ignore
 		}
 	}
 	
-	
 	public static void addJUnitToBuildPath(Shell shell, IJavaProject project) throws JavaModelException {
 		IProject junitProject= ResourcesPlugin.getWorkspace().getRoot().getProject("org.junit"); //$NON-NLS-1$
-		IClasspathEntry entry;
+		IClasspathEntry entry= null;
 		if (junitProject.exists()) {
 			entry= JavaCore.newProjectEntry(junitProject.getFullPath());
 		} else {
-			IPath junitHome= new Path(JUnitPlugin.JUNIT_HOME);
-			IPath sourceHome= new Path("ECLIPSE_HOME"); //$NON-NLS-1$
-			entry= JavaCore.newVariableEntry(
-				junitHome.append("junit.jar"),   //$NON-NLS-1$
-				//TODO: find a better solution than declaring a classpath variable
-				sourceHome.append("plugins/org.eclipse.jdt.source_3.1.0/src/org.junit_3.8.1/junitsrc.zip"),  //$NON-NLS-1$
-				null
-			);
+			IPath junitHome= new Path(JUnitPlugin.JUNIT_HOME).append("junit.jar"); //$NON-NLS-1$
+			IPath sourceHome= new Path(JUnitPlugin.JUNIT_SRC_HOME).append("junitsrc.zip"); //$NON-NLS-1$
+			entry= JavaCore.newVariableEntry(junitHome, sourceHome, null);
 		}
 		addToClasspath(shell, project, entry);
 	}	

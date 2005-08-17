@@ -95,6 +95,12 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	 * The class path variable referring to the junit home location
 	 */
 	public final static String JUNIT_HOME= "JUNIT_HOME"; //$NON-NLS-1$
+	
+	/**
+	 * The class path variable referring to the junit source location
+     * @since 3.2
+	 */
+	public final static String JUNIT_SRC_HOME= "JUNIT_SRC_HOME";  //$NON-NLS-1$
 
 	private static final IPath ICONS_PATH= new Path("$nl$/icons/full"); //$NON-NLS-1$
 	
