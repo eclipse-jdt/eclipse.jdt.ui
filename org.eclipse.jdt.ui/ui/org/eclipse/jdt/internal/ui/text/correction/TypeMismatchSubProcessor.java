@@ -94,7 +94,7 @@ public class TypeMismatchSubProcessor {
 			}
 		} else if (parentNodeType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) selectedNode.getParent();
-			if (selectedNode.equals(frag.getName())) {
+			if (selectedNode.equals(frag.getName()) || selectedNode.equals(frag.getInitializer())) {
 				nodeToCast= frag.getInitializer();
 				IVariableBinding varBinding= frag.resolveBinding();
 				if (varBinding != null) {
@@ -106,6 +106,9 @@ public class TypeMismatchSubProcessor {
 			// try to find the binding corresponding to 'castTypeName'
 			ITypeBinding guessedCastTypeBinding= ASTResolving.guessBindingForReference(nodeToCast);
 			castTypeBinding= guessedCastTypeBinding;
+		}
+		if (castTypeBinding == null) {
+			return;
 		}
 
 		ITypeBinding binding= nodeToCast.resolveTypeBinding();
