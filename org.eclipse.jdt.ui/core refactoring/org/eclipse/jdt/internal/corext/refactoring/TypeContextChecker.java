@@ -221,7 +221,7 @@ public class TypeContextChecker {
 			
 			cuString.append(types[parameterCount]).append(' ');
 			int offsetBeforeMethodName= cuString.length();
-			cuString.append(METHOD_NAME).append('('); //$NON-NLS-1$
+			cuString.append(METHOD_NAME).append('('); 
 			for (int i= 0; i < parameterCount; i++) {
 				if (i > 0)
 					cuString.append(',');

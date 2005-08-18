@@ -1423,7 +1423,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 
 	public void handleTestSelected(TestRunInfo testInfo) {
 		if (testInfo == null) {
-			showFailure(null); //$NON-NLS-1$
+			showFailure(null); 
 		} else {
 			showFailure(testInfo);
 		}

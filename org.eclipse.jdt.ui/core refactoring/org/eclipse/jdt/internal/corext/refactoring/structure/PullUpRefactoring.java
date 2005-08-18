@@ -1121,7 +1121,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 
 	public IMember[] getAdditionalRequiredMembersToPullUp(IProgressMonitor pm) throws JavaModelException {
 		IMember[] members= getMembersToBeCreatedInTargetClass();
-		pm.beginTask(RefactoringCoreMessages.PullUpRefactoring_calculating_required, members.length);// not true, but not easy to give anything better //$NON-NLS-1$
+		pm.beginTask(RefactoringCoreMessages.PullUpRefactoring_calculating_required, members.length);// not true, but not easy to give anything better 
 		List queue= new ArrayList(members.length);
 		queue.addAll(Arrays.asList(members));
 		if (queue.isEmpty())

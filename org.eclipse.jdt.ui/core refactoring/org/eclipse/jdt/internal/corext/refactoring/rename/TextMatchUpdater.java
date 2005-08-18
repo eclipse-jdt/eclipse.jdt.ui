@@ -120,7 +120,7 @@ class TextMatchUpdater {
 				
 			} else if (resource instanceof IContainer){
 				IResource[] members= ((IContainer) resource).members();
-				pm.beginTask(task, members.length); //$NON-NLS-1$
+				pm.beginTask(task, members.length); 
 				pm.subTask(task);
 				for (int i = 0; i < members.length; i++) {
 					if (pm.isCanceled())

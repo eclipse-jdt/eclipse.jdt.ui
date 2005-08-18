@@ -184,7 +184,7 @@ public class RefreshAction extends SelectionDispatchAction {
 		File location = project.getLocation().toFile();
 		if (!location.exists()) {
 			final String message = Messages.format(
-				ActionMessages.RefreshAction_locationDeleted_message, //$NON-NLS-1$
+				ActionMessages.RefreshAction_locationDeleted_message, 
 				new Object[] {project.getName(), location.getAbsolutePath()});
 			final boolean[] result= new boolean[1];
 			// Must prompt user in UI thread (we're in the operation thread here).

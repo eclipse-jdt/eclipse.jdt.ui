@@ -157,7 +157,7 @@ public class ExtractConstantWizard extends RefactoringWizard {
 			String[] data= new String[] { ExtractConstantRefactoring.PUBLIC,
 										  ExtractConstantRefactoring.PROTECTED,
 										  ExtractConstantRefactoring.PACKAGE,
-										  ExtractConstantRefactoring.PRIVATE }; //$NON-NLS-4$ //$NON-NLS-3$ //$NON-NLS-2$ //$NON-NLS-1$
+										  ExtractConstantRefactoring.PRIVATE }; //   
 
 			updateContentAssistImage();
 			for (int i= 0; i < labels.length; i++) {

@@ -349,11 +349,11 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		if (buffer != null && buffer.isDirty()) {
 			if (buffer.isStateValidated() && buffer.isSynchronized()) {
 				result.addWarning(Messages.format(
-					RefactoringCoreMessages.JavaDeleteProcessor_unsaved_changes, //$NON-NLS-1$
+					RefactoringCoreMessages.JavaDeleteProcessor_unsaved_changes, 
 					file.getFullPath().toString()));
 			} else {
 				result.addFatalError(Messages.format(
-					RefactoringCoreMessages.JavaDeleteProcessor_unsaved_changes, //$NON-NLS-1$
+					RefactoringCoreMessages.JavaDeleteProcessor_unsaved_changes, 
 					file.getFullPath().toString()));
 			}
 		}

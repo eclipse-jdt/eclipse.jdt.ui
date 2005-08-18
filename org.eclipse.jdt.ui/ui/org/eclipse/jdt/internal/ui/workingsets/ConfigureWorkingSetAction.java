@@ -41,7 +41,7 @@ public class ConfigureWorkingSetAction extends Action {
 		List workingSets= new ArrayList(Arrays.asList(fWorkingSetModel.getAllWorkingSets()));
 		WorkingSetConfigurationDialog dialog= new WorkingSetConfigurationDialog(
 			fSite.getShell(), 
-			(IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()])); //$NON-NLS-1$
+			(IWorkingSet[])workingSets.toArray(new IWorkingSet[workingSets.size()])); 
 		dialog.setSelection(fWorkingSetModel.getActiveWorkingSets());
 		if (dialog.open() == IDialogConstants.OK_ID) {
 			IWorkingSet[] selection= dialog.getSelection();

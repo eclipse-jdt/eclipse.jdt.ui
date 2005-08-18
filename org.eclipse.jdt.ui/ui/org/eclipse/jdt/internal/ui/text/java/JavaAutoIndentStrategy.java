@@ -268,7 +268,7 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 		JavaIndenter indenter= new JavaIndenter(d, scanner, fProject);
 		StringBuffer indent= indenter.computeIndentation(c.offset);
 		if (indent == null)
-			indent= new StringBuffer(); //$NON-NLS-1$
+			indent= new StringBuffer(); 
 
 		int docLength= d.getLength();
 		if (c.offset == -1 || docLength == 0)

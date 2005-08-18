@@ -111,8 +111,8 @@ public class HierarchyViewerSorter extends ViewerSorter {
 		} else if (cat1 == ANONYM) {
 			return 0;
 		} else {
-			String name1= ((IType) e1).getElementName(); //$NON-NLS-1$
-			String name2= ((IType) e2).getElementName(); //$NON-NLS-1$
+			String name1= ((IType) e1).getElementName(); 
+			String name2= ((IType) e2).getElementName(); 
 			return getCollator().compare(name1, name2);
 		}
 	}

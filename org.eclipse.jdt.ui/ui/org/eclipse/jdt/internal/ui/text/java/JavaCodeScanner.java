@@ -320,7 +320,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		 * @see org.eclipse.jdt.internal.ui.text.ISourceVersionDependent#setSourceVersion(java.lang.String)
 		 */
 		public void setSourceVersion(String version) {
-			fIsVersionMatch= fVersion.compareTo(version) <= 0; //$NON-NLS-1$
+			fIsVersionMatch= fVersion.compareTo(version) <= 0; 
 		}
 
 	}
@@ -435,7 +435,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		// Add word rule for keyword 'return'.
 		CombinedWordRule.WordMatcher returnWordRule= new CombinedWordRule.WordMatcher();
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD_RETURN);
-		returnWordRule.addWord(RETURN, token);  //$NON-NLS-1$
+		returnWordRule.addWord(RETURN, token);  
 		combinedWordRule.addWordMatcher(returnWordRule);
 
 		// Add word rule for keywords, types, and constants.

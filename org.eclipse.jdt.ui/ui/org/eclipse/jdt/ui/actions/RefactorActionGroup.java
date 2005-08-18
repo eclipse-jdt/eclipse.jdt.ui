@@ -138,7 +138,7 @@ public class RefactorActionGroup extends ActionGroup {
 	
 	private class RefactorQuickAccessAction extends JDTQuickMenuAction {
 		public RefactorQuickAccessAction(CompilationUnitEditor editor) {
-			super(editor, QUICK_MENU_ID); //$NON-NLS-1$
+			super(editor, QUICK_MENU_ID); 
 		}
 		protected void fillMenu(IMenuManager menu) {
 			fillQuickMenu(menu);
@@ -486,7 +486,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private void addRefactorSubmenu(IMenuManager menu) {
 		String menuText= ActionMessages.RefactorMenu_label; 
 		if (fQuickAccessAction != null) {
-			menuText= fQuickAccessAction.addShortcut(menuText); //$NON-NLS-1$
+			menuText= fQuickAccessAction.addShortcut(menuText); 
 		}
 		IMenuManager refactorSubmenu= new MenuManager(menuText, MENU_ID);  
 		if (fEditor != null) {

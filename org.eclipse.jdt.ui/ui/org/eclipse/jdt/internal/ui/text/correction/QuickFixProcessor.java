@@ -185,7 +185,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 		try {
 			IBuffer buf= cu.getBuffer();
 			while (offset >= start) {
-				if (ignoreCharacters.indexOf(buf.getChar(offset - 1)) == -1) { //$NON-NLS-1$
+				if (ignoreCharacters.indexOf(buf.getChar(offset - 1)) == -1) { 
 					return offset;
 				}
 				offset--;

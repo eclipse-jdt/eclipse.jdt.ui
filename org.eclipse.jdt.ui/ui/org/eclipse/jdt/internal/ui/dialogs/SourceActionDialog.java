@@ -384,7 +384,7 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		commentComposite.setFont(composite.getFont());	
 		
 		Button commentButton= new Button(commentComposite, SWT.CHECK);
-		commentButton.setText(fCommentString); //$NON-NLS-1$
+		commentButton.setText(fCommentString); 
 
 		commentButton.addSelectionListener(new SelectionListener() {
 			public void widgetSelected(SelectionEvent e) {

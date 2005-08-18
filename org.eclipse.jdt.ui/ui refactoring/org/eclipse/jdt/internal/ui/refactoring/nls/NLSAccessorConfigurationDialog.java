@@ -264,7 +264,7 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 			return result.toArray();
 
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, NLSUIMessages.NLSAccessorConfigurationDialog_externalizing, NLSUIMessages .NLSAccessorConfigurationDialog_exception); //$NON-NLS-1$
+			ExceptionHandler.handle(e, NLSUIMessages.NLSAccessorConfigurationDialog_externalizing, NLSUIMessages .NLSAccessorConfigurationDialog_exception); 
 			return new Object[0];
 		}
 	}

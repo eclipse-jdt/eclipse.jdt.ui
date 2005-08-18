@@ -48,7 +48,7 @@ import org.eclipse.ltk.core.refactoring.UndoTextFileChange;
 				JavaPlugin.getPluginId(), 
 				IStatus.ERROR, 
 				Messages.format(
-					RefactoringCoreMessages.UndoCompilationUnitChange_no_resource, //$NON-NLS-1$
+					RefactoringCoreMessages.UndoCompilationUnitChange_no_resource, 
 					cunit.getElementName()), 
 				null)
 			);

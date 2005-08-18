@@ -86,7 +86,7 @@ public class CorrectionCommandHandler extends AbstractHandler {
 			JavaCorrectionProcessor.collectAssists(context, new ProblemLocation[0], proposals);
 		} else {
 			try {
-				boolean goToClosest= selection.getLength() == 0; //$NON-NLS-1$
+				boolean goToClosest= selection.getLength() == 0; 
 				Annotation[] annotations= getAnnotations(selection.getOffset(), goToClosest);
 				JavaCorrectionProcessor.collectProposals(context, model, annotations, true, false, proposals);
 			} catch (BadLocationException e) {

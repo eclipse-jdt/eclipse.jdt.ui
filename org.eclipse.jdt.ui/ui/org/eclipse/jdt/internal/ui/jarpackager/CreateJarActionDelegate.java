@@ -56,7 +56,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 			message= JarPackagerMessages.JarFileExportOperation_creationOfSomeJARsFailed; 
 		else
 			message= JarPackagerMessages.JarFileExportOperation_jarCreationFailed; 
-		MultiStatus readStatus= new MultiStatus(JavaPlugin.getPluginId(), 0, message, null); //$NON-NLS-1$
+		MultiStatus readStatus= new MultiStatus(JavaPlugin.getPluginId(), 0, message, null); 
 		JarPackageData[] jarPackages= readJarPackages(descriptions, readStatus);
 		if (jarPackages.length > 0) {
 			IStatus status= export(jarPackages);

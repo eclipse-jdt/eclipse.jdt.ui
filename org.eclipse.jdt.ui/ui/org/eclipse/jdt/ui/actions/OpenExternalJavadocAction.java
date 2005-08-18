@@ -178,9 +178,9 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 		Display.getDefault().asyncExec(new Runnable() {
 			public void run() {
 				if (isError) {
-					MessageDialog.openError(shell, getTitle(), message); //$NON-NLS-1$
+					MessageDialog.openError(shell, getTitle(), message); 
 				} else {
-					MessageDialog.openInformation(shell, getTitle(), message); //$NON-NLS-1$
+					MessageDialog.openInformation(shell, getTitle(), message); 
 				}
 			}
 		});

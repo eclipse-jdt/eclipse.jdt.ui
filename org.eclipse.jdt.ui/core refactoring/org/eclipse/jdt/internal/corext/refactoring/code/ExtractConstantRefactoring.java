@@ -598,7 +598,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 		if(qualifyReferencesWithDeclaringClassName())
 			return getContainingTypeBinding().getName() + "." + fConstantName; //$NON-NLS-1$
 		else
-			return fConstantName; //$NON-NLS-1$
+			return fConstantName; 
 	}
 
 	private void computeConstantDeclarationLocation() throws JavaModelException {

@@ -270,11 +270,11 @@ public class JavadocWriter {
 		doclet.setAttribute(store.PATH, store.getDocletPath());
 
 		String str= store.getOverview();
-		if (str.length() > 0) //$NON-NLS-1$
+		if (str.length() > 0) 
 			xmlJavadocDesc.setAttribute(store.OVERVIEW, str);
 
 		str= store.getAdditionalParams();
-		if (str.length() > 0) //$NON-NLS-1$
+		if (str.length() > 0) 
 			xmlJavadocDesc.setAttribute(store.EXTRAOPTIONS, str);
 
 	}

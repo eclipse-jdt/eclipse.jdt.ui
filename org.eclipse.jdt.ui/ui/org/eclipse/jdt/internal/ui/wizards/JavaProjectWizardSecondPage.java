@@ -168,7 +168,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			IPath outputLocation= null;
 	
 			if (fFirstPage.getDetect()) {
-				if (!fCurrProject.getFile(FILENAME_CLASSPATH).exists()) { //$NON-NLS-1$
+				if (!fCurrProject.getFile(FILENAME_CLASSPATH).exists()) { 
 					final ClassPathDetector detector= new ClassPathDetector(fCurrProject, new SubProgressMonitor(monitor, 2));
 					entries= detector.getClasspath();
                     outputLocation= detector.getOutputLocation();
@@ -250,11 +250,11 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 		if (file.exists()) {
 			File projectFile= new File(file, FILENAME_PROJECT);
 			if (projectFile.exists()) {
-				fDotProjectBackup= createBackup(projectFile, "project-desc"); //$NON-NLS-1$ //$NON-NLS-2$
+				fDotProjectBackup= createBackup(projectFile, "project-desc"); //$NON-NLS-1$ 
 			}
 			File classpathFile= new File(file, FILENAME_CLASSPATH);
 			if (classpathFile.exists()) {
-				fDotClasspathBackup= createBackup(classpathFile, "classpath-desc"); //$NON-NLS-1$ //$NON-NLS-2$
+				fDotClasspathBackup= createBackup(classpathFile, "classpath-desc"); //$NON-NLS-1$ 
 			}
 		}
 	}

@@ -905,9 +905,9 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
             Assert.isTrue(binding.getInterfaces().length <= 1);
             if (binding.getInterfaces().length == 0)
                 return;
-            declaration.superInterfaceTypes().add(0, newType); //$NON-NLS-1$
+            declaration.superInterfaceTypes().add(0, newType); 
         } else {
-            declaration.setSuperclassType(newType); //$NON-NLS-1$
+            declaration.setSuperclassType(newType); 
         }
     }
 

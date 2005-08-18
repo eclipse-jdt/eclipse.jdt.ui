@@ -63,7 +63,7 @@ public class RecentSettingsStore {
 
 		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		
-		IDialogSettings projectsSection= settings.getSection(SECTION_PROJECTS); //$NON-NLS-1$
+		IDialogSettings projectsSection= settings.getSection(SECTION_PROJECTS); 
 		if (projectsSection != null) {
 			IDialogSettings[] sections= projectsSection.getSections();
 			for (int i= 0; i < sections.length; i++) {

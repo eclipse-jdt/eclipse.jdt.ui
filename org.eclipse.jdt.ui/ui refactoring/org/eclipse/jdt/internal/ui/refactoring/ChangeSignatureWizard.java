@@ -346,7 +346,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		private void updateSignaturePreview() {
 			try{
 				int top= fSignaturePreview.getTextWidget().getTopPixel();
-				fSignaturePreviewDocument.set(getChangeMethodSignatureRefactoring().getMethodSignaturePreview()); //$NON-NLS-1$
+				fSignaturePreviewDocument.set(getChangeMethodSignatureRefactoring().getMethodSignaturePreview()); 
 				fSignaturePreview.getTextWidget().setTopPixel(top);
 			} catch (JavaModelException e){
 				ExceptionHandler.handle(e, RefactoringMessages.ChangeSignatureRefactoring_modify_Parameters, RefactoringMessages.ChangeSignatureInputPage_exception); 

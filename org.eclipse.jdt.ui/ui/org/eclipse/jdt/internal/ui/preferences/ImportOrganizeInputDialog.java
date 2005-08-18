@@ -97,7 +97,7 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		ImportOrganizeInputAdapter adapter= new ImportOrganizeInputAdapter();
 
 		fNameDialogField= new StringButtonDialogField(adapter);
-		fNameDialogField.setLabelText(label); //$NON-NLS-1$
+		fNameDialogField.setLabelText(label); 
 		fNameDialogField.setButtonLabel(PreferencesMessages.ImportOrganizeInputDialog_browse_packages_button); 
 		fNameDialogField.setDialogFieldListener(adapter);
 		fNameDialogField.setText(""); //$NON-NLS-1$

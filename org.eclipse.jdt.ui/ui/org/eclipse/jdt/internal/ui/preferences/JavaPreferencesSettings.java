@@ -88,7 +88,7 @@ public class JavaPreferencesSettings  {
 	}
 		
 	private static String[] unpackList(String str, String separator) {
-		StringTokenizer tok= new StringTokenizer(str, separator); //$NON-NLS-1$
+		StringTokenizer tok= new StringTokenizer(str, separator); 
 		int nTokens= tok.countTokens();
 		String[] res= new String[nTokens];
 		for (int i= 0; i < nTokens; i++) {

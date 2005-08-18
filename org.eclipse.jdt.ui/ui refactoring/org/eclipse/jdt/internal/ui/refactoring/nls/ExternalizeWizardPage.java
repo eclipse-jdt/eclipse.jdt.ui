@@ -458,7 +458,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener#dialogFieldChanged(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
 		 */
 		public void dialogFieldChanged(DialogField field) {
-			IStatus keyStatus= validateKey(fKeyField.getText()); //$NON-NLS-1$
+			IStatus keyStatus= validateKey(fKeyField.getText()); 
 			//IStatus valueStatus= StatusInfo.OK_STATUS; // no validation yet
 
 			//updateStatus(StatusUtil.getMoreSevere(valueStatus, keyStatus));
@@ -1184,7 +1184,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 	
 	private Button createTaskButton(Composite parent, String label, SelectionAdapter adapter) {
 		Button button= new Button(parent, SWT.PUSH);
-		button.setText(label); //$NON-NLS-1$
+		button.setText(label); 
 		button.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		SWTUtil.setButtonDimensionHint(button);
 		button.addSelectionListener(adapter);

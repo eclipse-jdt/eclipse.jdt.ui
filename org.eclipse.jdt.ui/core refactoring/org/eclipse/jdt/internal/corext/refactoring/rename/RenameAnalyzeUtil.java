@@ -276,7 +276,7 @@ class RenameAnalyzeUtil {
 		ISourceRange range= getOldSourceRange(newMatch);
 		RefactoringStatusContext context= JavaStatusContext.create(cu, range);
 		String message= Messages.format(
-				RefactoringCoreMessages.RenameAnalyzeUtil_reference_shadowed, //$NON-NLS-1$
+				RefactoringCoreMessages.RenameAnalyzeUtil_reference_shadowed, 
 				new String[] {cu.getElementName(), newElementName});
 		result.addError(message, context);
 	}

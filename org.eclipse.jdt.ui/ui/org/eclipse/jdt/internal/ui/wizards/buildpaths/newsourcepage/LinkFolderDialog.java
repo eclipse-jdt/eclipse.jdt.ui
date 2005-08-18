@@ -284,7 +284,7 @@ public class LinkFolderDialog extends StatusDialog {
          * correct, <code>false</code> otherwise
          */
         private IStatus validateFolderName(String name) {
-            if (name.length() == 0) { //$NON-NLS-1$
+            if (name.length() == 0) { 
             	return new StatusInfo(IStatus.ERROR, NewWizardMessages.NewFolderDialog_folderNameEmpty); 
             }
             
@@ -402,7 +402,7 @@ public class LinkFolderDialog extends StatusDialog {
         WorkspaceModifyOperation operation = new WorkspaceModifyOperation() {
             public void execute(IProgressMonitor monitor) throws CoreException {
                 try {
-                    monitor.beginTask(NewWizardMessages.NewFolderDialog_progress, 2000); //$NON-NLS-1$
+                    monitor.beginTask(NewWizardMessages.NewFolderDialog_progress, 2000); 
                     if (monitor.isCanceled())
                         throw new OperationCanceledException();
                     
@@ -427,7 +427,7 @@ public class LinkFolderDialog extends StatusDialog {
             return null;
         } catch (InvocationTargetException exception) {
             if (exception.getTargetException() instanceof CoreException) {
-                ErrorDialog.openError(getShell(), NewWizardMessages.NewFolderDialog_errorTitle, //$NON-NLS-1$
+                ErrorDialog.openError(getShell(), NewWizardMessages.NewFolderDialog_errorTitle, 
                         null, // no special message
                         ((CoreException) exception.getTargetException())
                                 .getStatus());
@@ -437,9 +437,9 @@ public class LinkFolderDialog extends StatusDialog {
                         "Exception in {0}.createNewFolder(): {1}", //$NON-NLS-1$
                         new Object[] { getClass().getName(),
                                 exception.getTargetException() })));
-                MessageDialog.openError(getShell(), NewWizardMessages.NewFolderDialog_errorTitle, //$NON-NLS-1$
+                MessageDialog.openError(getShell(), NewWizardMessages.NewFolderDialog_errorTitle, 
                         Messages.format(
-                                NewWizardMessages.NewFolderDialog_internalError, //$NON-NLS-1$
+                                NewWizardMessages.NewFolderDialog_internalError, 
                                 new Object[] { exception.getTargetException()
                                         .getMessage() }));
             }

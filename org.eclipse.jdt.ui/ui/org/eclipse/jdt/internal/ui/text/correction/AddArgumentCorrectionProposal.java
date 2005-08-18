@@ -39,7 +39,7 @@ public class AddArgumentCorrectionProposal extends LinkedCorrectionProposal {
 	private ASTNode fCallerNode;
 
 	public AddArgumentCorrectionProposal(String label, ICompilationUnit cu, ASTNode callerNode, int[] insertIdx, ITypeBinding[] expectedTypes, int relevance) {
-		super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); //$NON-NLS-1$
+		super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)); 
 		fCallerNode= callerNode;
 		fInsertIndexes= insertIdx;
 		fParamTypes= expectedTypes;

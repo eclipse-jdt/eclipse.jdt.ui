@@ -109,7 +109,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 				return executable.getAbsolutePath();
 			}
 			final String location= fInstall.getInstallLocation().getAbsolutePath() + File.separatorChar;
-			File executable= new File(location + "bin" + File.separatorChar + command); //$NON-NLS-1$ //$NON-NLS-2$
+			File executable= new File(location + "bin" + File.separatorChar + command); //$NON-NLS-1$ 
 			if (executable.exists() && executable.isFile())
 				return executable.getAbsolutePath();
 			executable= new File(executable.getAbsolutePath() + ".exe"); //$NON-NLS-1$

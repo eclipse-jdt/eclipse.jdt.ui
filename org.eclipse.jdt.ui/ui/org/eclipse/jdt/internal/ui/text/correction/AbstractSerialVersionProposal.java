@@ -51,7 +51,7 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 	protected static final long SERIAL_VALUE= 1;
 
 	/** The default serial id expression */
-	protected static final String DEFAULT_EXPRESSION= SERIAL_VALUE + LONG_SUFFIX; //$NON-NLS-1$
+	protected static final String DEFAULT_EXPRESSION= SERIAL_VALUE + LONG_SUFFIX; 
 
 	/** The name of the serial version field */
 	protected static final String NAME_FIELD= "serialVersionUID"; //$NON-NLS-1$

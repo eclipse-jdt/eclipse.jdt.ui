@@ -833,7 +833,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			fSettings= dialogSettings.getSection(SETTINGS_SECTION);
 			if (fSettings == null) {
 				fSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
-				fSettings.put(SORT_ORDER, false); //$NON-NLS-1$
+				fSettings.put(SORT_ORDER, false); 
 			}
 
 			fSortOrder= fSettings.getBoolean(SORT_ORDER);

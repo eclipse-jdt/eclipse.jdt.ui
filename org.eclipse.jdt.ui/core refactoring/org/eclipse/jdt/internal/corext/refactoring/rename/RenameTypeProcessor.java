@@ -123,7 +123,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	 
 	public String getProcessorName() {
 		return Messages.format(
-			RefactoringCoreMessages.RenameTypeRefactoring_name,  //$NON-NLS-1$
+			RefactoringCoreMessages.RenameTypeRefactoring_name,  
 			new String[]{JavaModelUtil.getFullyQualifiedName(fType), getNewElementName()});
 	}
 	

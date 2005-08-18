@@ -274,7 +274,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 	}
 
 	private void validateInput() {
-		String errorMessage= null; //$NON-NLS-1$
+		String errorMessage= null; 
 		String newText= fWorkingSetName.getText();
 
 		if (newText.equals(newText.trim()) == false)

@@ -744,7 +744,7 @@ public class BuildPathsBlock {
 	}
 	
 	public static boolean hasClassfiles(IResource resource) throws CoreException {
-		if (resource.isDerived()) { //$NON-NLS-1$
+		if (resource.isDerived()) { 
 			return true;
 		}		
 		if (resource instanceof IContainer) {

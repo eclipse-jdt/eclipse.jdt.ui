@@ -69,7 +69,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		public Category(String _key, String _previewText, String _name) {
 			this.key= _key;
 			this.name= _name;
-			this.previewText= _previewText != null ? createPreviewHeader(_name) + _previewText : null; //$NON-NLS-1$
+			this.previewText= _previewText != null ? createPreviewHeader(_name) + _previewText : null; 
 			children= new ArrayList();
 		}
 		
@@ -293,7 +293,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
             
             int max= getMax(nrOfTrue, nrOfFalse);
             String label= FormatterMessages.LineWrappingTabPage_force_split_checkbox_multi_text; 
-            fForceSplit.setText(getLabelText(label, max, fElements.size())); //$NON-NLS-1$
+            fForceSplit.setText(getLabelText(label, max, fElements.size())); 
         }
         
         private String getLabelText(String label, int count, int nElements) {
@@ -344,10 +344,10 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	
 	protected static final String[] WRAPPING_NAMES = { 
 	    FormatterMessages.LineWrappingTabPage_splitting_do_not_split, 
-	    FormatterMessages.LineWrappingTabPage_splitting_wrap_when_necessary, // COMPACT_SPLIT //$NON-NLS-1$
-	    FormatterMessages.LineWrappingTabPage_splitting_always_wrap_first_others_when_necessary, // COMPACT_FIRST_BREAK_SPLIT  //$NON-NLS-1$
-	    FormatterMessages.LineWrappingTabPage_splitting_wrap_always, // ONE_PER_LINE_SPLIT  //$NON-NLS-1$
-	    FormatterMessages.LineWrappingTabPage_splitting_wrap_always_indent_all_but_first, // NEXT_SHIFTED_SPLIT  //$NON-NLS-1$
+	    FormatterMessages.LineWrappingTabPage_splitting_wrap_when_necessary, // COMPACT_SPLIT 
+	    FormatterMessages.LineWrappingTabPage_splitting_always_wrap_first_others_when_necessary, // COMPACT_FIRST_BREAK_SPLIT  
+	    FormatterMessages.LineWrappingTabPage_splitting_wrap_always, // ONE_PER_LINE_SPLIT  
+	    FormatterMessages.LineWrappingTabPage_splitting_wrap_always_indent_all_but_first, // NEXT_SHIFTED_SPLIT  
 	    FormatterMessages.LineWrappingTabPage_splitting_wrap_always_except_first_only_if_necessary
 	};
 	

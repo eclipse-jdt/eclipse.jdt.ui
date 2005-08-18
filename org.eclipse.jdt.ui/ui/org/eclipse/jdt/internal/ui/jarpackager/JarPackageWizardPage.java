@@ -348,7 +348,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		String comboText= fDestinationNamesCombo.getText();
 		IPath path= Path.fromOSString(comboText);
 
-		if (path.segmentCount() > 0 && ensureTargetFileIsValid(path.toFile()) && path.getFileExtension() == null) //$NON-NLS-1$
+		if (path.segmentCount() > 0 && ensureTargetFileIsValid(path.toFile()) && path.getFileExtension() == null) 
 			// append .jar
 			path= path.addFileExtension(JarPackagerUtil.JAR_EXTENSION);
 

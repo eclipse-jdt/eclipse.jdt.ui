@@ -235,14 +235,14 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		if (messages.length == 0)
 			return false;
 		result.addFatalError(Messages.format(
-			RefactoringCoreMessages.SelfEncapsulateField_compiler_errors_field,  //$NON-NLS-1$
+			RefactoringCoreMessages.SelfEncapsulateField_compiler_errors_field,  
 			new String[] { fField.getElementName(), messages[0].getMessage()}));
 		return true;
 	}
 
 	private String getMappingErrorMessage() {
 		return Messages.format(
-			RefactoringCoreMessages.SelfEncapsulateField_cannot_analyze_selected_field, //$NON-NLS-1$
+			RefactoringCoreMessages.SelfEncapsulateField_cannot_analyze_selected_field, 
 			new String[] {fField.getElementName()});
 	}
 
@@ -267,7 +267,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			String selector= method.getName();
 			if (selector.equals(name))
 				status.addFatalError(Messages.format(
-					RefactoringCoreMessages.SelfEncapsulateField_method_exists, //$NON-NLS-1$
+					RefactoringCoreMessages.SelfEncapsulateField_method_exists, 
 					new String[] {BindingLabels.getFullyQualified(method), type.getElementName()}));
 		}
 	}	
@@ -393,7 +393,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		Message[] messages= root.getMessages();
 		if (messages.length != 0) {
 			result.addError(Messages.format(
-				RefactoringCoreMessages.SelfEncapsulateField_compiler_errors_update, //$NON-NLS-1$
+				RefactoringCoreMessages.SelfEncapsulateField_compiler_errors_update, 
 				element.getElementName()), JavaStatusContext.create(element));
 		}
 	}

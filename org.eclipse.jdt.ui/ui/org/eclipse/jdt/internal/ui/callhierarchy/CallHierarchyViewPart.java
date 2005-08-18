@@ -350,7 +350,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         // Page 2: Nothing selected
         fNoHierarchyShownLabel = new Label(fPagebook, SWT.TOP + SWT.LEFT + SWT.WRAP);
-        fNoHierarchyShownLabel.setText(CallHierarchyMessages.CallHierarchyViewPart_empty); //$NON-NLS-1$   
+        fNoHierarchyShownLabel.setText(CallHierarchyMessages.CallHierarchyViewPart_empty); //   
 
 		initDragAndDrop();
 

@@ -33,7 +33,7 @@ public class ResourceExtender extends PropertyTester {
 	 */
 	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
 		IResource resource= (IResource)receiver;
-		if (PROPERTY_MATCHES_PATTERN.equals(method)) { //$NON-NLS-1$
+		if (PROPERTY_MATCHES_PATTERN.equals(method)) { 
 			String fileName= resource.getName();
 			StringMatcher matcher= new StringMatcher((String)expectedValue, false, false);
 			return matcher.match(fileName);

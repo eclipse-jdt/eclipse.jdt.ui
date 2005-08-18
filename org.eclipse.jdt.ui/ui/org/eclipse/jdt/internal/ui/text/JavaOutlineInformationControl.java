@@ -773,7 +773,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	 */
 	protected void fillViewMenu(IMenuManager viewMenu) {
 		super.fillViewMenu(viewMenu);
-		viewMenu.add(fShowOnlyMainTypeAction); //$NON-NLS-1$
+		viewMenu.add(fShowOnlyMainTypeAction); 
 
 		viewMenu.add(new Separator("Sorters")); //$NON-NLS-1$
 		viewMenu.add(fLexicalSortingAction);

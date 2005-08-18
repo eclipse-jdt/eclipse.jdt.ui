@@ -97,7 +97,7 @@ public class TypeRules {
 			if (typeToAssign.isArray()) {
 				return isArrayCompatible(definedType);
 			}
-			if (isJavaLangObject(definedType)) { //$NON-NLS-1$
+			if (isJavaLangObject(definedType)) { 
 				return true;
 			}
 			return Bindings.isSuperType(definedType, typeToAssign);

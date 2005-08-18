@@ -110,7 +110,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 
 	public String getProcessorName() {
 		return Messages.format(
-			RefactoringCoreMessages.RenameMethodRefactoring_name, //$NON-NLS-1$
+			RefactoringCoreMessages.RenameMethodRefactoring_name, 
 			new String[]{fMethod.getElementName(), getNewElementName()});
 	}
 	

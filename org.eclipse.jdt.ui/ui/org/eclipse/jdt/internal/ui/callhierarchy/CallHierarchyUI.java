@@ -164,10 +164,10 @@ public class CallHierarchyUI {
         } catch (JavaModelException e) {
             JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(),
                     IJavaStatusConstants.INTERNAL_ERROR,
-                    CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_message, e)); //$NON-NLS-1$
+                    CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_message, e)); 
 
             ErrorDialog.openError(shell, title,
-                CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_message, //$NON-NLS-1$
+                CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_message, 
                 e.getStatus());
             return false;
         } catch (PartInitException x) {
@@ -180,7 +180,7 @@ public class CallHierarchyUI {
         		name= "";  //$NON-NLS-1$
             MessageDialog.openError(shell, title,
                 Messages.format(
-                    CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_messageArgs, //$NON-NLS-1$
+                    CallHierarchyMessages.CallHierarchyUI_open_in_editor_error_messageArgs, 
                     new String[] { name, x.getMessage() }));
             return false;
         }

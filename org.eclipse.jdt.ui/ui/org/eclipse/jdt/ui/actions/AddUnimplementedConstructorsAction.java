@@ -193,7 +193,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			fAddConstructorsSettings= dialogSettings.getSection(SETTINGS_SECTION);
 			if (fAddConstructorsSettings == null) {
 				fAddConstructorsSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
-				fAddConstructorsSettings.put(OMIT_SUPER, false); //$NON-NLS-1$
+				fAddConstructorsSettings.put(OMIT_SUPER, false); 
 			}
 
 			fOmitSuper= fAddConstructorsSettings.getBoolean(OMIT_SUPER);

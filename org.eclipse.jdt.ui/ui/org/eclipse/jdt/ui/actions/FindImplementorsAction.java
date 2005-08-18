@@ -45,7 +45,7 @@ public class FindImplementorsAction extends FindAction {
 	 * @param site the site providing context information for this action
 	 */
 	public FindImplementorsAction(IWorkbenchSite site) {
-		super(site); //$NON-NLS-1$
+		super(site); 
 	}
 
 	/**
@@ -53,7 +53,7 @@ public class FindImplementorsAction extends FindAction {
 	 * @param editor the Java editor
 	 */
 	public FindImplementorsAction(JavaEditor editor) {
-		super(editor); //$NON-NLS-1$
+		super(editor); 
 	}
 
 	void init() {

@@ -75,7 +75,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			super(PAGE_NAME);
 			setDescription(DESCRIPTION);
 			Assert.isNotNull(tempNameProposals);
-			fParamNameProposals= tempNameProposals; //$NON-NLS-1$
+			fParamNameProposals= tempNameProposals; 
 			fSignaturePreviewDocument= new Document();
 		}
 
@@ -155,7 +155,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 		private void updateSignaturePreview() {
 			try{
 				int top= fSignaturePreview.getTextWidget().getTopPixel();
-				fSignaturePreviewDocument.set(getIntroduceParameterRefactoring().getMethodSignaturePreview()); //$NON-NLS-1$
+				fSignaturePreviewDocument.set(getIntroduceParameterRefactoring().getMethodSignaturePreview()); 
 				fSignaturePreview.getTextWidget().setTopPixel(top);
 			} catch (JavaModelException e){
 				ExceptionHandler.handle(e, RefactoringMessages.ChangeSignatureRefactoring_modify_Parameters, RefactoringMessages.ChangeSignatureInputPage_exception); 

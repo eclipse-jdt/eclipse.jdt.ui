@@ -160,7 +160,7 @@ public class RemoteTestRunner implements TestListener {
 						else if (message.startsWith(MessageIds.TEST_RERUN)) {
 							String arg= message.substring(MessageIds.MSG_HEADER_LENGTH);
 							//format: testId className testName
-							int c0= arg.indexOf(' '); //$NON-NLS-1$
+							int c0= arg.indexOf(' '); 
 							int c1= arg.indexOf(' ', c0+1);
 							String s= arg.substring(0, c0);
 							int testId= Integer.parseInt(s);

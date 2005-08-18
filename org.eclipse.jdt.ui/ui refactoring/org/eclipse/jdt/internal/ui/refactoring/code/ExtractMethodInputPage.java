@@ -211,7 +211,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 			checkBox.setText(RefactoringMessages.ExtractMethodInputPage_duplicates_single); 
 		} else {
 			checkBox.setText(Messages.format(
-				RefactoringMessages.ExtractMethodInputPage_duplicates_multi, //$NON-NLS-1$
+				RefactoringMessages.ExtractMethodInputPage_duplicates_multi, 
 				new Integer(duplicates))); 
 		}
 		checkBox.setSelection(fRefactoring.getReplaceDuplicates());
@@ -239,7 +239,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 		} else {
 			ClassInstanceCreation creation= (ClassInstanceCreation)ASTNodes.getParent(node, ClassInstanceCreation.class);
 			return Messages.format(
-				RefactoringMessages.ExtractMethodInputPage_anonymous_type_label,  //$NON-NLS-1$
+				RefactoringMessages.ExtractMethodInputPage_anonymous_type_label,  
 				ASTNodes.asString(creation.getType()));
 		}
 	}

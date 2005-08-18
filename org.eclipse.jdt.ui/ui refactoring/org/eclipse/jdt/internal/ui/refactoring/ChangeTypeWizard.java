@@ -261,7 +261,7 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			
 			Label label= new Label(composite, SWT.NONE);
 			label.setText(Messages.format(
-					RefactoringMessages.ChangeTypeWizard_pleaseChooseType, //$NON-NLS-1$
+					RefactoringMessages.ChangeTypeWizard_pleaseChooseType, 
 					((ChangeTypeRefactoring) getRefactoring()).getTarget()));
 			label.setLayoutData(new GridData());
 			
@@ -312,11 +312,11 @@ public class ChangeTypeWizard extends RefactoringWizard {
 			} else {
 				if (getGeneralizeTypeRefactoring().getOriginalType().equals(type)) {
 					ChangeTypeInputPage.this.setMessage(Messages.format(
-						RefactoringMessages.ChangeTypeWizard_with_itself, type.getName())); //$NON-NLS-1$
+						RefactoringMessages.ChangeTypeWizard_with_itself, type.getName())); 
 					
 				} else {
 					ChangeTypeInputPage.this.setMessage(Messages.format(
-						RefactoringMessages.ChangeTypeWizard_grayed_types,  //$NON-NLS-1$
+						RefactoringMessages.ChangeTypeWizard_grayed_types,  
 						new Object[] {type.getName(), getGeneralizeTypeRefactoring().getOriginalType().getName()}));
 				}
 			}

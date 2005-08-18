@@ -121,11 +121,11 @@ public class MoveMembersWizard extends RefactoringWizard {
 			IMember[] members= getMoveProcessor().getMembersToMove();
 			if (members.length == 1) {
 				label.setText(Messages.format(
-						RefactoringMessages.MoveMembersInputPage_destination_single, //$NON-NLS-1$
+						RefactoringMessages.MoveMembersInputPage_destination_single, 
 						JavaElementLabels.getElementLabel(members[0], LABEL_FLAGS)));
 			} else {
 				label.setText(Messages.format(
-						RefactoringMessages.MoveMembersInputPage_destination_multi, //$NON-NLS-1$
+						RefactoringMessages.MoveMembersInputPage_destination_multi, 
 						String.valueOf(members.length)));
 			}
 			GridData gd= new GridData();

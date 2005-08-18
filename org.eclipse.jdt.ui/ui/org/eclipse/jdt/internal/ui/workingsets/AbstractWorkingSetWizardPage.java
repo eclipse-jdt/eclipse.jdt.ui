@@ -107,7 +107,7 @@ public abstract class AbstractWorkingSetWizardPage extends WizardPage implements
 	protected abstract IWorkingSet createWorkingSet(String workingSetName);
 
 	private void validateInput() {
-		String errorMessage= null; //$NON-NLS-1$
+		String errorMessage= null; 
 		String newText= fWorkingSetName.getText();
 
 		if (newText.equals(newText.trim()) == false)

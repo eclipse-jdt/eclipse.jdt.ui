@@ -168,7 +168,7 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	}
 	
 	public String getSingularLabel(String elementName) {
-		String[] args= new String[] {ASTNodes.asString(fSelectedName), elementName}; //$NON-NLS-1$
+		String[] args= new String[] {ASTNodes.asString(fSelectedName), elementName}; 
 		return Messages.format(SearchMessages.ExceptionOccurrencesFinder_label_singular, args); 
 	}
 	

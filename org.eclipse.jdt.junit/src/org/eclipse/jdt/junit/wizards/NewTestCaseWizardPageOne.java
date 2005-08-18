@@ -145,7 +145,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		fMethodStubsButtons= new MethodStubsSelectionButtonGroup(SWT.CHECK, buttonNames, 1);
 		fMethodStubsButtons.setLabelText(WizardMessages.NewTestCaseWizardPageOne_method_Stub_label); 
 		
-		fClassToTestCompletionProcessor= new JavaTypeCompletionProcessor(false, false); //$NON-NLS-1$
+		fClassToTestCompletionProcessor= new JavaTypeCompletionProcessor(false, false); 
 
 		fClassUnderTestStatus= new JUnitStatus();
 		
@@ -824,7 +824,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 			status.setError(WizardMessages.NewTestCaseWizardPageOne_error_superclass_empty); 
 			return status;	
 		}
-		if (getPackageFragmentRoot() != null) { //$NON-NLS-1$
+		if (getPackageFragmentRoot() != null) { 
 			try {
 				IType type= resolveClassNameToType(getPackageFragmentRoot().getJavaProject(), getPackageFragment(), superClassName);	
 				if (type == null) {

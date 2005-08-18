@@ -223,7 +223,7 @@ public class JavadocConfigurationBlock {
 			return;
 		}
 		String prefix= JavaDocLocations.ARCHIVE_PREFIX;
-		boolean isArchive= initialValue.startsWith(prefix); //$NON-NLS-1$
+		boolean isArchive= initialValue.startsWith(prefix); 
 		
 		fURLRadioButton.setSelection(!isArchive);
 		fArchiveRadioButton.setSelection(isArchive);
@@ -274,7 +274,7 @@ public class JavadocConfigurationBlock {
 
 			URL location= getJavadocLocation();
 			if (location == null) {
-				MessageDialog.openWarning(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
+				MessageDialog.openWarning(fShell, fTitle, fInvalidMessage); 
 				return;
 			}
 
@@ -285,10 +285,10 @@ public class JavadocConfigurationBlock {
 				} else if (protocol.equals("file")) { //$NON-NLS-1$
 					validateFile(location);
 				} else {
-					MessageDialog.openWarning(fShell, fTitle, fUnable); //$NON-NLS-1$
+					MessageDialog.openWarning(fShell, fTitle, fUnable); 
 				}
 			} catch (MalformedURLException e) {
-				MessageDialog.openWarning(fShell, fTitle, fUnable); //$NON-NLS-1$
+				MessageDialog.openWarning(fShell, fTitle, fUnable); 
 			}
 
 		}
@@ -304,14 +304,14 @@ public class JavadocConfigurationBlock {
 				if (indexFile.isFile()) {				
 					File packageList= new File(folder, "package-list"); //$NON-NLS-1$
 					if (packageList.exists()) {
-						if (MessageDialog.openConfirm(fShell, fTitle, fValidMessage)) { //$NON-NLS-1$
+						if (MessageDialog.openConfirm(fShell, fTitle, fValidMessage)) { 
 							spawnInBrowser(indexFile.toURL());
 						}
 						return;					
 					}
 				}
 			}
-			MessageDialog.openWarning(fShell, fTitle, fInvalidMessage); //$NON-NLS-1$
+			MessageDialog.openWarning(fShell, fTitle, fInvalidMessage); 
 		}
 		
 		private void validateURL(URL location) throws MalformedURLException {
@@ -490,7 +490,7 @@ public class JavadocConfigurationBlock {
 	 * @param message the error message
 	 */
 	protected void displayErrorDialog(String message) {
-		MessageDialog.openError(fShell, ERROR_DIALOG_TITLE, message); //$NON-NLS-1$
+		MessageDialog.openError(fShell, ERROR_DIALOG_TITLE, message); 
 	}
 		
 	private String chooseJavaDocFolder() {
@@ -584,7 +584,7 @@ public class JavadocConfigurationBlock {
 			return status;
 		} catch (MalformedURLException e) {
 			StatusInfo status= new StatusInfo();
-			status.setError(e.getMessage());  //$NON-NLS-1$
+			status.setError(e.getMessage());  
 			return status;
 		}
 	}
@@ -596,7 +596,7 @@ public class JavadocConfigurationBlock {
 		} catch (MalformedURLException e) {
 			fArchiveURLResult= null;
 			StatusInfo status= new StatusInfo();
-			status.setError(e.getMessage());  //$NON-NLS-1$
+			status.setError(e.getMessage());  
 			//status.setError(PreferencesMessages.getString("JavadocConfigurationBlock.MalformedURL.error"));  //$NON-NLS-1$
 			return status;
 		}

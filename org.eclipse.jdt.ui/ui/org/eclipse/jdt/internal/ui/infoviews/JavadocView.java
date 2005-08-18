@@ -268,7 +268,7 @@ public class JavadocView extends AbstractInfoView {
 				String title= InfoViewMessages.JavadocView_error_noBrowser_title;
 				String message= InfoViewMessages.JavadocView_error_noBrowser_message;
 				String toggleMessage= InfoViewMessages.JavadocView_error_noBrowser_doNotWarn;
-				MessageDialogWithToggle dialog= MessageDialogWithToggle.openError(parent.getShell(), title, message, toggleMessage, false, null, null); //$NON-NLS-1$
+				MessageDialogWithToggle dialog= MessageDialogWithToggle.openError(parent.getShell(), title, message, toggleMessage, false, null, null); 
 				if (dialog.getReturnCode() == Window.OK)
 					store.setValue(DO_NOT_WARN_PREFERENCE_KEY, dialog.getToggleState());
 			}

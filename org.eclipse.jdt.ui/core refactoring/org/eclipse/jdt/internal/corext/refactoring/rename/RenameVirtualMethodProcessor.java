@@ -129,7 +129,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			} else {
 				if (classesDeclareOverridingNativeMethod(hierarchy.getAllSubtypes(declaring))) {
 					result.addError(Messages.format(
-						RefactoringCoreMessages.RenameVirtualMethodRefactoring_requieres_renaming_native,  //$NON-NLS-1$
+						RefactoringCoreMessages.RenameVirtualMethodRefactoring_requieres_renaming_native,  
 						new String[]{method.getElementName(), "UnsatisfiedLinkError"})); //$NON-NLS-1$
 				}
 	
@@ -139,11 +139,11 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 					RefactoringStatusContext context= JavaStatusContext.create(hierarchyMethod);
 					if (Checks.compareParamTypes(method.getParameterTypes(), hierarchyMethod.getParameterTypes())) {
 						result.addError(Messages.format(
-							RefactoringCoreMessages.RenameVirtualMethodRefactoring_hierarchy_declares2, //$NON-NLS-1$
+							RefactoringCoreMessages.RenameVirtualMethodRefactoring_hierarchy_declares2, 
 							name), context); 
 					} else {
 						result.addWarning(Messages.format(
-							RefactoringCoreMessages.RenameVirtualMethodRefactoring_hierarchy_declares1, //$NON-NLS-1$
+							RefactoringCoreMessages.RenameVirtualMethodRefactoring_hierarchy_declares1, 
 							name), context); 
 					}					
 				}

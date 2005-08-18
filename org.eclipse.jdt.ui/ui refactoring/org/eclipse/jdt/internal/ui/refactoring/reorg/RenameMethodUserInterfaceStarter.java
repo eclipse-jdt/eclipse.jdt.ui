@@ -43,19 +43,19 @@ public class RenameMethodUserInterfaceStarter extends RenameUserInterfaceStarter
 					String message= null;
 					if (method.getDeclaringType().isInterface()) {
 						message= Messages.format(
-							RefactoringCoreMessages.MethodChecks_implements, //$NON-NLS-1$
+							RefactoringCoreMessages.MethodChecks_implements, 
 							new String[]{
 								JavaElementUtil.createMethodSignature(method), 
 								JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())});
 					} else {
 						message= Messages.format(
-							RefactoringCoreMessages.MethodChecks_overrides, //$NON-NLS-1$
+							RefactoringCoreMessages.MethodChecks_overrides, 
 							new String[]{
 								JavaElementUtil.createMethodSignature(method), 
 								JavaModelUtil.getFullyQualifiedName(method.getDeclaringType())});
 					}
 					message= Messages.format(
-						ReorgMessages.RenameMethodUserInterfaceStarter_message,  //$NON-NLS-1$
+						ReorgMessages.RenameMethodUserInterfaceStarter_message,  
 						message);
 					if (!MessageDialog.openQuestion(parent, 
 							ReorgMessages.RenameMethodUserInterfaceStarter_name,  

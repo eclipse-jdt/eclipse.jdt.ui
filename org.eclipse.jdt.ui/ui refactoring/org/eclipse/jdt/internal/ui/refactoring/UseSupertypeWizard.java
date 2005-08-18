@@ -97,7 +97,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 
 			Label label= new Label(composite, SWT.NONE);
 			label.setText(Messages.format(
-					RefactoringMessages.UseSupertypeInputPage_Select_supertype_to_use, //$NON-NLS-1$
+					RefactoringMessages.UseSupertypeInputPage_Select_supertype_to_use, 
 					JavaElementLabels.getElementLabel(((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().getSubType(), JavaElementLabels.T_FULLY_QUALIFIED)));
 			label.setLayoutData(new GridData());
 		

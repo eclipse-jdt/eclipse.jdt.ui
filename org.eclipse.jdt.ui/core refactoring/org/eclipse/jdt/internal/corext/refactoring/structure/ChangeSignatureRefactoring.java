@@ -395,7 +395,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	private void checkParameterName(RefactoringStatus result, ParameterInfo info, int position) {
 		if (info.getNewName().trim().length() == 0) {
 			result.addFatalError(Messages.format(
-					RefactoringCoreMessages.ChangeSignatureRefactoring_param_name_not_empty, Integer.toString(position))); //$NON-NLS-1$
+					RefactoringCoreMessages.ChangeSignatureRefactoring_param_name_not_empty, Integer.toString(position))); 
 		} else {
 			result.merge(Checks.checkTempName(info.getNewName()));
 		}

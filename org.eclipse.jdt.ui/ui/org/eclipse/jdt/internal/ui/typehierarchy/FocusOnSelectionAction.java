@@ -65,7 +65,7 @@ public class FocusOnSelectionAction extends Action {
 		if (element instanceof IType) {
 			IType type= (IType)element;
 			setText(Messages.format(
-					TypeHierarchyMessages.FocusOnSelectionAction_label, //$NON-NLS-1$
+					TypeHierarchyMessages.FocusOnSelectionAction_label, 
 					JavaElementLabels.getTextLabel(type, 0))); 
 			return true;
 		}

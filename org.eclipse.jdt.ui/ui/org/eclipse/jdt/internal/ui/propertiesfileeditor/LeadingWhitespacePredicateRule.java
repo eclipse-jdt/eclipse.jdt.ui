@@ -48,7 +48,7 @@ public final class LeadingWhitespacePredicateRule extends WordPatternRule {
 	 * @param token the token to be returned on success
 	 */
 	public LeadingWhitespacePredicateRule(IToken token, String whitespace) {
-		super(new DummyDetector(), whitespace, "dummy", token); //$NON-NLS-1$//$NON-NLS-2$
+		super(new DummyDetector(), whitespace, "dummy", token); //$NON-NLS-1$
 		setColumnConstraint(0);
 	}
 

@@ -39,14 +39,14 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 	private final Object fCastType; // String or ITypeBinding or null: Should become ITypeBinding
 
 	public CastCompletionProposal(String label, ICompilationUnit targetCU, Expression nodeToCast, String castType, int relevance) {
-		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST)); //$NON-NLS-1$
+		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST)); 
 		fNodeToCast= nodeToCast;
 		fCastType= castType;
 		setCommandId(ADD_CAST_ID);
 	}
 
 	public CastCompletionProposal(String label, ICompilationUnit targetCU, Expression nodeToCast, ITypeBinding castType, int relevance) {
-		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST)); //$NON-NLS-1$
+		super(label, targetCU, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST)); 
 		fNodeToCast= nodeToCast;
 		fCastType= castType;
 		setCommandId(ADD_CAST_ID);

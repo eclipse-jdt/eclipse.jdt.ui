@@ -424,7 +424,7 @@ public class FindStringsToExternalizeAction extends SelectionDispatchAction {
 					NonNLSElement nlsel= (NonNLSElement)element;
 					String elementName= ResourceUtil.getResource(nlsel.cu).getFullPath().toString();
 					return Messages.format(
-						ActionMessages.FindStringsToExternalizeAction_foundStrings, //$NON-NLS-1$
+						ActionMessages.FindStringsToExternalizeAction_foundStrings, 
 						new Object[] {new Integer(nlsel.count), elementName} );
 				}		
 				public Image getImage(Object element) {

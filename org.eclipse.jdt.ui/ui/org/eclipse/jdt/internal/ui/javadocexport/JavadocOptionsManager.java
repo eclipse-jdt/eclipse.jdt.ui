@@ -153,9 +153,9 @@ public class JavadocOptionsManager {
 		fXmlfile= xmlJavadocFile;
 		fWizardStatus= new StatusInfo();
 
-		IDialogSettings javadocSection= dialogSettings.getSection(SECTION_JAVADOC); //$NON-NLS-1$
+		IDialogSettings javadocSection= dialogSettings.getSection(SECTION_JAVADOC); 
 		
-		String commandHistory= null; //$NON-NLS-1$
+		String commandHistory= null; 
 		if (javadocSection != null) {
 			commandHistory= javadocSection.get(JAVADOC_COMMAND_HISTORY);
 		}
@@ -357,7 +357,7 @@ public class JavadocOptionsManager {
 		fDocletname= ""; //$NON-NLS-1$
 		fDocletpath= ""; //$NON-NLS-1$
 
-		if (destination.length() == 0) { //$NON-NLS-1$
+		if (destination.length() == 0) { 
 			NodeList list= element.getChildNodes();
 			for (int i= 0; i < list.getLength(); i++) {
 				Node child= list.item(i);
@@ -435,7 +435,7 @@ public class JavadocOptionsManager {
 		fNotree= loadBoolean(element.getAttribute(NOTREE));
 		fSplitindex= loadBoolean(element.getAttribute(SPLITINDEX));
 		
-		fSource= element.getAttribute(SOURCE); //$NON-NLS-1$
+		fSource= element.getAttribute(SOURCE); 
 	}
 
 	/*
@@ -637,7 +637,7 @@ public class JavadocOptionsManager {
 
 	private boolean loadBoolean(String value) {
 
-		if (value == null || value.length() == 0) //$NON-NLS-1$
+		if (value == null || value.length() == 0) 
 			return false;
 		else {
 			if (value.equals("true")) //$NON-NLS-1$
@@ -708,7 +708,7 @@ public class JavadocOptionsManager {
 		if (fFromStandard) {
 			if (fSource.length() > 0 && !fSource.equals("-")) { //$NON-NLS-1$
 				toolArgs.add("-source"); //$NON-NLS-1$
-				toolArgs.add(fSource); //$NON-NLS-1$
+				toolArgs.add(fSource); 
 			}
 			
 			if (fUse)
@@ -730,13 +730,13 @@ public class JavadocOptionsManager {
 			if (fSplitindex)
 				toolArgs.add("-splitindex"); //$NON-NLS-1$
 
-			if (fTitle.length() != 0) { //$NON-NLS-1$
+			if (fTitle.length() != 0) { 
 				toolArgs.add("-doctitle"); //$NON-NLS-1$
 				toolArgs.add(fTitle);
 			}
 
 
-			if (fStylesheet.length() != 0) { //$NON-NLS-1$
+			if (fStylesheet.length() != 0) { 
 				toolArgs.add("-stylesheetfile"); //$NON-NLS-1$
 				toolArgs.add(fStylesheet);
 			}
@@ -749,7 +749,7 @@ public class JavadocOptionsManager {
 		} //end standard options
 
 		if (fAdditionalParams.length() + fVMParams.length() != 0) {
-			ExecutionArguments tokens= new ExecutionArguments(fVMParams, fAdditionalParams); //$NON-NLS-1$
+			ExecutionArguments tokens= new ExecutionArguments(fVMParams, fAdditionalParams); 
 			String[] vmArgsArray= tokens.getVMArgumentsArray();
 			for (int i= 0; i < vmArgsArray.length; i++) {
 				vmArgs.add(vmArgsArray[i]);
@@ -761,7 +761,7 @@ public class JavadocOptionsManager {
 		}
 		addProxyOptions(vmArgs);
 		
-		if (fOverview.length() != 0) { //$NON-NLS-1$
+		if (fOverview.length() != 0) { 
 			toolArgs.add("-overview"); //$NON-NLS-1$
 			toolArgs.add(fOverview);
 		}
@@ -790,12 +790,12 @@ public class JavadocOptionsManager {
 		}
 		String proxyHost= System.getProperty("http.proxyHost"); //$NON-NLS-1$
 		if (proxyHost != null) {
-			vmOptions.add(hostPrefix + proxyHost); //$NON-NLS-1$
+			vmOptions.add(hostPrefix + proxyHost); 
 		}
 		
 		String proxyPort= System.getProperty("http.proxyPort"); //$NON-NLS-1$
 		if (proxyPort != null) {
-			vmOptions.add(portPrefix + proxyPort); //$NON-NLS-1$
+			vmOptions.add(portPrefix + proxyPort); 
 		}
 	}
 	
@@ -874,19 +874,19 @@ public class JavadocOptionsManager {
 		settings.put(OPENINBROWSER, fOpenInBrowser);
 		settings.put(SOURCE, fSource);
 
-		if (fAntpath.length() != 0) //$NON-NLS-1$
+		if (fAntpath.length() != 0) 
 			settings.put(ANTPATH, fAntpath);
-		if (fDestination.length() != 0) //$NON-NLS-1$
+		if (fDestination.length() != 0) 
 			settings.put(DESTINATION, fDestination);
-		if (fAdditionalParams.length() != 0) //$NON-NLS-1$
+		if (fAdditionalParams.length() != 0) 
 			settings.put(EXTRAOPTIONS, fAdditionalParams);
-		if (fVMParams.length() != 0) //$NON-NLS-1$
+		if (fVMParams.length() != 0) 
 			settings.put(VMOPTIONS, fVMParams);
-		if (fOverview.length() != 0) //$NON-NLS-1$
+		if (fOverview.length() != 0) 
 			settings.put(OVERVIEW, fOverview);
-		if (fStylesheet.length() != 0) //$NON-NLS-1$
+		if (fStylesheet.length() != 0) 
 			settings.put(STYLESHEETFILE, fStylesheet);
-		if (fTitle.length() != 0) //$NON-NLS-1$
+		if (fTitle.length() != 0) 
 			settings.put(TITLE, fTitle);
 
 		if (checkedProjects.length == 1) {

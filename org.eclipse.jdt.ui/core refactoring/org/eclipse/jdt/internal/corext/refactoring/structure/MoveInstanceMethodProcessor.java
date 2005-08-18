@@ -2593,7 +2593,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final IType type= fMethod.getDeclaringType();
 		final String name= type.getFullyQualifiedName();
 		try {
-			final String[] candidates= NamingConventions.suggestArgumentNames(fMethod.getJavaProject(), type.getPackageFragment().getElementName(), name, 0, computeReservedIdentifiers()); //$NON-NLS-1$
+			final String[] candidates= NamingConventions.suggestArgumentNames(fMethod.getJavaProject(), type.getPackageFragment().getElementName(), name, 0, computeReservedIdentifiers()); 
 			if (candidates.length > 0) {
 				if (candidates[0].indexOf('$') < 0)
 					return candidates[0];

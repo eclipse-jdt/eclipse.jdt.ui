@@ -68,14 +68,14 @@ public class ExtractTempWizard extends RefactoringWizard {
 		private Label fLabel;
 		private final boolean fInitialValid;
 		private static final String DESCRIPTION = RefactoringMessages.ExtractTempInputPage_enter_name; 
-		private String[] fTempNameProposals;//$NON-NLS-1$
+		private String[] fTempNameProposals;
 		private IDialogSettings fSettings;
 		
 		public ExtractTempInputPage(String[] tempNameProposals) {
 			super(DESCRIPTION, true, tempNameProposals.length == 0 ? "" : tempNameProposals[0]); //$NON-NLS-1$
 			Assert.isNotNull(tempNameProposals);
-			fTempNameProposals= tempNameProposals; //$NON-NLS-1$
-			fInitialValid= tempNameProposals.length > 0; //$NON-NLS-1$
+			fTempNameProposals= tempNameProposals; 
+			fInitialValid= tempNameProposals.length > 0; 
 		}
 	
 		public void createControl(Composite parent) {

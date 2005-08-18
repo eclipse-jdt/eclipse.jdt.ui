@@ -174,7 +174,7 @@ public class JavaExpandHover extends AnnotationExpandHover {
 	 * @see org.eclipse.ui.internal.texteditor.AnnotationExpandHover#getOrder(org.eclipse.jface.text.source.Annotation)
 	 */
 	protected int getOrder(Annotation annotation) {
-		if (isBreakpointAnnotation(annotation)) //$NON-NLS-1$
+		if (isBreakpointAnnotation(annotation)) 
 			return 1000;
 		else
 			return super.getOrder(annotation);

@@ -61,7 +61,7 @@ public class RemoteTestRunnerClient {
 	            return fActualState;
 	        }
 	        if (message.startsWith(MessageIds.RTRACE_START)) {
-	            fFailedRerunTrace.setLength(0); //$NON-NLS-1$
+	            fFailedRerunTrace.setLength(0); 
 	            return fRerunState;
 	        }
 	        String arg= message.substring(MessageIds.MSG_HEADER_LENGTH);
@@ -357,8 +357,8 @@ public class RemoteTestRunnerClient {
 		// format: testId" "className" "testName" "status
 		// status: FAILURE, ERROR, OK
 		int i= arg.indexOf(' ');
-		int c= arg.indexOf(' ', i+1); //$NON-NLS-1$
-		int t= arg.indexOf(' ', c+1); //$NON-NLS-1$
+		int c= arg.indexOf(' ', i+1); 
+		int t= arg.indexOf(' ', c+1); 
 		String testId= arg.substring(0, i);
 		String className= arg.substring(i+1, c);
 		String testName= arg.substring(c+1, t);

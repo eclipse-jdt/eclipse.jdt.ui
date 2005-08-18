@@ -329,7 +329,7 @@ public class TextBuffer {
 		} catch (BadLocationException e) {
 			IStatus s= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, 
 				Messages.format(
-					TextManipulationMessages.TextBuffer_wrongRange,  //$NON-NLS-1$
+					TextManipulationMessages.TextBuffer_wrongRange,  
 					new Object[] {new Integer(offset), new Integer(length) } ), e);
 			throw new CoreException(s);
 		}	

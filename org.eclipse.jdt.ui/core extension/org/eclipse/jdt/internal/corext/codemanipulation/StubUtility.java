@@ -355,7 +355,7 @@ public class StubUtility {
 
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), cu.getJavaProject(), lineDelimiter);
 		context.setVariable(CodeTemplateContextType.EXCEPTION_TYPE, exceptionType);
-		context.setVariable(CodeTemplateContextType.EXCEPTION_VAR, variableName); //$NON-NLS-1$
+		context.setVariable(CodeTemplateContextType.EXCEPTION_VAR, variableName); 
 		return evaluateTemplate(context, template);
 	}
 	

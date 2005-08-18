@@ -330,7 +330,7 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		link.setLayoutData(gd);
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, null); //$NON-NLS-1$
+				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, null); 
 			}
 		});
 	}

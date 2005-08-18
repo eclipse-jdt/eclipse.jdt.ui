@@ -536,7 +536,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 					Message[] messages= ASTNodes.getMessages(methodDecl, ASTNodes.NODE_ONLY);
 					if (messages.length > 0) {
 						status.addFatalError(Messages.format(
-							RefactoringCoreMessages.ExtractMethodAnalyzer_compile_errors, //$NON-NLS-1$
+							RefactoringCoreMessages.ExtractMethodAnalyzer_compile_errors, 
 							methodDecl.getName().getIdentifier()), JavaStatusContext.create(fCUnit, methodDecl));
 						break superCall;
 					}

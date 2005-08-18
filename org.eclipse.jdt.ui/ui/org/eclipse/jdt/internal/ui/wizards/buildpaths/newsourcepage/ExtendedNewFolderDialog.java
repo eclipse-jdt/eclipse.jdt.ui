@@ -343,7 +343,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
                 // locationStatus takes precedence over missing location warning.
                 return createStatus(
                         IStatus.WARNING,
-                        NewWizardMessages.NewFolderDialog_linkTargetNonExistent); //$NON-NLS-1$	
+                        NewWizardMessages.NewFolderDialog_linkTargetNonExistent); //	
             }
             return locationStatus;
         }
@@ -358,7 +358,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
          */
         private IStatus validateFileType(File linkTargetFile) {
             if (linkTargetFile.isDirectory() == false)
-                return createStatus(IStatus.ERROR, NewWizardMessages.NewFolderDialog_linkTargetNotFolder); //$NON-NLS-1$
+                return createStatus(IStatus.ERROR, NewWizardMessages.NewFolderDialog_linkTargetNotFolder); 
             return createStatus(IStatus.OK, ""); //$NON-NLS-1$
         }
         
@@ -406,7 +406,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             IPath path = new Path(text);
             if (!path.toFile().exists()) {
                 updateStatus(IStatus.ERROR, Messages.format(
-                        NewWizardMessages.NewFolderDialog_notExists, new Object[] { text })); //$NON-NLS-1$
+                        NewWizardMessages.NewFolderDialog_notExists, new Object[] { text })); 
                 return false;
             }
             updateStatus(IStatus.OK, "");  //$NON-NLS-1$
@@ -423,8 +423,8 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             IWorkspace workspace = container.getWorkspace();
             IStatus nameStatus = workspace.validateName(name, IResource.FOLDER);
 
-            if (name.length() == 0) { //$NON-NLS-1$
-                updateStatus(IStatus.ERROR, NewWizardMessages.NewFolderDialog_folderNameEmpty); //$NON-NLS-1$
+            if (name.length() == 0) { 
+                updateStatus(IStatus.ERROR, NewWizardMessages.NewFolderDialog_folderNameEmpty); 
                 return false;
             }
             
@@ -437,7 +437,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             if (container.getFolder(path).exists()
                     || container.getFile(path).exists()) {
                 updateStatus(IStatus.ERROR, Messages.format(
-                        NewWizardMessages.NewFolderDialog_folderNameEmpty_alreadyExists, new Object[] { name })); //$NON-NLS-1$
+                        NewWizardMessages.NewFolderDialog_folderNameEmpty_alreadyExists, new Object[] { name })); 
                 return false;
             }
             updateStatus(IStatus.OK, ""); //$NON-NLS-1$
@@ -564,7 +564,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
         
         fFolderNameField= new FolderNameField(composite);
         
-        fFolderTypeGroup= new FolderTypeGroup(composite); //$NON-NLS-1$
+        fFolderTypeGroup= new FolderTypeGroup(composite); 
         fDependenciesGroup= new DependenciesGroup(composite);
         
 		Validator validator= new Validator();
@@ -609,7 +609,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
         WorkspaceModifyOperation operation = new WorkspaceModifyOperation() {
             public void execute(IProgressMonitor monitor) throws CoreException {
                 try {
-                    monitor.beginTask(NewWizardMessages.NewFolderDialog_progress, 2000); //$NON-NLS-1$
+                    monitor.beginTask(NewWizardMessages.NewFolderDialog_progress, 2000); 
                     if (monitor.isCanceled())
                         throw new OperationCanceledException();
                     
@@ -648,7 +648,7 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
             return null;
         } catch (InvocationTargetException exception) {
             if (exception.getTargetException() instanceof CoreException) {
-                ErrorDialog.openError(getShell(), NewWizardMessages.NewFolderDialog_errorTitle, //$NON-NLS-1$
+                ErrorDialog.openError(getShell(), NewWizardMessages.NewFolderDialog_errorTitle, 
                         null, // no special message
                         ((CoreException) exception.getTargetException())
                                 .getStatus());
@@ -658,9 +658,9 @@ public class ExtendedNewFolderDialog extends SelectionStatusDialog {
                         "Exception in {0}.createNewFolder(): {1}", //$NON-NLS-1$
                         new Object[] { getClass().getName(),
                                 exception.getTargetException() })));
-                MessageDialog.openError(getShell(), NewWizardMessages.NewFolderDialog_errorTitle, //$NON-NLS-1$
+                MessageDialog.openError(getShell(), NewWizardMessages.NewFolderDialog_errorTitle, 
                         Messages.format(
-                                NewWizardMessages.NewFolderDialog_internalError, //$NON-NLS-1$
+                                NewWizardMessages.NewFolderDialog_internalError, 
                                 new Object[] { exception.getTargetException()
                                         .getMessage() }));
             }

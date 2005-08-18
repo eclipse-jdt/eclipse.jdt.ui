@@ -265,7 +265,7 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 		store.setDefault(SRCBIN_BINNAME, "bin"); //$NON-NLS-1$
 		
 		store.setDefault(CLASSPATH_JRELIBRARY_LIST, getDefaultJRELibraries());
-		store.setDefault(CLASSPATH_JRELIBRARY_INDEX, 0); //$NON-NLS-1$
+		store.setDefault(CLASSPATH_JRELIBRARY_INDEX, 0); 
 	}
 	
 	private static String getDefaultJRELibraries() {
@@ -371,12 +371,12 @@ public class NewJavaProjectPreferencePage extends PreferencePage implements IWor
 
 		fSrcFolderNameLabel= new Label(sourceFolderGroup, SWT.NONE);
 		fSrcFolderNameLabel.setText(PreferencesMessages.NewJavaProjectPreferencePage_folders_src); 
-		fSrcFolderNameText= addTextControl(sourceFolderGroup, fSrcFolderNameLabel, SRCBIN_SRCNAME, indent); //$NON-NLS-1$
+		fSrcFolderNameText= addTextControl(sourceFolderGroup, fSrcFolderNameLabel, SRCBIN_SRCNAME, indent); 
 		fSrcFolderNameText.addModifyListener(fModifyListener);
 
 		fBinFolderNameLabel= new Label(sourceFolderGroup, SWT.NONE);
 		fBinFolderNameLabel.setText(PreferencesMessages.NewJavaProjectPreferencePage_folders_bin); 
-		fBinFolderNameText= addTextControl(sourceFolderGroup, fBinFolderNameLabel, SRCBIN_BINNAME, indent); //$NON-NLS-1$
+		fBinFolderNameText= addTextControl(sourceFolderGroup, fBinFolderNameLabel, SRCBIN_BINNAME, indent); 
 		fBinFolderNameText.addModifyListener(fModifyListener);
 
 		String[] jreNames= getJRENames();

@@ -252,7 +252,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 			fMemberBindings= getMemberBindings();
 			if (fSourceBinding == null || hasUnresolvedMemberBinding()) {
 				result.addFatalError(Messages.format(
-					RefactoringCoreMessages.MoveMembersRefactoring_compile_errors, //$NON-NLS-1$
+					RefactoringCoreMessages.MoveMembersRefactoring_compile_errors, 
 					fSource.getCu().getElementName()));
 			}
 			fMemberDeclarations= getASTMembers(result);
@@ -717,7 +717,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 		ITypeBinding targetBinding= getDestinationBinding();
 		if (targetBinding == null) {
 			status.addFatalError(Messages.format(
-				RefactoringCoreMessages.MoveMembersRefactoring_compile_errors, //$NON-NLS-1$
+				RefactoringCoreMessages.MoveMembersRefactoring_compile_errors, 
 				fTarget.getCu().getElementName()));
 			monitor.done();
 			return;

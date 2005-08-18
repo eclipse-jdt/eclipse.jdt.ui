@@ -345,11 +345,11 @@ public class JavadocTagsSubProcessor {
 	 	} else {
 	 		return;
 	 	}
-	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), bodyDeclaration, node, 1); //$NON-NLS-1$
+	 	ASTRewriteCorrectionProposal proposal= new AddMissingJavadocTagProposal(label, context.getCompilationUnit(), bodyDeclaration, node, 1); 
 	 	proposals.add(proposal);
 
 	 	String label2= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_allmissing_description;
-	 	ASTRewriteCorrectionProposal addAllMissing= new AddAllMissingJavadocTagsProposal(label2, context.getCompilationUnit(), bodyDeclaration, 5); //$NON-NLS-1$
+	 	ASTRewriteCorrectionProposal addAllMissing= new AddAllMissingJavadocTagsProposal(label2, context.getCompilationUnit(), bodyDeclaration, 5); 
 	 	proposals.add(addAllMissing);
 	}
 
@@ -494,7 +494,7 @@ public class JavadocTagsSubProcessor {
 		for (int i= 0; i < nTags; i++) {
 			TagElement curr= (TagElement) tags.get(i);
 			String currName= curr.getTagName();
-			if (TagElement.TAG_THROWS.equals(currName) || TagElement.TAG_EXCEPTION.equals(currName)) {  //$NON-NLS-1$//$NON-NLS-2$
+			if (TagElement.TAG_THROWS.equals(currName) || TagElement.TAG_EXCEPTION.equals(currName)) {  
 				String argument= getArgument(curr);
 				if (arg.equals(argument)) {
 					return curr;
@@ -606,6 +606,6 @@ public class JavadocTagsSubProcessor {
 
 		String label= CorrectionMessages.JavadocTagsSubProcessor_removetag_description;
 		Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-		proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image)); //$NON-NLS-1$
+		proposals.add(new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image)); 
 	}
 }

@@ -167,11 +167,11 @@ public class HTMLPrinter {
 	}
 
 	public static void insertPageProlog(StringBuffer buffer, int position) {
-		insertPageProlog(buffer, position, getBgColor()); //$NON-NLS-1$
+		insertPageProlog(buffer, position, getBgColor()); 
 	}
 
 	public static void insertPageProlog(StringBuffer buffer, int position, URL styleSheetURL) {
-		insertPageProlog(buffer, position, getBgColor(), styleSheetURL); //$NON-NLS-1$
+		insertPageProlog(buffer, position, getBgColor(), styleSheetURL); 
 	}
 
 	private static RGB getBgColor() {

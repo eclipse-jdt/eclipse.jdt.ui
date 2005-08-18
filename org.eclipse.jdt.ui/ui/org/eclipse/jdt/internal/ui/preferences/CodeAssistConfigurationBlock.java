@@ -211,7 +211,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		link.setText(label);
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, targetInfo); //$NON-NLS-1$
+				PreferencesUtil.createPreferenceDialogOn(link.getShell(), e.text, null, targetInfo); 
 			}
 		});
 	}

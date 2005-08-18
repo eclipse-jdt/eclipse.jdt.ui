@@ -133,7 +133,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 	
 	private Button createCheckBox(Composite parent, String name, SelectionListener listener) {
 		Button button= new Button(parent, SWT.CHECK | SWT.LEFT);
-		button.setText(name); //$NON-NLS-1$
+		button.setText(name); 
 		button.setEnabled(true);
 		button.setSelection(true);
 		button.addSelectionListener(listener);

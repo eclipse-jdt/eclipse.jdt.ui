@@ -133,7 +133,7 @@ public class RefactoringExecutionHelper {
 				if (validationStatus != null && validationStatus.hasFatalError()) {
 					MessageDialog.openError(fParent, fRefactoring.getName(), 
 						Messages.format(
-							RefactoringMessages.RefactoringExecutionHelper_cannot_execute, //$NON-NLS-1$
+							RefactoringMessages.RefactoringExecutionHelper_cannot_execute, 
 							validationStatus.getMessageMatchingSeverity(RefactoringStatus.FATAL)));
 					return;
 				}

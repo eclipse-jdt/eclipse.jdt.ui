@@ -58,7 +58,7 @@ public class OccurrencesSearchGroup extends ActionGroup  {
 
 	private class QuickAccessAction extends JDTQuickMenuAction {
 		public QuickAccessAction(JavaEditor editor) {
-			super(editor, IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE_QUICK_MENU); //$NON-NLS-1$
+			super(editor, IJavaEditorActionDefinitionIds.SEARCH_OCCURRENCES_IN_FILE_QUICK_MENU); 
 		}
 		protected void fillMenu(IMenuManager menu) {
 			fillQuickMenu(menu);

@@ -152,7 +152,7 @@ public class ImplementOccurrencesFinder implements org.eclipse.jdt.internal.ui.s
 	}
 	
 	public String getSingularLabel(String elementName) {
-		String[] args= new String[] {ASTNodes.asString(fSelectedNode), elementName}; //$NON-NLS-1$
+		String[] args= new String[] {ASTNodes.asString(fSelectedNode), elementName}; 
 		return Messages.format(SearchMessages.ImplementOccurrencesFinder_label_singular, args); 
 	}
 	

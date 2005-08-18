@@ -302,7 +302,7 @@ public class NLSRefactoring extends Refactoring {
 		String pattern= getSubstitutionPattern();
 
 		RefactoringStatus result= new RefactoringStatus();
-		if (pattern.trim().length() == 0) {//$NON-NLS-1$ 
+		if (pattern.trim().length() == 0) {// 
 			result.addError(NLSMessages.NLSRefactoring_pattern_empty); 
 		}
 

@@ -765,7 +765,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 
 	public IMember[] getAdditionalRequiredMembers(IProgressMonitor monitor) throws JavaModelException {
 		IMember[] members= MemberActionInfo.getMembers(getInfosForMembersToBeCreatedInSubclassesOfDeclaringClass());
-		monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_calculating_required, members.length);// not true, but not easy to give anything better //$NON-NLS-1$
+		monitor.beginTask(RefactoringCoreMessages.PushDownRefactoring_calculating_required, members.length);// not true, but not easy to give anything better 
 		List queue= new ArrayList(members.length);
 		queue.addAll(Arrays.asList(members));
 		if (queue.isEmpty())

@@ -112,7 +112,7 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 		fGenConstructorSettings= dialogSettings.getSection(SETTINGS_SECTION);
 		if (fGenConstructorSettings == null) {
 			fGenConstructorSettings= dialogSettings.addNewSection(SETTINGS_SECTION);
-			fGenConstructorSettings.put(OMIT_SUPER, false); //$NON-NLS-1$
+			fGenConstructorSettings.put(OMIT_SUPER, false); 
 		}
 
 		fOmitSuper= fGenConstructorSettings.getBoolean(OMIT_SUPER);

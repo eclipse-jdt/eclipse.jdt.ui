@@ -239,7 +239,7 @@ public class ParametricStructureComputer {
 			return;
 
 		if (DEBUG_INITIALIZATION)
-			System.out.println("Examining constraint " + lhs + " {" + elemStructure(lhs) + "} <= " + rhs + " {" + elemStructure(rhs) + "}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$
+			System.out.println("Examining constraint " + lhs + " {" + elemStructure(lhs) + "} <= " + rhs + " {" + elemStructure(rhs) + "}"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ 
 
 		if (updateStructureOfVar(lhs, elemStructure(rhs), TypeOperator.SubType)) {
 			if (lhs instanceof CollectionElementVariable2)

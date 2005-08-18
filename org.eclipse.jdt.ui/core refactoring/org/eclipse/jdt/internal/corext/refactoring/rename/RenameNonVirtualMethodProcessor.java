@@ -75,13 +75,13 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 				RefactoringStatusContext context= JavaStatusContext.create(hierarchyMethod);
 				if (Checks.compareParamTypes(method.getParameterTypes(), hierarchyMethod.getParameterTypes())) {
 					String message= Messages.format(
-						RefactoringCoreMessages.RenamePrivateMethodRefactoring_hierarchy_defines, //$NON-NLS-1$
+						RefactoringCoreMessages.RenamePrivateMethodRefactoring_hierarchy_defines, 
 						new String[]{JavaModelUtil.getFullyQualifiedName(
 							declaring), name});
 					result.addError(message, context);				
 				}else {
 					String message= Messages.format(
-						RefactoringCoreMessages.RenamePrivateMethodRefactoring_hierarchy_defines2, //$NON-NLS-1$
+						RefactoringCoreMessages.RenamePrivateMethodRefactoring_hierarchy_defines2, 
 						new String[]{JavaModelUtil.getFullyQualifiedName(
 							declaring), name});
 					result.addWarning(message, context);				

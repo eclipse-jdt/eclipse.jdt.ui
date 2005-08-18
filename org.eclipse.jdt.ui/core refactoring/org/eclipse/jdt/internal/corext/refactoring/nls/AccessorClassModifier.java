@@ -232,7 +232,7 @@ public class AccessorClassModifier {
 			int len= accessorClassRef.getName().length();
 			String[] args= {accessorClassRef.getName(), substitution.getUpdatedAccessor()};
 			TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_accessor, args), 
-					new ReplaceEdit(region.getOffset(), len, substitution.getUpdatedAccessor())); //$NON-NLS-1$ //$NON-NLS-2$
+					new ReplaceEdit(region.getOffset(), len, substitution.getUpdatedAccessor())); // 
 		}
 		
 	}

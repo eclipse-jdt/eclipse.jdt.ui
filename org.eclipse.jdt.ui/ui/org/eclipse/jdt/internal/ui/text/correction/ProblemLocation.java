@@ -111,7 +111,7 @@ public class ProblemLocation implements IProblemLocation {
 		if (arg != null) {
 			for (int i= 0; i < arg.length; i++) {
 				buf.append(arg[i]);
-				buf.append('\n');				 //$NON-NLS-1$
+				buf.append('\n');				 
 			}
 		}
 		return buf.toString();

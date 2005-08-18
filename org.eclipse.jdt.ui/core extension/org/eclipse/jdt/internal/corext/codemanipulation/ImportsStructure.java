@@ -435,7 +435,7 @@ public final class ImportsStructure implements IImportsStructure {
 	}
 		
 	public static boolean isImplicitImport(String qualifier, ICompilationUnit cu) {
-		if (JAVA_LANG.equals(qualifier)) { //$NON-NLS-1$
+		if (JAVA_LANG.equals(qualifier)) { 
 			return true;
 		}
 		String packageName= cu.getParent().getElementName();
@@ -613,7 +613,7 @@ public final class ImportsStructure implements IImportsStructure {
 				res.append('<');
 				for (int i= 0; i < typeArguments.length; i++) {
 					if (i > 0) {
-						res.append(','); //$NON-NLS-1$
+						res.append(','); 
 					}
 					res.append(addImport(typeArguments[i]));
 				}

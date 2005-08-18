@@ -68,20 +68,20 @@ public abstract class JDTChange extends Change {
 					fTextFileBuffer.commit(pm, false);
 				} else {
 					status.addFatalError(Messages.format(
-						RefactoringCoreMessages.Change_is_unsaved, fResource.getFullPath().toString())); //$NON-NLS-1$
+						RefactoringCoreMessages.Change_is_unsaved, fResource.getFullPath().toString())); 
 				}
 			}
 		}
 		public void checkDirty(RefactoringStatus status) {
 			if (fDirty) {
 				status.addFatalError(Messages.format(
-					RefactoringCoreMessages.Change_is_unsaved, fResource.getFullPath().toString())); //$NON-NLS-1$
+					RefactoringCoreMessages.Change_is_unsaved, fResource.getFullPath().toString())); 
 			}
 		}
 		public void checkReadOnly(RefactoringStatus status) {
 			if (fReadOnly) {
 				status.addFatalError(Messages.format(
-					RefactoringCoreMessages.Change_is_read_only, fResource.getFullPath().toString())); //$NON-NLS-1$
+					RefactoringCoreMessages.Change_is_read_only, fResource.getFullPath().toString())); 
 			}
 		}
 		public void checkSameReadOnly(RefactoringStatus status, boolean valueToMatch) {
@@ -95,12 +95,12 @@ public abstract class JDTChange extends Change {
 			if (fKind == DOCUMENT) {
 				if (stampToMatch != IDocumentExtension4.UNKNOWN_MODIFICATION_STAMP && fModificationStamp != stampToMatch) {
 					status.addFatalError(Messages.format(
-						RefactoringCoreMessages.Change_has_modifications, fResource.getFullPath().toString())); //$NON-NLS-1$
+						RefactoringCoreMessages.Change_has_modifications, fResource.getFullPath().toString())); 
 				}
 			} else {
 				if (stampToMatch != IResource.NULL_STAMP && fModificationStamp != stampToMatch) {
 					status.addFatalError(Messages.format(
-						RefactoringCoreMessages.Change_has_modifications, fResource.getFullPath().toString())); //$NON-NLS-1$
+						RefactoringCoreMessages.Change_has_modifications, fResource.getFullPath().toString())); 
 					
 				}
 			}
@@ -216,14 +216,14 @@ public abstract class JDTChange extends Change {
 
 	protected static void checkExistence(RefactoringStatus status, Object element) {
 		if (element == null) {
-			status.addFatalError(RefactoringCoreMessages.DynamicValidationStateChange_workspace_changed); //$NON-NLS-1$
+			status.addFatalError(RefactoringCoreMessages.DynamicValidationStateChange_workspace_changed); 
 			
 		} else if (element instanceof IResource && !((IResource)element).exists()) {
 			status.addFatalError(Messages.format(
-				RefactoringCoreMessages.Change_does_not_exist, ((IResource)element).getFullPath().toString())); //$NON-NLS-1$
+				RefactoringCoreMessages.Change_does_not_exist, ((IResource)element).getFullPath().toString())); 
 		} else if (element instanceof IJavaElement && !((IJavaElement)element).exists()) {
 			status.addFatalError(Messages.format(
-				RefactoringCoreMessages.Change_does_not_exist, ((IJavaElement)element).getElementName())); //$NON-NLS-1$
+				RefactoringCoreMessages.Change_does_not_exist, ((IJavaElement)element).getElementName())); 
 		}
 	}
 

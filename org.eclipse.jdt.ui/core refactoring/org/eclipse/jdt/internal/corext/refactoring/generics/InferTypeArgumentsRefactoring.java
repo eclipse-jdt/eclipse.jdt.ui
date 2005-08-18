@@ -333,7 +333,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 			Type originalType= (Type) ((SimpleName) node).getParent();
 			
 			// Must rewrite all type arguments in one batch. Do the rewrite when the first one is encountered; skip the others.
-			Object rewritten= originalType.getProperty(REWRITTEN); //$NON-NLS-1$
+			Object rewritten= originalType.getProperty(REWRITTEN); 
 			if (rewritten == REWRITTEN)
 				return;
 			originalType.setProperty(REWRITTEN, REWRITTEN);

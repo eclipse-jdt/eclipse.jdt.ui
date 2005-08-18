@@ -139,7 +139,7 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	}
 	
 	public String getSingularLabel(String elementName) {
-		String[] args= new String[] {ASTNodes.asString(fSelectedNode), elementName}; //$NON-NLS-1$
+		String[] args= new String[] {ASTNodes.asString(fSelectedNode), elementName}; 
 		return Messages.format(SearchMessages.OccurrencesFinder_label_singular, args); 
 	}
 	

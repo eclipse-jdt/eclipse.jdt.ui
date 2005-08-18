@@ -88,6 +88,6 @@ public final class ConditionalTypeConstraint implements ITypeConstraint2 {
 	 * @see java.lang.Object#toString()
 	 */
 	public final String toString() {
-		return fThenVariable.toString() + " <?= " + fElseVariable.toString(); //$NON-NLS-1$ //$NON-NLS-2$
+		return fThenVariable.toString() + " <?= " + fElseVariable.toString(); //$NON-NLS-1$ 
 	}
 }

@@ -82,7 +82,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 */
 	public JarPackageWizard() {
 		IDialogSettings workbenchSettings= JavaPlugin.getDefault().getDialogSettings();
-		IDialogSettings section= workbenchSettings.getSection(DIALOG_SETTINGS_KEY); //$NON-NLS-1$
+		IDialogSettings section= workbenchSettings.getSection(DIALOG_SETTINGS_KEY); 
 		if (section == null)
 			fHasNewDialogSettings= true;
 		else {

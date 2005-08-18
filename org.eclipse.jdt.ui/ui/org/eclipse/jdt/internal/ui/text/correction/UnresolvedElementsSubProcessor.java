@@ -455,7 +455,7 @@ public class UnresolvedElementsSubProcessor {
 		if (binding != null && binding.isArray()) {
 			String idLength= "length"; //$NON-NLS-1$
 			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changevariable_description, idLength);
-			proposals.add(new RenameNodeCompletionProposal(label, cu, node.getStartPosition(), node.getLength(), idLength, 8)); //$NON-NLS-1$
+			proposals.add(new RenameNodeCompletionProposal(label, cu, node.getStartPosition(), node.getLength(), idLength, 8)); 
 		}
 	}
 
@@ -603,7 +603,7 @@ public class UnresolvedElementsSubProcessor {
 				String[] arg= { simpleName, packName };
 				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changetype_description, arg);
 			}
-			proposal= new RenameNodeCompletionProposal(label, cu, node.getStartPosition(), node.getLength(), simpleName, relevance); //$NON-NLS-1$
+			proposal= new RenameNodeCompletionProposal(label, cu, node.getStartPosition(), node.getLength(), simpleName, relevance); 
 		}
 		if (importRewrite != null) {
 			proposal.setImportRewrite(importRewrite);

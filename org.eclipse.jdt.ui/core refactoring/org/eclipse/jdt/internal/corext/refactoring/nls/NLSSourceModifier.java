@@ -120,7 +120,7 @@ public class NLSSourceModifier {
 			int len= accessorClassRef.getName().length();
 			String[] args= {accessorClassRef.getName(), substitution.getUpdatedAccessor()};
 			TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_accessor, args), 
-					new ReplaceEdit(region.getOffset(), len, substitution.getUpdatedAccessor())); //$NON-NLS-1$ //$NON-NLS-2$
+					new ReplaceEdit(region.getOffset(), len, substitution.getUpdatedAccessor())); // 
 		}
 		
 	}
@@ -133,7 +133,7 @@ public class NLSSourceModifier {
 		if (fIsEclipseNLS)
 			replaceEdit= new ReplaceEdit(region.getOffset(), region.getLength(), substitution.getKey());
 		else
-			replaceEdit= new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getKey()) + '\"'); //$NON-NLS-1$ //$NON-NLS-2$
+			replaceEdit= new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getKey()) + '\"'); // 
 		
 		TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_key, args), replaceEdit); 
 	}
@@ -142,7 +142,7 @@ public class NLSSourceModifier {
 		Region region= substitution.getNLSElement().getPosition();
 		String[] args= {substitution.getInitialValue(), substitution.getValueNonEmpty()};
 		TextChangeCompatibility.addTextEdit(change, Messages.format(NLSMessages.NLSSourceModifier_replace_value, args), 
-				new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getValueNonEmpty()) + '\"')); //$NON-NLS-1$ //$NON-NLS-2$
+				new ReplaceEdit(region.getOffset(), region.getLength(), '\"' + unwindEscapeChars(substitution.getValueNonEmpty()) + '\"')); // 
 	}
 
 	private void deleteAccessor(NLSSubstitution substitution, TextChange change) {
@@ -241,7 +241,7 @@ public class NLSSourceModifier {
 
 	private TextEdit createAddTagChange(NLSElement element) {
 		int offset= element.getTagPosition().getOffset(); //to be changed
-		String text= ' ' + element.getTagText(); //$NON-NLS-1$
+		String text= ' ' + element.getTagText(); 
 		return new InsertEdit(offset, text);
 	}
 

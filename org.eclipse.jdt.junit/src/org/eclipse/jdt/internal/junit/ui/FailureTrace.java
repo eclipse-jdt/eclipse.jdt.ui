@@ -111,7 +111,7 @@ public class FailureTrace implements IMenuListener {
 	private Action createOpenEditorAction(String traceLine) {
 		try { 
 			String testName= traceLine;
-			testName= testName.substring(testName.indexOf(FRAME_PREFIX)); //$NON-NLS-1$
+			testName= testName.substring(testName.indexOf(FRAME_PREFIX)); 
 			testName= testName.substring(FRAME_PREFIX.length(), testName.lastIndexOf('(')).trim();
 			testName= testName.substring(0, testName.lastIndexOf('.'));
 			int innerSeparatorIndex= testName.indexOf('$');

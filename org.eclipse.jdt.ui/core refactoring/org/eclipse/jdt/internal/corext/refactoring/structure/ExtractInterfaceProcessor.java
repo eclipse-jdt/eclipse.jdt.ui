@@ -495,7 +495,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					}
 				}
 			}
-			final String comment= StubUtility.getMethodComment(fSubType.getCompilationUnit(), fSubType.getElementName(), declaration, true, false, string, names, StubUtility.getLineDelimiterUsed(fSubType.getJavaProject())); //$NON-NLS-1$
+			final String comment= StubUtility.getMethodComment(fSubType.getCompilationUnit(), fSubType.getElementName(), declaration, true, false, string, names, StubUtility.getLineDelimiterUsed(fSubType.getJavaProject())); 
 			if (comment != null) {
 				if (declaration.getJavadoc() != null) {
 					rewrite.replace(declaration.getJavadoc(), rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC), null);

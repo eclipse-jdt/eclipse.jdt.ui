@@ -151,7 +151,7 @@ public class ProjectSelectionDialog extends SelectionStatusDialog {
 			updateStatus(new StatusInfo(IStatus.ERROR, "")); //$NON-NLS-1$
 			setSelectionResult(null);
 		} else {
-			updateStatus(new StatusInfo()); //$NON-NLS-1$
+			updateStatus(new StatusInfo()); 
 			setSelectionResult(objects);
 		}
 	}

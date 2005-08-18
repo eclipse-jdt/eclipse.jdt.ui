@@ -176,7 +176,7 @@ public class ProfileStore {
 			try {
 				val= stream.toString("UTF-8"); //$NON-NLS-1$
 			} catch (UnsupportedEncodingException e) {
-				val= stream.toString(); //$NON-NLS-1$
+				val= stream.toString(); 
 			}
 			IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
 			preferenceStore.setValue(PREF_FORMATTER_PROFILES, val);

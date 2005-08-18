@@ -107,7 +107,7 @@ public class RenameResourceChange extends JDTChange {
 
 	public String getName() {
 		return Messages.format(
-			RefactoringCoreMessages.RenameResourceChange_name, new String[]{fResourcePath.toString(), //$NON-NLS-1$
+			RefactoringCoreMessages.RenameResourceChange_name, new String[]{fResourcePath.toString(), 
 			fNewName});
 	}
 

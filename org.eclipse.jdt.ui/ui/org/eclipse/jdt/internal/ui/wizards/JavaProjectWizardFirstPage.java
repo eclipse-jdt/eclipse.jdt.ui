@@ -561,7 +561,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			final String name= fNameGroup.getName();
 
 			// check wether the project name field is empty
-			if (name.length() == 0) { //$NON-NLS-1$
+			if (name.length() == 0) { 
 				setErrorMessage(null);
 				setMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_enterProjectName); 
 				setPageComplete(false);
@@ -595,7 +595,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			}
 
 			// check whether the location is a syntactically correct path
-			if (!Path.EMPTY.isValidPath(location)) { //$NON-NLS-1$
+			if (!Path.EMPTY.isValidPath(location)) { 
 				setErrorMessage(NewWizardMessages.JavaProjectWizardFirstPage_Message_invalidDirectory); 
 				setPageComplete(false);
 				return;

@@ -112,7 +112,7 @@ public class GenerateActionGroup extends ActionGroup {
 	
 	private class RefactorQuickAccessAction extends JDTQuickMenuAction {
 		public RefactorQuickAccessAction(CompilationUnitEditor editor) {
-			super(editor, QUICK_MENU_ID); //$NON-NLS-1$
+			super(editor, QUICK_MENU_ID); 
 		}
 		protected void fillMenu(IMenuManager menu) {
 			fillQuickMenu(menu);
@@ -330,7 +330,7 @@ public class GenerateActionGroup extends ActionGroup {
 		super.fillContextMenu(menu);
 		String menuText= ActionMessages.SourceMenu_label; 
 		if (fQuickAccessAction != null) {
-			menuText= fQuickAccessAction.addShortcut(menuText); //$NON-NLS-1$
+			menuText= fQuickAccessAction.addShortcut(menuText); 
 		}
 		IMenuManager subMenu= new MenuManager(menuText, MENU_ID); 
 		int added= 0;

@@ -82,12 +82,12 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 	/**
 	 * The string used to mark the beginning of the generated code
 	 */
-	public static final String START_MARKER= COMMENT_START + NON_COMMENT_START_MARKER; //$NON-NLS-1$
+	public static final String START_MARKER= COMMENT_START + NON_COMMENT_START_MARKER; 
 	
 	/**
 	 * The string used to mark the end of the generated code
 	 */
-	public static final String END_MARKER= COMMENT_START + NON_COMMENT_END_MARKER; //$NON-NLS-1$
+	public static final String END_MARKER= COMMENT_START + NON_COMMENT_END_MARKER; 
 
 	private final static String PAGE_NAME= "NewTestSuiteCreationWizardPage"; //$NON-NLS-1$
 	

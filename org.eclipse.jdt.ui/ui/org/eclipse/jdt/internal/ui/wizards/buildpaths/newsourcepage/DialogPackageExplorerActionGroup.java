@@ -634,7 +634,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
             return FILE;
         IContainer fileParent= file.getParent();
 		if (fileParent.getFullPath().equals(project.getPath())) {
-            if (project.isOnClasspath(project)) //$NON-NLS-1$
+            if (project.isOnClasspath(project)) 
                 return EXCLUDED_FILE;
             return FILE;
         }

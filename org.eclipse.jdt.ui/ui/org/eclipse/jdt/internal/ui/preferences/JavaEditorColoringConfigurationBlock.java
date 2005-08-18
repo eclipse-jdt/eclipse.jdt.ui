@@ -544,7 +544,7 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 		link.setText(PreferencesMessages.JavaEditorColoringConfigurationBlock_link);
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				PreferencesUtil.createPreferenceDialogOn(parent.getShell(), e.text, null, null); //$NON-NLS-1$
+				PreferencesUtil.createPreferenceDialogOn(parent.getShell(), e.text, null, null); 
 			}
 		});
 		// TODO replace by link-specific tooltips when

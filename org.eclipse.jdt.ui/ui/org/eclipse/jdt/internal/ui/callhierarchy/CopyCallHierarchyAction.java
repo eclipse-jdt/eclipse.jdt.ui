@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.util.SelectionUtil;
 
 class CopyCallHierarchyAction extends Action {
-    private static final char INDENTATION= '\t';  //$NON-NLS-1$
+    private static final char INDENTATION= '\t';  
     
     private CallHierarchyViewPart fView;
     private CallHierarchyViewer fViewer;

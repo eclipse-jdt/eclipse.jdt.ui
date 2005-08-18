@@ -217,7 +217,7 @@ class JavaEditorHoverConfigurationBlock implements IPreferenceConfigurationBlock
 		hoverComposite.setLayout(layout);
 
 		String rollOverLabel= PreferencesMessages.JavaEditorHoverConfigurationBlock_annotationRollover; 
-		addCheckBox(hoverComposite, rollOverLabel, PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, 0); //$NON-NLS-1$
+		addCheckBox(hoverComposite, rollOverLabel, PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER, 0); 
 
 		// Affordance checkbox
 		fShowHoverAffordanceCheckbox= new Button(hoverComposite, SWT.CHECK);

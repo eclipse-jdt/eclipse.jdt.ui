@@ -62,7 +62,7 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	
 	public String getProcessorName() {
 		return Messages.format(
-			RefactoringCoreMessages.RenameSourceFolderRefactoring_rename, //$NON-NLS-1$
+			RefactoringCoreMessages.RenameSourceFolderRefactoring_rename, 
 			new String[]{fSourceFolder.getElementName(), getNewElementName()});
 	}
 	

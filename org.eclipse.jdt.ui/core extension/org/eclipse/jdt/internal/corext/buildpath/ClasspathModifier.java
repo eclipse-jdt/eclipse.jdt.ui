@@ -1392,7 +1392,7 @@ public class ClasspathModifier {
 			if (elem == null) {
 				elem= existingElem;
 			}
-			exclude(path.removeFirstSegments(path.segmentCount() - i).toString(), null, elem, project, new SubProgressMonitor(monitor, 1)); //$NON-NLS-1$
+			exclude(path.removeFirstSegments(path.segmentCount() - i).toString(), null, elem, project, new SubProgressMonitor(monitor, 1)); 
 		} finally {
 			monitor.done();
 		}
@@ -1673,7 +1673,7 @@ public class ClasspathModifier {
 		try {
 			monitor.beginTask(NewWizardMessages.ClasspathModifier_Monitor_ComparePaths, paths.length); 
 			if (path.getFileExtension() == null)
-				path= new Path(completeName(path.toString())); //$NON-NLS-1$
+				path= new Path(completeName(path.toString())); 
 			for (int i= 0; i < paths.length; i++) {
 				if (paths[i].equals(path))
 					return true;

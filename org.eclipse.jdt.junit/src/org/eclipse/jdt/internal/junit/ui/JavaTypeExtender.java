@@ -48,7 +48,7 @@ public class JavaTypeExtender extends PropertyTester  {
 				return true;
 		}
 		if (javaElement != null) {
-			if (PROPERTY_IS_Test.equals(method)) { //$NON-NLS-1$
+			if (PROPERTY_IS_Test.equals(method)) { 
 				return isTest(javaElement);
 			}
 		}

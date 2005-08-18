@@ -34,7 +34,7 @@ public class ResourceExtender extends PropertyTester {
 	 */
 	public boolean test(Object receiver, String method, Object[] args, Object expectedValue) {
 		IResource resource= (IResource)receiver;
-		if (PROPERTY_IS_TEST.equals(method)) { //$NON-NLS-1$
+		if (PROPERTY_IS_TEST.equals(method)) { 
 			return isJUnitTest(resource);
 		}
 		Assert.isTrue(false);

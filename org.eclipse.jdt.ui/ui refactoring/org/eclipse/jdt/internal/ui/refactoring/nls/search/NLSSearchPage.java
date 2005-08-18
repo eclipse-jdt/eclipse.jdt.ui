@@ -424,7 +424,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		if (fWrapperClass != null)
 			fWrapperClassCombo.setText(PatternStrings.getSignature(fWrapperClass));
 		else
-			fWrapperClassCombo.setText(values.wrapperClassName); //$NON-NLS-1$
+			fWrapperClassCombo.setText(values.wrapperClassName); 
 	}
 
 	private SearchPatternData tryTypedTextSelection(ISelection selection) {
@@ -574,7 +574,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				break;
 		}
 		if (searchFor == TYPE && pattern != null) {
-			String propertyFilePathStr= null; //$NON-NLS-1$
+			String propertyFilePathStr= null; 
 			// make suggestions for properties file: look for string constants according to conventions
 			if (mainType != null) {
 				propertyFilePathStr= getPropertyFilePathStr(mainType, RESOURCE_BUNDLE_FIELD);
@@ -586,7 +586,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				IPath path= element.getPath().removeFileExtension().addFileExtension("properties"); //$NON-NLS-1$
 				propertyFilePathStr= path.toString();
 			}
-			return new SearchPatternData(pattern, element, propertyFilePathStr); //$NON-NLS-1$
+			return new SearchPatternData(pattern, element, propertyFilePathStr); 
 		}
 
 		return null;

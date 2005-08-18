@@ -167,7 +167,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			IJavaElement elem= null;
 			String handleId= settings.get("javaElement"); //$NON-NLS-1$
 			if (handleId != null && handleId.length() > 0) {
-				IJavaElement restored= JavaCore.create(handleId); //$NON-NLS-1$
+				IJavaElement restored= JavaCore.create(handleId); 
 				if (restored != null && isSearchableType(restored) && restored.exists()) {
 					elem= restored;
 				}

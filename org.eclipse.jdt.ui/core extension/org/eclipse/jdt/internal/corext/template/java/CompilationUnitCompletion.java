@@ -490,7 +490,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 		 */
 		private void initBounds() {
 			fBounds.clear();
-			fBounds.add(OBJECT_SIGNATURE); //$NON-NLS-1$
+			fBounds.add(OBJECT_SIGNATURE); 
 		}
 
 		/**
@@ -537,7 +537,7 @@ final class CompilationUnitCompletion extends CompletionRequestor {
 			if (SignatureUtil.isJavaLangObject(subTypeSignature))
 				return false; // Object has no super types
 			
-			if (Signature.getTypeSignatureKind(subTypeSignature) != Signature.BASE_TYPE_SIGNATURE && SignatureUtil.isJavaLangObject(superTypeSignature)) //$NON-NLS-1$
+			if (Signature.getTypeSignatureKind(subTypeSignature) != Signature.BASE_TYPE_SIGNATURE && SignatureUtil.isJavaLangObject(superTypeSignature)) 
 				return true;
 			
 			if (fUnit == null)

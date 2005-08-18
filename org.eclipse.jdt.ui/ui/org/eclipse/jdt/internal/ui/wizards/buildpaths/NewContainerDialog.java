@@ -64,7 +64,7 @@ public class NewContainerDialog extends StatusDialog {
 		if (entryToEdit == null) {
 			fContainerDialogField.setText(""); //$NON-NLS-1$
 		} else {
-			fContainerDialogField.setText(entryToEdit.getPath().removeFirstSegments(1).toString()); //$NON-NLS-1$
+			fContainerDialogField.setText(entryToEdit.getPath().removeFirstSegments(1).toString()); 
 		}
 	}
 	

@@ -612,7 +612,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 			throw new CoreException(JavaUIStatus.createError(
 				IJavaModelStatusConstants.INVALID_RESOURCE_TYPE,
 				JavaEditorMessages.ClassFileEditor_error_invalid_input_message,
-				null)); //$NON-NLS-1$
+				null)); 
 
 		JavaModelException e= probeInputForSource(input);
 		if (e != null) {
@@ -623,7 +623,7 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				throw new CoreException(JavaUIStatus.createError(
 					IJavaModelStatusConstants.INVALID_RESOURCE,
 					JavaEditorMessages.ClassFileEditor_error_classfile_not_on_classpath,
-					null)); //$NON-NLS-1$
+					null)); 
 			} else {
 				throw e;
 			}

@@ -28,7 +28,7 @@ public class SearchParticipantDescriptor {
 		private static final String ID= "id"; //$NON-NLS-1$
 		
 		private IConfigurationElement fConfigurationElement;
-		private boolean fEnabled; //$NON-NLS-1$	
+		private boolean fEnabled; //	
 		
 		protected SearchParticipantDescriptor(IConfigurationElement configElement) {
 			fConfigurationElement= configElement;

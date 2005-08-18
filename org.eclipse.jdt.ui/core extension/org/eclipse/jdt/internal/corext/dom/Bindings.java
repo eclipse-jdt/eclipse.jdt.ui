@@ -1344,7 +1344,7 @@ public class Bindings {
 		final String EMPTY= ""; //$NON-NLS-1$
 		
 		if (binding.isAnonymous() || binding.isLocal()) {
-			return EMPTY; //$NON-NLS-1$
+			return EMPTY; 
 		}
 		
 		if (binding.isPrimitive() || binding.isNullType() || binding.isTypeVariable()) {

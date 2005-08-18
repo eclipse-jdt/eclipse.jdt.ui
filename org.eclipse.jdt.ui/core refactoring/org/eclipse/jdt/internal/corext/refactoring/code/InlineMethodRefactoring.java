@@ -235,7 +235,7 @@ public class InlineMethodRefactoring extends Refactoring {
 							added= true;
 							TextEditGroup group= new TextEditGroup(RefactoringCoreMessages.InlineMethodRefactoring_edit_inline); 
 							change.addTextEditGroup(group);
-							result.merge(inliner.perform(group)); //$NON-NLS-1$
+							result.merge(inliner.perform(group)); 
 						} else {
 							fDeleteSource= false;
 						}

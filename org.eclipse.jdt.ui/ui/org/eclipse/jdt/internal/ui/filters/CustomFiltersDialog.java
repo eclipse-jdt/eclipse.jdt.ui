@@ -409,7 +409,7 @@ public class CustomFiltersDialog extends SelectionDialog {
 		int length= pattern.length();
 		StringBuffer buf= new StringBuffer(length);
 		for (int i= 0; i < length; i++) {
-			char ch= pattern.charAt(i); //$NON-NLS-1$
+			char ch= pattern.charAt(i); 
 			if (separator.equals(String.valueOf(ch)))
 				buf.append(ch);
 			buf.append(ch);

@@ -207,7 +207,7 @@ public class BindingLabelProvider extends LabelProvider {
 			if (parameters != null) {
 				for (int index= 0; index < parameters.length; index++) {
 					if (index > 0) {
-						buffer.append(JavaElementLabels.COMMA_STRING); //$NON-NLS-1$
+						buffer.append(JavaElementLabels.COMMA_STRING); 
 					}
 					if (parameters != null) {
 						ITypeBinding paramType= parameters[index];

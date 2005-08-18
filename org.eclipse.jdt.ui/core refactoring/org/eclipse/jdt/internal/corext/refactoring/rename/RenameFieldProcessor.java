@@ -103,7 +103,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	
 	public String getProcessorName() {
 		return Messages.format(
-			RefactoringCoreMessages.RenameFieldRefactoring_name, //$NON-NLS-1$
+			RefactoringCoreMessages.RenameFieldRefactoring_name, 
 			new String[]{fField.getElementName(), getNewElementName()});
 	}
 	
@@ -399,7 +399,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			IField otherField= nestedTypes[i].getField(getNewElementName());
 			if (otherField.exists()){
 				String msg= Messages.format(
-					RefactoringCoreMessages.RenameFieldRefactoring_hiding, //$NON-NLS-1$
+					RefactoringCoreMessages.RenameFieldRefactoring_hiding, 
 					new String[]{fField.getElementName(), getNewElementName(), JavaModelUtil.getFullyQualifiedName(nestedTypes[i])});
 				result.addWarning(msg, JavaStatusContext.create(otherField));
 			}									

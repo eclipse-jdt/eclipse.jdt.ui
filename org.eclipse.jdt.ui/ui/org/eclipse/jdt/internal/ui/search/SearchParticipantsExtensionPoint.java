@@ -45,7 +45,7 @@ public class SearchParticipantsExtensionPoint {
 			SearchParticipantDescriptor descriptor= new SearchParticipantDescriptor(allParticipants[i]);
 			IStatus status= descriptor.checkSyntax();
 			if (status.isOK()) {
-				fActiveParticipants.add(descriptor); //$NON-NLS-1$
+				fActiveParticipants.add(descriptor); 
 			} else {
 				JavaPlugin.log(status);
 			}
