@@ -227,7 +227,7 @@ public class IndentAction extends TextEditorAction {
 			ITypedRegion startingPartition= TextUtilities.getPartition(document, IJavaPartitions.JAVA_PARTITIONING, offset, false);
 			String type= partition.getType();
 			if (type.equals(IJavaPartitions.JAVA_DOC) || type.equals(IJavaPartitions.JAVA_MULTI_LINE_COMMENT)) {
-				indent= computeJavadocIndent(document, line, scanner);
+				indent= computeJavadocIndent(document, line, scanner, startingPartition);
 			} else if (!fIsTabAction && startingPartition.getOffset() == offset && startingPartition.getType().equals(IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)) {
 				
 				// line comment starting at position 0 -> indent inside
@@ -334,27 +334,53 @@ public class IndentAction extends TextEditorAction {
 	 * @param document the document
 	 * @param line the line in document
 	 * @param scanner the scanner
+	 * @param partition the javadoc partition
 	 * @return the indent, or <code>null</code> if not computable
 	 * @throws BadLocationException
 	 * @since 3.1
 	 */
-	private String computeJavadocIndent(IDocument document, int line, JavaHeuristicScanner scanner) throws BadLocationException {
-		if (line == 0)
+	private String computeJavadocIndent(IDocument document, int line, JavaHeuristicScanner scanner, ITypedRegion partition) throws BadLocationException {
+		if (line == 0) // impossible - the first line is never inside a javadoc comment
 			return null;
 		
-		IRegion previousLine= document.getLineInformation(line - 1);
-		int start= previousLine.getOffset();
-		int end= start + previousLine.getLength();
+		// don't make any assumptions if the line does not start with \s*\* - it might be
+		// commented out code, for which we don't want to change the indent
+		final IRegion lineInfo= document.getLineInformation(line);
+		final int lineStart= lineInfo.getOffset();
+		final int lineLength= lineInfo.getLength();
+		final int lineEnd= lineStart + lineLength;
+		int nonWS= scanner.findNonWhitespaceForwardInAnyPartition(lineStart, lineEnd);
+		if (nonWS == JavaHeuristicScanner.NOT_FOUND || document.getChar(nonWS) != '*') {
+			if (nonWS == JavaHeuristicScanner.NOT_FOUND)
+				return document.get(lineStart, lineLength);
+			return document.get(lineStart, nonWS - lineStart);
+		}
 		
-		int firstNonWS= scanner.findNonWhitespaceForwardInAnyPartition(start, end);
-		if (firstNonWS == JavaHeuristicScanner.NOT_FOUND)
-			return document.get(start, end - start);
+		// take the indent from the previous line and reuse
+		IRegion previousLine= document.getLineInformation(line - 1);
+		int previousLineStart= previousLine.getOffset();
+		int previousLineLength= previousLine.getLength();
+		int previousLineEnd= previousLineStart + previousLineLength;
+		
 		StringBuffer buf= new StringBuffer();
-		String indentation= document.get(start, firstNonWS - start);
-		buf.append(indentation);
-		if (document.getChar(firstNonWS) == '/')
-			// javadoc started on the previous line
+		int previousLineNonWS= scanner.findNonWhitespaceForwardInAnyPartition(previousLineStart, previousLineEnd);
+		if (previousLineNonWS == JavaHeuristicScanner.NOT_FOUND || document.getChar(previousLineNonWS) != '*') {
+			// align with the comment start if the previous line is not an asterix line
+			previousLine= document.getLineInformationOfOffset(partition.getOffset());
+			previousLineStart= previousLine.getOffset();
+			previousLineLength= previousLine.getLength();
+			previousLineEnd= previousLineStart + previousLineLength;
+			previousLineNonWS= scanner.findNonWhitespaceForwardInAnyPartition(previousLineStart, previousLineEnd);
+			if (previousLineNonWS == JavaHeuristicScanner.NOT_FOUND)
+				previousLineNonWS= previousLineEnd;
+			
+			// add the initial space 
+			// TODO this may be controlled by a formatter preference in the future
 			buf.append(' ');
+		}
+		
+		String indentation= document.get(previousLineStart, previousLineNonWS - previousLineStart);
+		buf.insert(0, indentation);
 		return buf.toString();
 	}
 	
