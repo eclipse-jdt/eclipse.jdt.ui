@@ -38,7 +38,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
@@ -157,11 +156,13 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 		SearchPattern pattern= createSearchPattern(wc.findPrimaryType());
 		SearchResultGroup[] groups= RefactoringSearchEngine.search(pattern, scope, pm, new ICompilationUnit[]{wc},
 				new RefactoringStatus()); //status cannot get an error by construction: search scope is only the CU. 
-		Assert.isTrue(groups.length <= 1); //just 1 file or none
-		if (groups.length == 0)
-			return null;
-		else	
-			return groups[0];
+//		Assert.isTrue(groups.length <= 1); //just 1 file or none, but inaccurate matches can play bad here (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=106127)
+		for (int index= 0; index < groups.length; index++) {
+			SearchResultGroup group= groups[index];
+			if (group.getCompilationUnit().equals(wc))
+				return group;
+		}
+		return null;
 	}
 	
 	private static SearchPattern createSearchPattern(IType type) throws JavaModelException{
