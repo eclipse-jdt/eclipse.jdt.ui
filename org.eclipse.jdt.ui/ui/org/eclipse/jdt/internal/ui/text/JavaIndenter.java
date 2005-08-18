@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
 
 /**
- * Uses the {@link org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner}to
+ * Uses the {@link org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner} to
  * get the indentation level for a certain position in a document.
  *
  * <p>
@@ -33,10 +33,344 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
  *
  * @since 3.0
  */
-public class JavaIndenter {
+public final class JavaIndenter {
+	
+	private final class CorePrefs {
+		final boolean prefUseTabs;
+		final int prefTabSize;
+		final int prefIndentationSize;
+		final boolean prefArrayDimensionsDeepIndent;
+		final int prefArrayIndent;
+		final boolean prefArrayDeepIndent;
+		final boolean prefTernaryDeepAlign;
+		final int prefTernaryIndent;
+		final int prefCaseIndent;
+		final int prefAssignmentIndent;
+		final int prefCaseBlockIndent;
+		final int prefSimpleIndent;
+		final int prefBracketIndent;
+		final boolean prefMethodDeclDeepIndent;
+		final int prefMethodDeclIndent;
+		final boolean prefMethodCallDeepIndent;
+		final int prefMethodCallIndent;
+		final boolean prefParenthesisDeepIndent;
+		final int prefParenthesisIndent;
+		final int prefBlockIndent;
+		final int prefMethodBodyIndent;
+		final int prefTypeIndent;
+		final boolean prefIndentBracesForBlocks;
+		final boolean prefIndentBracesForArrays;
+		final boolean prefIndentBracesForMethods;
+		final boolean prefIndentBracesForTypes;
+		final int prefContinuationIndent;
+		final boolean prefHasGenerics;
+		final String prefTabChar;
+		
+		private final IJavaProject fProject;
+
+		/**
+		 * Returns <code>true</code> if the class is used outside the workbench,
+		 * <code>false</code> in normal mode
+		 *
+		 * @return <code>true</code> if the plug-ins are not available
+		 */
+		private boolean isStandalone() {
+			return JavaCore.getPlugin() == null;
+		}
+		
+		/**
+		 * Returns the possibly project-specific core preference defined under <code>key</code>.
+		 *
+		 * @param key the key of the preference
+		 * @return the value of the preference
+		 * @since 3.1
+		 */
+		private String getCoreFormatterOption(String key) {
+			if (fProject == null)
+				return JavaCore.getOption(key);
+			return fProject.getOption(key, true);
+		}
+		
+		CorePrefs(IJavaProject project) {
+			fProject= project;
+			if (isStandalone()) {
+				prefUseTabs= true;
+				prefTabSize= 4;
+				prefIndentationSize= 4;
+				prefArrayDimensionsDeepIndent= true;
+				prefContinuationIndent= 2;
+				prefBlockIndent= 1;
+				prefArrayIndent= prefContinuationIndent;
+				prefArrayDeepIndent= true;
+				prefTernaryDeepAlign= false;
+				prefTernaryIndent= prefContinuationIndent;
+				prefCaseIndent= 0;
+				prefAssignmentIndent= prefBlockIndent;
+				prefCaseBlockIndent= prefBlockIndent;
+				prefIndentBracesForBlocks= false;
+				prefSimpleIndent= (prefIndentBracesForBlocks && prefBlockIndent == 0) ? 1 : prefBlockIndent;
+				prefBracketIndent= prefBlockIndent;
+				prefMethodDeclDeepIndent= true;
+				prefMethodDeclIndent= 1;
+				prefMethodCallDeepIndent= false;
+				prefMethodCallIndent= 1;
+				prefParenthesisDeepIndent= false;
+				prefParenthesisIndent= prefContinuationIndent;
+				prefMethodBodyIndent= 1;
+				prefTypeIndent= 1;
+				prefIndentBracesForArrays= false;
+				prefIndentBracesForMethods= false;
+				prefIndentBracesForTypes= false;
+				prefHasGenerics= false;
+				prefTabChar= JavaCore.TAB;
+			} else {
+				prefUseTabs= prefUseTabs();
+				prefTabSize= prefTabSize();
+				prefIndentationSize= prefIndentationSize();
+				prefArrayDimensionsDeepIndent= prefArrayDimensionsDeepIndent();
+				prefContinuationIndent= prefContinuationIndent();
+				prefBlockIndent= prefBlockIndent();
+				prefArrayIndent= prefArrayIndent();
+				prefArrayDeepIndent= prefArrayDeepIndent();
+				prefTernaryDeepAlign= prefTernaryDeepAlign();
+				prefTernaryIndent= prefTernaryIndent();
+				prefCaseIndent= prefCaseIndent();
+				prefAssignmentIndent= prefAssignmentIndent();
+				prefCaseBlockIndent= prefCaseBlockIndent();
+				prefIndentBracesForBlocks= prefIndentBracesForBlocks();
+				prefSimpleIndent= prefSimpleIndent();
+				prefBracketIndent= prefBracketIndent();
+				prefMethodDeclDeepIndent= prefMethodDeclDeepIndent();
+				prefMethodDeclIndent= prefMethodDeclIndent();
+				prefMethodCallDeepIndent= prefMethodCallDeepIndent();
+				prefMethodCallIndent= prefMethodCallIndent();
+				prefParenthesisDeepIndent= prefParenthesisDeepIndent();
+				prefParenthesisIndent= prefParenthesisIndent();
+				prefMethodBodyIndent= prefMethodBodyIndent();
+				prefTypeIndent= prefTypeIndent();
+				prefIndentBracesForArrays= prefIndentBracesForArrays();
+				prefIndentBracesForMethods= prefIndentBracesForMethods();
+				prefIndentBracesForTypes= prefIndentBracesForTypes();
+				prefHasGenerics= hasGenerics();
+				prefTabChar= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
+			}
+		}
+		
+		private boolean prefUseTabs() {
+			return !JavaCore.SPACE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
+		}
+
+		private int prefTabSize() {
+			return CodeFormatterUtil.getTabWidth(fProject);
+		}
+
+		private int prefIndentationSize() {
+			return CodeFormatterUtil.getIndentWidth(fProject);
+		}
+
+		private boolean prefArrayDimensionsDeepIndent() {
+			return true; // sensible default, no formatter setting
+		}
+
+		private int prefArrayIndent() {
+			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER);
+			try {
+				if (DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_BY_ONE)
+					return 1;
+			} catch (IllegalArgumentException e) {
+				// ignore and return default
+			}
+
+			return prefContinuationIndent(); // default
+		}
+
+		private boolean prefArrayDeepIndent() {
+			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER);
+			try {
+				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
+			} catch (IllegalArgumentException e) {
+				// ignore and return default
+			}
+
+			return true;
+		}
+
+		private boolean prefTernaryDeepAlign() {
+			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION);
+			try {
+				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
+			} catch (IllegalArgumentException e) {
+				// ignore and return default
+			}
+			return false;
+		}
+
+		private int prefTernaryIndent() {
+			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION);
+			try {
+				if (DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_BY_ONE)
+					return 1;
+				else
+					return prefContinuationIndent();
+			} catch (IllegalArgumentException e) {
+				// ignore and return default
+			}
+
+			return prefContinuationIndent();
+		}
+
+		private int prefCaseIndent() {
+			if (DefaultCodeFormatterConstants.TRUE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_SWITCH)))
+				return prefBlockIndent();
+			else
+				return 0;
+		}
+
+		private int prefAssignmentIndent() {
+			return prefBlockIndent();
+		}
+
+		private int prefCaseBlockIndent() {
+			if (true)
+				return prefBlockIndent();
+
+			if (DefaultCodeFormatterConstants.TRUE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_CASES)))
+				return prefBlockIndent();
+			else
+				return 0;
+		}
+
+		private int prefSimpleIndent() {
+			if (prefIndentBracesForBlocks() && prefBlockIndent() == 0)
+				return 1;
+			else return prefBlockIndent();
+		}
+
+		private int prefBracketIndent() {
+			return prefBlockIndent();
+		}
+
+		private boolean prefMethodDeclDeepIndent() {
+			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_METHOD_DECLARATION);
+			try {
+				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
+			} catch (IllegalArgumentException e) {
+				// ignore and return default
+			}
+
+			return true;
+		}
+
+		private int prefMethodDeclIndent() {
+			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_METHOD_DECLARATION);
+			try {
+				if (DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_BY_ONE)
+					return 1;
+				else
+					return prefContinuationIndent();
+			} catch (IllegalArgumentException e) {
+				// ignore and return default
+			}
+			return 1;
+		}
+
+		private boolean prefMethodCallDeepIndent() {
+			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION);
+			try {
+				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
+			} catch (IllegalArgumentException e) {
+				// ignore and return default
+			}
+			return false; // sensible default
+		}
+
+		private int prefMethodCallIndent() {
+			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION);
+			try {
+				if (DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_BY_ONE)
+					return 1;
+				else
+					return prefContinuationIndent();
+			} catch (IllegalArgumentException e) {
+				// ignore and return default
+			}
+
+			return 1; // sensible default
+		}
+
+		private boolean prefParenthesisDeepIndent() {
+			if (true) // don't do parenthesis deep indentation
+				return false;
+
+			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION);
+			try {
+				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
+			} catch (IllegalArgumentException e) {
+				// ignore and return default
+			}
+
+			return false; // sensible default
+		}
+
+		private int prefParenthesisIndent() {
+			return prefContinuationIndent();
+		}
+
+		private int prefBlockIndent() {
+			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BLOCK);
+			if (DefaultCodeFormatterConstants.FALSE.equals(option))
+				return 0;
+
+			return 1; // sensible default
+		}
+
+		private int prefMethodBodyIndent() {
+			if (DefaultCodeFormatterConstants.FALSE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BODY)))
+				return 0;
+
+			return 1; // sensible default
+		}
+
+		private int prefTypeIndent() {
+			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER);
+			if (DefaultCodeFormatterConstants.FALSE.equals(option))
+				return 0;
+
+			return 1; // sensible default
+		}
+
+		private boolean prefIndentBracesForBlocks() {
+			return DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK));
+		}
+
+		private boolean prefIndentBracesForArrays() {
+			return DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ARRAY_INITIALIZER));
+		}
+
+		private boolean prefIndentBracesForMethods() {
+			return DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_METHOD_DECLARATION));
+		}
+
+		private boolean prefIndentBracesForTypes() {
+			return DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_TYPE_DECLARATION));
+		}
+
+		private int prefContinuationIndent() {
+			try {
+				return Integer.parseInt(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION));
+			} catch (NumberFormatException e) {
+				// ignore and return default
+			}
+
+			return 2; // sensible default
+		}
+		private boolean hasGenerics() {
+			return JavaCore.VERSION_1_5.compareTo(getCoreFormatterOption(JavaCore.COMPILER_SOURCE)) <= 0;
+		}
+	}
 
 	/** The document being scanned. */
-	private IDocument fDocument;
+	private final IDocument fDocument;
 	/** The indentation accumulated by <code>findReferencePosition</code>. */
 	private int fIndent;
 	/**
@@ -56,8 +390,8 @@ public class JavaIndenter {
 	 * The scanner we will use to scan the document. It has to be installed
 	 * on the same document as the one we get.
 	 */
-	private JavaHeuristicScanner fScanner;
-	private final IJavaProject fProject;
+	private final JavaHeuristicScanner fScanner;
+	private final CorePrefs fPrefs;
 
 	/**
 	 * Creates a new instance.
@@ -86,7 +420,7 @@ public class JavaIndenter {
 		Assert.isNotNull(scanner);
 		fDocument= document;
 		fScanner= scanner;
-		fProject= project;
+		fPrefs= new CorePrefs(project);
 	}
 
 	/**
@@ -179,7 +513,7 @@ public class JavaIndenter {
 	 * @return the visual length in characters
 	 */
 	private int computeVisualLength(CharSequence indent) {
-		final int tabSize= prefTabSize();
+		final int tabSize= fPrefs.prefTabSize;
 		int length= 0;
 		for (int i= 0; i < indent.length(); i++) {
 			char ch= indent.charAt(i);
@@ -207,7 +541,7 @@ public class JavaIndenter {
 	 * @return the stripped <code>reference</code>
 	 */
 	private StringBuffer stripExceedingChars(StringBuffer reference, int indentLength) {
-		final int tabSize= prefTabSize();
+		final int tabSize= fPrefs.prefTabSize;
 		int measured= 0;
 		int chars= reference.length();
 		int i= 0;
@@ -273,8 +607,8 @@ public class JavaIndenter {
 	 *         by <code>start</code> and <code>indent</code>
 	 */
 	private StringBuffer createIndent(int start, final int indent, final boolean convertSpaceRunsToTabs) {
-		final boolean convertTabs= prefUseTabs() && convertSpaceRunsToTabs;
-		final int tabLen= prefTabSize();
+		final boolean convertTabs= fPrefs.prefUseTabs && convertSpaceRunsToTabs;
+		final int tabLen= fPrefs.prefTabSize;
 		final StringBuffer ret= new StringBuffer();
 		try {
 			int spaces= 0;
@@ -318,14 +652,14 @@ public class JavaIndenter {
 	 */
 	private StringBuffer createReusingIndent(StringBuffer buffer, int additional) {
 		int refLength= computeVisualLength(buffer);
-		int addLength= prefIndentationSize() * additional; // may be < 0
+		int addLength= fPrefs.prefIndentationSize * additional; // may be < 0
 		int totalLength= Math.max(0, refLength + addLength);
 
 
 		// copy the reference indentation for the indent up to the last tab
 		// stop within the maxCopy area
 		int minLength= Math.min(totalLength, refLength);
-		int tabSize= prefTabSize();
+		int tabSize= fPrefs.prefTabSize;
 		int maxCopyLength= tabSize > 0 ? minLength - minLength % tabSize : minLength; // maximum indent to copy
 		stripExceedingChars(buffer, maxCopyLength);
 
@@ -333,13 +667,13 @@ public class JavaIndenter {
 		// add additional indent
 		int missing= totalLength - maxCopyLength;
 		final int tabs, spaces;
-		if (JavaCore.SPACE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))) {
+		if (JavaCore.SPACE.equals(fPrefs.prefTabChar)) {
 			tabs= 0;
 			spaces= missing;
-		} else if (JavaCore.TAB.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))) {
+		} else if (JavaCore.TAB.equals(fPrefs.prefTabChar)) {
 			tabs= tabSize > 0 ? missing / tabSize : 0;
 			spaces= tabSize > 0 ? missing % tabSize : missing;
-		} else if (DefaultCodeFormatterConstants.MIXED.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR))){
+		} else if (DefaultCodeFormatterConstants.MIXED.equals(fPrefs.prefTabChar)) {
 			tabs= tabSize > 0 ? missing / tabSize : 0;
 			spaces= tabSize > 0 ? missing % tabSize : missing;
 		} else {
@@ -445,11 +779,11 @@ public class JavaIndenter {
 							matchCase= true;
 						break;
 					case Symbols.TokenLBRACE: // for opening-brace-on-new-line style
-						if (bracelessBlockStart && !prefIndentBracesForBlocks())
+						if (bracelessBlockStart && !fPrefs.prefIndentBracesForBlocks)
 							unindent= true;
-						else if ((prevToken == Symbols.TokenCOLON || prevToken == Symbols.TokenEQUAL || prevToken == Symbols.TokenRBRACKET) && !prefIndentBracesForArrays())
+						else if ((prevToken == Symbols.TokenCOLON || prevToken == Symbols.TokenEQUAL || prevToken == Symbols.TokenRBRACKET) && !fPrefs.prefIndentBracesForArrays)
 							unindent= true;
-						else if (!bracelessBlockStart && prefIndentBracesForMethods())
+						else if (!bracelessBlockStart && fPrefs.prefIndentBracesForMethods)
 							indent= true;
 						break;
 					case Symbols.TokenRBRACE: // closing braces get unindented
@@ -575,20 +909,20 @@ public class JavaIndenter {
 
 			case Symbols.TokenEQUAL:
 				// indent assignments
-				fIndent= prefAssignmentIndent();
+				fIndent= fPrefs.prefAssignmentIndent;
 				return fPosition;
 
 			case Symbols.TokenCOLON:
 				// TODO handle ternary deep indentation
-				fIndent= prefCaseBlockIndent();
+				fIndent= fPrefs.prefCaseBlockIndent;
 				return fPosition;
 
 			case Symbols.TokenQUESTIONMARK:
-				if (prefTernaryDeepAlign()) {
+				if (fPrefs.prefTernaryDeepAlign) {
 					setFirstElementAlignment(fPosition, offset + 1);
 					return fPosition;
 				} else {
-					fIndent= prefTernaryIndent();
+					fIndent= fPrefs.prefTernaryIndent;
 					return fPosition;
 				}
 
@@ -596,7 +930,7 @@ public class JavaIndenter {
 			case Symbols.TokenDO:
 			case Symbols.TokenWHILE:
 			case Symbols.TokenELSE:
-				fIndent= prefSimpleIndent();
+				fIndent= fPrefs.prefSimpleIndent;
 				return fPosition;
 
 			case Symbols.TokenTRY:
@@ -607,7 +941,7 @@ public class JavaIndenter {
 					int scope= fPosition;
 					nextToken();
 					if (fToken == Symbols.TokenIF || fToken == Symbols.TokenWHILE || fToken == Symbols.TokenFOR) {
-						fIndent= prefSimpleIndent();
+						fIndent= fPrefs.prefSimpleIndent;
 						return fPosition;
 					}
 					fPosition= scope;
@@ -684,7 +1018,7 @@ public class JavaIndenter {
 						break;
 
 					case Symbols.TokenSWITCH:
-						fIndent= prefCaseIndent();
+						fIndent= fPrefs.prefCaseIndent;
 						return fPosition;
 				}
 			}
@@ -780,9 +1114,9 @@ public class JavaIndenter {
 
 	private int getBlockIndent(boolean isMethodBody, boolean isTypeBody) {
 		if (isTypeBody)
-			return prefTypeIndent() + (prefIndentBracesForTypes() ? 1 : 0);
+			return fPrefs.prefTypeIndent + (fPrefs.prefIndentBracesForTypes ? 1 : 0);
 		else if (isMethodBody)
-			return prefMethodBodyIndent() + (prefIndentBracesForMethods() ? 1 : 0);
+			return fPrefs.prefMethodBodyIndent + (fPrefs.prefIndentBracesForMethods ? 1 : 0);
 		else
 			return fIndent;
 	}
@@ -831,7 +1165,7 @@ public class JavaIndenter {
 					return fPosition;
 				case Symbols.TokenLBRACE:
 					// opening brace of switch statement
-					fIndent= prefCaseIndent();
+					fIndent= fPrefs.prefCaseIndent;
 					return fPosition;
 				case Symbols.TokenCASE:
 				case Symbols.TokenDEFAULT:
@@ -902,11 +1236,11 @@ public class JavaIndenter {
 				case Symbols.TokenSEMICOLON:
 					return fPosition;
 				case Symbols.TokenQUESTIONMARK:
-					if (prefTernaryDeepAlign()) {
+					if (fPrefs.prefTernaryDeepAlign) {
 						setFirstElementAlignment(fPosition - 1, fPosition + 1);
 						return fPosition;
 					} else {
-						fIndent= prefTernaryIndent();
+						fIndent= fPrefs.prefTernaryIndent;
 						return fPosition;
 					}
 				case Symbols.TokenEOF:
@@ -934,7 +1268,7 @@ public class JavaIndenter {
 			case Symbols.TokenRBRACE:
 				return skipScope(Symbols.TokenLBRACE, Symbols.TokenRBRACE);
 			case Symbols.TokenGREATERTHAN:
-				if (!hasGenerics())
+				if (!fPrefs.prefHasGenerics)
 					return false;
 				int storedPosition= fPosition;
 				int storedToken= fToken;
@@ -1025,27 +1359,27 @@ public class JavaIndenter {
 
 				// special: method declaration deep indentation
 				if (looksLikeMethodDecl()) {
-					if (prefMethodDeclDeepIndent())
+					if (fPrefs.prefMethodDeclDeepIndent)
 						return setFirstElementAlignment(pos, bound);
 					else {
-						fIndent= prefMethodDeclIndent();
+						fIndent= fPrefs.prefMethodDeclIndent;
 						return pos;
 					}
 				} else {
 					fPosition= pos;
 					if (looksLikeMethodCall()) {
-						if (prefMethodCallDeepIndent())
+						if (fPrefs.prefMethodCallDeepIndent)
 							return setFirstElementAlignment(pos, bound);
 						else {
-							fIndent= prefMethodCallIndent();
+							fIndent= fPrefs.prefMethodCallIndent;
 							return pos;
 						}
-					} else if (prefParenthesisDeepIndent())
+					} else if (fPrefs.prefParenthesisDeepIndent)
 						return setFirstElementAlignment(pos, bound);
 				}
 
 				// normal: return the parenthesis as reference
-				fIndent= prefParenthesisIndent();
+				fIndent= fPrefs.prefParenthesisIndent;
 				return pos;
 
 			case Symbols.TokenLBRACE:
@@ -1053,17 +1387,17 @@ public class JavaIndenter {
 
 				// special: array initializer
 				if (looksLikeArrayInitializerIntro())
-					if (prefArrayDeepIndent())
+					if (fPrefs.prefArrayDeepIndent)
 						return setFirstElementAlignment(pos, bound);
 					else
-						fIndent= prefArrayIndent();
+						fIndent= fPrefs.prefArrayIndent;
 				else
-					fIndent= prefBlockIndent();
+					fIndent= fPrefs.prefBlockIndent;
 
 				// normal: skip to the statement start before the scope introducer
 				// opening braces are often on differently ending indents than e.g. a method definition
-				if (looksLikeArrayInitializerIntro() && !prefIndentBracesForArrays()
-						|| !prefIndentBracesForBlocks()) {
+				if (looksLikeArrayInitializerIntro() && !fPrefs.prefIndentBracesForArrays
+						|| !fPrefs.prefIndentBracesForBlocks) {
 					fPosition= pos; // restore
 					return skipToStatementStart(true, true); // set to true to match the first if
 				} else {
@@ -1074,12 +1408,12 @@ public class JavaIndenter {
 				pos= fPosition; // store
 
 				// special: method declaration deep indentation
-				if (prefArrayDimensionsDeepIndent()) {
+				if (fPrefs.prefArrayDimensionsDeepIndent) {
 					return setFirstElementAlignment(pos, bound);
 				}
 
 				// normal: return the bracket as reference
-				fIndent= prefBracketIndent();
+				fIndent= fPrefs.prefBracketIndent;
 				return pos; // restore
 
 			default:
@@ -1301,297 +1635,5 @@ public class JavaIndenter {
 					return false;
 			}
 		}
-	}
-
-	/**
-	 * Returns the possibly project-specific core preference defined under <code>key</code>.
-	 *
-	 * @param key the key of the preference
-	 * @return the value of the preference
-	 * @since 3.1
-	 */
-	private String getCoreFormatterOption(String key) {
-		if (fProject == null)
-			return JavaCore.getOption(key);
-		return fProject.getOption(key, true);
-	}
-
-	private boolean prefUseTabs() {
-		boolean useTabs;
-		if (!isStandalone())
-			useTabs= !JavaCore.SPACE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR));
-		else
-			useTabs= true; // sensible default for testing
-
-		return useTabs;
-	}
-
-	private int prefTabSize() {
-		return CodeFormatterUtil.getTabWidth(fProject);
-	}
-
-	private int prefIndentationSize() {
-		return CodeFormatterUtil.getIndentWidth(fProject);
-	}
-
-	private boolean prefArrayDimensionsDeepIndent() {
-		return true; // sensible default, no formatter setting
-	}
-
-	private int prefArrayIndent() {
-		if (!isStandalone()) {
-			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER);
-			try {
-				if (DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_BY_ONE)
-					return 1;
-			} catch (IllegalArgumentException e) {
-				// ignore and return default
-			}
-		}
-
-		return prefContinuationIndent(); // default
-	}
-
-	private boolean prefArrayDeepIndent() {
-		if (!isStandalone()) {
-			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_EXPRESSIONS_IN_ARRAY_INITIALIZER);
-			try {
-				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
-			} catch (IllegalArgumentException e) {
-				// ignore and return default
-			}
-		}
-
-		return true;
-	}
-
-	private boolean prefTernaryDeepAlign() {
-		if (!isStandalone()) {
-			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION);
-			try {
-				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
-			} catch (IllegalArgumentException e) {
-				// ignore and return default
-			}
-		}
-		return false;
-	}
-
-	private int prefTernaryIndent() {
-		if (!isStandalone()) {
-			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_CONDITIONAL_EXPRESSION);
-			try {
-				if (DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_BY_ONE)
-					return 1;
-				else
-					return prefContinuationIndent();
-			} catch (IllegalArgumentException e) {
-				// ignore and return default
-			}
-		}
-
-		return prefContinuationIndent();
-	}
-
-	private int prefCaseIndent() {
-		if (!isStandalone()) {
-			if (DefaultCodeFormatterConstants.TRUE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_SWITCH)))
-				return prefBlockIndent();
-			else
-				return 0;
-		}
-
-		return 0; // sun standard
-	}
-
-	private int prefAssignmentIndent() {
-		return prefBlockIndent();
-	}
-
-	private int prefCaseBlockIndent() {
-		if (true)
-			return prefBlockIndent();
-
-		if (!isStandalone()) {
-			if (DefaultCodeFormatterConstants.TRUE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_SWITCHSTATEMENTS_COMPARE_TO_CASES)))
-				return prefBlockIndent();
-			else
-				return 0;
-		}
-		return prefBlockIndent(); // sun standard
-	}
-
-	private int prefSimpleIndent() {
-		if (prefIndentBracesForBlocks() && prefBlockIndent() == 0)
-			return 1;
-		else return prefBlockIndent();
-	}
-
-	private int prefBracketIndent() {
-		return prefBlockIndent();
-	}
-
-	private boolean prefMethodDeclDeepIndent() {
-		if (!isStandalone()) {
-			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_METHOD_DECLARATION);
-			try {
-				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
-			} catch (IllegalArgumentException e) {
-				// ignore and return default
-			}
-		}
-
-		return true;
-	}
-
-	private int prefMethodDeclIndent() {
-		if (!isStandalone()) {
-			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_PARAMETERS_IN_METHOD_DECLARATION);
-			try {
-				if (DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_BY_ONE)
-					return 1;
-				else
-					return prefContinuationIndent();
-			} catch (IllegalArgumentException e) {
-				// ignore and return default
-			}
-		}
-		return 1;
-	}
-
-	private boolean prefMethodCallDeepIndent() {
-		if (!isStandalone()) {
-			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION);
-			try {
-				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
-			} catch (IllegalArgumentException e) {
-				// ignore and return default
-			}
-		}
-		return false; // sensible default
-	}
-
-	private int prefMethodCallIndent() {
-		if (!isStandalone()) {
-			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ARGUMENTS_IN_METHOD_INVOCATION);
-			try {
-				if (DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_BY_ONE)
-					return 1;
-				else
-					return prefContinuationIndent();
-			} catch (IllegalArgumentException e) {
-				// ignore and return default
-			}
-		}
-
-		return 1; // sensible default
-	}
-
-	private boolean prefParenthesisDeepIndent() {
-
-		if (true) // don't do parenthesis deep indentation
-			return false;
-
-		if (!isStandalone()) {
-			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION);
-			try {
-				return DefaultCodeFormatterConstants.getIndentStyle(option) == DefaultCodeFormatterConstants.INDENT_ON_COLUMN;
-			} catch (IllegalArgumentException e) {
-				// ignore and return default
-			}
-		}
-
-		return false; // sensible default
-	}
-
-	private int prefParenthesisIndent() {
-		return prefContinuationIndent();
-	}
-
-	private int prefBlockIndent() {
-		if (!isStandalone()) {
-			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BLOCK);
-			if (DefaultCodeFormatterConstants.FALSE.equals(option))
-				return 0;
-		}
-
-		return 1; // sensible default
-	}
-
-	private int prefMethodBodyIndent() {
-		if (!isStandalone()) {
-			if (DefaultCodeFormatterConstants.FALSE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_STATEMENTS_COMPARE_TO_BODY)))
-				return 0;
-		}
-
-		return 1; // sensible default
-	}
-
-	private int prefTypeIndent() {
-		if (!isStandalone()) {
-			String option= getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_BODY_DECLARATIONS_COMPARE_TO_TYPE_HEADER);
-			if (DefaultCodeFormatterConstants.FALSE.equals(option))
-				return 0;
-		}
-
-		return 1; // sensible default
-	}
-
-	private boolean prefIndentBracesForBlocks() {
-		if (!isStandalone()) {
-			return DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_BLOCK));
-		}
-
-		return false; // sensible default
-	}
-
-	private boolean prefIndentBracesForArrays() {
-		if (!isStandalone()) {
-			return DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_ARRAY_INITIALIZER));
-		}
-
-		return false; // sensible default
-	}
-
-	private boolean prefIndentBracesForMethods() {
-		if (!isStandalone()) {
-			return DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_METHOD_DECLARATION));
-		}
-
-		return false; // sensible default
-	}
-
-	private boolean prefIndentBracesForTypes() {
-		if (!isStandalone()) {
-			return DefaultCodeFormatterConstants.NEXT_LINE_SHIFTED.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_BRACE_POSITION_FOR_TYPE_DECLARATION));
-		}
-
-		return false; // sensible default
-	}
-
-	private int prefContinuationIndent() {
-		if (!isStandalone()) {
-			try {
-				return Integer.parseInt(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_CONTINUATION_INDENTATION));
-			} catch (NumberFormatException e) {
-				// ignore and return default
-			}
-		}
-
-		return 2; // sensible default
-	}
-
-	/**
-	 * Returns <code>true</code> if the class is used outside the workbench,
-	 * <code>false</code> in normal mode
-	 *
-	 * @return <code>true</code> if the plug-ins are not available
-	 */
-	private boolean isStandalone() {
-		return JavaCore.getPlugin() == null;
-	}
-
-	private boolean hasGenerics() {
-		return JavaCore.VERSION_1_5.compareTo(getCoreFormatterOption(JavaCore.COMPILER_SOURCE)) <= 0;
 	}
 }

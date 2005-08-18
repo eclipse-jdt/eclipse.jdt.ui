@@ -373,6 +373,8 @@ public class JavaMoveLinesAction extends TextEditorAction {
 				fSharedState.endCompoundEdit();
 			fSharedState.beginCompoundEdit();
 			fSharedState.fIsChanging= true;
+			widget.setRedraw(false);
+			
 			document.replace(offset, lenght, insertion);
 			
 			ILineRange selectionAfter;
@@ -395,6 +397,8 @@ public class JavaMoveLinesAction extends TextEditorAction {
 			// won't happen without concurrent modification - bail out
 			return;
 		} finally {
+			widget.setRedraw(true);
+			
 			fSharedState.fIsChanging= false;
 			if (fCopy)
 				fSharedState.endCompoundEdit();
