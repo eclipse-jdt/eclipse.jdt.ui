@@ -22,7 +22,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 
-import org.eclipse.ltk.core.refactoring.AbstractTextEditChange;
+import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
 
 import org.eclipse.ltk.internal.ui.refactoring.TextEditChangeElement;
@@ -56,7 +56,7 @@ public class CompilationUnitChangeChildrenCreator implements IChangeElementChild
 	}
 	
 	public void createChildren(DefaultChangeElement changeElement) {
-		final AbstractTextEditChange change= (AbstractTextEditChange) changeElement.getChange();
+		final TextEditBasedChange change= (TextEditBasedChange) changeElement.getChange();
 		ICompilationUnit cunit= (ICompilationUnit) change.getAdapter(ICompilationUnit.class);
 		if (cunit != null) {
 			List children= new ArrayList(5);
@@ -80,7 +80,7 @@ public class CompilationUnitChangeChildrenCreator implements IChangeElementChild
 		}
 	}
 	
-	private TextEditBasedChangeGroup[] getSortedChangeGroups(AbstractTextEditChange change) {
+	private TextEditBasedChangeGroup[] getSortedChangeGroups(TextEditBasedChange change) {
 		TextEditBasedChangeGroup[] edits= change.getChangeGroups();
 		List result= new ArrayList(edits.length);
 		for (int i= 0; i < edits.length; i++) {
