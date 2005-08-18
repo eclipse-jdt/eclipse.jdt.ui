@@ -374,6 +374,10 @@ public class JavaMoveLinesAction extends TextEditorAction {
 			fSharedState.beginCompoundEdit();
 			fSharedState.fIsChanging= true;
 			widget.setRedraw(false);
+			// set the caret offset to 0 in order to clear the selection
+			// this is a performance optimization, since document modifications are much cheaper
+			// if the selection has length 0, because no selection events get sent out then.
+			widget.setCaretOffset(0);
 			
 			document.replace(offset, lenght, insertion);
 			
