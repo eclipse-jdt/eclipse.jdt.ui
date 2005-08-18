@@ -113,6 +113,12 @@
             <adapter type="org.eclipse.ltk.internal.ui.refactoring.IChangeElementChildrenCreator"/>
 		</factory>
 		
+        <factory
+            adaptableType="org.eclipse.ltk.core.refactoring.CompositeTextFileChange"
+            class="org.eclipse.jdt.internal.ui.refactoring.RefactoringAdapterFactory">
+            <adapter type="org.eclipse.ltk.internal.ui.refactoring.IChangeElementChildrenCreator"/>
+        </factory>
+
    </extension>     	
 
 

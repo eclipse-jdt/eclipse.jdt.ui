@@ -22,7 +22,10 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String Assert_assertion_failed;
 	public static String Assert_null_argument;
-	
+
+	public static String CompositeRefactoring_error_setup;
+	public static String CompositeRefactoring_creating_change;
+
 	public static String DynamicValidationStateChange_workspace_changed;
 	
 	public static String Checks_Choose_name;
@@ -797,5 +800,4 @@ public final class RefactoringCoreMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
 	}
-
 }

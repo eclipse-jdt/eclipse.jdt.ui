@@ -15,6 +15,7 @@ import org.eclipse.core.runtime.IAdapterFactory;
 import org.eclipse.ltk.internal.ui.refactoring.IChangeElementChildrenCreator;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.composite.CompositeCompilationUnitChange;
 
 public class RefactoringAdapterFactory implements IAdapterFactory {
 
@@ -29,7 +30,7 @@ public class RefactoringAdapterFactory implements IAdapterFactory {
 	public Object getAdapter(Object object, Class key) {
 		if (!IChangeElementChildrenCreator.class.equals(key))
 			return null;
-		if (!(object instanceof CompilationUnitChange))
+		if (!(object instanceof CompilationUnitChange) && !(object instanceof CompositeCompilationUnitChange))
 			return null;
 		return new CompilationUnitChangeChildrenCreator();
 	}
