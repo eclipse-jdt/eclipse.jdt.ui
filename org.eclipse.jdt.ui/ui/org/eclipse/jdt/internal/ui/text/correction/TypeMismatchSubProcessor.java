@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -111,7 +112,7 @@ public class TypeMismatchSubProcessor {
 		}
 
 		ITypeBinding binding= nodeToCast.resolveTypeBinding();
-		if (binding == null || canCast(castTypeName, castTypeBinding, binding)) {
+		if (binding == null || canCast(castTypeName, castTypeBinding, binding) || nodeToCast instanceof CastExpression) {
 			proposals.add(createCastProposal(context, castTypeName, castTypeBinding, nodeToCast, 7));
 		}
 

@@ -391,10 +391,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
-		buf.append("public class XY implements Runnable {\n");
-		buf.append("\n");
-		buf.append("    public void run() {\n");
-		buf.append("    }\n");
+		buf.append("public class XY {\n");
 		buf.append("\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
@@ -402,7 +399,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
-		buf.append("public interface XY extends Runnable {\n");
+		buf.append("public interface XY {\n");
 		buf.append("\n");
 		buf.append("}\n");
 		String expected3= buf.toString();
@@ -410,7 +407,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
-		buf.append("public enum XY implements Runnable {\n");
+		buf.append("public enum XY {\n");
 		buf.append("\n");
 		buf.append("}\n");
 		String expected4= buf.toString();
@@ -916,6 +913,258 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		String expected7= buf.toString();
 		
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2, preview3, preview4, preview5, preview6, preview7 }, new String[] { expected1, expected2, expected3, expected4, expected5, expected6, expected7});		
+	}
+
+	public void testTypeInTypeArguments1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    class SomeType { }\n");
+		buf.append("    void foo() {\n");
+		buf.append("        E<XYX> list= new E<SomeType>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertCorrectLabels(proposals);
+		
+		assertNumberOfProposals(proposals, 6);
+
+		String[] expected= new String[6];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    class SomeType { }\n");
+		buf.append("    void foo() {\n");
+		buf.append("        E<SomeType> list= new E<SomeType>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class XYX {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface XYX {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public enum XYX {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    class SomeType { }\n");
+		buf.append("    <XYX> void foo() {\n");
+		buf.append("        E<XYX> list= new E<SomeType>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[4]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E<T, XYX> {\n");
+		buf.append("    class SomeType { }\n");
+		buf.append("    void foo() {\n");
+		buf.append("        E<XYX> list= new E<SomeType>();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[5]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testTypeInTypeArguments2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    class SomeType { }\n");
+		buf.append("    void foo() {\n");
+		buf.append("        E<Map<String, ? extends XYX>> list= new E<Map<String, ? extends SomeType>>() {\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 6);
+
+		String[] expected= new String[6];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    class SomeType { }\n");
+		buf.append("    void foo() {\n");
+		buf.append("        E<Map<String, ? extends SomeType>> list= new E<Map<String, ? extends SomeType>>() {\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import test1.E.SomeType;\n");
+		buf.append("\n");
+		buf.append("public class XYX extends SomeType {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface XYX {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public enum XYX {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    class SomeType { }\n");
+		buf.append("    <XYX> void foo() {\n");
+		buf.append("        E<Map<String, ? extends XYX>> list= new E<Map<String, ? extends SomeType>>() {\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[4]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("public class E<T, XYX> {\n");
+		buf.append("    class SomeType { }\n");
+		buf.append("    void foo() {\n");
+		buf.append("        E<Map<String, ? extends XYX>> list= new E<Map<String, ? extends SomeType>>() {\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[5]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	
+	public void testParameterizedType1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(XXY<String> b) {\n");
+		buf.append("        b.foo();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class XXY<T> {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface XXY<T> {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testParameterizedType2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    class SomeType<S1, S2> { }\n");
+		buf.append("    void foo() {\n");
+		buf.append("        SomeType<String, String> list= new XXY<String, String>() { };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 3);
+
+		String[] expected= new String[3];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("public class E<T> {\n");
+		buf.append("    class SomeType<S1, S2> { }\n");
+		buf.append("    void foo() {\n");
+		buf.append("        SomeType<String, String> list= new SomeType<String, String>() { };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import test1.E.SomeType;\n");
+		buf.append("\n");
+		buf.append("public class XXY<T1, T2> extends SomeType<String, String> {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public interface XXY<T1, T2> {\n");
+		buf.append("\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
 	}
 
 	private void createSomeAmbiguity(boolean ifc, boolean isException) throws Exception {

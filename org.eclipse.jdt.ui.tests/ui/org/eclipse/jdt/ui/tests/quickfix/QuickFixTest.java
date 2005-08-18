@@ -64,6 +64,7 @@ public class QuickFixTest extends TestCase {
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
 		suite.addTest(SerialVersionQuickFixTest.allTests());
+		suite.addTest(UtilitiesTest.allTests());
 		suite.addTest(UnresolvedTypesQuickFixTest.allTests());
 		suite.addTest(UnresolvedVariablesQuickFixTest.allTests());
 		suite.addTest(UnresolvedMethodsQuickFixTest.allTests());
@@ -127,16 +128,7 @@ public class QuickFixTest extends TestCase {
 	
 	
 	public static void assertExpectedExistInProposals(List actualProposals, String[] expecteds) throws CoreException, BadLocationException {
-		ArrayList actuals= new ArrayList(actualProposals.size());
-		for (int i= 0; i < actualProposals.size(); i++) {
-			Object curr= actualProposals.get(i);
-			if (curr instanceof CUCorrectionProposal) {
-				actuals.add(getPreviewContent((CUCorrectionProposal) curr));
-			} else if (curr instanceof NewCUCompletionUsingWizardProposal) {
-				actuals.add(getWizardPreviewContent((NewCUCompletionUsingWizardProposal) curr));
-			}
-		}
-		StringAsserts.assertExpectedExistInProposals((String[]) actuals.toArray(new String[actuals.size()]), expecteds);
+		StringAsserts.assertExpectedExistInProposals(getPreviewContents(actualProposals), expecteds);
 	}
 	
 	public static TypeDeclaration findTypeDeclaration(CompilationUnit astRoot, String simpleTypeName) {
@@ -318,6 +310,20 @@ public class QuickFixTest extends TestCase {
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		return (CompilationUnit) parser.createAST(null);
+	}
+	
+	
+	protected static String[] getPreviewContents(List proposals) throws CoreException, BadLocationException {
+		String[] res= new String[proposals.size()];
+		for (int i= 0; i < proposals.size(); i++) {
+			Object curr= proposals.get(i);
+			if (curr instanceof CUCorrectionProposal) {
+				res[i]= getPreviewContent((CUCorrectionProposal) curr);
+			} else if (curr instanceof NewCUCompletionUsingWizardProposal) {
+				res[i]= getWizardPreviewContent((NewCUCompletionUsingWizardProposal) curr);
+			}
+		}
+		return res;
 	}
 	
 	protected static String getPreviewContent(CUCorrectionProposal proposal) throws CoreException {

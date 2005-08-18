@@ -14,8 +14,22 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -23,8 +37,11 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 
@@ -43,10 +60,11 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 		fNewType= newType;
 		fOfferSuperTypeProposals= offerSuperTypeProposals;
 
+		String typeName= BindingLabelProvider.getBindingLabel(newType, JavaElementLabels.ALL_DEFAULT);
 		if (binding.getKind() == IBinding.VARIABLE) {
 			IVariableBinding varBinding= (IVariableBinding) binding;
 
-			String[] args= { varBinding.getName(), newType.getName() };
+			String[] args= { varBinding.getName(),  typeName};
 			if (varBinding.isField()) {
 				setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_field_name, args));
 			} else if (astRoot.findDeclaringNode(binding) instanceof SingleVariableDeclaration) {
@@ -55,7 +73,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 				setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_variable_name, args));
 			}
 		} else {
-			String[] args= { binding.getName(), newType.getName() };
+			String[] args= { binding.getName(), typeName };
 			setDisplayName(Messages.format(CorrectionMessages.TypeChangeCompletionProposal_method_name, args));
 		}
 	}

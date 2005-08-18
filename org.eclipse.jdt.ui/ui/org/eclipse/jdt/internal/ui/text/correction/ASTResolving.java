@@ -57,8 +57,10 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.SwitchCase;
@@ -369,6 +371,13 @@ public class ASTResolving {
 	}
 
     public static ITypeBinding guessBindingForTypeReference(ASTNode node) {
+    	StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
+    	if (locationInParent == QualifiedName.QUALIFIER_PROPERTY) {
+    		return null; // can't guess type for X.A
+    	}
+    	if (locationInParent == SimpleType.NAME_PROPERTY) {
+    		node= node.getParent();
+    	}
     	ITypeBinding binding= Bindings.normalizeTypeBinding(getPossibleTypeBinding(node));
     	if (binding != null) {
     		if (binding.isWildcardType()) {
@@ -378,55 +387,104 @@ public class ASTResolving {
     	return binding;
     }
 
-    private static ITypeBinding getPossibleTypeBinding(ASTNode node) {
-    	ASTNode parent= node.getParent();
-    	while (parent instanceof Type) {
-    		parent= parent.getParent();
-    	}
-    	switch (parent.getNodeType()) {
-    	case ASTNode.VARIABLE_DECLARATION_STATEMENT:
-    		return guessVariableType(((VariableDeclarationStatement) parent).fragments());
-		case ASTNode.FIELD_DECLARATION:
-			return guessVariableType(((FieldDeclaration) parent).fragments());
-		case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
-			return guessVariableType(((VariableDeclarationExpression) parent).fragments());
-		case ASTNode.SINGLE_VARIABLE_DECLARATION:
-			SingleVariableDeclaration varDecl= (SingleVariableDeclaration) parent;
-			if (varDecl.getInitializer() != null) {
-				return varDecl.getInitializer().resolveTypeBinding();
+	private static ITypeBinding getPossibleTypeBinding(ASTNode node) {
+		ASTNode parent= node.getParent();
+		switch (parent.getNodeType()) {
+			case ASTNode.ARRAY_TYPE: {
+				int dim= 1;
+				while (parent.getParent() instanceof ArrayType) {
+					parent= parent.getParent();
+					dim++;
+				}
+				ITypeBinding parentBinding= getPossibleTypeBinding(parent);
+				if (parentBinding != null && parentBinding.getDimensions() == dim) {
+					return parentBinding.getElementType();
+				}
+				return null;
 			}
-			break;
-		case ASTNode.ARRAY_CREATION:
-			ArrayCreation creation= (ArrayCreation) parent;
-			if (creation.getInitializer() != null) {
-				return creation.getInitializer().resolveTypeBinding();
+			case ASTNode.PARAMETERIZED_TYPE: {
+				ITypeBinding parentBinding= getPossibleTypeBinding(parent);
+				if (parentBinding == null || !parentBinding.isParameterizedType()) {
+					return null;
+				}
+				if (node.getLocationInParent() == ParameterizedType.TYPE_PROPERTY) {
+					return parentBinding;
+				}
+
+				ITypeBinding[] typeArguments= parentBinding.getTypeArguments();
+				List argumentNodes= ((ParameterizedType) parent).typeArguments();
+				int index= argumentNodes.indexOf(node);
+				if (index != -1 && typeArguments.length == argumentNodes.size()) {
+					return typeArguments[index];
+				}
+				return null;
 			}
-			return getPossibleReferenceBinding(parent);
-        case ASTNode.TYPE_LITERAL:
-        	return ((TypeLiteral) parent).getType().resolveBinding();
-        case ASTNode.CLASS_INSTANCE_CREATION:
-        	return getPossibleReferenceBinding(parent);
-        case ASTNode.TAG_ELEMENT:
-        	TagElement tagElement= (TagElement) parent;
-        	if ("@throws".equals(tagElement.getTagName()) || "@exception".equals(tagElement.getTagName())) {  //$NON-NLS-1$//$NON-NLS-2$
-        		ASTNode methNode= tagElement.getParent().getParent();
-        		if (methNode instanceof MethodDeclaration) {
-        			List thrownExcpetions= ((MethodDeclaration) methNode).thrownExceptions();
-        			if (thrownExcpetions.size() == 1) {
-        				return ((Name) thrownExcpetions.get(0)).resolveTypeBinding();
-        			}
-        		}
-        	}
-        	break;
-     	}
-    	return null;
-    }
+			case ASTNode.WILDCARD_TYPE: {
+				ITypeBinding parentBinding= getPossibleTypeBinding(parent);
+				if (parentBinding == null || !parentBinding.isWildcardType()) {
+					return null;
+				}
+				WildcardType wildcardType= (WildcardType) parent;
+				if (parentBinding.isUpperbound() == wildcardType.isUpperBound()) {
+					return parentBinding.getBound();
+				}
+				return null;
+			}
+			case ASTNode.QUALIFIED_TYPE: {
+				ITypeBinding parentBinding= getPossibleTypeBinding(parent);
+				if (parentBinding == null || !parentBinding.isMember()) {
+					return null;
+				}
+				if (node.getLocationInParent() == QualifiedType.QUALIFIER_PROPERTY) {
+					return parentBinding.getDeclaringClass();
+				}
+				return parentBinding;
+			}
+			case ASTNode.VARIABLE_DECLARATION_STATEMENT:
+				return guessVariableType(((VariableDeclarationStatement) parent).fragments());
+			case ASTNode.FIELD_DECLARATION:
+				return guessVariableType(((FieldDeclaration) parent).fragments());
+			case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
+				return guessVariableType(((VariableDeclarationExpression) parent).fragments());
+			case ASTNode.SINGLE_VARIABLE_DECLARATION:
+				SingleVariableDeclaration varDecl= (SingleVariableDeclaration) parent;
+				if (varDecl.getInitializer() != null) {
+					return Bindings.normalizeTypeBinding(varDecl.getInitializer().resolveTypeBinding());
+				}
+				break;
+			case ASTNode.ARRAY_CREATION:
+				ArrayCreation creation= (ArrayCreation) parent;
+				if (creation.getInitializer() != null) {
+					return creation.getInitializer().resolveTypeBinding();
+				}
+				return getPossibleReferenceBinding(parent);
+			case ASTNode.TYPE_LITERAL:
+				return ((TypeLiteral) parent).getType().resolveBinding();
+			case ASTNode.CLASS_INSTANCE_CREATION:
+				return getPossibleReferenceBinding(parent);
+			case ASTNode.CAST_EXPRESSION:
+				return getPossibleReferenceBinding(parent);
+			case ASTNode.TAG_ELEMENT:
+				TagElement tagElement= (TagElement) parent;
+				if (TagElement.TAG_THROWS.equals(tagElement.getTagName()) || TagElement.TAG_EXCEPTION.equals(tagElement.getTagName())) {
+					ASTNode methNode= tagElement.getParent().getParent();
+					if (methNode instanceof MethodDeclaration) {
+						List thrownExcpetions= ((MethodDeclaration) methNode).thrownExceptions();
+						if (thrownExcpetions.size() == 1) {
+							return ((Name) thrownExcpetions.get(0)).resolveTypeBinding();
+						}
+					}
+				}
+				break;
+		}
+		return null;
+	}
 
    	private static ITypeBinding guessVariableType(List fragments) {
 		for (Iterator iter= fragments.iterator(); iter.hasNext();) {
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) iter.next();
 			if (frag.getInitializer() != null) {
-				return frag.getInitializer().resolveTypeBinding();
+				return Bindings.normalizeTypeBinding(frag.getInitializer().resolveTypeBinding());
 			}
 		}
 		return null;
@@ -671,26 +729,31 @@ public class ASTResolving {
 	private static int internalGetPossibleTypeKinds(ASTNode node) {
 		int kind= SimilarElementsRequestor.ALL_TYPES;
 
+		int mask= SimilarElementsRequestor.ALL_TYPES | SimilarElementsRequestor.VOIDTYPE;
+		
 		ASTNode parent= node.getParent();
 		while (parent instanceof QualifiedName) {
 			if (node.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY) {
-				return SimilarElementsRequestor.REF_TYPES;
+				return SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
 			}
 			node= parent;
 			parent= parent.getParent();
+			mask= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
 		}
 		while (parent instanceof Type) {
 			if (parent instanceof QualifiedType) {
 				if (node.getLocationInParent() == QualifiedType.QUALIFIER_PROPERTY) {
-					return SimilarElementsRequestor.REF_TYPES;
+					return mask & (SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES);
 				}
+				mask&= SimilarElementsRequestor.REF_TYPES & ~SimilarElementsRequestor.VARIABLES;
 			} else if (parent instanceof ParameterizedType) {
 				if (node.getLocationInParent() == ParameterizedType.TYPE_ARGUMENTS_PROPERTY) {
-					return SimilarElementsRequestor.REF_TYPES;
+					return mask & SimilarElementsRequestor.REF_TYPES;
 				}
+				mask&= SimilarElementsRequestor.CLASSES | SimilarElementsRequestor.INTERFACES;
 			} else if (parent instanceof WildcardType) {
 				if (node.getLocationInParent() == WildcardType.BOUND_PROPERTY) {
-					return SimilarElementsRequestor.REF_TYPES;
+					return mask & SimilarElementsRequestor.REF_TYPES;
 				}
 			}
 			node= parent;
@@ -754,7 +817,7 @@ public class ASTResolving {
 				break;
 			default:
 		}
-		return kind;
+		return kind & mask;
 	}
 
 	public static String getFullName(Name name) {
