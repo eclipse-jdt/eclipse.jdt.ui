@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 
 import org.eclipse.jdt.ui.IWorkingCopyProvider;
 
@@ -44,11 +45,23 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	protected TreeViewer fViewer;
 
 	private ViewerFilter fWorkingSetFilter;
+	private MethodOverrideTester fMethodOverrideTester;
+	private ITypeHierarchyLifeCycleListener fTypeHierarchyLifeCycleListener;
+	
 	
 	public TypeHierarchyContentProvider(TypeHierarchyLifeCycle lifecycle) {
 		fTypeHierarchy= lifecycle;
 		fMemberFilter= null;
 		fWorkingSetFilter= null;
+		fMethodOverrideTester= null;
+		fTypeHierarchyLifeCycleListener= new ITypeHierarchyLifeCycleListener() {
+			public void typeHierarchyChanged(TypeHierarchyLifeCycle typeHierarchyProvider, IType[] changedTypes) {
+				if (changedTypes == null) {
+					fMethodOverrideTester= null;
+				}
+			}
+		};
+		lifecycle.addChangedListener(fTypeHierarchyLifeCycleListener);
 	}
 	
 	/**
@@ -59,8 +72,28 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 */
 	public final void setMemberFilter(IMember[] memberFilter) {
 		fMemberFilter= memberFilter;
+	}	
+
+	private IMethod findMethod(IMethod filterMethod, IType typeToFindIn) throws JavaModelException {
+		IType filterType= filterMethod.getDeclaringType();
+		ITypeHierarchy hierarchy= fTypeHierarchy.getHierarchy();
+		
+		boolean filterOverrides= JavaModelUtil.isSuperType(hierarchy, typeToFindIn, filterType);
+		IType focusType= filterOverrides ? filterType : typeToFindIn;
+		
+		if (fMethodOverrideTester == null || !fMethodOverrideTester.getFocusType().equals(focusType)) {
+			fMethodOverrideTester= new MethodOverrideTester(focusType, hierarchy);
+		}
+
+		if (filterOverrides) {
+			return fMethodOverrideTester.findOverriddenMethod(filterMethod, typeToFindIn);
+		} else {
+			return fMethodOverrideTester.findOverridingMethod(filterMethod, typeToFindIn);
+		}
 	}
 	
+
+
 	/**
 	 * The members to filter or <code>null</code> if member filtering is disabled.
 	 */
@@ -201,7 +234,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 				}
 			} else if (member instanceof IMethod) {
 				IMethod curr= (IMethod)member;
-				IMethod meth= JavaModelUtil.findMethod2(curr, parent.getMethods());
+				IMethod meth= findMethod(curr, parent);
 				if (meth != null && !children.contains(meth)) {
 					children.add(meth);
 				}
@@ -239,7 +272,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 				return true;
 			} else if (member instanceof IMethod) {
 				IMethod curr= (IMethod)member;
-				IMethod meth= JavaModelUtil.findMethod2(curr, type.getMethods());
+				IMethod meth= findMethod(curr, type);
 				if (meth != null) {
 					return true;
 				}
@@ -273,6 +306,8 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	 * @see IContentProvider#dispose
 	 */	
 	public void dispose() {
+		fTypeHierarchy.removeChangedListener(fTypeHierarchyLifeCycleListener);
+		
 	}
 	
 	/*

@@ -1015,6 +1015,17 @@ public final class JavaModelUtil {
 		return (IType[]) types.toArray(new IType[types.size()]);
 	}
 	
+	public static boolean isSuperType(ITypeHierarchy hierarchy, IType possibleSuperType, IType type) {
+		IType[] supertypes= hierarchy.getSupertypes(type);
+		for (int i= 0; i < supertypes.length; i++) {
+			IType curr= supertypes[i];
+			if (possibleSuperType.equals(curr) || isSuperType(hierarchy, possibleSuperType, curr)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
 	public static boolean isExcludedPath(IPath resourcePath, IPath[] exclusionPatterns) {
 		char[] path = resourcePath.toString().toCharArray();
 		for (int i = 0, length = exclusionPatterns.length; i < length; i++) {

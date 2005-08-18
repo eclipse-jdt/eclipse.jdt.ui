@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -157,9 +158,15 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 		}
 		
 		IType type= method.getDeclaringType();
-		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(type);
-		if (hierarchy != null) {
-			return findInHierarchy(type, hierarchy, method);
+		
+		MethodOverrideTester methodOverrideTester= SuperTypeHierarchyCache.getMethodOverrideTester(type);
+		IMethod defining= methodOverrideTester.findMethodDefininition(method, true);
+		if (defining != null) {
+			if (JdtFlags.isAbstract(defining)) {
+				return JavaElementImageDescriptor.IMPLEMENTS;
+			} else {
+				return JavaElementImageDescriptor.OVERRIDES;
+			}
 		}
 		return 0;
 	}
@@ -204,18 +211,6 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 		return 0;
 	}
 	
-	private int findInHierarchy(IType type, ITypeHierarchy hierarchy, IMethod method) throws JavaModelException {
-		IMethod defining= JavaModelUtil.findMethodDefininition2(hierarchy, type, method, true);
-		if (defining != null) {
-			if (JdtFlags.isAbstract(defining)) {
-				return JavaElementImageDescriptor.IMPLEMENTS;
-			} else {
-				return JavaElementImageDescriptor.OVERRIDES;
-			}
-		}
-		return 0;
-	}	 
-
 	/* (non-Javadoc)
 	 * @see IBaseLabelProvider#addListener(ILabelProviderListener)
 	 */

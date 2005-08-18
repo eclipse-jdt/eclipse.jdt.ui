@@ -12,9 +12,9 @@
 package org.eclipse.jdt.internal.corext.util;
 
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -70,25 +70,97 @@ public class MethodOverrideTester {
 	private final IType fFocusType;
 	private final ITypeHierarchy fHierarchy;
 	
-	private final Map /* <IMethod, Substitutions> */ fMethodSubstitutions;
-
+	private Map /* <IMethod, Substitutions> */ fMethodSubstitutions;
 	private Map /* <IType, Substitutions> */ fTypeVariableSubstitutions;
 			
 	public MethodOverrideTester(IType focusType, ITypeHierarchy hierarchy) {
 		fFocusType= focusType;
 		fHierarchy= hierarchy;
 		fTypeVariableSubstitutions= null;
-		fMethodSubstitutions= new LinkedHashMap(3, 0.75f, true) {
-			private static final long serialVersionUID= 1L;
-			protected boolean removeEldestEntry(java.util.Map.Entry eldest) {
-				return size() > 3;
-			}
-		};
+		fMethodSubstitutions= null;
 	}
 	
 	public IType getFocusType() {
 		return fFocusType;
 	}
+	
+	public ITypeHierarchy getTypeHierarchy() {
+		return fHierarchy;
+	}
+	
+	/**
+	 * Finds the method that is defines/declares the given method. The search is bottom-up, so this
+	 * returns the nearest defining/declaring method.
+	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
+	 * @throws JavaModelException
+	 */
+	public IMethod findMethodDefininition(IMethod overriding, boolean testVisibility) throws JavaModelException {		
+		IType type= overriding.getDeclaringType();
+		IType superClass= fHierarchy.getSuperclass(type);
+		if (superClass != null) {
+			IMethod res= findMethodInHierarchy(superClass, overriding);
+			if (res != null && !Flags.isPrivate(res.getFlags())) {
+				if (!testVisibility || JavaModelUtil.isVisibleInHierarchy(res, type.getPackageFragment())) {
+					return res;
+				}
+			}
+		}
+		if (!overriding.isConstructor()) {
+			IType[] interfaces= fHierarchy.getSuperInterfaces(type);
+			for (int i= 0; i < interfaces.length; i++) {
+				IMethod res= findMethodInHierarchy(interfaces[i], overriding);
+				if (res != null) {
+					return res; // methods from interfaces are always public and therefore visible
+				}
+			}
+		}
+		return null;
+	}
+	
+	private IMethod findMethodInHierarchy(IType type, IMethod overriding) throws JavaModelException {
+		IMethod method= findOverriddenMethod(overriding, type);
+		if (method != null) {
+			return method;
+		}
+		IType superClass= fHierarchy.getSuperclass(type);
+		if (superClass != null) {
+			IMethod res=  findMethodInHierarchy(superClass, overriding);
+			if (res != null) {
+				return res;
+			}
+		}
+		if (!overriding.isConstructor()) {
+			IType[] superInterfaces= fHierarchy.getSuperInterfaces(type);
+			for (int i= 0; i < superInterfaces.length; i++) {
+				IMethod res= findMethodInHierarchy(superInterfaces[i], overriding);
+				if (res != null) {
+					return res;
+				}
+			}
+		}
+		return method;		
+	}
+	
+	public IMethod findOverriddenMethod(IMethod overriding, IType overriddenType) throws JavaModelException {
+		IMethod[] overriddenMethods= overriddenType.getMethods();
+		for (int i= overriddenMethods.length - 1; i >= 0; i--) {
+			if (isSubsignature(overriddenMethods[i], overriding)) {
+				return overriddenMethods[i];
+			}
+		}
+		return null;
+	}
+	
+	public IMethod findOverridingMethod(IMethod overridden, IType overridingType) throws JavaModelException {
+		IMethod[] overridingMethods= overridingType.getMethods();
+		for (int i= overridingMethods.length - 1; i >= 0; i--) {
+			if (isSubsignature(overridden, overridingMethods[i])) {
+				return overridingMethods[i];
+			}
+		}
+		return null;
+	}
+	
 	
 	public boolean isSubsignature(IMethod overridden, IMethod overriding) throws JavaModelException {
 		boolean isConstructor= overridden.isConstructor();
@@ -206,6 +278,10 @@ public class MethodOverrideTester {
 	 * Returns the substitutions for a method's type parameters
 	 */
 	private Substitutions getMethodSubstitions(IMethod method) throws JavaModelException {
+		if (fMethodSubstitutions == null) {
+			fMethodSubstitutions= new LRUMap(3);
+		}
+		
 		Substitutions s= (Substitutions) fMethodSubstitutions.get(method);
 		if (s == null) {
 			ITypeParameter[] typeParameters= method.getTypeParameters();
@@ -231,6 +307,7 @@ public class MethodOverrideTester {
 		if (fTypeVariableSubstitutions == null) {
 			fTypeVariableSubstitutions= new HashMap();
 			computeSubstitutions(fFocusType, null, null);
+			//System.out.println("Calculating type substitutions for " + fFocusType.getElementName());
 		}
 		Substitutions subst= (Substitutions) fTypeVariableSubstitutions.get(type);
 		if (subst == null) {
@@ -303,8 +380,8 @@ public class MethodOverrideTester {
 	
 
 	/**
-	 * Translates the type signature to a type name where all variables are substituted for the given type or method context.
-	 * The returned name contains only simple name and can be use to compare.
+	 * Translates the type signature to a 'normalized' type name where all variables are substituted for the given type or method context.
+	 * The returned name contains only simple names and can be used to compare against other substituted type names
 	 * @param typeSig The type signature to translate
 	 * @param context The context for the substitution
 	 * @return a type name

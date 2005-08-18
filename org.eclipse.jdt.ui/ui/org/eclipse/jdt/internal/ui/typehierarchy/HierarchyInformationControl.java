@@ -40,6 +40,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
@@ -49,6 +50,7 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.AbstractInformationControl;
@@ -72,11 +74,14 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	
 	private IMethod fFocus; // method to filter for or null if type hierarchy
 	private boolean fDoFilter;
+	
+	private MethodOverrideTester fMethodOverrideTester;
 
 	public HierarchyInformationControl(Shell parent, int shellStyle, int treeStyle) {
 		super(parent, shellStyle, treeStyle, IJavaEditorActionDefinitionIds.OPEN_HIERARCHY, true);
 		fOtherExpandedElements= null;
 		fDoFilter= true;
+		fMethodOverrideTester= null;
 	}
 	
 	private KeyAdapter getKeyAdapter() {
@@ -173,7 +178,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		}
 		
 		try {
-			IMethod method= JavaModelUtil.findMethod2(fFocus, type.getMethods());
+			IMethod method= findMethod(fFocus, type);
 			if (method != null) {
 				// check visibility
 				IPackageFragment pack= (IPackageFragment) fFocus.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
@@ -187,6 +192,24 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		}
 		return false;			
 		
+	}
+	
+	private IMethod findMethod(IMethod filterMethod, IType typeToFindIn) throws JavaModelException {
+		IType filterType= filterMethod.getDeclaringType();
+		ITypeHierarchy hierarchy= fLifeCycle.getHierarchy();
+		
+		boolean filterOverrides= JavaModelUtil.isSuperType(hierarchy, typeToFindIn, filterType);
+		IType focusType= filterOverrides ? filterType : typeToFindIn;
+		
+		if (fMethodOverrideTester == null || !fMethodOverrideTester.getFocusType().equals(focusType)) {
+			fMethodOverrideTester= new MethodOverrideTester(focusType, hierarchy);
+		}
+
+		if (filterOverrides) {
+			return fMethodOverrideTester.findOverriddenMethod(filterMethod, typeToFindIn);
+		} else {
+			return fMethodOverrideTester.findOverridingMethod(filterMethod, typeToFindIn);
+		}
 	}
 
 	/* (non-Javadoc)
@@ -374,7 +397,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		if (selectedElement instanceof IType && fFocus != null) {
 			IType type= (IType) selectedElement;
 			try {
-				return JavaModelUtil.findMethod2(fFocus, type.getMethods());
+				return findMethod(fFocus, type);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
