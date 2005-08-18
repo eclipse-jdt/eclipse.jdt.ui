@@ -236,6 +236,10 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		performCuOK();
 	}
 	
+	public void testCuNestedVectors1() throws Exception {
+		performCuOK();
+	}
+	
 	public void testCuInferTypeVariable01() throws Exception {
 		if (BUG_86990_core_no_main_type || BUG_87050_core_resolve_method_type_param) {
 			printTestDisabledMessage("BUG_86990_core_no_main_type || BUG_87050_core_resolve_method_type_param");
