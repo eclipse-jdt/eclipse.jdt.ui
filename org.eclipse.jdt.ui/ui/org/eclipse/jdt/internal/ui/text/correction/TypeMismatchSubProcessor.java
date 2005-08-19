@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -96,10 +97,7 @@ public class TypeMismatchSubProcessor {
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) selectedNode.getParent();
 			if (selectedNode.equals(frag.getName()) || selectedNode.equals(frag.getInitializer())) {
 				nodeToCast= frag.getInitializer();
-				IVariableBinding varBinding= frag.resolveBinding();
-				if (varBinding != null) {
-					castTypeBinding= varBinding.getType();
-				}
+				castTypeBinding= ASTNodes.getType(frag).resolveBinding();
 				receiverNode= frag.getName();
 			}
 		} else {
