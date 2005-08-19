@@ -101,6 +101,8 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	 * @see org.eclipse.jface.viewers.IColorProvider#getForeground(java.lang.Object)
 	 */
 	public Color getForeground(Object element) {
+		if ((element instanceof Error))
+			return fRed;
 		if ((element instanceof ExceptionAttribute) && ((ExceptionAttribute) element).getException() != null)
 			return fRed;
 		

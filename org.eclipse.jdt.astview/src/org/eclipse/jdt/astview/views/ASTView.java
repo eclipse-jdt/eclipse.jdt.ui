@@ -1162,11 +1162,20 @@ public class ASTView extends ViewPart implements IShowInSource {
 				}
 			}
 			MyASTRequestor requestor= new MyASTRequestor();
-			parser.createASTs(new ICompilationUnit[0], new String[] {key}, requestor, null);
+			ASTAttribute item;
 			Object viewerInput= fViewer.getInput();
-			Binding binding= new Binding(viewerInput, requestor.fBindingKey, requestor.fBinding, true);
-			fViewer.add(viewerInput, binding);
-			fViewer.setSelection(new StructuredSelection(binding), true);
+			try {
+				parser.createASTs(new ICompilationUnit[0], new String[] { key }, requestor, null);
+				if (requestor.fBindingKey != null) {
+					item= new Binding(viewerInput, requestor.fBindingKey, requestor.fBinding, true);
+				} else {
+					item= new Error(viewerInput, "Key not resolved: " + key, null);
+				}
+			} catch (RuntimeException e) {
+				item= new Error(viewerInput, "Error resolving key: " + key, e);
+			}
+			fViewer.add(viewerInput, item);
+			fViewer.setSelection(new StructuredSelection(item), true);
 		}
 	}
 	

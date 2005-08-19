@@ -16,10 +16,10 @@ import org.eclipse.swt.graphics.Image;
 
 public class Error extends ExceptionAttribute {
 	
-	private final Binding fParent;
+	private final Object fParent;
 	private final String fLabel;
 	
-	public Error(Binding parent, String label, RuntimeException thrownException) {
+	public Error(Object parent, String label, RuntimeException thrownException) {
 		fParent= parent;
 		fLabel= label;
 		fException= thrownException;
