@@ -88,6 +88,8 @@ public class NewTypeWizardTest extends TestCase {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODCOMMENT_ID, "/**\n * Method\n */", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, "/**\n * Overridden\n */", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "${body_statement}", null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "${body_statement}", null);
+
 		
 		fJProject1= ProjectTestSetup.getProject();
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
@@ -285,12 +287,14 @@ public class NewTypeWizardTest extends TestCase {
 		buf.append("     * Constructor\n");
 		buf.append("     */\n");
 		buf.append("    public E(String t) {\n");
+		buf.append("        super(t);\n");
 		buf.append("    }\n");
 		buf.append("\n");
 		buf.append("    /**\n");
 		buf.append("     * Method\n");
 		buf.append("     */\n");
 		buf.append("    public static void main(String[] args) {\n");
+		buf.append("\n");
 		buf.append("    }\n");
 		buf.append("\n");
 		buf.append("}\n");

@@ -91,6 +91,7 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
@@ -174,21 +175,15 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	public static class ImportsManager {
 
 		private ImportsStructure fImportsStructure;
-		private Set fAddedTypes;
 		
 		/* package */ ImportsManager(IImportsStructure importsStructure) {
 			fImportsStructure= (ImportsStructure) importsStructure;
 		}
 		
 		/* package */ ImportsManager(ICompilationUnit createdWorkingCopy) throws CoreException {
-			this(createdWorkingCopy, new HashSet());
-		}
-
-		/* package */ ImportsManager(ICompilationUnit createdWorkingCopy, Set addedTypes) throws CoreException {
 			IJavaProject javaProject= createdWorkingCopy.getJavaProject();
 			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(javaProject);
 			int threshold= JavaPreferencesSettings.getImportNumberThreshold(javaProject);
-			fAddedTypes= addedTypes;
 			
 			fImportsStructure= new ImportsStructure(createdWorkingCopy, prefOrder, threshold, true);
 		}
@@ -208,7 +203,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		 * fully qualified type name if an import conflict prevented the import.
 		 */				
 		public String addImport(String qualifiedTypeName) {
-			fAddedTypes.add(qualifiedTypeName);
 			return fImportsStructure.addImport(qualifiedTypeName);
 		}
 				
@@ -232,17 +226,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		
 		/* package */ void removeImport(String qualifiedName) {
-			if (fAddedTypes.contains(qualifiedName)) {
-				fImportsStructure.removeImport(qualifiedName);
-			}
+			fImportsStructure.removeImport(qualifiedName);
 		}
 		
-		/* package */ Set getAddedTypes() {
-			String[] createdImports= fImportsStructure.getCreatedImports();
-			for (int i= 0; i < createdImports.length; i++) {
-				fAddedTypes.add(createdImports[i]);
-			}
-			return fAddedTypes;
+		/* package */ void removeStaticImport(String qualifiedName) {
+			fImportsStructure.removeStaticImport(qualifiedName);
 		}
 	}
 		
@@ -1737,46 +1725,54 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			monitor= new NullProgressMonitor();
 		}
 
-		monitor.beginTask(NewWizardMessages.NewTypeWizardPage_operationdesc, 10); 
+		monitor.beginTask(NewWizardMessages.NewTypeWizardPage_operationdesc, 8); 
 		
-		ICompilationUnit createdWorkingCopy= null;
-		try {
-			IPackageFragmentRoot root= getPackageFragmentRoot();
-			IPackageFragment pack= getPackageFragment();
-			if (pack == null) {
-				pack= root.getPackageFragment(""); //$NON-NLS-1$
-			}
-			
-			if (!pack.exists()) {
-				String packName= pack.getElementName();
-				pack= root.createPackageFragment(packName, true, null);
-			}		
-			
+		IPackageFragmentRoot root= getPackageFragmentRoot();
+		IPackageFragment pack= getPackageFragment();
+		if (pack == null) {
+			pack= root.getPackageFragment(""); //$NON-NLS-1$
+		}
+		
+		if (!pack.exists()) {
+			String packName= pack.getElementName();
+			pack= root.createPackageFragment(packName, true, new SubProgressMonitor(monitor, 1));
+		} else {
 			monitor.worked(1);
-			
+		}
+		
+		boolean needsSave;
+		ICompilationUnit connectedCU= null;
+		
+		try {	
 			String clName= getTypeNameWithoutParameters();
 			
 			boolean isInnerClass= isEnclosingTypeSelected();
-			
+		
 			IType createdType;
 			ImportsManager imports;
 			int indent= 0;
 
+			Set /* String (import names) */ existingImports;
+			
 			String lineDelimiter= null;	
 			if (!isInnerClass) {
 				lineDelimiter= StubUtility.getLineDelimiterUsed(pack.getJavaProject());
 										
 				ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$ //$NON-NLS-2$
 				// create a working copy with a new owner
-				createdWorkingCopy= parentCU.getWorkingCopy(null);
+				
+				needsSave= true;
+				parentCU.becomeWorkingCopy(null, new SubProgressMonitor(monitor, 1)); // cu is now a (primary) working copy
+				connectedCU= parentCU;
 				
 				// use the compiler template with an empty type content to get the imports right
-				String content= CodeGeneration.getCompilationUnitContent(createdWorkingCopy, getFileComment(createdWorkingCopy, lineDelimiter), getTypeComment(createdWorkingCopy, lineDelimiter), "", lineDelimiter); //$NON-NLS-1$
+				String content= CodeGeneration.getCompilationUnitContent(parentCU, getFileComment(parentCU, lineDelimiter), getTypeComment(parentCU, lineDelimiter), "", lineDelimiter); //$NON-NLS-1$
 				if (content != null) {
-					createdWorkingCopy.getBuffer().setContents(content);
+					parentCU.getBuffer().setContents(content);
 				}
+				existingImports= getExistingImports(parentCU);
 							
-				imports= new ImportsManager(createdWorkingCopy);
+				imports= new ImportsManager(parentCU);
 				// add an import that will be removed again. Having this import solves 14661
 				imports.addImport(JavaModelUtil.concatenateName(pack.getElementName(), clName));
 				
@@ -1784,14 +1780,21 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				
 				String cuContent= constructCUContent(parentCU, typeContent, lineDelimiter);
 				
-				createdWorkingCopy.getBuffer().setContents(cuContent);
+				parentCU.getBuffer().setContents(cuContent);
 				
-				createdType= createdWorkingCopy.getType(clName);
+				createdType= parentCU.getType(clName);
 			} else {
 				IType enclosingType= getEnclosingType();
-					
+				
 				ICompilationUnit parentCU= enclosingType.getCompilationUnit();
+				
+				needsSave= !parentCU.isWorkingCopy();
+				parentCU.becomeWorkingCopy(null, new SubProgressMonitor(monitor, 1)); // cu is now for sure (primary) a working copy
+				connectedCU= parentCU;
+				
 				imports= new ImportsManager(parentCU);
+				
+				existingImports= getExistingImports(parentCU);
 	
 				// add imports that will be removed again. Having the imports solves 14661
 				IType[] topLevelTypes= parentCU.getTypes();
@@ -1825,7 +1828,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 					sibling = elems.length > 0 ? elems[0] : null;
 				}
 				
-				createdType= enclosingType.createType(content.toString(), sibling, false, new SubProgressMonitor(monitor, 1));
+				createdType= enclosingType.createType(content.toString(), sibling, false, new SubProgressMonitor(monitor, 2));
 			
 				indent= StubUtility.getIndentUsed(enclosingType) + 1;
 			}
@@ -1836,9 +1839,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			// add imports for superclass/interfaces, so types can be resolved correctly
 			
 			ICompilationUnit cu= createdType.getCompilationUnit();	
-			boolean needsSave= !cu.isWorkingCopy();
 			
-			imports.create(needsSave, new SubProgressMonitor(monitor, 1));
+			imports.create(false, new SubProgressMonitor(monitor, 1));
 				
 			JavaModelUtil.reconcile(cu);
 
@@ -1847,14 +1849,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 			
 			// set up again
-			imports= new ImportsManager(imports.getCompilationUnit(), imports.getAddedTypes());
+			imports= new ImportsManager(imports.getCompilationUnit());
 			
 			createTypeMembers(createdType, imports, new SubProgressMonitor(monitor, 1));
 	
 			// add imports
-			imports.create(needsSave, new SubProgressMonitor(monitor, 1));
+			imports.create(false, new SubProgressMonitor(monitor, 1));
 			
-			removeUnusedImports(cu, imports.getAddedTypes(), needsSave);
+			removeUnusedImports(cu, existingImports, false);
 			
 			JavaModelUtil.reconcile(cu);
 			
@@ -1871,58 +1873,81 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				if (fileComment != null && fileComment.length() > 0) {
 					buf.replace(0, 0, fileComment + lineDelimiter);
 				}
-				cu.commitWorkingCopy(false, new SubProgressMonitor(monitor, 1));
+			}
+			fCreatedType= createdType;
+
+			if (needsSave) {
+				cu.commitWorkingCopy(true, new SubProgressMonitor(monitor, 1));
 			} else {
-				if (needsSave) {
-					buf.save(null, false);
-				}
 				monitor.worked(1);
 			}
-
-			if (createdWorkingCopy != null) {
-				fCreatedType= (IType) createdType.getPrimaryElement();
-			} else {
-				fCreatedType= createdType;
-			}
+			
 		} finally {
-			if (createdWorkingCopy != null) {
-				createdWorkingCopy.discardWorkingCopy();
+			if (connectedCU != null) {
+				connectedCU.discardWorkingCopy();
 			}
 			monitor.done();
 		}
 	}	
 	
-	private void removeUnusedImports(ICompilationUnit cu, Set addedTypes, boolean needsSave) throws CoreException {
+	private Set /* String */ getExistingImports(ICompilationUnit cu) {
+		ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
+		parser.setSource(cu);
+		parser.setResolveBindings(false);
+		CompilationUnit root= (CompilationUnit) parser.createAST(null);
+		List imports= root.imports();
+		Set res= new HashSet(imports.size());
+		for (int i= 0; i < imports.size(); i++) {
+			res.add(ASTNodes.asString((ImportDeclaration) imports.get(i)));
+		}
+		return res;
+	}
+
+	private void removeUnusedImports(ICompilationUnit cu, Set existingImports, boolean needsSave) throws CoreException {
 		ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
+		
 		CompilationUnit root= (CompilationUnit) parser.createAST(null);
+		if (root.getProblems().length == 0) {
+			return;
+		}
+		
 		List importsDecls= root.imports();
 		if (importsDecls.isEmpty()) {
 			return;
 		}
+		ImportsManager imports= new ImportsManager(cu);
 		
 		int importsEnd= ASTNodes.getExclusiveEnd((ASTNode) importsDecls.get(importsDecls.size() - 1));
 		IProblem[] problems= root.getProblems();
-		ArrayList res= new ArrayList();
 		for (int i= 0; i < problems.length; i++) {
 			IProblem curr= problems[i];
 			if (curr.getSourceEnd() < importsEnd) {
 				int id= curr.getID();
-				if (id == IProblem.UnusedImport || id == IProblem.NotVisibleType) { // not visible problems hide unused -> remove both  	 
-					String imp= problems[i].getArguments()[0];
-					res.add(imp);
+				if (id == IProblem.UnusedImport || id == IProblem.NotVisibleType) { // not visible problems hide unused -> remove both
+					int pos= curr.getSourceStart();
+					for (int k= 0; k < importsDecls.size(); k++) {
+						ImportDeclaration decl= (ImportDeclaration) importsDecls.get(k);
+						if (decl.getStartPosition() <= pos && pos < decl.getStartPosition() + decl.getLength()) {
+							if (existingImports.isEmpty() || !existingImports.contains(ASTNodes.asString(decl))) {
+								String name= decl.getName().getFullyQualifiedName();
+								if (decl.isOnDemand()) {
+									name += ".*"; //$NON-NLS-1$
+								}
+								if (decl.isStatic()) {
+									imports.removeStaticImport(name);
+								} else {
+									imports.removeImport(name);
+								}
+							}
+							break;
+						}
+					}
 				}
 			}
 		}
-		if (!res.isEmpty()) {
-			ImportsManager imports= new ImportsManager(cu, addedTypes);
-			for (int i= 0; i < res.size(); i++) {
-				String curr= (String) res.get(i);
-				imports.removeImport(curr);
-			}
-			imports.create(needsSave, null);
-		}
+		imports.create(needsSave, null);
 	}
 
 	/**
@@ -2247,12 +2272,12 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		if (binding != null) {
 			if (doUnimplementedMethods) {
-				AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(type, null, unit, createBindingKeys(StubUtility2.getUnimplementedMethods(binding)), settings, false, true, true);
+				AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(type, null, unit, createBindingKeys(StubUtility2.getUnimplementedMethods(binding)), settings, false, true, false);
 				operation.run(monitor);
 				createImports(imports, operation.getCreatedImports());
 			}
 			if (doConstructors) {
-				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(type, null, unit, createBindingKeys(StubUtility2.getVisibleConstructors(binding, false, true)), settings, false, true, true);
+				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(type, null, unit, createBindingKeys(StubUtility2.getVisibleConstructors(binding, false, true)), settings, false, true, false);
 				operation.run(monitor);
 				createImports(imports, operation.getCreatedImports());
 			}
