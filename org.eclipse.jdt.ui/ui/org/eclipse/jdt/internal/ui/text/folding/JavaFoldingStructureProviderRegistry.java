@@ -42,7 +42,7 @@ public class JavaFoldingStructureProviderRegistry {
 	}
 
 	/**
-	 * Returns an array of <code>IJavaFoldingProviderDescriptor</code> describing
+	 * Returns an array of <code>JavaFoldingStructureProviderDescriptor</code> describing
 	 * all extension to the <code>foldingProviders</code> extension point.
 	 *
 	 * @return the list of extensions to the
@@ -56,11 +56,11 @@ public class JavaFoldingStructureProviderRegistry {
 	}
 
 	/**
-	 * Returns the folding provider with identifier <code>id</code> or
+	 * Returns the folding provider descriptor with identifier <code>id</code> or
 	 * <code>null</code> if no such provider is registered.
 	 *
 	 * @param id the identifier for which a provider is wanted
-	 * @return the corresponding provider, or <code>null</code> if none can be
+	 * @return the corresponding provider descriptor, or <code>null</code> if none can be
 	 *         found
 	 */
 	public JavaFoldingStructureProviderDescriptor getFoldingProviderDescriptor(String id) {
