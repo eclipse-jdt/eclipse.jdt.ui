@@ -12,20 +12,24 @@ package org.eclipse.jdt.internal.corext.refactoring.changes;
 
 import org.eclipse.text.edits.UndoEdit;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ContentStamp;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
+
+import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.ltk.core.refactoring.*;
-import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CompilationUnitChange extends TextFileChange {
 
@@ -78,7 +82,16 @@ public class CompilationUnitChange extends TextFileChange {
 	 */
 	protected void releaseDocument(IDocument document, IProgressMonitor pm) throws CoreException {
 		super.releaseDocument(document, pm);
-		fCUnit.discardWorkingCopy();
+		try {
+			fCUnit.discardWorkingCopy();
+		} finally {
+			if (!isDocumentAcquired()) {
+				if (fCUnit.isWorkingCopy())
+					JavaModelUtil.reconcile(fCUnit);
+				else
+					fCUnit.makeConsistent(pm);
+			}
+		}
 	}
 	
 	/**
