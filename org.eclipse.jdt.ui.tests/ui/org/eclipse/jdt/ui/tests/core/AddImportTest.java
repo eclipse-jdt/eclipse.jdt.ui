@@ -585,6 +585,45 @@ public class AddImportTest extends CoreTests {
 		} finally {
 			FileBuffers.getTextFileBufferManager().disconnect(path, null);
 		}
+	}
+	
+	public void testAddImports_bug107206() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.lang.System;\n");
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("    java.util.Vector.class x;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+		
+		IPath path= cu.getPath();
+		
+		FileBuffers.getTextFileBufferManager().connect(path, null);
+		try {
+			IDocument doc= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path).getDocument();
+			int selOffset= buf.indexOf("Vector.class") + "Vector.class".length();
+		
+			AddImportsOperation op= new AddImportsOperation(cu, doc, selOffset, 0, null);
+			op.run(null);
+
+			buf= new StringBuffer();
+			buf.append("package pack1;\n");
+			buf.append("\n");
+			buf.append("import java.lang.System;\n");
+			buf.append("\n");		
+			buf.append("public class C {\n");
+			buf.append("    java.util.Vector.class x;\n"); // no change
+			buf.append("}\n");
+			assertEqualString(doc.get(), buf.toString());
+
+		} finally {
+			FileBuffers.getTextFileBufferManager().disconnect(path, null);
+		}
 	}	
 
 	public void testAddImportActionStatic1() throws Exception {
