@@ -27,9 +27,9 @@ public class JavaElement extends ASTAttribute {
 		JavaElementLabels.T_TYPE_PARAMETERS |JavaElementLabels.USE_RESOLVED;
 	
 	private final IJavaElement fJavaElement;
-	private final Binding fParent;
+	private final Object fParent;
 
-	public JavaElement(Binding parent, IJavaElement javaElement) {
+	public JavaElement(Object parent, IJavaElement javaElement) {
 		fParent= parent;
 		fJavaElement= javaElement;
 	}
