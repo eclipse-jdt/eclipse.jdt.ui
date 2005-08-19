@@ -25,24 +25,36 @@ public interface IComposableRefactoring {
 
 	/**
 	 * Returns the global working copy owner to use.
+	 * <p>
+	 * If the refactoring is not part of a composite refactoring, this method
+	 * always returns <code>null</code>.
+	 * </p>
 	 * 
-	 * @return the global working copy owner
+	 * @return the global working copy owner, or <code>null</code>
 	 */
 	public WorkingCopyOwner getGlobalWorkingCopyOwner();
 
 	/**
 	 * Returns the local working copy owner to use.
+	 * <p>
+	 * If the refactoring is not part of a composite refactoring, this method
+	 * always returns <code>null</code>.
+	 * </p>
 	 * 
-	 * @return the local working copy owner
+	 * @return the local working copy owner, or <code>null</code>
 	 */
 	public WorkingCopyOwner getLocalWorkingCopyOwner();
 
 	/**
 	 * Returns the working copy to use instead of the original compilation unit.
+	 * <p>
+	 * If the refactoring is not part of a composite refactoring, this method
+	 * always returns the original compilation unit.
+	 * </p>
 	 * 
 	 * @param original
 	 *            the original compilation unit
-	 * @return the working copy
+	 * @return the working copy, or the original compilation unit
 	 * @throws JavaModelException
 	 *             if the working copy could not be acquired
 	 */
