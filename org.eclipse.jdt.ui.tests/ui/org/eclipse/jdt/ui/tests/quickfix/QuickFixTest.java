@@ -385,7 +385,17 @@ public class QuickFixTest extends TestCase {
 		}
 	}
 	
-	protected String getPreviewsInBufAppend(ICompilationUnit cu, List proposals) throws CoreException, BadLocationException {
+	public static String getPreviewsInBufAppend(ICompilationUnit cu) throws CoreException, BadLocationException {
+		CompilationUnit astRoot= getASTRoot(cu);
+		List proposals= collectCorrections(cu, astRoot);
+		if (proposals.isEmpty()) {
+			return null;
+		}
+		return getPreviewsInBufAppend(cu, proposals);
+	}
+		
+	
+	protected static String getPreviewsInBufAppend(ICompilationUnit cu, List proposals) throws CoreException, BadLocationException {
 		StringBuffer buf= new StringBuffer();
 		String[] previewContents= getPreviewContents(proposals);
 		
@@ -418,7 +428,7 @@ public class QuickFixTest extends TestCase {
 	}
 
 
-	private void wrapInBufAppend(String curr, StringBuffer buf) {
+	private static void wrapInBufAppend(String curr, StringBuffer buf) {
 		buf.append("buf.append(\"");
 		
 		int last= curr.length() - 1;
@@ -429,6 +439,8 @@ public class QuickFixTest extends TestCase {
 				if (k < last) {
 					buf.append("buf.append(\"");
 				}
+			} else if (ch == '\r') {
+				// ignore
 			} else if (ch == '\t') {
 				buf.append("    "); // 4 spaces
 			} else if (ch == '"' || ch == '\\') {

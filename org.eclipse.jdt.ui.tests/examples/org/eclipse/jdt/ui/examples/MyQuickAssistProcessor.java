@@ -25,12 +25,15 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
 import org.eclipse.ui.IEditorPart;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.StringLiteral;
@@ -44,6 +47,8 @@ import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal;
+
+import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 
 /**
  *
@@ -112,7 +117,7 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 				return true;
 			}
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			result.add(new ChangeCorrectionProposal("To clipboard in buf.append()", null, 3, image) {
+			result.add(new ChangeCorrectionProposal("Wrap in buf.append() (to clipboard)", null, 3, image) {
 				/* (non-Javadoc)
 				 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.ui.IEditorPart, org.eclipse.jface.text.IDocument)
 				 */
@@ -121,7 +126,6 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 					super.performChange(activeEditor, doc);
 				}
 			});
-
 		} catch (BadLocationException e) {
 			return false;
 		} finally {
@@ -129,6 +133,44 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		return true;
 	}
+	
+	private boolean getCreateQuickFixTestProposal(final IInvocationContext context, List result) throws CoreException {
+		final ICompilationUnit cu= context.getCompilationUnit();
+		if (context.getSelectionOffset() != 0 || context.getSelectionLength() != cu.getSourceRange().getLength()) {
+			return false;
+		}
+		if (context.getASTRoot().getProblems().length != 1) {
+			return false;
+		}
+		
+		if (result == null) {
+			return true;
+		}
+		
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		result.add(new ChangeCorrectionProposal("Create quick fix test", null, 3, image) {
+			/* (non-Javadoc)
+			 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.ui.IEditorPart, org.eclipse.jface.text.IDocument)
+			 */
+			protected void performChange(IEditorPart activeEditor, IDocument doc) throws CoreException {
+				try {
+					String content= QuickFixTest.getPreviewsInBufAppend(cu);
+					if (content != null) {
+						Clipboard clipboard= new Clipboard(Display.getCurrent());
+						clipboard.setContents(new Object[] { content }, new Transfer[] { TextTransfer.getInstance() } );
+						super.performChange(activeEditor, doc);
+						return;
+					}
+				} catch (BadLocationException e) {
+					// ignore
+				}
+ 				MessageDialog.openError(activeEditor.getSite().getShell(), "Create quick fix test", "Could not create quick fix test");
+				
+			}
+		});
+		return true;
+	}
+	
 	
 	
 	/**
@@ -174,7 +216,7 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 	 * @see org.eclipse.jdt.ui.text.java.IQuickAssistProcessor#hasAssists(org.eclipse.jdt.ui.text.java.IInvocationContext)
 	 */
 	public boolean hasAssists(IInvocationContext context) throws CoreException {
-		return getConvertProposal(context, null) || getStringWrappedProposal(context, null);
+		return getConvertProposal(context, null) || getStringWrappedProposal(context, null) || getCreateQuickFixTestProposal(context, null);
 	}
 
 	/* (non-Javadoc)
@@ -184,6 +226,7 @@ public class MyQuickAssistProcessor implements IQuickAssistProcessor {
 		ArrayList resultingCollections= new ArrayList();
 		getConvertProposal(context, resultingCollections);
 		getStringWrappedProposal(context, resultingCollections);
+		getCreateQuickFixTestProposal(context, resultingCollections);
 		return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 	}
 
