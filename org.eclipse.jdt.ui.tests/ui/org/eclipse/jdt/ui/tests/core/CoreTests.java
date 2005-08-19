@@ -39,6 +39,7 @@ public class CoreTests extends TestCase {
 		suite.addTest(JavaElementLabelsTest.allTests());
 		suite.addTest(JavaModelUtilTest.allTests());
 		suite.addTest(NameProposerTest.allTests());
+		suite.addTest(OverrideTest.allTests());
 		suite.addTest(PartialASTTest.allTests());
 		suite.addTest(ScopeAnalyzerTest.allTests());
 		suite.addTest(TemplateStoreTest.allTests());
