@@ -92,11 +92,14 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 		boolean createMain= false;
 		boolean createConstructors= false;
 		boolean createUnimplemented= true;
-		IDialogSettings section= getDialogSettings().getSection(PAGE_NAME);
-		if (section != null) {
-			createMain= section.getBoolean(SETTINGS_CREATEMAIN);
-			createConstructors= section.getBoolean(SETTINGS_CREATECONSTR);
-			createUnimplemented= section.getBoolean(SETTINGS_CREATEUNIMPLEMENTED);
+		IDialogSettings dialogSettings= getDialogSettings();
+		if (dialogSettings != null) {
+			IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
+			if (section != null) {
+				createMain= section.getBoolean(SETTINGS_CREATEMAIN);
+				createConstructors= section.getBoolean(SETTINGS_CREATECONSTR);
+				createUnimplemented= section.getBoolean(SETTINGS_CREATEUNIMPLEMENTED);
+			}
 		}
 		
 		setMethodStubSelection(createMain, createConstructors, createUnimplemented, true);
@@ -178,9 +181,19 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 		super.setVisible(visible);
 		if (visible) {
 			setFocus();
+		} else {
+			IDialogSettings dialogSettings= getDialogSettings();
+			if (dialogSettings != null) {
+				IDialogSettings section= dialogSettings.getSection(PAGE_NAME);
+				if (section == null) {
+					section= dialogSettings.addNewSection(PAGE_NAME);
+				}
+				section.put(SETTINGS_CREATEMAIN, isCreateMain());
+				section.put(SETTINGS_CREATECONSTR, isCreateConstructors());
+				section.put(SETTINGS_CREATEUNIMPLEMENTED, isCreateInherited());
+			}
 		}
-	}
-		
+	}	
 	
 	private void createMethodStubSelectionControls(Composite composite, int nColumns) {
 		Control labelControl= fMethodStubsButtons.getLabelControl(composite);
@@ -267,14 +280,6 @@ public class NewClassWizardPage extends NewTypeWizardPage {
 			buf.append("}"); //$NON-NLS-1$
 			type.createMethod(buf.toString(), null, false, null);
 		}
-		
-		IDialogSettings section= getDialogSettings().getSection(PAGE_NAME);
-		if (section == null) {
-			section= getDialogSettings().addNewSection(PAGE_NAME);
-		}
-		section.put(SETTINGS_CREATEMAIN, doMain);
-		section.put(SETTINGS_CREATECONSTR, doConstr);
-		section.put(SETTINGS_CREATEUNIMPLEMENTED, doInherited);
 		
 		if (monitor != null) {
 			monitor.done();
