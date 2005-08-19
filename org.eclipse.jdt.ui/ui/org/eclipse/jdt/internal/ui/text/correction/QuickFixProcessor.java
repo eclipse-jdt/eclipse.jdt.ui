@@ -171,6 +171,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MethodReturnsVoid:
 			case IProblem.ForbiddenReference:
 			case IProblem.DiscouragedReference:
+			case IProblem.UnnecessaryNLSTag:
 			//case IProblem.NonGenericType:
 				return true;
 			default:
@@ -297,6 +298,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.NonExternalizedStringLiteral:
 				LocalCorrectionsSubProcessor.addNLSProposals(context, problem, proposals);
+				break;
+			case IProblem.UnnecessaryNLSTag:
+				LocalCorrectionsSubProcessor.getUnnecessaryNLSTagProposals(context, problem, proposals);
 				break;
 			case IProblem.NonStaticAccessToStaticField:
 			case IProblem.NonStaticAccessToStaticMethod:

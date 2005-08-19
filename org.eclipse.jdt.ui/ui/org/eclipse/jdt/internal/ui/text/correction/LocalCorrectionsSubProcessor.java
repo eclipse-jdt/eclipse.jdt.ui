@@ -26,6 +26,7 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.ISharedImages;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -80,6 +81,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -288,6 +290,24 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(nlsProposal);
 		}
 	}
+	
+	public static void getUnnecessaryNLSTagProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws JavaModelException {
+		IBuffer buffer= context.getCompilationUnit().getBuffer();
+		if (buffer != null) {
+			int offset= problem.getOffset();
+			int length= problem.getLength();
+			while (offset > 0 && Strings.isIndentChar(buffer.getChar(offset - 1))) {
+				offset--;
+				length++;
+			}
+			String name= CorrectionMessages.LocalCorrectionsSubProcessor_remove_nls_tag_description;
+			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(name, context.getCompilationUnit(), offset, length, new String(), 6);
+			proposal.setImage(image);
+			proposals.add(proposal);
+		}
+	}
+	
 
 	/*
 	 * Fix instance accesses and indirect (static) accesses to static fields/methods
@@ -887,6 +907,8 @@ public class LocalCorrectionsSubProcessor {
 			proposals.add(proposal);
 		}
 	}
+
+
 
 
 }
