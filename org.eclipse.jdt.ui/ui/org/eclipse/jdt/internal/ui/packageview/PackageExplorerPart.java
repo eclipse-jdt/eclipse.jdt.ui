@@ -1188,49 +1188,43 @@ public class PackageExplorerPart extends ViewPart
 		}
 	}
 
-	private ISelection convertSelection(ISelection s) {
+	public ISelection convertSelection(ISelection s) {
 		if (!(s instanceof IStructuredSelection))
 			return s;
 			
 		Object[] elements= ((StructuredSelection)s).toArray();
-		if (!containsResources(elements))
-			return s;
 				
-		for (int i= 0; i < elements.length; i++) {
-			Object o= elements[i];
-			if (!(o instanceof IJavaElement)) {
-				if (o instanceof IResource) {
-					IJavaElement jElement= JavaCore.create((IResource)o);
-					if (jElement != null && jElement.exists()) 
-						elements[i]= jElement;
-				}
-				else if (o instanceof IAdaptable) {
-					IResource r= (IResource)((IAdaptable)o).getAdapter(IResource.class);
-					if (r != null) {
-						IJavaElement jElement= JavaCore.create(r);
-						if (jElement != null && jElement.exists()) 
-							elements[i]= jElement;
-						else
-							elements[i]= r;
-					}
-				}
-			}
-		}
+		for (int i= 0; i < elements.length; i++) 
+			elements[i]= convertElement(elements[i]);
 		
 		return new StructuredSelection(elements);
 	}
-	
-	private boolean containsResources(Object[] elements) {
-		for (int i = 0; i < elements.length; i++) {
-			Object o= elements[i];
-			if (!(o instanceof IJavaElement)) {
-				if (o instanceof IResource)
-					return true;
-				if ((o instanceof IAdaptable) && ((IAdaptable)o).getAdapter(IResource.class) != null)
-					return true;
-				}
+
+	private Object convertElement(Object original) {
+		if (original instanceof IJavaElement) {
+			return original;
+		
+		} else if (original instanceof IResource) {
+			IJavaElement je= JavaCore.create((IResource)original);
+			if (je != null && je.exists()) 
+				return je;
+		
+		} else if (original instanceof IAdaptable) {
+			IAdaptable adaptable= (IAdaptable)original;
+			IJavaElement je= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
+			if (je != null && je.exists())
+				return je;
+			
+			IResource r= (IResource) adaptable.getAdapter(IResource.class);
+			if (r != null) {
+				je= JavaCore.create(r);
+				if (je != null && je.exists()) 
+					return je;
+				else
+					return r;
+			}
 		}
-		return false;
+		return original;
 	}
 	
 	public void selectAndReveal(Object element) {

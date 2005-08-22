@@ -24,6 +24,7 @@ public class PackageExplorerTests {
 		suite.addTest(ContentProviderTests3.suite());
 		suite.addTest(ContentProviderTests4.suite());
 		suite.addTest(ContentProviderTests5.suite());
+		suite.addTest(PackageExplorerShowInTests.suite());
 		suite.addTestSuite(WorkingSetDropAdapterTest.class);
 		//$JUnit-END$
 		return suite;
