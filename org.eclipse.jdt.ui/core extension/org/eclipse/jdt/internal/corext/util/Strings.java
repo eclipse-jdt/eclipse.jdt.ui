@@ -618,5 +618,23 @@ public class Strings {
 		}
 		return tokens;
 	}
+	
+	public static String removeTrailingCharacters(String text, char toRemove) {
+		int size= text.length();
+		int end= size;
+		for (int i= size - 1; i >= 0; i--) {
+			char c= text.charAt(i);
+			if (c == toRemove) {
+				end= i;
+			} else {
+				break;
+			}
+		}
+		if (end == size)
+			return text;
+		else if (end == 0)
+			return ""; //$NON-NLS-1$
+		else
+			return text.substring(0, end);
+	}
 }
-

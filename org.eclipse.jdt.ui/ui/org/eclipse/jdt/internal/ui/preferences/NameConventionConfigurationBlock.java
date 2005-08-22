@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -124,8 +125,8 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 		
 		public NameConventionEntry getResult() {
 			NameConventionEntry res= new NameConventionEntry();
-			res.prefix= fPrefixField.getText();
-			res.suffix= fSuffixField.getText();			
+			res.prefix= Strings.removeTrailingCharacters(fPrefixField.getText(), ',');
+			res.suffix= Strings.removeTrailingCharacters(fSuffixField.getText(), ',');			
 			res.prefixkey= fEntry.prefixkey;
 			res.suffixkey= fEntry.suffixkey;
 			res.kind= 	fEntry.kind;
@@ -504,8 +505,4 @@ public class NameConventionConfigurationBlock extends OptionsConfigurationBlock 
 			updateModel(fNameConventionList);
 		}
 	}		
-
-
 }
-
-

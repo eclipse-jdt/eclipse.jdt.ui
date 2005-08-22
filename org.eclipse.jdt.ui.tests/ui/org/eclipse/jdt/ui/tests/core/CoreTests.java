@@ -47,6 +47,7 @@ public class CoreTests extends TestCase {
 		suite.addTest(TypeHierarchyTest.allTests());
 		suite.addTest(TypeRulesTest.allTests());
 		suite.addTest(TypeInfoTest.allTests());	
+		suite.addTest(StringsTest.allTests());
 		
 		return new ProjectTestSetup(suite);
 	}
