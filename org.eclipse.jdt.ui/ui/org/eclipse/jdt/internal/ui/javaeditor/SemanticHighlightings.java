@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -382,6 +383,7 @@ public class SemanticHighlightings {
 						|| desc == InfixExpression.LEFT_OPERAND_PROPERTY 
 						|| desc == InfixExpression.RIGHT_OPERAND_PROPERTY
 						|| desc == ConditionalExpression.THEN_EXPRESSION_PROPERTY
+						|| desc == PrefixExpression.OPERAND_PROPERTY
 						|| desc == ConditionalExpression.ELSE_EXPRESSION_PROPERTY) {
 					ASTNode parent= node.getParent();
 					if (parent instanceof Expression)
