@@ -210,13 +210,15 @@ public class OverrideMethodDialog extends SourceActionDialog {
 
 	private static class OverrideMethodSorter extends ViewerSorter {
 
-		private ITypeBinding[] fAllTypes;
+		private ITypeBinding[] fAllTypes= new ITypeBinding[0];
 
 		public OverrideMethodSorter(ITypeBinding curr) {
-			ITypeBinding[] superTypes= Bindings.getAllSuperTypes(curr);
-			fAllTypes= new ITypeBinding[superTypes.length + 1];
-			fAllTypes[0]= curr;
-			System.arraycopy(superTypes, 0, fAllTypes, 1, superTypes.length);
+			if (curr != null) {
+				ITypeBinding[] superTypes= Bindings.getAllSuperTypes(curr);
+				fAllTypes= new ITypeBinding[superTypes.length + 1];
+				fAllTypes[0]= curr;
+				System.arraycopy(superTypes, 0, fAllTypes, 1, superTypes.length);
+			}
 		}
 
 		/*
