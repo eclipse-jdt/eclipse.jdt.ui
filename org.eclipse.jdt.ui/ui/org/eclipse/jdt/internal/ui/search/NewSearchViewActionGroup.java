@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.search;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.NavigateActionGroup;
+import org.eclipse.jdt.ui.actions.RefactorActionGroup;
+
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.OpenEvent;
@@ -20,14 +22,15 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.actions.ActionGroup;
 
 class NewSearchViewActionGroup extends CompositeActionGroup {
-	JavaSearchActionGroup fJavaSearchActionGroup;
 	NavigateActionGroup fNavigateActionGroup;
 	
 	public NewSearchViewActionGroup(IViewPart part) {
 		Assert.isNotNull(part);
-		fJavaSearchActionGroup= new JavaSearchActionGroup(part);
-		fNavigateActionGroup= new NavigateActionGroup(part);
-		setGroups(new ActionGroup[]{fJavaSearchActionGroup, fNavigateActionGroup});
+		setGroups(new ActionGroup[]{
+			fNavigateActionGroup= new NavigateActionGroup(part),
+			new RefactorActionGroup(part),
+			new JavaSearchActionGroup(part) 
+			});
 	}
 	
 	public void handleOpen(OpenEvent event) {
