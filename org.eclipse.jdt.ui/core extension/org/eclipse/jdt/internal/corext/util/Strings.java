@@ -223,17 +223,6 @@ public class Strings {
 	 * has the requested number of indents. If <code>indentsToRemove <= 0</code>
 	 * the line is returned.
 	 * 
-	 * @deprecated as of 3.1 use {@link #trimIndent(String, int, int, int)} instead
-	 */
-	public static String trimIndent(String line, int indentsToRemove, int tabWidth) {
-		return trimIndent(line, indentsToRemove, tabWidth, tabWidth);
-	}
-	
-	/**
-	 * Removes the given number of indents from the line. Asserts that the given line 
-	 * has the requested number of indents. If <code>indentsToRemove <= 0</code>
-	 * the line is returned.
-	 * 
 	 * @param project the java project from which to get the formatter
 	 *        preferences, or <code>null</code> for global preferences
 	 * @since 3.1
@@ -325,16 +314,6 @@ public class Strings {
 	 */
 	public static void trimIndentation(String[] lines, int tabWidth, int indentWidth) {
 		trimIndentation(lines, tabWidth, indentWidth, true);
-	}
-	
-	/**
-	 * Removes the common number of indents from all lines. If a line
-	 * only consists out of white space it is ignored. If <code>
-	 * considerFirstLine</code> is false the first line will be ignored.
-	 * @deprecated as of 3.1 use {@link #trimIndentation(String[], int, int, boolean)} instead
-	 */
-	public static void trimIndentation(String[] lines, int tabWidth, boolean considerFirstLine) {
-		trimIndentation(lines, tabWidth, tabWidth, considerFirstLine);
 	}
 	
 	/**
@@ -462,17 +441,6 @@ public class Strings {
 	 * Returns the length of the string representing the number of 
 	 * indents in the given string <code>line</code>. Returns 
 	 * <code>-1<code> if the line isn't prefixed with an indent of
-	 * the given number of indents. 
-	 * @deprecated as of 3.1 use {@link #computeIndentLength(String, int, int, int)} instead
-	 */
-	public static int computeIndentLength(String line, int numberOfIndents, int tabWidth) {
-		return computeIndentLength(line, numberOfIndents, tabWidth, tabWidth);
-	}
-	
-	/**
-	 * Returns the length of the string representing the number of 
-	 * indents in the given string <code>line</code>. Returns 
-	 * <code>-1<code> if the line isn't prefixed with an indent of
 	 * the given number of indents.
 	 * 
 	 * @param project the java project from which to get the formatter
@@ -538,16 +506,6 @@ public class Strings {
 	 * Change the indent of, possible muti-line, code range. The current indent is removed, a new indent added.
 	 * The first line of the code will not be changed. (It is considered to have no indent as it might start in
 	 * the middle of a line)
-	 * @deprecated use the version specifying the indent width instead
-	 */
-	public static String changeIndent(String code, int codeIndentLevel, int tabWidth, String newIndent, String lineDelim) {
-		return changeIndent(code, codeIndentLevel, tabWidth, tabWidth, newIndent, lineDelim);
-	}
-	
-	/**
-	 * Change the indent of, possible muti-line, code range. The current indent is removed, a new indent added.
-	 * The first line of the code will not be changed. (It is considered to have no indent as it might start in
-	 * the middle of a line)
 	 * 
 	 * @param project the java project from which to get the formatter
 	 *        preferences, or <code>null</code> for global preferences
@@ -593,13 +551,6 @@ public class Strings {
 			// can not happen
 			return code;
 		}
-	}
-	
-	/**
-	 * @deprecated use {@link #trimIndentation(String, int, int, boolean)} instead
-	 */
-	public static String trimIndentation(String source, int tabWidth, boolean considerFirstLine) {
-		return trimIndentation(source, tabWidth, tabWidth, considerFirstLine);
 	}
 	
 	public static String trimIndentation(String source, IJavaProject project, boolean considerFirstLine) {
