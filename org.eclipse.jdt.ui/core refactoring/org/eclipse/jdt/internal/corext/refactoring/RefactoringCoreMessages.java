@@ -25,6 +25,7 @@ public final class RefactoringCoreMessages extends NLS {
 
 	public static String CompositeRefactoring_error_setup;
 	public static String CompositeRefactoring_creating_change;
+	public static String CompositeRefactoring_checking_preconditions;
 
 	public static String DynamicValidationStateChange_workspace_changed;
 	

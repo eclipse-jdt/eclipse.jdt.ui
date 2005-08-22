@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.composite;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -22,6 +23,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -72,6 +74,9 @@ public class CompositeRefactoring extends Refactoring {
 
 	/** The set of custom changes (element type: <code>Change</code>) */
 	private final Set fCustomChanges= new HashSet();
+
+	/** The set of disabled composable refactorings (element type: &lt;<code>Refactoring</code>&gt;) */
+	private final Set fDisabledRefactorings= new HashSet(2);
 
 	/** The global working copy owner */
 	private WorkingCopyOwner fGlobalOwner= null;
@@ -158,38 +163,53 @@ public class CompositeRefactoring extends Refactoring {
 	public final RefactoringStatus checkFinalConditions(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		fChanges.clear();
 
+		boolean first= true;
+
+		monitor.beginTask("", Math.max(1, 3 * (fRefactorings.length - fDisabledRefactorings.size()) - 1)); //$NON-NLS-1$
+		monitor.setTaskName(RefactoringCoreMessages.CompositeRefactoring_checking_preconditions);
+
 		final RefactoringStatus status= new RefactoringStatus();
-		for (int index= 0; index < fRefactorings.length; index++) {
+		try {
 
-			final Refactoring refactoring= fRefactorings[index];
-			Assert.isTrue(refactoring instanceof IComposableRefactoring);
+			for (int index= 0; index < fRefactorings.length; index++) {
 
-			final IComposableRefactoring composable= (IComposableRefactoring) refactoring;
+				final Refactoring refactoring= fRefactorings[index];
+				Assert.isTrue(refactoring instanceof IComposableRefactoring);
 
-			final RefactoringArguments arguments= (RefactoringArguments) fRefactoringArguments.get(refactoring);
-			if (arguments != null) {
+				if (!fDisabledRefactorings.contains(refactoring)) {
+					final IComposableRefactoring composable= (IComposableRefactoring) refactoring;
 
-				if (!composable.initialize(arguments))
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.CompositeRefactoring_error_setup, refactoring.getName()));
+					final RefactoringArguments arguments= (RefactoringArguments) fRefactoringArguments.get(refactoring);
+					if (arguments != null) {
+
+						if (!composable.initialize(arguments))
+							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.CompositeRefactoring_error_setup, refactoring.getName()));
+					}
+
+					if (!first)
+						status.merge(refactoring.checkInitialConditions(new SubProgressMonitor(monitor, 1)));
+
+					first= false;
+
+					if (status.hasFatalError())
+						return status;
+
+					status.merge(refactoring.checkFinalConditions(new SubProgressMonitor(monitor, 1)));
+
+					if (status.hasFatalError())
+						return status;
+
+					final Change change= refactoring.createChange(new SubProgressMonitor(monitor, 1));
+					if (change != null) {
+
+						registerChange(change);
+						updateWorkingCopies(change);
+					}
+				}
 			}
 
-			if (index != 0)
-				status.merge(refactoring.checkInitialConditions(monitor));
-
-			if (status.hasFatalError())
-				return status;
-
-			status.merge(refactoring.checkFinalConditions(monitor));
-
-			if (status.hasFatalError())
-				return status;
-
-			final Change change= refactoring.createChange(monitor);
-			if (change != null) {
-
-				registerChange(change);
-				updateWorkingCopies(change);
-			}
+		} finally {
+			monitor.done();
 		}
 		return status;
 	}
@@ -199,18 +219,33 @@ public class CompositeRefactoring extends Refactoring {
 	 */
 	public final RefactoringStatus checkInitialConditions(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 
-		final Refactoring refactoring= fRefactorings[0];
-		Assert.isTrue(refactoring instanceof IComposableRefactoring);
+		monitor.beginTask("", 1); //$NON-NLS-1$
+		monitor.setTaskName(RefactoringCoreMessages.CompositeRefactoring_checking_preconditions);
 
-		final IComposableRefactoring composable= (IComposableRefactoring) refactoring;
+		try {
 
-		final RefactoringArguments arguments= (RefactoringArguments) fRefactoringArguments.get(refactoring);
-		if (arguments != null) {
+			for (int index= 0; index < fRefactorings.length; index++) {
 
-			if (composable.initialize(arguments))
-				return refactoring.checkInitialConditions(monitor);
+				final Refactoring refactoring= fRefactorings[index];
+				Assert.isTrue(refactoring instanceof IComposableRefactoring);
+
+				if (!fDisabledRefactorings.contains(refactoring)) {
+					final IComposableRefactoring composable= (IComposableRefactoring) refactoring;
+
+					final RefactoringArguments arguments= (RefactoringArguments) fRefactoringArguments.get(refactoring);
+					if (arguments != null) {
+
+						if (composable.initialize(arguments))
+							return refactoring.checkInitialConditions(new SubProgressMonitor(monitor, 1));
+					}
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.CompositeRefactoring_error_setup, refactoring.getName()));
+				}
+			}
+
+		} finally {
+			monitor.done();
 		}
-		return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.CompositeRefactoring_error_setup, refactoring.getName()));
+		return new RefactoringStatus();
 	}
 
 	/*
@@ -235,9 +270,18 @@ public class CompositeRefactoring extends Refactoring {
 			fGlobalOwner= null;
 			fLocalOwners.clear();
 
-			for (final Iterator iterator= fWorkingCopies.values().iterator(); iterator.hasNext();)
+			final Collection copies= fWorkingCopies.values();
+
+			final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
+			subMonitor.beginTask(RefactoringCoreMessages.CompositeRefactoring_creating_change, copies.size());
+
+			for (final Iterator iterator= copies.iterator(); iterator.hasNext();) {
 				((ICompilationUnit) iterator.next()).discardWorkingCopy();
 
+				subMonitor.worked(1);
+			}
+
+			subMonitor.done();
 			monitor.done();
 		}
 	}
@@ -383,6 +427,23 @@ public class CompositeRefactoring extends Refactoring {
 	 */
 	public final void setRefactoringArguments(final Refactoring refactoring, final RefactoringArguments arguments) {
 		fRefactoringArguments.put(refactoring, arguments);
+	}
+
+	/**
+	 * Determines whether the specified composable refactoring is currently
+	 * enabled.
+	 * 
+	 * @param refactoring
+	 *            the refactoring to control its enablement
+	 * @param enable
+	 *            <code>true</code> to enable the composable refactoring,
+	 *            <code>false</code> otherwise
+	 */
+	public final void setRefactoringEnabled(final Refactoring refactoring, final boolean enable) {
+		if (enable)
+			fDisabledRefactorings.remove(refactoring);
+		else
+			fDisabledRefactorings.add(refactoring);
 	}
 
 	/**
