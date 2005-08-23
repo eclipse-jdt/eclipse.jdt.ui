@@ -80,6 +80,34 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 	public static final String SERIAL_SUPPORT_JAR= "serialsupport.jar"; //$NON-NLS-1$
 
 	/**
+	 * Computes the class path entries which are on the user class path and are
+	 * explicitely put on the boot class path.
+	 * 
+	 * @param project
+	 *            the project to compute the classpath for
+	 * @return the computed classpath. May be empty, but not null.
+	 * @throws CoreException
+	 *             if the project's class path cannot be computed
+	 */
+	protected static String[] computeUserAndBootClasspath(final IJavaProject project) throws CoreException {
+		final IRuntimeClasspathEntry[] unresolved= JavaRuntime.computeUnresolvedRuntimeClasspath(project);
+		final List resolved= new ArrayList(unresolved.length);
+		for (int index= 0; index < unresolved.length; index++) {
+			final IRuntimeClasspathEntry entry= unresolved[index];
+			final int property= entry.getClasspathProperty();
+			if (property == IRuntimeClasspathEntry.USER_CLASSES || property == IRuntimeClasspathEntry.BOOTSTRAP_CLASSES) {
+				final IRuntimeClasspathEntry[] entries= JavaRuntime.resolveRuntimeClasspathEntry(entry, project);
+				for (int offset= 0; offset < entries.length; offset++) {
+					final String location= entries[offset].getLocation();
+					if (location != null)
+						resolved.add(location);
+				}
+			}
+		}
+		return (String[]) resolved.toArray(new String[resolved.size()]);
+	}
+
+	/**
 	 * Displays an appropriate error message for a specific problem.
 	 *
 	 * @param message The message to display
@@ -200,7 +228,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 			copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_MAIN_TYPE_NAME, SERIAL_SUPPORT_CLASS);
 			copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROGRAM_ARGUMENTS, getQualifiedName());
 			copy.setAttribute(IJavaLaunchConfigurationConstants.ATTR_PROJECT_NAME, project.getElementName());
-			final String[] entries= JavaRuntime.computeDefaultRuntimeClassPath(project);
+			final String[] entries= computeUserAndBootClasspath(project);
 			final IRuntimeClasspathEntry[] classpath= new IRuntimeClasspathEntry[entries.length + 2];
 			monitor.worked(1);
 			classpath[0]= JavaRuntime.newRuntimeContainerClasspathEntry(new Path(JavaRuntime.JRE_CONTAINER), IRuntimeClasspathEntry.STANDARD_CLASSES, project);
