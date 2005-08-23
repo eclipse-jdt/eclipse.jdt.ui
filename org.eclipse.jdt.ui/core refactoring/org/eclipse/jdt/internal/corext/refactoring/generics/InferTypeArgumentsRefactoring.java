@@ -53,9 +53,9 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
@@ -329,8 +329,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
 	private void rewriteTypeVariable(TypeVariable2 typeCv, CompilationUnitRewrite rewrite) {
 		ASTNode node= typeCv.getRange().getNode(rewrite.getRoot());
-		if (node instanceof SimpleName) {
-			Type originalType= (Type) ((SimpleName) node).getParent();
+		if (node instanceof Name && node.getParent() instanceof Type) {
+			Type originalType= (Type) node.getParent();
 			
 			// Must rewrite all type arguments in one batch. Do the rewrite when the first one is encountered; skip the others.
 			Object rewritten= originalType.getProperty(REWRITTEN); 
