@@ -385,7 +385,7 @@ public final class JavaModelUtil {
 	 * @return The found method or <code>null</code>, if nothing found
 	 */
 	public static IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IMethod[] methods) throws JavaModelException {
-		for (int i= methods.length - 1; i >= 0; i--) {
+		for (int i= 0; i < methods.length; i++) {
 			if (isSameMethodSignature(name, paramTypes, isConstructor, methods[i])) {
 				return methods[i];
 			}
@@ -402,7 +402,7 @@ public final class JavaModelUtil {
 	 * @return The found method or <code>null</code>, if nothing found
 	 */
 	public static IMethod findMethod2(IMethod curr, IMethod[] methods) throws JavaModelException {
-		for (int i= methods.length - 1; i >= 0; i--) {
+		for (int i= 0; i < methods.length; i++) {
 			if (isSameMethodSignature2(curr, methods[i])) {
 				return methods[i];
 			}
