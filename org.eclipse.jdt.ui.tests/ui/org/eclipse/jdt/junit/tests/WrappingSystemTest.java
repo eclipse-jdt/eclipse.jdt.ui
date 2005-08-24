@@ -174,8 +174,9 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 		long startTime = System.currentTimeMillis();
 		while (stillWaiting(numExpectedTableLines)) {
 			if (System.currentTimeMillis() - startTime > millisecondTimeout)
-				fail("Timeout waiting for " + numExpectedTableLines
-						+ " lines in table.");
+				fail("Timeout waiting for " + numExpectedTableLines 
+						+ " lines in table. Present: " + getNumTableItems() + " items.\n"
+						+ "The 2nd vm has " + (hasNotTerminated() ? "not " : "") + "terminated.");
 			dispatchEvents();
 		}
 	}
