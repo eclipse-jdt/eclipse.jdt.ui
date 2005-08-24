@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.ProgressMonitorWrapper;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -219,6 +220,8 @@ public class TypeInfoViewer {
 		private void processVMInstallType(IVMInstallType installType, List locations, List labels) {
 			if (installType != null) {
 				IVMInstall[] installs= installType.getVMInstalls();
+				boolean isMac= Platform.OS_MACOSX.equals(Platform.getOS());
+				final String HOME_SUFFIX= "/Home"; //$NON-NLS-1$
 				for (int i= 0; i < installs.length; i++) {
 					String label= getFormattedLabel(installs[i].getName());
 					LibraryLocation[] libLocations= installs[i].getLibraryLocations();
@@ -226,6 +229,9 @@ public class TypeInfoViewer {
 						processLibraryLocation(libLocations, label);
 					} else {
 						String filePath= installs[i].getInstallLocation().getAbsolutePath();
+						// on MacOS X install locations end in an additional "/Home" segment; remove it
+						if (isMac && filePath.endsWith(HOME_SUFFIX))
+							filePath= filePath.substring(0, filePath.length()- HOME_SUFFIX.length() + 1);
 						locations.add(filePath);
 						labels.add(label);
 					}
