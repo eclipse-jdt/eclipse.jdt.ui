@@ -59,7 +59,11 @@ public class WrappingUnitTest extends TestCase {
 	public void test03waitForTableToFillObeysTimeout() throws Exception {
 		final WrappingSystemTest test = new WrappingSystemTest() {
 			protected void dispatchEvents() {
-				// do nothing
+				// do nothing (avoid accessing display from non-UI thread)
+			}
+			
+			protected int getNumTableItems() throws PartInitException {
+				return -1; // avoid accessing getActiveWorkbenchWindow() from non-UI thread
 			}
 
 			protected boolean stillWaiting(int numExpectedTableLines)
@@ -72,14 +76,15 @@ public class WrappingUnitTest extends TestCase {
 
 		new Thread(new Runnable() {
 			public void run() {
-				try {
-					test.waitForTableToFill(17, 50);
-				} catch (AssertionFailedError e) {
-					synchronized (done) {
+				synchronized (done) {
+					try {
+						test.waitForTableToFill(17, 50);
+						fail();
+					} catch (AssertionFailedError e) {
 						done[0] = true;
+					} catch (PartInitException e) {
+						fail();// bah.
 					}
-				} catch (PartInitException e) {
-					// bah.
 				}
 			}
 		}).start();
