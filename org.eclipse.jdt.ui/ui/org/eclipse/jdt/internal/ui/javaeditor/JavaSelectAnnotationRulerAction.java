@@ -12,6 +12,9 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import java.util.Iterator;
 import java.util.ResourceBundle;
+
+import org.eclipse.swt.widgets.Event;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextOperationTarget;
@@ -64,7 +67,15 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 	public void run() {
 		if (fStore.getBoolean(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER))
 			return;
-
+		
+		runWithEvent(null);
+	}
+	
+	/*
+	 * @see org.eclipse.jface.action.IAction#runWithEvent(org.eclipse.swt.widgets.Event)
+	 * @since 3.1
+	 */
+	public void runWithEvent(Event event) {
 		if (fAnnotation instanceof OverrideIndicatorManager.OverrideIndicator) {
 			((OverrideIndicatorManager.OverrideIndicator)fAnnotation).open();
 			return;
