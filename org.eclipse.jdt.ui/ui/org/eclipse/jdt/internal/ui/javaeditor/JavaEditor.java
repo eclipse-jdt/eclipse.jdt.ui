@@ -2378,7 +2378,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.REMOVE_OCCURRENCE_ANNOTATIONS);
 		setAction("RemoveOccurrenceAnnotations", action); //$NON-NLS-1$
 
-		// add annotation actions
+		// add annotation actions for roll-over expand hover
 		action= new JavaSelectMarkerRulerAction2(JavaEditorMessages.getBundleForConstructedKeys(), "Editor.RulerAnnotationSelection.", this); //$NON-NLS-1$
 		setAction("AnnotationAction", action); //$NON-NLS-1$
 
