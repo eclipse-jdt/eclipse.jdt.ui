@@ -14,8 +14,11 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
+
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.ltk.core.refactoring.*;
 
 /**
  * A utility class to provide compatibility with the old
@@ -35,6 +38,22 @@ public class TextChangeCompatibility {
 		}
 		insert(root, edit);
 		change.addTextEditGroup(new TextEditGroup(name, edit));
+	}
+	
+	public static void addTextEdit(TextChange change, String name, TextEdit edit, GroupCategorySet groupCategories) {
+		Assert.isNotNull(change);
+		Assert.isNotNull(name);
+		Assert.isNotNull(edit);
+		TextEdit root= change.getEdit();
+		if (root == null) {
+			root= new MultiTextEdit();
+			change.setEdit(root);
+		}
+		insert(root, edit);
+		change.addTextEditChangeGroup(new TextEditChangeGroup(
+			change,
+			new TextEditGroup(name, edit),
+			groupCategories));
 	}
 	
 	public static void addTextEdit(TextChange change, String name, TextEdit[] edits) {
