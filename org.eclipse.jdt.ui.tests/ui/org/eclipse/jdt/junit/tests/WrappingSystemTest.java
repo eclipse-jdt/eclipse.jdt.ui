@@ -74,9 +74,9 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 
 	public void test02characterizeImages() throws Exception {
 		runTests("\\n", 0, 3);
-		assertEquals(getFailureDisplay().getExceptionIcon(), getImage(0));
-		assertEquals(null, getImage(1));
-		assertEquals(getFailureDisplay().getStackIcon(), getImage(2));
+		assertEquals(getFailureTrace().getTrace(), getFailureDisplay().getExceptionIcon(), getImage(0));
+		assertEquals(getFailureTrace().getTrace(), null, getImage(1));
+		assertEquals(getFailureTrace().getTrace(), getFailureDisplay().getStackIcon(), getImage(2));
 	}
 
 	private FailureTableDisplay getFailureDisplay() throws PartInitException {
