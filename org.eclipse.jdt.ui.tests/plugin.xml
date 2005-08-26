@@ -84,7 +84,7 @@
             allowMultiple="true"
             class="org.eclipse.jdt.ui.tests.performance.views.MockupPackageExplorerPart"
             id="org.eclipse.jdt.ui.tests.MockPackageExplorer"
-            name="Package Explorer"/>
+            name="Package Explorer Mock View"/>
    </extension>
 <!-- **************** TEST MARKER for quick fix ******************* -->
    <extension
