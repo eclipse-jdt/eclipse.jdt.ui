@@ -361,7 +361,7 @@ public class ParametricStructureComputer {
 		if (parmIdx == CollectionElementVariable2.NOT_DECLARED_TYPE_VARIABLE_INDEX)
 			return; //TODO: ParametricStructure should use type variable keys instead of index
 			
-		if (elemContainerStructure == v1Structure) { // avoid creating cyclic structure
+		if (elemContainerStructure == v1Structure || containsSubStructure(v1Structure, elemContainerStructure)) { // avoid creating cyclic structure
 			if (!(elemStructure(elemVar) == ParametricStructure.NONE))
 				setStructureAndPush(elemVar, ParametricStructure.NONE);
 			if (elemContainerStructure.getParameters()[parmIdx] == ParametricStructure.NONE) {
@@ -374,6 +374,21 @@ public class ParametricStructureComputer {
 			if (DEBUG_INITIALIZATION)
 				System.out.println("  updated structure of " + elemContainer + " to " + elemContainerStructure); //$NON-NLS-1$ //$NON-NLS-2$
 		}
+	}
+
+	private boolean containsSubStructure(ParametricStructure containingStructure, ParametricStructure subStructure) {
+		if (containingStructure == null)
+			return false;
+		
+		ParametricStructure[] parameters= containingStructure.getParameters();
+		for (int i= 0; i < parameters.length; i++) {
+			ParametricStructure parameter= parameters[i];
+			if (parameter == subStructure)
+				return true;
+			else if (parameter != null && containsSubStructure(parameter, subStructure))
+				return true;
+		}
+		return false;
 	}
 
 	/**
