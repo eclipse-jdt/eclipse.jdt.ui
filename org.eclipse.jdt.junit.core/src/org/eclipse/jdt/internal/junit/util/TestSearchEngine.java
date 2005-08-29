@@ -202,14 +202,14 @@ public class TestSearchEngine {
 		if (testCaseType == null)
 			return found;
 		
-		IType[] subtypes= javaProject.newTypeHierarchy(testCaseType, getRegion(javaProject), pm).getAllSubtypes(testCaseType);
+		IType[] subtypes= javaProject.newTypeHierarchy(testCaseType, getRegion(element), pm).getAllSubtypes(testCaseType);
 			
 		if (subtypes == null)
 		    throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JUnitPlugin.PLUGIN_ID, IJavaLaunchConfigurationConstants.ERR_UNSPECIFIED_MAIN_TYPE, JUnitMessages.JUnitBaseLaunchConfiguration_error_notests, null))); 
 
 		for (int i = 0; i < subtypes.length; i++) {
 		    try {
-		        if (element.equals(subtypes[i].getAncestor(element.getElementType())) && hasValidModifiers(subtypes[i]))
+		        if (hasValidModifiers(subtypes[i]))
 		            found.add(subtypes[i]);
 		    } catch (JavaModelException e) {
 		        JUnitPlugin.log(e.getStatus());
@@ -227,15 +227,20 @@ public class TestSearchEngine {
 		} 
 	}
 	
-	private static IRegion getRegion(IJavaProject javaProject) throws JavaModelException{
-	    IRegion region = JavaCore.newRegion();
-	    IJavaElement[] elements= javaProject.getChildren();
-	    for(int i=0; i<elements.length; i++) {
-	        if (((IPackageFragmentRoot)elements[i]).isArchive())
-	            continue;
-	        region.add(elements[i]);
-	    }
-	    return region;
+	private static IRegion getRegion(IJavaElement element) throws JavaModelException{
+		IRegion result= JavaCore.newRegion();
+		if (element.getElementType() == IJavaElement.JAVA_PROJECT) {
+			// for projects only add the contained source folders
+			IPackageFragmentRoot[] roots= ((IJavaProject) element).getPackageFragmentRoots();
+			for (int i= 0; i < roots.length; i++) {
+				if (!roots[i].isArchive()) {
+					result.add(roots[i]);
+				}
+			}
+		} else {
+			result.add(element);
+		}
+		return result;
 	}
 
 	private static Object computeScope(Object element) throws JavaModelException {

@@ -24,6 +24,8 @@ import org.eclipse.jdt.ui.tests.quickfix.QuickFixTest;
 import org.eclipse.jdt.ui.tests.search.SearchTest;
 import org.eclipse.jdt.ui.tests.wizardapi.NewJavaProjectWizardTest;
 
+import org.eclipse.jdt.junit.tests.TestTestSearchEngine;
+
 
 /**
  * Test all areas of the UI.
@@ -56,7 +58,9 @@ public class AutomatedSuite extends TestSuite {
 		
 		addTest(CallHierarchyContentProviderTest.suite());
 		
-		addTest(SearchTest.suite()); 
+		addTest(SearchTest.suite());
+		
+		addTestSuite(TestTestSearchEngine.class);
 	}
 }
 
