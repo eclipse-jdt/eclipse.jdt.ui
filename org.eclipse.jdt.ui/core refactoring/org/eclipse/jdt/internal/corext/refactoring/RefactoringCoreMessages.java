@@ -196,7 +196,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractTempRefactoring_array_initializer;
 	public static String ExtractTempRefactoring_another_variable;
 	public static String ExtractTempRefactoring_assignment;
-	public static String ExtractTempRefactoring_single_conditional_expression;
 	public static String ExtractTempRefactoring_convention;
 	public static String ExtractTempRefactoring_checking_preconditions;
 	public static String ExtractTempRefactoring_preview;

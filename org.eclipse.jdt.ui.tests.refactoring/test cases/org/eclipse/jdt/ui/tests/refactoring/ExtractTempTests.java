@@ -645,9 +645,10 @@ public class ExtractTempTests extends RefactoringTest {
 		failHelper1(4, 18, 4, 19, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 
-	public void testFail12() throws Exception{
-		failHelper1(4, 16, 4, 29, false, false, "temp", RefactoringStatus.FATAL);
-	}	
+// removed - allowe now (see bug 98847)
+//	public void testFail12() throws Exception{
+//		failHelper1(4, 16, 4, 29, false, false, "temp", RefactoringStatus.FATAL);
+//	}	
 
 //removed
 //	public void testFail13() throws Exception{
