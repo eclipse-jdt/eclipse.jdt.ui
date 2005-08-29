@@ -233,7 +233,7 @@ public class TestSearchEngine {
 			// for projects only add the contained source folders
 			IPackageFragmentRoot[] roots= ((IJavaProject) element).getPackageFragmentRoots();
 			for (int i= 0; i < roots.length; i++) {
-				if (!roots[i].isExternal()) {
+				if (!roots[i].isArchive()) {
 					result.add(roots[i]);
 				}
 			}
