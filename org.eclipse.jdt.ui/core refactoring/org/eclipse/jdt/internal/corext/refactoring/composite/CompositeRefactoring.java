@@ -91,6 +91,12 @@ public class CompositeRefactoring extends Refactoring {
 	private final String fName;
 
 	/**
+	 * Should initial conditions of the first enabled refactoring be checked
+	 * again during <code>checkFinalConditions</code>?
+	 */
+	private boolean fRecheckInitialConditions= false;
+
+	/**
 	 * The refactoring setups (element type: &lt;<code>Refactoring</code>,
 	 * <code>RefactoringArguments</code>&gt;)
 	 */
@@ -186,7 +192,7 @@ public class CompositeRefactoring extends Refactoring {
 							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.CompositeRefactoring_error_setup, refactoring.getName()));
 					}
 
-					if (!first)
+					if (!first && fRecheckInitialConditions)
 						status.merge(refactoring.checkInitialConditions(new SubProgressMonitor(monitor, 1)));
 
 					first= false;
@@ -414,6 +420,18 @@ public class CompositeRefactoring extends Refactoring {
 	 */
 	public final void removeRefactoringArguments(final Refactoring refactoring) {
 		fRefactoringArguments.remove(refactoring);
+	}
+
+	/**
+	 * Determines whether initial conditions of the first enabled refactoring
+	 * should be checked again during <code>checkFinalConditions</code>.
+	 * 
+	 * @param check
+	 *            <code>true</code> to check again, <code>false</code>
+	 *            otherwise
+	 */
+	public final void setRecheckInitialConditions(final boolean check) {
+		fRecheckInitialConditions= check;
 	}
 
 	/**
