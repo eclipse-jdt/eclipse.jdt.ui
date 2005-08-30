@@ -364,14 +364,15 @@ public class CompositeRefactoring extends Refactoring {
 
 	/**
 	 * Manages a custom change.
+	 * <p>
+	 * The default implementation does nothing.
+	 * </p>
 	 * 
 	 * @param change
 	 *            the change to manage
 	 */
-	private void manageCustomChange(final Change change) {
-		// TW: implement
-
-		Assert.isTrue(false, "Not yet supported"); //$NON-NLS-1$
+	protected void manageCustomChange(final Change change) {
+		// Do nothing
 	}
 
 	/**
@@ -380,7 +381,7 @@ public class CompositeRefactoring extends Refactoring {
 	 * @param change
 	 *            the change to register
 	 */
-	private void registerChange(final Change change) {
+	protected void registerChange(final Change change) {
 
 		if (change instanceof CompositeChange) {
 
@@ -472,7 +473,7 @@ public class CompositeRefactoring extends Refactoring {
 	 * @throws JavaModelException
 	 *             if the working copy does not exist
 	 */
-	private void updateWorkingCopies(final Change change) throws JavaModelException {
+	protected void updateWorkingCopies(final Change change) throws JavaModelException {
 
 		if (change instanceof CompositeChange) {
 
