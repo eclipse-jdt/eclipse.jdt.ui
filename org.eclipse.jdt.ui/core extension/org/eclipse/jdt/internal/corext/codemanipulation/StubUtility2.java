@@ -142,7 +142,10 @@ public final class StubUtility2 {
 	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ITypeBinding typeBinding, AST ast, IMethodBinding superConstructor, IVariableBinding[] variableBindings, int modifiers, CodeGenerationSettings settings) throws CoreException {
 
 		MethodDeclaration decl= ast.newMethodDeclaration();
-		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
+		if (typeBinding.isEnum())
+			decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE));
+		else
+			decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
 		decl.setName(ast.newSimpleName(typeBinding.getName()));
 		decl.setConstructor(true);
 

@@ -38,12 +38,15 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddCustomConstructorOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -120,7 +123,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof IType)) {
 			IType type= (IType) selection.getFirstElement();
-			return type.getCompilationUnit() != null && !type.isInterface() && !type.isEnum();
+			return type.getCompilationUnit() != null && !type.isInterface() && !type.isAnnotation();
 		}
 
 		if ((selection.size() == 1) && (selection.getFirstElement() instanceof ICompilationUnit))
@@ -170,7 +173,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					}
 					try {
 						final IType declaringType= field.getDeclaringType();
-						if (declaringType.isInterface() || declaringType.isEnum())
+						if (declaringType.isInterface() || declaringType.isAnnotation())
 							return null;
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
@@ -190,13 +193,13 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		Object[] elements= selection.toArray();
 		if (elements.length == 1 && (elements[0] instanceof IType)) {
 			IType type= (IType) elements[0];
-			if (type.getCompilationUnit() != null && !type.isInterface() && !type.isEnum()) {
+			if (type.getCompilationUnit() != null && !type.isInterface() && !type.isAnnotation()) {
 				return type;
 			}
 		} else if (elements[0] instanceof ICompilationUnit) {
 			ICompilationUnit unit= (ICompilationUnit) elements[0];
 			IType type= unit.findPrimaryType();
-			if (type != null && !type.isInterface() && !type.isEnum())
+			if (type != null && !type.isInterface() && !type.isAnnotation())
 				return type;
 		} else if (elements[0] instanceof IField) {
 			return ((IField) elements[0]).getCompilationUnit().findPrimaryType();
@@ -232,9 +235,6 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 					return;
 				} else if (type.isInterface()) {
 					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_interface_not_applicable); 
-					return;
-				} else if (type.isEnum()) {
-					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_enum_not_applicable); 
 					return;
 				} else
 					run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
@@ -307,10 +307,16 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			return;
 		}
 		final GenerateConstructorUsingFieldsContentProvider provider= new GenerateConstructorUsingFieldsContentProvider(type, fields, Arrays.asList(selected));
-		IMethodBinding[] bindings= StubUtility2.getVisibleConstructors(provider.getType(), false, true);
-		if (bindings.length == 0) {
-			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_nothing_found); 
-			return;
+		IMethodBinding[] bindings= null;
+		final ITypeBinding provided= provider.getType();
+		if (provided.isEnum()) {
+			bindings= new IMethodBinding[] {getObjectConstructor(provider.getCompilationUnit())};
+		} else {
+			bindings= StubUtility2.getVisibleConstructors(provided, false, true);
+			if (bindings.length == 0) {
+				MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_nothing_found);
+				return;
+			}
 		}
 
 		GenerateConstructorUsingFieldsSelectionDialog dialog= new GenerateConstructorUsingFieldsSelectionDialog(getShell(), new BindingLabelProvider(), provider, fEditor, type, bindings);
@@ -321,7 +327,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		dialog.setSize(60, 18);
 		dialog.setInput(new Object());
 		dialog.setMessage(ActionMessages.GenerateConstructorUsingFieldsAction_dialog_label); 
-		dialog.setValidator(new GenerateConstructorUsingFieldsValidator(dialog, provider.getType(), fields.size()));
+		dialog.setValidator(new GenerateConstructorUsingFieldsValidator(dialog, provided, fields.size()));
 
 		if (dialog.open() == Window.OK) {
 			Object[] elements= dialog.getResult();
@@ -360,6 +366,11 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				}
 			}
 		}
+	}
+
+	private IMethodBinding getObjectConstructor(CompilationUnit compilationUnit) {
+		final ITypeBinding binding= compilationUnit.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+		return Bindings.findMethodInType(binding, "Object", new ITypeBinding[0]); //$NON-NLS-1$
 	}
 
 	/*
