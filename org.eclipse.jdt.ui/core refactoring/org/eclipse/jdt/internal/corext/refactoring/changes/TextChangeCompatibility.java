@@ -14,6 +14,7 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
@@ -52,8 +53,7 @@ public class TextChangeCompatibility {
 		insert(root, edit);
 		change.addTextEditChangeGroup(new TextEditChangeGroup(
 			change,
-			new TextEditGroup(name, edit),
-			groupCategories));
+			new CategorizedTextEditGroup(name, edit, groupCategories)));
 	}
 	
 	public static void addTextEdit(TextChange change, String name, TextEdit[] edits) {
