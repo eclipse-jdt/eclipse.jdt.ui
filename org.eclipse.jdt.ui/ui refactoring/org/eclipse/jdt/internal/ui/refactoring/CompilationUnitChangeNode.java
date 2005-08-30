@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
- package org.eclipse.jdt.internal.ui.refactoring;
+package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.util.ArrayList;
 import java.util.Collections;
@@ -19,24 +19,98 @@ import java.util.Map;
 
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.jface.resource.ImageDescriptor;
+import org.eclipse.jface.util.Assert;
+
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
+
+import org.eclipse.ltk.ui.refactoring.LanguageElementNode;
+import org.eclipse.ltk.ui.refactoring.TextEditChangeNode;
 
 import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
 
-import org.eclipse.ltk.internal.ui.refactoring.TextEditChangeElement;
-import org.eclipse.ltk.internal.ui.refactoring.ChangeElement;
-import org.eclipse.ltk.internal.ui.refactoring.DefaultChangeElement;
-import org.eclipse.ltk.internal.ui.refactoring.IChangeElementChildrenCreator;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
-public class CompilationUnitChangeChildrenCreator implements IChangeElementChildrenCreator {
+import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
+
+public class CompilationUnitChangeNode extends TextEditChangeNode {
+
+	static final ChildNode[] EMPTY_CHILDREN= new ChildNode[0];
+	
+	private static class JavaLanguageNode extends LanguageElementNode {
+
+		private IJavaElement fJavaElement;
+		private static JavaElementImageProvider fgImageProvider= new JavaElementImageProvider();
+
+		public JavaLanguageNode(TextEditChangeNode parent, IJavaElement element) {
+			super(parent);
+			fJavaElement= element;
+			Assert.isNotNull(fJavaElement);
+		}
+		
+		public JavaLanguageNode(ChildNode parent, IJavaElement element) {
+			super(parent);
+			fJavaElement= element;
+			Assert.isNotNull(fJavaElement);
+		}
+		
+		public String getText() {
+			return JavaElementLabels.getElementLabel(fJavaElement, JavaElementLabels.ALL_DEFAULT);
+		}
+		
+		public ImageDescriptor getImageDescriptor() {
+			return fgImageProvider.getJavaImageDescriptor(
+				fJavaElement, 
+				JavaElementImageProvider.OVERLAY_ICONS | JavaElementImageProvider.SMALL_ICONS);
+		}
+		
+		public IRegion getTextRange() throws CoreException {
+			ISourceRange range= ((ISourceReference)fJavaElement).getSourceRange();
+			return new Region(range.getOffset(), range.getLength());
+		}	
+	}	
+	
+	public CompilationUnitChangeNode(TextEditBasedChange change) {
+		super(change);
+	}
+	
+	protected ChildNode[] createChildNodes() {
+		final TextEditBasedChange change= getTextEditBasedChange();
+		ICompilationUnit cunit= (ICompilationUnit) change.getAdapter(ICompilationUnit.class);
+		if (cunit != null) {
+			List children= new ArrayList(5);
+			Map map= new HashMap(20);
+			TextEditBasedChangeGroup[] changes= getSortedChangeGroups(change);
+			for (int i= 0; i < changes.length; i++) {
+				TextEditBasedChangeGroup tec= changes[i];
+				try {
+					IJavaElement element= getModifiedJavaElement(tec, cunit);
+					if (element.equals(cunit)) {
+						children.add(createTextEditGroupNode(this, tec));
+					} else {
+						JavaLanguageNode pjce= getChangeElement(map, element, children, this);
+						pjce.addChild(createTextEditGroupNode(pjce, tec));
+					}
+				} catch (JavaModelException e) {
+					children.add(createTextEditGroupNode(this, tec));
+				}
+			}
+			return (ChildNode[]) children.toArray(new ChildNode[children.size()]);
+		} else {
+			return EMPTY_CHILDREN;
+		}
+	}
+	
 	private static class OffsetComparator implements Comparator {
 		public int compare(Object o1, Object o2) {
 			TextEditBasedChangeGroup c1= (TextEditBasedChangeGroup)o1;
@@ -52,31 +126,6 @@ public class CompilationUnitChangeChildrenCreator implements IChangeElementChild
 		}
 		private int getOffset(TextEditBasedChangeGroup edit) {
 			return edit.getRegion().getOffset();
-		}
-	}
-	
-	public void createChildren(DefaultChangeElement changeElement) {
-		final TextEditBasedChange change= (TextEditBasedChange) changeElement.getChange();
-		ICompilationUnit cunit= (ICompilationUnit) change.getAdapter(ICompilationUnit.class);
-		if (cunit != null) {
-			List children= new ArrayList(5);
-			Map map= new HashMap(20);
-			TextEditBasedChangeGroup[] changes= getSortedChangeGroups(change);
-			for (int i= 0; i < changes.length; i++) {
-				TextEditBasedChangeGroup tec= changes[i];
-				try {
-					IJavaElement element= getModifiedJavaElement(tec, cunit);
-					if (element.equals(cunit)) {
-						children.add(new TextEditChangeElement(changeElement, tec));
-					} else {
-						PseudoJavaChangeElement pjce= getChangeElement(map, element, children, changeElement);
-						pjce.addChild(new TextEditChangeElement(pjce, tec));
-					}
-				} catch (JavaModelException e) {
-					children.add(new TextEditChangeElement(changeElement, tec));
-				}
-			}
-			changeElement.setChildren((ChangeElement[]) children.toArray(new ChangeElement[children.size()]));
 		}
 	}
 	
@@ -116,18 +165,18 @@ public class CompilationUnitChangeChildrenCreator implements IChangeElementChild
 		return result;
 	}
 	
-	private PseudoJavaChangeElement getChangeElement(Map map, IJavaElement element, List children, ChangeElement cunitChange) {
-		PseudoJavaChangeElement result= (PseudoJavaChangeElement)map.get(element);
+	private JavaLanguageNode getChangeElement(Map map, IJavaElement element, List children, TextEditChangeNode cunitChange) {
+		JavaLanguageNode result= (JavaLanguageNode)map.get(element);
 		if (result != null)
 			return result;
 		IJavaElement parent= element.getParent();
 		if (parent instanceof ICompilationUnit) {
-			result= new PseudoJavaChangeElement(cunitChange, element);
+			result= new JavaLanguageNode(cunitChange, element);
 			children.add(result);
 			map.put(element, result);
 		} else {
-			PseudoJavaChangeElement parentChange= getChangeElement(map, parent, children, cunitChange);
-			result= new PseudoJavaChangeElement(parentChange, element);
+			JavaLanguageNode parentChange= getChangeElement(map, parent, children, cunitChange);
+			result= new JavaLanguageNode(parentChange, element);
 			parentChange.addChild(result);
 			map.put(element, result);
 		}

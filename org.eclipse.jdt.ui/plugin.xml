@@ -110,13 +110,15 @@
 		<factory 
             class="org.eclipse.jdt.internal.ui.refactoring.RefactoringAdapterFactory" 
             adaptableType="org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange">
-            <adapter type="org.eclipse.ltk.internal.ui.refactoring.IChangeElementChildrenCreator"/>
+            
+            <adapter type="org.eclipse.ltk.ui.refactoring.TextEditChangeNode"/>
 		</factory>
 		
         <factory
-            adaptableType="org.eclipse.ltk.core.refactoring.CompositeTextFileChange"
-            class="org.eclipse.jdt.internal.ui.refactoring.RefactoringAdapterFactory">
-            <adapter type="org.eclipse.ltk.internal.ui.refactoring.IChangeElementChildrenCreator"/>
+            class="org.eclipse.jdt.internal.ui.refactoring.RefactoringAdapterFactory"
+            adaptableType="org.eclipse.ltk.core.refactoring.CompositeTextFileChange">
+            
+            <adapter type="org.eclipse.ltk.ui.refactoring.TextEditChangeNode"/>
         </factory>
 
    </extension>     	

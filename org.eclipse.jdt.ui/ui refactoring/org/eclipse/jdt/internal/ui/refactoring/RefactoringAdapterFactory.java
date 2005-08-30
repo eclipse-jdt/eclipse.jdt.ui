@@ -12,7 +12,9 @@
 
 import org.eclipse.core.runtime.IAdapterFactory;
 
-import org.eclipse.ltk.internal.ui.refactoring.IChangeElementChildrenCreator;
+import org.eclipse.ltk.ui.refactoring.TextEditChangeNode;
+
+import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.composite.CompositeCompilationUnitChange;
@@ -20,7 +22,7 @@ import org.eclipse.jdt.internal.corext.refactoring.composite.CompositeCompilatio
 public class RefactoringAdapterFactory implements IAdapterFactory {
 
 	private static final Class[] ADAPTER_LIST= new Class[] {
-		IChangeElementChildrenCreator.class
+		TextEditChangeNode.class
 	};
 
 	public Class[] getAdapterList() {
@@ -28,10 +30,10 @@ public class RefactoringAdapterFactory implements IAdapterFactory {
 	}
 
 	public Object getAdapter(Object object, Class key) {
-		if (!IChangeElementChildrenCreator.class.equals(key))
+		if (!TextEditChangeNode.class.equals(key))
 			return null;
 		if (!(object instanceof CompilationUnitChange) && !(object instanceof CompositeCompilationUnitChange))
 			return null;
-		return new CompilationUnitChangeChildrenCreator();
+		return new CompilationUnitChangeNode((TextEditBasedChange)object);
 	}
 }
