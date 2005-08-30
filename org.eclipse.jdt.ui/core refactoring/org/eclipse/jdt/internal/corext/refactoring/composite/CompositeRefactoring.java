@@ -68,7 +68,7 @@ public class CompositeRefactoring extends Refactoring {
 
 	/**
 	 * The created changes (element type: &lt;<code>ICompilationUnit</code>,
-	 * <code>AbstractTextEditChange</code>&gt;)
+	 * <code>CompositeTextFileChange</code>&gt;)
 	 */
 	private final Map fChanges= new HashMap();
 
@@ -381,20 +381,31 @@ public class CompositeRefactoring extends Refactoring {
 		} else if (change instanceof CompilationUnitChange) {
 			final CompilationUnitChange unitChange= (CompilationUnitChange) change;
 
-			final ICompilationUnit unit= unitChange.getCompilationUnit().getPrimary();
-			if (!fChanges.containsKey(unit)) {
+			registerCompilationUnitChange(unitChange);
+		}
+	}
 
-				final CompositeTextFileChange newChange= new CompositeCompilationUnitChange(unit.getElementName(), unit);
-				newChange.addChange(unitChange);
+	/**
+	 * Registers a compilation unit change.
+	 * 
+	 * @param change
+	 *            the change to register
+	 */
+	protected void registerCompilationUnitChange(final CompilationUnitChange change) {
 
-				fChanges.put(unit, newChange);
+		final ICompilationUnit unit= change.getCompilationUnit().getPrimary();
+		if (!fChanges.containsKey(unit)) {
 
-			} else {
+			final CompositeTextFileChange newChange= new CompositeCompilationUnitChange(unit.getElementName(), unit);
+			newChange.addChange(change);
 
-				final CompositeTextFileChange existingChange= (CompositeTextFileChange) fChanges.get(unit);
-				if (existingChange != null)
-					existingChange.addChange(unitChange);
-			}
+			fChanges.put(unit, newChange);
+
+		} else {
+
+			final CompositeTextFileChange existingChange= (CompositeTextFileChange) fChanges.get(unit);
+			if (existingChange != null)
+				existingChange.addChange(change);
 		}
 	}
 
@@ -472,25 +483,38 @@ public class CompositeRefactoring extends Refactoring {
 			final CompilationUnitChange unitChange= (CompilationUnitChange) change;
 
 			final TextEdit edit= unitChange.getEdit();
-			if (edit != null) {
-
-				final TextEdit cloned= edit.copy();
-
-				final ICompilationUnit unit= unitChange.getCompilationUnit();
-				final IDocument document= new Document(unit.getBuffer().getContents());
-
-				try {
-					cloned.apply(document, 0);
-				} catch (MalformedTreeException exception) {
-					JavaPlugin.log(exception);
-				} catch (BadLocationException exception) {
-					JavaPlugin.log(exception);
-				}
-
-				unit.getBuffer().setContents(document.get());
-				JavaModelUtil.reconcile(unit);
-			}
+			if (edit != null)
+				updateWorkingCopy(unitChange.getCompilationUnit(), edit.copy());
 		}
-		// Nothing to update here
+	}
+
+	/**
+	 * Updates the specified working copy with the text edit.
+	 * <p>
+	 * The passed text edit should be a copy, since it is altered during the
+	 * working copy update process.
+	 * </p>
+	 * 
+	 * @param unit
+	 *            the working copy to update
+	 * @param edit
+	 *            the text edit to apply
+	 * @throws JavaModelException
+	 *             if the working copy does not exist
+	 */
+	protected void updateWorkingCopy(final ICompilationUnit unit, final TextEdit edit) throws JavaModelException {
+
+		final IDocument document= new Document(unit.getBuffer().getContents());
+
+		try {
+			edit.apply(document, 0);
+		} catch (MalformedTreeException exception) {
+			JavaPlugin.log(exception);
+		} catch (BadLocationException exception) {
+			JavaPlugin.log(exception);
+		}
+
+		unit.getBuffer().setContents(document.get());
+		JavaModelUtil.reconcile(unit);
 	}
 }
