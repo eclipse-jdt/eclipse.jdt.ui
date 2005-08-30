@@ -149,7 +149,11 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 		}
 		fInsertPositions.add(null);
 	}
-	
+
+	protected IType getType() {
+		return fType;
+	}
+
 	private boolean asBoolean(String string, boolean defaultValue) {
 		if (string != null) {
 			return StringConverter.asBoolean(string, defaultValue);

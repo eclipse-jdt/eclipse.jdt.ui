@@ -40,6 +40,7 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
@@ -316,8 +317,14 @@ public class GenerateConstructorUsingFieldsSelectionDialog extends SourceActionD
 	}
 
 	protected Composite createVisibilityControlAndModifiers(Composite parent, final IVisibilityChangeListener visibilityChangeListener, int[] availableVisibilities, int correctVisibility) {
-		Composite visibilityComposite= createVisibilityControl(parent, visibilityChangeListener, availableVisibilities, correctVisibility);
-		return visibilityComposite;
+		int[] visibilities= availableVisibilities;
+		try {
+			if (getType().isEnum())
+				visibilities= new int[] { 0, Modifier.PRIVATE};
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		return createVisibilityControl(parent, visibilityChangeListener, visibilities, correctVisibility);
 	}
 
 	List getElementList() {
