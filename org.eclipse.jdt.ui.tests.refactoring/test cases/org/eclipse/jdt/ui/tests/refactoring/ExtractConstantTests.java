@@ -301,6 +301,14 @@ public class ExtractConstantTests extends RefactoringTest {
 		helper1(12, 19, 12, 28, false, true, "INTEGER", "INTEGER");
 	}
 
+	public void test31() throws Exception { //bug 104293
+		helper1(9, 32, 9, 44, true, false, "AS_LIST", "AS_LIST");
+	}
+	
+	public void test32() throws Exception { //bug 104293
+		helper1(7, 20, 7, 35, true, false, "STRING", "STRING");
+	}
+	
 	public void testZeroLengthSelection0() throws Exception {
 		helper1(5, 18, 5, 18, false, false, "CONSTANT", "_100");
 	}

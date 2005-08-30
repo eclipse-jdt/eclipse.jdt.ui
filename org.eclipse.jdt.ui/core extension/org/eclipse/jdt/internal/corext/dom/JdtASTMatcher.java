@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.internal.corext.Assert;
 
@@ -22,8 +23,17 @@ public class JdtASTMatcher extends ASTMatcher {
 		if (! isomorphic || !(other instanceof SimpleName))
 			return false;
 		SimpleName name= (SimpleName)other;
-		if (node.resolveBinding() != name.resolveBinding())
-			return false;
+		IBinding nodeBinding= node.resolveBinding();
+		IBinding otherBinding= name.resolveBinding();
+		if (nodeBinding == null) {
+			if (otherBinding != null) {
+				return false;
+			}
+		} else {
+			if (! Bindings.equals(nodeBinding, otherBinding)) {
+				return false;
+			}
+		}
 		if (node.resolveTypeBinding() != name.resolveTypeBinding())
 			return false;
 		return true;	
