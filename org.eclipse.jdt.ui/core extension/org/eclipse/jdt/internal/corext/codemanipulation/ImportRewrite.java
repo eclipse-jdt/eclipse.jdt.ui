@@ -229,4 +229,8 @@ public final class ImportRewrite {
 	public String[] getCreatedStaticImports() {
 	    return fImportsStructure.getCreatedStaticImports();
 	}
+	
+	public String toString() {
+		return fImportsStructure.toString();
+	}
 }
