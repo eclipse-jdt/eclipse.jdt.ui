@@ -536,12 +536,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	
 	private String getNewConstructorSource(AbstractTypeDeclaration declaration) throws CoreException {
 		String lineDelimiter= StubUtility.getLineDelimiterUsed(fCu);
-		String bodyStatement= fFieldName + '=' + getTempInitializerCode() + ';';
-		String constructorBody= CodeGeneration.getMethodBodyContent(fCu, getEnclosingTypeName(), getEnclosingTypeName(), true, bodyStatement, lineDelimiter);
-		if (constructorBody == null)
-			constructorBody= ""; //$NON-NLS-1$
-		return getNewConstructorComment() + JdtFlags.getVisibilityString(declaration.getModifiers()) + ' ' + getEnclosingTypeName() + '(' + "){" +  //$NON-NLS-1$
-		lineDelimiter + constructorBody + lineDelimiter + '}';
+		return getNewConstructorComment() + JdtFlags.getVisibilityString(declaration.getModifiers()) + ' ' + getEnclosingTypeName() + "(){" +  //$NON-NLS-1$
+		lineDelimiter + (fFieldName + '=' + getTempInitializerCode() + ';') + lineDelimiter + '}';
 	}
 
 	private String getNewConstructorComment() throws CoreException {

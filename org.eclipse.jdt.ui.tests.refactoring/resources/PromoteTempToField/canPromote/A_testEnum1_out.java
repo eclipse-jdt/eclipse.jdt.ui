@@ -9,7 +9,6 @@ enum A {
 	 */
 	A() {
 		fVar= 0;
-		// TODO Auto-generated constructor stub
 	}
 
 	public void f(){
