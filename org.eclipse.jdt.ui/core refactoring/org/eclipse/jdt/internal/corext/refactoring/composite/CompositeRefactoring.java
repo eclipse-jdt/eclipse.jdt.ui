@@ -363,19 +363,6 @@ public class CompositeRefactoring extends Refactoring {
 	}
 
 	/**
-	 * Manages a custom change.
-	 * <p>
-	 * The default implementation does nothing.
-	 * </p>
-	 * 
-	 * @param change
-	 *            the change to manage
-	 */
-	protected void manageCustomChange(final Change change) {
-		// Do nothing
-	}
-
-	/**
 	 * Registers a change created from a composable refactoring.
 	 * 
 	 * @param change
@@ -408,9 +395,7 @@ public class CompositeRefactoring extends Refactoring {
 				if (existingChange != null)
 					existingChange.addChange(unitChange);
 			}
-
-		} else
-			manageCustomChange(change);
+		}
 	}
 
 	/**
