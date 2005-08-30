@@ -91,6 +91,12 @@ public class CompositeRefactoring extends Refactoring {
 	private final String fName;
 
 	/**
+	 * Should initial conditions of the first enabled refactoring be checked
+	 * again during <code>checkFinalConditions</code>?
+	 */
+	private boolean fRecheckInitialConditions= false;
+
+	/**
 	 * The refactoring setups (element type: &lt;<code>Refactoring</code>,
 	 * <code>RefactoringArguments</code>&gt;)
 	 */
@@ -186,7 +192,7 @@ public class CompositeRefactoring extends Refactoring {
 							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.CompositeRefactoring_error_setup, refactoring.getName()));
 					}
 
-					if (!first)
+					if (!first && fRecheckInitialConditions)
 						status.merge(refactoring.checkInitialConditions(new SubProgressMonitor(monitor, 1)));
 
 					first= false;
@@ -358,14 +364,15 @@ public class CompositeRefactoring extends Refactoring {
 
 	/**
 	 * Manages a custom change.
+	 * <p>
+	 * The default implementation does nothing.
+	 * </p>
 	 * 
 	 * @param change
 	 *            the change to manage
 	 */
-	private void manageCustomChange(final Change change) {
-		// TW: implement
-
-		Assert.isTrue(false, "Not yet supported"); //$NON-NLS-1$
+	protected void manageCustomChange(final Change change) {
+		// Do nothing
 	}
 
 	/**
@@ -374,7 +381,7 @@ public class CompositeRefactoring extends Refactoring {
 	 * @param change
 	 *            the change to register
 	 */
-	private void registerChange(final Change change) {
+	protected void registerChange(final Change change) {
 
 		if (change instanceof CompositeChange) {
 
@@ -417,6 +424,18 @@ public class CompositeRefactoring extends Refactoring {
 	}
 
 	/**
+	 * Determines whether initial conditions of the first enabled refactoring
+	 * should be checked again during <code>checkFinalConditions</code>.
+	 * 
+	 * @param check
+	 *            <code>true</code> to check again, <code>false</code>
+	 *            otherwise
+	 */
+	public final void setRecheckInitialConditions(final boolean check) {
+		fRecheckInitialConditions= check;
+	}
+
+	/**
 	 * Sets a refactoring arguments for the specified composable refactoring.
 	 * 
 	 * @param refactoring
@@ -454,7 +473,7 @@ public class CompositeRefactoring extends Refactoring {
 	 * @throws JavaModelException
 	 *             if the working copy does not exist
 	 */
-	private void updateWorkingCopies(final Change change) throws JavaModelException {
+	protected void updateWorkingCopies(final Change change) throws JavaModelException {
 
 		if (change instanceof CompositeChange) {
 

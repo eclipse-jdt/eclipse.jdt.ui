@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
@@ -67,6 +66,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.NullLiteral;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -363,24 +363,24 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private RefactoringStatus checkExpression() throws JavaModelException {
 		Expression selectedExpression= getSelectedExpression().getAssociatedExpression();
+		if (selectedExpression != null) {
+			final ASTNode parent= selectedExpression.getParent();
+			if (selectedExpression instanceof NullLiteral) {
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_null_literals);
+			} else if (selectedExpression instanceof ArrayInitializer) {
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_array_initializer);
+			} else if (selectedExpression instanceof Assignment) {
+				if (parent instanceof Expression && !(parent instanceof ParenthesizedExpression))
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_assignment);
+				else
+					return null;
 
-		if (selectedExpression instanceof NullLiteral) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_null_literals); 
-		} else if (selectedExpression instanceof ArrayInitializer) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_array_initializer); 
-		} else if (selectedExpression instanceof Assignment) {
-			if (selectedExpression.getParent() instanceof Expression)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_assignment); 
-			else
-				return null;
-
-		} else if (selectedExpression instanceof ConditionalExpression) {
-			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_single_conditional_expression); 
-		} else if (selectedExpression instanceof SimpleName) {
-			if ((((SimpleName) selectedExpression)).isDeclaration())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_names_in_declarations); 
-			if (selectedExpression.getParent() instanceof QualifiedName && selectedExpression.getLocationInParent() == QualifiedName.NAME_PROPERTY || selectedExpression.getParent() instanceof FieldAccess && selectedExpression.getLocationInParent() == FieldAccess.NAME_PROPERTY)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_select_expression);
+			} else if (selectedExpression instanceof SimpleName) {
+				if ((((SimpleName) selectedExpression)).isDeclaration())
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_names_in_declarations);
+				if (parent instanceof QualifiedName && selectedExpression.getLocationInParent() == QualifiedName.NAME_PROPERTY || parent instanceof FieldAccess && selectedExpression.getLocationInParent() == FieldAccess.NAME_PROPERTY)
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_select_expression);
+			}
 		}
 
 		return null;
@@ -746,10 +746,15 @@ public class ExtractTempRefactoring extends Refactoring {
 
 		if (selectedFragment instanceof IExpressionFragment && !Checks.isInsideJavadoc(selectedFragment.getAssociatedNode())) {
 			fSelectedExpression= (IExpressionFragment) selectedFragment;
-		} else if (selectedFragment != null && selectedFragment.getAssociatedNode() instanceof ExpressionStatement) {
-			ExpressionStatement exprStatement= (ExpressionStatement) selectedFragment.getAssociatedNode();
-			Expression expression= exprStatement.getExpression();
-			fSelectedExpression= (IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(expression);
+		} else if (selectedFragment != null) {
+			if (selectedFragment.getAssociatedNode() instanceof ExpressionStatement) {
+				ExpressionStatement exprStatement= (ExpressionStatement) selectedFragment.getAssociatedNode();
+				Expression expression= exprStatement.getExpression();
+				fSelectedExpression= (IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(expression);
+			} else if (selectedFragment.getAssociatedNode() instanceof Assignment) {
+				Assignment assignment= (Assignment) selectedFragment.getAssociatedNode();
+				fSelectedExpression= (IExpressionFragment) ASTFragmentFactory.createFragmentForFullSubtree(assignment);
+			}
 		}
 
 		if (fSelectedExpression != null && Checks.isEnumCase(fSelectedExpression.getAssociatedExpression().getParent())) {

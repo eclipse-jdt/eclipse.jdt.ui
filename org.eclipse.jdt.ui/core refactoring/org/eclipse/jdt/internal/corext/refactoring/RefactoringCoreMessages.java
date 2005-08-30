@@ -196,7 +196,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractTempRefactoring_array_initializer;
 	public static String ExtractTempRefactoring_another_variable;
 	public static String ExtractTempRefactoring_assignment;
-	public static String ExtractTempRefactoring_single_conditional_expression;
 	public static String ExtractTempRefactoring_convention;
 	public static String ExtractTempRefactoring_checking_preconditions;
 	public static String ExtractTempRefactoring_preview;
@@ -318,8 +317,12 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameTypeRefactoring_local_type;
 	public static String RenameTypeRefactoring_member_type;
 	public static String RenameTypeRefactoring_another_type;
+	
 	public static String TextMatchUpdater_update;
 	public static String TextMatchUpdater_searching;
+	public static String TextMatchUpdater_textualMatches_name;
+	public static String TextMatchUpdater_textualMatches_description;
+	
 	public static String RippleMethodFinder_analizing_hierarchy;
 	public static String RefactoringAnalyzeUtil_name_collision;
 	public static String RefactoringSearchEngine_binary_match_ungrouped;

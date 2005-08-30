@@ -100,7 +100,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 		final ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setResolveBindings(true);
 		parser.setSource(buffer.get().toCharArray());
-		parser.setUnitName(fCompilationUnit.getElementName());
+		parser.setUnitName(fCompilationUnit.getResource().getFullPath().toString());
 		parser.setProject(fCompilationUnit.getJavaProject());
 		final CompilationUnit unit= (CompilationUnit) parser.createAST(new NullProgressMonitor());
 		ITypeBinding binding= null;

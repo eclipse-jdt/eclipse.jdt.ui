@@ -30,6 +30,9 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
+import org.eclipse.ltk.core.refactoring.GroupCategory;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
@@ -47,6 +50,11 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 class TextMatchUpdater {
 	
 	private static final String TEXT_EDIT_LABEL= RefactoringCoreMessages.TextMatchUpdater_update; 
+	
+	private static final GroupCategorySet TEXTUAL_MATCHES= new GroupCategorySet(
+		new GroupCategory("org.eclipse.jdt.internal.corext.textualMatches", //$NON-NLS-1$
+			RefactoringCoreMessages.TextMatchUpdater_textualMatches_name, 
+			RefactoringCoreMessages.TextMatchUpdater_textualMatches_description));
 	
 	private IJavaSearchScope fScope;
 	private TextChangeManager fManager;
@@ -171,7 +179,7 @@ class TextMatchUpdater {
 		for (Iterator resultIter= matches.iterator(); resultIter.hasNext();){
 			int matchStart= ((Integer) resultIter.next()).intValue();
 			ReplaceEdit edit= new ReplaceEdit(matchStart, fCurrentNameLength, fNewName);
-			TextChangeCompatibility.addTextEdit(fManager.get(cu), TEXT_EDIT_LABEL, edit);
+			TextChangeCompatibility.addTextEdit(fManager.get(cu), TEXT_EDIT_LABEL, edit, TEXTUAL_MATCHES);
 		}
 	}
 }

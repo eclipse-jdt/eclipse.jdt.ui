@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 
@@ -293,9 +294,17 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		}
 		List toImplement= new ArrayList();
 		IMethodBinding[] overridable= null;
-		if (binding != null)
-			overridable= StubUtility2.getOverridableMethods(fUnit.getAST(), binding, false);
-		else
+		if (binding != null) {
+			final IPackageBinding pack= binding.getPackage();
+			final IMethodBinding[] methods= StubUtility2.getOverridableMethods(fUnit.getAST(), binding, false);
+			List list= new ArrayList(methods.length);
+			for (int index= 0; index < methods.length; index++) {
+				final IMethodBinding cur= methods[index];
+				if (Bindings.isVisibleInHierarchy(cur, pack))
+					list.add(cur);
+			}
+			overridable= (IMethodBinding[]) list.toArray(new IMethodBinding[list.size()]);
+		} else
 			overridable= new IMethodBinding[] {};
 		for (int i= 0; i < overridable.length; i++) {
 			if (Modifier.isAbstract(overridable[i].getModifiers())) {

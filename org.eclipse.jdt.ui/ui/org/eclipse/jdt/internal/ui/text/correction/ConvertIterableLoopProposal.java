@@ -227,10 +227,6 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 								final IBinding result= ((Name) expression).resolveBinding();
 								if (result != null && result.equals(fIterator))
 									return replace(node);
-							} else if (expression instanceof MethodInvocation) {
-								final IBinding result= ((MethodInvocation) expression).resolveMethodBinding();
-								if (result != null && result.equals(fIterator))
-									return replace(node);
 							} else if (expression instanceof FieldAccess) {
 								final IBinding result= ((FieldAccess) expression).resolveFieldBinding();
 								if (result != null && result.equals(fIterator))
