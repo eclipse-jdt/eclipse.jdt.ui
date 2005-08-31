@@ -40,7 +40,13 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.jdt.core.ElementChangedEvent;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IElementChangedListener;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -60,6 +66,82 @@ import org.xml.sax.SAXException;
 
 public class TypeInfoHistory {
 	
+	private static class TypeHistoryDeltaListener implements IElementChangedListener {
+		public void elementChanged(ElementChangedEvent event) {
+			if (processDelta(event.getDelta())) {
+				TypeInfoHistory.getInstance().markAsInconsistent();
+			}
+		}
+		
+		/**
+		 * Computes whether the histroy needs a consistency check or not.
+		 * 
+		 * @param delta the Java element delta
+		 * 
+		 * @return <code>true</code> if consistency must be checked 
+		 *  <code>false</code> otherwise.
+		 */
+		private boolean processDelta(IJavaElementDelta delta) {
+			IJavaElement elem= delta.getElement();
+			
+			boolean isChanged= delta.getKind() == IJavaElementDelta.CHANGED;
+			boolean isRemoved= delta.getKind() == IJavaElementDelta.REMOVED;
+						
+			switch (elem.getElementType()) {
+				case IJavaElement.JAVA_PROJECT:
+					if (isRemoved || (isChanged && 
+							(delta.getFlags() & IJavaElementDelta.F_CLOSED) != 0)) {
+						return true;
+					}
+					return processChildrenDelta(delta);
+				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+					if (isRemoved || (isChanged && (
+							(delta.getFlags() & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0 ||
+							(delta.getFlags() & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0))) {
+						return true;
+					}
+					return processChildrenDelta(delta);
+				case IJavaElement.JAVA_MODEL:
+				case IJavaElement.PACKAGE_FRAGMENT:
+				case IJavaElement.CLASS_FILE:
+				case IJavaElement.TYPE: // type children can be inner classes
+					if (isRemoved) {
+						return true;
+					}				
+					return processChildrenDelta(delta);
+				case IJavaElement.COMPILATION_UNIT:
+					// Not the primary compilation unit. Ignore it 
+					if (!JavaModelUtil.isPrimary((ICompilationUnit) elem)) {
+						return false;
+					}
+
+					if (isRemoved || (isChanged && isUnknownStructuralChange(delta.getFlags()))) {
+						return true;
+					}
+					return processChildrenDelta(delta);
+				default:
+					// fields, methods, imports ect
+					return false;
+			}	
+		}
+		
+		private boolean isUnknownStructuralChange(int flags) {
+			if ((flags & IJavaElementDelta.F_CONTENT) == 0)
+				return false;
+			return (flags & IJavaElementDelta.F_FINE_GRAINED) == 0; 
+		}
+
+		private boolean processChildrenDelta(IJavaElementDelta delta) {
+			IJavaElementDelta[] children= delta.getAffectedChildren();
+			for (int i= 0; i < children.length; i++) {
+				if (processDelta(children[i])) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+	
 	private static final String NODE_ROOT= "typeInfoHistroy"; //$NON-NLS-1$
 	private static final String NODE_TYPE_INFO= "typeInfo"; //$NON-NLS-1$
 	private static final String NODE_NAME= "name"; //$NON-NLS-1$
@@ -77,6 +159,9 @@ public class TypeInfoHistory {
 		}
 	};
 	
+	private boolean fNeedsConsistencyCheck;
+	private IElementChangedListener fDeltaListener;
+	
 	private static final String FILENAME= "TypeInfoHistory.xml"; //$NON-NLS-1$
 	private static TypeInfoHistory fgInstance;
 	
@@ -86,8 +171,26 @@ public class TypeInfoHistory {
 		return fgInstance;
 	}
 	
+	public static void shutdown() {
+		if (fgInstance == null)
+			return;
+		fgInstance.doShutdown();
+		
+	}
+	
 	private TypeInfoHistory() {
+		fNeedsConsistencyCheck= true;
+		fDeltaListener= new TypeHistoryDeltaListener();
+		JavaCore.addElementChangedListener(fDeltaListener);
 		load();
+	}
+	
+	public synchronized void markAsInconsistent() {
+		fNeedsConsistencyCheck= true;
+	}
+	
+	public synchronized boolean needConsistencyCheck() {
+		return fNeedsConsistencyCheck;
 	}
 	
 	public synchronized boolean isEmpty() {
@@ -115,6 +218,7 @@ public class TypeInfoHistory {
 			monitor.worked(1);
 		}
 		monitor.done();
+		fNeedsConsistencyCheck= false;
 	}
 	
 	public synchronized void accessed(TypeInfo info) {
@@ -290,4 +394,8 @@ public class TypeInfoHistory {
 	private static JavaUIException createException(Throwable t, String message) {
 		return new JavaUIException(JavaUIStatus.createError(IStatus.ERROR, message, t));
 	}	
+	
+	private void doShutdown() {
+		JavaCore.removeElementChangedListener(fDeltaListener);
+	}
 }
