@@ -14,11 +14,12 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
-import org.eclipse.text.edits.TextEditGroup;
-
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
+import org.eclipse.ltk.core.refactoring.GroupCategory;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
@@ -74,6 +75,14 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * @since 3.1
  */
 public final class MemberVisibilityAdjustor {
+
+	/**
+	 * The visibility group category set.
+	 * 
+	 * @since 3.2
+	 */
+	public static final GroupCategorySet SET_VISIBILITY_ADJUSTMENTS= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.visibilityAdjustments", //$NON-NLS-1$
+			RefactoringCoreMessages.MemberVisibilityAdjustor_adjustments_name, RefactoringCoreMessages.MemberVisibilityAdjustor_adjustments_description));
 
 	/** Description of a member visibility adjustment */
 	public static class IncomingMemberVisibilityAdjustment implements IVisibilityAdjustment {
@@ -152,7 +161,7 @@ public final class MemberVisibilityAdjustor {
 		 * @param status the refactoring status, or <code>null</code>
 		 * @throws JavaModelException if an error occurs
 		 */
-		protected final void rewriteVisibility(final MemberVisibilityAdjustor adjustor, final ASTRewrite rewrite, final CompilationUnit root, final TextEditGroup group, final RefactoringStatus status) throws JavaModelException {
+		protected final void rewriteVisibility(final MemberVisibilityAdjustor adjustor, final ASTRewrite rewrite, final CompilationUnit root, final CategorizedTextEditGroup group, final RefactoringStatus status) throws JavaModelException {
 			Assert.isNotNull(adjustor);
 			Assert.isNotNull(rewrite);
 			Assert.isNotNull(root);
@@ -212,7 +221,7 @@ public final class MemberVisibilityAdjustor {
 						rewriteVisibility(adjustor, adjustor.fRewrite, adjustor.fRoot, null, fRefactoringStatus);
 					else {
 						final CompilationUnitRewrite rewrite= adjustor.getCompilationUnitRewrite(fMember.getCompilationUnit());
-						rewriteVisibility(adjustor, rewrite.getASTRewrite(), rewrite.getRoot(), rewrite.createGroupDescription(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility, getLabel(getKeyword()))), fRefactoringStatus);
+						rewriteVisibility(adjustor, rewrite.getASTRewrite(), rewrite.getRoot(), rewrite.createCategorizedGroupDescription(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility, getLabel(getKeyword())), SET_VISIBILITY_ADJUSTMENTS), fRefactoringStatus);
 					}
 				} else if (fRefactoringStatus != null)
 					adjustor.fStatus.merge(fRefactoringStatus);
@@ -314,7 +323,7 @@ public final class MemberVisibilityAdjustor {
 				monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_adjusting);
 				if (fNeedsRewriting) {
 					final CompilationUnitRewrite rewrite= adjustor.getCompilationUnitRewrite(fMember.getCompilationUnit());
-					rewriteVisibility(adjustor, rewrite.getASTRewrite(), rewrite.getRoot(), rewrite.createGroupDescription(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility, getLabel(getKeyword()))), fRefactoringStatus);
+					rewriteVisibility(adjustor, rewrite.getASTRewrite(), rewrite.getRoot(), rewrite.createCategorizedGroupDescription(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility, getLabel(getKeyword())), SET_VISIBILITY_ADJUSTMENTS), fRefactoringStatus);
 				}
 				monitor.worked(1);
 			} finally {

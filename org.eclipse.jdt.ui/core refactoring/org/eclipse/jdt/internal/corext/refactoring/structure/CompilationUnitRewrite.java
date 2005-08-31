@@ -25,6 +25,9 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
@@ -117,7 +120,13 @@ public class CompilationUnitRewrite {
 		clearASTRewrite();
 		fImportRewrite= null;
 	}
-	
+
+	public CategorizedTextEditGroup createCategorizedGroupDescription(String name, GroupCategorySet set) {
+		CategorizedTextEditGroup result= new CategorizedTextEditGroup(name, set);
+		fTextEditGroups.add(result);
+		return result;
+	}
+
 	public TextEditGroup createGroupDescription(String name) {
 		TextEditGroup result= new TextEditGroup(name);
 		fTextEditGroups.add(result);

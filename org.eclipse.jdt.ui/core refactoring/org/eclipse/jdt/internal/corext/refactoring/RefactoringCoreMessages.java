@@ -322,6 +322,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String TextMatchUpdater_searching;
 	public static String TextMatchUpdater_textualMatches_name;
 	public static String TextMatchUpdater_textualMatches_description;
+	public static String MemberVisibilityAdjustor_adjustments_name;
+	public static String MemberVisibilityAdjustor_adjustments_description;
 	
 	public static String RippleMethodFinder_analizing_hierarchy;
 	public static String RefactoringAnalyzeUtil_name_collision;
