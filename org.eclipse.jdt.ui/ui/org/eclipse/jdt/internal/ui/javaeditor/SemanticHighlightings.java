@@ -716,8 +716,8 @@ public class SemanticHighlightings {
 				return false;
 
 			ITypeBinding currentType= Bindings.getBindingOfParentType(node);
-			ITypeBinding declaringType= ((IMethodBinding)binding).getDeclaringClass();
-			if (currentType == declaringType)
+			ITypeBinding declaringType= ((IMethodBinding) binding).getDeclaringClass();
+			if (currentType == declaringType || currentType == null)
 				return false;
 
 			return Bindings.isSuperType(declaringType, currentType);
