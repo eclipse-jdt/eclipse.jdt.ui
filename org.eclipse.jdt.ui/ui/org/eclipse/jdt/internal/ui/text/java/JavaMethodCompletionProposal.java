@@ -43,6 +43,8 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	protected final static char[] METHOD_TRIGGERS= new char[] { ';', ',', '.', '\t', '[', ' ' };
 	/** Triggers for method proposals. Do not modify. */
 	protected final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-', ' ' };
+	/** Triggers for method name proposals (static imports). Do not modify. */
+	protected final static char[] METHOD_NAME_TRIGGERS= new char[] { ';' };
 	
 	protected static class ExitPolicy implements IExitPolicy {
 	
@@ -155,6 +157,8 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	}
 	
 	protected char[] computeTriggerCharacters() {
+		if (fProposal.getKind() == CompletionProposal.METHOD_NAME_REFERENCE)
+			return METHOD_NAME_TRIGGERS;
 		if (hasParameters())
 			return METHOD_WITH_ARGUMENTS_TRIGGERS;
 		return METHOD_TRIGGERS;
