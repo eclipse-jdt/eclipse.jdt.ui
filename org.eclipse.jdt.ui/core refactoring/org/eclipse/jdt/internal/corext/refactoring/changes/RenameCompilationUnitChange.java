@@ -10,11 +10,19 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -25,11 +33,12 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 
 public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange {
+
+	private static final String ID_RENAME_COMPILATION_UNIT= "org.eclipse.jdt.ui.rename.compilationunit"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 
 	public RenameCompilationUnitChange(ICompilationUnit cu, String newName) {
 		this(ResourceUtil.getResource(cu).getFullPath(), cu.getElementName(), newName, IResource.NULL_STAMP);
@@ -55,7 +64,7 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 		return Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_name, new String[]{getOldName(), getNewName()}); 
 	}
 	
-	/* non java-doc
+	/*
 	 * @see AbstractRenameChange#createUndoChange()
 	 */
 	protected Change createUndoChange(long stampToRestore) throws JavaModelException{
@@ -66,5 +75,15 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 		ICompilationUnit cu= (ICompilationUnit)getModifiedElement();
 		if (cu != null)
 			cu.rename(getNewName(), false, pm);
+	}
+
+	/*
+	 * @see org.eclipse.ltk.core.refactoring.Change#getRefactoringDescriptor()
+	 */
+	public RefactoringDescriptor getRefactoringDescriptor() {
+		final Map arguments= new HashMap();
+		arguments.put(ATTRIBUTE_PATH, getResourcePath());
+		arguments.put(ATTRIBUTE_NAME, getNewName());
+		return new RefactoringDescriptor(ID_RENAME_COMPILATION_UNIT, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { getOldName(), getNewName()}), null, arguments);
 	}
 }

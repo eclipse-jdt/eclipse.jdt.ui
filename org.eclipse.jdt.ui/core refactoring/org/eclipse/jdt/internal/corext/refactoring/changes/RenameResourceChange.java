@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -17,17 +21,24 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * Represents a change that renames a given resource
  */
 public class RenameResourceChange extends JDTChange {
+
+	private static final String ID_RENAME_RESOURCE= "org.eclipse.jdt.ui.rename.resource"; //$NON-NLS-1$
+
+	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
+
+	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 
 	/*
 	 * we cannot use handles because they became invalid when you rename the resource.
@@ -113,5 +124,15 @@ public class RenameResourceChange extends JDTChange {
 
 	public Object getModifiedElement() {
 		return getResource();
+	}
+
+	/*
+	 * @see org.eclipse.ltk.core.refactoring.Change#getRefactoringDescriptor()
+	 */
+	public RefactoringDescriptor getRefactoringDescriptor() {
+		final Map arguments= new HashMap();
+		arguments.put(ATTRIBUTE_PATH, fResourcePath.toPortableString());
+		arguments.put(ATTRIBUTE_NAME, fNewName);
+		return new RefactoringDescriptor(ID_RENAME_RESOURCE, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { getResource().getName(), fNewName}), null, arguments);
 	}
 }

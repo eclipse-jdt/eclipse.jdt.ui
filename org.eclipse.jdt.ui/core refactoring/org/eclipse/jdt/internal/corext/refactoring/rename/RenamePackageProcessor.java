@@ -11,12 +11,15 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -39,6 +42,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -79,6 +83,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -87,7 +92,15 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 public class RenamePackageProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
-	
+
+	private static final String ID_RENAME_PACKAGE= "org.eclipse.jdt.ui.rename.package"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_HANDLE= "handle"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_PATTERNS= "patterns"; //$NON-NLS-1$
+
 	private IPackageFragment fPackage;
 	
 	/** references to fPackage (can include star imports which also import namesake package fragments) */
@@ -587,19 +600,31 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	// ----------- Changes ---------------
 	
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		try{
-			pm.beginTask(RefactoringCoreMessages.RenamePackageRefactoring_creating_change, 1); 
-			final DynamicValidationStateChange result= new DynamicValidationStateChange(
-				RefactoringCoreMessages.Change_javaChanges); 
-	
+		try {
+			pm.beginTask(RefactoringCoreMessages.RenamePackageRefactoring_creating_change, 1);
+			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges) {
+				public RefactoringDescriptor getRefactoringDescriptor() {
+					final Map arguments= new HashMap();
+					arguments.put(ATTRIBUTE_HANDLE, fPackage.getHandleIdentifier());
+					arguments.put(ATTRIBUTE_NAME, getNewElementName());
+					arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
+					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+					arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
+					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
+					String project= null;
+					IJavaProject javaProject= fPackage.getJavaProject();
+					if (javaProject != null)
+						project= javaProject.getElementName();
+					return new RefactoringDescriptor(ID_RENAME_PACKAGE, project, MessageFormat.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description, new String[] { fPackage.getElementName(), getNewElementName()}), null, arguments);
+				}
+			};
 			result.addAll(fChangeManager.getAllChanges());
-							
 			result.add(new RenamePackageChange(fPackage, getNewElementName()));
 			pm.worked(1);
 			return result;
-		} finally{
+		} finally {
 			pm.done();
-		}	
+		}
 	}
 	
 	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {

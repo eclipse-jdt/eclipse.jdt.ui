@@ -10,13 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
@@ -51,6 +55,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
@@ -60,6 +66,11 @@ import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
  * Rename processor to rename type parameters.
  */
 public final class RenameTypeParameterProcessor extends JavaRenameProcessor implements INameUpdating, IReferenceUpdating {
+
+	private static final String ID_RENAME_TYPE_PARAMETER= "org.eclipse.jdt.ui.rename.type.parameter"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_HANDLE= "handle"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 
 	/**
 	 * AST visitor which searches for occurrences of the type parameter.
@@ -249,7 +260,25 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	public final Change createChange(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 		try {
-			return fChange;
+			Change change= fChange;
+			if (change != null) {
+				final CompositeChange composite= new CompositeChange("", new Change[] { change}) { //$NON-NLS-1$
+					public RefactoringDescriptor getRefactoringDescriptor() {
+						final Map arguments= new HashMap();
+						arguments.put(ATTRIBUTE_HANDLE, fTypeParameter.getParent().getHandleIdentifier());
+						arguments.put(ATTRIBUTE_NAME, getNewElementName());
+						arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+						String project= null;
+						IJavaProject javaProject= fTypeParameter.getJavaProject();
+						if (javaProject != null)
+							project= javaProject.getElementName();
+						return new RefactoringDescriptor(ID_RENAME_TYPE_PARAMETER, project, MessageFormat.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description, new String[] { fTypeParameter.getElementName(), getNewElementName()}), null, arguments);
+					}
+				};
+				composite.markAsSynthetic();
+				change= composite;
+			}
+			return change;
 		} finally {
 			monitor.done();
 		}

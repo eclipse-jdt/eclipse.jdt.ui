@@ -802,7 +802,19 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameSourceFolderChange_rename_archive;
 	public static String RenameSourceFolderChange_rename_external;
 	public static String RenameSourceFolderChange_rename_linked;
-	
+
+	public static String RenameCompilationUnitChange_descriptor_description;
+	public static String RenameResourceChange_descriptor_description;
+	public static String RenameFieldProcessor_descriptor_description;
+	public static String RenameEnumConstProcessor_descriptor_description;
+	public static String RenameJavaProjectChange_descriptor_description;
+	public static String RenameLocalVariableProcessor_descriptor_description;
+	public static String RenameMethodProcessor_descriptor_description;
+	public static String RenamePackageProcessor_descriptor_description;
+	public static String RenameSourceFolderChange_descriptor_description;
+	public static String RenameTypeParameterProcessor_descriptor_description;
+	public static String RenameTypeProcessor_descriptor_description;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
 	}

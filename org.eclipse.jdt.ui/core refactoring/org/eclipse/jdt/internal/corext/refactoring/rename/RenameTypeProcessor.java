@@ -10,10 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.text.edits.ReplaceEdit;
@@ -29,6 +32,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -39,6 +43,7 @@ import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
@@ -85,7 +90,15 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating {
-	
+
+	private static final String ID_RENAME_TYPE= "org.eclipse.jdt.ui.rename.type"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_HANDLE= "handle"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_PATTERNS= "patterns"; //$NON-NLS-1$
+
 	private IType fType;
 	private SearchResultGroup[] fReferences;
 	private TextChangeManager fChangeManager;
@@ -631,15 +644,25 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 	
 	//------------- Changes ---------------
-	
-	/*
-	 * non java-doc
-	 * @see IRefactoring#createChange
-	 */
-	public Change createChange(IProgressMonitor pm) throws CoreException{
-		pm.beginTask(RefactoringCoreMessages.RenameTypeRefactoring_creating_change, 4); 
-		final DynamicValidationStateChange result= new DynamicValidationStateChange(
-			RefactoringCoreMessages.Change_javaChanges); 
+
+	public Change createChange(IProgressMonitor pm) throws CoreException {
+		pm.beginTask(RefactoringCoreMessages.RenameTypeRefactoring_creating_change, 4);
+		final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges) {
+			public RefactoringDescriptor getRefactoringDescriptor() {
+				final Map arguments= new HashMap();
+				arguments.put(ATTRIBUTE_HANDLE, fType.getHandleIdentifier());
+				arguments.put(ATTRIBUTE_NAME, getNewElementName());
+				arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
+				arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+				arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
+				arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
+				String project= null;
+				IJavaProject javaProject= fType.getJavaProject();
+				if (javaProject != null)
+					project= javaProject.getElementName();
+				return new RefactoringDescriptor(ID_RENAME_TYPE, project, MessageFormat.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { fType.getFullyQualifiedName('.'), getNewElementName()}), null, arguments);
+			}
+		};
 		result.addAll(fChangeManager.getAllChanges());
 		if (willRenameCU()) {
 			IResource resource= ResourceUtil.getResource(fType);
@@ -649,8 +672,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				result.add(new RenameCompilationUnitChange(fType.getCompilationUnit(), getNewElementName() + ".java")); //$NON-NLS-1$
 			}
 		}
-		pm.worked(1);	
-		return result;	
+		pm.worked(1);
+		return result;
 	}
 	
 	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {

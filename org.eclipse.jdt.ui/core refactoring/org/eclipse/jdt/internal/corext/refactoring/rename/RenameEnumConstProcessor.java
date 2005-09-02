@@ -10,22 +10,31 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 
+	private static final String ID_RENAME_ENUM_CONSTANT= "org.eclipse.jdt.ui.rename.enum.constant"; //$NON-NLS-1$
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameEnumConstProcessor"; //$NON-NLS-1$
 
 	public RenameEnumConstProcessor(IField field) {
@@ -81,5 +90,31 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	 */
 	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
 		// Don't load participants to rename getters and setters
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor#createChange(org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	public Change createChange(IProgressMonitor pm) throws CoreException {
+		Change change= super.createChange(pm);
+		if (change != null) {
+			final CompositeChange composite= new CompositeChange("", new Change[] { change}) { //$NON-NLS-1$
+				public final RefactoringDescriptor getRefactoringDescriptor() {
+					final Map arguments= new HashMap();
+					arguments.put(ATTRIBUTE_HANDLE, getField().getHandleIdentifier());
+					arguments.put(ATTRIBUTE_NAME, getNewElementName());
+					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
+					String project= null;
+					IJavaProject javaProject= getField().getJavaProject();
+					if (javaProject != null)
+						project= javaProject.getElementName();
+					return new RefactoringDescriptor(ID_RENAME_ENUM_CONSTANT, project, MessageFormat.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description, new String[] { getField().getElementName(), getNewElementName()}), null, arguments);
+				}
+			};
+			composite.markAsSynthetic();
+			change= composite;
+		}
+		return change;
 	}
 }

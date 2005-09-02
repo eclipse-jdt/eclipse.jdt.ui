@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
@@ -26,8 +29,20 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.jface.text.Region;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
@@ -45,8 +60,6 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
-import org.eclipse.jface.text.Region;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -62,14 +75,13 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
-
 public class RenameLocalVariableProcessor extends JavaRenameProcessor implements INameUpdating, IReferenceUpdating {
+
+	private static final String ID_RENAME_LOCAL_VARIABLE= "org.eclipse.jdt.ui.rename.local.variable"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_HANDLE= "handle"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_RANGE= "variable"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 
 	private static class ProblemNodeFinder {
 	
@@ -384,14 +396,29 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
         }
         return result;
     }
-    
-	
-	/* non java-doc
-	 * @see IRefactoring#createChange(IProgressMonitor)
-	 */
+
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.done();
-		return fChange;
+		Change change= fChange;
+		if (change != null) {
+			final CompositeChange composite= new CompositeChange("", new Change[] { change}) { //$NON-NLS-1$
+				public RefactoringDescriptor getRefactoringDescriptor() {
+					final Map arguments= new HashMap();
+					arguments.put(ATTRIBUTE_HANDLE, fCu.getHandleIdentifier());
+					arguments.put(ATTRIBUTE_NAME, getNewElementName());
+					final ISourceRange range= fLocalVariable.getNameRange();
+					arguments.put(ATTRIBUTE_RANGE, Integer.valueOf(range.getOffset()).toString() + " " + Integer.valueOf(range.getLength()).toString()); //$NON-NLS-1$
+					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+					String project= null;
+					IJavaProject javaProject= fCu.getJavaProject();
+					if (javaProject != null)
+						project= javaProject.getElementName();
+					return new RefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, MessageFormat.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, fNewName}), null, arguments);
+				}
+			};
+			composite.markAsSynthetic();
+			change= composite;
+		}
+		return change;
 	}
-
 }

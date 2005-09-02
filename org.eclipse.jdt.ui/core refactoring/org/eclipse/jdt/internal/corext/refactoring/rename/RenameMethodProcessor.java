@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.text.edits.ReplaceEdit;
@@ -25,6 +28,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -33,6 +37,7 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
@@ -72,7 +77,12 @@ import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating {
-	
+
+	private static final String ID_RENAME_METHOD= "org.eclipse.jdt.ui.rename.method"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_HANDLE= "handle"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
+
 	private SearchResultGroup[] fOccurrences;
 	private boolean fUpdateReferences;
 	private IMethod fMethod;
@@ -563,11 +573,23 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	//-------- changes -----
 	
 	public final Change createChange(IProgressMonitor pm) throws CoreException {
-		try{
-			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, fChangeManager.getAllChanges()); 
-		} finally{
+		try {
+			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, fChangeManager.getAllChanges()) {
+				public RefactoringDescriptor getRefactoringDescriptor() {
+					final Map arguments= new HashMap();
+					arguments.put(ATTRIBUTE_HANDLE, fMethod.getHandleIdentifier());
+					arguments.put(ATTRIBUTE_NAME, getNewElementName());
+					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+					String project= null;
+					IJavaProject javaProject= fMethod.getJavaProject();
+					if (javaProject != null)
+						project= javaProject.getElementName();
+					return new RefactoringDescriptor(ID_RENAME_METHOD, project, MessageFormat.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description, new String[] { fMethod.getElementName(), getNewElementName()}), null, arguments);
+				}
+			};
+		} finally {
 			pm.done();
-		}	
+		}
 	}
 	
 	private TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus status) throws CoreException {

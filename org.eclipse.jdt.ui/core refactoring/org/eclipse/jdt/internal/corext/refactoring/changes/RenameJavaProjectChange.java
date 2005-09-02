@@ -10,6 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,6 +24,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -33,6 +38,11 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
+
+	private static final String ID_RENAME_JAVA_PROJECT= "org.eclipse.jdt.ui.rename.java.project"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 
 	private boolean fUpdateReferences;
 	
@@ -133,5 +143,13 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	
 	private IProject[] getReferencingProjects() {
 		return  getProject().getReferencingProjects();
+	}
+
+	public RefactoringDescriptor getRefactoringDescriptor() {
+		final Map arguments= new HashMap();
+		arguments.put(ATTRIBUTE_PATH, getResourcePath());
+		arguments.put(ATTRIBUTE_NAME, getNewName());
+		arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+		return new RefactoringDescriptor(ID_RENAME_JAVA_PROJECT, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameJavaProjectChange_descriptor_description, new String[] { getOldName(), getNewName()}), null, arguments);
 	}
 }

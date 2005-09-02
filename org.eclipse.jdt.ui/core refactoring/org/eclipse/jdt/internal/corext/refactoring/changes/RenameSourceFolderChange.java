@@ -10,12 +10,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
+import java.text.MessageFormat;
+import java.util.HashMap;
+import java.util.Map;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
@@ -24,10 +33,11 @@ import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChan
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-
 public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
+
+	private static final String ID_RENAME_SOURCE_FOLDER= "org.eclipse.jdt.ui.rename.source.folder"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 
 	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) {
 		this(sourceFolder.getPath(), sourceFolder.getElementName(), newName, IResource.NULL_STAMP);
@@ -118,5 +128,16 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 		}
 				
 		return result;
+	}
+
+	public RefactoringDescriptor getRefactoringDescriptor() {
+		final Map arguments= new HashMap();
+		arguments.put(ATTRIBUTE_PATH, getResourcePath());
+		arguments.put(ATTRIBUTE_NAME, getNewName());
+		String project= null;
+		final IProject container= getResource().getProject();
+		if (container != null)
+			project= container.getName();
+		return new RefactoringDescriptor(ID_RENAME_SOURCE_FOLDER, project, MessageFormat.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { getOldName(), getNewName()}), null, arguments);
 	}
 }

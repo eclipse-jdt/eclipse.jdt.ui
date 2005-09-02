@@ -9,8 +9,11 @@
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
+import java.text.MessageFormat;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -22,8 +25,19 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
@@ -56,26 +70,22 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
-import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
-import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
-
 public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating {
-	
-	private static final String DECLARED_SUPERTYPE= RefactoringCoreMessages.RenameFieldRefactoring_declared_in_supertype; 
+
+	private static final String ID_RENAME_FIELD= "org.eclipse.jdt.ui.rename.field"; //$NON-NLS-1$
+	protected static final String ATTRIBUTE_HANDLE= "handle"; //$NON-NLS-1$
+	protected static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
+	protected static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_RENAME_GETTER= "getter"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_RENAME_SETTER= "setter"; //$NON-NLS-1$
+	protected static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
+
 	private IField fField;
 	private SearchResultGroup[] fReferences;
 	private TextChangeManager fChangeManager;
 	private ICompilationUnit[] fNewWorkingCopies;
-	private boolean fUpdateReferences;
-	
-	private boolean fUpdateTextualMatches;
-	
+	protected boolean fUpdateReferences;
+	protected boolean fUpdateTextualMatches;
 	private boolean fRenameGetter;
 	private boolean fRenameSetter;
 
@@ -212,7 +222,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		if (MethodChecks.isVirtual(getter)) {
 			final ITypeHierarchy hierarchy= getter.getDeclaringType().newTypeHierarchy(monitor);
 			if (MethodChecks.isDeclaredInInterface(getter, hierarchy, monitor) != null || MethodChecks.overridesAnotherMethod(getter, hierarchy) != null)
-				return DECLARED_SUPERTYPE;
+				return RefactoringCoreMessages.RenameFieldRefactoring_declared_in_supertype;
 		}
 		return null;	
 	}
@@ -231,7 +241,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		if (MethodChecks.isVirtual(setter)) {
 			final ITypeHierarchy hierarchy= setter.getDeclaringType().newTypeHierarchy(monitor);
 			if (MethodChecks.isDeclaredInInterface(setter, hierarchy, monitor) != null || MethodChecks.overridesAnotherMethod(setter, hierarchy) != null)
-				return DECLARED_SUPERTYPE;
+				return RefactoringCoreMessages.RenameFieldRefactoring_declared_in_supertype;
 		}
 		return null;	
 	}
@@ -457,15 +467,27 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	
 	// ---------- Changes -----------------
 
-	/* non java-doc
-	 * IRefactoring#createChange
-	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
-		try{
-			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, fChangeManager.getAllChanges()); 
-		} finally{
+		try {
+			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, fChangeManager.getAllChanges()) {
+				public final RefactoringDescriptor getRefactoringDescriptor() {
+					final Map arguments= new HashMap();
+					arguments.put(ATTRIBUTE_HANDLE, fField.getHandleIdentifier());
+					arguments.put(ATTRIBUTE_NAME, getNewElementName());
+					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
+					arguments.put(ATTRIBUTE_RENAME_GETTER, Boolean.valueOf(fRenameGetter));
+					arguments.put(ATTRIBUTE_RENAME_SETTER, Boolean.valueOf(fRenameSetter));
+					String project= null;
+					IJavaProject javaProject= fField.getJavaProject();
+					if (javaProject != null)
+						project= javaProject.getElementName();
+					return new RefactoringDescriptor(ID_RENAME_FIELD, project, MessageFormat.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { fField.getElementName(), getNewElementName()}), null, arguments);
+				}
+			};
+		} finally {
 			pm.done();
-		}	
+		}
 	}
 	
 	//----------
