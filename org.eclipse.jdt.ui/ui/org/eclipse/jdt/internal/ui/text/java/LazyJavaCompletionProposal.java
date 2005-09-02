@@ -44,6 +44,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
@@ -510,11 +511,22 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 		if (offset < getReplacementOffset())
 			return false;
 
-		/*
-		 * See http://dev.eclipse.org/bugs/show_bug.cgi?id=17667
-		String word= fReplacementString;
-		 */
-		boolean validated= startsWith(document, offset, getDisplayString()); // TODO remove early display string reference
+		String expected;
+		if (fProposal.getKind() == CompletionProposal.METHOD_NAME_REFERENCE) {
+			// static imports - includes package & type name
+			StringBuffer buf= new StringBuffer();
+			buf.append(Signature.toCharArray(fProposal.getDeclarationSignature()));
+			buf.append('.');
+			buf.append(getDisplayString()); // TODO remove early display string reference
+			expected= buf.toString();
+		} else {
+			/*
+			 * See http://dev.eclipse.org/bugs/show_bug.cgi?id=17667
+			String word= fReplacementString;
+			 */
+			expected= getDisplayString(); // TODO remove early display string reference
+		}
+		boolean validated= startsWith(document, offset, expected);
 
 		if (validated && event != null) {
 			// adapt replacement range to document change
