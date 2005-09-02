@@ -82,7 +82,7 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 	 */
 	public RefactoringDescriptor getRefactoringDescriptor() {
 		final Map arguments= new HashMap();
-		arguments.put(ATTRIBUTE_PATH, getResourcePath());
+		arguments.put(ATTRIBUTE_PATH, getResourcePath().toPortableString());
 		arguments.put(ATTRIBUTE_NAME, getNewName());
 		return new RefactoringDescriptor(ID_RENAME_COMPILATION_UNIT, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { getOldName(), getNewName()}), null, arguments);
 	}

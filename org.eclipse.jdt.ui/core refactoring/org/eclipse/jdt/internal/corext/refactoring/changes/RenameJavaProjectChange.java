@@ -147,7 +147,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 
 	public RefactoringDescriptor getRefactoringDescriptor() {
 		final Map arguments= new HashMap();
-		arguments.put(ATTRIBUTE_PATH, getResourcePath());
+		arguments.put(ATTRIBUTE_PATH, getResourcePath().toPortableString());
 		arguments.put(ATTRIBUTE_NAME, getNewName());
 		arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 		return new RefactoringDescriptor(ID_RENAME_JAVA_PROJECT, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameJavaProjectChange_descriptor_description, new String[] { getOldName(), getNewName()}), null, arguments);
