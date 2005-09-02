@@ -510,22 +510,23 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 
 		if (offset < getReplacementOffset())
 			return false;
+		
+		/*
+		 * See http://dev.eclipse.org/bugs/show_bug.cgi?id=17667
+		 * why we do not use the replacement string.
+		 * String word= fReplacementString;
+		 */
 
-		String expected;
+		String expected= getDisplayString(); // TODO remove early display string reference
 		if (fProposal.getKind() == CompletionProposal.METHOD_NAME_REFERENCE) {
 			// static imports - includes package & type name
 			StringBuffer buf= new StringBuffer();
 			buf.append(Signature.toCharArray(fProposal.getDeclarationSignature()));
 			buf.append('.');
-			buf.append(getDisplayString()); // TODO remove early display string reference
+			buf.append(expected);
 			expected= buf.toString();
-		} else {
-			/*
-			 * See http://dev.eclipse.org/bugs/show_bug.cgi?id=17667
-			String word= fReplacementString;
-			 */
-			expected= getDisplayString(); // TODO remove early display string reference
-		}
+		} 
+
 		boolean validated= startsWith(document, offset, expected);
 
 		if (validated && event != null) {
