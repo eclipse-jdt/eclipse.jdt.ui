@@ -407,7 +407,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 					arguments.put(ATTRIBUTE_HANDLE, fCu.getHandleIdentifier());
 					arguments.put(ATTRIBUTE_NAME, getNewElementName());
 					final ISourceRange range= fLocalVariable.getNameRange();
-					arguments.put(ATTRIBUTE_RANGE, Integer.valueOf(range.getOffset()).toString() + " " + Integer.valueOf(range.getLength()).toString()); //$NON-NLS-1$
+					arguments.put(ATTRIBUTE_RANGE, new Integer(range.getOffset()).toString() + " " + new Integer(range.getLength()).toString()); //$NON-NLS-1$
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 					String project= null;
 					IJavaProject javaProject= fCu.getJavaProject();
