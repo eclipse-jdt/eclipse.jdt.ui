@@ -50,6 +50,8 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -648,6 +650,11 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		setTitle(NewWizardMessages.JavaProjectWizardFirstPage_page_title); 
 		setDescription(NewWizardMessages.JavaProjectWizardFirstPage_page_description); 
 		fInitialName= ""; //$NON-NLS-1$
+		initializeDefaultVM();
+	}
+	
+	private void initializeDefaultVM() {
+		JavaRuntime.getDefaultVMInstall();
 	}
 	
 	public void setName(String name) {
