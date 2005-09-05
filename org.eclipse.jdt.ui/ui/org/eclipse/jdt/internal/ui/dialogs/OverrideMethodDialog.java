@@ -266,6 +266,29 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		}
 	}
 
+	private static ITypeBinding getSuperType(final ITypeBinding binding, final String name) {
+
+		if (binding.isArray() || binding.isPrimitive())
+			return null;
+
+		if (binding.getQualifiedName().startsWith(name))
+			return binding;
+
+		final ITypeBinding type= binding.getSuperclass();
+		if (type != null) {
+			final ITypeBinding result= getSuperType(type, name);
+			if (result != null)
+				return result;
+		}
+		final ITypeBinding[] types= binding.getInterfaces();
+		for (int index= 0; index < types.length; index++) {
+			final ITypeBinding result= getSuperType(types[index], name);
+			if (result != null)
+				return result;
+		}
+		return null;
+	}
+
 	private CompilationUnit fUnit= null;
 
 	public OverrideMethodDialog(Shell shell, CompilationUnitEditor editor, IType type, boolean isSubType) throws JavaModelException {
@@ -311,6 +334,17 @@ public class OverrideMethodDialog extends SourceActionDialog {
 				toImplement.add(overridable[i]);
 			}
 		}
+
+		ITypeBinding cloneable= getSuperType(binding, "java.lang.Cloneable"); //$NON-NLS-1$
+		if (cloneable != null) {
+			IMethodBinding[] methods= fUnit.getAST().resolveWellKnownType("java.lang.Object").getDeclaredMethods(); //$NON-NLS-1$
+			for (int index= 0; index < methods.length; index++) {
+				IMethodBinding method= methods[index];
+				if (method.getName().equals("clone") && method.getParameterTypes().length == 0) //$NON-NLS-1$
+					toImplement.add(method);
+			}
+		}
+
 		IMethodBinding[] toImplementArray= (IMethodBinding[]) toImplement.toArray(new IMethodBinding[toImplement.size()]);
 		setInitialSelections(toImplementArray);
 
