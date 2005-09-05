@@ -6,7 +6,6 @@ class A{
 		int p0= 2, k= u, k1= k;
 		int l1= l+1, p, q= p+u;
 		private Inner(int u) {
-			super();
 			this.u= u;
 			k= u;
 			q= p+u;

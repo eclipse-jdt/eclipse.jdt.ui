@@ -713,13 +713,14 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring {
 		addParametersForLocalsUsedInInnerClass(rewrite, bindings, newConstructor);
 
 		Block body= ast.newBlock();
-		SuperConstructorInvocation superConstructorInvocation= ast.newSuperConstructorInvocation();
-		for (int i= 0; i < paramCount; i++) {
-			SingleVariableDeclaration param= (SingleVariableDeclaration) newConstructor.parameters().get(i);
-			superConstructorInvocation.arguments().add(ast.newSimpleName(param.getName().getIdentifier()));
+		if (paramCount > 0) {
+			SuperConstructorInvocation superConstructorInvocation= ast.newSuperConstructorInvocation();
+			for (int i= 0; i < paramCount; i++) {
+				SingleVariableDeclaration param= (SingleVariableDeclaration) newConstructor.parameters().get(i);
+				superConstructorInvocation.arguments().add(ast.newSimpleName(param.getName().getIdentifier()));
+			}
+			body.statements().add(superConstructorInvocation);
 		}
-		body.statements().add(superConstructorInvocation);
-
 		final IJavaProject project= fCu.getJavaProject();
 		List excludedFields= new ArrayList();
 		List excludedParams= new ArrayList();
