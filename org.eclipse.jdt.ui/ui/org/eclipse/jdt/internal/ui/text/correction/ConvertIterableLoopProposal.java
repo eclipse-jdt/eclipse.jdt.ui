@@ -14,9 +14,13 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -45,9 +49,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
@@ -93,9 +100,6 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 	/** Has the element variable been assigned outside the for statement? */
 	private boolean fAssigned= false;
 
-	/** The ast to operate on */
-	private final AST fAst;
-
 	/** The binding of the element variable */
 	private IBinding fElement= null;
 
@@ -110,6 +114,9 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 
 	/** The nodes of the element variable occurrences */
 	private List fOccurrences= new ArrayList(2);
+
+	/** The compilation unit to operate on */
+	private final CompilationUnit fRoot;
 
 	/** The for statement to convert */
 	private final ForStatement fStatement;
@@ -126,7 +133,97 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 	public ConvertIterableLoopProposal(final String name, final ICompilationUnit unit, final ForStatement statement, final int relevance, final Image image) {
 		super(name, unit, null, relevance, image);
 		fStatement= statement;
-		fAst= statement.getAST();
+		fRoot= (CompilationUnit) statement.getRoot();
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#addEdits(org.eclipse.jface.text.IDocument,org.eclipse.text.edits.TextEdit)
+	 */
+	protected final void addEdits(final IDocument document, final TextEdit root) throws CoreException {
+		final CompilationUnitRewrite rewriter= new CompilationUnitRewrite(getCompilationUnit(), fRoot);
+		final ASTRewrite rewrite= rewriter.getASTRewrite();
+		final AST ast= fRoot.getAST();
+		final EnhancedForStatement statement= ast.newEnhancedForStatement();
+		final List names= computeElementNames();
+		String name= GROUP_ELEMENT;
+		if (fElement != null) {
+			name= fElement.getName();
+			if (!names.contains(name))
+				names.add(0, name);
+		} else {
+			if (!names.isEmpty())
+				name= (String) names.get(0);
+		}
+		for (final Iterator iterator= names.iterator(); iterator.hasNext();)
+			addLinkedPositionProposal(GROUP_ELEMENT, (String) iterator.next(), null);
+		final Statement body= fStatement.getBody();
+		final ImportRemover remover= rewriter.getImportRemover();
+		if (body != null) {
+			if (body instanceof Block) {
+				final ListRewrite list= rewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
+				for (final Iterator iterator= fOccurrences.iterator(); iterator.hasNext();) {
+					final Statement parent= (Statement) ASTNodes.getParent((ASTNode) iterator.next(), Statement.class);
+					if (parent != null && list.getRewrittenList().contains(parent)) {
+						list.remove(parent, null);
+						remover.registerRemovedNode(parent);
+					}
+				}
+				final String text= name;
+				body.accept(new ASTVisitor() {
+
+					private boolean replace(final Expression expression) {
+						final SimpleName node= ast.newSimpleName(text);
+						rewrite.replace(expression, node, null);
+						remover.registerRemovedNode(expression);
+						addLinkedPosition(rewrite.track(node), false, GROUP_ELEMENT);
+						return false;
+					}
+
+					public final boolean visit(final MethodInvocation node) {
+						final IMethodBinding binding= node.resolveMethodBinding();
+						if (binding != null && (binding.getName().equals("next") || binding.getName().equals("nextElement"))) { //$NON-NLS-1$ //$NON-NLS-2$
+							final Expression expression= node.getExpression();
+							if (expression instanceof Name) {
+								final IBinding result= ((Name) expression).resolveBinding();
+								if (result != null && result.equals(fIterator))
+									return replace(node);
+							} else if (expression instanceof FieldAccess) {
+								final IBinding result= ((FieldAccess) expression).resolveFieldBinding();
+								if (result != null && result.equals(fIterator))
+									return replace(node);
+							}
+						}
+						return super.visit(node);
+					}
+
+					public final boolean visit(final SimpleName node) {
+						if (fElement != null) {
+							final IBinding binding= node.resolveBinding();
+							if (binding != null && binding.equals(fElement)) {
+								final Statement parent= (Statement) ASTNodes.getParent(node, Statement.class);
+								if (parent != null && list.getRewrittenList().contains(parent))
+									addLinkedPosition(rewrite.track(node), false, GROUP_ELEMENT);
+							}
+						}
+						return false;
+					}
+				});
+			}
+			statement.setBody((Statement) rewrite.createMoveTarget(body));
+		}
+		final SingleVariableDeclaration declaration= ast.newSingleVariableDeclaration();
+		final SimpleName simple= ast.newSimpleName(name);
+		addLinkedPosition(rewrite.track(simple), true, GROUP_ELEMENT);
+		declaration.setName(simple);
+		final ITypeBinding iterable= getIterableType(fIterator.getType());
+		final ImportRewrite imports= rewriter.getImportRewrite();
+		declaration.setType(imports.addImport(iterable, ast));
+		remover.registerAddedImport(iterable.getQualifiedName());
+		statement.setParameter(declaration);
+		statement.setExpression(getExpression(rewrite));
+		rewrite.replace(fStatement, statement, null);
+		remover.registerRemovedNode(fStatement);
+		root.addChild(rewriter.createChange().getEdit());
 	}
 
 	private List computeElementNames() {
@@ -179,87 +276,14 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 			if (bindings.length > 0)
 				return bindings[0];
 		}
-		return fAst.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+		return fRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
 	protected final ASTRewrite getRewrite() throws CoreException {
-		final ASTRewrite rewrite= ASTRewrite.create(fAst);
-		final EnhancedForStatement statement= fAst.newEnhancedForStatement();
-		final List names= computeElementNames();
-		String name= GROUP_ELEMENT;
-		if (fElement != null) {
-			name= fElement.getName();
-			if (!names.contains(name))
-				names.add(0, name);
-		} else {
-			if (!names.isEmpty())
-				name= (String) names.get(0);
-		}
-		for (final Iterator iterator= names.iterator(); iterator.hasNext();)
-			addLinkedPositionProposal(GROUP_ELEMENT, (String) iterator.next(), null);
-		final Statement body= fStatement.getBody();
-		if (body != null) {
-			if (body instanceof Block) {
-				final ListRewrite list= rewrite.getListRewrite(body, Block.STATEMENTS_PROPERTY);
-				for (final Iterator iterator= fOccurrences.iterator(); iterator.hasNext();) {
-					final Statement parent= (Statement) ASTNodes.getParent((ASTNode) iterator.next(), Statement.class);
-					if (parent != null && list.getRewrittenList().contains(parent))
-						list.remove(parent, null);
-				}
-				final String text= name;
-				body.accept(new ASTVisitor() {
-
-					private boolean replace(final Expression expression) {
-						final SimpleName node= fAst.newSimpleName(text);
-						rewrite.replace(expression, node, null);
-						addLinkedPosition(rewrite.track(node), false, GROUP_ELEMENT);
-						return false;
-					}
-
-					public final boolean visit(final MethodInvocation node) {
-						final IMethodBinding binding= node.resolveMethodBinding();
-						if (binding != null && (binding.getName().equals("next") || binding.getName().equals("nextElement"))) { //$NON-NLS-1$ //$NON-NLS-2$
-							final Expression expression= node.getExpression();
-							if (expression instanceof Name) {
-								final IBinding result= ((Name) expression).resolveBinding();
-								if (result != null && result.equals(fIterator))
-									return replace(node);
-							} else if (expression instanceof FieldAccess) {
-								final IBinding result= ((FieldAccess) expression).resolveFieldBinding();
-								if (result != null && result.equals(fIterator))
-									return replace(node);
-							}
-						}
-						return super.visit(node);
-					}
-
-					public final boolean visit(final SimpleName node) {
-						if (fElement != null) {
-							final IBinding binding= node.resolveBinding();
-							if (binding != null && binding.equals(fElement)) {
-								final Statement parent= (Statement) ASTNodes.getParent(node, Statement.class);
-								if (parent != null && list.getRewrittenList().contains(parent))
-									addLinkedPosition(rewrite.track(node), false, GROUP_ELEMENT);
-							}
-						}
-						return false;
-					}
-				});
-			}
-			statement.setBody((Statement) rewrite.createMoveTarget(body));
-		}
-		final SingleVariableDeclaration declaration= fAst.newSingleVariableDeclaration();
-		final SimpleName simple= fAst.newSimpleName(name);
-		addLinkedPosition(rewrite.track(simple), true, GROUP_ELEMENT);
-		declaration.setName(simple);
-		declaration.setType(getImportRewrite().addImport(getIterableType(fIterator.getType()), fAst));
-		statement.setParameter(declaration);
-		statement.setExpression(getExpression(rewrite));
-		rewrite.replace(fStatement, statement, null);
-		return rewrite;
+		return null;
 	}
 
 	/**
@@ -282,29 +306,29 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 								if (binding != null) {
 									final ITypeBinding type= binding.getReturnType();
 									if (type != null) {
-									final String qualified= type.getQualifiedName();
-									if (qualified.startsWith("java.util.Enumeration<") || qualified.startsWith("java.util.Iterator<")) { //$NON-NLS-1$ //$NON-NLS-2$
-										final Expression qualifier= node.getExpression();
-										if (qualifier != null) {
-											final ITypeBinding resolved= qualifier.resolveTypeBinding();
-											if (resolved != null) {
-												final ITypeBinding iterable= getSuperType(resolved, "java.lang.Iterable"); //$NON-NLS-1$
-												if (iterable != null) {
-													fExpression= qualifier;
-													if (qualifier instanceof Name) {
-														final Name name= (Name) qualifier;
-														fIterable= name.resolveBinding();
-													} else if (qualifier instanceof MethodInvocation) {
-														final MethodInvocation invocation= (MethodInvocation) qualifier;
-														fIterable= invocation.resolveMethodBinding();
-													} else if (qualifier instanceof FieldAccess) {
-														final FieldAccess access= (FieldAccess) qualifier;
-														fIterable= access.resolveFieldBinding();
+										final String qualified= type.getQualifiedName();
+										if (qualified.startsWith("java.util.Enumeration<") || qualified.startsWith("java.util.Iterator<")) { //$NON-NLS-1$ //$NON-NLS-2$
+											final Expression qualifier= node.getExpression();
+											if (qualifier != null) {
+												final ITypeBinding resolved= qualifier.resolveTypeBinding();
+												if (resolved != null) {
+													final ITypeBinding iterable= getSuperType(resolved, "java.lang.Iterable"); //$NON-NLS-1$
+													if (iterable != null) {
+														fExpression= qualifier;
+														if (qualifier instanceof Name) {
+															final Name name= (Name) qualifier;
+															fIterable= name.resolveBinding();
+														} else if (qualifier instanceof MethodInvocation) {
+															final MethodInvocation invocation= (MethodInvocation) qualifier;
+															fIterable= invocation.resolveMethodBinding();
+														} else if (qualifier instanceof FieldAccess) {
+															final FieldAccess access= (FieldAccess) qualifier;
+															fIterable= access.resolveFieldBinding();
+														}
 													}
 												}
 											}
 										}
-									}
 									}
 								}
 								return true;

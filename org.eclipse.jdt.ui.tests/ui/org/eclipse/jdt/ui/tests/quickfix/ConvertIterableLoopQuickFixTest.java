@@ -125,7 +125,6 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test;\r\n" + 
 				"import java.util.Collection;\r\n" + 
-				"import java.util.Iterator;\r\n" + 
 				"public class A {\r\n" + 
 				"	Collection<String> c;\r\n" + 
 				"	public A() {\r\n" + 
@@ -165,7 +164,6 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		buf= new StringBuffer();
 		buf.append("package test;\r\n" + 
-				"import java.util.Enumeration;\r\n" + 
 				"import java.util.Vector;\r\n" + 
 				"public class A {\r\n" + 
 				"	Vector<String> c;\r\n" + 
@@ -208,7 +206,6 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test;\r\n" + 
 				"import java.util.Collection;\r\n" + 
-				"import java.util.Iterator;\r\n" + 
 				"public class A {\r\n" + 
 				"	Collection<String> c;\r\n" + 
 				"	public A() {\r\n" + 
@@ -251,7 +248,6 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test;\r\n" + 
 				"import java.util.Collection;\r\n" + 
-				"import java.util.Iterator;\r\n" + 
 				"public class A {\r\n" + 
 				"	Collection<String> c;\r\n" + 
 				"	public A() {\r\n" + 
@@ -297,7 +293,6 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test;\r\n" + 
 				"import java.util.Collection;\r\n" + 
-				"import java.util.Iterator;\r\n" + 
 				"public class A {\r\n" + 
 				"	Collection<String> c;\r\n" + 
 				"	private Collection<String> getCollection() {\r\n" + 
@@ -346,7 +341,6 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test;\r\n" + 
 				"import java.util.Collection;\r\n" + 
-				"import java.util.Iterator;\r\n" + 
 				"public class A {\r\n" + 
 				"	Collection<String> c;\r\n" + 
 				"	private Collection<String> getCollection() {\r\n" + 
@@ -393,7 +387,6 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test;\r\n" + 
 				"import java.util.Collection;\r\n" + 
-				"import java.util.Iterator;\r\n" + 
 				"public class A {\r\n" + 
 				"	public A() {\r\n" + 
 				"		Collection<Collection<String>> cc= null;\r\n" + 
@@ -440,7 +433,6 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test;\r\n" + 
 				"import java.util.Collection;\r\n" + 
-				"import java.util.Iterator;\r\n" + 
 				"public class A {\r\n" + 
 				"	Collection<String> c;\r\n" + 
 				"	private Collection<String> getCollection() {\r\n" + 
@@ -486,7 +478,6 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		buf= new StringBuffer();
 		buf.append("package test;\r\n" + 
 				"import java.util.Collection;\r\n" + 
-				"import java.util.Iterator;\r\n" + 
 				"public class A {\r\n" + 
 				"	public A() {\r\n" + 
 				"		Collection<Collection<String>> cc= null;\r\n" + 
