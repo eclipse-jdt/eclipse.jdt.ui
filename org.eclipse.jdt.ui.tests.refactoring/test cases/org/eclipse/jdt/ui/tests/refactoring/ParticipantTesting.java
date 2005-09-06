@@ -75,7 +75,7 @@ public class ParticipantTesting {
 	}
 	
 	public static void testRename(String[] handles, RenameArguments[] args) {
-		Assert.assertTrue(handles.length == args.length);
+		Assert.assertEquals(handles.length, args.length);
 		if (handles.length == 0) {
 			TestRenameParticipantShared.testNumberOfElements(0);
 			TestRenameParticipantSingle.testNumberOfInstances(0);
@@ -90,7 +90,7 @@ public class ParticipantTesting {
 	}
 	
 	public static void testMove(String[] handles, MoveArguments[] args) {
-		Assert.assertTrue(handles.length == args.length);
+		Assert.assertEquals(handles.length, args.length);
 		if (handles.length == 0) {
 			TestMoveParticipantShared.testNumberOfElements(0);
 			TestMoveParticipantSingle.testNumberOfInstances(0);

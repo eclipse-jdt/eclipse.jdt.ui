@@ -312,12 +312,9 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			result.merge(checkTypesImportedInCu());
 			pm.worked(1);	
 		
-			result.merge(Checks.checkForNativeMethods(fType));
-			pm.worked(1);	
+			result.merge(Checks.checkForMainAndNativeMethods(fType));
+			pm.worked(2);	
 		
-			result.merge(Checks.checkForMainMethod(fType));
-			pm.worked(1);	
-			
 			// before doing any expensive analysis
 			if (result.hasFatalError())
 				return result;

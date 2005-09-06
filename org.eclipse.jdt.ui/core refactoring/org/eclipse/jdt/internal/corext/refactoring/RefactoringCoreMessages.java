@@ -77,6 +77,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String CopyPackageChange_copy;
 	public static String RenamePackageChange_checking_change;
 	public static String RenamePackageChange_name;
+	public static String RenamePackageChange_name_with_subpackages;
 	public static String MoveCompilationUnitChange_default_package;
 	public static String MoveCompilationUnitChange_name;
 	public static String RenameCompilationUnitChange_name;

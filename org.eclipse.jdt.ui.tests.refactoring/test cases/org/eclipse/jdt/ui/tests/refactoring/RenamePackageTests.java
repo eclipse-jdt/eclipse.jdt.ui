@@ -26,6 +26,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -33,15 +39,11 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
-
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
-import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 
 public class RenamePackageTests extends RefactoringTest {
@@ -51,7 +53,9 @@ public class RenamePackageTests extends RefactoringTest {
 	private static final Class clazz= RenamePackageTests.class;
 	private static final String REFACTORING_PATH= "RenamePackage/";
 	
+	private boolean fUpdateReferences;
 	private boolean fUpdateTextualMatches;
+	private boolean fRenameSubpackages;
 	
 	public RenamePackageTests(String name) {
 		super(name);
@@ -67,7 +71,9 @@ public class RenamePackageTests extends RefactoringTest {
 	
 	protected void setUp() throws Exception {
 		super.setUp();
+		fUpdateReferences= true;
 		fUpdateTextualMatches= false;
+		fRenameSubpackages= false;
 	}
 	
 	protected String getRefactoringPath() {
@@ -142,8 +148,7 @@ public class RenamePackageTests extends RefactoringTest {
 		helper1(new String[]{"r"}, new String[][]{{"A"}}, "p1");
 	}
 	
-	private void helper2(String[] packageNames, String[][] packageFileNames, String newPackageName, boolean updateReferences) throws Exception{
-		try{
+	private void helper2(String[] packageNames, String[][] packageFileNames, String newPackageName) throws Exception{
 			ParticipantTesting.reset();
 			IPackageFragment[] packages= new IPackageFragment[packageNames.length];
 			ICompilationUnit[][] cus= new ICompilationUnit[packageFileNames.length][packageFileNames[0].length];
@@ -176,14 +181,14 @@ public class RenamePackageTests extends RefactoringTest {
 			String[] moveHandles= ParticipantTesting.createHandles(movedObjects.toArray());
 			String[] renameHandles= ParticipantTesting.createHandles(thisPackage);
 			RenameRefactoring ref= createRefactoring(thisPackage, newPackageName);
-			((RenamePackageProcessor)ref.getProcessor()).setUpdateReferences(updateReferences);
+			((RenamePackageProcessor)ref.getProcessor()).setUpdateReferences(fUpdateReferences);
 			((RenamePackageProcessor) ref.getProcessor()).setUpdateTextualMatches(fUpdateTextualMatches);
 			RefactoringStatus result= performRefactoring(ref);
 			assertEquals("preconditions were supposed to pass", null, result);
 			
 			ParticipantTesting.testRename(renameHandles,
 				new RenameArguments[] {
-					new RenameArguments(newPackageName, updateReferences)});
+					new RenameArguments(newPackageName, fUpdateReferences)});
 			
 			if (!targetExists) {
 				ParticipantTesting.testCreate(createHandles);
@@ -193,7 +198,7 @@ public class RenamePackageTests extends RefactoringTest {
 			
 			List args= new ArrayList();
 			for (int i= 0; i < packageFileNames[0].length; i++) {
-				args.add(new MoveArguments(target, updateReferences));
+				args.add(new MoveArguments(target, fUpdateReferences));
 			}
 			ParticipantTesting.testMove(moveHandles, (MoveArguments[]) args.toArray(new MoveArguments[args.size()]));
 			
@@ -227,21 +232,68 @@ public class RenamePackageTests extends RefactoringTest {
 					assertEqualLines("invalid update in file " + cu.getElementName(), s1,	s2);
 				}
 			}
-		} finally{
-			performDummySearch();
-			try {
-				getRoot().getPackageFragment(newPackageName).delete(true, null);
-				for (int i= 1; i < packageNames.length; i++) {
-					getRoot().getPackageFragment(packageNames[i]).delete(true, null);
-				}
-			} catch (Exception e) {
-				e.printStackTrace();
-			}	
-		}	
 	}
 	
-	private void helper2(String[] packageNames, String[][] packageFileNames, String newPackageName) throws Exception{
-		helper2(packageNames, packageFileNames, newPackageName, true);
+	class PackageRename {
+		final String[] fPackageNames;
+		final String[][] fPackageFileNames;
+		final String fNewPackageName;
+
+		final IPackageFragment[] fPackages;
+		final ICompilationUnit[][] fCus;
+
+		public PackageRename (String[] packageNames, String[][] packageFileNames, String newPackageName) throws Exception {
+			fPackageNames= packageNames;
+			fPackageFileNames= packageFileNames;
+			fNewPackageName= newPackageName;
+			
+			fPackages= new IPackageFragment[packageNames.length];
+			fCus= new ICompilationUnit[packageFileNames.length][];
+			for (int i= 0; i < packageNames.length; i++){
+				fPackages[i]= getRoot().createPackageFragment(packageNames[i], true, null);
+				fCus[i]= new ICompilationUnit[packageFileNames[i].length];
+				for (int j= 0; j < packageFileNames[i].length; j++){
+					fCus[i][j]= createCUfromTestFile(fPackages[i], packageFileNames[i][j], packageNames[i].replace('.', '/') + "/");
+				}
+			}
+		}
+		
+		public void execute() throws Exception {
+			IPackageFragment thisPackage= fPackages[0];
+			RenameRefactoring ref= createRefactoring(thisPackage, fNewPackageName);
+			RenamePackageProcessor processor= (RenamePackageProcessor) ref.getProcessor();
+			processor.setUpdateReferences(fUpdateReferences);
+			processor.setUpdateTextualMatches(fUpdateTextualMatches);
+			processor.setRenameSubpackages(fRenameSubpackages);
+			RefactoringStatus result= performRefactoring(ref);
+			assertEquals("preconditions were supposed to pass", null, result);
+			
+			assertTrue("package not renamed: " + fPackageNames[0], ! getRoot().getPackageFragment(fPackageNames[0]).exists());
+			IPackageFragment newPackage= getRoot().getPackageFragment(fNewPackageName);
+			assertTrue("new package does not exist", newPackage.exists());
+			
+			for (int i= 0; i < fPackageFileNames.length; i++){
+				String packageName= getNewPackageName(fPackageNames[i]);
+				String packagePath= packageName.replace('.', '/') + "/";
+				
+				for (int j= 0; j < fPackageFileNames[i].length; j++){
+					String expected= getFileContents(getOutputTestFileName(fPackageFileNames[i][j], packagePath));
+					ICompilationUnit cu= getRoot().getPackageFragment(packageName).getCompilationUnit(fPackageFileNames[i][j] + ".java");
+					String actual= cu.getSource();
+					assertEqualLines("invalid update in file " + cu.getElementName(), expected,	actual);
+				}
+			}
+		}
+
+		public String getNewPackageName(String oldPackageName) {
+			if (oldPackageName.equals(fPackageNames[0]))
+				return fNewPackageName;
+			
+			if (fRenameSubpackages && oldPackageName.startsWith(fPackageNames[0] + "."))
+				return fNewPackageName + oldPackageName.substring(fPackageNames[0].length());
+			
+			return oldPackageName;
+		}
 	}
 	
 	/**
@@ -272,7 +324,7 @@ public class RenamePackageTests extends RefactoringTest {
 		}
 		
 		RenameRefactoring ref= createRefactoring(thisPackage, newPackageName);
-		((RenamePackageProcessor) ref.getProcessor()).setUpdateReferences(true);
+		((RenamePackageProcessor) ref.getProcessor()).setUpdateReferences(fUpdateReferences);
 		((RenamePackageProcessor) ref.getProcessor()).setUpdateTextualMatches(fUpdateTextualMatches);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("preconditions were supposed to pass", null, result);
@@ -353,6 +405,86 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 
 	// ---------- tests -------------	
+	public void testHierarchical01() throws Exception {
+		fRenameSubpackages= true;
+		
+		PackageRename rename= new PackageRename(new String[]{"my", "my.a", "my.b"}, new String[][]{{"MyA"},{"ATest"},{"B"}}, "your");
+		IPackageFragment thisPackage= rename.fPackages[0];
+		IPath srcPath= thisPackage.getParent().getPath();
+		IFolder target= ResourcesPlugin.getWorkspace().getRoot().getFolder(srcPath.append("your"));
+		
+		ParticipantTesting.reset();
+		String[] createHandles= ParticipantTesting.createHandles(target, target.getFolder("a"), target.getFolder("b"));
+		String[] deleteHandles= ParticipantTesting.createHandles(thisPackage.getResource());
+		String[] moveHandles= ParticipantTesting.createHandles(new Object[] {
+				rename.fCus[0][0].getResource(),
+				rename.fCus[1][0].getResource(),
+				rename.fCus[2][0].getResource(),
+		});
+		String[] renameHandles= ParticipantTesting.createHandles(JavaElementUtil.getPackageAndSubpackages(thisPackage));
+		
+		rename.execute();
+		
+		ParticipantTesting.testCreate(createHandles);
+		ParticipantTesting.testDelete(deleteHandles);
+		ParticipantTesting.testMove(moveHandles, new MoveArguments[] {
+				new MoveArguments(target, true),
+				new MoveArguments(target.getFolder("a"), true),
+				new MoveArguments(target.getFolder("b"), true),
+		});
+		ParticipantTesting.testRename(renameHandles, new RenameArguments[] {
+				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[0]), true),
+				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[1]), true),
+				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[2]), true),
+		});
+		
+		target.delete(true, null);
+	}
+	
+	public void testHierarchical02() throws Exception {
+		fRenameSubpackages= true;
+		fUpdateTextualMatches= true;
+		
+		PackageRename rename= new PackageRename(new String[]{"my", "my.pack"}, new String[][]{{},{"C"}}, "your");
+		IPackageFragment thisPackage= rename.fPackages[0];
+		IPath srcPath= thisPackage.getParent().getPath();
+		IFolder target= ResourcesPlugin.getWorkspace().getRoot().getFolder(srcPath.append("your"));
+		
+		ParticipantTesting.reset();
+		String[] createHandles= ParticipantTesting.createHandles(target, target.getFolder("pack"));
+		String[] deleteHandles= ParticipantTesting.createHandles(thisPackage.getResource());
+		String[] moveHandles= ParticipantTesting.createHandles(new Object[] {
+				rename.fCus[1][0].getResource(),
+		});
+		String[] renameHandles= ParticipantTesting.createHandles(JavaElementUtil.getPackageAndSubpackages(thisPackage));
+		
+		rename.execute();
+		
+		ParticipantTesting.testCreate(createHandles);
+		ParticipantTesting.testDelete(deleteHandles);
+		ParticipantTesting.testMove(moveHandles, new MoveArguments[] {
+				new MoveArguments(target.getFolder("pack"), true),
+		});
+		ParticipantTesting.testRename(renameHandles, new RenameArguments[] {
+				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[0]), true),
+				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[1]), true),
+		});
+		
+		target.delete(true, null);
+	}
+	
+//	public void testSWT() throws Exception {
+//		fRenameSubpackages= true;
+//		
+//		SWTTestProject swtProject= new SWTTestProject();
+//		try {
+//			IJavaProject project= swtProject.getProject();
+//			
+//		} finally {
+//			swtProject.delete();
+//		}
+//	}
+	
 	public void testFail0() throws Exception{
 		helper1(new String[]{"r"}, new String[][]{{"A"}}, "9");
 	}
@@ -433,12 +565,14 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	public void test5() throws Exception{
-		helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1", false);
+		fUpdateReferences= false;
+		helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1");
 	}
 	
 	public void test6() throws Exception{ //bug 66250
+		fUpdateReferences= false;
 		fUpdateTextualMatches= true;
-		helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1", false);
+		helper2(new String[]{"r"}, new String[][]{{"A"}}, "p1");
 	}
 	
 	public void testReadOnly() throws Exception{

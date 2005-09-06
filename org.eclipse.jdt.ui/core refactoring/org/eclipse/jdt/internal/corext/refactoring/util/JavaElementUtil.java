@@ -178,6 +178,25 @@ public class JavaElementUtil {
 		return (element instanceof IPackageFragment) && ((IPackageFragment)element).isDefaultPackage();
 	}
 	
+	/**
+	 * @param pack a package fragment, except default packages
+	 * @return an array containing the given package and all subpackages 
+	 * @throws JavaModelException 
+	 */
+	public static IPackageFragment[] getPackageAndSubpackages(IPackageFragment pack) throws JavaModelException {
+		IPackageFragmentRoot root= (IPackageFragmentRoot) pack.getParent();
+		IJavaElement[] allPackages= root.getChildren();
+		ArrayList subpackages= new ArrayList();
+		subpackages.add(pack);
+		String prefix= pack.getElementName() + '.';
+		for (int i= 0; i < allPackages.length; i++) {
+			IPackageFragment currentPackage= (IPackageFragment) allPackages[i];
+			if (currentPackage.getElementName().startsWith(prefix))
+				subpackages.add(currentPackage);
+		}
+		return (IPackageFragment[]) subpackages.toArray(new IPackageFragment[subpackages.size()]);
+	}
+	
 	public static IMember[] sortByOffset(IMember[] members){
 		Comparator comparator= new Comparator(){
 			public int compare(Object o1, Object o2){
