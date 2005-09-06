@@ -30,6 +30,7 @@
 			<fileset dir=".">
 			  <include name="plugin.xml" />
 			  <include name="plugin.properties" />
+			  <include name=".options" />
 			  <include name="serialsupport.jar" />
 			  <include name="JavadocViewStyleSheet.css" />
 			  <include name="JavadocHoverStyleSheet.css" />
