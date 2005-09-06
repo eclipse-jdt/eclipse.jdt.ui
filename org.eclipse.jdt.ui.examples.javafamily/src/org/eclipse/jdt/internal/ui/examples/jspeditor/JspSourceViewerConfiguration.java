@@ -13,10 +13,12 @@ package org.eclipse.jdt.internal.ui.examples.jspeditor;
 
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.jface.text.DefaultTextHover;
 import org.eclipse.jface.text.ITextHover;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
+import org.eclipse.jface.text.source.DefaultAnnotationHover;
 import org.eclipse.jface.text.source.IAnnotationHover;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
@@ -63,6 +65,6 @@ public class JspSourceViewerConfiguration extends SourceViewerConfiguration {
 	 * @see SourceViewerConfiguration#getTextHover(ISourceViewer, String)
 	 */
 	public ITextHover getTextHover(ISourceViewer sourceViewer, String contentType) {
-		return new AnnotationTextHover(fTextEditor.getDocumentProvider().getAnnotationModel(fTextEditor.getEditorInput()));
+		return new DefaultTextHover(sourceViewer);
 	}
 }
