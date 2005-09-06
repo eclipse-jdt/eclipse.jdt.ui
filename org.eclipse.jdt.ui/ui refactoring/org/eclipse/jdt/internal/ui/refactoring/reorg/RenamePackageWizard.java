@@ -98,7 +98,7 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 //			Dialog.applyDialogFont(composite);
 		}
 		
-		protected void hook1(Composite composite, RowLayouter layouter) {
+		protected void hook2(Composite composite, RowLayouter layouter) {
 			fRenameSubpackages= new Button(composite, SWT.CHECK);
 			fRenameSubpackages.setText("Rename Subpackages");
 			boolean subpackagesEnablement= false;

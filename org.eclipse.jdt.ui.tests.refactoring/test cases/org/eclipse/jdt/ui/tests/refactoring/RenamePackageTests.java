@@ -10,24 +10,37 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.io.BufferedInputStream;
+import java.io.File;
+import java.io.FileInputStream;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.zip.ZipInputStream;
 
+import junit.framework.Assert;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CheckConditionsOperation;
+import org.eclipse.ltk.core.refactoring.CreateChangeOperation;
+import org.eclipse.ltk.core.refactoring.IUndoManager;
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
@@ -38,12 +51,15 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
+import org.eclipse.jdt.ui.tests.refactoring.infra.ZipTools;
 
 
 public class RenamePackageTests extends RefactoringTest {
@@ -437,8 +453,6 @@ public class RenamePackageTests extends RefactoringTest {
 				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[1]), true),
 				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[2]), true),
 		});
-		
-		target.delete(true, null);
 	}
 	
 	public void testHierarchical02() throws Exception {
@@ -469,21 +483,108 @@ public class RenamePackageTests extends RefactoringTest {
 				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[0]), true),
 				new RenameArguments(rename.getNewPackageName(rename.fPackageNames[1]), true),
 		});
-		
-		target.delete(true, null);
 	}
 	
-//	public void testSWT() throws Exception {
-//		fRenameSubpackages= true;
-//		
-//		SWTTestProject swtProject= new SWTTestProject();
-//		try {
-//			IJavaProject project= swtProject.getProject();
-//			
-//		} finally {
-//			swtProject.delete();
-//		}
-//	}
+	public void testHierarchicalJUnit() throws Exception {
+		fRenameSubpackages= true;
+		
+		File junitSrcArchive= JavaTestPlugin.getDefault().getFileInPlugin(JavaProjectHelper.JUNIT_SRC_381);
+		Assert.assertTrue(junitSrcArchive != null && junitSrcArchive.exists());
+		IPackageFragmentRoot src= JavaProjectHelper.addSourceContainerWithImport(getRoot().getJavaProject(), "src", junitSrcArchive, JavaProjectHelper.JUNIT_SRC_ENCODING);
+		
+		String[] packageNames= new String[]{"junit", "junit.extensions", "junit.framework", "junit.runner", "junit.samples", "junit.samples.money", "junit.tests", "junit.tests.extensions", "junit.tests.framework", "junit.tests.runner", "junit.textui"};
+		ICompilationUnit[][] cus= new ICompilationUnit[packageNames.length][];
+		for (int i= 0; i < cus.length; i++) {
+			cus[i]= src.getPackageFragment(packageNames[i]).getCompilationUnits();
+		}
+		IPackageFragment thisPackage= src.getPackageFragment("junit");
+		IPath srcPath= src.getPath();
+		IWorkspaceRoot workspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
+		
+		ParticipantTesting.reset();
+		PackageRename rename= new PackageRename(packageNames, new String[packageNames.length][0],"jdiverge");
+		
+		Object[] createdFolders= new Object[packageNames.length];
+		for (int i= 0; i < createdFolders.length; i++) {
+			createdFolders[i]= workspaceRoot.getFolder(srcPath.append(rename.getNewPackageName(packageNames[i]).replace('.', '/')));
+		}
+		String[] createHandles= ParticipantTesting.createHandles(createdFolders);
+		String[] deleteHandles= ParticipantTesting.createHandles(thisPackage.getResource());
+		
+		ArrayList moveHandlesList= new ArrayList();
+		ArrayList moveArgumentsList= new ArrayList();
+		for (int p= 0; p < cus.length; p++) {
+			ICompilationUnit[] packCus= cus[p];
+			IFolder targetFolder= workspaceRoot.getFolder(srcPath.append(rename.getNewPackageName(packageNames[p]).replace('.', '/')));
+			for (int c= 0; c < packCus.length; c++) {
+				moveHandlesList.add(packCus[c].getResource());
+				moveArgumentsList.add(new MoveArguments(targetFolder, true));
+			}
+			IPackageFragment pack= src.getPackageFragment(packageNames[p]);
+			Object[] nonJavaResources= pack.getNonJavaResources();
+			for (int i= 0; i < nonJavaResources.length; i++) {
+				moveHandlesList.add(nonJavaResources[i]);
+				moveArgumentsList.add(new MoveArguments(targetFolder, true));
+			}
+		}
+		MoveArguments[] moveArguments= (MoveArguments[]) moveArgumentsList.toArray(new MoveArguments[moveArgumentsList.size()]);
+		String[] moveHandles= ParticipantTesting.createHandles(moveHandlesList.toArray());
+		
+		RenameArguments[] renameArguments= new RenameArguments[packageNames.length];
+		for (int i= 0; i < packageNames.length; i++) {
+			renameArguments[i]= new RenameArguments(rename.getNewPackageName(packageNames[i]), true);
+		}
+		String[] renameHandles= ParticipantTesting.createHandles(JavaElementUtil.getPackageAndSubpackages(thisPackage));
+		
+		// --- execute:
+		RenameRefactoring ref= createRefactoring(thisPackage, "jdiverge");
+		RenamePackageProcessor processor= (RenamePackageProcessor) ref.getProcessor();
+		processor.setUpdateReferences(fUpdateReferences);
+		processor.setUpdateTextualMatches(fUpdateTextualMatches);
+		processor.setRenameSubpackages(fRenameSubpackages);
+
+		performDummySearch();
+		IUndoManager undoManager= getUndoManager();
+		CreateChangeOperation create= new CreateChangeOperation(
+			new CheckConditionsOperation(ref, CheckConditionsOperation.ALL_CONDITIONS),
+			RefactoringStatus.FATAL);
+		PerformChangeOperation perform= new PerformChangeOperation(create);
+		perform.setUndoManager(undoManager, ref.getName());
+		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
+		RefactoringStatus status= create.getConditionCheckingStatus();
+		assertTrue("Change wasn't executed", perform.changeExecuted());
+		Change undo= perform.getUndoChange();
+		assertNotNull("Undo doesn't exist", undo);
+		assertTrue("Undo manager is empty", undoManager.anythingToUndo());
+		
+		assertFalse(status.hasError());
+		assertTrue(status.hasWarning());
+		RefactoringStatusEntry[] statusEntries= status.getEntries();
+		for (int i= 0; i < statusEntries.length; i++) {
+			RefactoringStatusEntry entry= statusEntries[i];
+			assertTrue(entry.isWarning());
+			assertTrue(entry.getCode() == RefactoringStatusCodes.MAIN_METHOD);
+		}
+		
+		assertTrue("package not renamed: " + rename.fPackageNames[0], ! src.getPackageFragment(rename.fPackageNames[0]).exists());
+		IPackageFragment newPackage= src.getPackageFragment(rename.fNewPackageName);
+		assertTrue("new package does not exist", newPackage.exists());
+		// ---
+		
+		ParticipantTesting.testCreate(createHandles);
+		ParticipantTesting.testDelete(deleteHandles);
+		ParticipantTesting.testMove(moveHandles, moveArguments);
+		ParticipantTesting.testRename(renameHandles, renameArguments);
+		
+		PerformChangeOperation performUndo= new PerformChangeOperation(undo);
+		ResourcesPlugin.getWorkspace().run(performUndo, new NullProgressMonitor());
+		
+		assertTrue("new package still exists", ! newPackage.exists());
+		assertTrue("original package does not exist: " + rename.fPackageNames[0], src.getPackageFragment(rename.fPackageNames[0]).exists());
+		
+		ZipInputStream zis= new ZipInputStream(new BufferedInputStream(new FileInputStream(junitSrcArchive)));
+		ZipTools.compareWithZipped(src, zis, JavaProjectHelper.JUNIT_SRC_ENCODING);
+	}
 	
 	public void testFail0() throws Exception{
 		helper1(new String[]{"r"}, new String[][]{{"A"}}, "9");

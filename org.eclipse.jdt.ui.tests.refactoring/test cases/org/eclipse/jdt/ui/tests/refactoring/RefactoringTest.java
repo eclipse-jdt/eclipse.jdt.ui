@@ -108,7 +108,10 @@ public abstract class RefactoringTest extends TestCase {
 				try{
 					IPackageFragment pack= (IPackageFragment)packages[i];
 					if (! pack.equals(getPackageP()) && pack.exists() && ! pack.isReadOnly())
-						pack.delete(true, null);
+						if (pack.isDefaultPackage())
+							pack.delete(true, null);
+						else
+							pack.getResource().delete(true, null); // also delete packages with subpackages
 				}	catch (JavaModelException e){
 					//try to delete'em all
 					e.printStackTrace();
@@ -349,7 +352,7 @@ public abstract class RefactoringTest extends TestCase {
 		return sb.toString();
 	}
 
-	public InputStream getFileInputStream(String fileName) throws IOException {
+	public static InputStream getFileInputStream(String fileName) throws IOException {
 		return RefactoringTestPlugin.getDefault().getTestResourceStream(fileName);
 	}
 

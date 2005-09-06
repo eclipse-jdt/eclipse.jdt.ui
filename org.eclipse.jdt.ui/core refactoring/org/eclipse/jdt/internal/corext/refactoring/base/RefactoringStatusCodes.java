@@ -29,6 +29,9 @@ public class RefactoringStatusCodes {
 	public static final int LOCAL_AND_ANONYMOUS_NOT_SUPPORTED= 	132;
 	public static final int REFERENCE_IN_CLASSFILE= 								133;
 
+	public static final int NATIVE_METHOD= 192;
+	public static final int MAIN_METHOD= 193;
+	
 	// inline method error codes
 	public static final int INLINE_METHOD_FIELD_INITIALIZER= 						256;
 	public static final int INLINE_METHOD_LOCAL_INITIALIZER= 						257;

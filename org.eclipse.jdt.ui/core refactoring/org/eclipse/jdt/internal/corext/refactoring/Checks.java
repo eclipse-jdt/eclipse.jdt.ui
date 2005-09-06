@@ -54,9 +54,11 @@ import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -271,12 +273,12 @@ public class Checks {
 			if (JdtFlags.isNative(methods[i])){
 				String msg= Messages.format(RefactoringCoreMessages.Checks_method_native,  
 								new String[]{JavaModelUtil.getFullyQualifiedName(methods[i].getDeclaringType()), methods[i].getElementName(), "UnsatisfiedLinkError"});//$NON-NLS-1$
-				result.addError(msg, JavaStatusContext.create(methods[i])); 
+				result.addEntry(RefactoringStatus.ERROR, msg, JavaStatusContext.create(methods[i]), Corext.getPluginId(), RefactoringStatusCodes.NATIVE_METHOD); 
 			}
 			if (methods[i].isMainMethod()) {
 				String msg= Messages.format(RefactoringCoreMessages.Checks_has_main,
 						JavaModelUtil.getFullyQualifiedName(methods[i].getDeclaringType()));
-				result.addWarning(msg, JavaStatusContext.create(methods[i]));
+				result.addEntry(RefactoringStatus.WARNING, msg, JavaStatusContext.create(methods[i]), Corext.getPluginId(), RefactoringStatusCodes.MAIN_METHOD); 
 			}
 		}
 		return result;
