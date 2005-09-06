@@ -335,6 +335,7 @@ public final class RefactoringMessages extends NLS {
 	public static String RenameSourceFolder_inputPage_description;
 	public static String RenamePackageWizard_defaultPageTitle;
 	public static String RenamePackageWizard_inputPage_description;
+	public static String RenamePackageWizard_rename_subpackages;
 	public static String RenameCuWizard_defaultPageTitle;
 	public static String RenameCuWizard_inputPage_description;
 	public static String RenameTypeWizard_defaultPageTitle;

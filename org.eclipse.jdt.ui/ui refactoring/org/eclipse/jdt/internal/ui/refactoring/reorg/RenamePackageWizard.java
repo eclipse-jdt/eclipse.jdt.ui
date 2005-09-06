@@ -100,7 +100,7 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 		
 		protected void hook2(Composite composite, RowLayouter layouter) {
 			fRenameSubpackages= new Button(composite, SWT.CHECK);
-			fRenameSubpackages.setText("Rename Subpackages");
+			fRenameSubpackages.setText(RefactoringMessages.RenamePackageWizard_rename_subpackages);
 			boolean subpackagesEnablement= false;
 			try {
 				subpackagesEnablement= getRenamePackageProcessor().canEnableRenameSubpackages();
