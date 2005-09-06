@@ -908,30 +908,58 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		if (statement.getNodeType() == ASTNode.IF_STATEMENT) {
-			IfStatement ifStatement= (IfStatement) statement;
-			Statement thenStatment= ifStatement.getThenStatement();
-			Statement elseStatment= ifStatement.getElseStatement();
+			ASTRewrite rewrite= ASTRewrite.create(ast);
+			
+			while (statement.getLocationInParent() == IfStatement.ELSE_STATEMENT_PROPERTY) {
+				statement= (Statement) statement.getParent();
+			}
+			
+			boolean missingBlockFound= false;
+			boolean foundElse= false;
+			
+			IfStatement ifStatement;
+			Statement thenStatment;
+			Statement elseStatment;
+			do {
+				ifStatement= (IfStatement) statement;
+				thenStatment= ifStatement.getThenStatement();
+				elseStatment= ifStatement.getElseStatement();
 
-			// add then _and_ else blocks
-			if ((childProperty == IfStatement.THEN_STATEMENT_PROPERTY && elseStatment != null && !(elseStatment instanceof Block))
-				|| (childProperty == IfStatement.ELSE_STATEMENT_PROPERTY && !(thenStatment instanceof Block))) {
-
-				ASTRewrite rewrite= ASTRewrite.create(ast);
-
-				ASTNode childPlaceholder1= rewrite.createMoveTarget(thenStatment);
-				Block replacingBody1= ast.newBlock();
-				replacingBody1.statements().add(childPlaceholder1);
-				rewrite.set(statement, IfStatement.THEN_STATEMENT_PROPERTY, replacingBody1, null);
-
+				if (!(thenStatment instanceof Block)) {
+					ASTNode childPlaceholder1= rewrite.createMoveTarget(thenStatment);
+					Block replacingBody1= ast.newBlock();
+					replacingBody1.statements().add(childPlaceholder1);
+					rewrite.set(ifStatement, IfStatement.THEN_STATEMENT_PROPERTY, replacingBody1, null);
+					if (thenStatment != child) {
+						missingBlockFound= true;
+					}
+				}
+				if (elseStatment != null) {
+					foundElse= true;
+				}
+				statement= elseStatment;
+			} while (elseStatment instanceof IfStatement);
+			
+			if (elseStatment != null && !(elseStatment instanceof Block)) {
 				ASTNode childPlaceholder2= rewrite.createMoveTarget(elseStatment);
+				
 				Block replacingBody2= ast.newBlock();
 				replacingBody2.statements().add(childPlaceholder2);
-				rewrite.set(statement, IfStatement.ELSE_STATEMENT_PROPERTY, replacingBody2, null);
+				rewrite.set(ifStatement, IfStatement.ELSE_STATEMENT_PROPERTY, replacingBody2, null);
+				if (elseStatment != child) {
+					missingBlockFound= true;
+				}
+			}
 
+			if (missingBlockFound && foundElse) {
 				String label = CorrectionMessages.QuickAssistProcessor_replacethenelsewithblock_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
-				proposal.setEndPosition(rewrite.track(elseStatment));
+				if (elseStatment == null) {
+					proposal.setEndPosition(rewrite.track(ifStatement));
+				} else {
+					proposal.setEndPosition(rewrite.track(elseStatment));
+				}
 				resultingCollections.add(proposal);
 			}
 		}

@@ -2680,5 +2680,254 @@ public class AssistQuickFixTest extends QuickFixTest {
 
 		}
 
-    
+	public void testChangeIfStatementToBlock() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            ;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "if (";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(2);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}    
+	
+	public void testChangeElseStatementToBlock() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("	public void foo() {\n");
+		buf.append("		if (true) {\n");
+		buf.append("			;\n");
+		buf.append("		} else\n");
+		buf.append("            ;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "else";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("	public void foo() {\n");
+		buf.append("		if (true) {\n");
+		buf.append("			;\n");
+		buf.append("		} else {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}   
+	
+	public void testChangeIfWithElseStatmentToBlock() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("	public void foo() {\n");
+		buf.append("        if (true) \n");
+		buf.append("            ;\n");
+		buf.append("        else {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "if (";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("	public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}   
+	
+	public void testChangeIfAndElseStatementToBlock() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("	public void foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            ;\n");
+		buf.append("        else\n");
+		buf.append("            ;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "if (";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		
+		str= "else";
+		context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("	public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}   
+	
+	public void testChangeIfAndElseIfStatementToBlock() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("	public void foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            ;\n");
+		buf.append("        else if (true)\n");
+		buf.append("            ;\n");
+		buf.append("        else if (false)\n");
+		buf.append("            ;\n");
+		buf.append("        else\n");
+		buf.append("            ;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "else if (";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("	public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else if (false) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}   
+	
+	public void testChangeIfAndElseIfStatementWithBlockToBlock() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("	public void foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            ;\n");
+		buf.append("        else if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else if (false)\n");
+		buf.append("            ;\n");
+		buf.append("        else\n");
+		buf.append("            ;\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "else if (";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("	public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else if (false) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("	}\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());	
+	}   
 }
