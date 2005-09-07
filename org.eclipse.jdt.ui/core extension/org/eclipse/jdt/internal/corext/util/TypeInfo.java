@@ -26,7 +26,8 @@ public abstract class TypeInfo {
 	final String fName;
 	final String fPackage;
 	final char[][] fEnclosingNames;
-	final int fModifiers;
+	
+	int fModifiers;
 	
 	public static final int UNRESOLVABLE_TYPE_INFO= 1;
 	public static final int JAR_FILE_ENTRY_TYPE_INFO= 2;
@@ -91,6 +92,15 @@ public abstract class TypeInfo {
 	 */
 	public int getModifiers() {
 		return fModifiers;
+	}
+	
+	/**
+	 * Sets the modifiers to the given value.
+	 * 
+	 * @param modifiers the new modifiers
+	 */
+	public void setModifiers(int modifiers) {
+		fModifiers= modifiers;
 	}
 	
 	/**

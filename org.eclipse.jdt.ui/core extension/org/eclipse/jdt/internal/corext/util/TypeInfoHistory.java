@@ -101,10 +101,14 @@ public class TypeInfoHistory {
 						return true;
 					}
 					return processChildrenDelta(delta);
+				case IJavaElement.TYPE:
+					if (isChanged && (delta.getFlags() & IJavaElementDelta.F_MODIFIERS) != 0) {
+						return true;
+					}
+					// type children can be inner classes: fall through
 				case IJavaElement.JAVA_MODEL:
 				case IJavaElement.PACKAGE_FRAGMENT:
 				case IJavaElement.CLASS_FILE:
-				case IJavaElement.TYPE: // type children can be inner classes
 					if (isRemoved) {
 						return true;
 					}				
@@ -210,8 +214,12 @@ public class TypeInfoHistory {
 			TypeInfo type= (TypeInfo)iter.next();
 			try {
 				IType jType= type.resolveType(scope);
-				if (jType == null || !jType.exists())
+				if (jType == null || !jType.exists()) {
 					fHistroy.remove(type);
+				} else {
+					// copy over the modifiers since they may have changed
+					type.setModifiers(jType.getFlags());
+				}
 			} catch (JavaModelException e) {
 				fHistroy.remove(type);
 			}
