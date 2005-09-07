@@ -26,7 +26,8 @@ public abstract class TypeInfo {
 	final String fName;
 	final String fPackage;
 	final char[][] fEnclosingNames;
-	final int fModifiers;
+	
+	int fModifiers;
 	
 	public static final int UNRESOLVABLE_TYPE_INFO= 1;
 	public static final int JAR_FILE_ENTRY_TYPE_INFO= 2;
@@ -91,6 +92,15 @@ public abstract class TypeInfo {
 	 */
 	public int getModifiers() {
 		return fModifiers;
+	}
+	
+	/**
+	 * Sets the modifiers to the given value.
+	 * 
+	 * @param modifiers the new modifiers
+	 */
+	public void setModifiers(int modifiers) {
+		fModifiers= modifiers;
 	}
 	
 	/**
@@ -219,8 +229,10 @@ public abstract class TypeInfo {
 	}
 
 	protected boolean doEquals(TypeInfo other) {
+		// Don't compare the modifiers since they aren't relevant to identify
+		// a type.
 		return fName.equals(other.fName) && fPackage.equals(other.fPackage) 
-			&& fModifiers == other.fModifiers && CharOperation.equals(fEnclosingNames, other.fEnclosingNames);
+			&& CharOperation.equals(fEnclosingNames, other.fEnclosingNames);
 	}
 	
 	protected static boolean equals(String s1, String s2) {

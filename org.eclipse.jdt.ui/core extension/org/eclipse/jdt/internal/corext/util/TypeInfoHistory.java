@@ -32,6 +32,7 @@ import javax.xml.transform.OutputKeys;
 import javax.xml.transform.Transformer;
 import javax.xml.transform.TransformerException;
 import javax.xml.transform.TransformerFactory;
+import javax.xml.transform.TransformerFactoryConfigurationError;
 import javax.xml.transform.dom.DOMSource;
 import javax.xml.transform.stream.StreamResult;
 
@@ -74,7 +75,7 @@ public class TypeInfoHistory {
 		}
 		
 		/**
-		 * Computes whether the histroy needs a consistency check or not.
+		 * Computes whether the history needs a consistency check or not.
 		 * 
 		 * @param delta the Java element delta
 		 * 
@@ -105,7 +106,8 @@ public class TypeInfoHistory {
 				case IJavaElement.PACKAGE_FRAGMENT:
 				case IJavaElement.CLASS_FILE:
 				case IJavaElement.TYPE: // type children can be inner classes
-					if (isRemoved) {
+					if (isRemoved || (isChanged &&
+							(delta.getFlags() & IJavaElementDelta.F_MODIFIERS) != 0)) {
 						return true;
 					}				
 					return processChildrenDelta(delta);
@@ -158,7 +160,7 @@ public class TypeInfoHistory {
 	
 	private static final char[][] EMPTY_ENCLOSING_NAMES= new char[0][0];
 	
-	private Map fHistroy= new LinkedHashMap(80, 0.75f, true) {
+	private Map fHistory= new LinkedHashMap(80, 0.75f, true) {
 		private static final long serialVersionUID= 1L;
 		protected boolean removeEldestEntry(Map.Entry eldest) {
 			return size() > 60;
@@ -200,26 +202,30 @@ public class TypeInfoHistory {
 	}
 	
 	public synchronized boolean isEmpty() {
-		return fHistroy.isEmpty();
+		return fHistory.isEmpty();
 	}
 	
 	public synchronized boolean contains(TypeInfo type) {
-		return fHistroy.get(type) != null;
+		return fHistory.get(type) != null;
 	}
 
 	public synchronized void checkConsistency(IProgressMonitor monitor) {
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
-		List keys= new ArrayList(fHistroy.keySet());
+		List keys= new ArrayList(fHistory.keySet());
 		monitor.beginTask(CorextMessages.TypeInfoHistory_consistency_check, keys.size());
 		monitor.setTaskName(CorextMessages.TypeInfoHistory_consistency_check);
 		for (Iterator iter= keys.iterator(); iter.hasNext();) {
 			TypeInfo type= (TypeInfo)iter.next();
 			try {
 				IType jType= type.resolveType(scope);
-				if (jType == null || !jType.exists())
-					fHistroy.remove(type);
+				if (jType == null || !jType.exists()) {
+					fHistory.remove(type);
+				} else {
+					// copy over the modifiers since they may have changed
+					type.setModifiers(jType.getFlags());
+				}
 			} catch (JavaModelException e) {
-				fHistroy.remove(type);
+				fHistory.remove(type);
 			}
 			monitor.worked(1);
 		}
@@ -228,15 +234,15 @@ public class TypeInfoHistory {
 	}
 	
 	public synchronized void accessed(TypeInfo info) {
-		fHistroy.put(info, info);
+		fHistory.put(info, info);
 	}
 	
 	public synchronized TypeInfo remove(TypeInfo info) {
-		return (TypeInfo)fHistroy.remove(info);
+		return (TypeInfo)fHistory.remove(info);
 	}
 	
 	public synchronized TypeInfo[] getTypeInfos() {
-		Collection values= fHistroy.values();
+		Collection values= fHistory.values();
 		int size= values.size();
 		TypeInfo[] result= new TypeInfo[size];
 		int i= size - 1;
@@ -248,7 +254,7 @@ public class TypeInfoHistory {
 	}
 	
 	public synchronized TypeInfo[] getFilteredTypeInfos(TypeInfoFilter filter) {
-		Collection values= fHistroy.values();
+		Collection values= fHistory.values();
 		List result= new ArrayList();
 		for (Iterator iter= values.iterator(); iter.hasNext();) {
 			TypeInfo type= (TypeInfo)iter.next();
@@ -320,7 +326,7 @@ public class TypeInfoHistory {
 					}
 					TypeInfo info= factory.create(
 						pack.toCharArray(), name.toCharArray(), enclosingNames, modifiers, path);
-					fHistroy.put(info, info);
+					fHistory.put(info, info);
 				}
 			}
 		}
@@ -336,6 +342,10 @@ public class TypeInfoHistory {
 		} catch (IOException e) {
 			JavaPlugin.log(e);
 		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		} catch (TransformerFactoryConfigurationError e) {
+			// The XML library can be misconficgured (e.g. via 
+			// -Djava.endorsed.dirs=C:\notExisting\xerces-2_7_1)
 			JavaPlugin.log(e);
 		} finally {
 			try {
@@ -357,7 +367,7 @@ public class TypeInfoHistory {
 			Element rootElement = document.createElement(NODE_ROOT);
 			document.appendChild(rootElement);
 	
-			Iterator values= fHistroy.values().iterator();
+			Iterator values= fHistory.values().iterator();
 			while (values.hasNext()) {
 				TypeInfo type= (TypeInfo)values.next();
 				Element typeElement= document.createElement(NODE_TYPE_INFO);
