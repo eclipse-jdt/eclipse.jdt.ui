@@ -219,8 +219,10 @@ public abstract class TypeInfo {
 	}
 
 	protected boolean doEquals(TypeInfo other) {
+		// Don't compare the modifiers since they aren't relevant to identify
+		// a type.
 		return fName.equals(other.fName) && fPackage.equals(other.fPackage) 
-			&& fModifiers == other.fModifiers && CharOperation.equals(fEnclosingNames, other.fEnclosingNames);
+			&& CharOperation.equals(fEnclosingNames, other.fEnclosingNames);
 	}
 	
 	protected static boolean equals(String s1, String s2) {
