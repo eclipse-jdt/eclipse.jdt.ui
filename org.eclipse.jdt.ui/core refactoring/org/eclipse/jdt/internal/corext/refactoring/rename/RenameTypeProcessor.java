@@ -645,11 +645,13 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.RenameTypeRefactoring_creating_change, 4);
 		final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges) {
+
 			public RefactoringDescriptor getRefactoringDescriptor() {
 				final Map arguments= new HashMap();
 				arguments.put(ATTRIBUTE_HANDLE, fType.getHandleIdentifier());
 				arguments.put(ATTRIBUTE_NAME, getNewElementName());
-				arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
+				if (fFilePatterns != null && "".equals(fFilePatterns)) //$NON-NLS-1$
+					arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
 				arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 				arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
 				arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());

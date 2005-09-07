@@ -485,11 +485,13 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		try {
 			pm.beginTask(RefactoringCoreMessages.RenamePackageRefactoring_creating_change, 1);
 			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges) {
+
 				public RefactoringDescriptor getRefactoringDescriptor() {
 					final Map arguments= new HashMap();
 					arguments.put(ATTRIBUTE_HANDLE, fPackage.getHandleIdentifier());
 					arguments.put(ATTRIBUTE_NAME, getNewElementName());
-					arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
+					if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
+						arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 					arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
 					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
