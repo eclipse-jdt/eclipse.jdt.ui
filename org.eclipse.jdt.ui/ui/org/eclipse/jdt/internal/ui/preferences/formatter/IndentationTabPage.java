@@ -7,6 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     istvan@benedek-home.de
+ *       - 103706 [formatter] indent empty lines
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
