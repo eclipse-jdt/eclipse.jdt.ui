@@ -165,6 +165,9 @@ public class SuperTypesOfSingleton extends TypeSet {
 			}
 			return true;
 		}
+		if (other.isUniverse()) {
+			return false;
+		}
 		// For now, no more tricks up my sleeve; get an iterator
 		for(Iterator iter= other.iterator(); iter.hasNext(); ) {
 			TType t= (TType) iter.next();
