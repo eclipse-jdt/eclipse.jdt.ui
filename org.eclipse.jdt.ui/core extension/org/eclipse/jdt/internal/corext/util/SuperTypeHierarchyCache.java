@@ -35,9 +35,7 @@ public class SuperTypeHierarchyCache {
 		}
 		
 		public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
-			synchronized (fgHierarchyCache) {
-				removeHierarchyEntryFromCache(this);
-			}
+			removeHierarchyEntryFromCache(this);
 		}
 
 		public ITypeHierarchy getTypeHierarchy() {
