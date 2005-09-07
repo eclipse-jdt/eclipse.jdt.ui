@@ -1101,7 +1101,7 @@ public class ReorgPolicyFactory {
 		public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants sharedParticipants) throws CoreException {
 			List result= new ArrayList();
 			fReorgExecutionLog= new ReorgExecutionLog();
-			CopyArguments args= new CopyArguments(getDestinationCu(), fReorgExecutionLog);
+			CopyArguments args= new CopyArguments(getJavaElementDestination(), fReorgExecutionLog);
 			IJavaElement[] javaElements= getJavaElements();
 			for (int i= 0; i < javaElements.length; i++) {
 				result.addAll(Arrays.asList(ParticipantManager.loadCopyParticipants(
