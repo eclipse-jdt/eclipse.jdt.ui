@@ -476,8 +476,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 					arguments.put(ATTRIBUTE_NAME, getNewElementName());
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
-					arguments.put(ATTRIBUTE_RENAME_GETTER, Boolean.valueOf(fRenameGetter));
-					arguments.put(ATTRIBUTE_RENAME_SETTER, Boolean.valueOf(fRenameSetter));
+					arguments.put(ATTRIBUTE_RENAME_GETTER, Boolean.valueOf(fRenameGetter).toString());
+					arguments.put(ATTRIBUTE_RENAME_SETTER, Boolean.valueOf(fRenameSetter).toString());
 					String project= null;
 					IJavaProject javaProject= fField.getJavaProject();
 					if (javaProject != null)
