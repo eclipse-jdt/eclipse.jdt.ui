@@ -458,11 +458,11 @@ public class JavaAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy {
 	 * @return <code>true</code> if the content of <code>document</code> looks like an anonymous class definition, <code>false</code> otherwise
 	 */
 	private static boolean looksLikeAnonymousClassDef(IDocument document, String partitioning, JavaHeuristicScanner scanner, int position) {
-		int previousCommaOrParen= scanner.scanBackward(position - 1, JavaHeuristicScanner.UNBOUND, new char[] {',', '('});
-		if (previousCommaOrParen == -1 || position < previousCommaOrParen + 5) // 2 for borders, 3 for "new"
+		int previousCommaParenEqual= scanner.scanBackward(position - 1, JavaHeuristicScanner.UNBOUND, new char[] {',', '(', '='});
+		if (previousCommaParenEqual == -1 || position < previousCommaParenEqual + 5) // 2 for borders, 3 for "new"
 			return false;
 
-		if (isNewMatch(document, previousCommaOrParen + 1, position - previousCommaOrParen - 2, partitioning))
+		if (isNewMatch(document, previousCommaParenEqual + 1, position - previousCommaParenEqual - 2, partitioning))
 			return true;
 
 		return false;

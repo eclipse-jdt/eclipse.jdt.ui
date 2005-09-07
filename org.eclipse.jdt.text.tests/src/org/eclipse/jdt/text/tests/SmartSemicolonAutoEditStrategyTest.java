@@ -240,4 +240,10 @@ public class SmartSemicolonAutoEditStrategyTest extends TestCase {
 		verifyBracePosition(39, 45);
 	}
 	
+	public void testBraceAnonymousClassInstantiation() throws BadLocationException {
+		fDocument.set("  Object object=new Object();");
+		verifyBracePosition(27, 28);
+		verifyBracePosition(28, 28);
+	}
+	
 }
