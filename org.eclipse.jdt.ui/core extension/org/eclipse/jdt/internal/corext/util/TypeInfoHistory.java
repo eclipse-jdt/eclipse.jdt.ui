@@ -102,12 +102,15 @@ public class TypeInfoHistory {
 						return true;
 					}
 					return processChildrenDelta(delta);
+				case IJavaElement.TYPE:
+					if (isChanged && (delta.getFlags() & IJavaElementDelta.F_MODIFIERS) != 0) {
+						return true;
+					}
+					// type children can be inner classes: fall through
 				case IJavaElement.JAVA_MODEL:
 				case IJavaElement.PACKAGE_FRAGMENT:
 				case IJavaElement.CLASS_FILE:
-				case IJavaElement.TYPE: // type children can be inner classes
-					if (isRemoved || (isChanged &&
-							(delta.getFlags() & IJavaElementDelta.F_MODIFIERS) != 0)) {
+					if (isRemoved) {
 						return true;
 					}				
 					return processChildrenDelta(delta);
