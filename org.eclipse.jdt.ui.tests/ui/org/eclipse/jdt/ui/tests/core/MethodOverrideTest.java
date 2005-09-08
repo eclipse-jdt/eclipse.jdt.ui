@@ -304,6 +304,9 @@ public class MethodOverrideTest extends CoreTests {
 		IMethodBinding[] overridingBindings= overridingTypeBinding.getDeclaredMethods();
 		IMethodBinding[] overriddenBindings= overriddenTypeBinding.getDeclaredMethods();
 		
+		if (DEBUG_SHOWRESULTS) {
+			System.out.println("--- " + getName() + " ---");
+		}
 		for (int i= 0; i < overridingMethods.length; i++) {
 			
 			IMethod overriding= overridingMethods[i];
