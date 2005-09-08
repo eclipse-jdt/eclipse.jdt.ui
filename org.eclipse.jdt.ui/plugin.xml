@@ -1978,6 +1978,7 @@
             <separator name="reorgGroup"/>
             <separator name="typeGroup"/>
             <separator name="codingGroup"/>
+            <separator name="historyGroup"/>
          </menu>
 <!-- undo/redo group  -->
 		 <!--
@@ -2132,6 +2133,19 @@
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
                id="org.eclipse.jdt.ui.actions.Inline">
          </action>
+         <action
+               class="org.eclipse.jdt.internal.ui.refactoring.actions.ShowWorkspaceHistoryActionDelegate"
+               definitionId="org.eclipse.jdt.ui.refactor.show.history"
+               id="org.eclipse.jdt.ui.actions.ShowRefactoringHistory"
+               label="%Refactoring.showHistoryAction.label"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/historyGroup">
+         </action>
+         <action
+               class="org.eclipse.jdt.internal.ui.refactoring.actions.ExportWorkspaceHistoryActionDelegate"
+               definitionId="org.eclipse.jdt.ui.refactor.export.history"
+               id="org.eclipse.jdt.ui.actions.ExportRefactoringHistory"
+               label="%Refactoring.exportHistoryAction.label"
+               menubarPath="org.eclipse.jdt.ui.refactoring.menu/historyGroup"/>
 <!-- =========================================================================== -->
 <!-- Source Menu                                                                 -->
 <!-- =========================================================================== -->
@@ -3235,6 +3249,17 @@
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.inline">
       </command>
+      <command
+            categoryId="org.eclipse.jdt.ui.category.refactoring"
+            description="%ActionDefinition.showRefactoringHistory.description"
+            id="org.eclipse.jdt.ui.refactor.show.history"
+            name="%ActionDefinition.showRefactoringHistory.name">
+      </command>
+      <command
+            categoryId="org.eclipse.jdt.ui.category.refactoring"
+            description="%ActionDefinition.exportRefactoringHistory.description"
+            id="org.eclipse.jdt.ui.refactor.export.history"
+            name="%ActionDefinition.exportRefactoringHistory.name"/>
       <command
             name="%ActionDefinition.extractMethod.name"
             description="%ActionDefinition.extractMethod.description"
@@ -4508,5 +4533,57 @@
     <extension point="org.eclipse.core.runtime.preferences">
         <initializer class="org.eclipse.jdt.internal.ui.JavaUIPreferenceInitializer"/>
     </extension>
-    
+       <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            id="org.eclipse.jdt.ui.refactor.show.history"
+            objectClass="org.eclipse.core.resources.IProject">
+         <action
+               class="org.eclipse.jdt.internal.ui.refactoring.actions.ShowProjectHistoryActionDelegate"
+               definitionId="org.eclipse.jdt.ui.refactor.show.history"
+               enablesFor="1"
+               id="org.eclipse.jdt.ui.actions.ShowRefactoringHistory"
+               label="%showRefactoringHistoryAction.label"
+               menubarPath="additions"
+               tooltip="%showRefactoringHistoryAction.tooltip">
+         </action>
+      </objectContribution>
+      <objectContribution
+            id="org.eclipse.jdt.ui.refactor.show.history"
+            objectClass="org.eclipse.jdt.core.IJavaProject">
+         <action
+               class="org.eclipse.jdt.internal.ui.refactoring.actions.ShowProjectHistoryActionDelegate"
+               definitionId="org.eclipse.jdt.ui.refactor.show.history"
+               enablesFor="1"
+               id="org.eclipse.jdt.ui.actions.ShowRefactoringHistory"
+               label="%showRefactoringHistoryAction.label"
+               menubarPath="additions"
+               tooltip="%showRefactoringHistoryAction.tooltip">
+         </action>
+      </objectContribution>
+      <objectContribution
+            id="org.eclipse.jdt.ui.refactor.export.history"
+            objectClass="org.eclipse.core.resources.IProject">
+         <action
+               class="org.eclipse.jdt.internal.ui.refactoring.actions.ExportProjectHistoryActionDelegate"
+               definitionId="org.eclipse.jdt.ui.refactor.export.history"
+               enablesFor="1"
+               id="org.eclipse.jdt.ui.actions.ExportRefactoringHistory"
+               label="%exportRefactoringHistoryAction.label"
+               menubarPath="additions"
+               tooltip="%exportRefactoringHistoryAction.tooltip"/>
+      </objectContribution>
+      <objectContribution
+            id="org.eclipse.jdt.ui.refactor.export.history"
+            objectClass="org.eclipse.jdt.core.IJavaProject">
+         <action
+               class="org.eclipse.jdt.internal.ui.refactoring.actions.ExportProjectHistoryActionDelegate"
+               definitionId="org.eclipse.jdt.ui.refactor.export.history"
+               enablesFor="1"
+               id="org.eclipse.jdt.ui.actions.ExportRefactoringHistory"
+               label="%exportRefactoringHistoryAction.label"
+               menubarPath="additions"
+               tooltip="%exportRefactoringHistoryAction.tooltip"/>
+      </objectContribution>
+   </extension>
 </plugin>
