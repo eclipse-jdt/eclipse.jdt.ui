@@ -287,8 +287,9 @@ public class ContentProviderTests1 extends TestCase {
 
 			assertTrue("No add happened", ! fMyPart.hasAddHappened()); //$NON-NLS-1$
 			assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-			assertEquals("One refresh", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
 			assertEquals("Correct refresh", fMyPart.getRefreshedObject().get(0), fPack6); //$NON-NLS-1$
+			if (fMyPart.getRefreshedObject().size() != 1)
+				fail("One refresh expected, was:\n" + fMyPart.getRefreshedObject()); //$NON-NLS-1$
 			
 		} finally {
 			cu.discardWorkingCopy();
