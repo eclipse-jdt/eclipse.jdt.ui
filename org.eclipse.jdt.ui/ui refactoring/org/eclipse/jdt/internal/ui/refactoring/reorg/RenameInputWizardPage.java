@@ -25,6 +25,9 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+
+import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
@@ -32,8 +35,6 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
-
-import org.eclipse.ltk.core.refactoring.Refactoring;
 
 abstract class RenameInputWizardPage extends TextInputWizardPage {
 
@@ -104,6 +105,21 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		// none by default
 	}
 
+	public void setVisible(boolean visible) {
+		if (visible) {
+			INameUpdating nameUpdating= (INameUpdating)getRefactoring().getAdapter(INameUpdating.class);
+			if (nameUpdating != null) {
+				String newName= nameUpdating.getNewElementName();
+				if (newName != null && newName.length() > 0 && !newName.equals(getInitialValue())) {
+					Text textField= getTextField();
+					textField.setText(newName);
+					textField.setSelection(0, newName.length());
+				}
+			}
+		}
+		super.setVisible(visible);
+	}
+	
 	protected boolean saveSettings() {
 		if (getContainer() instanceof Dialog)
 			return ((Dialog)getContainer()).getReturnCode() == IDialogConstants.OK_ID;

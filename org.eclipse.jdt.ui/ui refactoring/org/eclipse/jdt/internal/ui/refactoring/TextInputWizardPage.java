@@ -94,6 +94,24 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 	}
 	
 	/**
+	 * Returns the text entry field
+	 * 
+	 * @return the text entry field
+	 */
+	protected Text getTextField() {
+		return fTextField;
+	}
+	
+	/**
+	 * Returns the initial value.
+	 * 
+	 * @return the initial value
+	 */
+	public String getInitialValue() {
+		return fInitialValue;
+	}
+	
+	/**
 	 * Performs input validation. Returns a <code>RefactoringStatus</code> which
 	 * describes the result of input validation. <code>Null<code> is interpreted
 	 * as no error.
@@ -170,4 +188,3 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 		}
 	}
 }
-
