@@ -2133,6 +2133,7 @@
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/codingGroup"
                id="org.eclipse.jdt.ui.actions.Inline">
          </action>
+<!--
          <action
                class="org.eclipse.jdt.internal.ui.refactoring.actions.ShowWorkspaceHistoryActionDelegate"
                definitionId="org.eclipse.jdt.ui.refactor.show.history"
@@ -2146,6 +2147,7 @@
                id="org.eclipse.jdt.ui.actions.ExportRefactoringHistory"
                label="%Refactoring.exportHistoryAction.label"
                menubarPath="org.eclipse.jdt.ui.refactoring.menu/historyGroup"/>
+-->
 <!-- =========================================================================== -->
 <!-- Source Menu                                                                 -->
 <!-- =========================================================================== -->
@@ -4533,7 +4535,8 @@
     <extension point="org.eclipse.core.runtime.preferences">
         <initializer class="org.eclipse.jdt.internal.ui.JavaUIPreferenceInitializer"/>
     </extension>
-       <extension
+<!--
+    <extension
          point="org.eclipse.ui.popupMenus">
       <objectContribution
             id="org.eclipse.jdt.ui.refactor.show.history"
@@ -4586,4 +4589,5 @@
                tooltip="%exportRefactoringHistoryAction.tooltip"/>
       </objectContribution>
    </extension>
+-->
 </plugin>
