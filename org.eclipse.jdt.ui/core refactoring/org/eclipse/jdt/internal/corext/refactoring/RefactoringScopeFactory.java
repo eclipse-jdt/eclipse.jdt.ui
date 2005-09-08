@@ -127,10 +127,12 @@ public class RefactoringScopeFactory {
 		if (javaElement instanceof IMember) {
 			IMember member= (IMember) javaElement;
 			if (JdtFlags.isPrivate(member)) {
-				if (member.getCompilationUnit() != null)
+				if (member.getCompilationUnit() != null) {
 					return SearchEngine.createJavaSearchScope(new IJavaElement[] { member.getCompilationUnit()});
-				else
-					return SearchEngine.createJavaSearchScope(new IJavaElement[] { member});
+				} else if (member.getClassFile() != null) {
+					// member could be called from an inner class-> search package fragment (see also bug 109053):
+					return SearchEngine.createJavaSearchScope(new IJavaElement[] { member.getAncestor(IJavaElement.PACKAGE_FRAGMENT)});
+				}
 			}
 		}
 		Collection referencingProjects= getReferencingProjects(javaElement.getJavaProject());
