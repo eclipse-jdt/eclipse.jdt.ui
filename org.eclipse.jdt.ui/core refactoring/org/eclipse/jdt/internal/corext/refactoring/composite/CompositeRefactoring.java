@@ -35,6 +35,7 @@ import org.eclipse.ltk.core.refactoring.CompositeTextFileChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoring;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -54,7 +55,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.2
  */
-public class CompositeRefactoring extends Refactoring {
+public class CompositeRefactoring extends Refactoring implements IInitializableRefactoring {
 
 	/** The global working copy owner */
 	private static class GlobalWorkingCopyOwner extends WorkingCopyOwner {
@@ -257,7 +258,7 @@ public class CompositeRefactoring extends Refactoring {
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public final Change createChange(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+	public Change createChange(final IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
 
 		try {
@@ -360,6 +361,13 @@ public class CompositeRefactoring extends Refactoring {
 		fWorkingCopies.put(original, unit);
 
 		return unit;
+	}
+
+	/*
+	 * @see org.eclipse.ltk.core.refactoring.recording.IRecordableRefactoring#initialize(org.eclipse.ltk.core.refactoring.participants.RefactoringArguments)
+	 */
+	public final boolean initialize(RefactoringArguments arguments) {
+		return true;
 	}
 
 	/**
