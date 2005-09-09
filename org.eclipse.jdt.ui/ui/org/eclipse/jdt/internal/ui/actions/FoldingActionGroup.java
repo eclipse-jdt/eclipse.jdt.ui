@@ -69,11 +69,15 @@ public class FoldingActionGroup extends ActionGroup {
 	private final TextOperationAction fExpand;
 	private final TextOperationAction fCollapse;
 	private final TextOperationAction fExpandAll;
+	
+	/* since 3.2 */
 	private final PreferenceAction fRestoreDefaults;
 	private final FoldingAction fCollapseMembers;
 	private final FoldingAction fCollapseComments;
+	private final TextOperationAction fCollapseAll;
 	
 	private final IProjectionListener fProjectionListener;
+
 
 
 	
@@ -91,6 +95,7 @@ public class FoldingActionGroup extends ActionGroup {
 			fExpand= null;
 			fCollapse= null;
 			fExpandAll= null;
+			fCollapseAll= null;
 			fRestoreDefaults= null;
 			fCollapseMembers= null;
 			fCollapseComments= null;
@@ -135,6 +140,10 @@ public class FoldingActionGroup extends ActionGroup {
 		fExpandAll.setActionDefinitionId(IFoldingCommandIds.FOLDING_EXPAND_ALL);
 		editor.setAction("FoldingExpandAll", fExpandAll); //$NON-NLS-1$
 		
+		fCollapseAll= new TextOperationAction(FoldingMessages.getResourceBundle(), "Projection.CollapseAll.", editor, ProjectionViewer.COLLAPSE_ALL, true); //$NON-NLS-1$
+		fCollapseAll.setActionDefinitionId(IFoldingCommandIds.FOLDING_COLLAPSE_ALL);
+		editor.setAction("FoldingCollapseAll", fCollapseAll); //$NON-NLS-1$
+		
 		fExpand= new TextOperationAction(FoldingMessages.getResourceBundle(), "Projection.Expand.", editor, ProjectionViewer.EXPAND, true); //$NON-NLS-1$
 		fExpand.setActionDefinitionId(IFoldingCommandIds.FOLDING_EXPAND);
 		editor.setAction("FoldingExpand", fExpand); //$NON-NLS-1$
@@ -151,7 +160,7 @@ public class FoldingActionGroup extends ActionGroup {
 				}
 			}
 		};
-		fRestoreDefaults.setActionDefinitionId(IFoldingCommandIds.FOLDING_COLLAPSE_ALL);
+		fRestoreDefaults.setActionDefinitionId(IFoldingCommandIds.FOLDING_RESTORE);
 		editor.setAction("FoldingRestore", fRestoreDefaults); //$NON-NLS-1$
 		
 		fCollapseMembers= new FoldingAction(FoldingMessages.getResourceBundle(), "Projection.CollapseMembers.") { //$NON-NLS-1$
@@ -210,6 +219,7 @@ public class FoldingActionGroup extends ActionGroup {
 			fExpand.update();
 			fExpandAll.update();
 			fCollapse.update();
+			fCollapseAll.update();
 			fRestoreDefaults.update();
 			fCollapseMembers.update();
 			fCollapseComments.update();
@@ -228,6 +238,7 @@ public class FoldingActionGroup extends ActionGroup {
 			manager.add(fExpandAll);
 			manager.add(fExpand);
 			manager.add(fCollapse);
+			manager.add(fCollapseAll);
 			manager.add(fRestoreDefaults);
 			manager.add(fCollapseMembers);
 			manager.add(fCollapseComments);

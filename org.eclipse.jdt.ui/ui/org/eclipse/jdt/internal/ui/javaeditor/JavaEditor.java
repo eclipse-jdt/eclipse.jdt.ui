@@ -3550,6 +3550,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		foldingMenu.add(action);
 		action= getAction("FoldingExpandAll"); //$NON-NLS-1$
 		foldingMenu.add(action);
+		action= getAction("FoldingCollapseAll"); //$NON-NLS-1$
+		foldingMenu.add(action);
 		action= getAction("FoldingRestore"); //$NON-NLS-1$
 		foldingMenu.add(action);
 		action= getAction("FoldingCollapseMembers"); //$NON-NLS-1$
