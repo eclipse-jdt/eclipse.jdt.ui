@@ -206,9 +206,8 @@ public abstract class OpenCloseWorkingSetAction extends SelectionDispatchAction 
 			} else if (element instanceof IJavaProject) {
 				project= ((IJavaProject)element).getProject();
 			}
-			if (project == null || !validate(project))
-				return null;
-			result.add(project);
+			if (project != null && validate(project))
+				result.add(project);
 		}
 		return result;
 	}
