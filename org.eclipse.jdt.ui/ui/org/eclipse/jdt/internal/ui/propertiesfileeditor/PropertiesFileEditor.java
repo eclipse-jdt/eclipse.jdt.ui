@@ -25,14 +25,13 @@ import org.eclipse.jface.text.source.IVerticalRuler;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 
-import org.eclipse.ui.editors.text.TextEditor;
-
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.part.IShowInTargetList;
 import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
-import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.TextOperationAction;
+
+import org.eclipse.ui.editors.text.TextEditor;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
@@ -210,17 +209,6 @@ public class PropertiesFileEditor extends TextEditor {
 			getEditorSite().getActionBars().getStatusLineManager().setMessage(null);
 			getEditorSite().getActionBars().getStatusLineManager().setErrorMessage(null);
 		}
-	}
-
-	/**
-	 * Sets the given message as error message to this editor's status line.
-	 *
-	 * @param msg message to be set
-	 */
-	protected void setStatusLineErrorMessage(String msg) {
-		IEditorStatusLine statusLine= (IEditorStatusLine) getAdapter(IEditorStatusLine.class);
-		if (statusLine != null)
-			statusLine.setMessage(true, msg, null);
 	}
 
 	/*

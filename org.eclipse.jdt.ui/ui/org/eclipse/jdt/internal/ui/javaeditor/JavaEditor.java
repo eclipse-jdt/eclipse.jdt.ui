@@ -8,11 +8,8 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.BreakIterator;
 import java.text.CharacterIterator;
 import java.util.ArrayList;
@@ -29,13 +26,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Preferences;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
-import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ProjectScope;
 
@@ -121,7 +116,6 @@ import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.IPartListener2;
 import org.eclipse.ui.IPartService;
 import org.eclipse.ui.ISelectionListener;
-import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWindowListener;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
@@ -141,7 +135,6 @@ import org.eclipse.ui.texteditor.AbstractDecoratedTextEditorPreferenceConstants;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.ChainedPreferenceStore;
 import org.eclipse.ui.texteditor.IDocumentProvider;
-import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
@@ -228,8 +221,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.IViewPartInputProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
 import org.osgi.service.prefs.BackingStoreException;
-
-
 
 /**
  * Java specific text editor.
@@ -1474,16 +1465,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	private InformationPresenter fInformationPresenter;
 	/** History for structure select action */
 	private SelectionHistory fSelectionHistory;
-	/**
-	 * Indicates whether this editor is about to update any annotation views.
-	 * @since 3.0
-	 */
-	private boolean fIsUpdatingAnnotationViews= false;
-	/**
-	 * The marker that served as last target for a goto marker request.
-	 * @since 3.0
-	 */
-	private IMarker fLastMarkerTarget= null;
 	protected CompositeActionGroup fActionGroups;
 
 	/**
@@ -2680,42 +2661,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	/**
-	 * {@inheritDoc}
-	 * @deprecated
-	 */
-	public void gotoMarker(IMarker marker) {
-		fLastMarkerTarget= marker;
-		if (!fIsUpdatingAnnotationViews) {
-		    super.gotoMarker(marker);
-		}
-	}
-
-	/**
-	 * Jumps to the next enabled annotation according to the given direction.
-	 * An annotation type is enabled if it is configured to be in the
-	 * Next/Previous tool bar drop down menu and if it is checked.
-	 *
-	 * @param forward <code>true</code> if search direction is forward, <code>false</code> if backward
-	 */
-	public void gotoAnnotation(boolean forward) {
-		ITextSelection selection= (ITextSelection) getSelectionProvider().getSelection();
-		Position position= new Position(0, 0);
-		if (false /* delayed - see bug 18316 */) {
-			getNextAnnotation(selection.getOffset(), selection.getLength(), forward, position);
-			selectAndReveal(position.getOffset(), position.getLength());
-		} else /* no delay - see bug 18316 */ {
-			Annotation annotation= getNextAnnotation(selection.getOffset(), selection.getLength(), forward, position);
-			setStatusLineErrorMessage(null);
-			setStatusLineMessage(null);
-			if (annotation != null) {
-				updateAnnotationViews(annotation);
-				selectAndReveal(position.getOffset(), position.getLength());
-				setStatusLineMessage(annotation.getText());
-			}
-		}
-	}
-
-	/**
 	 * Returns the lock object for the given annotation model.
 	 *
 	 * @param annotationModel the annotation model
@@ -2729,44 +2674,25 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			return annotationModel;
 	}
 
-	/**
-	 * Updates the annotation views that show the given annotation.
-	 *
-	 * @param annotation the annotation
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#updateMarkerViews(org.eclipse.jface.text.source.Annotation)
+	 * @since 3.2
 	 */
-	private void updateAnnotationViews(Annotation annotation) {
-		IMarker marker= null;
-		if (annotation instanceof MarkerAnnotation)
-			marker= ((MarkerAnnotation) annotation).getMarker();
-		else if (annotation instanceof IJavaAnnotation) {
+	protected void updateMarkerViews(Annotation annotation) {
+		if (annotation instanceof IJavaAnnotation) {
 			Iterator e= ((IJavaAnnotation) annotation).getOverlaidIterator();
 			if (e != null) {
 				while (e.hasNext()) {
 					Object o= e.next();
 					if (o instanceof MarkerAnnotation) {
-						marker= ((MarkerAnnotation) o).getMarker();
-						break;
+						super.updateMarkerViews((MarkerAnnotation)o);
+						return;
 					}
 				}
 			}
+			return;
 		}
-
-		if (marker != null && !marker.equals(fLastMarkerTarget)) {
-			try {
-				boolean isProblem= marker.isSubtypeOf(IMarker.PROBLEM);
-				IWorkbenchPage page= getSite().getPage();
-				IViewPart view= page.findView(isProblem ? IPageLayout.ID_PROBLEM_VIEW: IPageLayout.ID_TASK_LIST); //  
-				if (view != null) {
-					Method method= view.getClass().getMethod("setSelection", new Class[] { IStructuredSelection.class, boolean.class}); //$NON-NLS-1$
-					method.invoke(view, new Object[] {new StructuredSelection(marker), Boolean.TRUE });
-				}
-			} catch (CoreException x) {
-			} catch (NoSuchMethodException x) {
-			} catch (IllegalAccessException x) {
-			} catch (InvocationTargetException x) {
-			}
-			// ignore exceptions, don't update any of the lists, just set status line
-		}
+		super.updateMarkerViews(annotation);
 	}
 
 	/**
@@ -3203,14 +3129,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		setStatusLineErrorMessage(null);
 		setStatusLineMessage(null);
 		if (annotation != null) {
-			try {
-				fIsUpdatingAnnotationViews= true;
-				updateAnnotationViews(annotation);
-			} finally {
-				fIsUpdatingAnnotationViews= false;
-			}
-			if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation) annotation).isProblem())
-				setStatusLineMessage(annotation.getText());
+			updateMarkerViews(annotation);
+		if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation) annotation).isProblem())
+			setStatusLineMessage(annotation.getText());
 		}
 	}
 
@@ -3279,29 +3200,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	/**
-	 * Sets the given message as error message to this editor's status line.
-	 *
-	 * @param msg message to be set
-	 */
-	protected void setStatusLineErrorMessage(String msg) {
-		IEditorStatusLine statusLine= (IEditorStatusLine) getAdapter(IEditorStatusLine.class);
-		if (statusLine != null)
-			statusLine.setMessage(true, msg, null);
-	}
-
-	/**
-	 * Sets the given message as message to this editor's status line.
-	 *
-	 * @param msg message to be set
-	 * @since 3.0
-	 */
-	protected void setStatusLineMessage(String msg) {
-		IEditorStatusLine statusLine= (IEditorStatusLine) getAdapter(IEditorStatusLine.class);
-		if (statusLine != null)
-			statusLine.setMessage(false, msg, null);
-	}
-
-	/**
 	 * Returns the signed current selection.
 	 * The length will be negative if the resulting selection
 	 * is right-to-left (RtoL).
@@ -3348,17 +3246,19 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	/**
-	 * Returns the annotation closest to the given range respecting the given
-	 * direction. If an annotation is found, the annotations current position
-	 * is copied into the provided annotation position.
+	 * {@inheritDoc}
+	 * <p>
+	 * Overrides the default implementation to handle {@link IJavaAnnotation}.
+	 * </p>
 	 *
 	 * @param offset the region offset
 	 * @param length the region length
 	 * @param forward <code>true</code> for forwards, <code>false</code> for backward
 	 * @param annotationPosition the position of the found annotation
 	 * @return the found annotation
+	 * @since 3.2
 	 */
-	private Annotation getNextAnnotation(final int offset, final int length, boolean forward, Position annotationPosition) {
+	protected Annotation findAnnotation(final int offset, final int length, boolean forward, Position annotationPosition) {
 
 		Annotation nextAnnotation= null;
 		Position nextAnnotationPosition= null;
@@ -3448,24 +3348,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		return null;
-	}
-
-	/**
-	 * Returns whether the given annotation is configured as a target for the
-	 * "Go to Next/Previous Annotation" actions
-	 *
-	 * @param annotation the annotation
-	 * @return <code>true</code> if this is a target, <code>false</code>
-	 *         otherwise
-	 * @since 3.0
-	 */
-	private boolean isNavigationTarget(Annotation annotation) {
-		Preferences preferences= EditorsUI.getPluginPreferences();
-		AnnotationPreference preference= getAnnotationPreferenceLookup().getAnnotationPreference(annotation);
-//		See bug 41689
-//		String key= forward ? preference.getIsGoToNextNavigationTargetKey() : preference.getIsGoToPreviousNavigationTargetKey();
-		String key= preference == null ? null : preference.getIsGoToNextNavigationTargetKey();
-		return (key != null && preferences.getBoolean(key));
 	}
 
 	/**

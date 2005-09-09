@@ -15,6 +15,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.ResourceBundle;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
@@ -28,6 +29,7 @@ import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.actions.RetargetAction;
 import org.eclipse.ui.texteditor.BasicTextEditorActionContributor;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 
@@ -48,8 +50,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 
 	private TogglePresentationAction fTogglePresentation;
 	private ToggleMarkOccurrencesAction fToggleMarkOccurrencesAction;
-	private GotoAnnotationAction fPreviousAnnotation;
-	private GotoAnnotationAction fNextAnnotation;
 
 	private RetargetTextEditorAction fGotoMatchingBracket;
 	private RetargetTextEditorAction fShowOutline;
@@ -82,10 +82,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 		fTogglePresentation= new TogglePresentationAction();
 
 		fToggleMarkOccurrencesAction= new ToggleMarkOccurrencesAction();
-
-		fPreviousAnnotation= new GotoAnnotationAction("PreviousAnnotation.", false); //$NON-NLS-1$
-
-		fNextAnnotation= new GotoAnnotationAction("NextAnnotation.", true); //$NON-NLS-1$
 
 		fGotoMatchingBracket= new RetargetTextEditorAction(b, "GotoMatchingBracket."); //$NON-NLS-1$
 		fGotoMatchingBracket.setActionDefinitionId(IJavaEditorActionDefinitionIds.GOTO_MATCHING_BRACKET);
@@ -134,11 +130,6 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 
 		super.init(bars, page);
 
-		// register actions that have a dynamic editor.
-		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_NEXT_ANNOTATION, fNextAnnotation);
-		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, fPreviousAnnotation);
-		bars.setGlobalActionHandler(ActionFactory.NEXT.getId(), fNextAnnotation);
-		bars.setGlobalActionHandler(ActionFactory.PREVIOUS.getId(), fPreviousAnnotation);
 		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY, fTogglePresentation);
 		bars.setGlobalActionHandler(IJavaEditorActionDefinitionIds.TOGGLE_MARK_OCCURRENCES, fToggleMarkOccurrencesAction);
 
@@ -187,19 +178,12 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 
 		super.setActiveEditor(part);
 
-		IActionBars actionBars= getActionBars();
-		IStatusLineManager manager= actionBars.getStatusLineManager();
-		manager.setMessage(null);
-		manager.setErrorMessage(null);
-
 		ITextEditor textEditor= null;
 		if (part instanceof ITextEditor)
-			textEditor= (ITextEditor) part;
+			textEditor= (ITextEditor)part;
 
 		fTogglePresentation.setEditor(textEditor);
 		fToggleMarkOccurrencesAction.setEditor(textEditor);
-		fPreviousAnnotation.setEditor(textEditor);
-		fNextAnnotation.setEditor(textEditor);
 
 		fGotoMatchingBracket.setAction(getAction(textEditor, GotoMatchingBracketAction.GOTO_MATCHING_BRACKET));
 		fShowJavaDoc.setAction(getAction(textEditor, "ShowJavaDoc")); //$NON-NLS-1$
@@ -224,6 +208,19 @@ public class BasicJavaEditorActionContributor extends BasicTextEditorActionContr
 			if (foldingActions != null)
 				foldingActions.updateActionBars();
 		}
+
+		IActionBars actionBars= getActionBars();
+		IStatusLineManager manager= actionBars.getStatusLineManager();
+		manager.setMessage(null);
+		manager.setErrorMessage(null);
+		
+		/** The global actions to be connected with editor actions */
+		IAction action= getAction(textEditor, ITextEditorActionConstants.NEXT);
+		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_NEXT_ANNOTATION, action);
+		actionBars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, action);
+		action= getAction(textEditor, ITextEditorActionConstants.PREVIOUS);
+		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, action);
+		actionBars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, action);
 	}
 
 	/*

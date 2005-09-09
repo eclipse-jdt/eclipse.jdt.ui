@@ -63,9 +63,9 @@ import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionContext;
 import org.eclipse.ui.actions.ActionGroup;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.IWorkbenchAdapter;
 import org.eclipse.ui.model.WorkbenchAdapter;
 import org.eclipse.ui.part.IPageSite;
@@ -77,7 +77,6 @@ import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.IUpdate;
-import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.ui.views.contentoutline.IContentOutlinePage;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
@@ -871,11 +870,6 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	private Hashtable fActions= new Hashtable();
 
 	private TogglePresentationAction fTogglePresentation;
-	private GotoAnnotationAction fPreviousAnnotation;
-	private GotoAnnotationAction fNextAnnotation;
-	private TextEditorAction fShowJavadoc;
-	private IAction fUndo;
-	private IAction fRedo;
 
 	private ToggleLinkingAction fToggleLinkingAction;
 
@@ -897,15 +891,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		fEditor= editor;
 
 		fTogglePresentation= new TogglePresentationAction();
-		fPreviousAnnotation= new GotoAnnotationAction("PreviousAnnotation.", false); //$NON-NLS-1$
-		fNextAnnotation= new GotoAnnotationAction("NextAnnotation.", true); //$NON-NLS-1$
-		fShowJavadoc= (TextEditorAction) fEditor.getAction("ShowJavaDoc"); //$NON-NLS-1$
-		fUndo= fEditor.getAction(ITextEditorActionConstants.UNDO);
-		fRedo= fEditor.getAction(ITextEditorActionConstants.REDO);
-
 		fTogglePresentation.setEditor(editor);
-		fPreviousAnnotation.setEditor(editor);
-		fNextAnnotation.setEditor(editor);
 
 		fPropertyChangeListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
@@ -1096,21 +1082,23 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 				new JavaSearchActionGroup(this)});
 
 		// register global actions
-		IActionBars bars= site.getActionBars();
+		IActionBars actionBars= site.getActionBars();
+		actionBars.setGlobalActionHandler(ITextEditorActionConstants.UNDO, fEditor.getAction(ITextEditorActionConstants.UNDO));
+		actionBars.setGlobalActionHandler(ITextEditorActionConstants.REDO, fEditor.getAction(ITextEditorActionConstants.REDO));
 
-		bars.setGlobalActionHandler(ITextEditorActionConstants.UNDO, fUndo);
-		bars.setGlobalActionHandler(ITextEditorActionConstants.REDO, fRedo);
-		bars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, fPreviousAnnotation);
-		bars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, fNextAnnotation);
-		bars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fShowJavadoc);
-		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY, fTogglePresentation);
-		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_NEXT_ANNOTATION, fNextAnnotation);
-		bars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, fPreviousAnnotation);
+		IAction action= fEditor.getAction(ITextEditorActionConstants.NEXT);
+		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_NEXT_ANNOTATION, action);
+		actionBars.setGlobalActionHandler(ITextEditorActionConstants.NEXT, action);
+		action= fEditor.getAction(ITextEditorActionConstants.PREVIOUS);
+		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.GOTO_PREVIOUS_ANNOTATION, action);
+		actionBars.setGlobalActionHandler(ITextEditorActionConstants.PREVIOUS, action);
+		
+		actionBars.setGlobalActionHandler(JdtActionConstants.SHOW_JAVA_DOC, fEditor.getAction("ShowJavaDoc")); //$NON-NLS-1$
+		actionBars.setGlobalActionHandler(ITextEditorActionDefinitionIds.TOGGLE_SHOW_SELECTED_ELEMENT_ONLY, fTogglePresentation);
 
+		fActionGroups.fillActionBars(actionBars);
 
-		fActionGroups.fillActionBars(bars);
-
-		IStatusLineManager statusLineManager= bars.getStatusLineManager();
+		IStatusLineManager statusLineManager= actionBars.getStatusLineManager();
 		if (statusLineManager != null) {
 			StatusBarUpdater updater= new StatusBarUpdater(statusLineManager);
 			fOutlineViewer.addPostSelectionChangedListener(updater);
@@ -1118,7 +1106,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		// Custom filter group
 		fCustomFiltersActionGroup= new CustomFiltersActionGroup("org.eclipse.jdt.ui.JavaOutlinePage", fOutlineViewer); //$NON-NLS-1$
 
-		registerToolbarActions(bars);
+		registerToolbarActions(actionBars);
 
 		fOutlineViewer.setInput(fInput);
 	}
@@ -1162,8 +1150,6 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			fActionGroups.dispose();
 
 		fTogglePresentation.setEditor(null);
-		fPreviousAnnotation.setEditor(null);
-		fNextAnnotation.setEditor(null);
 
 		fOutlineViewer= null;
 

@@ -176,8 +176,6 @@ public interface IJavaHelpContextIds {
 	public static final String PREVIOUS_PROBLEM_ACTION=							PREFIX + "previous_problem_action"; 	 //$NON-NLS-1$
 	// *** end
 	public static final String JAVA_SELECT_MARKER_RULER_ACTION=							PREFIX + "java_select_marker_ruler_action"; 	 //$NON-NLS-1$	
-	public static final String GOTO_NEXT_ERROR_ACTION=							PREFIX + "goto_next_error_action"; 	 //$NON-NLS-1$	
-	public static final String GOTO_PREVIOUS_ERROR_ACTION=							PREFIX + "goto_previous_error_action"; 	 //$NON-NLS-1$	
 	public static final String SHOW_QUALIFIED_NAMES_ACTION=							PREFIX + "show_qualified_names_action"; 	 //$NON-NLS-1$	
 	public static final String SORT_BY_DEFINING_TYPE_ACTION=							PREFIX + "sort_by_defining_type_action"; 	 //$NON-NLS-1$	
 	public static final String FORMAT_ACTION=							PREFIX + "format_action"; 	 //$NON-NLS-1$	
