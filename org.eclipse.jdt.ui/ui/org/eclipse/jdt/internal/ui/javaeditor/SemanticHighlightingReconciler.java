@@ -196,10 +196,15 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 
 	/** Background job */
 	private Job fJob;
-	/** Cancel scheduled background jobs */
-	private boolean fCancelJobs;
 	/** Background job lock */
-	private Object fJobLock= new Object();
+	private final Object fJobLock= new Object();
+	/** Reconcile operation lock. */
+	private final Object fReconcileLock= new Object();
+	/**
+	 * <code>true</code> if any thread is executing
+	 * <code>reconcile</code>, <code>false</code> otherwise.
+	 */
+	private boolean fIsReconciling= false;
 
 	/** The semantic highlighting presenter - cache for background thread, only valid during {@link #reconciled(CompilationUnit, boolean, IProgressMonitor)} */
 	private SemanticHighlightingPresenter fJobPresenter;
@@ -219,42 +224,51 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * @see org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener#reconciled(CompilationUnit, boolean, IProgressMonitor)
 	 */
 	public void reconciled(CompilationUnit ast, boolean forced, IProgressMonitor progressMonitor) {
+		// ensure at most one thread can be reconciling at any time
+		synchronized (fReconcileLock) {
+			if (fIsReconciling)
+				return;
+			else
+				fIsReconciling= true;
+		}
 		fJobPresenter= fPresenter;
 		fJobSemanticHighlightings= fSemanticHighlightings;
 		fJobHighlightings= fHighlightings;
-		if (fJobPresenter == null || fJobSemanticHighlightings == null || fJobHighlightings == null) {
+		
+		try {
+			if (fJobPresenter == null || fJobSemanticHighlightings == null || fJobHighlightings == null)
+				return;
+			
+			fJobPresenter.setCanceled(progressMonitor.isCanceled());
+			
+			if (ast == null || fJobPresenter.isCanceled())
+				return;
+			
+			ASTNode[] subtrees= getAffectedSubtrees(ast);
+			if (subtrees.length == 0)
+				return;
+			
+			startReconcilingPositions();
+			
+			if (!fJobPresenter.isCanceled())
+				reconcilePositions(subtrees);
+			
+			TextPresentation textPresentation= null;
+			if (!fJobPresenter.isCanceled())
+				textPresentation= fJobPresenter.createPresentation(fAddedPositions, fRemovedPositions);
+			
+			if (!fJobPresenter.isCanceled())
+				updatePresentation(textPresentation, fAddedPositions, fRemovedPositions);
+			
+			stopReconcilingPositions();
+		} finally {
 			fJobPresenter= null;
 			fJobSemanticHighlightings= null;
 			fJobHighlightings= null;
-			return;
+			synchronized (fReconcileLock) {
+				fIsReconciling= false;
+			}
 		}
-
-		fJobPresenter.setCanceled(progressMonitor.isCanceled());
-
-		if (ast == null || fJobPresenter.isCanceled())
-			return;
-
-		ASTNode[] subtrees= getAffectedSubtrees(ast);
-		if (subtrees.length == 0)
-			return;
-
-		startReconcilingPositions();
-
-		if (!fJobPresenter.isCanceled())
-			reconcilePositions(subtrees);
-
-		TextPresentation textPresentation= null;
-		if (!fJobPresenter.isCanceled())
-			textPresentation= fJobPresenter.createPresentation(fAddedPositions, fRemovedPositions);
-
-		if (!fJobPresenter.isCanceled())
-			updatePresentation(textPresentation, fAddedPositions, fRemovedPositions);
-
-		stopReconcilingPositions();
-
-		fJobPresenter= null;
-		fJobSemanticHighlightings= null;
-		fJobHighlightings= null;
 	}
 
 	/**
@@ -349,9 +363,9 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 		fEditor= editor;
 		fSourceViewer= sourceViewer;
 
-		if (fEditor instanceof CompilationUnitEditor)
+		if (fEditor instanceof CompilationUnitEditor) {
 			((CompilationUnitEditor)fEditor).addReconcileListener(this);
-		else {
+		} else {
 			fSourceViewer.addTextInputListener(this);
 			scheduleJob();
 		}
@@ -383,32 +397,41 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 */
 	private void scheduleJob() {
 		final IJavaElement element= fEditor.getInputJavaElement();
-		if (element != null) {
-			Job job= new Job(JavaEditorMessages.SemanticHighlighting_job) {
-				protected IStatus run(IProgressMonitor monitor) {
-					synchronized (fJobLock) {
-						if (fJob != null)
+
+		synchronized (fJobLock) {
+			final Job oldJob= fJob;
+			if (fJob != null) {
+				fJob.cancel();
+				fJob= null;
+			}
+			
+			if (element != null) {
+				fJob= new Job(JavaEditorMessages.SemanticHighlighting_job) {
+					protected IStatus run(IProgressMonitor monitor) {
+						if (oldJob != null) {
 							try {
-								fJobLock.wait();
+								oldJob.join();
 							} catch (InterruptedException e) {
 								JavaPlugin.log(e);
+								return Status.CANCEL_STATUS;
 							}
-						if (fCancelJobs || fJob != null)
+						}
+						if (monitor.isCanceled())
 							return Status.CANCEL_STATUS;
-						fJob= this;
+						CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(element, ASTProvider.WAIT_YES, monitor);
+						reconciled(ast, false, monitor);
+						synchronized (fJobLock) {
+							// allow the job to be gc'ed
+							if (fJob == this)
+								fJob= null;
+						}
+						return Status.OK_STATUS;
 					}
-					CompilationUnit ast= JavaPlugin.getDefault().getASTProvider().getAST(element, ASTProvider.WAIT_YES, monitor);
-					reconciled(ast, false, monitor);
-					synchronized (fJobLock) {
-						fJob= null;
-						fJobLock.notifyAll();
-					}
-					return Status.OK_STATUS;
-				}
-			};
-			job.setSystem(true);
-			job.setPriority(Job.DECORATE);
-			job.schedule();
+				};
+				fJob.setSystem(true);
+				fJob.setPriority(Job.DECORATE);
+				fJob.schedule();
+			}
 		}
 	}
 
@@ -417,9 +440,10 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 */
 	public void inputDocumentAboutToBeChanged(IDocument oldInput, IDocument newInput) {
 		synchronized (fJobLock) {
-			fCancelJobs= true;
-			if (fJob != null)
+			if (fJob != null) {
 				fJob.cancel();
+				fJob= null;
+			}
 		}
 	}
 
@@ -427,10 +451,6 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	 * @see org.eclipse.jface.text.ITextInputListener#inputDocumentChanged(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.IDocument)
 	 */
 	public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
-		synchronized (fJobLock) {
-			fCancelJobs= false;
-		}
-		if (newInput != null)
-			scheduleJob();
+		scheduleJob();
 	}
 }
