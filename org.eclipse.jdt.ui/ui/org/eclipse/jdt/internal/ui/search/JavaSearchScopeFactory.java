@@ -234,28 +234,37 @@ public class JavaSearchScopeFactory {
 	}
 
 	private Set getJavaElements(ISelection selection) {
-		Set javaElements;
 		if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
-			Iterator iter= ((IStructuredSelection) selection).iterator();
-			javaElements= new HashSet(((IStructuredSelection) selection).size());
-			while (iter.hasNext()) {
-				Object selectedElement= iter.next();
-				if (selectedElement instanceof IJavaElement)
-					addJavaElements(javaElements, (IJavaElement) selectedElement);
-				else if (selectedElement instanceof IResource)
-					addJavaElements(javaElements, (IResource) selectedElement);
-				else if (selectedElement instanceof LogicalPackage)
-					addJavaElements(javaElements, (LogicalPackage) selectedElement);
-				else if (selectedElement instanceof IAdaptable) {
-					IResource resource= (IResource) ((IAdaptable) selectedElement).getAdapter(IResource.class);
-					if (resource != null)
-						addJavaElements(javaElements, resource);
-				}
-			}
+			return getJavaElements(((IStructuredSelection)selection).toArray());
 		} else {
-			javaElements= EMPTY_SET;
+			return EMPTY_SET;
 		}
-		return javaElements;
+	}
+
+	private Set getJavaElements(Object[] elements) {
+		if (elements.length == 0)
+			return EMPTY_SET;
+		
+		Set result= new HashSet(elements.length);
+		for (int i= 0; i < elements.length; i++) {
+			Object selectedElement= elements[i];
+			if (selectedElement instanceof IJavaElement) {
+				addJavaElements(result, (IJavaElement) selectedElement);
+			} else if (selectedElement instanceof IResource) {
+				addJavaElements(result, (IResource) selectedElement);
+			} else if (selectedElement instanceof LogicalPackage) {
+				addJavaElements(result, (LogicalPackage) selectedElement);
+			} else if (selectedElement instanceof IWorkingSet) {
+				IWorkingSet ws= (IWorkingSet)selectedElement;
+				result.addAll(getJavaElements(ws.getElements()));
+			} else if (selectedElement instanceof IAdaptable) {
+				IResource resource= (IResource) ((IAdaptable) selectedElement).getAdapter(IResource.class);
+				if (resource != null)
+					addJavaElements(result, resource);
+			}
+			
+		}
+		return result;
 	}
 
 	private IJavaSearchScope createJavaSearchScope(Set javaElements, boolean includeJRE) {
