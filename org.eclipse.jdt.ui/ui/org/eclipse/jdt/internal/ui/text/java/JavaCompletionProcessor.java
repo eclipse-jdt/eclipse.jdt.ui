@@ -10,149 +10,57 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-
-
-import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.ListIterator;
+import java.util.Set;
 
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.ErrorDialog;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
-import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.contentassist.IContextInformationExtension;
+import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 
 import org.eclipse.ui.IEditorPart;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
-
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
-import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
-import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
-
 
 /**
  * Java completion processor.
  */
-public class JavaCompletionProcessor implements IContentAssistProcessor {
-
-	private static class ContextInformationWrapper implements IContextInformation, IContextInformationExtension {
-
-		private final IContextInformation fContextInformation;
-		private int fPosition;
-
-		public ContextInformationWrapper(IContextInformation contextInformation) {
-			fContextInformation= contextInformation;
-		}
-
-		/*
-		 * @see IContextInformation#getContextDisplayString()
-		 */
-		public String getContextDisplayString() {
-			return fContextInformation.getContextDisplayString();
-		}
-
-			/*
-		 * @see IContextInformation#getImage()
-		 */
-		public Image getImage() {
-			return fContextInformation.getImage();
-		}
-
-		/*
-		 * @see IContextInformation#getInformationDisplayString()
-		 */
-		public String getInformationDisplayString() {
-			return fContextInformation.getInformationDisplayString();
-		}
-
-		/*
-		 * @see IContextInformationExtension#getContextInformationPosition()
-		 */
-		public int getContextInformationPosition() {
-			return fPosition;
-		}
-
-		public void setContextInformationPosition(int position) {
-			fPosition= position;
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.contentassist.IContextInformation#equals(java.lang.Object)
-		 */
-		public boolean equals(Object object) {
-			if (object instanceof ContextInformationWrapper)
-				return fContextInformation.equals(((ContextInformationWrapper) object).fContextInformation);
-			else
-				return fContextInformation.equals(object);
-		}
-	}
-
+public class JavaCompletionProcessor extends ContentAssistProcessor {
 
 	private final static String VISIBILITY= JavaCore.CODEASSIST_VISIBILITY_CHECK;
 	private final static String ENABLED= "enabled"; //$NON-NLS-1$
 	private final static String DISABLED= "disabled"; //$NON-NLS-1$
-
-
-	protected IWorkingCopyManager fManager;
-	private IEditorPart fEditor;
+	private static final Set KEYWORDS;
+	
 	private IContextInformationValidator fValidator;
 
-	private char[] fProposalAutoActivationSet;
-	private CompletionProposalComparator fComparator;
-
-	private TemplateEngine fTemplateEngine;
-
 	private int fNumberOfComputedResults= 0;
-	private String fErrorMsg;
+	
+	private final CompletionProposalComparator fAlphaComparator;
+	private final CompletionProposalComparator fComparator;
+	protected final IEditorPart fEditor;
+	
 
-
-	public JavaCompletionProcessor(IEditorPart editor) {
+	public JavaCompletionProcessor(IEditorPart editor, String partition) {
+		super(partition);
 		fEditor= editor;
-		fManager= JavaPlugin.getDefault().getWorkingCopyManager();
-		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
-		if (contextType == null) {
-			contextType= new JavaContextType();
-			JavaPlugin.getDefault().getTemplateContextRegistry().addContextType(contextType);
-		}
-		if (contextType != null)
-			fTemplateEngine= new TemplateEngine(contextType);
-
+		fAlphaComparator= new CompletionProposalComparator();
+		fAlphaComparator.setOrderAlphabetically(true);
 		fComparator= new CompletionProposalComparator();
-	}
-
-	/**
-	 * Sets this processor's set of characters triggering the activation of the
-	 * completion proposal computation.
-	 *
-	 * @param activationSet the activation set
-	 */
-	public void setCompletionProposalAutoActivationCharacters(char[] activationSet) {
-		fProposalAutoActivationSet= activationSet;
 	}
 
 	/**
@@ -192,20 +100,17 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		// not yet supported
 	}
 
-	/**
-	 * @see IContentAssistProcessor#getErrorMessage()
+	/*
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
 	 */
 	public String getErrorMessage() {
-
-		if (fNumberOfComputedResults == 0) {
-			if (fErrorMsg == null || fErrorMsg.trim().length() == 0)
-				return JavaUIMessages.JavaEditor_codeassist_noCompletions;
-		}
-		return fErrorMsg;
+		if (fNumberOfComputedResults == 0)
+			return JavaUIMessages.JavaEditor_codeassist_noCompletions;
+		return null;
 	}
 
-	/**
-	 * @see IContentAssistProcessor#getContextInformationValidator()
+	/*
+	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationValidator()
 	 */
 	public IContextInformationValidator getContextInformationValidator() {
 		if (fValidator == null)
@@ -213,180 +118,139 @@ public class JavaCompletionProcessor implements IContentAssistProcessor {
 		return fValidator;
 	}
 
-	/**
-	 * @see IContentAssistProcessor#getContextInformationAutoActivationCharacters()
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor#filterAndSort(java.util.List, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public char[] getContextInformationAutoActivationCharacters() {
-		return null;
-	}
-
-	/**
-	 * @see IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
-	 */
-	public char[] getCompletionProposalAutoActivationCharacters() {
-		return fProposalAutoActivationSet;
-	}
-
-	private boolean looksLikeMethod(JavaCodeReader reader) throws IOException {
-		int curr= reader.read();
-		while (curr != JavaCodeReader.EOF && Character.isWhitespace((char) curr))
-			curr= reader.read();
-
-		if (curr == JavaCodeReader.EOF)
-			return false;
-
-		return Character.isJavaIdentifierPart((char) curr) || Character.isJavaIdentifierStart((char) curr);
-	}
-
-	private int guessContextInformationPosition(ITextViewer viewer, int offset) {
-		int contextPosition= offset;
-
-		IDocument document= viewer.getDocument();
-
-		try {
-
-			JavaCodeReader reader= new JavaCodeReader();
-			reader.configureBackwardReader(document, offset, true, true);
-
-			int nestingLevel= 0;
-
-			int curr= reader.read();
-			while (curr != JavaCodeReader.EOF) {
-
-				if (')' == (char) curr)
-					++ nestingLevel;
-
-				else if ('(' == (char) curr) {
-					-- nestingLevel;
-
-					if (nestingLevel < 0) {
-						int start= reader.getOffset();
-						if (looksLikeMethod(reader))
-							return start + 1;
-					}
-				}
-
-				curr= reader.read();
-			}
-		} catch (IOException e) {
-		}
-
-		return contextPosition;
-	}
-
-	private List addContextInformations(ITextViewer viewer, int offset) {
-		ICompletionProposal[] proposals= internalComputeCompletionProposals(viewer, offset);
-
-		List result= new ArrayList();
-		for (int i= 0; i < proposals.length; i++) {
-			IContextInformation contextInformation= proposals[i].getContextInformation();
-			if (contextInformation != null) {
-				ContextInformationWrapper wrapper= new ContextInformationWrapper(contextInformation);
-				wrapper.setContextInformationPosition(offset);
-				result.add(wrapper);
-			}
-		}
-		return result;
-	}
-
-	/**
-	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
-	 */
-	public IContextInformation[] computeContextInformation(ITextViewer viewer, int offset) {
-		int contextInformationPosition= guessContextInformationPosition(viewer, offset);
-		List result= addContextInformations(viewer, contextInformationPosition);
-		return (IContextInformation[]) result.toArray(new IContextInformation[result.size()]);
-	}
-
-	/**
-	 * Order the given proposals.
-	 */
-	private ICompletionProposal[] order(ICompletionProposal[] proposals) {
-		Arrays.sort(proposals, fComparator);
+	protected List filterAndSortProposals(List proposals, IProgressMonitor monitor, TextContentAssistInvocationContext context) {
+		filter(proposals, context);
+		Collections.sort(proposals, fComparator);
+		fNumberOfComputedResults= proposals.size();
 		return proposals;
 	}
 
-	/**
-	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
-	 */
-	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
-		return internalComputeCompletionProposals(viewer, offset);
-	}
-
-	private ICompletionProposal[] internalComputeCompletionProposals(ITextViewer viewer, int offset) {
-
-		ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
-		if (unit == null)
-			return new ICompletionProposal[0];
-		
-		ICompletionProposal[] results;
-
-		CompletionProposalCollector collector;
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES)) {
-			collector= new ExperimentalResultCollector(unit);
-		} else {
-			collector= new CompletionProposalCollector(unit);
-		}
-
-		try {
-			Point selection= viewer.getSelectedRange();
-			if (selection.y > 0)
-				collector.setReplacementLength(selection.y);
-			
-				unit.codeComplete(offset, collector);
-		} catch (JavaModelException x) {
-			Shell shell= viewer.getTextWidget().getShell();
-			if (x.isDoesNotExist() && !unit.getJavaProject().isOnClasspath(unit))
-				MessageDialog.openInformation(shell, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_title, JavaTextMessages.CompletionProcessor_error_notOnBuildPath_message);
-			else
-				ErrorDialog.openError(shell, JavaTextMessages.CompletionProcessor_error_accessing_title, JavaTextMessages.CompletionProcessor_error_accessing_message, x.getStatus());
-		}
-
-		results= collector.getJavaCompletionProposals();
-		int contextInformationOffset= guessContextInformationPosition(viewer, offset);
-		if (contextInformationOffset != offset) {
-			for (int i= 0; i < results.length; i++) {
-				if (results[i] instanceof JavaMethodCompletionProposal) {
-					JavaMethodCompletionProposal jmcp= (JavaMethodCompletionProposal) results[i];
-					jmcp.setContextInformationPosition(contextInformationOffset);
-				}
-			}
-		}
-		fErrorMsg= collector.getErrorMessage();
-
-		if (fTemplateEngine != null) {
-			fTemplateEngine.reset();
-			fTemplateEngine.complete(viewer, offset, unit);
-
-			TemplateProposal[] templateResults= fTemplateEngine.getResults();
-
-			// update relevance of template proposals that match with a keyword
-			// give those templates slightly more relevance than the keyword to
-			// sort them first
-			IJavaCompletionProposal[] keyWordResults= collector.getKeywordCompletionProposals();
-			for (int i= 0; i < keyWordResults.length; i++) {
-				String keyword= keyWordResults[i].getDisplayString();
-				for (int k= 0; k < templateResults.length; k++) {
-					TemplateProposal curr= templateResults[k];
-					if (curr.getTemplate().getName().startsWith(keyword)) {
-						curr.setRelevance(keyWordResults[i].getRelevance() + 1);
-					}
-				}
-			}
-
-			// concatenate arrays
-			ICompletionProposal[] total= new ICompletionProposal[results.length + templateResults.length];
-			System.arraycopy(templateResults, 0, total, 0, templateResults.length);
-			System.arraycopy(results, 0, total, templateResults.length, results.length);
-			results= total;
-		}
-
-		fNumberOfComputedResults= (results == null ? 0 : results.length);
+	private void filter(List proposals, TextContentAssistInvocationContext context) {
 
 		/*
-		 * Order here and not in result collector to make sure that the order
-		 * applies to all proposals and not just those of the compilation unit.
+		 * TODO filtering is hard if the subjects come from multiple,
+		 * often unknown sources. This method implements some heuristics
+		 * that seem to work well.
 		 */
-		return order(results);
+		
+		/*
+		 * Duplicate filter:
+		 *  Goal: remove hippie proposals for stuff that already have java proposals
+		 *  Implementation:
+		 *  - sort alphanumerically, sorting hippies on top
+		 *  - remove any non-IJavaCompletionProposals that happen to have
+		 *    the same prefix completion text as another proposal.
+		 */
+		Collections.sort(proposals, fAlphaComparator);
+
+		IDocument document= context.getDocument();
+		int offset= context.getInvocationOffset();
+
+		ICompletionProposalExtension3 last= null;
+		for (ListIterator it= proposals.listIterator(proposals.size()); it.hasPrevious();) {
+			ICompletionProposal proposal= (ICompletionProposal) it.previous();
+			ICompletionProposalExtension3 current= null;
+			if (proposal instanceof ICompletionProposalExtension3) {
+				current= (ICompletionProposalExtension3) proposal;
+				if (last != null) {
+					String lastCompletion= getPrefixCompletionText(document, offset, last);
+					String curCompletion= getPrefixCompletionText(document, offset, current);
+					if (lastCompletion.equals(curCompletion) && !(current instanceof IJavaCompletionProposal))
+						it.remove();
+				}
+			}
+			last= current;
+		}
+
+		/*
+		 * Keyword filter: 
+		 *  Goal: remove any proposal that is equal to a
+		 *            Java keyword but is not a IJavaCompletionProposal
+		 *  Implementation:
+		 *   - remove all proposals that hava keyword display string
+		 */
+		for (Iterator iter= proposals.iterator(); iter.hasNext();) {
+			ICompletionProposal proposal= (ICompletionProposal) iter.next();
+			if (!(proposal instanceof IJavaCompletionProposal)) {
+				if (isKeyword(proposal.getDisplayString()))
+					iter.remove();
+			}
+
+		}
+	}
+
+	private String getPrefixCompletionText(IDocument document, int offset, ICompletionProposalExtension3 last) {
+		CharSequence prefixCompletionText= last.getPrefixCompletionText(document, offset);
+		return prefixCompletionText == null ? ((ICompletionProposal) last).getDisplayString() : prefixCompletionText.toString();
+	}
+	
+	static {
+		Set keywords= new HashSet(42);
+		keywords.add("abstract"); //$NON-NLS-1$
+		keywords.add("assert"); //$NON-NLS-1$
+		keywords.add("break"); //$NON-NLS-1$
+		keywords.add("case"); //$NON-NLS-1$
+		keywords.add("catch"); //$NON-NLS-1$
+		keywords.add("class"); //$NON-NLS-1$
+		keywords.add("continue"); //$NON-NLS-1$
+		keywords.add("default"); //$NON-NLS-1$
+		keywords.add("do"); //$NON-NLS-1$
+		keywords.add("else"); //$NON-NLS-1$
+		keywords.add("elseif"); //$NON-NLS-1$
+		keywords.add("extends"); //$NON-NLS-1$
+		keywords.add("final"); //$NON-NLS-1$
+		keywords.add("finally"); //$NON-NLS-1$
+		keywords.add("for"); //$NON-NLS-1$
+		keywords.add("if"); //$NON-NLS-1$
+		keywords.add("implements"); //$NON-NLS-1$
+		keywords.add("import"); //$NON-NLS-1$
+		keywords.add("instanceof"); //$NON-NLS-1$
+		keywords.add("interface"); //$NON-NLS-1$
+		keywords.add("native"); //$NON-NLS-1$
+		keywords.add("new"); //$NON-NLS-1$
+		keywords.add("package"); //$NON-NLS-1$
+		keywords.add("private"); //$NON-NLS-1$
+		keywords.add("protected"); //$NON-NLS-1$
+		keywords.add("public"); //$NON-NLS-1$
+		keywords.add("return"); //$NON-NLS-1$
+		keywords.add("static"); //$NON-NLS-1$
+		keywords.add("strictfp"); //$NON-NLS-1$
+		keywords.add("super"); //$NON-NLS-1$
+		keywords.add("switch"); //$NON-NLS-1$
+		keywords.add("synchronized"); //$NON-NLS-1$
+		keywords.add("this"); //$NON-NLS-1$
+		keywords.add("throw"); //$NON-NLS-1$
+		keywords.add("throws"); //$NON-NLS-1$
+		keywords.add("transient"); //$NON-NLS-1$
+		keywords.add("try"); //$NON-NLS-1$
+		keywords.add("volatile"); //$NON-NLS-1$
+		keywords.add("while"); //$NON-NLS-1$
+		keywords.add("true"); //$NON-NLS-1$
+		keywords.add("false"); //$NON-NLS-1$
+		keywords.add("null"); //$NON-NLS-1$
+		KEYWORDS= Collections.unmodifiableSet(keywords);
+	}
+	
+	private boolean isKeyword(String name) {
+		return KEYWORDS.contains(name);
+	}
+
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor#filterAndSortContextInformation(java.util.List, org.eclipse.core.runtime.IProgressMonitor)
+	 */
+	protected List filterAndSortContextInformation(List contexts, IProgressMonitor monitor) {
+		fNumberOfComputedResults= contexts.size();
+		return super.filterAndSortContextInformation(contexts, monitor);
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor#createContext(org.eclipse.jface.text.ITextViewer, int)
+	 */
+	protected TextContentAssistInvocationContext createContext(ITextViewer viewer, int offset) {
+		return new JavaContentAssistInvocationContext(viewer, offset, fEditor);
 	}
 }

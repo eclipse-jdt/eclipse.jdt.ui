@@ -36,3 +36,6 @@ org.eclipse.jdt.ui/perf/explorer/createPartControl=1300
 
 #Reports the time for a single search participant
 org.eclipse.jdt.ui/perf/search/participants=300
+
+#Reports the time for a single completion proposal computer
+org.eclipse.jdt.ui/perf/content_assist/extensions=1000

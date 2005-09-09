@@ -11,24 +11,32 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import java.util.Collection;
+import java.util.Iterator;
+
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.actions.RetargetAction;
-import org.eclipse.ui.ide.IDEActionFactory;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 import org.eclipse.ui.texteditor.RetargetTextEditorAction;
+
+import org.eclipse.ui.ide.IDEActionFactory;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
+import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 
 
 public class BasicEditorActionContributor extends BasicJavaEditorActionContributor {
@@ -71,7 +79,19 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 		IMenuManager editMenu= menu.findMenuUsingPath(IWorkbenchActionConstants.M_EDIT);
 		if (editMenu != null) {
 			editMenu.add(fChangeEncodingAction);
-			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fRetargetContentAssist);
+			IMenuManager caMenu= new MenuManager(JavaEditorMessages.BasicEditorActionContributor_specific_content_assist_menu, "specific_content_assist"); //$NON-NLS-1$
+			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, caMenu);
+			
+			caMenu.add(fRetargetContentAssist);
+			Collection descriptors= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
+			for (Iterator it= descriptors.iterator(); it.hasNext();) {
+				final CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
+				if (cat.isSeparateCommand() && cat.hasComputers()) {
+					IAction caAction= new SpecificContentAssistAction(cat);
+					caMenu.add(caAction);
+				}
+			}
+			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fCorrectionAssist);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fContextInformation);
 		}

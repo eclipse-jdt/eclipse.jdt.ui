@@ -75,7 +75,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaElementHyperlinkDetector;
 import org.eclipse.jdt.internal.ui.javaeditor.NLSKeyHyperlinkDetector;
 import org.eclipse.jdt.internal.ui.text.AbstractJavaScanner;
-import org.eclipse.jdt.internal.ui.text.CompoundContentAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.ContentAssistPreference;
 import org.eclipse.jdt.internal.ui.text.HTMLAnnotationHover;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
@@ -88,6 +87,7 @@ import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
+import org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
@@ -101,9 +101,8 @@ import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverProxy;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaInformationProvider;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocAutoIndentStrategy;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
 import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocScanner;
-import org.eclipse.jdt.internal.ui.text.spelling.WordCompletionProcessor;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavadocCompletionProcessor;
 import org.eclipse.jdt.internal.ui.typehierarchy.HierarchyInformationControl;
 
 
@@ -393,27 +392,26 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 			assistant.setRestoreCompletionProposalSize(getSettings("completion_proposal_size")); //$NON-NLS-1$
 
-			IContentAssistProcessor javaProcessor= new JavaCompletionProcessor(getEditor());
+			IContentAssistProcessor javaProcessor= new JavaCompletionProcessor(getEditor(), IDocument.DEFAULT_CONTENT_TYPE);
 			assistant.setContentAssistProcessor(javaProcessor, IDocument.DEFAULT_CONTENT_TYPE);
 
-			// Register the java processor for single line comments to get the NLS template working inside comments
-			IContentAssistProcessor wordProcessor= new WordCompletionProcessor();
-			CompoundContentAssistProcessor compoundProcessor= new CompoundContentAssistProcessor();
-			compoundProcessor.add(javaProcessor);
-			compoundProcessor.add(wordProcessor);
+			ContentAssistProcessor singleLineProcessor= new JavaCompletionProcessor(getEditor(), IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
+			assistant.setContentAssistProcessor(singleLineProcessor, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 
-			assistant.setContentAssistProcessor(compoundProcessor, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
+			ContentAssistProcessor stringProcessor= new JavaCompletionProcessor(getEditor(), IJavaPartitions.JAVA_STRING);
+			assistant.setContentAssistProcessor(stringProcessor, IJavaPartitions.JAVA_STRING);
+			
+			ContentAssistProcessor multiLineProcessor= new JavaCompletionProcessor(getEditor(), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+			assistant.setContentAssistProcessor(multiLineProcessor, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 
-			assistant.setContentAssistProcessor(wordProcessor, IJavaPartitions.JAVA_STRING);
-			assistant.setContentAssistProcessor(wordProcessor, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
-
-			assistant.setContentAssistProcessor(new JavaDocCompletionProcessor(getEditor()), IJavaPartitions.JAVA_DOC);
+			ContentAssistProcessor javadocProcessor= new JavadocCompletionProcessor(getEditor());
+			assistant.setContentAssistProcessor(javadocProcessor, IJavaPartitions.JAVA_DOC);
 
 			ContentAssistPreference.configure(assistant, fPreferenceStore);
 
 			assistant.setContextInformationPopupOrientation(IContentAssistant.CONTEXT_INFO_ABOVE);
 			assistant.setInformationControlCreator(getInformationControlCreator(sourceViewer));
-
+			
 			return assistant;
 		}
 

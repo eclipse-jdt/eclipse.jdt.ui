@@ -495,7 +495,8 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 		 * See http://dev.eclipse.org/bugs/show_bug.cgi?id=17667
 		String word= fReplacementString;
 		 */
-		boolean validated= startsWith(document, offset, fDisplayString);
+		boolean validated= startsWith(document, offset, fDisplayString)
+				|| startsWith(document, offset, fReplacementString);
 
 		if (validated && event != null) {
 			// adapt replacement range to document change

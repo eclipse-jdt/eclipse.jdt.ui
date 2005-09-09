@@ -27,7 +27,7 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionProcessor;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavadocCompletionProcessor;
 
 
 public class ContentAssistPreference {
@@ -82,10 +82,10 @@ public class ContentAssistPreference {
 		return null;
 	}
 
-	private static JavaDocCompletionProcessor getJavaDocProcessor(ContentAssistant assistant) {
+	private static JavadocCompletionProcessor getJavaDocProcessor(ContentAssistant assistant) {
 		IContentAssistProcessor p= assistant.getContentAssistProcessor(IJavaPartitions.JAVA_DOC);
-		if (p instanceof JavaDocCompletionProcessor)
-			return (JavaDocCompletionProcessor) p;
+		if (p instanceof JavadocCompletionProcessor)
+			return (JavadocCompletionProcessor) p;
 		return null;
 	}
 
@@ -109,7 +109,7 @@ public class ContentAssistPreference {
 	}
 
 	private static void configureJavaDocProcessor(ContentAssistant assistant, IPreferenceStore store) {
-		JavaDocCompletionProcessor jdcp= getJavaDocProcessor(assistant);
+		JavadocCompletionProcessor jdcp= getJavaDocProcessor(assistant);
 		if (jdcp == null)
 			return;
 
@@ -186,7 +186,7 @@ public class ContentAssistPreference {
 	}
 
 	private static void changeJavaDocProcessor(ContentAssistant assistant, IPreferenceStore store, String key) {
-		JavaDocCompletionProcessor jdcp= getJavaDocProcessor(assistant);
+		JavadocCompletionProcessor jdcp= getJavaDocProcessor(assistant);
 		if (jdcp == null)
 			return;
 

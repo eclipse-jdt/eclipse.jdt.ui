@@ -52,6 +52,7 @@ import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal;
+import org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposal;
 import org.eclipse.jdt.internal.ui.text.java.ProposalInfo;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
@@ -490,7 +491,8 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 			compLen--; // remove the semicolon from import proposals
 		}
 
-		JavaCompletionProposal proposal= new JavaCompletionProposal(new String(completion, 0, compLen), start, end - start, image, nameBuffer.toString(), severity);
+		JavaCompletionProposal proposal= new JavaTypeCompletionProposal(String.valueOf(completion, 0, compLen), null, start, end - start, image, nameBuffer.toString(), severity);
+//		JavaCompletionProposal proposal= new JavaCompletionProposal(String.valueOf(completion, 0, compLen), start, end - start, image, nameBuffer.toString(), severity);
 		proposal.setProposalInfo(proposalInfo);
 		proposal.setTriggerCharacters( new char[] { '#' });
 		return proposal;
