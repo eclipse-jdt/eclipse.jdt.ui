@@ -187,10 +187,21 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 				result.remove(index);
 			}
 		}
+		
+		// Don't dive into closed or opened projects
+		if (projectGotClosedOrOpened(resource, kind, flags))
+			return;
+		
 		IResourceDelta[] children= delta.getAffectedChildren();
 		for (int i= 0; i < children.length; i++) {
 			processResourceDelta(result, children[i]);
 		}
+	}
+
+	private boolean projectGotClosedOrOpened(IResource resource, int kind, int flags) {
+		return resource.getType() == IResource.PROJECT 
+			&& kind == IResourceDelta.CHANGED 
+			&& (flags & IResourceDelta.OPEN) != 0;
 	}
 	
 	private void checkElementExistence(IWorkingSet workingSet) {
