@@ -27,17 +27,18 @@ import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.IStructuredSelection;
-
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -88,7 +89,9 @@ public class RefreshAction extends SelectionDispatchAction {
 			return true;
 		for (Iterator iter= selection.iterator(); iter.hasNext();) {
 			Object element= iter.next();
-			if (element instanceof IAdaptable) {
+			if (element instanceof IWorkingSet) {
+				// don't inspect working sets any deeper.
+			} else if (element instanceof IAdaptable) {
 				IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
 				if (resource == null)
 					return false;
@@ -150,14 +153,7 @@ public class RefreshAction extends SelectionDispatchAction {
 		}
 		
 		List result= new ArrayList(selection.size());
-		for (Iterator iter= selection.iterator(); iter.hasNext();) {
-			Object element= iter.next();
-			if (element instanceof IAdaptable) {
-				IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
-				if (resource != null)
-					result.add(resource);
-			}			
-		}
+		getResources(result, selection.toArray());
 		
 		for (Iterator iter= result.iterator(); iter.hasNext();) {
 			IResource resource= (IResource) iter.next();
@@ -166,6 +162,25 @@ public class RefreshAction extends SelectionDispatchAction {
 		}
 		
 		return (IResource[]) result.toArray(new IResource[result.size()]);
+	}
+	
+	private void getResources(List result, Object[] elements) {
+		for (int i= 0; i < elements.length; i++) {
+			Object element= elements[i];
+			// Must check working set before IAdaptable since WorkingSet
+			// implements IAdaptable
+			if (element instanceof IWorkingSet) {
+				getResources(result, ((IWorkingSet)element).getElements());
+			} else if (element instanceof IAdaptable) {
+				IResource resource= (IResource)((IAdaptable)element).getAdapter(IResource.class);
+				if (resource == null)
+					continue;
+				if (resource.getType() != IResource.PROJECT  || 
+						(resource.getType() == IResource.PROJECT && ((IProject)resource).isOpen())) {
+					result.add(resource);
+				}
+			}
+		}
 	}
 	
 	private boolean isDescendent(List candidates, IResource element) {
@@ -201,4 +216,3 @@ public class RefreshAction extends SelectionDispatchAction {
 		}
 	}	
 }
-
