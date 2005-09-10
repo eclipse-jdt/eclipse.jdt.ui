@@ -279,8 +279,8 @@ public class PackageExplorerPart extends ViewPart
 		 */
 		protected Object[] getFilteredChildren(Object parent) {
 			List list = new ArrayList();
-			ViewerFilter[] filters = fViewer.getFilters();
-			Object[] children = ((ITreeContentProvider) fViewer.getContentProvider()).getChildren(parent);
+			ViewerFilter[] filters = getFilters();
+			Object[] children = ((ITreeContentProvider)getContentProvider()).getChildren(parent);
 			for (int i = 0; i < children.length; i++) {
 				Object object = children[i];
 				if (!isEssential(object)) {
@@ -302,8 +302,8 @@ public class PackageExplorerPart extends ViewPart
 			if (parent instanceof IJavaProject) // workaround for bug 78053: Package Explorer shouldn't fetch any children on startup
 				return super.isExpandable(parent);
 			
-			ViewerFilter[] filters= fViewer.getFilters();
-			Object[] children= ((ITreeContentProvider) fViewer.getContentProvider()).getChildren(parent);
+			ViewerFilter[] filters= getFilters();
+			Object[] children= ((ITreeContentProvider)getContentProvider()).getChildren(parent);
 			for (int i = 0; i < children.length; i++) {
 				Object object= children[i];
 				
@@ -321,7 +321,7 @@ public class PackageExplorerPart extends ViewPart
 		private Object filter(Object object, Object parent, ViewerFilter[] filters) {
 			for (int i = 0; i < filters.length; i++) {
 				ViewerFilter filter = filters[i];
-				if (!filter.select(fViewer, parent, object))
+				if (!filter.select(this, parent, object))
 					return null;
 			}
 			return object;
