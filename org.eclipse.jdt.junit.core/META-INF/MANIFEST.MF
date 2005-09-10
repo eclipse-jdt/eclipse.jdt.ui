@@ -36,4 +36,3 @@ Require-Bundle:
  org.eclipse.ltk.core.refactoring,
  org.eclipse.core.variables
 Eclipse-AutoStart: true
-Plugin-Class: org.eclipse.jdt.internal.junit.ui.JUnitPlugin
