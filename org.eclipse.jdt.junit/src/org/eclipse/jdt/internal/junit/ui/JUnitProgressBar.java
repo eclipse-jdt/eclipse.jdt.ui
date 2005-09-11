@@ -95,8 +95,6 @@ public class JUnitProgressBar extends Canvas {
 			gc.setBackground(fStoppedColor);
 		else if (fError)
 			gc.setBackground(fFailureColor);
-		else if (fStopped)
-			gc.setBackground(fStoppedColor);
 		else
 			gc.setBackground(fOKColor);
 	}
