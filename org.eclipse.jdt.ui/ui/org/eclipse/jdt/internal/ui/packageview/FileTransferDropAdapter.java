@@ -31,6 +31,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Resources;
+
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -71,7 +73,7 @@ class FileTransferDropAdapter extends JdtViewerDropAdapter implements TransferDr
 			
 		if (isContainer) {
 			IContainer container= (IContainer)target;
-			if (container.isAccessible() && !container.getResourceAttributes().isReadOnly())
+			if (container.isAccessible() && !Resources.isReadOnly(container))
 				event.detail= DND.DROP_COPY;
 		} else {
 			IJavaElement element= (IJavaElement)target;
