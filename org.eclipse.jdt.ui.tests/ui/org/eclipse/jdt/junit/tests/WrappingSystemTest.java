@@ -116,7 +116,7 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 			int howManyNumbersInErrorString, int numExpectedTableItems)
 			throws CoreException, JavaModelException, PartInitException {
 		launchTests(prefixForErrorMessage, howManyNumbersInErrorString);
-		waitForTableToFill(numExpectedTableItems, 30000);
+		waitForTableToFill(numExpectedTableItems, 60000);
 	}
 
 	protected void launchTests(String prefixForErrorMessage,
