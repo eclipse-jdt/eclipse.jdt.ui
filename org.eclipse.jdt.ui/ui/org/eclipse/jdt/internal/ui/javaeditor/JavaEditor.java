@@ -3130,8 +3130,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		setStatusLineMessage(null);
 		if (annotation != null) {
 			updateMarkerViews(annotation);
-		if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation) annotation).isProblem())
-			setStatusLineMessage(annotation.getText());
+			if (annotation instanceof IJavaAnnotation && ((IJavaAnnotation) annotation).isProblem())
+				setStatusLineMessage(annotation.getText());
 		}
 	}
 
@@ -3339,14 +3339,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		Iterator e= new JavaAnnotationIterator(model, true, true);
 		while (e.hasNext()) {
 			Annotation a= (Annotation) e.next();
-			if (!isNavigationTarget(a))
-				continue;
-
 			Position p= model.getPosition(a);
 			if (p != null && p.overlapsWith(offset, length))
 				return a;
 		}
-
 		return null;
 	}
 
