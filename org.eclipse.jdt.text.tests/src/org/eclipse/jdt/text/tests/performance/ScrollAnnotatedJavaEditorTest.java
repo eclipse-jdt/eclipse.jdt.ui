@@ -26,6 +26,10 @@ public class ScrollAnnotatedJavaEditorTest extends AbstractScrollAnnotatedJavaEd
 	public static Test suite() {
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
+	
+	public static Test setUpTest(Test someTest) {
+		return new PerformanceTestSetup(someTest);
+	}
 
 	/**
 	 * Measure the time spent while scrolling page wise with error

@@ -36,6 +36,10 @@ public class ScrollAnnotatedJavaEditorInvocationCountTest extends AbstractScroll
 		return new PerformanceTestSetup(new TestSuite(THIS));
 	}
 	
+	public static Test setUpTest(Test someTest) {
+		return new PerformanceTestSetup(someTest);
+	}
+	
 	protected void setUp(AbstractTextEditor editor) throws Exception {
 		editor.showChangeInformation(false); // don't need to test quick diff...
 		super.setUp(editor);
