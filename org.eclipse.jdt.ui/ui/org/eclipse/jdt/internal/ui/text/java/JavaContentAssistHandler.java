@@ -60,7 +60,7 @@ public final class JavaContentAssistHandler extends AbstractHandler {
 		for (Iterator it1= categories.iterator(); it1.hasNext();) {
 			CompletionProposalCategory cat= (CompletionProposalCategory) it1.next();
 			oldstates[i++]= cat.isEnabled();
-			cat.setEnabled(cat.getId().equals(computerId));
+			cat.setIncluded(cat.getId().equals(computerId));
 		}
 		
 		try {
@@ -71,7 +71,7 @@ public final class JavaContentAssistHandler extends AbstractHandler {
 			i= 0;
 			for (Iterator it1= categories.iterator(); it1.hasNext();) {
 				CompletionProposalCategory cat= (CompletionProposalCategory) it1.next();
-				cat.setEnabled(oldstates[i++]);
+				cat.setIncluded(oldstates[i++]);
 			}
 		}
 		
