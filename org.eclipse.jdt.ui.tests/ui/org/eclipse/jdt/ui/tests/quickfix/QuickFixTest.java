@@ -449,6 +449,9 @@ public class QuickFixTest extends TestCase {
 				buf.append(ch);
 			}
 		}
+		if (buf.length() > 0 && buf.charAt(buf.length() - 1) != '\n') {
+			buf.append("\\n\");\n");
+		}
 	}
 	
 	

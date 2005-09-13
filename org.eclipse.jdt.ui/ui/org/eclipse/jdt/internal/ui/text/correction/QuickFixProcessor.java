@@ -172,6 +172,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ForbiddenReference:
 			case IProblem.DiscouragedReference:
 			case IProblem.UnnecessaryNLSTag:
+			case IProblem.AssignmentHasNoEffect:
 			//case IProblem.NonGenericType:
 				return true;
 			default:
@@ -487,7 +488,10 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.ForbiddenReference:
 			case IProblem.DiscouragedReference:
 				ReorgCorrectionsSubProcessor.getAccessRulesProposals(context, problem, proposals);
-				break;				
+				break;
+			case IProblem.AssignmentHasNoEffect:
+				LocalCorrectionsSubProcessor.getAssignmentHasNoEffectProposals(context, problem, proposals);
+				break;
 			default:
 		}
 		if (JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {

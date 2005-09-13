@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -275,7 +276,7 @@ public class LocalCorrectionsSubProcessor {
 				}
 			}
 			public String getAdditionalProposalInfo() {
-				return CorrectionMessages.LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_externalizestrings_additional_info;
+				return CorrectionMessages.LocalCorrectionsSubProcessor_externalizestrings_additional_info;
 			}
 			
 		};
@@ -777,7 +778,7 @@ public class LocalCorrectionsSubProcessor {
 					expr= parent;
 					parent= expr.getParent();
 				}
-				String label= CorrectionMessages.LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_setparenteses_bitop_description;
+				String label= CorrectionMessages.LocalCorrectionsSubProcessor_setparenteses_bitop_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
 				CUCorrectionProposal proposal= new CUCorrectionProposal(label, context.getCompilationUnit(), 5, image);
 				proposals.add(proposal);
@@ -908,7 +909,62 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
+	public static void getAssignmentHasNoEffectProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		CompilationUnit root= context.getASTRoot();
+		ASTNode selectedNode= problem.getCoveringNode(root);
+		if (!(selectedNode instanceof Assignment)) {
+			return;
+		}
+		ASTNode assignedNode= ((Assignment) selectedNode).getLeftHandSide();
+		ASTNode assignExpression= ((Assignment) selectedNode).getRightHandSide();
+		if (!(assignedNode instanceof SimpleName) && !(assignExpression instanceof SimpleName)) {
+			return;
+		}
+		
+		IBinding binding= ((SimpleName) assignedNode).resolveBinding();
+		if (!(binding instanceof IVariableBinding) || ((IVariableBinding) binding).isField()) {
+			return;
+		}
+		ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
+		if (typeBinding == null)  {
+			return;
+		}
+		IVariableBinding fieldBinding= Bindings.findFieldInHierarchy(typeBinding, binding.getName());
+		if (fieldBinding == null || fieldBinding.getDeclaringClass() != typeBinding && Modifier.isPrivate(fieldBinding.getModifiers())) {
+			return;
+		}
+		
+		if (assignedNode instanceof SimpleName) {
+			String label= CorrectionMessages.LocalCorrectionsSubProcessor_qualify_left_hand_side_description;
+			proposals.add(createNoSideEffectProposal(context, (SimpleName) assignedNode, fieldBinding, label, 6));
+		}
+		if (assignExpression instanceof SimpleName) {
+			String label= CorrectionMessages.LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_qualify_right_hand_side_description;
+			proposals.add(createNoSideEffectProposal(context, (SimpleName) assignExpression, fieldBinding, label, 5));
+		}		
+	
+	}
 
+	private static ASTRewriteCorrectionProposal createNoSideEffectProposal(IInvocationContext context, SimpleName nodeToQualify, IVariableBinding fieldBinding, String label, int relevance) {
+		AST ast= nodeToQualify.getAST();
+		
+		Expression qualifier;
+		if (Modifier.isStatic(fieldBinding.getModifiers())) {
+			ITypeBinding declaringClass= fieldBinding.getDeclaringClass();
+			qualifier= ast.newSimpleName(declaringClass.getTypeDeclaration().getName());
+		} else {
+			qualifier= ast.newThisExpression();
+		}
 
+		ASTRewrite rewrite= ASTRewrite.create(ast);
+		FieldAccess access= ast.newFieldAccess();
+		access.setName((SimpleName) rewrite.createCopyTarget(nodeToQualify));
+		access.setExpression(qualifier);
+		rewrite.replace(nodeToQualify, access, null);
+		
+
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		return new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, relevance, image);
+	}
 
 }
