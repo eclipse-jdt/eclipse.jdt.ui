@@ -44,8 +44,6 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	private Button fUpdateQualifiedNames;
 	private QualifiedNameComponent fQualifiedNameComponent;
 	
-	private static final String JAVA_FILE_EXT= ".java";  //$NON-NLS-1$
-	
 	private static final String UPDATE_TEXTUAL_MATCHES= "updateTextualMatches"; //$NON-NLS-1$
 	private static final String UPDATE_QUALIFIED_NAMES= "updateQualifiedNames"; //$NON-NLS-1$
 	
@@ -123,12 +121,8 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		super.setVisible(visible);
 	}
 
-	private String getNewName(INameUpdating nameUpdating) {
-		String result= nameUpdating.getNewElementName();
-		// If renaming a CU we have to remove the java file extension
-		if (result.endsWith(JAVA_FILE_EXT))
-			result= result.substring(0, result.length() - JAVA_FILE_EXT.length());
-		return result;
+	protected String getNewName(INameUpdating nameUpdating) {
+		return nameUpdating.getNewElementName();
 	}
 	
 	protected boolean saveSettings() {
