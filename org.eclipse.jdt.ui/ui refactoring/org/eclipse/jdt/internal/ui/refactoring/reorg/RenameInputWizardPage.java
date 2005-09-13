@@ -121,6 +121,12 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		super.setVisible(visible);
 	}
 
+	/**
+	 * Returns the new name for the Java element or <code>null</code>
+	 * if no new name is provided
+	 * 
+	 * @return the new name or <code>null</code>
+	 */
 	protected String getNewName(INameUpdating nameUpdating) {
 		return nameUpdating.getNewElementName();
 	}

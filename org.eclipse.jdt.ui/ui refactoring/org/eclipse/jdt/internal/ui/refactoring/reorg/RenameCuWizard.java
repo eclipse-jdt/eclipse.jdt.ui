@@ -45,7 +45,7 @@ public class RenameCuWizard extends RenameRefactoringWizard {
 			protected String getNewName(INameUpdating nameUpdating) {
 				String result= nameUpdating.getNewElementName();
 				// If renaming a CU we have to remove the java file extension
-				if (result.endsWith(JAVA_FILE_EXT))
+				if (result != null && result.endsWith(JAVA_FILE_EXT))
 					result= result.substring(0, result.length() - JAVA_FILE_EXT.length());
 				return result;
 			}
