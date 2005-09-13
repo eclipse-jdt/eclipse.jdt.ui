@@ -289,6 +289,7 @@ final class FormatterMessages extends NLS {
 	public static String LineWrappingTabPage_width_indent_option_default_indent_array;
 	public static String LineWrappingTabPage_error_invalid_value;
 	public static String LineWrappingTabPage_enum_superinterfaces;
+	public static String LineWrappingTabPage_assignment_alignment;
 	public static String AlreadyExistsDialog_message_profile_already_exists;
 	public static String AlreadyExistsDialog_message_profile_name_empty;
 	public static String AlreadyExistsDialog_dialog_title;

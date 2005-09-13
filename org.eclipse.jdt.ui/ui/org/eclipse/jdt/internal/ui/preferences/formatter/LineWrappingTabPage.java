@@ -480,7 +480,17 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	    "CANCELLED, RUNNING, WAITING, FINISHED }", //$NON-NLS-1$
 	    FormatterMessages.LineWrappingTabPage_enum_constants
 	);
-
+	
+	private final Category fAssignmentCategory= new Category(
+		    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ASSIGNMENT,
+		    "class Example {" + //$NON-NLS-1$
+		    "private static final String string = \"TextTextText\";" + //$NON-NLS-1$
+		    "void foo() {" + //$NON-NLS-1$
+		    "for (int i = 0; i < 10; i++) {}" + //$NON-NLS-1$
+		    "String s;" + //$NON-NLS-1$
+		    "s = \"TextTextText\";}}", //$NON-NLS-1$
+	        FormatterMessages.LineWrappingTabPage_assignment_alignment
+		);
 	
 	/**
 	 * The default preview line width.
@@ -591,6 +601,7 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 		expressions.children.add(fBinaryExpressionCategory);
 		expressions.children.add(fConditionalExpressionCategory);
 		expressions.children.add(fArrayInitializerExpressionsCategory);
+		expressions.children.add(fAssignmentCategory);
 		
 		final Category statements= new Category(FormatterMessages.LineWrappingTabPage_statements); 
 		statements.children.add(fCompactIfCategory);
