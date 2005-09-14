@@ -47,6 +47,8 @@ import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jface.text.BadLocationException;
+
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchSite;
@@ -67,8 +69,10 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageDeclaration;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -432,7 +436,11 @@ public class PasteAction extends SelectionDispatchAction{
 						editorPart[0]= openCu(cu);
 					}
 					if (!fDestinationPack.getElementName().equals(fCuParser.getPackageName())) {
-						cu.createPackageDeclaration(fDestinationPack.getElementName(), new SubProgressMonitor(pm, 1));
+						if (fDestinationPack.getElementName().length() == 0) {
+							removePackageDeclaration(cu);
+						} else {
+							cu.createPackageDeclaration(fDestinationPack.getElementName(), new SubProgressMonitor(pm, 1));
+						}
 						if (!alreadyExists && editorPart[0] != null)
 							editorPart[0].doSave(new SubProgressMonitor(pm, 1)); //avoid showing error marker due to missing/wrong package declaration
 						else
@@ -441,6 +449,23 @@ public class PasteAction extends SelectionDispatchAction{
 						pm.worked(1);
 					}
 					BasicNewResourceWizard.selectAndReveal(cu.getResource(), PlatformUI.getWorkbench().getActiveWorkbenchWindow());
+				}
+
+				private void removePackageDeclaration(final ICompilationUnit cu) throws JavaModelException, CoreException {
+					IPackageDeclaration[] packageDeclarations= cu.getPackageDeclarations();
+					if (packageDeclarations.length != 0) {
+						ITextFileBuffer buffer= null;
+						try {
+							buffer= RefactoringFileBuffers.acquire(cu);
+							ISourceRange sourceRange= packageDeclarations[0].getSourceRange();
+							buffer.getDocument().replace(sourceRange.getOffset(), sourceRange.getLength(), ""); //$NON-NLS-1$
+						} catch (BadLocationException e) {
+							JavaPlugin.log(e);
+						} finally {
+							if (buffer != null)
+								RefactoringFileBuffers.release(cu);
+						}
+					}
 				}
 			};
 			
