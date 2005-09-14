@@ -43,6 +43,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	private Button fUpdateTextualMatches;
 	private Button fUpdateQualifiedNames;
 	private QualifiedNameComponent fQualifiedNameComponent;
+	
 	private static final String UPDATE_TEXTUAL_MATCHES= "updateTextualMatches"; //$NON-NLS-1$
 	private static final String UPDATE_QUALIFIED_NAMES= "updateQualifiedNames"; //$NON-NLS-1$
 	
@@ -109,7 +110,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		if (visible) {
 			INameUpdating nameUpdating= (INameUpdating)getRefactoring().getAdapter(INameUpdating.class);
 			if (nameUpdating != null) {
-				String newName= nameUpdating.getNewElementName();
+				String newName= getNewName(nameUpdating);
 				if (newName != null && newName.length() > 0 && !newName.equals(getInitialValue())) {
 					Text textField= getTextField();
 					textField.setText(newName);
@@ -118,6 +119,10 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 			}
 		}
 		super.setVisible(visible);
+	}
+
+	protected String getNewName(INameUpdating nameUpdating) {
+		return nameUpdating.getNewElementName();
 	}
 	
 	protected boolean saveSettings() {
