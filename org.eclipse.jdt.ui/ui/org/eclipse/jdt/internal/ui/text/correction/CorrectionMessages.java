@@ -78,7 +78,7 @@ final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_addnon_nls_description;
 	public static String LocalCorrectionsSubProcessor_changeaccesstostatic_description;
 	public static String LocalCorrectionsSubProcessor_changeaccesstostaticdefining_description;
-	public static String LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_setparenteses_bitop_description;
+	public static String LocalCorrectionsSubProcessor_setparenteses_bitop_description;
 	public static String LocalCorrectionsSubProcessor_indirectaccesstostatic_description;
 	public static String LocalCorrectionsSubProcessor_uninitializedvariable_description;
 	public static String LocalCorrectionsSubProcessor_removesemicolon_description;
@@ -282,7 +282,7 @@ final class CorrectionMessages extends NLS {
 
 	public static String ModifierCorrectionSubProcessor_addoverrideannotation;
 	public static String ModifierCorrectionSubProcessor_adddeprecatedannotation;
-	public static String LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_externalizestrings_additional_info;
+	public static String LocalCorrectionsSubProcessor_externalizestrings_additional_info;
 	public static String AssignToVariableAssistProposal_assigntoexistingfield_description;
 	public static String ReorgCorrectionsSubProcessor_50_compliance_operation;
 	public static String ReorgCorrectionsSubProcessor_no_50jre_title;
@@ -301,4 +301,6 @@ final class CorrectionMessages extends NLS {
 	public static String ReorgCorrectionsSubProcessor_accessrules_description;
 	public static String UnresolvedElementsSubProcessor_change_full_type_description;
 	public static String LocalCorrectionsSubProcessor_remove_nls_tag_description;
+	public static String LocalCorrectionsSubProcessor_qualify_left_hand_side_description;
+	public static String LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_qualify_right_hand_side_description;
 }
