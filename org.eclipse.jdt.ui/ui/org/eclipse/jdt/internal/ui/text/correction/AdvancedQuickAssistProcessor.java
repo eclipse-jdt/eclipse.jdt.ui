@@ -74,6 +74,7 @@ import org.eclipse.jdt.core.dom.InfixExpression.Operator;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -1000,6 +1001,11 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (infixExpression.getOperator() != andOperator) {
 			return false;
 		}
+		int offset= isOperatorSelected(infixExpression, context.getSelectionOffset(), context.getSelectionLength());
+		if (offset == -1) {
+			return false;
+		}
+
 		// check that infix expression belongs to IfStatement
 		Statement statement = ASTResolving.findParentStatement(node);
 		if (!(statement instanceof IfStatement)) {
@@ -1024,36 +1030,14 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		AST ast = ifStatement.getAST();
 		ASTRewrite rewrite = ASTRewrite.create(ast);
+		
 		// prepare left and right conditions
-		Expression leftCondition = null;
-		Expression rightCondition = null;
-		Expression currentExpression = infixExpression;
-		while (true) {
-			if (leftCondition == null) {
-				Expression leftOperand = ((InfixExpression) currentExpression).getLeftOperand();
-				if (leftOperand instanceof ParenthesizedExpression)
-					leftOperand = ((ParenthesizedExpression) leftOperand).getExpression();
-				Expression leftPlaceholder = (Expression) rewrite.createCopyTarget(leftOperand);
-				leftCondition = leftPlaceholder;
-			}
-			Expression rightOperand = ((InfixExpression) currentExpression).getRightOperand();
-			if (rightCondition == null) {
-				if (rightOperand instanceof ParenthesizedExpression)
-					rightOperand = ((ParenthesizedExpression) rightOperand).getExpression();
-				Expression rightPlaceholder = (Expression) rewrite.createCopyTarget(rightOperand);
-				rightCondition = rightPlaceholder;
-			} else {
-				Expression rightPlaceholder = (Expression) rewrite.createCopyTarget(rightOperand);
-				InfixExpression infix = ast.newInfixExpression();
-				infix.setOperator(andOperator);
-				infix.setLeftOperand(rightCondition);
-				infix.setRightOperand(rightPlaceholder);
-				rightCondition = infix;
-			}
-			if (currentExpression.getParent() == ifStatement)
-				break;
-			currentExpression = (Expression) currentExpression.getParent();
-		}
+		Expression[] newOperands= { null, null };
+		breakInfixOperationAtOperation(rewrite, topInfixExpression, andOperator, offset, true, newOperands);
+
+		Expression leftCondition= newOperands[0];
+		Expression rightCondition= newOperands[1];
+		
 		// replace condition in inner IfStatement
 		rewrite.set(ifStatement, IfStatement.EXPRESSION_PROPERTY, rightCondition, null);
 		// prepare outter IfStatement
@@ -1073,6 +1057,39 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		resultingCollections.add(proposal);
 		return true;
 	}
+	private static boolean isSelectingOperator(ASTNode n1, ASTNode n2, int offset, int length) {
+		// between the nodes
+		if (offset + length <= n2.getStartPosition() && offset >= ASTNodes.getExclusiveEnd(n1)) {
+			return true;
+		}
+		// or exactly select the node (but not with infix expressions)
+		if (n1.getStartPosition() == offset && ASTNodes.getExclusiveEnd(n2) == offset + length) {
+			if (n1 instanceof InfixExpression || n2 instanceof InfixExpression) {
+				return false;
+			}
+			return true;
+		}
+		return false;
+	}
+	
+	private static int isOperatorSelected(InfixExpression infixExpression, int offset, int length) {
+		ASTNode left= infixExpression.getLeftOperand();
+		ASTNode right= infixExpression.getRightOperand();
+		
+		if (isSelectingOperator(left, right, offset, length)) {
+			return ASTNodes.getExclusiveEnd(left);
+		}
+		List extended= infixExpression.extendedOperands();
+		for (int i= 0; i < extended.size(); i++) {
+			left= right;
+			right= (ASTNode) extended.get(i);
+			if (isSelectingOperator(left, right, offset, length)) {
+				return ASTNodes.getExclusiveEnd(left);
+			}
+		}
+		return -1;
+	}
+	
 	private static boolean getJoinOrIfStatementsProposals(IInvocationContext context, ASTNode covering, ArrayList coveredNodes,
 			Collection resultingCollections) {
 		Operator orOperator = InfixExpression.Operator.CONDITIONAL_OR;
@@ -1184,6 +1201,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		if (infixExpression.getOperator() != orOperator) {
 			return false;
 		}
+		int offset= isOperatorSelected(infixExpression, context.getSelectionOffset(), context.getSelectionLength());
+		if (offset == -1) {
+			return false;
+		}
 		// check that infix expression belongs to IfStatement
 		Statement statement = ASTResolving.findParentStatement(node);
 		if (!(statement instanceof IfStatement)) {
@@ -1208,36 +1229,14 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		AST ast = ifStatement.getAST();
 		ASTRewrite rewrite = ASTRewrite.create(ast);
+
 		// prepare left and right conditions
-		Expression leftCondition = null;
-		Expression rightCondition = null;
-		Expression currentExpression = infixExpression;
-		while (true) {
-			if (leftCondition == null) {
-				Expression leftOperand = ((InfixExpression) currentExpression).getLeftOperand();
-				if (leftOperand instanceof ParenthesizedExpression)
-					leftOperand = ((ParenthesizedExpression) leftOperand).getExpression();
-				Expression leftPlaceholder = (Expression) rewrite.createCopyTarget(leftOperand);
-				leftCondition = leftPlaceholder;
-			}
-			Expression rightOperand = ((InfixExpression) currentExpression).getRightOperand();
-			if (rightCondition == null) {
-				if (rightOperand instanceof ParenthesizedExpression)
-					rightOperand = ((ParenthesizedExpression) rightOperand).getExpression();
-				Expression rightPlaceholder = (Expression) rewrite.createCopyTarget(rightOperand);
-				rightCondition = rightPlaceholder;
-			} else {
-				Expression rightPlaceholder = (Expression) rewrite.createCopyTarget(rightOperand);
-				InfixExpression infix = ast.newInfixExpression();
-				infix.setOperator(orOperator);
-				infix.setLeftOperand(rightCondition);
-				infix.setRightOperand(rightPlaceholder);
-				rightCondition = infix;
-			}
-			if (currentExpression.getParent() == ifStatement)
-				break;
-			currentExpression = (Expression) currentExpression.getParent();
-		}
+		Expression[] newOperands= { null, null };
+		breakInfixOperationAtOperation(rewrite, topInfixExpression, orOperator, offset, true, newOperands);
+		
+		Expression leftCondition= newOperands[0];
+		Expression rightCondition= newOperands[1];
+		
 		// prepare first statement
 		IfStatement firstIf = ast.newIfStatement();
 		firstIf.setExpression(leftCondition);
@@ -1389,6 +1388,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				&& (operator != InfixExpression.Operator.TIMES) && (operator != InfixExpression.Operator.XOR)) {
 			return false;
 		}
+		
+		int offset= isOperatorSelected(infixExpression, context.getSelectionOffset(), context.getSelectionLength());
+		if (offset == -1) {
+			return false;
+		}
+		
 		// ok, we could produce quick assist
 		if (resultingCollections == null) {
 			return true;
@@ -1399,18 +1404,18 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Expression leftExpression = null;
 		Expression rightExpression = null;
 		InfixExpression currentExpression = infixExpression;
-		leftExpression= addRightOperandInInfixExpression(operator, ast, rewrite, leftExpression, infixExpression.getLeftOperand());
+		leftExpression= combineOperands(rewrite, leftExpression, infixExpression.getLeftOperand(), true, operator);
 		if (infixExpression.getRightOperand().getStartPosition() <= context.getSelectionOffset()) {
-			leftExpression= addRightOperandInInfixExpression(operator, ast, rewrite, leftExpression, infixExpression.getRightOperand());
+			leftExpression= combineOperands(rewrite, leftExpression, infixExpression.getRightOperand(), true, operator);
 		} else {
-			rightExpression= addRightOperandInInfixExpression(operator, ast, rewrite, rightExpression, infixExpression.getRightOperand());
+			rightExpression= combineOperands(rewrite, rightExpression, infixExpression.getRightOperand(), true, operator);
 		}
 		for (Iterator I= currentExpression.extendedOperands().iterator(); I.hasNext();) {
 			Expression extendedOperand= (Expression) I.next();
 			if (extendedOperand.getStartPosition() <= context.getSelectionOffset()) {
-				leftExpression= addRightOperandInInfixExpression(operator, ast, rewrite, leftExpression, extendedOperand);
+				leftExpression= combineOperands(rewrite, leftExpression, extendedOperand, true, operator);
 			} else {
-				rightExpression= addRightOperandInInfixExpression(operator, ast, rewrite, rightExpression, extendedOperand);
+				rightExpression= combineOperands(rewrite, rightExpression, extendedOperand, true, operator);
 			}
 		}
 		// create new infix expression
@@ -1418,7 +1423,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		newInfix.setOperator(operator);
 		newInfix.setLeftOperand(rightExpression);
 		newInfix.setRightOperand(leftExpression);
-		rewrite.replace(currentExpression, newInfix, null);
+		rewrite.replace(infixExpression, newInfix, null);
 		// add correction proposal
 		String label = CorrectionMessages.AdvancedQuickAssistProcessor_exchangeOperands_description;
 		Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -1426,18 +1431,58 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		resultingCollections.add(proposal);
 		return true;
 	}
-	private static Expression addRightOperandInInfixExpression(Operator operator, AST ast, ASTRewrite rewrite,
-			Expression expression, Expression rightOperand) {
-		Expression rightPlaceholder = (Expression) rewrite.createCopyTarget(rightOperand);
-		if (expression == null) {
-			return rightPlaceholder;
+	
+	/**
+	 * Breaks an infix operation with possible extended operators at the given operator and returns the new left and right operands.  
+	 * a & b & c   ->  [[a' & b' ] & c' ]   (c' == copy of c)
+	 * @param rewrite
+	 * @param expression
+	 * @param operator
+	 * @param operatorOffset
+	 */
+	private static void breakInfixOperationAtOperation(ASTRewrite rewrite, Expression expression, Operator operator, int operatorOffset, boolean removeParenthesis, Expression[] res) {
+		if (expression.getStartPosition() + expression.getLength() <= operatorOffset) {
+			// add to the left
+			res[0]= combineOperands(rewrite, res[0], expression, removeParenthesis, operator);
+			return;
 		}
-		InfixExpression infix = ast.newInfixExpression();
+		if (operatorOffset <= expression.getStartPosition()) {
+			// add to the right
+			res[1]= combineOperands(rewrite, res[1], expression, removeParenthesis, operator);
+			return;
+		}
+		if (!(expression instanceof InfixExpression)) {
+			throw new IllegalArgumentException("Cannot break up non-infix expression"); //$NON-NLS-1$
+		}
+		InfixExpression infixExpression= (InfixExpression) expression;
+		if (infixExpression.getOperator() != operator) {
+			throw new IllegalArgumentException("Incompatible operator"); //$NON-NLS-1$
+		}
+		breakInfixOperationAtOperation(rewrite, infixExpression.getLeftOperand(), operator, operatorOffset, removeParenthesis, res);
+		breakInfixOperationAtOperation(rewrite, infixExpression.getRightOperand(), operator, operatorOffset, removeParenthesis, res);	
+		
+		List extended= infixExpression.extendedOperands();
+		for (int i= 0; i < extended.size(); i++) {
+			breakInfixOperationAtOperation(rewrite, (Expression) extended.get(i), operator, operatorOffset, removeParenthesis, res);	
+		}
+	}
+	
+	private static Expression combineOperands(ASTRewrite rewrite, Expression existing, Expression nodeToAdd, boolean removeParenthesis, Operator operator) {
+		if (existing == null && removeParenthesis) {
+			while (nodeToAdd instanceof ParenthesizedExpression) {
+				nodeToAdd= ((ParenthesizedExpression) nodeToAdd).getExpression();
+			}
+		}
+		Expression newRight= (Expression) rewrite.createMoveTarget(nodeToAdd);
+		if (existing == null) {
+			return newRight;
+		}
+		AST ast= rewrite.getAST();
+		InfixExpression infix= ast.newInfixExpression();
 		infix.setOperator(operator);
-		infix.setLeftOperand(expression);
-		infix.setRightOperand(rightPlaceholder);
-		expression = infix;
-		return expression;
+		infix.setLeftOperand(existing);
+		infix.setRightOperand(newRight);
+		return infix;
 	}
 
 	private static boolean getCastAndAssignIfStatementProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
