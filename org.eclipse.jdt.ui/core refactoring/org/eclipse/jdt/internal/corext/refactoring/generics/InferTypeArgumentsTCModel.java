@@ -42,7 +42,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.Paramet
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeVariable;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.WildcardType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ArrayElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
@@ -719,10 +718,22 @@ public class InferTypeArgumentsTCModel {
 					CollectionElementVariable2 referenceTypeParametersCv= getElementVariable(referenceCv, referenceTypeParameter);
 					createEqualsConstraint(referenceTypeArgumentCv, referenceTypeParametersCv);
 				} else if (referenceTypeArgument.isWildcardType()) {
-					WildcardType wildcardType= (WildcardType) referenceTypeArgument;
-					ConstraintVariable2 referenceTypeArgumentCv= makeImmutableTypeVariable(wildcardType);
+					ConstraintVariable2 referenceTypeArgumentCv= makeImmutableTypeVariable(fTypeEnvironment.VOID); //block it for now (bug 106174)
 					CollectionElementVariable2 referenceTypeParametersCv= getElementVariable(referenceCv, referenceTypeParameter);
 					createEqualsConstraint(referenceTypeArgumentCv, referenceTypeParametersCv);
+					
+//					WildcardType wildcardType= (WildcardType) referenceTypeArgument;
+//					if (wildcardType.isUnboundWildcardType()) {
+//						ConstraintVariable2 referenceTypeArgumentCv= makeImmutableTypeVariable(wildcardType);
+//						CollectionElementVariable2 referenceTypeParametersCv= getElementVariable(referenceCv, referenceTypeParameter);
+//						createEqualsConstraint(referenceTypeArgumentCv, referenceTypeParametersCv);
+//					} else if (wildcardType.isSuperWildcardType() && wildcardType.getBound().isTypeVariable()) {
+//						ConstraintVariable2 referenceTypeArgumentBoundCv= getElementTypeCv(wildcardType.getBound(), expressionCv, methodTypeVariables);
+//						CollectionElementVariable2 referenceTypeParametersCv= getElementVariable(referenceCv, referenceTypeParameter);
+//						//TODO: need *strict* subtype constraint?
+//						createSubtypeConstraint(referenceTypeParametersCv, referenceTypeArgumentBoundCv);
+//					}
+					// else: TODO
 					
 //				} else if (referenceTypeArgument.isParameterizedType()) {
 //					//TODO: nested containers

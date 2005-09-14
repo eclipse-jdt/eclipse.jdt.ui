@@ -171,6 +171,8 @@ public class InferTypeArgumentsConstraintsSolver {
 //				result= result.intersectedWith(SubTypesOfSingleton.create(bounds[i].getErasure()));
 //			}
 //			return result;
+		} else if (type.isVoidType()) {
+			return fTypeSetEnvironment.getEmptyTypeSet();
 		} else {
 			return new SingletonTypeSet(type, fTypeSetEnvironment);
 		}
