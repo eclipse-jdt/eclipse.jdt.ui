@@ -922,7 +922,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 		
 		IBinding binding= ((SimpleName) assignedNode).resolveBinding();
-		if (!(binding instanceof IVariableBinding) || ((IVariableBinding) binding).isField()) {
+		if (!(binding instanceof IVariableBinding)) {
 			return;
 		}
 		ITypeBinding typeBinding= Bindings.getBindingOfParentType(selectedNode);
@@ -941,7 +941,15 @@ public class LocalCorrectionsSubProcessor {
 		if (assignExpression instanceof SimpleName) {
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_qualify_right_hand_side_description;
 			proposals.add(createNoSideEffectProposal(context, (SimpleName) assignExpression, fieldBinding, label, 5));
-		}		
+		}
+		
+		if (binding == fieldBinding && ASTResolving.findParentBodyDeclaration(selectedNode) instanceof MethodDeclaration) {
+			SimpleName simpleName= (SimpleName) ((assignedNode instanceof SimpleName) ? assignedNode : assignExpression);
+			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createparameter_description, simpleName.getIdentifier());
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
+			proposals.add(new NewVariableCompletionProposal(label, context.getCompilationUnit(), NewVariableCompletionProposal.PARAM, simpleName, null, 5, image));
+		}
+		
 	
 	}
 

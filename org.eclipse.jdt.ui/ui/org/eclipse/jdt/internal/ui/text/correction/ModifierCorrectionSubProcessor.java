@@ -807,9 +807,17 @@ public class ModifierCorrectionSubProcessor {
 		} else if (node.getLocationInParent() == SingleVariableDeclaration.NAME_PROPERTY) {
 			addSuppressWarningsProposal(context.getCompilationUnit(), node.getParent(), warningToken, -2, proposals);
 			return;
+		} else if (node.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+			node= ASTResolving.findParentBodyDeclaration(node);
+			if (node instanceof FieldDeclaration) {
+				node= node.getParent();
+			}
 		}
 		
 		ASTNode target= ASTResolving.findParentBodyDeclaration(node);
+		if (target instanceof Initializer) { 
+			target= ASTResolving.findParentBodyDeclaration(target.getParent());
+		}
 		if (target != null) {
 			addSuppressWarningsProposal(context.getCompilationUnit(), target, warningToken, -3, proposals);
 		}

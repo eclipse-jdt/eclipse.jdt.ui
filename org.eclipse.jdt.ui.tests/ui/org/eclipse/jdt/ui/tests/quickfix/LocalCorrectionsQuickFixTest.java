@@ -4344,9 +4344,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
-		String[] expected= new String[1];
+		String[] expected= new String[2];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -4354,6 +4354,15 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    String e;\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("@SuppressWarnings(\"nls\")\n");
+		buf.append("public class E {\n");
+		buf.append("    String e;    //$NON-NLS-1$\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
@@ -4376,9 +4385,9 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 1);
+		assertNumberOfProposals(proposals, 2);
 
-		String[] expected= new String[1];
+		String[] expected= new String[2];
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("\n");
@@ -4386,6 +4395,15 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("    String e; //\n");
 		buf.append("}\n");
 		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("@SuppressWarnings(\"nls\")\n");
+		buf.append("public class E {\n");
+		buf.append("    String e; //   //$NON-NLS-1$\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
 	}

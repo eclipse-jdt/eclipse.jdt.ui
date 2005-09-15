@@ -63,7 +63,7 @@ public class QuickFixTest extends TestCase {
 
 	public static Test suite() {
 		TestSuite suite= new TestSuite();
-		suite.addTest(SerialVersionQuickFixTest.allTests());
+//		suite.addTest(SerialVersionQuickFixTest.allTests());
 		suite.addTest(UtilitiesTest.allTests());
 		suite.addTest(UnresolvedTypesQuickFixTest.allTests());
 		suite.addTest(UnresolvedVariablesQuickFixTest.allTests());
@@ -240,7 +240,7 @@ public class QuickFixTest extends TestCase {
 			context= new AssistContext(cu, offset, length);
 		}
 		
-		ProblemLocation problem= new ProblemLocation(offset, length, curr.getID(), curr.getArguments(), true);
+		ProblemLocation problem= new ProblemLocation(offset, length, curr.getID(), curr.getArguments(), curr.isError());
 		ArrayList proposals= collectCorrections(context, problem);
 		if (!proposals.isEmpty()) {
 			assertCorrectContext(context, problem);
