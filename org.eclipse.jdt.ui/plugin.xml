@@ -1721,6 +1721,18 @@
             pattern="*.class">
       </filter>
    </extension>
+   
+<!-- =========================================================================== -->
+<!-- Export wizard category                                                      -->
+<!-- =========================================================================== -->
+   <extension
+         point="org.eclipse.ui.exportWizards">
+      <category
+	     name="%importExportWizards.category"
+	     id="org.eclipse.jdt.ui.Java">
+	  </category>
+   </extension>
+   
 <!-- =========================================================================== -->
 <!-- JAR Packager                                                                -->
 <!-- =========================================================================== -->
@@ -1730,6 +1742,7 @@
             name="%jarExportWizard.label"
             icon="$nl$/icons/full/etool16/exportjar_wiz.gif"
             class="org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard"
+            category="org.eclipse.jdt.ui.Java"
             id="org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard">
          <description>
             %jarExportWizard.description
@@ -1778,6 +1791,7 @@
             name="%JavadocWizard.name"
             icon="$nl$/icons/full/etool16/javadoc.gif"
             class="org.eclipse.jdt.internal.ui.javadocexport.JavadocWizard"
+            category="org.eclipse.jdt.ui.Java"
             id="org.eclipse.jdt.internal.ui.javadocexport.JavadocWizard">
          <description>
             %JavadocWizard.description
