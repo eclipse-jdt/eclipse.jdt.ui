@@ -67,6 +67,8 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
  * An experimental proposal.
  */
 public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposal {
+	/** Triggers for types. Do not modify. */
+	private final static char[] GENERIC_TYPE_TRIGGERS= new char[] { '.', '\t', '[', '(', '<', ' ' };
 
 	/**
 	 * Short-lived context information object for generic types. Currently, these
@@ -220,7 +222,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
 
-		if (shouldAppendArguments(document, offset)) {
+		if (shouldAppendArguments(document, offset, trigger)) {
 			try {
 				TypeArgumentProposal[] typeArgumentProposals= computeTypeArgumentProposals();
 				if (typeArgumentProposals.length > 0) {
@@ -232,7 +234,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 					// set the generic type as replacement string
 					super.setReplacementString(buffer.toString());
 					// add import & remove package, update replacement offset
-					super.apply(document, trigger, offset);
+					super.apply(document, '\0', offset);
 
 					if (getTextViewer() != null) {
 						if (hasAmbiguousProposals(typeArgumentProposals)) {
@@ -257,6 +259,13 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 		// - already followed by <type arguments>
 		// - proposal type does not inherit from expected type
 		super.apply(document, trigger, offset);
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal#computeTriggerCharacters()
+	 */
+	protected char[] computeTriggerCharacters() {
+		return GENERIC_TYPE_TRIGGERS;
 	}
 
 	/**
@@ -635,9 +644,13 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	 *
 	 * @param document the document
 	 * @param offset the insertion offset
+	 * @param trigger the trigger character
 	 * @return <code>true</code> if arguments should be appended
 	 */
-	private boolean shouldAppendArguments(IDocument document, int offset) {
+	private boolean shouldAppendArguments(IDocument document, int offset, char trigger) {
+		if (trigger != '\0' && trigger != '<')
+			return false;
+		
 		try {
 			IRegion region= document.getLineInformationOfOffset(offset);
 			String line= document.get(region.getOffset(), region.getLength());
@@ -714,6 +727,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 			}
 
 			LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
+			ui.setExitPolicy(new ExitPolicy('>', document));
 			ui.setExitPosition(getTextViewer(), replacementOffset + replacementString.length(), 0, Integer.MAX_VALUE);
 			ui.setDoContextInfo(true);
 			ui.enter();

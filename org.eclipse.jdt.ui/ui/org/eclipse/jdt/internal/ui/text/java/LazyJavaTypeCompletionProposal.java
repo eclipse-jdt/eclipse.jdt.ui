@@ -108,6 +108,15 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 				impStructure.getResultingEdits(document, new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
 			}
+			
+			if (trigger == '(' && JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACKETS)) {
+				document.replace(getReplacementOffset() + getCursorPosition(), 0, ")"); //$NON-NLS-1$
+				StringBuffer buf= new StringBuffer();
+				for (int i= 0; i < getCursorPosition() - 1; i++)
+					buf.append(' ');
+				buf.append("()"); //$NON-NLS-1$
+				setUpLinkedMode(document, buf.toString());
+			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		} catch (BadLocationException e) {

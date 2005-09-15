@@ -15,6 +15,7 @@ package org.eclipse.jdt.internal.ui.text.java;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.events.VerifyEvent;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
@@ -42,6 +43,15 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
+import org.eclipse.jface.text.link.ILinkedModeListener;
+import org.eclipse.jface.text.link.LinkedModeModel;
+import org.eclipse.jface.text.link.LinkedModeUI;
+import org.eclipse.jface.text.link.LinkedPosition;
+import org.eclipse.jface.text.link.LinkedPositionGroup;
+import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
+import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
+
+import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.Signature;
@@ -104,6 +114,49 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 			}
 			return fPosition.getOffset();
 		}
+	}
+
+	protected static final class ExitPolicy implements IExitPolicy {
+	
+		final char fExitCharacter;
+		private final IDocument fDocument;
+	
+		public ExitPolicy(char exitCharacter, IDocument document) {
+			fExitCharacter= exitCharacter;
+			fDocument= document;
+		}
+	
+		/*
+		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
+		 */
+		public ExitFlags doExit(LinkedModeModel environment, VerifyEvent event, int offset, int length) {
+	
+			if (event.character == fExitCharacter) {
+				if (environment.anyPositionContains(offset))
+					return new ExitFlags(ILinkedModeListener.UPDATE_CARET, false);
+				else
+					return new ExitFlags(ILinkedModeListener.UPDATE_CARET, true);
+			}
+	
+			switch (event.character) {
+				case ';':
+					return new ExitFlags(ILinkedModeListener.NONE, true);
+				case SWT.CR:
+					// when entering an anonymous class as a parameter, we don't want
+					// to jump after the parenthesis when return is pressed
+					if (offset > 0) {
+						try {
+							if (fDocument.getChar(offset - 1) == '{')
+								return new ExitFlags(ILinkedModeListener.EXIT_ALL, true);
+						} catch (BadLocationException e) {
+						}
+					}
+					// fall through
+				default:
+					return null;
+			}
+		}
+	
 	}
 
 	private boolean fDisplayStringComputed;
@@ -236,17 +289,6 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 			if (delta > 0)
 				setReplacementLength(getReplacementLength() + delta);
 	
-			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96059
-			// don't apply the proposal if for some reason we're not valid any longer
-			if (!validate(document, offset, null)) {
-				setCursorPosition(offset - getReplacementOffset());
-				if (trigger != '\0') {
-					document.replace(offset, 0, String.valueOf(trigger));
-					setCursorPosition(getCursorPosition() + 1);
-				}
-				return;
-			}
-			
 			boolean isSmartTrigger= isSmartTrigger(trigger);
 	
 			String replacement;
@@ -267,7 +309,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	
 			// reference position just at the end of the document change.
 			int referenceOffset= getReplacementOffset() + getReplacementLength();
-			final ReferenceTracker referenceTracker= new JavaMethodCompletionProposal.ReferenceTracker();
+			final ReferenceTracker referenceTracker= new ReferenceTracker();
 			referenceTracker.preReplace(document, referenceOffset);
 	
 			replace(document, getReplacementOffset(), getReplacementLength(), replacement);
@@ -320,6 +362,29 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 		IDocument document= viewer.getDocument();
 		if (fTextViewer == null)
 			fTextViewer= viewer;
+		
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96059
+		// don't apply the proposal if for some reason we're not valid any longer
+		if (!validate(document, offset, null)) {
+			setCursorPosition(offset - getReplacementOffset());
+			if (trigger != '\0') {
+				try {
+					document.replace(offset, 0, String.valueOf(trigger));
+					setCursorPosition(getCursorPosition() + 1);
+					if (trigger == '(' && JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACKETS)) {
+						document.replace(getReplacementOffset() + getCursorPosition(), 0, ")"); //$NON-NLS-1$
+						StringBuffer buf= new StringBuffer();
+						for (int i= 0; i < getCursorPosition() - 1; i++)
+							buf.append(' ');
+						buf.append("()"); //$NON-NLS-1$
+						setUpLinkedMode(document, buf.toString());
+					}
+				} catch (BadLocationException x) {
+					// ignore
+				}
+			}
+			return;
+		}
 
 		// don't eat if not in preferences, XOR with modifier key 1 (Ctrl)
 		// but: if there is a selection, replace it!
@@ -744,5 +809,31 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 
 	protected final boolean isToggleEating() {
 		return fToggleEating;
+	}
+
+	protected void setUpLinkedMode(IDocument document, String string) throws BadLocationException {
+		if (getTextViewer() != null && string != null) {
+			int index= string.indexOf("()"); //$NON-NLS-1$
+			if (index != -1 && index + 1 == getCursorPosition()) {
+				IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+				if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACKETS)) {
+					int newOffset= getReplacementOffset() + getCursorPosition();
+	
+					LinkedPositionGroup group= new LinkedPositionGroup();
+					group.addPosition(new LinkedPosition(document, newOffset, 0, LinkedPositionGroup.NO_STOP));
+	
+					LinkedModeModel model= new LinkedModeModel();
+					model.addGroup(group);
+					model.forceInstall();
+	
+					LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
+					ui.setSimpleMode(true);
+					ui.setExitPolicy(new ExitPolicy(')', document));
+					ui.setExitPosition(getTextViewer(), newOffset + 1, 0, Integer.MAX_VALUE);
+					ui.setCyclingMode(LinkedModeUI.CYCLE_NEVER);
+					ui.enter();
+				}
+			}
+		}
 	}
 }
