@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -31,6 +32,7 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -126,6 +128,16 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ChangeSignatureRefactoring extends Refactoring {
+	
+	private static final String ID_CHANGE_METHOD_SIGNATURE= "org.eclipse.jdt.ui.change.method.signature"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_HANDLE= "handle"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_RETURN= "return"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_PARAMETER= "parameter"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_DEFAULT= "default"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_EXCEPTION= "exception"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_KIND= "kind"; //$NON-NLS-1$
 	
 	private List fParameterInfos;
 
@@ -759,11 +771,32 @@ public class ChangeSignatureRefactoring extends Refactoring {
 	    	return RefactoringStatus.createWarningStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_non_virtual); 
 		return null;
 	}
-	
-	public String getMethodSignaturePreview() throws JavaModelException{
+
+	public String getOldMethodSignature() throws JavaModelException{
 		StringBuffer buff= new StringBuffer();
 		
-		buff.append(getPreviewOfVisibityString());
+		int flags= getMethod().getFlags();
+		buff.append(getVisibilityString(flags));
+		if (Flags.isStatic(flags))
+			buff.append("static "); //$NON-NLS-1$
+		if (! getMethod().isConstructor())
+			buff.append(fReturnTypeInfo.getOldTypeName())
+				.append(' ');
+
+		buff.append(fMethod.getElementName())
+			.append(Signature.C_PARAM_START)
+			.append(getOldMethodParameters())
+			.append(Signature.C_PARAM_END);
+		
+		buff.append(getOldMethodThrows());
+		
+		return buff.toString();
+	}
+
+	public String getNewMethodSignature() throws JavaModelException{
+		StringBuffer buff= new StringBuffer();
+		
+		buff.append(getVisibilityString(fVisibility));
 		if (Flags.isStatic(getMethod().getFlags()))
 			buff.append("static "); //$NON-NLS-1$
 		if (! getMethod().isConstructor())
@@ -780,8 +813,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return buff.toString();
 	}
 
-	private String getPreviewOfVisibityString() {
-		String visibilityString= JdtFlags.getVisibilityString(fVisibility);
+	private String getVisibilityString(int visibility) {
+		String visibilityString= JdtFlags.getVisibilityString(visibility);
 		if ("".equals(visibilityString)) //$NON-NLS-1$
 			return visibilityString;
 		return visibilityString + ' ';
@@ -803,7 +836,22 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return buff.toString();
 	}
 
-	
+	private String getOldMethodThrows() {
+		final String throwsString= " throws "; //$NON-NLS-1$
+		StringBuffer buff= new StringBuffer(throwsString);
+		for (Iterator iter= fExceptionInfos.iterator(); iter.hasNext(); ) {
+			ExceptionInfo info= (ExceptionInfo) iter.next();
+			if (! info.isAdded()) {
+				buff.append(info.getType().getElementName());
+				buff.append(", "); //$NON-NLS-1$
+			}
+		}
+		if (buff.length() == throwsString.length())
+			return ""; //$NON-NLS-1$
+		buff.delete(buff.length() - 2, buff.length());
+		return buff.toString();
+	}
+
 	private void checkForDuplicateParameterNames(RefactoringStatus result){
 		Set found= new HashSet();
 		Set doubled= new HashSet();
@@ -862,6 +910,18 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return true;	
 	}
 
+	private String getOldMethodParameters() {
+		StringBuffer buff= new StringBuffer();
+		int i= 0;
+		for (Iterator iter= getNotAddedInfos().iterator(); iter.hasNext(); i++) {
+			ParameterInfo info= (ParameterInfo) iter.next();
+			if (i != 0 )
+				buff.append(", ");  //$NON-NLS-1$
+			buff.append(createDeclarationString(info));
+		}
+		return buff.toString();
+	}
+		
 	private String getMethodParameters() {
 		StringBuffer buff= new StringBuffer();
 		int i= 0;
@@ -873,7 +933,17 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		}
 		return buff.toString();
 	}
-		
+
+	private List getAddedInfos(){
+		List result= new ArrayList(1);
+		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
+			ParameterInfo info= (ParameterInfo) iter.next();
+			if (info.isAdded())
+				result.add(info);
+		}
+		return result;
+	}
+
 	private List getDeletedInfos(){
 		List result= new ArrayList(1);
 		for (Iterator iter= fParameterInfos.iterator(); iter.hasNext();) {
@@ -882,6 +952,12 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				result.add(info);
 		}
 		return result;
+	}
+
+	private List getNotAddedInfos(){
+		List all= new ArrayList(fParameterInfos);
+		all.removeAll(getAddedInfos());
+		return all;
 	}
 	
 	private List getNotDeletedInfos(){
@@ -992,15 +1068,64 @@ public class ChangeSignatureRefactoring extends Refactoring {
 		return Checks.validateModifiesFiles(getAllFilesToModify(), getValidationContext());
 	}
 
-	//--  changes ----
 	public Change createChange(IProgressMonitor pm) {
 		pm.beginTask("", 1); //$NON-NLS-1$
-		try{
-			return new DynamicValidationStateChange(RefactoringCoreMessages.ChangeSignatureRefactoring_restructure_parameters, fChangeManager.getAllChanges()); 
-		} finally{
+		try {
+			return new DynamicValidationStateChange(RefactoringCoreMessages.ChangeSignatureRefactoring_restructure_parameters, fChangeManager.getAllChanges()) {
+				public RefactoringDescriptor getRefactoringDescriptor() {
+					final Map arguments= new HashMap();
+					arguments.put(ATTRIBUTE_HANDLE, fMethod.getHandleIdentifier());
+					arguments.put(ATTRIBUTE_NAME, fMethodName);
+					if (fReturnTypeInfo.isTypeNameChanged())
+						arguments.put(ATTRIBUTE_RETURN, fReturnTypeInfo.getNewTypeName());
+					try {
+						if (!isVisibilitySameAsInitial())
+							arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
+					int count= 1;
+					for (final Iterator iterator= fParameterInfos.iterator(); iterator.hasNext();) {
+						final ParameterInfo info= (ParameterInfo) iterator.next();
+						final StringBuffer buffer= new StringBuffer(64);
+						buffer.append(info.getOldTypeName());
+						buffer.append(" "); //$NON-NLS-1$
+						buffer.append(info.getOldName());
+						buffer.append(" "); //$NON-NLS-1$
+						buffer.append(info.getOldIndex());
+						buffer.append(" "); //$NON-NLS-1$
+						buffer.append(info.getNewTypeName());
+						buffer.append(" "); //$NON-NLS-1$
+						buffer.append(info.getNewName());
+						buffer.append(" "); //$NON-NLS-1$
+						buffer.append(info.isDeleted());
+						arguments.put(ATTRIBUTE_PARAMETER + count, buffer.toString());
+						final String value= info.getDefaultValue();
+						if (value != null && !"".equals(value)) //$NON-NLS-1$
+							arguments.put(ATTRIBUTE_DEFAULT + count, value);
+					}
+					count= 1;
+					for (final Iterator iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
+						final ExceptionInfo info= (ExceptionInfo) iterator.next();
+						arguments.put(ATTRIBUTE_EXCEPTION + count, info.getType().getHandleIdentifier());
+						arguments.put(ATTRIBUTE_KIND + count, new Integer(info.getKind()).toString());
+					}
+					String project= null;
+					IJavaProject javaProject= fMethod.getJavaProject();
+					if (javaProject != null)
+						project= javaProject.getElementName();
+					try {
+						return new RefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, MessageFormat.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), null, arguments);
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+						return null;
+					}
+				}
+			};
+		} finally {
 			pm.done();
 			clearManagers();
-		}	
+		}
 	}
 
 	private TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus result) throws CoreException {

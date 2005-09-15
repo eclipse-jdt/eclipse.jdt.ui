@@ -815,6 +815,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameSourceFolderChange_descriptor_description;
 	public static String RenameTypeParameterProcessor_descriptor_description;
 	public static String RenameTypeProcessor_descriptor_description;
+	public static String ChangeSignatureRefactoring_descriptor_description;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);

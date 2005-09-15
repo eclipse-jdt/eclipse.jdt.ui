@@ -20,9 +20,9 @@ public class ExceptionInfo {
 	private final ITypeBinding fTypeBinding;
 	private int fKind;
 
-	private static final int OLD= 0;
-	private static final int ADDED= 1;
-	private static final int DELETED= 2;
+	public static final int OLD= 0;
+	public static final int ADDED= 1;
+	public static final int DELETED= 2;
 	
 	private ExceptionInfo(IType type, int kind, ITypeBinding binding) {
 		Assert.isNotNull(type);
@@ -62,6 +62,10 @@ public class ExceptionInfo {
 	
 	public IType getType() {
 		return fType;
+	}
+	
+	public int getKind() {
+		return fKind;
 	}
 	
 	/**

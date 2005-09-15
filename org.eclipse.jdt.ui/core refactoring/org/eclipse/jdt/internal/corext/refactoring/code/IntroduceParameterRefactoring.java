@@ -320,7 +320,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 	}
 	
 	public String getMethodSignaturePreview() throws JavaModelException {
-		return fChangeSignatureRefactoring.getMethodSignaturePreview();
+		return fChangeSignatureRefactoring.getNewMethodSignature();
 	}
 	
 //--- Input setting/validation
