@@ -166,7 +166,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(unit3, root3);
 		assertCorrectLabels(proposals);
 
-		String[] expected= new String[3];
+		String[] expected= new String[2];
 		
 		buffer= new StringBuffer();
 		buffer.append("package test3;\n"); //$NON-NLS-1$
@@ -177,7 +177,7 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		buffer.append("    public void test() {\n"); //$NON-NLS-1$
 		buffer.append("        Serializable var3= new Serializable() {\n"); //$NON-NLS-1$
 		buffer.append("            " + FIELD_COMMENT + "\n");
-		buffer.append("            private static final long serialVersionUID = 0L;\n"); //$NON-NLS-1$
+		buffer.append("            private static final long serialVersionUID = 1L;\n"); //$NON-NLS-1$
 		buffer.append("            int var4;\n"); //$NON-NLS-1$
 		buffer.append("        };\n"); //$NON-NLS-1$
 		buffer.append("    }\n"); //$NON-NLS-1$
@@ -199,22 +199,22 @@ public class SerialVersionQuickFixTest extends QuickFixTest {
 		buffer.append("    }\n"); //$NON-NLS-1$
 		buffer.append("}\n"); //$NON-NLS-1$
 		expected[1]= buffer.toString();
-		
-		buffer= new StringBuffer();
-		buffer.append("package test3;\n"); //$NON-NLS-1$
-		buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
-		buffer.append("public class Test3 {\n"); //$NON-NLS-1$
-		buffer.append("    protected int var1;\n"); //$NON-NLS-1$
-		buffer.append("    protected int var2;\n"); //$NON-NLS-1$
-		buffer.append("    @SuppressWarnings(\"serial\")\n"); //$NON-NLS-1$
-		buffer.append("    public void test() {\n"); //$NON-NLS-1$
-		buffer.append("        Serializable var3= new Serializable() {\n"); //$NON-NLS-1$
-		buffer.append("            int var4;\n"); //$NON-NLS-1$
-		buffer.append("        };\n"); //$NON-NLS-1$
-		buffer.append("    }\n"); //$NON-NLS-1$
-		buffer.append("}\n"); //$NON-NLS-1$
-		expected[2]= buffer.toString();
-		
+//		
+//		buffer= new StringBuffer();
+//		buffer.append("package test3;\n"); //$NON-NLS-1$
+//		buffer.append("import java.io.Serializable;\n"); //$NON-NLS-1$
+//		buffer.append("public class Test3 {\n"); //$NON-NLS-1$
+//		buffer.append("    protected int var1;\n"); //$NON-NLS-1$
+//		buffer.append("    protected int var2;\n"); //$NON-NLS-1$
+//		buffer.append("    @SuppressWarnings(\"serial\")\n"); //$NON-NLS-1$
+//		buffer.append("    public void test() {\n"); //$NON-NLS-1$
+//		buffer.append("        Serializable var3= new Serializable() {\n"); //$NON-NLS-1$
+//		buffer.append("            int var4;\n"); //$NON-NLS-1$
+//		buffer.append("        };\n"); //$NON-NLS-1$
+//		buffer.append("    }\n"); //$NON-NLS-1$
+//		buffer.append("}\n"); //$NON-NLS-1$
+//		expected[2]= buffer.toString();
+//		
 		
 		assertEqualStringsIgnoreOrder(getPreviewContents(proposals), expected);
 	}
