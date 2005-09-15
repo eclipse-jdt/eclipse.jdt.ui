@@ -260,7 +260,9 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 		if (key == null)
 			key= PreferencesMessages.CodeAssistConfigurationBlockInProgress_no_shortcut;
 
-		new Label(composite, SWT.NONE | SWT.WRAP).setText(MessageFormat.format(PreferencesMessages.CodeAssistConfigurationBlockInProgress_computer_description, new Object[] { key }));
+		Label label= new Label(composite, SWT.NONE | SWT.WRAP);
+		label.setText(MessageFormat.format(PreferencesMessages.CodeAssistConfigurationBlockInProgress_computer_description, new Object[] { key }));
+		label.setLayoutData(new RowData(300, SWT.DEFAULT));
 		
 		createControls(composite);
 		
