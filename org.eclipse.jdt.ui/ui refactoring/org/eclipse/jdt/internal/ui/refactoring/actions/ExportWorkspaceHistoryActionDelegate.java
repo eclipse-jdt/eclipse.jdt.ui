@@ -17,6 +17,7 @@ import java.util.ResourceBundle;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.ui.IWorkbenchWindow;
@@ -114,7 +115,7 @@ public class ExportWorkspaceHistoryActionDelegate implements IWorkbenchWindowAct
 				return (int) (predecessor.getTimeStamp() - successor.getTimeStamp());
 			}
 		});
-		final RefactoringHistoryDialog dialog= new ExportRefactoringHistoryDialog(shell, ResourceBundle.getBundle(BUNDLE_NAME), handles);
+		final RefactoringHistoryDialog dialog= new ExportRefactoringHistoryDialog(shell, ResourceBundle.getBundle(BUNDLE_NAME), handles, IDialogConstants.OK_ID);
 		initializeHistoryDialog(dialog);
 		dialog.open();
 	}
