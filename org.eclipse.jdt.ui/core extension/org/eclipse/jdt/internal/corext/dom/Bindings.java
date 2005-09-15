@@ -422,13 +422,13 @@ public class Bindings {
 			return field;
 		ITypeBinding superClass= type.getSuperclass();
 		if (superClass != null) {
-			field= findFieldInType(type, fieldName);
+			field= findFieldInHierarchy(superClass, fieldName);
 			if (field != null)
 				return field;			
 		}
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
-			field= findFieldInType(type, fieldName);
+			field= findFieldInHierarchy(interfaces[i], fieldName);
 			if (field != null) // no private fields in interfaces
 				return field;
 		}
