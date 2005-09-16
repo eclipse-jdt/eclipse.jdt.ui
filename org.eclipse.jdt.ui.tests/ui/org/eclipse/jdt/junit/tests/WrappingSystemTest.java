@@ -61,19 +61,19 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 	}
 
 	public void test00characterizeSecondLine() throws Exception {
-		runTests("\\n", 1000, 2);
+		runTests("\\n", 1000, 2, false);
 		String text = getText(1);
 		assertTrue(text, text.startsWith("Numbers"));
 	}
 
 	public void test01shouldWrapSecondLine() throws Exception {
-		runTests("\\n", 1000, 2);
+		runTests("\\n", 1000, 2, false);
 		String text = getText(1);
 		assertTrue(text, text.length() < 300);
 	}
 
 	public void test02characterizeImages() throws Exception {
-		runTests("\\n", 0, 3);
+		runTests("\\n", 0, 3, true);
 		assertEquals(getFailureTrace().getTrace(), getFailureDisplay().getExceptionIcon(), getImage(0));
 		assertEquals(getFailureTrace().getTrace(), null, getImage(1));
 		assertEquals(getFailureTrace().getTrace(), getFailureDisplay().getStackIcon(), getImage(2));
@@ -84,7 +84,7 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 	}
 
 	public void test03shouldWrapFirstLine() throws Exception {
-		runTests("", 1000, 1);
+		runTests("", 1000, 1, false);
 		String text = getText(0);
 		assertTrue(text, text.length() < 300);
 	}
@@ -113,10 +113,10 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 	}
 
 	public void runTests(String prefixForErrorMessage,
-			int howManyNumbersInErrorString, int numExpectedTableItems)
+			int howManyNumbersInErrorString, int numExpectedTableItems, boolean lastItemHasImage)
 			throws CoreException, JavaModelException, PartInitException {
 		launchTests(prefixForErrorMessage, howManyNumbersInErrorString);
-		waitForTableToFill(numExpectedTableItems, 60000);
+		waitForTableToFill(numExpectedTableItems, 60000, lastItemHasImage);
 	}
 
 	protected void launchTests(String prefixForErrorMessage,
@@ -170,9 +170,9 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 	}
 
 	protected void waitForTableToFill(int numExpectedTableLines,
-			int millisecondTimeout) throws PartInitException {
+			int millisecondTimeout, boolean lastItemHasImage) throws PartInitException {
 		long startTime = System.currentTimeMillis();
-		while (stillWaiting(numExpectedTableLines)) {
+		while (stillWaiting(numExpectedTableLines, lastItemHasImage)) {
 			if (System.currentTimeMillis() - startTime > millisecondTimeout)
 				fail("Timeout waiting for " + numExpectedTableLines 
 						+ " lines in table. Present: " + getNumTableItems() + " items.\n"
@@ -185,9 +185,9 @@ public class WrappingSystemTest extends TestCase implements ILaunchesListener2 {
 		PlatformUI.getWorkbench().getDisplay().readAndDispatch();
 	}
 
-	protected boolean stillWaiting(int numExpectedTableLines)
+	protected boolean stillWaiting(int numExpectedTableLines, boolean lastItemHasImage)
 			throws PartInitException {
-		return hasNotTerminated() || getNumTableItems() < numExpectedTableLines;
+		return hasNotTerminated() || getNumTableItems() < numExpectedTableLines || (lastItemHasImage && getImage(numExpectedTableLines - 1) == null);
 	}
 
 	protected int getNumTableItems() throws PartInitException {

@@ -34,26 +34,26 @@ public class WrappingUnitTest extends TestCase {
 			}
 
 			protected void waitForTableToFill(int numExpectedTableLines,
-					int millisecondTimeout) throws PartInitException {
+					int millisecondTimeout, boolean lastItemHasImage) throws PartInitException {
 				wasCalled[0] = true;
 				assertEquals(17, numExpectedTableLines);
 			}
 		};
 
-		test.runTests(null, 0, 17);
+		test.runTests(null, 0, 17, false);
 		assertTrue(wasCalled[0]);
 	}
 
 	public void test02waitForTableToFillWaitsForNumberOfLines()
 			throws Exception {
 		WrappingSystemTest test = new WrappingSystemTest() {
-			protected boolean stillWaiting(int numExpectedTableLines)
+			protected boolean stillWaiting(int numExpectedTableLines, boolean lastItemHasImage)
 					throws PartInitException {
 				assertEquals(17, numExpectedTableLines);
 				return false;
 			}
 		};
-		test.waitForTableToFill(17, 30000);
+		test.waitForTableToFill(17, 30000, false);
 	}
 
 	public void test03waitForTableToFillObeysTimeout() throws Exception {
@@ -66,7 +66,7 @@ public class WrappingUnitTest extends TestCase {
 				return -1; // avoid accessing getActiveWorkbenchWindow() from non-UI thread
 			}
 
-			protected boolean stillWaiting(int numExpectedTableLines)
+			protected boolean stillWaiting(int numExpectedTableLines, boolean lastItemHasImage)
 					throws PartInitException {
 				return true;
 			}
@@ -78,7 +78,7 @@ public class WrappingUnitTest extends TestCase {
 			public void run() {
 				synchronized (done) {
 					try {
-						test.waitForTableToFill(17, 50);
+						test.waitForTableToFill(17, 50, false);
 						fail();
 					} catch (AssertionFailedError e) {
 						done[0] = true;
@@ -107,6 +107,6 @@ public class WrappingUnitTest extends TestCase {
 			}
 		};
 		
-		assertTrue(test.stillWaiting(17));
+		assertTrue(test.stillWaiting(17, false));
 	}
 }
