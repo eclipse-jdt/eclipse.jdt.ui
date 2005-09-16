@@ -43,6 +43,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
+import org.eclipse.jdt.core.dom.ArrayCreation;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
+import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -355,7 +358,8 @@ public class InlineConstantRefactoring extends Refactoring {
 		
 		private final Expression fInitializer;
 		private final ICompilationUnit fInitializerUnit;
-
+		private final VariableDeclarationFragment fOriginalDeclaration; 
+		
 		/** The references in this compilation unit, represented as AST Nodes in the parsed representation of the compilation unit */
 		private final Expression[] fReferences;
 		private final VariableDeclarationFragment fDeclarationToRemove;
@@ -375,6 +379,8 @@ public class InlineConstantRefactoring extends Refactoring {
 				fDeclarationToRemove= refactoring.getDeclaration();
 			else
 				fDeclarationToRemove= null;
+			
+			fOriginalDeclaration= refactoring.getDeclaration();
 			
 			fReferences= new Expression[references.length];
 			for (int i= 0; i < references.length; i++)
@@ -427,6 +433,22 @@ public class InlineConstantRefactoring extends Refactoring {
 
 			TextEditGroup msg= fCuRewrite.createGroupDescription(RefactoringCoreMessages.InlineConstantRefactoring_Inline); 
 			Expression newReference= (Expression) fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer, reference.getNodeType());
+
+			if (fInitializer instanceof ArrayInitializer) {
+				ArrayCreation arrayCreation= fCuRewrite.getAST().newArrayCreation();
+				ArrayType arrayType= (ArrayType) ASTNodeFactory.newType(fCuRewrite.getAST(), fOriginalDeclaration);
+				arrayCreation.setType(arrayType);
+
+				ArrayInitializer newArrayInitializer= (ArrayInitializer) fCuRewrite.getASTRewrite().createStringPlaceholder(modifiedInitializer,
+						ASTNode.ARRAY_INITIALIZER);
+				arrayCreation.setInitializer(newArrayInitializer);
+				newReference= arrayCreation;
+
+				ITypeBinding typeToAddToImport= ASTNodes.getType(fOriginalDeclaration).resolveBinding();
+				fCuRewrite.getImportRewrite().addImport(typeToAddToImport);
+				fCuRewrite.getImportRemover().registerAddedImport(typeToAddToImport.getName());
+			}
+
 			if (shouldParenthesizeSubstitute(fInitializer, reference)) {
 				ParenthesizedExpression parenthesized= fCuRewrite.getAST().newParenthesizedExpression();
 				parenthesized.setExpression(newReference);
