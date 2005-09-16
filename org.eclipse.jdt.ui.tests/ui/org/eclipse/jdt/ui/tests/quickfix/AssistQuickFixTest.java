@@ -2687,7 +2687,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
 		buf.append("    public void foo() {\n");
-		buf.append("        if (true)\n");
+		buf.append("        if (true) \n");
 		buf.append("            ;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
@@ -2700,9 +2700,6 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(2);
-		String preview= getPreviewContent(proposal);
-
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
@@ -2712,7 +2709,30 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());	
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true) \n");
+		buf.append("            ;\n");
+		buf.append("        else {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        ;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2, expected3});
 	}    
 	
 	public void testChangeElseStatementToBlock() throws Exception {
@@ -2721,12 +2741,12 @@ public class AssistQuickFixTest extends QuickFixTest {
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("	public void foo() {\n");
-		buf.append("		if (true) {\n");
-		buf.append("			;\n");
-		buf.append("		} else\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;;\n");
+		buf.append("        } else\n");
 		buf.append("            ;\n");
-		buf.append("	}\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
@@ -2736,37 +2756,49 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("	public void foo() {\n");
-		buf.append("		if (true) {\n");
-		buf.append("			;\n");
-		buf.append("		} else {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;;\n");
+		buf.append("        } else {\n");
 		buf.append("            ;\n");
 		buf.append("        }\n");
-		buf.append("	}\n");
+		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());	
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (false)\n");
+		buf.append("            ;\n");
+		buf.append("        else {\n");
+		buf.append("            ;;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2});
 	}   
 	
-	public void testChangeIfWithElseStatmentToBlock() throws Exception {
+	public void testChangeIfWithElseStatementToBlock() throws Exception {
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("	public void foo() {\n");
-		buf.append("        if (true) \n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true)\n");
 		buf.append("            ;\n");
 		buf.append("        else {\n");
-		buf.append("            ;\n");
+		buf.append("            ;;\n");
 		buf.append("        }\n");
-		buf.append("	}\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
@@ -2777,34 +2809,46 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 2);
 		assertCorrectLabels(proposals);
 		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
-		String preview= getPreviewContent(proposal);
-
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("	public void foo() {\n");
+		buf.append("    public void foo() {\n");
 		buf.append("        if (true) {\n");
 		buf.append("            ;\n");
 		buf.append("        } else {\n");
-		buf.append("            ;\n");
+		buf.append("            ;;\n");
 		buf.append("        }\n");
-		buf.append("	}\n");
+		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());	
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (false) {\n");
+		buf.append("            ;;\n");
+		buf.append("        } else\n");
+		buf.append("            ;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2});
 	}   
 	
-	public void testChangeIfAndElseStatementToBlock() throws Exception {
+	public void testChangeIfAndElseStatementToBlock1() throws Exception {
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("	public void foo() {\n");
+		buf.append("    public void foo() {\n");
 		buf.append("        if (true)\n");
 		buf.append("            ;\n");
 		buf.append("        else\n");
 		buf.append("            ;\n");
-		buf.append("	}\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
@@ -2815,36 +2859,116 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
-		str= "else";
-		context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		proposals= collectAssists(context, false);
-		
-		assertNumberOfProposals(proposals, 3);
-		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview= getPreviewContent(proposal);
-
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("	public void foo() {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else\n");
+		buf.append("            ;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
 		buf.append("        if (true) {\n");
 		buf.append("            ;\n");
 		buf.append("        } else {\n");
 		buf.append("            ;\n");
 		buf.append("        }\n");
-		buf.append("	}\n");
+		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());	
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (false)\n");
+		buf.append("            ;\n");
+		buf.append("        else\n");
+		buf.append("            ;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2, expected3});
 	}   
 	
-	public void testChangeIfAndElseIfStatementToBlock() throws Exception {
+	public void testChangeIfAndElseStatementToBlock2() throws Exception {
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("	public void foo() {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            ;\n");
+		buf.append("        else\n");
+		buf.append("            ;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		String str= "else";
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 3);
+		assertCorrectLabels(proposals);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            ;\n");
+		buf.append("        else {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (false)\n");
+		buf.append("            ;\n");
+		buf.append("        else\n");
+		buf.append("            ;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2, expected3});
+	}   
+	
+	public void testChangeIfAndElseIfStatementToBlock() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
 		buf.append("        if (true)\n");
 		buf.append("            ;\n");
 		buf.append("        else if (true)\n");
@@ -2853,7 +2977,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("            ;\n");
 		buf.append("        else\n");
 		buf.append("            ;\n");
-		buf.append("	}\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
@@ -2864,13 +2988,28 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
 		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview= getPreviewContent(proposal);
-
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("	public void foo() {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            ;\n");
+		buf.append("        else {\n");
+		buf.append("            if (true)\n");
+		buf.append("                ;\n");
+		buf.append("            else if (false)\n");
+		buf.append("                ;\n");
+		buf.append("            else\n");
+		buf.append("                ;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
 		buf.append("        if (true) {\n");
 		buf.append("            ;\n");
 		buf.append("        } else if (true) {\n");
@@ -2880,17 +3019,37 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        } else {\n");
 		buf.append("            ;\n");
 		buf.append("        }\n");
-		buf.append("	}\n");
+		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());	
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (false) {\n");
+		buf.append("            if (true)\n");
+		buf.append("                ;\n");
+		buf.append("            else if (false)\n");
+		buf.append("                ;\n");
+		buf.append("            else\n");
+		buf.append("                ;\n");
+		buf.append("        } else\n");
+		buf.append("            ;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2, expected3});
 	}   
 	
 	public void testChangeIfAndElseIfStatementWithBlockToBlock() throws Exception {
+		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("	public void foo() {\n");
+		buf.append("    public void foo() {\n");
 		buf.append("        if (true)\n");
 		buf.append("            ;\n");
 		buf.append("        else if (true) {\n");
@@ -2899,7 +3058,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("            ;\n");
 		buf.append("        else\n");
 		buf.append("            ;\n");
-		buf.append("	}\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 		
@@ -2909,14 +3068,29 @@ public class AssistQuickFixTest extends QuickFixTest {
 		
 		assertNumberOfProposals(proposals, 3);
 		assertCorrectLabels(proposals);
-		
-		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(1);
-		String preview= getPreviewContent(proposal);
 
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E {\n");
-		buf.append("	public void foo() {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            ;\n");
+		buf.append("        else {\n");
+		buf.append("            if (true) {\n");
+		buf.append("                ;\n");
+		buf.append("            } else if (false)\n");
+		buf.append("                ;\n");
+		buf.append("            else\n");
+		buf.append("                ;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
 		buf.append("        if (true) {\n");
 		buf.append("            ;\n");
 		buf.append("        } else if (true) {\n");
@@ -2926,8 +3100,27 @@ public class AssistQuickFixTest extends QuickFixTest {
 		buf.append("        } else {\n");
 		buf.append("            ;\n");
 		buf.append("        }\n");
-		buf.append("	}\n");
+		buf.append("    }\n");
 		buf.append("}\n");
-		assertEqualString(preview, buf.toString());	
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (false) {\n");
+		buf.append("            if (true) {\n");
+		buf.append("                ;\n");
+		buf.append("            } else if (false)\n");
+		buf.append("                ;\n");
+		buf.append("            else\n");
+		buf.append("                ;\n");
+		buf.append("        } else\n");
+		buf.append("            ;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, new String[] {expected1, expected2, expected3});
 	}   
 }

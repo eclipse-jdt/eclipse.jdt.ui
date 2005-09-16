@@ -954,12 +954,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			if (missingBlockFound && foundElse) {
 				String label = CorrectionMessages.QuickAssistProcessor_replacethenelsewithblock_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
-				if (elseStatment == null) {
-					proposal.setEndPosition(rewrite.track(ifStatement));
-				} else {
-					proposal.setEndPosition(rewrite.track(elseStatment));
-				}
+				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 10, image);
 				resultingCollections.add(proposal);
 			}
 		}
