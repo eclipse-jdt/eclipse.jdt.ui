@@ -240,6 +240,14 @@ public class InlineTempTests extends RefactoringTest {
 		helper1(11, 14, 11, 21);
 	}	
 	
+	public void test29() throws Exception{
+		helper1(4, 8, 4, 11);
+	}
+	
+	public void test30() throws Exception{
+		helper1(4, 8, 4, 11);
+	}
+	
 	//------
 	
 	public void testFail0() throws Exception{
@@ -302,11 +310,6 @@ public class InlineTempTests extends RefactoringTest {
 	public void testFail13() throws Exception{
 //		printTestDisabledMessage("12106");
 		helper2(4, 18, 4, 19);
-	}
-
-	public void testFail14() throws Exception{
-//		printTestDisabledMessage("22632");
-		helper2(4, 8, 4, 11);
 	}
 	
 }

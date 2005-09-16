@@ -37,7 +37,10 @@ import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -135,15 +138,10 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 
     private RefactoringStatus checkInitializer() {
-    	switch(fTempDeclaration.getInitializer().getNodeType()){
-    		case ASTNode.NULL_LITERAL:
-    			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTemRefactoring_error_message_nulLiteralsCannotBeInlined); 
-    		case ASTNode.ARRAY_INITIALIZER:
-    			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTempRefactoring_Array_vars_initialized); 	 
-    		default:	
-		        return null;
-    	}
-    }
+		if (fTempDeclaration.getInitializer().getNodeType() == ASTNode.NULL_LITERAL)
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InlineTemRefactoring_error_message_nulLiteralsCannotBeInlined);
+		return null;
+	}
 
 	private RefactoringStatus checkSelection() {
 		if (fTempDeclaration.getParent() instanceof MethodDeclaration)
@@ -217,7 +215,7 @@ public class InlineTempRefactoring extends Refactoring {
 		int length= fTempDeclaration.getName().getIdentifier().length();
 		for(int i= 0; i < offsets.length; i++){
 			int offset= offsets[i];
-            String sourceToInline= getInitializerSource(needsBrackets(offset));
+            String sourceToInline= getInitializerSource(needsBrackets(offset), isArrayInitializer());
 			TextChangeCompatibility.addTextEdit(change, changeName, new ReplaceEdit(offset, length, sourceToInline));
 			pm.worked(1);	
 		}
@@ -234,6 +232,10 @@ public class InlineTempRefactoring extends Refactoring {
     		return true;
     		
     	return ASTNodes.substituteMustBeParenthesized(initializer, inlineSite);
+    }
+    
+    private boolean isArrayInitializer() {
+    	return (fTempDeclaration.getInitializer().getNodeType()==ASTNode.ARRAY_INITIALIZER);
     }
 
 	private SimpleName getReferenceAtOffset(int offset) {
@@ -276,13 +278,39 @@ public class InlineTempRefactoring extends Refactoring {
 		TextChangeCompatibility.addTextEdit(change, changeName, new DeleteEdit(range.getOffset(), range.getLength()));
 	}
 	
-	private String getInitializerSource(boolean brackets) throws JavaModelException{
+	private String getInitializerSource(boolean brackets, boolean isArrayInitializer) throws JavaModelException {
 		if (brackets)
-			return '(' + getRawInitializerSource() + ')'; 
+			return '(' + getModifiedInitializerSource(isArrayInitializer) + ')';
 		else
-			return getRawInitializerSource(); 
+			return getModifiedInitializerSource(isArrayInitializer);
 	}
 	
+	private String getModifiedInitializerSource(boolean isArrayInitializer) throws JavaModelException {
+		if (isArrayInitializer)
+			return "new " + getTypeNameWithExtraArrayDimensions() + getRawInitializerSource(); //$NON-NLS-1$
+		else
+			return getRawInitializerSource();
+	}
+	
+	private String getTypeNameWithExtraArrayDimensions() throws JavaModelException {
+		if (fTempDeclaration instanceof SingleVariableDeclaration) {
+			return getRawTypeName( ((SingleVariableDeclaration) fTempDeclaration).getType());
+		} else if (fTempDeclaration instanceof VariableDeclarationFragment) {
+			String name= getRawTypeName( ((VariableDeclarationStatement) fTempDeclaration.getParent()).getType());
+			for (int i= 0; i < ((VariableDeclarationFragment) fTempDeclaration).getExtraDimensions(); i++)
+				name+= "[]"; //$NON-NLS-1$
+			return name;
+		}
+		Assert.isTrue(false, "Must be either SingleVariableDeclaration or VariableDeclarationFragment"); //$NON-NLS-1$
+		return null;
+	}
+	
+	private String getRawTypeName(Type selection) throws JavaModelException {
+		int start= selection.getStartPosition();
+		int end= start + selection.getLength();
+		return fCu.getSource().substring(start, end);
+	}
+
 	private String getRawInitializerSource() throws JavaModelException{
 		int start= fTempDeclaration.getInitializer().getStartPosition();
 		int length= fTempDeclaration.getInitializer().getLength();

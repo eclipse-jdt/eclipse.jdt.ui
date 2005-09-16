@@ -184,7 +184,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineTempRefactoring_inline;
 	public static String InlineTempRefactoring_inline_edit_name;
 	public static String InlineTempRefactoring_remove_edit_name;
-	public static String InlineTempRefactoring_Array_vars_initialized;
 	public static String InlineTempRefactoring_for_initializers;
 	
 	public static String ExtractTempRefactoring_name;
