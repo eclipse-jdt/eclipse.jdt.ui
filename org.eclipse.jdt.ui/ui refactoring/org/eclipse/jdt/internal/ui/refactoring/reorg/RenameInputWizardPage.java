@@ -88,9 +88,8 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 				
 		layouter.perform(label, text, 1);
 		
-		hook1(composite, layouter);
 		addOptionalUpdateReferencesCheckbox(composite, layouter);
-		hook2(composite, layouter);
+		addAdditionalOptions(composite, layouter);
 		addOptionalUpdateTextualMatches(composite, layouter);
 		addOptionalUpdateQualifiedNameComponent(composite, layouter, layout.marginWidth);
 		updateForcePreview();
@@ -99,10 +98,13 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), fHelpContextID);
 	}
 	
-	protected void hook1(Composite composite, RowLayouter layouter) {
-		// none by default
-	}
-	protected void hook2(Composite composite, RowLayouter layouter) {
+	/**
+	 * Clients can override this method to provide more UI elements. By default, does nothing
+	 * 
+	 * @param composite the parent composite
+	 * @param layouter the row layouter to use
+	 */
+	protected void addAdditionalOptions(Composite composite, RowLayouter layouter) {
 		// none by default
 	}
 

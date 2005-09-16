@@ -60,45 +60,7 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 			super(message, contextHelpId, true, initialValue);
 		}
 	
-		/* non java-doc
-		 * @see DialogPage#createControl(org.eclipse.swt.widgets.Composite)
-		 */
-		public void createControl(Composite parent) {
-			super.createControl(parent);
-////if (true) return;
-//			Composite parentComposite= (Composite)getControl();
-//			
-//			Composite composite= new Composite(parentComposite, SWT.NONE);
-//			composite.setLayout(new GridLayout());
-//			composite.setLayoutData(new GridData(GridData.FILL_BOTH));
-//		
-//			Label separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
-//			separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//	
-//			fRenameSubpackages= new Button(composite, SWT.CHECK);
-//			fRenameSubpackages.setText("Rename Subpackages");
-//			boolean subpackagesEnablement= false;
-//			try {
-//				subpackagesEnablement= getRenamePackageProcessor().canEnableRenameSubpackages();
-//			} catch (JavaModelException e) {
-//				JavaPlugin.log(e);
-//			}
-//			fRenameSubpackages.setEnabled(subpackagesEnablement);
-//			
-//			boolean subpackagesSelection= subpackagesEnablement && getBooleanSetting(RENAME_SUBPACKAGES, getRenamePackageProcessor().getRenameSubpackages());
-//			fRenameSubpackages.setSelection(subpackagesSelection);
-//			getRenamePackageProcessor().setRenameSubpackages(subpackagesSelection);
-//			fRenameSubpackages.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//			fRenameSubpackages.addSelectionListener(new SelectionAdapter(){
-//				public void widgetSelected(SelectionEvent e) {
-//					getRenamePackageProcessor().setRenameSubpackages(fRenameSubpackages.getSelection());
-//				}
-//			});
-//			
-//			Dialog.applyDialogFont(composite);
-		}
-		
-		protected void hook2(Composite composite, RowLayouter layouter) {
+		protected void addAdditionalOptions(Composite composite, RowLayouter layouter) {
 			fRenameSubpackages= new Button(composite, SWT.CHECK);
 			fRenameSubpackages.setText(RefactoringMessages.RenamePackageWizard_rename_subpackages);
 			boolean subpackagesEnablement= false;
@@ -125,56 +87,7 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 			layouter.perform(separator);
 		}
 		
-//		protected void addOptionalUpdateReferencesCheckbox(Composite parent, RowLayouter layouter) {
-//			Composite composite= new Composite(parent, SWT.NONE);
-//			GridData gd= new GridData(GridData.FILL_HORIZONTAL);
-//			gd.horizontalSpan= 2;
-//			composite.setLayoutData(gd);
-//			
-//			GridLayout layout= new GridLayout();
-//			layout.numColumns= 2;
-//			layout.verticalSpacing= 8;
-//			layout.horizontalSpacing= layout.marginWidth = layout.marginHeight= 0;
-//			composite.setLayout(layout);
-//			
-//			final IReferenceUpdating ref= (IReferenceUpdating)getRefactoring().getAdapter(IReferenceUpdating.class);
-//			String title= RefactoringMessages.RenameInputWizardPage_update_references; 
-//			boolean defaultValue= true; //bug 77901
-//			fUpdateReferences= new Button(composite, SWT.CHECK);
-//			fUpdateReferences.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//			fUpdateReferences.setText(title);
-//			fUpdateReferences.setSelection(defaultValue);
-//			
-//			ref.setUpdateReferences(fUpdateReferences.getSelection());
-//			fUpdateReferences.addSelectionListener(new SelectionAdapter(){
-//				public void widgetSelected(SelectionEvent e) {
-//					ref.setUpdateReferences(fUpdateReferences.getSelection());
-//				}
-//			});		
-//			
-//			fRenameSubpackages= new Button(composite, SWT.CHECK);
-//			fRenameSubpackages.setText("Rename Subpackages");
-//			boolean subpackagesEnablement= false;
-//			try {
-//				subpackagesEnablement= getRenamePackageProcessor().canEnableRenameSubpackages();
-//			} catch (JavaModelException e) {
-//				JavaPlugin.log(e);
-//			}
-//			fRenameSubpackages.setEnabled(subpackagesEnablement);
-//			
-//			boolean subpackagesSelection= subpackagesEnablement && getBooleanSetting(RENAME_SUBPACKAGES, getRenamePackageProcessor().getRenameSubpackages());
-//			fRenameSubpackages.setSelection(subpackagesSelection);
-//			getRenamePackageProcessor().setRenameSubpackages(subpackagesSelection);
-//			fRenameSubpackages.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-//			fRenameSubpackages.addSelectionListener(new SelectionAdapter(){
-//				public void widgetSelected(SelectionEvent e) {
-//					getRenamePackageProcessor().setRenameSubpackages(fRenameSubpackages.getSelection());
-//				}
-//			});
-//		}
-		
 		public void dispose() {
-		if (false)
 			if (saveSettings() && fRenameSubpackages.isEnabled())
 				saveBooleanSetting(RENAME_SUBPACKAGES, fRenameSubpackages);
 			super.dispose();
