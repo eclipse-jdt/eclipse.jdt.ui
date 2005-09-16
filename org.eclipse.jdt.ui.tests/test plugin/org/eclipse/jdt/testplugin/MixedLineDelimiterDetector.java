@@ -142,7 +142,7 @@ public class MixedLineDelimiterDetector  {
 
 		public void locateMatches(IProgressMonitor progressMonitor, CharSequence searchInput, ITextSearchResultCollector collector, IResourceProxy proxy) throws CoreException {
 			IFile file= (IFile)proxy.requestResource();
-			if (file.getContentDescription() == null || !FileBuffers.getTextFileBufferManager().isTextFileLocation(file.getFullPath(), false))
+			if (file.getContentDescription() == null || !FileBuffers.getTextFileBufferManager().isTextFileLocation(file.getFullPath(), true))
 				return;
 
 			try {
