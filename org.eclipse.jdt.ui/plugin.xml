@@ -1271,11 +1271,11 @@
             <keywordReference id="org.eclipse.jdt.ui.templates"/>
       </page>
       <page
-            name="%codeAssistPageName"
+            name="%contentAssistPageName"
             category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CodeAssistPreferencePage"
             id="org.eclipse.jdt.ui.preferences.CodeAssistPreferencePage">
-            <keywordReference id="org.eclipse.jdt.ui.codeassist"/>
+            <keywordReference id="org.eclipse.jdt.ui.contentassist"/>
       </page>
       <page
             name="Work in Progress"
@@ -1400,8 +1400,8 @@
             label="%preferenceKeywords.javaeditor"
             id="org.eclipse.jdt.ui.javaeditor"/>      
       <keyword
-            label="%preferenceKeywords.codeassist"
-            id="org.eclipse.jdt.ui.codeassist"/>   
+            label="%preferenceKeywords.contentassist"
+            id="org.eclipse.jdt.ui.contentassist"/>   
       <keyword
             label="%preferenceKeywords.hover"
             id="org.eclipse.jdt.ui.hover"/>

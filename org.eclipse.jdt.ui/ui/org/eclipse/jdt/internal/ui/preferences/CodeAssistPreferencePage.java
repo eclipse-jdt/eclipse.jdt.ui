@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
 
 /**
- * Code Assist preference page.
+ * Content Assist preference page.
  * <p>
  * Note: Must be public since it is referenced from plugin.xml
  * </p>

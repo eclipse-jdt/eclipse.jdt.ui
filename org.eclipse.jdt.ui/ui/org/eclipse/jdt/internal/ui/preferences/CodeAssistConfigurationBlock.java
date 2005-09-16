@@ -46,7 +46,7 @@ import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /**
- * Configures the code assist preferences.
+ * Configures the content assist preferences.
  * 
  * @since 3.0
  */
