@@ -44,6 +44,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.bindings.Binding;
 import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -358,9 +359,21 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 		private String getKeyboardShortcut(ParameterizedCommand command) {
 			final IBindingService bindingSvc= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
-			TriggerSequence[] triggers= bindingSvc.getActiveBindingsFor(command);
-			if (triggers.length > 0)
-				return triggers[0].format();
+			String activeLocale= bindingSvc.getLocale();
+			String activePlatform= bindingSvc.getPlatform();
+			final Binding[] bindings= bindingSvc.getBindings();
+			for (int i= 0; i < bindings.length; i++) {
+				Binding binding= bindings[i];
+				String locale= binding.getLocale();
+				String platform= binding.getPlatform();
+				if (command.equals(binding.getParameterizedCommand()) 
+						&& (locale == null || locale.equals(activeLocale)) 
+						&& (platform == null || platform.equals(activePlatform)))
+				{
+					TriggerSequence triggers= binding.getTriggerSequence();
+					return triggers.format();
+				}
+			}
 			return null;
 		}
 		
