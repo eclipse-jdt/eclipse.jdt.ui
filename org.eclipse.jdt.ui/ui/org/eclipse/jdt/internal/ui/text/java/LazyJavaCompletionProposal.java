@@ -236,17 +236,6 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 			if (delta > 0)
 				setReplacementLength(getReplacementLength() + delta);
 	
-			// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96059
-			// don't apply the proposal if for some reason we're not valid any longer
-			if (!validate(document, offset, null)) {
-				setCursorPosition(offset - getReplacementOffset());
-				if (trigger != '\0') {
-					document.replace(offset, 0, String.valueOf(trigger));
-					setCursorPosition(getCursorPosition() + 1);
-				}
-				return;
-			}
-			
 			boolean isSmartTrigger= isSmartTrigger(trigger);
 	
 			String replacement;
@@ -320,6 +309,21 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 		IDocument document= viewer.getDocument();
 		if (fTextViewer == null)
 			fTextViewer= viewer;
+		
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96059
+		// don't apply the proposal if for some reason we're not valid any longer
+		if (!validate(document, offset, null)) {
+			setCursorPosition(offset - getReplacementOffset());
+			if (trigger != '\0') {
+				try {
+					document.replace(offset, 0, String.valueOf(trigger));
+					setCursorPosition(getCursorPosition() + 1);
+				} catch (BadLocationException e) {
+					// ignore
+				}
+			}
+			return;
+		}
 
 		// don't eat if not in preferences, XOR with modifier key 1 (Ctrl)
 		// but: if there is a selection, replace it!
