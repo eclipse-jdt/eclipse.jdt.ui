@@ -39,7 +39,9 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -236,12 +238,18 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 	private String getLabel(ASTNode node) {
 		if (node instanceof AbstractTypeDeclaration) {
 			return ((AbstractTypeDeclaration)node).getName().getIdentifier();
-		} else {
-			ClassInstanceCreation creation= (ClassInstanceCreation)ASTNodes.getParent(node, ClassInstanceCreation.class);
-			return Messages.format(
-				RefactoringMessages.ExtractMethodInputPage_anonymous_type_label,  
-				ASTNodes.asString(creation.getType()));
+		} else if (node instanceof AnonymousClassDeclaration) {
+			if (node.getLocationInParent() == ClassInstanceCreation.ANONYMOUS_CLASS_DECLARATION_PROPERTY) {
+				ClassInstanceCreation creation= (ClassInstanceCreation)node.getParent();
+				return Messages.format(
+					RefactoringMessages.ExtractMethodInputPage_anonymous_type_label,  
+					ASTNodes.asString(creation.getType()));
+			} else if (node.getLocationInParent() == EnumConstantDeclaration.ANONYMOUS_CLASS_DECLARATION_PROPERTY) {
+				EnumConstantDeclaration decl= (EnumConstantDeclaration)node.getParent();
+				return decl.getName().getIdentifier();
+			}
 		}
+		return "UNKNOWN"; //$NON-NLS-1$
 	}
 
 	private Text createTextInputField(Composite parent, int style) {
