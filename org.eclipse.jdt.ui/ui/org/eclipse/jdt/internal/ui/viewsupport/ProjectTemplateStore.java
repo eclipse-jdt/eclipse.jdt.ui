@@ -20,8 +20,6 @@ import java.util.Set;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.persistence.TemplatePersistenceData;
@@ -49,7 +47,7 @@ public final class ProjectTemplateStore {
 		if (project == null) {
 			fProjectStore= null;
 		} else {
-			final IPreferenceStore projectSettings= new ScopedPreferenceStore(new ProjectScope(project), JavaUI.ID_PLUGIN);
+			final ScopedPreferenceStore projectSettings= new ScopedPreferenceStore(new ProjectScope(project), JavaUI.ID_PLUGIN);
 			fProjectStore= new TemplateStore(projectSettings, KEY) {
 				/*
 				 * Make sure we keep the id of added code templates - add removes
@@ -66,6 +64,7 @@ public final class ProjectTemplateStore {
 					writer.save(getTemplateData(false), output);
 					
 					projectSettings.setValue(KEY, output.toString());
+					projectSettings.save();
 				}
 			};
 		}
