@@ -288,6 +288,8 @@ public class CompositeRefactoring extends Refactoring implements IInitializableR
 				subMonitor.worked(1);
 			}
 
+			fWorkingCopies.clear();
+
 			subMonitor.done();
 			monitor.done();
 		}
@@ -353,6 +355,9 @@ public class CompositeRefactoring extends Refactoring implements IInitializableR
 	public final ICompilationUnit getWorkingCopy(final ICompilationUnit original) throws JavaModelException {
 		Assert.isNotNull(original);
 
+		if (fWorkingCopies.containsValue(original))
+			return original;
+
 		final ICompilationUnit cached= (ICompilationUnit) fWorkingCopies.get(original);
 		if (cached != null)
 			return cached;
@@ -366,7 +371,14 @@ public class CompositeRefactoring extends Refactoring implements IInitializableR
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.recording.IRecordableRefactoring#initialize(org.eclipse.ltk.core.refactoring.participants.RefactoringArguments)
 	 */
-	public final boolean initialize(RefactoringArguments arguments) {
+	public boolean initialize(final RefactoringArguments arguments) {
+		for (int index= 0; index < fRefactorings.length; index++) {
+			if (!fDisabledRefactorings.contains(fRefactorings[index]) && fRefactorings[index] instanceof IInitializableRefactoring) {
+				final IInitializableRefactoring refactoring= (IInitializableRefactoring) fRefactorings[index];
+				if (!refactoring.initialize(arguments))
+					return false;
+			}
+		}
 		return true;
 	}
 
