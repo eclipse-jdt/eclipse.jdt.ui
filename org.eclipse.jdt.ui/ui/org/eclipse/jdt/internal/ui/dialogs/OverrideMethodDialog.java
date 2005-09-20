@@ -335,13 +335,15 @@ public class OverrideMethodDialog extends SourceActionDialog {
 			}
 		}
 
-		ITypeBinding cloneable= getSuperType(binding, "java.lang.Cloneable"); //$NON-NLS-1$
-		if (cloneable != null) {
-			IMethodBinding[] methods= fUnit.getAST().resolveWellKnownType("java.lang.Object").getDeclaredMethods(); //$NON-NLS-1$
-			for (int index= 0; index < methods.length; index++) {
-				IMethodBinding method= methods[index];
-				if (method.getName().equals("clone") && method.getParameterTypes().length == 0) //$NON-NLS-1$
-					toImplement.add(method);
+		if (binding != null) {
+			ITypeBinding cloneable= getSuperType(binding, "java.lang.Cloneable"); //$NON-NLS-1$
+			if (cloneable != null) {
+				IMethodBinding[] methods= fUnit.getAST().resolveWellKnownType("java.lang.Object").getDeclaredMethods(); //$NON-NLS-1$
+				for (int index= 0; index < methods.length; index++) {
+					IMethodBinding method= methods[index];
+					if (method.getName().equals("clone") && method.getParameterTypes().length == 0) //$NON-NLS-1$
+						toImplement.add(method);
+				}
 			}
 		}
 
