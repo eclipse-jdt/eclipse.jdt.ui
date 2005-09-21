@@ -297,13 +297,45 @@ public class LocalCorrectionsSubProcessor {
 		if (buffer != null) {
 			int offset= problem.getOffset();
 			int length= problem.getLength();
-			while (offset > 0 && Strings.isIndentChar(buffer.getChar(offset - 1))) {
-				offset--;
-				length++;
+			
+			
+			
+			String replaceString= new String();
+			boolean hasMoreInComment= false;
+			
+			// look after the tag
+			int next= offset + length;
+			while (next < buffer.getLength()) {
+				char ch= buffer.getChar(next);
+				if (Strings.isIndentChar(ch)) {
+					next++; // remove all whitespace
+				} else if (Strings.isLineDelimiterChar(ch)) {
+					length= next - offset; 
+					break;
+				} else if (ch == '/') {
+					next++;
+					if (next == buffer.getLength() || buffer.getChar(next) != '/') {
+						replaceString= "//"; //$NON-NLS-1$
+					} else {
+						length= next - offset - 1;
+					}
+					hasMoreInComment= true;
+					break;
+				} else {
+					replaceString= "//"; //$NON-NLS-1$
+					hasMoreInComment= true;
+					break;
+				}
+			}
+			if (!hasMoreInComment) {
+				while (offset > 0 && Strings.isIndentChar(buffer.getChar(offset - 1))) {
+					offset--;
+					length++;
+				}
 			}
 			String name= CorrectionMessages.LocalCorrectionsSubProcessor_remove_nls_tag_description;
 			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(name, context.getCompilationUnit(), offset, length, new String(), 6);
+			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(name, context.getCompilationUnit(), offset, length, replaceString, 6);
 			proposal.setImage(image);
 			proposals.add(proposal);
 		}
