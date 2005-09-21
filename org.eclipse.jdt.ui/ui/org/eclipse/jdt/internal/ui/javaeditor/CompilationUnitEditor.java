@@ -44,7 +44,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.bindings.Binding;
 import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
@@ -328,10 +327,8 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				
 				if (nSeparateCategories > 0) {
 					ContentAssistant assistant= (ContentAssistant) contentAssistant;
-					String shortcut= getContentAssistKeyBinding();
-					String gesture= shortcut != null ? MessageFormat.format(JavaEditorMessages.CompilationUnitEditor_content_assist_toggle_affordance_press_gesture, new Object[] { shortcut }) : JavaEditorMessages.CompilationUnitEditor_content_assist_toggle_affordance_click_gesture;
+					final ParameterizedCommand command= getContentAssistCommand();
 					final MessageFormat format= new MessageFormat(JavaEditorMessages.CompilationUnitEditor_content_assist_toggle_affordance_update_message);
-					final Object[] args= { null, gesture, null }; 
 					assistant.setMessage(""); //$NON-NLS-1$
 					assistant.addCompletionListener(new ICompletionListener() {
 						public void computingProposals(ContentAssistEvent event) {
@@ -339,8 +336,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 							proc.setRepeatedInvocation(event.repetition);
 							String current= proc.getCurrentCategory();
 							String next= proc.getNextCategory();
-							args[0]= current;
-							args[2]= next;
+							String shortcut= getKeyboardShortcut(command);
+							String gesture= shortcut != null ? MessageFormat.format(JavaEditorMessages.CompilationUnitEditor_content_assist_toggle_affordance_press_gesture, new Object[] { shortcut }) : JavaEditorMessages.CompilationUnitEditor_content_assist_toggle_affordance_click_gesture;
+							Object[] args= { current, gesture, next };
 							String message= format.format(args);
 							event.assistant.setMessage(message);
 						}
@@ -349,31 +347,18 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			}
 		}
 
-		private String getContentAssistKeyBinding() {
+		private ParameterizedCommand getContentAssistCommand() {
 			final ICommandService commandSvc= (ICommandService) PlatformUI.getWorkbench().getAdapter(ICommandService.class);
 			final Command command= commandSvc.getCommand(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
 			ParameterizedCommand pCmd= new ParameterizedCommand(command, null);
-			String key= getKeyboardShortcut(pCmd);
-			return key;
+			return pCmd;
 		}
 
 		private String getKeyboardShortcut(ParameterizedCommand command) {
 			final IBindingService bindingSvc= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
-			String activeLocale= bindingSvc.getLocale();
-			String activePlatform= bindingSvc.getPlatform();
-			final Binding[] bindings= bindingSvc.getBindings();
-			for (int i= 0; i < bindings.length; i++) {
-				Binding binding= bindings[i];
-				String locale= binding.getLocale();
-				String platform= binding.getPlatform();
-				if (command.equals(binding.getParameterizedCommand()) 
-						&& (locale == null || locale.equals(activeLocale)) 
-						&& (platform == null || platform.equals(activePlatform)))
-				{
-					TriggerSequence triggers= binding.getTriggerSequence();
-					return triggers.format();
-				}
-			}
+			TriggerSequence[] triggers= bindingSvc.getActiveBindingsFor(command);
+			if (triggers.length > 0)
+				return triggers[0].format();
 			return null;
 		}
 		
