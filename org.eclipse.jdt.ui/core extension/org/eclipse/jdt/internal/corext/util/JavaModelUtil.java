@@ -676,18 +676,22 @@ public final class JavaModelUtil {
 			String[] currParamTypes= getParameterTypes(method);
 			String[] otherParamTypes= getParameterTypes(other);
 			for (int i= 0; i < currParamTypes.length; i++) {
-				String p1= currParamTypes[i];
-				String p2= otherParamTypes[i];
-				if (p1 == null) {
-					return p2 == null || PrimitiveType.toCode(p2) == null;
-				} else if (p2 == null) {
-					return p1 == null || PrimitiveType.toCode(p1) == null;
-				} else {
-					return p1.equals(p2);
+				if (!isCompatibleParameterType(currParamTypes[i], otherParamTypes[i])) {
+					return false;
 				}
 			}
 		}
 		return true;
+	}
+
+	private static boolean isCompatibleParameterType(String p1, String p2) {
+		if (p1 == null) {
+			return p2 == null || PrimitiveType.toCode(p2) == null;
+		} else if (p2 == null) {
+			return p1 == null || PrimitiveType.toCode(p1) == null;
+		} else {
+			return p1.equals(p2);
+		}
 	}
 		
 	private static String[] getParameterTypes(IMethod curr) throws JavaModelException {
