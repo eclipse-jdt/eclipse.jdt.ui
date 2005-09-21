@@ -22,12 +22,9 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
@@ -63,15 +60,16 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 		protected void addAdditionalOptions(Composite composite, RowLayouter layouter) {
 			fRenameSubpackages= new Button(composite, SWT.CHECK);
 			fRenameSubpackages.setText(RefactoringMessages.RenamePackageWizard_rename_subpackages);
+			/* TODO: ma: Commented out for M2: Disabled control is confusing. Markus, please review
 			boolean subpackagesEnablement= false;
 			try {
 				subpackagesEnablement= getRenamePackageProcessor().canEnableRenameSubpackages();
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}
-			fRenameSubpackages.setEnabled(subpackagesEnablement);
+			fRenameSubpackages.setEnabled(subpackagesEnablement);*/
 			
-			boolean subpackagesSelection= subpackagesEnablement && getBooleanSetting(RENAME_SUBPACKAGES, getRenamePackageProcessor().getRenameSubpackages());
+			boolean subpackagesSelection= /*subpackagesEnablement &&*/ getBooleanSetting(RENAME_SUBPACKAGES, getRenamePackageProcessor().getRenameSubpackages());
 			fRenameSubpackages.setSelection(subpackagesSelection);
 			getRenamePackageProcessor().setRenameSubpackages(subpackagesSelection);
 			fRenameSubpackages.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
