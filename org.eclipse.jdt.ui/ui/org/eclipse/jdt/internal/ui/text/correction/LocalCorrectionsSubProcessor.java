@@ -921,7 +921,7 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 		
-		IBinding binding= ((SimpleName) assignedNode).resolveBinding();
+		IBinding binding= (assignedNode instanceof SimpleName) ? ((SimpleName) assignedNode).resolveBinding() : ((SimpleName) assignExpression).resolveBinding();
 		if (!(binding instanceof IVariableBinding)) {
 			return;
 		}
@@ -934,14 +934,16 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 		
-		if (assignedNode instanceof SimpleName) {
-			String label= CorrectionMessages.LocalCorrectionsSubProcessor_qualify_left_hand_side_description;
-			proposals.add(createNoSideEffectProposal(context, (SimpleName) assignedNode, fieldBinding, label, 6));
-		}
-		if (assignExpression instanceof SimpleName) {
-			String label= CorrectionMessages.LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_qualify_right_hand_side_description;
-			proposals.add(createNoSideEffectProposal(context, (SimpleName) assignExpression, fieldBinding, label, 5));
-		}
+		if (binding != fieldBinding) {
+			if (assignedNode instanceof SimpleName) {
+				String label= CorrectionMessages.LocalCorrectionsSubProcessor_qualify_left_hand_side_description;
+				proposals.add(createNoSideEffectProposal(context, (SimpleName) assignedNode, fieldBinding, label, 6));
+			}
+			if (assignExpression instanceof SimpleName) {
+				String label= CorrectionMessages.LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_qualify_right_hand_side_description;
+				proposals.add(createNoSideEffectProposal(context, (SimpleName) assignExpression, fieldBinding, label, 5));
+			}
+		}	
 		
 		if (binding == fieldBinding && ASTResolving.findParentBodyDeclaration(selectedNode) instanceof MethodDeclaration) {
 			SimpleName simpleName= (SimpleName) ((assignedNode instanceof SimpleName) ? assignedNode : assignExpression);
