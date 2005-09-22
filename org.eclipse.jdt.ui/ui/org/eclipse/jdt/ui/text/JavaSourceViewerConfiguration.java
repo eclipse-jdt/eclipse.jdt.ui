@@ -392,19 +392,19 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 			assistant.setRestoreCompletionProposalSize(getSettings("completion_proposal_size")); //$NON-NLS-1$
 
-			IContentAssistProcessor javaProcessor= new JavaCompletionProcessor(getEditor(), IDocument.DEFAULT_CONTENT_TYPE);
+			IContentAssistProcessor javaProcessor= new JavaCompletionProcessor(getEditor(), assistant, IDocument.DEFAULT_CONTENT_TYPE);
 			assistant.setContentAssistProcessor(javaProcessor, IDocument.DEFAULT_CONTENT_TYPE);
 
-			ContentAssistProcessor singleLineProcessor= new JavaCompletionProcessor(getEditor(), IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
+			ContentAssistProcessor singleLineProcessor= new JavaCompletionProcessor(getEditor(), assistant, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 			assistant.setContentAssistProcessor(singleLineProcessor, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT);
 
-			ContentAssistProcessor stringProcessor= new JavaCompletionProcessor(getEditor(), IJavaPartitions.JAVA_STRING);
+			ContentAssistProcessor stringProcessor= new JavaCompletionProcessor(getEditor(), assistant, IJavaPartitions.JAVA_STRING);
 			assistant.setContentAssistProcessor(stringProcessor, IJavaPartitions.JAVA_STRING);
 			
-			ContentAssistProcessor multiLineProcessor= new JavaCompletionProcessor(getEditor(), IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
+			ContentAssistProcessor multiLineProcessor= new JavaCompletionProcessor(getEditor(), assistant, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 			assistant.setContentAssistProcessor(multiLineProcessor, IJavaPartitions.JAVA_MULTI_LINE_COMMENT);
 
-			ContentAssistProcessor javadocProcessor= new JavadocCompletionProcessor(getEditor());
+			ContentAssistProcessor javadocProcessor= new JavadocCompletionProcessor(getEditor(), assistant);
 			assistant.setContentAssistProcessor(javadocProcessor, IJavaPartitions.JAVA_DOC);
 
 			ContentAssistPreference.configure(assistant, fPreferenceStore);

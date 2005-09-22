@@ -10,41 +10,51 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.commands.Command;
+import org.eclipse.core.commands.ParameterizedCommand;
+
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.jface.bindings.TriggerSequence;
+
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.ContentAssistEvent;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.ICompletionListener;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.commands.ICommandService;
+import org.eclipse.ui.keys.IBindingService;
+import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+
 import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * A content assist processor that aggregates the proposals of the
- * {@link org.eclipse.jface.text.contentassist.ICompletionProposalComputer}s
- * contributed via the
- * <code>org.eclipse.jdt.ui.javaCompletionProposalComputer</code>
- * extension point.
+ * {@link org.eclipse.jface.text.contentassist.ICompletionProposalComputer}s contributed via the
+ * <code>org.eclipse.jdt.ui.javaCompletionProposalComputer</code> extension point.
  * <p>
  * Subclasses may extend:
  * <ul>
- * <li><code>createContext</code> to modify the context object passed
- * to the computers</li>
- * <li><code>createProgressMonitor</code> to change the way progress
- * is reported</li>
+ * <li><code>createContext</code> to modify the context object passed to the computers</li>
+ * <li><code>createProgressMonitor</code> to change the way progress is reported</li>
  * <li><code>filterAndSort</code> to add sorting and filtering</li>
- * <li><code>getContextInformationValidator</code> to add context
- * validation (needed if any contexts are provided)</li>
+ * <li><code>getContextInformationValidator</code> to add context validation (needed if any
+ * contexts are provided)</li>
  * <li><code>getErrorMessage</code> to change error reporting</li>
  * </ul>
  * </p>
@@ -66,13 +76,58 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	
 	private final List fCategories;
 	private final String fPartition;
-	private char[] fCompletionAutoActivationCharacters;
-	private int fRepetition;
+	private final ContentAssistant fAssistant;
 	
-	public ContentAssistProcessor(String partition) {
+	private char[] fCompletionAutoActivationCharacters;
+	
+	/* cycling stuff */
+	private int fRepetition= -1;
+	private List/*<List<CompletionProposalCategory>>*/ fCategoryIteration= null;
+	private String fIterationGesture= null;
+	
+	public ContentAssistProcessor(ContentAssistant assistant, String partition) {
 		Assert.isNotNull(partition);
+		Assert.isNotNull(assistant);
 		fPartition= partition;
 		fCategories= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
+		fAssistant= assistant;
+		fAssistant.addCompletionListener(new ICompletionListener() {
+			
+			/*
+			 * @see org.eclipse.jface.text.contentassist.ICompletionListener#assistSessionStarted(org.eclipse.jface.text.contentassist.ContentAssistEvent)
+			 */
+			public void assistSessionStarted(ContentAssistEvent event) {
+				if (event.processor != ContentAssistProcessor.this)
+					return;
+				
+				fCategoryIteration= getCategoryIteration();
+				fRepetition= 0;
+				fIterationGesture= getIterationGesture();
+				if (fCategoryIteration.size() == 1) {
+					event.assistant.setCyclingMode(false);
+					event.assistant.setShowEmptyList(false);
+				} else {
+					event.assistant.setCyclingMode(true);
+					event.assistant.setMessage(createIterationMessage());
+					event.assistant.setShowEmptyList(true);
+				}
+			}
+			
+			/*
+			 * @see org.eclipse.jface.text.contentassist.ICompletionListener#assistSessionEnded(org.eclipse.jface.text.contentassist.ContentAssistEvent)
+			 */
+			public void assistSessionEnded(ContentAssistEvent event) {
+				if (event.processor != ContentAssistProcessor.this)
+					return;
+				
+				fCategoryIteration= null;
+				fRepetition= -1;
+				fIterationGesture= null;
+				event.assistant.setShowEmptyList(false);
+				event.assistant.setCyclingMode(false);
+			}
+			
+		});
 	}
 
 	/*
@@ -105,25 +160,6 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		}
 		
 		return proposals;
-	}
-
-	private List getCategories() {
-		List steps= getSeparateCategories();
-		int selection= fRepetition % (steps.size() + 1);
-		
-		if (selection == 0) {
-			// default mix - enable all included computers
-			List included= new ArrayList();
-			for (Iterator it= fCategories.iterator(); it.hasNext();) {
-				CompletionProposalCategory category= (CompletionProposalCategory) it.next();
-				if (category.isIncluded())
-					included.add(category);
-			}
-			return included;
-		}
-		
-		// selective - enable the nth enabled category
-		return Collections.singletonList(steps.get(selection - 1));
 	}
 
 	/**
@@ -252,43 +288,90 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		return new TextContentAssistInvocationContext(viewer, offset);
 	}
 
-	public void setRepeatedInvocation(int repetition) {
-		fRepetition= repetition;
-	}
-	
-	public String getCurrentCategory() {
-		return getCategoryName(fRepetition);
-	}
-	
-	public String getNextCategory() {
-		return getCategoryName(fRepetition + 1);
+	private List getCategories() {
+		if (fCategoryIteration == null)
+			return fCategories;
+		
+		int iteration= fRepetition % fCategoryIteration.size();
+		fAssistant.setMessage(createIterationMessage());
+		fAssistant.setEmptyMessage(createEmptyMessage());
+		fRepetition++;
+		
+		return (List) fCategoryIteration.get(iteration);
 	}
 
-	private String getCategoryName(int index) {
-		List steps= getSeparateCategories();
-		int selection= index % (steps.size() + 1);
-		if (selection == 0)
-			return JavaTextMessages.ContentAssistProcessor_defaultProposalCategory;
-		return toString((CompletionProposalCategory) steps.get(selection - 1));
+	private List getCategoryIteration() {
+		List sequence= new ArrayList();
+		sequence.add(getDefaultCategories());
+		for (Iterator it= getSeparateCategories().iterator(); it.hasNext();) {
+			CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
+			sequence.add(Collections.singletonList(cat));
+		}
+		return sequence;
 	}
-	
-	private String toString(CompletionProposalCategory category) {
-		return category.getName().replaceAll("&", ""); //$NON-NLS-1$ //$NON-NLS-2$;
+
+	private List getDefaultCategories() {
+		// default mix - enable all included computers
+		List included= new ArrayList();
+		for (Iterator it= fCategories.iterator(); it.hasNext();) {
+			CompletionProposalCategory category= (CompletionProposalCategory) it.next();
+			if (category.isIncluded() && category.hasComputers(fPartition))
+				included.add(category);
+		}
+		return included;
 	}
 
 	private List getSeparateCategories() {
 		ArrayList sorted= new ArrayList();
 		for (Iterator it= fCategories.iterator(); it.hasNext();) {
 			CompletionProposalCategory category= (CompletionProposalCategory) it.next();
-			if (isSeparateCategory(category))
+			if (category.isSeparateCommand() && category.hasComputers(fPartition))
 				sorted.add(category);
 		}
 		Collections.sort(sorted, ORDER_COMPARATOR);
 		return sorted;
 	}
-
-	private boolean isSeparateCategory(CompletionProposalCategory category) {
-		return category.isSeparateCommand() && category.hasComputers();
+	
+	private String createEmptyMessage() {
+		final MessageFormat format= new MessageFormat(JavaTextMessages.ContentAssistProcessor_empty_message);
+		Object[] args= {getCategoryLabel(fRepetition)};
+		String message= format.format(args);
+		return message;
+	}
+	
+	private String createIterationMessage() {
+		final MessageFormat format= new MessageFormat(JavaTextMessages.ContentAssistProcessor_toggle_affordance_update_message);
+		String current= getCategoryLabel(fRepetition);
+		String next= getCategoryLabel(fRepetition + 1);
+		Object[] args= { current, fIterationGesture, next };
+		String message= format.format(args);
+		return message;
+	}
+	
+	private String getCategoryLabel(int repetition) {
+		int iteration= repetition % fCategoryIteration.size();
+		if (iteration == 0)
+			return JavaTextMessages.ContentAssistProcessor_defaultProposalCategory;
+		return toString((CompletionProposalCategory) ((List) fCategoryIteration.get(iteration)).get(0));
+	}
+	
+	private String toString(CompletionProposalCategory category) {
+		return category.getName().replaceAll("&", ""); //$NON-NLS-1$ //$NON-NLS-2$;
 	}
 
+	private String getIterationGesture() {
+		final IBindingService bindingSvc= (IBindingService) PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+		TriggerSequence[] triggers= bindingSvc.getActiveBindingsFor(getContentAssistCommand());
+		return triggers.length > 0 ? 
+				  MessageFormat.format(JavaTextMessages.ContentAssistProcessor_toggle_affordance_press_gesture, new Object[] { triggers[0].format() })
+				: JavaTextMessages.ContentAssistProcessor_toggle_affordance_click_gesture;
+	}
+
+	private ParameterizedCommand getContentAssistCommand() {
+		final ICommandService commandSvc= (ICommandService) PlatformUI.getWorkbench().getAdapter(ICommandService.class);
+		final Command command= commandSvc.getCommand(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
+		ParameterizedCommand pCmd= new ParameterizedCommand(command, null);
+		return pCmd;
+	}
+	
 }

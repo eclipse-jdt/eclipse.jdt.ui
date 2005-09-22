@@ -22,6 +22,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
@@ -55,8 +56,8 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	protected final IEditorPart fEditor;
 	
 
-	public JavaCompletionProcessor(IEditorPart editor, String partition) {
-		super(partition);
+	public JavaCompletionProcessor(IEditorPart editor, ContentAssistant assistant, String partition) {
+		super(assistant, partition);
 		fEditor= editor;
 		fAlphaComparator= new CompletionProposalComparator();
 		fAlphaComparator.setOrderAlphabetically(true);

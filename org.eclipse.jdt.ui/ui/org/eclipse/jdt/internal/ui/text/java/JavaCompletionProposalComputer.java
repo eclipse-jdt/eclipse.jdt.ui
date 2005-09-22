@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
  * 
  * @since 3.2
  */
-public final class JavaCompletionProposalComputer implements ICompletionProposalComputer {
+public class JavaCompletionProposalComputer implements ICompletionProposalComputer {
 
 	private static final class ContextInformationWrapper implements IContextInformation, IContextInformationExtension {
 
@@ -199,13 +199,7 @@ public final class JavaCompletionProposalComputer implements ICompletionProposal
 		
 		ITextViewer viewer= context.getViewer();
 		
-		CompletionProposalCollector collector;
-		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES)) {
-			collector= new ExperimentalResultCollector(unit);
-		} else {
-			collector= new CompletionProposalCollector(unit);
-		}
-		
+		CompletionProposalCollector collector= createCollector(unit);
 		context.setCollector(collector);
 
 		try {
@@ -235,5 +229,15 @@ public final class JavaCompletionProposalComputer implements ICompletionProposal
 		
 		List proposals= new ArrayList(Arrays.asList(javaProposals));
 		return proposals;
+	}
+
+	/**
+	 * Creates the collector used to get proposals from core.
+	 */
+	protected CompletionProposalCollector createCollector(ICompilationUnit unit) {
+		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES))
+			return new ExperimentalResultCollector(unit);
+		else
+			return new CompletionProposalCollector(unit);
 	}
 }

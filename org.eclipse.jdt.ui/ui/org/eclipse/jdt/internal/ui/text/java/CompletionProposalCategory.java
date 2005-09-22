@@ -197,6 +197,24 @@ public final class CompletionProposalCategory {
 	}
 	
 	/**
+	 * Returns <code>true</code> if the category contains any computers in the given partition, <code>false</code>
+	 * otherwise.
+	 * 
+	 * @param partition the partition
+	 * @return <code>true</code> if the category contains any computers, <code>false</code>
+	 *         otherwise
+	 */
+	public boolean hasComputers(String partition) {
+		List descriptors= fRegistry.getProposalComputerDescriptors(partition);
+		for (Iterator it= descriptors.iterator(); it.hasNext();) {
+			CompletionProposalComputerDescriptor desc= (CompletionProposalComputerDescriptor) it.next();
+			if (desc.getCategory() == this)
+				return true;
+		}
+		return false;
+	}
+	
+	/**
 	 * @return sortOrder
 	 */
 	public int getSortOrder() {

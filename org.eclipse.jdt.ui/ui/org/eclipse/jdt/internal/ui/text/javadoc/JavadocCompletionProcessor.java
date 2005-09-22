@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
 
 
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
@@ -30,8 +31,8 @@ public class JavadocCompletionProcessor extends JavaCompletionProcessor {
 
 	private int fSubProcessorFlags;
 
-	public JavadocCompletionProcessor(IEditorPart editor) {
-		super(editor, IJavaPartitions.JAVA_DOC);
+	public JavadocCompletionProcessor(IEditorPart editor, ContentAssistant assistant) {
+		super(editor, assistant, IJavaPartitions.JAVA_DOC);
 		fSubProcessorFlags= 0;
 	}
 

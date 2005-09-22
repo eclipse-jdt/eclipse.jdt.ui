@@ -177,7 +177,14 @@
 	<!-- java and javadoc category -->
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
-		id="javaProposalCategory"
+		id="javaTypeProposalCategory"
+		name="%JavaTypesCategory">
+		<proposalCategory
+			icon="$nl$/icons/full/obj16/types_assist.png"/>
+	</extension>
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="javaNoTypeProposalCategory"
 		name="%JavaProposalCategory">
 		<proposalCategory
 			icon="$nl$/icons/full/obj16/java_assist.png"/>
@@ -213,10 +220,19 @@
 	<!-- java completions -->   
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
-		id="JavaCompletionProposalComputer">
+		id="JavaTypeCompletionProposalComputer">
 		<javaCompletionProposalComputer 
-			class="org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer"
-			categoryId="org.eclipse.jdt.ui.javaProposalCategory">
+			class="org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposalComputer"
+			categoryId="org.eclipse.jdt.ui.javaTypeProposalCategory">
+			<partition type="__dftl_partition_content_type"/>
+		</javaCompletionProposalComputer>
+	</extension>
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="JavaNoTypeCompletionProposalComputer">
+		<javaCompletionProposalComputer 
+			class="org.eclipse.jdt.internal.ui.text.java.JavaNoTypeCompletionProposalComputer"
+			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
 			<partition type="__dftl_partition_content_type"/>
 		</javaCompletionProposalComputer>
 	</extension>
@@ -226,7 +242,7 @@
 		id="JavaCompletionProposalComputer">
 		<javaCompletionProposalComputer 
 			class="org.eclipse.jdt.internal.ui.text.javadoc.JavadocCompletionProposalComputer"
-			categoryId="org.eclipse.jdt.ui.javaProposalCategory">
+			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
 			<partition type="__java_javadoc"/>
 		</javaCompletionProposalComputer>
 	</extension>
@@ -255,13 +271,18 @@
 			<partition type="__java_javadoc"/>
 		</javaCompletionProposalComputer>
 	</extension>
-	<!-- hippie word completions (in all partitions) -->   
+	<!-- hippie word completions -->   
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="HippieCompletionProposalComputer">
 		<javaCompletionProposalComputer
 			class="org.eclipse.ui.texteditor.HippieProposalComputer"
-			categoryId="org.eclipse.jdt.ui.textProposalCategory"/>
+			categoryId="org.eclipse.jdt.ui.textProposalCategory">
+			<partition type="__java_singleline_comment"/>
+			<partition type="__java_multiline_comment"/>
+			<partition type="__java_string"/>
+			<partition type="__java_javadoc"/>
+		</javaCompletionProposalComputer>
 	</extension>
 	
 	<!-- the parameterized content assist action and keybindings for our contributed computers -->

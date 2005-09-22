@@ -401,6 +401,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	 * wildcard types or the the bound of type variables with a single bound.
 	 *
 	 * @param binding the type argument binding
+	 * @param parameter the type parameter of the expected type
 	 * @return a type argument proposal for <code>binding</code>
 	 * @throws JavaModelException 
 	 */
@@ -624,7 +625,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	}
 
 	/**
-	 * Returns the java mode type of this type proposal.
+	 * Returns the java model type of this type proposal.
 	 *
 	 * @return the java mode type of this type proposal
 	 * @throws JavaModelException

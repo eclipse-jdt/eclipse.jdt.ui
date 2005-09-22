@@ -10,30 +10,25 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import java.util.Collection;
-import java.util.Iterator;
-
 import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
-
-import org.eclipse.jface.action.IAction;
-
-import org.eclipse.jface.text.ITextOperationTarget;
-import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.SpecificContentAssistExecutor;
 
 /**
  * 
  * @since 3.2
  */
 public final class JavaContentAssistHandler extends AbstractHandler {
+	private final SpecificContentAssistExecutor fExecutor= new SpecificContentAssistExecutor(CompletionProposalComputerRegistry.getDefault());
 	
 	public JavaContentAssistHandler() {
 	}
@@ -42,49 +37,26 @@ public final class JavaContentAssistHandler extends AbstractHandler {
 	 * @see org.eclipse.core.commands.IHandler#execute(org.eclipse.core.commands.ExecutionEvent)
 	 */
 	public Object execute(ExecutionEvent event) throws ExecutionException {
-		final JavaEditor editor= getActiveJavaEditor();
+		ITextEditor editor= getActiveEditor();
 		if (editor == null)
 			return null;
 		
-		String computerId= event.getParameter("org.eclipse.jdt.ui.specific_content_assist.category_id"); //$NON-NLS-1$
-		if (computerId == null)
+		String categoryId= event.getParameter("org.eclipse.jdt.ui.specific_content_assist.category_id"); //$NON-NLS-1$
+		if (categoryId == null)
 			return null;
 		
-		IAction action= editor.getAction("ContentAssistProposal"); //$NON-NLS-1$
-		if (action == null || !action.isEnabled())
-			return null;
-		
-		Collection categories= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
-		boolean[] oldstates= new boolean[categories.size()];
-		int i= 0;
-		for (Iterator it1= categories.iterator(); it1.hasNext();) {
-			CompletionProposalCategory cat= (CompletionProposalCategory) it1.next();
-			oldstates[i++]= cat.isIncluded();
-			cat.setIncluded(cat.getId().equals(computerId));
-		}
-		
-		try {
-			ITextOperationTarget target= editor.getViewer().getTextOperationTarget();
-			if (target.canDoOperation(ISourceViewer.CONTENTASSIST_PROPOSALS))
-				target.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
-		} finally {
-			i= 0;
-			for (Iterator it1= categories.iterator(); it1.hasNext();) {
-				CompletionProposalCategory cat= (CompletionProposalCategory) it1.next();
-				cat.setIncluded(oldstates[i++]);
-			}
-		}
-		
+		fExecutor.invokeContentAssist(editor, categoryId);
+
 		return null;
 	}
 
-	private JavaEditor getActiveJavaEditor() {
+	private ITextEditor getActiveEditor() {
 		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (window != null) {
 			IWorkbenchPage page= window.getActivePage();
 			if (page != null) {
 				IEditorPart editor= page.getActiveEditor();
-				if (editor instanceof JavaEditor)
+				if (editor instanceof ITextEditor)
 					return (JavaEditor) editor;
 			}
 		}

@@ -1,0 +1,44 @@
+/*******************************************************************************
+ * Copyright (c) 2005 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.internal.ui.text.java;
+
+import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.ICompilationUnit;
+
+import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
+
+/**
+ * 
+ * @since 3.2
+ */
+public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalComputer {
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer#createCollector(org.eclipse.jdt.core.ICompilationUnit)
+	 */
+	protected CompletionProposalCollector createCollector(ICompilationUnit unit) {
+		CompletionProposalCollector collector= super.createCollector(unit);
+		collector.setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, true);
+		collector.setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, true);
+		collector.setIgnored(CompletionProposal.FIELD_REF, true);
+		collector.setIgnored(CompletionProposal.KEYWORD, true);
+		collector.setIgnored(CompletionProposal.LABEL_REF, true);
+		collector.setIgnored(CompletionProposal.LOCAL_VARIABLE_REF, true);
+		collector.setIgnored(CompletionProposal.METHOD_DECLARATION, true);
+		collector.setIgnored(CompletionProposal.METHOD_NAME_REFERENCE, true);
+		collector.setIgnored(CompletionProposal.METHOD_REF, true);
+		collector.setIgnored(CompletionProposal.PACKAGE_REF, true);
+		collector.setIgnored(CompletionProposal.POTENTIAL_METHOD_DECLARATION, true);
+		collector.setIgnored(CompletionProposal.VARIABLE_DECLARATION, true);
+		
+		collector.setIgnored(CompletionProposal.TYPE_REF, false);
+		return collector;
+	}
+}

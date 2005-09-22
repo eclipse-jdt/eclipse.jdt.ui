@@ -86,7 +86,7 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 			Collection descriptors= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
 			for (Iterator it= descriptors.iterator(); it.hasNext();) {
 				final CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
-				if (cat.isSeparateCommand() && cat.hasComputers()) {
+				if (cat.hasComputers()) {
 					IAction caAction= new SpecificContentAssistAction(cat);
 					caMenu.add(caAction);
 				}

@@ -10,25 +10,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor;
 
-import java.util.Collection;
-import java.util.Iterator;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
-
-import org.eclipse.jface.text.ITextOperationTarget;
-import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 
 final class SpecificContentAssistAction extends Action {
 	private final CompletionProposalCategory fCategory;
+	private final SpecificContentAssistExecutor fExecutor= new SpecificContentAssistExecutor(CompletionProposalComputerRegistry.getDefault());
 
 	public SpecificContentAssistAction(CompletionProposalCategory category) {
 		fCategory= category;
@@ -41,47 +37,22 @@ final class SpecificContentAssistAction extends Action {
 	 * @see org.eclipse.jface.action.Action#run()
 	 */
 	public void run() {
-		final JavaEditor editor= getActiveJavaEditor();
+		ITextEditor editor= getActiveEditor();
 		if (editor == null)
 			return;
 		
-		String computerId= fCategory.getId();
-		
-		IAction action= editor.getAction("ContentAssistProposal"); //$NON-NLS-1$
-		if (action == null || !action.isEnabled())
-			return;
-		
-		Collection categories= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
-		boolean[] oldstates= new boolean[categories.size()];
-		int i= 0;
-		for (Iterator it1= categories.iterator(); it1.hasNext();) {
-			CompletionProposalCategory cat= (CompletionProposalCategory) it1.next();
-			oldstates[i++]= cat.isIncluded();
-			cat.setIncluded(cat.getId().equals(computerId));
-		}
-		
-		try {
-			ITextOperationTarget target= editor.getViewer().getTextOperationTarget();
-			if (target.canDoOperation(ISourceViewer.CONTENTASSIST_PROPOSALS))
-				target.doOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
-		} finally {
-			i= 0;
-			for (Iterator it1= categories.iterator(); it1.hasNext();) {
-				CompletionProposalCategory cat= (CompletionProposalCategory) it1.next();
-				cat.setIncluded(oldstates[i++]);
-			}
-		}
+		fExecutor.invokeContentAssist(editor, fCategory.getId());
 		
 		return;
 	}
 
-	private JavaEditor getActiveJavaEditor() {
+	private ITextEditor getActiveEditor() {
 		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
 		if (window != null) {
 			IWorkbenchPage page= window.getActivePage();
 			if (page != null) {
 				IEditorPart editor= page.getActiveEditor();
-				if (editor instanceof JavaEditor)
+				if (editor instanceof ITextEditor)
 					return (JavaEditor) editor;
 			}
 		}

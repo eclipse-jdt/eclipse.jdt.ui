@@ -140,7 +140,4 @@ final class JavaEditorMessages extends NLS {
 	}
 
 	public static String BasicEditorActionContributor_specific_content_assist_menu;
-	public static String CompilationUnitEditor_content_assist_toggle_affordance_press_gesture;
-	public static String CompilationUnitEditor_content_assist_toggle_affordance_click_gesture;
-	public static String CompilationUnitEditor_content_assist_toggle_affordance_update_message;
 }
