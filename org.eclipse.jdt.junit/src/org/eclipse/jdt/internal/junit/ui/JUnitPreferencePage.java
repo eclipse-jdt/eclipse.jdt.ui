@@ -696,7 +696,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	}
 	
 	public boolean performOk() {
-		IPreferenceStore store= getPreferenceStore();
 		fStackFilterContentProvider.saveFilters();
 		return true;
 	}
@@ -707,7 +706,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	}
 
 	private void setDefaultValues() {
-		IPreferenceStore store= getPreferenceStore();
 		fStackFilterContentProvider.setDefaults();
 	}
 
