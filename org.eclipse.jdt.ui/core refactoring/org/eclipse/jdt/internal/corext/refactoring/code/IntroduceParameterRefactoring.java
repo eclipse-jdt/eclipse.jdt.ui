@@ -418,14 +418,6 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		return fChangeSignatureRefactoring.checkSignature();
 	}
 	
-	private RefactoringStatus checkExcludedParameterNames() {
-//		for (int i= 0; i < fExcludedParameterNames.length; i++) {
-//			if (fParameter.getNewName().equals(fExcludedParameterNames[i]))
-//			return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.getString("IntroduceParameterRefactoring.duplicate_name")); //$NON-NLS-1$
-//		}
-		return new RefactoringStatus();
-	}
-	
 //--- checkInput
 	
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {

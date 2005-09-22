@@ -188,10 +188,6 @@ public class ParametricStructureComputer {
 //			return null;
 	}
 	
-	private boolean isArrayAccess(ConstraintVariable2 v) {
-		return false; //TODO: the COnstraintVariable should know whether this is an array access => store on creation
-	}
-
 	private boolean mightBeParametric(TType type) {
 		return isParametricType(type);//TODO check this is the only case?
 	}
