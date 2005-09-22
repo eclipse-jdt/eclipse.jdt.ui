@@ -40,6 +40,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
@@ -57,6 +58,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -109,6 +111,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 	private static final String TRACKED_POSITION_PROPERTY= "MoveStaticMembersProcessor.trackedPosition"; //$NON-NLS-1$
 	private IMember[] fMembersToMove;
 	private IType fDestinationType;
+	private ITypeHierarchy fDestinationTypeHierarchy;
 	private String fDestinationTypeName;
 	
 	private CodeGenerationSettings fPreferences;
@@ -308,14 +311,6 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 			if (result.hasFatalError())
 				return result;
 			
-			result.merge(checkAccessedMembersAvailability(new SubProgressMonitor(pm, 1)));
-			if (result.hasFatalError())
-				return result;
-
-			result.merge(checkMovedMembersAvailability(new SubProgressMonitor(pm, 1)));
-			if (result.hasFatalError())
-				return result;
-			
 			result.merge(checkNativeMovedMethods(new SubProgressMonitor(pm, 1)));
 			
 			if (result.hasFatalError())
@@ -440,88 +435,6 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 		}
 	}
 
-	private RefactoringStatus checkAccessedMembersAvailability(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_checking, 3); 
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(checkAccessedMethodsAvailability(new SubProgressMonitor(pm, 1)));
-		result.merge(checkAccessedFieldsAvailability(new SubProgressMonitor(pm, 1)));
-		result.merge(checkAccessedTypesAvailability(new SubProgressMonitor(pm, 1)));
-		pm.done();
-		return result;
-	}
-
-	private RefactoringStatus checkAccessedMethodsAvailability(IProgressMonitor pm) throws JavaModelException {
-		RefactoringStatus result= new RefactoringStatus();
-		IMethod[] accessedMethods= ReferenceFinderUtil.getMethodsReferencedIn(fMembersToMove, pm);
-		List movedElementList= Arrays.asList(fMembersToMove);
-		for (int i= 0; i < accessedMethods.length; i++) {
-			if (containsAncestorOf(movedElementList, accessedMethods[i]))
-				continue;
-			if (! JdtFlags.isStatic(accessedMethods[i])) //safely ignore non-static 
-				continue;
-			if (! isVisibleFrom(accessedMethods[i], accessedMethods[i].getDeclaringType(), fDestinationType)){
-				String msg= createNonAccessibleMemberMessage(accessedMethods[i], fDestinationType, false);
-				result.addError(msg, JavaStatusContext.create(accessedMethods[i]));
-			}	
-		}
-		return result;
-	}
-	
-	private RefactoringStatus checkAccessedTypesAvailability(IProgressMonitor pm) throws JavaModelException {
-		RefactoringStatus result= new RefactoringStatus();
-		IType[] accessedTypes= ReferenceFinderUtil.getTypesReferencedIn(fMembersToMove, pm);
-		List movedElementList= Arrays.asList(fMembersToMove);
-		for (int i= 0; i < accessedTypes.length; i++) {
-			if (containsAncestorOf(movedElementList, accessedTypes[i]))
-				continue;
-			if (! JdtFlags.isStatic(accessedTypes[i])) //safely ignore non-static 
-				continue;
-			if (! isVisibleFrom(accessedTypes[i], accessedTypes[i].getDeclaringType(), fDestinationType)){
-				String msg= createNonAccessibleMemberMessage(accessedTypes[i], fDestinationType, false);
-				result.addError(msg, JavaStatusContext.create(accessedTypes[i]));
-			}	
-		}
-		return result;
-	}
-	
-	private RefactoringStatus checkAccessedFieldsAvailability(IProgressMonitor pm) throws JavaModelException {
-		RefactoringStatus result= new RefactoringStatus();
-		IField[] accessedFields= ReferenceFinderUtil.getFieldsReferencedIn(fMembersToMove, pm);
-		List movedElementList= Arrays.asList(fMembersToMove);
-		for (int i= 0; i < accessedFields.length; i++) {
-			if (containsAncestorOf(movedElementList, accessedFields[i]))
-				continue;
-			if (! JdtFlags.isStatic(accessedFields[i])) //safely ignore non-static 
-				continue;
-			if (! isVisibleFrom(accessedFields[i], accessedFields[i].getDeclaringType(), fDestinationType)){
-				String msg= createNonAccessibleMemberMessage(accessedFields[i], fDestinationType, false);
-				result.addError(msg, JavaStatusContext.create(accessedFields[i]));
-			}	
-		}
-		return result;
-	}
-	
-	private boolean containsAncestorOf(List movedElementList, IMember accessedMember) {
-		IJavaElement element= accessedMember;
-		do {
-			if (movedElementList.contains(element))
-				return true;
-			element= element.getParent();
-		} while (element instanceof IMember);
-		return false;
-	}
-
-	private RefactoringStatus checkMovedMembersAvailability(IProgressMonitor pm) throws JavaModelException{
-		pm.beginTask("", fMembersToMove.length); //$NON-NLS-1$
-		pm.setTaskName(RefactoringCoreMessages.MoveMembersRefactoring_check_availability); 
-		RefactoringStatus result= new RefactoringStatus();
-		for (int i= 0; i < fMembersToMove.length; i++) {
-			result.merge(checkMovedMemberAvailability(fMembersToMove[i], new SubProgressMonitor(pm, 1)));
-		}
-		pm.done();
-		return result;
-	}
-	
 	private RefactoringStatus checkMovedMemberAvailability(IMember memberToMove, IProgressMonitor pm) throws JavaModelException{
 		RefactoringStatus result= new RefactoringStatus();
 		if (memberToMove instanceof IType) { // recursively check accessibility of member type's members
@@ -629,9 +542,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 	}
 
 	private static boolean isVisibleFrom(IMember member, IType newMemberDeclaringType, IType accessingType) throws JavaModelException{
-		int memberVisibility= JdtFlags.getLowerVisibility(
-			JdtFlags.getVisibilityCode(member),
-			JdtFlags.getVisibilityCode(newMemberDeclaringType));
+		int memberVisibility= JdtFlags.getVisibilityCode(newMemberDeclaringType);
 			
 		IType declaringType= newMemberDeclaringType.getDeclaringType();
 		while (declaringType != null) { //get lowest visibility in all parent types of newMemberDeclaringType
@@ -724,11 +635,6 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 		}
 		
 		try {
-			// First update references in moved members, in order to extract the source.
-			String[] memberSources= getUpdatedMemberSource(status, fMemberDeclarations, targetBinding);
-			monitor.worked(1);
-			if (status.hasFatalError())
-				return;
 			Map adjustments= new HashMap();
 			IMember member= null;
 			SubProgressMonitor sub= new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
@@ -742,10 +648,61 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 				adjustor.setSetters(true);
 				adjustor.setVisibilitySeverity(RefactoringStatus.WARNING);
 				adjustor.setFailureSeverity(RefactoringStatus.WARNING);
+				adjustor.setRewrite(fSource.getASTRewrite(), fSource.getRoot());
 				adjustor.adjustVisibility(new NullProgressMonitor());
+
+				// Adjust visibility of moved member itself
+				if (!Flags.isPublic(member.getFlags())) {
+					if (isUsed(member)) {
+						int threshold= Modifier.PUBLIC;
+						if (isMoveIntoSubtype(member, sub))
+							threshold= Modifier.PROTECTED;
+						else if (fDestinationType.getPackageFragment().getElementName().equals(fSourceBinding.getPackage().getName()))
+							threshold= Modifier.NONE;
+
+						final Modifier.ModifierKeyword keyword= Modifier.ModifierKeyword.fromFlagValue(threshold);
+
+						if (MemberVisibilityAdjustor.hasLowerVisibility(member.getFlags(), threshold)
+								&& MemberVisibilityAdjustor.needsVisibilityAdjustments(member, keyword, adjustments)) {
+
+							String warningMessage= ""; //$NON-NLS-1$
+							switch (member.getElementType()) {
+								case IJavaElement.FIELD:
+									warningMessage= RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_field_warning;
+									break;
+								case IJavaElement.METHOD:
+									warningMessage= RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning;
+									break;
+								case IJavaElement.TYPE:
+									warningMessage= RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_type_warning;
+									break;
+							}
+
+							final MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment adjustment= new MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment(
+									member, keyword, RefactoringStatus.createStatus(RefactoringStatus.WARNING, Messages.format(warningMessage,
+											new String[] { MemberVisibilityAdjustor.getLabel(member), MemberVisibilityAdjustor.getLabel(keyword) }),
+											JavaStatusContext.create(member), null, RefactoringStatusEntry.NO_CODE, null));
+							adjustment.setNeedsRewriting(true);
+							adjustments.put(member, adjustment);
+						}
+					}
+				}
+				// Check if destination type is visible from references ->
+				// error message if not
+				status.merge(checkMovedMemberAvailability(member, new SubProgressMonitor(sub, 1)));
+				// Put rewrite info into code and into status
+				adjustor.rewriteVisibility(new NullProgressMonitor());
 			}
+
+			// First update references in moved members, in order to extract the
+			// source.
+			String[] memberSources= getUpdatedMemberSource(status, fMemberDeclarations, targetBinding);
+			monitor.worked(1);
+			if (status.hasFatalError())
+				return;
+			
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2();
-			engine.setPattern(fMembersToMove, IJavaSearchConstants.REFERENCES);
+			engine.setPattern(fMembersToMove, IJavaSearchConstants.ALL_OCCURRENCES);
 			engine.setGranularity(RefactoringSearchEngine2.GRANULARITY_COMPILATION_UNIT);
 			engine.setFiltering(true, true);
 			engine.setScope(RefactoringScopeFactory.create(fMembersToMove));
@@ -787,6 +744,31 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 		}
 	}
 	
+
+	private boolean isMoveIntoSubtype(IMember member, IProgressMonitor sub) throws JavaModelException {
+
+		if (fDestinationTypeHierarchy == null)
+			fDestinationTypeHierarchy= fDestinationType.newSupertypeHierarchy(new SubProgressMonitor(sub, 1,
+					SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+		final IType[] types= fDestinationTypeHierarchy.getSupertypes(fDestinationType);
+		for (int index= 0; index < types.length; index++)
+			if (types[index].equals(member.getDeclaringType()))
+				return true;
+
+		return false;
+	}
+
+	private boolean isUsed(IMember member) throws JavaModelException {
+
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES,
+				SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
+		engine.setScope(RefactoringScopeFactory.create(member));
+		engine.setGranularity(RefactoringSearchEngine2.GRANULARITY_COMPILATION_UNIT);
+		engine.searchPattern(new NullProgressMonitor());
+
+		return (engine.getResults().length != 0);
+	}
+
 	private CompilationUnitRewrite getCuRewrite(ICompilationUnit unit) {
 		if (fSource.getCu().equals(unit))
 			return fSource;
