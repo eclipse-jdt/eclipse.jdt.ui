@@ -155,8 +155,8 @@ public final class MemberVisibilityAdjustor {
 		 * Rewrites the visibility adjustment.
 		 * 
 		 * @param adjustor the java element visibility adjustor
-		 * @param rewrite the ast rewrite to use
-		 * @param root the root of the ast used in the rewrite
+		 * @param rewrite the AST rewrite to use
+		 * @param root the root of the AST used in the rewrite
 		 * @param group the text edit group description to use, or <code>null</code>
 		 * @param status the refactoring status, or <code>null</code>
 		 * @throws JavaModelException if an error occurs
@@ -439,7 +439,7 @@ public final class MemberVisibilityAdjustor {
 	}
 
 	/**
-	 * Converts a given modifier kevword into a visibility flag.
+	 * Converts a given modifier keyword into a visibility flag.
 	 * 
 	 * @param keyword the keyword to convert
 	 * @return the visibility flag
@@ -495,9 +495,6 @@ public final class MemberVisibilityAdjustor {
 	/** The map of members to visibility adjustments */
 	private Map fAdjustments= new HashMap();
 
-	/** The failure message severity */
-	private int fFailureSeverity= RefactoringStatus.ERROR;
-
 	/** Should getters be used to resolve visibility issues? */
 	private boolean fGetters= true;
 
@@ -513,13 +510,13 @@ public final class MemberVisibilityAdjustor {
 	/** The referencing java element */
 	private final IJavaElement fReferencing;
 
-	/** The ast rewrite to use for reference visibility adjustments, or <code>null</code> to use a compilation unit rewrite */
+	/** The AST rewrite to use for reference visibility adjustments, or <code>null</code> to use a compilation unit rewrite */
 	private ASTRewrite fRewrite= null;
 
 	/** The map of compilation units to compilation unit rewrites */
 	private Map fRewrites= new HashMap(3);
 
-	/** The root node of the ast rewrite for reference visibility adjustments, or <code>null</code> to use a compilation unit rewrite */
+	/** The root node of the AST rewrite for reference visibility adjustments, or <code>null</code> to use a compilation unit rewrite */
 	private CompilationUnit fRoot= null;
 
 	/** The incoming search scope */
@@ -1173,7 +1170,6 @@ public final class MemberVisibilityAdjustor {
 	 */
 	public final void setFailureSeverity(final int severity) {
 		Assert.isTrue(isStatusSeverity(severity));
-		fFailureSeverity= severity;
 	}
 
 	/**
@@ -1210,12 +1206,12 @@ public final class MemberVisibilityAdjustor {
 	}
 
 	/**
-	 * Sets the ast rewrite to use for member visibility adjustments.
+	 * Sets the AST rewrite to use for member visibility adjustments.
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to use a compilation unit rewrite.
 	 * 
-	 * @param rewrite the ast rewrite to set
-	 * @param root the root of the ast used in the rewrite
+	 * @param rewrite the AST rewrite to set
+	 * @param root the root of the AST used in the rewrite
 	 */
 	public final void setRewrite(final ASTRewrite rewrite, final CompilationUnit root) {
 		Assert.isTrue(rewrite == null || root != null);
