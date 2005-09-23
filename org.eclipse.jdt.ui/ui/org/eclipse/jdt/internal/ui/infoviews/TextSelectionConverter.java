@@ -20,6 +20,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -81,11 +83,8 @@ class TextSelectionConverter {
 			if (input instanceof ICodeAssist) {
 				if (input instanceof ICompilationUnit) {
 					ICompilationUnit cunit= (ICompilationUnit)input;
-					if (cunit.isWorkingCopy()) {
-						synchronized (cunit) {
-							cunit.reconcile();
-						}
-					}
+					if (cunit.isWorkingCopy())
+						JavaModelUtil.reconcile(cunit);
 				}
 				IJavaElement[] elements= ((ICodeAssist)input).codeSelect(selection.getOffset(), selection.getLength());
 				if (elements != null && elements.length > 0)
@@ -97,11 +96,8 @@ class TextSelectionConverter {
 	private static IJavaElement getElementAtOffset(IJavaElement input, ITextSelection selection) throws JavaModelException {
 		if (input instanceof ICompilationUnit) {
 			ICompilationUnit cunit= (ICompilationUnit)input;
-			if (cunit.isWorkingCopy()) {
-				synchronized (cunit) {
-					cunit.reconcile();
-				}
-			}
+			if (cunit.isWorkingCopy())
+				JavaModelUtil.reconcile(cunit);
 			IJavaElement ref= cunit.getElementAt(selection.getOffset());
 			if (ref == null)
 				return input;

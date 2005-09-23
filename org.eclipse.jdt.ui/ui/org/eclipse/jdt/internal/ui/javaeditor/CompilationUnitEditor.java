@@ -112,6 +112,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
@@ -1108,10 +1109,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 			if (unit != null) {
 				try {
-
-					synchronized (unit) {
-						unit.reconcile(ICompilationUnit.NO_AST, false, null, null);
-					}
+					JavaModelUtil.reconcile(unit);
 					IJavaElement[] findings= unit.findElements(element);
 					if (findings != null && findings.length > 0)
 						return findings[0];
@@ -1337,9 +1335,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		if (unit != null) {
 			try {
 				if (reconcile) {
-					synchronized (unit) {
-						unit.reconcile(ICompilationUnit.NO_AST, false, null, null);
-					}
+					JavaModelUtil.reconcile(unit);
 					return unit.getElementAt(offset);
 				} else if (unit.isConsistent())
 					return unit.getElementAt(offset);

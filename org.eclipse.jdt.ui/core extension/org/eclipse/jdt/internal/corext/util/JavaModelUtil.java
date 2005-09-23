@@ -1059,13 +1059,11 @@ public final class JavaModelUtil {
 	 * @param unit
 	 */
 	public static void reconcile(ICompilationUnit unit) throws JavaModelException {
-		synchronized(unit)  {
-			unit.reconcile(
+		unit.reconcile(
 				ICompilationUnit.NO_AST, 
 				false /* don't force problem detection */, 
 				null /* use primary owner */, 
 				null /* no progress monitor */);
-		}
 	}
 	
 	/**

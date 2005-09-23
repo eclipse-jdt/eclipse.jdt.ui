@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -220,11 +221,7 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 			return fChoices;
 
 		} else {
-
-			synchronized (fCompilationUnit) {
-				fCompilationUnit.reconcile(ICompilationUnit.NO_AST, false, null, null);
-			}
-
+			JavaModelUtil.reconcile(fCompilationUnit);
 			String[][] parameterTypes= getParameterSignatures();
 			ParameterGuesser guesser= new ParameterGuesser(fProposal.getCompletionLocation() + 1, fCompilationUnit);
 			for (int i= fParameterNames.length - 1; i >= 0; i--) {

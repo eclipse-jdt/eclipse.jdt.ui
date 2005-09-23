@@ -924,23 +924,21 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			final IProgressMonitor subMonitor1= getSubProgressMonitor(monitor, 50);
 
 			try {
-				synchronized (info.fCopy) {
-					Platform.run(new ISafeRunnable() {
-						public void run() {
-							try {
-								info.fCopy.reconcile(ICompilationUnit.NO_AST, false, null, subMonitor1);
-							} catch (JavaModelException ex) {
-								handleException(ex);
-							} catch (OperationCanceledException ex) {
-								// do not log this
-							}
+				Platform.run(new ISafeRunnable() {
+					public void run() {
+						try {
+							info.fCopy.reconcile(ICompilationUnit.NO_AST, false, null, subMonitor1);
+						} catch (JavaModelException ex) {
+							handleException(ex);
+						} catch (OperationCanceledException ex) {
+							// do not log this
 						}
-						public void handleException(Throwable ex) {
-							IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during reconcile while saving", ex);  //$NON-NLS-1$
-							JavaPlugin.getDefault().getLog().log(status);
-						}
-					});
-				}
+					}
+					public void handleException(Throwable ex) {
+						IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, "Error in JDT Core during reconcile while saving", ex);  //$NON-NLS-1$
+						JavaPlugin.getDefault().getLog().log(status);
+					}
+				});
 			} finally {
 				subMonitor1.done();
 			}

@@ -57,6 +57,8 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProvider;
@@ -511,11 +513,9 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 					fCachedModel= model;
 					if (fInput instanceof ICompilationUnit) {
 						ICompilationUnit unit= (ICompilationUnit) fInput;
-						synchronized (unit) {
-							try {
-								unit.reconcile(ICompilationUnit.NO_AST, false, null, null);
-							} catch (JavaModelException x) {
-							}
+						try {
+							JavaModelUtil.reconcile(unit);
+						} catch (JavaModelException x) {
 						}
 					}
 

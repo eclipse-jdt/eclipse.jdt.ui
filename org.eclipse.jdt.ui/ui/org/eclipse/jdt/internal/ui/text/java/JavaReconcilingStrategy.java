@@ -93,16 +93,14 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 							try {
 								boolean isASTNeeded= initialReconcile || JavaPlugin.getDefault().getASTProvider().isActive(unit);
 								// reconcile
-								synchronized (unit) {
-									if (fIsJavaReconcilingListener && isASTNeeded) {
-										ast[0]= unit.reconcile(ASTProvider.AST_LEVEL, true, null, fProgressMonitor);
-										if (ast[0] != null) {
-											// mark as unmodifiable
-											ASTNodes.setFlagsToAST(ast[0], ASTNode.PROTECT);
-										}
-									} else
-										unit.reconcile(ICompilationUnit.NO_AST, true, null, fProgressMonitor);
-								}
+								if (fIsJavaReconcilingListener && isASTNeeded) {
+									ast[0]= unit.reconcile(ASTProvider.AST_LEVEL, true, null, fProgressMonitor);
+									if (ast[0] != null) {
+										// mark as unmodifiable
+										ASTNodes.setFlagsToAST(ast[0], ASTNode.PROTECT);
+									}
+								} else
+									unit.reconcile(ICompilationUnit.NO_AST, true, null, fProgressMonitor);
 							} catch (OperationCanceledException ex) {
 								Assert.isTrue(fProgressMonitor == null || fProgressMonitor.isCanceled());
 								ast[0]= null;
