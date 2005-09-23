@@ -125,8 +125,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getInvertEqualsProposal(context, coveringNode, null)
 				|| getConvertForLoopProposal(context, coveringNode, null)
 				|| getExtractLocalProposal(context, coveringNode, null)
-				|| getConvertIterableLoopProposal(context, coveringNode, null);
-
+				|| getConvertIterableLoopProposal(context, coveringNode, null)
+				|| getSurroundWithRunnableProposal(context, coveringNode, null);
 
 		}
 		return false;
@@ -161,6 +161,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getExtractLocalProposal(context, coveringNode, resultingCollections);
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
+				getSurroundWithRunnableProposal(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -958,6 +959,22 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				resultingCollections.add(proposal);
 			}
 		}
+		return true;
+	}
+	
+	private static boolean getSurroundWithRunnableProposal(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
+		Statement[] selectedStatements= SurroundWithRunnableProposal.getSelectedStatements(context);
+		if (selectedStatements == null)
+			return false;
+		
+		if (resultingCollections == null)
+			return true;
+		
+		String label= CorrectionMessages.QuickAssistProcessor_surround_with_runnable;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		
+		SurroundWithRunnableProposal proposal= new SurroundWithRunnableProposal(label, context, 10, image, selectedStatements);
+		resultingCollections.add(proposal);
 		return true;
 	}
 

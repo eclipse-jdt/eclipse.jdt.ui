@@ -233,6 +233,7 @@ final class CorrectionMessages extends NLS {
 	public static String QuickAssistProcessor_typetoarrayInitializer_description;
 	public static String QuickAssistProcessor_createmethodinsuper_description;
 	public static String QuickAssistProcessor_forLoop_description;
+	public static String QuickAssistProcessor_surround_with_runnable;
 	public static String LinkedNamesAssistProposal_proposalinfo;
 	public static String LinkedNamesAssistProposal_description;
 	public static String QuickTemplateProcessor_surround_label;
