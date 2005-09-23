@@ -10,11 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.io.IOException;
 import java.util.Hashtable;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -91,7 +93,17 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	private void validatePassingTest(String parentClassName, String className, String packageName, String[] cuNames, String[] packageNames, String enclosingInstanceName, boolean makeFinal, boolean possible, boolean mandatory, boolean createFieldIfPossible) throws Exception {
 		IType parentClas= getClassFromTestFile(getPackage(packageName), parentClassName);
 		IType clas= parentClas.getType(className);
-		
+		validatePassingTest(className, clas, cuNames, packageNames, enclosingInstanceName, makeFinal, possible, mandatory, createFieldIfPossible);
+	}
+	
+	private void validatePassingTest(String parentClassName, String parentClassNameInParent, String className, String packageName, String[] cuNames, String[] packageNames, String enclosingInstanceName, boolean makeFinal, boolean possible, boolean mandatory, boolean createFieldIfPossible) throws Exception {
+		IType parentClas= getClassFromTestFile(getPackage(packageName), parentClassName);
+		IType parent2 = parentClas.getType(parentClassNameInParent);
+		IType clas = parent2.getType(className);
+		validatePassingTest(className, clas, cuNames, packageNames, enclosingInstanceName, makeFinal, possible, mandatory, createFieldIfPossible);
+	}
+
+	private void validatePassingTest(String className, IType clas, String[] cuNames, String[] packageNames, String enclosingInstanceName, boolean makeFinal, boolean possible, boolean mandatory, boolean createFieldIfPossible) throws JavaModelException, CoreException, Exception, IOException {
 		assertTrue("should be enabled", RefactoringAvailabilityTester.isMoveInnerAvailable(clas));
 		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
@@ -125,6 +137,8 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		String actual= newCu.getSource();
 		assertEqualLines("new Cu:", expected, actual);
 	}
+	
+	
 	private void validatePassingTest(String parentClassName, String className, String[] cuNames, String[] packageNames, String enclosingInstanceName, boolean possible, boolean mandatory) throws Exception {
 		validatePassingTest(parentClassName, className, "p", cuNames, packageNames, enclosingInstanceName, false, possible, mandatory, true);
 	}
@@ -284,9 +298,19 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	public void test31() throws Exception{
 		printTestDisabledMessage("disabled due to missing support for statically imported methods");
-//		validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
+		// validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
 	}
-
+	
+	// Move inner class; enclosing class must remain private
+	public void test32() throws Exception{
+		validatePassingTest("A", "Inner", "MoreInner", "p1", new String[]{"A"}, new String[]{"p1"}, null, false, false, false, false);
+	}
+	
+	// Fallthrough
+	public void test33() throws Exception{
+		validatePassingTest("A", "Inner", "MoreInner", "p2", new String[]{"A"}, new String[]{"p2"}, null, false, false, false, false);
+	}
+	
 	public void test_nonstatic_0() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);
 	}
@@ -447,6 +471,11 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	public void test_nonstatic_42() throws Exception{
 		printTestDisabledMessage("disabled due to missing support for statically imported methods");		
 //		validatePassingTest("A", "Inner", "p", new String[]{"A"}, new String[]{"p"}, "a", false, true, false, false);
+	}
+	
+	// Using member of enclosing type, non-static edition
+	public void test_nonstatic_43() throws Exception{
+		validatePassingTest("A", "Inner", "MoreInner", "p5", new String[]{"A"}, new String[]{"p5"}, "inner", true, true, true, true);
 	}
 
 	public void testFail_nonstatic_0() throws Exception{
