@@ -72,7 +72,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	/**
 	 * Returns the rewriter that has been passed in the constructor. Implementors can override this
-	 * method to create the rewriter lazy.
+	 * method to create the rewriter lazy. This method will only be called once.
 	 * @return Returns the rewriter to be used.
 	 * @throws CoreException A core exception is thrown when the could not be created.
 	 */
