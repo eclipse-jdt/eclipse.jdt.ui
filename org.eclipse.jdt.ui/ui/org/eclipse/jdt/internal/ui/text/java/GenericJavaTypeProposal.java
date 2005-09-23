@@ -355,7 +355,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 			// take the lower bound of the type parameter
 			for (int i= 0; i < arguments.length; i++) {
 				if (arguments[i] == null) {
-					arguments[i]= computeTypeProposal(type, parameters[i]);
+					arguments[i]= computeTypeProposal(parameters[i]);
 				}
 			}
 			fTypeArgumentProposals= arguments;
@@ -364,15 +364,18 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	}
 
 	/**
-	 * Returns a type argument proposal for a given type binding. The proposal
-	 * is the simple type name for unbounded types or the upper bound of
-	 * wildcard types with a single bound.
-	 *
-	 * @param parameter the type parameter
+	 * Returns a type argument proposal for a given type parameter. The proposal is:
+	 * <ul>
+	 * <li>the type bound for type parameters with a single bound</li>
+	 * <li>the type parameter name for all other (unbounded or more than one bound) type parameters</li>
+	 * </ul>
+	 * Type argument proposals for type parameters are always ambiguous.
+	 * 
+	 * @param parameter the type parameter of the inserted type
 	 * @return a type argument proposal for <code>parameter</code>
 	 * @throws JavaModelException
 	 */
-	private TypeArgumentProposal computeTypeProposal(IType type, ITypeParameter parameter) throws JavaModelException {
+	private TypeArgumentProposal computeTypeProposal(ITypeParameter parameter) throws JavaModelException {
 		String[] bounds= parameter.getBounds();
 		String elementName= parameter.getElementName();
 		String displayName= computeTypeParameterDisplayName(parameter, bounds);
@@ -396,36 +399,39 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	}
 
 	/**
-	 * Returns a type argument proposal for a given type binding. The proposal
-	 * is the simple type name for unbounded types or the upper bound of
-	 * wildcard types or the the bound of type variables with a single bound.
-	 *
-	 * @param binding the type argument binding
-	 * @param parameter the type parameter of the expected type
+	 * Returns a type argument proposal for a given type binding. The proposal is:
+	 * <ul>
+	 * <li>the simple type name for normal types or type variables (unambigous proposal)</li>
+	 * <li>for wildcard types (ambigous proposals):
+	 * <ul>
+	 * <li>the upper bound for wildcards with an upper bound</li>
+	 * <li>the {@linkplain #computeTypeProposal(ITypeParameter) parameter proposal} for unbounded
+	 * wildcards or wildcards with a lower bound</li>
+	 * </ul>
+	 * </li>
+	 * </ul>
+	 * 
+	 * @param binding the type argument binding in the expected type
+	 * @param parameter the type parameter of the inserted type
 	 * @return a type argument proposal for <code>binding</code>
-	 * @throws JavaModelException 
+	 * @throws JavaModelException
+	 * @see #computeTypeProposal(ITypeParameter)
 	 */
 	private TypeArgumentProposal computeTypeProposal(ITypeBinding binding, ITypeParameter parameter) throws JavaModelException {
-		// TODO merge type bounds from parameter and binding
-		
 		final String name= binding.getName();
 		if (binding.isWildcardType()) {
 			String contextName= name.replaceFirst("\\?", parameter.getElementName()); //$NON-NLS-1$
+
 			if (binding.isUpperbound())
 				// upper bound - the upper bound is the bound itself
 				return new TypeArgumentProposal(binding.getBound().getName(), true, contextName);
-			// lower bound - the upper bound is always Object
-			return new TypeArgumentProposal("Object", true, contextName); //$NON-NLS-1$
+			
+			// no or upper bound - use the type parameter of the inserted type, as it may be more
+			// restrictive (eg. List<?> list= new SerializableList<Serializable>()) 
+			return computeTypeProposal(parameter);
 		}
 
-		if (binding.isTypeVariable()) {
-			final ITypeBinding[] bounds= binding.getTypeBounds();
-			if (bounds.length == 1)
-				return new TypeArgumentProposal(bounds[0].getName(), true, name);
-			return new TypeArgumentProposal(name, true, name);
-		}
-
-		// not a wildcard or type variable
+		// not a wildcard but a type or type variable - this is unambigously the right thing to insert
 		return new TypeArgumentProposal(name, false, name);
 	}
 
