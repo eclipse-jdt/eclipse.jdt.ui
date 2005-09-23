@@ -504,16 +504,6 @@ public class IntroduceFactoryTests extends RefactoringTest {
 		assertEquals("status", expectedStatus, result.getSeverity());
 	}	
 
-	private void failBugHelper(String baseFileName, boolean staticFactory, int expectedStatus) throws Exception {
-		ICompilationUnit	cu= createCUForBugTestCase(null, getPackageP(), baseFileName, true);
-		ISourceRange		selection= findSelectionInSource(cu.getSource());
-		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(cu, selection.getOffset(), selection.getLength());
-		RefactoringStatus	result= performRefactoring(ref);
-
-		assertNotNull("precondition was supposed to fail", result);
-		assertEquals("status", expectedStatus, result.getSeverity());
-	}	
-
 	//--- TESTS
 	public void testStaticContext_FFF() throws Exception {
 		singleUnitHelper(false);
