@@ -387,6 +387,11 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void test32() throws Exception {
 		helper1(new String[] { "p1.A"}, "p1.A", 9, 25, 9, 26, PARAMETER, "p", true, true);
 	}
+	
+	// Test visibility of a target field is not affected.
+	public void test33() throws Exception {
+		helper1(new String[] { "p.Foo", "p.Bar" }, "p.Foo", 6, 18, 6, 21, FIELD, "_bar", false, false);
+	}
 
 	// Move mA1 to field fB, do not inline delegator
 	public void test3() throws Exception {

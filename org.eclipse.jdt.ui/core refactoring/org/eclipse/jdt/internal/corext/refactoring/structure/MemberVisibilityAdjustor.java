@@ -773,7 +773,9 @@ public final class MemberVisibilityAdjustor {
 			final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(fReferenced, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
 			engine.setScope(fScope);
 			engine.setStatus(fStatus);
-			if (fIncoming) { // calls to the referenced (moved) element. 
+			if (fIncoming) { 
+				// check calls to the referenced (moved) element, adjust element
+				// visibility if necessary.
 				engine.searchPattern(new SubProgressMonitor(monitor, 1));
 				adjustIncomingVisibility((SearchResultGroup[]) engine.getResults(), new SubProgressMonitor(monitor, 1));
 				engine.clearResults();
@@ -782,16 +784,14 @@ public final class MemberVisibilityAdjustor {
 					adjustIncomingVisibility(type.getTypes(), type.getMethods(), type.getFields(), new SubProgressMonitor(monitor, 1));
 				}
 			}
-			if (fOutgoing) { // check calls from within the referenced (moved) element; the destinations of these calls may need to be increased in visibility.
-/*				search for the types, fields, and methods which are called/acted upon inside the referenced element 
-				(the one to be moved)	and assure that they are also visible from within the referencing element (the 
-				destination type (or package	if move to new type)).
-				For example, if a method is moved, then accessed private fields are no longer visible.
-				For example, if an inner type is moved to a top-level type, all types, fields, and methods internal
-						to this type are moved as well and are still visible (need not be updated).
-						In this case, fReferencing is a package.
-						Need to exclude fields, types, methods which are defined inside the referenced element.
-						*/
+			if (fOutgoing) {
+				/*
+				 * Search for the types, fields, and methods which
+				 * are called/acted upon inside the referenced element (the one
+				 * to be moved) and assure that they are also visible from
+				 * within the referencing element (the destination type (or
+				 * package if move to new type)).
+				 */
 				engine.searchReferencedTypes(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 				engine.searchReferencedFields(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 				engine.searchReferencedMethods(fReferenced, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));

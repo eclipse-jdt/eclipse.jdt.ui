@@ -122,6 +122,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -1543,6 +1544,16 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			}
 			if (!fRemove || !removable)
 				createMethodDelegation(declaration, rewrites, adjustor.getAdjustments(), status, new SubProgressMonitor(monitor, 1));
+
+			// Do not adjust visibility of a target field; references to the
+			// field will be removed anyway.
+			final IJavaElement targetElement= fTarget.getJavaElement();
+			if (targetElement != null && targetElement instanceof IField) {
+				final IVisibilityAdjustment adjustmentForTarget= (IVisibilityAdjustment) adjustor.getAdjustments().get(targetElement);
+				if (adjustmentForTarget != null)
+					adjustor.getAdjustments().remove(targetElement);
+			}
+
 			adjustor.rewriteVisibility(new SubProgressMonitor(monitor, 1));
 			sourceRewrite.rewriteAST(document, fMethod.getJavaProject().getOptions(true));
 			createMethodSignature(document, declaration, sourceRewrite, rewrites);
