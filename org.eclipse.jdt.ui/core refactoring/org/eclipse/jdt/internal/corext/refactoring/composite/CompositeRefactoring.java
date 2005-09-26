@@ -35,7 +35,7 @@ import org.eclipse.ltk.core.refactoring.CompositeTextFileChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
-import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoring;
+import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringObject;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.2
  */
-public class CompositeRefactoring extends Refactoring implements IInitializableRefactoring {
+public class CompositeRefactoring extends Refactoring implements IInitializableRefactoringObject {
 
 	/** The global working copy owner */
 	private static class GlobalWorkingCopyOwner extends WorkingCopyOwner {
@@ -369,12 +369,12 @@ public class CompositeRefactoring extends Refactoring implements IInitializableR
 	}
 
 	/*
-	 * @see org.eclipse.ltk.core.refactoring.recording.IRecordableRefactoring#initialize(org.eclipse.ltk.core.refactoring.participants.RefactoringArguments)
+	 * @see org.eclipse.ltk.core.refactoring.recording.IInitializableRefactoringObject#initialize(org.eclipse.ltk.core.refactoring.participants.RefactoringArguments)
 	 */
 	public boolean initialize(final RefactoringArguments arguments) {
 		for (int index= 0; index < fRefactorings.length; index++) {
-			if (!fDisabledRefactorings.contains(fRefactorings[index]) && fRefactorings[index] instanceof IInitializableRefactoring) {
-				final IInitializableRefactoring refactoring= (IInitializableRefactoring) fRefactorings[index];
+			if (!fDisabledRefactorings.contains(fRefactorings[index]) && fRefactorings[index] instanceof IInitializableRefactoringObject) {
+				final IInitializableRefactoringObject refactoring= (IInitializableRefactoringObject) fRefactorings[index];
 				if (!refactoring.initialize(arguments))
 					return false;
 			}
