@@ -16,32 +16,41 @@ import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
+import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringObject;
 
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
-import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
-import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class RenameResourceProcessor extends RenameProcessor implements INameUpdating {
+public class RenameResourceProcessor extends RenameProcessor implements IInitializableRefactoringObject, INameUpdating {
+
+	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 
 	private IResource fResource;
 	private String fNewElementName;
@@ -159,10 +168,7 @@ public class RenameResourceProcessor extends RenameProcessor implements INameUpd
 	}
 		
 	//--- changes 
-	
-	/* non java-doc 
-	 * @see IRefactoring#createChange(IProgressMonitor)
-	 */
+
 	public Change createChange(IProgressMonitor pm) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
@@ -172,5 +178,21 @@ public class RenameResourceProcessor extends RenameProcessor implements INameUpd
 			pm.done();
 		}	
 	}
-}
 
+	public boolean initialize(final RefactoringArguments arguments) {
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			final String path= generic.getAttribute(ATTRIBUTE_PATH);
+			if (path != null)
+				fResource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(path));
+			final String name= generic.getAttribute(ATTRIBUTE_NAME);
+			try {
+				if (name != null && fResource != null && checkNewElementName(name).isOK())
+					fNewElementName= name;
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+		}
+		return fResource != null && fNewElementName != null;
+	}
+}

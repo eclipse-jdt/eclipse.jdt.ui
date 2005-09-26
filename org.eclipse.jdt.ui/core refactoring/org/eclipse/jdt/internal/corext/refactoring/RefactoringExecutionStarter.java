@@ -59,6 +59,7 @@ import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
@@ -332,7 +333,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startRenameResourceRefactoring(final IResource resource, final Shell shell) throws CoreException {
-		final RenameRefactoring refactoring= new RenameRefactoring(new RenameResourceProcessor(resource));
+		final RenameRefactoring refactoring= new JavaRenameRefactoring(new RenameResourceProcessor(resource));
 		RenameUserInterfaceManager.getDefault().getStarter(refactoring).activate(refactoring, shell, true);
 	}
 
