@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameEnumConstProcessor;
@@ -188,7 +189,7 @@ public class RenameSupport {
 	public static final int UPDATE_SETTER_METHOD= 1 << 5;
 
 	private RenameSupport(JavaRenameProcessor processor, String newName, int flags) throws CoreException {
-		fRefactoring= new RenameRefactoring(processor);
+		fRefactoring= new JavaRenameRefactoring(processor);
 		initialize(fRefactoring, newName, flags);
 	}
 
