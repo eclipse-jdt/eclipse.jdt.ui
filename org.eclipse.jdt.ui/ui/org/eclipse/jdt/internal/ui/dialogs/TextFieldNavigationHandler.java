@@ -18,6 +18,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 
+import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
@@ -49,28 +50,24 @@ public class TextFieldNavigationHandler {
 		new FocusHandler(new TextNavigable(text));
 	}
 	
+	public static void install(StyledText styledText) {
+		new FocusHandler(new StyledTextNavigable(styledText));
+	}
+	
 	public static void install(Combo combo) {
 		new FocusHandler(new ComboNavigable(combo));
 	}
 	
-	private abstract static class Navigable {
-		
+	private abstract static class WorkaroundNavigable extends Navigable {
+		/* workarounds for:
+		 * - bug 103630: Add API: Combo#getCaretPosition()
+		 * - bug 106024: Text#setSelection(int, int) does not handle start > end with SWT.SINGLE
+		 */ 
 		Point fLastSelection;
 		int fCaretPosition;
 		
-		public abstract Control getControl();
-		
-		public abstract CharSequence getText();
-
-		public abstract Point getSelection();
-
-		public abstract int getCaretPosition();
-
-		public abstract void setSelection(int start, int end);
-		
 		void selectionChanged() {
 			Point selection= getSelection();
-//			System.out.println("TextFieldNavigationHandler.selectionChanged():" + selection);
 			if (selection.equals(fLastSelection)) {
 				// leave caret position
 			} else if (selection.x == selection.y) { //empty range
@@ -84,8 +81,22 @@ public class TextFieldNavigationHandler {
 		}
 	}
 	
-	private static class TextNavigable extends Navigable {
-		static final boolean BUG_106024_TEXT_SELECTION= true; //TODO: platform-dependent
+	private abstract static class Navigable {
+		public abstract Control getControl();
+		
+		public abstract String getText();
+
+		public abstract void setText(String text);
+		
+		public abstract Point getSelection();
+
+		public abstract void setSelection(int start, int end);
+		
+		public abstract int getCaretPosition();
+	}
+	
+	private static class TextNavigable extends WorkaroundNavigable {
+		static final boolean BUG_106024_TEXT_SELECTION= true; //TODO: only wrong on win32?
 		
 		private final Text fText;
 		
@@ -112,10 +123,14 @@ public class TextFieldNavigationHandler {
 			return fText;
 		}
 
-		public CharSequence getText() {
+		public String getText() {
 			return fText.getText();
 		}
 
+		public void setText(String text) {
+			fText.setText(text);
+		}
+		
 		public Point getSelection() {
 			return fText.getSelection();
 		}
@@ -134,12 +149,44 @@ public class TextFieldNavigationHandler {
 		}
 	}
 	
-	private static class ComboNavigable extends Navigable {
+	private static class StyledTextNavigable extends WorkaroundNavigable {
+		private final StyledText fStyledText;
+		
+		public StyledTextNavigable(StyledText styledText) {
+			fStyledText= styledText;
+		}
+		
+		public Control getControl() {
+			return fStyledText;
+		}
+		
+		public String getText() {
+			return fStyledText.getText();
+		}
+		
+		public void setText(String text) {
+			fStyledText.setText(text);
+		}
+		
+		public Point getSelection() {
+			return fStyledText.getSelection();
+		}
+		
+		public int getCaretPosition() {
+			return fStyledText.getCaretOffset();
+		}
+		
+		public void setSelection(int start, int end) {
+			fStyledText.setSelection(start, end);
+		}
+	}
+	
+	private static class ComboNavigable extends WorkaroundNavigable {
 		private final Combo fCombo;
 		
 		public ComboNavigable(Combo combo) {
 			fCombo= combo;
-			//workaround for bug xxx (no API):
+			//workaround for bug 103630 (no API):
 			fLastSelection= getSelection();
 			fCaretPosition= fLastSelection.y;
 			fCombo.addKeyListener(new KeyAdapter() {
@@ -158,8 +205,12 @@ public class TextFieldNavigationHandler {
 			return fCombo;
 		}
 
-		public CharSequence getText() {
+		public String getText() {
 			return fCombo.getText();
+		}
+		
+		public void setText(String text) {
+			fCombo.setText(text);
 		}
 		
 		public Point getSelection() {
@@ -223,7 +274,7 @@ public class TextFieldNavigationHandler {
 				return;
 			fHandlerActivations= new ArrayList();
 			
-			//TODO: DELETE_PREVIOUS/NEXT_WORD
+			//TODO: DELETE_LINE* ?
 			fHandlerActivations.add(handlerService.activateHandler(ITextEditorActionDefinitionIds.SELECT_WORD_NEXT, new AbstractHandler() {
 				public Object execute(ExecutionEvent event) throws ExecutionException {
 					fIterator.setText(fNavigable.getText());
@@ -273,6 +324,50 @@ public class TextFieldNavigationHandler {
 					int newCaret= fIterator.preceding(caretPosition);
 					fNavigable.setSelection(newCaret, newCaret);
 					fIterator.setText(""); //$NON-NLS-1$
+					return null;
+				}
+			}));
+			fHandlerActivations.add(handlerService.activateHandler(ITextEditorActionDefinitionIds.DELETE_NEXT_WORD, new AbstractHandler() {
+				public Object execute(ExecutionEvent event) throws ExecutionException {
+					Point selection= fNavigable.getSelection();
+					String text= fNavigable.getText();
+					int start;
+					int end;
+					if (selection.x != selection.y) {
+						start= selection.x;
+						end= selection.y;
+					} else {
+						fIterator.setText(text);
+						start= fNavigable.getCaretPosition();
+						end= fIterator.following(start);
+						fIterator.setText(""); //$NON-NLS-1$
+						if (end == BreakIterator.DONE)
+							return null;
+					}
+					fNavigable.setText(text.substring(0, start) + text.substring(end));
+					fNavigable.setSelection(start, start);
+					return null;
+				}
+			}));
+			fHandlerActivations.add(handlerService.activateHandler(ITextEditorActionDefinitionIds.DELETE_PREVIOUS_WORD, new AbstractHandler() {
+				public Object execute(ExecutionEvent event) throws ExecutionException {
+					Point selection= fNavigable.getSelection();
+					String text= fNavigable.getText();
+					int start;
+					int end;
+					if (selection.x != selection.y) {
+						start= selection.x;
+						end= selection.y;
+					} else {
+						fIterator.setText(text);
+						end= fNavigable.getCaretPosition();
+						start= fIterator.preceding(end);
+						fIterator.setText(""); //$NON-NLS-1$
+						if (start == BreakIterator.DONE)
+							return null;
+					}
+					fNavigable.setText(text.substring(0, start) + text.substring(end));
+					fNavigable.setSelection(start, start);
 					return null;
 				}
 			}));
