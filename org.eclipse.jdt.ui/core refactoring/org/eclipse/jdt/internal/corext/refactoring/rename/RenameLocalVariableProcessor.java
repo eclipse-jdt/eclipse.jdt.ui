@@ -18,6 +18,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
@@ -37,15 +38,18 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -75,6 +79,8 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RenameLocalVariableProcessor extends JavaRenameProcessor implements INameUpdating, IReferenceUpdating {
 
@@ -146,8 +152,8 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		}
 	}
 	
-	private final ILocalVariable fLocalVariable;
-	private final ICompilationUnit fCu;
+	private ILocalVariable fLocalVariable;
+	private ICompilationUnit fCu;
 	
 	//the following fields are set or modified after the construction
 	private boolean fUpdateReferences;
@@ -424,6 +430,68 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	}
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			final String handle= generic.getAttribute(ATTRIBUTE_HANDLE);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+				else
+					fCu= (ICompilationUnit) element;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_HANDLE));
+			final String name= generic.getAttribute(ATTRIBUTE_NAME);
+			if (name != null) {
+				RefactoringStatus status= new RefactoringStatus();
+				try {
+					status= checkNewElementName(name);
+				} catch (CoreException exception) {
+					JavaPlugin.log(exception);
+				}
+				if (!status.hasError())
+					setNewElementName(name);
+				else
+					return status;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_NAME));
+			if (fCu != null) {
+				final String range= generic.getAttribute(ATTRIBUTE_RANGE);
+				if (range != null) {
+					int offset= 0;
+					int length= 0;
+					final StringTokenizer tokenizer= new StringTokenizer(range);
+					if (tokenizer.hasMoreTokens())
+						offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+					if (tokenizer.hasMoreTokens())
+						length= Integer.valueOf(tokenizer.nextToken()).intValue();
+					if (offset >= 0 && length >= 0) {
+						try {
+							final IJavaElement[] elements= fCu.codeSelect(offset, length);
+							if (elements != null) {
+								for (int index= 0; index < elements.length; index++) {
+									final IJavaElement element= elements[index];
+									if (element instanceof ILocalVariable)
+										fLocalVariable= (ILocalVariable) element;
+								}
+							}
+							if (fLocalVariable == null)
+								return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+						} catch (JavaModelException exception) {
+							JavaPlugin.log(exception);
+						}
+					} else
+						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { range, ATTRIBUTE_RANGE}));
+				} else
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_RANGE));
+			}
+			final String references= generic.getAttribute(ATTRIBUTE_REFERENCES);
+			if (references != null) {
+				fUpdateReferences= Boolean.valueOf(references).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REFERENCES));
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
 	}
 }

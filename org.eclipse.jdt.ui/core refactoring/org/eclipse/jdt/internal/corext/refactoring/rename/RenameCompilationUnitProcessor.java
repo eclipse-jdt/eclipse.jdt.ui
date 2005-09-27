@@ -353,7 +353,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 			if (path != null) {
 				final IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(path));
 				if (resource == null || !resource.exists())
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.RenameResourceChange_does_not_exist, path));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
 				else
 					fCu= (ICompilationUnit) JavaCore.create(resource);
 			} else
@@ -372,9 +372,10 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 					else
 						return status;
 				}
-			} else 
+			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_NAME));
-		}
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
 	}
 }

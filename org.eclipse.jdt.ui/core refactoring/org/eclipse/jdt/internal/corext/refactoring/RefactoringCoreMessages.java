@@ -818,6 +818,9 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String JavaRenameRefactoring_error_unsupported_initialization;
 
 	public static String InitializableRefactoring_argument_not_exist;
+	public static String InitializableRefactoring_inacceptable_arguments;
+	public static String InitializableRefactoring_input_not_exists;
+	public static String InitializableRefactoring_illegal_argument;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);

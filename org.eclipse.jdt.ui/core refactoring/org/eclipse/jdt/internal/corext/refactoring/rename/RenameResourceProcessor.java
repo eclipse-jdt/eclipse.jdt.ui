@@ -187,7 +187,7 @@ public class RenameResourceProcessor extends RenameProcessor implements IInitial
 			if (path != null) {
 				fResource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(path));
 				if (fResource == null || !fResource.exists())
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.RenameResourceChange_does_not_exist, path));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PATH));
 			final String name= generic.getAttribute(ATTRIBUTE_NAME);
@@ -204,9 +204,10 @@ public class RenameResourceProcessor extends RenameProcessor implements IInitial
 					else
 						return status;
 				}
-			} else 
+			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_NAME));
-		}
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
 	}
 }
