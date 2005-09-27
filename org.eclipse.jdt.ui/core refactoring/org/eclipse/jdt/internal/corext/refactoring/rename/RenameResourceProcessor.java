@@ -33,6 +33,7 @@ import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringObject;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -179,20 +180,33 @@ public class RenameResourceProcessor extends RenameProcessor implements IInitial
 		}	
 	}
 
-	public boolean initialize(final RefactoringArguments arguments) {
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof GenericRefactoringArguments) {
 			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
 			final String path= generic.getAttribute(ATTRIBUTE_PATH);
-			if (path != null)
+			if (path != null) {
 				fResource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(path));
+				if (fResource == null || !fResource.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.RenameResourceChange_does_not_exist, path));
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PATH));
 			final String name= generic.getAttribute(ATTRIBUTE_NAME);
-			try {
-				if (name != null && fResource != null && checkNewElementName(name).isOK())
-					fNewElementName= name;
-			} catch (JavaModelException exception) {
-				JavaPlugin.log(exception);
-			}
+			if (name != null) {
+				if (fResource != null) {
+					RefactoringStatus status= new RefactoringStatus();
+					try {
+						status= checkNewElementName(name);
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
+					if (!status.hasError())
+						fNewElementName= name;
+					else
+						return status;
+				}
+			} else 
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_NAME));
 		}
-		return fResource != null && fNewElementName != null;
+		return new RefactoringStatus();
 	}
 }

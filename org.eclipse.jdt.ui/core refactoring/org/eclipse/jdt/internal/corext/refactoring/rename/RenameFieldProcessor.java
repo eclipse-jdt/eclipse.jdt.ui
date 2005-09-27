@@ -30,6 +30,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
@@ -634,5 +635,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		
 		return typeWc.getField(getNewElementName());
 	}
-	
+
+	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		return new RefactoringStatus();
+	}
 }

@@ -46,6 +46,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
@@ -958,5 +959,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			}
 		}
 	}
-	
+
+	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		return new RefactoringStatus();
+	}
 }

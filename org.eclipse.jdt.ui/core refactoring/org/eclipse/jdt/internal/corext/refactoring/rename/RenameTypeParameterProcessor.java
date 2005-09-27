@@ -59,6 +59,7 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
@@ -404,5 +405,12 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	 */
 	public final void setUpdateReferences(final boolean update) {
 		fUpdateReferences= update;
+	}
+
+	/*
+	 * @see org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringObject#initialize(org.eclipse.ltk.core.refactoring.participants.RefactoringArguments)
+	 */
+	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
+		return new RefactoringStatus();
 	}
 }

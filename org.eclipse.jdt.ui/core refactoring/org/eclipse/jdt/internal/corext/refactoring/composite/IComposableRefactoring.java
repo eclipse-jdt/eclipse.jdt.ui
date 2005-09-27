@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.composite;
 
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringObject;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
  * 
  * @since 3.2
  */
-public interface IComposableRefactoring {
+public interface IComposableRefactoring extends IInitializableRefactoringObject {
 
 	/**
 	 * Returns the global working copy owner to use.
@@ -59,17 +59,6 @@ public interface IComposableRefactoring {
 	 *             if the working copy could not be acquired
 	 */
 	public ICompilationUnit getWorkingCopy(ICompilationUnit original) throws JavaModelException;
-
-	/**
-	 * Initializes the refactoring with the refactoring arguments.
-	 * 
-	 * @param arguments
-	 *            the refactoring arguments
-	 * @return <code>true</code> if the refactoring could be initialized,
-	 *         <code>false</code> otherwise. If the refactoring could not be
-	 *         initialized, it will not be executed.
-	 */
-	public boolean initialize(RefactoringArguments arguments);
 
 	/**
 	 * Sets the composite refactoring. This method is automatically called by

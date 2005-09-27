@@ -37,6 +37,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
@@ -420,5 +421,9 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			change= composite;
 		}
 		return change;
+	}
+
+	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		return new RefactoringStatus();
 	}
 }

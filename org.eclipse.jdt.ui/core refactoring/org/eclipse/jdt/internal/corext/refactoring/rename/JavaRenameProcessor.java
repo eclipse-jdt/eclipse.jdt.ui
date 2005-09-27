@@ -26,8 +26,9 @@ import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringObject;
 
-public abstract class JavaRenameProcessor extends RenameProcessor implements INameUpdating {
+public abstract class JavaRenameProcessor extends RenameProcessor implements IInitializableRefactoringObject, INameUpdating {
 	
 	private String fNewElementName;
 	

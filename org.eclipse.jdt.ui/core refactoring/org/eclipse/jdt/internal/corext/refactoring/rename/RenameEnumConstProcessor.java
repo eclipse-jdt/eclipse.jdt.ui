@@ -30,6 +30,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 public final class RenameEnumConstProcessor extends RenameFieldProcessor {
@@ -116,5 +117,12 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 			change= composite;
 		}
 		return change;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor#initialize(org.eclipse.ltk.core.refactoring.participants.RefactoringArguments)
+	 */
+	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		return new RefactoringStatus();
 	}
 }

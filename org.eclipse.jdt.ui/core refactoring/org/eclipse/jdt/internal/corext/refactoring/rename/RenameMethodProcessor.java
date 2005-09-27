@@ -32,6 +32,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
@@ -651,5 +652,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		ISourceRange nameRange= fMethod.getNameRange();
 		ReplaceEdit replaceEdit= new ReplaceEdit(nameRange.getOffset(), nameRange.getLength(), getNewElementName());
 		TextChangeCompatibility.addTextEdit(change, editName, replaceEdit);
+	}
+
+	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		return new RefactoringStatus();
 	}
 }	

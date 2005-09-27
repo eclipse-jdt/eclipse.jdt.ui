@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
@@ -135,10 +136,7 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	private String createNewPath(String newName) {
 		return fSourceFolder.getPath().removeLastSegments(1).append(newName).toString();
 	}
-	
-	/* non java-doc
-	 * @see Refactoring#checkInput(IProgressMonitor)
-	 */
+
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
@@ -154,9 +152,6 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	
 	//-- changes
 
-	/* non java-doc
-	 * @see IRefactoring#createChange(IProgressMonitor)
-	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
@@ -166,5 +161,8 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 			pm.done();
 		}	
 	}
-}
 
+	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		return new RefactoringStatus();
+	}
+}

@@ -36,6 +36,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
@@ -779,5 +780,9 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		QualifiedNameFinder.process(fQualifiedNameSearchResult, fType.getFullyQualifiedName(),  
 			fragment.getElementName() + "." + getNewElementName(), //$NON-NLS-1$
 			fFilePatterns, fType.getJavaProject().getProject(), pm);
-	}	
+	}
+
+	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		return new RefactoringStatus();
+	}
 }
