@@ -231,15 +231,12 @@ public class JavadocConfigurationBlock {
 		if (isArchive) {
 			String jarPathStr;
 			String insidePath= ""; //$NON-NLS-1$
-			int excIndex= initialValue.indexOf('!');
+			int excIndex= initialValue.indexOf("!/"); //$NON-NLS-1$
 			if (excIndex == -1) {
 				jarPathStr= initialValue.substring(prefix.length());
 			} else {
 				jarPathStr= initialValue.substring(prefix.length(), excIndex);
-				insidePath= initialValue.substring(excIndex + 1);
-				if (insidePath.length() > 0 && insidePath.charAt(0) == '/') {
-					insidePath= insidePath.substring(1);
-				}
+				insidePath= initialValue.substring(excIndex + 2);
 			}
 			IPath jarPath= new Path(jarPathStr);
 			fArchivePathField.setText(insidePath);

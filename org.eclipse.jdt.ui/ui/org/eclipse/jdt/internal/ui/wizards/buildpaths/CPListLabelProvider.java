@@ -119,17 +119,13 @@ public class CPListLabelProvider extends LabelProvider {
 			if (str != null) {
 				String prefix= JavaDocLocations.ARCHIVE_PREFIX;
 				if (str.startsWith(prefix)) {
-					int sepIndex= str.lastIndexOf('!');
+					int sepIndex= str.lastIndexOf("!/"); //$NON-NLS-1$
 					if (sepIndex == -1) {
 						arg= str.substring(prefix.length());
 					} else {
 						String archive= str.substring(prefix.length(), sepIndex);
-						String root= str.substring(sepIndex + 1);
-						if (root.length() > 0 && !root.equals(String.valueOf('/'))) {
-							arg= Messages.format(NewWizardMessages.CPListLabelProvider_twopart, new String[] { archive, root }); 
-						} else {
-							arg= archive;
-						}
+						String root= str.substring(sepIndex + 2);
+						arg= Messages.format(NewWizardMessages.CPListLabelProvider_twopart, new String[] { archive, root }); 
 					}
 				} else {
 					arg= str;
