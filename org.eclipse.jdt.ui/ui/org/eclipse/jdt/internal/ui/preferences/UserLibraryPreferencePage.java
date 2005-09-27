@@ -284,6 +284,7 @@ public class UserLibraryPreferencePage extends PreferencePage implements IWorkbe
 			fExportImportList.setCheckAllButtonIndex(0);
 			fExportImportList.setUncheckAllButtonIndex(1);
 			fExportImportList.setViewerSorter(new CPListElementSorter());
+			fExportImportList.setDialogFieldListener(this);
 			if (isSave()) {
 				fExportImportList.setLabelText(PreferencesMessages.UserLibraryPreferencePage_LoadSaveDialog_list_save_label); 
 				fExportImportList.setElements(fExistingLibraries);
