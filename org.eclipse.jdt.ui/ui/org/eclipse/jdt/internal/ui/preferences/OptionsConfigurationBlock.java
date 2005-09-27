@@ -627,6 +627,7 @@ public abstract class OptionsConfigurationBlock {
 				}
 				fDisabledProjectSettings= null;
 				updateControls();
+				validateSettings(null, null, null);
 			} else {
 				fDisabledProjectSettings= new IdentityHashMap();
 				for (int i= 0; i < fAllKeys.length; i++) {
@@ -637,6 +638,10 @@ public abstract class OptionsConfigurationBlock {
 				}
 			}
 		}
+	}
+	
+	public boolean areSettingsEnabled() {
+		return fDisabledProjectSettings == null || fProject == null;
 	}
 	
 	

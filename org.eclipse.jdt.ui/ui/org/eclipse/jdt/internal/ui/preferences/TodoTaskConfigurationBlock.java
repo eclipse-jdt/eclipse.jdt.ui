@@ -273,6 +273,10 @@ public class TodoTaskConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
+		if (!areSettingsEnabled()) {
+			return;
+		}
+		
 		if (changedKey != null) {
 			if (PREF_COMPILER_TASK_TAGS.equals(changedKey)) {
 				fTaskTagsStatus= validateTaskTags();

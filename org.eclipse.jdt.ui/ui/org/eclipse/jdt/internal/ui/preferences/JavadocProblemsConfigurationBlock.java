@@ -203,6 +203,10 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */	
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
+		if (!areSettingsEnabled()) {
+			return;
+		}
+		
 		if (changedKey != null) {
 			if (PREF_PB_INVALID_JAVADOC.equals(changedKey) ||
 					PREF_PB_MISSING_JAVADOC_TAGS.equals(changedKey) ||
@@ -218,7 +222,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 		fContext.statusChanged(new StatusInfo());
 	}
 	
-	private void updateEnableStates() {
+	private void updateEnableStates() {		
 		boolean enableJavadoc= checkValue(PREF_JAVADOC_SUPPORT, ENABLED);
 		enableConfigControls(enableJavadoc);
 
@@ -238,7 +242,7 @@ public class JavadocProblemsConfigurationBlock extends OptionsConfigurationBlock
 			setComboEnabled(PREF_PB_MISSING_JAVADOC_COMMENTS_VISIBILITY, enableMissingCommentsErrors);
 		}
 	}
-	
+			
 	protected void enableConfigControls(boolean enable) {
 		if (enable) {
 			if (fBlockEnableState != null) {

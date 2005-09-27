@@ -68,10 +68,10 @@ public class CodeFormatterPreferencePage extends PropertyAndPreferencePage {
 	 * @see org.eclipse.jdt.internal.ui.preferences.PropertyAndPreferencePage#enableProjectSpecificSettings(boolean)
 	 */
 	protected void enableProjectSpecificSettings(boolean useProjectSpecificSettings) {
+		super.enableProjectSpecificSettings(useProjectSpecificSettings);
 		if (fConfigurationBlock != null) {
 			fConfigurationBlock.enableProjectSpecificSettings(useProjectSpecificSettings);
 		}
-		super.enableProjectSpecificSettings(useProjectSpecificSettings);
 	}
 	
 	/* (non-Javadoc)

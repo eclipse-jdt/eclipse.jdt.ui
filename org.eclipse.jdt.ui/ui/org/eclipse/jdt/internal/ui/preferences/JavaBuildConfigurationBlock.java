@@ -222,6 +222,9 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */	
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
+		if (!areSettingsEnabled()) {
+			return;
+		}
 		
 		if (changedKey != null) {
 			if (PREF_PB_MAX_PER_UNIT.equals(changedKey)) {

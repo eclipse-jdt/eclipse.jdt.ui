@@ -404,6 +404,10 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */	
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
+		if (!areSettingsEnabled()) {
+			return;
+		}
+		
 		if (changedKey != null) {
 			if (PREF_PB_UNUSED_PARAMETER.equals(changedKey) ||
 					PREF_PB_DEPRECATION.equals(changedKey) ||
@@ -435,7 +439,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		boolean enableHiding= !checkValue(PREF_PB_LOCAL_VARIABLE_HIDING, IGNORE);
 		getCheckBox(PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD).setEnabled(enableHiding);
-		
 	}
 
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {

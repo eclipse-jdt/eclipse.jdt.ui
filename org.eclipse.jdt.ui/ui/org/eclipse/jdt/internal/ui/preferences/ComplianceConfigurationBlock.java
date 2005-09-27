@@ -313,6 +313,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	 * @param changedKey Key that changed, or null, if all changed.
 	 */	
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
+		if (!areSettingsEnabled()) {
+			return;
+		}
 		if (changedKey != null) {
 			if (INTR_DEFAULT_COMPLIANCE.equals(changedKey)) {
 				updateComplianceEnableState();
