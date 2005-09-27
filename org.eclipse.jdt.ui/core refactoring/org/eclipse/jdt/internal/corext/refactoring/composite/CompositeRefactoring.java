@@ -189,8 +189,9 @@ public class CompositeRefactoring extends Refactoring implements IInitializableR
 					final RefactoringArguments arguments= (RefactoringArguments) fRefactoringArguments.get(refactoring);
 					if (arguments != null) {
 
-						if (!composable.initialize(arguments))
-							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.CompositeRefactoring_error_setup, refactoring.getName()));
+						final RefactoringStatus result= composable.initialize(arguments);
+						if (result.hasFatalError())
+							return result;
 					}
 
 					if (!first && fRecheckInitialConditions)
@@ -242,7 +243,8 @@ public class CompositeRefactoring extends Refactoring implements IInitializableR
 					final RefactoringArguments arguments= (RefactoringArguments) fRefactoringArguments.get(refactoring);
 					if (arguments != null) {
 
-						if (composable.initialize(arguments))
+						final RefactoringStatus status= composable.initialize(arguments);
+						if (!status.hasFatalError())
 							return refactoring.checkInitialConditions(new SubProgressMonitor(monitor, 1));
 					}
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.CompositeRefactoring_error_setup, refactoring.getName()));
@@ -371,15 +373,13 @@ public class CompositeRefactoring extends Refactoring implements IInitializableR
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.recording.IInitializableRefactoringObject#initialize(org.eclipse.ltk.core.refactoring.participants.RefactoringArguments)
 	 */
-	public boolean initialize(final RefactoringArguments arguments) {
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		final RefactoringStatus status= new RefactoringStatus();
 		for (int index= 0; index < fRefactorings.length; index++) {
-			if (!fDisabledRefactorings.contains(fRefactorings[index]) && fRefactorings[index] instanceof IInitializableRefactoringObject) {
-				final IInitializableRefactoringObject refactoring= (IInitializableRefactoringObject) fRefactorings[index];
-				if (!refactoring.initialize(arguments))
-					return false;
-			}
+			if (!fDisabledRefactorings.contains(fRefactorings[index]) && fRefactorings[index] instanceof IInitializableRefactoringObject)
+				status.merge(((IInitializableRefactoringObject) fRefactorings[index]).initialize(arguments));
 		}
-		return true;
+		return status;
 	}
 
 	/**
