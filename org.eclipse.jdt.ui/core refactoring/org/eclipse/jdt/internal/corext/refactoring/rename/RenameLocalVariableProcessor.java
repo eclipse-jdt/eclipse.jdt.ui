@@ -404,29 +404,36 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
         return result;
     }
 
-	public Change createChange(IProgressMonitor pm) throws CoreException {
-		pm.done();
-		Change change= fChange;
-		if (change != null) {
-			final CompositeChange composite= new CompositeChange("", new Change[] { change}) { //$NON-NLS-1$
-				public RefactoringDescriptor getRefactoringDescriptor() {
-					final Map arguments= new HashMap();
-					arguments.put(ATTRIBUTE_HANDLE, fCu.getHandleIdentifier());
-					arguments.put(ATTRIBUTE_NAME, getNewElementName());
-					final ISourceRange range= fLocalVariable.getNameRange();
-					arguments.put(ATTRIBUTE_RANGE, new Integer(range.getOffset()).toString() + " " + new Integer(range.getLength()).toString()); //$NON-NLS-1$
-					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-					String project= null;
-					IJavaProject javaProject= fCu.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, MessageFormat.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, fNewName}), null, arguments);
-				}
-			};
-			composite.markAsSynthetic();
-			change= composite;
+	public Change createChange(IProgressMonitor monitor) throws CoreException {
+		try {
+			Change change= fChange;
+			if (change != null) {
+				final CompositeChange composite= new CompositeChange("", new Change[] { change}) { //$NON-NLS-1$
+
+					public RefactoringDescriptor getRefactoringDescriptor() {
+						final Map arguments= new HashMap();
+						arguments.put(ATTRIBUTE_HANDLE, fCu.getHandleIdentifier());
+						arguments.put(ATTRIBUTE_NAME, getNewElementName());
+						final ISourceRange range= fLocalVariable.getNameRange();
+						arguments.put(ATTRIBUTE_RANGE, new Integer(range.getOffset()).toString() + " " + new Integer(range.getLength()).toString()); //$NON-NLS-1$
+						arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+						String project= null;
+						IJavaProject javaProject= fCu.getJavaProject();
+						if (javaProject != null)
+							project= javaProject.getElementName();
+						return new RefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, MessageFormat.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, fNewName}), null, arguments);
+					}
+				};
+				composite.markAsSynthetic();
+				change= composite;
+			}
+			return change;
+		} finally {
+			fChange= null;
+			fCompilationUnitNode= null;
+			fTempDeclarationNode= null;
+			monitor.done();
 		}
-		return change;
 	}
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {

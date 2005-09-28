@@ -328,6 +328,8 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		if (fWillRenameType)
 			return fRenameTypeProcessor.createChange(pm);
 		
+		fRenameTypeProcessor= null;
+		
 		IResource resource= ResourceUtil.getResource(fCu);
 		if (resource != null && resource.isLinked())
 			return new DynamicValidationStateChange( 
@@ -354,8 +356,14 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 				final IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(path));
 				if (resource == null || !resource.exists())
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
-				else
+				else {
 					fCu= (ICompilationUnit) JavaCore.create(resource);
+					try {
+						computeRenameTypeRefactoring();
+					} catch (CoreException exception) {
+						JavaPlugin.log(exception);
+					}
+				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PATH));
 			final String name= generic.getAttribute(ATTRIBUTE_NAME);

@@ -36,10 +36,12 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -49,6 +51,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -643,37 +646,43 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	
 	//------------- Changes ---------------
 
-	public Change createChange(IProgressMonitor pm) throws CoreException {
-		pm.beginTask(RefactoringCoreMessages.RenameTypeRefactoring_creating_change, 4);
-		final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges) {
+	public Change createChange(IProgressMonitor monitor) throws CoreException {
+		try {
+			monitor.beginTask(RefactoringCoreMessages.RenameTypeRefactoring_creating_change, 4);
+			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges) {
 
-			public RefactoringDescriptor getRefactoringDescriptor() {
-				final Map arguments= new HashMap();
-				arguments.put(ATTRIBUTE_HANDLE, fType.getHandleIdentifier());
-				arguments.put(ATTRIBUTE_NAME, getNewElementName());
-				if (fFilePatterns != null && "".equals(fFilePatterns)) //$NON-NLS-1$
-					arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
-				arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-				arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
-				arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
-				String project= null;
-				IJavaProject javaProject= fType.getJavaProject();
-				if (javaProject != null)
-					project= javaProject.getElementName();
-				return new RefactoringDescriptor(ID_RENAME_TYPE, project, MessageFormat.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { fType.getFullyQualifiedName('.'), getNewElementName()}), null, arguments);
+				public RefactoringDescriptor getRefactoringDescriptor() {
+					final Map arguments= new HashMap();
+					arguments.put(ATTRIBUTE_HANDLE, fType.getHandleIdentifier());
+					arguments.put(ATTRIBUTE_NAME, getNewElementName());
+					if (fFilePatterns != null && "".equals(fFilePatterns)) //$NON-NLS-1$
+						arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
+					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+					arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
+					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
+					String project= null;
+					IJavaProject javaProject= fType.getJavaProject();
+					if (javaProject != null)
+						project= javaProject.getElementName();
+					return new RefactoringDescriptor(ID_RENAME_TYPE, project, MessageFormat.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { fType.getFullyQualifiedName('.'), getNewElementName()}), null, arguments);
+				}
+			};
+			result.addAll(fChangeManager.getAllChanges());
+			if (willRenameCU()) {
+				IResource resource= ResourceUtil.getResource(fType);
+				if (resource != null && resource.isLinked()) {
+					result.add(new RenameResourceChange(ResourceUtil.getResource(fType), getNewElementName() + ".java")); //$NON-NLS-1$)
+				} else {
+					result.add(new RenameCompilationUnitChange(fType.getCompilationUnit(), getNewElementName() + ".java")); //$NON-NLS-1$
+				}
 			}
-		};
-		result.addAll(fChangeManager.getAllChanges());
-		if (willRenameCU()) {
-			IResource resource= ResourceUtil.getResource(fType);
-			if (resource != null && resource.isLinked()) {
-				result.add(new RenameResourceChange(ResourceUtil.getResource(fType), getNewElementName() + ".java")); //$NON-NLS-1$)
-			} else {
-				result.add(new RenameCompilationUnitChange(fType.getCompilationUnit(), getNewElementName() + ".java")); //$NON-NLS-1$
-			}
+			monitor.worked(1);
+			return result;
+		} finally {
+			fChangeManager= null;
+			fQualifiedNameSearchResult= null;
+			fReferences= null;
 		}
-		pm.worked(1);
-		return result;
 	}
 	
 	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
@@ -783,6 +792,48 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			final String handle= generic.getAttribute(ATTRIBUTE_HANDLE);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+				else
+					fType= (IType) element;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_HANDLE));
+			final String name= generic.getAttribute(ATTRIBUTE_NAME);
+			if (name != null) {
+				if (fType != null) {
+					final RefactoringStatus status= checkNewElementName(name);
+					if (!status.hasError())
+						setNewElementName(name);
+					else
+						return status;
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_NAME));
+			final String patterns= generic.getAttribute(ATTRIBUTE_PATTERNS);
+			if (patterns != null && !"".equals(patterns)) //$NON-NLS-1$
+				fFilePatterns= patterns;
+			final String references= generic.getAttribute(ATTRIBUTE_REFERENCES);
+			if (references != null) {
+				fUpdateReferences= Boolean.valueOf(references).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REFERENCES));
+			final String matches= generic.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
+			if (matches != null) {
+				fUpdateTextualMatches= Boolean.valueOf(matches).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TEXTUAL_MATCHES));
+			final String qualified= generic.getAttribute(ATTRIBUTE_QUALIFIED);
+			if (qualified != null) {
+				fUpdateQualifiedNames= Boolean.valueOf(qualified).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_QUALIFIED));
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
 	}
 }

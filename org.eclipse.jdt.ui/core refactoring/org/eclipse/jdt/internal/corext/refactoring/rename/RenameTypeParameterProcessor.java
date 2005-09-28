@@ -20,12 +20,25 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
+import org.eclipse.osgi.util.NLS;
+
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -53,15 +66,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 /**
  * Rename processor to rename type parameters.
@@ -165,7 +169,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	private Change fChange= null;
 
 	/** The type parameter to rename */
-	private final ITypeParameter fTypeParameter;
+	private ITypeParameter fTypeParameter;
 
 	/** Should references to the type parameter be updated? */
 	private boolean fUpdateReferences= true;
@@ -281,6 +285,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 			}
 			return change;
 		} finally {
+			fChange= null;
 			monitor.done();
 		}
 	}
@@ -411,6 +416,40 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	 * @see org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringObject#initialize(org.eclipse.ltk.core.refactoring.participants.RefactoringArguments)
 	 */
 	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			final String handle= generic.getAttribute(ATTRIBUTE_HANDLE);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+				else
+					fTypeParameter= (ITypeParameter) element;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_HANDLE));
+			final String name= generic.getAttribute(ATTRIBUTE_NAME);
+			if (name != null) {
+				if (fTypeParameter != null) {
+					RefactoringStatus status= new RefactoringStatus();
+					try {
+						status= checkNewElementName(name);
+					} catch (CoreException exception) {
+						JavaPlugin.log(exception);
+					}
+					if (!status.hasError())
+						setNewElementName(name);
+					else
+						return status;
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_NAME));
+			final String references= generic.getAttribute(ATTRIBUTE_REFERENCES);
+			if (references != null) {
+				fUpdateReferences= Boolean.valueOf(references).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REFERENCES));
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
 	}
 }

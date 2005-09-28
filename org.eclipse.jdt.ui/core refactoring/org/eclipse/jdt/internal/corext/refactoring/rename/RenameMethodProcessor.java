@@ -104,8 +104,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		fMethod= method;
 		setNewElementName(fMethod.getElementName());
 		fUpdateReferences= true;
+		initializeWorkingCopyOwner();
+	}
+
+	protected void initializeWorkingCopyOwner() {
 		fWorkingCopyOwner= new WorkingCopyOwner() {/*must subclass*/};
-	}	
+	}
 	
 	protected void setData(RenameMethodProcessor other) {
 		fUpdateReferences= other.fUpdateReferences;
@@ -576,7 +580,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				
 	//-------- changes -----
 	
-	public final Change createChange(IProgressMonitor pm) throws CoreException {
+	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, fChangeManager.getAllChanges()) {
 				public RefactoringDescriptor getRefactoringDescriptor() {
@@ -592,7 +596,10 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				}
 			};
 		} finally {
-			pm.done();
+			fChangeManager= null;
+			fMethodsToRename= null;
+			fOccurrences= null;
+			monitor.done();
 		}
 	}
 	
@@ -665,8 +672,10 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
-				else
+				else {
 					fMethod= (IMethod) element;
+					initializeWorkingCopyOwner();
+				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_HANDLE));
 			final String name= generic.getAttribute(ATTRIBUTE_NAME);
