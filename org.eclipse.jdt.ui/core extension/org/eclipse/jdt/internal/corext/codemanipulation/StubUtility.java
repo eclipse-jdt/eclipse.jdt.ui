@@ -54,8 +54,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -63,6 +61,8 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -73,7 +73,6 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -84,222 +83,12 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
 
 public class StubUtility {
 	
-	
-	public static class GenStubSettings extends CodeGenerationSettings {
-	
-		public boolean callSuper;
-		public boolean methodOverwrites;
-		public boolean noBody;
-		public int methodModifiers;
-		
-		public GenStubSettings(CodeGenerationSettings settings) {
-			settings.setSettings(this);
-			methodModifiers= -1;	
-		}
-		
-	}
-		
+			
 	private static final String[] EMPTY= new String[0];
 	
-	/**
-	 * Generates a method stub including the method comment. Given a template
-	 * method, a stub with the same signature will be constructed so it can be
-	 * added to a type. The method body will be empty or contain a return or
-	 * super call.
-	 * @param cu The cu to create the source for
-	 * @param destTypeName The name of the type to which the method will be
-	 * added to
-	 * @param method A method template (method belongs to different type than the parent)
-	 * @param definingType The type that defines the method.
-	 * @param settings Options as defined above (<code>GenStubSettings</code>)
-	 * @param imports Imports required by the stub are added to the imports structure. If imports structure is <code>null</code>
-	 * all type names are qualified.
-	 * @return The generated code
-	 * @throws CoreException
-	 * @throws JavaModelException
+	/*
+	 * Don't use this method directly, use CodeGeneration.
 	 */
-	public static String genStub(ICompilationUnit cu, String destTypeName, IMethod method, IType definingType, GenStubSettings settings, IImportsStructure imports) throws CoreException {
-		String methName= method.getElementName();
-		String[] paramNames= suggestArgumentNames(method.getJavaProject(), method.getParameterNames());
-		String returnType= method.isConstructor() ? null : method.getReturnType();
-		String lineDelimiter= String.valueOf('\n'); // reformatting required
-		
-		
-		StringBuffer buf= new StringBuffer();
-		// add method comment
-		if (settings.createComments && cu != null) {
-			IMethod overridden= null;
-			if (settings.methodOverwrites && returnType != null) {
-				overridden= JavaModelUtil.findMethod(methName, method.getParameterTypes(), false, definingType.getMethods());
-			}
-			String[] typeParameterNames= getTypeParameterNames(method.getTypeParameters());
-			String comment= getMethodComment(cu, destTypeName, methName, paramNames, method.getExceptionTypes(), returnType, typeParameterNames, overridden, lineDelimiter);
-			if (comment != null) {
-				buf.append(comment);
-			} else {
-				buf.append("/**").append(lineDelimiter); //$NON-NLS-1$
-				buf.append(" *").append(lineDelimiter); //$NON-NLS-1$
-				buf.append(" */").append(lineDelimiter); //$NON-NLS-1$							
-			}
-			buf.append(lineDelimiter);
-		}
-		// add method declaration
-		String bodyContent= null;
-		if (!settings.noBody) {
-			String bodyStatement= getDefaultMethodBodyStatement(methName, paramNames, returnType, settings.callSuper);
-			bodyContent= getMethodBodyContent(returnType == null, method.getJavaProject(), destTypeName, methName, bodyStatement, lineDelimiter);
-			if (bodyContent == null) {
-				bodyContent= ""; //$NON-NLS-1$
-			}
-		}
-		int flags= settings.methodModifiers;
-		if (flags == -1) {
-			flags= method.getFlags();
-		}
-		
-		genMethodDeclaration(destTypeName, method, flags, bodyContent, imports, buf);
-		return buf.toString();
-	}
-
-	/**
-	 * Generates a method stub not including the method comment. Given a
-	 * template method and the body content, a stub with the same signature will
-	 * be constructed so it can be added to a type.
-	 * @param destTypeName The name of the type to which the method will be
-	 * added to
-	 * @param method A method template (method belongs to different type than the parent)
-	 * @param flags
-	 * @param bodyContent Content of the body
-	 * @param imports Imports required by the stub are added to the imports
-	 * structure. If imports structure is <code>null</code> all type names are
-	 * qualified.
-	 * @param buf The buffer to append the generated code.
-	 * @throws CoreException
-	 * @throws JavaModelException
-	 */
-	private static void genMethodDeclaration(String destTypeName, IMethod method, int flags, String bodyContent, IImportsStructure imports, StringBuffer buf) throws CoreException {
-		IType parentType= method.getDeclaringType();	
-		String methodName= method.getElementName();
-		String[] paramTypes= method.getParameterTypes();
-		String[] paramNames= suggestArgumentNames(parentType.getJavaProject(), method.getParameterNames());
-
-		String[] excTypes= method.getExceptionTypes();
-
-		boolean isConstructor= method.isConstructor();
-		String retTypeSig= isConstructor ? null : method.getReturnType();
-		
-		int lastParam= paramTypes.length -1;
-		
-		if (Flags.isPublic(flags) || (parentType.isInterface() && bodyContent != null)) {
-			buf.append("public "); //$NON-NLS-1$
-		} else if (Flags.isProtected(flags)) {
-			buf.append("protected "); //$NON-NLS-1$
-		} else if (Flags.isPrivate(flags)) {
-			buf.append("private "); //$NON-NLS-1$
-		}
-		if (Flags.isSynchronized(flags)) {
-			buf.append("synchronized "); //$NON-NLS-1$
-		}		
-		if (Flags.isVolatile(flags)) {
-			buf.append("volatile "); //$NON-NLS-1$
-		}
-		if (Flags.isStrictfp(flags)) {
-			buf.append("strictfp "); //$NON-NLS-1$
-		}
-		if (Flags.isStatic(flags)) {
-			buf.append("static "); //$NON-NLS-1$
-		}		
-			
-		if (isConstructor) {
-			buf.append(destTypeName);
-		} else {
-			String retTypeFrm;
-			if (!isPrimitiveType(retTypeSig)) {
-				retTypeFrm= resolveAndAdd(retTypeSig, parentType, imports);
-			} else {
-				retTypeFrm= Signature.toString(retTypeSig);
-			}
-			buf.append(retTypeFrm);
-			buf.append(' ');
-			buf.append(methodName);
-		}
-		buf.append('(');
-		for (int i= 0; i <= lastParam; i++) {
-			String paramTypeSig= paramTypes[i];
-			String paramTypeFrm;
-			
-			if (!isPrimitiveType(paramTypeSig)) {
-				paramTypeFrm= resolveAndAdd(paramTypeSig, parentType, imports);
-			} else {
-				paramTypeFrm= Signature.toString(paramTypeSig);
-			}
-			buf.append(paramTypeFrm);
-			buf.append(' ');
-			buf.append(paramNames[i]);
-			if (i < lastParam) {
-				buf.append(", "); //$NON-NLS-1$
-			}
-		}
-		buf.append(')');
-		
-		int lastExc= excTypes.length - 1;
-		if (lastExc >= 0) {
-			buf.append(" throws "); //$NON-NLS-1$
-			for (int i= 0; i <= lastExc; i++) {
-				String excTypeSig= excTypes[i];
-				String excTypeFrm= resolveAndAdd(excTypeSig, parentType, imports);
-				buf.append(excTypeFrm);
-				if (i < lastExc) {
-					buf.append(", "); //$NON-NLS-1$
-				}
-			}
-		}
-		if (bodyContent == null) {
-			buf.append(";\n\n"); //$NON-NLS-1$
-		} else {
-			buf.append(" {\n\t"); //$NON-NLS-1$
-			if (bodyContent.length() > 0) {
-				buf.append(bodyContent);
-				buf.append('\n');
-			}
-			buf.append("}\n");			 //$NON-NLS-1$
-		}
-	}
-	
-	public static String getDefaultMethodBodyStatement(String methodName, String[] paramNames, String retTypeSig, boolean callSuper) {
-		StringBuffer buf= new StringBuffer();
-		if (callSuper) {
-			if (retTypeSig != null) {
-				if (!Signature.SIG_VOID.equals(retTypeSig)) {
-					buf.append("return "); //$NON-NLS-1$
-				}
-				buf.append("super."); //$NON-NLS-1$
-				buf.append(methodName);
-			} else {
-				buf.append("super"); //$NON-NLS-1$
-			}
-			buf.append('(');			
-			for (int i= 0; i < paramNames.length; i++) {
-				if (i > 0) {
-					buf.append(", "); //$NON-NLS-1$
-				}
-				buf.append(paramNames[i]);
-			}
-			buf.append(");"); //$NON-NLS-1$
-		} else {
-			if (retTypeSig != null && !retTypeSig.equals(Signature.SIG_VOID)) {
-				if (!isPrimitiveType(retTypeSig) || Signature.getArrayCount(retTypeSig) > 0) {
-					buf.append("return null;"); //$NON-NLS-1$
-				} else if (retTypeSig.equals(Signature.SIG_BOOLEAN)) {
-					buf.append("return false;"); //$NON-NLS-1$
-				} else {
-					buf.append("return 0;"); //$NON-NLS-1$
-				}
-			}			
-		}
-		return buf.toString();
-	}	
-
 	public static String getMethodBodyContent(boolean isConstructor, IJavaProject project, String destTypeName, String methodName, String bodyStatement, String lineDelimiter) throws CoreException {
 		String templateName= isConstructor ? CodeTemplateContextType.CONSTRUCTORSTUB_ID : CodeTemplateContextType.METHODSTUB_ID;
 		Template template= getCodeTemplate(templateName, project);
@@ -317,6 +106,9 @@ public class StubUtility {
 		return str;
 	}
 	
+	/*
+	 * Don't use this method directly, use CodeGeneration.
+	 */
 	public static String getGetterMethodBodyContent(IJavaProject project, String destTypeName, String methodName, String fieldName, String lineDelimiter) throws CoreException {
 		String templateName= CodeTemplateContextType.GETTERSTUB_ID;
 		Template template= getCodeTemplate(templateName, project);
@@ -331,6 +123,9 @@ public class StubUtility {
 		return evaluateTemplate(context, template);
 	}
 	
+	/*
+	 * Don't use this method directly, use CodeGeneration.
+	 */
 	public static String getSetterMethodBodyContent(IJavaProject project, String destTypeName, String methodName, String fieldName, String paramName, String lineDelimiter) throws CoreException {
 		String templateName= CodeTemplateContextType.SETTERSTUB_ID;
 		Template template= getCodeTemplate(templateName, project);
@@ -360,12 +155,16 @@ public class StubUtility {
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeComment(ICompilationUnit, String, String, String, String)
+	 * Don't use this method directly, use CodeGeneration.
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getCompilationUnitContent(ICompilationUnit, String, String, String, String)
 	 */	
 	public static String getCompilationUnitContent(ICompilationUnit cu, String fileComment, String typeComment, String typeContent, String lineDelimiter) throws CoreException {
 		IPackageFragment pack= (IPackageFragment) cu.getParent();
 		String packDecl= pack.isDefaultPackage() ? "" : "package " + pack.getElementName() + ';'; //$NON-NLS-1$ //$NON-NLS-2$
-
+		return getCompilationUnitContent(cu, packDecl, fileComment, typeComment, typeContent, lineDelimiter);
+	}
+	
+	public static String getCompilationUnitContent(ICompilationUnit cu, String packDecl, String fileComment, String typeComment, String typeContent, String lineDelimiter) throws CoreException {
 		Template template= getCodeTemplate(CodeTemplateContextType.NEWTYPE_ID, cu.getJavaProject());
 		if (template == null) {
 			return null;
@@ -384,7 +183,9 @@ public class StubUtility {
 		return evaluateTemplate(context, template, fullLine);
 	}
 	
+	
 	/*
+	 * Don't use this method directly, use CodeGeneration.
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getFileComment(ICompilationUnit, String)
 	 */	
 	public static String getFileComment(ICompilationUnit cu, String lineDelimiter) throws CoreException {
@@ -400,7 +201,8 @@ public class StubUtility {
 		return evaluateTemplate(context, template);
 	}	
 
-	/**
+	/*
+	 * Don't use this method directly, use CodeGeneration.
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeComment(ICompilationUnit, String, String[], String)
 	 */		
 	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String[] typeParameterNames, String lineDelim) throws CoreException {
@@ -443,16 +245,44 @@ public class StubUtility {
 		return document.get();
 	}
 
-	private static String[] getParameterTypesQualifiedNames(IMethodBinding binding) {
+	/*
+	 * Returns the parameters type names used in see tags. Currently, these are always fully qualified.
+	 */
+	public static String[] getParameterTypeNamesForSeeTag(IMethodBinding binding) {
 		ITypeBinding[] typeBindings= binding.getParameterTypes();
 		String[] result= new String[typeBindings.length];
 		for (int i= 0; i < result.length; i++) {
-			if (typeBindings[i].isTypeVariable())
-				result[i]= typeBindings[i].getName();
-			else
-				result[i]= typeBindings[i].getTypeDeclaration().getQualifiedName();
+			ITypeBinding curr= typeBindings[i];
+			if (curr.isTypeVariable()) {
+				curr= curr.getErasure(); // in Javadoc only use type variable erasures
+			}
+			curr= curr.getTypeDeclaration(); // no parameterized types
+			result[i]= curr.getQualifiedName();
 		}
 		return result;
+	}
+	
+	/*
+	 * Returns the parameters type names used in see tags. Currently, these are always fully qualified.
+	 */
+	private static String[] getParameterTypeNamesForSeeTag(IMethod overridden) {
+		try {
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setProject(overridden.getJavaProject());
+			IBinding[] bindings= parser.createBindings(new IJavaElement[] { overridden }, null);
+			if (bindings.length == 1 && bindings[0] instanceof IMethodBinding) {
+				return getParameterTypeNamesForSeeTag((IMethodBinding) bindings[0]);
+			}
+		} catch (IllegalStateException e) {
+			// method does not exist
+		}
+		// fall back code. Not good for generic methods!
+		String[] paramTypes= overridden.getParameterTypes();
+		String[] paramTypeNames= new String[paramTypes.length];
+		for (int i= 0; i < paramTypes.length; i++) {
+			paramTypeNames[i]= Signature.toString(Signature.getTypeErasure(paramTypes[i]));
+		}
+		return paramTypeNames;
 	}
 
 	private static String getSeeTag(String declaringClassQualifiedName, String methodName, String[] parameterTypesQualifiedNames) {
@@ -472,31 +302,6 @@ public class StubUtility {
 		return buf.toString();
 	}
 	
-	private static String getSeeTag(IMethod overridden) throws JavaModelException {
-		IType declaringType= overridden.getDeclaringType();
-		StringBuffer buf= new StringBuffer();
-		buf.append("@see "); //$NON-NLS-1$
-		buf.append(declaringType.getFullyQualifiedName('.'));
-		buf.append('#'); 
-		buf.append(overridden.getElementName());
-		buf.append('(');
-		String[] paramTypes= overridden.getParameterTypes();
-		for (int i= 0; i < paramTypes.length; i++) {
-			if (i > 0) {
-				buf.append(", "); //$NON-NLS-1$
-			}
-			String curr= Signature.getTypeErasure(paramTypes[i]);
-			buf.append(JavaModelUtil.getResolvedTypeName(curr, declaringType));
-			int arrayCount= Signature.getArrayCount(curr);
-			while (arrayCount > 0) {
-				buf.append("[]"); //$NON-NLS-1$
-				arrayCount--;
-			}
-		}
-		buf.append(')');
-		return buf.toString();
-	}
-	
 	public static String[] getTypeParameterNames(ITypeParameter[] typeParameters) {
 		String[] typeParametersNames= new String[typeParameters.length];
 		for (int i= 0; i < typeParameters.length; i++) {
@@ -505,19 +310,8 @@ public class StubUtility {
 		return typeParametersNames;
 	}
 	
-	/**
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(IMethod,IMethod,String)
-	 */
-	public static String getMethodComment(IMethod method, IMethod overridden, String lineDelimiter) throws CoreException {
-		String retType= method.isConstructor() ? null : method.getReturnType();
-		String[] paramNames= method.getParameterNames();
-		String[] typeParameterNames= getTypeParameterNames(method.getTypeParameters());
-		
-		return getMethodComment(method.getCompilationUnit(), method.getDeclaringType().getElementName(),
-			method.getElementName(), paramNames, method.getExceptionTypes(), retType, typeParameterNames, overridden, lineDelimiter);
-	}
-
-	/**
+	/*
+	 * Don't use this method directly, use CodeGeneration.
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, String, String[], String[], String, String[], IMethod, String)
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, String[] typeParameterNames, IMethod overridden, String lineDelimiter) throws CoreException {
@@ -540,7 +334,9 @@ public class StubUtility {
 			context.setVariable(CodeTemplateContextType.RETURN_TYPE, Signature.toString(retTypeSig));
 		}
 		if (overridden != null) {
-			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(overridden));
+			String overriddenTypeName= overridden.getDeclaringType().getFullyQualifiedName('.');
+			String[] overriddenParamTypeNames= getParameterTypeNamesForSeeTag(overridden);
+			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(overriddenTypeName, methodName, overriddenParamTypeNames));
 		}
 		TemplateBuffer buffer;
 		try {
@@ -607,7 +403,9 @@ public class StubUtility {
 		return doc.get();
 	}
 	
-
+	/*
+	 * Don't use this method directly, use CodeGeneration.
+	 */
 	public static String getFieldComment(ICompilationUnit cu, String typeName, String fieldName, String lineDelimiter) throws CoreException {
 		Template template= getCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, cu.getJavaProject());
 		if (template == null) {
@@ -622,7 +420,8 @@ public class StubUtility {
 	}	
 	
 	
-	/**
+	/*
+	 * Don't use this method directly, use CodeGeneration.
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getSetterComment(ICompilationUnit, String, String, String, String, String, String, String)
 	 */
 	public static String getSetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String paramName, String bareFieldName, String lineDelimiter) throws CoreException {
@@ -644,7 +443,8 @@ public class StubUtility {
 		return evaluateTemplate(context, template);
 	}	
 	
-	/**
+	/*
+	 * Don't use this method directly, use CodeGeneration.
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getGetterComment(ICompilationUnit, String, String, String, String, String, String)
 	 */
 	public static String getGetterComment(ICompilationUnit cu, String typeName, String methodName, String fieldName, String fieldType, String bareFieldName, String lineDelimiter) throws CoreException {
@@ -664,7 +464,7 @@ public class StubUtility {
 		return evaluateTemplate(context, template);
 	}
 	
-	public static String evaluateTemplate(CodeTemplateContext context, Template template) throws CoreException {
+	private static String evaluateTemplate(CodeTemplateContext context, Template template) throws CoreException {
 		TemplateBuffer buffer;
 		try {
 			buffer= context.evaluate(template);
@@ -682,7 +482,7 @@ public class StubUtility {
 		return str;
 	}
 	
-	public static String evaluateTemplate(CodeTemplateContext context, Template template, String[] fullLineVariables) throws CoreException {
+	private static String evaluateTemplate(CodeTemplateContext context, Template template, String[] fullLineVariables) throws CoreException {
 		TemplateBuffer buffer;
 		try {
 			buffer= context.evaluate(template);
@@ -700,41 +500,14 @@ public class StubUtility {
 		}
 	}
 
-	/**
-	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, MethodDeclaration, IMethodBinding, String)
-	 */
-	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
-		if (overridden != null) {
-			overridden= overridden.getMethodDeclaration();
-			String declaringClassQualifiedName= overridden.getDeclaringClass().getQualifiedName();
-			String[] parameterTypesQualifiedNames= getParameterTypesQualifiedNames(overridden);			
-			return getMethodComment(cu, typeName, decl, true, overridden.isDeprecated(), declaringClassQualifiedName, parameterTypesQualifiedNames, lineDelimiter);
-		} else {
-			return getMethodComment(cu, typeName, decl, false, false, null, null, lineDelimiter);
-		}
-	}
 	
-	/**
-	 * Returns the comment for a method using the comment code templates.
-	 * <code>null</code> is returned if the template is empty.
-	 * @param cu The compilation unit to which the method belongs
-	 * @param typeName Name of the type to which the method belongs.
-	 * @param decl The AST MethodDeclaration node that will be added as new
-	 * method.
-	 * @param isOverridden <code>true</code> iff decl overrides another method
-	 * @param isDeprecated <code>true</code> iff the method that decl overrides is deprecated.
-	 * Note: it must not be <code>true</code> if isOverridden is <code>false</code>.
-	 * @param declaringClassQualifiedName Fully qualified name of the type in which the overriddden 
-	 * method (if any exists) in declared. If isOverridden is <code>false</code>, this is ignored.
-	 * @param parameterTypesQualifiedNames Fully qualified names of parameter types of the type in which the overriddden 
-	 * method (if any exists) in declared. If isOverridden is <code>false</code>, this is ignored.
-	 * @param lineDelimiter The line delimiter to use
-	 * @return String Returns the method comment or <code>null</code> if the
-	 * configured template is empty. 
-	 * (formatting required)
-	 * @throws CoreException
+	/*
+	 * Don't use this method directly, use CodeGeneration.
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, MethodDeclaration, boolean, String, String[], String)
 	 */
-	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, boolean isOverridden, boolean isDeprecated, String declaringClassQualifiedName, String[] parameterTypesQualifiedNames, String lineDelimiter) throws CoreException {
+	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, boolean isDeprecated, String overriddenMethodDeclaringTypeName, String[] overriddenMethodParameterTypeNames, String lineDelimiter) throws CoreException {
+		
+		boolean isOverridden= overriddenMethodDeclaringTypeName != null && overriddenMethodParameterTypeNames != null;
 		String templateName= CodeTemplateContextType.METHODCOMMENT_ID;
 		if (decl.isConstructor()) {
 			templateName= CodeTemplateContextType.CONSTRUCTORCOMMENT_ID;
@@ -750,12 +523,11 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.ENCLOSING_TYPE, typeName);
 		context.setVariable(CodeTemplateContextType.ENCLOSING_METHOD, decl.getName().getIdentifier());
 		if (!decl.isConstructor()) {
-			ASTNode returnType= (decl.getAST().apiLevel() == AST.JLS2) ? decl.getReturnType() : decl.getReturnType2();
-			context.setVariable(CodeTemplateContextType.RETURN_TYPE, ASTNodes.asString(returnType));
+			context.setVariable(CodeTemplateContextType.RETURN_TYPE, ASTNodes.asString(getReturnType(decl)));
 		}
 		if (isOverridden) {
 			String methodName= decl.getName().getIdentifier();
-			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(declaringClassQualifiedName, methodName, parameterTypesQualifiedNames));
+			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(overriddenMethodDeclaringTypeName, methodName, overriddenMethodParameterTypeNames));
 		}
 		
 		TemplateBuffer buffer;
@@ -798,7 +570,7 @@ public class StubUtility {
 		
 		String returnType= null;
 		if (!decl.isConstructor()) {
-			returnType= ASTNodes.asString((decl.getAST().apiLevel() == AST.JLS2) ? decl.getReturnType() : decl.getReturnType2());
+			returnType= ASTNodes.asString(getReturnType(decl));
 		}
 		int[] tagOffsets= position.getOffsets();
 		for (int i= tagOffsets.length - 1; i >= 0; i--) { // from last to first
@@ -810,6 +582,15 @@ public class StubUtility {
 		}
 		return textBuffer.get();
 	}
+	
+	/**
+	 * @deprecated Deprecated to avoid deprecated warnings
+	 */
+	private static ASTNode getReturnType(MethodDeclaration decl) {
+		// used from API, can't eliminate
+		return (decl.getAST().apiLevel() == AST.JLS2) ? decl.getReturnType() : decl.getReturnType2();
+	}
+	
 	
 	private static TemplateVariable findVariable(TemplateBuffer buffer, String variable) {
 		TemplateVariable[] positions= buffer.getVariables();
@@ -884,205 +665,7 @@ public class StubUtility {
 		}
 		return true;
 	}
-
-	private static boolean isPrimitiveType(String typeName) {
-		char first= Signature.getElementType(typeName).charAt(0);
-		return (first != Signature.C_RESOLVED && first != Signature.C_UNRESOLVED && first != Signature.C_TYPE_VARIABLE);
-	}
-
-	private static String resolveAndAdd(String refTypeSig, IType declaringType, IImportsStructure imports) throws JavaModelException {
-		int genericStart = refTypeSig.indexOf(Signature.C_GENERIC_START);
-		if (genericStart != -1) {
-			// generic type
-			StringBuffer buf= new StringBuffer();
-			
-			String erasure= resolveAndAdd(Signature.getTypeErasure(refTypeSig), declaringType, imports);
-			buf.append(erasure);
-			buf.append('<');
-			String[] typeArguments= Signature.getTypeArguments(refTypeSig);
-			if (typeArguments.length > 0) {
-				for (int i= 0; i < typeArguments.length; i++) {
-					if (i > 0) {
-						buf.append(", "); //$NON-NLS-1$
-					}
-					buf.append(resolveAndAdd(typeArguments[i], declaringType, imports));
-				}
-			}
-			buf.append('>');
-			return buf.toString();
-		}
-		if (refTypeSig.length() > 0) {
-			switch (refTypeSig.charAt(0)) {
-				case Signature.C_ARRAY :
-					int arrayCount= Signature.getArrayCount(refTypeSig);
-					StringBuffer buf= new StringBuffer();
-					buf.append(resolveAndAdd(Signature.getElementType(refTypeSig), declaringType, imports));
-					for (int i= 0; i < arrayCount; i++) {
-						buf.append("[]"); //$NON-NLS-1$
-					}
-					return buf.toString();
-				case Signature.C_RESOLVED:
-				case Signature.C_UNRESOLVED:
-					String resolvedTypeName= JavaModelUtil.getResolvedTypeName(refTypeSig, declaringType);
-					if (resolvedTypeName != null) {
-						if (imports == null) {
-							return resolvedTypeName;
-						} else {
-							return imports.addImport(resolvedTypeName);
-						}
-					}
-					break;
-				case Signature.C_EXTENDS:
-					return "? extends " + resolveAndAdd(refTypeSig.substring(1), declaringType, imports); //$NON-NLS-1$
-				case Signature.C_SUPER:
-					return "? super " + resolveAndAdd(refTypeSig.substring(1), declaringType, imports); //$NON-NLS-1$
-			}
-		}
-		return Signature.toString(refTypeSig);
-	}
 		
-	/**
-	 * Finds a method in a list of methods.
-	 * @param method
-	 * @param allMethods
-	 * @return The found method or null, if nothing found
-	 * @throws JavaModelException
-	 */
-	private static IMethod findMethod(IMethod method, List allMethods) throws JavaModelException {
-		String name= method.getElementName();
-		String[] paramTypes= method.getParameterTypes();
-		boolean isConstructor= method.isConstructor();
-
-		for (int i= allMethods.size() - 1; i >= 0; i--) {
-			IMethod curr= (IMethod) allMethods.get(i);
-			if (JavaModelUtil.isSameMethodSignature(name, paramTypes, isConstructor, curr)) {
-				return curr;
-			}			
-		}
-		return null;
-	}
-
-	/**
-	 * Returns all unimplemented constructors of a type including root type default 
-	 * constructors if there are no other superclass constructors unimplemented. 
-	 * @param type The type to create constructors for
-	 * @return Returns the generated stubs or <code>null</code> if the creation has been canceled
-	 * @throws CoreException
-	 */
-	public static IMethod[] getOverridableConstructors(IType type) throws CoreException {
-		List constructorMethods= new ArrayList();
-		ITypeHierarchy hierarchy= type.newSupertypeHierarchy(null);				
-		IType supertype= hierarchy.getSuperclass(type);
-		if (supertype == null)
-			return (new IMethod[0]);
-
-		IMethod[] superMethods= supertype.getMethods();
-		boolean constuctorFound= false;
-		String typeName= type.getElementName();
-		IMethod[] methods= type.getMethods();
-		for (int i= 0; i < superMethods.length; i++) {
-				IMethod curr= superMethods[i];
-				if (curr.isConstructor())  {
-					constuctorFound= true;
-					if (JavaModelUtil.isVisibleInHierarchy(curr, type.getPackageFragment()))
-						if (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null)
-							constructorMethods.add(curr);
-		
-				}
-		}
-		
-		// http://bugs.eclipse.org/bugs/show_bug.cgi?id=38487
-		if (!constuctorFound)  {
-			IType objectType= type.getJavaProject().findType("java.lang.Object"); //$NON-NLS-1$
-			IMethod curr= objectType.getMethod("Object", EMPTY);  //$NON-NLS-1$
-			if (JavaModelUtil.findMethod(typeName, curr.getParameterTypes(), true, methods) == null) {
-				constructorMethods.add(curr);
-			}
-		}
-		return (IMethod[]) constructorMethods.toArray(new IMethod[constructorMethods.size()]);
-	}
-
-	/**
-	 * Returns all overridable methods of a type
-	 * @param type The type to search the overridable methods for 
-	 * @param hierarchy The type hierarchy of the type
- 	 * @param isSubType If set, the result can include methods of the passed type, if not only methods from super
-	 * types are considered
-	 * @return Returns the all methods that can be overridden
-	 * @throws JavaModelException
-	 */
-	public static IMethod[] getOverridableMethods(IType type, ITypeHierarchy hierarchy, boolean isSubType) throws JavaModelException {
-		List allMethods= new ArrayList();
-
-		IMethod[] typeMethods= type.getMethods();
-		for (int i= 0; i < typeMethods.length; i++) {
-			IMethod curr= typeMethods[i];
-			if (!curr.isConstructor() && !Flags.isStatic(curr.getFlags()) && !Flags.isPrivate(curr.getFlags())) {
-				allMethods.add(curr);
-			}
-		}
-
-		IType[] superTypes= hierarchy.getAllSuperclasses(type);
-		for (int i= 0; i < superTypes.length; i++) {
-			IMethod[] methods= superTypes[i].getMethods();
-			for (int k= 0; k < methods.length; k++) {
-				IMethod curr= methods[k];
-				if (!curr.isConstructor() && !Flags.isStatic(curr.getFlags()) && !Flags.isPrivate(curr.getFlags())) {
-					if (findMethod(curr, allMethods) == null) {
-						allMethods.add(curr);
-					}
-				}
-			}
-		}
-
-		IType[] superInterfaces= hierarchy.getAllSuperInterfaces(type);
-		for (int i= 0; i < superInterfaces.length; i++) {
-			IMethod[] methods= superInterfaces[i].getMethods();
-			for (int k= 0; k < methods.length; k++) {
-				IMethod curr= methods[k];
-
-				// binary interfaces can contain static initializers (variable intializations)
-				// 1G4CKUS
-				if (!Flags.isStatic(curr.getFlags())) {
-					IMethod impl= findMethod(curr, allMethods);
-					if (impl == null || !JavaModelUtil.isVisibleInHierarchy(impl, type.getPackageFragment()) || prefereInterfaceMethod(hierarchy, curr, impl)) {
-						if (impl != null) {
-							allMethods.remove(impl);
-						}
-						// implement an interface method when it does not exist in the hierarchy
-						// or when it throws less exceptions that the implemented
-						allMethods.add(curr);
-					}
-				}
-			}
-		}
-		if (!isSubType) {
-			allMethods.removeAll(Arrays.asList(typeMethods));
-		}
-		// remove finals
-		for (int i= allMethods.size() - 1; i >= 0; i--) {
-			IMethod curr= (IMethod) allMethods.get(i);
-			if (Flags.isFinal(curr.getFlags())) {
-				allMethods.remove(i);
-			}
-		}
-		return (IMethod[]) allMethods.toArray(new IMethod[allMethods.size()]);
-	}
-	
-	private static boolean prefereInterfaceMethod(ITypeHierarchy hierarchy, IMethod interfaceMethod, IMethod curr) throws JavaModelException {
-		if (Flags.isFinal(curr.getFlags())) {
-			return false;
-		}
-		IType interfaceType= interfaceMethod.getDeclaringType();
-		IType[] interfaces= hierarchy.getAllSuperInterfaces(curr.getDeclaringType());
-		for (int i= 0; i < interfaces.length; i++) {
-			if (interfaces[i] == interfaceType) {
-				return false;
-			}
-		}
-		return curr.getExceptionTypes().length > interfaceMethod.getExceptionTypes().length;
-	}	
-
 	/**
 	 * Returns the line delimiter which is used in the specified project.
 	 * 

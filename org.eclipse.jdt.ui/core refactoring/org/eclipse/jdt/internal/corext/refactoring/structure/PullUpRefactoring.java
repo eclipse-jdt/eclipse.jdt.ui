@@ -98,6 +98,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
+import org.eclipse.jdt.ui.CodeGeneration;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public final class PullUpRefactoring extends HierarchyRefactoring {
@@ -1031,7 +1033,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 				for (int i= 0; i < fullParamNames.length; i++) {
 					fullParamNames[i]= Bindings.getFullyQualifiedName(params[i]);
 				}
-				String comment= StubUtility.getMethodComment(cu, enclosingTypeName, newMethodNode, true, false, fullTypeName, fullParamNames, StubUtility.getLineDelimiterUsed(cu));
+				String comment= CodeGeneration.getMethodComment(cu, enclosingTypeName, newMethodNode, false, fullTypeName, fullParamNames, StubUtility.getLineDelimiterUsed(cu));
 				return (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
 			}
 		}

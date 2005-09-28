@@ -34,7 +34,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.templates.Template;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -55,7 +54,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -106,8 +104,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -118,7 +114,6 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
 
 /**
  * Refactoring processor to extract interfaces.
@@ -495,7 +490,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					}
 				}
 			}
-			final String comment= StubUtility.getMethodComment(fSubType.getCompilationUnit(), fSubType.getElementName(), declaration, true, false, string, names, StubUtility.getLineDelimiterUsed(fSubType.getJavaProject())); 
+			final String comment= CodeGeneration.getMethodComment(fSubType.getCompilationUnit(), fSubType.getElementName(), declaration, false, string, names, StubUtility.getLineDelimiterUsed(fSubType.getJavaProject())); 
 			if (comment != null) {
 				if (declaration.getJavadoc() != null) {
 					rewrite.replace(declaration.getJavadoc(), rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC), null);
@@ -811,28 +806,17 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		Assert.isNotNull(imports);
 		Assert.isNotNull(content);
 		final IPackageFragment fragment= (IPackageFragment) unit.getParent();
-		final Template template= new ProjectTemplateStore(unit.getJavaProject().getProject()).findTemplateById(CodeTemplateContextType.NEWTYPE_ID);
-		if (template != null) {
-			final CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), unit.getJavaProject(), StubUtility.getLineDelimiterUsed(fSubType.getJavaProject()));
-			context.setCompilationUnitVariables(unit);
-			final StringBuffer buffer= new StringBuffer();
-			final String delimiter= StubUtility.getLineDelimiterUsed(fSubType.getJavaProject());
-			if (!fragment.isDefaultPackage()) {
-				buffer.append("package " + fragment.getElementName() + ";"); //$NON-NLS-1$ //$NON-NLS-2$
-				buffer.append(delimiter);
-				buffer.append(delimiter);
-			}
-			if (imports.length() > 0)
-				buffer.append(imports);
-
-			context.setVariable(CodeTemplateContextType.PACKAGE_DECLARATION, buffer.toString());
-			context.setVariable(CodeTemplateContextType.FILE_COMMENT, fileComment != null ? fileComment : ""); //$NON-NLS-1$
-			context.setVariable(CodeTemplateContextType.TYPE_COMMENT, comment != null ? comment : ""); //$NON-NLS-1$
-			context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, content);
-			context.setVariable(CodeTemplateContextType.TYPENAME, Signature.getQualifier(unit.getElementName()));
-			return StubUtility.evaluateTemplate(context, template);
+		final StringBuffer buffer= new StringBuffer();
+		final String delimiter= StubUtility.getLineDelimiterUsed(fSubType.getJavaProject());
+		if (!fragment.isDefaultPackage()) {
+			buffer.append("package " + fragment.getElementName() + ";"); //$NON-NLS-1$ //$NON-NLS-2$
+			buffer.append(delimiter);
+			buffer.append(delimiter);
 		}
-		return null;
+		if (imports.length() > 0)
+			buffer.append(imports);
+		
+		return StubUtility.getCompilationUnitContent(unit, buffer.toString(), fileComment, comment, content, delimiter);
 	}
 
 	/**

@@ -371,11 +371,12 @@ public class JavadocTagsSubProcessor {
 		if (declaration instanceof MethodDeclaration) {
 			MethodDeclaration methodDecl= (MethodDeclaration) declaration;
 			IMethodBinding methodBinding= methodDecl.resolveBinding();
+			IMethodBinding overridden= null;
 			if (methodBinding != null) {
-				methodBinding= Bindings.findMethodDeclarationInHierarchy(binding, methodBinding);
+				overridden= Bindings.findMethodDefininition(methodBinding, true);
 			}
 
-			String string= CodeGeneration.getMethodComment(cu, binding.getName(), methodDecl, methodBinding, String.valueOf('\n'));
+			String string= CodeGeneration.getMethodComment(cu, binding.getName(), methodDecl, overridden, String.valueOf('\n'));
 			if (string != null) {
 				String label= CorrectionMessages.JavadocTagsSubProcessor_addjavadoc_method_description;
 				proposals.add(new AddJavadocCommentProposal(label, cu, 1, declaration.getStartPosition(), string));

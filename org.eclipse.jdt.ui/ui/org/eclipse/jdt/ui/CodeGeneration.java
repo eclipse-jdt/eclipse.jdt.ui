@@ -133,7 +133,14 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
-		return StubUtility.getMethodComment(cu, declaringTypeName, decl, overridden, lineDelimiter);
+		if (overridden != null) {
+			overridden= overridden.getMethodDeclaration();
+			String declaringClassQualifiedName= overridden.getDeclaringClass().getQualifiedName();
+			String[] parameterTypesQualifiedNames= StubUtility.getParameterTypeNamesForSeeTag(overridden);
+			return StubUtility.getMethodComment(cu, declaringTypeName, decl, overridden.isDeprecated(), declaringClassQualifiedName, parameterTypesQualifiedNames, lineDelimiter);
+		} else {
+			return StubUtility.getMethodComment(cu, declaringTypeName, decl, false, null, null, lineDelimiter);
+		}
 	}
 
 	/**
@@ -204,8 +211,41 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
 	public static String getMethodComment(IMethod method, IMethod overridden, String lineDelimiter) throws CoreException {
-		return StubUtility.getMethodComment(method, overridden, lineDelimiter);
-	}	
+		String retType= method.isConstructor() ? null : method.getReturnType();
+		String[] paramNames= method.getParameterNames();
+		String[] typeParameterNames= StubUtility.getTypeParameterNames(method.getTypeParameters());
+		
+		return StubUtility.getMethodComment(method.getCompilationUnit(), method.getDeclaringType().getElementName(),
+			method.getElementName(), paramNames, method.getExceptionTypes(), retType, typeParameterNames, overridden, lineDelimiter);
+	}
+	
+	/**
+	 * Returns the comment for a method or constructor using the comment code templates (constructor / method / overriding method).
+	 * <code>null</code> is returned if the template is empty.
+	 * <p>The returned string is unformatted and not indented.
+	 * 
+	 * @param cu The compilation unit to which the method belongs. The compilation unit does not need to exist.
+	 * @param declaringTypeName Name of the type to which the method belongs. For inner types the name must be qualified and include the outer
+	 * types names (dot separated). See {@link org.eclipse.jdt.core.IType#getTypeQualifiedName(char)}.
+
+	 * @param decl The MethodDeclaration AST node that will be added as new
+	 * method. The node does not need to exist in an AST (no parent needed) and does not need to resolve.
+	 * See {@link org.eclipse.jdt.core.dom.AST#newMethodDeclaration()} for how to create such a node.
+	 * @param isDeprecated If set, the method is deprecated
+	 * 	@param overriddenMethodDeclaringTypeName If a method is overridden, the fully qualified type name of the overridden method's declaring type,
+	 * or <code>null</code> if no method is overridden.
+	 * 	@param overriddenMethodParameterTypeNames If a method is overridden, the fully qualified parameter type names of the overridden method,
+	 * or <code>null</code> if no method is overridden.
+	 * @param lineDelimiter The line delimiter to be used.
+	 * @return Returns the constructed comment or <code>null</code> if
+	 * the comment code template is empty. The returned string is unformatted and and has no indent (formatting required).
+	 * @throws CoreException Thrown when the evaluation of the code template fails.
+	 * @since 3.2
+	 */
+
+	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, MethodDeclaration decl, boolean isDeprecated, String overriddenMethodDeclaringTypeName, String[] overriddenMethodParameterTypeNames, String lineDelimiter) throws CoreException {
+		return StubUtility.getMethodComment(cu, declaringTypeName, decl, isDeprecated, overriddenMethodDeclaringTypeName, overriddenMethodParameterTypeNames, lineDelimiter);
+	}
 
 	/**
 	 * Returns the content of the body for a method or constructor using the method body templates.

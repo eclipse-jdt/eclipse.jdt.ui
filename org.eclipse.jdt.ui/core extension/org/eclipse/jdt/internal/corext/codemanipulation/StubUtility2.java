@@ -130,7 +130,7 @@ public final class StubUtility2 {
 		}
 
 		if (settings != null && settings.createComments) {
-			String string= getMethodComment(unit, type, decl, binding, delimiter);
+			String string= CodeGeneration.getMethodComment(unit, type, decl, binding, delimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);
@@ -236,7 +236,7 @@ public final class StubUtility2 {
 		}
 
 		if (settings != null && settings.createComments) {
-			String string= getMethodComment(unit, typeBinding.getName(), decl, superConstructor, delimiter);
+			String string= CodeGeneration.getMethodComment(unit, typeBinding.getName(), decl, superConstructor, delimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);
@@ -342,7 +342,7 @@ public final class StubUtility2 {
 		}
 
 		if (settings != null && settings.createComments) {
-			String string= getMethodComment(unit, qualifiedName, decl, methodBinding, delimiter);
+			String string= CodeGeneration.getMethodComment(unit, qualifiedName, decl, methodBinding, delimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);
@@ -428,7 +428,7 @@ public final class StubUtility2 {
 		}
 
 		if (settings.createComments) {
-			String string= getMethodComment(unit, type, decl, binding, delimiter);
+			String string= CodeGeneration.getMethodComment(unit, type, decl, binding, delimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);
@@ -516,7 +516,7 @@ public final class StubUtility2 {
 		}
 
 		if (settings != null && settings.createComments) {
-			String string= getMethodComment(unit, type, decl, binding, delimiter);
+			String string= CodeGeneration.getMethodComment(unit, type, decl, binding, delimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);
@@ -739,17 +739,6 @@ public final class StubUtility2 {
 		return ASTNodeFactory.newModifiers(ast, modifiers);
 	}
 
-	private static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, IMethodBinding overridden, String lineDelimiter) throws CoreException {
-		if (overridden != null) {
-			overridden= overridden.getMethodDeclaration();
-			String declaringClassQualifiedName= overridden.getDeclaringClass().getQualifiedName();
-			String[] parameterTypesQualifiedNames= getParameterTypesQualifiedNames(overridden);
-			return StubUtility.getMethodComment(cu, typeName, decl, true, overridden.isDeprecated(), declaringClassQualifiedName, parameterTypesQualifiedNames, lineDelimiter);
-		} else {
-			return StubUtility.getMethodComment(cu, typeName, decl, false, false, null, null, lineDelimiter);
-		}
-	}
-
 	public static IMethodBinding[] getOverridableMethods(AST ast, ITypeBinding typeBinding, boolean isSubType) {
 		List allMethods= new ArrayList();
 		IMethodBinding[] typeMethods= typeBinding.getDeclaredMethods();
@@ -812,26 +801,6 @@ public final class StubUtility2 {
 	private static String getParameterName(ICompilationUnit unit, IVariableBinding binding, String[] excluded) {
 		final String name= NamingConventions.removePrefixAndSuffixForFieldName(unit.getJavaProject(), binding.getName(), binding.getModifiers());
 		return StubUtility.suggestArgumentName(unit.getJavaProject(), name, excluded);
-	}
-
-	private static String[] getParameterTypesQualifiedNames(IMethodBinding binding) {
-		ITypeBinding[] typeBindings= binding.getParameterTypes();
-		String[] result= new String[typeBindings.length];
-		for (int i= 0; i < result.length; i++) {
-			if (typeBindings[i].isTypeVariable())
-				result[i]= typeBindings[i].getName();
-			else {
-				if (binding.isVarargs() && typeBindings[i].isArray() && i == typeBindings.length - 1) {
-					StringBuffer buffer= new StringBuffer(typeBindings[i].getElementType().getQualifiedName());
-					for (int dim= 1; dim < typeBindings[i].getDimensions(); dim++)
-						buffer.append("[]"); //$NON-NLS-1$
-					buffer.append("..."); //$NON-NLS-1$
-					result[i]= buffer.toString();
-				} else
-					result[i]= typeBindings[i].getTypeDeclaration().getQualifiedName();
-			}
-		}
-		return result;
 	}
 
 	public static IMethodBinding[] getUnimplementedMethods(ITypeBinding typeBinding) {
