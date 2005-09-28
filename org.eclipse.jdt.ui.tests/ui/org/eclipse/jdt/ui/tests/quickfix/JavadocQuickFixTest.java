@@ -1075,7 +1075,58 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		assertEqualString(preview1, expected);
 	}
 
-	
+	public void testMissingMethodComment4() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class B extends A<Integer> {\n");
+		buf.append("    public void foo(Integer x) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class A<T extends Number> {\n");
+		buf.append("    /**\n");
+		buf.append("     * @param x\n");
+		buf.append("     */\n");
+		buf.append("    public void foo(T x) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("B.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("/**\n");
+		buf.append(" */\n");
+		buf.append("public class B extends A<Integer> {\n");
+		buf.append("    /**\n");
+		buf.append("     * A override comment.\n");
+		buf.append("     * @see pack.A#foo(java.lang.Number)\n");
+		buf.append("     */\n");
+		buf.append("    public void foo(Integer x) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("class A<T extends Number> {\n");
+		buf.append("    /**\n");
+		buf.append("     * @param x\n");
+		buf.append("     */\n");
+		buf.append("    public void foo(T x) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+		}
+
 	
 	public void testMissingConstructorComment() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
