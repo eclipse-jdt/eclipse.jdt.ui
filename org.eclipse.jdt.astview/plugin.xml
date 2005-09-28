@@ -43,5 +43,20 @@
         commandId="org.eclipse.jdt.astview.views.ASTView"
         schemeId="org.eclipse.ui.defaultAcceleratorConfiguration">
   </key>
-  </extension> 
+  </extension>
+  
+  
+  <extension
+        point="org.eclipse.ui.perspectiveExtensions">
+     <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaPerspective">
+        <viewShortcut id="org.eclipse.jdt.astview.views.ASTView"/>
+     </perspectiveExtension>
+     <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaBrowsingPerspective">
+        <viewShortcut id="org.eclipse.jdt.astview.views.ASTView"/>
+     </perspectiveExtension>
+     <perspectiveExtension targetID="org.eclipse.jdt.ui.JavaHierarchyPerspective">
+        <viewShortcut id="org.eclipse.jdt.astview.views.ASTView"/>
+     </perspectiveExtension>
+  </extension>
+  
 </plugin>
