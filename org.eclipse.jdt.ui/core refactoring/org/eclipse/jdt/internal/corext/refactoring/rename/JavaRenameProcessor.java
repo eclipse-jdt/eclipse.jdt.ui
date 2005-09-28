@@ -76,6 +76,16 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements IIn
 		return fNewElementName;
 	}
 	
+	/**
+	 * Since a <code>JavaRenameProcessor</code> only renames one element,
+	 * this method must return an array containing exactly one element.
+	 * 
+	 * @return an array containing exactly one element
+	 * 
+	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getElements()
+	 */
+	public abstract Object[] getElements();
+	
 	protected abstract String[] getAffectedProjectNatures() throws CoreException;
 	
 	public abstract boolean getUpdateReferences();	

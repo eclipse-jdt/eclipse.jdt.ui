@@ -16,23 +16,26 @@ import java.io.InputStreamReader;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
-import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
 public class RenameTypeTests extends RefactoringTest {
 	
@@ -100,6 +103,8 @@ public class RenameTypeTests extends RefactoringTest {
 		ICompilationUnit newcu= pack.getCompilationUnit(newCUName + ".java");
 		assertTrue("cu " + newcu.getElementName()+ " does not exist", newcu.exists());
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName(newCUName)), newcu.getSource());
+		IType newElement = (IType) processor.getNewElement();
+		assertTrue("new element does not exist:\n" + newElement.toString(), newElement.exists());
 		return renameHandles;
 	}
 	

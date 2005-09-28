@@ -197,13 +197,18 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 	
 	public Object getNewElement() {
-		IPackageFragment parent= fType.getPackageFragment();
-		ICompilationUnit cu;
-		if (Checks.isTopLevel(fType) && fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java")) //$NON-NLS-1$
-			cu= parent.getCompilationUnit(getNewElementName() + ".java"); //$NON-NLS-1$
-		else
-			cu= fType.getCompilationUnit();	
-		return cu.getType(getNewElementName());
+		if (Checks.isTopLevel(fType)) {
+			ICompilationUnit cu;
+			if (fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java")) { //$NON-NLS-1$
+				IPackageFragment parent= fType.getPackageFragment();
+				cu= parent.getCompilationUnit(getNewElementName() + ".java"); //$NON-NLS-1$
+			} else {
+				cu= fType.getCompilationUnit();
+			}
+			return cu.getType(getNewElementName());
+		} else {
+			return fType.getDeclaringType().getType(getNewElementName());
+		}
 	}
 
 	//---- ITextUpdating -------------------------------------------------
