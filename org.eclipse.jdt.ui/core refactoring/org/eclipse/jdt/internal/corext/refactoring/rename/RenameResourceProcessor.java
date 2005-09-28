@@ -60,8 +60,8 @@ public class RenameResourceProcessor extends RenameProcessor implements IInitial
 	
 	public RenameResourceProcessor(IResource resource) {
 		fResource= resource;
-		if (fResource != null) {
-			setNewElementName(fResource.getName());
+		if (resource != null) {
+			setNewElementName(resource.getName());
 		}
 	}
 

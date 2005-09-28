@@ -119,7 +119,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	
 	public RenameTypeProcessor(IType type) {
 		fType= type;
-		setNewElementName(fType.getElementName());
+		if (type != null)
+			setNewElementName(type.getElementName());
 		fUpdateReferences= true; //default is yes
 		fUpdateTextualMatches= false;
 	}

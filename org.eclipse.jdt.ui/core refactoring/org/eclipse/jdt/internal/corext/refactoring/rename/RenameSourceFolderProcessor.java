@@ -59,7 +59,8 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	
 	public RenameSourceFolderProcessor(IPackageFragmentRoot root) {
 		fSourceFolder= root;
-		setNewElementName(fSourceFolder.getElementName());
+		if (root != null)
+			setNewElementName(root.getElementName());
 	}
 
 	public String getIdentifier() {

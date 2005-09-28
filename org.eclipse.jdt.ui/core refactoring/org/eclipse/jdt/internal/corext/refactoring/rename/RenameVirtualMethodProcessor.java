@@ -23,6 +23,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -228,5 +229,11 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		} finally {
 			fCachedHierarchy= null;
 		}
+	}
+
+	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		final RefactoringStatus status= super.initialize(arguments);
+		fOriginalMethod= getMethod();
+		return status;
 	}
 }

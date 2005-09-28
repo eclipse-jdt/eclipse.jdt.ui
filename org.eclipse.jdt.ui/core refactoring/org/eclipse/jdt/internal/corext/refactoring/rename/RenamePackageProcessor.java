@@ -134,7 +134,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	
 	public RenamePackageProcessor(IPackageFragment fragment) {
 		fPackage= fragment;
-		setNewElementName(fPackage.getElementName());
+		if (fPackage != null)
+			setNewElementName(fPackage.getElementName());
 		fUpdateReferences= true;
 		fUpdateTextualMatches= false;
 		fRenameSubpackages= false;

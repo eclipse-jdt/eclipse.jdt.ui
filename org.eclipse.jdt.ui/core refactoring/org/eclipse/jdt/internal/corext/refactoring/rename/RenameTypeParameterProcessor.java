@@ -180,9 +180,9 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	 * @param parameter the type parameter to rename
 	 */
 	public RenameTypeParameterProcessor(final ITypeParameter parameter) {
-		Assert.isNotNull(parameter);
 		fTypeParameter= parameter;
-		setNewElementName(fTypeParameter.getElementName());
+		if (parameter != null)
+			setNewElementName(parameter.getElementName());
 	}
 
 	/*

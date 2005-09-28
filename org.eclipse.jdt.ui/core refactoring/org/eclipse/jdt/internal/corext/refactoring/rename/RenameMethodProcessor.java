@@ -102,7 +102,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	
 	protected void initialize(IMethod method) {
 		fMethod= method;
-		setNewElementName(fMethod.getElementName());
+		if (method != null)
+			setNewElementName(method.getElementName());
 		fUpdateReferences= true;
 		initializeWorkingCopyOwner();
 	}

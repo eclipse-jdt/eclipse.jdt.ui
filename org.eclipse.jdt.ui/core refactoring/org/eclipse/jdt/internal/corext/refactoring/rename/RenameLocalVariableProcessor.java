@@ -166,10 +166,10 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameTypeParameterProcessor"; //$NON-NLS-1$
 	
 	public RenameLocalVariableProcessor(ILocalVariable localVariable) {
-		Assert.isNotNull(localVariable);
 		fLocalVariable= localVariable;
 		fUpdateReferences= true;
-		fCu= (ICompilationUnit) localVariable.getAncestor(IJavaElement.COMPILATION_UNIT);
+		if (localVariable != null)
+			fCu= (ICompilationUnit) localVariable.getAncestor(IJavaElement.COMPILATION_UNIT);
 		fNewName= ""; //$NON-NLS-1$
 	}
 
