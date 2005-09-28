@@ -352,6 +352,9 @@ public class ModifierCorrectionSubProcessor {
 					break;
 				case IProblem.IllegalModifierForMethod:
 					excludedModifiers= ~(Modifier.PUBLIC | Modifier.PROTECTED | Modifier.PRIVATE | Modifier.STATIC | Modifier.ABSTRACT | Modifier.FINAL | Modifier.NATIVE | Modifier.STRICTFP);
+					if (((IMethodBinding) binding).isConstructor()) {
+						excludedModifiers |= Modifier.STATIC;
+					}
 					break;
 				case IProblem.IllegalModifierForVariable:
 					excludedModifiers= ~Modifier.FINAL;
