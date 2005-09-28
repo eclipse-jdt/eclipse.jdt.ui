@@ -93,6 +93,7 @@ public interface IJavaColorConstants {
 	 * (value <code>"java_annotation"</code>).
 	 *
 	 * @since 3.1
+	 * @deprecated replaced as of 3.2 by an equivalent semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#ANNOTATION}
 	 */
 	String JAVA_ANNOTATION= "java_annotation"; //$NON-NLS-1$
 

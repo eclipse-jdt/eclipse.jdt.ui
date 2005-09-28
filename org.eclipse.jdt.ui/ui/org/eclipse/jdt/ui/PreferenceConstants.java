@@ -1575,6 +1575,7 @@ public class PreferenceConstants {
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
 	 * @since 3.1
+	 * @deprecated the annotation highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#ANNOTATION}
 	 */
 	public final static String EDITOR_JAVA_ANNOTATION_COLOR= IJavaColorConstants.JAVA_ANNOTATION;	
  
@@ -1585,6 +1586,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * 
 	 * @since 3.1
+	 * @deprecated the annotation highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#ANNOTATION}
 	 */
 	public final static String EDITOR_JAVA_ANNOTATION_BOLD= IJavaColorConstants.JAVA_ANNOTATION + EDITOR_BOLD_SUFFIX;
 	
@@ -1595,6 +1597,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * 
 	 * @since 3.1
+	 * @deprecated the annotation highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#ANNOTATION}
 	 */
 	public final static String EDITOR_JAVA_ANNOTATION_ITALIC= IJavaColorConstants.JAVA_ANNOTATION + EDITOR_ITALIC_SUFFIX;
 	
@@ -1605,6 +1608,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * 
 	 * @since 3.1
+	 * @deprecated the annotation highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#ANNOTATION}
 	 */
 	public final static String EDITOR_JAVA_ANNOTATION_STRIKETHROUGH= IJavaColorConstants.JAVA_ANNOTATION + EDITOR_STRIKETHROUGH_SUFFIX;
 
@@ -1615,6 +1619,7 @@ public class PreferenceConstants {
 	 * </p>
 	 * 
 	 * @since 3.1
+	 * @deprecated the annotation highlighting has been replaced by a semantic highlighting, see {@link org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings#ANNOTATION}
 	 */
 	public final static String EDITOR_JAVA_ANNOTATION_UNDERLINE= IJavaColorConstants.JAVA_ANNOTATION + EDITOR_UNDERLINE_SUFFIX;
 	

@@ -305,7 +305,6 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 			{ PreferencesMessages.JavaEditorPreferencePage_keywords, PreferenceConstants.EDITOR_JAVA_KEYWORD_COLOR }, 
 			{ PreferencesMessages.JavaEditorPreferencePage_returnKeyword, PreferenceConstants.EDITOR_JAVA_KEYWORD_RETURN_COLOR }, 
 			{ PreferencesMessages.JavaEditorPreferencePage_operators, PreferenceConstants.EDITOR_JAVA_OPERATOR_COLOR }, 
-			{ PreferencesMessages.JavaEditorPreferencePage_annotations, PreferenceConstants.EDITOR_JAVA_ANNOTATION_COLOR }, 
 			{ PreferencesMessages.JavaEditorPreferencePage_strings, PreferenceConstants.EDITOR_STRING_COLOR }, 
 			{ PreferencesMessages.JavaEditorPreferencePage_others, PreferenceConstants.EDITOR_JAVA_DEFAULT_COLOR }, 
 	};
@@ -849,12 +848,19 @@ class JavaEditorColoringConfigurationBlock extends AbstractConfigurationBlock {
 	 */
 	private SemanticHighlightingManager.HighlightedRange[][] createPreviewerRanges() {
 		return new SemanticHighlightingManager.HighlightedRange[][] {
-			{ createHighlightedRange( 6, 13,  9, SemanticHighlightings.DEPRECATED_MEMBER) },
-			{ createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_VARIABLE) },
-			{ createHighlightedRange( 7, 26,  8, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 26, 8, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 26, 8, SemanticHighlightings.FIELD) },
-			{ createHighlightedRange( 9, 20, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(9, 20, 11, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange( 6, 13,  9, SemanticHighlightings.DEPRECATED_MEMBER), createHighlightedRange( 6, 13,  9, SemanticHighlightings.CLASS),  },
+			{ createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_VARIABLE), createHighlightedRange( 6, 23,  1, SemanticHighlightings.TYPE_ARGUMENT), },
+			{ createHighlightedRange( 6, 37,  9, SemanticHighlightings.INTERFACE) },
+			{ createHighlightedRange( 6, 47,  6, SemanticHighlightings.TYPE_ARGUMENT), createHighlightedRange( 6, 47,  6, SemanticHighlightings.CLASS) },
+			{ createHighlightedRange( 7,  6,  5, SemanticHighlightings.ENUM), },
+			{ createHighlightedRange( 7, 14, 3, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 14, 3, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 14, 3, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange( 7, 19, 5, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 19, 5, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 19, 5, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange( 7, 26, 4, SemanticHighlightings.STATIC_FINAL_FIELD), createHighlightedRange(7, 26, 4, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(7, 26, 4, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange( 9, 8, 6, SemanticHighlightings.CLASS), },
+			{ createHighlightedRange( 9, 15, 11, SemanticHighlightings.STATIC_FIELD), createHighlightedRange(9, 15, 11, SemanticHighlightings.FIELD) },
 			{ createHighlightedRange(11,  9,  1, SemanticHighlightings.TYPE_VARIABLE) },
 			{ createHighlightedRange(11, 11,  5, SemanticHighlightings.FIELD) },
+			{ createHighlightedRange(13, 2,  16, SemanticHighlightings.ANNOTATION) },
 			{ createHighlightedRange(13, 19,  5, SemanticHighlightings.ANNOTATION_ELEMENT_REFERENCE) },
 			{ createHighlightedRange(14, 12,  3, SemanticHighlightings.METHOD_DECLARATION), createHighlightedRange(14, 12,  3, SemanticHighlightings.METHOD) },
 			{ createHighlightedRange(14, 24,  9, SemanticHighlightings.PARAMETER_VARIABLE) },

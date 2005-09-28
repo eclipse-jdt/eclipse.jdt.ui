@@ -41,8 +41,10 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.WildcardType;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
@@ -139,6 +141,41 @@ public class SemanticHighlightings {
 	 */
 	public static final String AUTOBOXING="autoboxing"; //$NON-NLS-1$
 
+	/**
+	 * A named preference part that controls the highlighting of classes.
+	 *
+	 * @since 3.2
+	 */
+	public static final String CLASS="class"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference part that controls the highlighting of enums.
+	 *
+	 * @since 3.2
+	 */
+	public static final String ENUM="enum"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference part that controls the highlighting of interfaces.
+	 *
+	 * @since 3.2
+	 */
+	public static final String INTERFACE="interface"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference part that controls the highlighting of annotations.
+	 *
+	 * @since 3.2
+	 */
+	public static final String ANNOTATION="annotation"; //$NON-NLS-1$
+	
+	/**
+	 * A named preference part that controls the highlighting of type arguments.
+	 *
+	 * @since 3.2
+	 */
+	public static final String TYPE_ARGUMENT="typeArgument"; //$NON-NLS-1$
+	
 	/**
 	 * Semantic highlightings
 	 */
@@ -1119,7 +1156,7 @@ public class SemanticHighlightings {
 	}
 
 	/**
-	 * Semantic highlighting for generic type parameters.
+	 * Semantic highlighting for type variables.
 	 * @since 3.1
 	 */
 	private static final class TypeVariableHighlighting extends SemanticHighlighting {
@@ -1182,7 +1219,364 @@ public class SemanticHighlightings {
 			return binding instanceof ITypeBinding && ((ITypeBinding) binding).isTypeVariable();
 		}
 	}
+	
+	/**
+	 * Semantic highlighting for classes.
+	 * @since 3.2
+	 */
+	private static final class ClassHighlighting extends SemanticHighlighting {
 
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		public String getPreferenceKey() {
+			return CLASS;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		public RGB getDefaultTextColor() {
+			return new RGB(0, 80, 50);
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		public boolean isBoldByDefault() {
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return false;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		public String getDisplayName() {
+			return JavaEditorMessages.SemanticHighlighting_classes;
+		}
+
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
+		 */
+		public boolean consumes(SemanticToken token) {
+
+			// 1: match types
+			SimpleName name= token.getNode();
+			ASTNode node= name.getParent();
+			int nodeType= node.getNodeType();
+			if (nodeType == ASTNode.QUALIFIED_NAME && name.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
+				node= node.getParent();
+				nodeType= node.getNodeType();
+			}
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE && nodeType != ASTNode.TYPE_DECLARATION)
+				return false;
+
+			// 2: match classes
+			IBinding binding= token.getBinding();
+			return binding instanceof ITypeBinding && ((ITypeBinding) binding).isClass();
+		}
+	}
+
+	/**
+	 * Semantic highlighting for enums.
+	 * @since 3.2
+	 */
+	private static final class EnumHighlighting extends SemanticHighlighting {
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		public String getPreferenceKey() {
+			return ENUM;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		public RGB getDefaultTextColor() {
+			return new RGB(100, 70, 50);
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		public boolean isBoldByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		public String getDisplayName() {
+			return JavaEditorMessages.SemanticHighlighting_enums;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
+		 */
+		public boolean consumes(SemanticToken token) {
+			
+			// 1: match types
+			SimpleName name= token.getNode();
+			ASTNode node= name.getParent();
+			int nodeType= node.getNodeType();
+			if (nodeType == ASTNode.QUALIFIED_NAME && name.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
+				node= node.getParent();
+				nodeType= node.getNodeType();
+			}
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE && nodeType != ASTNode.ENUM_DECLARATION)
+				return false;
+			
+			// 2: match enums
+			IBinding binding= token.getBinding();
+			return binding instanceof ITypeBinding && ((ITypeBinding) binding).isEnum();
+		}
+	}
+	
+	/**
+	 * Semantic highlighting for interfaces.
+	 * @since 3.2
+	 */
+	private static final class InterfaceHighlighting extends SemanticHighlighting {
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		public String getPreferenceKey() {
+			return INTERFACE;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		public RGB getDefaultTextColor() {
+			return new RGB(50, 63, 112);
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		public boolean isBoldByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		public String getDisplayName() {
+			return JavaEditorMessages.SemanticHighlighting_interfaces;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
+		 */
+		public boolean consumes(SemanticToken token) {
+			
+			// 1: match types
+			SimpleName name= token.getNode();
+			ASTNode node= name.getParent();
+			int nodeType= node.getNodeType();
+			if (nodeType == ASTNode.QUALIFIED_NAME && name.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
+				node= node.getParent();
+				nodeType= node.getNodeType();
+			}
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE && nodeType != ASTNode.TYPE_DECLARATION)
+				return false;
+			
+			// 2: match interfaces
+			IBinding binding= token.getBinding();
+			return binding instanceof ITypeBinding && ((ITypeBinding) binding).isInterface();
+		}
+	}
+	
+	/**
+	 * Semantic highlighting for annotation types.
+	 * @since 3.2
+	 */
+	private static final class AnnotationHighlighting extends SemanticHighlighting {
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		public String getPreferenceKey() {
+			return ANNOTATION;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		public RGB getDefaultTextColor() {
+			return new RGB(100, 100, 100);
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		public boolean isBoldByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return true; // as it replaces the syntax based highlighting which is always enabled
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		public String getDisplayName() {
+			return JavaEditorMessages.SemanticHighlighting_annotations;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
+		 */
+		public boolean consumes(SemanticToken token) {
+			
+			// 1: match types
+			SimpleName name= token.getNode();
+			ASTNode node= name.getParent();
+			int nodeType= node.getNodeType();
+			if (nodeType == ASTNode.QUALIFIED_NAME && name.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
+				node= node.getParent();
+				nodeType= node.getNodeType();
+			}
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE && nodeType != ASTNode.ANNOTATION_TYPE_DECLARATION 
+					&& nodeType != ASTNode.MARKER_ANNOTATION && nodeType != ASTNode.NORMAL_ANNOTATION && nodeType != ASTNode.SINGLE_MEMBER_ANNOTATION)
+				return false;
+			
+			// 2: match annotations
+			IBinding binding= token.getBinding();
+			return binding instanceof ITypeBinding && ((ITypeBinding) binding).isAnnotation();
+		}
+	}
+	
+	/**
+	 * Semantic highlighting for annotation types.
+	 * @since 3.2
+	 */
+	private static final class TypeArgumentHighlighting extends SemanticHighlighting {
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#getPreferenceKey()
+		 */
+		public String getPreferenceKey() {
+			return TYPE_ARGUMENT;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextColor()
+		 */
+		public RGB getDefaultTextColor() {
+			return new RGB(13, 100, 0);
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDefaultTextStyleBold()
+		 */
+		public boolean isBoldByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isItalicByDefault()
+		 */
+		public boolean isItalicByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#isEnabledByDefault()
+		 */
+		public boolean isEnabledByDefault() {
+			return false;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.ISemanticHighlighting#getDisplayName()
+		 */
+		public String getDisplayName() {
+			return JavaEditorMessages.SemanticHighlighting_typeArguments;
+		}
+		
+		/*
+		 * @see org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlighting#consumes(org.eclipse.jdt.internal.ui.javaeditor.SemanticToken)
+		 */
+		public boolean consumes(SemanticToken token) {
+			
+			// 1: match types
+			SimpleName name= token.getNode();
+			ASTNode node= name.getParent();
+			int nodeType= node.getNodeType();
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE && nodeType != ASTNode.TYPE_PARAMETER)
+				return false;
+			
+			// 2: match type arguments
+			// wildcard types are always type arguments!
+			StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
+			if (locationInParent == WildcardType.BOUND_PROPERTY)
+				return true;
+			
+			if (locationInParent == ParameterizedType.TYPE_ARGUMENTS_PROPERTY)
+				return true;
+			
+			if (locationInParent == TypeDeclaration.TYPE_PARAMETERS_PROPERTY)
+				return true;
+			
+			return false;
+		}
+	}
+	
 	/**
 	 * A named preference that controls the given semantic highlighting's color.
 	 *
@@ -1264,8 +1658,13 @@ public class SemanticHighlightings {
 				new ParameterVariableHighlighting(),
 				new LocalVariableDeclarationHighlighting(),
 				new LocalVariableHighlighting(),
-				new TypeVariableHighlighting(),
-				new MethodHighlighting(),
+				new TypeVariableHighlighting(), // before type arguments!
+				new MethodHighlighting(), // before types to get ctors
+				new TypeArgumentHighlighting(), // before other types
+				new ClassHighlighting(),
+				new EnumHighlighting(),
+				new AnnotationHighlighting(), // before interfaces
+				new InterfaceHighlighting(),
 			};
 		return fgSemanticHighlightings;
 	}
@@ -1287,6 +1686,7 @@ public class SemanticHighlightings {
 		}
 
 		convertMethodHighlightingPreferences(store);
+		convertAnnotationHighlightingPreferences(store);
 	}
 
 	/**
@@ -1361,7 +1761,6 @@ public class SemanticHighlightings {
 	 * @since 3.1
 	 */
 	private static void convertMethodHighlightingPreferences(IPreferenceStore store) {
-		// migrate the preferences for method highlighting
 		String colorkey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + METHOD + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_COLOR_SUFFIX;
 		String boldkey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + METHOD + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX;
 		String italickey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + METHOD + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX;
@@ -1379,6 +1778,44 @@ public class SemanticHighlightings {
 
 	}
 
+	/**
+	 * In 3.1, annotations were highlighted by a rule-based word matcher that matched any identifier
+	 * preceded by an '@' sign and possibly white space.
+	 * <p>
+	 * This does not work when there is a comment between the '@' and the annotation, results in
+	 * stale highlighting if there is a new line between the '@' and the annotation, and does not
+	 * work for highlighting annotation declarations. Because different preference key naming
+	 * schemes are used, we have to migrate the old settings to the new ones, which is done here.
+	 * Nothing needs to be done if the old settings were set to the default values.
+	 * </p>
+	 * 
+	 * @param store the preference store to migrate
+	 * @since 3.2
+	 */
+	private static void convertAnnotationHighlightingPreferences(IPreferenceStore store) {
+		String colorkey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + ANNOTATION + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_COLOR_SUFFIX;
+		String boldkey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + ANNOTATION + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_BOLD_SUFFIX;
+		String italickey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + ANNOTATION + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ITALIC_SUFFIX;
+		String strikethroughKey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + ANNOTATION + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_STRIKETHROUGH_SUFFIX;
+		String underlineKey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + ANNOTATION + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_UNDERLINE_SUFFIX;
+		String enabledkey= PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_PREFIX + ANNOTATION + PreferenceConstants.EDITOR_SEMANTIC_HIGHLIGHTING_ENABLED_SUFFIX;
+		
+		String oldColorkey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_COLOR;
+		String oldBoldkey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_BOLD;
+		String oldItalickey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_ITALIC;
+		String oldStrikethroughKey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_STRIKETHROUGH;
+		String oldUnderlineKey= PreferenceConstants.EDITOR_JAVA_ANNOTATION_UNDERLINE;
+		
+		if (conditionalReset(store, oldColorkey, colorkey)
+				|| conditionalReset(store, oldBoldkey, boldkey)
+				|| conditionalReset(store, oldItalickey, italickey)
+				|| conditionalReset(store, oldStrikethroughKey, strikethroughKey)
+				|| conditionalReset(store, oldUnderlineKey, underlineKey)) {
+			store.setValue(enabledkey, true);
+		}
+		
+	}
+	
 	/**
 	 * If the setting pointed to by <code>oldKey</code> is not the default
 	 * setting, store that setting under <code>newKey</code> and reset

@@ -129,6 +129,11 @@ final class JavaEditorMessages extends NLS {
 	public static String SemanticHighlighting_typeVariables;
 	public static String SemanticHighlighting_method;
 	public static String SemanticHighlighting_autoboxing;
+	public static String SemanticHighlighting_classes;
+	public static String SemanticHighlighting_enums;
+	public static String SemanticHighlighting_interfaces;
+	public static String SemanticHighlighting_annotations;
+	public static String SemanticHighlighting_typeArguments;
 	public static String JavaEditor_markOccurrences_job_name;
 	public static String Editor_OpenPropertiesFile_error_keyNotFound;
 	public static String Editor_OpenPropertiesFile_error_fileNotFound_dialogMessage;
