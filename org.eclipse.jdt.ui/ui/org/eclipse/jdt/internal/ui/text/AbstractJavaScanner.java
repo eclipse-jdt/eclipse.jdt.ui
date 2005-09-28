@@ -200,11 +200,11 @@ public abstract class AbstractJavaScanner extends BufferedRuleBasedScanner {
 		}
 	}
 
-	protected void addTokenWithProxyAttribute(String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey) {
+	private void addTokenWithProxyAttribute(String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey) {
 		fTokenMap.put(colorKey, new Token(createTextAttribute(null, boldKey, italicKey, strikethroughKey, underlineKey)));
 	}
 
-	protected final void addToken(String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey) {
+	private void addToken(String colorKey, String boldKey, String italicKey, String strikethroughKey, String underlineKey) {
 		if (fColorManager != null && colorKey != null && fColorManager.getColor(colorKey) == null) {
 			RGB rgb= PreferenceConverter.getColor(fPreferenceStore, colorKey);
 			if (fColorManager instanceof IColorManagerExtension) {
