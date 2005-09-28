@@ -1,7 +1,11 @@
 package org.eclipse.jdt.jeview.views;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -188,7 +192,11 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	}
 
 	void setInput(IJavaElement javaElement) {
-		fInput= new JERoot(javaElement);
+		setInput(Collections.singleton(javaElement));
+	}
+	
+	void setInput(Collection<? extends IJavaElement> javaElements) {
+		fInput= new JERoot(javaElements);
 		fViewer.setInput(fInput);
 		ITreeContentProvider tcp= (ITreeContentProvider) fViewer.getContentProvider();
 		Object[] elements= tcp.getElements(fInput);
@@ -431,17 +439,22 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		ISelection selection= context.getSelection();
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= ((IStructuredSelection) selection);
-			if (structuredSelection.size() == 1) {
-				Object first= structuredSelection.getFirstElement();
-				if (first instanceof IJavaElement) {
-					setInput((IJavaElement) first);
-					return true;
-				} else if (first instanceof IResource) {
-					IJavaElement input= JavaCore.create((IResource) first);
-					if (input != null) {
-						setInput(input);
-						return true;
+			if (structuredSelection.size() >= 1) {
+				Set<IJavaElement> input= new LinkedHashSet<IJavaElement>();
+				for (Iterator iter = structuredSelection.iterator(); iter.hasNext();) {
+					Object first= iter.next();
+					if (first instanceof IJavaElement) {
+						input.add((IJavaElement) first);
+					} else if (first instanceof IResource) {
+						IJavaElement je= JavaCore.create((IResource) first);
+						if (je != null) {
+							input.add(je);
+						}
 					}
+				}
+				if (input.size() > 0) {
+					setInput(input);
+					return true;
 				}
 			}
 		}

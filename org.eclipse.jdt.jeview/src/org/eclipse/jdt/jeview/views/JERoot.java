@@ -11,15 +11,33 @@
 
 package org.eclipse.jdt.jeview.views;
 
+import java.util.Collection;
+import java.util.List;
+
 import org.eclipse.jdt.core.IJavaElement;
 
 
 public class JERoot extends JEAttribute {
 
-	private final JavaElement fJavaElement;
+	private final List<JavaElement> fJavaElements;
 
-	public JERoot(IJavaElement javaElement) {
-		fJavaElement= new JavaElement(null, javaElement);
+	public JERoot(Collection<? extends IJavaElement> javaElements) {
+		fJavaElements= new Mapper<IJavaElement, JavaElement>() {
+			@Override public JavaElement map(IJavaElement element) {
+				return new JavaElement(null, element);
+			}
+		}.mapToList(javaElements);
+		
+//		fJavaElements= Mapper.build(javaElements, new Mapper<IJavaElement, JavaElement>() {
+//			@Override public JavaElement map(IJavaElement element) {
+//				return new JavaElement(null, element);
+//			}
+//		});
+		
+//		fJavaElements= new ArrayList<JavaElement>(javaElements.size());
+//		for (IJavaElement javaElement : javaElements) {
+//			fJavaElements.add(new JavaElement(null, javaElement));
+//		}
 	}
 
 	@Override
@@ -29,12 +47,20 @@ public class JERoot extends JEAttribute {
 
 	@Override
 	public JEAttribute[] getChildren() {
-		return new JEAttribute[] { fJavaElement };
+		return fJavaElements.toArray(new JavaElement[fJavaElements.size()]);
 	}
 
 	@Override
 	public String getLabel() {
-		return "root: " + fJavaElement.getLabel();
+		StringBuffer buf = new StringBuffer("root: ");
+		boolean first= true;
+		for (JavaElement je : fJavaElements) {
+			if (! first)
+				buf.append(", ");
+			buf.append(je.getLabel());
+			first= false;
+		}
+		return buf.toString();
 	}
 
 	@Override
@@ -46,12 +72,12 @@ public class JERoot extends JEAttribute {
 		}
 		
 		JERoot other= (JERoot) obj;
-		return fJavaElement.equals(other.fJavaElement);
+		return fJavaElements.equals(other.fJavaElements);
 	}
 	
 	@Override
 	public int hashCode() {
-		return fJavaElement.hashCode();
+		return fJavaElements.hashCode();
 	}
 
 }
