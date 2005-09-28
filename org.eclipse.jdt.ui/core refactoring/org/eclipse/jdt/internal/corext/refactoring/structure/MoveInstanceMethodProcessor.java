@@ -1548,7 +1548,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			// Do not adjust visibility of a target field; references to the
 			// field will be removed anyway.
 			final IJavaElement targetElement= fTarget.getJavaElement();
-			if (targetElement != null && targetElement instanceof IField) {
+			if (targetElement != null && targetElement instanceof IField && Flags.isPrivate(fMethod.getFlags())) {
 				final IVisibilityAdjustment adjustmentForTarget= (IVisibilityAdjustment) adjustor.getAdjustments().get(targetElement);
 				if (adjustmentForTarget != null)
 					adjustor.getAdjustments().remove(targetElement);
