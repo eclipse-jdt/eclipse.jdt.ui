@@ -4178,7 +4178,7 @@ public class AssistQuickFixTest extends QuickFixTest {
 		expected1.append("}\n");
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
 	}
-	
+	/*
 	public void testSurroundWithRunnable25() throws Exception {
 		
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -4214,12 +4214,8 @@ public class AssistQuickFixTest extends QuickFixTest {
 		expected1.append("        int y = 1;\n");
 		expected1.append("        switch (y) {\n");
 		expected1.append("        case 1:\n");
-		
-		expected1.append("            final int e4 = 9, e5 = 0;\n");
-//		not as expected because of bug 109963
-//		expected1.append("            final int e4 = 9;\n");
-//		expected1.append("                int e5 = 0;\n");
-		
+		expected1.append("            final int e4 = 9;\n");
+		expected1.append("                int e5 = 0;\n");
 		expected1.append("            Runnable runnable = new Runnable() {\n");
 		expected1.append("                    public void run() {\n");
 		expected1.append("                        System.out.println(e4);\n");
@@ -4233,58 +4229,57 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
 	}
 	
-//Fails because of bug 109963
-//	public void testSurroundWithRunnable26() throws Exception {
-//		
-//		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-//		StringBuffer buf= new StringBuffer();
-//		buf.append("package test1;\n");
-//		buf.append("public class E {\n");
-//		buf.append("    public void foo() {\n");
-//		buf.append("        int y = 1;\n");
-//		buf.append("        switch (y) {\n");
-//		buf.append("        case 1:\n");
-//		buf.append("            int e4 = 9, e5 = 0;\n");
-//		buf.append("            System.out.println(e4);\n");
-//		buf.append("            e5++;\n");
-//		buf.append("        default:\n");
-//		buf.append("        }\n");
-//		buf.append("    }\n");
-//		buf.append("}\n");
-//		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
-//		
-//		StringBuffer selection= new StringBuffer();
-//		selection.append("            int e4 = 9, e5 = 0;\n");
-//		selection.append("            System.out.println(e4);\n");
-//		
-//		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
-//		List proposals= collectAssists(context, false);
-//		
-//		assertNumberOfProposals(proposals, 9);
-//		assertCorrectLabels(proposals);
-//
-//		StringBuffer expected1= new StringBuffer();
-//		expected1.append("package test1;\n");
-//		expected1.append("public class E {\n");
-//		expected1.append("    public void foo() {\n");
-//		expected1.append("        int y = 1;\n");
-//		expected1.append("        switch (y) {\n");
-//		expected1.append("        case 1:\n");
-//		expected1.append("            int e5;\n");
-//		expected1.append("                Runnable runnable = new Runnable() {\n");
-//		expected1.append("                    public void run() {\n");
-//		expected1.append("                        int e4 = 9;\n");
-//		expected1.append("                        e5 = 0;\n");
-//		expected1.append("                        System.out.println(e4);\n");
-//		expected1.append("                    }\n");
-//		expected1.append("                };\n");
-//		expected1.append("                e5++;\n");
-//		expected1.append("        default:\n");
-//		expected1.append("        }\n");
-//		expected1.append("    }\n");
-//		expected1.append("}\n");
-//		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
-//	}
+	public void testSurroundWithRunnable26() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int y = 1;\n");
+		buf.append("        switch (y) {\n");
+		buf.append("        case 1:\n");
+		buf.append("            int e4 = 9, e5 = 0;\n");
+		buf.append("            System.out.println(e4);\n");
+		buf.append("            e5++;\n");
+		buf.append("        default:\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		StringBuffer selection= new StringBuffer();
+		selection.append("            int e4 = 9, e5 = 0;\n");
+		selection.append("            System.out.println(e4);\n");
+		
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 9);
+		assertCorrectLabels(proposals);
+
+		StringBuffer expected1= new StringBuffer();
+		expected1.append("package test1;\n");
+		expected1.append("public class E {\n");
+		expected1.append("    public void foo() {\n");
+		expected1.append("        int y = 1;\n");
+		expected1.append("        switch (y) {\n");
+		expected1.append("        case 1:\n");
+		expected1.append("            int e5;\n");
+		expected1.append("                Runnable runnable = new Runnable() {\n");
+		expected1.append("                    public void run() {\n");
+		expected1.append("                        int e4 = 9;\n");
+		expected1.append("                        e5 = 0;\n");
+		expected1.append("                        System.out.println(e4);\n");
+		expected1.append("                    }\n");
+		expected1.append("                };\n");
+		expected1.append("                e5++;\n");
+		expected1.append("        default:\n");
+		expected1.append("        }\n");
+		expected1.append("    }\n");
+		expected1.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+	}*/
 	
 	public void testSurroundWithRunnable27() throws Exception {
 		
