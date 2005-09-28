@@ -100,7 +100,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	
 	public RenameFieldProcessor(IField field) {
 		fField= field;
-		setNewElementName(fField.getElementName());
+		if (fField != null)
+			setNewElementName(fField.getElementName());
 		fUpdateReferences= true;
 		fUpdateTextualMatches= false;
 		

@@ -62,7 +62,8 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 	
 	public RenameJavaProjectProcessor(IJavaProject project) {
 		fProject= project;
-		setNewElementName(fProject.getElementName());
+		if (fProject != null)
+			setNewElementName(fProject.getElementName());
 		fUpdateReferences= true;
 	}
 
