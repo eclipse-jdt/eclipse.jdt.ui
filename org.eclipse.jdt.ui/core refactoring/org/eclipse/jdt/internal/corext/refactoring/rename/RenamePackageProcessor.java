@@ -518,14 +518,17 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		} finally {
 			fChangeManager= null;
 			fImportsManager= null;
-			fQualifiedNameSearchResult= null;
 			monitor.done();
 		}
 	}
 	
 	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
-		if (fQualifiedNameSearchResult != null) {	
-			return fQualifiedNameSearchResult.getSingleChange(Changes.getModifiedFiles(participantChanges));
+		if (fQualifiedNameSearchResult != null) {
+			try {
+				return fQualifiedNameSearchResult.getSingleChange(Changes.getModifiedFiles(participantChanges));
+			} finally {
+				fQualifiedNameSearchResult= null;
+			}
 		} else {
 			return null;
 		}

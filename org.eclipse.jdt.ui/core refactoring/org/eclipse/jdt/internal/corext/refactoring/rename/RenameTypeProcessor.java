@@ -681,14 +681,17 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			return result;
 		} finally {
 			fChangeManager= null;
-			fQualifiedNameSearchResult= null;
 			fReferences= null;
 		}
 	}
 	
 	public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException {
-		if (fQualifiedNameSearchResult != null) {	
-			return fQualifiedNameSearchResult.getSingleChange(Changes.getModifiedFiles(participantChanges));
+		if (fQualifiedNameSearchResult != null) {
+			try {
+				return fQualifiedNameSearchResult.getSingleChange(Changes.getModifiedFiles(participantChanges));
+			} finally {
+				fQualifiedNameSearchResult= null;
+			}
 		} else {
 			return null;
 		}
