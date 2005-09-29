@@ -74,7 +74,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		fMemberFilter= memberFilter;
 	}	
 
-	private IMethod findMethod(IMethod filterMethod, IType typeToFindIn) throws JavaModelException {
+	private boolean initializeMethodOverrideTester(IMethod filterMethod, IType typeToFindIn) {
 		IType filterType= filterMethod.getDeclaringType();
 		ITypeHierarchy hierarchy= fTypeHierarchy.getHierarchy();
 		
@@ -84,15 +84,38 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		if (fMethodOverrideTester == null || !fMethodOverrideTester.getFocusType().equals(focusType)) {
 			fMethodOverrideTester= new MethodOverrideTester(focusType, hierarchy);
 		}
-
-		if (filterOverrides) {
-			return fMethodOverrideTester.findOverriddenMethod(filterMethod, typeToFindIn);
-		} else {
-			return fMethodOverrideTester.findOverridingMethod(filterMethod, typeToFindIn);
+		return filterOverrides;
+	}
+	
+	private void addCompatibleMethods(IMethod filterMethod, IType typeToFindIn, List children) throws JavaModelException {
+		boolean filterMethodOverrides= initializeMethodOverrideTester(filterMethod, typeToFindIn);
+		IMethod[] methods= typeToFindIn.getMethods();
+		for (int i= 0; i < methods.length; i++) {
+			IMethod curr= methods[i];
+			if (isCompatibleMethod(filterMethod, curr, filterMethodOverrides) && !children.contains(curr)) {
+				children.add(curr);
+			}
 		}
 	}
 	
-
+	private boolean hasCompatibleMethod(IMethod filterMethod, IType typeToFindIn) throws JavaModelException {
+		boolean filterMethodOverrides= initializeMethodOverrideTester(filterMethod, typeToFindIn);
+		IMethod[] methods= typeToFindIn.getMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if (isCompatibleMethod(filterMethod, methods[i], filterMethodOverrides)) {
+				return true;
+			}
+		}
+		return false;
+	}
+	
+	private boolean isCompatibleMethod(IMethod filterMethod, IMethod method, boolean filterOverrides) throws JavaModelException {
+		if (filterOverrides) {
+			return fMethodOverrideTester.isSubsignature(method, filterMethod);
+		} else {
+			return fMethodOverrideTester.isSubsignature(filterMethod, method);
+		}
+	}
 
 	/**
 	 * The members to filter or <code>null</code> if member filtering is disabled.
@@ -233,11 +256,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 					children.add(member);
 				}
 			} else if (member instanceof IMethod) {
-				IMethod curr= (IMethod)member;
-				IMethod meth= findMethod(curr, parent);
-				if (meth != null && !children.contains(meth)) {
-					children.add(meth);
-				}
+				addCompatibleMethods((IMethod) member, parent, children);
 			}
 		}		
 	}
@@ -271,9 +290,7 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 			if (type.equals(member.getDeclaringType())) {
 				return true;
 			} else if (member instanceof IMethod) {
-				IMethod curr= (IMethod)member;
-				IMethod meth= findMethod(curr, type);
-				if (meth != null) {
+				if (hasCompatibleMethod((IMethod) member, type)) {
 					return true;
 				}
 			}

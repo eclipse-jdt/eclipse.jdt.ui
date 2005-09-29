@@ -141,6 +141,14 @@ public class MethodOverrideTester {
 		return method;		
 	}
 	
+	/**
+	 * Finds an overridden method in a type. With generics it is possible that more than method are overridden.
+	 * In that case the first overridden method found is returned.
+	 * @param overriding The overriding method
+	 * @param overriddenType The type to find methods in
+	 * @return The first overridden method or <code>null</code> if no method is overridden
+	 * @throws JavaModelException
+	 */
 	public IMethod findOverriddenMethod(IMethod overriding, IType overriddenType) throws JavaModelException {
 		IMethod[] overriddenMethods= overriddenType.getMethods();
 		for (int i= 0; i < overriddenMethods.length; i++) {
@@ -151,6 +159,13 @@ public class MethodOverrideTester {
 		return null;
 	}
 	
+	/**
+	 * Finds an overriding method in a type.
+	 * @param overridden The overridden method
+	 * @param overridingType The type to find methods in
+	 * @return The overriding method or <code>null</code> if no method is overriding.
+	 * @throws JavaModelException
+	 */
 	public IMethod findOverridingMethod(IMethod overridden, IType overridingType) throws JavaModelException {
 		IMethod[] overridingMethods= overridingType.getMethods();
 		for (int i= 0; i < overridingMethods.length; i++) {
@@ -160,8 +175,7 @@ public class MethodOverrideTester {
 		}
 		return null;
 	}
-	
-	
+		
 	public boolean isSubsignature(IMethod overridden, IMethod overriding) throws JavaModelException {
 		boolean isConstructor= overridden.isConstructor();
 		if (isConstructor != overriding.isConstructor()) {
