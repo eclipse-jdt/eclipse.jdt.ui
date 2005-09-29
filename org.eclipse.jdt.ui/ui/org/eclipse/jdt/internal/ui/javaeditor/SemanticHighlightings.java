@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WildcardType;
@@ -1277,11 +1276,7 @@ public class SemanticHighlightings {
 			SimpleName name= token.getNode();
 			ASTNode node= name.getParent();
 			int nodeType= node.getNodeType();
-			if (nodeType == ASTNode.QUALIFIED_NAME && name.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
-				node= node.getParent();
-				nodeType= node.getNodeType();
-			}
-			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE && nodeType != ASTNode.TYPE_DECLARATION)
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE  && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.TYPE_DECLARATION)
 				return false;
 
 			// 2: match classes
@@ -1347,11 +1342,7 @@ public class SemanticHighlightings {
 			SimpleName name= token.getNode();
 			ASTNode node= name.getParent();
 			int nodeType= node.getNodeType();
-			if (nodeType == ASTNode.QUALIFIED_NAME && name.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
-				node= node.getParent();
-				nodeType= node.getNodeType();
-			}
-			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE && nodeType != ASTNode.ENUM_DECLARATION)
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.ENUM_DECLARATION)
 				return false;
 			
 			// 2: match enums
@@ -1417,11 +1408,7 @@ public class SemanticHighlightings {
 			SimpleName name= token.getNode();
 			ASTNode node= name.getParent();
 			int nodeType= node.getNodeType();
-			if (nodeType == ASTNode.QUALIFIED_NAME && name.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
-				node= node.getParent();
-				nodeType= node.getNodeType();
-			}
-			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE && nodeType != ASTNode.TYPE_DECLARATION)
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE  && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.TYPE_DECLARATION)
 				return false;
 			
 			// 2: match interfaces
@@ -1487,11 +1474,7 @@ public class SemanticHighlightings {
 			SimpleName name= token.getNode();
 			ASTNode node= name.getParent();
 			int nodeType= node.getNodeType();
-			if (nodeType == ASTNode.QUALIFIED_NAME && name.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
-				node= node.getParent();
-				nodeType= node.getNodeType();
-			}
-			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE && nodeType != ASTNode.ANNOTATION_TYPE_DECLARATION 
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE  && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.ANNOTATION_TYPE_DECLARATION 
 					&& nodeType != ASTNode.MARKER_ANNOTATION && nodeType != ASTNode.NORMAL_ANNOTATION && nodeType != ASTNode.SINGLE_MEMBER_ANNOTATION)
 				return false;
 			
@@ -1558,7 +1541,7 @@ public class SemanticHighlightings {
 			SimpleName name= token.getNode();
 			ASTNode node= name.getParent();
 			int nodeType= node.getNodeType();
-			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE && nodeType != ASTNode.TYPE_PARAMETER)
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE)
 				return false;
 			
 			// 2: match type arguments
@@ -1568,9 +1551,6 @@ public class SemanticHighlightings {
 				return true;
 			
 			if (locationInParent == ParameterizedType.TYPE_ARGUMENTS_PROPERTY)
-				return true;
-			
-			if (locationInParent == TypeDeclaration.TYPE_PARAMETERS_PROPERTY)
 				return true;
 			
 			return false;
