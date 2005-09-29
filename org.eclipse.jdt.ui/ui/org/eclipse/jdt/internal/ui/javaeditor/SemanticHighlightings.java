@@ -1276,8 +1276,14 @@ public class SemanticHighlightings {
 			SimpleName name= token.getNode();
 			ASTNode node= name.getParent();
 			int nodeType= node.getNodeType();
-			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE  && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.TYPE_DECLARATION)
+			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.THIS_EXPRESSION && nodeType != ASTNode.QUALIFIED_TYPE  && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.TYPE_DECLARATION)
 				return false;
+			while (nodeType == ASTNode.QUALIFIED_NAME) {
+				node= node.getParent();
+				nodeType= node.getNodeType();
+				if (nodeType == ASTNode.IMPORT_DECLARATION)
+					return false;
+			}
 
 			// 2: match classes
 			IBinding binding= token.getBinding();
@@ -1344,7 +1350,13 @@ public class SemanticHighlightings {
 			int nodeType= node.getNodeType();
 			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.ENUM_DECLARATION)
 				return false;
-			
+			while (nodeType == ASTNode.QUALIFIED_NAME) {
+				node= node.getParent();
+				nodeType= node.getNodeType();
+				if (nodeType == ASTNode.IMPORT_DECLARATION)
+					return false;
+			}
+
 			// 2: match enums
 			IBinding binding= token.getBinding();
 			return binding instanceof ITypeBinding && ((ITypeBinding) binding).isEnum();
@@ -1410,7 +1422,13 @@ public class SemanticHighlightings {
 			int nodeType= node.getNodeType();
 			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE  && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.TYPE_DECLARATION)
 				return false;
-			
+			while (nodeType == ASTNode.QUALIFIED_NAME) {
+				node= node.getParent();
+				nodeType= node.getNodeType();
+				if (nodeType == ASTNode.IMPORT_DECLARATION)
+					return false;
+			}
+
 			// 2: match interfaces
 			IBinding binding= token.getBinding();
 			return binding instanceof ITypeBinding && ((ITypeBinding) binding).isInterface();
@@ -1477,7 +1495,13 @@ public class SemanticHighlightings {
 			if (nodeType != ASTNode.SIMPLE_TYPE && nodeType != ASTNode.QUALIFIED_TYPE  && nodeType != ASTNode.QUALIFIED_NAME && nodeType != ASTNode.ANNOTATION_TYPE_DECLARATION 
 					&& nodeType != ASTNode.MARKER_ANNOTATION && nodeType != ASTNode.NORMAL_ANNOTATION && nodeType != ASTNode.SINGLE_MEMBER_ANNOTATION)
 				return false;
-			
+			while (nodeType == ASTNode.QUALIFIED_NAME) {
+				node= node.getParent();
+				nodeType= node.getNodeType();
+				if (nodeType == ASTNode.IMPORT_DECLARATION)
+					return false;
+			}
+
 			// 2: match annotations
 			IBinding binding= token.getBinding();
 			return binding instanceof ITypeBinding && ((ITypeBinding) binding).isAnnotation();

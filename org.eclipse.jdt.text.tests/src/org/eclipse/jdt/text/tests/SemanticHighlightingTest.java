@@ -147,6 +147,9 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 				createPosition(8, 6, 5),
 				createPosition(13, 11, 6),
 				createPosition(14, 26, 6),
+				createPosition(41, 16, 4),
+				createPosition(42, 20, 13),
+				createPosition(43, 15, 7),
 		};
 		Position[] actual= getSemanticHighlightingPositions();
 //		System.out.println(toString(actual));
@@ -167,6 +170,9 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 				createPosition(15, 3, 5),
 				createPosition(15, 10, 6),
 				createPosition(16, 3, 6),
+				createPosition(41, 16, 4),
+				createPosition(42, 20, 13),
+				createPosition(43, 15, 7),
 		};
 		Position[] actual= getSemanticHighlightingPositions();
 //		System.out.println(toString(actual));
@@ -200,6 +206,72 @@ public class SemanticHighlightingTest extends AbstractSemanticHighlightingTest {
 		Position[] expected= new Position[] {
 				createPosition(39, 15, 1),
 				createPosition(40, 2, 1),
+		};
+//		System.out.println(toString(actual));
+		assertEqualPositions(expected, actual);
+	}
+	
+	public void testTypeArgumentHighlighting() throws Exception {
+		setUpSemanticHighlighting(SemanticHighlightings.TYPE_ARGUMENT);
+		Position[] actual= getSemanticHighlightingPositions();
+		Position[] expected= new Position[] {
+				createPosition(41, 8, 6),
+		};
+//		System.out.println(toString(actual));
+		assertEqualPositions(expected, actual);
+	}
+	
+	public void testInterfaceHighlighting() throws Exception {
+		setUpSemanticHighlighting(SemanticHighlightings.INTERFACE);
+		Position[] actual= getSemanticHighlightingPositions();
+		Position[] expected= new Position[] {
+				createPosition(41, 3, 4),
+				createPosition(42, 3, 16), // annotations are also interfaces
+		};
+//		System.out.println(toString(actual));
+		assertEqualPositions(expected, actual);
+	}
+	
+	public void testEnumHighlighting() throws Exception {
+		setUpSemanticHighlighting(SemanticHighlightings.ENUM);
+		Position[] actual= getSemanticHighlightingPositions();
+		Position[] expected= new Position[] {
+				createPosition(43, 3, 11),
+		};
+//		System.out.println(toString(actual));
+		assertEqualPositions(expected, actual);
+	}
+	
+	public void testAnnotationHighlighting() throws Exception {
+		setUpSemanticHighlighting(SemanticHighlightings.ANNOTATION);
+		Position[] actual= getSemanticHighlightingPositions();
+		Position[] expected= new Position[] {
+				createPosition(38, 2, 16),
+				createPosition(42, 3, 16),
+		};
+//		System.out.println(toString(actual));
+		assertEqualPositions(expected, actual);
+	}
+	
+	public void testClassHighlighting() throws Exception {
+		setUpSemanticHighlighting(SemanticHighlightings.CLASS);
+		Position[] actual= getSemanticHighlightingPositions();
+		Position[] expected= new Position[] {
+				createPosition(2, 15, 6),
+				createPosition(14, 16, 9),
+				createPosition(24, 1, 13),
+				createPosition(27, 10, 10),
+				createPosition(30, 7, 10),
+				createPosition(30, 26, 13),
+				createPosition(31, 2, 6),
+				createPosition(31, 17, 6),
+				createPosition(32, 19, 6),
+				createPosition(33, 25, 6),
+				createPosition(34, 24, 6),
+				createPosition(35, 30, 6),
+				createPosition(39, 7, 7),
+				createPosition(39, 25, 6),
+				createPosition(41, 8, 6),
 		};
 //		System.out.println(toString(actual));
 		assertEqualPositions(expected, actual);

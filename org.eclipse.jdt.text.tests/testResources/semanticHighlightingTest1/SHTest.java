@@ -1,4 +1,4 @@
-import test.ExternalClass;
+import test.ExternalClass;import java.util.List;import java.lang.annotation.ElementType;
 
 abstract class SHTest {
 	int field;
@@ -39,6 +39,9 @@ abstract class SHTest {
 	@SuppressWarnings(value="all")
 	class Generic<E extends Number> {
 		E method() {
+			List<String> list= null;
+			SuppressWarnings annotationRef= null;
+			ElementType enumRef= null;
 			return null;
 		}
 	}
