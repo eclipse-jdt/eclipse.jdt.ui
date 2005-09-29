@@ -58,7 +58,7 @@ public final class ASTProvider {
 	 *
 	 * @since 3.1
 	 */
-	private static final class WAIT_FLAG {
+	public static final class WAIT_FLAG {
 
 		String fName;
 
