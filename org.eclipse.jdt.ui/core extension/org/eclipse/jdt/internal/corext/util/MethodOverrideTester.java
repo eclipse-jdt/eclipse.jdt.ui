@@ -143,7 +143,7 @@ public class MethodOverrideTester {
 	
 	public IMethod findOverriddenMethod(IMethod overriding, IType overriddenType) throws JavaModelException {
 		IMethod[] overriddenMethods= overriddenType.getMethods();
-		for (int i= overriddenMethods.length - 1; i >= 0; i--) {
+		for (int i= 0; i < overriddenMethods.length; i++) {
 			if (isSubsignature(overriddenMethods[i], overriding)) {
 				return overriddenMethods[i];
 			}
@@ -153,7 +153,7 @@ public class MethodOverrideTester {
 	
 	public IMethod findOverridingMethod(IMethod overridden, IType overridingType) throws JavaModelException {
 		IMethod[] overridingMethods= overridingType.getMethods();
-		for (int i= overridingMethods.length - 1; i >= 0; i--) {
+		for (int i= 0; i < overridingMethods.length; i++) {
 			if (isSubsignature(overridden, overridingMethods[i])) {
 				return overridingMethods[i];
 			}
