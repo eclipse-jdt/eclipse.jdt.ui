@@ -453,4 +453,13 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	public void inputDocumentChanged(IDocument oldInput, IDocument newInput) {
 		scheduleJob();
 	}
+	
+	/**
+	 * Refreshes the highlighting.
+	 * 
+	 * @since 3.2
+	 */
+	public void refresh() {
+		scheduleJob();
+	}
 }

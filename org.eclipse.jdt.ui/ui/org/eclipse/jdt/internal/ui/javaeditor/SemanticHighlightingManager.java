@@ -492,6 +492,8 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 
 		if (!isEnabled())
 			return;
+		
+		boolean refreshNeeded= false;
 
 		for (int i= 0, n= fSemanticHighlightings.length; i < n; i++) {
 			SemanticHighlighting semanticHighlighting= fSemanticHighlightings[i];
@@ -500,6 +502,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			if (colorKey.equals(event.getProperty())) {
 				adaptToTextForegroundChange(fHighlightings[i], event);
 				fPresenter.highlightingStyleChanged(fHighlightings[i]);
+				refreshNeeded= true;
 				continue;
 			}
 
@@ -507,6 +510,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			if (boldKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fHighlightings[i], event, SWT.BOLD);
 				fPresenter.highlightingStyleChanged(fHighlightings[i]);
+				refreshNeeded= true;
 				continue;
 			}
 
@@ -514,6 +518,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			if (italicKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fHighlightings[i], event, SWT.ITALIC);
 				fPresenter.highlightingStyleChanged(fHighlightings[i]);
+				refreshNeeded= true;
 				continue;
 			}
 
@@ -521,6 +526,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			if (strikethroughKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fHighlightings[i], event, TextAttribute.STRIKETHROUGH);
 				fPresenter.highlightingStyleChanged(fHighlightings[i]);
+				refreshNeeded= true;
 				continue;
 			}
 
@@ -528,6 +534,7 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			if (underlineKey.equals(event.getProperty())) {
 				adaptToTextStyleChange(fHighlightings[i], event, TextAttribute.UNDERLINE);
 				fPresenter.highlightingStyleChanged(fHighlightings[i]);
+				refreshNeeded= true;
 				continue;
 			}
 
@@ -535,9 +542,13 @@ public class SemanticHighlightingManager implements IPropertyChangeListener {
 			if (enabledKey.equals(event.getProperty())) {
 				adaptToEnablementChange(fHighlightings[i], event);
 				fPresenter.highlightingStyleChanged(fHighlightings[i]);
+				refreshNeeded= true;
 				continue;
 			}
 		}
+		
+		if (refreshNeeded && fReconciler != null)
+			fReconciler.refresh();
 	}
 
 	private void adaptToEnablementChange(Highlighting highlighting, PropertyChangeEvent event) {
