@@ -353,11 +353,11 @@ public class MethodOverrideTest extends CoreTests {
 
 	private static String getDebugString(IMethodBinding overriding,  IMethodBinding overriddenMethod) {
 		StringBuffer buf= new StringBuffer();
-		buf.append(BindingLabelProvider.getBindingLabel(overriding, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED));
+		buf.append(BindingLabelProvider.getBindingLabel(overriding, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.T_TYPE_PARAMETERS));
 		buf.append(" - ");
-		buf.append(BindingLabelProvider.getBindingLabel(overriddenMethod, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED));
+		buf.append(BindingLabelProvider.getBindingLabel(overriddenMethod, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.M_FULLY_QUALIFIED  | JavaElementLabels.T_TYPE_PARAMETERS));
 		buf.append(" (");
-		buf.append(BindingLabelProvider.getBindingLabel(overriddenMethod.getMethodDeclaration(), JavaElementLabels.M_PARAMETER_TYPES));
+		buf.append(BindingLabelProvider.getBindingLabel(overriddenMethod.getMethodDeclaration(), JavaElementLabels.M_PARAMETER_TYPES  | JavaElementLabels.T_TYPE_PARAMETERS));
 		buf.append(")");
 		return buf.toString();
 	}
