@@ -401,11 +401,13 @@ public class CompletionProposalCollector extends CompletionRequestor {
 
 	/**
 	 * Returns the <code>CompletionContext</code> for this completion operation.
-	 *
+	 * <p>
+	 * Public since 3.2. XXX this API is provisional and may change anytime during the course of 3.2
+	 * </p>
 	 * @return the <code>CompletionContext</code> for this completion operation
 	 * @see CompletionRequestor#acceptContext(CompletionContext)
 	 */
-	protected final CompletionContext getContext() {
+	public final CompletionContext getContext() {
 		return fContext;
 	}
 

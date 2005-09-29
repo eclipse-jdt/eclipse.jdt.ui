@@ -14,7 +14,8 @@ import org.eclipse.jface.text.ITextViewer;
 
 import org.eclipse.ui.IEditorPart;
 
-import org.eclipse.jdt.internal.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+
 
 /**
  * 

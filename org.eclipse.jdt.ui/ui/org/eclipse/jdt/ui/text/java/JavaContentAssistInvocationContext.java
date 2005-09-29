@@ -8,27 +8,31 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.java;
-
-import org.eclipse.core.runtime.IProgressMonitor;
+package org.eclipse.jdt.ui.text.java;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 
 import org.eclipse.ui.IEditorPart;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTRequestor;
-import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 
 /**
+ * Describes the context of a content assist invocation in a Java editor. The context knows the
+ * {@link ICompilationUnit compilation unit}, the
+ * {@link CompletionProposalCollector proposal collector} used to get Java core proposals and the
+ * {@link CompletionContext core completion context} received from core.
+ * <p>
+ * Clients may use this class.
+ * </p>
+ * <p>
+ * XXX this API is provisional and may change anytime during the course of 3.2
+ * </p>
  * 
  * @since 3.2
  */
@@ -38,17 +42,26 @@ public class JavaContentAssistInvocationContext extends TextContentAssistInvocat
 	private ICompilationUnit fCU= null;
 	private boolean fCUComputed= false;
 	
-	private ASTNode fAST= null;
-	private boolean fASTComputed= false;
-
 	private CompletionProposalCollector fCollector;
 
+	/**
+	 * Creates a new context.
+	 * 
+	 * @param viewer the viewer used by the editor
+	 * @param offset the invocation offset
+	 * @param editor the editor that content assist is invoked in
+	 */
 	public JavaContentAssistInvocationContext(ITextViewer viewer, int offset, IEditorPart editor) {
 		super(viewer, offset);
 		Assert.isNotNull(editor);
 		fEditor= editor;
 	}
 	
+	/**
+	 * Returns the compilation unit that content assist is invoked in.
+	 * 
+	 * @return the compilation unit that content assist is invoked in
+	 */
 	public ICompilationUnit computeCompilationUnit() {
 		if (!fCUComputed) {
 			fCUComputed= true;
@@ -57,35 +70,33 @@ public class JavaContentAssistInvocationContext extends TextContentAssistInvocat
 		return fCU;
 	}
 	
-	public ASTNode computeAST(IProgressMonitor pm) {
-		if (!fASTComputed) {
-			fASTComputed= true;
-			ICompilationUnit unit= computeCompilationUnit();
-			if (unit != null) {
-				final ASTNode[] astholder= new ASTNode[0];
-				ICompilationUnit[] cus= {unit};
-				ASTParser.newParser(0).createASTs(cus, null, new ASTRequestor() {
-					/*
-					 * @see org.eclipse.jdt.core.dom.ASTRequestor#acceptAST(org.eclipse.jdt.core.ICompilationUnit, org.eclipse.jdt.core.dom.CompilationUnit)
-					 */
-					public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
-						astholder[0]= ast;
-					}
-				}, pm);
-				
-				fAST= astholder[0];
-			}
-		}
-		
-		return fAST;
-	}
-
+	/**
+	 * Returns the compeletion requestor that was used to get core proposals, or <code>null</code>
+	 * if no core proposals have been requested.
+	 * 
+	 * @return the compeletion requestor that was used to get core proposals, or <code>null</code>
+	 */
 	public CompletionProposalCollector getCollector() {
 		return fCollector;
 	}
 	
+	/**
+	 * XXX internal - do not use
+	 */
 	public void setCollector(CompletionProposalCollector collector) {
 		fCollector= collector;
+	}
+	
+	/**
+	 * Returns the {@link CompletionContext core completion context} if available, <code>null</code>
+	 * otherwise. Shortcut for <code>getCollector().getContext()</code>.
+	 * 
+	 * @return the core completion context if available, <code>null</code> otherwise
+	 */
+	public CompletionContext getContext() {
+		if (fCollector != null)
+			return fCollector.getContext();
+		return null;
 	}
 	
 	/*
