@@ -37,6 +37,8 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public final class RenameEnumConstProcessor extends RenameFieldProcessor {
@@ -116,7 +118,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 					IJavaProject javaProject= getField().getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_RENAME_ENUM_CONSTANT, project, MessageFormat.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description, new String[] { getField().getElementName(), getNewElementName()}), null, arguments);
+					return new RefactoringDescriptor(ID_RENAME_ENUM_CONSTANT, project, MessageFormat.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description, new String[] { getField().getElementName(), JavaElementLabels.getElementLabel(getField().getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), null, arguments);
 				}
 			};
 			composite.markAsSynthetic();

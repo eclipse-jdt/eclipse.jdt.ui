@@ -93,6 +93,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating {
 
 	private static final String ID_RENAME_TYPE= "org.eclipse.jdt.ui.rename.type"; //$NON-NLS-1$
@@ -670,7 +672,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 					IJavaProject javaProject= fType.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_RENAME_TYPE, project, MessageFormat.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { fType.getFullyQualifiedName('.'), getNewElementName()}), null, arguments);
+					return new RefactoringDescriptor(ID_RENAME_TYPE, project, MessageFormat.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), null, arguments);
 				}
 			};
 			result.addAll(fChangeManager.getAllChanges());

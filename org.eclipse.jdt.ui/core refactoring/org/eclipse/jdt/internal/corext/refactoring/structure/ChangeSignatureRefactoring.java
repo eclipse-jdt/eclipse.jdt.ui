@@ -125,6 +125,8 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ChangeSignatureRefactoring extends Refactoring {
@@ -783,6 +785,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			buff.append(fReturnTypeInfo.getOldTypeName())
 				.append(' ');
 
+		buff.append(JavaElementLabels.getElementLabel(fMethod.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED));
+		buff.append('#');
 		buff.append(fMethod.getElementName())
 			.append(Signature.C_PARAM_START)
 			.append(getOldMethodParameters())

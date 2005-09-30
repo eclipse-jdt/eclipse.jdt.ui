@@ -80,6 +80,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RenameLocalVariableProcessor extends JavaRenameProcessor implements INameUpdating, IReferenceUpdating {
@@ -421,7 +423,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 						IJavaProject javaProject= fCu.getJavaProject();
 						if (javaProject != null)
 							project= javaProject.getElementName();
-						return new RefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, MessageFormat.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, fNewName}), null, arguments);
+						return new RefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, MessageFormat.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName}), null, arguments);
 					}
 				};
 				composite.markAsSynthetic();

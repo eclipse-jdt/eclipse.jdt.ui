@@ -65,6 +65,8 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -277,7 +279,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 						IJavaProject javaProject= fTypeParameter.getJavaProject();
 						if (javaProject != null)
 							project= javaProject.getElementName();
-						return new RefactoringDescriptor(ID_RENAME_TYPE_PARAMETER, project, MessageFormat.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description, new String[] { fTypeParameter.getElementName(), getNewElementName()}), null, arguments);
+						return new RefactoringDescriptor(ID_RENAME_TYPE_PARAMETER, project, MessageFormat.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description, new String[] { fTypeParameter.getElementName(), JavaElementLabels.getElementLabel(fTypeParameter.getDeclaringMember(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), null, arguments);
 					}
 				};
 				composite.markAsSynthetic();

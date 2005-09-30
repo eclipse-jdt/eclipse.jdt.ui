@@ -25,6 +25,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -84,6 +85,16 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 		final Map arguments= new HashMap();
 		arguments.put(ATTRIBUTE_PATH, getResourcePath().toPortableString());
 		arguments.put(ATTRIBUTE_NAME, getNewName());
-		return new RefactoringDescriptor(ID_RENAME_COMPILATION_UNIT, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { getOldName(), getNewName()}), null, arguments);
+		String label= null;
+		final ICompilationUnit unit= (ICompilationUnit) getModifiedElement();
+		if (unit != null) {
+			final IPackageFragment fragment= (IPackageFragment) unit.getParent();
+			if (!fragment.isDefaultPackage())
+				label= fragment.getElementName() + "." + unit.getElementName(); //$NON-NLS-1$
+			else
+				label= unit.getElementName();
+		} else
+			label= getOldName();
+		return new RefactoringDescriptor(ID_RENAME_COMPILATION_UNIT, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, getNewName()}), null, arguments);
 	}
 }

@@ -75,6 +75,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating {
@@ -490,7 +492,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 					IJavaProject javaProject= fField.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_RENAME_FIELD, project, MessageFormat.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { fField.getElementName(), getNewElementName()}), null, arguments);
+					return new RefactoringDescriptor(ID_RENAME_FIELD, project, MessageFormat.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "#" + fField.getElementName(), getNewElementName()}), null, arguments); //$NON-NLS-1$
 				}
 			};
 		} finally {
