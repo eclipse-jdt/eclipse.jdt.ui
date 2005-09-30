@@ -28,13 +28,13 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.part.ISetSelectionTarget;
 
-import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
+
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
-
-import org.eclipse.ltk.core.refactoring.Refactoring;
 
 public class RenameUserInterfaceStarter extends UserInterfaceStarter {
 	
@@ -107,11 +107,12 @@ public class RenameUserInterfaceStarter extends UserInterfaceStarter {
 	}
 	
 	public void activate(Refactoring refactoring, Shell parent, boolean save) throws CoreException {
-		JavaRenameProcessor processor= (JavaRenameProcessor)refactoring.getAdapter(JavaRenameProcessor.class);
-		SelectionState state= new SelectionState(processor.getElements()[0]); // can take [0], since JavaRenameProcessors operate on a single element
+		RenameProcessor processor= (RenameProcessor)refactoring.getAdapter(RenameProcessor.class);
+		Object[] elements= processor.getElements();
+		SelectionState state= elements.length == 1 ? new SelectionState(elements[0]) : null;
 		super.activate(refactoring, parent, save);
 		INameUpdating nameUpdating= (INameUpdating)refactoring.getAdapter(INameUpdating.class);
-		if (nameUpdating != null)
+		if (nameUpdating != null && state != null)
 			state.restore(nameUpdating.getNewElement());
 	}
 }
