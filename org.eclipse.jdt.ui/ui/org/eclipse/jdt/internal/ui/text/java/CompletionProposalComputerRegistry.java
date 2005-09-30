@@ -44,7 +44,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.2
  */
-public class CompletionProposalComputerRegistry {
+public final class CompletionProposalComputerRegistry {
 
 	private static final String EXTENSION_POINT= "javaCompletionProposalComputer"; //$NON-NLS-1$
 	
