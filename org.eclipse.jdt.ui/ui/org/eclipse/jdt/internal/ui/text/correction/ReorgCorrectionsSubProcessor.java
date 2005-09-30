@@ -66,6 +66,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -104,15 +105,16 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 public class ReorgCorrectionsSubProcessor {
 
 	public static void getWrongTypeNameProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		String[] args= problem.getProblemArguments();
-		if (args.length == 2) {
-			ICompilationUnit cu= context.getCompilationUnit();
-			boolean isLinked= cu.getResource().isLinked();
+		ICompilationUnit cu= context.getCompilationUnit();
+		boolean isLinked= cu.getResource().isLinked();
 
-			// rename type
-			proposals.add(new CorrectMainTypeNameProposal(cu, context.getASTRoot(), args[1], 5));
-
-			String newCUName= args[1] + ".java"; //$NON-NLS-1$
+		ASTNode coveredNode= context.getCoveredNode();
+		if (coveredNode instanceof SimpleName) {
+			String currTypeName= ((SimpleName) coveredNode).getIdentifier();
+			
+			proposals.add(new CorrectMainTypeNameProposal(cu, context.getASTRoot(), currTypeName, 5));
+			
+			String newCUName= currTypeName + ".java"; //$NON-NLS-1$
 			ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
 			if (!newCU.exists() && !isLinked && !JavaConventions.validateCompilationUnitName(newCUName).matches(IStatus.ERROR)) {
 				RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
@@ -125,36 +127,33 @@ public class ReorgCorrectionsSubProcessor {
 	}
 
 	public static void getWrongPackageDeclNameProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		String[] args= problem.getProblemArguments();
-		if (args.length == 1) {
-			ICompilationUnit cu= context.getCompilationUnit();
-			boolean isLinked= cu.getResource().isLinked();
+		ICompilationUnit cu= context.getCompilationUnit();
+		boolean isLinked= cu.getResource().isLinked();
 
-			// correct pack decl
-			int relevance= cu.getPackageDeclarations().length == 0 ? 7 : 5; // bug 38357
-			proposals.add(new CorrectPackageDeclarationProposal(cu, problem, relevance));
+		// correct pack decl
+		int relevance= cu.getPackageDeclarations().length == 0 ? 7 : 5; // bug 38357
+		proposals.add(new CorrectPackageDeclarationProposal(cu, problem, relevance));
 
-			// move to pack
-			IPackageDeclaration[] packDecls= cu.getPackageDeclarations();
-			String newPackName= packDecls.length > 0 ? packDecls[0].getElementName() : ""; //$NON-NLS-1$
+		// move to pack
+		IPackageDeclaration[] packDecls= cu.getPackageDeclarations();
+		String newPackName= packDecls.length > 0 ? packDecls[0].getElementName() : ""; //$NON-NLS-1$
 
-			IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(cu);
-			IPackageFragment newPack= root.getPackageFragment(newPackName);
+		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(cu);
+		IPackageFragment newPack= root.getPackageFragment(newPackName);
 
-			ICompilationUnit newCU= newPack.getCompilationUnit(cu.getElementName());
-			if (!newCU.exists() && !isLinked) {
-				String label;
-				if (newPack.isDefaultPackage()) {
-					label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_movecu_default_description, cu.getElementName());
-				} else {
-					label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_movecu_description, new Object[] { cu.getElementName(), newPack.getElementName() });
-				}
-				CompositeChange composite= new CompositeChange(label);
-				composite.add(new CreatePackageChange(newPack));
-				composite.add(new MoveCompilationUnitChange(cu, newPack));
-
-				proposals.add(new ChangeCorrectionProposal(label, composite, 6, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_MOVE)));
+		ICompilationUnit newCU= newPack.getCompilationUnit(cu.getElementName());
+		if (!newCU.exists() && !isLinked) {
+			String label;
+			if (newPack.isDefaultPackage()) {
+				label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_movecu_default_description, cu.getElementName());
+			} else {
+				label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_movecu_description, new Object[] { cu.getElementName(), newPack.getElementName() });
 			}
+			CompositeChange composite= new CompositeChange(label);
+			composite.add(new CreatePackageChange(newPack));
+			composite.add(new MoveCompilationUnitChange(cu, newPack));
+
+			proposals.add(new ChangeCorrectionProposal(label, composite, 6, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_MOVE)));
 		}
 	}
 
