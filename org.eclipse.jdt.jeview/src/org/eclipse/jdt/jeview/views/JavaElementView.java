@@ -61,6 +61,7 @@ import org.eclipse.ui.part.IShowInSource;
 import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -72,6 +73,8 @@ import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -79,6 +82,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 
+import org.eclipse.jdt.jeview.EditorUtility;
 import org.eclipse.jdt.jeview.JEPluginImages;
 import org.eclipse.jdt.jeview.JEViewPlugin;
 import org.eclipse.jdt.jeview.properties.JavaElementProperties;
@@ -88,7 +92,7 @@ import org.eclipse.jdt.jeview.properties.ResourceProperties;
 public class JavaElementView extends ViewPart implements IShowInSource, IShowInTarget {
 	TreeViewer fViewer;
 	private DrillDownAdapter fDrillDownAdapter;
-	private JERoot fInput;
+	JERoot fInput;
 	
 	private Action fResetAction;
 	private Action fCodeSelectAction;
@@ -331,9 +335,15 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		};
 		
 		fDoubleClickAction = new Action() {
+			private Object fPreviousDouble;
+
 			@Override public void run() {
 				ISelection selection = fViewer.getSelection();
 				Object obj = ((IStructuredSelection)selection).getFirstElement();
+				
+				boolean isSecondDoubleClick= (obj == fPreviousDouble);
+				fPreviousDouble= isSecondDoubleClick ? null : obj;
+
 				if (obj instanceof JavaElement) {
 					IJavaElement javaElement= ((JavaElement) obj).getJavaElement();
 					switch (javaElement.getElementType()) {
@@ -348,8 +358,14 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 						default :
 							try {
 								IEditorPart editorPart= JavaUI.openInEditor(javaElement);
-								if (editorPart != null)
-									JavaUI.revealInEditor(editorPart, javaElement);
+								if (editorPart != null) {
+									if (isSecondDoubleClick && javaElement instanceof ISourceReference && editorPart instanceof ITextEditor) {
+										ISourceRange sourceRange= ((ISourceReference) javaElement).getSourceRange();
+										EditorUtility.selectInEditor((ITextEditor) editorPart, sourceRange.getOffset(), sourceRange.getLength());
+									} else {
+										JavaUI.revealInEditor(editorPart, javaElement);
+									}
+								}
 							} catch (PartInitException e) {
 								showAndLogError("Could not open editor.", e); //$NON-NLS-1$
 							} catch (JavaModelException e) {
