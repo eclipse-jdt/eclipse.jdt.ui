@@ -330,12 +330,14 @@ public class TestPriorization extends TestCase {
 		return true;
 	}
 
+	/*
 	private void printOrder(List order) {
 		for (int i= 0; i < order.size(); i++) {
 			String s= (String)order.get(i);
 			System.out.println(s);
 		}
 	}
+	*/
 
 	private void collectOrder(Test suite, List order) {
 		if (suite instanceof TestCase) {

@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.dialogs;
 
-import java.util.ArrayList;
-
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
@@ -27,8 +25,6 @@ import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
-
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
@@ -75,7 +71,7 @@ public class DialogsTest extends TestCase {
 		JavaProjectHelper.delete(jproject);
 	}
 	*/
-	
+	/*
 	private TypeInfo[] getRefs(ArrayList list, int off, int len) {
 		TypeInfo[] res= new TypeInfo[len];
 		for (int i= 0; i < len; i++) {
@@ -84,7 +80,7 @@ public class DialogsTest extends TestCase {
 		return res;
 	}
 	
-	/*
+	
 	public void testMultiElementSelectionDialog() throws Exception {
 		IJavaProject jproject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		JavaProjectHelper.addSourceContainer(jproject, "src1");
