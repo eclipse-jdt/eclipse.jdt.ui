@@ -301,12 +301,12 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		// validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
 	}
 	
-	// Move inner class; enclosing class must remain private
+	// Move inner class; enclosing class must remain private if not  used
 	public void test32() throws Exception{
 		validatePassingTest("A", "Inner", "MoreInner", "p1", new String[]{"A"}, new String[]{"p1"}, null, false, false, false, false);
 	}
 	
-	// Fallthrough
+	// Move inner class which has access to enclosing private class, enclosing class must be increased in visibility
 	public void test33() throws Exception{
 		validatePassingTest("A", "Inner", "MoreInner", "p2", new String[]{"A"}, new String[]{"p2"}, null, false, false, false, false);
 	}
@@ -476,6 +476,11 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	// Using member of enclosing type, non-static edition
 	public void test_nonstatic_43() throws Exception{
 		validatePassingTest("A", "Inner", "MoreInner", "p5", new String[]{"A"}, new String[]{"p5"}, "inner", true, true, true, true);
+	}
+	
+	// Move inner class and create field; enclosing class must be changed to use default visibility.
+	public void test_nonstatic_44() throws Exception{
+		validatePassingTest("A", "Inner", "MoreInner", "p2", new String[]{"A"}, new String[]{"p2"}, "p", true, true, false, true);
 	}
 
 	public void testFail_nonstatic_0() throws Exception{

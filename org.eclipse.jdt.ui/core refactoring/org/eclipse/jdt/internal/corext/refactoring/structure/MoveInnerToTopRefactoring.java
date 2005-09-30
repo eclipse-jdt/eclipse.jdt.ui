@@ -859,14 +859,20 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 				rewrite.remove(declaration, groupMove);
 				targetRewrite.getImportRemover().registerRemovedNode(declaration);
 			} else {
-				//Bug 101017: Rewrite the visibility of the element to be moved and add a warning.
-				ModifierRewrite.create(rewrite, declaration).setModifiers(JdtFlags.clearFlag(Modifier.STATIC | Modifier.PROTECTED | Modifier.PRIVATE, declaration.getModifiers()), groupMove);
-				final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, 
-						Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_change_visibility_type_warning, 
-								new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_DEFAULT) }), 
-								JavaStatusContext.create(fSourceRewrite.getCu()));
-				if (!containsStatusEntry(status, entry))
-					status.addEntry(entry);
+				// Bug 101017/96308: Rewrite the visibility of the element to be
+				// moved and add a warning.
+				int newFlags= JdtFlags.clearFlag(Modifier.STATIC, declaration.getModifiers());
+				
+				if (Modifier.isPrivate(declaration.getModifiers()) || Modifier.isProtected(declaration.getModifiers())) {
+					newFlags= JdtFlags.clearFlag(Modifier.PROTECTED | Modifier.PRIVATE, newFlags);
+					final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, Messages.format(
+							RefactoringCoreMessages.MoveInnerToTopRefactoring_change_visibility_type_warning, new String[] { BindingLabelProvider
+									.getBindingLabel(binding, JavaElementLabels.ALL_DEFAULT) }), JavaStatusContext.create(fSourceRewrite.getCu()));
+					if (!containsStatusEntry(status, entry))
+						status.addEntry(entry);
+				}
+				
+				ModifierRewrite.create(rewrite, declaration).setModifiers(newFlags, groupMove);
 			}
 		}
 		ASTNode[] references= getReferenceNodesIn(root, typeReferences, targetUnit);
@@ -1360,7 +1366,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 			final TextEditGroup group) throws JavaModelException {
 		final ITypeBinding declaring= binding.getDeclaringClass();
 		if (declaring != null && !declaring.isInterface() && Modifier.isPrivate(binding.getModifiers())) {
-			if (neededEnclosingTypes.contains(binding.getJavaElement())) {
+			if (neededEnclosingTypes.contains(binding.getJavaElement()) || fCreateInstanceField) {
 				final ASTNode node= ASTNodes.findDeclaration(binding, fSourceRewrite.getRoot());
 				if (node instanceof AbstractTypeDeclaration) {
 					final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) node;
