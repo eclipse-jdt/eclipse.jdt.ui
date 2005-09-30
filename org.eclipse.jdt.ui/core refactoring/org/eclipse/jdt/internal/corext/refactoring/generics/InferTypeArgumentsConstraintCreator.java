@@ -78,8 +78,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.VariableVari
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor {
 
 	/**
@@ -166,7 +164,6 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 				
 			} else {
 				//TODO: array...
-				int i= -1;
 				//logUnexpectedNode(node, null);
 			}
 			
@@ -859,8 +856,8 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		if (initializer == null)
 			return;
 		
-		ConstraintVariable2 initializerCv= getConstraintVariable(initializer);
-		ConstraintVariable2 nameCv= getConstraintVariable(node);
+//		ConstraintVariable2 initializerCv= getConstraintVariable(initializer);
+//		ConstraintVariable2 nameCv= getConstraintVariable(node);
 		//TODO: check: property has been set in visit(CatchClause), visit(MethodDeclaration), visit(EnhancedForStatament)
 		//fTCFactory.createSubtypeConstraint(initializerCv, nameCv); //TODO: not for augment raw container clients
 	}
@@ -911,14 +908,14 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		node.setProperty(CV_PROP, constraintVariable);
 	}
 	
-	private void logUnexpectedNode(ASTNode node, String msg) {
-		String message= msg == null ? "" : msg + ":\n";  //$NON-NLS-1$//$NON-NLS-2$
-		if (node == null) {
-			message+= "ASTNode was not expected to be null"; //$NON-NLS-1$
-		} else {
-			message+= "Found unexpected node (type: " + node.getNodeType() + "):\n" + node.toString(); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		JavaPlugin.log(new Exception(message).fillInStackTrace());
-	}
+//	private void logUnexpectedNode(ASTNode node, String msg) {
+//		String message= msg == null ? "" : msg + ":\n";  //$NON-NLS-1$//$NON-NLS-2$
+//		if (node == null) {
+//			message+= "ASTNode was not expected to be null"; //$NON-NLS-1$
+//		} else {
+//			message+= "Found unexpected node (type: " + node.getNodeType() + "):\n" + node.toString(); //$NON-NLS-1$ //$NON-NLS-2$
+//		}
+//		JavaPlugin.log(new Exception(message).fillInStackTrace());
+//	}
 
 }
