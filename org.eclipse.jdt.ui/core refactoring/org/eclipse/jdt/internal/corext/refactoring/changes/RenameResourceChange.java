@@ -135,4 +135,8 @@ public class RenameResourceChange extends JDTChange {
 		arguments.put(ATTRIBUTE_NAME, fNewName);
 		return new RefactoringDescriptor(ID_RENAME_RESOURCE, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { getResource().getFullPath().toString(), fNewName}), null, arguments);
 	}
+
+	public String getNewName() {
+		return fNewName;
+	}
 }

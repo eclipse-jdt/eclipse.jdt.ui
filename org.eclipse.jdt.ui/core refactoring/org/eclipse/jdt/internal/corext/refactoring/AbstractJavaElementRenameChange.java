@@ -77,30 +77,15 @@ public abstract class AbstractJavaElementRenameChange extends JDTChange {
 		}
 	}
 
-	/**
-	 * Gets the newName.
-	 * 
-	 * @return Returns a String
-	 */
-	protected String getNewName() {
+	public String getNewName() {
 		return fNewName;
 	}
 
-	/**
-	 * Gets the resourcePath.
-	 * 
-	 * @return Returns a IPath
-	 */
 	protected IPath getResourcePath() {
 		return fResourcePath;
 	}
 
-	/**
-	 * Gets the oldName
-	 * 
-	 * @return Returns a String
-	 */
-	protected String getOldName() {
+	public String getOldName() {
 		return fOldName;
 	}
 }
