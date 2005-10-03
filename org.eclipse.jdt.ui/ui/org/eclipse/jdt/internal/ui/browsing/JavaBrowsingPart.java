@@ -293,7 +293,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 					LogicalPackage lp= null;
 					for (int j= 0; j < packagesMem.length; j++) {
 						javaElementHandle= packagesMem[j].getString(TAG_SELECTED_ELEMENT_PATH);
-						Object pack= (IPackageFragment)JavaCore.create(javaElementHandle);
+						Object pack= JavaCore.create(javaElementHandle);
 						if (pack instanceof IPackageFragment && ((IPackageFragment)pack).exists()) {
 							if (lp == null)
 								lp= new LogicalPackage((IPackageFragment)pack);
@@ -1077,7 +1077,7 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 				if (je == null && firstElement instanceof IFile) {
 					IContainer parent= ((IFile)firstElement).getParent();
 					if (parent != null)
-						return (IJavaElement)parent.getAdapter(IJavaElement.class);
+						return parent.getAdapter(IJavaElement.class);
 					else return null;
 				} else
 					return je;

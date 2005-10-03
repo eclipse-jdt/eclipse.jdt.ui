@@ -128,7 +128,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 		switch (o.getElementType()) {
 			case IJavaElement.COMPILATION_UNIT:
 				if (silent)
-					return (ICompilationUnit)o;
+					return o;
 				else
 					return findType((ICompilationUnit)o, silent);
 			case IJavaElement.CLASS_FILE:

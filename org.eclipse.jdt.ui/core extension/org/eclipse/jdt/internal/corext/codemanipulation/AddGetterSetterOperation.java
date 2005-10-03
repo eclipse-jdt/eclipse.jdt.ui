@@ -189,7 +189,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 				sibling= fInsert;
 			ASTNode insertion= null;
 			if (sibling instanceof IMethod)
-				insertion= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getParent().getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
+				insertion= ASTNodes.getParent(NodeFinder.perform(rewrite.getParent().getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
 			addNewAccessor(type, field, GetterSetterUtil.getGetterStub(field, name, fSettings.createComments, fVisibility | (field.getFlags() & Flags.AccStatic)), rewrite, insertion);
 		}
 	}
@@ -215,7 +215,7 @@ public final class AddGetterSetterOperation implements IWorkspaceRunnable {
 				sibling= fInsert;
 			ASTNode insertion= null;
 			if (sibling instanceof IMethod)
-				insertion= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getParent().getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
+				insertion= ASTNodes.getParent(NodeFinder.perform(rewrite.getParent().getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
 			addNewAccessor(type, field, GetterSetterUtil.getSetterStub(field, name, fSettings.createComments, fVisibility | (field.getFlags() & Flags.AccStatic)), rewrite, insertion);
 		}
 	}

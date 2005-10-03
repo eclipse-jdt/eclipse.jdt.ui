@@ -278,7 +278,7 @@ public class BuildPathAction extends Action implements IClasspathInformationProv
 
 		IStructuredSelection selection;
 		if (fOperation instanceof EditOutputFolderOperation)
-			selection= (StructuredSelection) getSelection();
+			selection= getSelection();
 		else
 			selection= new StructuredSelection(resultElements);
 		selectAndReveal(selection);

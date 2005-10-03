@@ -194,7 +194,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 						}
 						ASTNode insertion= null;
 						if (fInsert instanceof IMethod)
-							insertion= (MethodDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
+							insertion= ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
 						String variableKey= null;
 						String methodKey= null;
 						MethodDeclaration stub= null;
