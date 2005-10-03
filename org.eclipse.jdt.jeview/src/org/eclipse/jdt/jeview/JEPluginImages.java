@@ -29,6 +29,7 @@ public class JEPluginImages {
 	public static final String PROPERTIES= "properties.gif";
 	public static final String REFRESH= "refresh.gif";
 	public static final String SET_FOCUS= "setfocus.gif";
+	public static final String CODE_SELECT= "codeSelect.gif";
 	
 	public static final ImageDescriptor IMG_CHILDREN= create(CHILDREN);
 	public static final ImageDescriptor IMG_INFO= create(INFO);
@@ -36,6 +37,7 @@ public class JEPluginImages {
 	public static final ImageDescriptor IMG_PROPERTIES= create(PROPERTIES);
 	public static final ImageDescriptor IMG_REFRESH= create(REFRESH);
 	public static final ImageDescriptor IMG_SET_FOCUS= create(SET_FOCUS);
+	public static final ImageDescriptor IMG_SET_FOCUS_CODE_SELECT= create(CODE_SELECT);
 	
 	private static ImageDescriptor create(String name) {
 		try {

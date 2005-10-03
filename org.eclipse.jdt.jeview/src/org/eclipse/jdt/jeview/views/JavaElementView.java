@@ -96,6 +96,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	
 	private Action fResetAction;
 	private Action fCodeSelectAction;
+	private Action fElementAtAction;
 	private Action fCreateFromHandleAction;
 	private Action fRefreshAction;
 	private Action fPropertiesAction;
@@ -233,6 +234,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 
 	private void fillLocalPullDown(IMenuManager manager) {
 		manager.add(fCodeSelectAction);
+		manager.add(fElementAtAction);
 		manager.add(fCreateFromHandleAction);
 		manager.add(fResetAction);
 		manager.add(new Separator());
@@ -253,6 +255,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
 		manager.add(fCodeSelectAction);
+		manager.add(fElementAtAction);
 		manager.add(fResetAction);
 		manager.add(fRefreshAction);
 		manager.add(new Separator());
@@ -260,7 +263,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	}
 
 	private void makeActions() {
-		fCodeSelectAction= new Action("Set Input from Editor", JEPluginImages.IMG_SET_FOCUS) {
+		fCodeSelectAction= new Action("Set Input from Editor (codeSelect)", JEPluginImages.IMG_SET_FOCUS_CODE_SELECT) {
 			@Override public void run() {
 				IEditorPart editor= getSite().getPage().getActiveEditor();
 				IEditorInput input= editor.getEditorInput();
@@ -285,8 +288,34 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				setInput(resolved[0]);
 			}
 		};
-		fCodeSelectAction.setToolTipText("Set input from current editor's selection");
-		//TODO: getElementAt
+		fCodeSelectAction.setToolTipText("Set input from current editor's selection (codeSelect)");
+		
+		fElementAtAction= new Action("Set Input from Editor location (getElementAt)", JEPluginImages.IMG_SET_FOCUS) {
+			@Override public void run() {
+				IEditorPart editor= getSite().getPage().getActiveEditor();
+				IEditorInput input= editor.getEditorInput();
+				ISelectionProvider selectionProvider= editor.getSite().getSelectionProvider();
+				if (input == null || selectionProvider == null)
+					return;
+				ISelection selection= selectionProvider.getSelection();
+				if (! (selection instanceof ITextSelection))
+					return;
+				IJavaElement javaElement= (IJavaElement) input.getAdapter(IJavaElement.class);
+				if (javaElement == null)
+					return;
+				IJavaElement resolved;
+				try {
+					resolved= getElementAtOffset(javaElement, (ITextSelection) selection);
+				} catch (JavaModelException e) {
+					return;
+				}
+				if (resolved == null)
+					return;
+				
+				setInput(resolved);
+			}
+		};
+		fElementAtAction.setToolTipText("Set input from current editor's selection location (getElementAt)");
 		
 		fCreateFromHandleAction= new Action("Create From Handle...") {
 			@Override public void run() {
@@ -392,6 +421,25 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				return elements;
 		}
 		return new IJavaElement[0];
+	}
+	
+	static IJavaElement getElementAtOffset(IJavaElement input, ITextSelection selection) throws JavaModelException {
+		if (input instanceof ICompilationUnit) {
+			ICompilationUnit cunit= (ICompilationUnit) input;
+			reconcile(cunit);
+			IJavaElement ref= cunit.getElementAt(selection.getOffset());
+			if (ref == null)
+				return input;
+			else
+				return ref;
+		} else if (input instanceof IClassFile) {
+			IJavaElement ref= ((IClassFile)input).getElementAt(selection.getOffset());
+			if (ref == null)
+				return input;
+			else
+				return ref;
+		}
+		return null;
 	}
 	
 	/* see JavaModelUtil.reconcile((ICompilationUnit) input) */
