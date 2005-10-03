@@ -2081,6 +2081,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		String typeBody= CodeGeneration.getTypeBody(templateID, parentCU, getTypeName(), lineDelimiter);
 		if (typeBody != null) {
 			buf.append(typeBody);
+		} else {
+			buf.append(lineDelimiter);
 		}
 		buf.append('}').append(lineDelimiter);
 		return buf.toString();
