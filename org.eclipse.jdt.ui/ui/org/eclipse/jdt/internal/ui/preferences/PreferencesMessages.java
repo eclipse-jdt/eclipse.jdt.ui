@@ -500,6 +500,10 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeTemplateBlock_methodstub_label;
 	public static String CodeTemplateBlock_constructorstub_label;
 	public static String CodeTemplateBlock_newtype_label;
+	public static String CodeTemplateBlock_classbody_label;
+	public static String CodeTemplateBlock_interfacebody_label;
+	public static String CodeTemplateBlock_enumbody_label;
+	public static String CodeTemplateBlock_annotationbody_label;
 	public static String CodeTemplateBlock_typecomment_label;
 	public static String CodeTemplateBlock_fieldcomment_label;
 	public static String CodeTemplateBlock_filecomment_label;

@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
 /**
  * Class that offers access to the templates contained in the 'code templates' preference page.
@@ -26,6 +27,35 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
  */
 public class CodeGeneration {
 
+	
+	/**
+	 * Constant ID for the type kind to be used in {@link #getTypeBody(String, ICompilationUnit, String, String)} to get the code template used
+	 * for a new class type body.
+	 * @since 3.2
+	 */
+	public static final String CLASS_BODY_TEMPLATE_ID= CodeTemplateContextType.CLASSBODY_ID;
+	
+	/**
+	 * Constant ID for the type kind to be used in {@link #getTypeBody(String, ICompilationUnit, String, String)} to get the code template used
+	 * for a new interface type body.
+	 * @since 3.2
+	 */
+	public static final String INTERFACE_BODY_TEMPLATE_ID= CodeTemplateContextType.INTERFACEBODY_ID;
+	
+	/**
+	 * Constant ID for the type kind to be used in {@link #getTypeBody(String, ICompilationUnit, String, String)} to get the code template used
+	 * for a new enum type body.
+	 * @since 3.2
+	 */
+	public static final String ENUM_BODY_TEMPLATE_ID= CodeTemplateContextType.ENUMBODY_ID;
+	
+	/**
+	 * Constant ID for the type kind to be used in {@link #getTypeBody(String, ICompilationUnit, String, String)} to get the code template used
+	 * for a new annotation type body.
+	 * @since 3.2
+	 */
+	public static final String ANNOTATION_BODY_TEMPLATE_ID= CodeTemplateContextType.ANNOTATIONBODY_ID;
+	
 	private static final String[] EMPTY= new String[0];
 	
 	private CodeGeneration() {
@@ -100,6 +130,21 @@ public class CodeGeneration {
 	 */	
 	public static String getTypeComment(ICompilationUnit cu, String typeQualifiedName, String[] typeParameterNames, String lineDelimiter) throws CoreException {
 		return StubUtility.getTypeComment(cu, typeQualifiedName, typeParameterNames, lineDelimiter);
+	}
+		
+	/**
+	 * Returns the content of a new new type body using the 'type body' code templates. The returned content is unformatted and is not indented.
+	 * @param typeKind The type kind ID of the body template. Valid values are {@link #CLASS_BODY_TEMPLATE_ID}, {@link #INTERFACE_BODY_TEMPLATE_ID},
+	 * {@link #ENUM_BODY_TEMPLATE_ID} and {@link #ANNOTATION_BODY_TEMPLATE_ID}.
+	 * @param cu The compilation unit where the type is contained. The compilation unit does not need to exist.
+	 * @param typeName The name of the type(for embedding in the template as a user variable).
+	 * @param lineDelim The line delimiter to be used.
+	 * @return Returns the new content or <code>null</code> if the code template is undefined or empty. The returned content is unformatted and is not indented.
+	 * @throws CoreException Thrown when the evaluation of the code template fails.
+	 * @since 3.2
+	 */	
+	public static String getTypeBody(String typeKind, ICompilationUnit cu, String typeName, String lineDelim) throws CoreException {
+		return StubUtility.getTypeBody(typeKind, cu, typeName, lineDelim);
 	}
 
 	/**

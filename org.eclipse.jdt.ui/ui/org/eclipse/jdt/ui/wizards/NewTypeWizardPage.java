@@ -1776,7 +1776,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				// add an import that will be removed again. Having this import solves 14661
 				imports.addImport(JavaModelUtil.concatenateName(pack.getElementName(), clName));
 				
-				String typeContent= constructTypeStub(imports, lineDelimiter);
+				String typeContent= constructTypeStub(parentCU, imports, lineDelimiter);
 				
 				String cuContent= constructCUContent(parentCU, typeContent, lineDelimiter);
 				
@@ -1811,7 +1811,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 					content.append(lineDelimiter);
 				}
 
-				content.append(constructTypeStub(imports, lineDelimiter));
+				content.append(constructTypeStub(parentCU, imports, lineDelimiter));
 				IJavaElement sibling= null;
 				if (enclosingType.isEnum()) {
 					IField[] fields = enclosingType.getFields();
@@ -2040,34 +2040,49 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 		}
 	}
-
+	
 	/*
 	 * Called from createType to construct the source for this type
 	 */		
-	private String constructTypeStub(ImportsManager imports, String lineDelimiter) {	
+	private String constructTypeStub(ICompilationUnit parentCU, ImportsManager imports, String lineDelimiter) throws CoreException {
 		StringBuffer buf= new StringBuffer();
-			
+		
 		int modifiers= getModifiers();
 		buf.append(Flags.toString(modifiers));
 		if (modifiers != 0) {
 			buf.append(' ');
 		}
-		String type=""; //$NON-NLS-1$
+		String type= ""; //$NON-NLS-1$
+		String templateID= ""; //$NON-NLS-1$
 		switch (fTypeKind) {
-			case CLASS_TYPE: type= "class "; break; //$NON-NLS-1$
-			case INTERFACE_TYPE: type= "interface "; break; //$NON-NLS-1$
-			case ENUM_TYPE: type= "enum "; break; //$NON-NLS-1$
-			case ANNOTATION_TYPE: type= "@interface "; break; //$NON-NLS-1$
+			case CLASS_TYPE: 
+				type= "class ";  //$NON-NLS-1$
+				templateID= CodeGeneration.CLASS_BODY_TEMPLATE_ID;
+				break;
+			case INTERFACE_TYPE: 
+				type= "interface "; //$NON-NLS-1$
+				templateID= CodeGeneration.INTERFACE_BODY_TEMPLATE_ID;
+				break; 
+			case ENUM_TYPE: 
+				type= "enum "; //$NON-NLS-1$
+				templateID= CodeGeneration.ENUM_BODY_TEMPLATE_ID;
+				break;
+			case ANNOTATION_TYPE: 
+				type= "@interface "; //$NON-NLS-1$
+				templateID= CodeGeneration.ANNOTATION_BODY_TEMPLATE_ID;
+				break;
 		}
 		buf.append(type);
 		buf.append(getTypeName());
 		writeSuperClass(buf, imports);
 		writeSuperInterfaces(buf, imports);	
-		buf.append('{');
-		buf.append(lineDelimiter);
-		buf.append(lineDelimiter);
-		buf.append('}');
-		buf.append(lineDelimiter);
+
+		buf.append(" {").append(lineDelimiter); //$NON-NLS-1$
+		String typeBody= CodeGeneration.getTypeBody(templateID, parentCU, getTypeName(), lineDelimiter);
+		if (typeBody != null) {
+			buf.append(typeBody);
+		}
+		buf.append('}').append(lineDelimiter);
 		return buf.toString();
 	}
 	

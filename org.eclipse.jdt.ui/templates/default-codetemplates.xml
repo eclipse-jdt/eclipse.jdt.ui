@@ -54,6 +54,18 @@ ${package_declaration}
 ${typecomment}
 ${type_declaration}</template>
 
+<template name="classbody" id="org.eclipse.jdt.ui.text.codetemplates.classbody" description="%CodeTemplates.classbody" context="classbody_context" enabled="true">
+</template>
+
+<template name="interfacebody" id="org.eclipse.jdt.ui.text.codetemplates.interfacebody" description="%CodeTemplates.interfacebody" context="interfacebody_context" enabled="true">
+</template>
+
+<template name="enumbody" id="org.eclipse.jdt.ui.text.codetemplates.enumbody" description="%CodeTemplates.enumbody" context="enumbody_context" enabled="true">
+</template>
+
+<template name="annotationbody" id="org.eclipse.jdt.ui.text.codetemplates.annotationbody" description="%CodeTemplates.annotationbody" context="annotationbody_context" enabled="true">
+</template>
+
 <template name="catchblock" id="org.eclipse.jdt.ui.text.codetemplates.catchblock" description="%CodeTemplates.catchblock" context="catchblock_context" enabled="true">// ${todo} %CodeTemplates.catchblock.tododesc
 ${exception_var}.printStackTrace();</template>
 

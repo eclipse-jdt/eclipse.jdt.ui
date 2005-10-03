@@ -42,6 +42,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.Document;
@@ -74,7 +75,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
   */
 public class CodeTemplateBlock {
 	
-	private class CodeTemplateAdapter implements ITreeListAdapter, IDialogFieldListener {
+	private class CodeTemplateAdapter extends ViewerSorter implements ITreeListAdapter, IDialogFieldListener {
 
 		private final Object[] NO_CHILDREN= new Object[0];
 
@@ -124,6 +125,59 @@ public class CodeTemplateBlock {
 
 		public void keyPressed(TreeListDialogField field, KeyEvent event) {
 		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.ViewerSorter#category(java.lang.Object)
+		 */
+		public int category(Object element) {
+			if (element == COMMENT_NODE) {
+				return 1;
+			} else if (element == CODE_NODE) {
+				return 2;
+			}
+			
+			TemplatePersistenceData data= (TemplatePersistenceData) element;
+			String id= data.getId();
+			
+			if (CodeTemplateContextType.NEWTYPE_ID.equals(id)) {
+				return 101;
+			} else if (CodeTemplateContextType.CLASSBODY_ID.equals(id)) {
+				return 102;
+			} else if (CodeTemplateContextType.INTERFACEBODY_ID.equals(id)) {
+				return 103;
+			} else if (CodeTemplateContextType.ENUMBODY_ID.equals(id)) {
+				return 104;
+			} else if (CodeTemplateContextType.ANNOTATIONBODY_ID.equals(id)) {
+				return 105;
+			} else if (CodeTemplateContextType.METHODSTUB_ID.equals(id)) {
+				return 106;
+			} else if (CodeTemplateContextType.CONSTRUCTORSTUB_ID.equals(id)) {
+				return 107;
+			} else if (CodeTemplateContextType.GETTERSTUB_ID.equals(id)) {
+				return 108;
+			} else if (CodeTemplateContextType.SETTERSTUB_ID.equals(id)) {
+				return 109;
+			} else if (CodeTemplateContextType.CATCHBLOCK_ID.equals(id)) {
+				return 110;
+			} else if (CodeTemplateContextType.FILECOMMENT_ID.equals(id)) {
+				return 1;
+			} else if (CodeTemplateContextType.TYPECOMMENT_ID.equals(id)) {
+				return 2;
+			} else if (CodeTemplateContextType.FIELDCOMMENT_ID.equals(id)) {
+				return 3;
+			} else if (CodeTemplateContextType.CONSTRUCTORCOMMENT_ID.equals(id)) {
+				return 4;
+			} else if (CodeTemplateContextType.METHODCOMMENT_ID.equals(id)) {
+				return 5;
+			} else if (CodeTemplateContextType.OVERRIDECOMMENT_ID.equals(id)) {
+				return 6;
+			} else if (CodeTemplateContextType.GETTERCOMMENT_ID.equals(id)) {
+				return 7;
+			} else if (CodeTemplateContextType.SETTERCOMMENT_ID.equals(id)) {
+				return 8;
+			}
+			return 1000;
+		}
 	}
 
 	private static class CodeTemplateLabelProvider extends LabelProvider {
@@ -157,6 +211,14 @@ public class CodeTemplateBlock {
 				return PreferencesMessages.CodeTemplateBlock_setterstub_label; 
 			} else if (CodeTemplateContextType.NEWTYPE_ID.equals(id)) {
 				return PreferencesMessages.CodeTemplateBlock_newtype_label; 
+			} else if (CodeTemplateContextType.CLASSBODY_ID.equals(id)) {
+				return PreferencesMessages.CodeTemplateBlock_classbody_label; 
+			} else if (CodeTemplateContextType.INTERFACEBODY_ID.equals(id)) {
+				return PreferencesMessages.CodeTemplateBlock_interfacebody_label; 
+			} else if (CodeTemplateContextType.ENUMBODY_ID.equals(id)) {
+				return PreferencesMessages.CodeTemplateBlock_enumbody_label; 
+			} else if (CodeTemplateContextType.ANNOTATIONBODY_ID.equals(id)) {
+				return PreferencesMessages.CodeTemplateBlock_annotationbody_label; 
 			} else if (CodeTemplateContextType.FILECOMMENT_ID.equals(id)) {
 				return PreferencesMessages.CodeTemplateBlock_filecomment_label; 
 			} else if (CodeTemplateContextType.TYPECOMMENT_ID.equals(id)) {
@@ -176,8 +238,7 @@ public class CodeTemplateBlock {
 			}
 			return data.getTemplate().getDescription();
 		}
-
-	}	
+	}		
 	
 	private final static int IDX_EDIT= 0;
 	private final static int IDX_IMPORT= 2;
@@ -223,7 +284,8 @@ public class CodeTemplateBlock {
 		};		
 		fCodeTemplateTree= new TreeListDialogField(adapter, buttonLabels, new CodeTemplateLabelProvider());
 		fCodeTemplateTree.setDialogFieldListener(adapter);
-		fCodeTemplateTree.setLabelText(PreferencesMessages.CodeTemplateBlock_templates_label); 
+		fCodeTemplateTree.setLabelText(PreferencesMessages.CodeTemplateBlock_templates_label);
+		fCodeTemplateTree.setViewerSorter(adapter);
 
 		fCodeTemplateTree.enableButton(IDX_EXPORT, false);
 		fCodeTemplateTree.enableButton(IDX_EDIT, false);

@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.StringTokenizer;
 
 import org.eclipse.text.edits.DeleteEdit;
@@ -85,6 +86,15 @@ public class StubUtility {
 	
 			
 	private static final String[] EMPTY= new String[0];
+	
+	private static final Set VALID_TYPE_BODY_TEMPLATES;
+	static {
+		VALID_TYPE_BODY_TEMPLATES= new HashSet();
+		VALID_TYPE_BODY_TEMPLATES.add(CodeTemplateContextType.CLASSBODY_ID);
+		VALID_TYPE_BODY_TEMPLATES.add(CodeTemplateContextType.INTERFACEBODY_ID);
+		VALID_TYPE_BODY_TEMPLATES.add(CodeTemplateContextType.ENUMBODY_ID);
+		VALID_TYPE_BODY_TEMPLATES.add(CodeTemplateContextType.ANNOTATIONBODY_ID);
+	}
 	
 	/*
 	 * Don't use this method directly, use CodeGeneration.
@@ -308,6 +318,26 @@ public class StubUtility {
 			typeParametersNames[i]= typeParameters[i].getElementName();
 		}
 		return typeParametersNames;
+	}
+
+	/**
+     * Don't use this method directly, use CodeGeneration.
+	 * @see org.eclipse.jdt.ui.CodeGeneration#getTypeBody(String, ICompilationUnit, String, String)
+	 */		
+	public static String getTypeBody(String templateID, ICompilationUnit cu, String typeName, String lineDelim) throws CoreException {
+		if ( !VALID_TYPE_BODY_TEMPLATES.contains(templateID)) {
+			throw new IllegalArgumentException("Invalid code template ID: " + templateID);  //$NON-NLS-1$
+		}
+		
+		Template template= getCodeTemplate(templateID, cu.getJavaProject());
+		if (template == null) {
+			return null;
+		}
+		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), cu.getJavaProject(), lineDelim);
+		context.setCompilationUnitVariables(cu);
+		context.setVariable(CodeTemplateContextType.TYPENAME, typeName);
+
+		return evaluateTemplate(context, template);
 	}
 	
 	/*

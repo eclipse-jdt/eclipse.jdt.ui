@@ -39,6 +39,10 @@ public class CodeTemplateContextType extends TemplateContextType {
 	public static final String GETTERBODY_CONTEXTTYPE= "getterbody_context"; //$NON-NLS-1$
 	public static final String SETTERBODY_CONTEXTTYPE= "setterbody_context"; //$NON-NLS-1$
 	public static final String NEWTYPE_CONTEXTTYPE= "newtype_context"; //$NON-NLS-1$
+	public static final String CLASSBODY_CONTEXTTYPE= "classbody_context"; //$NON-NLS-1$
+	public static final String INTERFACEBODY_CONTEXTTYPE= "interfacebody_context"; //$NON-NLS-1$
+	public static final String ENUMBODY_CONTEXTTYPE= "enumbody_context"; //$NON-NLS-1$
+	public static final String ANNOTATIONBODY_CONTEXTTYPE= "annotationbody_context"; //$NON-NLS-1$
 	public static final String FILECOMMENT_CONTEXTTYPE= "filecomment_context"; //$NON-NLS-1$
 	public static final String TYPECOMMENT_CONTEXTTYPE= "typecomment_context"; //$NON-NLS-1$
 	public static final String FIELDCOMMENT_CONTEXTTYPE= "fieldcomment_context"; //$NON-NLS-1$
@@ -61,6 +65,10 @@ public class CodeTemplateContextType extends TemplateContextType {
 	public static final String SETTERSTUB_ID= CODETEMPLATES_PREFIX + "setterbody"; //$NON-NLS-1$
 	public static final String FILECOMMENT_ID= CODETEMPLATES_PREFIX + "file" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String TYPECOMMENT_ID= CODETEMPLATES_PREFIX + "type" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String CLASSBODY_ID= CODETEMPLATES_PREFIX + "classbody"; //$NON-NLS-1$
+	public static final String INTERFACEBODY_ID= CODETEMPLATES_PREFIX + "interfacebody"; //$NON-NLS-1$
+	public static final String ENUMBODY_ID= CODETEMPLATES_PREFIX + "enumbody"; //$NON-NLS-1$
+	public static final String ANNOTATIONBODY_ID= CODETEMPLATES_PREFIX + "annotationbody"; //$NON-NLS-1$
 	public static final String FIELDCOMMENT_ID= CODETEMPLATES_PREFIX + "field" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String METHODCOMMENT_ID= CODETEMPLATES_PREFIX + "method" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String CONSTRUCTORCOMMENT_ID= CODETEMPLATES_PREFIX + "constructor" + COMMENT_SUFFIX; //$NON-NLS-1$
@@ -91,6 +99,10 @@ public class CodeTemplateContextType extends TemplateContextType {
 
 	public static final String PACKAGE_DECLARATION= "package_declaration"; //$NON-NLS-1$
 	public static final String TYPE_DECLARATION= "type_declaration"; //$NON-NLS-1$
+	public static final String CLASS_BODY= "classbody"; //$NON-NLS-1$
+	public static final String INTERFACE_BODY= "interfacebody"; //$NON-NLS-1$
+	public static final String ENUM_BODY= "enumbody"; //$NON-NLS-1$
+	public static final String ANNOTATION_BODY= "annotationbody"; //$NON-NLS-1$
 	public static final String TYPE_COMMENT= "typecomment"; //$NON-NLS-1$
 	public static final String FILE_COMMENT= "filecomment"; //$NON-NLS-1$
 	
@@ -179,6 +191,12 @@ public class CodeTemplateContextType extends TemplateContextType {
 			addResolver(new CodeTemplateVariableResolver(TYPE_DECLARATION,  JavaTemplateMessages.CodeTemplateContextType_variable_description_typedeclaration)); 
 			addResolver(new CodeTemplateVariableResolver(TYPE_COMMENT,  JavaTemplateMessages.CodeTemplateContextType_variable_description_typecomment)); 
 			addResolver(new CodeTemplateVariableResolver(FILE_COMMENT,  JavaTemplateMessages.CodeTemplateContextType_variable_description_filecomment)); 
+			addCompilationUnitVariables();
+		} else if (CLASSBODY_CONTEXTTYPE.equals(contextName) ||
+				INTERFACEBODY_CONTEXTTYPE.equals(contextName) ||
+				ENUMBODY_CONTEXTTYPE.equals(contextName) ||
+				ANNOTATIONBODY_CONTEXTTYPE.equals(contextName)) {
+			addResolver(new CodeTemplateVariableResolver(TYPENAME,  JavaTemplateMessages.CodeTemplateContextType_variable_description_typename)); 
 			addCompilationUnitVariables();
 		} else if (TYPECOMMENT_CONTEXTTYPE.equals(contextName)) {
 			addResolver(new CodeTemplateVariableResolver(TYPENAME,  JavaTemplateMessages.CodeTemplateContextType_variable_description_typename)); 
@@ -280,6 +298,10 @@ public class CodeTemplateContextType extends TemplateContextType {
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.GETTERBODY_CONTEXTTYPE));
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.SETTERBODY_CONTEXTTYPE));		
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.NEWTYPE_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.CLASSBODY_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.INTERFACEBODY_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.ENUMBODY_CONTEXTTYPE));
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.ANNOTATIONBODY_CONTEXTTYPE));
 		
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.FILECOMMENT_CONTEXTTYPE));
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.TYPECOMMENT_CONTEXTTYPE));
