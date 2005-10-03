@@ -439,7 +439,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			else
 				return ref;
 		}
-		return null;
+		return input;
 	}
 	
 	/* see JavaModelUtil.reconcile((ICompilationUnit) input) */
