@@ -43,7 +43,6 @@ import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.WildcardType;
 
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
@@ -1569,11 +1568,7 @@ public class SemanticHighlightings {
 				return false;
 			
 			// 2: match type arguments
-			// wildcard types are always type arguments!
 			StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
-			if (locationInParent == WildcardType.BOUND_PROPERTY)
-				return true;
-			
 			if (locationInParent == ParameterizedType.TYPE_ARGUMENTS_PROPERTY)
 				return true;
 			
