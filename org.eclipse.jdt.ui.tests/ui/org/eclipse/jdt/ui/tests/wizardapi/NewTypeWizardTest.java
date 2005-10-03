@@ -36,6 +36,7 @@ import org.eclipse.jdt.ui.wizards.NewAnnotationWizardPage;
 import org.eclipse.jdt.ui.wizards.NewClassWizardPage;
 import org.eclipse.jdt.ui.wizards.NewEnumWizardPage;
 import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
+import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -89,6 +90,10 @@ public class NewTypeWizardTest extends TestCase {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, "/**\n * Overridden\n */", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "${body_statement}", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "${body_statement}", null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.CLASSBODY_ID, "/* class body */\n", null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.INTERFACEBODY_ID, "/* interface body */\n", null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.ENUMBODY_ID, "/* enum body */\n", null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.ANNOTATIONBODY_ID, "/* annotation body */\n", null);
 
 		
 		fJProject1= ProjectTestSetup.getProject();
@@ -132,7 +137,7 @@ public class NewTypeWizardTest extends TestCase {
 		buf.append(" * Type\n");
 		buf.append(" */\n");
 		buf.append("public class E {\n");
-		buf.append("\n");
+		buf.append("    /* class body */\n");
 		buf.append("}\n");
 		String expected= buf.toString();
 		
@@ -173,7 +178,7 @@ public class NewTypeWizardTest extends TestCase {
 		buf.append(" * Type\n");
 		buf.append(" */\n");
 		buf.append("public class E extends ArrayList<String> {\n");
-		buf.append("\n");
+		buf.append("    /* class body */\n");
 		buf.append("}\n");
 		String expected= buf.toString();
 		
@@ -231,7 +236,7 @@ public class NewTypeWizardTest extends TestCase {
 		buf.append("    @Override\n");
 		buf.append("    public void foo(String t) {\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		buf.append("    /* class body */\n");
 		buf.append("}\n");
 		String expected= buf.toString();
 		
@@ -289,6 +294,7 @@ public class NewTypeWizardTest extends TestCase {
 		buf.append("    public E(String t) {\n");
 		buf.append("        super(t);\n");
 		buf.append("    }\n");
+		buf.append("    /* class body */\n");
 		buf.append("\n");
 		buf.append("    /**\n");
 		buf.append("     * Method\n");
@@ -296,7 +302,6 @@ public class NewTypeWizardTest extends TestCase {
 		buf.append("    public static void main(String[] args) {\n");
 		buf.append("\n");
 		buf.append("    }\n");
-		buf.append("\n");
 		buf.append("}\n");
 		String expected= buf.toString();
 		
@@ -347,7 +352,7 @@ public class NewTypeWizardTest extends TestCase {
 		buf.append("     * Type\n");
 		buf.append("     */\n");
 		buf.append("    public class E<S> extends ArrayList<S> {\n");
-		buf.append("\n");
+		buf.append("        /* class body */\n");
 		buf.append("    }\n");
 		buf.append("\n");
 		buf.append("    public abstract void foo(T t);\n");
@@ -401,7 +406,7 @@ public class NewTypeWizardTest extends TestCase {
 		buf.append(" * Type\n");
 		buf.append(" */\n");
 		buf.append("public class E implements List<File> {\n");
-		buf.append("\n");
+		buf.append("    /* class body */\n");
 		buf.append("}\n");
 		String expected= buf.toString();
 		
@@ -467,7 +472,7 @@ public class NewTypeWizardTest extends TestCase {
 		buf.append("    @Override\n");
 		buf.append("    public void foo(Inner inner) {\n");
 		buf.append("    }\n");
-		buf.append("\n");
+		buf.append("    /* class body */\n");
 		buf.append("}\n");
 		String expected= buf.toString();
 		
@@ -536,7 +541,7 @@ public class NewTypeWizardTest extends TestCase {
 		buf.append("        @Override\n");
 		buf.append("        public void foo(Inner inner) {\n");
 		buf.append("        }\n");
-		buf.append("\n");
+		buf.append("        /* class body */\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		
@@ -578,7 +583,7 @@ public class NewTypeWizardTest extends TestCase {
 		buf.append(" * Type\n");
 		buf.append(" */\n");
 		buf.append("public interface E extends List<String>, Runnable {\n");
-		buf.append("\n");
+		buf.append("    /* interface body */\n");
 		buf.append("}\n");
 		String expected= buf.toString();
 		
@@ -613,7 +618,7 @@ public class NewTypeWizardTest extends TestCase {
 		buf.append(" * Type\n");
 		buf.append(" */\n");
 		buf.append("public enum E {\n");
-		buf.append("\n");
+		buf.append("    /* enum body */\n");
 		buf.append("}\n");
 		String expected= buf.toString();
 		
@@ -648,11 +653,105 @@ public class NewTypeWizardTest extends TestCase {
 		buf.append(" * Type\n");
 		buf.append(" */\n");
 		buf.append("public @interface E {\n");
-		buf.append("\n");
+		buf.append("    /* annotation body */\n");
 		buf.append("}\n");
 		String expected= buf.toString();
 		
 		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
 	}
+
+	public void typeBodyTest( NewTypeWizardPage wizardPage, String templateID, String templateBody, String expectedBody,
+	    String packageName, String typeName, String typeKeyword) throws Exception {
+		StubUtility.setCodeTemplate(templateID, templateBody, null);
+
+		IPackageFragment pack= fSourceFolder.createPackageFragment(packageName, false, null);
 	
+		wizardPage.setPackageFragmentRoot(fSourceFolder, true);
+		wizardPage.setPackageFragment(pack, true);
+		wizardPage.setEnclosingTypeSelection(false, true);
+		wizardPage.setTypeName(typeName, true);
+		
+		wizardPage.setSuperClass("", true);
+		
+		List interfaces= new ArrayList();
+		wizardPage.setSuperInterfaces(interfaces, true);
+		
+		//wizardPage.setMethodStubSelection(false, false, false, true);
+		wizardPage.setAddComments(true, true);
+		wizardPage.enableCommentControl(true);
+		
+		wizardPage.createType(null);
+		
+		String actual= wizardPage.getCreatedType().getCompilationUnit().getSource();
+		
+		StringBuffer buf= new StringBuffer();
+		buf.append("/**\n");
+		buf.append(" * File\n");
+		buf.append(" */\n");
+		buf.append("package ");
+		buf.append(packageName);
+		buf.append(";\n");
+		buf.append("\n");
+		buf.append("/**\n");
+		buf.append(" * Type\n");
+		buf.append(" */\n");
+		buf.append("public ");
+		buf.append(typeKeyword);
+		buf.append( " ");
+		buf.append(typeName);
+		buf.append(" {\n");
+		buf.append(expectedBody);
+		buf.append("}\n");
+		String expected= buf.toString();
+
+		// one carriage return is the default for all body templates
+		// ..resetting before any asserts are thrown
+		StubUtility.setCodeTemplate(templateID, "\n", null);
+		
+		StringAsserts.assertEqualStringIgnoreDelim(actual, expected);
+	}
+
+	public void testCreateClassWithBody() throws Exception
+	{
+		typeBodyTest( new NewClassWizardPage(),
+			CodeTemplateContextType.CLASSBODY_ID, 
+			"    // test comment\n    String testMember = \"${type_name}\"\n",
+			"    // test comment\n    String testMember = \"TestClassBodyType\"\n",
+			"testclassbodypackage",
+			"TestClassBodyType",
+			"class" );
+	}
+
+	public void testCreateInterfaceWithBody() throws Exception
+	{
+		typeBodyTest( new NewInterfaceWizardPage(),
+			CodeTemplateContextType.INTERFACEBODY_ID, 
+			"\n    // public methods for ${type_name}\n",
+			"\n    // public methods for TestInterfaceBodyType\n",
+			"testinterfacebodypackage",
+			"TestInterfaceBodyType",
+			"interface" );
+	}
+
+	public void testCreateEnumWithBody() throws Exception
+	{
+		typeBodyTest( new NewEnumWizardPage(),
+			CodeTemplateContextType.ENUMBODY_ID, 
+			"\n    // enumeration constants\n    // public methods\n",
+			"\n    // enumeration constants\n    // public methods\n",
+			"enumbodypackage",
+			"EnumBodyType",
+			"enum" );
+	}
+
+	public void testCreateAnnotationWithBody() throws Exception
+	{
+		typeBodyTest( new NewAnnotationWizardPage(),
+			CodeTemplateContextType.ANNOTATIONBODY_ID, 
+			"\n    @SomeOtherSpecialAnnotation ${package_name}_${type_name}\n",
+			"\n    @SomeOtherSpecialAnnotation annotationbodypackage_AnnotationBodyType\n",
+			"annotationbodypackage",
+			"AnnotationBodyType",
+			"@interface" );
+	}
 }
