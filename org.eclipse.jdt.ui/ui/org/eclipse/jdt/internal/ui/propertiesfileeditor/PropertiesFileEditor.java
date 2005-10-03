@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.propertiesfileeditor;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.action.Action;
@@ -198,6 +199,14 @@ public class PropertiesFileEditor extends TextEditor {
 			};
 		}
 		return super.getAdapter(adapter);
+	}
+	
+	/*
+	 * @see org.eclipse.ui.part.WorkbenchPart#getOrientation()
+	 * @since 3.2
+	 */
+	public int getOrientation() {
+		return SWT.LEFT_TO_RIGHT;	// properties editors are always left to right by default (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=110986)
 	}
 
 	/*
