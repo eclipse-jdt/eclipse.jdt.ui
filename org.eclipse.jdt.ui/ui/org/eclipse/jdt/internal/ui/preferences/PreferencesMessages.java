@@ -347,6 +347,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_needsprojectbuild_message;
 	public static String ProblemSeveritiesConfigurationBlock_common_description;
 	public static String ProblemSeveritiesConfigurationBlock_pb_unsafe_type_op_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_raw_type_reference;
 	public static String ProblemSeveritiesConfigurationBlock_pb_final_param_bound_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_inexact_vararg_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_accidential_assignement_label;

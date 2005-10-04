@@ -88,6 +88,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 	private static final Key PREF_15_PB_ANNOTATION_SUPER_INTERFACE= getJDTCoreKey(JavaCore.COMPILER_PB_ANNOTATION_SUPER_INTERFACE);
 	private static final Key PREF_15_PB_TYPE_PARAMETER_HIDING= getJDTCoreKey(JavaCore.COMPILER_PB_TYPE_PARAMETER_HIDING);
 	private static final Key PREF_15_PB_INCOMPLETE_ENUM_SWITCH= getJDTCoreKey(JavaCore.COMPILER_PB_INCOMPLETE_ENUM_SWITCH);
+	private static final Key PREF_15_PB_RAW_TYPE_REFERENCE= getJDTCoreKey(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE);
 	
 	private static final Key PREF_PB_SUPPRESS_WARNINGS= getJDTCoreKey(JavaCore.COMPILER_PB_SUPPRESS_WARNINGS);
 	private static final Key PREF_PB_UNHANDLED_WARNING_TOKEN= getJDTCoreKey(JavaCore.COMPILER_PB_UNHANDLED_WARNING_TOKEN);
@@ -365,6 +366,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unsafe_type_op_label; 
 		addComboBox(inner, label, PREF_15_PB_UNCHECKED_TYPE_OPERATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_raw_type_reference; 
+		addCheckBox(inner, label, PREF_15_PB_RAW_TYPE_REFERENCE, enabledDisabled, extraIndent);
+		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_final_param_bound_label; 
 		addComboBox(inner, label, PREF_15_PB_FINAL_PARAM_BOUND, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
@@ -412,6 +416,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 			if (PREF_PB_UNUSED_PARAMETER.equals(changedKey) ||
 					PREF_PB_DEPRECATION.equals(changedKey) ||
 					PREF_PB_LOCAL_VARIABLE_HIDING.equals(changedKey) ||
+					PREF_15_PB_UNCHECKED_TYPE_OPERATION.equals(changedKey) ||
 					PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION.equals(changedKey)) {				
 				updateEnableStates();
 			} else if (PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING.equals(changedKey)) {
@@ -439,6 +444,9 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		boolean enableHiding= !checkValue(PREF_PB_LOCAL_VARIABLE_HIDING, IGNORE);
 		getCheckBox(PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD).setEnabled(enableHiding);
+		
+		boolean enableGenericTypeOps= !checkValue(PREF_15_PB_UNCHECKED_TYPE_OPERATION, IGNORE);
+		getCheckBox(PREF_15_PB_RAW_TYPE_REFERENCE).setEnabled(enableGenericTypeOps);
 	}
 
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
