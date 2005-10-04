@@ -71,7 +71,6 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 		private void addFinalCheckBox(Composite newControl) {
 			fFinalCheckBox= new Button(newControl, SWT.CHECK);
 			fFinalCheckBox.setText(RefactoringMessages.MoveInnerToToplnputPage_instance_final); 
-			fFinalCheckBox.setSelection(getMoveRefactoring().isInstanceFieldMarkedFinal());
 			GridData data= new GridData(GridData.FILL_HORIZONTAL);
 			data.horizontalSpan= 2;
 			fFinalCheckBox.setLayoutData(data);
@@ -93,8 +92,6 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 						// Do nothing
 					} else if (refactoring.isCreatingInstanceFieldPossible()) {
 						fFinalCheckBox.setEnabled(!empty);
-						if (empty)
-							fFinalCheckBox.setSelection(false);
 					}
 					if (!refactoring.isCreatingInstanceFieldMandatory())
 						refactoring.setCreateInstanceField(!empty);
@@ -118,9 +115,13 @@ public class MoveInnerToTopWizard extends RefactoringWizard {
 			addFieldNameEntry(newControl);
 			addFinalCheckBox(newControl);
 
-			final boolean mandatory= getMoveRefactoring().isCreatingInstanceFieldMandatory();
-			fFinalCheckBox.setSelection(mandatory);
-			fFinalCheckBox.setEnabled(mandatory);
+			if (getMoveRefactoring().isCreatingInstanceFieldPossible()) {
+				fFinalCheckBox.setSelection(getMoveRefactoring().isInstanceFieldMarkedFinal());
+				fFinalCheckBox.setEnabled(true);
+			} else {
+				fFinalCheckBox.setSelection(false);
+				fFinalCheckBox.setEnabled(false);
+			}
 		}
 
 		/*
