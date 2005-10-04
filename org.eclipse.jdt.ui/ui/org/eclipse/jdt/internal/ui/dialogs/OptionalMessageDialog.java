@@ -57,7 +57,7 @@ public class OptionalMessageDialog extends MessageDialog {
 		return dialog.open();
 	}
 
-	private OptionalMessageDialog(String id, Shell parent, String title, Image titleImage, String message, int dialogType, String[] buttonLabels, int defaultButtonIndex) {
+	protected OptionalMessageDialog(String id, Shell parent, String title, Image titleImage, String message, int dialogType, String[] buttonLabels, int defaultButtonIndex) {
 		super(parent, title, titleImage, message, dialogType, buttonLabels, defaultButtonIndex);
 		fId= id;
 	}

@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+import org.eclipse.jdt.internal.ui.dialogs.SortMembersMessageDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
@@ -204,12 +205,12 @@ public class SortMembersAction extends SelectionDispatchAction {
 		}		
 		
 		{
-			int returnCode= OptionalMessageDialog.open(ID + ".semantic_changes",  //$NON-NLS-1$
+			int returnCode= SortMembersMessageDialog.open(ID + ".preference_page",  //$NON-NLS-1$
 					getShell(), 
 					getDialogTitle(),
 					null,
-					ActionMessages.SortMembersAction_semantic_change,  
-					MessageDialog.WARNING, 		
+					ActionMessages.SortMembersAction_configure_sort_order,
+					MessageDialog.INFORMATION, 		
 					new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 
 					0);
 			if (returnCode != OptionalMessageDialog.NOT_SHOWN && 

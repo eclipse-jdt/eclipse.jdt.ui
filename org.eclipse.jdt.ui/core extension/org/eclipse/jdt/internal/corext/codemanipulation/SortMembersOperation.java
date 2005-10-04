@@ -14,19 +14,32 @@ import java.text.Collator;
 import java.util.Comparator;
 import java.util.List;
 
-import org.eclipse.core.resources.IWorkspaceRunnable;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.util.CompilationUnitSorter;
+import org.eclipse.core.resources.IWorkspaceRunnable;
+import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.Initializer;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Modifier;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.util.CompilationUnitSorter;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 
@@ -102,6 +115,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 		 * @see CompilationUnitSorter#sort(int, org.eclipse.jdt.core.ICompilationUnit, int[], java.util.Comparator, int, org.eclipse.core.runtime.IProgressMonitor)
 		 */
 		public int compare(Object e1, Object e2) {
+			boolean sortAll= fMemberOrderCache.isSortAll();
 			BodyDeclaration bodyDeclaration1= (BodyDeclaration) e1;
 			BodyDeclaration bodyDeclaration2= (BodyDeclaration) e2;
 			int cat1= category(bodyDeclaration1);
@@ -160,28 +174,27 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 						if (length1 != length2) {
 							return length1 - length2;
 						}
-						// preserve relative order
-						int value1= ((Integer) bodyDeclaration1.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
-						int value2= ((Integer) bodyDeclaration2.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
-						return value1 - value2;
+						return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
 					}
 				case ASTNode.FIELD_DECLARATION :
 					{
-						FieldDeclaration field1= (FieldDeclaration) bodyDeclaration1;
-						FieldDeclaration field2= (FieldDeclaration) bodyDeclaration2;
-
-						String name1= ((VariableDeclarationFragment) field1.fragments().get(0)).getName().getIdentifier();
-						String name2= ((VariableDeclarationFragment) field2.fragments().get(0)).getName().getIdentifier();
-
-						// field declarations are sorted by name
-						return compareNames(bodyDeclaration1, bodyDeclaration2, name1, name2);
+						if (sortAll) {
+							FieldDeclaration field1= (FieldDeclaration) bodyDeclaration1;
+							FieldDeclaration field2= (FieldDeclaration) bodyDeclaration2;
+	
+							String name1= ((VariableDeclarationFragment) field1.fragments().get(0)).getName().getIdentifier();
+							String name2= ((VariableDeclarationFragment) field2.fragments().get(0)).getName().getIdentifier();
+	
+							// field declarations are sorted by name
+							return compareNames(bodyDeclaration1, bodyDeclaration2, name1, name2);
+						} else {
+							return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
+						}
 					}
 				case ASTNode.INITIALIZER :
 					{
 						// preserve relative order
-						int value1= ((Integer) bodyDeclaration1.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
-						int value2= ((Integer) bodyDeclaration2.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
-						return value1 - value2;
+						return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
 					}
 				case ASTNode.TYPE_DECLARATION :
 				case ASTNode.ENUM_DECLARATION :
@@ -198,14 +211,18 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 					}
 				case ASTNode.ENUM_CONSTANT_DECLARATION :
 					{
-						EnumConstantDeclaration decl1= (EnumConstantDeclaration) bodyDeclaration1;
-						EnumConstantDeclaration decl2= (EnumConstantDeclaration) bodyDeclaration2;
-						
-						String name1= decl1.getName().getIdentifier();
-						String name2= decl2.getName().getIdentifier();
-						
-						// enum constants declarations are sorted by name
-						return compareNames(bodyDeclaration1, bodyDeclaration2, name1, name2);					
+						if (sortAll) {
+							EnumConstantDeclaration decl1= (EnumConstantDeclaration) bodyDeclaration1;
+							EnumConstantDeclaration decl2= (EnumConstantDeclaration) bodyDeclaration2;
+							
+							String name1= decl1.getName().getIdentifier();
+							String name2= decl2.getName().getIdentifier();
+							
+							// enum constants declarations are sorted by name
+							return compareNames(bodyDeclaration1, bodyDeclaration2, name1, name2);		
+						} else {
+							return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
+						}
 					}
 				case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION :
 					{
@@ -222,15 +239,18 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 			return 0;
 		}
 
+		private int preserveRelativeOrder(BodyDeclaration bodyDeclaration1, BodyDeclaration bodyDeclaration2) {
+			int value1= ((Integer) bodyDeclaration1.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
+			int value2= ((Integer) bodyDeclaration2.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
+			return value1 - value2;
+		}
+
 		private int compareNames(BodyDeclaration bodyDeclaration1, BodyDeclaration bodyDeclaration2, String name1, String name2) {
 			int cmp= this.fCollator.compare(name1, name2);
 			if (cmp != 0) {
 				return cmp;
 			}
-			// preserve relative order
-			int value1= ((Integer) bodyDeclaration1.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
-			int value2= ((Integer) bodyDeclaration2.getProperty(CompilationUnitSorter.RELATIVE_ORDER)).intValue();
-			return value1 - value2;
+			return preserveRelativeOrder(bodyDeclaration1, bodyDeclaration2);
 		}
 
 		private String buildSignature(Type type) {
@@ -252,6 +272,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 		fCompilationUnit= cu;
 		fPositions= positions;
 	}
+
 
 	/**
 	 * Runs the operation.

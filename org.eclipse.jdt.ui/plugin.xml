@@ -12,7 +12,7 @@
    <extension-point id="queryParticipants" name="%queryParticipantsExtensionPoint" schema="schema/queryParticipants.exsd"/>
    <extension-point id="javaCompletionProposalComputer" name="%javaCompletionProposalComputer" schema="schema/javaCompletionProposalComputer.exsd"/>
    
-
+sor
 <extension
 	point="org.eclipse.ui.decorators">
 	<!---
@@ -1357,7 +1357,7 @@
       </page>
       <page
             name="%memberSortPrefName"
-            category="org.eclipse.jdt.ui.preferences.AppearancePreferencePage"
+            category="org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage"
             id="org.eclipse.jdt.ui.preferences.MembersOrderPreferencePage">
          <keywordReference id="org.eclipse.jdt.ui.sortorder"/>

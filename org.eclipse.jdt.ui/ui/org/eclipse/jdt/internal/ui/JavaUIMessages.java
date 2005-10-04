@@ -165,4 +165,5 @@ public final class JavaUIMessages extends NLS {
 	}
 
 	public static String TypeInfoViewer_library_name_format;
+	public static String SortMembersMessageDialog_configure_preferences_tool_tip;
 }
