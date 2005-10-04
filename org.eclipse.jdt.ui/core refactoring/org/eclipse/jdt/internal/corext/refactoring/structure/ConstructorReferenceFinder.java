@@ -225,8 +225,11 @@ class ConstructorReferenceFinder {
 		IType[] subTypes= hierarchy.getAllSubtypes(type);
 		List result= new ArrayList(subTypes.length);
 		for (int i= 0; i < subTypes.length; i++) {
-			if (! subTypes[i].isBinary())
+			if (! subTypes[i].isBinary()) {
+				if (RefactoringSearchEngine.isDerived(subTypes[i].getResource()))
+					continue;
 				result.add(subTypes[i]);
+			}
 		}
 		return (IType[]) result.toArray(new IType[result.size()]);
 	}

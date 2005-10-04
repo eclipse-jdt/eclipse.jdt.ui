@@ -72,6 +72,8 @@ public final class RefactoringSearchEngine2 {
 		private final Set fInaccurateMatches= new HashSet();
 
 		public final void acceptSearchMatch(final SearchMatch match) throws CoreException {
+			if (RefactoringSearchEngine.isDerived(match.getResource()))
+				return;
 
 			final SearchMatch accepted= fRequestor.acceptSearchMatch(match);
 			if (accepted != null) {
@@ -135,6 +137,9 @@ public final class RefactoringSearchEngine2 {
 		private final Set fInaccurateMatches= new HashSet();
 
 		public final void acceptSearchMatch(final SearchMatch match) throws CoreException {
+			if (RefactoringSearchEngine.isDerived(match.getResource()))
+				return;
+
 			final SearchMatch accepted= fRequestor.acceptSearchMatch(match);
 			if (accepted != null) {
 				fCollectedMatches.add(accepted);

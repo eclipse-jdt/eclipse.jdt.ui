@@ -21,6 +21,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IResource;
 
@@ -45,6 +46,15 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
  */
 public class RefactoringSearchEngine {
 
+	private static final boolean HIDE_DERIVED_FROM_REFACTORING;
+	static {
+		String value= Platform.getDebugOption("org.eclipse.jdt.ui/hideDerivedFromRefactoring"); //$NON-NLS-1$
+		HIDE_DERIVED_FROM_REFACTORING= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
+	}
+	public static boolean isDerived(IResource resource) {
+		return HIDE_DERIVED_FROM_REFACTORING && resource != null && resource.isDerived();
+	}
+	
 	private RefactoringSearchEngine(){
 		//no instances
 	}
@@ -60,6 +70,8 @@ public class RefactoringSearchEngine {
 		SearchRequestor requestor = new SearchRequestor() {
 			private IResource fLastResource;
 			public void acceptSearchMatch(SearchMatch match) {
+				if (isDerived(match.getResource()))
+					return;
 				if (match.getAccuracy() == SearchMatch.A_INACCURATE)
 					hasPotentialMatches[0]= true;
 				if (fLastResource != match.getResource()) {
@@ -199,4 +211,5 @@ public class RefactoringSearchEngine {
 		if (hasNonCuMatches)
 			status.addError(RefactoringCoreMessages.RefactoringSearchEngine_non_cu_matches); 
 	}
+
 }

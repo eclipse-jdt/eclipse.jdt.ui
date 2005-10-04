@@ -39,3 +39,6 @@ org.eclipse.jdt.ui/perf/search/participants=300
 
 #Reports the time for a single completion proposal computer
 org.eclipse.jdt.ui/perf/content_assist/extensions=1000
+
+#skip derived resources in RefactoringSearchEngine, etc. (temporary option)
+org.eclipse.jdt.ui/hideDerivedFromRefactoring= false

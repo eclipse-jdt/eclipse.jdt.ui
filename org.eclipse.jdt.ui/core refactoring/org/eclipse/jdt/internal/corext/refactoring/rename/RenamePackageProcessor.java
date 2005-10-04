@@ -784,6 +784,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			final List packageFragments= new ArrayList();
 			SearchRequestor requestor= new SearchRequestor() {
 				public void acceptSearchMatch(SearchMatch match) throws CoreException {
+					if (RefactoringSearchEngine.isDerived(match.getResource()))
+						return;
 					IJavaElement enclosingElement= SearchUtils.getEnclosingJavaElement(match);
 					if (enclosingElement instanceof IPackageFragment) {
 						IPackageFragment pack= (IPackageFragment) enclosingElement;
