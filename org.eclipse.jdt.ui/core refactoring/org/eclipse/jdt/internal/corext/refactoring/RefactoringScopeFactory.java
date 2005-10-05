@@ -136,7 +136,7 @@ public class RefactoringScopeFactory {
 			}
 		}
 		Collection referencingProjects= getReferencingProjects(javaElement.getJavaProject());
-		return SearchEngine.createJavaSearchScope((IJavaProject[]) referencingProjects.toArray(new IJavaProject[referencingProjects.size()]));
+		return SearchEngine.createJavaSearchScope((IJavaProject[]) referencingProjects.toArray(new IJavaProject[referencingProjects.size()]), false); //see bug 111574
 	}
 	
 	/**
