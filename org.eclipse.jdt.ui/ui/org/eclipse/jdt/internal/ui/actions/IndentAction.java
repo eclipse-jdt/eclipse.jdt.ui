@@ -77,7 +77,7 @@ public class IndentAction extends TextEditorAction {
 	
 	/** 
 	 * Whether this is the action invoked by TAB. When <code>true</code>, indentation behaves 
-	 * differently to accomodate normal TAB operation.
+	 * differently to accommodate normal TAB operation.
 	 */
 	private final boolean fIsTabAction;
 	
@@ -156,7 +156,7 @@ public class IndentAction extends TextEditorAction {
 						}
 						
 						// always reset the selection if anything was replaced
-						// but not when we had a singleline nontab invocation
+						// but not when we had a single line non-tab invocation
 						if (newOffset != -1 && (hasChanged || newOffset != offset || newLength != length))
 							selectAndReveal(newOffset, newLength);
 						
@@ -365,7 +365,7 @@ public class IndentAction extends TextEditorAction {
 		StringBuffer buf= new StringBuffer();
 		int previousLineNonWS= scanner.findNonWhitespaceForwardInAnyPartition(previousLineStart, previousLineEnd);
 		if (previousLineNonWS == JavaHeuristicScanner.NOT_FOUND || document.getChar(previousLineNonWS) != '*') {
-			// align with the comment start if the previous line is not an asterix line
+			// align with the comment start if the previous line is not an asterisked line
 			previousLine= document.getLineInformationOfOffset(partition.getOffset());
 			previousLineStart= previousLine.getOffset();
 			previousLineLength= previousLine.getLength();
@@ -451,7 +451,7 @@ public class IndentAction extends TextEditorAction {
 
 	/**
 	 * Returns the possibly project-specific core preference defined under <code>key</code>, or
-	 * def if the value is not a integer.
+	 * <code>def</code> if the value is not a integer.
 	 * 
 	 * @param key the key of the preference
 	 * @param def the default value
