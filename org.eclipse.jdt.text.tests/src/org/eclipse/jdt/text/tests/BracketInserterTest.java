@@ -14,18 +14,19 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.text.tests.Accessor;
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyledText;
+import org.eclipse.swt.widgets.Event;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.widgets.Event;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.text.tests.Accessor;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -38,13 +39,14 @@ import org.eclipse.jface.text.link.LinkedPosition;
 
 import org.eclipse.ui.PartInitException;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
-
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.text.tests.performance.DisplayHelper;
+import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -82,7 +84,7 @@ public class BracketInserterTest extends TestCase {
 				"    \n" +
 				"    HashMap hm= new HashMap();\n" +
 				"}\n";
-	
+	  
 	// document offsets 
 	private static final int BODY_OFFSET= 196;
 	private static final int ARGS_OFFSET= 171;
@@ -239,7 +241,7 @@ public class BracketInserterTest extends TestCase {
 		use14();
 		setCaret(BODY_OFFSET);
 		type('(');
-		typeAndRun(')');
+		type(')');
 		
 		assertEquals("()", fDocument.get(BODY_OFFSET, 2));
 		assertEquals(BODY_OFFSET + 2, getCaret());
@@ -255,9 +257,9 @@ public class BracketInserterTest extends TestCase {
 		type('(');
 		type('(');
 
-		typeAndRun(')');
-		typeAndRun(')');
-		typeAndRun(')');
+		type(')');
+		type(')');
+		type(')');
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 7, getCaret());
@@ -270,7 +272,7 @@ public class BracketInserterTest extends TestCase {
 		assertEquals(BODY_OFFSET + 1, position.getOffset());
 		assertEquals(6, position.getLength());
 		
-		typeAndRun(')');
+		type(')');
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 8, getCaret());
@@ -284,7 +286,7 @@ public class BracketInserterTest extends TestCase {
 		type('(');
 		type('(');
 		type('(');
-		typeAndRun('\t');
+		type('\t');
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 5, getCaret());
@@ -293,8 +295,8 @@ public class BracketInserterTest extends TestCase {
 		assertNotNull(model);
 		assertTrue(model.isNested());
 		
-		typeAndRun('\t');
-		typeAndRun('\t');
+		type('\t');
+		type('\t');
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 7, getCaret());
@@ -303,7 +305,7 @@ public class BracketInserterTest extends TestCase {
 		assertNotNull(model);
 		assertFalse(model.isNested());
 		
-		typeAndRun('\t');
+		type('\t');
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 8, getCaret());
@@ -318,7 +320,7 @@ public class BracketInserterTest extends TestCase {
 		type('(');
 		type('(');
 		type('(');
-		typeAndRun(SWT.CR);
+		type(SWT.CR);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 8, getCaret());
@@ -333,7 +335,7 @@ public class BracketInserterTest extends TestCase {
 		type('(');
 		type('(');
 		type('(');
-		typeAndRun(SWT.ESC);
+		type(SWT.ESC);
 		
 		assertEquals("(((())))", fDocument.get(BODY_OFFSET, 8));
 		assertEquals(BODY_OFFSET + 4, getCaret());
@@ -423,6 +425,7 @@ public class BracketInserterTest extends TestCase {
 		use15();
 		
 		setCaret(FOO_VOID_OFFSET);
+		
 		type('<');
 		
 		assertEquals("<>void foo", fDocument.get(FOO_VOID_OFFSET, 10));
@@ -485,16 +488,13 @@ public class BracketInserterTest extends TestCase {
 		event.keyCode= keyCode;
 		event.stateMask= stateMask;
 		fAccessor.invoke("handleKeyDown", new Object[] {event});
-	}
-
-	/**
-	 * Type a character into the styled text and drive the event loop.
-	 * 
-	 * @param character the character to type
-	 */
-	private void typeAndRun(char character) {
-		type(character);
-		runEvents();
+		
+		new DisplayHelper() {
+			protected boolean condition() {
+				return false;
+			}
+		}.waitForCondition(EditorTestHelper.getActiveDisplay(), 100);
+		
 	}
 
 	private int getCaret() {
@@ -503,11 +503,7 @@ public class BracketInserterTest extends TestCase {
 
 	private void setCaret(int offset) {
 		fEditor.getSelectionProvider().setSelection(new TextSelection(offset, 0));
+		int newOffset= ((ITextSelection)fEditor.getSelectionProvider().getSelection()).getOffset();
+		assertEquals(offset, newOffset);
 	}
-
-	private void runEvents() {
-		while (fTextWidget.getDisplay().readAndDispatch()) {
-		}
-	}
-
 }
