@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -140,9 +141,13 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			for (Iterator iter= selection.iterator(); iter.hasNext();) {
 				Object element= iter.next();
 				if (element instanceof JavaElement) {
-					externalSelection.add(((JavaElement) element).getJavaElement());
+					IJavaElement javaElement= ((JavaElement) element).getJavaElement();
+					if (! (javaElement instanceof IJavaModel)) // various selection listeners assume getJavaProject() is non-null 
+						externalSelection.add(javaElement);
 				} else if (element instanceof JEResource) {
-					externalSelection.add(((JEResource) element).getResource());
+					IResource resource= ((JEResource) element).getResource();
+					if (! (resource instanceof IWorkspaceRoot)) // various selection listeners assume getProject() is non-null
+						externalSelection.add(resource);
 				} else {
 					//TODO: support for other node types?
 				}
@@ -375,31 +380,35 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 
 				if (obj instanceof JavaElement) {
 					IJavaElement javaElement= ((JavaElement) obj).getJavaElement();
-					switch (javaElement.getElementType()) {
-						case IJavaElement.JAVA_MODEL :
-						case IJavaElement.JAVA_PROJECT :
-						case IJavaElement.PACKAGE_FRAGMENT_ROOT :
-						case IJavaElement.PACKAGE_FRAGMENT :
-							ShowInPackageViewAction showInPackageViewAction= new ShowInPackageViewAction(getViewSite());
-							showInPackageViewAction.run(javaElement);
-							break;
-							
-						default :
-							try {
-								IEditorPart editorPart= JavaUI.openInEditor(javaElement);
-								if (editorPart != null) {
-									if (isSecondDoubleClick && javaElement instanceof ISourceReference && editorPart instanceof ITextEditor) {
-										ISourceRange sourceRange= ((ISourceReference) javaElement).getSourceRange();
-										EditorUtility.selectInEditor((ITextEditor) editorPart, sourceRange.getOffset(), sourceRange.getLength());
-									} else {
-										JavaUI.revealInEditor(editorPart, javaElement);
+					if (javaElement != null) {
+						switch (javaElement.getElementType()) {
+							case IJavaElement.JAVA_MODEL :
+								break;
+								
+							case IJavaElement.JAVA_PROJECT :
+							case IJavaElement.PACKAGE_FRAGMENT_ROOT :
+							case IJavaElement.PACKAGE_FRAGMENT :
+								ShowInPackageViewAction showInPackageViewAction= new ShowInPackageViewAction(getViewSite());
+								showInPackageViewAction.run(javaElement);
+								break;
+								
+							default :
+								try {
+									IEditorPart editorPart= JavaUI.openInEditor(javaElement);
+									if (editorPart != null) {
+										if (isSecondDoubleClick && javaElement instanceof ISourceReference && editorPart instanceof ITextEditor) {
+											ISourceRange sourceRange= ((ISourceReference) javaElement).getSourceRange();
+											EditorUtility.selectInEditor((ITextEditor) editorPart, sourceRange.getOffset(), sourceRange.getLength());
+										} else {
+											JavaUI.revealInEditor(editorPart, javaElement);
+										}
 									}
+								} catch (PartInitException e) {
+									showAndLogError("Could not open editor.", e); //$NON-NLS-1$
+								} catch (JavaModelException e) {
+									showAndLogError("Could not open editor.", e); //$NON-NLS-1$
 								}
-							} catch (PartInitException e) {
-								showAndLogError("Could not open editor.", e); //$NON-NLS-1$
-							} catch (JavaModelException e) {
-								showAndLogError("Could not open editor.", e); //$NON-NLS-1$
-							}
+						}
 					}
 					
 				} else if (obj instanceof Error) {
