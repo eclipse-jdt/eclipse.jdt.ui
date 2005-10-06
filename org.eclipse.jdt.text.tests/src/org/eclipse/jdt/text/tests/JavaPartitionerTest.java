@@ -24,10 +24,8 @@ import org.eclipse.jface.text.IDocumentPartitioningListener;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.TypedRegion;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaTextTools;
-
-import org.eclipse.jdt.internal.ui.text.JavaPartitionScanner;
-
 
 
 public class JavaPartitionerTest extends TestCase {
@@ -96,13 +94,13 @@ public class JavaPartitionerTest extends TestCase {
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
 				new TypedRegion(0,  4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(4,  7, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(4,  7, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(11, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(16, 8, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(16, 8, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(24, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(29, 4, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(29, 4, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(33, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(38, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(38, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(43, 4, IDocument.DEFAULT_CONTENT_TYPE)
 			};
 			
@@ -123,13 +121,13 @@ public class JavaPartitionerTest extends TestCase {
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
 				new TypedRegion(0,  4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(4,  7, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(4,  7, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(11, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(16, 8, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(16, 8, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(24, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(29, 4, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(29, 4, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(33, 3, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(36, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(36, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(41, 4, IDocument.DEFAULT_CONTENT_TYPE)
 			};
 			
@@ -150,13 +148,13 @@ public class JavaPartitionerTest extends TestCase {
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
 				new TypedRegion(0,  4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(4,  7, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(4,  7, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(11, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(16, 8, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(16, 8, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(24, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(29, 4, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(29, 4, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(33, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(38, 8, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(38, 8, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(46, 4, IDocument.DEFAULT_CONTENT_TYPE)
 			};
 			
@@ -176,15 +174,15 @@ public class JavaPartitionerTest extends TestCase {
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
 				new TypedRegion(0,  4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(4,  7, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(4,  7, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(11, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(16, 8, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(16, 8, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(24, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(29, 4, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(29, 4, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(33, 2, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(35, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(35, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(40, 2, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(42, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(42, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(47, 4, IDocument.DEFAULT_CONTENT_TYPE)
 			};
 			
@@ -206,11 +204,11 @@ public class JavaPartitionerTest extends TestCase {
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
 				new TypedRegion(0,  4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(4,  7, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(4,  7, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(11, 2, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(13, 4, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(13, 4, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(17, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(22, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(22, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(27, 4, IDocument.DEFAULT_CONTENT_TYPE)
 			};
 			
@@ -235,11 +233,11 @@ public class JavaPartitionerTest extends TestCase {
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
 				new TypedRegion(0,  12, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(12,  8, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(12,  8, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(20, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(25, 4, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(25, 4, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(29, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(34, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(34, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(39, 4, IDocument.DEFAULT_CONTENT_TYPE)
 			};
 			
@@ -261,11 +259,11 @@ public class JavaPartitionerTest extends TestCase {
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
 				new TypedRegion(0,  4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(4,  7, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(4,  7, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(11, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(16, 8, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(16, 8, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(24, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(29, 13, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(29, 13, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(42, 4, IDocument.DEFAULT_CONTENT_TYPE)
 			};
 			
@@ -286,11 +284,11 @@ public class JavaPartitionerTest extends TestCase {
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
 				new TypedRegion(0,  4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(4,  7, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(4,  7, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(11, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(16, 8, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(16, 8, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(24, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(29, 13, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(29, 13, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(42, 4, IDocument.DEFAULT_CONTENT_TYPE)
 			};
 			
@@ -311,11 +309,11 @@ public class JavaPartitionerTest extends TestCase {
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
 				new TypedRegion(0,  4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(4,  18, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(4,  18, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(22, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(27, 4, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(27, 4, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(31, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(36, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(36, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(41, 4, IDocument.DEFAULT_CONTENT_TYPE)
 			};
 			
@@ -383,11 +381,11 @@ public class JavaPartitionerTest extends TestCase {
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
 				new TypedRegion(0,  4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(4,  7, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(4,  7, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(11, 9, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(20, 4, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(20, 4, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(24, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(29, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(29, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(34, 4, IDocument.DEFAULT_CONTENT_TYPE)
 			};
 			
@@ -404,9 +402,9 @@ public class JavaPartitionerTest extends TestCase {
 						
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
-				new TypedRegion(0, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(0, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(5, 1, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(6, 5, JavaPartitionScanner.JAVA_DOC)
+				new TypedRegion(6, 5, IJavaPartitions.JAVA_DOC)
 			};
 						
 			checkPartitioning(expectation, result);
@@ -416,11 +414,11 @@ public class JavaPartitionerTest extends TestCase {
 
 			result= fDocument.computePartitioning(0, fDocument.getLength());
 			expectation= new TypedRegion[] {
-				new TypedRegion(0, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(0, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(5, 4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(9, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(9, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(14, 1, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(15, 7, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT)
+				new TypedRegion(15, 7, IJavaPartitions.JAVA_MULTI_LINE_COMMENT)
 			};		
 			
 		} catch (BadLocationException x) {
@@ -435,11 +433,11 @@ public class JavaPartitionerTest extends TestCase {
 						
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
-				new TypedRegion(0, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(0, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(5, 1, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(6, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(6, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(11, 1, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(12, 5, JavaPartitionScanner.JAVA_DOC)
+				new TypedRegion(12, 5, IJavaPartitions.JAVA_DOC)
 			};
 						
 			checkPartitioning(expectation, result);
@@ -449,13 +447,13 @@ public class JavaPartitionerTest extends TestCase {
 
 			result= fDocument.computePartitioning(0, fDocument.getLength());
 			expectation= new TypedRegion[] {
-				new TypedRegion(0, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(0, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(5, 4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(9, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(9, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(14, 1, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(15, 7, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(15, 7, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(22, 1, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(23, 5, JavaPartitionScanner.JAVA_DOC)
+				new TypedRegion(23, 5, IJavaPartitions.JAVA_DOC)
 			};		
 			
 		} catch (BadLocationException x) {
@@ -470,9 +468,9 @@ public class JavaPartitionerTest extends TestCase {
 						
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
-				new TypedRegion(0, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(0, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(5, 1, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(6, 4, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT)
+				new TypedRegion(6, 4, IJavaPartitions.JAVA_MULTI_LINE_COMMENT)
 			};
 						
 			checkPartitioning(expectation, result);
@@ -482,13 +480,13 @@ public class JavaPartitionerTest extends TestCase {
 
 			result= fDocument.computePartitioning(0, fDocument.getLength());
 			expectation= new TypedRegion[] {
-				new TypedRegion(0, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(0, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(5, 1, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(6, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(6, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(11, 1, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(12, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(12, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(17, 1, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(18, 5, JavaPartitionScanner.JAVA_DOC)
+				new TypedRegion(18, 5, IJavaPartitions.JAVA_DOC)
 			};		
 			
 		} catch (BadLocationException x) {
@@ -508,13 +506,13 @@ public class JavaPartitionerTest extends TestCase {
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
 				new TypedRegion(0,  4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(4,  7, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(4,  7, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(11, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(16, 8, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(16, 8, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(24, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(29, 4, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(29, 4, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(33, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(38, 8, JavaPartitionScanner.JAVA_DOC)
+				new TypedRegion(38, 8, IJavaPartitions.JAVA_DOC)
 			};
 			
 			checkPartitioning(expectation, result);
@@ -535,15 +533,15 @@ public class JavaPartitionerTest extends TestCase {
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
 				new TypedRegion(0,  4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(4,  7, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(4,  7, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(11, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(16, 8, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(16, 8, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(24, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(29, 4, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(29, 4, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(33, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(38, 5, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(38, 5, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(43, 4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(47, 2, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT)
+				new TypedRegion(47, 2, IJavaPartitions.JAVA_MULTI_LINE_COMMENT)
 			};
 			
 			checkPartitioning(expectation, result);
@@ -565,13 +563,13 @@ public class JavaPartitionerTest extends TestCase {
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
 				new TypedRegion(0,  4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(4,  7, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(4,  7, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(11, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(16, 8, JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(16, 8, IJavaPartitions.JAVA_DOC),
 				new TypedRegion(24, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(29, 4, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(29, 4, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(33, 5, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(38, 4, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(38, 4, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(42, 4, IDocument.DEFAULT_CONTENT_TYPE)
 			};
 			
@@ -606,7 +604,7 @@ public class JavaPartitionerTest extends TestCase {
 						
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
-				new TypedRegion(0,  2, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT)
+				new TypedRegion(0,  2, IJavaPartitions.JAVA_MULTI_LINE_COMMENT)
 			};
 						
 			checkPartitioning(expectation, result);
@@ -614,7 +612,7 @@ public class JavaPartitionerTest extends TestCase {
 			fDocument.replace(2, 0, " ");
 			result= fDocument.computePartitioning(0, fDocument.getLength());
 			expectation= new TypedRegion[] {
-				new TypedRegion(0,  3, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT)
+				new TypedRegion(0,  3, IJavaPartitions.JAVA_MULTI_LINE_COMMENT)
 			};
 			
 			checkPartitioning(expectation, result);
@@ -631,7 +629,7 @@ public class JavaPartitionerTest extends TestCase {
 						
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation= {
-				new TypedRegion(0,  2, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT)
+				new TypedRegion(0,  2, IJavaPartitions.JAVA_MULTI_LINE_COMMENT)
 			};
 						
 			checkPartitioning(expectation, result);
@@ -639,7 +637,7 @@ public class JavaPartitionerTest extends TestCase {
 			fDocument.replace(2, 0, "*");
 			result= fDocument.computePartitioning(0, fDocument.getLength());
 			expectation= new TypedRegion[] {
-				new TypedRegion(0,  3, JavaPartitionScanner.JAVA_DOC)
+				new TypedRegion(0,  3, IJavaPartitions.JAVA_DOC)
 			};
 			
 			checkPartitioning(expectation, result);
@@ -657,9 +655,9 @@ public class JavaPartitionerTest extends TestCase {
 			ITypedRegion[] result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation1= {
 				new TypedRegion(0,  1, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(1,  10, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(1,  10, IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(11, 4, IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(15, 5, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT)
+				new TypedRegion(15, 5, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT)
 			};			
 			checkPartitioning(expectation1, result);
 			
@@ -669,9 +667,9 @@ public class JavaPartitionerTest extends TestCase {
 			
 			result= fDocument.computePartitioning(0, fDocument.getLength());
 			TypedRegion[] expectation2= {
-				new TypedRegion(0,  6, JavaPartitionScanner.JAVA_SINGLE_LINE_COMMENT),
+				new TypedRegion(0,  6, IJavaPartitions.JAVA_SINGLE_LINE_COMMENT),
 				new TypedRegion(6,  4,  IDocument.DEFAULT_CONTENT_TYPE),
-				new TypedRegion(10,  12, JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT)
+				new TypedRegion(10,  12, IJavaPartitions.JAVA_MULTI_LINE_COMMENT)
 			};			
 			checkPartitioning(expectation2, result);
 					
@@ -698,7 +696,7 @@ public class JavaPartitionerTest extends TestCase {
 			
 			result= fDocument.computePartitioning(0, fDocument.getLength());
 			expectation= new TypedRegion[] {
-				new TypedRegion(0,  fDocument.getLength(),  JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT)
+				new TypedRegion(0,  fDocument.getLength(),  IJavaPartitions.JAVA_MULTI_LINE_COMMENT)
 			};			
 			checkPartitioning(expectation, result);			
 			
@@ -706,7 +704,7 @@ public class JavaPartitionerTest extends TestCase {
 			fDocument.replace(fDocument.getLength(), 0, "\r\n");
 			result= fDocument.computePartitioning(0, fDocument.getLength());
 			expectation= new TypedRegion[] {
-				new TypedRegion(0,  4,  JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT),
+				new TypedRegion(0,  4,  IJavaPartitions.JAVA_MULTI_LINE_COMMENT),
 				new TypedRegion(4, 2, IDocument.DEFAULT_CONTENT_TYPE)
 			};			
 			checkPartitioning(expectation, result);			
@@ -732,28 +730,28 @@ public class JavaPartitionerTest extends TestCase {
 			fDocument.replace(fDocument.getLength(), 0, "*");
 			result= fDocument.computePartitioning(0, fDocument.getLength());
 			expectation= new TypedRegion[] {
-				new TypedRegion(0,  fDocument.getLength(),  JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT)
+				new TypedRegion(0,  fDocument.getLength(),  IJavaPartitions.JAVA_MULTI_LINE_COMMENT)
 			};			
 			checkPartitioning(expectation, result);			
 			
 			fDocument.replace(fDocument.getLength(), 0, "\r\n");
 			result= fDocument.computePartitioning(0, fDocument.getLength());
 			expectation= new TypedRegion[] {
-				new TypedRegion(0,  fDocument.getLength(),  JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT)
+				new TypedRegion(0,  fDocument.getLength(),  IJavaPartitions.JAVA_MULTI_LINE_COMMENT)
 			};			
 			checkPartitioning(expectation, result);
 			
 			fDocument.replace(fDocument.getLength(), 0, "*");
 			result= fDocument.computePartitioning(0, fDocument.getLength());
 			expectation= new TypedRegion[] {
-				new TypedRegion(0,  fDocument.getLength(),  JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT)
+				new TypedRegion(0,  fDocument.getLength(),  IJavaPartitions.JAVA_MULTI_LINE_COMMENT)
 			};			
 			checkPartitioning(expectation, result);
 			
 			fDocument.replace(fDocument.getLength(), 0, "*");
 			result= fDocument.computePartitioning(0, fDocument.getLength());
 			expectation= new TypedRegion[] {
-				new TypedRegion(0,  fDocument.getLength(),  JavaPartitionScanner.JAVA_MULTI_LINE_COMMENT)
+				new TypedRegion(0,  fDocument.getLength(),  IJavaPartitions.JAVA_MULTI_LINE_COMMENT)
 			};			
 			checkPartitioning(expectation, result);			
 			
@@ -782,14 +780,14 @@ public class JavaPartitionerTest extends TestCase {
 
 			result= fDocument.computePartitioning(0, fDocument.getLength());
 			expectation= new TypedRegion[] {
-				new TypedRegion(0,  fDocument.getLength(),  JavaPartitionScanner.JAVA_DOC)
+				new TypedRegion(0,  fDocument.getLength(),  IJavaPartitions.JAVA_DOC)
 			};			
 			checkPartitioning(expectation, result);			
 			
 			fDocument.replace(fDocument.getLength(), 0, "*");
 			result= fDocument.computePartitioning(0, fDocument.getLength());
 			expectation= new TypedRegion[] {
-				new TypedRegion(0,  8,  JavaPartitionScanner.JAVA_DOC),
+				new TypedRegion(0,  8,  IJavaPartitions.JAVA_DOC),
 				new TypedRegion(8, 1, IDocument.DEFAULT_CONTENT_TYPE)
 			};			
 			checkPartitioning(expectation, result);		
