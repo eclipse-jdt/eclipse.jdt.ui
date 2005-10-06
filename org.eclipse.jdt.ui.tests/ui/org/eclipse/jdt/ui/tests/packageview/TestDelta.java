@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 /**
  * @author Jen's account
@@ -134,6 +135,14 @@ public class TestDelta implements IJavaElementDelta {
 	public static IJavaElementDelta createDelta(IPackageFragment frag, int action) {
 		TestDelta delta= new TestDelta(action, frag);
 		return createParentDeltas(frag, delta);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.core.IJavaElementDelta#getCompilationUnitAST()
+	 */
+	public CompilationUnit getCompilationUnitAST() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
