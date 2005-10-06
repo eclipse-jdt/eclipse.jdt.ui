@@ -44,11 +44,24 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 	 * @param enableVoid complete <code>void</code> base type iff <code>true</code>
 	 */
 	public JavaTypeCompletionProcessor(boolean enableBaseTypes, boolean enableVoid) {
-		super(new TypeCompletionRequestor(enableBaseTypes, enableVoid));
+		this(enableBaseTypes, enableVoid, false);
+	}
+	
+	/**
+	 * Creates a <code>JavaTypeCompletionProcessor</code>.
+	 * The completion context must be set via {@link #setPackageFragment(IPackageFragment)}.
+	 * 
+	 * @param enableBaseTypes complete java base types iff <code>true</code>
+	 * @param enableVoid complete <code>void</code> base type iff <code>true</code>
+	 * @param fullyQualify always complete to fully qualifies type iff <code>true</code>
+	 */
+	public JavaTypeCompletionProcessor(boolean enableBaseTypes, boolean enableVoid, boolean fullyQualify) {
+		super(new TypeCompletionRequestor(enableBaseTypes, enableVoid, fullyQualify));
 	}
 	
 	public char[] getCompletionProposalAutoActivationCharacters() {
-		return null; // see https://bugs.eclipse.org/bugs/show_bug.cgi?id=89476
+		// disable auto activation in dialog fields, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=89476
+		return null;
 	}
 
 	/**
@@ -102,8 +115,10 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 		
 		private boolean fEnableBaseTypes;
 		private boolean fEnableVoid;
+		private final boolean fFullyQualify;
 		
-		public TypeCompletionRequestor(boolean enableBaseTypes, boolean enableVoid) {
+		public TypeCompletionRequestor(boolean enableBaseTypes, boolean enableVoid, boolean fullyQualify) {
+			fFullyQualify= fullyQualify;
 			fEnableBaseTypes= enableBaseTypes;
 			fEnableVoid= enableVoid;
 			setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, true);
@@ -147,14 +162,14 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 					}
 					String name= buf.toString();
 					
-					addAdjustedCompletion(
+					addAdjustedTypeCompletion(
 							name,
 							new String(proposal.getCompletion()),
 							proposal.getReplaceStart(),
 							proposal.getReplaceEnd(),
 							proposal.getRelevance(),
-							JavaElementImageProvider.getTypeImageDescriptor(false, false, proposal.getFlags(), false));
-								//TODO: extract isInner and isInInterface from Signature?
+							JavaElementImageProvider.getTypeImageDescriptor(false, false, proposal.getFlags(), false),
+							fFullyQualify ? new String(fullName) : null);
 					return;
 					
 				case CompletionProposal.KEYWORD:

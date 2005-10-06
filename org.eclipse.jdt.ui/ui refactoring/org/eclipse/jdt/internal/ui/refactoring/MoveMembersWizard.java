@@ -175,7 +175,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 			} else {
 				setPageComplete(false);
 			}
-			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(false, false);
+			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(false, false, true);
 			IPackageFragment context= (IPackageFragment) getMoveProcessor().getDeclaringType().getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 			processor.setPackageFragment(context);
 			ControlContentAssistHelper.createComboContentAssistant(fDestinationField, processor);

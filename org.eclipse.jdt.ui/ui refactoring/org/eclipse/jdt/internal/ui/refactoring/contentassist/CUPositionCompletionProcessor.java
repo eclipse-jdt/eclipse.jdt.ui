@@ -207,6 +207,8 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 	}
 
 	protected abstract static class CUPositionCompletionRequestor extends CompletionRequestor {
+		public static final char[] TRIGGER_CHARACTERS= new char[] { '.' };
+		
 		private int fOffsetReduction;
 		private IJavaProject fJavaProject;
 		
@@ -240,10 +242,26 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 		
 		protected final void addAdjustedCompletion(String name, String completion,
 				int start, int end, int relevance, ImageDescriptor descriptor) {
-			fProposals.add(new JavaCompletionProposal(completion, start - fOffsetReduction, end - start,
-					getImage(descriptor), name, relevance));
+			JavaCompletionProposal javaCompletionProposal= new JavaCompletionProposal(completion, start - fOffsetReduction, end - start,
+					getImage(descriptor), name, relevance);
+			javaCompletionProposal.setTriggerCharacters(TRIGGER_CHARACTERS);
+			fProposals.add(javaCompletionProposal);
 		}
 		
+		protected final void addAdjustedTypeCompletion(String name, String completion,
+				int start, int end, int relevance, ImageDescriptor descriptor, String fullyQualifiedName) {
+			JavaCompletionProposal javaCompletionProposal= new JavaCompletionProposal(
+					fullyQualifiedName == null ? completion : fullyQualifiedName,
+					fullyQualifiedName == null ? start - fOffsetReduction : 0,
+					end - start, getImage(descriptor), name, relevance);
+//			JavaTypeCompletionProposal javaCompletionProposal= new JavaTypeCompletionProposal(
+//					fullyQualifiedName == null ? completion : fullyQualifiedName, null,
+//					fullyQualifiedName == null ? start - fOffsetReduction : 0,
+//					end - start, getImage(descriptor), name, relevance, completion);
+			javaCompletionProposal.setTriggerCharacters(TRIGGER_CHARACTERS);
+			fProposals.add(javaCompletionProposal);
+		}
+
 		private static Image getImage(ImageDescriptor descriptor) {
 			return (descriptor == null) ? null : CUPositionCompletionProcessor.IMAGE_DESC_REGISTRY.get(descriptor);
 		}
