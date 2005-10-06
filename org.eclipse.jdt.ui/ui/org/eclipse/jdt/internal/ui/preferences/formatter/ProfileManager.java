@@ -57,7 +57,7 @@ public class ProfileManager extends Observable {
 	public static abstract class Profile implements Comparable {
 		
 		public abstract String getName();
-		public abstract Profile rename(String name);
+		public abstract Profile rename(String name, ProfileManager manager);
 		
 		public abstract Map getSettings();
 		public abstract void setSettings(Map settings);
@@ -117,8 +117,11 @@ public class ProfileManager extends Observable {
 			return fName;	
 		}
 		
-		public Profile rename(String name) {
-			return this;
+		public Profile rename(String name, ProfileManager manager) {
+			final String trimmed= name.trim();
+		 	CustomProfile newProfile= new CustomProfile(trimmed, fSettings, ProfileVersioner.CURRENT_VERSION);
+		 	manager.addProfile(newProfile);
+			return newProfile;
 		}
 		
 		public Map getSettings() {
@@ -168,7 +171,7 @@ public class ProfileManager extends Observable {
 			return fName;
 		}
 		
-		public Profile rename(String name) {
+		public Profile rename(String name, ProfileManager manager) {
 			final String trimmed= name.trim();
 			if (trimmed.equals(getName())) 
 				return this;
@@ -176,9 +179,7 @@ public class ProfileManager extends Observable {
 			String oldID= getID(); // remember old id before changing name
 			fName= trimmed;
 			
-			if (fManager != null) { 
-				fManager.profileRenamed(this, oldID);
-			}
+			manager.profileRenamed(this, oldID);
 			return this;
 		}
 
@@ -237,13 +238,11 @@ public class ProfileManager extends Observable {
 			super(oldName, options, ProfileVersioner.CURRENT_VERSION);
 		}
 		
-		public Profile rename(String name) {
+		public Profile rename(String name, ProfileManager manager) {
 			CustomProfile profile= new CustomProfile(name.trim(), getSettings(), getVersion());
 
-			if (fManager != null) {
-				fManager.profileReplaced(this, profile);
-			}
-			return this;
+			manager.profileReplaced(this, profile);
+			return profile;
 		}
 				
 		public String getID() { 

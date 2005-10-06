@@ -189,7 +189,7 @@ public class AlreadyExistsDialog extends StatusDialog {
 		if (!getStatus().isOK()) 
 			return;
 		if (fRenameRadio.getSelection())
-			fProfile.rename(fNameText.getText().trim());
+			fProfile.rename(fNameText.getText().trim(), fProfileManager);
 		super.okPressed();
 	}
 }

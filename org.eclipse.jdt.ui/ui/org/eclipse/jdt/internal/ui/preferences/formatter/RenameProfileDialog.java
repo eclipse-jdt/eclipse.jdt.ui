@@ -27,7 +27,7 @@ import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.StatusDialog;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
+import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.SharedProfile;
 
 /**
@@ -43,10 +43,11 @@ public class RenameProfileDialog extends StatusDialog {
 	private final StatusInfo fDuplicate;
 	private final StatusInfo fNoMessage;
 
-	private final CustomProfile fProfile;
+	private final Profile fProfile;
 	private final ProfileManager fManager;
+	private Profile fRenamedProfile;
 	
-	public RenameProfileDialog(Shell parentShell, CustomProfile profile, ProfileManager manager) {
+	public RenameProfileDialog(Shell parentShell, Profile profile, ProfileManager manager) {
 		super(parentShell);
 		fManager= manager;
 		setTitle(FormatterMessages.RenameProfileDialog_dialog_title); 
@@ -126,11 +127,15 @@ public class RenameProfileDialog extends StatusDialog {
 		updateStatus(fOk);
 	}
 	
+	public Profile getRenamedProfile() {
+		return fRenamedProfile;
+	}
+	
 	
 	protected void okPressed() {
 		if (!getStatus().isOK()) 
 			return;
-		fProfile.rename(fNameText.getText());
+		fRenamedProfile= fProfile.rename(fNameText.getText(), fManager);
 		super.okPressed();
 	}
 }

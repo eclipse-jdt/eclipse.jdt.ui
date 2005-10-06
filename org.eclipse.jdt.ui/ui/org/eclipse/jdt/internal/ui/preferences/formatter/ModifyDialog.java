@@ -44,7 +44,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
 public class ModifyDialog extends StatusDialog {
@@ -218,18 +217,17 @@ public class ModifyDialog extends StatusDialog {
 	
 	private void applyPressed() {
 		 if (fProfile.isBuiltInProfile() || fProfile.isSharedProfile()) {
-		 	CustomProfile newProfile= new CustomProfile(fProfile.getName(), new HashMap(fWorkingValues), ProfileVersioner.CURRENT_VERSION);
-		 	RenameProfileDialog dialog= new RenameProfileDialog(getShell(), newProfile, fProfileManager);
+		 	RenameProfileDialog dialog= new RenameProfileDialog(getShell(), fProfile, fProfileManager);
 		 	if (dialog.open() != Window.OK) {
 		 		return;
 		 	}
-		 	fProfileManager.addProfile(newProfile);
-			fProfile= newProfile;
+
+			fProfile= dialog.getRenamedProfile();
+			
 		    fStandardStatus= new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
 			updateStatus(fStandardStatus);
-		 } else {
-		 	fProfile.setSettings(new HashMap(fWorkingValues));
 		 }
+		 fProfile.setSettings(new HashMap(fWorkingValues));
 		 fApplyButton.setEnabled(false);
 	}
     

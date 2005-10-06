@@ -143,12 +143,13 @@ public class CodeFormatterConfigurationBlock {
 		}
 
 		public void update(Observable o, Object arg) {
-			final boolean state= ((ProfileManager)o).getSelected() instanceof CustomProfile;
-			fEditButton.setText(state ? FormatterMessages.CodingStyleConfigurationBlock_edit_button_desc
+			Profile selected= ((ProfileManager)o).getSelected();
+			final boolean notBuiltIn= !selected.isBuiltInProfile();
+			fEditButton.setText(notBuiltIn ? FormatterMessages.CodingStyleConfigurationBlock_edit_button_desc
 			    : FormatterMessages.CodingStyleConfigurationBlock_show_button_desc); 
-			fDeleteButton.setEnabled(state);
-			fSaveButton.setEnabled(state);
-			fRenameButton.setEnabled(state);
+			fDeleteButton.setEnabled(notBuiltIn);
+			fSaveButton.setEnabled(notBuiltIn && !selected.isSharedProfile());
+			fRenameButton.setEnabled(notBuiltIn);
 		}
 
 		public void widgetSelected(SelectionEvent e) {
@@ -171,10 +172,13 @@ public class CodeFormatterConfigurationBlock {
 		}
 		
 		private void renameButtonPressed() {
-			if (!(fProfileManager.getSelected() instanceof CustomProfile)) return;
-			final CustomProfile profile= (CustomProfile)fProfileManager.getSelected();
+			if (fProfileManager.getSelected().isBuiltInProfile())
+				return;
+			final CustomProfile profile= (CustomProfile) fProfileManager.getSelected();
 			final RenameProfileDialog renameDialog= new RenameProfileDialog(fComposite.getShell(), profile, fProfileManager);
-			renameDialog.open();
+			if (renameDialog.open() == Window.OK) {
+				fProfileManager.setSelected(renameDialog.getRenamedProfile());
+			}
 		}
 		
 		private void modifyButtonPressed() {
