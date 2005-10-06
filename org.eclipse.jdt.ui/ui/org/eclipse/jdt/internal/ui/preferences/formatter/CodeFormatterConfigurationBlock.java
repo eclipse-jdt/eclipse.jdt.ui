@@ -148,7 +148,7 @@ public class CodeFormatterConfigurationBlock {
 			fEditButton.setText(notBuiltIn ? FormatterMessages.CodingStyleConfigurationBlock_edit_button_desc
 			    : FormatterMessages.CodingStyleConfigurationBlock_show_button_desc); 
 			fDeleteButton.setEnabled(notBuiltIn);
-			fSaveButton.setEnabled(notBuiltIn && !selected.isSharedProfile());
+			fSaveButton.setEnabled(notBuiltIn);
 			fRenameButton.setEnabled(notBuiltIn);
 		}
 
@@ -206,6 +206,17 @@ public class CodeFormatterConfigurationBlock {
 		}
 		
 		private void saveButtonPressed() {
+			Profile selected= fProfileManager.getSelected();
+			if (selected.isSharedProfile()) {
+				final RenameProfileDialog renameDialog= new RenameProfileDialog(fComposite.getShell(), selected, fProfileManager);
+				if (renameDialog.open() != Window.OK) {
+					return;
+				}
+					
+				selected= renameDialog.getRenamedProfile();
+				fProfileManager.setSelected(selected);
+			}
+			
 			final FileDialog dialog= new FileDialog(fComposite.getShell(), SWT.SAVE);
 			dialog.setText(FormatterMessages.CodingStyleConfigurationBlock_save_profile_dialog_title); 
 			dialog.setFilterExtensions(new String [] {"*.xml"}); //$NON-NLS-1$
@@ -226,7 +237,8 @@ public class CodeFormatterConfigurationBlock {
 			}
 			
 			final Collection profiles= new ArrayList();
-			profiles.add(fProfileManager.getSelected());
+
+			profiles.add(selected);
 			try {
 				ProfileStore.writeProfilesToFile(profiles, file);
 			} catch (CoreException e) {
