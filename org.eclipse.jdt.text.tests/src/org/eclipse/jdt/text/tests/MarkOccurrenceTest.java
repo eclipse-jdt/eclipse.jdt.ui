@@ -23,7 +23,6 @@ import org.eclipse.swt.graphics.RGB;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -45,8 +44,8 @@ import org.eclipse.ui.editors.text.EditorsUI;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.internal.editors.text.EditorsPlugin;
-import org.eclipse.ui.plugin.AbstractUIPlugin;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -166,9 +165,7 @@ public class MarkOccurrenceTest extends TestCase {
 	}
 	
 	public void testMarkOccurrencesAfterEditorReuse() {
-		AbstractUIPlugin plugin= (AbstractUIPlugin)Platform.getPlugin("org.eclipse.ui.workbench"); 
-		IPreferenceStore store= plugin.getPreferenceStore();
-		
+		IPreferenceStore store= PlatformUI.getWorkbench().getPreferenceStore();
 		store.setValue("REUSE_OPEN_EDITORS_BOOLEAN", true);
 		
 		int reuseOpenEditors= store.getInt("REUSE_OPEN_EDITORS");
