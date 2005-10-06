@@ -35,4 +35,4 @@ Require-Bundle:
  org.eclipse.compare,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.core.variables
-Eclipse-AutoStart: true
+Eclipse-LazyStart: true

@@ -115,5 +115,5 @@ Require-Bundle:
  org.eclipse.ltk.core.refactoring,
  org.eclipse.ltk.ui.refactoring,
  org.eclipse.ui.forms
-Eclipse-AutoStart: true
+Eclipse-LazyStart: true
 Plugin-Class: org.eclipse.jdt.internal.ui.JavaPlugin
