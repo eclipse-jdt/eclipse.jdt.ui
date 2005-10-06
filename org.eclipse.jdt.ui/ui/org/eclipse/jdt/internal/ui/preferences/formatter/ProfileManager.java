@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences.formatter;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.HashMap;
@@ -19,9 +18,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.QualifiedName;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -30,17 +26,15 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.jface.operation.IRunnableWithProgress;
-
-import org.eclipse.ui.PlatformUI;
-
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
 
 import org.osgi.service.prefs.BackingStoreException;
 
@@ -96,6 +90,10 @@ public class ProfileManager extends Observable {
 		public boolean isSharedProfile() {
 			return false;
 		}
+		
+		public boolean isBuiltInProfile() {
+			return false;
+		}
 	}
 	
 	/**
@@ -143,6 +141,10 @@ public class ProfileManager extends Observable {
 
 		public boolean isProfileToSave() {
 			return false;
+		}
+		
+		public boolean isBuiltInProfile() {
+			return true;
 		}
 	
 	}
@@ -231,8 +233,8 @@ public class ProfileManager extends Observable {
 	
 	public final static class SharedProfile extends CustomProfile {
 		
-		public SharedProfile(Map options) {
-			super(FormatterMessages.ProfileManager_unnamed_profile_name0, options, ProfileVersioner.CURRENT_VERSION); 
+		public SharedProfile(String oldName, Map options) {
+			super(oldName, options, ProfileVersioner.CURRENT_VERSION);
 		}
 		
 		public Profile rename(String name) {
@@ -320,6 +322,7 @@ public class ProfileManager extends Observable {
 	 * All keys appearing in a profile, sorted alphabetically
 	 */
 	private final static List fKeys;
+	private final PreferencesAccess fPreferencesAccess;
 	
 	static {
 	    fKeys= new ArrayList();
@@ -333,7 +336,9 @@ public class ProfileManager extends Observable {
 	 * Create and initialize a new profile manager.
 	 * @param profiles Initial custom profiles (List of type <code>CustomProfile</code>)
 	 */
-	public ProfileManager(List profiles, IScopeContext context) {
+	public ProfileManager(List profiles, IScopeContext context, PreferencesAccess preferencesAccess) {
+		fPreferencesAccess= preferencesAccess;
+		
 		fProfiles= new HashMap();
 		fProfilesByName= new ArrayList();
 	
@@ -348,7 +353,7 @@ public class ProfileManager extends Observable {
 		
 		Collections.sort(fProfilesByName);
 		
-		InstanceScope instanceScope= new InstanceScope();
+		IScopeContext instanceScope= fPreferencesAccess.getInstanceScope(); 
 		String profileId= instanceScope.getNode(JavaUI.ID_PLUGIN).get(PROFILE_KEY, null);
 		
 		// fix for bug 89739
@@ -373,15 +378,32 @@ public class ProfileManager extends Observable {
 			Map map= readFromPreferenceStore(context, profile);
 			if (map != null) {
 				Profile matching= null;
-				for (int i= 0; matching == null && i < fProfilesByName.size(); i++) {
-					Profile curr= (Profile) fProfilesByName.get(i);
-					if (curr.hasEqualSettings(map, getKeys())) {
+			
+				String projProfileId= context.getNode(JavaUI.ID_PLUGIN).get(PROFILE_KEY, null);
+				if (projProfileId != null) {
+					Profile curr= (Profile) fProfiles.get(projProfileId);
+					if (curr != null && (curr.isBuiltInProfile() || curr.hasEqualSettings(map, getKeys()))) {
 						matching= curr;
+					}
+				} else {
+					// old version: look for similar
+					for (final Iterator iter = fProfilesByName.iterator(); iter.hasNext();) {
+						Profile curr= (Profile) iter.next();
+						if (curr.hasEqualSettings(map, getKeys())) {
+							matching= curr;
+							break;
+						}
 					}
 				}
 				if (matching == null) {
+					String name;
+					if (projProfileId != null && !fProfiles.containsKey(projProfileId)) {
+						name= Messages.format(FormatterMessages.ProfileManager_unmanaged_profile_with_name, projProfileId.substring(ID_PREFIX.length()));
+					} else {
+						name= FormatterMessages.ProfileManager_unmanaged_profile;
+					}
 					// current settings do not correspond to any profile -> create a 'team' profile
-					SharedProfile shared= new SharedProfile(map);
+					SharedProfile shared= new SharedProfile(name, map);
 					shared.setManager(this);
 					fProfiles.put(shared.getID(), shared);
 					fProfilesByName.add(shared); // add last
@@ -530,47 +552,19 @@ public class ProfileManager extends Observable {
 		final Map profileOptions= profile.getSettings();
 		
 		final IEclipsePreferences corePrefs= context.getNode(JavaCore.PLUGIN_ID);
-		boolean hasCoreChanges= updatePreferences(corePrefs, fCoreKeys, profileOptions);
+		updatePreferences(corePrefs, fCoreKeys, profileOptions);
 		
 		final IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
-		boolean hasUIChanges= updatePreferences(uiPrefs, fUIKeys, profileOptions);
+		updatePreferences(uiPrefs, fUIKeys, profileOptions);
 		
 		if (uiPrefs.getInt(FORMATTER_SETTINGS_VERSION, 0) != ProfileVersioner.CURRENT_VERSION) {
 			uiPrefs.putInt(FORMATTER_SETTINGS_VERSION, ProfileVersioner.CURRENT_VERSION);
-			hasUIChanges= true;
 		}
 		
 		if (context.getName() == InstanceScope.SCOPE) {
-			final String oldProfile= uiPrefs.get(PROFILE_KEY, null);
-			if (!profile.getID().equals(oldProfile)) {
-				uiPrefs.put(PROFILE_KEY, profile.getID());
-				hasUIChanges= true;
-			}
+			uiPrefs.put(PROFILE_KEY, profile.getID());
 		} else if (context.getName() == ProjectScope.SCOPE && !profile.isSharedProfile()) {
-			setProjectProfileNameProperty(context, profile.getID());
-		}
-		if (hasUIChanges) {
-			flushPreferences(uiPrefs);
-		}
-		if (hasCoreChanges) {
-			flushPreferences(corePrefs);
-		}
-	}
-	
-	private void flushPreferences(final IEclipsePreferences prefs) {
-		try {
-			PlatformUI.getWorkbench().getProgressService().run(true, true, new IRunnableWithProgress() {
-				public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					try {
-						prefs.flush();
-					} catch (BackingStoreException e) {
-						throw new InvocationTargetException(e);
-					}
-				}
-			});
-		} catch (InvocationTargetException e) {
-			JavaPlugin.log(e);
-		} catch (InterruptedException e) {
+			uiPrefs.put(PROFILE_KEY, profile.getID());
 		}
 	}
 	
@@ -647,7 +641,7 @@ public class ProfileManager extends Observable {
 	 * correspond to the one returned by <code>getSortedNames</code>.
 	 * @return a list of elements of type <code>Profile</code>
 	 * 
-	 * @see #getSortedNames()
+	 * @see #getSortedDisplayNames()
 	 */
 	public List getSortedProfiles() {
 		return Collections.unmodifiableList(fProfilesByName);
@@ -660,11 +654,12 @@ public class ProfileManager extends Observable {
 	 * @return All names, sorted alphabetically
 	 * @see #getSortedProfiles()  
 	 */	
-	public String [] getSortedNames() {
-		final String [] sortedNames= new String[fProfilesByName.size()];
+	public String[] getSortedDisplayNames() {
+		final String[] sortedNames= new String[fProfilesByName.size()];
 		int i= 0;
 		for (final Iterator iter = fProfilesByName.iterator(); iter.hasNext();) {
-			sortedNames[i++]= ((Profile) iter.next()).getName();
+			Profile curr= (Profile) iter.next();
+			sortedNames[i++]= curr.getName();
 		}
 		return sortedNames;
 	}
@@ -690,33 +685,12 @@ public class ProfileManager extends Observable {
 	
 	public void clearAllSettings(IScopeContext context) {
 		final IEclipsePreferences corePrefs= context.getNode(JavaCore.PLUGIN_ID);
-		boolean hasCoreChanges= updatePreferences(corePrefs, fCoreKeys, Collections.EMPTY_MAP);
+		updatePreferences(corePrefs, fCoreKeys, Collections.EMPTY_MAP);
 		
 		final IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
-		boolean hasUIChanges= updatePreferences(uiPrefs, fUIKeys, Collections.EMPTY_MAP);
+		updatePreferences(uiPrefs, fUIKeys, Collections.EMPTY_MAP);
 		
-		if (hasUIChanges) {
-			flushPreferences(uiPrefs);
-		}
-		if (hasCoreChanges) {
-			flushPreferences(corePrefs);
-		}
-		
-		if (context.getName() == ProjectScope.SCOPE) {
-			setProjectProfileNameProperty(context, null);
-		}
-	}
-
-
-	private void setProjectProfileNameProperty(IScopeContext context, String id) {
-		String projectName= context.getNode(JavaUI.ID_PLUGIN).parent().name();
-		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(projectName);
-		try {
-			QualifiedName key= new QualifiedName(JavaUI.ID_PLUGIN, PROFILE_KEY);
-			project.setPersistentProperty(key, id);
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		}
+		uiPrefs.remove(PROFILE_KEY);
 	}
 	
 	/**
@@ -746,7 +720,13 @@ public class ProfileManager extends Observable {
 	 * @return Returns <code>true</code> if a profile with the given name exists
 	 */
 	public boolean containsName(String name) {
-		return fProfiles.containsKey(ID_PREFIX + name);
+		for (final Iterator iter = fProfilesByName.iterator(); iter.hasNext();) {
+			Profile curr= (Profile) iter.next();
+			if (name.equals(curr.getName())) {
+				return true;
+			}
+		}
+		return false;
 	}
 	
 	/**
@@ -791,7 +771,7 @@ public class ProfileManager extends Observable {
 		fSelected= (Profile) fProfilesByName.get(index);
 
 		if (!removedProfile.isSharedProfile()) {
-			updateProfilesWithName(removedProfile.getID(), null);
+			updateProfilesWithName(removedProfile.getID(), null, false);
 		}
 		
 		notifyObservers(PROFILE_DELETED_EVENT);
@@ -803,7 +783,7 @@ public class ProfileManager extends Observable {
 		fProfiles.put(profile.getID(), profile);
 
 		if (!profile.isSharedProfile()) {
-			updateProfilesWithName(oldID, profile);
+			updateProfilesWithName(oldID, profile, false);
 		}
 		
 		Collections.sort(fProfilesByName);
@@ -818,7 +798,7 @@ public class ProfileManager extends Observable {
 		Collections.sort(fProfilesByName);
 		
 		if (!oldProfile.isSharedProfile()) {
-			updateProfilesWithName(oldProfile.getID(), null);
+			updateProfilesWithName(oldProfile.getID(), null, false);
 		}
 		
 		setSelected(newProfile);
@@ -828,37 +808,36 @@ public class ProfileManager extends Observable {
 	
 	public void profileChanged(CustomProfile profile) {
 		if (!profile.isSharedProfile()) {
-			updateProfilesWithName(profile.getID(), profile);
+			updateProfilesWithName(profile.getID(), profile, true);
 		}
 		
 		notifyObservers(SETTINGS_CHANGED_EVENT);
 	}
 	
 	
-	private void updateProfilesWithName(String oldName, Profile newProfile) {
+	private void updateProfilesWithName(String oldName, Profile newProfile, boolean applySettings) {
 		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
-		QualifiedName key= new QualifiedName(JavaUI.ID_PLUGIN, PROFILE_KEY);
 		for (int i= 0; i < projects.length; i++) {
-			IProject curr= projects[i];
-			if (curr.isAccessible()) {
-				try {
-					String profileId= curr.getPersistentProperty(key);
-					if (oldName.equals(profileId)) {
-						if (newProfile == null) {
-							curr.setPersistentProperty(key, null); // remove
-						} else {
-							writeToPreferenceStore(newProfile, new ProjectScope(curr));
-						}
+			IScopeContext projectScope= fPreferencesAccess.getProjectScope(projects[i]);
+			IEclipsePreferences node= projectScope.getNode(JavaUI.ID_PLUGIN);
+			String profileId= node.get(PROFILE_KEY, null);
+			if (oldName.equals(profileId)) {
+				if (newProfile == null) {
+					node.remove(PROFILE_KEY);
+				} else {
+					if (applySettings) {
+						writeToPreferenceStore(newProfile, projectScope);
+					} else {
+						node.put(PROFILE_KEY, newProfile.getID());
 					}
-				} catch (CoreException e) {
-					JavaPlugin.log(e);
 				}
 			}
 		}
 		
-		final IEclipsePreferences uiPrefs= new InstanceScope().getNode(JavaUI.ID_PLUGIN);
+		IScopeContext instanceScope= fPreferencesAccess.getInstanceScope();
+		final IEclipsePreferences uiPrefs= instanceScope.getNode(JavaUI.ID_PLUGIN);
 		if (newProfile != null && oldName.equals(uiPrefs.get(PROFILE_KEY, null))) {
-			writeToPreferenceStore(newProfile, new InstanceScope());
+			writeToPreferenceStore(newProfile, instanceScope);
 		}
 	}
 	

@@ -44,26 +44,23 @@ import javax.xml.transform.stream.StreamResult;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-import org.eclipse.core.runtime.preferences.InstanceScope;
+import org.eclipse.core.runtime.preferences.IScopeContext;
 
-import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.jface.preference.IPreferenceStore;
-
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIException;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
+import org.osgi.service.prefs.BackingStoreException;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.xml.sax.Attributes;
@@ -160,15 +157,15 @@ public class ProfileStore {
 	 * and are all updated to the latest version.
 	 * @throws CoreException
 	 */
-	public static List readProfiles() throws CoreException {
-		List res= readProfilesFromPreferences(PREF_FORMATTER_PROFILES);
+	public static List readProfiles(IScopeContext instanceScope) throws CoreException {
+		List res= readProfilesFromPreferences(PREF_FORMATTER_PROFILES, instanceScope);
 		if (res == null) {
-			return readOldForCompatibility();
+			return readOldForCompatibility(instanceScope);
 		}
 		return res;
 	}
 	
-	public static void writeProfiles(Collection profiles) throws CoreException {
+	public static void writeProfiles(Collection profiles, IScopeContext instanceScope) throws CoreException {
 		ByteArrayOutputStream stream= new ByteArrayOutputStream(2000);
 		try {
 			writeProfilesToStream(profiles, stream);
@@ -178,17 +175,16 @@ public class ProfileStore {
 			} catch (UnsupportedEncodingException e) {
 				val= stream.toString(); 
 			}
-			IPreferenceStore preferenceStore= PreferenceConstants.getPreferenceStore();
-			preferenceStore.setValue(PREF_FORMATTER_PROFILES, val);
-			preferenceStore.setValue(PREF_FORMATTER_PROFILES_VERSION, ProfileVersioner.CURRENT_VERSION);
-			JavaPlugin.getDefault().savePluginPreferences();
+			IEclipsePreferences uiPreferences = instanceScope.getNode(JavaUI.ID_PLUGIN);
+			uiPreferences.put(PREF_FORMATTER_PROFILES, val);
+			uiPreferences.putInt(PREF_FORMATTER_PROFILES_VERSION, ProfileVersioner.CURRENT_VERSION);
 		} finally {
 			try { stream.close(); } catch (IOException e) { /* ignore */ }
 		}
 	}
 	
-	private static List readProfilesFromPreferences(String key) throws CoreException {
-		String string= PreferenceConstants.getPreferenceStore().getString(key);
+	private static List readProfilesFromPreferences(String key, IScopeContext instanceScope) throws CoreException {
+		String string= instanceScope.getNode(JavaUI.ID_PLUGIN).get(key, null);
 		if (string != null && string.length() > 0) {
 			byte[] bytes;
 			try {
@@ -217,7 +213,7 @@ public class ProfileStore {
 	 * as collection.
 	 * @return returns a list of <code>CustomProfile</code> or <code>null</code>
 	 */
-	private static List readOldForCompatibility() {
+	private static List readOldForCompatibility(IScopeContext instanceScope) {
 		
 		// in 3.0 M9 and less the profiles were stored in a file in the plugin's meta data
 		final String STORE_FILE= "code_formatter_profiles.xml"; //$NON-NLS-1$
@@ -235,7 +231,7 @@ public class ProfileStore {
 					for (int i= 0; i < res.size(); i++) {
 						ProfileVersioner.updateAndComplete((CustomProfile) res.get(i));
 					}
-					writeProfiles(res);
+					writeProfiles(res, instanceScope);
 				}
 				file.delete(); // remove after successful write
 				return res;
@@ -380,36 +376,47 @@ public class ProfileStore {
 	}
 	
 	public static void checkCurrentOptionsVersion() {
-		InstanceScope instanceofScope= new InstanceScope();
-		IEclipsePreferences uiPreferences= instanceofScope.getNode(JavaUI.ID_PLUGIN);
+		PreferencesAccess access= PreferencesAccess.getOriginalPreferences();
+		
+		IScopeContext instanceScope= access.getInstanceScope();
+		IEclipsePreferences uiPreferences= instanceScope.getNode(JavaUI.ID_PLUGIN);
 		int version= uiPreferences.getInt(PREF_FORMATTER_PROFILES_VERSION, 0);
 		if (version >= ProfileVersioner.CURRENT_VERSION) {
 			return; // is up to date
 		}
 		try {
-			List profiles= ProfileStore.readProfiles();
+			List profiles= ProfileStore.readProfiles(instanceScope);
 			if (profiles == null) {
 				profiles= Collections.EMPTY_LIST;
 			}
-			ProfileManager manager= new ProfileManager(profiles, instanceofScope);
+			ProfileManager manager= new ProfileManager(profiles, instanceScope, access);
 			if (manager.getSelected() instanceof CustomProfile) {
-				manager.commitChanges(instanceofScope); // updates JavaCore options
+				manager.commitChanges(instanceScope); // updates JavaCore options
 			}
 			uiPreferences.putInt(PREF_FORMATTER_PROFILES_VERSION, ProfileVersioner.CURRENT_VERSION);
-			try {
-				IJavaProject[] javaProjects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
-				for (int i= 0; i < javaProjects.length; i++) {
-					ProjectScope scope= new ProjectScope(javaProjects[i].getProject());
-					if (ProfileManager.hasProjectSpecificSettings(scope)) {
-						manager= new ProfileManager(profiles, scope);
-						manager.commitChanges(scope); // updates JavaCore project options
-					}
+			savePreferences(instanceScope);
+						
+			IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
+			for (int i= 0; i < projects.length; i++) {
+				IScopeContext scope= access.getProjectScope(projects[i]);
+				if (ProfileManager.hasProjectSpecificSettings(scope)) {
+					manager= new ProfileManager(profiles, scope, access);
+					manager.commitChanges(scope); // updates JavaCore project options
+					savePreferences(scope);
 				}
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
+		} catch (BackingStoreException e) {
+			JavaPlugin.log(e);
+		}
+	}
+	
+	private static void savePreferences(final IScopeContext context) throws BackingStoreException {
+		try {
+			context.getNode(JavaUI.ID_PLUGIN).flush();
+		} finally {
+			context.getNode(JavaCore.PLUGIN_ID).flush();
 		}
 	}
 	

@@ -44,7 +44,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.BuiltInProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 
@@ -89,7 +88,7 @@ public class ModifyDialog extends StatusDialog {
 		setShellStyle(getShellStyle() | SWT.RESIZE | SWT.MAX );
 				
 		fProfile= profile;
-		if (fProfile instanceof BuiltInProfile) {
+		if (fProfile.isBuiltInProfile()) {
 		    fStandardStatus= new Status(IStatus.INFO, JavaPlugin.getPluginId(), IStatus.OK, FormatterMessages.ModifyDialog_dialog_show_warning_builtin, null); 
 		    fTitle= Messages.format(FormatterMessages.ModifyDialog_dialog_show_title, profile.getName()); 
 		} else {
@@ -218,8 +217,8 @@ public class ModifyDialog extends StatusDialog {
     }
 	
 	private void applyPressed() {
-		 if (fProfile instanceof BuiltInProfile) {
-		 	CustomProfile newProfile= new CustomProfile("", new HashMap(fWorkingValues), ProfileVersioner.CURRENT_VERSION); //$NON-NLS-1$
+		 if (fProfile.isBuiltInProfile() || fProfile.isSharedProfile()) {
+		 	CustomProfile newProfile= new CustomProfile(fProfile.getName(), new HashMap(fWorkingValues), ProfileVersioner.CURRENT_VERSION);
 		 	RenameProfileDialog dialog= new RenameProfileDialog(getShell(), newProfile, fProfileManager);
 		 	if (dialog.open() != Window.OK) {
 		 		return;

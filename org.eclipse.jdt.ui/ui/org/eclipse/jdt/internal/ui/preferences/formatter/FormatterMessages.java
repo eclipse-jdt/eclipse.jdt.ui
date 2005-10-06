@@ -435,8 +435,9 @@ final class FormatterMessages extends NLS {
 	public static String NewLinesTabPage_annotations_group_option_after_annotation;
 	public static String ProfileManager_default_profile_name;
 	public static String ProfileManager_eclipse_profile_name;
-	public static String ProfileManager_unnamed_profile_name0;
 	public static String ProfileManager_java_conventions_profile_name;
+	public static String ProfileManager_unmanaged_profile;
+	public static String ProfileManager_unmanaged_profile_with_name;
 	public static String RenameProfileDialog_status_message_profile_with_this_name_already_exists;
 	public static String RenameProfileDialog_status_message_profile_name_empty;
 	public static String RenameProfileDialog_dialog_title;

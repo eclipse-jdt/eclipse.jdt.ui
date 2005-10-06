@@ -19,7 +19,6 @@ import java.util.Observer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.preferences.IScopeContext;
-import org.eclipse.core.runtime.preferences.InstanceScope;
 
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
@@ -43,6 +42,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.PreferencesAccess;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomProfile;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.Profile;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -75,13 +75,15 @@ public class CodeFormatterConfigurationBlock {
 			case ProfileManager.PROFILE_CREATED_EVENT:
 			case ProfileManager.SETTINGS_CHANGED_EVENT:
 				try {
-					ProfileStore.writeProfiles(fProfileManager.getSortedProfiles()); // update profile store
+					ProfileStore.writeProfiles(fProfileManager.getSortedProfiles(), fInstanceScope); // update profile store
+					fProfileManager.commitChanges(fCurrContext); // update formatter settings with curently selected profile 
 				} catch (CoreException x) {
 					JavaPlugin.log(x);
 				}
-				// fall through
+				break;
 			case ProfileManager.SELECTION_CHANGED_EVENT:
-				fProfileManager.commitChanges(fCurrContext); // update formatter settings with curently selected profile 
+				fProfileManager.commitChanges(fCurrContext); // update formatter settings with curently selected profile
+				break;
 			}
 		}
 	}
@@ -119,7 +121,7 @@ public class CodeFormatterConfigurationBlock {
 		}
 		
 		private void updateProfiles() {
-			fProfileCombo.setItems(fProfileManager.getSortedNames());
+			fProfileCombo.setItems(fProfileManager.getSortedDisplayNames());
 		}
 
 		private void updateSelection() {
@@ -336,14 +338,16 @@ public class CodeFormatterConfigurationBlock {
 	private PixelConverter fPixConv;
 
 	private IScopeContext fCurrContext;
+	private IScopeContext fInstanceScope;
 	
 	/**
 	 * Create a new <code>CodeFormatterConfigurationBlock</code>.
 	 */
-	public CodeFormatterConfigurationBlock(IProject project) {
+	public CodeFormatterConfigurationBlock(IProject project, PreferencesAccess access) {
+		fInstanceScope= access.getInstanceScope();
 		List profiles= null;
 		try {
-		    profiles= ProfileStore.readProfiles();
+		    profiles= ProfileStore.readProfiles(fInstanceScope);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		}
@@ -352,12 +356,12 @@ public class CodeFormatterConfigurationBlock {
 		    profiles= new ArrayList();
 		
 		if (project != null) {
-			fCurrContext= new ProjectScope(project);
+			fCurrContext= access.getProjectScope(project);
 		} else {
-			fCurrContext= new InstanceScope();
+			fCurrContext= fInstanceScope;
 		}
 		
-		fProfileManager= new ProfileManager(profiles, fCurrContext);
+		fProfileManager= new ProfileManager(profiles, fCurrContext, access);
 
 		new StoreUpdater();
 	}

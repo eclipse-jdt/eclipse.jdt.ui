@@ -70,7 +70,7 @@ public class CreateProfileDialog extends StatusDialog {
 		super(parentShell);
 		fProfileManager= profileManager;
 		fSortedProfiles= fProfileManager.getSortedProfiles();
-		fSortedNames= fProfileManager.getSortedNames();
+		fSortedNames= fProfileManager.getSortedDisplayNames();
 	}
 	
 	

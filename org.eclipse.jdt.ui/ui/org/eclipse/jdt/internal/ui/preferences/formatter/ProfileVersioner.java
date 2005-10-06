@@ -31,9 +31,9 @@ public class ProfileVersioner {
 	public static final int VERSION_6= 6; // after splitting of new_line_in_control_statements
 	public static final int VERSION_7= 7; // after moving comment formatter to JDT Core
 	public static final int VERSION_8= 8; // fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=89739
-//	public static final int VERSION_9= 9; // after splitting tabSize -> tabLength / indentSize
+	public static final int VERSION_9= 9; // after storing project profile names in preferences
 	
-	public static final int CURRENT_VERSION= VERSION_8;
+	public static final int CURRENT_VERSION= VERSION_9;
 	
 	public static void updateAndComplete(CustomProfile profile) {
 		final Map oldSettings= profile.getSettings();
@@ -82,6 +82,8 @@ public class ProfileVersioner {
 		return newSettings;
 	}
 	
+
+
 	/**
 	 * Updates the map to use the latest the source compliance
 	 * @param map The map to update
@@ -539,7 +541,6 @@ public class ProfileVersioner {
 		checkAndReplaceBooleanWithINSERT(oldSettings, FORMATTER_COMMENT_NEWLINEFORPARAMETER, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_NEW_LINE_FOR_PARAMETER); 
 		checkAndReplaceBooleanWithINSERT(oldSettings, FORMATTER_COMMENT_SEPARATEROOTTAGS, DefaultCodeFormatterConstants.FORMATTER_COMMENT_INSERT_EMPTY_LINE_BEFORE_ROOT_TAGS); 
 	}
-
 	
 //	private static void version7to8(Map oldSettings) {
 //		checkAndReplace(oldSettings,

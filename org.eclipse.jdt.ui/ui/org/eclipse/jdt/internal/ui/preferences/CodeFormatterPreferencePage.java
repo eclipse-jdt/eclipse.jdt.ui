@@ -18,7 +18,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
+import org.eclipse.jface.preference.IPreferencePageContainer;
+
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
+import org.eclipse.ui.preferences.IWorkingCopyManager;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.preferences.formatter.CodeFormatterConfigurationBlock;
@@ -44,7 +48,16 @@ public class CodeFormatterPreferencePage extends PropertyAndPreferencePage {
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
 	 */
 	public void createControl(Composite parent) {
-		fConfigurationBlock= new CodeFormatterConfigurationBlock(getProject());
+		IPreferencePageContainer container= getContainer();
+		PreferencesAccess access;
+		if (container instanceof IWorkbenchPreferenceContainer) {
+			IWorkingCopyManager workingCopyManager= ((IWorkbenchPreferenceContainer) container).getWorkingCopyManager();
+			access= PreferencesAccess.getWorkingCopyPreferences(workingCopyManager);
+		} else {
+			access= PreferencesAccess.getOriginalPreferences();
+		}
+		
+		fConfigurationBlock= new CodeFormatterConfigurationBlock(getProject(), access);
 		
 		super.createControl(parent);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.CODEFORMATTER_PREFERENCE_PAGE);

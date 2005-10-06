@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.CustomPr
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager.SharedProfile;
 
 /**
- * The dialog to create a new profile. 
+ * The dialog to rename a new profile. 
  */
 public class RenameProfileDialog extends StatusDialog {
 	
@@ -41,6 +41,7 @@ public class RenameProfileDialog extends StatusDialog {
 	private final StatusInfo fOk;
 	private final StatusInfo fEmpty;
 	private final StatusInfo fDuplicate;
+	private final StatusInfo fNoMessage;
 
 	private final CustomProfile fProfile;
 	private final ProfileManager fManager;
@@ -52,7 +53,8 @@ public class RenameProfileDialog extends StatusDialog {
 		fProfile= profile;
 		fOk= new StatusInfo();
 		fDuplicate= new StatusInfo(IStatus.ERROR, FormatterMessages.RenameProfileDialog_status_message_profile_with_this_name_already_exists); 
-		fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.RenameProfileDialog_status_message_profile_name_empty); 
+		fEmpty= new StatusInfo(IStatus.ERROR, FormatterMessages.RenameProfileDialog_status_message_profile_name_empty);
+		fNoMessage= new StatusInfo(IStatus.ERROR, new String());
 	}
 	
 	public Control createDialogArea(Composite parent) {
@@ -91,8 +93,8 @@ public class RenameProfileDialog extends StatusDialog {
 				doValidation();
 			}
 		});
-
-		updateStatus(fOk);
+		fNameText.setText(fProfile.getName());
+		fNameText.selectAll();
 		
 		applyDialogFont(composite);
 		
@@ -112,7 +114,7 @@ public class RenameProfileDialog extends StatusDialog {
 		}
 		
 		if (name.equals(fProfile.getName())) {
-			updateStatus(fOk);
+			updateStatus(fNoMessage);
 			return;
 		}
 		
