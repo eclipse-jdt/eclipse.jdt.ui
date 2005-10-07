@@ -373,7 +373,7 @@ public class ProfileManager extends Observable {
 		}
 		fSelected= profile;
 		
-		if (context.getName() == ProjectScope.SCOPE) {
+		if (context.getName() == ProjectScope.SCOPE && hasProjectSpecificSettings(context)) {
 			Map map= readFromPreferenceStore(context, profile);
 			if (map != null) {
 				Profile matching= null;
@@ -462,7 +462,7 @@ public class ProfileManager extends Observable {
 		final Map profileOptions= new HashMap();
 		IEclipsePreferences uiPrefs= context.getNode(JavaUI.ID_PLUGIN);
 		IEclipsePreferences corePrefs= context.getNode(JavaCore.PLUGIN_ID);
-		
+				
 		int version= uiPrefs.getInt(FORMATTER_SETTINGS_VERSION, ProfileVersioner.VERSION_1);
 		if (version != ProfileVersioner.CURRENT_VERSION) {
 			Map allOptions= new HashMap();
