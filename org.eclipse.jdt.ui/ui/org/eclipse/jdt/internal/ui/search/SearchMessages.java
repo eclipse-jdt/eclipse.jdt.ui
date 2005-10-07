@@ -193,6 +193,8 @@ public final class SearchMessages extends NLS {
 	public static String MatchFilter_InexactFilter_actionLabel;
 	public static String MatchFilter_InexactFilter_description;
 	public static String MethodExitsFinder_no_return_type_selected;
+	public static String BreakContinueTargetFinder_cannot_highlight;
+	public static String BreakContinueTargetFinder_no_break_or_continue_selected;
 	public static String TextSearchLabelProvider_matchCountFormat;
 	public static String FiltersDialog_title;
 	public static String FiltersDialog_filters_label;

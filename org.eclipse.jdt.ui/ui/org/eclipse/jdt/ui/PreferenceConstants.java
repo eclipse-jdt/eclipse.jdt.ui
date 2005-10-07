@@ -2227,6 +2227,17 @@ public class PreferenceConstants {
 	public static final String EDITOR_MARK_METHOD_EXIT_POINTS= "markMethodExitPoints"; //$NON-NLS-1$
 
 	/**
+	 * A named preference that controls whether targets for of <code>break</code> and <code>continue</code> statements are marked.
+	 * Only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
+	 * <p>
+	 * Value is of type <code>Boolean</code>.
+	 * </p>
+	 * 
+	 * @since 3.2
+	 */
+	public static final String EDITOR_MARK_BREAK_CONTINUE_TARGETS= "markBreakContinueTargets"; //$NON-NLS-1$
+	
+	/**
 	 * A named preference that controls whether method exit points are marked.
 	 * Only valid if {@link #EDITOR_MARK_OCCURRENCES} is <code>true</code>.
 	 * <p>
@@ -3503,6 +3514,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_MARK_LOCAL_VARIABLE_OCCURRENCES, true);
 		store.setDefault(PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES, true);
 		store.setDefault(PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS, true);
+		store.setDefault(PreferenceConstants.EDITOR_MARK_BREAK_CONTINUE_TARGETS, true);
 		store.setDefault(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS, true);
 		
 		// spell checking

@@ -202,6 +202,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectHi
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectNextAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectPreviousAction;
 import org.eclipse.jdt.internal.ui.javaeditor.selectionactions.StructureSelectionAction;
+import org.eclipse.jdt.internal.ui.search.BreakContinueTargetFinder;
 import org.eclipse.jdt.internal.ui.search.ExceptionOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.ImplementOccurrencesFinder;
 import org.eclipse.jdt.internal.ui.search.MethodExitsFinder;
@@ -1537,6 +1538,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	private boolean fMarkMethodExitPoints;
+	
+	/**
+	 * Tells whether to mark targets of <code>break</code> and <code>continue</code> statements in this editor.
+	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
+	 * @since 3.2
+	 */
+	private boolean fMarkBreakContinueTargets;
+	
 	/**
 	 * Tells whether to mark implementors in this editor.
 	 * Only valid if {@link #fMarkOccurrenceAnnotations} is <code>true</code>.
@@ -1655,6 +1664,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fMarkExceptions= store.getBoolean(PreferenceConstants.EDITOR_MARK_EXCEPTION_OCCURRENCES);
 		fMarkImplementors= store.getBoolean(PreferenceConstants.EDITOR_MARK_IMPLEMENTORS);
 		fMarkMethodExitPoints= store.getBoolean(PreferenceConstants.EDITOR_MARK_METHOD_EXIT_POINTS);
+		fMarkBreakContinueTargets= store.getBoolean(PreferenceConstants.EDITOR_MARK_BREAK_CONTINUE_TARGETS);
 	}
 
 	/*
@@ -2453,6 +2463,10 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				fMarkMethodExitPoints= newBooleanValue;
 				return;
 			}
+			if (PreferenceConstants.EDITOR_MARK_BREAK_CONTINUE_TARGETS.equals(property)) {
+				fMarkBreakContinueTargets= newBooleanValue;
+				return;
+			}
 			if (PreferenceConstants.EDITOR_MARK_IMPLEMENTORS.equals(property)) {
 				fMarkImplementors= newBooleanValue;
 				return;
@@ -2852,6 +2866,16 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			if (message == null) {
 				matches= finder.perform();
 				if (!fMarkMethodExitPoints && !matches.isEmpty())
+					matches.clear();
+			}
+		}
+
+		if ((matches == null || matches.isEmpty()) && (fMarkBreakContinueTargets || fMarkTypeOccurrences)) {
+			BreakContinueTargetFinder finder= new BreakContinueTargetFinder();
+			String message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
+			if (message == null) {
+				matches= finder.perform();
+				if (!fMarkBreakContinueTargets && !matches.isEmpty())
 					matches.clear();
 			}
 		}

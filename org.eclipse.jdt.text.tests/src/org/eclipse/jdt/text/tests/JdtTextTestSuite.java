@@ -50,6 +50,7 @@ public class JdtTextTestSuite {
 		suite.addTest(AutoboxingSemanticHighlightingTest.suite());
 		suite.addTest(NewForLoopJavaContextTest.suite());
 		suite.addTest(JavaDoubleClickSelectorTest.suite());
+		suite.addTest(BreakContinueTargetFinderTest.suite());
 		//$JUnit-END$
 		
 		return suite;

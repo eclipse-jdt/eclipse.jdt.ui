@@ -215,6 +215,7 @@ public final class PreferencesMessages extends NLS {
 	public static String MarkOccurrencesConfigurationBlock_markExceptionOccurrences;
 	public static String MarkOccurrencesConfigurationBlock_markMethodExitPoints;
 	public static String MarkOccurrencesConfigurationBlock_markImplementors;
+	public static String MarkOccurrencesConfigurationBlock_markBreakContinueTargets;
 	public static String MarkOccurrencesConfigurationBlock_stickyOccurrences;
 	public static String JavaElementInfoPage_binary;
 	public static String JavaElementInfoPage_classpath_entry_kind;
