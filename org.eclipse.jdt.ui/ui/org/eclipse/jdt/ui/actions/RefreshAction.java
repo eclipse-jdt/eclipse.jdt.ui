@@ -194,13 +194,13 @@ public class RefreshAction extends SelectionDispatchAction {
 	}
 	
 	private void checkLocationDeleted(IProject project) throws CoreException {
-		if (!project.exists())
+		if (!project.exists() || project.getLocation() == null)
 			return;
-		File location = project.getLocation().toFile();
-		if (!location.exists()) {
+		File file = project.getLocation().toFile();
+		if (!file.exists()) {
 			final String message = Messages.format(
 				ActionMessages.RefreshAction_locationDeleted_message, 
-				new Object[] {project.getName(), location.getAbsolutePath()});
+				new Object[] {project.getName(), file.getAbsolutePath()});
 			final boolean[] result= new boolean[1];
 			// Must prompt user in UI thread (we're in the operation thread here).
 			getShell().getDisplay().syncExec(new Runnable() {

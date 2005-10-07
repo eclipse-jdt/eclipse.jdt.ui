@@ -219,7 +219,7 @@ public class JavadocWriter {
 		for (int i= 0; i < fJavaProjects.length; i++) {
 			IProject proj= fJavaProjects[i].getProject();
 			IPath projLoc= proj.getLocation();
-			if (projLoc.segmentCount() <= matchingSegments && projLoc.isPrefixOf(fullPath)) {
+			if (projLoc != null && projLoc.segmentCount() <= matchingSegments && projLoc.isPrefixOf(fullPath)) {
 				return getRelativePath(fullPath, matchingSegments);
 			}
 		}

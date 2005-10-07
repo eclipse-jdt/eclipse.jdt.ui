@@ -112,7 +112,16 @@ public class CreateFileChange extends JDTChange {
 	public RefactoringStatus isValid(IProgressMonitor pm) {
 		RefactoringStatus result= new RefactoringStatus();
 		IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
-		File jFile= new File(file.getLocation().toOSString());
+		
+		IPath location= file.getLocation();
+		if (location == null) {
+			result.addFatalError(Messages.format(
+				NLSChangesMessages.CreateFileChange_error_unknownLocation, 
+				file.getFullPath().toString()));
+			return result;
+		}
+		
+		File jFile= new File(location.toOSString());
 		if (jFile.exists()) {
 			result.addFatalError(Messages.format(
 				NLSChangesMessages.CreateFileChange_error_exists, 

@@ -26,6 +26,7 @@ public final class NLSChangesMessages extends NLS {
 	public static String deleteFile_Delete_File;
 
 	public static String CreateFileChange_error_exists;
+	public static String CreateFileChange_error_unknownLocation;
 	
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, NLSChangesMessages.class);
