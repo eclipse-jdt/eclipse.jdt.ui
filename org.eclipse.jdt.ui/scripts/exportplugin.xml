@@ -3,7 +3,6 @@
 
 	<target name="init">
 		<tstamp/>
-		<property name="tempdir"	value="../../tmp" />
 		<property name="destdir"	value="../../plugin-export" />
 		<property name="plugin"		value="org.eclipse.jdt.ui" />
 		<property name="plugin_version"	value="_3.1.0" />
@@ -16,16 +15,8 @@
 	</target>
 
 	<target name="export" depends="build">
-		<delete dir="${tempdir}" />
-		<mkdir dir="${tempdir}" />
 		<mkdir dir="${destdir}" />
 		<delete file="${destjar}" />
-		<zip zipfile="${tempdir}/src.zip">
-		    <fileset dir="core refactoring" />
-		    <fileset dir="ui refactoring" />
-		    <fileset dir="ui" />
-		    <fileset dir="core extension" />
-  		</zip>		
 		<zip zipfile="${destjar}">
 			<fileset dir=".">
 			  <include name="plugin.xml" />
@@ -35,12 +26,16 @@
 			  <include name="JavadocViewStyleSheet.css" />
 			  <include name="JavadocHoverStyleSheet.css" />
 			  <include name="icons/**"/>
+			  <include name="schema/**"/>
 			  <include name="templates/**" />
 			  <include name="META-INF/**" />
 			</fileset>
 			<fileset dir="bin" />
-			<fileset file="${tempdir}/src.zip" />
+			
+		    <zipfileset dir="core refactoring" prefix="src" />
+		    <zipfileset dir="ui refactoring" prefix="src" />
+		    <zipfileset dir="ui" prefix="src" />
+		    <zipfileset dir="core extension" prefix="src" />
 		</zip>
-		<delete file="${tempdir}/src.zip" />
 	</target>
 </project>
