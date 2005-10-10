@@ -132,6 +132,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 				PREF_15_PB_UNCHECKED_TYPE_OPERATION, PREF_15_PB_FINAL_PARAM_BOUND, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST,
 				PREF_15_PB_AUTOBOXING_PROBLEM, PREF_15_PB_MISSING_OVERRIDE_ANNOTATION, PREF_15_PB_ANNOTATION_SUPER_INTERFACE,
 				PREF_15_PB_TYPE_PARAMETER_HIDING, PREF_15_PB_INCOMPLETE_ENUM_SWITCH, PREF_PB_MISSING_DEPRECATED_ANNOTATION,
+				PREF_15_PB_RAW_TYPE_REFERENCE,
 				PREF_PB_FORBIDDEN_REFERENCE, PREF_PB_DISCOURRAGED_REFERENCE, PREF_PB_SUPPRESS_WARNINGS, PREF_PB_UNHANDLED_WARNING_TOKEN
 			};
 	}
@@ -367,7 +368,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		addComboBox(inner, label, PREF_15_PB_UNCHECKED_TYPE_OPERATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_raw_type_reference; 
-		addCheckBox(inner, label, PREF_15_PB_RAW_TYPE_REFERENCE, enabledDisabled, extraIndent);
+		addComboBox(inner, label, PREF_15_PB_RAW_TYPE_REFERENCE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_final_param_bound_label; 
 		addComboBox(inner, label, PREF_15_PB_FINAL_PARAM_BOUND, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
@@ -416,7 +417,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 			if (PREF_PB_UNUSED_PARAMETER.equals(changedKey) ||
 					PREF_PB_DEPRECATION.equals(changedKey) ||
 					PREF_PB_LOCAL_VARIABLE_HIDING.equals(changedKey) ||
-					PREF_15_PB_UNCHECKED_TYPE_OPERATION.equals(changedKey) ||
 					PREF_PB_UNUSED_DECLARED_THROWN_EXCEPTION.equals(changedKey)) {				
 				updateEnableStates();
 			} else if (PREF_PB_SIGNAL_PARAMETER_IN_OVERRIDING.equals(changedKey)) {
@@ -444,9 +444,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 
 		boolean enableHiding= !checkValue(PREF_PB_LOCAL_VARIABLE_HIDING, IGNORE);
 		getCheckBox(PREF_PB_SPECIAL_PARAMETER_HIDING_FIELD).setEnabled(enableHiding);
-		
-		boolean enableGenericTypeOps= !checkValue(PREF_15_PB_UNCHECKED_TYPE_OPERATION, IGNORE);
-		getCheckBox(PREF_15_PB_RAW_TYPE_REFERENCE).setEnabled(enableGenericTypeOps);
 	}
 
 	protected String[] getFullBuildDialogStrings(boolean workspaceSettings) {
