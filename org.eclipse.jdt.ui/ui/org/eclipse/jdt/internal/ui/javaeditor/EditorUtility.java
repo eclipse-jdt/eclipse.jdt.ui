@@ -131,11 +131,6 @@ public class EditorUtility {
 			return openInEditor((IFile) inputElement, activate);
 
 		IEditorInput input= getEditorInput(inputElement);
-		if (input instanceof IFileEditorInput) {
-			IFileEditorInput fileInput= (IFileEditorInput) input;
-			return openInEditor(fileInput.getFile(), activate);
-		}
-
 		if (input != null)
 			return openInEditor(input, getEditorID(input, inputElement), activate);
 
