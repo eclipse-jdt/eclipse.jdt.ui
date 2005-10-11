@@ -24,12 +24,14 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	
 	private final String PREVIEW=
 	createPreviewHeader(FormatterMessages.BracesTabPage_preview_header) + 
-	"class Empty {}\n" + //$NON-NLS-1$
+	"interface Empty {}\n" + //$NON-NLS-1$
 	"\n" + //$NON-NLS-1$
 	"enum MyEnum {" + //$NON-NLS-1$
 	"    UNDEFINED(0) {" + //$NON-NLS-1$
 	"        void foo() {}" + //$NON-NLS-1$
 	"    }" + //$NON-NLS-1$
+	"}\n" + //$NON-NLS-1$
+	"@interface SomeAnnotationType {" + //$NON-NLS-1$
 	"}" + //$NON-NLS-1$
 	"class Example {" + //$NON-NLS-1$
 	"  SomeClass fField= new SomeClass() {" + //$NON-NLS-1$
@@ -53,6 +55,7 @@ public class BracesTabPage extends ModifyDialogTabPage {
 	"    }" + //$NON-NLS-1$
 	"  }" + //$NON-NLS-1$
 	"}"; //$NON-NLS-1$
+
 	
 	
 	private CompilationUnitPreview fPreview;
