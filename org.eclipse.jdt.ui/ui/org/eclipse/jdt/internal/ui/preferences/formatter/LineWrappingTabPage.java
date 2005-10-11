@@ -477,7 +477,9 @@ public class LineWrappingTabPage extends ModifyDialogTabPage {
 	private final Category fEnumConstantsCategory= new Category(
 	    DefaultCodeFormatterConstants.FORMATTER_ALIGNMENT_FOR_ENUM_CONSTANTS,
 	    "enum Example {" + //$NON-NLS-1$
-	    "CANCELLED, RUNNING, WAITING, FINISHED }", //$NON-NLS-1$
+	    "CANCELLED, RUNNING, WAITING, FINISHED }" + //$NON-NLS-1$
+	    "enum Example {" + //$NON-NLS-1$
+	    "GREEN(0, 255, 0), RED(255, 0, 0)  }", //$NON-NLS-1$
 	    FormatterMessages.LineWrappingTabPage_enum_constants
 	);
 	
