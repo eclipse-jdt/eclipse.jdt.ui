@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -790,12 +791,12 @@ public class ModifierCorrectionSubProcessor {
 		if (warningToken == null) {
 			return;
 		}
-		/*for (Iterator iter= proposals.iterator(); iter.hasNext();) {
+		for (Iterator iter= proposals.iterator(); iter.hasNext();) {
 			Object element= iter.next();
-			if (element instanceof ICommandAccess && ADD_SUPPRESSWARNINGS_ID.equals(((ICommandAccess) element).getCommandId())) {
+			if (element instanceof SuppressWarningsProposal && warningToken.equals(((SuppressWarningsProposal) element).getWarningToken())) {
 				return; // only one at a time
 			}
-		}*/
+		}
 		
 		ASTNode node= problem.getCoveringNode(context.getASTRoot());
 		if (node == null) {
@@ -831,6 +832,107 @@ public class ModifierCorrectionSubProcessor {
 			return ((VariableDeclarationFragment) fragments.get(0)).getName().getIdentifier();
 		}
 		return new String();
+	}
+	
+	private static class SuppressWarningsProposal extends ASTRewriteCorrectionProposal {
+		
+		private final String fWarningToken;
+		private final ASTNode fNode;
+		private final ChildListPropertyDescriptor fProperty;
+
+		public SuppressWarningsProposal(String warningToken, String label, ICompilationUnit cu, ASTNode node, ChildListPropertyDescriptor property, int relevance) {
+			super(label, cu, null, relevance, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ANNOTATION));
+			fWarningToken= warningToken;
+			fNode= node;
+			fProperty= property;
+			setCommandId(ADD_SUPPRESSWARNINGS_ID);
+		}
+		
+		/**
+		 * @return Returns the warningToken.
+		 */
+		public String getWarningToken() {
+			return fWarningToken;
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
+		 */
+		protected ASTRewrite getRewrite() throws CoreException {
+			AST ast= fNode.getAST();
+			ASTRewrite rewrite= ASTRewrite.create(ast);
+			
+			StringLiteral newStringLiteral= ast.newStringLiteral();
+			newStringLiteral.setLiteralValue(fWarningToken);
+			
+			Annotation existing= findExistingAnnotation((List) fNode.getStructuralProperty(fProperty));
+			if (existing == null) {
+				ListRewrite listRewrite= rewrite.getListRewrite(fNode, fProperty);
+				
+				SingleMemberAnnotation newAnnot= ast.newSingleMemberAnnotation();
+				newAnnot.setTypeName(ast.newSimpleName("SuppressWarnings")); //$NON-NLS-1$
+
+				newAnnot.setValue(newStringLiteral);
+				
+				listRewrite.insertFirst(newAnnot, null);
+			} else if (existing instanceof SingleMemberAnnotation) {
+				SingleMemberAnnotation annotation= (SingleMemberAnnotation) existing;
+				Expression value= annotation.getValue();
+				if (!addSuppressArgument(rewrite, value, newStringLiteral)) {
+					rewrite.set(existing, SingleMemberAnnotation.VALUE_PROPERTY, newStringLiteral, null);
+				}
+			} else if (existing instanceof NormalAnnotation) {
+				NormalAnnotation annotation= (NormalAnnotation) existing;
+				Expression value= findValue(annotation.values());
+				if (!addSuppressArgument(rewrite, value, newStringLiteral)) {
+					ListRewrite listRewrite= rewrite.getListRewrite(annotation, NormalAnnotation.VALUES_PROPERTY);
+					MemberValuePair pair= ast.newMemberValuePair();
+					pair.setName(ast.newSimpleName("value")); //$NON-NLS-1$
+					pair.setValue(newStringLiteral);
+					listRewrite.insertFirst(pair, null);
+				}	
+			}
+			return rewrite;
+		}
+		
+		private static boolean addSuppressArgument(ASTRewrite rewrite, Expression value, StringLiteral newStringLiteral) {
+			if (value instanceof ArrayInitializer) {
+				ListRewrite listRewrite= rewrite.getListRewrite(value, ArrayInitializer.EXPRESSIONS_PROPERTY);
+				listRewrite.insertLast(newStringLiteral, null);
+			} else if (value instanceof StringLiteral) {
+				ArrayInitializer newArr= rewrite.getAST().newArrayInitializer();
+				newArr.expressions().add(rewrite.createMoveTarget(value));
+				newArr.expressions().add(newStringLiteral);
+				rewrite.replace(value, newArr, null);
+			} else {
+				return false;
+			}
+			return true;
+		}
+		
+		private static Expression findValue(List keyValues) {
+			for (int i= 0, len= keyValues.size(); i < len; i++) {
+				MemberValuePair curr= (MemberValuePair) keyValues.get(i);
+				if ("value".equals(curr.getName().getIdentifier())) { //$NON-NLS-1$
+					return curr.getValue();
+				}
+			}
+			return null;
+		}
+		
+		private static Annotation findExistingAnnotation(List modifiers) {
+			for (int i= 0, len= modifiers.size(); i < len; i++) {
+				Object curr= modifiers.get(i);
+				if (curr instanceof NormalAnnotation || curr instanceof SingleMemberAnnotation) {
+					Annotation annotation= (Annotation) curr;
+					String fullyQualifiedName= annotation.getTypeName().getFullyQualifiedName();
+					if ("SuppressWarnings".equals(fullyQualifiedName) || "java.lang.SuppressWarnings".equals(fullyQualifiedName)) { //$NON-NLS-1$ //$NON-NLS-2$
+						return annotation;
+					}
+				}
+			}
+			return null;
+		}
 	}
 	
 	private static void addSuppressWarningsProposal(ICompilationUnit cu, ASTNode node, String warningToken, int relevance, Collection proposals) {
@@ -883,83 +985,11 @@ public class ModifierCorrectionSubProcessor {
 				return;
 		}
 		
-		AST ast= node.getAST();
-		ASTRewrite rewrite= ASTRewrite.create(ast);
-		
-		StringLiteral newStringLiteral= ast.newStringLiteral();
-		newStringLiteral.setLiteralValue(warningToken);
-		
-		Annotation existing= findExistingAnnotation((List) node.getStructuralProperty(property));
-		if (existing == null) {
-			ListRewrite listRewrite= rewrite.getListRewrite(node, property);
-			
-			SingleMemberAnnotation newAnnot= ast.newSingleMemberAnnotation();
-			newAnnot.setTypeName(ast.newSimpleName("SuppressWarnings")); //$NON-NLS-1$
-
-			newAnnot.setValue(newStringLiteral);
-			
-			listRewrite.insertFirst(newAnnot, null);
-		} else if (existing instanceof SingleMemberAnnotation) {
-			SingleMemberAnnotation annotation= (SingleMemberAnnotation) existing;
-			Expression value= annotation.getValue();
-			if (!addSuppressArgument(rewrite, value, newStringLiteral)) {
-				rewrite.set(existing, SingleMemberAnnotation.VALUE_PROPERTY, newStringLiteral, null);
-			}
-		} else if (existing instanceof NormalAnnotation) {
-			NormalAnnotation annotation= (NormalAnnotation) existing;
-			Expression value= findValue(annotation.values());
-			if (!addSuppressArgument(rewrite, value, newStringLiteral)) {
-				ListRewrite listRewrite= rewrite.getListRewrite(annotation, NormalAnnotation.VALUES_PROPERTY);
-				MemberValuePair pair= ast.newMemberValuePair();
-				pair.setName(ast.newSimpleName("value")); //$NON-NLS-1$
-				pair.setValue(newStringLiteral);
-				listRewrite.insertFirst(pair, null);
-			}	
-		}
 		String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_suppress_warnings_label, new String[] { warningToken, name });
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ANNOTATION);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance, image);
-		proposal.setCommandId(ADD_SUPPRESSWARNINGS_ID);
+		ASTRewriteCorrectionProposal proposal= new SuppressWarningsProposal(warningToken, label, cu, node, property, relevance);
+
 		proposals.add(proposal);
 	}
 	
-	private static boolean addSuppressArgument(ASTRewrite rewrite, Expression value, StringLiteral newStringLiteral) {
-		if (value instanceof ArrayInitializer) {
-			ListRewrite listRewrite= rewrite.getListRewrite(value, ArrayInitializer.EXPRESSIONS_PROPERTY);
-			listRewrite.insertLast(newStringLiteral, null);
-		} else if (value instanceof StringLiteral) {
-			ArrayInitializer newArr= rewrite.getAST().newArrayInitializer();
-			newArr.expressions().add(rewrite.createMoveTarget(value));
-			newArr.expressions().add(newStringLiteral);
-			rewrite.replace(value, newArr, null);
-		} else {
-			return false;
-		}
-		return true;
-	}
-	
-	
-	private static Expression findValue(List keyValues) {
-		for (int i= 0, len= keyValues.size(); i < len; i++) {
-			MemberValuePair curr= (MemberValuePair) keyValues.get(i);
-			if ("value".equals(curr.getName().getIdentifier())) { //$NON-NLS-1$
-				return curr.getValue();
-			}
-		}
-		return null;
-	}
-	
-	private static Annotation findExistingAnnotation(List modifiers) {
-		for (int i= 0, len= modifiers.size(); i < len; i++) {
-			Object curr= modifiers.get(i);
-			if (curr instanceof NormalAnnotation || curr instanceof SingleMemberAnnotation) {
-				Annotation annotation= (Annotation) curr;
-				String fullyQualifiedName= annotation.getTypeName().getFullyQualifiedName();
-				if ("SuppressWarnings".equals(fullyQualifiedName) || "java.lang.SuppressWarnings".equals(fullyQualifiedName)) { //$NON-NLS-1$ //$NON-NLS-2$
-					return annotation;
-				}
-			}
-		}
-		return null;
-	}
+
 }
