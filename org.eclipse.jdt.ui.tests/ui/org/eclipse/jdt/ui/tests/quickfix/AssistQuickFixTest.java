@@ -4412,4 +4412,42 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
 	}
 
+	public void testSurroundWithRunnable30() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true) \n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		StringBuffer selection= new StringBuffer();
+		selection.append("            System.out.println(1);\n");
+		
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 9);
+		assertCorrectLabels(proposals);
+
+		StringBuffer expected1= new StringBuffer();
+		expected1.append("package test;\n");
+		expected1.append("public class E {\n");
+		expected1.append("    public void foo() {\n");
+		expected1.append("        if (true) {\n");
+		expected1.append("            Runnable runnable = new Runnable() {\n");
+		expected1.append("                public void run() {\n");
+		expected1.append("                    System.out.println(1);\n");
+		expected1.append("                }\n");
+		expected1.append("            };\n");
+		expected1.append("        }\n");
+		expected1.append("    }\n");
+		expected1.append("}\n");
+		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
+	}
+	
 }

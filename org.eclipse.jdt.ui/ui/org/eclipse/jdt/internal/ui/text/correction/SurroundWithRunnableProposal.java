@@ -191,7 +191,13 @@ public class SurroundWithRunnableProposal extends LinkedCorrectionProposal {
 			
 			moveToBlock(selectedNodes, newBody, accessedAfter, readInside, fRewrite);
 			
-			getListRewrite(selectedNodes[0], fRewrite).insertAfter(insertedCode, selectedNodes[selectedNodes.length - 1], null);
+			if (selectedNodes.length == 1 && ASTNodes.isControlStatementBody(selectedNodes[0].getLocationInParent())) {
+				Block wrap= ast.newBlock();
+				fRewrite.replace(selectedNodes[0], wrap, null);
+				fRewrite.getListRewrite(wrap, Block.STATEMENTS_PROPERTY).insertFirst(insertedCode, null);
+			} else {
+				getListRewrite(selectedNodes[0], fRewrite).insertAfter(insertedCode, selectedNodes[selectedNodes.length - 1], null);
+			}
 			
 			setEndPosition(fRewrite.track(insertedCode));
 		}
