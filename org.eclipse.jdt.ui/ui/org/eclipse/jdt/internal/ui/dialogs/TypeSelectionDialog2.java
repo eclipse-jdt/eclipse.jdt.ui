@@ -174,8 +174,13 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	}
 	
 	public boolean close() {
-		TypeInfoHistory.getInstance().save();
-		return super.close();
+		boolean result;
+		try {
+			TypeInfoHistory.getInstance().save();
+		} finally {
+			result= super.close();
+		}
+		return result;
 	}
 	
 	public void setTitle(String title) {

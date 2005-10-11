@@ -45,7 +45,6 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.IPropertyChangeListener;
@@ -336,15 +335,14 @@ public class TypeSelectionComponent extends Composite {
 	}
 	
 	private void fillViewMenu(IMenuManager viewMenu) {
-		FullyQualifyDuplicatesAction fullyQualifyDuplicatesAction= new FullyQualifyDuplicatesAction();
-		fullyQualifyDuplicatesAction.setChecked(fSettings.getBoolean(FULLY_QUALIFY_DUPLICATES));
-		viewMenu.add(fullyQualifyDuplicatesAction);
 		if (!fMultipleSelection) {
-			viewMenu.add(new Separator());
 			ToggleStatusLineAction showStatusLineAction= new ToggleStatusLineAction();
 			showStatusLineAction.setChecked(fSettings.getBoolean(SHOW_STATUS_LINE));
 			viewMenu.add(showStatusLineAction);
 		}
+		FullyQualifyDuplicatesAction fullyQualifyDuplicatesAction= new FullyQualifyDuplicatesAction();
+		fullyQualifyDuplicatesAction.setChecked(fSettings.getBoolean(FULLY_QUALIFY_DUPLICATES));
+		viewMenu.add(fullyQualifyDuplicatesAction);
 		if (fScope == null) {
 			fFilterActionGroup= new WorkingSetFilterActionGroup(getShell(),
 				new IPropertyChangeListener() {
