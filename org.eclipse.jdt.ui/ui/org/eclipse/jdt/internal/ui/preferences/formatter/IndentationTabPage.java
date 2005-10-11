@@ -73,15 +73,16 @@ public class IndentationTabPage extends ModifyDialogTabPage {
 				FormatterMessages.IndentationTabPage_general_group_option_tab_policy_TAB, 
 				FormatterMessages.IndentationTabPage_general_group_option_tab_policy_MIXED
 		};
-		final ComboPreference tabPolicy= createComboPref(generalGroup, numColumns, FormatterMessages.IndentationTabPage_general_group_option_tab_policy, DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, tabPolicyValues, tabPolicyLabels); 
+		final ComboPreference tabPolicy= createComboPref(generalGroup, numColumns, FormatterMessages.IndentationTabPage_general_group_option_tab_policy, DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, tabPolicyValues, tabPolicyLabels);
+		final CheckboxPreference onlyForLeading= createCheckboxPref(generalGroup, numColumns, FormatterMessages.IndentationTabPage_use_tabs_only_for_leading_indentations, DefaultCodeFormatterConstants.FORMATTER_USE_TABS_ONLY_FOR_LEADING_INDENTATIONS, FALSE_TRUE);
 		final NumberPreference indentSize= createNumberPref(generalGroup, numColumns, FormatterMessages.IndentationTabPage_general_group_option_indent_size, DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 32); 
-		final NumberPreference tabSize= createNumberPref(generalGroup, numColumns, FormatterMessages.IndentationTabPage_general_group_option_tab_size, DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 32); 
+		final NumberPreference tabSize= createNumberPref(generalGroup, numColumns, FormatterMessages.IndentationTabPage_general_group_option_tab_size, DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 0, 32);
 		
 		String tabchar= (String) fWorkingValues.get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
-		updateTabPreferences(tabchar, tabSize, indentSize);
+		updateTabPreferences(tabchar, tabSize, indentSize, onlyForLeading);
 		tabPolicy.addObserver(new Observer() {
 			public void update(Observable o, Object arg) {
-				updateTabPreferences((String) arg, tabSize, indentSize);
+				updateTabPreferences((String) arg, tabSize, indentSize, onlyForLeading);
 			}
 		});
 		tabSize.addObserver(new Observer() {
@@ -131,7 +132,7 @@ public class IndentationTabPage extends ModifyDialogTabPage {
         fPreview.update();
     }
 
-	private void updateTabPreferences(String tabPolicy, NumberPreference tabPreference, NumberPreference indentPreference) {
+	private void updateTabPreferences(String tabPolicy, NumberPreference tabPreference, NumberPreference indentPreference, CheckboxPreference onlyForLeading) {
 		/*
 		 * If the tab-char is SPACE (or TAB), INDENTATION_SIZE
 		 * preference is not used by the core formatter. We piggy back the
@@ -148,6 +149,7 @@ public class IndentationTabPage extends ModifyDialogTabPage {
 			tabPreference.setKey(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
 			indentPreference.setEnabled(true);
 			indentPreference.setKey(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE);
+			onlyForLeading.setEnabled(true);
 		} else if (JavaCore.SPACE.equals(tabPolicy)) {
 			if (DefaultCodeFormatterConstants.MIXED.equals(fOldTabChar))
 				swapTabValues();
@@ -155,6 +157,7 @@ public class IndentationTabPage extends ModifyDialogTabPage {
 			tabPreference.setKey(DefaultCodeFormatterConstants.FORMATTER_INDENTATION_SIZE);
 			indentPreference.setEnabled(true);
 			indentPreference.setKey(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+			onlyForLeading.setEnabled(false);
 		} else if (JavaCore.TAB.equals(tabPolicy)) {
 			if (DefaultCodeFormatterConstants.MIXED.equals(fOldTabChar))
 				swapTabValues();
@@ -162,6 +165,7 @@ public class IndentationTabPage extends ModifyDialogTabPage {
 			tabPreference.setKey(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
 			indentPreference.setEnabled(false);
 			indentPreference.setKey(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE);
+			onlyForLeading.setEnabled(true);
 		} else {
 			Assert.isTrue(false);
 		}
