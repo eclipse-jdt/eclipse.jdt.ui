@@ -258,8 +258,13 @@ public final class WhiteSpaceOptions {
     "result= (a *( b +  c + d) * (e + f));"); //$NON-NLS-1$
 
     private final static PreviewSnippet ASSERT_PREVIEW= new PreviewSnippet(
-        CodeFormatter.K_STATEMENTS,
-        "assert condition : reportError();" //$NON-NLS-1$
+    	CodeFormatter.K_STATEMENTS,
+    	"assert condition : reportError();" //$NON-NLS-1$
+	);
+    
+    private final static PreviewSnippet RETURN_PREVIEW= new PreviewSnippet(
+    	CodeFormatter.K_STATEMENTS,
+    	"return (o);" //$NON-NLS-1$
     );
     
     private final static PreviewSnippet ANNOTATION_DECL_PREVIEW= new PreviewSnippet(
@@ -528,6 +533,7 @@ public final class WhiteSpaceOptions {
         createSynchronizedTree(workingValues, statements);
         createTryStatementTree(workingValues, statements);
         createAssertTree(workingValues, statements);
+        createReturnTree(workingValues, statements);
         
         final InnerNode expressions= new InnerNode(null, workingValues, FormatterMessages.WhiteSpaceTabPage_expressions); 
         createFunctionCallTree(workingValues, expressions);
@@ -709,7 +715,10 @@ public final class WhiteSpaceOptions {
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_if, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_IF, IF_PREVIEW); 
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_switch, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_SWITCH, SWITCH_PREVIEW); 
         createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_synchronized, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_SYNCHRONIZED, SYNCHRONIZED_PREVIEW); 
-        createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_while, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_WHILE, WHILE_PREVIEW); 
+        createOption(parent, workingValues, FormatterMessages.WhiteSpaceOptions_while, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_WHILE, WHILE_PREVIEW);
+        
+        final InnerNode returns= createChild(parent, workingValues, FormatterMessages.WhiteSpaceOptions_return);
+        createOption(returns, workingValues, FormatterMessages.WhiteSpaceOptions_return_with_parenthesized_expression, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_PARENTHESIZED_EXPRESSION_IN_RETURN, RETURN_PREVIEW);
         
         final InnerNode decls= createChild(parent, workingValues, FormatterMessages.WhiteSpaceOptions_member_function_declaration);  
         createOption(decls, workingValues, FormatterMessages.WhiteSpaceOptions_constructor, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_CONSTRUCTOR_DECLARATION, CONSTRUCTOR_DECL_PREVIEW); 
@@ -1092,6 +1101,12 @@ public final class WhiteSpaceOptions {
     	final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.WhiteSpaceTabPage_assert); 
     	createOption(root, workingValues, FormatterMessages.WhiteSpaceTabPage_before_colon, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COLON_IN_ASSERT, ASSERT_PREVIEW); 
     	createOption(root, workingValues, FormatterMessages.WhiteSpaceTabPage_after_colon, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COLON_IN_ASSERT, ASSERT_PREVIEW); 
+    	return root;
+    }
+    
+    private static InnerNode createReturnTree(Map workingValues, InnerNode parent) {
+    	final InnerNode root= new InnerNode(parent, workingValues, FormatterMessages.WhiteSpaceOptions_return); 
+    	createOption(root, workingValues, FormatterMessages.WhiteSpaceTabPage_before_parenthesized_expressions, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_PARENTHESIZED_EXPRESSION_IN_RETURN, RETURN_PREVIEW);
     	return root;
     }
     

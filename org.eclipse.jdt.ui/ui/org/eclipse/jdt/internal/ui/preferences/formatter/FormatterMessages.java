@@ -139,6 +139,9 @@ final class FormatterMessages extends NLS {
 	public static String WhiteSpaceTabPage_enum_const_before_opening_brace;
 	public static String WhiteSpaceTabPage_annot_type_method_before_opening_paren;
 	public static String WhiteSpaceTabPage_annot_type_method_between_empty_parens;
+	public static String WhiteSpaceTabPage_before_parenthesized_expressions;
+	public static String WhiteSpaceTabPage_insert_space;
+	public static String WhiteSpaceOptions_return;
 	public static String WhiteSpaceOptions_before;
 	public static String WhiteSpaceOptions_after;
 	public static String WhiteSpaceOptions_operator;
@@ -242,7 +245,7 @@ final class FormatterMessages extends NLS {
 	public static String WhiteSpaceOptions_after_and;
 	public static String WhiteSpaceOptions_before_ellipsis;
 	public static String WhiteSpaceOptions_after_ellipsis;
-	public static String WhiteSpaceTabPage_insert_space;
+	public static String WhiteSpaceOptions_return_with_parenthesized_expression;
 	public static String LineWrappingTabPage_compact_if_else;
 	public static String LineWrappingTabPage_extends_clause;
 	public static String LineWrappingTabPage_enum_constant_arguments;
@@ -404,6 +407,7 @@ final class FormatterMessages extends NLS {
 	public static String IndentationTabPage_switch_group_option_indent_statements_within_case_body;
 	public static String IndentationTabPage_switch_group_option_indent_break_statements;
     public static String IndentationTabPage_indent_empty_lines;
+	public static String IndentationTabPage_use_tabs_only_for_leading_indentations;
 	public static String ModifyDialog_dialog_title;
 	public static String ModifyDialog_apply_button;
 	public static String ModifyDialog_dialog_show_title;
