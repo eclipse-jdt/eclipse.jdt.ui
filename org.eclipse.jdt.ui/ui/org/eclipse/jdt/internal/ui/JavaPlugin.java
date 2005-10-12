@@ -12,14 +12,9 @@ package org.eclipse.jdt.internal.ui;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IConfigurationElement;
-import org.eclipse.core.runtime.IPluginDescriptor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
@@ -45,10 +40,7 @@ import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.templates.ContextTypeRegistry;
 import org.eclipse.jface.text.templates.persistence.TemplateStore;
 
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IEditorReference;
-import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -63,17 +55,14 @@ import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 
 import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.IBufferFactory;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.internal.corext.template.java.CodeTemplates;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
-import org.eclipse.jdt.internal.corext.template.java.Templates;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 
@@ -86,8 +75,8 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.ClassFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitDocumentProvider;
-import org.eclipse.jdt.internal.ui.javaeditor.CustomBufferFactory;
 import org.eclipse.jdt.internal.ui.javaeditor.DocumentAdapter;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.ICompilationUnitDocumentProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
@@ -168,7 +157,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 
 	private IWorkingCopyManager fWorkingCopyManager;
-	private IBufferFactory fBufferFactory;
+	
+	/**
+	 * @deprecated
+	 */
+	private org.eclipse.jdt.core.IBufferFactory fBufferFactory;
 	private ICompilationUnitDocumentProvider fCompilationUnitDocumentProvider;
 	private ClassFileDocumentProvider fClassFileDocumentProvider;
 	private JavaTextTools fJavaTextTools;
@@ -238,55 +231,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	/**
-	 * Returns an array of all editors that have an unsaved content. If the identical content is 
-	 * presented in more than one editor, only one of those editor parts is part of the result.
-	 * 
-	 * @return an array of all dirty editor parts.
+	 * @deprecated Use EditorUtility.getDirtyEditors() instead.
 	 */
 	public static IEditorPart[] getDirtyEditors() {
-		Set inputs= new HashSet();
-		List result= new ArrayList(0);
-		IWorkbench workbench= getDefault().getWorkbench();
-		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
-		for (int i= 0; i < windows.length; i++) {
-			IWorkbenchPage[] pages= windows[i].getPages();
-			for (int x= 0; x < pages.length; x++) {
-				IEditorPart[] editors= pages[x].getDirtyEditors();
-				for (int z= 0; z < editors.length; z++) {
-					IEditorPart ep= editors[z];
-					IEditorInput input= ep.getEditorInput();
-					if (!inputs.contains(input)) {
-						inputs.add(input);
-						result.add(ep);
-					}
-				}
-			}
-		}
-		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
+		return EditorUtility.getDirtyEditors();
 	}
-	
-	/**
-	 * Returns an array of all instanciated editors.
-	 * @return the list of instantiated editors
-	 */
-	public static IEditorPart[] getInstanciatedEditors() {
-		List result= new ArrayList(0);
-		IWorkbench workbench= getDefault().getWorkbench();
-		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
-		for (int windowIndex= 0; windowIndex < windows.length; windowIndex++) {
-			IWorkbenchPage[] pages= windows[windowIndex].getPages();
-			for (int pageIndex= 0; pageIndex < pages.length; pageIndex++) {
-				IEditorReference[] references= pages[pageIndex].getEditorReferences();
-				for (int refIndex= 0; refIndex < references.length; refIndex++) {
-					IEditorPart editor= references[refIndex].getEditor(false);
-					if (editor != null)
-						result.add(editor);
-				}
-			}
-		}
-		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
-	}
-	
+		
 	public static String getPluginId() {
 		return JavaUI.ID_PLUGIN;
 	}
@@ -356,7 +306,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @param descriptor the plug-in descriptor
 	 * @deprecated
 	 */
-	public JavaPlugin(IPluginDescriptor descriptor) {
+	public JavaPlugin(org.eclipse.core.runtime.IPluginDescriptor descriptor) {
 		super(descriptor);
 		fgJavaPlugin= this;
 	}
@@ -384,6 +334,18 @@ public class JavaPlugin extends AbstractUIPlugin {
 		new InitializeAfterLoadJob().schedule();
 	}
 	
+	
+	/** @deprecated */
+	private static IPreferenceStore getDeprecatedWorkbenchPreferenceStore() {
+		return PlatformUI.getWorkbench().getPreferenceStore();
+	}
+	
+	/** @deprecated */
+	private String DEPRECATED_EDITOR_TAB_WIDTH= PreferenceConstants.EDITOR_TAB_WIDTH;
+	
+	/** @deprecated */
+	private String DEPRECATED_REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD= PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD;
+	
 	/**
 	 * Installs backwards compatibility for the preference store.
 	 */
@@ -401,7 +363,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (store.contains(JFaceResources.TEXT_FONT) && !getPreferenceStore().isDefault(JFaceResources.TEXT_FONT)) {
 			if (!store.getBoolean(fontPropagatedKey))
 				PreferenceConverter.setValue(
-						PlatformUI.getWorkbench().getPreferenceStore(), PreferenceConstants.EDITOR_TEXT_FONT, PreferenceConverter.getFontDataArray(store, JFaceResources.TEXT_FONT));
+						getDeprecatedWorkbenchPreferenceStore(), PreferenceConstants.EDITOR_TEXT_FONT, PreferenceConverter.getFontDataArray(store, JFaceResources.TEXT_FONT));
 		}
 		store.setValue(fontPropagatedKey, true);
 
@@ -424,7 +386,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		 * Backwards compatibility: propagate the Java editor tab width from a
 		 * pre-3.0 plug-in to the new preference key. This is done only once.
 		 */
-		final String oldTabWidthKey= PreferenceConstants.EDITOR_TAB_WIDTH;
+		final String oldTabWidthKey= DEPRECATED_EDITOR_TAB_WIDTH;
 		final String newTabWidthKey= AbstractDecoratedTextEditorPreferenceConstants.EDITOR_TAB_WIDTH;
 		String tabWidthPropagatedKey= "tabWidthPropagated"; //$NON-NLS-1$
 		if (store.contains(oldTabWidthKey) && !store.isDefault(oldTabWidthKey)) {
@@ -461,7 +423,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		// The commented call above triggers the eager loading of the LTK core plugin
 		// Since the condition checking failed severity is guaranteed to be of RefactoringStatus.SEVERITY_WARNING,
 		// we directly insert the inlined value of this constant
-		store.setToDefault(PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD);
+		store.setToDefault(DEPRECATED_REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD);
 		
 		if (!store.getBoolean(JavaDocLocations.PREF_JAVADOCLOCATIONS_MIGRATED)) {
 			JavaDocLocations.migrateToClasspathAttributes();
@@ -535,9 +497,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/**
 	 * @deprecated
 	 */
-	public synchronized IBufferFactory getBufferFactory() {
+	public synchronized org.eclipse.jdt.core.IBufferFactory getBufferFactory() {
 		if (fBufferFactory == null)
-			fBufferFactory= new CustomBufferFactory();
+			fBufferFactory= new org.eclipse.jdt.internal.ui.javaeditor.CustomBufferFactory();
 		return fBufferFactory;
 	}
 	
@@ -728,8 +690,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/**
 	 * @deprecated Indirection added to avoid deprecated warning on file
 	 */
-	private Templates getOldTemplateStoreInstance() {
-		return Templates.getInstance();
+	private org.eclipse.jdt.internal.corext.template.java.Templates getOldTemplateStoreInstance() {
+		return org.eclipse.jdt.internal.corext.template.java.Templates.getInstance();
 	}
 
 	/**
@@ -783,8 +745,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 	/**
 	 * @deprecated Indirection added to avoid deprecated warning on file
 	 */
-	private CodeTemplates getOldCodeTemplateStoreInstance() {
-		return CodeTemplates.getInstance();
+	private org.eclipse.jdt.internal.corext.template.java.CodeTemplates getOldCodeTemplateStoreInstance() {
+		return org.eclipse.jdt.internal.corext.template.java.CodeTemplates.getInstance();
 	}
 	
 	private synchronized ImageDescriptorRegistry internalGetImageDescriptorRegistry() {
