@@ -595,7 +595,7 @@ public final class ASTProvider {
 		disposeAST();
 
 		synchronized (fWaitLock) {
-			fWaitLock.notify();
+			fWaitLock.notifyAll();
 		}
 	}
 
