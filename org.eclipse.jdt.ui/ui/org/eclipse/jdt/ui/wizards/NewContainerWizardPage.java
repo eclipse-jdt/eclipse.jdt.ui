@@ -203,9 +203,9 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	}
 	
 	/**
-	 * Returns the test selection of the current editor. <code>null</code> is returned
+	 * Returns the text selection of the current editor. <code>null</code> is returned
 	 * when the current editor does not have focus or does not return a text selection.
-	 * @return Returns the test selection of the current editor or <code>null</code>.
+	 * @return Returns the text selection of the current editor or <code>null</code>.
      *
      * @since 3.0 
 	 */
