@@ -110,7 +110,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
  * 
  * Note: This analyzer doesn't do a full flow analysis. For example it doesn't
  * do dead code analysis or variable initialization analysis. It analyses the
- * the first access to a variable (read or write) and if all execution pathes
+ * the first access to a variable (read or write) and if all execution paths
  * return a value.
  */
 abstract class FlowAnalyzer extends GenericVisitor {
