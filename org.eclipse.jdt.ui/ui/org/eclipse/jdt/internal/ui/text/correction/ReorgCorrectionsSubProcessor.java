@@ -50,6 +50,7 @@ import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -66,7 +67,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -108,9 +108,9 @@ public class ReorgCorrectionsSubProcessor {
 		ICompilationUnit cu= context.getCompilationUnit();
 		boolean isLinked= cu.getResource().isLinked();
 
-		ASTNode coveredNode= context.getCoveredNode();
-		if (coveredNode instanceof SimpleName) {
-			String currTypeName= ((SimpleName) coveredNode).getIdentifier();
+		IBuffer buffer= cu.getBuffer();
+		if (buffer != null) {
+			String currTypeName= buffer.getText(problem.getOffset(), problem.getLength());
 			
 			proposals.add(new CorrectMainTypeNameProposal(cu, context.getASTRoot(), currTypeName, 5));
 			
@@ -118,7 +118,7 @@ public class ReorgCorrectionsSubProcessor {
 			ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
 			if (!newCU.exists() && !isLinked && !JavaConventions.validateCompilationUnitName(newCUName).matches(IStatus.ERROR)) {
 				RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
-
+	
 				// rename cu
 				String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renamecu_description, newCUName);
 				proposals.add(new ChangeCorrectionProposal(label, change, 6, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME)));

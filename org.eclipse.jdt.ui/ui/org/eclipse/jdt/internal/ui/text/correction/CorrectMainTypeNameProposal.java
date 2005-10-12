@@ -26,6 +26,8 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
@@ -34,16 +36,16 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
   */
 public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 
-	private String fOldName;
-	private String fNewName;
-	private final CompilationUnit fRoot;
+	private final String fOldName;
+	private final String fNewName;
+	private final IInvocationContext fContext;
 
 	/**
 	 * Constructor for CorrectTypeNameProposal.
 	 */
-	public CorrectMainTypeNameProposal(ICompilationUnit cu, CompilationUnit root, String oldTypeName, int relevance) {
+	public CorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContext context, String oldTypeName, int relevance) {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
-		fRoot= root;
+		fContext= context;
 		fNewName= Signature.getQualifier(cu.getElementName());
 
 		setDisplayName(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renametype_description, fNewName));
@@ -56,7 +58,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
 	 */
 	protected ASTRewrite getRewrite() throws CoreException {
-		CompilationUnit astRoot= fRoot;
+		CompilationUnit astRoot= fContext.getASTRoot();
 
 		AST ast= astRoot.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
