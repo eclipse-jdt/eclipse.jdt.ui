@@ -36,6 +36,7 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.actions.GlobalBuildAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.actions.ListDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
@@ -43,16 +44,22 @@ import org.eclipse.jdt.internal.ui.viewsupport.ListContentProvider;
 public class RefactoringSaveHelper {
 
 	private boolean fFilesSaved;
+	private boolean fAllowSaveAlways;
 
+	
+	public RefactoringSaveHelper(boolean allowSaveAlways) {
+		fAllowSaveAlways= allowSaveAlways;
+	}
+	
 	public RefactoringSaveHelper() {
-		super();
+		this(true);
 	}
 
 	public boolean saveEditors(Shell shell) {
-		IEditorPart[] dirtyEditors= JavaPlugin.getDirtyEditors();
+		IEditorPart[] dirtyEditors= EditorUtility.getDirtyEditors();
 		if (dirtyEditors.length == 0)
 			return true;
-		if (! saveAllDirtyEditors(shell))
+		if (! saveAllDirtyEditors(shell, dirtyEditors))
 			return false;
 		try {
 			// Save isn't cancelable.
@@ -83,21 +90,23 @@ public class RefactoringSaveHelper {
 		}
 	}
 	
-	private boolean saveAllDirtyEditors(Shell shell) {
-		if (RefactoringSavePreferences.getSaveAllEditors()) //must save everything
+	private boolean saveAllDirtyEditors(Shell shell, IEditorPart[] dirtyEditors) {
+		if (fAllowSaveAlways && RefactoringSavePreferences.getSaveAllEditors()) //must save everything
 			return true;
 		ListDialog dialog= new ListDialog(shell) {
 			protected Control createDialogArea(Composite parent) {
 				Composite result= (Composite) super.createDialogArea(parent);
-				final Button check= new Button(result, SWT.CHECK);
-				check.setText(RefactoringMessages.RefactoringStarter_always_save); 
-				check.setSelection(RefactoringSavePreferences.getSaveAllEditors());
-				check.addSelectionListener(new SelectionAdapter() {
-					public void widgetSelected(SelectionEvent e) {
-						RefactoringSavePreferences.setSaveAllEditors(check.getSelection());
-					}
-				});
-				applyDialogFont(result);		
+				if (fAllowSaveAlways) {
+					final Button check= new Button(result, SWT.CHECK);
+					check.setText(RefactoringMessages.RefactoringStarter_always_save); 
+					check.setSelection(RefactoringSavePreferences.getSaveAllEditors());
+					check.addSelectionListener(new SelectionAdapter() {
+						public void widgetSelected(SelectionEvent e) {
+							RefactoringSavePreferences.setSaveAllEditors(check.getSelection());
+						}
+					});
+					applyDialogFont(result);
+				}
 				return result;
 			}
 		};
@@ -106,8 +115,12 @@ public class RefactoringSaveHelper {
 		dialog.setLabelProvider(createDialogLabelProvider());
 		dialog.setMessage(RefactoringMessages.RefactoringStarter_must_save); 
 		dialog.setContentProvider(new ListContentProvider());
-		dialog.setInput(Arrays.asList(JavaPlugin.getDirtyEditors()));
+		dialog.setInput(Arrays.asList(dirtyEditors));
 		return dialog.open() == Window.OK;
+	}
+	
+	public boolean hasFilesSaved() {
+		return fFilesSaved;
 	}
 	
 	private ILabelProvider createDialogLabelProvider() {

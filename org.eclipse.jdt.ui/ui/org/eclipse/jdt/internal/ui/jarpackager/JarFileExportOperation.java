@@ -44,6 +44,12 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IncrementalProjectBuilder;
 import org.eclipse.core.resources.ResourcesPlugin;
 
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.operation.ModalContext;
+
+import org.eclipse.ui.actions.WorkspaceModifyOperation;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
@@ -56,31 +62,19 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.util.IClassFileReader;
 import org.eclipse.jdt.core.util.ISourceAttribute;
 
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.operation.ModalContext;
-import org.eclipse.jface.util.Assert;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.actions.WorkspaceModifyOperation;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 import org.eclipse.jdt.ui.jarpackager.JarWriter2;
+
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 /**
  * Operation for exporting a resource and its children to a new  JAR file.
@@ -936,140 +930,22 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			return false;
 		}
 		
-		if (fParentShell == null)
-			// no checking if shell is null
-			return true;
-
-		IFile[] unsavedFiles= getUnsavedFiles();
-		if (unsavedFiles.length > 0)
-			return saveModifiedResourcesIfUserConfirms(unsavedFiles);
-
-		return true;
-	}
-
-	/**
-	 * Returns the files which are not saved and which are
-	 * part of the files being exported.
-	 * 
-	 * @return an array of unsaved files
-	 */
-	private IFile[] getUnsavedFiles() {
-		IEditorPart[] dirtyEditors= getDirtyEditors(fParentShell);
-		Set unsavedFiles= new HashSet(dirtyEditors.length);
-		if (dirtyEditors.length > 0) {
-			List selection= JarPackagerUtil.asResources(fJarPackage.getElements());
-			for (int i= 0; i < dirtyEditors.length; i++) {
-				if (dirtyEditors[i].getEditorInput() instanceof IFileEditorInput) {
-					IFile dirtyFile= ((IFileEditorInput)dirtyEditors[i].getEditorInput()).getFile();
-					if (JarPackagerUtil.contains(selection, dirtyFile)) {
-						unsavedFiles.add(dirtyFile);
-					}
+		if (fParentShell != null) {
+			final boolean[] res= { false };
+			fParentShell.getDisplay().syncExec(new Runnable() {
+				public void run() {
+					RefactoringSaveHelper refactoringSaveHelper= new RefactoringSaveHelper(false);
+					res[0]= refactoringSaveHelper.saveEditors(fParentShell);
+					fFilesSaved= refactoringSaveHelper.hasFilesSaved();
 				}
+			});
+			if (!res[0]) {
+				addError(JarPackagerMessages.JarFileExportOperation_fileUnsaved, null); 
+				return false;
 			}
 		}
-		return (IFile[])unsavedFiles.toArray(new IFile[unsavedFiles.size()]);
-	}
 
-	/**
-	 * Asks the user to confirm to save the modified resources.
-	 * 
-	 * @return true if user pressed OK.
-	 */
-	private boolean confirmSaveModifiedResources(final IFile[] dirtyFiles) {
-		if (dirtyFiles == null || dirtyFiles.length == 0)
-			return true;
-
-		// Get display for further UI operations
-		Display display= fParentShell.getDisplay();
-		if (display == null || display.isDisposed())
-			return false;
-
-		// Ask user to confirm saving of all files
-		final int[] intResult= new int[1];
-		Runnable runnable= new Runnable() {
-			public void run() {
-				ConfirmSaveModifiedResourcesDialog dlg= new ConfirmSaveModifiedResourcesDialog(fParentShell, dirtyFiles);
-				intResult[0]= dlg.open();
-			}
-		};
-		display.syncExec(runnable);
-
-		return intResult[0] == IDialogConstants.OK_ID;
-	}
-
-	/**
-	 * Asks to confirm to save the modified resources
-	 * and save them if OK is pressed.
-	 * 
-	 * @return true if user pressed OK and save was successful.
-	 */
-	private boolean saveModifiedResourcesIfUserConfirms(IFile[] dirtyFiles) {
-		if (confirmSaveModifiedResources(dirtyFiles))
-			return saveModifiedResources(dirtyFiles);
-
-		// Report unsaved files
-		for (int i= 0; i < dirtyFiles.length; i++)
-			addError(Messages.format(JarPackagerMessages.JarFileExportOperation_fileUnsaved, dirtyFiles[i].getFullPath()), null); 
-		return false;
-	}
-
-	/**
-	 * Save all of the editors in the workbench.  
-	 * 
-	 * @return true if successful.
-	 */
-	private boolean saveModifiedResources(final IFile[] dirtyFiles) {
-		// Get display for further UI operations
-		Display display= fParentShell.getDisplay();
-		if (display == null || display.isDisposed())
-			return false;
-		
-		final boolean[] retVal= new boolean[1];
-		Runnable runnable= new Runnable() {
-			public void run() {
-				try {
-					PlatformUI.getWorkbench().getProgressService().runInUI(
-						PlatformUI.getWorkbench().getProgressService(),
-						createSaveModifiedResourcesRunnable(dirtyFiles),
-						ResourcesPlugin.getWorkspace().getRoot());
-					retVal[0]= true;
-				} catch (InvocationTargetException ex) {
-					addError(JarPackagerMessages.JarFileExportOperation_errorSavingModifiedResources, ex); 
-					JavaPlugin.log(ex);
-					retVal[0]= false;
-				} catch (InterruptedException ex) {
-						Assert.isTrue(false); // Can't happen. Operation isn't cancelable.
-						retVal[0]= false;
-				}
-	 		}
-		};
-		fFilesSaved= false;
-		display.syncExec(runnable);
-		if (retVal[0])
-			fFilesSaved= true;
-		return retVal[0];
-	}
-
-	private IRunnableWithProgress createSaveModifiedResourcesRunnable(final IFile[] dirtyFiles) {
-		return new IRunnableWithProgress() {
-			public void run(final IProgressMonitor pm) {
-				IEditorPart[] editorsToSave= getDirtyEditors(fParentShell);
-				pm.beginTask(JarPackagerMessages.JarFileExportOperation_savingModifiedResources, editorsToSave.length); 
-				try {
-					List dirtyFilesList= Arrays.asList(dirtyFiles);
-					for (int i= 0; i < editorsToSave.length; i++) {
-						if (editorsToSave[i].getEditorInput() instanceof IFileEditorInput) {
-							IFile dirtyFile= ((IFileEditorInput)editorsToSave[i].getEditorInput()).getFile();					
-							if (dirtyFilesList.contains((dirtyFile)))
-								editorsToSave[i].doSave(new SubProgressMonitor(pm, 1));
-						}
-						pm.worked(1);
-					}
-				} finally {
-					pm.done();
-				}
-			}
-		};
+		return true;
 	}
 
 	protected void saveFiles() {
@@ -1094,19 +970,6 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				addError(JarPackagerMessages.JarFileExportOperation_errorSavingDescription, ex); 
 			}
 		}
-	}
-
-	private IEditorPart[] getDirtyEditors(Shell parent) {
-		Display display= parent.getDisplay();
-		final Object[] result= new Object[1];
-		display.syncExec(
-			new Runnable() {
-				public void run() {
-					result[0]= JavaPlugin.getDirtyEditors();
-				}
-			}
-		);
-		return (IEditorPart[])result[0];
 	}
 
 	protected void saveDescription() throws CoreException, IOException {

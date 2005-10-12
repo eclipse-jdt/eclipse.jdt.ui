@@ -138,7 +138,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	 * (non-Javadoc)
 	 * Method declared on IWizard.
 	 */
-	public boolean performFinish() {
+	public boolean performFinish() { 
 		/*
 		 * Compute and assign the minmal export list
 		 */

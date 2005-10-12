@@ -13,6 +13,10 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -38,8 +42,11 @@ import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.WorkspaceModifyOperation;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -439,5 +446,33 @@ public class EditorUtility {
 			jProject= ((IClassFileEditorInput)input).getClassFile().getJavaProject();
 		}
 		return jProject;
+	}
+	
+	/**
+	 * Returns an array of all editors that have an unsaved content. If the identical content is 
+	 * presented in more than one editor, only one of those editor parts is part of the result.
+	 * 
+	 * @return an array of all dirty editor parts.
+	 */
+	public static IEditorPart[] getDirtyEditors() {
+		Set inputs= new HashSet();
+		List result= new ArrayList(0);
+		IWorkbench workbench= PlatformUI.getWorkbench();
+		IWorkbenchWindow[] windows= workbench.getWorkbenchWindows();
+		for (int i= 0; i < windows.length; i++) {
+			IWorkbenchPage[] pages= windows[i].getPages();
+			for (int x= 0; x < pages.length; x++) {
+				IEditorPart[] editors= pages[x].getDirtyEditors();
+				for (int z= 0; z < editors.length; z++) {
+					IEditorPart ep= editors[z];
+					IEditorInput input= ep.getEditorInput();
+					if (!inputs.contains(input)) {
+						inputs.add(input);
+						result.add(ep);
+					}
+				}
+			}
+		}
+		return (IEditorPart[])result.toArray(new IEditorPart[result.size()]);
 	}
 }
