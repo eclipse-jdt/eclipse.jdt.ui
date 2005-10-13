@@ -40,7 +40,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.ZipTools;
 
 public class InferTypeArgumentsTests extends RefactoringTest {
 
-	private static final boolean BUG_84422= true;
+	private static final boolean DETERMINE_ELEMENT_TYPE_FROM_CAST= false;
 	private static final boolean BUG_86967_core_restore_binding= true;
 	private static final boolean BUG_86990_core_no_main_type= true;
 	private static final boolean BUG_87050_core_resolve_method_type_param= false;
@@ -362,10 +362,6 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	}
 	
 	public void testCuArrays01() throws Exception {
-		if (BUG_84422) {
-			printTestDisabledMessage("BUG_84422");
-			return;
-		}
 		performCuOK();
 	}
 	
@@ -382,18 +378,22 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	}
 	
 	public void testCuArrays05() throws Exception {
-		if (BUG_84422) {
-			printTestDisabledMessage("BUG_84422");
+		if (! DETERMINE_ELEMENT_TYPE_FROM_CAST) {
+			printTestDisabledMessage("DETERMINE_ELEMENT_TYPE_FROM_CAST");
 			return;
 		}
 		performCuOK();
 	}
 	
 	public void testCuArrays06() throws Exception {
-		if (BUG_84422) {
-			printTestDisabledMessage("BUG_84422");
-			return;
-		}
+		performCuOK();
+	}
+	
+	public void testCuToArray01() throws Exception {
+		performCuOK();
+	}
+	
+	public void testCuToArray02() throws Exception {
 		performCuOK();
 	}
 	

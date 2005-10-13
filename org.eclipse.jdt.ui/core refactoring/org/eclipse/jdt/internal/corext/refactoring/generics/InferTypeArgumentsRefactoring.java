@@ -88,8 +88,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class InferTypeArgumentsRefactoring extends Refactoring {
 	
-	private static final boolean BUG_98165_core_wrong_source_range= true;
-	
 	private static final String REWRITTEN= "InferTypeArgumentsRefactoring.rewritten"; //$NON-NLS-1$
 	
 	private TextChangeManager fChangeManager;
@@ -442,8 +440,18 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 
 	private void rewriteCastVariable(CastVariable2 castCv, CompilationUnitRewrite rewrite) {
 		ASTNode node= castCv.getRange().getNode(rewrite.getRoot());
-		if (! (node instanceof CastExpression) && BUG_98165_core_wrong_source_range)
-			return;
+		
+		ConstraintVariable2 expressionVariable= castCv.getExpressionVariable();
+		ConstraintVariable2 methodReceiverCv= fTCModel.getMethodReceiverCv(expressionVariable);
+		if (methodReceiverCv != null) {
+			TType chosenReceiverType= InferTypeArgumentsConstraintsSolver.getChosenType(methodReceiverCv);
+			if (chosenReceiverType == null)
+				return;
+			else if (! InferTypeArgumentsTCModel.isAGenericType(chosenReceiverType))
+				return;
+			else if (hasUnboundElement(methodReceiverCv))
+				return;
+		}
 		
 		CastExpression castExpression= (CastExpression) node;
 		Expression expression= castExpression.getExpression();
@@ -456,6 +464,17 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 		Expression newExpression= (Expression) rewrite.getASTRewrite().createMoveTarget(expression);
 		rewrite.getASTRewrite().replace(nodeToReplace, newExpression, rewrite.createGroupDescription(RefactoringCoreMessages.InferTypeArgumentsRefactoring_removeCast)); 
 		rewrite.getImportRemover().registerRemovedNode(nodeToReplace);
+	}
+
+	private boolean hasUnboundElement(ConstraintVariable2 methodReceiverCv) {
+		ArrayList/*<CollectionElementVariable2>*/ typeArgumentCvs= getTypeArgumentCvs(methodReceiverCv);
+		for (Iterator iter= typeArgumentCvs.iterator(); iter.hasNext();) {
+			CollectionElementVariable2 elementCv= (CollectionElementVariable2) iter.next();
+			TType chosenElementType= InferTypeArgumentsConstraintsSolver.getChosenType(elementCv);
+			if (chosenElementType == null)
+				return true;
+		}
+		return false;
 	}
 
 	/*

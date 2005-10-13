@@ -278,7 +278,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 		if (expressionCv instanceof ImmutableTypeVariable2)
 			return;
 		if (! (expressionCv instanceof TypeVariable2 || expressionCv instanceof IndependentTypeVariable2 || expressionCv instanceof CollectionElementVariable2)
-				&& fTCModel.getElementVariables(expressionCv).size() == 0)
+				&& fTCModel.getElementVariables(expressionCv).size() == 0 && fTCModel.getArrayElementVariable(expressionCv) == null)
 			return;
 		
 		fTCModel.createElementEqualsConstraints(expressionCv, typeCv);
@@ -544,13 +544,16 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 			fTCModel.createTypeVariablesEqualityConstraints(receiverCv, methodTypeVariables, returnTypeCv, declaredReturnTType);
 		
 		} else if (declaredReturnType.isArray()) {
-//			ConstraintVariable2 returnTypeCv= fTCModel.makeArrayTypeVariable(declaredReturnType); //TODO: own type variable kind?
-			ConstraintVariable2 returnTypeCv= fTCModel.makeParameterizedTypeVariable(declaredReturnType);
+			ConstraintVariable2 returnTypeCv= fTCModel.makeArrayTypeVariable(declaredReturnType);
 			setConstraintVariable(node, returnTypeCv);
 			//e.g. List<E>: <T> T[] toArray(T[] a)
 			ConstraintVariable2 receiverCv= null;
-			if (receiver != null) //TODO: deal with methods inside generic types
+			if (receiver != null) { //TODO: deal with methods inside generic types
 				receiverCv= getConstraintVariable(receiver);
+
+				//TODO: is this necessary elsewhere?
+				fTCModel.setMethodReceiverCV(returnTypeCv, receiverCv);
+			}
 			// Elem[retVal] =^= Elem[receiver]
 			TType declaredReturnTType= fTCModel.createTType(declaredReturnType);
 			fTCModel.createTypeVariablesEqualityConstraints(receiverCv, methodTypeVariables, returnTypeCv, declaredReturnTType);
@@ -708,7 +711,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 				}
 
 			} else { //TODO: not else, but always? Other kinds of type references?
-				if (! fTCModel.isAGenericType(declaredParameterType))
+				if (! InferTypeArgumentsTCModel.isAGenericType(declaredParameterType))
 					continue;
 				ParameterTypeVariable2 parameterTypeCv= fTCModel.makeParameterTypeVariable(methodBinding, iParam);
 				// Elem[param] =^= Elem[arg]

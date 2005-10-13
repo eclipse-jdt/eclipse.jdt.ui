@@ -43,6 +43,7 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ArrayElementVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ArrayTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
@@ -66,6 +67,7 @@ public class InferTypeArgumentsTCModel {
 	private static final String INDEXED_COLLECTION_ELEMENTS= "IndexedCollectionElements"; //$NON-NLS-1$
 	private static final String ARRAY_ELEMENT= "ArrayElement"; //$NON-NLS-1$
 	private static final String USED_IN= "UsedIn"; //$NON-NLS-1$
+	private static final String METHOD_RECEIVER= "MethodReceiver"; //$NON-NLS-1$
 	private static final Map EMPTY_COLLECTION_ELEMENT_VARIABLES_MAP= Collections.EMPTY_MAP;
 	
 	protected static boolean fStoreToString= DEBUG;
@@ -408,20 +410,36 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	private ParameterizedTypeVariable2 makeParameterizedTypeVariable(TType type) {
-		Assert.isTrue(type.isParameterizedType() || type.isRawType() || type.isGenericType() || type.isArrayType());
+		Assert.isTrue(isAGenericType(type));
 		
 		ParameterizedTypeVariable2 cv= new ParameterizedTypeVariable2(type);
 		ParameterizedTypeVariable2 storedCv= (ParameterizedTypeVariable2) storedCv(cv);
 		if (cv == storedCv) {
 			fCuScopedConstraintVariables.add(storedCv);
 			makeElementVariables(storedCv, type);
-			makeArrayElementVariable(storedCv);
 			if (fStoreToString)
 				storedCv.setData(ConstraintVariable2.TO_STRING, "ParameterizedType(" + type.getPrettySignature() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
 		}
 		return storedCv;
 	}
-		
+
+	public ArrayTypeVariable2 makeArrayTypeVariable(ITypeBinding typeBinding) {
+		TType type= createTType(typeBinding);
+		return makeArrayTypeVariable((ArrayType) type);
+	}
+	
+	private ArrayTypeVariable2 makeArrayTypeVariable(ArrayType type) {
+		ArrayTypeVariable2 cv= new ArrayTypeVariable2(type);
+		ArrayTypeVariable2 storedCv= (ArrayTypeVariable2) storedCv(cv);
+		if (cv == storedCv) {
+			fCuScopedConstraintVariables.add(storedCv);
+			makeArrayElementVariable(storedCv);
+			if (fStoreToString)
+				storedCv.setData(ConstraintVariable2.TO_STRING, "ArrayType(" + type.getPrettySignature() + ")"); //$NON-NLS-1$ //$NON-NLS-2$
+		}
+		return storedCv;
+	}
+	
 	public ParameterTypeVariable2 makeParameterTypeVariable(IMethodBinding methodBinding, int parameterIndex) {
 		TType type= getBoxedType(methodBinding.getParameterTypes() [parameterIndex], /*no boxing*/null);
 		if (type == null)
@@ -501,13 +519,13 @@ public class InferTypeArgumentsTCModel {
 		return storedCv;
 	}
 	
-	public boolean isAGenericType(TType type) {
+	public static boolean isAGenericType(TType type) {
 		return type.isGenericType()
 				|| type.isParameterizedType()
 				|| type.isRawType();
 	}
 
-	public boolean isAGenericType(ITypeBinding type) {
+	public static boolean isAGenericType(ITypeBinding type) {
 		return type.isGenericType()
 				|| type.isParameterizedType()
 				|| type.isRawType();
@@ -546,7 +564,7 @@ public class InferTypeArgumentsTCModel {
 		return (ArrayElementVariable2) constraintVariable.getData(ARRAY_ELEMENT);
 	}
 	
-	public void setArrayElementVariable(ConstraintVariable2 constraintVariable, ArrayElementVariable2 arrayElementVariable) {
+	private void setArrayElementVariable(ConstraintVariable2 constraintVariable, ArrayElementVariable2 arrayElementVariable) {
 		constraintVariable.setData(ARRAY_ELEMENT, arrayElementVariable);
 	}
 	
@@ -828,6 +846,19 @@ public class InferTypeArgumentsTCModel {
 			createEqualsConstraint(leftArrayElement, rightArrayElement);
 			createElementEqualsConstraints(leftArrayElement, rightArrayElement); // recursive
 		}
+	}
+
+	/**
+	 * @return the receiver of the method invocation this expressionVariable
+	 *         depends on, or null iff no receiver is available. If the receiver
+	 *         stayed raw, then the method return type cannot be substituted.
+	 */
+	public ConstraintVariable2 getMethodReceiverCv(ConstraintVariable2 expressionVariable) {
+		return (ConstraintVariable2) expressionVariable.getData(METHOD_RECEIVER);
+	}
+	
+	public void setMethodReceiverCV(ConstraintVariable2 expressionVariable, ConstraintVariable2 methodReceiverCV) {
+		expressionVariable.setData(METHOD_RECEIVER, methodReceiverCV);
 	}
 	
 }

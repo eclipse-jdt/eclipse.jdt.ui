@@ -30,6 +30,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.ArrayType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.HierarchyType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
@@ -37,6 +38,8 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.Enum
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.SingletonTypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSet;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.typesets.TypeSetEnvironment;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ArrayElementVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ArrayTypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CastVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
@@ -171,6 +174,16 @@ public class InferTypeArgumentsConstraintsSolver {
 //				result= result.intersectedWith(SubTypesOfSingleton.create(bounds[i].getErasure()));
 //			}
 //			return result;
+			
+		} else if (cv instanceof ArrayTypeVariable2) {
+			return fTypeSetEnvironment.getUniverseTypeSet();
+		} else if (cv instanceof ArrayElementVariable2) {
+			if (cv.getType() != null && cv.getType().isTypeVariable()) {
+				return fTypeSetEnvironment.getUniverseTypeSet();
+			} else {
+				return new SingletonTypeSet(type, fTypeSetEnvironment);
+			}
+			
 		} else if (type.isVoidType()) {
 			return fTypeSetEnvironment.getEmptyTypeSet();
 		} else {
@@ -358,12 +371,26 @@ public class InferTypeArgumentsConstraintsSolver {
 			CastVariable2 castCv= castVariables[i];
 			ConstraintVariable2 expressionVariable= castCv.getExpressionVariable();
 			TType chosenType= InferTypeArgumentsConstraintsSolver.getChosenType(expressionVariable);
-			if (chosenType != null && TTypes.canAssignTo(chosenType, castCv.getType())) {
-				if (chosenType.equals(expressionVariable.getType()))
+			TType castType= castCv.getType();
+			TType expressionType= expressionVariable.getType();
+			if (chosenType != null && TTypes.canAssignTo(chosenType, castType)) {
+				if (chosenType.equals(expressionType))
 					continue; // The type has not changed. Don't remove the cast, since it could be
 							   // there to get access to default-visible members or to
 							   // unify types of conditional expressions. 
 				fUpdate.addCastToRemove(castCv);
+				
+			} else if (expressionVariable instanceof ArrayTypeVariable2 && castType.isArrayType()) { // bug 97258
+				ArrayElementVariable2 arrayElementCv= fTCModel.getArrayElementVariable(expressionVariable);
+				if (arrayElementCv == null)
+					continue;
+				TType chosenArrayType= InferTypeArgumentsConstraintsSolver.getChosenType(arrayElementCv);
+				if (chosenArrayType != null && TTypes.canAssignTo(chosenArrayType, ((ArrayType) castType).getComponentType())) {
+					if (expressionType instanceof ArrayType && chosenArrayType.equals(((ArrayType) expressionType).getComponentType()))
+						continue; // The type has not changed. Don't remove the cast, since it could be
+								   // there to unify types of conditional expressions.
+					fUpdate.addCastToRemove(castCv);
+				}
 			}
 		}
 	}
