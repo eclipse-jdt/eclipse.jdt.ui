@@ -89,7 +89,7 @@ abstract class ResourceReorgChange extends JDTChange {
 		IResource resource= getResource();
 		Assert.isNotNull(resource);
 			
-		if (ReorgUtils.equalInWorkspaceOrOnDisk(resource, current))
+		if (ReorgUtils.areEqualInWorkspaceOrOnDisk(resource, current))
 			return false;
 		
 		if (current instanceof IFile)

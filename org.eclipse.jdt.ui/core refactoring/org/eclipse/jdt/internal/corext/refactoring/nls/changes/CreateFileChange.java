@@ -11,10 +11,13 @@
 package org.eclipse.jdt.internal.corext.refactoring.nls.changes;
 
 import java.io.ByteArrayInputStream;
-import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
+import java.net.URI;
+
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileInfo;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -109,11 +112,11 @@ public class CreateFileChange extends JDTChange {
 		return ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
 	}
 
-	public RefactoringStatus isValid(IProgressMonitor pm) {
+	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		IFile file= ResourcesPlugin.getWorkspace().getRoot().getFile(fPath);
 		
-		IPath location= file.getLocation();
+		URI location= file.getLocationURI();
 		if (location == null) {
 			result.addFatalError(Messages.format(
 				NLSChangesMessages.CreateFileChange_error_unknownLocation, 
@@ -121,7 +124,7 @@ public class CreateFileChange extends JDTChange {
 			return result;
 		}
 		
-		File jFile= new File(location.toOSString());
+		IFileInfo jFile= EFS.getStore(location).fetchInfo();
 		if (jFile.exists()) {
 			result.addFatalError(Messages.format(
 				NLSChangesMessages.CreateFileChange_error_exists, 

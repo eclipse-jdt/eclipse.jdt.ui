@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.buildpath;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
+
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -1854,10 +1858,13 @@ public class ClasspathModifier {
 						throw new CoreException(rootStatus);
 					}
 				} else {
-					IPath projLocation= project.getProject().getLocation();
-					if (projLocation != null && path.toFile().exists()) {
-						rootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExistingDifferentCase); 
-						throw new CoreException(rootStatus);
+					URI projLocation= project.getProject().getLocationURI();
+					if (projLocation != null) {
+						IFileStore store= EFS.getStore(projLocation).getChild(path);
+						if (store.fetchInfo().exists()) {
+							rootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExistingDifferentCase); 
+							throw new CoreException(rootStatus);
+						}
 					}
 				}
 			}

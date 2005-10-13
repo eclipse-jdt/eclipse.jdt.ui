@@ -98,6 +98,7 @@ Require-Bundle:
  org.eclipse.ui.console,
  org.eclipse.help,
  org.eclipse.core.expressions,
+ org.eclipse.core.filesystem,
  org.eclipse.core.resources,
  org.eclipse.jdt.core,
  org.eclipse.search,

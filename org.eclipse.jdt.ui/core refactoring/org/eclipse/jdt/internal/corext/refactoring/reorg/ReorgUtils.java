@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
+import java.net.URI;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -21,12 +22,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IPath;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.ui.IWorkingSet;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -41,8 +42,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-
-import org.eclipse.ui.IWorkingSet;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
@@ -548,20 +547,8 @@ public class ReorgUtils {
 			return false;
 		if (r1.equals(r2))
 			return true;
-		IPath r1Location= r1.getLocation();
-		IPath r2Location= r2.getLocation();
-		if (r1Location == null || r2Location == null)
-			return false;
-		return r1Location.equals(r2Location);
-	}
-	
-	public static boolean equalInWorkspaceOrOnDisk(IResource r1, IResource r2){
-		if (r1 == null || r2 == null)
-			return false;
-		if (r1.equals(r2))
-			return true;
-		IPath r1Location= r1.getLocation();
-		IPath r2Location= r2.getLocation();
+		URI r1Location= r1.getLocationURI();
+		URI r2Location= r2.getLocationURI();
 		if (r1Location == null || r2Location == null)
 			return false;
 		return r1Location.equals(r2Location);

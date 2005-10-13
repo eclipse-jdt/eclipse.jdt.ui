@@ -10,16 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,6 +26,12 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.SubProgressMonitor;
+
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
@@ -39,12 +44,13 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.WorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
+
 import org.eclipse.ui.views.navigator.ResourceSorter;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -56,12 +62,12 @@ import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -331,10 +337,19 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 						return;
 					}
 				} else {
-					IPath projLocation= fCurrJProject.getProject().getLocation();
-					if (projLocation != null && projLocation.append(str).toFile().exists()) {
-						fRootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExistingDifferentCase); 
-						return;
+					URI projLocation= fCurrJProject.getProject().getLocationURI();
+					if (projLocation != null) {
+						try {
+							IFileStore store= EFS.getStore(projLocation).getChild(str);
+							if (store.fetchInfo().exists()) {
+								fRootStatus.setError(NewWizardMessages.NewSourceFolderWizardPage_error_AlreadyExistingDifferentCase); 
+								return;
+							}
+						} catch (CoreException e) {
+							// we couldn't create the file store. Ignore the exception
+							// since we can't check if the file exist. Pretend that it
+							// doesn't.
+						}
 					}
 				}
 				ArrayList newEntries= new ArrayList(fEntries.length + 1);
