@@ -104,6 +104,7 @@ import org.eclipse.jface.text.source.IOverviewRuler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.ISourceViewerExtension2;
 import org.eclipse.jface.text.source.IVerticalRuler;
+import org.eclipse.jface.text.source.IVerticalRulerColumn;
 import org.eclipse.jface.text.source.LineChangeHover;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.jface.text.source.projection.ProjectionSupport;
@@ -3480,13 +3481,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	}
 
 	/*
-	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#createCompositeRuler()
+	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#createAnnotationRulerColumn(org.eclipse.jface.text.source.CompositeRuler)
+	 * @since 3.2
 	 */
-	protected CompositeRuler createCompositeRuler() {
+	protected IVerticalRulerColumn createAnnotationRulerColumn(CompositeRuler ruler) {
 		if (!getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_ANNOTATION_ROLL_OVER))
-			return super.createCompositeRuler();
+			return super.createAnnotationRulerColumn(ruler);
 
-		CompositeRuler ruler= new CompositeRuler();
 		AnnotationRulerColumn column= new AnnotationRulerColumn(VERTICAL_RULER_WIDTH, getAnnotationAccess());
 		column.setHover(new JavaExpandHover(ruler, getAnnotationAccess(), new IDoubleClickListener() {
 
@@ -3510,14 +3511,8 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 
 		}));
-		ruler.addDecorator(0, column);
-
-		if (isLineNumberRulerVisible())
-			ruler.addDecorator(1, createLineNumberRulerColumn());
-		else if (isPrefQuickDiffAlwaysOn())
-			ruler.addDecorator(1, createChangeRulerColumn());
-
-		return ruler;
+		
+		return column;
 	}
 
 	/**
