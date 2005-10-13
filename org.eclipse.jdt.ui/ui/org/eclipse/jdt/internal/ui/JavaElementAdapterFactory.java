@@ -12,7 +12,7 @@
 package org.eclipse.jdt.internal.ui;
 
 
-import org.eclipse.core.internal.resources.mapping.ResourceMapping;
+import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;

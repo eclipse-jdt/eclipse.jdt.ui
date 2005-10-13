@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import org.eclipse.text.edits.ReplaceEdit;
 
-import org.eclipse.core.internal.resources.mapping.ResourceMapping;
+import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;

@@ -18,7 +18,7 @@ import java.util.Set;
 
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.internal.resources.mapping.ResourceMapping;
+import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;

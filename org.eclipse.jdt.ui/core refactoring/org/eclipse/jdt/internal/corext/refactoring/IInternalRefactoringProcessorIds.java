@@ -13,8 +13,8 @@
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.core.resources.IResourceVisitor;
-import org.eclipse.core.internal.resources.mapping.ResourceMapping;
-import org.eclipse.core.internal.resources.mapping.ResourceMappingContext;
+import org.eclipse.core.resources.mapping.ResourceMapping;
+import org.eclipse.core.resources.mapping.ResourceMappingContext;
 
 public interface IInternalRefactoringProcessorIds {
 	
@@ -43,7 +43,7 @@ public interface IInternalRefactoringProcessorIds {
 	 * to enumerate the resources which form the Java element. <code>ResourceMappingContext.LOCAL_CONTEXT</code> 
 	 * should be use as the <code>ResourceMappingContext</code> passed to the accept methdod.
 	 * </p>
-	 * @see org.eclipse.core.internal.resources.mapping.ResourceMapping
+	 * @see org.eclipse.core.resources.mapping.ResourceMapping
 	 * @since 3.1
 	 */
 	public static String COPY_PROCESSOR= "org.eclipse.jdt.ui.CopyProcessor";  //$NON-NLS-1$
