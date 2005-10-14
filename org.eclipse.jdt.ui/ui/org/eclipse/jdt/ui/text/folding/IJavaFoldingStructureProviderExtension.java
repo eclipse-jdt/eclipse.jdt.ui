@@ -18,6 +18,9 @@ package org.eclipse.jdt.ui.text.folding;
  * <ul>
  * <li>collapsing of comments and members</li>
  * </ul>
+ * <p>
+ * XXX: This is work in progress and can change anytime until API for 3.2 is frozen.
+ * </p>
  * 
  * @since 3.2
  */
