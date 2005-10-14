@@ -14,7 +14,8 @@ class Cell3 {
 		return new Cell3();
 	}
 
-	private @Authorship(
+	@Authorship(
 		name="Rene Descartes",
-		purpose="None whatsoever") /*[*/Cell3/*]*/() { }
+		purpose="None whatsoever")
+	private /*[*/Cell3/*]*/() { }
 }

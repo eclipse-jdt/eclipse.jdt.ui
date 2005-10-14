@@ -1469,6 +1469,20 @@ public class ChangeSignatureTests extends RefactoringTest {
 		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 	}	
 	
+	public void testAll63()throws Exception{ //bug 
+		String[] signature= {};
+		ParameterInfo[] newParamInfo= null;
+		int[] newIndices= null;
+		String[] newParamTypeNames= {};
+		String[] oldParamNames= {};
+		String[] newParamNames= {};
+		int[] permutation= {};
+		int[] deletedIndices= null;
+		int newVisibility= Modifier.PROTECTED;
+		String newReturnTypeName= "void";
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParamTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
+	}	
+	
 	public void testAddRecursive1()throws Exception{ //bug 42100
 		String[] signature= {"I"};
 		String[] newNames= {"bool"};

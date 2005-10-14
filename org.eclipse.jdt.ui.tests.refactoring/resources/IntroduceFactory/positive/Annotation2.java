@@ -13,5 +13,6 @@ class Cell2 {
 		return new Cell2();
 	}
 
-	private @Buggy("doesn't work") /*[*/Cell2/*]*/() { }
+	@Buggy("doesn't work")
+	private /*[*/Cell2/*]*/() { }
 }

@@ -11,5 +11,6 @@ class Cell1 {
 		return new Cell1();
 	}
 
-	private @Preliminary /*[*/Cell1/*]*/() { }
+	@Preliminary
+	private /*[*/Cell1/*]*/() { }
 }

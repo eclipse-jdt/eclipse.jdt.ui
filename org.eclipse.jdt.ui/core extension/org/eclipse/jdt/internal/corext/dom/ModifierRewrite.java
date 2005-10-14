@@ -119,23 +119,23 @@ public class ModifierRewrite {
 				}
 			}
 		}
+		
 		// find last annotation
-		IExtendedModifier last= null;
+		IExtendedModifier lastAnnotation= null;
 		List extendedList= fModifierRewrite.getRewrittenList();
 		for (int i= 0; i < extendedList.size(); i++) {
 			IExtendedModifier curr= (IExtendedModifier) extendedList.get(i);
-			if (!curr.isAnnotation())
-				last= curr;
+			if (curr.isAnnotation())
+				lastAnnotation= curr;
 		}
 		
-		List newNodes= ASTNodeFactory.newModifiers(fAst, newModifiers);
-		
 		// add modifiers
+		List newNodes= ASTNodeFactory.newModifiers(fAst, newModifiers);
 		for (int i= 0; i < newNodes.size(); i++) {
 			Modifier curr= (Modifier) newNodes.get(i);
 			if ((curr.getKeyword().toFlagValue() & VISIBILITY_MODIFIERS) != 0) {
-				if (last != null)
-					fModifierRewrite.insertBefore(curr, (ASTNode) last, editGroup);
+				if (lastAnnotation != null)
+					fModifierRewrite.insertAfter(curr, (ASTNode) lastAnnotation, editGroup);
 				else
 					fModifierRewrite.insertFirst(curr, editGroup);
 			} else {
