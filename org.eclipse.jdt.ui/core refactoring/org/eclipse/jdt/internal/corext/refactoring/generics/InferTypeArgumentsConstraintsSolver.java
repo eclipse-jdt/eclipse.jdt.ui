@@ -384,9 +384,9 @@ public class InferTypeArgumentsConstraintsSolver {
 				ArrayElementVariable2 arrayElementCv= fTCModel.getArrayElementVariable(expressionVariable);
 				if (arrayElementCv == null)
 					continue;
-				TType chosenArrayType= InferTypeArgumentsConstraintsSolver.getChosenType(arrayElementCv);
-				if (chosenArrayType != null && TTypes.canAssignTo(chosenArrayType, ((ArrayType) castType).getComponentType())) {
-					if (expressionType instanceof ArrayType && chosenArrayType.equals(((ArrayType) expressionType).getComponentType()))
+				TType chosenArrayElementType= InferTypeArgumentsConstraintsSolver.getChosenType(arrayElementCv);
+				if (chosenArrayElementType != null && TTypes.canAssignTo(chosenArrayElementType, ((ArrayType) castType).getComponentType())) {
+					if (expressionType instanceof ArrayType && chosenArrayElementType.equals(((ArrayType) expressionType).getComponentType()))
 						continue; // The type has not changed. Don't remove the cast, since it could be
 								   // there to unify types of conditional expressions.
 					fUpdate.addCastToRemove(castCv);
