@@ -824,6 +824,14 @@ public class InferTypeArgumentsTCModel {
 	}
 
 	public void createElementEqualsConstraints(ConstraintVariable2 cv, ConstraintVariable2 initializerCv) {
+		internalCreateElementEqualsConstraints(cv, initializerCv, false);
+	}
+
+	public void createAssignmentElementConstraints(ConstraintVariable2 cv, ConstraintVariable2 initializerCv) {
+		internalCreateElementEqualsConstraints(cv, initializerCv, true);
+	}
+	
+	private void internalCreateElementEqualsConstraints(ConstraintVariable2 cv, ConstraintVariable2 initializerCv, boolean isAssignment) {
 		if (cv == null || initializerCv == null)
 			return;
 		
@@ -836,15 +844,18 @@ public class InferTypeArgumentsTCModel {
 			if (rightElementVariable != null) {
 				CollectionElementVariable2 leftElementVariable= (CollectionElementVariable2) leftEntry.getValue();
 				createEqualsConstraint(leftElementVariable, rightElementVariable);
-				createElementEqualsConstraints(leftElementVariable, rightElementVariable); // recursive
+				internalCreateElementEqualsConstraints(leftElementVariable, rightElementVariable, false); // recursive
 			}
 		}
 		
 		ArrayElementVariable2 leftArrayElement= getArrayElementVariable(cv);
 		ArrayElementVariable2 rightArrayElement= getArrayElementVariable(initializerCv);
 		if (leftArrayElement != null && rightArrayElement != null) {
-			createEqualsConstraint(leftArrayElement, rightArrayElement);
-			createElementEqualsConstraints(leftArrayElement, rightArrayElement); // recursive
+			if (isAssignment)
+				createSubtypeConstraint(rightArrayElement, leftArrayElement);
+			else
+				createEqualsConstraint(leftArrayElement, rightArrayElement);
+			internalCreateElementEqualsConstraints(leftArrayElement, rightArrayElement, false); // recursive
 		}
 	}
 

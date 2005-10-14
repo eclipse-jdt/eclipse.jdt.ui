@@ -281,7 +281,7 @@ public class InferTypeArgumentsConstraintCreator extends HierarchicalASTVisitor 
 				&& fTCModel.getElementVariables(expressionCv).size() == 0 && fTCModel.getArrayElementVariable(expressionCv) == null)
 			return;
 		
-		fTCModel.createElementEqualsConstraints(expressionCv, typeCv);
+		fTCModel.createAssignmentElementConstraints(typeCv, expressionCv);
 		
 		if (expression instanceof MethodInvocation) {
 			MethodInvocation invoc= (MethodInvocation) expression;

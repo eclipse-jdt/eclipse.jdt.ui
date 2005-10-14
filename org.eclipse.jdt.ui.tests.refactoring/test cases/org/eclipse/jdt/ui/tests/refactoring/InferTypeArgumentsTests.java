@@ -389,6 +389,10 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 		performCuOK();
 	}
 	
+	public void testCuArrays07() throws Exception {
+		performCuOK();
+	}
+	
 	public void testCuToArray01() throws Exception {
 		performCuOK();
 	}
