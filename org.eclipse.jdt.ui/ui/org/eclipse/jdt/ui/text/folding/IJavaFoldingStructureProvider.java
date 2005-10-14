@@ -32,6 +32,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
  *		the following functions:
  *			<ul>
  *            <li>collapsing of comments and members</li>
+ *            <li>expanding and collapsing of certain java elements</li>
  *			</ul>
  * </li>
  * </ul>

@@ -11,15 +11,18 @@
 package org.eclipse.jdt.internal.ui.text.folding;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -134,6 +137,27 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 		boolean match(JavaProjectionAnnotation annotation);
 	}
 	
+	private static final class JavaElementSetFilter implements Filter {
+		private final Set fSet;
+		private final boolean fMatchCollapsed;
+
+		private JavaElementSetFilter(Set set, boolean matchCollapsed) {
+			fSet= set;
+			fMatchCollapsed= matchCollapsed;
+		}
+
+		public boolean match(JavaProjectionAnnotation annotation) {
+			boolean stateMatch= fMatchCollapsed == annotation.isCollapsed();
+			if (stateMatch && !annotation.isComment() && !annotation.isMarkedDeleted()) {
+				IJavaElement element= annotation.getElement();
+				if (fSet.contains(element)) {
+					return true;
+				}
+			}
+			return false;
+		}
+	}
+
 	private class ElementChangedListener implements IElementChangedListener {
 
 		/*
@@ -406,7 +430,6 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 				IJavaElement element= annotation.getElement();
 				if (element instanceof IMember) {
 					if (element.getElementType() != IJavaElement.TYPE || ((IMember) element).getDeclaringType() != null) {
-						annotation.markCollapsed();
 						return true;
 					}
 				}
@@ -422,7 +445,6 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	private final Filter fCommentFilter = new Filter() {
 		public boolean match(JavaProjectionAnnotation annotation) {
 			if (!annotation.isCollapsed() && annotation.isComment() && !annotation.isMarkedDeleted()) {
-				annotation.markCollapsed();
 				return true;
 			}
 			return false;
@@ -1002,7 +1024,7 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	 * @since 3.2
 	 */
 	public void collapseMembers() {
-		collapseMatches(fMemberFilter);
+		modifyFiltered(fMemberFilter, false);
 	}
 	
 	/*
@@ -1010,16 +1032,34 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 	 * @since 3.2
 	 */
 	public void collapseComments() {
-		collapseMatches(fCommentFilter);
+		modifyFiltered(fCommentFilter, false);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProviderExtension#collapseElements(org.eclipse.jdt.core.IJavaElement[])
+	 */
+	public void collapseElements(IJavaElement[] elements) {
+		Set set= new HashSet(Arrays.asList(elements));
+		modifyFiltered(new JavaElementSetFilter(set, false), false);
+	}
+
+	/*
+	 * @see org.eclipse.jdt.ui.text.folding.IJavaFoldingStructureProviderExtension#expandElements(org.eclipse.jdt.core.IJavaElement[])
+	 */
+	public void expandElements(IJavaElement[] elements) {
+		Set set= new HashSet(Arrays.asList(elements));
+		modifyFiltered(new JavaElementSetFilter(set, true), true);
 	}
 
 	/**
 	 * Collapses all annotations matched by the passed filter.
 	 * 
 	 * @param filter the filter to use to select which annotations to collapse
+	 * @param expand <code>true</code> to expand the matched annotations, <code>false</code> to
+	 *        collapse them
 	 * @since 3.2
 	 */
-	private void collapseMatches(Filter filter) {
+	private void modifyFiltered(Filter filter, boolean expand) {
 		if (!isInstalled())
 			return;
 
@@ -1034,9 +1074,14 @@ public class DefaultJavaFoldingStructureProvider implements IProjectionListener,
 			if (annotation instanceof JavaProjectionAnnotation) {
 				JavaProjectionAnnotation java= (JavaProjectionAnnotation) annotation;
 				
-				if (filter.match(java))
+				if (filter.match(java)) {
+					if (expand)
+						java.markExpanded();
+					else
+						java.markCollapsed();
 					modified.add(java);
-				
+				}
+
 			}
 		}
 		
