@@ -78,7 +78,7 @@ public class AddJavaDocStubOperation implements IWorkspaceRunnable {
 		if (!meth.isConstructor()) {
 			ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(declaringType);
 			MethodOverrideTester tester= new MethodOverrideTester(declaringType, hierarchy);
-			overridden= tester.findMethodDefininition(meth, true);
+			overridden= tester.findOverriddenMethod(meth, true);
 		}
 		return CodeGeneration.getMethodComment(meth, overridden, lineDelimiter);
 	}

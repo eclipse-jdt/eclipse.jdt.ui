@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -1039,7 +1040,7 @@ public class JavaElementLabels {
 	private static void getInternalArchiveLabel(IPackageFragmentRoot root, long flags, StringBuffer buf) {
 		IResource resource= root.getResource();
 		boolean rootQualified= getFlag(flags, ROOT_QUALIFIED);
-		boolean referencedQualified= getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED) && JavaModelUtil.isReferenced(root) && resource != null;
+		boolean referencedQualified= getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED) && isReferenced(root);
 		if (rootQualified) {
 			buf.append(root.getPath().makeRelative().toString());
 		} else {
@@ -1057,7 +1058,7 @@ public class JavaElementLabels {
 	private static void getFolderLabel(IPackageFragmentRoot root, long flags, StringBuffer buf) {
 		IResource resource= root.getResource();
 		boolean rootQualified= getFlag(flags, ROOT_QUALIFIED);
-		boolean referencedQualified= getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED) && JavaModelUtil.isReferenced(root) && resource != null;
+		boolean referencedQualified= getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED) && isReferenced(root);
 		if (rootQualified) {
 			buf.append(root.getPath().makeRelative().toString());
 		} else {
@@ -1073,6 +1074,22 @@ public class JavaElementLabels {
 				buf.append(root.getParent().getElementName());
 			}
 		}
+	}
+	
+	/**
+	 * Returns <code>true</code> if the given package fragment root is
+	 * referenced. This means it is own by a different project but is referenced
+	 * by the root's parent. Returns <code>false</code> if the given root
+	 * doesn't have an underlying resource.
+	 */
+	private static boolean isReferenced(IPackageFragmentRoot root) {
+		IResource resource= root.getResource();
+		if (resource != null) {
+			IProject jarProject= resource.getProject();
+			IProject container= root.getJavaProject().getProject();
+			return !container.equals(jarProject);
+		}
+		return false;
 	}
 
 	private static void refreshPackageNamePattern() {

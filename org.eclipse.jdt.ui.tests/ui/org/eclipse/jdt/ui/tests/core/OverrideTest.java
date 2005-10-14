@@ -106,9 +106,9 @@ public class OverrideTest extends TestCase {
 		IMethodBinding subString= sub.getMethods()[1].resolveBinding();
 		IMethodBinding subObject= sub.getMethods()[2].resolveBinding();
 		
-		assertSame(topInteger, Bindings.findMethodDefininition(subInteger, true));
-		assertNull(Bindings.findMethodDefininition(subString, true));
-		assertNull(Bindings.findMethodDefininition(subObject, true));
+		assertSame(topInteger, Bindings.findOverriddenMethod(subInteger, true));
+		assertNull(Bindings.findOverriddenMethod(subString, true));
+		assertNull(Bindings.findOverriddenMethod(subObject, true));
 	}
 	
 	public void test14Overloaded2() throws Exception {
@@ -149,10 +149,10 @@ public class OverrideTest extends TestCase {
 		TypeDeclaration sub2= (TypeDeclaration) astRoot.types().get(4);
 		IMethodBinding sub2Integer= sub2.getMethods()[0].resolveBinding();
 		
-		assertNull(Bindings.findMethodDefininition(iTopInteger, true));
-		assertSame(iTopInteger, Bindings.findMethodDefininition(middle1Integer, true));
-		assertSame(middle1Integer, Bindings.findMethodDefininition(sub1Integer, true));
-		assertSame(iTopInteger, Bindings.findMethodDefininition(sub2Integer, true));
+		assertNull(Bindings.findOverriddenMethod(iTopInteger, true));
+		assertSame(iTopInteger, Bindings.findOverriddenMethod(middle1Integer, true));
+		assertSame(middle1Integer, Bindings.findOverriddenMethod(sub1Integer, true));
+		assertSame(iTopInteger, Bindings.findOverriddenMethod(sub2Integer, true));
 	}
 
 	public void test15Bug100233() throws Exception {
@@ -193,8 +193,8 @@ public class OverrideTest extends TestCase {
 		IMethodBinding bg1= b.getMethods()[0].resolveBinding();
 		IMethodBinding bg2= b.getMethods()[1].resolveBinding();
 		
-		assertNull(Bindings.findMethodDefininition(bg1, true));
-		assertSame(ag2, Bindings.findMethodDefininition(bg2, true).getMethodDeclaration()); // found method is from parameterized superclass
+		assertNull(Bindings.findOverriddenMethod(bg1, true));
+		assertSame(ag2, Bindings.findOverriddenMethod(bg2, true).getMethodDeclaration()); // found method is from parameterized superclass
 	}
 	
 	public void test15Bug97027() throws Exception {
@@ -216,7 +216,7 @@ public class OverrideTest extends TestCase {
 		TypeDeclaration bb= (TypeDeclaration) astRoot.types().get(1);
 		IMethodBinding bbtest= bb.getMethods()[0].resolveBinding();
 		
-		assertNull(Bindings.findMethodDefininition(bbtest, true));
+		assertNull(Bindings.findOverriddenMethod(bbtest, true));
 	}
 	
 	public void test15JLS3_842() throws Exception {
@@ -244,7 +244,7 @@ public class OverrideTest extends TestCase {
 		TypeDeclaration overrider= (TypeDeclaration) astRoot.types().get(1);
 		IMethodBinding overrider_toList= overrider.getMethods()[0].resolveBinding();
 		
-		assertSame(collectionConverter_toList, Bindings.findMethodDefininition(overrider_toList, true));
+		assertSame(collectionConverter_toList, Bindings.findOverriddenMethod(overrider_toList, true));
 	}
 	
 	public void test15JLS3_848_1() throws Exception {
@@ -270,7 +270,7 @@ public class OverrideTest extends TestCase {
 		TypeDeclaration d= (TypeDeclaration) astRoot.types().get(1);
 		IMethodBinding dcopy= d.getMethods()[0].resolveBinding();
 		
-		assertSame(ccopy, Bindings.findMethodDefininition(dcopy, true));
+		assertSame(ccopy, Bindings.findOverriddenMethod(dcopy, true));
 	}
 	
 	public void test15JLS3_848_2() throws Exception {
@@ -299,7 +299,7 @@ public class OverrideTest extends TestCase {
 		TypeDeclaration overrider= (TypeDeclaration) astRoot.types().get(1);
 		IMethodBinding overrider_toList= overrider.getMethods()[0].resolveBinding();
 		
-		assertSame(stringSorter_toList, Bindings.findMethodDefininition(overrider_toList, true));
+		assertSame(stringSorter_toList, Bindings.findOverriddenMethod(overrider_toList, true));
 	}
 	
 	public void test15JLS3_848_3() throws Exception {
@@ -326,8 +326,8 @@ public class OverrideTest extends TestCase {
 		IMethodBinding didObject= d.getMethods()[0].resolveBinding();
 		IMethodBinding didString= d.getMethods()[1].resolveBinding();
 		
-		assertNull(Bindings.findMethodDefininition(didObject, true));
-		assertSame(cid, Bindings.findMethodDefininition(didString, true).getMethodDeclaration());
+		assertNull(Bindings.findOverriddenMethod(didObject, true));
+		assertSame(cid, Bindings.findOverriddenMethod(didString, true).getMethodDeclaration());
 	}
 	
 	public void test15JLS3_848_4() throws Exception {
@@ -360,8 +360,8 @@ public class OverrideTest extends TestCase {
 		IMethodBinding didString= d.getMethods()[0].resolveBinding();
 		IMethodBinding didInteger= d.getMethods()[1].resolveBinding();
 		
-		assertEquals(cid, Bindings.findMethodDefininition(didString, true).getMethodDeclaration());
-		assertEquals(iid, Bindings.findMethodDefininition(didInteger, true).getMethodDeclaration());
+		assertEquals(cid, Bindings.findOverriddenMethod(didString, true).getMethodDeclaration());
+		assertEquals(iid, Bindings.findOverriddenMethod(didInteger, true).getMethodDeclaration());
 	}
 	
 	public void test15ClassTypeVars1() throws Exception {
@@ -388,8 +388,8 @@ public class OverrideTest extends TestCase {
 		IMethodBinding btakeST= b.getMethods()[0].resolveBinding();
 		IMethodBinding btakeTS= b.getMethods()[1].resolveBinding();
 		
-		assertEquals(atake, Bindings.findMethodDefininition(btakeST, true).getMethodDeclaration());
-		assertNull(Bindings.findMethodDefininition(btakeTS, true));
+		assertEquals(atake, Bindings.findOverriddenMethod(btakeST, true).getMethodDeclaration());
+		assertNull(Bindings.findOverriddenMethod(btakeTS, true));
 	}
 	
 	public void test15ClassTypeVars2() throws Exception {
@@ -442,13 +442,13 @@ public class OverrideTest extends TestCase {
 		IMethodBinding emNumber= e.getMethods()[0].resolveBinding();
 		IMethodBinding emInteger= e.getMethods()[1].resolveBinding();
 		
-		assertEquals(am, Bindings.findMethodDefininition(bm, true).getMethodDeclaration());
-		assertEquals(am, Bindings.findMethodDefininition(bm, true).getMethodDeclaration());
-		assertEquals(am, Bindings.findMethodDefininition(cm, true).getMethodDeclaration());
-		assertEquals(am, Bindings.findMethodDefininition(dmNumber, true).getMethodDeclaration());
-		assertEquals(bm, Bindings.findMethodDefininition(dmInteger, true).getMethodDeclaration());
-		assertNull(Bindings.findMethodDefininition(emNumber, true));
-		assertEquals(bm, Bindings.findMethodDefininition(emInteger, true).getMethodDeclaration());
+		assertEquals(am, Bindings.findOverriddenMethod(bm, true).getMethodDeclaration());
+		assertEquals(am, Bindings.findOverriddenMethod(bm, true).getMethodDeclaration());
+		assertEquals(am, Bindings.findOverriddenMethod(cm, true).getMethodDeclaration());
+		assertEquals(am, Bindings.findOverriddenMethod(dmNumber, true).getMethodDeclaration());
+		assertEquals(bm, Bindings.findOverriddenMethod(dmInteger, true).getMethodDeclaration());
+		assertNull(Bindings.findOverriddenMethod(emNumber, true));
+		assertEquals(bm, Bindings.findOverriddenMethod(emInteger, true).getMethodDeclaration());
 	}
 	
 	public void test15MethodTypeVars1() throws Exception {
@@ -477,9 +477,9 @@ public class OverrideTest extends TestCase {
 		IMethodBinding btakeTS= b.getMethods()[1].resolveBinding();
 		IMethodBinding btakeSTS= b.getMethods()[2].resolveBinding();
 		
-		assertEquals(atake, Bindings.findMethodDefininition(btakeST, true).getMethodDeclaration());
-		assertNull(Bindings.findMethodDefininition(btakeTS, true));
-		assertNull(Bindings.findMethodDefininition(btakeSTS, true));
+		assertEquals(atake, Bindings.findOverriddenMethod(btakeST, true).getMethodDeclaration());
+		assertNull(Bindings.findOverriddenMethod(btakeTS, true));
+		assertNull(Bindings.findOverriddenMethod(btakeSTS, true));
 	}
 	
 	public void test15MethodTypeVars2() throws Exception {
@@ -510,9 +510,9 @@ public class OverrideTest extends TestCase {
 		IMethodBinding btake2= b.getMethods()[1].resolveBinding();
 		IMethodBinding btake3= b.getMethods()[2].resolveBinding();
 		
-		assertEquals(atake, Bindings.findMethodDefininition(btake1, true).getMethodDeclaration());
-		assertNull(Bindings.findMethodDefininition(btake2, true));
-		assertNull(Bindings.findMethodDefininition(btake3, true));
+		assertEquals(atake, Bindings.findOverriddenMethod(btake1, true).getMethodDeclaration());
+		assertNull(Bindings.findOverriddenMethod(btake2, true));
+		assertNull(Bindings.findOverriddenMethod(btake3, true));
 	}
 
 	public void test15MethodTypeVars3() throws Exception {
@@ -538,8 +538,8 @@ public class OverrideTest extends TestCase {
 		IMethodBinding btake= b.getMethods()[0].resolveBinding();
 		IMethodBinding btake2= b.getMethods()[1].resolveBinding();
 		
-		assertNull(Bindings.findMethodDefininition(btake, true));
-		assertNull(Bindings.findMethodDefininition(btake2, true));
+		assertNull(Bindings.findOverriddenMethod(btake, true));
+		assertNull(Bindings.findOverriddenMethod(btake2, true));
 	}
 	
 	public void test15MethodTypeVars4() throws Exception {
@@ -564,7 +564,7 @@ public class OverrideTest extends TestCase {
 		TypeDeclaration b= (TypeDeclaration) astRoot.types().get(1);
 		IMethodBinding bm= b.getMethods()[0].resolveBinding();
 		
-		assertEquals(am, Bindings.findMethodDefininition(bm, true));
+		assertEquals(am, Bindings.findOverriddenMethod(bm, true));
 	}
 	
 	public void test15MethodTypeVars5() throws Exception {
@@ -587,7 +587,7 @@ public class OverrideTest extends TestCase {
 		TypeDeclaration b= (TypeDeclaration) astRoot.types().get(1);
 		IMethodBinding bm= b.getMethods()[0].resolveBinding();
 		
-		assertNull(Bindings.findMethodDefininition(bm, true));
+		assertNull(Bindings.findOverriddenMethod(bm, true));
 	}
 	
 	public void test15MethodTypeVars6() throws Exception {
@@ -613,7 +613,7 @@ public class OverrideTest extends TestCase {
 		TypeDeclaration b= (TypeDeclaration) astRoot.types().get(1);
 		IMethodBinding bm= b.getMethods()[0].resolveBinding();
 		
-		assertEquals(am, Bindings.findMethodDefininition(bm, true));
+		assertEquals(am, Bindings.findOverriddenMethod(bm, true));
 	}
 	
 	public void test15Bug99608() throws Exception {
@@ -643,8 +643,8 @@ public class OverrideTest extends TestCase {
 		IMethodBinding subAdd= sub.getMethods()[0].resolveBinding();
 		IMethodBinding subRemove= sub.getMethods()[1].resolveBinding();
 		
-		assertEquals(topAdd, Bindings.findMethodDefininition(subAdd, true).getMethodDeclaration());
-		assertEquals(topRemove, Bindings.findMethodDefininition(subRemove, true).getMethodDeclaration());
+		assertEquals(topAdd, Bindings.findOverriddenMethod(subAdd, true).getMethodDeclaration());
+		assertEquals(topRemove, Bindings.findOverriddenMethod(subRemove, true).getMethodDeclaration());
 	}
 	
 	public void test15Bug90114() throws Exception {
@@ -669,7 +669,7 @@ public class OverrideTest extends TestCase {
 		TypeDeclaration x= (TypeDeclaration) astRoot.types().get(1);
 		IMethodBinding xnotOverridden= x.getMethods()[0].resolveBinding();
 		
-		assertNull(Bindings.findMethodDefininition(xnotOverridden, true));
+		assertNull(Bindings.findOverriddenMethod(xnotOverridden, true));
 	}
 
 	public void test15Bug89516primitive() throws Exception {
@@ -691,7 +691,7 @@ public class OverrideTest extends TestCase {
 		TypeDeclaration test= (TypeDeclaration) astRoot.types().get(0);
 		IMethodBinding testAdd= test.getMethods()[0].resolveBinding();
 		
-		assertNull(Bindings.findMethodDefininition(testAdd, true));
+		assertNull(Bindings.findOverriddenMethod(testAdd, true));
 	}
 	
 	public void test15Bug105669() throws Exception {
@@ -714,7 +714,7 @@ public class OverrideTest extends TestCase {
 		TypeDeclaration i= (TypeDeclaration) astRoot.types().get(0);
 		IMethodBinding iaddAll= i.getMethods()[0].resolveBinding();
 		
-		IMethodBinding overridden= Bindings.findMethodDefininition(iaddAll, true).getMethodDeclaration();
+		IMethodBinding overridden= Bindings.findOverriddenMethod(iaddAll, true).getMethodDeclaration();
 		ITypeBinding vector= i.getSuperclassType().resolveBinding().getTypeDeclaration();
 		
 		assertTrue(Arrays.asList(vector.getDeclaredMethods()).contains(overridden));
@@ -769,10 +769,10 @@ public class OverrideTest extends TestCase {
 		TypeDeclaration e= (TypeDeclaration) astRoot.types().get(5);
 		IMethodBinding efoo= e.getMethods()[0].resolveBinding();
 		
-		assertNull(Bindings.findMethodDefininition(bfoo, true));
-		assertNull(Bindings.findMethodDefininition(cfoo, true));
-		assertEquals(afoo, Bindings.findMethodDefininition(dfoo, true));
-		assertNull(Bindings.findMethodDefininition(efoo, true));
+		assertNull(Bindings.findOverriddenMethod(bfoo, true));
+		assertNull(Bindings.findOverriddenMethod(cfoo, true));
+		assertEquals(afoo, Bindings.findOverriddenMethod(dfoo, true));
+		assertNull(Bindings.findOverriddenMethod(efoo, true));
 	}
 	
 }

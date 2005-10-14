@@ -80,7 +80,7 @@ public class SuperTypeHierarchyCache {
 	}
 
 	public static MethodOverrideTester getMethodOverrideTester(IType type) throws JavaModelException {
-		synchronized (fgMethodOvderrideTesterCache) {
+		synchronized (fgHierarchyCache) {
 			MethodOverrideTester test= (MethodOverrideTester) fgMethodOvderrideTesterCache.get(type);
 			if (test == null) {
 				test= new MethodOverrideTester(type, getTypeHierarchy(type));
@@ -91,12 +91,10 @@ public class SuperTypeHierarchyCache {
 	}
 	
 	private static void removeMethodOverrideTester(ITypeHierarchy hierarchy) {
-		synchronized (fgMethodOvderrideTesterCache) {
-			for (Iterator iter= fgMethodOvderrideTesterCache.values().iterator(); iter.hasNext();) {
-				MethodOverrideTester curr= (MethodOverrideTester) iter.next();
-				if (curr.getTypeHierarchy().equals(hierarchy)) {
-					iter.remove();
-				}
+		for (Iterator iter= fgMethodOvderrideTesterCache.values().iterator(); iter.hasNext();) {
+			MethodOverrideTester curr= (MethodOverrideTester) iter.next();
+			if (curr.getTypeHierarchy().equals(hierarchy)) {
+				iter.remove();
 			}
 		}
 	}
@@ -178,8 +176,8 @@ public class SuperTypeHierarchyCache {
 	}
 	
 	private static void removeHierarchyEntryFromCache(HierarchyCacheEntry entry) {
-		removeMethodOverrideTester(entry.getTypeHierarchy());
 		synchronized (fgHierarchyCache) {
+			removeMethodOverrideTester(entry.getTypeHierarchy());
 			entry.dispose();
 			fgHierarchyCache.remove(entry);
 		}

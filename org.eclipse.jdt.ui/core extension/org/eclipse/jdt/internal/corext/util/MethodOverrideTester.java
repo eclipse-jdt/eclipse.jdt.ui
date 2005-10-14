@@ -65,7 +65,7 @@ public class MethodOverrideTester {
 			}
 			return null;
 		}
-	}
+	}	
 	
 	private final IType fFocusType;
 	private final ITypeHierarchy fHierarchy;
@@ -89,16 +89,38 @@ public class MethodOverrideTester {
 	}
 	
 	/**
-	 * Finds the method that is defines/declares the given method. The search is bottom-up, so this
-	 * returns the nearest defining/declaring method.
+	 * Finds the method that declares the given method. A declaring method is the 'original' method declaration that does
+	 * not override nor implement a method. <code>null</code> is returned it the given method does not override
+	 * a method. When searching, super class are examined before implemented interfaces.
 	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
 	 * @throws JavaModelException
 	 */
-	public IMethod findMethodDefininition(IMethod overriding, boolean testVisibility) throws JavaModelException {		
+	public IMethod findDeclaringMethod(IMethod overriding, boolean testVisibility) throws JavaModelException {
+		IMethod result= null;
+		IMethod overridden= findOverriddenMethod(overriding, testVisibility);
+		while (overridden != null) {
+			result= overridden;
+			overridden= findOverriddenMethod(result, testVisibility);
+		}
+		return result;
+	}
+	
+	/**
+	 * Finds the method that is overridden by the given method.
+	 * First the super class is examined and then the implemented interfaces.
+	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
+	 * @throws JavaModelException
+	 */
+	public IMethod findOverriddenMethod(IMethod overriding, boolean testVisibility) throws JavaModelException {
+		int flags= overriding.getFlags();
+		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || overriding.isConstructor()) {
+			return null;
+		}
+		
 		IType type= overriding.getDeclaringType();
 		IType superClass= fHierarchy.getSuperclass(type);
 		if (superClass != null) {
-			IMethod res= findMethodInHierarchy(superClass, overriding);
+			IMethod res= findOverriddenMethodInHierarchy(superClass, overriding);
 			if (res != null && !Flags.isPrivate(res.getFlags())) {
 				if (!testVisibility || JavaModelUtil.isVisibleInHierarchy(res, type.getPackageFragment())) {
 					return res;
@@ -108,7 +130,7 @@ public class MethodOverrideTester {
 		if (!overriding.isConstructor()) {
 			IType[] interfaces= fHierarchy.getSuperInterfaces(type);
 			for (int i= 0; i < interfaces.length; i++) {
-				IMethod res= findMethodInHierarchy(interfaces[i], overriding);
+				IMethod res= findOverriddenMethodInHierarchy(interfaces[i], overriding);
 				if (res != null) {
 					return res; // methods from interfaces are always public and therefore visible
 				}
@@ -117,14 +139,22 @@ public class MethodOverrideTester {
 		return null;
 	}
 	
-	private IMethod findMethodInHierarchy(IType type, IMethod overriding) throws JavaModelException {
-		IMethod method= findOverriddenMethod(overriding, type);
+	/**
+	 * Finds the directly overridden method in a type and its super types. First the super class is examined and then the implemented interfaces.
+	 * With generics it is possible that 2 methods in the same type are overidden at the same time. In that case, the first overridden method found is returned. 
+	 * 	@param type The type to find methods in
+	 * @param overriding The overriding method
+	 * @return The first overridden method or <code>null</code> if no method is overridden
+	 * @throws JavaModelException
+	 */
+	public IMethod findOverriddenMethodInHierarchy(IType type, IMethod overriding) throws JavaModelException {
+		IMethod method= findOverriddenMethodInType(type, overriding);
 		if (method != null) {
 			return method;
 		}
 		IType superClass= fHierarchy.getSuperclass(type);
 		if (superClass != null) {
-			IMethod res=  findMethodInHierarchy(superClass, overriding);
+			IMethod res=  findOverriddenMethodInHierarchy(superClass, overriding);
 			if (res != null) {
 				return res;
 			}
@@ -132,7 +162,7 @@ public class MethodOverrideTester {
 		if (!overriding.isConstructor()) {
 			IType[] superInterfaces= fHierarchy.getSuperInterfaces(type);
 			for (int i= 0; i < superInterfaces.length; i++) {
-				IMethod res= findMethodInHierarchy(superInterfaces[i], overriding);
+				IMethod res= findOverriddenMethodInHierarchy(superInterfaces[i], overriding);
 				if (res != null) {
 					return res;
 				}
@@ -142,14 +172,14 @@ public class MethodOverrideTester {
 	}
 	
 	/**
-	 * Finds an overridden method in a type. With generics it is possible that more than method are overridden.
+	 * Finds an overridden method in a type. WWith generics it is possible that 2 methods in the same type are overidden at the same time.
 	 * In that case the first overridden method found is returned.
-	 * @param overriding The overriding method
 	 * @param overriddenType The type to find methods in
+	 * @param overriding The overriding method
 	 * @return The first overridden method or <code>null</code> if no method is overridden
 	 * @throws JavaModelException
 	 */
-	public IMethod findOverriddenMethod(IMethod overriding, IType overriddenType) throws JavaModelException {
+	public IMethod findOverriddenMethodInType(IType overriddenType, IMethod overriding) throws JavaModelException {
 		IMethod[] overriddenMethods= overriddenType.getMethods();
 		for (int i= 0; i < overriddenMethods.length; i++) {
 			if (isSubsignature(overriddenMethods[i], overriding)) {
@@ -161,12 +191,12 @@ public class MethodOverrideTester {
 	
 	/**
 	 * Finds an overriding method in a type.
-	 * @param overridden The overridden method
 	 * @param overridingType The type to find methods in
+	 * @param overridden The overridden method
 	 * @return The overriding method or <code>null</code> if no method is overriding.
 	 * @throws JavaModelException
 	 */
-	public IMethod findOverridingMethod(IMethod overridden, IType overridingType) throws JavaModelException {
+	public IMethod findOverridingMethodInType(IType overridingType, IMethod overridden) throws JavaModelException {
 		IMethod[] overridingMethods= overridingType.getMethods();
 		for (int i= 0; i < overridingMethods.length; i++) {
 			if (isSubsignature(overridden, overridingMethods[i])) {
@@ -175,13 +205,16 @@ public class MethodOverrideTester {
 		}
 		return null;
 	}
-		
+	
+	/**
+	 * Tests if a overriding method is a subsignature of a overridden.
+	 * @param overridden The overridden method
+	 * @param overriding The type to find methods in
+	 * @return returns <code>true</code> if the overriding method is a subsignature of a overridden.
+	 * @throws JavaModelException
+	 */
 	public boolean isSubsignature(IMethod overridden, IMethod overriding) throws JavaModelException {
-		boolean isConstructor= overridden.isConstructor();
-		if (isConstructor != overriding.isConstructor()) {
-			return false;
-		}
-		if (!isConstructor && !overridden.getElementName().equals(overriding.getElementName())) {
+		if (!overridden.getElementName().equals(overriding.getElementName())) {
 			return false;
 		}
 		int nParameters= overridden.getNumberOfParameters();

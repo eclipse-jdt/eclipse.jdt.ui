@@ -328,6 +328,34 @@ public class Bindings {
 		}
 		return null;
 	}
+	
+	/**
+	 * Finds the field specified by <code>fieldName</code> in
+	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such field
+	 * exists. If the field is defined in more than one super type only the first match is 
+	 * returned. First the super class is examined and than the implemented interfaces.
+	 * @param type The type to search the field in
+	 * @param fieldName The name of the field to find
+	 * @return the variable binding representing the field
+	 */
+	public static IVariableBinding findFieldInHierarchy(ITypeBinding type, String fieldName) {
+		IVariableBinding field= findFieldInType(type, fieldName);
+		if (field != null)
+			return field;
+		ITypeBinding superClass= type.getSuperclass();
+		if (superClass != null) {
+			field= findFieldInHierarchy(superClass, fieldName);
+			if (field != null)
+				return field;			
+		}
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			field= findFieldInHierarchy(interfaces[i], fieldName);
+			if (field != null) // no private fields in interfaces
+				return field;
+		}
+		return null;
+	}
 		
 	/**
 	 * Finds the method specified by <code>methodName<code> and </code>parameters</code> in
@@ -337,8 +365,6 @@ public class Bindings {
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only 
 	 *  the name is matched and parameters are ignored.
 	 * @return the method binding representing the method
-	 * 
-	 * @deprecated use {@link #findOverriddenMethodInType(ITypeBinding, IMethodBinding)}
 	 */
 	public static IMethodBinding findMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
 		if (type.isPrimitive())
@@ -352,6 +378,35 @@ public class Bindings {
 				if (isEqualMethod(methods[i], methodName, parameters))
 					return methods[i];
 			}
+		}
+		return null;
+	}
+	
+	/**
+	 * Finds the method specified by <code>methodName</code> and </code>parameters</code> in
+	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
+	 * exists. If the method is defined in more than one super type only the first match is 
+	 * returned. First the super class is examined and than the implemented interfaces.
+	 * @param type The type to search the method in
+	 * @param methodName The name of the method to find
+	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
+	 * @return the method binding representing the method
+	 */
+	public static IMethodBinding findMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
+		IMethodBinding method= findMethodInType(type, methodName, parameters);
+		if (method != null)
+			return method;
+		ITypeBinding superClass= type.getSuperclass();
+		if (superClass != null) {
+			method= findMethodInHierarchy(superClass, methodName, parameters);
+			if (method != null)
+				return method;			
+		}
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			method= findMethodInHierarchy(interfaces[i], methodName, parameters);
+			if (method != null)
+				return method;
 		}
 		return null;
 	}
@@ -381,72 +436,16 @@ public class Bindings {
 	}
 	
 	/**
-	 * Finds the method in the given <code>type</code> that is overridden by the specified <code>method<code>.
-	 * Returns <code>null</code> if no such method exits.
-	 * @param type The type to search the method in
-	 * @param method The specified method that would override the result
-	 * @return the method binding of the method that is overridden by the specified <code>method<code>, or <code>null</code>
-	 */
-	public static IMethodBinding findOverriddenMethodInType(ITypeBinding type, IMethodBinding method) {
-		if (type.isPrimitive())
-			return null;
-		IMethodBinding[] methods= type.getDeclaredMethods();
-		for (int i= 0; i < methods.length; i++) {
-			if (isSubsignature(method, methods[i]))
-				return methods[i];
-		}
-		return null;
-//		String methodName= method.getName();
-//		IMethodBinding[] methods= type.getDeclaredMethods();
-//		for (int i= 0; i < methods.length; i++) {
-//			IMethodBinding curr= methods[i];
-//			if (curr.getName().equals(methodName) && method.overrides(curr)) { // name check: see bug 98483; overrides checks return types: see bug 105808.
-//				return curr;
-//			}
-//		}
-//		return null;
-	}
-
-	/**
-	 * Finds the field specified by <code>fieldName</code> in
-	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such field
-	 * exists. If the field is defined in more than one super type only the first match is 
-	 * returned. First the super class is examined and than the implemented interfaces.
-	 * @param type The type to search the field in
-	 * @param fieldName The name of the field to find
-	 * @return the variable binding representing the field
-	 */
-	public static IVariableBinding findFieldInHierarchy(ITypeBinding type, String fieldName) {
-		IVariableBinding field= findFieldInType(type, fieldName);
-		if (field != null)
-			return field;
-		ITypeBinding superClass= type.getSuperclass();
-		if (superClass != null) {
-			field= findFieldInHierarchy(superClass, fieldName);
-			if (field != null)
-				return field;			
-		}
-		ITypeBinding[] interfaces= type.getInterfaces();
-		for (int i= 0; i < interfaces.length; i++) {
-			field= findFieldInHierarchy(interfaces[i], fieldName);
-			if (field != null) // no private fields in interfaces
-				return field;
-		}
-		return null;
-	}
-
-
-	/**
 	 * Finds the method specified by <code>methodName</code> and </code>parameters</code> in
 	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
 	 * exists. If the method is defined in more than one super type only the first match is 
 	 * returned. First the super class is examined and than the implemented interfaces.
-	 * @param type The type to search the method in
+	 * @param type the type to search the method in
 	 * @param methodName The name of the method to find
 	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
 	 * @return the method binding representing the method
 	 */
-	public static IMethodBinding findMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding parameters[]) {
+	public static IMethodBinding findMethodInHierarchy(ITypeBinding type, String methodName, String[] parameters) {
 		IMethodBinding method= findMethodInType(type, methodName, parameters);
 		if (method != null)
 			return method;
@@ -464,36 +463,19 @@ public class Bindings {
 		}
 		return null;
 	}
-
-
+	
 	/**
-	 * Finds the method specified by <code>methodName</code> and </code>parameters</code> in
-	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
-	 * exists. If the method is defined in more than one super type only the first match is 
-	 * returned. First the super class is examined and than the implemented interfaces.
-	 * @param typeObject the type binding for <code>java.lang.Object</code>.
-	 * @param type the type to search the method in
-	 * @param methodName The name of the method to find
-	 * @param parameters The parameter types of the method to find. If <code>null</code> is passed, only the name is matched and parameters are ignored.
-	 * @return the method binding representing the method
+	 * Finds the method in the given <code>type</code> that is overridden by the specified <code>method<code>.
+	 * Returns <code>null</code> if no such method exits.
+	 * @param type The type to search the method in
+	 * @param method The specified method that would override the result
+	 * @return the method binding of the method that is overridden by the specified <code>method<code>, or <code>null</code>
 	 */
-	public static IMethodBinding findMethodInHierarchy(ITypeBinding typeObject, ITypeBinding type, String methodName, String parameters[]) {
-		IMethodBinding method= findMethodInType(type, methodName, parameters);
-		if (method != null)
-			return method;
-		ITypeBinding superClass= type.getSuperclass();
-		if (superClass == null && type.isInterface())
-			superClass= typeObject;
-		if (superClass != null) {
-			method= findMethodInHierarchy(typeObject, superClass, methodName, parameters);
-			if (method != null)
-				return method;			
-		}
-		ITypeBinding[] interfaces= type.getInterfaces();
-		for (int i= 0; i < interfaces.length; i++) {
-			method= findMethodInHierarchy(typeObject, interfaces[i], methodName, parameters);
-			if (method != null)
-				return method;
+	public static IMethodBinding findOverriddenMethodInType(ITypeBinding type, IMethodBinding method) {
+		IMethodBinding[] methods= type.getDeclaredMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if (isSubsignature(methods[i], method))
+				return methods[i];
 		}
 		return null;
 	}
@@ -527,33 +509,30 @@ public class Bindings {
 	
 	
 	/**
-	 * Finds the method that is defines the given method. The returned method might not be visible.
-	 * @param method The method to find
+	 * Finds the method that is overridden by the given method. The search is bottom-up, so this
+	 * returns the nearest defining/declaring method.
+	 * @param overriding overriding method
 	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
 	 * @return the method binding representing the method
 	 */
-	public static IMethodBinding findMethodDefininition(IMethodBinding method, boolean testVisibility) {
-		int modifiers= method.getModifiers();
-		if (Modifier.isPrivate(modifiers) || Modifier.isStatic(modifiers) || method.isConstructor()) {
+	public static IMethodBinding findOverriddenMethod(IMethodBinding overriding, boolean testVisibility) {
+		int modifiers= overriding.getModifiers();
+		if (Modifier.isPrivate(modifiers) || Modifier.isStatic(modifiers) || overriding.isConstructor()) {
 			return null;
 		}
 		
-		ITypeBinding type= method.getDeclaringClass();
-		if (type.isInterface()) {
-			return null;
-		}
-		
+		ITypeBinding type= overriding.getDeclaringClass();
 		if (type.getSuperclass() != null) {
-			IMethodBinding res= findOverriddenMethodInHierarchy(type.getSuperclass(), method);
+			IMethodBinding res= findOverriddenMethodInHierarchy(type.getSuperclass(), overriding);
 			if (res != null && !Modifier.isPrivate(res.getModifiers())) {
-				if (!testVisibility || isVisibleInHierarchy(res, method.getDeclaringClass().getPackage())) {
+				if (!testVisibility || isVisibleInHierarchy(res, overriding.getDeclaringClass().getPackage())) {
 					return res;
 				}
 			}
 		}
 		ITypeBinding[] interfaces= type.getInterfaces();
 		for (int i= 0; i < interfaces.length; i++) {
-			IMethodBinding res= findOverriddenMethodInHierarchy(interfaces[i], method);
+			IMethodBinding res= findOverriddenMethodInHierarchy(interfaces[i], overriding);
 			if (res != null) {
 				return res; // methods from interfaces are always public and therefore visible
 			}
@@ -561,27 +540,6 @@ public class Bindings {
 		return null;
 	}
 	
-	/**
-	 * Finds the method that is implemented by the given method.
-	 * @param method The method to find
- 	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
-	 * @return the method binding representing the method
-	 */
-	public static IMethodBinding findMethodImplementation(IMethodBinding method, boolean testVisibility) {
-		ITypeBinding superClass= method.getDeclaringClass().getSuperclass();
-		
-		while (superClass != null) {
-			IMethodBinding res= findOverriddenMethodInType(superClass, method);
-			if (res != null) {
-				if (isVisibleInHierarchy(res, method.getDeclaringClass().getPackage())) {
-					return res;
-				}
-				return null;
-			}
-			superClass= superClass.getSuperclass();
-		}
-		return null;
-	}
 	
 	public static boolean isVisibleInHierarchy(IMethodBinding member, IPackageBinding pack) {
 		int otherflags= member.getModifiers();
@@ -593,40 +551,7 @@ public class Bindings {
 		}		
 		return pack == declaringType.getPackage();
 	}
-	
-	/**
-	 * Finds the declaration of a method in
-	 * the type hierarchy denoted by the given type. Returns <code>null</code> if no such method
-	 * exists. If the method is defined in more than one super type only the first match is 
-	 * returned. First the implemented interfaces are examined and then the super class.
-	 * @param type The type to search the method in
-	 * @param methodBinding The binding of the method to find
-	 * @return the method binding representing the overridden method, or <code>null</code>
-	 */
-	public static IMethodBinding findMethodDeclarationInHierarchy(ITypeBinding type, IMethodBinding methodBinding) {
-		ITypeBinding[] interfaces= type.getInterfaces();
-		for (int i= 0; i < interfaces.length; i++) {
-			ITypeBinding curr= interfaces[i];
-			IMethodBinding method= findOverriddenMethodInType(curr, methodBinding);
-			if (method != null)
-				return method;
-			method= findMethodDeclarationInHierarchy(interfaces[i], methodBinding);
-			if (method != null)
-				return method;
-		}
-		ITypeBinding superClass= type.getSuperclass();
-		if (superClass != null) {
-			IMethodBinding method= findOverriddenMethodInType(superClass, methodBinding);
-			if (method != null)
-				return method;
-			
-			method= findMethodDeclarationInHierarchy(superClass, methodBinding);
-			if (method != null)
-				return method;			
-		}
-		return null;
-	}
-	
+		
 	/**
 	 * Returns all super types (classes and interfaces) for the given type.
 	 * @param type The type to get the supertypes of.
@@ -735,25 +660,25 @@ public class Bindings {
 	}
 
 	/**
-	 * @param m1 overriding method
-	 * @param m2 overridden method
+	 * @param overridden overridden method
+	 * @param overriding overriding method
 	 * @return <code>true</code> iff the method <code>m1</code> is a subsignature of the method <code>m2</code>.
 	 * 		This is one of the requirements for m1 to override m2.
 	 * 		Accessibility and return types are not taken into account.
 	 * 		Note that subsignature is <em>not</em> symmetric!
 	 */
-	public static boolean isSubsignature(IMethodBinding m1, IMethodBinding m2) {
-		//TODO: use IMethodBinding#isSubsignature(..) once it is tested and fixed (only erasure of m1's parameter types, considering type variable counts, doing type variable substitution
-		if (! m1.getName().equals(m2.getName()))
+	public static boolean isSubsignature(IMethodBinding overridden, IMethodBinding overriding) {
+		//TODO: use IMethodBinding#isSubsignature(..) once it is tested and fixed (only erasure of m1's parameter types, considering type variable counts, doing type variable substitution		
+		if (!overriding.getName().equals(overridden.getName()))
 			return false;
 			
-		ITypeBinding[] m1Params= m1.getParameterTypes();
-		ITypeBinding[] m2Params= m2.getParameterTypes();
+		ITypeBinding[] m1Params= overriding.getParameterTypes();
+		ITypeBinding[] m2Params= overridden.getParameterTypes();
 		if (m1Params.length != m2Params.length)
 			return false;
 		
-		ITypeBinding[] m1TypeParams= m1.getTypeParameters();
-		ITypeBinding[] m2TypeParams= m2.getTypeParameters();
+		ITypeBinding[] m1TypeParams= overriding.getTypeParameters();
+		ITypeBinding[] m2TypeParams= overridden.getTypeParameters();
 		if (m1TypeParams.length != m2TypeParams.length
 				&& m1TypeParams.length != 0) //non-generic m1 can override a generic m2
 			return false;
@@ -1029,6 +954,7 @@ public class Bindings {
 	 * @param in the project defining the scope
 	 * @return the corresponding IField
 	 * @throws JavaModelException if an error occurs in the Java model
+	 * @deprecated Inline as (IField) field.getJavaElement();
 	 */
 	public static IField findField(IVariableBinding field, IJavaProject in) throws JavaModelException {
 		Assert.isTrue(field.isField());
@@ -1066,6 +992,7 @@ public class Bindings {
 	 * @param scope the project scope
 	 * @return the corresponding IType or <code>null</code>
 	 * @throws JavaModelException if an error occurs in the Java model
+	 * @deprecated Inline as (IType) type.getJavaElement();
 	 */
 	public static IType findType(ITypeBinding type, IJavaProject scope) throws JavaModelException {
 		IType iType= (IType) type.getJavaElement();
@@ -1116,6 +1043,7 @@ public class Bindings {
 	 * @param scope the project scope 
 	 * @return the corresponding IMethod or <code>null</code> 
 	 * @throws JavaModelException if an error occurs in the Java model
+	 * 	@deprecated Inline as (IMethod) method.getJavaElement();
 	 */
 	public static IMethod findMethod(IMethodBinding method, IJavaProject scope) throws JavaModelException {
 		if (! USE_UI_BINDING_GET_JAVA_ELEMENT) {
@@ -1159,6 +1087,7 @@ public class Bindings {
 	 * @param type the type to look in
 	 * @return the corresponding IMethod or <code>null</code>
 	 * @throws JavaModelException if an error occurs in the Java model
+	 * @deprecated Use {@link #findMethodInHierarchy(ITypeBinding, String, String[])} or {@link JavaModelUtil}
 	 */
 	public static IMethod findMethod(IMethodBinding method, IType type) throws JavaModelException {
 		method= method.getMethodDeclaration();
@@ -1425,14 +1354,12 @@ public class Bindings {
 		return true;
 	}
 
-	public static boolean containsOverridingMethod(IMethodBinding[] candidates, IMethodBinding overridable) {
-		for (int index= 0; index < candidates.length; index++) {
-			if (areOverriddenMethods(candidates[index], overridable))
-				return true;
-		}
-		return false;
-	}
 
+	/**
+	 * @deprecated Need to review: Use {@link #isSubsignature(IMethodBinding, IMethodBinding)} if the two bindings
+	 * are in the same hierarchy (directly overrides each other), or {@link #findMethodInHierarchy(ITypeBinding, String, ITypeBinding[])}
+	 * else.
+	 */
 	public static boolean containsSignatureEquivalentConstructor(IMethodBinding[] candidates, IMethodBinding overridable) {
 		for (int index= 0; index < candidates.length; index++) {
 			if (isSignatureEquivalentConstructor(candidates[index], overridable))
@@ -1441,7 +1368,7 @@ public class Bindings {
 		return false;
 	}
 
-	public static boolean isSignatureEquivalentConstructor(IMethodBinding overridden, IMethodBinding overridable) {
+	private static boolean isSignatureEquivalentConstructor(IMethodBinding overridden, IMethodBinding overridable) {
 
 		if (!overridden.isConstructor() || !overridable.isConstructor())
 			return false;
@@ -1452,6 +1379,11 @@ public class Bindings {
 		return areSubTypeCompatible(overridden, overridable);
 	}
 	
+	/**
+	 * @deprecated Need to review: Use {@link #isSubsignature(IMethodBinding, IMethodBinding)} if the two bindings
+	 * are in the same hierarchy (directly overrides each other), or {@link #findMethodInHierarchy(ITypeBinding, String, ITypeBinding[])}
+	 * else.
+	 */
 	public static boolean areOverriddenMethods(IMethodBinding overridden, IMethodBinding overridable) {
 
 		if (!overridden.getName().equals(overridable.getName()))

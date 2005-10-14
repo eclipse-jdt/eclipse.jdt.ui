@@ -37,11 +37,11 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
@@ -405,9 +405,8 @@ public class JavaDocAutoIndentStrategy extends DefaultIndentLineAutoEditStrategy
 	 */
 	private static IMethod getInheritedMethod(IMethod method) throws JavaModelException {
 		IType declaringType= method.getDeclaringType();
-		ITypeHierarchy typeHierarchy= SuperTypeHierarchyCache.getTypeHierarchy(declaringType);
-		return JavaModelUtil.findMethodDeclarationInHierarchy(typeHierarchy, declaringType,
-			method.getElementName(), method.getParameterTypes(), method.isConstructor());
+		MethodOverrideTester tester= SuperTypeHierarchyCache.getMethodOverrideTester(declaringType);
+		return tester.findOverriddenMethod(method, true);
 	}
 
 	/**

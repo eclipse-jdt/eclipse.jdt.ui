@@ -135,7 +135,11 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 						candidates.add(method);
 				}
 				if (candidates.size() > 1) {
-					method= Bindings.findMethodInHierarchy(rewrite.getAST().resolveWellKnownType("java.lang.Object"), binding, fMethodName, fParamTypes); //$NON-NLS-1$
+					method= Bindings.findMethodInHierarchy(binding, fMethodName, fParamTypes);
+					if (method == null) {
+						ITypeBinding objectType= rewrite.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+						method= Bindings.findMethodInType(objectType, fMethodName, fParamTypes);
+					}
 					if (method == null)
 						method= (IMethodBinding) candidates.get(0);
 				} else if (!candidates.isEmpty())

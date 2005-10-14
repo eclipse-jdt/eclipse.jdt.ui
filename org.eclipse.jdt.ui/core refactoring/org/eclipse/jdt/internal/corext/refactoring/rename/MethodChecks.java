@@ -33,6 +33,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 
 public class MethodChecks {
 
@@ -120,7 +121,8 @@ public class MethodChecks {
 	}
 
 	public static IMethod overridesAnotherMethod(IMethod method, ITypeHierarchy hierarchy) throws JavaModelException {
-		IMethod found= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, method.getDeclaringType(), method.getElementName(), method.getParameterTypes(), method.isConstructor());
+		MethodOverrideTester tester= new MethodOverrideTester(method.getDeclaringType(), hierarchy);
+		IMethod found= tester.findDeclaringMethod(method, true);
 		boolean overrides= (found != null && !found.equals(method) && (!JdtFlags.isStatic(found)) && (!JdtFlags.isPrivate(found)));
 		if (overrides)
 			return found;

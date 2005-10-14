@@ -125,7 +125,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 					return 0;
 				}
 				int flags= method.getFlags();
-				if (!method.getDeclaringType().isInterface() && !method.isConstructor() && !Flags.isPrivate(flags) && !Flags.isStatic(flags)) {
+				if (!method.isConstructor() && !Flags.isPrivate(flags) && !Flags.isStatic(flags)) {
 					int res= getOverrideIndicators(method);
 					if (res != 0 && Flags.isSynchronized(flags)) {
 						return res | JavaElementImageDescriptor.SYNCHRONIZED;
@@ -160,7 +160,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 		IType type= method.getDeclaringType();
 		
 		MethodOverrideTester methodOverrideTester= SuperTypeHierarchyCache.getMethodOverrideTester(type);
-		IMethod defining= methodOverrideTester.findMethodDefininition(method, true);
+		IMethod defining= methodOverrideTester.findOverriddenMethod(method, true);
 		if (defining != null) {
 			if (JdtFlags.isAbstract(defining)) {
 				return JavaElementImageDescriptor.IMPLEMENTS;
@@ -176,7 +176,7 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 		if (node instanceof SimpleName && node.getParent() instanceof MethodDeclaration) {
 			IMethodBinding binding= ((MethodDeclaration) node.getParent()).resolveBinding();
 			if (binding != null) {
-				IMethodBinding defining= Bindings.findMethodDefininition(binding, true);
+				IMethodBinding defining= Bindings.findOverriddenMethod(binding, true);
 				if (defining != null) {
 					if (JdtFlags.isAbstract(defining)) {
 						return JavaElementImageDescriptor.IMPLEMENTS;
@@ -198,14 +198,29 @@ public class OverrideIndicatorLabelDecorator implements ILabelDecorator, ILightw
 	 * @param paramTypes The parameter types of the method to find.
 	 * @return The resulting decoration.
 	 * @throws JavaModelException
+	 * @deprecated Not used anymore. This method is not accurate for methods in generic types.
 	 */
 	protected int findInHierarchy(IType type, ITypeHierarchy hierarchy, String name, String[] paramTypes) throws JavaModelException {
-		IMethod defining= JavaModelUtil.findMethodDefininition(hierarchy, type, name, paramTypes, false, true);
-		if (defining != null) {
-			if (JdtFlags.isAbstract(defining)) {
-				return JavaElementImageDescriptor.IMPLEMENTS;
-			} else {
-				return JavaElementImageDescriptor.OVERRIDES;
+		IType superClass= hierarchy.getSuperclass(type);
+		if (superClass != null) {
+			IMethod res= JavaModelUtil.findMethodInHierarchy(hierarchy, superClass, name, paramTypes, false);
+			if (res != null && !Flags.isPrivate(res.getFlags()) && JavaModelUtil.isVisibleInHierarchy(res, type.getPackageFragment())) {
+				if (JdtFlags.isAbstract(res)) {
+					return JavaElementImageDescriptor.IMPLEMENTS;
+				} else {
+					return JavaElementImageDescriptor.OVERRIDES;
+				}
+			}
+		}
+		IType[] interfaces= hierarchy.getSuperInterfaces(type);
+		for (int i= 0; i < interfaces.length; i++) {
+			IMethod res= JavaModelUtil.findMethodInHierarchy(hierarchy, interfaces[i], name, paramTypes, false);
+			if (res != null) {
+				if (JdtFlags.isAbstract(res)) {
+					return JavaElementImageDescriptor.IMPLEMENTS;
+				} else {
+					return JavaElementImageDescriptor.OVERRIDES;
+				}
 			}
 		}
 		return 0;

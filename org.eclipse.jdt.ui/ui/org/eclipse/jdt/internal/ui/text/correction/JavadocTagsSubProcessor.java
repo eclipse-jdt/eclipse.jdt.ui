@@ -373,7 +373,7 @@ public class JavadocTagsSubProcessor {
 			IMethodBinding methodBinding= methodDecl.resolveBinding();
 			IMethodBinding overridden= null;
 			if (methodBinding != null) {
-				overridden= Bindings.findMethodDefininition(methodBinding, true);
+				overridden= Bindings.findOverriddenMethod(methodBinding, true);
 			}
 
 			String string= CodeGeneration.getMethodComment(cu, binding.getName(), methodDecl, overridden, String.valueOf('\n'));

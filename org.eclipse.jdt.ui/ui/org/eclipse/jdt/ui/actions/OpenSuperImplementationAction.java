@@ -14,8 +14,9 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
@@ -24,12 +25,12 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
@@ -132,9 +133,7 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		}		
 
 		try {
-			IType type= method.getDeclaringType();
-
-			IMethod impl= findSuperImplementation(type, method);
+			IMethod impl= findSuperImplementation(method);
 			if (impl != null) {
 				OpenActionUtil.open(impl);
 			}
@@ -145,14 +144,9 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 		}
 	}
 	
-	private IMethod findSuperImplementation(IType declaringType, IMethod method) throws JavaModelException {
-		ITypeHierarchy hierarchy= SuperTypeHierarchyCache.getTypeHierarchy(declaringType);
-		IMethod impl= JavaModelUtil.findMethodImplementationInHierarchy2(hierarchy, declaringType, method);
-		if (impl == null) {
-			// if no implementation found try to open a declaration
-			impl= JavaModelUtil.findMethodDeclarationInHierarchy2(hierarchy, declaringType, method);
-		}
-		return impl;
+	private IMethod findSuperImplementation(IMethod method) throws JavaModelException {
+		MethodOverrideTester tester= SuperTypeHierarchyCache.getMethodOverrideTester(method.getDeclaringType());
+		return tester.findOverriddenMethod(method, false);
 	}
 	
 	
@@ -171,9 +165,8 @@ public class OpenSuperImplementationAction extends SelectionDispatchAction {
 			int flags= method.getFlags();
 			if (!Flags.isStatic(flags) && !Flags.isPrivate(flags)) {
 				IType declaringType= method.getDeclaringType();
-				// if possible, make a check. don't care about working copies etc. In doubt, the action will be enabled.
 				if (SuperTypeHierarchyCache.hasInCache(declaringType)) {
-					if (findSuperImplementation(declaringType, method) == null) {
+					if (findSuperImplementation(method) == null) {
 						return false;
 					}
 				}

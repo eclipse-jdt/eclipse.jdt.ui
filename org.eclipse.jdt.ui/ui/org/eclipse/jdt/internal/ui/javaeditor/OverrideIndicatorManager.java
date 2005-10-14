@@ -100,7 +100,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 				if (node instanceof MethodDeclaration) {
 					try {
 						IMethodBinding methodBinding= ((MethodDeclaration)node).resolveBinding();
-						IMethodBinding definingMethodBinding= Bindings.findMethodDefininition(methodBinding, true);
+						IMethodBinding definingMethodBinding= Bindings.findOverriddenMethod(methodBinding, true);
 						if (definingMethodBinding != null) {
 							IJavaElement definingMethod= definingMethodBinding.getJavaElement();
 							if (definingMethod != null) {
@@ -182,7 +182,7 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 			public boolean visit(MethodDeclaration node) {
 				IMethodBinding binding= node.resolveBinding();
 				if (binding != null) {
-					IMethodBinding definingMethod= Bindings.findMethodDefininition(binding, true);
+					IMethodBinding definingMethod= Bindings.findOverriddenMethod(binding, true);
 					if (definingMethod != null) {
 
 						ITypeBinding definingType= definingMethod.getDeclaringClass();

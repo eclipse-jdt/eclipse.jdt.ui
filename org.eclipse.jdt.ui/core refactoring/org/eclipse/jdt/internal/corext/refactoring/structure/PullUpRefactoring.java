@@ -1343,7 +1343,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 			IMethod first= JavaModelUtil.findMethod(name, paramTypes, isConstructor, targetClass);
 			if (first != null && MethodChecks.isVirtual(first))
 				return true;
-			IMethod found= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, targetClass, name, paramTypes, isConstructor);
+			IMethod found= JavaModelUtil.findMethodInHierarchy(hierarchy, targetClass, name, paramTypes, isConstructor);
 			return found != null && MethodChecks.isVirtual(found);
 		} finally {
 			pm.done();

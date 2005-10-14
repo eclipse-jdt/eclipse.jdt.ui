@@ -13,18 +13,33 @@ package org.eclipse.jdt.internal.corext.util;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.jdt.core.*;
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jdt.core.ClasspathContainerInitializer;
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClasspathContainer;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.CharOperation;
-import org.eclipse.jdt.core.dom.PrimitiveType;
 
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
@@ -80,21 +95,7 @@ public final class JavaModelUtil {
 		return null;
 	}
 	
-	/**
-	 * Returns <code>true</code> if the given package fragment root is
-	 * referenced. This means it is own by a different project but is referenced
-	 * by the root's parent. Returns <code>false</code> if the given root
-	 * doesn't have an underlying resource.
-	 */
-	public static boolean isReferenced(IPackageFragmentRoot root) {
-		IResource resource= root.getResource();
-		if (resource != null) {
-			IProject jarProject= resource.getProject();
-			IProject container= root.getJavaProject().getProject();
-			return !container.equals(jarProject);
-		}
-		return false;
-	}
+
 	
 	private static IType findType(IPackageFragmentRoot root, String fullyQualifiedName) throws JavaModelException{
 		IJavaElement[] children= root.getChildren();
@@ -133,18 +134,6 @@ public final class JavaModelUtil {
 		return null;
 	}
 	
-	/** 
-	 * Finds a type by package and type name.
-	 * @param jproject the java project to search in
-	 * @param pack The package name
-	 * @param typeQualifiedName the type qualified name (type name with enclosing type names (separated by dots))
-	 * @return the type found, or null if not existing
-	 * @deprecated Use IJavaProject.findType(String, String) instead
-	 */	
-	public static IType findType(IJavaProject jproject, String pack, String typeQualifiedName) throws JavaModelException {
-		return jproject.findType(pack, typeQualifiedName);
-	}
-
 	/**
 	 * Finds a type container by container name.
 	 * The returned element will be of type <code>IType</code> or a <code>IPackageFragment</code>.
@@ -185,22 +174,6 @@ public final class JavaModelUtil {
 		}
 		return null;
 	}
-		
-	/** 
-	 * Finds a a member in a compilation unit. Typical usage is to find the corresponding
-	 * member in a working copy.
-	 * @param cu the compilation unit (eg. working copy) to search in
-	 * @param member the member (eg. from the original)
-	 * @return the member found, or null if not existing
-	 */		
-	public static IMember findMemberInCompilationUnit(ICompilationUnit cu, IMember member) {
-		IJavaElement[] elements= cu.findElements(member);
-		if (elements != null && elements.length > 0) {
-			return (IMember) elements[0];
-		}
-		return null;
-	}
-	
 	
 	/** 
 	 * Returns the element of the given compilation unit which is "equal" to the
@@ -309,7 +282,7 @@ public final class JavaModelUtil {
 			return false;
 		}		
 		
-		IPackageFragment otherpack= (IPackageFragment) findParentOfKind(member, IJavaElement.PACKAGE_FRAGMENT);
+		IPackageFragment otherpack= (IPackageFragment) member.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 		return (pack != null && otherpack != null && isSamePackage(pack, otherpack));
 	}
 	
@@ -334,7 +307,7 @@ public final class JavaModelUtil {
 			return false;
 		}		
 		
-		IPackageFragment otherpack= (IPackageFragment) findParentOfKind(member, IJavaElement.PACKAGE_FRAGMENT);
+		IPackageFragment otherpack= (IPackageFragment) member.getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 		return (pack != null && pack.equals(otherpack));
 	}
 			
@@ -345,18 +318,6 @@ public final class JavaModelUtil {
 	 */
 	public static IPackageFragmentRoot getPackageFragmentRoot(IJavaElement element) {
 		return (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-	}
-
-	/**
-	 * Returns the parent of the supplied java element that conforms to the given 
-	 * parent type or <code>null</code>, if such a parent doesn't exit.
-	 * @deprecated Use element.getParent().getAncestor(kind);
-	 */
-	public static IJavaElement findParentOfKind(IJavaElement element, int kind) {
-		if (element != null && element.getParent() != null) {
-			return element.getParent().getAncestor(kind);
-		}
-		return null;
 	}
 	
 	/**
@@ -370,21 +331,7 @@ public final class JavaModelUtil {
 	 * @return The first found method or <code>null</code>, if nothing found
 	 */
 	public static IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IType type) throws JavaModelException {
-		return findMethod(name, paramTypes, isConstructor, type.getMethods());
-	}
-
-	/**
-	 * Finds a method by name.
-	 * This searches for a method with a name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done.
-	 * Constructors are only compared by parameters, not the name.
-	 * @param name The name of the method to find
-	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
-	 * @param isConstructor If the method is a constructor
-	 * @param methods The methods to search in
-	 * @return The found method or <code>null</code>, if nothing found
-	 */
-	public static IMethod findMethod(String name, String[] paramTypes, boolean isConstructor, IMethod[] methods) throws JavaModelException {
+		IMethod[] methods= type.getMethods();
 		for (int i= 0; i < methods.length; i++) {
 			if (isSameMethodSignature(name, paramTypes, isConstructor, methods[i])) {
 				return methods[i];
@@ -392,130 +339,21 @@ public final class JavaModelUtil {
 		}
 		return null;
 	}
-	
+				
 	/**
-	 * Finds a method. This searches for a method with a name and signature. Parameter types are only
+	 * Finds a method in a type and all its super types. The super class hierarchy is searched first, then the super interfaces.
+	 * This searches for a method with the same name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done.
 	 * Constructors are only compared by parameters, not the name.
-	 * @param curr The method to find
-	 * @param methods The methods to search in
-	 * @return The found method or <code>null</code>, if nothing found
-	 */
-	public static IMethod findMethod2(IMethod curr, IMethod[] methods) throws JavaModelException {
-		for (int i= 0; i < methods.length; i++) {
-			if (isSameMethodSignature2(curr, methods[i])) {
-				return methods[i];
-			}
-		}
-		return null;
-	}
-	
-
-	/**
-	 * Finds a method declaration in a type's hierarchy. The search is top down, so this
-	 * returns the first declaration of the method in the hierarchy.
-	 * This searches for a method with a name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done.
-	 * Constructors are only compared by parameters, not the name.
-	 * @param type Searches in this type's supertypes.
+	 * NOTE: For finding overrideen methods or for finding the declaraing method, use {@link MethodOverrideTester}
+	 * @param hierarchy The hierarchy containing the type
+	 * 	@param type The type to start the search from
 	 * @param name The name of the method to find
 	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
 	 * @param isConstructor If the method is a constructor
-	 * @return The first method found or null, if nothing found
+	 * @return The first found method or <code>null</code>, if nothing found
 	 */
-	public static IMethod findMethodDeclarationInHierarchy(ITypeHierarchy hierarchy, IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
-		IType[] superTypes= hierarchy.getAllSupertypes(type);
-		for (int i= superTypes.length - 1; i >= 0; i--) {
-			IMethod first= findMethod(name, paramTypes, isConstructor, superTypes[i]);
-			if (first != null && !Flags.isPrivate(first.getFlags())) {
-				// the order getAllSupertypes does make assumptions of the order of inner elements -> search recursively
-				IMethod res= findMethodDeclarationInHierarchy(hierarchy, first.getDeclaringType(), name, paramTypes, isConstructor);
-				if (res != null) {
-					return res;
-				}
-				return first;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Finds a method declaration in a type's hierarchy. The search is top down, so this
-	 * returns the first declaration of the method in the hierarchy.
-	 * This searches for a method with a name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done.
-	 * Constructors are only compared by parameters, not the name.
-	 * @param type Searches in this type's supertypes.
-	 * @param method The method to find
-	 * @return The first method found or null, if nothing found
-	 */
-	public static IMethod findMethodDeclarationInHierarchy2(ITypeHierarchy hierarchy, IType type, IMethod method) throws JavaModelException {
-		IType[] superTypes= hierarchy.getAllSupertypes(type);
-		for (int i= superTypes.length - 1; i >= 0; i--) {
-			IMethod first= findMethod2(method, superTypes[i].getMethods());
-			if (first != null && !Flags.isPrivate(first.getFlags())) {
-				// the order getAllSupertypes does make assumptions of the order of inner elements -> search recursively
-				IMethod res= findMethodDeclarationInHierarchy2(hierarchy, first.getDeclaringType(), method);
-				if (res != null) {
-					return res;
-				}
-				return first;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Finds a method implementation in a type's class hierarchy. The search is bottom-up, so this
-	 * returns the nearest overridden method. Does not find methods in interfaces or abstract methods.
-	 * This searches for a method with a name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done.
-	 * Constructors are only compared by parameters, not the name.
-	 * @param type Type to search the superclasses
-	 * @param name The name of the method to find
-	 * @param paramTypes The type signatures of the parameters e.g. <code>{"QString;","I"}</code>
-	 * @param isConstructor If the method is a constructor
-	 * @return The first method found or null, if nothing found
-	 */
-	public static IMethod findMethodImplementationInHierarchy(ITypeHierarchy hierarchy, IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
-		IType[] superTypes= hierarchy.getAllSuperclasses(type);
-		for (int i= 0; i < superTypes.length; i++) {
-			IMethod found= findMethod(name, paramTypes, isConstructor, superTypes[i]);
-			if (found != null) {
-				if (Flags.isAbstract(found.getFlags())) {
-					return null;
-				}
-				return found;
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Finds a method implementation in a type's class hierarchy. The search is bottom-up, so this
-	 * returns the nearest overridden method. Does not find methods in interfaces or abstract methods.
-	 * This searches for a method with a name and signature. Parameter types are only
-	 * compared by the simple name, no resolving for the fully qualified type name is done.
-	 * Constructors are only compared by parameters, not the name.
-	 * @param type Type to search the superclasses
-	 * @param method The method to find
-	 * @return The first method found or null, if nothing found
-	 */
-	public static IMethod findMethodImplementationInHierarchy2(ITypeHierarchy hierarchy, IType type, IMethod method) throws JavaModelException {
-		IType[] superTypes= hierarchy.getAllSuperclasses(type);
-		for (int i= 0; i < superTypes.length; i++) {
-			IMethod found= findMethod2(method, superTypes[i].getMethods());
-			if (found != null) {
-				if (Flags.isAbstract(found.getFlags())) {
-					return null;
-				}
-				return found;
-			}
-		}
-		return null;
-	}
-	
-	private static IMethod findMethodInHierarchy(ITypeHierarchy hierarchy, IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
+	public static IMethod findMethodInHierarchy(ITypeHierarchy hierarchy, IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {
 		IMethod method= findMethod(name, paramTypes, isConstructor, type);
 		if (method != null) {
 			return method;
@@ -538,87 +376,7 @@ public final class JavaModelUtil {
 		}
 		return method;		
 	}
-	
-	private static IMethod findMethodInHierarchy2(ITypeHierarchy hierarchy, IType type, IMethod curr) throws JavaModelException {
-		IMethod method= findMethod2(curr, type.getMethods());
-		if (method != null) {
-			return method;
-		}
-		IType superClass= hierarchy.getSuperclass(type);
-		if (superClass != null) {
-			IMethod res=  findMethodInHierarchy2(hierarchy, superClass, curr);
-			if (res != null) {
-				return res;
-			}
-		}
-		if (!curr.isConstructor()) {
-			IType[] superInterfaces= hierarchy.getSuperInterfaces(type);
-			for (int i= 0; i < superInterfaces.length; i++) {
-				IMethod res= findMethodInHierarchy2(hierarchy, superInterfaces[i], curr);
-				if (res != null) {
-					return res;
-				}
-			}
-		}
-		return method;		
-	}
-	
 		
-	/**
-	 * Finds the method that is defines/declares the given method. The search is bottom-up, so this
-	 * returns the nearest defining/declaring method.
-	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
-	 * @throws JavaModelException
-	 */
-	public static IMethod findMethodDefininition(ITypeHierarchy typeHierarchy, IType type, String methodName, String[] paramTypes, boolean isConstructor, boolean testVisibility) throws JavaModelException {		
-		IType superClass= typeHierarchy.getSuperclass(type);
-		if (superClass != null) {
-			IMethod res= findMethodInHierarchy(typeHierarchy, superClass, methodName, paramTypes, isConstructor);
-			if (res != null && !Flags.isPrivate(res.getFlags())) {
-				if (!testVisibility || isVisibleInHierarchy(res, type.getPackageFragment())) {
-					return res;
-				}
-			}
-		}
-		if (!isConstructor) {
-			IType[] interfaces= typeHierarchy.getSuperInterfaces(type);
-			for (int i= 0; i < interfaces.length; i++) {
-				IMethod res= findMethodInHierarchy(typeHierarchy, interfaces[i], methodName, paramTypes, false);
-				if (res != null) {
-					return res; // methods from interfaces are always public and therefore visible
-				}
-			}
-		}
-		return null;
-	}
-	
-	/**
-	 * Finds the method that is defines/declares the given method. The search is bottom-up, so this
-	 * returns the nearest defining/declaring method.
-	 * @param testVisibility If true the result is tested on visibility. Null is returned if the method is not visible.
-	 * @throws JavaModelException
-	 */
-	public static IMethod findMethodDefininition2(ITypeHierarchy typeHierarchy, IType type, IMethod method, boolean testVisibility) throws JavaModelException {		
-		IType superClass= typeHierarchy.getSuperclass(type);
-		if (superClass != null) {
-			IMethod res= findMethodInHierarchy2(typeHierarchy, superClass, method);
-			if (res != null && !Flags.isPrivate(res.getFlags())) {
-				if (!testVisibility || isVisibleInHierarchy(res, type.getPackageFragment())) {
-					return res;
-				}
-			}
-		}
-		if (!method.isConstructor()) {
-			IType[] interfaces= typeHierarchy.getSuperInterfaces(type);
-			for (int i= 0; i < interfaces.length; i++) {
-				IMethod res= findMethodInHierarchy2(typeHierarchy, interfaces[i], method);
-				if (res != null) {
-					return res; // methods from interfaces are always public and therefore visible
-				}
-			}
-		}
-		return null;
-	}
 	
 	/**
 	 * Tests if a method equals to the given signature.
@@ -648,105 +406,6 @@ public final class JavaModelUtil {
 		}
 		return false;
 	}
-	
-	
-	/**
-	 * Tests if two method have the same signature.
-	 * Parameter types are only compared by the simple name, no resolving for
-	 * the fully qualified type name is done. Erasures are compared. Type variables always match.
-	 * Constructors are only compared by parameters, not the name.
-	 * @param method
-	 * @param other
-	 * @return Returns <code>true</code> if the methods override
-	 * @throws JavaModelException
-	 */
-	public static boolean isSameMethodSignature2(IMethod method, IMethod other) throws JavaModelException {
-		boolean isConstructor= method.isConstructor();
-		if (isConstructor != other.isConstructor()) {
-			return false;
-		}
-		if (!isConstructor && !method.getElementName().equals(other.getElementName())) {
-			return false;
-		}
-		int nParameters= method.getNumberOfParameters();
-		if (nParameters != other.getNumberOfParameters()) {
-			return false;
-		}
-		if (nParameters > 0) {
-			String[] currParamTypes= getParameterTypes(method);
-			String[] otherParamTypes= getParameterTypes(other);
-			for (int i= 0; i < currParamTypes.length; i++) {
-				String p1= currParamTypes[i];
-				String p2= otherParamTypes[i];
-				if (p1 == null) {
-					return p2 == null || PrimitiveType.toCode(p2) == null;
-				} else if (p2 == null) {
-					return p1 == null || PrimitiveType.toCode(p1) == null;
-				} else {
-					return p1.equals(p2);
-				}
-			}
-		}
-		return true;
-	}
-		
-	private static String[] getParameterTypes(IMethod curr) throws JavaModelException {
-		String[] paramTypeSigs= curr.getParameterTypes();
-		String[] paramTypes= new String[paramTypeSigs.length];
-		if (is50OrHigher(curr.getJavaProject())) {
-			// for methods in 5.0 project test erasure
-			Set variables= getVariables(curr);
-			for (int i= 0; i < paramTypeSigs.length; i++) {
-				paramTypes[i]= getErasure(paramTypeSigs[i], variables);
-			}
-		} else {
-			for (int i= 0; i < paramTypeSigs.length; i++) {
-				paramTypes[i]= Signature.getSimpleName(Signature.toString(paramTypeSigs[i]));
-			}
-		}
-		return paramTypes;
-	}
-	
-	private static Set getVariables(IMethod curr) throws JavaModelException {
-		Set res= new HashSet();
-		ITypeParameter[] typeParameters= curr.getTypeParameters();
-		for (int i= 0; i < typeParameters.length; i++) {
-			res.add(typeParameters[i].getElementName());
-		}
-		typeParameters= curr.getDeclaringType().getTypeParameters();
-		for (int i= 0; i < typeParameters.length; i++) {
-			res.add(typeParameters[i].getElementName());
-		}
-		
-		return res;
-	}
-
-	private static String getErasure(String str, Set variables) {
-		switch (Signature.getTypeSignatureKind(str)) {
-			case Signature.TYPE_VARIABLE_SIGNATURE:
-				return null;
-			case Signature.CLASS_TYPE_SIGNATURE:
-				String s= Signature.toString(str);
-				if (variables.contains(s)) {
-					return null;
-				}
-				return Signature.getSimpleName(Signature.getTypeErasure(s));
-			case Signature.ARRAY_TYPE_SIGNATURE:
-				int dim= Signature.getArrayCount(str);
-				String erasure= getErasure(Signature.getElementType(str), variables);
-				if (erasure == null)
-					return null;
-				
-				StringBuffer buf= new StringBuffer(erasure);
-				for (int i= 0; i < dim; i++) {
-					buf.append('[').append(']');
-				}
-				return buf.toString();
-		}
-		return Signature.toString(str);
-	}
-
-
 
 	/**
 	 * Tests if two <code>IPackageFragment</code>s represent the same logical java package.
@@ -782,26 +441,7 @@ public final class JavaModelUtil {
 	public static boolean isInterfaceOrAnnotation(IType type) throws JavaModelException {
 		return type.isInterface();
 	}
-	
-	/**
-	 * Returns true if the element is on the build path of the given project
-	 * @deprecated Use jproject.isOnClasspath(element);
-	 */	
-	public static boolean isOnBuildPath(IJavaProject jproject, IJavaElement element) {
-		return jproject.isOnClasspath(element);
-	}
-	
-	/**
-	 * Tests if the given element is on the class path of its containing project. Handles the case
-	 * that the containing project isn't a Java project.
-	 */
-	public static boolean isOnClasspath(IJavaElement element) {
-		IJavaProject project= element.getJavaProject();
-		if (!project.exists())
-			return false;
-		return project.isOnClasspath(element);
-	}
-
+		
 	/**
 	 * Resolves a type name in the context of the declaring type.
 	 * 
@@ -924,50 +564,6 @@ public final class JavaModelUtil {
 	
 	
 	/**
-	 * @deprecated Inline this method.
-	 */
-	public static IMember toWorkingCopy(IMember member) {
-		return member;
-	}
-
-	/**
-	 * @deprecated Inline this method.
-	 */
-	public static IPackageDeclaration toWorkingCopy(IPackageDeclaration declaration) {
-		return declaration;
-	}
-	
-	/**
-	 * @deprecated Inline this method.
-	 */
-	public static IJavaElement toWorkingCopy(IJavaElement elem) {
-		return elem;
-	}	
-
-	/**
-	 * @deprecated Inline this method.
-	 */
-	public static IImportContainer toWorkingCopy(IImportContainer container) {
-		return container;
-
-	}
-
-	/**
-	 * @deprecated Inline this method.
-	 */
-	public static IImportDeclaration toWorkingCopy(IImportDeclaration importDeclaration) {
-		return importDeclaration;
-	}
-
-
-	/**
-	 * @deprecated Inline this method.
-	 */
-	public static ICompilationUnit toWorkingCopy(ICompilationUnit cu) {
-		return cu;
-	}
-	
-	/**
 	 * Returns true if a cu is a primary cu (original or shared working copy)
 	 */
 	public static boolean isPrimary(ICompilationUnit cu) {
@@ -1007,19 +603,24 @@ public final class JavaModelUtil {
 	}
 
 	public static IType[] getAllSuperTypes(IType type, IProgressMonitor pm) throws JavaModelException {
-		//workaround for 23656
-		Set types= new HashSet(Arrays.asList(type.newSupertypeHierarchy(pm).getAllSupertypes(type)));
-		IType objekt= type.getJavaProject().findType("java.lang.Object");//$NON-NLS-1$
-		if (objekt != null)
-			types.add(objekt);
-		return (IType[]) types.toArray(new IType[types.size()]);
+		// workaround for 23656
+		IType[] superTypes= SuperTypeHierarchyCache.getTypeHierarchy(type).getAllSupertypes(type);
+		if (type.isInterface()) {
+			IType objekt= type.getJavaProject().findType("java.lang.Object");//$NON-NLS-1$
+			if (objekt != null) {
+				IType[] superInterfacesAndObject= new IType[superTypes.length + 1];
+				System.arraycopy(superTypes, 0, superInterfacesAndObject, 0, superTypes.length);
+				superInterfacesAndObject[superTypes.length]= objekt;
+				return superInterfacesAndObject;
+			}
+		}
+		return superTypes;
 	}
 	
 	public static boolean isSuperType(ITypeHierarchy hierarchy, IType possibleSuperType, IType type) {
-		IType[] supertypes= hierarchy.getSupertypes(type);
+		IType[] supertypes= hierarchy.getAllSupertypes(type);
 		for (int i= 0; i < supertypes.length; i++) {
-			IType curr= supertypes[i];
-			if (possibleSuperType.equals(curr) || isSuperType(hierarchy, possibleSuperType, curr)) {
+			if (possibleSuperType.equals(supertypes[i])) {
 				return true;
 			}
 		}

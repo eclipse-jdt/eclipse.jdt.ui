@@ -12,26 +12,21 @@ package org.eclipse.jdt.ui.tests.core;
 
 
 import java.io.File;
-import java.util.ArrayList;
-import java.util.Arrays;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -40,6 +35,9 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
 public class JavaModelUtilTest extends TestCase {
 	
@@ -153,39 +151,7 @@ public class JavaModelUtilTest extends TestCase {
 		type= JavaModelUtil.findType(fJProject1, "pack1.ReqProjType.Inner.InnerInner");
 		assertElementName("InnerInner", type, IJavaElement.TYPE);	
 	}
-	
-	/**
-	 * @deprecated Tests a deprecated method
-	 */
-	public void testFindType2() throws Exception {
-		IType type= JavaModelUtil.findType(fJProject1, "junit.extensions", "ExceptionTestCase");
-		assertElementName("ExceptionTestCase", type, IJavaElement.TYPE);
-
-		type= JavaModelUtil.findType(fJProject1, "junit.samples.money" , "IMoney");
-		assertElementName("IMoney", type, IJavaElement.TYPE);	
-
-		type= JavaModelUtil.findType(fJProject1, "junit.tests.framework", "TestCaseTest.TornDown");
-		assertElementName("TornDown", type, IJavaElement.TYPE);
 		
-		type= JavaModelUtil.findType(fJProject1, "mylib" , "Foo");
-		assertElementName("Foo", type, IJavaElement.TYPE);
-		
-		type= JavaModelUtil.findType(fJProject1, "mylib", "Foo.FooInner");
-		assertElementName("FooInner", type, IJavaElement.TYPE);
-		
-		type= JavaModelUtil.findType(fJProject1, "mylib", "Foo.FooInner.FooInnerInner");
-		assertElementName("FooInnerInner", type, IJavaElement.TYPE);
-		
-		type= JavaModelUtil.findType(fJProject1, "pack1", "ReqProjType");
-		assertElementName("ReqProjType", type, IJavaElement.TYPE);
-		
-		type= JavaModelUtil.findType(fJProject1, "pack1", "ReqProjType.Inner");
-		assertElementName("Inner", type, IJavaElement.TYPE);	
-
-		type= JavaModelUtil.findType(fJProject1, "pack1", "ReqProjType.Inner.InnerInner");
-		assertElementName("InnerInner", type, IJavaElement.TYPE);				
-	}
-	
 	public void testFindTypeContainer() throws Exception {
 		IJavaElement elem= JavaModelUtil.findTypeContainer(fJProject1, "junit.extensions");
 		assertElementName("junit.extensions", elem, IJavaElement.PACKAGE_FRAGMENT);
@@ -234,32 +200,7 @@ public class JavaModelUtilTest extends TestCase {
 		type= JavaModelUtil.findTypeInCompilationUnit(cu, "ReqProjType.Inner.InnerInner");
 		assertElementName("InnerInner", type, IJavaElement.TYPE);		
 	}
-	
-	public void testFindMemberInCompilationUnit() throws Exception {
-		ICompilationUnit cu= (ICompilationUnit) fJProject1.findElement(new Path("junit/tests/framework/TestCaseTest.java"));
-		assertElementName("TestCaseTest.java", cu, IJavaElement.COMPILATION_UNIT);
-		ArrayList children= new ArrayList();
 		
-		IType type= JavaModelUtil.findTypeInCompilationUnit(cu, "TestCaseTest");
-		assertElementName("TestCaseTest", type, IJavaElement.TYPE);
-		
-		children.addAll(Arrays.asList(type.getChildren()));
-		
-		type= JavaModelUtil.findTypeInCompilationUnit(cu, "TestCaseTest.TornDown");
-		assertElementName("TornDown", type, IJavaElement.TYPE);
-		
-		children.addAll(Arrays.asList(type.getChildren()));
-		
-		assertEquals("a", children.size(), 20);
-
-		for (int i= 0; i < children.size(); i++) {
-			Object curr= children.get(i);
-			assertTrue("b", curr instanceof IMember);
-			IMember member= JavaModelUtil.findMemberInCompilationUnit(cu, (IMember) curr);
-			assertEquals("b-" + i, curr, member);
-		}
-	}
-	
 	private void assertClasspathEntry(String name, IJavaElement elem, IPath path, int type) throws Exception {
 		IPackageFragmentRoot root= JavaModelUtil.getPackageFragmentRoot(elem);
 		assertNotNull(name + "-noroot", root);
@@ -289,28 +230,6 @@ public class JavaModelUtilTest extends TestCase {
 		assertElementName("ReqProjType", type, IJavaElement.TYPE);
 		path= fJProject2.getProject().getFullPath().append("src");
 		assertClasspathEntry("ReqProjType", type, path, IClasspathEntry.CPE_SOURCE);		
-	}
-
-	/**
-	 * @deprecated Tests a deprecated method
-	 */	
-	public void testIsOnBuildPath() throws Exception {
-		IType type= JavaModelUtil.findType(fJProject1, "junit.extensions.ExceptionTestCase");
-		assertElementName("ExceptionTestCase", type, IJavaElement.TYPE);
-		assertTrue("ExceptionTestCase-bp1", JavaModelUtil.isOnBuildPath(fJProject1, type));
-		assertTrue("ExceptionTestCase-bp2", !JavaModelUtil.isOnBuildPath(fJProject2, type));
-		
-		type= JavaModelUtil.findType(fJProject1, "java.lang.Object");
-		assertElementName("Object", type, IJavaElement.TYPE);		
-		assertTrue("Object-bp1", JavaModelUtil.isOnBuildPath(fJProject1, type));
-		// relies on shared objects for library entries
-		assertTrue("Object-bp2", JavaModelUtil.isOnBuildPath(fJProject2, type));			
-		
-		type= JavaModelUtil.findType(fJProject1, "pack1.ReqProjType");
-		assertElementName("ReqProjType", type, IJavaElement.TYPE);
-		assertTrue("ReqProjType-bp1", JavaModelUtil.isOnBuildPath(fJProject1, type));
-		// relies on shared objects for project entries
-		assertTrue("ReqProjType-bp2", JavaModelUtil.isOnBuildPath(fJProject2, type));		
 	}
 	
 	private void assertFindMethod(String methName, String[] paramTypeNames, boolean isConstructor, IType type) throws Exception {
@@ -367,7 +286,7 @@ public class JavaModelUtilTest extends TestCase {
 			sig[i]= Signature.createTypeSignature(name, false);
 			assertNotNull(methName + "-ts1" + i, sig[i]);
 		}
-		IMethod meth= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, methName, sig, isConstructor);
+		IMethod meth= JavaModelUtil.findMethodInHierarchy(hierarchy, type, methName, sig, isConstructor);
 		assertElementName(methName, meth, IJavaElement.METHOD);
 		assertTrue("methName-nparam1", meth.getParameterTypes().length == paramTypeNames.length);
 		assertEquals("methName-decltype", declaringTypeName, JavaModelUtil.getFullyQualifiedName(meth.getDeclaringType()));
@@ -377,7 +296,7 @@ public class JavaModelUtilTest extends TestCase {
 			sig[i]= Signature.createTypeSignature(paramTypeNames[i], true);
 			assertNotNull(methName + "-ts2" + i, sig[i]);
 		}		
-		meth= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, type, methName, sig, isConstructor);
+		meth= JavaModelUtil.findMethodInHierarchy(hierarchy, type, methName, sig, isConstructor);
 		assertElementName(methName, meth, IJavaElement.METHOD);
 		assertTrue("methName-nparam2", meth.getParameterTypes().length == paramTypeNames.length);
 		assertEquals("methName-decltype", declaringTypeName, JavaModelUtil.getFullyQualifiedName(meth.getDeclaringType()));
@@ -387,8 +306,8 @@ public class JavaModelUtilTest extends TestCase {
 		IType type= JavaModelUtil.findType(fJProject1, "junit.extensions.TestSetup");
 		assertElementName("TestSetup", type, IJavaElement.TYPE);		
 		
-		assertFindMethodInHierarchy("run", new String[] { "junit.framework.TestResult" }, false, type, "junit.framework.Test");
-		assertFindMethodInHierarchy("toString", new String[] {} , false, type, "java.lang.Object");
+		assertFindMethodInHierarchy("run", new String[] { "junit.framework.TestResult" }, false, type, "junit.extensions.TestSetup");
+		assertFindMethodInHierarchy("toString", new String[] {} , false, type, "junit.extensions.TestDecorator");
 	}
 	
 	public void testHasMainMethod() throws Exception {

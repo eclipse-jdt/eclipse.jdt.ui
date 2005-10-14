@@ -322,7 +322,7 @@ public class MethodOverrideTest extends CoreTests {
 			
 			boolean overrideAnnotationResult= overrideAnnotation.booleanValue();
 			boolean testerOverrides= tester.isSubsignature(overriddenMethod, overriding);
-			boolean uiBindingsIsSubsignature= Bindings.isSubsignature(overridingBinding, overriddenBinding);
+			boolean uiBindingsIsSubsignature= Bindings.isSubsignature(overriddenBinding, overridingBinding);
 			
 			if (DEBUG_SHOWRESULTS) {
 				boolean bindingOverrides= overridingBinding.getMethodDeclaration().overrides(overriddenBinding.getMethodDeclaration());
