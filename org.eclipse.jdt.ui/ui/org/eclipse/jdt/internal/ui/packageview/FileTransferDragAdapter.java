@@ -218,8 +218,11 @@ class FileTransferDragAdapter extends DragSourceAdapter implements TransferDragS
 			} else if (o instanceof IAdaptable) {
 				r= (IResource)((IAdaptable)o).getAdapter(IResource.class);
 			}
-			if (r != null)
+			// Only add resource for which we have a location
+			// in the local file system.
+			if (r != null && r.getLocation() != null) {
 				result.add(r);
+			}
 		}
 		return result;
 	}

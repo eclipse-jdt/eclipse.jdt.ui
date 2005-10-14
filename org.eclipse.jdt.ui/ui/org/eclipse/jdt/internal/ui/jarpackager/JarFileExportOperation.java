@@ -646,10 +646,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			fJavaNameToClassFilesMap= buildJavaToClassMap(classContainer);
 			if (fJavaNameToClassFilesMap == null) {
 				// Could not fully build map. fallback is to export whole directory
-				IPath location= classContainer.getLocation();
-				String containerName= "";  //$NON-NLS-1$
-				if (location != null)
-					containerName= location.toFile().toString();
+				String containerName= classContainer.getFullPath().toString();
 				String msg= Messages.format(JarPackagerMessages.JarFileExportOperation_missingSourceFileAttributeExportedAll, containerName); 
 				addInfo(msg, null);
 				fExportedClassContainers.add(classContainer);

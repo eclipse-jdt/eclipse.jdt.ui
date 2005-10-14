@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.preferences;
 
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -22,8 +21,8 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
 
-import org.eclipse.ui.dialogs.PropertyPage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.PropertyPage;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -32,6 +31,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 
@@ -134,10 +135,10 @@ public class JavaElementInfoPage extends PropertyPage {
 		} else if (element instanceof IJavaProject) {
 			Label packageLabel= new Label(composite, SWT.NONE);
 			packageLabel.setText(PreferencesMessages.JavaElementInfoPage_location); 
-			IPath location= ((IJavaProject)element).getProject().getLocation();
+			String location= Resources.getLocationString(((IJavaProject)element).getProject());
 			if (location != null) {
 				Label packageName= new Label(composite, SWT.NONE);
-				packageName.setText(location.toOSString());				
+				packageName.setText(location);				
 			}
 		}
 		Dialog.applyDialogFont(composite);		

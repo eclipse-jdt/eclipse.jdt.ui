@@ -10,11 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
-import java.io.File;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -39,6 +42,7 @@ import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -194,13 +198,16 @@ public class RefreshAction extends SelectionDispatchAction {
 	}
 	
 	private void checkLocationDeleted(IProject project) throws CoreException {
-		if (!project.exists() || project.getLocation() == null)
+		if (!project.exists())
 			return;
-		File file = project.getLocation().toFile();
-		if (!file.exists()) {
+		URI location= project.getLocationURI();
+		if (location == null)
+			return;
+		IFileStore store= EFS.getStore(location);
+		if (!store.fetchInfo().exists()) {
 			final String message = Messages.format(
 				ActionMessages.RefreshAction_locationDeleted_message, 
-				new Object[] {project.getName(), file.getAbsolutePath()});
+				new Object[] { project.getName(), Resources.getLocationString(project) });
 			final boolean[] result= new boolean[1];
 			// Must prompt user in UI thread (we're in the operation thread here).
 			getShell().getDisplay().syncExec(new Runnable() {

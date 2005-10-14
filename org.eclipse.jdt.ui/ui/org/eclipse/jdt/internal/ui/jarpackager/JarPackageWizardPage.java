@@ -589,8 +589,12 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			fDestinationNamesCombo.setFocus();
 			return false;
 		}
-		if (getWorkspaceLocation() != null && getWorkspaceLocation().isPrefixOf(fJarPackage.getAbsoluteJarLocation())) {
-			int segments= getWorkspaceLocation().matchingFirstSegments(fJarPackage.getAbsoluteJarLocation());
+		// Check if the Jar is put into the workspace an conflicts with the containers
+		// exported. If the workspace isn't on the local files system we are fine since
+		// the Jar is always created in the local file system
+		IPath workspaceLocation= ResourcesPlugin.getWorkspace().getRoot().getLocation();
+		if (workspaceLocation != null && workspaceLocation.isPrefixOf(fJarPackage.getAbsoluteJarLocation())) {
+			int segments= workspaceLocation.matchingFirstSegments(fJarPackage.getAbsoluteJarLocation());
 			IPath path= fJarPackage.getAbsoluteJarLocation().removeFirstSegments(segments);
 			IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(path);
 			if (resource != null && resource.getType() == IResource.FILE) {
@@ -834,12 +838,5 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 
 	private Object[] getSelectedElements() {
 		return getSelectedResources().toArray();
-	}
-
-	/**
-	 * @return the location or <code>null</code>
-	 */
-	private IPath getWorkspaceLocation() {
-		return ResourcesPlugin.getWorkspace().getRoot().getLocation();
 	}
 }
