@@ -12,13 +12,14 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jface.text.Assert;
-
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.text.Assert;
 
 import org.eclipse.ui.IEditorInput;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.ProblemsLabelDecorator;
@@ -72,7 +73,11 @@ public class JavaEditorErrorTickUpdater implements IProblemChangedListener {
 		if (titleImage == null) {
 			return;
 		}
-		Image newImage= fLabelProvider.getImage(jelement);
+		Image newImage;
+		if (jelement instanceof ICompilationUnit && !jelement.getJavaProject().isOnClasspath(jelement))
+			newImage= fLabelProvider.getImage(jelement.getResource());
+		else
+			newImage= fLabelProvider.getImage(jelement);
 		if (titleImage != newImage) {
 			postImageChange(newImage);
 		}
