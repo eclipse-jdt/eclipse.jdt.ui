@@ -338,7 +338,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		new InitializeAfterLoadJob().schedule();
 	}
 	
-	/* package */ static void initializeAfterLoad(IProgressMonitor unused) {
+	/* package */ static void initializeAfterLoad() {
 		Job job = new Job(JavaUIMessages.JavaPlugin_initializing_ui) {
 			protected IStatus run(IProgressMonitor monitor) {
 				IJobManager manager= Platform.getJobManager();

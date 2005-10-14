@@ -27,8 +27,7 @@ public class InitializeAfterLoadJob extends UIJob {
 	public IStatus runInUIThread(IProgressMonitor monitor) {
 		try {
 			JavaCore.initializeAfterLoad(monitor);
-			// no need for a monitor. Java Plugin is spawning a job.
-			JavaPlugin.initializeAfterLoad(null);
+			JavaPlugin.initializeAfterLoad();
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 			return e.getStatus();
