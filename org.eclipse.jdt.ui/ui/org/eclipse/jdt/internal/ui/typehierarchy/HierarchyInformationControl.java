@@ -206,9 +206,9 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		}
 
 		if (filterOverrides) {
-			return fMethodOverrideTester.findOverriddenMethod(filterMethod, typeToFindIn);
+			return fMethodOverrideTester.findOverriddenMethodInType(typeToFindIn, filterMethod);
 		} else {
-			return fMethodOverrideTester.findOverridingMethod(filterMethod, typeToFindIn);
+			return fMethodOverrideTester.findOverridingMethodInType(typeToFindIn, filterMethod);
 		}
 	}
 

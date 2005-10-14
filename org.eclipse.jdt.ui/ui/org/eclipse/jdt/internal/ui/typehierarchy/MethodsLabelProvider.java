@@ -14,7 +14,6 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.widgets.Display;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
@@ -22,7 +21,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
@@ -71,11 +70,8 @@ public class MethodsLabelProvider extends AppearanceAwareLabelProvider {
 			return declaringType;
 		}
 		IMethod method= (IMethod) element;
-		int flags= method.getFlags();
-		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || method.isConstructor()) {
-			return declaringType;
-		}
-		IMethod res= JavaModelUtil.findMethodDeclarationInHierarchy(hierarchy, declaringType, method.getElementName(), method.getParameterTypes(), false);
+		MethodOverrideTester tester= new MethodOverrideTester(declaringType, hierarchy);
+		IMethod res= tester.findDeclaringMethod(method, true);
 		if (res == null || method.equals(res)) {
 			return declaringType;
 		}
