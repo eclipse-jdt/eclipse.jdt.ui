@@ -618,10 +618,18 @@ public final class JavaModelUtil {
 	}
 	
 	public static boolean isSuperType(ITypeHierarchy hierarchy, IType possibleSuperType, IType type) {
-		IType[] supertypes= hierarchy.getAllSupertypes(type);
-		for (int i= 0; i < supertypes.length; i++) {
-			if (possibleSuperType.equals(supertypes[i])) {
-				return true;
+		// filed bug 112635 to add this method to ITypeHierarchy
+		IType superClass= hierarchy.getSuperclass(type);
+		if (superClass != null && (possibleSuperType.equals(superClass) || isSuperType(hierarchy, possibleSuperType, superClass))) {
+			return true;
+		}
+		if (Flags.isInterface(hierarchy.getCachedFlags(possibleSuperType))) {
+			IType[] superInterfaces= hierarchy.getSuperInterfaces(type);
+			for (int i= 0; i < superInterfaces.length; i++) {
+				IType curr= superInterfaces[i];
+				if (possibleSuperType.equals(curr) || isSuperType(hierarchy, possibleSuperType, curr)) {
+					return true;
+				}
 			}
 		}
 		return false;
