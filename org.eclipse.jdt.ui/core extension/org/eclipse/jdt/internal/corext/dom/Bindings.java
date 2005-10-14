@@ -856,29 +856,29 @@ public class Bindings {
 	/**
 	 * Returns <code>true</code> if the given type is a super type of a candidate.
 	 * <code>true</code> is returned if the two type bindings are identical (TODO)
-	 * @param type the type to inspect
-	 * @param candidate the candidates
+	 * @param possibleSuperType the type to inspect
+	 * @param type the type whose super types are looked at
 	 * @return <code>true</code> is a super type of one of the candidates; otherwise
 	 *  <code>false</code>
 	 */
-	public static boolean isSuperType(ITypeBinding type, ITypeBinding candidate) {
-		if (candidate.isArray() || candidate.isPrimitive()) {
+	public static boolean isSuperType(ITypeBinding possibleSuperType, ITypeBinding type) {
+		if (type.isArray() || type.isPrimitive()) {
 			return false;
 		}
-		if (Bindings.equals(candidate, type)) {
+		if (Bindings.equals(type, possibleSuperType)) {
 			return true;
 		}
-		ITypeBinding superClass= candidate.getSuperclass();
+		ITypeBinding superClass= type.getSuperclass();
 		if (superClass != null) {
-			if (isSuperType(type, superClass)) {
+			if (isSuperType(possibleSuperType, superClass)) {
 				return true;
 			}
 		}
 		
-		if (type.isInterface()) {
-			ITypeBinding[] superInterfaces= candidate.getInterfaces();
+		if (possibleSuperType.isInterface()) {
+			ITypeBinding[] superInterfaces= type.getInterfaces();
 			for (int i= 0; i < superInterfaces.length; i++) {
-				if (isSuperType(type, superInterfaces[i])) {
+				if (isSuperType(possibleSuperType, superInterfaces[i])) {
 					return true;
 				}			
 			}
