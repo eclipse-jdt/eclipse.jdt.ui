@@ -20,13 +20,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
 
 import org.eclipse.search.ui.ISearchQuery;
 import org.eclipse.search.ui.ISearchResultListener;
@@ -39,14 +36,12 @@ import org.eclipse.search.ui.text.Match;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.search.IMatchPresentation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 
 public class JavaSearchResult extends AbstractTextSearchResult implements IEditorMatchAdapter, IFileMatchAdapter {
 	private JavaSearchQuery fQuery;
@@ -140,21 +135,21 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 	public IFile getFile(Object element) {
 		if (element instanceof IJavaElement) {
 			IJavaElement javaElement= (IJavaElement) element;
-			IFile matchFile= null;
 			ICompilationUnit cu= (ICompilationUnit) javaElement.getAncestor(IJavaElement.COMPILATION_UNIT);
 			if (cu != null) {
-				matchFile= (IFile) cu.getResource();
+				return (IFile) cu.getResource();
 			} else {
 				IClassFile cf= (IClassFile) javaElement.getAncestor(IJavaElement.CLASS_FILE);
 				if (cf != null)
-					matchFile= (IFile) cf.getResource();
+					return (IFile) cf.getResource();
 			}
-			return matchFile;
+			return null;
 		}
 		if (element instanceof IFile)
 			return (IFile) element;
 		return null;
 	}
+	
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -162,34 +157,12 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 	 *      org.eclipse.ui.IEditorPart)
 	 */
 	public boolean isShownInEditor(Match match, IEditorPart editor) {
-		IEditorInput editorInput= editor.getEditorInput();
-		if (match.getElement() instanceof IJavaElement) {
-			IJavaElement je= (IJavaElement) match.getElement();
-			if (editorInput instanceof IFileEditorInput) {
-				IPackageFragmentRoot root= (IPackageFragmentRoot) je.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-				if (root.isArchive())
-					return false;
-				IFile inputFile= ((IFileEditorInput)editorInput).getFile();
-				IResource matchFile= null;
-				ICompilationUnit cu= (ICompilationUnit) je.getAncestor(IJavaElement.COMPILATION_UNIT);
-				if (cu != null) {
-					matchFile= cu.getResource();
-				} else {
-					IClassFile cf= (IClassFile) je.getAncestor(IJavaElement.CLASS_FILE);
-					if (cf != null)
-						matchFile= cf.getResource();
-				}
-				if (matchFile != null)
-					return inputFile.equals(matchFile);
-				else
-					return false;
-			} else if (editorInput instanceof IClassFileEditorInput) {
-				return ((IClassFileEditorInput)editorInput).getClassFile().equals(je.getAncestor(IJavaElement.CLASS_FILE));
-			}
-		} else if (match.getElement() instanceof IFile) {
-			if (editorInput instanceof IFileEditorInput) {
-				return ((IFileEditorInput)editorInput).getFile().equals(match.getElement());
-			}
+		Object element= match.getElement();
+		if (element instanceof IJavaElement) {
+			element= ((IJavaElement) element).getOpenable(); // class file or compilation unit 
+			return element != null && element.equals(editor.getEditorInput().getAdapter(IJavaElement.class));
+		} else if (element instanceof IFile) {
+			return element.equals(editor.getEditorInput().getAdapter(IFile.class));
 		}
 		return false;
 	}
