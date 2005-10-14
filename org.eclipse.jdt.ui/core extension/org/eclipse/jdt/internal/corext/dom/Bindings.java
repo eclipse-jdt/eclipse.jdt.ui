@@ -474,7 +474,7 @@ public class Bindings {
 	public static IMethodBinding findOverriddenMethodInType(ITypeBinding type, IMethodBinding method) {
 		IMethodBinding[] methods= type.getDeclaredMethods();
 		for (int i= 0; i < methods.length; i++) {
-			if (isSubsignature(methods[i], method))
+			if (isSubsignature(method, methods[i]))
 				return methods[i];
 		}
 		return null;
@@ -660,14 +660,14 @@ public class Bindings {
 	}
 
 	/**
-	 * @param overridden overridden method
-	 * @param overriding overriding method
+	 * @param overriding overriding method (m1)
+	 * @param overridden overridden method (m2)
 	 * @return <code>true</code> iff the method <code>m1</code> is a subsignature of the method <code>m2</code>.
 	 * 		This is one of the requirements for m1 to override m2.
 	 * 		Accessibility and return types are not taken into account.
 	 * 		Note that subsignature is <em>not</em> symmetric!
 	 */
-	public static boolean isSubsignature(IMethodBinding overridden, IMethodBinding overriding) {
+	public static boolean isSubsignature(IMethodBinding overriding, IMethodBinding overridden) {
 		//TODO: use IMethodBinding#isSubsignature(..) once it is tested and fixed (only erasure of m1's parameter types, considering type variable counts, doing type variable substitution		
 		if (!overriding.getName().equals(overridden.getName()))
 			return false;

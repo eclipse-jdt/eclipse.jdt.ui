@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
@@ -40,7 +41,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IParent;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.search.IMatchPresentation;
@@ -82,26 +82,37 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 	}
 
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
-		IEditorInput editorInput= editor.getEditorInput();
-		if (editorInput instanceof IFileEditorInput)  {
-			IFileEditorInput fileEditorInput= (IFileEditorInput) editorInput;
-			return computeContainedMatches(result, fileEditorInput.getFile());
-		} else if (editorInput instanceof IClassFileEditorInput) {
-			IClassFileEditorInput classFileEditorInput= (IClassFileEditorInput) editorInput;
-			Set matches= new HashSet();
-			collectMatches(matches, classFileEditorInput.getClassFile());
-			return (Match[]) matches.toArray(new Match[matches.size()]);
-		}
-		return null;
+		return computeContainedMatches(editor.getEditorInput());
 	}
 
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IFile file) {
-		IJavaElement javaElement= JavaCore.create(file);
-		if (!(javaElement instanceof ICompilationUnit || javaElement instanceof IClassFile))
-			return NO_MATCHES;
+		return computeContainedMatches(file);
+	}
+	
+	private Match[] computeContainedMatches(IAdaptable adaptable) {
+		IJavaElement javaElement= (IJavaElement) adaptable.getAdapter(IJavaElement.class);
 		Set matches= new HashSet();
-		collectMatches(matches, javaElement);
-		return (Match[]) matches.toArray(new Match[matches.size()]);
+		if (javaElement != null) {
+			collectMatches(matches, javaElement);
+		}
+		IFile file= (IFile) adaptable.getAdapter(IFile.class);
+		if (file != null) {
+			collectMatches(matches, file);
+		}
+		if (!matches.isEmpty()) {
+			return (Match[]) matches.toArray(new Match[matches.size()]);
+		}
+		return NO_MATCHES;
+	}
+	
+	
+	private void collectMatches(Set matches, IFile element) {
+		Match[] m= getMatches(element);
+		if (m.length != 0) {
+			for (int i= 0; i < m.length; i++) {
+				matches.add(m[i]);
+			}
+		}
 	}
 	
 	private void collectMatches(Set matches, IJavaElement element) {

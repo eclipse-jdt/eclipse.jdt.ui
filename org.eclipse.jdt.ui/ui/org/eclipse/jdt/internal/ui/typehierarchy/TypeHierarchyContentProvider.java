@@ -111,9 +111,9 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 	
 	private boolean isCompatibleMethod(IMethod filterMethod, IMethod method, boolean filterOverrides) throws JavaModelException {
 		if (filterOverrides) {
-			return fMethodOverrideTester.isSubsignature(method, filterMethod);
-		} else {
 			return fMethodOverrideTester.isSubsignature(filterMethod, method);
+		} else {
+			return fMethodOverrideTester.isSubsignature(method, filterMethod);
 		}
 	}
 

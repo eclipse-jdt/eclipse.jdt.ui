@@ -182,7 +182,7 @@ public class MethodOverrideTester {
 	public IMethod findOverriddenMethodInType(IType overriddenType, IMethod overriding) throws JavaModelException {
 		IMethod[] overriddenMethods= overriddenType.getMethods();
 		for (int i= 0; i < overriddenMethods.length; i++) {
-			if (isSubsignature(overriddenMethods[i], overriding)) {
+			if (isSubsignature(overriding, overriddenMethods[i])) {
 				return overriddenMethods[i];
 			}
 		}
@@ -199,7 +199,7 @@ public class MethodOverrideTester {
 	public IMethod findOverridingMethodInType(IType overridingType, IMethod overridden) throws JavaModelException {
 		IMethod[] overridingMethods= overridingType.getMethods();
 		for (int i= 0; i < overridingMethods.length; i++) {
-			if (isSubsignature(overridden, overridingMethods[i])) {
+			if (isSubsignature(overridingMethods[i], overridden)) {
 				return overridingMethods[i];
 			}
 		}
@@ -207,13 +207,16 @@ public class MethodOverrideTester {
 	}
 	
 	/**
-	 * Tests if a overriding method is a subsignature of a overridden.
-	 * @param overridden The overridden method
-	 * @param overriding The type to find methods in
-	 * @return returns <code>true</code> if the overriding method is a subsignature of a overridden.
+	 * Tests if a method is a subsignature of another method.
+	 * @param overriding overriding method (m1)
+	 * @param overridden overridden method (m2)
+	 * @return <code>true</code> iff the method <code>m1</code> is a subsignature of the method <code>m2</code>.
+	 * 		This is one of the requirements for m1 to override m2.
+	 * 		Accessibility and return types are not taken into account.
+	 * 		Note that subsignature is <em>not</em> symmetric!
 	 * @throws JavaModelException
 	 */
-	public boolean isSubsignature(IMethod overridden, IMethod overriding) throws JavaModelException {
+	public boolean isSubsignature(IMethod overriding, IMethod overridden) throws JavaModelException {
 		if (!overridden.getElementName().equals(overriding.getElementName())) {
 			return false;
 		}
@@ -222,14 +225,14 @@ public class MethodOverrideTester {
 			return false;
 		}
 		
-		if (!hasCompatibleTypeParameters(overridden, overriding)) {
+		if (!hasCompatibleTypeParameters(overriding, overridden)) {
 			return false;
 		}
 		
-		return nParameters == 0 || hasCompatibleParameterTypes(overridden, overriding);
+		return nParameters == 0 || hasCompatibleParameterTypes(overriding, overridden);
 	}
 
-	private boolean hasCompatibleTypeParameters(IMethod overridden, IMethod overriding) throws JavaModelException {
+	private boolean hasCompatibleTypeParameters(IMethod overriding, IMethod overridden) throws JavaModelException {
 		ITypeParameter[] overriddenTypeParameters= overridden.getTypeParameters();
 		ITypeParameter[] overridingTypeParameters= overriding.getTypeParameters();
 		int nOverridingTypeParameters= overridingTypeParameters.length;
@@ -253,7 +256,7 @@ public class MethodOverrideTester {
 		return true;
 	}
 
-	private boolean hasCompatibleParameterTypes(IMethod overridden, IMethod overriding) throws JavaModelException {
+	private boolean hasCompatibleParameterTypes(IMethod overriding, IMethod overridden) throws JavaModelException {
 		String[] overriddenParamTypes= overridden.getParameterTypes();
 		String[] overridingParamTypes= overriding.getParameterTypes();
 		
@@ -354,7 +357,6 @@ public class MethodOverrideTester {
 		if (fTypeVariableSubstitutions == null) {
 			fTypeVariableSubstitutions= new HashMap();
 			computeSubstitutions(fFocusType, null, null);
-			//System.out.println("Calculating type substitutions for " + fFocusType.getElementName());
 		}
 		Substitutions subst= (Substitutions) fTypeVariableSubstitutions.get(type);
 		if (subst == null) {
