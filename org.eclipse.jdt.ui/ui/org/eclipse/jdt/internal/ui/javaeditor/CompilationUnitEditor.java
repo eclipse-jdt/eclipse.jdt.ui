@@ -1429,6 +1429,10 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 						IPackageFragmentRoot root= jp.getPackageFragmentRoot(jp.getProject());
 						IPackageFragment pkg= root.getPackageFragment(""); //$NON-NLS-1$
 						cu= pkg.getCompilationUnit("A.java"); //$NON-NLS-1$
+						/*
+						 * FIXME:	Must use a shared working copy owner, e.g. JavaPlugin.getDefault().getFakeWokringCopyOwner())
+						 * 			This will allow to actions to detect fake working copies ==> disable 
+						 */
 						WorkingCopyOwner woc= new WorkingCopyOwner() {};
 						/*
 						 * FIXME: must dispose dispose the working copy later
