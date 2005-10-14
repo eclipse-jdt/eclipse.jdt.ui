@@ -12,6 +12,10 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
@@ -26,6 +30,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -83,6 +88,7 @@ import org.eclipse.jface.text.source.SourceViewerConfiguration;
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
@@ -102,12 +108,17 @@ import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -145,6 +156,9 @@ import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
  */
 public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilingListener {
 	private static final boolean CODE_ASSIST_DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
+	
+	// FIXME: work in progress
+	private static final boolean SHOW_OUTLINE_FOR_REMOTE_FILES= false;
 
 	/**
 	 * Text operation code for requesting correction assist to show correction
@@ -1385,7 +1399,55 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	protected void setOutlinePageInput(JavaOutlinePage page, IEditorInput input) {
 		if (page != null) {
 			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-			page.setInput(manager.getWorkingCopy(input));
+			ICompilationUnit cu= manager.getWorkingCopy(input);
+			if (SHOW_OUTLINE_FOR_REMOTE_FILES && cu == null && input instanceof IStorageEditorInput) {
+				IStorageEditorInput sei= (IStorageEditorInput)input;
+				try {
+					IStorage storage= sei.getStorage();
+					// XXX: currently no support for external non-readonly files
+					if (storage.isReadOnly()) {
+						IPath path= storage.getFullPath();
+						for (int i= 0; i < path.segmentCount(); i++)
+							System.out.println(path.segment(i));
+						int READER_CHUNK_SIZE= 2048;
+						int BUFFER_SIZE= 8 * READER_CHUNK_SIZE;
+						Reader in= new BufferedReader(new InputStreamReader(storage.getContents()));
+						StringBuffer buffer= new StringBuffer(BUFFER_SIZE);
+						char[] readBuffer= new char[READER_CHUNK_SIZE];
+						int n;
+						try {
+							n= in.read(readBuffer);
+							while (n > 0) {
+								buffer.append(readBuffer, 0, n);
+								n= in.read(readBuffer);
+							}
+						} catch (IOException e) {
+							JavaPlugin.log(e);
+						}
+						IJavaModel jm= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+						IJavaProject jp= jm.getJavaProject("__projectWorkingcopy__"); //$NON-NLS-1$
+						IPackageFragmentRoot root= jp.getPackageFragmentRoot(jp.getProject());
+						IPackageFragment pkg= root.getPackageFragment(""); //$NON-NLS-1$
+						cu= pkg.getCompilationUnit("A.java"); //$NON-NLS-1$
+						WorkingCopyOwner woc= new WorkingCopyOwner() {};
+						/*
+						 * FIXME: must dispose dispose the working copy later
+						 */
+						cu= cu.getWorkingCopy(woc, null, getProgressMonitor());
+						cu.getBuffer().setContents(buffer.toString());
+						cu.reconcile(AST.JLS3, false, woc, getProgressMonitor());
+						
+						/*
+						 * XXX: if we enable this code it should be during doSetInput 
+						 */
+						//					if (manager instanceof WorkingCopyManager)
+						//						((WorkingCopyManager)manager).setWorkingCopy(input, cu);
+					}
+				} catch (CoreException ex) {
+					cu= null;
+				}
+			}
+			page.setInput(cu);
 		}
 	}
 
