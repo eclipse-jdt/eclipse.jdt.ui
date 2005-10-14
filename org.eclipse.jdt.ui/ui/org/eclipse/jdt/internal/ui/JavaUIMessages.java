@@ -21,6 +21,8 @@ public final class JavaUIMessages extends NLS {
 	}
 
 	public static String JavaPlugin_internal_error;
+	public static String JavaPlugin_initializing_ui;
+	
 	public static String JavaElementProperties_name;
 
 	public static String OpenTypeAction_description;
@@ -156,14 +158,15 @@ public final class JavaUIMessages extends NLS {
 	public static String TypeInfoViewer_progressJob_label;
 	public static String TypeInfoViewer_remove_from_history;
 	public static String TypeInfoViewer_separator_message;
+	public static String TypeInfoViewer_library_name_format;
 	
 	public static String InitializeAfterLoadJob_starter_job_name;
 	public static String InitializeAfterLoadJob_real_job_name;
+	
+	public static String SortMembersMessageDialog_configure_preferences_tool_tip;
 	
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaUIMessages.class);
 	}
 
-	public static String TypeInfoViewer_library_name_format;
-	public static String SortMembersMessageDialog_configure_preferences_tool_tip;
 }

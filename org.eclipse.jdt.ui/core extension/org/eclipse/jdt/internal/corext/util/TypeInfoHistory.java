@@ -40,6 +40,10 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -153,6 +157,38 @@ public class TypeInfoHistory {
 		}
 	}
 	
+	private static class UpdateJob extends Job {
+		public static final String FAMILY= UpdateJob.class.getName();
+		private UpdateJob fLastJob;
+		public UpdateJob(UpdateJob lastJob) {
+			super(CorextMessages.TypeInfoHistory_consistency_check);
+			fLastJob= lastJob;
+		}
+		protected IStatus run(IProgressMonitor monitor) {
+			TypeInfoHistory history= TypeInfoHistory.getInstance();
+			try {
+				if (fLastJob != null) {
+					boolean joined= false;
+					while (!joined) {
+						try {
+							fLastJob.join();
+							joined= true;
+						} catch (InterruptedException e) {
+						}
+					}
+					fLastJob= null;
+				}
+				history.internalCheckConsistency(monitor);
+			} finally {
+				history.clearUpdateJob();
+			}
+			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
+		}
+		public boolean belongsTo(Object family) {
+			return FAMILY.equals(family);
+		}
+	}
+	
 	private static final String NODE_ROOT= "typeInfoHistroy"; //$NON-NLS-1$
 	private static final String NODE_TYPE_INFO= "typeInfo"; //$NON-NLS-1$
 	private static final String NODE_NAME= "name"; //$NON-NLS-1$
@@ -172,6 +208,7 @@ public class TypeInfoHistory {
 	
 	private boolean fNeedsConsistencyCheck;
 	private IElementChangedListener fDeltaListener;
+	private UpdateJob fUpdateJob;
 	
 	private static final String FILENAME= "TypeInfoHistory.xml"; //$NON-NLS-1$
 	private static TypeInfoHistory fgInstance;
@@ -198,6 +235,12 @@ public class TypeInfoHistory {
 	
 	public synchronized void markAsInconsistent() {
 		fNeedsConsistencyCheck= true;
+		if (fUpdateJob != null) {
+			fUpdateJob.cancel();
+		}
+		fUpdateJob= new UpdateJob(fUpdateJob);
+		fUpdateJob.setPriority(Job.SHORT);
+		fUpdateJob.schedule();
 	}
 	
 	public synchronized boolean needConsistencyCheck() {
@@ -212,7 +255,26 @@ public class TypeInfoHistory {
 		return fHistory.get(type) != null;
 	}
 
-	public synchronized void checkConsistency(IProgressMonitor monitor) {
+	public synchronized void checkConsistency(IProgressMonitor monitor) throws OperationCanceledException {
+		if (!fNeedsConsistencyCheck)
+			return;
+		// if we have an update job, join it instead of doing our
+		// own checking.
+		if (fUpdateJob != null) {
+			boolean success= false;
+			try {
+				Platform.getJobManager().join(UpdateJob.FAMILY, monitor);
+				success= true;
+			} catch (OperationCanceledException e) {
+			} catch (InterruptedException e) {
+			}
+			if (success && !fNeedsConsistencyCheck)
+				return;
+		}
+		internalCheckConsistency(monitor);
+	}
+
+	private synchronized void internalCheckConsistency(IProgressMonitor monitor) throws OperationCanceledException {
 		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
 		List keys= new ArrayList(fHistory.keySet());
 		monitor.beginTask(CorextMessages.TypeInfoHistory_consistency_check, keys.size());
@@ -234,6 +296,10 @@ public class TypeInfoHistory {
 		}
 		monitor.done();
 		fNeedsConsistencyCheck= false;
+	}
+	
+	private synchronized void clearUpdateJob() {
+		fUpdateJob= null;
 	}
 	
 	public synchronized void accessed(TypeInfo info) {
