@@ -20,7 +20,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.SortedSet;
 import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -317,17 +316,9 @@ public final class CompletionProposalComputerRegistry {
 		Set partitions= descriptor.getPartitions();
 		for (Iterator it= partitions.iterator(); it.hasNext();) {
 			String partition= (String) it.next();
-			SortedSet descriptors= (SortedSet) fDescriptorsByPartition.get(partition);
-			if (descriptors != null) {
-				// use identity since TreeSet does not check equality
-				for (Iterator it2= descriptors.iterator(); it2.hasNext();) {
-					CompletionProposalComputerDescriptor desc= (CompletionProposalComputerDescriptor) it2.next();
-					if (desc.equals(descriptor)) {
-						it2.remove();
-						break;
-					}
-				}
-			}
+			List descriptors= (List) fDescriptorsByPartition.get(partition);
+			if (descriptors != null)
+				descriptors.remove(descriptor);
 		}
 		informUser(status);
 	}
