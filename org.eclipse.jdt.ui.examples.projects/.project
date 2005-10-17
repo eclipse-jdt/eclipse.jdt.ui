@@ -2,14 +2,7 @@
 <projectDescription>
 	<name>org.eclipse.jdt.ui.examples.projects</name>
 	<comment></comment>
-	<projects>
-		<project>org.eclipse.core.boot</project>
-		<project>org.eclipse.core.resources</project>
-		<project>org.eclipse.core.runtime.compatibility</project>
-		<project>org.eclipse.swt</project>
-		<project>org.eclipse.ui</project>
-		<project>org.eclipse.ui.ide</project>
-	</projects>
+	<projects></projects>
 	<buildSpec>
 		<buildCommand>
 			<name>org.eclipse.jdt.core.javabuilder</name>
