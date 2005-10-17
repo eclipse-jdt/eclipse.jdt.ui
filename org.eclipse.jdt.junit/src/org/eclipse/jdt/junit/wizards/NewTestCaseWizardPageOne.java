@@ -59,6 +59,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
+import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
@@ -699,7 +700,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		final String delimiter= getLineDelimiter();
 		buffer.append("{").append(delimiter); //$NON-NLS-1$
 		if (fPage2.isCreateTasks()) {
-			final String content= StubUtility.getMethodBodyContent(false, method.getJavaProject(), CLASS_UNDER_TEST, name, "", delimiter); //$NON-NLS-1$
+			final String content= CodeGeneration.getMethodBodyContent(method.getCompilationUnit(), CLASS_UNDER_TEST, name, false, "", delimiter); //$NON-NLS-1$
 			if (content != null && content.length() > 0)
 				buffer.append(content);
 		}
