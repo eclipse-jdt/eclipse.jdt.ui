@@ -51,7 +51,7 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		String completion= String.valueOf(methodProposal.getCompletion());
 		// super class' behavior if this is not a normal completion or has no
 		// parameters
-		if ((completion.length() == 0) || ((completion.length() == 1) && completion.charAt(0) == ')') || Signature.getParameterCount(methodProposal.getSignature()) == 0)
+		if ((completion.length() == 0) || ((completion.length() == 1) && completion.charAt(0) == ')') || Signature.getParameterCount(methodProposal.getSignature()) == 0 || getContext().isInJavadoc())
 			return super.createJavaCompletionProposal(methodProposal);
 
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
@@ -68,7 +68,7 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 	 */
 	private IJavaCompletionProposal createTypeProposal(CompletionProposal typeProposal) {
 		final ICompilationUnit cu= getCompilationUnit();
-		if (cu == null)
+		if (cu == null || getContext().isInJavadoc())
 			return super.createJavaCompletionProposal(typeProposal);
 
 		IJavaProject project= cu.getJavaProject();
