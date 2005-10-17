@@ -350,6 +350,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 				TypeInfoHistory.getInstance().checkConsistency(monitor);
 				return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
 			}
+			public boolean belongsTo(Object family) {
+				return JavaUI.ID_PLUGIN.equals(family);
+			}
 		};
 		job.setPriority(Job.SHORT);
 		job.schedule();

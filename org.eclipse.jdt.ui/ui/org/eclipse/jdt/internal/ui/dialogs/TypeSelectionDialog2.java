@@ -39,7 +39,6 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -50,6 +49,8 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -227,14 +228,14 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	}
 	
 	private void ensureConsistency() throws InvocationTargetException, InterruptedException {
-		// we only have to ensure histroy consistency here since the search engine
+		// we only have to ensure history consistency here since the search engine
 		// takes care of working copies.
 		class ConsistencyRunnable implements IRunnableWithProgress {
 			public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 				if (fgFirstTime) {
-					// Join the initalize after load job.
+					// Join the initialize after load job.
 					IJobManager manager= Platform.getJobManager();
-					manager.join(JavaCore.PLUGIN_ID, monitor);
+					manager.join(JavaUI.ID_PLUGIN, monitor);
 				}
 				TypeInfoHistory history= TypeInfoHistory.getInstance();
 				if (fgFirstTime || history.isEmpty()) {
