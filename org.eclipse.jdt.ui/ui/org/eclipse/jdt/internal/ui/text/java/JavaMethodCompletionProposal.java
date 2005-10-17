@@ -14,6 +14,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -34,17 +35,19 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	private boolean fHasParametersComputed= false;
 	private int fContextInformationPosition;
 
-	public JavaMethodCompletionProposal(CompletionProposal proposal, ICompilationUnit cu) {
-		super(proposal);
+	public JavaMethodCompletionProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu) {
+		super(proposal, context);
 		fCompilationUnit= cu;
 	}
 
 	public void apply(IDocument document, char trigger, int offset) {
 		super.apply(document, trigger, offset);
-		try {
-			setUpLinkedMode(document, getReplacementString());
-		} catch (BadLocationException e) {
-			// ignore
+		if (!fContext.isInJavadoc()) {
+			try {
+				setUpLinkedMode(document, getReplacementString());
+			} catch (BadLocationException e) {
+				// ignore
+			}
 		}
 	}
 
@@ -90,7 +93,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	}
 	
 	protected int computeCursorPosition() {
-		if (hasParameters() && getReplacementString().endsWith(")")) //$NON-NLS-1$
+		if (!fContext.isInJavadoc() && hasParameters() && getReplacementString().endsWith(")")) //$NON-NLS-1$
 			return getReplacementString().indexOf("(") + 1; //$NON-NLS-1$
 		return super.computeCursorPosition();
 	}

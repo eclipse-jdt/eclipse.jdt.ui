@@ -352,11 +352,15 @@ public class CompletionProposalCollector extends CompletionRequestor {
 			case CompletionProposal.PACKAGE_REF:
 				return createPackageProposal(proposal);
 			case CompletionProposal.TYPE_REF:
+			case CompletionProposal.JAVADOC_TYPE_REF:
 				return createTypeProposal(proposal);
 			case CompletionProposal.FIELD_REF:
+			case CompletionProposal.JAVADOC_FIELD_REF:
+			case CompletionProposal.JAVADOC_VALUE_REF:
 				return createFieldProposal(proposal);
 			case CompletionProposal.METHOD_REF:
 			case CompletionProposal.METHOD_NAME_REFERENCE:
+			case CompletionProposal.JAVADOC_METHOD_REF:
 				return createMethodReferenceProposal(proposal);
 			case CompletionProposal.METHOD_DECLARATION:
 				return createMethodDeclarationProposal(proposal);
@@ -369,6 +373,10 @@ public class CompletionProposalCollector extends CompletionRequestor {
 				return createLocalVariableProposal(proposal);
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
 				return createAnnotationAttributeReferenceProposal(proposal);
+			case CompletionProposal.JAVADOC_BLOCK_TAG:
+			case CompletionProposal.JAVADOC_INLINE_TAG:
+			case CompletionProposal.JAVADOC_PARAM_REF:
+				return createJavadocSimpleProposal(proposal);
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
 			default:
 				return null;
@@ -504,11 +512,14 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		switch (proposal.getKind()) {
 			case CompletionProposal.METHOD_DECLARATION:
 			case CompletionProposal.METHOD_NAME_REFERENCE:
+			case CompletionProposal.JAVADOC_METHOD_REF:
 			case CompletionProposal.METHOD_REF:
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
 			case CompletionProposal.ANONYMOUS_CLASS_DECLARATION:
 			case CompletionProposal.FIELD_REF:
+			case CompletionProposal.JAVADOC_FIELD_REF:
+			case CompletionProposal.JAVADOC_VALUE_REF:
 				char[] declaration= proposal.getDeclarationSignature();
 				// special methods may not have a declaring type: methods defined on arrays etc.
 				// TODO remove when bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=84690 gets fixed
@@ -517,12 +528,16 @@ public class CompletionProposalCollector extends CompletionRequestor {
 				return Signature.toCharArray(declaration);
 			case CompletionProposal.PACKAGE_REF:
 				return proposal.getDeclarationSignature();
+			case CompletionProposal.JAVADOC_TYPE_REF:
 			case CompletionProposal.TYPE_REF:
 				return Signature.toCharArray(proposal.getSignature());
 			case CompletionProposal.LOCAL_VARIABLE_REF:
 			case CompletionProposal.VARIABLE_DECLARATION:
 			case CompletionProposal.KEYWORD:
 			case CompletionProposal.LABEL_REF:
+			case CompletionProposal.JAVADOC_BLOCK_TAG:
+			case CompletionProposal.JAVADOC_INLINE_TAG:
+			case CompletionProposal.JAVADOC_PARAM_REF:
 				return null;
 			default:
 				Assert.isTrue(false);
@@ -593,6 +608,27 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		return javaProposal;
 	}
 
+	private IJavaCompletionProposal createJavadocSimpleProposal(CompletionProposal javadocProposal) {
+		// TODO do better with javadoc proposals 
+//		String completion= String.valueOf(proposal.getCompletion());
+//		int start= proposal.getReplaceStart();
+//		int length= getLength(proposal);
+//		String label= fLabelProvider.createSimpleLabel(proposal);
+//		Image image= getImage(fLabelProvider.createImageDescriptor(proposal));
+//		int relevance= computeRelevance(proposal);
+//
+//		JavaCompletionProposal javaProposal= new JavaCompletionProposal(completion, start, length, image, label, relevance);
+//		if (fJavaProject != null)
+//			javaProposal.setProposalInfo(new FieldProposalInfo(fJavaProject, proposal));
+//
+//		javaProposal.setTriggerCharacters(VAR_TRIGGER);
+//
+//		return javaProposal;
+		LazyJavaCompletionProposal proposal = new LazyJavaCompletionProposal(javadocProposal, getContext());
+//		adaptLength(proposal, javadocProposal);
+		return proposal;
+	}
+
 	private IJavaCompletionProposal createKeywordProposal(CompletionProposal proposal) {
 		String completion= String.valueOf(proposal.getCompletion());
 		int start= proposal.getReplaceStart();
@@ -648,7 +684,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	private IJavaCompletionProposal createMethodReferenceProposal(CompletionProposal methodProposal) {
-		LazyJavaCompletionProposal proposal= new JavaMethodCompletionProposal(methodProposal, getCompilationUnit());
+		LazyJavaCompletionProposal proposal= new JavaMethodCompletionProposal(methodProposal, getContext(), getCompilationUnit());
 		adaptLength(proposal, methodProposal);
 		return proposal;
 	}
@@ -671,7 +707,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	private IJavaCompletionProposal createTypeProposal(CompletionProposal typeProposal) {
-		LazyJavaCompletionProposal proposal= new LazyJavaTypeCompletionProposal(typeProposal, getCompilationUnit());
+		LazyJavaCompletionProposal proposal= new LazyJavaTypeCompletionProposal(typeProposal, getContext(), getCompilationUnit());
 		adaptLength(proposal, typeProposal);
 		return proposal;
 	}

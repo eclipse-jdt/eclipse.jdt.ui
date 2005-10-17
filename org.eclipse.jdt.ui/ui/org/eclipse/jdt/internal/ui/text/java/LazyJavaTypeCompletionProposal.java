@@ -21,13 +21,16 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -47,13 +50,26 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	private String fFullyQualifiedTypeName;
 
 
-	public LazyJavaTypeCompletionProposal(CompletionProposal proposal, ICompilationUnit cu) {
-		super(proposal);
+	public LazyJavaTypeCompletionProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu) {
+		super(proposal, context);
 		fCompilationUnit= cu;
 		fFullyQualifiedTypeName= null;
 	}
 	
-	
+	/**
+	 * Returns the java model type of this type proposal.
+	 *
+	 * @return the java mode type of this type proposal
+	 * @throws JavaModelException
+	 */
+	protected IType getProposedType() throws JavaModelException {
+		if (fCompilationUnit != null) {
+			String fullType= SignatureUtil.stripSignatureToFQN(String.valueOf(fProposal.getSignature()));
+			return fCompilationUnit.getJavaProject().findType(fullType);
+		}
+		return null;
+	}
+
 	protected final String getFullyQualifiedTypeName() {
 		if (fFullyQualifiedTypeName == null) {
 			fFullyQualifiedTypeName= String.valueOf(Signature.toCharArray(fProposal.getSignature()));
@@ -80,6 +96,27 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 			}
 		}
 		return false;
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeReplacementString()
+	 */
+	protected String computeReplacementString() {
+		if (fContext.isInJavadoc()) {
+			 // never qualify types in javadoc, except for local types
+			try {
+				IType[] allTypes= fCompilationUnit.getAllTypes();
+				for (int i= 0; i < allTypes.length; i++) {
+					IType type= allTypes[i];
+					if (type.equals(getProposedType()))
+						return super.computeReplacementString();
+				}
+				return getFullyQualifiedTypeName();
+			} catch (JavaModelException x) {
+				JavaPlugin.log(x);
+			}
+		}
+		return super.computeReplacementString();
 	}
 
 	/* (non-Javadoc)
@@ -126,7 +163,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 
 	private boolean allowAddingImports() {
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		return preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_ADDIMPORT);
+		return !fContext.isInJavadoc() && preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_ADDIMPORT);
 	}
 
 	/*

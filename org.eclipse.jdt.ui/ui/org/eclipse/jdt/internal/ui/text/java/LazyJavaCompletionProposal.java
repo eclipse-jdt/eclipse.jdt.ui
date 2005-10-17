@@ -53,6 +53,7 @@ import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.Signature;
 
@@ -193,13 +194,16 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	private int fRelevance;
 	
 	protected final CompletionProposal fProposal;
+	protected final CompletionContext fContext;
 	private StyleRange fRememberedStyleRange;
 	private boolean fToggleEating;
 	private ITextViewer fTextViewer;
 
-	public LazyJavaCompletionProposal(CompletionProposal proposal) {
+	public LazyJavaCompletionProposal(CompletionProposal proposal, CompletionContext context) {
 		Assert.isNotNull(proposal);
+		Assert.isNotNull(context);
 		fProposal= proposal;
+		fContext = context;
 	}
 
 	/*
@@ -365,7 +369,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 		
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96059
 		// don't apply the proposal if for some reason we're not valid any longer
-		if (!validate(document, offset, null)) {
+		if (!fContext.isInJavadoc() && !validate(document, offset, null)) {
 			setCursorPosition(offset - getReplacementOffset());
 			if (trigger != '\0') {
 				try {

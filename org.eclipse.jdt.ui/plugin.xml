@@ -191,6 +191,13 @@
 	</extension>
 	<extension
 		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="javadocProposalCategory"
+		name="%JavadocProposalCategory">
+		<proposalCategory
+			icon="$nl$/icons/full/obj16/jdoc_tag_obj.gif"/>
+	</extension>
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
 		id="defaultProposalCategory"
 		name="%DefaultProposalCategory">
 		<proposalCategory/>
@@ -243,6 +250,15 @@
 		<javaCompletionProposalComputer 
 			class="org.eclipse.jdt.internal.ui.text.javadoc.JavadocCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
+			<partition type="__java_javadoc"/>
+		</javaCompletionProposalComputer>
+	</extension>
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalComputer"
+		id="JavadocCompletionProposalComputer">
+		<javaCompletionProposalComputer 
+			class="org.eclipse.jdt.internal.ui.text.java.JavadocCompletionProposalComputer"
+			categoryId="org.eclipse.jdt.ui.javadocProposalCategory">
 			<partition type="__java_javadoc"/>
 		</javaCompletionProposalComputer>
 	</extension>

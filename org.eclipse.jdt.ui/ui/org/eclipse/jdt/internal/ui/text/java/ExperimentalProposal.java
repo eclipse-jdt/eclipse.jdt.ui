@@ -28,6 +28,7 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -47,8 +48,8 @@ public final class ExperimentalProposal extends JavaMethodCompletionProposal {
 
 	private IRegion fSelectedRegion; // initialized by apply()
 
-	public ExperimentalProposal(CompletionProposal proposal, ICompilationUnit cu) {
-		super(proposal, cu);
+	public ExperimentalProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu) {
+		super(proposal, context, cu);
 	}
 
 	/*

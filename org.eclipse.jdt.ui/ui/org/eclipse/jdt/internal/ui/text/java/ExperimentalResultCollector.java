@@ -37,11 +37,14 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 	 * @see org.eclipse.jdt.internal.ui.text.java.ResultCollector#createJavaCompletionProposal(org.eclipse.jdt.core.CompletionProposal)
 	 */
 	protected IJavaCompletionProposal createJavaCompletionProposal(CompletionProposal proposal) {
-		if (proposal.getKind() == CompletionProposal.METHOD_REF)
-			return createMethodReferenceProposal(proposal);
-		if (proposal.getKind() == CompletionProposal.TYPE_REF)
-			return createTypeProposal(proposal);
-		return super.createJavaCompletionProposal(proposal);
+		switch (proposal.getKind()) {
+			case CompletionProposal.METHOD_REF:
+				return createMethodReferenceProposal(proposal);
+			case CompletionProposal.TYPE_REF:
+				return createTypeProposal(proposal);
+			default:
+				return super.createJavaCompletionProposal(proposal);
+		}
 	}
 
 	private IJavaCompletionProposal createMethodReferenceProposal(CompletionProposal methodProposal) {
@@ -54,10 +57,9 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		LazyJavaCompletionProposal proposal;
 		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS))
-			proposal= new ParameterGuessingProposal(methodProposal, getCompilationUnit());
+			proposal= new ParameterGuessingProposal(methodProposal, getContext(), getCompilationUnit());
 		else
-			proposal= new ExperimentalProposal(methodProposal, getCompilationUnit());
-
+			proposal= new ExperimentalProposal(methodProposal, getContext(), getCompilationUnit());
 		return proposal;
 	}
 

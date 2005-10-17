@@ -528,6 +528,16 @@ public class JavaCompletionProposal implements IJavaCompletionProposal, IComplet
 	 * <code>false</code> otherwise.
 	 */
 	protected boolean startsWith(IDocument document, int offset, String word) {
+		// TODO move the javadoc specific code to a subclass
+		int idx = word.indexOf("{@link "); //$NON-NLS-1$
+		if (idx==0) {
+			word = word.substring(7);
+		} else {
+			idx = word.indexOf("{@value "); //$NON-NLS-1$
+			if (idx==0) {
+				word = word.substring(8);
+			}
+		}
 		int wordLength= word == null ? 0 : word.length();
 		if (offset >  fReplacementOffset + wordLength)
 			return false;

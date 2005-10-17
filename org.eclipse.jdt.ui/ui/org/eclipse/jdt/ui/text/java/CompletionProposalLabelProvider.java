@@ -192,6 +192,30 @@ public class CompletionProposalLabelProvider {
 
 		return nameBuffer.toString();
 	}
+	
+	String createJavadocTagMethodProposalLabel(CompletionProposal methodProposal) {
+		// TODO merge with method
+		StringBuffer nameBuffer= new StringBuffer();
+
+		// method name
+		nameBuffer.append(methodProposal.getCompletion());
+
+		// return type
+		if (!methodProposal.isConstructor()) {
+			// TODO remove SignatureUtil.fix83600 call when bugs are fixed
+			char[] returnType= createTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
+			nameBuffer.append("  "); //$NON-NLS-1$
+			nameBuffer.append(returnType);
+		}
+
+		// declaring type
+		nameBuffer.append(" - "); //$NON-NLS-1$
+		String declaringType= extractDeclaringTypeFQN(methodProposal);
+		declaringType= Signature.getSimpleName(declaringType);
+		nameBuffer.append(declaringType);
+
+		return nameBuffer.toString();
+	}
 
 	String createOverrideMethodProposalLabel(CompletionProposal methodProposal) {
 		StringBuffer nameBuffer= new StringBuffer();
@@ -254,6 +278,11 @@ public class CompletionProposalLabelProvider {
 	String createTypeProposalLabel(CompletionProposal typeProposal) {
 		char[] fullName= Signature.toCharArray(typeProposal.getSignature());
 		return createTypeProposalLabel(fullName);
+	}
+	
+	String createJavadocSimpleProposalLabel(CompletionProposal proposal) {
+		// TODO get rid of this
+		return createSimpleLabel(proposal);
 	}
 	
 	String createTypeProposalLabel(char[] fullName) {
@@ -355,6 +384,15 @@ public class CompletionProposalLabelProvider {
 				return createAnonymousTypeLabel(proposal);
 			case CompletionProposal.TYPE_REF:
 				return createTypeProposalLabel(proposal);
+			case CompletionProposal.JAVADOC_TYPE_REF:
+			case CompletionProposal.JAVADOC_FIELD_REF:
+			case CompletionProposal.JAVADOC_VALUE_REF:
+			case CompletionProposal.JAVADOC_BLOCK_TAG:
+			case CompletionProposal.JAVADOC_INLINE_TAG:
+			case CompletionProposal.JAVADOC_PARAM_REF:
+				return createJavadocSimpleProposalLabel(proposal);
+			case CompletionProposal.JAVADOC_METHOD_REF:
+				return createJavadocTagMethodProposalLabel(proposal);
 			case CompletionProposal.PACKAGE_REF:
 				return createPackageProposalLabel(proposal);
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
@@ -416,6 +454,15 @@ public class CompletionProposalLabelProvider {
 			case CompletionProposal.KEYWORD:
 			case CompletionProposal.LABEL_REF:
 				descriptor= null;
+				break;
+			case CompletionProposal.JAVADOC_METHOD_REF:
+			case CompletionProposal.JAVADOC_TYPE_REF:
+			case CompletionProposal.JAVADOC_FIELD_REF:
+			case CompletionProposal.JAVADOC_VALUE_REF:
+			case CompletionProposal.JAVADOC_BLOCK_TAG:
+			case CompletionProposal.JAVADOC_INLINE_TAG:
+			case CompletionProposal.JAVADOC_PARAM_REF:
+				descriptor = JavaPluginImages.DESC_OBJS_JAVADOCTAG;
 				break;
 			default:
 				descriptor= null;

@@ -209,12 +209,10 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	}
 
 	private IRegion fSelectedRegion; // initialized by apply()
-	private final CompletionContext fContext;
 	private TypeArgumentProposal[] fTypeArgumentProposals;
 
 	public GenericJavaTypeProposal(CompletionProposal typeProposal, CompletionContext context, ICompilationUnit cu) {
-		super(typeProposal, cu);
-		fContext= context;
+		super(typeProposal, context, cu);
 	}
 
 	/*
@@ -629,20 +627,6 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 		if (bindings.size() > 0)
 			return (ITypeBinding) bindings.get(keys[0]);
 
-		return null;
-	}
-
-	/**
-	 * Returns the java model type of this type proposal.
-	 *
-	 * @return the java mode type of this type proposal
-	 * @throws JavaModelException
-	 */
-	private IType getProposedType() throws JavaModelException {
-		if (fCompilationUnit != null) {
-			String fullType= SignatureUtil.stripSignatureToFQN(String.valueOf(fProposal.getSignature()));
-			return fCompilationUnit.getJavaProject().findType(fullType);
-		}
 		return null;
 	}
 

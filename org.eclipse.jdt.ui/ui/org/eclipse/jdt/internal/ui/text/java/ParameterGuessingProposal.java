@@ -38,6 +38,7 @@ import org.eclipse.jface.text.link.ProposalPosition;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -68,8 +69,8 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 	private ICompletionProposal[][] fChoices; // initialized by guessParameters()
 	private IPositionUpdater fUpdater;
 
- 	public ParameterGuessingProposal(CompletionProposal proposal, ICompilationUnit cu) {
- 		super(proposal, cu);
+ 	public ParameterGuessingProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu) {
+ 		super(proposal, context, cu);
  	}
 
 	private boolean appendArguments(IDocument document, int offset) {
