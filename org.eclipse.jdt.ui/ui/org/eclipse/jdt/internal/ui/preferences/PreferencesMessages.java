@@ -389,6 +389,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_pb_missing_deprecated_annotation_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_annotation_super_interface_label;
 	public static String ProblemSeveritiesConfigurationBlock_pb_type_parameter_hiding_label;
+	public static String ProblemSeveritiesConfigurationBlock_pb_unused_label_label;
 	public static String JavadocProblemsPreferencePage_title;
 	public static String JavadocProblemsConfigurationBlock_public;
 	public static String JavadocProblemsConfigurationBlock_protected;
@@ -718,4 +719,5 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeAssistConfigurationBlockInProgress_Down;
 	public static String CodeAssistConfigurationBlockInProgress_separator;
 	public static String CodeAssistConfigurationBlockInProgress_include;
+
 }
