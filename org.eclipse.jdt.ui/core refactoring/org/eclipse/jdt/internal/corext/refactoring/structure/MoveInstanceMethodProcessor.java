@@ -27,7 +27,9 @@ import org.eclipse.text.edits.TextEditProcessor;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -2426,8 +2428,13 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 */
 	protected IType getTargetType() throws JavaModelException {
 		Assert.isNotNull(fTarget);
-		if (fTargetType == null)
-			fTargetType= Bindings.findType(fTarget.getType(), fMethod.getJavaProject());
+		if (fTargetType == null) {
+			final ITypeBinding binding= fTarget.getType();
+			if (binding != null)
+				fTargetType= (IType) binding.getJavaElement();
+			else
+				throw new JavaModelException(new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, RefactoringCoreMessages.MoveInstanceMethodProcessor_cannot_be_moved, null)));
+		}
 		return fTargetType;
 	}
 
@@ -2612,6 +2619,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
-		return ""; //$NON-NLS-1$
+		return "arg"; //$NON-NLS-1$
 	}
 }
