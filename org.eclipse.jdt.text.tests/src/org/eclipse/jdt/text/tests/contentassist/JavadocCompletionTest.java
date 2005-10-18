@@ -261,7 +261,7 @@ public class JavadocCompletionTest extends TestCase {
 	public void testLinkMethodWithParamOverwriteWithParamsNoPrefix() throws Exception {
 		// TODO fails with OLD==false
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);
-		assertTypeJavadocProposal(" * Prefix {@linkjava.util. List#clear()|add(int, Object)} postfix", " * Prefix {@link java.util.List#|add(int, Object)} postfix", "clear");
+		assertTypeJavadocProposal(" * Prefix {@link java.util.List#clear()|add(int, Object)} postfix", " * Prefix {@link java.util.List#|add(int, Object)} postfix", "clear");
 	}
 	
 	public void testLinkMethodWithParamOverwriteWithParams() throws Exception {
