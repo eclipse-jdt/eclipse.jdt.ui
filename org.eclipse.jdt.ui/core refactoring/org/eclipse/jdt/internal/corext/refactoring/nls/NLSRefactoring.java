@@ -502,7 +502,7 @@ public class NLSRefactoring extends Refactoring {
 				}
 			}
 		}
-		return false;
+		return fIsEclipseNLS;
 	}
 	
 	/**
