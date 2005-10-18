@@ -53,6 +53,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.ImageImageDescriptor;
  * LabelDecorator that decorates an element's image with error and warning overlays that 
  * represent the severity of markers attached to the element's underlying resource. To see 
  * a problem decoration for a marker, the marker needs to be a subtype of <code>IMarker.PROBLEM</code>.
+ * <p>
+ * <b>Important</b>: Although this decorator implements ILightweightLabelDecorator, do not contibute this
+ * class as a decorator to the <code>org.eclipse.ui.decorators</code> extension. Only use this class in your
+ * own views and label providers. 
  * 
  * @since 2.0
  */
