@@ -47,43 +47,35 @@ public class ModifierRewrite {
 	}
 
 	private ModifierRewrite(ASTRewrite rewrite, ASTNode declNode) {
-		ListRewrite modifierRewrite= null;
+		fModifierRewrite= evaluateListRewrite(rewrite, declNode);
+		fAst= declNode.getAST();
+	}
+
+	private ListRewrite evaluateListRewrite(ASTRewrite rewrite, ASTNode declNode) {
 		switch (declNode.getNodeType()) {
 			case ASTNode.METHOD_DECLARATION:
-				modifierRewrite= rewrite.getListRewrite(declNode, MethodDeclaration.MODIFIERS2_PROPERTY);
-				break;
+				return rewrite.getListRewrite(declNode, MethodDeclaration.MODIFIERS2_PROPERTY);
 			case ASTNode.FIELD_DECLARATION:
-				modifierRewrite= rewrite.getListRewrite(declNode, FieldDeclaration.MODIFIERS2_PROPERTY);
-				break;
+				return rewrite.getListRewrite(declNode, FieldDeclaration.MODIFIERS2_PROPERTY);
 			case ASTNode.VARIABLE_DECLARATION_EXPRESSION:
-				modifierRewrite= rewrite.getListRewrite(declNode, VariableDeclarationExpression.MODIFIERS2_PROPERTY);
-				break;
+				return rewrite.getListRewrite(declNode, VariableDeclarationExpression.MODIFIERS2_PROPERTY);
 			case ASTNode.VARIABLE_DECLARATION_STATEMENT:
-				modifierRewrite= rewrite.getListRewrite(declNode, VariableDeclarationStatement.MODIFIERS2_PROPERTY);
-				break;
+				return rewrite.getListRewrite(declNode, VariableDeclarationStatement.MODIFIERS2_PROPERTY);
 			case ASTNode.SINGLE_VARIABLE_DECLARATION:
-				modifierRewrite= rewrite.getListRewrite(declNode, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
-				break;
+				return rewrite.getListRewrite(declNode, SingleVariableDeclaration.MODIFIERS2_PROPERTY);
 			case ASTNode.TYPE_DECLARATION:
-				modifierRewrite= rewrite.getListRewrite(declNode, TypeDeclaration.MODIFIERS2_PROPERTY);
-				break;
+				return rewrite.getListRewrite(declNode, TypeDeclaration.MODIFIERS2_PROPERTY);
 			case ASTNode.ENUM_DECLARATION:
-				modifierRewrite= rewrite.getListRewrite(declNode, EnumDeclaration.MODIFIERS2_PROPERTY);
-				break;
+				return rewrite.getListRewrite(declNode, EnumDeclaration.MODIFIERS2_PROPERTY);
 			case ASTNode.ANNOTATION_TYPE_DECLARATION:
-				modifierRewrite= rewrite.getListRewrite(declNode, AnnotationTypeDeclaration.MODIFIERS2_PROPERTY);
-				break;
+				return rewrite.getListRewrite(declNode, AnnotationTypeDeclaration.MODIFIERS2_PROPERTY);
 			case ASTNode.ENUM_CONSTANT_DECLARATION:
-				modifierRewrite= rewrite.getListRewrite(declNode, EnumConstantDeclaration.MODIFIERS2_PROPERTY);
-				break;
+				return rewrite.getListRewrite(declNode, EnumConstantDeclaration.MODIFIERS2_PROPERTY);
 			case ASTNode.ANNOTATION_TYPE_MEMBER_DECLARATION:
-				modifierRewrite= rewrite.getListRewrite(declNode, AnnotationTypeMemberDeclaration.MODIFIERS2_PROPERTY);
-				break;
+				return rewrite.getListRewrite(declNode, AnnotationTypeMemberDeclaration.MODIFIERS2_PROPERTY);
 			default:
 				throw new IllegalArgumentException("node has no modifiers: " + declNode.getClass().getName()); //$NON-NLS-1$
 		}
-		fModifierRewrite= modifierRewrite;
-		fAst= declNode.getAST();
 	}
 
 	public ListRewrite getModifierRewrite() {
@@ -102,6 +94,19 @@ public class ModifierRewrite {
 		internalSetModifiers(visibilityFlags, VISIBILITY_MODIFIERS, editGroup);
 	}
 
+	public void copyAllModifiers(ASTNode otherDecl, TextEditGroup editGroup) {
+		ListRewrite modifierList= evaluateListRewrite(fModifierRewrite.getASTRewrite(), otherDecl);
+		List originalList= modifierList.getOriginalList();
+		if (originalList.isEmpty()) {
+			return;
+		}
+		
+		ASTNode copy= modifierList.createCopyTarget((ASTNode) originalList.get(0), (ASTNode) originalList.get(originalList.size() - 1));
+		if (copy != null) {
+			fModifierRewrite.insertLast(copy, editGroup);
+		}
+	}
+	
 	private void internalSetModifiers(int modfiers, int consideredFlags, TextEditGroup editGroup) {
 		// remove modifiers
 		int newModifiers= modfiers & consideredFlags;
