@@ -1407,8 +1407,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					// XXX: currently no support for external non-readonly files
 					if (storage.isReadOnly()) {
 						IPath path= storage.getFullPath();
-						for (int i= 0; i < path.segmentCount(); i++)
-							System.out.println(path.segment(i));
 						int READER_CHUNK_SIZE= 2048;
 						int BUFFER_SIZE= 8 * READER_CHUNK_SIZE;
 						Reader in= new BufferedReader(new InputStreamReader(storage.getContents()));
