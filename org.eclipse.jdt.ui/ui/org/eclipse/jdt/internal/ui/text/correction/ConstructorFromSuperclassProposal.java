@@ -231,7 +231,7 @@ public class ConstructorFromSuperclassProposal extends LinkedCorrectionProposal 
 		if (nParams > 0) {
 			try {
 				IJavaProject project= getCompilationUnit().getJavaProject();
-				IMethod method= Bindings.findMethod(methodDecl, project);
+				IMethod method= (IMethod) methodDecl.getJavaElement();
 				if (method != null) {
 					return StubUtility.suggestArgumentNames(project, method.getParameterNames());
 				}

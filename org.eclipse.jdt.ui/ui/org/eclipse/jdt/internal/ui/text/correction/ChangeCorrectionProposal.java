@@ -29,6 +29,7 @@ import org.eclipse.jface.text.link.LinkedModeModel;
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -55,7 +56,8 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	/**
 	 * Constructs a change correction proposal.
 	 * @param name The name that is displayed in the proposal selection dialog.
-	 * @param change The change that is executed when the proposal is applied.
+	 * @param change The change that is executed when the proposal is applied or <code>null</code>
+	 * if the change will be created by implementors of {@link #createChange()}.
 	 * @param relevance The relevance of this proposal.
 	 * @param image The image that is displayed for this proposal or <code>null</code> if no
 	 * image is desired.
@@ -131,11 +133,17 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	public String getAdditionalProposalInfo() {
 		StringBuffer buf= new StringBuffer();
 		buf.append("<p>"); //$NON-NLS-1$
-		Change change= getChange();
-		if (change != null) {
-			buf.append(change.getName());
-		} else {
-			return null;
+		try {
+			Change change= getChange();
+			if (change != null) {
+				buf.append(change.getName());
+			} else {
+				return null;
+			}
+		} catch (CoreException e) {
+			buf.append("Unexpected error when accessing this proposal:<p><pre>"); //$NON-NLS-1$
+			buf.append(e.getLocalizedMessage());
+			buf.append("</pre>"); //$NON-NLS-1$
 		}
 		buf.append("</p>"); //$NON-NLS-1$
 		return buf.toString();
@@ -183,12 +191,24 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/**
 	 * Returns the change that will be executed when the proposal is applied.
-	 * @return Returns a Change
+	 * @return returns a Change
 	 */
-	public Change getChange() {
+	public final Change getChange() throws CoreException {
+		if (fChange == null) {
+			fChange= createChange();
+		}
 		return fChange;
 	}
 
+	/**
+	 * Creates the change for this proposal. This method is only called once and only when the change has
+	 * been initialized with <code>null</code> in {@link #ChangeCorrectionProposal(String, Change, int, Image)}.
+	 * @return returns the created change.
+	 */
+	protected Change createChange() throws CoreException {
+		return new NullChange();
+	}
+	
 	/**
 	 * Sets the display name.
 	 * @param name The name to set

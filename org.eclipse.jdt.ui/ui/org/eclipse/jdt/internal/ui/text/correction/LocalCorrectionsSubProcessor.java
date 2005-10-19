@@ -801,32 +801,28 @@ public class LocalCorrectionsSubProcessor {
 			}
 		} else if (selectedNode instanceof InfixExpression && isBitOperation((((InfixExpression) selectedNode).getOperator()))) {
 			// a & b == c -> (a & b) == c
-			CompareInBitWiseOpFinder visitor= new CompareInBitWiseOpFinder();
-			selectedNode.accept(visitor);
-			if (visitor.compareExpression != null) { // compare operation inside bit operations: set parents
-				ASTNode expr= selectedNode;
-				ASTNode parent= expr.getParent(); // include all parents
-				while (parent instanceof InfixExpression && isBitOperation(((InfixExpression) parent).getOperator())) {
-					expr= parent;
-					parent= expr.getParent();
-				}
+			final CompareInBitWiseOpFinder opFinder= new CompareInBitWiseOpFinder(selectedNode);
+			if (opFinder.getCompareExpression() != null) { // compare operation inside bit operations: set parents			
 				String label= CorrectionMessages.LocalCorrectionsSubProcessor_setparenteses_bitop_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CAST);
-				CUCorrectionProposal proposal= new CUCorrectionProposal(label, context.getCompilationUnit(), 5, image);
+				CUCorrectionProposal proposal= new CUCorrectionProposal(label, context.getCompilationUnit(), 5, image) {
+					protected void addEdits(IDocument document, TextEdit edit) throws CoreException {
+						InfixExpression compareExpression= opFinder.getCompareExpression();
+						InfixExpression expression= opFinder.getParentInfixExpression();
+						ASTNode left= compareExpression.getLeftOperand();
+						if (expression.getStartPosition() < left.getStartPosition()) {
+							edit.addChild(new InsertEdit(expression.getStartPosition(), String.valueOf('(')));
+							edit.addChild(new InsertEdit(ASTNodes.getExclusiveEnd(left), String.valueOf(')')));
+						}
+						ASTNode rigth= compareExpression.getRightOperand();
+						int selEnd= ASTNodes.getExclusiveEnd(expression);
+						if (selEnd > ASTNodes.getExclusiveEnd(rigth)) {
+							edit.addChild(new InsertEdit(rigth.getStartPosition(), String.valueOf('(')));
+							edit.addChild(new InsertEdit(selEnd, String.valueOf(')')));
+						}
+					}
+				};
 				proposals.add(proposal);
-				TextEdit edit= proposal.getTextChange().getEdit();
-				ASTNode left= visitor.compareExpression.getLeftOperand();
-
-				if (expr.getStartPosition() < left.getStartPosition()) {
-					edit.addChild(new InsertEdit(expr.getStartPosition(), String.valueOf('(')));
-					edit.addChild(new InsertEdit(ASTNodes.getExclusiveEnd(left), String.valueOf(')')));
-				}
-				ASTNode rigth= visitor.compareExpression.getRightOperand();
-				int selEnd= ASTNodes.getExclusiveEnd(expr);
-				if (selEnd > ASTNodes.getExclusiveEnd(rigth)) {
-					edit.addChild(new InsertEdit(rigth.getStartPosition(), String.valueOf('(')));
-					edit.addChild(new InsertEdit(selEnd, String.valueOf(')')));
-				}
 			}
 		}
 	}
@@ -835,18 +831,39 @@ public class LocalCorrectionsSubProcessor {
 		return op == InfixExpression.Operator.AND || op == InfixExpression.Operator.OR || op == InfixExpression.Operator.XOR;
 	}
 
-	private static class CompareInBitWiseOpFinder extends ASTVisitor{
-		public InfixExpression compareExpression= null;
+	private static class CompareInBitWiseOpFinder extends ASTVisitor {
+		
+		private InfixExpression fCompareExpression= null;
+		private final ASTNode fSelectedNode;
 
+		public CompareInBitWiseOpFinder(ASTNode selectedNode) {
+			fSelectedNode= selectedNode;
+			selectedNode.accept(this);
+		}
+		
 		public boolean visit(InfixExpression e) {
 			InfixExpression.Operator op= e.getOperator();
 			if (isBitOperation(op)) {
 				return true;
 			} else if (op == InfixExpression.Operator.EQUALS || op == InfixExpression.Operator.NOT_EQUALS) {
-				compareExpression= e;
+				fCompareExpression= e;
 				return false;
 			}
 			return false;
+		}
+		
+		public InfixExpression getCompareExpression() {
+			return fCompareExpression;
+		}
+		
+		public InfixExpression getParentInfixExpression() {
+			ASTNode expr= fSelectedNode;
+			ASTNode parent= expr.getParent(); // include all parents
+			while (parent instanceof InfixExpression && isBitOperation(((InfixExpression) parent).getOperator())) {
+				expr= parent;
+				parent= expr.getParent();
+			}
+			return (InfixExpression) expr;
 		}
 	}
 

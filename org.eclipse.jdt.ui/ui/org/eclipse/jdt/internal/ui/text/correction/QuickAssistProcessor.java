@@ -22,8 +22,8 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.Document;
 
-import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -200,28 +200,19 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		final ICompilationUnit cu= context.getCompilationUnit();
 		final ExtractTempRefactoring refactoring= ExtractTempRefactoring.create(cu, expression.getStartPosition(), expression.getLength());
-
-		//refactoring.setLeaveDirty(true);
 		if (refactoring.checkActivationBasics(context.getASTRoot(), new NullProgressMonitor()).isOK()) {
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);
-			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, null, 5, image) {
-				private Change fChange= null;
-				protected void initializeTextChange() throws CoreException {
-					if (fChange == null) {
-						refactoring.setTempName(refactoring.guessTempName());
-						if (!refactoring.checkFinalConditions(new NullProgressMonitor()).hasFatalError()) {
-							fChange= refactoring.createChange(new NullProgressMonitor());
-						} else {
-							String lineDelimiter= StubUtility.getLineDelimiterUsed(cu);
-							Document document= new Document(""); //$NON-NLS-1$
-							document.setInitialLineDelimiter(lineDelimiter);
-							fChange= new DocumentChange(getDisplayString(), document);
-						}
+			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, 5, image) {
+				protected TextChange createTextChange() throws CoreException {
+					refactoring.setTempName(refactoring.guessTempName());
+					if (!refactoring.checkFinalConditions(new NullProgressMonitor()).hasFatalError()) {
+						return (TextChange) refactoring.createChange(new NullProgressMonitor());
+					} else {
+						Document document= new Document(""); //$NON-NLS-1$
+						document.setInitialLineDelimiter(StubUtility.getLineDelimiterUsed(cu));
+						return new DocumentChange(getDisplayString(), document);
 					}
-				}
-				public Change getChange() {
-					return fChange;
 				}
 			};
 			proposals.add(proposal);
