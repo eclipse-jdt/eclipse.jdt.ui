@@ -865,13 +865,25 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 				
 				if (Modifier.isPrivate(declaration.getModifiers()) || Modifier.isProtected(declaration.getModifiers())) {
 					newFlags= JdtFlags.clearFlag(Modifier.PROTECTED | Modifier.PRIVATE, newFlags);
-					final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, Messages.format(
-							RefactoringCoreMessages.MoveInnerToTopRefactoring_change_visibility_type_warning, new String[] { BindingLabelProvider
-									.getBindingLabel(binding, JavaElementLabels.ALL_DEFAULT) }), JavaStatusContext.create(fSourceRewrite.getCu()));
+					final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_change_visibility_type_warning, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_DEFAULT)}), JavaStatusContext.create(fSourceRewrite.getCu()));
 					if (!containsStatusEntry(status, entry))
 						status.addEntry(entry);
 				}
 				
+				IMethod[] constructors= fType.getMethods();
+				for (int offset= 0; offset < constructors.length; offset++) {
+					MethodDeclaration decl= ASTNodeSearchUtil.getMethodDeclarationNode(constructors[offset], root);
+					if (decl != null && Modifier.isPrivate(decl.getModifiers())) {
+						int flags= JdtFlags.clearFlag(Modifier.PRIVATE, decl.getModifiers());
+						final IMethodBinding method= decl.resolveBinding();
+						if (method != null) {
+							final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.WARNING, Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_change_visibility_constructor_warning, new String[] { BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_DEFAULT)}), JavaStatusContext.create(fSourceRewrite.getCu()));
+							if (!containsStatusEntry(status, entry))
+								status.addEntry(entry);
+						}
+						ModifierRewrite.create(rewrite, decl).setModifiers(flags, groupMove);
+					}
+				}
 				ModifierRewrite.create(rewrite, declaration).setModifiers(newFlags, groupMove);
 			}
 		}

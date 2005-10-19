@@ -542,6 +542,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String MoveInnerToTopRefactoring_change_visibility;
 	public static String MoveInnerToTopRefactoring_change_visibility_type_warning;
 	public static String MoveInnerToTopRefactoring_change_visibility_method_warning;
+	public static String MoveInnerToTopRefactoring_change_visibility_constructor_warning;
 	public static String MoveInnerToTopRefactoring_change_visibility_field_warning;
 	public static String MoveInnerToTopRefactoring_change_qualifier;
 	public static String MoveInnerToTopRefactoring_type_exists;

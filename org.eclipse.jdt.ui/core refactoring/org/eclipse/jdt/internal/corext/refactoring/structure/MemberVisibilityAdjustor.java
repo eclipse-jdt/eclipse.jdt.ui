@@ -589,8 +589,12 @@ public final class MemberVisibilityAdjustor {
 			IType type= null;
 			for (int index= 0; index < types.length; index++) {
 				type= types[index];
-				if (!type.isBinary() && !type.isReadOnly())
+				if (!type.isBinary() && !type.isReadOnly()) {
 					adjustIncomingVisibility(type, new SubProgressMonitor(monitor, 1));
+					IMethod[] constructors= type.getMethods();
+					for (int offset= 0; offset < constructors.length; offset++)
+						adjustIncomingVisibility(constructors[offset], new SubProgressMonitor(monitor, 1));
+				}
 			}
 		} finally {
 			monitor.done();
