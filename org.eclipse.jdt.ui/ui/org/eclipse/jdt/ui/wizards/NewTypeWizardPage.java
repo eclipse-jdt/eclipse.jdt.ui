@@ -86,8 +86,6 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -107,7 +105,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
@@ -2273,20 +2270,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		ArrayList newMethods= new ArrayList();
 		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 		settings.createComments= isAddComments();
-		ITypeBinding binding= null;
 		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setResolveBindings(true);
 		parser.setSource(cu);
 		CompilationUnit unit= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 1));
-		if (type.isAnonymous()) {
-			ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), ClassInstanceCreation.class);
-			if (creation != null)
-				binding= creation.resolveTypeBinding();
-		} else {
-			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
-			if (declaration != null)
-				binding= declaration.resolveBinding();
-		}
+		final ITypeBinding binding= ASTNodes.getTypeBinding(unit, type);
 		if (binding != null) {
 			if (doUnimplementedMethods) {
 				AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(type, null, unit, createBindingKeys(StubUtility2.getUnimplementedMethods(binding)), settings, false, true, false);

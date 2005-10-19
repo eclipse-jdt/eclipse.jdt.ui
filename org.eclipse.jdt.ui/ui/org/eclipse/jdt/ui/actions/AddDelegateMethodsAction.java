@@ -57,8 +57,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -71,7 +69,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -165,18 +162,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		AddDelegateMethodsContentProvider(IType type, IField[] fields) throws JavaModelException {
 			RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 			fUnit= parser.parse(type.getCompilationUnit(), true);
-			ITypeBinding binding= null;
-			if (type.isAnonymous()) {
-				final ClassInstanceCreation cic= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()),
-						ClassInstanceCreation.class);
-				if (cic != null)
-					binding= cic.resolveTypeBinding();
-			} else {
-				final AbstractTypeDeclaration atd= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()),
-						AbstractTypeDeclaration.class);
-				if (atd != null)
-					binding= atd.resolveBinding();
-			}
+			final ITypeBinding binding= ASTNodes.getTypeBinding(fUnit, type);
 			if (binding != null) {
 				IBinding[][] bindings= StubUtility2.getDelegatableMethods(fUnit.getAST(), binding);
 				if (bindings != null) {
