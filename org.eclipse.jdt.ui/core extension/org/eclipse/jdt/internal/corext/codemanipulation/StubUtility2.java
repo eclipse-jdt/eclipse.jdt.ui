@@ -180,7 +180,6 @@ public final class StubUtility2 {
 
 		String delimiter= StubUtility.getLineDelimiterUsed(unit);
 
-		String bodyStatement= ""; //$NON-NLS-1$
 		if (superConstructor != null) {
 			SuperConstructorInvocation invocation= ast.newSuperConstructorInvocation();
 			SingleVariableDeclaration varDecl= null;
@@ -188,7 +187,7 @@ public final class StubUtility2 {
 				varDecl= (SingleVariableDeclaration) iterator.next();
 				invocation.arguments().add(ast.newSimpleName(varDecl.getName().getIdentifier()));
 			}
-			bodyStatement= ASTNodes.asFormattedString(invocation, 0, delimiter);
+			body.statements().add(invocation);
 		}
 
 		List prohibited= new ArrayList();
@@ -208,12 +207,6 @@ public final class StubUtility2 {
 			list.add(param);
 			var.setName(ast.newSimpleName(param));
 			parameters.add(var);
-		}
-
-		String placeHolder= CodeGeneration.getMethodBodyContent(unit, typeBinding.getName(), typeBinding.getName(), true, bodyStatement, delimiter);
-		if (placeHolder != null) {
-			ASTNode todoNode= rewrite.createStringPlaceholder(placeHolder, ASTNode.RETURN_STATEMENT);
-			body.statements().add(todoNode);
 		}
 
 		list= new ArrayList(prohibited);
@@ -237,6 +230,7 @@ public final class StubUtility2 {
 			assignment.setOperator(Assignment.Operator.ASSIGN);
 			body.statements().add(ast.newExpressionStatement(assignment));
 		}
+		
 
 		if (settings != null && settings.createComments) {
 			String string= CodeGeneration.getMethodComment(unit, typeBinding.getName(), decl, superConstructor, delimiter);

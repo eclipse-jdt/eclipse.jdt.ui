@@ -147,7 +147,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	public A(String field1) {\r\n" + 
 				"		super();\r\n" + 
-				"		// TODO Auto-generated constructor stub\r\n" + 
 				"		this.field1 = field1;\r\n" + 
 				"	}\r\n" + 
 				"\r\n" + 
@@ -243,7 +242,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	public A(String firstField, List secondField, A beforeHandThirdField) {\r\n" + 
 				"		super();\r\n" + 
-				"		// TODO Auto-generated constructor stub\r\n" + 
 				"		this.firstField = firstField;\r\n" + 
 				"		this.secondField = secondField;\r\n" + 
 				"		this.beforeHandThirdField = beforeHandThirdField;\r\n" + 
@@ -284,7 +282,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	public A(String field) {\r\n" + 
 				"		super();\r\n" + 
-				"		// TODO Auto-generated constructor stub\r\n" + 
 				"		this.field = field;\r\n" + 
 				"	}\r\n" + 
 				"	public void method2() {}\r\n" + 
@@ -315,7 +312,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"\r\n" + 
 				"	public A(String field) {\r\n" + 
 				"		super();\r\n" + 
-				"		// TODO Auto-generated constructor stub\r\n" + 
 				"		this.field = field;\r\n" + 
 				"	}\r\n" + 
 				"}", a.getSource());
@@ -345,7 +341,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"\r\n" + 
 				"	protected A(String field) {\r\n" + 
 				"		super();\r\n" + 
-				"		// TODO Auto-generated constructor stub\r\n" + 
 				"		this.field = field;\r\n" + 
 				"	}\r\n" + 
 				"}", a.getSource());
@@ -374,7 +369,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"	String field;\r\n" + 
 				"\r\n" + 
 				"	public A(String field) {\r\n" + 
-				"		// TODO Auto-generated constructor stub\r\n" + 
 				"		this.field = field;\r\n" + 
 				"	}\r\n" + 
 				"}", a.getSource());
@@ -422,7 +416,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	public A(Map<String, B> field1, E field2) {\r\n" + 
 				"		super();\r\n" + 
-				"		// TODO Auto-generated constructor stub\r\n" + 
 				"		this.field1 = field1;\r\n" + 
 				"		this.field2 = field2;\r\n" + 
 				"	}\r\n" + 
@@ -454,7 +447,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	public A(B field1) {\r\n" + 
 				"		super();\r\n" + 
-				"		// TODO Auto-generated constructor stub\r\n" + 
 				"		this.field1 = field1;\r\n" + 
 				"	}\r\n" + 
 				"}");
@@ -467,29 +459,26 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 	 */
 	public void test10() throws Exception {
 		
-		printTestDisabledMessage("see bug 42341 (final in parameters)");
-		
-//		runIt("A", new String[] { "field1" },
-//				"package p;\r\n" + 
-//				"\r\n" + 
-//				"public class A {\r\n" + 
-//				"	final A field1;\r\n" + 
-//				"}",
-//				
-//				"package p;\r\n" + 
-//				"\r\n" + 
-//				"public class A {\r\n" + 
-//				"	final A field1;\r\n" + 
-//				"\r\n" + 
-//				"	/**\r\n" + 
-//				"	 * @param field1\r\n" + 
-//				"	 */\r\n" + 
-//				"	public A(final A field1) {\r\n" + 
-//				"		super();\r\n" + 
-//				"		// TODO Auto-generated constructor stub\r\n" + 
-//				"		this.field1 = field1;\r\n" + 
-//				"	}\r\n" + 
-//				"}");
+		runIt("A", new String[] { "field1" },
+				"package p;\r\n" + 
+				"\r\n" + 
+				"public class A {\r\n" + 
+				"	final A field1;\r\n" + 
+				"}",
+				
+				"package p;\r\n" + 
+				"\r\n" + 
+				"public class A {\r\n" + 
+				"	final A field1;\r\n" + 
+				"\r\n" + 
+				"	/**\r\n" + 
+				"	 * @param field1\r\n" + 
+				"	 */\r\n" + 
+				"	public A(final A field1) {\r\n" + 
+				"		super();\r\n" + 
+				"		this.field1 = field1;\r\n" + 
+				"	}\r\n" + 
+				"}");
 	}
 
 	/**
@@ -522,7 +511,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	public A(Date startDate, Date endDate) {\r\n" + 
 				"		super();\r\n" + 
-				"		// TODO Auto-generated constructor stub\r\n" + 
 				"		this.startDate = startDate;\r\n" + 
 				"		this.endDate = endDate;\r\n" + 
 				"	}\r\n" + 
@@ -572,7 +560,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	public A(String a, String b, String a2, String b2) {\r\n" + 
 				"		super(a, b);\r\n" + 
-				"		// TODO Auto-generated constructor stub\r\n" + 
 				"		a = a2;\r\n" + 
 				"		b = b2;\r\n" + 
 				"	}\r\n" + 
@@ -625,7 +612,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	public A(Map<String, A> someMap, String field) {\r\n" + 
 				"		super(someMap);\r\n" + 
-				"		// TODO Auto-generated constructor stub\r\n" + 
 				"		this.field = field;\r\n" + 
 				"	}\r\n" + 
 				"}");
@@ -664,7 +650,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"		 */\r\n" + 
 				"		public B(A b) {\r\n" + 
 				"			super();\r\n" + 
-				"			// TODO Auto-generated constructor stub\r\n" + 
 				"			this.b = b;\r\n" + 
 				"		}\r\n" + 
 				"	}\r\n" + 
@@ -700,7 +685,6 @@ public class GenerateConstructorUsingFieldsTest extends SourceTestCase {
 				"	 */\r\n" + 
 				"	public B(A foo) {\r\n" + 
 				"		super();\r\n" + 
-				"		// TODO Auto-generated constructor stub\r\n" + 
 				"		this.foo = foo;\r\n" + 
 				"	}\r\n" + 
 				"}\r\n" + 
