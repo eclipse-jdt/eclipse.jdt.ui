@@ -943,6 +943,15 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		final IVariableBinding variable= (IVariableBinding) binding;
 		if (!variable.isField())
 			return false;
+		if ("length".equals(name.getIdentifier())) { //$NON-NLS-1$
+			final ASTNode parent= name.getParent();
+			if (parent instanceof QualifiedName) {
+				final QualifiedName qualified= (QualifiedName) parent;
+				final ITypeBinding type= qualified.getQualifier().resolveTypeBinding();
+				if (type != null && type.isArray())
+					return false;
+			}
+		}
 		return !Modifier.isStatic(variable.getModifiers());
 	}
 
@@ -1641,8 +1650,22 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 							if (target) {
 								if (invocation.getExpression() != null)
 									list.replace(argument, rewrite.createCopyTarget(invocation.getExpression()), group);
-								else
-									list.replace(argument, rewrite.getAST().newThisExpression(), group);
+								else {
+									final ThisExpression expression= rewrite.getAST().newThisExpression();
+									final AbstractTypeDeclaration member= (AbstractTypeDeclaration) ASTNodes.getParent(invocation, AbstractTypeDeclaration.class);
+									if (member != null) {
+										final ITypeBinding resolved= member.resolveBinding();
+										if (ASTNodes.getParent(invocation, AnonymousClassDeclaration.class) != null || (resolved != null && resolved.isMember())) {
+											final IMethodBinding method= declaration.resolveBinding();
+											if (method != null) {
+												final ITypeBinding declaring= method.getDeclaringClass();
+												if (declaring != null)
+													expression.setQualifier(rewrite.getAST().newSimpleName(declaring.getName()));
+											}
+										}
+									}
+									list.replace(argument, expression, group);
+								}
 							} else
 								list.remove(argument, group);
 						}
