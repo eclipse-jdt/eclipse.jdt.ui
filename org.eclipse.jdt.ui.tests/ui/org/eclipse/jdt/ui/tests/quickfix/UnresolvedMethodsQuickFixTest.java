@@ -1911,6 +1911,57 @@ public class UnresolvedMethodsQuickFixTest extends QuickFixTest {
 	}
 
 	
+	public void testParameterMismatchKeepModfiers() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Collections;\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("    void foo(@Deprecated final String map){}\n");
+		buf.append("    {foo(Collections.EMPTY_MAP);}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Collections;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("    void foo(@Deprecated final Map map){}\n");
+		buf.append("    {foo(Collections.EMPTY_MAP);}\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Collections;\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("class E {\n");
+		buf.append("    void foo(@Deprecated final String map){}\n");
+		buf.append("    {foo(Collections.EMPTY_MAP);}\n");
+		buf.append("    private void foo(Map empty_map) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	
+	
 	public void testParameterMismatchChangeFieldType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

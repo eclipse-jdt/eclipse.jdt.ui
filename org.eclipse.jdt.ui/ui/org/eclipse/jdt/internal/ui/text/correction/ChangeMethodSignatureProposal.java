@@ -21,8 +21,23 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.NamingConventions;
-
-import org.eclipse.jdt.core.dom.*;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
+import org.eclipse.jdt.core.dom.TagElement;
+import org.eclipse.jdt.core.dom.TextElement;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -33,6 +48,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
@@ -53,7 +69,8 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	static class ModifyDescription implements ChangeDescription {
 		public final String name;
 		public final ITypeBinding type;
-		SingleVariableDeclaration resultingNode;
+		Type resultingParamType;
+		SimpleName resultingParamName;
 		SimpleName resultingTagArg;
 
 		private ModifyDescription(ITypeBinding type, String name) {
@@ -149,9 +166,11 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				InsertDescription desc= (InsertDescription) curr;
 				SingleVariableDeclaration newNode= ast.newSingleVariableDeclaration();
 				newNode.setType(imports.addImport(desc.type, ast));
+				newNode.setName(ast.newSimpleName("x")); //$NON-NLS-1$
 
 				// remember to set name later
-				desc.resultingNode= newNode;
+				desc.resultingParamName= newNode.getName();
+				desc.resultingParamType= newNode.getType();
 				hasCreatedVariables= true;
 
 				listRewrite.insertAt(newNode, i, null);
@@ -181,16 +200,17 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			} else if (curr instanceof EditDescription) {
 				EditDescription desc= (EditDescription) curr;
 
+				Type newType= imports.addImport(desc.type, ast);
+				SimpleName newName= ast.newSimpleName("x"); //$NON-NLS-1$  // name will be set later
+				
 				SingleVariableDeclaration decl= (SingleVariableDeclaration) parameters.get(k);
-
-				SingleVariableDeclaration newNode= ast.newSingleVariableDeclaration();
-				newNode.setType(imports.addImport(desc.type, ast));
+				rewrite.replace(decl.getType(), newType, null);
+				rewrite.replace(decl.getName(), newName, null); 
 
 				// remember to set name later
-				desc.resultingNode= newNode;
+				desc.resultingParamName= newName;
+				desc.resultingParamType= newType;
 				hasCreatedVariables= true;
-
-				rewrite.replace(decl, newNode, null);
 
 				k++;
 
@@ -245,8 +265,6 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			ChangeDescription curr= fParameterChanges[i];
 			if (curr instanceof ModifyDescription) {
 				ModifyDescription desc= (ModifyDescription) curr;
-				SingleVariableDeclaration var= desc.resultingNode;
-				String suggestedName= desc.name;
 
 				String typeKey= getParamTypeGroupId(i);
 				String nameKey= getParamNameGroupId(i);
@@ -254,11 +272,13 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				// collect name suggestions
 				String favourite= null;
 				String[] excludedNames= (String[]) usedNames.toArray(new String[usedNames.size()]);
+				
+				String suggestedName= desc.name;
 				if (suggestedName != null) {
 					favourite= StubUtility.suggestArgumentName(getCompilationUnit().getJavaProject(), suggestedName, excludedNames);
 					addLinkedPositionProposal(nameKey, favourite, null);
 				}
-				Type type= var.getType();
+				Type type= desc.resultingParamType;
 				int dim= 0;
 				if (type.isArrayType()) {
 					dim= ((ArrayType) type).getDimensions();
@@ -272,7 +292,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 					favourite= suggestedNames[0];
 				}
 
-				var.setName(ast.newSimpleName(favourite));
+				desc.resultingParamName.setIdentifier(favourite);
 				usedNames.add(favourite);
 
 				// collect type suggestions
@@ -281,8 +301,8 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 					addLinkedPositionProposal(typeKey, bindings[k]);
 				}
 
-				addLinkedPosition(rewrite.track(var.getType()), false, typeKey);
-				addLinkedPosition(rewrite.track(var.getName()), false, nameKey);
+				addLinkedPosition(rewrite.track(desc.resultingParamType), false, typeKey);
+				addLinkedPosition(rewrite.track(desc.resultingParamName), false, nameKey);
 
 				SimpleName tagArg= desc.resultingTagArg;
 				if (tagArg != null) {
