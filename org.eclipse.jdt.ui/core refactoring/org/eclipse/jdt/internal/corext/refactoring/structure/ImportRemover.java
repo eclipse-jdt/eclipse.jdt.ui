@@ -32,6 +32,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 public class ImportRemover {
@@ -211,5 +212,20 @@ public class ImportRemover {
 
 	public void registerRemovedNode(ASTNode removed) {
 		fRemovedNodes.add(removed);
+	}
+
+	public void applyRemoves(ImportRewrite importRewrite) {
+		IBinding[] bindings= getImportsToRemove();
+		for (int i= 0; i < bindings.length; i++) {
+			if (bindings[i] instanceof ITypeBinding)
+				importRewrite.removeImport((ITypeBinding) bindings[i]);
+			else if (bindings[i] instanceof IMethodBinding) {
+				IMethodBinding binding= (IMethodBinding) bindings[i];
+				importRewrite.removeStaticImport(binding.getDeclaringClass().getQualifiedName() + '.' + binding.getName());
+			} else if (bindings[i] instanceof IVariableBinding) {
+				IVariableBinding binding= (IVariableBinding) bindings[i];
+				importRewrite.removeStaticImport(binding.getDeclaringClass().getQualifiedName() + '.' + binding.getName());
+			}
+		}
 	}
 }
