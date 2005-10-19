@@ -23,14 +23,12 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 
@@ -49,28 +47,25 @@ public class GenerateConstructorUsingFieldsContentProvider implements ITreeConte
 	public GenerateConstructorUsingFieldsContentProvider(IType type, List fields, List selected) throws JavaModelException {
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		fUnit= parser.parse(type.getCompilationUnit(), true);
-		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), AbstractTypeDeclaration.class);
-		if (declaration != null) {
-			fType= declaration.resolveBinding();
-			if (fType != null) {
-				IField field= null;
-				for (Iterator iterator= fields.iterator(); iterator.hasNext();) {
-					field= (IField) iterator.next();
-					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, fUnit);
-					if (fragment != null) {
-						IVariableBinding binding= fragment.resolveBinding();
-						if (binding != null)
-							fFields.add(binding);
-					}
+		fType= ASTNodes.getTypeBinding(fUnit, type);
+		if (fType != null) {
+			IField field= null;
+			for (Iterator iterator= fields.iterator(); iterator.hasNext();) {
+				field= (IField) iterator.next();
+				VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, fUnit);
+				if (fragment != null) {
+					IVariableBinding binding= fragment.resolveBinding();
+					if (binding != null)
+						fFields.add(binding);
 				}
-				for (Iterator iterator= selected.iterator(); iterator.hasNext();) {
-					field= (IField) iterator.next();
-					VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, fUnit);
-					if (fragment != null) {
-						IVariableBinding binding= fragment.resolveBinding();
-						if (binding != null)
-							fSelected.add(binding);
-					}
+			}
+			for (Iterator iterator= selected.iterator(); iterator.hasNext();) {
+				field= (IField) iterator.next();
+				VariableDeclarationFragment fragment= ASTNodeSearchUtil.getFieldDeclarationFragmentNode(field, fUnit);
+				if (fragment != null) {
+					IVariableBinding binding= fragment.resolveBinding();
+					if (binding != null)
+						fSelected.add(binding);
 				}
 			}
 		}

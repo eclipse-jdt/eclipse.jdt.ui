@@ -21,6 +21,13 @@ import java.util.List;
 
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -30,9 +37,11 @@ import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
@@ -765,6 +774,29 @@ public class ASTNodes {
 			if (curr instanceof Modifier && ((Modifier) curr).getKeyword().toFlagValue() == flag) {
 				return (Modifier) curr;
 			}
+		}
+		return null;
+	}
+
+	public static ITypeBinding getTypeBinding(CompilationUnit root, IType type) throws JavaModelException {
+		if (type.isAnonymous()) {
+			final IJavaElement parent= type.getParent();
+			if (parent instanceof IField && Flags.isEnum(((IMember) parent).getFlags())) {
+				final EnumConstantDeclaration constant= (EnumConstantDeclaration) NodeFinder.perform(root, ((ISourceReference) parent).getSourceRange());
+				if (constant != null) {
+					final AnonymousClassDeclaration declaration= constant.getAnonymousClassDeclaration();
+					if (declaration != null)
+						return declaration.resolveBinding();
+				}
+			} else {
+				final ClassInstanceCreation creation= (ClassInstanceCreation) getParent(NodeFinder.perform(root, type.getNameRange()), ClassInstanceCreation.class);
+				if (creation != null)
+					return creation.resolveTypeBinding();
+			}
+		} else {
+			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) getParent(NodeFinder.perform(root, type.getNameRange()), AbstractTypeDeclaration.class);
+			if (declaration != null)
+				return declaration.resolveBinding();
 		}
 		return null;
 	}

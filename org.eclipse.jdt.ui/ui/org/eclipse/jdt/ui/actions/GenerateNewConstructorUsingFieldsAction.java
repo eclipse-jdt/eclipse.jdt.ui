@@ -309,6 +309,10 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		final GenerateConstructorUsingFieldsContentProvider provider= new GenerateConstructorUsingFieldsContentProvider(type, fields, Arrays.asList(selected));
 		IMethodBinding[] bindings= null;
 		final ITypeBinding provided= provider.getType();
+		if (provided.isAnonymous()) {
+			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_anonymous_class);
+			return;
+		}
 		if (provided.isEnum()) {
 			bindings= new IMethodBinding[] {getObjectConstructor(provider.getCompilationUnit())};
 		} else {

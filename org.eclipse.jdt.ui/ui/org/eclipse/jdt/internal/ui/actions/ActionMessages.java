@@ -54,6 +54,7 @@ public final class ActionMessages extends NLS {
 	public static String OpenTypeHierarchyAction_messages_no_java_resources;
 	public static String OpenTypeHierarchyAction_messages_no_types;
 	public static String OpenTypeHierarchyAction_messages_no_valid_java_element;
+	public static String OpenTypeHierarchyAction_messages_unknown_import_decl;
 	public static String ShowInPackageViewAction_label;
 	public static String ShowInPackageViewAction_description;
 	public static String ShowInPackageViewAction_tooltip;
@@ -149,6 +150,8 @@ public final class ActionMessages extends NLS {
 	public static String GenerateConstructorUsingFieldsSelectionDialog_down_button;
 	public static String GenerateConstructorUsingFieldsSelectionDialog_sort_constructor_choices_label;
 	public static String GenerateConstructorUsingFieldsSelectionDialog_omit_super;
+	public static String GenerateConstructorUsingFieldsAction_error_anonymous_class;
+
 	public static String AddJavaDocStubAction_label;
 	public static String AddJavaDocStubAction_description;
 	public static String AddJavaDocStubAction_tooltip;
@@ -298,6 +301,4 @@ public final class ActionMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, ActionMessages.class);
 	}
-
-	public static String OpenTypeHierarchyAction_messages_unknown_import_decl;
 }
