@@ -216,21 +216,11 @@ public class ReorgMoveWizard extends RefactoringWizard {
 		
 		protected void addUpdateArea(Composite parent) {
 			Composite firstLine= new Composite(parent, SWT.NONE);
-			GridLayout layout= new GridLayout(2, false);
+			GridLayout layout= new GridLayout(1, false);
 			layout.marginHeight= layout.marginWidth= 0;
 			firstLine.setLayout(layout);
 			firstLine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			
-			if (getJavaMoveProcessor().canUpdateReferences()) {
-				addUpdateReferenceComponent(firstLine);
-				addUpdateQualifiedNameComponent(parent, layout.marginWidth);
-			} else if (getJavaMoveProcessor().canUpdateQualifiedNames()) {
-				addUpdateQualifiedNameComponent(firstLine, layout.marginWidth);
-			} else {
-				Composite filler= new Composite(firstLine, SWT.NONE);
-				filler.setLayoutData(new GridData(GridData.FILL_BOTH));
-			}
-			
+
 			Button newButton= new Button(firstLine, SWT.PUSH);
 			newButton.setText(ReorgMessages.ReorgMoveWizard_new); 
 			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
@@ -241,6 +231,13 @@ public class ReorgMoveWizard extends RefactoringWizard {
 					doNewButtonPressed();
 				}
 			});
+			
+			if (getJavaMoveProcessor().canUpdateReferences()) {
+				addUpdateReferenceComponent(firstLine);
+				addUpdateQualifiedNameComponent(firstLine, layout.marginWidth);
+			} else if (getJavaMoveProcessor().canUpdateQualifiedNames()) {
+				addUpdateQualifiedNameComponent(firstLine, layout.marginWidth);
+			}
 		}
 		
 		private boolean canUpdateReferences() {
