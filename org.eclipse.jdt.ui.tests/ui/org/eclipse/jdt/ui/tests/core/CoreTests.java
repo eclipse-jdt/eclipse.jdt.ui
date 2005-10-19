@@ -18,6 +18,8 @@ import junit.framework.TestSuite;
 
 import org.eclipse.jdt.testplugin.StringAsserts;
 
+import org.eclipse.jdt.ui.tests.core.source.SourceActionTests;
+
 /**
   */
 public class CoreTests extends TestCase {
@@ -26,8 +28,7 @@ public class CoreTests extends TestCase {
 		
 		TestSuite suite= new TestSuite();
 		suite.addTest(AddImportTest.allTests());
-		suite.addTest(AddUnimplementedConstructorsTest.allTests());
-		suite.addTest(AddUnimplementedMethodsTest.allTests());
+		suite.addTest(SourceActionTests.suite());
 		suite.addTest(ASTNodesInsertTest.allTests());
 		suite.addTest(BindingsNameTest.allTests());
 		suite.addTest(CallHierarchyTest.allTests());

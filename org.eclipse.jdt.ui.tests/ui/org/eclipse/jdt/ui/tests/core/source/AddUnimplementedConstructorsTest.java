@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.core;
+package org.eclipse.jdt.ui.tests.core.source;
 
 import java.io.IOException;
 import java.util.Hashtable;
@@ -49,6 +49,9 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.eclipse.jdt.ui.tests.core.CoreTests;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class AddUnimplementedConstructorsTest extends CoreTests {
 

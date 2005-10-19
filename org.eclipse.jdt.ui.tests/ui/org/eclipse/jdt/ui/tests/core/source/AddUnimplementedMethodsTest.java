@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.ui.tests.core;
+package org.eclipse.jdt.ui.tests.core.source;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
@@ -41,6 +41,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class AddUnimplementedMethodsTest extends TestCase {
 	
