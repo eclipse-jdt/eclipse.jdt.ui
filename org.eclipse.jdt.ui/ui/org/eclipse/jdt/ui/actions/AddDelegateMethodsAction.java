@@ -58,6 +58,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -164,15 +165,23 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 		AddDelegateMethodsContentProvider(IType type, IField[] fields) throws JavaModelException {
 			RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 			fUnit= parser.parse(type.getCompilationUnit(), true);
-			AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), AbstractTypeDeclaration.class);
-			if (declaration != null) {
-				ITypeBinding binding= declaration.resolveBinding();
-				if (binding != null) {
-					IBinding[][] bindings= StubUtility2.getDelegatableMethods(fUnit.getAST(), binding);
-					if (bindings != null) {
-						fBindings= bindings;
-						fCount= bindings.length;
-					}
+			ITypeBinding binding= null;
+			if (type.isAnonymous()) {
+				final ClassInstanceCreation cic= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()),
+						ClassInstanceCreation.class);
+				if (cic != null)
+					binding= cic.resolveTypeBinding();
+			} else {
+				final AbstractTypeDeclaration atd= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()),
+						AbstractTypeDeclaration.class);
+				if (atd != null)
+					binding= atd.resolveBinding();
+			}
+			if (binding != null) {
+				IBinding[][] bindings= StubUtility2.getDelegatableMethods(fUnit.getAST(), binding);
+				if (bindings != null) {
+					fBindings= bindings;
+					fCount= bindings.length;
 				}
 				List expanded= new ArrayList();
 				for (int index= 0; index < fields.length; index++) {
