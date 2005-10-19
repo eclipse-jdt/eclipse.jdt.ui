@@ -38,19 +38,10 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
-import org.eclipse.jdt.core.Flags;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
@@ -60,7 +51,6 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -295,26 +285,7 @@ public class OverrideMethodDialog extends SourceActionDialog {
 		super(shell, new BindingLabelProvider(), new OverrideMethodContentProvider(), editor, type, false);
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		fUnit= parser.parse(type.getCompilationUnit(), true);
-		ITypeBinding binding= null;
-		if (type.isAnonymous()) {
-			final IJavaElement parent= type.getParent();
-			if (parent instanceof IField && Flags.isEnum(((IMember) parent).getFlags())) {
-				final EnumConstantDeclaration constant= (EnumConstantDeclaration) NodeFinder.perform(fUnit, ((ISourceReference) parent).getSourceRange());
-				if (constant != null) {
-					final AnonymousClassDeclaration declaration= constant.getAnonymousClassDeclaration();
-					if (declaration != null)
-						binding= declaration.resolveBinding();
-				}
-			} else {
-				final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), ClassInstanceCreation.class);
-				if (creation != null)
-					binding= creation.resolveTypeBinding();
-			}
-		} else {
-			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(fUnit, type.getNameRange()), AbstractTypeDeclaration.class);
-			if (declaration != null)
-				binding= declaration.resolveBinding();
-		}
+		final ITypeBinding binding= ASTNodes.getTypeBinding(fUnit, type);
 		List toImplement= new ArrayList();
 		IMethodBinding[] overridable= null;
 		if (binding != null) {

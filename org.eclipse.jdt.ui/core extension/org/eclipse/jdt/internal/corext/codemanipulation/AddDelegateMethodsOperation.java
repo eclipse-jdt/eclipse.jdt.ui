@@ -33,15 +33,20 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -166,12 +171,25 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 			ITypeBinding binding= null;
 			ListRewrite rewriter= null;
 			if (fType.isAnonymous()) {
-				final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), ClassInstanceCreation.class);
-				if (creation != null) {
-					binding= creation.resolveTypeBinding();
-					final AnonymousClassDeclaration declaration= creation.getAnonymousClassDeclaration();
-					if (declaration != null)
-						rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+				final IJavaElement parent= fType.getParent();
+				if (parent instanceof IField && Flags.isEnum(((IMember) parent).getFlags())) {
+					final EnumConstantDeclaration constant= (EnumConstantDeclaration) NodeFinder.perform(rewrite.getRoot(), ((ISourceReference) parent).getSourceRange());
+					if (constant != null) {
+						final AnonymousClassDeclaration declaration= constant.getAnonymousClassDeclaration();
+						if (declaration != null) {
+							binding= declaration.resolveBinding();
+							if (binding != null)
+								rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+						}
+					}
+				} else {
+					final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), ClassInstanceCreation.class);
+					if (creation != null) {
+						binding= creation.resolveTypeBinding();
+						final AnonymousClassDeclaration declaration= creation.getAnonymousClassDeclaration();
+						if (declaration != null)
+							rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+					}
 				}
 			} else {
 				final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), AbstractTypeDeclaration.class);
