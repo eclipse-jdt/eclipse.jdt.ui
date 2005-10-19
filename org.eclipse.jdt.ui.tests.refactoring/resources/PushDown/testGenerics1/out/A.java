@@ -4,5 +4,6 @@ abstract class A<T>{
 }
 class B extends A<String>{
 
+	@Override
 	public void m() {}
 }

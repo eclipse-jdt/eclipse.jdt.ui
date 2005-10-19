@@ -12,6 +12,7 @@ class B extends A{
 		return null;
 	}
 
+	@Override
 	public Set m() {
 		return null;
 	}

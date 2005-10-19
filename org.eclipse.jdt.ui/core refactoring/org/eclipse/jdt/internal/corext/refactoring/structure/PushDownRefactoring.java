@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Type;
@@ -77,6 +78,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
@@ -584,7 +586,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 						} else {
 							final MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) infos[offset].getMember(), sourceRewriter.getRoot());
 							if (oldMethod != null) {
-								MethodDeclaration newMethod= createNewMethodDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter.getASTRewrite(), oldMethod);
+								MethodDeclaration newMethod= createNewMethodDeclarationNode(infos[offset], sourceRewriter.getRoot(), mapping, unitRewriter, oldMethod);
 								unitRewriter.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, declaration.bodyDeclarations()), unitRewriter.createGroupDescription(RefactoringCoreMessages.HierarchyRefactoring_add_member)); 
 								ImportRewriteUtil.addImports(unitRewriter, oldMethod, new HashMap(), new HashMap(), false);
 							}
@@ -702,9 +704,10 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		return newField;
 	}
 
-	private MethodDeclaration createNewMethodDeclarationNode(MemberActionInfo info, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, ASTRewrite rewrite, MethodDeclaration oldMethod) throws JavaModelException {
+	private MethodDeclaration createNewMethodDeclarationNode(MemberActionInfo info, CompilationUnit declaringCuNode, TypeVariableMaplet[] mapping, CompilationUnitRewrite rewriter, MethodDeclaration oldMethod) throws JavaModelException {
 		Assert.isTrue(!info.isFieldInfo());
 		IMethod method= (IMethod) info.getMember();
+		ASTRewrite rewrite= rewriter.getASTRewrite();
 		AST ast= rewrite.getAST();
 		MethodDeclaration newMethod= ast.newMethodDeclaration();
 		copyBodyOfPushedDownMethod(rewrite, method, oldMethod, newMethod, mapping);
@@ -712,6 +715,11 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		newMethod.setExtraDimensions(oldMethod.getExtraDimensions());
 		if (info.copyJavadocToCopiesInSubclasses())
 			copyJavadocNode(rewrite, method, oldMethod, newMethod);
+		if (info.isNewMethodToBeDeclaredAbstract() && JavaModelUtil.is50OrHigher(rewriter.getCu().getJavaProject())) {
+			final MarkerAnnotation annotation= ast.newMarkerAnnotation();
+			annotation.setTypeName(ast.newSimpleName("Override")); //$NON-NLS-1$
+			newMethod.modifiers().add(annotation);
+		}
 		newMethod.modifiers().addAll(ASTNodeFactory.newModifiers(ast, info.getNewModifiersForCopyInSubclass(oldMethod.getModifiers())));
 		newMethod.setName(ast.newSimpleName(oldMethod.getName().getIdentifier()));
 		copyReturnType(rewrite, method.getCompilationUnit(), oldMethod, newMethod, mapping);

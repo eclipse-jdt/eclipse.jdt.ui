@@ -7,5 +7,6 @@ abstract class A{
 }
 class B extends A{
 
+	@Override
 	public void m() {}
 }

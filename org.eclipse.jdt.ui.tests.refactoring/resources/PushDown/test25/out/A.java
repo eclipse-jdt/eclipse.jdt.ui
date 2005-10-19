@@ -10,6 +10,7 @@ abstract class A {
 }
 class B extends A {
 
+	@Override
 	public int foo() {
 		return 2;
 	}

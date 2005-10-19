@@ -9,6 +9,7 @@ abstract class A {
 }
 class B extends A {
 
+	@Override
 	public TEST foo() {
 		return TEST.CHECK;
 	}

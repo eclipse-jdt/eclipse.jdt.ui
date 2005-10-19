@@ -7,5 +7,6 @@ abstract class A<T>{
 }
 class B<T> extends A<T>{
 
+	@Override
 	public T m() {return null;}
 }
