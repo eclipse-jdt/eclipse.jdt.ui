@@ -15,7 +15,7 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
-import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringObject;
+import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringComponent;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -26,7 +26,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
  * 
  * @since 3.2
  */
-public class JavaRenameRefactoring extends RenameRefactoring implements IInitializableRefactoringObject {
+public class JavaRenameRefactoring extends RenameRefactoring implements IInitializableRefactoringComponent {
 
 	/**
 	 * Creates a new java rename refactoring.
@@ -39,13 +39,13 @@ public class JavaRenameRefactoring extends RenameRefactoring implements IInitial
 	}
 
 	/*
-	 * @see org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringObject#initialize(org.eclipse.ltk.core.refactoring.participants.RefactoringArguments)
+	 * @see org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringComponent#initialize(org.eclipse.ltk.core.refactoring.participants.RefactoringArguments)
 	 */
 	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
 		Assert.isNotNull(arguments);
 		final RefactoringProcessor processor= getProcessor();
-		if (processor instanceof IInitializableRefactoringObject) {
-			return ((IInitializableRefactoringObject) processor).initialize(arguments);
+		if (processor instanceof IInitializableRefactoringComponent) {
+			return ((IInitializableRefactoringComponent) processor).initialize(arguments);
 		}
 		return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.JavaRenameRefactoring_error_unsupported_initialization, getProcessor().getIdentifier()));
 	}

@@ -35,7 +35,7 @@ import org.eclipse.ltk.core.refactoring.CompositeTextFileChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
-import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringObject;
+import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringComponent;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.2
  */
-public class CompositeRefactoring extends Refactoring implements IInitializableRefactoringObject {
+public class CompositeRefactoring extends Refactoring implements IInitializableRefactoringComponent {
 
 	/** The global working copy owner */
 	private static class GlobalWorkingCopyOwner extends WorkingCopyOwner {
@@ -376,8 +376,8 @@ public class CompositeRefactoring extends Refactoring implements IInitializableR
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		final RefactoringStatus status= new RefactoringStatus();
 		for (int index= 0; index < fRefactorings.length; index++) {
-			if (!fDisabledRefactorings.contains(fRefactorings[index]) && fRefactorings[index] instanceof IInitializableRefactoringObject)
-				status.merge(((IInitializableRefactoringObject) fRefactorings[index]).initialize(arguments));
+			if (!fDisabledRefactorings.contains(fRefactorings[index]) && fRefactorings[index] instanceof IInitializableRefactoringComponent)
+				status.merge(((IInitializableRefactoringComponent) fRefactorings[index]).initialize(arguments));
 		}
 		return status;
 	}

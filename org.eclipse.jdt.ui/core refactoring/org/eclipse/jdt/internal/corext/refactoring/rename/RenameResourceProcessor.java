@@ -32,7 +32,7 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringObject;
+import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringComponent;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.JavaModelException;
@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class RenameResourceProcessor extends RenameProcessor implements IInitializableRefactoringObject, INameUpdating {
+public class RenameResourceProcessor extends RenameProcessor implements IInitializableRefactoringComponent, INameUpdating {
 
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$

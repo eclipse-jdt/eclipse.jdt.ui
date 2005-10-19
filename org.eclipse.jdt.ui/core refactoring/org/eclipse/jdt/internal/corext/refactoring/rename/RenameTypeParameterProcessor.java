@@ -415,7 +415,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	}
 
 	/*
-	 * @see org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringObject#initialize(org.eclipse.ltk.core.refactoring.participants.RefactoringArguments)
+	 * @see org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringComponent#initialize(org.eclipse.ltk.core.refactoring.participants.RefactoringArguments)
 	 */
 	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof GenericRefactoringArguments) {

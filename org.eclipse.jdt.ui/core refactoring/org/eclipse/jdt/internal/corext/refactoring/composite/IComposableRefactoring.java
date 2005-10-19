@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.composite;
 
-import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringObject;
+import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringComponent;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -21,7 +21,7 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
  * 
  * @since 3.2
  */
-public interface IComposableRefactoring extends IInitializableRefactoringObject {
+public interface IComposableRefactoring extends IInitializableRefactoringComponent {
 
 	/**
 	 * Returns the global working copy owner to use.
