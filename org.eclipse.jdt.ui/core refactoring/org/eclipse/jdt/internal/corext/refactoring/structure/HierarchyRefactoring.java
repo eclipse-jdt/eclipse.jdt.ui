@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -72,6 +73,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -126,8 +128,20 @@ public abstract class HierarchyRefactoring extends Refactoring {
 				String name= null;
 				for (int index= 0; index < fMapping.length; index++) {
 					name= binding.getName();
-					if (fMapping[index].getSourceName().equals(name) && node.getIdentifier().equals(name))
+					if (fMapping[index].getSourceName().equals(name) && node.getIdentifier().equals(name)) {
+						final MethodDeclaration declaration= (MethodDeclaration) ASTNodes.getParent(node, MethodDeclaration.class);
+						if (declaration != null) {
+							final IMethodBinding method= declaration.resolveBinding();
+							if (method != null) {
+								final ITypeBinding[] bindings= method.getTypeParameters();
+								for (int offset= 0; offset < bindings.length; offset++) {
+									if (bindings[offset].isEqualTo(binding))
+										return true;
+								}
+							}
+						}
 						fRewrite.set(node, SimpleName.IDENTIFIER_PROPERTY, fMapping[index].getTargetName(), null);
+					}
 				}
 			}
 			return true;
