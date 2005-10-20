@@ -225,14 +225,18 @@ public class CodeStyleFix extends AbstractFix {
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		ImportRewrite imports= new ImportRewrite(getCompilationUnit());
 		List groups= new ArrayList();
-		for (int i= 0; i < fBindingTuples.length; i++) {
-			TupleForUnqualifiedAccess tuple= fBindingTuples[i];
-			rewriteASTForThisQualifier(imports, tuple.getName(), tuple.getBinding(), rewrite, groups);
+		if (fBindingTuples != null) {
+			for (int i= 0; i < fBindingTuples.length; i++) {
+				TupleForUnqualifiedAccess tuple= fBindingTuples[i];
+				rewriteASTForThisQualifier(imports, tuple.getName(), tuple.getBinding(), rewrite, groups);
+			}
 		}
 		
-		for (int i= 0; i < fTupleDirects.length; i++) {
-			TupleForNonStaticAccess tuple= fTupleDirects[i];
-			rewriteASTForNonStaticAccess(imports, ast, tuple.getDeclaringTypeBinding(), tuple.getQualifier(), rewrite, groups);
+		if (fTupleDirects != null) {
+			for (int i= 0; i < fTupleDirects.length; i++) {
+				TupleForNonStaticAccess tuple= fTupleDirects[i];
+				rewriteASTForNonStaticAccess(imports, ast, tuple.getDeclaringTypeBinding(), tuple.getQualifier(), rewrite, groups);
+			}
 		}
 		
 		TextEdit edit= applyEdits(getCompilationUnit(), rewrite, imports);
