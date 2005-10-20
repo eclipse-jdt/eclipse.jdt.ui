@@ -12,10 +12,6 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.ResourceBundle;
 
-import org.eclipse.text.edits.MalformedTreeException;
-import org.eclipse.text.edits.ReplaceEdit;
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
@@ -33,7 +29,6 @@ import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITypedRegion;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.source.ISourceViewer;
@@ -49,15 +44,12 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.JavaHeuristicScanner;
 import org.eclipse.jdt.internal.ui.text.JavaIndenter;
-import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
-import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager.UndoSpec;
 
 
 /**
@@ -294,34 +286,7 @@ public class IndentAction extends TextEditorAction {
 		
 		// only change the document if it is a real change
 		if (!indent.equals(currentIndent)) {
-			String deletedText= document.get(offset, length);
 			document.replace(offset, length, indent);
-			
-			if (fIsTabAction && indent.length() > currentIndent.length() && JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_BACKSPACE)) {
-				ITextEditor editor= getTextEditor();
-				if (editor != null) {
-					final SmartBackspaceManager manager= (SmartBackspaceManager) editor.getAdapter(SmartBackspaceManager.class);
-					if (manager != null) {
-						try {
-							// restore smart portion
-							ReplaceEdit smart= new ReplaceEdit(offset, indent.length(), deletedText);
-							
-							final UndoSpec spec= new UndoSpec(
-									offset + indent.length(),
-									new Region(caret, 0),
-									new TextEdit[] { smart },
-									2,
-									null);
-							manager.register(spec);
-						} catch (MalformedTreeException e) {
-							// log & ignore
-							JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "Illegal smart backspace action", e)); //$NON-NLS-1$
-						}
-					}
-				}
-			}
-
-			
 			return true;
 		} else
 			return false;
