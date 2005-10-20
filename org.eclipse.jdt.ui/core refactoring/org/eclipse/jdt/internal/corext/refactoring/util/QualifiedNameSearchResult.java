@@ -59,6 +59,7 @@ public class QualifiedNameSearchResult {
 			return null;
 		
 		CompositeChange result= new CompositeChange(RefactoringCoreMessages.QualifiedNameSearchResult_change_name); 
+		result.markAsSynthetic();
 		List files= Arrays.asList(alreadyTouchedFiles);
 		for (Iterator iter= values.iterator(); iter.hasNext();) {
 			TextFileChange change= (TextFileChange)iter.next();

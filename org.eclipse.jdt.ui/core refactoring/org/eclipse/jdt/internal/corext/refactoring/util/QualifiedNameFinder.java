@@ -30,6 +30,8 @@ import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
 import org.eclipse.search.internal.core.text.MatchLocator;
 import org.eclipse.search.internal.core.text.TextSearchEngine;
 
+import org.eclipse.ltk.core.refactoring.GroupCategory;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.IJavaElement;
@@ -40,6 +42,11 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 
 public class QualifiedNameFinder {
+
+	private static final GroupCategorySet QUALIFIED_NAMES= new GroupCategorySet(
+		new GroupCategory("org.eclipse.jdt.internal.corext.qualifiedNames", //$NON-NLS-1$
+			RefactoringCoreMessages.QualifiedNameFinder_qualifiedNames_name, 
+			RefactoringCoreMessages.QualifiedNameFinder_qualifiedNames_description));
 	
 	private static class ResultCollector implements ITextSearchResultCollector {
 		
@@ -69,7 +76,7 @@ public class QualifiedNameFinder {
 			TextChangeCompatibility.addTextEdit(
 				change, 
 				RefactoringCoreMessages.QualifiedNameFinder_update_name,  
-				new ReplaceEdit(start, length, fNewValue));
+				new ReplaceEdit(start, length, fNewValue), QUALIFIED_NAMES);
 		}
 
 		public void done() throws CoreException {
