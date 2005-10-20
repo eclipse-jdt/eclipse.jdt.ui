@@ -25,6 +25,10 @@ import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ltk.core.refactoring.IRefactoringStatusEntryComparator;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
@@ -37,8 +41,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * Convenience wrapper for {@link SearchEngine} - performs searching and sorts the results by {@link IResource}.
@@ -204,12 +206,25 @@ public class RefactoringSearchEngine {
 		}
 		return pattern;
 	}
-	
-	private static void addStatusErrors(RefactoringStatus status, boolean hasPotentialMatches, boolean hasNonCuMatches) {
-		if (hasPotentialMatches)
-			status.addError(RefactoringCoreMessages.RefactoringSearchEngine_potential_matches); 
-		if (hasNonCuMatches)
-			status.addError(RefactoringCoreMessages.RefactoringSearchEngine_non_cu_matches); 
+
+	private static boolean containsStatusEntry(final RefactoringStatus status, final RefactoringStatusEntry other) {
+		return status.getEntries(new IRefactoringStatusEntryComparator() {
+			public final int compare(final RefactoringStatusEntry entry1, final RefactoringStatusEntry entry2) {
+				return entry1.getMessage().compareTo(entry2.getMessage());
+			}
+		}, other).length > 0;
 	}
 
+	private static void addStatusErrors(RefactoringStatus status, boolean hasPotentialMatches, boolean hasNonCuMatches) {
+		if (hasPotentialMatches) {
+			final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.ERROR, RefactoringCoreMessages.RefactoringSearchEngine_potential_matches);
+			if (!containsStatusEntry(status, entry))
+				status.addEntry(entry);
+		}
+		if (hasNonCuMatches) {
+			final RefactoringStatusEntry entry= new RefactoringStatusEntry(RefactoringStatus.ERROR, RefactoringCoreMessages.RefactoringSearchEngine_non_cu_matches);
+			if (!containsStatusEntry(status, entry))
+				status.addEntry(entry);
+		}
+	}
 }
