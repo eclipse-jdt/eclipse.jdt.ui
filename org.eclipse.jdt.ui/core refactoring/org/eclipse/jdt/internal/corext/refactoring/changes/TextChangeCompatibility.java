@@ -87,10 +87,11 @@ public class TextChangeCompatibility {
 		}
 		// We have the right parent. Now check if some of the children have to
 		// be moved under the new edit since it is covering it.
-		for (int i= children.length - 1; i >= 0; i--) {
+		int removed= 0;
+		for (int i= 0; i < children.length; i++) {
 			TextEdit child= children[i];
 			if (covers(edit, child)) {
-				parent.removeChild(i);
+				parent.removeChild(i - removed++);
 				edit.addChild(child);
 			}
 		}
