@@ -262,9 +262,13 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			ITypeBinding declaring= null;
 			if (binding instanceof IVariableBinding) {
 				final IVariableBinding variable= (IVariableBinding) binding;
+				if (Flags.isStatic(variable.getModifiers()))
+					return false;
 				declaring= variable.getDeclaringClass();
 			} else if (binding instanceof IMethodBinding) {
 				final IMethodBinding method= (IMethodBinding) binding;
+				if (Flags.isStatic(method.getModifiers()))
+					return false;
 				declaring= method.getDeclaringClass();
 			}
 			if (declaring != null) {
@@ -381,6 +385,9 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		/** The target compilation unit rewrite to use */
 		protected final CompilationUnitRewrite fTargetRewrite;
 
+		/** The existing static imports */
+		protected final Set fStaticImports= new HashSet();
+
 		/**
 		 * Creates a new method body rewriter.
 		 * 
@@ -395,6 +402,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			fTargetRewrite= targetRewrite;
 			fRewrite= rewrite;
 			fDeclaration= sourceDeclaration;
+			fStaticImports.clear();
+			ImportRewriteUtil.collectImports(fMethod.getJavaProject(), sourceDeclaration, new HashSet(), fStaticImports, false);
 		}
 
 		public final void endVisit(final AnonymousClassDeclaration node) {
@@ -544,14 +553,18 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 				final IVariableBinding variable= (IVariableBinding) binding;
 				final IMethodBinding method= fDeclaration.resolveBinding();
 				final ITypeBinding declaring= variable.getDeclaringClass();
-				if (variable != null && method != null && Bindings.equals(method.getDeclaringClass(), declaring)) {
-					if (JdtFlags.isStatic(variable))
+				if (variable != null && method != null) {
+					if (Bindings.equals(method.getDeclaringClass(), declaring)) {
+						if (JdtFlags.isStatic(variable))
+							rewrite.replace(node, ast.newQualifiedName(ASTNodeFactory.newName(ast, fTargetRewrite.getImportRewrite().addImport(declaring)), ast.newSimpleName(node.getFullyQualifiedName())), null);
+						else {
+							final FieldAccess access= ast.newFieldAccess();
+							access.setExpression(ast.newSimpleName(fTargetName));
+							access.setName(ast.newSimpleName(node.getFullyQualifiedName()));
+							rewrite.replace(node, access, null);
+						}
+					} else if (!(node.getParent() instanceof QualifiedName) && JdtFlags.isStatic(variable) && !fStaticImports.contains(variable)) {
 						rewrite.replace(node, ast.newQualifiedName(ASTNodeFactory.newName(ast, fTargetRewrite.getImportRewrite().addImport(declaring)), ast.newSimpleName(node.getFullyQualifiedName())), null);
-					else {
-						final FieldAccess access= ast.newFieldAccess();
-						access.setExpression(ast.newSimpleName(fTargetName));
-						access.setName(ast.newSimpleName(node.getFullyQualifiedName()));
-						rewrite.replace(node, access, null);
 					}
 				}
 			}
