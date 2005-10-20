@@ -73,7 +73,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 public class SortMembersAction extends SelectionDispatchAction {
 
 	private CompilationUnitEditor fEditor;
-	private final static String ID= "org.eclipse.jdt.ui.actions.SortMembersAction"; //$NON-NLS-1$
+	private final static String ID_OPTIONAL_DIALOG= "org.eclipse.jdt.ui.actions.SortMembersAction"; //$NON-NLS-1$
 
 	/**
 	 * Creates a new <code>SortMembersAction</code>. The action requires
@@ -131,6 +131,14 @@ public class SortMembersAction extends SelectionDispatchAction {
 				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.SortMembersAction_no_members); 
 				return;
 			}
+			if (!ActionUtil.isProcessable(getShell(), cu)) {
+				return;
+			}
+			
+			SortMembersMessageDialog dialog= new SortMembersMessageDialog(getShell());
+			if (dialog.open() != Window.OK) {
+				return;
+			}
 			
 			if (!ElementValidator.check(cu, getShell(), getDialogTitle(), false)) {
 				return;
@@ -139,7 +147,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 			// open an editor and work on a working copy
 			IEditorPart editor= EditorUtility.openInEditor(cu);
 			if (editor != null) {
-				run(shell, cu, editor);
+				run(shell, cu, editor, dialog.isNotSortingFieldsEnabled());
 			}
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, shell, getDialogTitle(), null); 
@@ -174,10 +182,17 @@ public class SortMembersAction extends SelectionDispatchAction {
 		Shell shell= getShell();
 		IJavaElement input= SelectionConverter.getInput(fEditor);
 		if (input instanceof ICompilationUnit) {
+			if (!ActionUtil.isProcessable(getShell(), input)) {
+				return;
+			}
+			SortMembersMessageDialog dialog= new SortMembersMessageDialog(getShell());
+			if (dialog.open() != Window.OK) {
+				return;
+			}
 			if (!ElementValidator.check(input, getShell(), getDialogTitle(), true)) {
 				return;
 			}
-			run(shell, (ICompilationUnit) input, fEditor);
+			run(shell, (ICompilationUnit) input, fEditor, dialog.isNotSortingFieldsEnabled());
 		} else {
 			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.SortMembersAction_not_applicable); 
 		}
@@ -199,27 +214,9 @@ public class SortMembersAction extends SelectionDispatchAction {
 		return false;
 	}
 	
-	private void run(Shell shell, ICompilationUnit cu, IEditorPart editor) {
-		if (!ActionUtil.isProcessable(getShell(), cu)) {
-			return;
-		}		
-		
-		{
-			int returnCode= SortMembersMessageDialog.open(ID + ".preference_page",  //$NON-NLS-1$
-					getShell(), 
-					getDialogTitle(),
-					null,
-					ActionMessages.SortMembersAction_configure_sort_order,
-					MessageDialog.INFORMATION, 		
-					new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 
-					0);
-			if (returnCode != OptionalMessageDialog.NOT_SHOWN && 
-					returnCode != Window.OK ) return;	
-		}
-		
-		
+	private void run(Shell shell, ICompilationUnit cu, IEditorPart editor, boolean isNotSortFields) {
 		if (containsRelevantMarkers(editor)) {
-			int returnCode= OptionalMessageDialog.open(ID, 
+			int returnCode= OptionalMessageDialog.open(ID_OPTIONAL_DIALOG, 
 					getShell(), 
 					getDialogTitle(),
 					null,
@@ -231,7 +228,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 					returnCode != Window.OK ) return;	
 		}
 
-		SortMembersOperation op= new SortMembersOperation(cu, null);
+		SortMembersOperation op= new SortMembersOperation(cu, null, isNotSortFields);
 		try {
 			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
 			PlatformUI.getWorkbench().getProgressService().runInUI(context,
@@ -243,6 +240,7 @@ public class SortMembersAction extends SelectionDispatchAction {
 			// Do nothing. Operation has been canceled by user.
 		}
 	}
+
 		
 	private ICompilationUnit getSelectedCompilationUnit(IStructuredSelection selection) {
 		if (selection.size() == 1) {
@@ -260,6 +258,6 @@ public class SortMembersAction extends SelectionDispatchAction {
 	}
 	
 	private String getDialogTitle() {
-		return ActionMessages.SortMembersAction_error_title; 
+		return ActionMessages.SortMembersAction_dialog_title; 
 	}	
 }

@@ -22,8 +22,6 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -58,19 +56,7 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	private static final String PREF_OUTLINE_SORT_OPTION= PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER;
 	private static final String PREF_VISIBILITY_SORT_OPTION= PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER;
 	private static final String PREF_USE_VISIBILITY_SORT_OPTION= PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER;
-	
-	/**
-	 * A named preferences that controls if all Java elements are also sorted by 
-	 * 'Sort Members' action.
-	 * <p>
-	 * Value is of type <code>Boolean</code>.
-	 * </p>
-	 * @since 3.2
-	 */
-	public static final String APPEARANCE_ENABLE_SORT_ALL= "org.eclipse.jdt.ui.enable.sort.all"; //$NON-NLS-1$
-
-	private static final String PREF_SORT_ALL_OPTION= APPEARANCE_ENABLE_SORT_ALL;
-	
+		
 	public static final String CONSTRUCTORS= "C"; //$NON-NLS-1$
 	public static final String FIELDS= "F"; //$NON-NLS-1$
 	public static final String METHODS= "M"; //$NON-NLS-1$
@@ -89,8 +75,6 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 	private ListDialogField fSortOrderList;
 	private ListDialogField fVisibilityOrderList;
 	private SelectionButtonDialogField fUseVisibilitySortField;
-	private SelectionButtonDialogField fNotSortAllRadio;
-	private SelectionButtonDialogField fSortAllRadio;
 
 	private static boolean isValidEntries(List entries, String entryString) {
 		StringTokenizer tokenizer= new StringTokenizer(entryString, ","); //$NON-NLS-1$
@@ -203,62 +187,11 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		createListDialogField(sortComposite, fVisibilityOrderList);
 		fVisibilityOrderList.setEnabled(fUseVisibilitySortField.isSelected());
 		
-		createSortMembersGroup(parent);
-		
 		Dialog.applyDialogFont(sortComposite);
 		
 		return sortComposite;
 	}
 	
-	private void createSortMembersGroup(Composite parent) {
-		GridLayout layout;
-		Group participantsGroup= new Group(parent, SWT.NONE);
-		participantsGroup.setLayout(new GridLayout());
-		participantsGroup.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
-		participantsGroup.setText(PreferencesMessages.MembersOrderPreferencePage_sort_members_group_title);
-		participantsGroup.setFont(parent.getFont());
-		
-		fNotSortAllRadio= new SelectionButtonDialogField(SWT.RADIO);
-		fNotSortAllRadio.setLabelText(PreferencesMessages.MembersOrderPreferencePage_dont_sort_all);
-		fNotSortAllRadio.doFillIntoGrid(participantsGroup, 1);
-		fNotSortAllRadio.setSelection(!getPreferenceStore().getBoolean(PREF_SORT_ALL_OPTION));
-		
-		fSortAllRadio= new SelectionButtonDialogField(SWT.RADIO);
-		fSortAllRadio.setLabelText(PreferencesMessages.MembersOrderPreferencePage_sort_all);
-		fSortAllRadio.doFillIntoGrid(participantsGroup, 1);
-		fSortAllRadio.setSelection(getPreferenceStore().getBoolean(PREF_SORT_ALL_OPTION));
-		
-		final Composite warningComposite= new Composite(participantsGroup, SWT.NONE);
-		layout= new GridLayout();
-		layout.numColumns= 2;
-		layout.marginWidth= 0;
-		layout.marginHeight= 0;
-		warningComposite.setLayout(layout);
-		warningComposite.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
-		warningComposite.setFont(participantsGroup.getFont());
-		
-		Image image= Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING);
-		final Label imageLabel= new Label(warningComposite, SWT.LEFT | SWT.WRAP);
-		imageLabel.setImage(image);
-		imageLabel.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 1));
-		imageLabel.setFont(warningComposite.getFont());
-		
-		final Label label= new Label(warningComposite, SWT.WRAP);
-		label.setText(PreferencesMessages.MembersOrderPreferencePage_semantic_change_warning);
-		GridData gridData= new GridData(GridData.FILL, GridData.CENTER, true, false, 1, 1);
-		gridData.widthHint= convertWidthInCharsToPixels(40);
-		label.setLayoutData(gridData);
-		label.setFont(warningComposite.getFont());
-		
-		fNotSortAllRadio.setDialogFieldListener(new IDialogFieldListener() {
-			public void dialogFieldChanged(DialogField field) {
-				imageLabel.setEnabled(!fNotSortAllRadio.isSelected());
-				label.setEnabled(!fNotSortAllRadio.isSelected());
-			}
-		});
-		imageLabel.setEnabled(!fNotSortAllRadio.isSelected());
-		label.setEnabled(!fNotSortAllRadio.isSelected());
-	}
 
 	private void createListDialogField(Composite composite, ListDialogField dialogField) {
 		Control list= dialogField.getListControl(composite);
@@ -305,8 +238,6 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 			fVisibilityOrderList.setElements(parseList(ALL_VISIBILITY_ENTRIES));
 	
 		fUseVisibilitySortField.setSelection(prefs.getDefaultBoolean(PREF_USE_VISIBILITY_SORT_OPTION));
-		fNotSortAllRadio.setSelection(!prefs.getDefaultBoolean(PREF_SORT_ALL_OPTION));
-		fSortAllRadio.setSelection(prefs.getDefaultBoolean(PREF_SORT_ALL_OPTION));
 		
 		super.performDefaults();
 	}
@@ -324,7 +255,6 @@ public class MembersOrderPreferencePage extends PreferencePage implements IWorkb
 		
 		//update the button setting
 		store.setValue(PREF_USE_VISIBILITY_SORT_OPTION, fUseVisibilitySortField.isSelected());
-		store.setValue(PREF_SORT_ALL_OPTION, !fNotSortAllRadio.isSelected());
 		JavaPlugin.getDefault().savePluginPreferences();
 		
 		return true;

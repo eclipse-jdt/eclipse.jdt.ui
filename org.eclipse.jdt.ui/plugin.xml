@@ -1373,7 +1373,7 @@
       </page>
       <page
             name="%memberSortPrefName"
-            category="org.eclipse.jdt.ui.preferences.CodeStylePreferencePage"
+            category="org.eclipse.jdt.ui.preferences.AppearancePreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage"
             id="org.eclipse.jdt.ui.preferences.MembersOrderPreferencePage">
          <keywordReference id="org.eclipse.jdt.ui.sortorder"/>

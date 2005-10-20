@@ -45,7 +45,6 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 	
 	private boolean fSortByVisibility;
 	private int[] fVisibilityOffsets= null;
-	private boolean fSortAll;
 	
 	public MembersOrderPreferenceCache() {
 		fCategoryOffsets= null;
@@ -68,8 +67,6 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 			fVisibilityOffsets= null;
 		} else if (PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER.equals(property)) {
 			fSortByVisibility= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
-		} else if (MembersOrderPreferencePage.APPEARANCE_ENABLE_SORT_ALL.equals(property)) {
-			fSortAll= PreferenceConstants.getPreferenceStore().getBoolean(property);
 		}
 	}
 
@@ -123,11 +120,7 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 	public boolean isSortByVisibility() {
 		return fSortByVisibility;
 	}
-	
-	public boolean isSortAll() {
-		return fSortAll;
-	}
-			
+				
 	public int getVisibilityIndex(int modifierFlags) {
 		if (fVisibilityOffsets == null) {
 			fVisibilityOffsets= getVisibilityOffsets();

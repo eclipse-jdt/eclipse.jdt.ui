@@ -52,13 +52,15 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 	/**
 	 * Default comparator for body declarations.
 	 */
-	public class DefaultJavaElementComparator implements Comparator {
+	public static class DefaultJavaElementComparator implements Comparator {
 
-		private Collator fCollator;
-		private MembersOrderPreferenceCache fMemberOrderCache;
+		private final Collator fCollator;
+		private final MembersOrderPreferenceCache fMemberOrderCache;
+		private final boolean fDoNotSortFields;
 
-		public DefaultJavaElementComparator() {
-			this.fCollator= Collator.getInstance();
+		public DefaultJavaElementComparator(boolean doNotSortFields) {
+			fDoNotSortFields= doNotSortFields;
+			fCollator= Collator.getInstance();
 			fMemberOrderCache= JavaPlugin.getDefault().getMemberOrderPreferenceCache();
 		}
 
@@ -115,7 +117,6 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 		 * @see CompilationUnitSorter#sort(int, org.eclipse.jdt.core.ICompilationUnit, int[], java.util.Comparator, int, org.eclipse.core.runtime.IProgressMonitor)
 		 */
 		public int compare(Object e1, Object e2) {
-			boolean sortAll= fMemberOrderCache.isSortAll();
 			BodyDeclaration bodyDeclaration1= (BodyDeclaration) e1;
 			BodyDeclaration bodyDeclaration2= (BodyDeclaration) e2;
 			int cat1= category(bodyDeclaration1);
@@ -178,7 +179,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 					}
 				case ASTNode.FIELD_DECLARATION :
 					{
-						if (sortAll) {
+						if (!fDoNotSortFields) {
 							FieldDeclaration field1= (FieldDeclaration) bodyDeclaration1;
 							FieldDeclaration field2= (FieldDeclaration) bodyDeclaration2;
 	
@@ -211,7 +212,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 					}
 				case ASTNode.ENUM_CONSTANT_DECLARATION :
 					{
-						if (sortAll) {
+						if (!fDoNotSortFields) {
 							EnumConstantDeclaration decl1= (EnumConstantDeclaration) bodyDeclaration1;
 							EnumConstantDeclaration decl2= (EnumConstantDeclaration) bodyDeclaration2;
 							
@@ -261,6 +262,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 
 	private ICompilationUnit fCompilationUnit;
 	private int[] fPositions;
+	private final boolean fDoNotSortFields;
 	
 	/**
 	 * Creates the operation.
@@ -268,9 +270,10 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 	 * @param positions Positions to track or <code>null</code> if no positions
 	 * should be tracked.
 	 */
-	public SortMembersOperation(ICompilationUnit cu, int[] positions) {
+	public SortMembersOperation(ICompilationUnit cu, int[] positions, boolean doNotSortFields) {
 		fCompilationUnit= cu;
 		fPositions= positions;
+		fDoNotSortFields= doNotSortFields;
 	}
 
 
@@ -278,7 +281,7 @@ public class SortMembersOperation implements IWorkspaceRunnable {
 	 * Runs the operation.
 	 */
 	public void run(IProgressMonitor monitor) throws CoreException {
-		CompilationUnitSorter.sort(AST.JLS3, fCompilationUnit, fPositions, new DefaultJavaElementComparator(), 0, monitor);
+		CompilationUnitSorter.sort(AST.JLS3, fCompilationUnit, fPositions, new DefaultJavaElementComparator(fDoNotSortFields), 0, monitor);
 	}
 
 	/**

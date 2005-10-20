@@ -8,49 +8,52 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferencePage;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
+import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
-public class SortMembersMessageDialog extends OptionalMessageDialog {
+public class SortMembersMessageDialog extends MessageDialog {
 	
-	/**
-	 * Opens the dialog but only if the user hasn't choosen to hide it.
-	 * Returns <code>NOT_SHOWN</code> if the dialog was not shown.
-	 */
-	public static int open(String id, Shell parent, String title, Image titleImage, String message, int dialogType, String[] buttonLabels, int defaultButtonIndex) {
-		if (!OptionalMessageDialog.isDialogEnabled(id))
-			return OptionalMessageDialog.NOT_SHOWN;
+	private final static String DIALOG_SETTINGS_SORT_ALL= "SortMembers.sort_all"; //$NON-NLS-1$
+	
+	private SelectionButtonDialogField fNotSortAllRadio;
+	private SelectionButtonDialogField fSortAllRadio;
+
+	private final IDialogSettings fDialogSettings;
+
+	public SortMembersMessageDialog(Shell parentShell) {
+		super(parentShell, DialogsMessages.SortMembersMessageDialog_dialog_title, null, new String(), INFORMATION, new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 0);
 		
-		MessageDialog dialog= new SortMembersMessageDialog(id, parent, title, titleImage, message, dialogType, buttonLabels, defaultButtonIndex);
-		return dialog.open();
-	}
-	
-	private String fMessage;
-
-	private SortMembersMessageDialog(String id, Shell parentShell, String dialogTitle, Image dialogTitleImage, String dialogMessage, int dialogImageType, String[] dialogButtonLabels, int defaultIndex) {
-		super(id, parentShell, dialogTitle, dialogTitleImage, null, dialogImageType, dialogButtonLabels, defaultIndex);
-		fMessage= dialogMessage;
+		setShellStyle(getShellStyle() | SWT.RESIZE);
+		
+		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
 	}
 		
 	private Control createLinkControl(Composite composite) {
 		Link link= new Link(composite, SWT.WRAP | SWT.RIGHT);
-		link.setText(fMessage); 
+		link.setText(DialogsMessages.SortMembersMessageDialog_description); 
 		link.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				openCodeTempatePage(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID);
 			}
 		});
-		link.setToolTipText(JavaUIMessages.SortMembersMessageDialog_configure_preferences_tool_tip); 
+		link.setToolTipText(DialogsMessages.SortMembersMessageDialog_link_tooltip); 
 		GridData gridData= new GridData(GridData.FILL, GridData.CENTER, true, false);
 		gridData.widthHint= convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH);//convertWidthInCharsToPixels(60);
 		link.setLayoutData(gridData);
@@ -63,19 +66,84 @@ public class SortMembersMessageDialog extends OptionalMessageDialog {
 		PreferencesUtil.createPreferenceDialogOn(getShell(), MembersOrderPreferencePage.PREF_ID, null, null).open();
 	}
 
-	protected Control createMessageArea(Composite composite) {
-		Composite messageComposite= new Composite(composite, SWT.NONE);
-		messageComposite.setFont(composite.getFont());
-		GridLayout layout= new GridLayout();
-		layout.numColumns= 2;
-		messageComposite.setLayout(layout);
-		messageComposite.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, true, false));
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.IconAndMessageDialog#createMessageArea(org.eclipse.swt.widgets.Composite)
+	 */
+	protected Control createMessageArea(Composite parent) {
+		initializeDialogUnits(parent);
 		
-		super.createMessageArea(messageComposite);
+		Composite messageComposite= new Composite(parent, SWT.NONE);
+		messageComposite.setFont(parent.getFont());
+		GridLayout layout= new GridLayout();
+		layout.numColumns= 1;
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.verticalSpacing= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_SPACING);
+		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+		messageComposite.setLayout(layout);
+		messageComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 		
 		createLinkControl(messageComposite);
+				
+		boolean isSortAll= fDialogSettings.getBoolean(DIALOG_SETTINGS_SORT_ALL);
+		int indent= convertWidthInCharsToPixels(3);
+		
+		fNotSortAllRadio= new SelectionButtonDialogField(SWT.RADIO);
+		fNotSortAllRadio.setLabelText(DialogsMessages.SortMembersMessageDialog_do_not_sort_fields_label);
+		fNotSortAllRadio.doFillIntoGrid(messageComposite, 1);
+		fNotSortAllRadio.setSelection(!isSortAll);
+		LayoutUtil.setHorizontalIndent(fNotSortAllRadio.getSelectionButton(null), indent);
+		
+		fSortAllRadio= new SelectionButtonDialogField(SWT.RADIO);
+		fSortAllRadio.setLabelText(DialogsMessages.SortMembersMessageDialog_sort_all_label);
+		fSortAllRadio.doFillIntoGrid(messageComposite, 1);
+		fSortAllRadio.setSelection(isSortAll);
+		LayoutUtil.setHorizontalIndent(fSortAllRadio.getSelectionButton(null), indent);
+		
+		final Composite warningComposite= new Composite(messageComposite, SWT.NONE);
+		layout= new GridLayout();
+		layout.numColumns= 2;
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		warningComposite.setLayout(layout);
+		warningComposite.setLayoutData(new GridData(GridData.FILL, GridData.CENTER, true, false));
+		warningComposite.setFont(messageComposite.getFont());
+		
+		Image image= Dialog.getImage(Dialog.DLG_IMG_MESSAGE_WARNING);
+		final Label imageLabel1= new Label(warningComposite, SWT.LEFT | SWT.WRAP);
+		imageLabel1.setImage(image);
+		imageLabel1.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 1));
+		
+		final Label label= new Label(warningComposite, SWT.WRAP);
+		label.setText(DialogsMessages.SortMembersMessageDialog_sort_warning_label);
+		GridData gridData= new GridData(GridData.FILL, GridData.CENTER, true, false, 1, 1);
+		gridData.widthHint= convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH);
+		label.setLayoutData(gridData);
+		label.setFont(warningComposite.getFont());
+		
+		fNotSortAllRadio.setDialogFieldListener(new IDialogFieldListener() {
+			public void dialogFieldChanged(DialogField field) {
+				imageLabel1.setEnabled(!fNotSortAllRadio.isSelected());
+				label.setEnabled(!fNotSortAllRadio.isSelected());
+			}
+		});
+		imageLabel1.setEnabled(!fNotSortAllRadio.isSelected());
+		label.setEnabled(!fNotSortAllRadio.isSelected());
 		
 		return messageComposite;
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.Dialog#close()
+	 */
+	public boolean close() {
+		fDialogSettings.put(DIALOG_SETTINGS_SORT_ALL, fSortAllRadio.isSelected());
+		return super.close();
+	}
+	
+
+	public boolean isNotSortingFieldsEnabled() {
+		return fNotSortAllRadio.isSelected();
 	}
 
 }
