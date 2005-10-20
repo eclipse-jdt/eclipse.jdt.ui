@@ -64,7 +64,7 @@ public class SmartBackspaceManager {
 
 		/**
 		 * Creates a new spec. A specification consists of a number of
-		 * <code>TextEdit</code> s that will be executed when backspace is
+		 * <code>TextEdit</code>s that will be executed when backspace is
 		 * pressed at <code>triggerOffset</code>. The spec will be removed
 		 * when it is executed, or if more than <code>lives</code>
 		 * <code>TypingRun</code>s have ended after registering the spec.
@@ -77,9 +77,9 @@ public class SmartBackspaceManager {
 		 *
 		 * @param triggerOffset the offset where this spec is active
 		 * @param selection the selection after executing the undo spec
-		 * @param edits the <code>TextEdit</code> s to perform when executing
+		 * @param edits the <code>TextEdit</code>s to perform when executing
 		 *        the spec
-		 * @param lives the number of <code>TypingRun</code> s before removing
+		 * @param lives the number of <code>TypingRun</code>s before removing
 		 *        the spec
 		 * @param child a child specification that will be registered after
 		 *        executing this spec, or <code>null</code>
