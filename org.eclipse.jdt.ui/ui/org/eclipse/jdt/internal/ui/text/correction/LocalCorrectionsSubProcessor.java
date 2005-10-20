@@ -26,7 +26,6 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.ISharedImages;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -76,19 +75,22 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
+import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.fix.StringFix;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.fix.CodeStyleMultiFix;
+import org.eclipse.jdt.internal.ui.fix.StringMultiFix;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.ChangeDescription;
@@ -103,6 +105,7 @@ public class LocalCorrectionsSubProcessor {
 	private static final String ADD_NON_NLS_ID= "org.eclipse.jdt.ui.correction.addNonNLS"; //$NON-NLS-1$
 	private static final String ADD_FIELD_QUALIFICATION_ID= "org.eclipse.jdt.ui.correction.qualifyField"; //$NON-NLS-1$
 	private static final String ADD_STATIC_ACCESS_ID= "org.eclipse.jdt.ui.correction.changeToStatic"; //$NON-NLS-1$
+	private static final String REMOVE_UNNECESSARY_NLS_TAG_ID= "org.eclipse.jdt.ui.correction.removeNlsTag"; //$NON-NLS-1$
 	
 	public static void addUncaughtExceptionProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -281,62 +284,22 @@ public class LocalCorrectionsSubProcessor {
 			
 		};
 		proposals.add(proposal);
-		TextEdit edit= NLSUtil.createNLSEdit(cu, problem.getOffset());
-		if (edit != null) {
-			String label= CorrectionMessages.LocalCorrectionsSubProcessor_addnon_nls_description;
+		
+		IFix fix= StringFix.createFix(context.getASTRoot(), problem, false, true);
+		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
-			CUCorrectionProposal nlsProposal= new CUCorrectionProposal(label, cu, 6, image);
-			nlsProposal.setCommandId(ADD_NON_NLS_ID);
-			nlsProposal.getTextChange().getEdit().addChild(edit);
-			proposals.add(nlsProposal);
+			FixCorrectionProposal addNLS= new FixCorrectionProposal(fix, new StringMultiFix(true, false), 6, image);
+			addNLS.setCommandId(ADD_NON_NLS_ID);
+			proposals.add(addNLS);
 		}
 	}
 	
-	public static void getUnnecessaryNLSTagProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws JavaModelException {
-		IBuffer buffer= context.getCompilationUnit().getBuffer();
-		if (buffer != null) {
-			int offset= problem.getOffset();
-			int length= problem.getLength();
-			
-			
-			
-			String replaceString= new String();
-			boolean hasMoreInComment= false;
-			
-			// look after the tag
-			int next= offset + length;
-			while (next < buffer.getLength()) {
-				char ch= buffer.getChar(next);
-				if (Strings.isIndentChar(ch)) {
-					next++; // remove all whitespace
-				} else if (Strings.isLineDelimiterChar(ch)) {
-					length= next - offset; 
-					break;
-				} else if (ch == '/') {
-					next++;
-					if (next == buffer.getLength() || buffer.getChar(next) != '/') {
-						replaceString= "//"; //$NON-NLS-1$
-					} else {
-						length= next - offset - 1;
-					}
-					hasMoreInComment= true;
-					break;
-				} else {
-					replaceString= "//"; //$NON-NLS-1$
-					hasMoreInComment= true;
-					break;
-				}
-			}
-			if (!hasMoreInComment) {
-				while (offset > 0 && Strings.isIndentChar(buffer.getChar(offset - 1))) {
-					offset--;
-					length++;
-				}
-			}
-			String name= CorrectionMessages.LocalCorrectionsSubProcessor_remove_nls_tag_description;
+	public static void getUnnecessaryNLSTagProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+		IFix fix= StringFix.createFix(context.getASTRoot(), problem, true, false);
+		if (fix != null) {
 			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-			ReplaceCorrectionProposal proposal= new ReplaceCorrectionProposal(name, context.getCompilationUnit(), offset, length, replaceString, 6);
-			proposal.setImage(image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new StringMultiFix(false, true), 6, image);
+			proposal.setCommandId(REMOVE_UNNECESSARY_NLS_TAG_ID);
 			proposals.add(proposal);
 		}
 	}
@@ -671,49 +634,13 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addUnqualifiedFieldAccessProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		while (selectedNode instanceof QualifiedName) {
-			selectedNode= ((QualifiedName) selectedNode).getQualifier();
+		IFix fix= CodeStyleFix.createFix(context.getASTRoot(), problem, true, false);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleMultiFix(true, false), 5, image);
+			proposal.setCommandId(ADD_FIELD_QUALIFICATION_ID);
+			proposals.add(proposal);
 		}
-		if (!(selectedNode instanceof SimpleName)) {
-			return;
-		}
-		SimpleName name = (SimpleName) selectedNode;
-		IBinding binding= name.resolveBinding();
-		if (binding.getKind() != IBinding.VARIABLE) {
-			return;
-		}
-
-		ASTRewrite rewrite= ASTRewrite.create(name.getAST());
-		ImportRewrite imports= new ImportRewrite(context.getCompilationUnit());
-
-		ITypeBinding declaringClass= ((IVariableBinding) binding).getDeclaringClass();
-		String qualifier;
-		if (Modifier.isStatic(binding.getModifiers())) {
-			qualifier= imports.addImport(declaringClass);
-		} else {
-			ITypeBinding parentType= Bindings.getBindingOfParentType(name);
-			ITypeBinding currType= parentType;
-			while (currType != null && !Bindings.isSuperType(declaringClass, currType)) {
-				currType= currType.getDeclaringClass();
-			}
-			if (currType != parentType) {
-				String outer= imports.addImport(currType);
-				qualifier= outer + ".this"; //$NON-NLS-1$
-			} else {
-				qualifier= "this"; //$NON-NLS-1$
-			}
-		}
-
-		String replacement= qualifier + '.' + name.getIdentifier();
-		rewrite.replace(name, rewrite.createStringPlaceholder(replacement, ASTNode.SIMPLE_NAME), null);
-
-		String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_unqualifiedfieldaccess_description, qualifier);
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image); 
-		proposal.setImportRewrite(imports);
-		proposal.setCommandId(ADD_FIELD_QUALIFICATION_ID);
-		proposals.add(proposal);
 	}
 
 	public static void addInvalidVariableNameProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {

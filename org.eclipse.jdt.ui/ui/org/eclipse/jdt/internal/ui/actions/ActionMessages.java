@@ -74,7 +74,10 @@ public final class ActionMessages extends NLS {
 	public static String OverrideMethodsAction_not_applicable;
 	public static String OverrideMethodsAction_interface_not_applicable;
 	public static String OverrideMethodsAction_annotation_not_applicable;
-
+	
+	public static String CleanUpAction_label;
+	public static String CleanUpAction_tooltip;
+	public static String CleanUpAction_description;
 	public static String AddGetterSetterAction_no_primary_type_title;
 	public static String AddGetterSetterAction_no_primary_type_message;
 	public static String AddGetterSetterAction_label;

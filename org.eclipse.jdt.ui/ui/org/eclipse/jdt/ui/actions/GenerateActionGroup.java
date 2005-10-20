@@ -30,18 +30,20 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.AddBookmarkAction;
-import org.eclipse.ui.ide.IDEActionFactory;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IUpdate;
 import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
+import org.eclipse.ui.ide.IDEActionFactory;
+
+import org.eclipse.jdt.ui.IContextMenuConstants;
+
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.AddTaskAction;
+import org.eclipse.jdt.internal.ui.actions.CleanUpAction;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.javaeditor.AddImportOnSelectionAction;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-
-import org.eclipse.jdt.ui.IContextMenuConstants;
 
 /**
  * Action group that adds the source and generate actions to a part's context
@@ -103,6 +105,7 @@ public class GenerateActionGroup extends ActionGroup {
 	private ExternalizeStringsAction fExternalizeStrings;
 	private FindStringsToExternalizeAction fFindStringsToExternalize;
 	private SurroundWithTryCatchAction fSurroundWithTryCatch;
+	private CleanUpAction fCleanUp;	
 	
 	private OrganizeImportsAction fOrganizeImports;
 	private SortMembersAction fSortMembers;
@@ -120,7 +123,7 @@ public class GenerateActionGroup extends ActionGroup {
 	}
 	
 	private RefactorQuickAccessAction fQuickAccessAction;
-	private IKeyBindingService fKeyBindingService;	
+	private IKeyBindingService fKeyBindingService;
 
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.
@@ -143,6 +146,10 @@ public class GenerateActionGroup extends ActionGroup {
 		fOrganizeImports= new OrganizeImportsAction(editor);
 		fOrganizeImports.setActionDefinitionId(IJavaEditorActionDefinitionIds.ORGANIZE_IMPORTS);
 		editor.setAction("OrganizeImports", fOrganizeImports); //$NON-NLS-1$
+		
+		fCleanUp= new CleanUpAction(editor);
+		fCleanUp.setActionDefinitionId(IJavaEditorActionDefinitionIds.CLEAN_UP);
+		editor.setAction("CleanUp", fCleanUp); //$NON-NLS-1$
 
 		fSortMembers= new SortMembersAction(editor);
 		fSortMembers.setActionDefinitionId(IJavaEditorActionDefinitionIds.SORT_MEMBERS);
@@ -254,6 +261,9 @@ public class GenerateActionGroup extends ActionGroup {
 
 		fFormatAll= new FormatAllAction(site);
 		fFormatAll.setActionDefinitionId(IJavaEditorActionDefinitionIds.FORMAT);
+		
+		fCleanUp= new CleanUpAction(site);
+		fCleanUp.setActionDefinitionId(IJavaEditorActionDefinitionIds.CLEAN_UP);
 
 		
 		fOverrideMethods.update(selection);
@@ -268,6 +278,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fOrganizeImports.update(selection);
 		fSortMembers.update(selection);
 		fFormatAll.update(selection);
+		fCleanUp.update(selection);
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection ss= (IStructuredSelection)selection;
 			fAddBookmark.selectionChanged(ss);
@@ -288,6 +299,7 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fFormatAll);
 		registerSelectionListener(provider, fSortMembers);
 		registerSelectionListener(provider, fAddTaskAction);
+		registerSelectionListener(provider, fCleanUp);
 		
 		fKeyBindingService= keyBindingService;
 		if (fKeyBindingService != null) {
@@ -371,6 +383,7 @@ public class GenerateActionGroup extends ActionGroup {
 		source.add(new Separator(GROUP_CODE));		
 		added+= addAction(source, fSurroundWithTryCatch);
 		added+= addAction(source, fExternalizeStrings);
+		added+= addAction(source, fCleanUp);
 		return added;
 	}
 
@@ -392,6 +405,7 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(source, fSurroundWithTryCatch);
 		added+= addAction(source, fExternalizeStrings);
 		added+= addAction(source, fFindStringsToExternalize);
+		added+= addAction(source, fCleanUp);
 		return added;
 	}
 
@@ -426,6 +440,7 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(JdtActionConstants.FIND_STRINGS_TO_EXTERNALIZE, fFindStringsToExternalize);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ORGANIZE_IMPORTS, fOrganizeImports);
 		actionBar.setGlobalActionHandler(JdtActionConstants.SORT_MEMBERS, fSortMembers);
+		actionBar.setGlobalActionHandler(JdtActionConstants.CLEAN_UP, fCleanUp);
 		if (!isEditorOwner()) {
 			// editor provides its own implementation of these actions.
 			actionBar.setGlobalActionHandler(IDEActionFactory.BOOKMARK.getId(), fAddBookmark);

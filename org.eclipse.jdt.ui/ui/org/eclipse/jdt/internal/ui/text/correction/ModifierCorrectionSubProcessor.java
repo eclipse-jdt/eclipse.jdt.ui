@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -67,7 +66,6 @@ import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StringLiteral;
-import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
@@ -83,6 +81,8 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Strings;
@@ -92,6 +92,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.fix.Java50MultiFix;
 import org.eclipse.jdt.internal.ui.text.correction.LinkedCorrectionProposal.ILinkedModeProposal;
 
 /**
@@ -611,52 +612,22 @@ public class ModifierCorrectionSubProcessor {
 		}
 	}
 	
-	public static void addOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
-		ASTRewriteCorrectionProposal proposal= getMissingAnnotationsProposal(context, problem, "Override"); //$NON-NLS-1$
-		if (proposal != null) {
-			proposal.setDisplayName(CorrectionMessages.ModifierCorrectionSubProcessor_addoverrideannotation);
-			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+	public static void addOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+		IFix fix= Java50Fix.createFix(context.getASTRoot(), problem, true, false);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50MultiFix(true, false), 5, image);
 			proposals.add(proposal);
 		}
 	}
 	
-	public static void addDeprecatedAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) {
-		ASTRewriteCorrectionProposal proposal= getMissingAnnotationsProposal(context, problem, "Deprecated"); //$NON-NLS-1$
-		if (proposal != null) {
-			proposal.setDisplayName(CorrectionMessages.ModifierCorrectionSubProcessor_adddeprecatedannotation);
-			proposal.setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+	public static void addDeprecatedAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+		IFix fix= Java50Fix.createFix(context.getASTRoot(), problem, false, true);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50MultiFix(false, true), 5, image);
 			proposals.add(proposal);
 		}
-	}
-		
-	private static ASTRewriteCorrectionProposal getMissingAnnotationsProposal(IInvocationContext context, IProblemLocation problem, String annotationName) {
-		ICompilationUnit cu= context.getCompilationUnit();
-
-		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-		ASTNode declaringNode= null;		
-		if (selectedNode instanceof MethodDeclaration) {
-			declaringNode= selectedNode;
-		} else if (selectedNode instanceof SimpleName) {
-			StructuralPropertyDescriptor locationInParent= selectedNode.getLocationInParent();
-			if (locationInParent == MethodDeclaration.NAME_PROPERTY || locationInParent == TypeDeclaration.NAME_PROPERTY) {
-				declaringNode= selectedNode.getParent();
-			} else if (locationInParent == VariableDeclarationFragment.NAME_PROPERTY) {
-				declaringNode= selectedNode.getParent().getParent();
-			}
-		}
-		if (declaringNode instanceof BodyDeclaration) {
-			BodyDeclaration declaration= (BodyDeclaration) declaringNode;
-			AST ast= declaration.getAST();
-			ASTRewrite rewrite= ASTRewrite.create(ast);
-			ListRewrite listRewrite= rewrite.getListRewrite(declaration, declaration.getModifiersProperty());
-
-			Annotation newAnnotation= ast.newMarkerAnnotation();
-			newAnnotation.setTypeName(ast.newSimpleName(annotationName));
-			listRewrite.insertFirst(newAnnotation, null);
-			
-			return new ASTRewriteCorrectionProposal("", cu, rewrite, 5, null); //$NON-NLS-1$
-		}
-		return null;
 	}
 
 	private static final String KEY_MODIFIER= "modifier"; //$NON-NLS-1$

@@ -645,4 +645,11 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * @since 3.2
 	 */
 	public static final String FOLDING_COLLAPSE_COMMENTS= "org.eclipse.jdt.ui.edit.text.java.folding.collapseComments"; //$NON-NLS-1$
+
+	/**
+	 * Action definition id of the code clean up action
+	 * (value: <code>"org.eclipse.jdt.ui.edit.text.java.clean.up"</code>).
+	 * @since 3.2
+	 */
+	public static final String CLEAN_UP= "org.eclipse.jdt.ui.edit.text.java.clean.up"; //$NON-NLS-1$
 }

@@ -254,6 +254,14 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.ConvertLineDelimitersToMac"</code>).
 	 */
 	public static final String CONVERT_LINE_DELIMITERS_TO_MAC= "org.eclipse.jdt.ui.actions.ConvertLineDelimitersToMac"; //$NON-NLS-1$
+	
+	/**
+	 * Source menu: name of standard Clean up global action 
+	 * (value <code>"org.eclipse.jdt.ui.actions.CleanUp"</code>).
+	 * 
+	 * @since 3.2
+	 */
+	public static final String CLEAN_UP= "org.eclipse.jdt.ui.actions.CleanUp"; //$NON-NLS-1$
 
 	// Refactor menu
 	
@@ -543,4 +551,6 @@ public class JdtActionConstants {
 	 * @since 3.1
 	 */
 	public static final String FIND_IMPLEMENT_OCCURRENCES= "org.eclipse.jdt.ui.actions.ImplementOccurrences"; //$NON-NLS-1$		
+
+
 }
