@@ -48,7 +48,6 @@ import org.eclipse.jdt.internal.corext.buildpath.AddSelectedLibraryOperation;
 import org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
-import org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.CreateOutputFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation;
 import org.eclipse.jdt.internal.corext.buildpath.EditOutputFolderOperation;
@@ -1061,10 +1060,6 @@ public class NewProjectWizardTest extends TestCase {
                 return locationQuery;
             }
 
-            public ClasspathModifierQueries.IFolderCreationQuery getFolderCreationQuery() {
-                return creationQuery;
-            }
-
             public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
                 return null;
             }
@@ -1094,7 +1089,6 @@ public class NewProjectWizardTest extends TestCase {
         
         ClasspathModifierOperation op= null;
         switch(type) {
-            case IClasspathInformationProvider.CREATE_FOLDER: op= new CreateFolderOperation(null, provider); break;
             case IClasspathInformationProvider.ADD_SEL_SF_TO_BP: op= new AddSelectedSourceFolderOperation(null, provider); break;
             case IClasspathInformationProvider.ADD_SEL_LIB_TO_BP: op= new AddSelectedLibraryOperation(null, provider); break;
             case IClasspathInformationProvider.REMOVE_FROM_BP: op= new RemoveFromClasspathOperation(null, provider); break;
@@ -1339,4 +1333,3 @@ public class NewProjectWizardTest extends TestCase {
         return name;
     }
 }
-

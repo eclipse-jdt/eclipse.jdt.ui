@@ -40,7 +40,7 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
  * 
  * Clients may subclass.
  * 
- * @see org.eclipse.jdt.ui.jarpackager.JarWriter2
+ * @see org.eclipse.jdt.ui.jarpackager.JarWriter3
  * @since 2.0
  */
 public class JarPackageData {
@@ -281,6 +281,8 @@ public class JarPackageData {
 	 * @since 3.0
 	 */
 	public IPath getAbsoluteJarLocation() {
+		// The workspace root is always local to the file system. 
+		// So getLocation is OK here.
 		IPath workspaceLocation= ResourcesPlugin.getWorkspace().getRoot().getLocation();
 		if (!fJarLocation.isAbsolute() && workspaceLocation != null)
 			// prepend workspace path
@@ -831,12 +833,28 @@ public class JarPackageData {
 	 * @param parent	the shell used to display question dialogs,
 	 *				 	or <code>null</code> if "false/no/cancel" is the answer
 	 * 					and no dialog should be shown
-	 * @return a JarWriter
+	 * @return a JarWriter2
 	 * @see JarWriter2
 	 * @throws CoreException if an unexpected exception happens
+	 * 
+	 * @deprecated Use {@link #createJarWriter3(Shell)} instead
 	 */
 	public JarWriter2 createJarWriter(Shell parent) throws CoreException {
 		return new JarWriter2(this, parent);
+	}
+	
+	/**
+	 * Creates and returns a JarWriter for this JAR package.
+	 *
+	 * @param parent	the shell used to display question dialogs,
+	 *				 	or <code>null</code> if "false/no/cancel" is the answer
+	 * 					and no dialog should be shown
+	 * @return a JarWriter3
+	 * @see JarWriter3
+	 * @throws CoreException if an unexpected exception happens
+	 */
+	public JarWriter3 createJarWriter3(Shell parent) throws CoreException {
+		return new JarWriter3(this, parent);
 	}
 	
 	/**

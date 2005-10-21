@@ -418,7 +418,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	private IPath[] getSourcePath(IJavaProject[] projects) {
 		HashSet res= new HashSet();
-		//loops through all projects and gets a list if of thier sourpaths
+		//loops through all projects and gets a list if of their source paths
 		for (int k= 0; k < projects.length; k++) {
 			IJavaProject iJavaProject= projects[k];
 
@@ -429,6 +429,8 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 					if (curr.getKind() == IPackageFragmentRoot.K_SOURCE) {
 						IResource resource= curr.getResource();
 						if (resource != null) {
+							// Using get location is OK here. If the source folder
+							// isn't local we can't create Javadoc for it.
 							IPath p= resource.getLocation();
 							if (p != null) {
 								res.add(p);
@@ -452,6 +454,13 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			try {
 				IPath outputLocation= null;
 				
+				// Not really clear yet what to do here for EFS. See bug
+				// https://bugs.eclipse.org/bugs/show_bug.cgi?id=113233.
+				
+				// However if the output location is not local it is currently
+				// not part of JavaRuntime.computeDefaultRuntimeClassPath either
+				// so it will be simply not added to the result which would be
+				// correct.
 				IResource outputPathFolder= root.findMember(curr.getOutputLocation());
 				if (outputPathFolder != null)
 					outputLocation= outputPathFolder.getLocation();

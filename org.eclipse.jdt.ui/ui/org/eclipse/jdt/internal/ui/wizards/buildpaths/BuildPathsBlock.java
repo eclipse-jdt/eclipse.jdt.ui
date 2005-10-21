@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -20,7 +21,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
@@ -30,6 +30,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -620,7 +621,7 @@ public class BuildPathsBlock {
 	
 	// -------- creation -------------------------------
 	
-	public static void createProject(IProject project, IPath locationPath, IProgressMonitor monitor) throws CoreException {
+	public static void createProject(IProject project, URI locationURI, IProgressMonitor monitor) throws CoreException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}				
@@ -630,10 +631,10 @@ public class BuildPathsBlock {
 		try {
 			if (!project.exists()) {
 				IProjectDescription desc= project.getWorkspace().newProjectDescription(project.getName());
-				if (Platform.getLocation().equals(locationPath)) {
-					locationPath= null;
+				if (ResourcesPlugin.getWorkspace().getRoot().getLocationURI().equals(locationURI)) {
+					locationURI= null;
 				}
-				desc.setLocation(locationPath);
+				desc.setLocationURI(locationURI);
 				project.create(desc, monitor);
 				monitor= null;
 			}

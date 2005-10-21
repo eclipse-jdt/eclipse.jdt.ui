@@ -26,7 +26,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
@@ -150,18 +149,6 @@ public interface IClasspathInformationProvider {
      * @see ClasspathModifierQueries#getDefaultOutputLocationQuery(Shell, IPath, List)
      */
     public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException;
-    
-    /**
-     * Method to retrieve an <code>IFolderCreationQuery</code> from 
-     * the provider.
-     * 
-     * @return an <code>IFolderCreationQuery</code>, must not be 
-     * <code>null</code>
-     * @throws JavaModelException
-     * 
-     * @see ClasspathModifierQueries#getDefaultFolderCreationQuery(Shell, Object)
-     */
-    public IFolderCreationQuery getFolderCreationQuery() throws JavaModelException;
     
     /**
      * Method to retrieve an <code>ILinkToQuery</code> from 

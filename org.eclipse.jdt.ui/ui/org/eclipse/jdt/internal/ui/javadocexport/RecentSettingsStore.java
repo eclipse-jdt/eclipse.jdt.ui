@@ -202,6 +202,9 @@ public class RecentSettingsStore {
 	
 	private String getDefaultAntPath(IJavaProject project) {
 		if (project != null) {
+			// The Javadoc.xml file can only be stored locally. So if
+			// the project isn't local then we can't provide a good 
+			// default location.
 			IPath path= project.getProject().getLocation();
 			if (path != null)
 				return path.append("javadoc.xml").toOSString(); //$NON-NLS-1$
@@ -215,6 +218,10 @@ public class RecentSettingsStore {
 			URL url= JavaUI.getProjectJavadocLocation(project);
 			//uses default if source is has http protocol
 			if (url == null || !url.getProtocol().equals("file")) { //$NON-NLS-1$
+				// Since Javadoc.exe is a local tool its output is local.
+				// So if the project isn't local then the default location
+				// can't be local to a project. So use #getLocation() to
+				// test this is fine here.
 				IPath path= project.getProject().getLocation();
 				if (path != null)
 					return path.append("doc").toOSString(); //$NON-NLS-1$

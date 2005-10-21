@@ -14,7 +14,9 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -27,6 +29,7 @@ import java.util.Set;
 import java.util.jar.Manifest;
 import java.util.zip.ZipException;
 
+import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -64,12 +67,13 @@ import org.eclipse.jdt.core.util.ISourceAttribute;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionWriter;
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
-import org.eclipse.jdt.ui.jarpackager.JarWriter2;
+import org.eclipse.jdt.ui.jarpackager.JarWriter3;
 
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -93,7 +97,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		}
 	}
 
-	private JarWriter2 fJarWriter;
+	private JarWriter3 fJarWriter;
 	private JarPackageData fJarPackage;
 	private JarPackageData[] fJarPackages;
 	private Shell fParentShell;
@@ -643,7 +647,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			return Collections.EMPTY_LIST.iterator();
 			
 		if (fClassFilesMapContainer == null || !fClassFilesMapContainer.equals(classContainer)) {
-			fJavaNameToClassFilesMap= buildJavaToClassMap(classContainer);
+			fJavaNameToClassFilesMap= buildJavaToClassMap(classContainer, progressMonitor);
 			if (fJavaNameToClassFilesMap == null) {
 				// Could not fully build map. fallback is to export whole directory
 				String containerName= classContainer.getFullPath().toString();
@@ -701,7 +705,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * Builds and returns a map that has the class files
 	 * for each java file in a given directory
 	 */
-	private Map buildJavaToClassMap(IContainer container) throws CoreException {
+	private Map buildJavaToClassMap(IContainer container, IProgressMonitor monitor) throws CoreException {
 		if (container == null || !container.isAccessible())
 			return new HashMap(0);
 		/*
@@ -713,10 +717,22 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		for (int i= 0;  i < members.length; i++) {
 			if (isClassFile(members[i])) {
 				IFile classFile= (IFile)members[i];
-				IPath location= classFile.getLocation();
+				URI location= classFile.getLocationURI();
 				if (location != null) {
-					File file= location.toFile();
-					cfReader= ToolFactory.createDefaultClassFileReader(location.toOSString(), IClassFileReader.CLASSFILE_ATTRIBUTES);
+					InputStream contents= null;
+					try {
+						contents= EFS.getStore(location).openInputStream(EFS.NONE, monitor);
+						cfReader= ToolFactory.createDefaultClassFileReader(contents, IClassFileReader.CLASSFILE_ATTRIBUTES);
+					} finally {
+						try {
+							if (contents != null)
+								contents.close();
+						} catch (IOException e) {
+							throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
+								Messages.format(JarPackagerMessages.JarFileExportOperation_errorCannotCloseConnection, Resources.getLocationString(classFile)),
+								e));
+						}
+					}
 					if (cfReader != null) {
 						ISourceAttribute sourceAttribute= cfReader.getSourceFileAttribute();
 						if (sourceAttribute == null) {
@@ -725,7 +741,9 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 							 * class file does not contain the name of its 
 							 * source file.
 							 */
-							addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_classFileWithoutSourceFileAttribute, file), null); 
+							addWarning(Messages.format(
+								JarPackagerMessages.JarFileExportOperation_classFileWithoutSourceFileAttribute, 
+								Resources.getLocationString(classFile)), null); 
 							return null;
 						}
 						String javaName= new String(sourceAttribute.getSourceFileName());
@@ -881,7 +899,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			} else
 				progressMonitor.beginTask("", totalWork); //$NON-NLS-1$
 						
-			fJarWriter= fJarPackage.createJarWriter(fParentShell);
+			fJarWriter= fJarPackage.createJarWriter3(fParentShell);
 			exportSelectedElements(progressMonitor);
 			if (getStatus().getSeverity() != IStatus.ERROR) {
 				progressMonitor.subTask(JarPackagerMessages.JarFileExportOperation_savingFiles); 

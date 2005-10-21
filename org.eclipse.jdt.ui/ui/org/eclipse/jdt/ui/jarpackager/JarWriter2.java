@@ -51,6 +51,8 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
  * 
  * @see org.eclipse.jdt.ui.jarpackager.JarPackageData
  * @since 3.1
+ * 
+ * @deprecated Use JarWriter3 instead which leverages new {@link org.eclipse.core.filesystem.EFS EFS} support
  */
 public class JarWriter2 {
 	
@@ -298,6 +300,9 @@ public class JarWriter2 {
 		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
 		for (int i= 0; i < projects.length; i++) {
 			IProject project= projects[i];
+			// The Jar is always put into the local file system. So it can only be
+			// part of a project if the project is local as well. So using getLocation
+			// is currently save here.
 			IPath projectLocation= project.getLocation();
 			boolean isInProject= projectLocation != null && projectLocation.isPrefixOf(jarPath);
 			if (isInProject) {

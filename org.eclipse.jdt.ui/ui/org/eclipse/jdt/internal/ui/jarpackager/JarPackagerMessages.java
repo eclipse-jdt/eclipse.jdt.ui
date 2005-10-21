@@ -76,6 +76,7 @@ public final class JarPackagerMessages extends NLS {
 	public static String JarFileExportOperation_errorClosingJarPackageDescriptionReader;
 	public static String JarFileExportOperation_errorDuringProjectBuild;
 	public static String JarFileExportOperation_errorSavingModifiedResources;
+	public static String JarFileExportOperation_errorCannotCloseConnection;
 	public static String JarOptionsPage_title;
 	public static String JarOptionsPage_description;
 	public static String JarOptionsPage_howTreatProblems_label;

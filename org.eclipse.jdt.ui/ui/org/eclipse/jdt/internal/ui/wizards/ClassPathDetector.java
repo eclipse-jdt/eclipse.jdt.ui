@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -27,6 +29,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
@@ -47,7 +50,11 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.util.IClassFileReader;
 import org.eclipse.jdt.core.util.ISourceAttribute;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
   */
@@ -167,17 +174,26 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 		return null;
 	}
 	
-	private IPath detectOutputFolder(List entries) {
+	private IPath detectOutputFolder(List entries) throws CoreException {
 		HashSet classFolders= new HashSet();
 		
 		for (Iterator iter= fClassFiles.iterator(); iter.hasNext();) {
 			IFile file= (IFile) iter.next();
-			IPath location= file.getLocation();
-			if (location == null) {
-				continue;
+			IClassFileReader reader= null;
+			InputStream content= null;
+			try {
+				content= file.getContents();
+				reader= ToolFactory.createDefaultClassFileReader(content, IClassFileReader.CLASSFILE_ATTRIBUTES);
+			} finally {
+				try {
+					if (content != null)
+						content.close();
+				} catch (IOException e) {
+					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
+						Messages.format(NewWizardMessages.ClassPathDetector_error_closing_file, file.getFullPath().toString()),
+						e));
+				}
 			}
-
-			IClassFileReader reader= ToolFactory.createDefaultClassFileReader(location.toOSString(), IClassFileReader.CLASSFILE_ATTRIBUTES);
 			if (reader == null) {
 				continue; // problematic class file
 			}
@@ -374,9 +390,4 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 	public IClasspathEntry[] getClasspath() {
 		return fResultClasspath;
 	}
-
-
-
 }
-	
-

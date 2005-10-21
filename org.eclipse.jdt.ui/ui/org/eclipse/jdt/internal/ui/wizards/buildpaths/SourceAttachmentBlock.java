@@ -410,6 +410,8 @@ public class SourceAttachmentBlock {
 				}
 				
 			} else {
+				// JDT/Core only supports source attachments in archives on the
+				// local file system. So using getLocation is save here. 
 				File file= filePath.toFile();
 				IResource res= fWorkspaceRoot.findMember(filePath);
 				if (res != null && res.getLocation() != null) {

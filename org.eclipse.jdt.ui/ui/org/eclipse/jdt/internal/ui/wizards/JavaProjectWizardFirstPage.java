@@ -702,7 +702,11 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 	 * anticipated initial value. Note that if the default has been returned
 	 * the path in a project description used to create a project should not be
 	 * set.
-	 * 
+	 * <p>
+	 * TODO At some point this method has to be converted to return an URI instead
+	 * of an path. However, this first requires support from Platform/UI to specify
+	 * a project location different than in a local file system. 
+	 * </p>
 	 * @return the project location path or its anticipated initial value.
 	 */
 	public IPath getLocationPath() {

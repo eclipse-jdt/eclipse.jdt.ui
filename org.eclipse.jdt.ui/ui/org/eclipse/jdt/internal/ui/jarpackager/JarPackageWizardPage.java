@@ -589,7 +589,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			fDestinationNamesCombo.setFocus();
 			return false;
 		}
-		// Check if the Jar is put into the workspace an conflicts with the containers
+		// Check if the Jar is put into the workspace and conflicts with the containers
 		// exported. If the workspace isn't on the local files system we are fine since
 		// the Jar is always created in the local file system
 		IPath workspaceLocation= ResourcesPlugin.getWorkspace().getRoot().getLocation();

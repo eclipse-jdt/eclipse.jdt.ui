@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
-import org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation;
 import org.eclipse.jdt.internal.corext.buildpath.EditOutputFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation;
@@ -71,7 +70,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
  * on request. Based on this operations, <code>ClasspathModifierAction</code>s are generated. 
  * The available operations are:
  * 
- * @see org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation
  * @see org.eclipse.jdt.internal.corext.buildpath.IncludeOperation
@@ -192,13 +190,8 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         fListeners= new ArrayList();
         fActions= new ClasspathModifierAction[7];
         ClasspathModifierOperation op;
-        op= new CreateFolderOperation(listener, provider);
-        /*addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_TOOL_NEWPACKROOT, JavaPluginImages.DESC_DLCLL_NEWPACKROOT, 
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateFolder.label"), //$NON-NLS-1$
-                NewWizardMessages.getString("NewSourceContainerWorkbookPage.ToolBar.CreateFolder.tooltip"), IAction.AS_PUSH_BUTTON), //$NON-NLS-1$
-                IClasspathInformationProvider.CREATE_FOLDER);*/
         op= new AddSelectedSourceFolderOperation(listener, provider);
-        // TODO User disabled image when avaible
+        // TODO User disabled image when available
         addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_ELCL_ADD_AS_SOURCE_FOLDER, null,
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_label, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddSelSFToCP_tooltip, IAction.AS_PUSH_BUTTON), 

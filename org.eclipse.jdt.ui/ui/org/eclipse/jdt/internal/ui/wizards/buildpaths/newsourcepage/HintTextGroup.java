@@ -62,7 +62,6 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
@@ -487,17 +486,6 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
         return ClasspathModifierQueries.getDefaultOutputLocationQuery(getShell(), new Path(fOutputLocationField.getText()), classpathEntries);
     }
 
-    /**
-     * Return an <code>IFolderCreationQuery</code>.
-     * 
-     * @see ClasspathModifierQueries#getDefaultFolderCreationQuery(Shell, Object)
-     * @see IClasspathInformationProvider#getFolderCreationQuery()
-     */
-    public IFolderCreationQuery getFolderCreationQuery() {
-        IStructuredSelection selection= getSelection();
-        return ClasspathModifierQueries.getDefaultFolderCreationQuery(getShell(), selection.getFirstElement());
-    }
-    
     /**
      * Return an <code>ILinkToQuery</code>.
      * 

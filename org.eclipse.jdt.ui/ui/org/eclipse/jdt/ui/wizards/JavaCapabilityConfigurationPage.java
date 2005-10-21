@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -198,18 +199,35 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	}
 
 	/**
-	 * Helper method to create and open a IProject . The project location
+	 * Helper method to create and open a IProject. The project location
 	 * is configured. No natures are added.
 	 * 
 	 * @param project The handle of the project to create.
 	 * @param locationPath The location of the project.
 	 * @param monitor a progress monitor to report progress or <code>null</code> if
-	 * progress reporting is not desired
-	 * @throws CoreException
+	 *  progress reporting is not desired
+	 * @throws CoreException if the project couldn't be created
 	 * @since 2.1
+	 * @deprecated use {@link #createProject(IProject, URI, IProgressMonitor)} instead.
 	 */
 	public static void createProject(IProject project, IPath locationPath, IProgressMonitor monitor) throws CoreException {
-		BuildPathsBlock.createProject(project, locationPath, monitor);
+		createProject(project, locationPath != null ? locationPath.toFile().toURI() : null, monitor);
+	}
+	
+	/**
+	 * Helper method to create and open a IProject. The project location
+	 * is configured. No natures are added.
+	 * 
+	 * @param project The handle of the project to create.
+	 * @param locationURI The location of the project.
+	 * @param monitor a progress monitor to report progress or <code>null</code> if
+	 *  progress reporting is not desired
+	 * @throws CoreException if the project couldn't be created
+	 * @see org.eclipse.core.resources.IProjectDescription#setLocationURI(java.net.URI)
+	 * @since 3.2
+	 */
+	public static void createProject(IProject project, URI locationURI, IProgressMonitor monitor) throws CoreException {
+		BuildPathsBlock.createProject(project, locationURI, monitor);
 	}
 	
 	/**

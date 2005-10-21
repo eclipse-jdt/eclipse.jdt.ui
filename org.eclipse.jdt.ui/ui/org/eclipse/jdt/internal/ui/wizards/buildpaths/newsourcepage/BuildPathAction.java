@@ -50,7 +50,6 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
@@ -200,17 +199,6 @@ public class BuildPathAction extends Action implements IClasspathInformationProv
 	public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {
 		List classpathEntries= ClasspathModifier.getExistingEntries(fJavaProject);
 		return ClasspathModifierQueries.getDefaultOutputLocationQuery(getShell(), fJavaProject.getOutputLocation().makeRelative(), classpathEntries);
-	}
-
-	/**
-	 * Return an <code>IFolderCreationQuery</code>.
-	 * 
-	 * @see ClasspathModifierQueries#getDefaultFolderCreationQuery(Shell, Object)
-	 * @see IClasspathInformationProvider#getFolderCreationQuery()
-	 */
-	public IFolderCreationQuery getFolderCreationQuery() {
-		IStructuredSelection selection= getSelection();
-		return ClasspathModifierQueries.getDefaultFolderCreationQuery(getShell(), selection.getFirstElement());
 	}
 
 	/**

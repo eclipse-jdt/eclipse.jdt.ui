@@ -11,13 +11,18 @@
 package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -35,7 +40,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -242,15 +246,17 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageNotShown);  
 					}
 				} else {
-					IPath location= pack.getResource().getLocation();
-					if (location != null && location.toFile().exists()) {
-						status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExistsDifferentCase); 
+					URI location= pack.getResource().getLocationURI();
+					if (location != null) {
+						IFileStore store= EFS.getStore(location);
+						if (store.fetchInfo().exists()) {
+							status.setError(NewWizardMessages.NewPackageWizardPage_error_PackageExistsDifferentCase); 
+						}
 					}
 				}
-			} catch (JavaModelException e) {
+			} catch (CoreException e) {
 				JavaPlugin.log(e);
 			}
-			
 		}
 		return status;
 	}

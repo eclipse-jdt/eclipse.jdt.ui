@@ -11,11 +11,15 @@
 package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
+import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
+
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -112,6 +116,7 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContext;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -1451,10 +1456,19 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 					status.setError(NewWizardMessages.NewTypeWizardPage_error_TypeNameExists); 
 					return status;
 				}
-				IPath location= resource.getLocation();
-				if (location != null && location.toFile().exists()) {
-					status.setError(NewWizardMessages.NewTypeWizardPage_error_TypeNameExistsDifferentCase); 
-					return status;
+				URI location= resource.getLocationURI();
+				if (location != null) {
+					try {
+						IFileStore store= EFS.getStore(location);
+						if (store.fetchInfo().exists()) {
+							status.setError(NewWizardMessages.NewTypeWizardPage_error_TypeNameExistsDifferentCase); 
+							return status;
+						}
+					} catch (CoreException e) {
+						status.setError(Messages.format(
+							NewWizardMessages.NewTypeWizardPage_error_uri_location_unkown, 
+							Resources.getLocationString(resource)));
+					}
 				}
 			}
 		} else {

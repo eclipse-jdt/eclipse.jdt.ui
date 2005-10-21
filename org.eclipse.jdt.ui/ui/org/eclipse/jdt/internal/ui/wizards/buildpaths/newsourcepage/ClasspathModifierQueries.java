@@ -16,7 +16,6 @@ import java.util.List;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.swt.SWT;
@@ -35,7 +34,6 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -480,7 +478,6 @@ public class ClasspathModifierQueries {
      * 
      * @see OutputFolderQuery
      * @see org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation
-     * @see org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation
      */
     public static OutputFolderQuery getDefaultFolderQuery(final Shell shell, IPath outputLocation) {
 		
@@ -632,72 +629,6 @@ public class ClasspathModifierQueries {
         };
     }
 
-    /**
-     * Query to create a folder.
-     * 
-     * The default query shows a dialog which allows
-     * the user to specify the new folder that should
-     * be created.
-     * 
-     * @param shell shell if there is any or <code>null</code>
-     * @param selection an object of type <code>IFolder</code>
-     * or <code>IJavaElement</code> which should become the direct
-     * parent of the new folder.
-     * indicate the type of the selected parent folder
-     * @return an <code>IFolderCreationQuery</code> showing a dialog
-     * to create a folder.
-     * 
-     * @see ClasspathModifierQueries.IFolderCreationQuery
-     * @see ExtendedNewFolderDialog
-     */
-    public static IFolderCreationQuery getDefaultFolderCreationQuery(final Shell shell, final Object selection) {
-        return new IFolderCreationQuery() {
-            protected boolean fIsSourceFolder;
-			protected IFolder fFolder;
-            
-            public boolean doQuery() {
-                final boolean[] isOK= {false};
-                Display.getDefault().syncExec(new Runnable() {
-                    public void run() {
-                        Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
-                        IContainer container;
-                        
-                        if (selection instanceof IFolder)
-                            container= (IFolder)selection;
-                        else {
-                            IJavaElement javaElement= (IJavaElement)selection;
-                            IJavaProject project= javaElement.getJavaProject();
-                            container= project.getProject();
-                            if (!(selection instanceof IJavaProject)) {
-                                container= container.getFolder(javaElement.getPath().removeFirstSegments(1));
-                            }
-                        }
-                        
-                        boolean javaProjectSelected= false;
-                        if (selection instanceof IJavaProject)
-                            javaProjectSelected= true;
-                        ExtendedNewFolderDialog dialog= new ExtendedNewFolderDialog(sh, container, javaProjectSelected);
-                        isOK[0]= dialog.open() == Window.OK;
-                        if (isOK[0]) {
-                            fFolder= dialog.getCreatedFolder();
-                            fIsSourceFolder= dialog.isSourceFolder();
-                        }
-                    }
-                });
-                return isOK[0];
-            }
-            
-            public boolean isSourceFolder() {
-                return fIsSourceFolder;
-            }
-    
-            public IFolder getCreatedFolder() {
-                return fFolder;
-            }
-            
-        };
-    }
-    
     /**
      * Query to create a linked source folder.
      * 

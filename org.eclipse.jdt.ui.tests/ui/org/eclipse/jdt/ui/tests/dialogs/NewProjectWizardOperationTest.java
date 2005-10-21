@@ -51,7 +51,6 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
@@ -1020,10 +1019,6 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
                 return null;
             }
 
-            public IFolderCreationQuery getFolderCreationQuery() throws JavaModelException {
-                return null;
-            }
-
             public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
                 return null;
             }
@@ -1125,10 +1120,6 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
                 return null;
             }
 
-            public IFolderCreationQuery getFolderCreationQuery() throws JavaModelException {
-                return null;
-            }
-
             public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
                 return null;
             }
@@ -1179,10 +1170,6 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
             }
 
             public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {
-                return null;
-            }
-
-            public IFolderCreationQuery getFolderCreationQuery() throws JavaModelException {
                 return null;
             }
 
@@ -1318,13 +1305,6 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
      * @see org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider#getOutputLocationQuery()
      */
     public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {
-        return null;
-    }
-
-    /* (non-Javadoc)
-     * @see org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider#getFolderCreationQuery()
-     */
-    public IFolderCreationQuery getFolderCreationQuery() throws JavaModelException {
         return null;
     }
 

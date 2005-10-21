@@ -388,7 +388,7 @@ public class JavadocOptionsManager {
 			}
 		}
 
-		//get tree elements
+		// The ant file for generating the Javadoc is always local.
 		IPath p= fXmlfile.getLocation();
 		if (p != null)
 			fAntpath= p.toOSString();
@@ -451,6 +451,7 @@ public class JavadocOptionsManager {
 			if (fXmlfile == null) {
 				return null;
 			}
+			// The XML file is always local. So ok to use getLocation here
 			IPath basePath= fXmlfile.getParent().getLocation(); // relative to the ant file location
 			if (basePath == null) {
 				return null;
@@ -771,6 +772,8 @@ public class JavadocOptionsManager {
 			if (curr instanceof IPackageFragment) {
 				toolArgs.add(curr.getElementName());
 			} else if (curr instanceof ICompilationUnit) {
+				// Since the Javadoc tool is running locally we can only  create
+				// Javadoc for local resources. So using the location is fine here.
 				IPath p= curr.getResource().getLocation();
 				if (p != null)
 					toolArgs.add(p.toOSString());
