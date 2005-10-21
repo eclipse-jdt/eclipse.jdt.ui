@@ -179,7 +179,8 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 */
 	protected boolean allowAddingImports() {
 		if (fContext.isInJavadoc()) {
-//			if (fContext.isJavadocFormalReference())
+			// TODO add support for informal javadoc references
+//			if (!fContext.isJavadocFormalReference())
 //				return false;
 			
 			if (!isJavadocProcessingEnabled())
