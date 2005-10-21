@@ -55,15 +55,35 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 public class JavadocCompletionTest extends TestCase {
-
+	/*
+	 * This test tests only <= 1.5 source level tags.
+	 */
 
 	private static final Class THIS= JavadocCompletionTest.class;
-	private static final boolean OLD= true;
+	private static final boolean OLD= false;
 	private static final String CARET= "|";
-	private static final String EMPTY_TYPE= "public class Completion {\n" +
-			"}\n";
-	private static final String[] BLOCK_TAGS= {"@exception", "@param", "@serialField", "@throws", "@author", "@deprecated", "@return", "@see", "@serial", "@serialData", "@since", "@version", "@inheritDoc", };
-	private static final String[] INLINE_TAGS= {"@docRoot", "@inheritDoc", "@link", "@linkplain", "@value",};
+	private static final String TYPE_JDOC_START= "/**\n";
+	private static final String TYPE_JDOC_END= " */\n";
+	private static final String TYPE_START= "public class Completion {\n";
+	private static final String TYPE_END= "}\n";
+	private static final String EMPTY_TYPE= TYPE_START + TYPE_END;
+	private static final String METHOD=
+			"	public int method(int param) {\n" +
+			"		return 0;\n" +
+			"	}\n";
+	private static final String MEMBER_JDOC_START= "	/**\n";
+	private static final String MEMBER_JDOC_END= "	 */\n";
+	private static final String FIELD= "	public int fField\n";
+	
+	// TODO re-add param
+	private static final String[] TYPE_BLOCK_TAGS= {"@see", "@since", "@deprecated", "@serial", "@author", "@version", /*"@param",*/ };
+	private static final String[] METHOD_BLOCK_TAGS= {"@see", "@since", "@deprecated", "@param", "@return", "@throws", "@exception", "@serialData", };
+	private static final String[] FIELD_BLOCK_TAGS= {"@see", "@since", "@deprecated", "@serial", "@serialField", };
+	// TODO re-add value
+	private static final String[] TYPE_INLINE_TAGS= {"@docRoot", "@link", "@linkplain", /*"@value",*/ "@code", "@literal", };
+	// TODO re-add value
+	private static final String[] METHOD_INLINE_TAGS= {"@docRoot", "@inheritDoc", "@link", "@linkplain", /*"@value",*/ "@code", "@literal", };
+	private static final String[] FIELD_INLINE_TAGS= {"@docRoot", "@link", "@linkplain", "@value", "@code", "@literal", };
 	private static final String[] HTML_TAGS= {"b", "blockquote", "br", "code", "dd", "dl", "dt", "em", "hr", "h1", "h2", "h3", "h4", "h5", "h6", "i", "li", "nl", "ol", "p", "pre", "q", "td", "th", "tr", "tt", "ul",};
 
 	public static Test allTests() {
@@ -82,7 +102,7 @@ public class JavadocCompletionTest extends TestCase {
 	private IPackageFragmentRoot fSourceFolder;
 	private IPackageFragment fPackage;
 	private String fTypeDeclaration;
-	private String fImports;
+	private ICompilationUnit fCU;
 
 	public JavadocCompletionTest(String name) {
 		super(name);
@@ -105,6 +125,7 @@ public class JavadocCompletionTest extends TestCase {
 		IPreferenceStore store= getJDTUIPrefs();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, true);
 		store.setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, false);
+		store.setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, false);
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, "/* (non-Javadoc)\n * ${see_to_overridden}\n */", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "//TODO\n${body_statement}", null);
@@ -113,7 +134,6 @@ public class JavadocCompletionTest extends TestCase {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "//TODO\n${body_statement}", null);
 		
 		fTypeDeclaration= EMPTY_TYPE;
-		fImports= "";
 	}
 
 	private IPreferenceStore getJDTUIPrefs() {
@@ -135,27 +155,58 @@ public class JavadocCompletionTest extends TestCase {
 		IPreferenceStore store= getJDTUIPrefs();
 		store.setToDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS);
 		store.setToDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
-		
+		store.setToDefault(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
+		store.setToDefault(PreferenceConstants.CODEASSIST_ADDIMPORT);
+		store.setToDefault(PreferenceConstants.EDITOR_CLOSE_BRACKETS);
+
 		JavaProjectHelper.delete(fJProject1);
+		fCU= null;
 	}
 
 	public void testSeeType() throws Exception {
 		assertTypeJavadocProposal(" * @see java.util.List|", " * @see List|", "List ");
 	}
 	
+	public void testSeeTypeImportsOn() throws Exception {
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
+		assertTypeJavadocProposal(" * @see List|", " * @see List|", "List ", "\nimport java.util.List;\n", "");
+	}
+	
 	public void testSeeTypeJavaLang() throws Exception {
-		assertTypeJavadocProposal(" * @see java.lang.String|", " * @see Str|", "String ");
+		assertTypeJavadocProposal(" * @see String|", " * @see Str|", "String ");
 	}
 	
 	public void testSeeImportedType() throws Exception {
-		fImports= "import java.util.List;\n";
-		assertTypeJavadocProposal(" * @see java.util.List|", " * @see Lis|", "List ");
+		assertTypeJavadocProposal(" * @see java.util.List|", " * @see Lis|", "List ", "import java.util.List;\n", "import java.util.List;\n");
+	}
+	
+	public void testSeeImportedTypeImportsOn() throws Exception {
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
+		assertTypeJavadocProposal(" * @see List|", " * @see Lis|", "List ", "import java.util.List;\n", "import java.util.List;\n");
 	}
 	
 	public void testSeeTypeSameType() throws Exception {
 		assertTypeJavadocProposal(" * @see Completion|", " * @see Comple|", "Completion ");
 	}
 	
+	public void testSeeTypeSameTypeImportsOn() throws Exception {
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
+		assertTypeJavadocProposal(" * @see Completion|", " * @see Comple|", "Completion ");
+	}
+	
+//	public void testInformalTypeReference() throws Exception {
+//		assertTypeJavadocProposal(" * Prefix <code>List|</code> postfix", " * Prefix <code>Li|</code> postfix", "List ");
+//	}
+//
+//	public void testInformalTypeReferenceImportsOn() throws Exception {
+//		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
+//		assertTypeJavadocProposal(" * Prefix <code>List|</code> postfix", " * Prefix <code>Li|</code> postfix", "List ");
+//	}
+//	
+//	public void testInformalTypeReferenceSameType() throws Exception {
+//		assertTypeJavadocProposal(" * Prefix <code>Completion|</code> postfix", " * Prefix <code>Completion|</code> postfix", "Completion ");
+//	}
+//	
 	public void testSeeMethod() throws Exception {
 		assertTypeJavadocProposal(" * @see java.util.List#size()|", " * @see java.util.List#siz|", "size(");
 	}
@@ -173,16 +224,16 @@ public class JavadocCompletionTest extends TestCase {
 	}
 	
 	public void testSeeMethodWithTypeVariableParameter() throws Exception {
-		if (OLD) // TODO erased vs. generic references - what does the spec say? 
+		if (OLD) // bug in OLD: have to use erased types 
 			assertTypeJavadocProposal(" * @see java.util.List#add(E)|", " * @see java.util.List#ad|", "add(E");
 		else
 			assertTypeJavadocProposal(" * @see java.util.List#add(Object)|", " * @see java.util.List#ad|", "add(E");
 	}
 	
 	public void testSeeMethodLocal() throws Exception {
-		fTypeDeclaration= "public class Completion {\n" +
+		fTypeDeclaration= TYPE_START +
 				"		public void method() {}\n" +
-				"}\n";
+				TYPE_END;
 		assertTypeJavadocProposal(" * @see #method()|", " * @see #me|", "met");
 	}
 	
@@ -196,12 +247,29 @@ public class JavadocCompletionTest extends TestCase {
 	public void testLinkTypeClosed() throws Exception {
 		assertTypeJavadocProposal(" * Prefix {@link java.util.List|}", " * Prefix {@link List|}", "List ");
 	}
+	public void testDirectLinkType() throws Exception {
+		assertTypeJavadocProposal(" * Prefix {@link java.util.List}|", " * Prefix List|", "{@link List}");
+	}
+	public void testDirectLinkTypeNoAutoClose() throws Exception {
+		getJDTUIPrefs().setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, false);
+		assertTypeJavadocProposal(" * Prefix {@link java.util.List|", " * Prefix List|", "{@link List}");
+	}
+	
+	public void testDirectLinkTypeImportsOn() throws Exception {
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
+		assertTypeJavadocProposal(" * Prefix {@link List}|", " * Prefix List|", "{@link List}", "\nimport java.util.List;\n", "");
+	}
+	public void testDirectLinkTypeNoAutoCloseImportsOn() throws Exception {
+		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
+		getJDTUIPrefs().setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, false);
+		assertTypeJavadocProposal(" * Prefix {@link List|", " * Prefix List|", "{@link List}", "\nimport java.util.List;\n", "");
+	}
 	
 	public void testLinkTypeJavaLang() throws Exception {
-		assertTypeJavadocProposal(" * Prefix {@link java.lang.String|", " * Prefix {@link Str|", "String ");
+		assertTypeJavadocProposal(" * Prefix {@link String|", " * Prefix {@link Str|", "String ");
 	}
 	public void testLinkTypeJavaLangClosed() throws Exception {
-		assertTypeJavadocProposal(" * Prefix {@link java.lang.String|}", " * Prefix {@link Str|}", "String ");
+		assertTypeJavadocProposal(" * Prefix {@link String|}", " * Prefix {@link Str|}", "String ");
 	}
 	
 	public void testLinkTypeSameType() throws Exception {
@@ -224,9 +292,9 @@ public class JavadocCompletionTest extends TestCase {
 	}
 	
 	public void testLinkMethodLocal() throws Exception {
-		fTypeDeclaration= "public class Completion {\n" +
+		fTypeDeclaration= TYPE_START +
 				"		public void method() {}\n" +
-				"}\n";
+				TYPE_END;
 		assertTypeJavadocProposal(" * {@link #method()|", " * {@link #me|", "met");
 	}
 	
@@ -243,29 +311,31 @@ public class JavadocCompletionTest extends TestCase {
 	}
 	
 	public void testLinkMethodWithParamNoOverwriteWithParams() throws Exception {
-		// TODO fails with OLD==false
 		assertTypeJavadocProposal(" * Prefix {@link java.util.List#clear()|add(int, Object)} postfix", " * Prefix {@link java.util.List#|add(int, Object)} postfix", "clear");
 	}
 	
 	public void testLinkMethodWithParamOverwriteNoPrefix() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);
-		assertTypeJavadocProposal(" * Prefix {@link java.util.List#clear()|add} postfix", " * Prefix {@link java.util.List#|add} postfix", "clear");
+		if (OLD) // this is really a bug in OLD
+			assertTypeJavadocProposal(" * Prefix {@link java.util.List#clear()|add} postfix", " * Prefix {@link java.util.List#|add} postfix", "clear");
+		else
+			assertTypeJavadocProposal(" * Prefix {@link java.util.List#clear()|} postfix", " * Prefix {@link java.util.List#|add} postfix", "clear");
 	}
 	
 	public void testLinkMethodWithParamOverwrite() throws Exception {
-		// TODO fails with OLD==false
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);
 		assertTypeJavadocProposal(" * Prefix {@link java.util.List#get(int)|} postfix", " * Prefix {@link java.util.List#g|et} postfix", "get(");
 	}
 	
 	public void testLinkMethodWithParamOverwriteWithParamsNoPrefix() throws Exception {
-		// TODO fails with OLD==false
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);
-		assertTypeJavadocProposal(" * Prefix {@link java.util.List#clear()|add(int, Object)} postfix", " * Prefix {@link java.util.List#|add(int, Object)} postfix", "clear");
+		if (OLD) // this is really a bug in OLD
+			assertTypeJavadocProposal(" * Prefix {@link java.util.List#clear()|add(int, Object)} postfix", " * Prefix {@link java.util.List#|add(int, Object)} postfix", "clear");
+		else
+			assertTypeJavadocProposal(" * Prefix {@link java.util.List#clear()|} postfix", " * Prefix {@link java.util.List#|add(int, Object)} postfix", "clear");
 	}
 	
 	public void testLinkMethodWithParamOverwriteWithParams() throws Exception {
-		// TODO fails with OLD==false
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);
 		assertTypeJavadocProposal(" * Prefix {@link java.util.List#get(int)|} postfix", " * Prefix {@link java.util.List#g|et(long)} postfix", "get(");
 	}
@@ -275,13 +345,13 @@ public class JavadocCompletionTest extends TestCase {
 	}
 	
 	public void testLinkMethodWithTypeVariableParameter() throws Exception {
-		if (OLD) // TODO erased vs. generic references - what does the spec say?  - nothing found yet, but List#addAll suggests erased types
+		if (OLD) // bug in OLD: have to use erased types
 			assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(E)|", " * Prefix {@link java.util.List#ad|", "add(E");
 		else
 			assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(Object)|", " * Prefix {@link java.util.List#ad|", "add(E");
 	}
 	public void testLinkMethodWithTypeVariableParameterClosed() throws Exception {
-		if (OLD) // TODO erased vs. generic references - what does the spec say? 
+		if (OLD) // bug in OLD: have to use erased types 
 			assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(E)|}", " * Prefix {@link java.util.List#ad|}", "add(E");
 		else
 			assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(Object)|}", " * Prefix {@link java.util.List#ad|}", "add(E");
@@ -291,13 +361,34 @@ public class JavadocCompletionTest extends TestCase {
 		assertTypeJavadocProposal(" * Prefix {@link java.util.Collections#EMPTY_LIST|", " * Prefix {@link java.util.Collections#|", "EMPTY_LI");
 	}
 	
-	public void testBlockTags() throws Exception {
-		// TODO fails with OLD==false
+	public void testTypeBlockTags() throws Exception {
 		tearDown();
-		for (int i= 0; i < BLOCK_TAGS.length; i++) {
+		for (int i= 0; i < TYPE_BLOCK_TAGS.length; i++) {
 			setUp();
-			String tag= BLOCK_TAGS[i];
+			String tag= TYPE_BLOCK_TAGS[i];
 			assertTypeJavadocProposal(" * " + tag, " * @|",  tag);
+			tearDown();
+		}
+		setUp();
+	}
+	
+	public void testMethodBlockTags() throws Exception {
+		tearDown();
+		for (int i= 0; i < METHOD_BLOCK_TAGS.length; i++) {
+			setUp();
+			String tag= METHOD_BLOCK_TAGS[i];
+			assertMethodJavadocProposal(" * " + tag, " * @|",  tag);
+			tearDown();
+		}
+		setUp();
+	}
+	
+	public void testFieldBlockTags() throws Exception {
+		tearDown();
+		for (int i= 0; i < FIELD_BLOCK_TAGS.length; i++) {
+			setUp();
+			String tag= FIELD_BLOCK_TAGS[i];
+			assertFieldJavadocProposal(" * " + tag, " * @|",  tag);
 			tearDown();
 		}
 		setUp();
@@ -309,22 +400,43 @@ public class JavadocCompletionTest extends TestCase {
  			return;
  		}
  		tearDown();
- 		for (int i= 0; i < INLINE_TAGS.length; i++) {
+ 		for (int i= 0; i < TYPE_INLINE_TAGS.length; i++) {
  			setUp();
-			String tag= INLINE_TAGS[i];
+			String tag= TYPE_INLINE_TAGS[i];
 			assertNoProposals(" * @|", tag);
 			tearDown();
 		}
 		setUp();
 	}
  	
-	public void testInlineTags() throws Exception {
-		// TODO fails with OLD==false
+	public void testTypeInlineTags() throws Exception {
  		tearDown();
-		for (int i= 0; i < INLINE_TAGS.length; i++) {
+		for (int i= 0; i < TYPE_INLINE_TAGS.length; i++) {
 			setUp();
-			String tag= INLINE_TAGS[i];
-			assertTypeJavadocProposal(" * {" + tag, " * {@|", tag);
+			String tag= TYPE_INLINE_TAGS[i];
+			assertTypeJavadocProposal(" * {" + tag + " |}", " * {@|", "{" + tag);
+			tearDown();
+		}
+		setUp();
+	}
+	
+	public void testMethodInlineTags() throws Exception {
+		tearDown();
+		for (int i= 0; i < METHOD_INLINE_TAGS.length; i++) {
+			setUp();
+			String tag= METHOD_INLINE_TAGS[i];
+			assertMethodJavadocProposal(" * {" + tag + " |}", " * {@|", "{" + tag);
+			tearDown();
+		}
+		setUp();
+	}
+	
+	public void testFieldInlineTags() throws Exception {
+		tearDown();
+		for (int i= 0; i < FIELD_INLINE_TAGS.length; i++) {
+			setUp();
+			String tag= FIELD_INLINE_TAGS[i];
+			assertFieldJavadocProposal(" * {" + tag + " |}", " * {@|", "{" + tag);
 			tearDown();
 		}
 		setUp();
@@ -336,9 +448,9 @@ public class JavadocCompletionTest extends TestCase {
  			return;
  		}
 		tearDown();
-		for (int i= 0; i < BLOCK_TAGS.length; i++) {
+		for (int i= 0; i < TYPE_BLOCK_TAGS.length; i++) {
 			setUp();
-			String tag= BLOCK_TAGS[i];
+			String tag= TYPE_BLOCK_TAGS[i];
 			assertNoProposals(" * {@|", tag);
 			tearDown();
 		}
@@ -371,24 +483,48 @@ public class JavadocCompletionTest extends TestCase {
 	 * @throws CoreException
 	 */
 	private void assertTypeJavadocProposal(String expected, String javadocLine, String selector) throws CoreException {
+		assertTypeJavadocProposal(expected, javadocLine, selector, "", "");
+	}
+	private void assertTypeJavadocProposal(String expected, String javadocLine, String selector, String expectedImports, String givenImports) throws CoreException {
 		StringBuffer contents= new StringBuffer();
-		IRegion preSelection= assembleTestCUExtractSelection(contents, javadocLine);
-		ICompilationUnit cu= createCU(fPackage, contents.toString());
+		IRegion preSelection= assembleTestCUExtractSelection(contents, javadocLine, givenImports);
+		StringBuffer result= new StringBuffer();
+		IRegion expectedSelection= assembleTestCUExtractSelection(result, expected, expectedImports);
 
-		ITextEditor editor= (ITextEditor) EditorUtility.openInEditor(cu);
+		assertJavadocProposal(selector, contents, preSelection, result, expectedSelection);
+	}
+
+	private void assertMethodJavadocProposal(String expected, String javadocLine, String selector) throws CoreException {
+		StringBuffer contents= new StringBuffer();
+		IRegion preSelection= assembleTestMethodCUExtractSelection(contents, javadocLine, METHOD);
+		StringBuffer result= new StringBuffer();
+		IRegion expectedSelection= assembleTestMethodCUExtractSelection(result, expected, METHOD);
+		
+		assertJavadocProposal(selector, contents, preSelection, result, expectedSelection);
+	}
+	
+	private void assertFieldJavadocProposal(String expected, String javadocLine, String selector) throws CoreException {
+		StringBuffer contents= new StringBuffer();
+		IRegion preSelection= assembleTestMethodCUExtractSelection(contents, javadocLine, FIELD);
+		StringBuffer result= new StringBuffer();
+		IRegion expectedSelection= assembleTestMethodCUExtractSelection(result, expected, FIELD);
+		
+		assertJavadocProposal(selector, contents, preSelection, result, expectedSelection);
+	}
+	
+	private void assertJavadocProposal(String selector, StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection) throws JavaModelException, PartInitException {
+		fCU= createCU(fPackage, contents.toString());
+		ITextEditor editor= (ITextEditor) EditorUtility.openInEditor(fCU);
 		IDocument doc;
 		ITextSelection postSelection;
 		try {
-			IJavaCompletionProposal proposal= findNonNullProposal(selector, cu, preSelection);
+			IJavaCompletionProposal proposal= findNonNullProposal(selector, fCU, preSelection);
 			doc= editor.getDocumentProvider().getDocument(editor.getEditorInput());
 			apply(editor, doc, proposal, preSelection);
 			postSelection= (ITextSelection) editor.getSelectionProvider().getSelection();
 		} finally {
 			EditorTestHelper.closeEditor(editor);
 		}
-		
-		StringBuffer result= new StringBuffer();
-		IRegion expectedSelection= assembleTestCUExtractSelection(result, expected);
 
 		assertEquals(result.toString(), doc.get());
 		assertEquals(expectedSelection.getOffset(), postSelection.getOffset());
@@ -397,7 +533,7 @@ public class JavadocCompletionTest extends TestCase {
 	
 	private void assertNoProposals(String javadocLine, String selector) throws CoreException {
 		StringBuffer contents= new StringBuffer();
-		IRegion preSelection= assembleTestCUExtractSelection(contents, javadocLine);
+		IRegion preSelection= assembleTestCUExtractSelection(contents, javadocLine, "");
 		ICompilationUnit cu= createCU(fPackage, contents.toString());
 
 		ITextEditor editor= (ITextEditor) EditorUtility.openInEditor(cu);
@@ -409,14 +545,40 @@ public class JavadocCompletionTest extends TestCase {
 		
 	}
 
-	private IRegion assembleTestCUExtractSelection(StringBuffer buffer, String javadocLine) {
+	private IRegion assembleTestCUExtractSelection(StringBuffer buffer, String javadocLine, String imports) {
 		String prefix= "package test1;\n" +
-				fImports +
+				imports +
 				 "\n" +
-				 "/**\n";
+				 TYPE_JDOC_START;
 		String postfix= "\n" +
-				 " */\n" +
+				 TYPE_JDOC_END +
 				 fTypeDeclaration;
+		StringBuffer lineBuffer= new StringBuffer(javadocLine);
+		int firstPipe= lineBuffer.indexOf(CARET);
+		int secondPipe;
+		if (firstPipe == -1) {
+			firstPipe= lineBuffer.length();
+			secondPipe= firstPipe;
+		} else {
+			lineBuffer.replace(firstPipe, firstPipe + CARET.length(), "");
+			secondPipe= lineBuffer.indexOf(CARET, firstPipe);
+			if (secondPipe ==-1)
+				secondPipe= firstPipe;
+			else
+				lineBuffer.replace(secondPipe, secondPipe + CARET.length(), "");
+		}
+		buffer.append(prefix + lineBuffer + postfix);
+		return new Region(firstPipe + prefix.length(), secondPipe - firstPipe);
+	}
+	
+	private IRegion assembleTestMethodCUExtractSelection(StringBuffer buffer, String javadocLine, String member) {
+		String prefix= "package test1;\n" +
+				"\n" +
+				TYPE_START +
+				MEMBER_JDOC_START;
+				String postfix= MEMBER_JDOC_END +
+				member +
+				TYPE_END;
 		StringBuffer lineBuffer= new StringBuffer(javadocLine);
 		int firstPipe= lineBuffer.indexOf(CARET);
 		int secondPipe;
@@ -460,7 +622,8 @@ public class JavadocCompletionTest extends TestCase {
 		}
 		
 		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
-		collector.setReplacementLength(selection.getLength());
+		if (selection.getLength() > 0)
+			collector.setReplacementLength(selection.getLength());
 		codeComplete(cu, selection.getOffset(), collector);
 
 		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
@@ -488,5 +651,4 @@ public class JavadocCompletionTest extends TestCase {
 			proposal.apply(doc);
 		}
 	}
-
 }

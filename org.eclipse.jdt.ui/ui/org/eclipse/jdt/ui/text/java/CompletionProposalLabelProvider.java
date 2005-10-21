@@ -280,6 +280,11 @@ public class CompletionProposalLabelProvider {
 		return createTypeProposalLabel(fullName);
 	}
 	
+	String createJavadocTypeProposalLabel(CompletionProposal typeProposal) {
+		char[] fullName= Signature.toCharArray(typeProposal.getSignature());
+		return createJavadocTypeProposalLabel(fullName);
+	}
+	
 	String createJavadocSimpleProposalLabel(CompletionProposal proposal) {
 		// TODO get rid of this
 		return createSimpleLabel(proposal);
@@ -292,6 +297,21 @@ public class CompletionProposalLabelProvider {
 
 		StringBuffer buf= new StringBuffer();
 		buf.append(fullName, qIndex, fullName.length - qIndex);
+		if (qIndex > 0) {
+			buf.append(JavaElementLabels.CONCAT_STRING);
+			buf.append(fullName, 0, qIndex - 1);
+		}
+		return buf.toString();
+	}
+	
+	String createJavadocTypeProposalLabel(char[] fullName) {
+		// only display innermost type name as type name, using any
+		// enclosing types as qualification
+		int qIndex= findSimpleNameStart(fullName);
+		
+		StringBuffer buf= new StringBuffer("{@link ");
+		buf.append(fullName, qIndex, fullName.length - qIndex);
+		buf.append('}');
 		if (qIndex > 0) {
 			buf.append(JavaElementLabels.CONCAT_STRING);
 			buf.append(fullName, 0, qIndex - 1);
@@ -385,6 +405,7 @@ public class CompletionProposalLabelProvider {
 			case CompletionProposal.TYPE_REF:
 				return createTypeProposalLabel(proposal);
 			case CompletionProposal.JAVADOC_TYPE_REF:
+				return createJavadocTypeProposalLabel(proposal);
 			case CompletionProposal.JAVADOC_FIELD_REF:
 			case CompletionProposal.JAVADOC_VALUE_REF:
 			case CompletionProposal.JAVADOC_BLOCK_TAG:

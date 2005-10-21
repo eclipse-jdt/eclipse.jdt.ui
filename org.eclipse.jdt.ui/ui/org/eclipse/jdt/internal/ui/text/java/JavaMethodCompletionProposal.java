@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
@@ -42,12 +41,8 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 
 	public void apply(IDocument document, char trigger, int offset) {
 		super.apply(document, trigger, offset);
-		if (!fContext.isInJavadoc()) {
-			try {
-				setUpLinkedMode(document, getReplacementString());
-			} catch (BadLocationException e) {
-				// ignore
-			}
+		if (!fContext.isInJavadoc() && getReplacementString().endsWith("()")) { //$NON-NLS-1$
+			setUpLinkedMode(document, ')');
 		}
 	}
 

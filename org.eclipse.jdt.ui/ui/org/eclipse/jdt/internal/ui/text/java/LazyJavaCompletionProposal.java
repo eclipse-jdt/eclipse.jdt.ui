@@ -375,13 +375,9 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 				try {
 					document.replace(offset, 0, String.valueOf(trigger));
 					setCursorPosition(getCursorPosition() + 1);
-					if (trigger == '(' && JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACKETS)) {
+					if (trigger == '(' && autocloseBrackets()) {
 						document.replace(getReplacementOffset() + getCursorPosition(), 0, ")"); //$NON-NLS-1$
-						StringBuffer buf= new StringBuffer();
-						for (int i= 0; i < getCursorPosition() - 1; i++)
-							buf.append(' ');
-						buf.append("()"); //$NON-NLS-1$
-						setUpLinkedMode(document, buf.toString());
+						setUpLinkedMode(document, ')');
 					}
 				} catch (BadLocationException x) {
 					// ignore
@@ -815,29 +811,39 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 		return fToggleEating;
 	}
 
-	protected void setUpLinkedMode(IDocument document, String string) throws BadLocationException {
-		if (getTextViewer() != null && string != null) {
-			int index= string.indexOf("()"); //$NON-NLS-1$
-			if (index != -1 && index + 1 == getCursorPosition()) {
-				IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-				if (preferenceStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACKETS)) {
-					int newOffset= getReplacementOffset() + getCursorPosition();
-	
-					LinkedPositionGroup group= new LinkedPositionGroup();
-					group.addPosition(new LinkedPosition(document, newOffset, 0, LinkedPositionGroup.NO_STOP));
-	
-					LinkedModeModel model= new LinkedModeModel();
-					model.addGroup(group);
-					model.forceInstall();
-	
-					LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
-					ui.setSimpleMode(true);
-					ui.setExitPolicy(new ExitPolicy(')', document));
-					ui.setExitPosition(getTextViewer(), newOffset + 1, 0, Integer.MAX_VALUE);
-					ui.setCyclingMode(LinkedModeUI.CYCLE_NEVER);
-					ui.enter();
-				}
+	/**
+	 * Sets up a simple linked mode at {@link #getCursorPosition()} and an exit policy that will
+	 * exit the mode when <code>closingCharacter</code> is typed and an exit position at
+	 * <code>getCursorPosition() + 1</code>.
+	 * 
+	 * @param document the document
+	 * @param closingCharacter the exit character
+	 */
+	protected void setUpLinkedMode(IDocument document, char closingCharacter) {
+		if (getTextViewer() != null && autocloseBrackets()) {
+			int offset= getReplacementOffset() + getCursorPosition();
+			try {
+				LinkedPositionGroup group= new LinkedPositionGroup();
+				group.addPosition(new LinkedPosition(document, offset, 0, LinkedPositionGroup.NO_STOP));
+				
+				LinkedModeModel model= new LinkedModeModel();
+				model.addGroup(group);
+				model.forceInstall();
+				
+				LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
+				ui.setSimpleMode(true);
+				ui.setExitPolicy(new ExitPolicy(closingCharacter, document));
+				ui.setExitPosition(getTextViewer(), offset + 1, 0, Integer.MAX_VALUE);
+				ui.setCyclingMode(LinkedModeUI.CYCLE_NEVER);
+				ui.enter();
+			} catch (BadLocationException x) {
+				JavaPlugin.log(x);
 			}
 		}
+	}
+	
+	protected boolean autocloseBrackets() {
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		return preferenceStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACKETS);
 	}
 }

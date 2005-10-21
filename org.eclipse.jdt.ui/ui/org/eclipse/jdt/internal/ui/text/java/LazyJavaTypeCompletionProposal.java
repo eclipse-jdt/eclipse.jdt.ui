@@ -26,11 +26,11 @@ import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
@@ -42,18 +42,22 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
   */
 public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	/** Triggers for types. Do not modify. */
-	protected final static char[] TYPE_TRIGGERS= new char[] { '.', '\t', '[', '(', ' ' };
+	protected static final char[] TYPE_TRIGGERS= new char[] { '.', '\t', '[', '(', ' ' };
+	/** Triggers for types in javadoc. Do not modify. */
+	protected static final char[] JDOC_TYPE_TRIGGERS= new char[] { '#', '}', ' ', '.' };
 
+	/** The compilation unit, or <code>null</code> if none is available. */
 	protected final ICompilationUnit fCompilationUnit;
 
-	/** The fully qualified type name. */
-	private String fFullyQualifiedTypeName;
-
+	private String fQualifiedName;
+	private String fSimpleName;
+	private IType fType;
+	private ImportsStructure fImportStructure;
 
 	public LazyJavaTypeCompletionProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu) {
 		super(proposal, context);
 		fCompilationUnit= cu;
-		fFullyQualifiedTypeName= null;
+		fQualifiedName= null;
 	}
 	
 	/**
@@ -62,97 +66,86 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 * @return the java mode type of this type proposal
 	 * @throws JavaModelException
 	 */
-	protected IType getProposedType() throws JavaModelException {
-		if (fCompilationUnit != null) {
-			String fullType= SignatureUtil.stripSignatureToFQN(String.valueOf(fProposal.getSignature()));
-			return fCompilationUnit.getJavaProject().findType(fullType);
+	protected final IType getProposedType() throws JavaModelException {
+		if (fType == null && fCompilationUnit != null) {
+			fType= fCompilationUnit.getJavaProject().findType(getQualifiedTypeName());
 		}
-		return null;
+		return fType;
 	}
 
-	protected final String getFullyQualifiedTypeName() {
-		if (fFullyQualifiedTypeName == null) {
-			fFullyQualifiedTypeName= String.valueOf(Signature.toCharArray(fProposal.getSignature()));
-		}
-		return fFullyQualifiedTypeName;
+	protected final String getQualifiedTypeName() {
+		if (fQualifiedName == null)
+			fQualifiedName= String.valueOf(Signature.toCharArray(fProposal.getSignature()));
+		return fQualifiedName;
 	}
 	
-	protected final String getUnqualifiedTypeName() {
-		return Signature.getSimpleName(getFullyQualifiedTypeName());
+	protected final String getSimpleTypeName() {
+		if (fSimpleName == null)
+			fSimpleName= Signature.getSimpleName(getQualifiedTypeName());
+		return fSimpleName;
 	}
 
-	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
-		// avoid adding imports when inside imports container
-		if (impStructure != null) {
-			String replacementString= getReplacementString();
-			String qualifiedType= getFullyQualifiedTypeName();
-			if (qualifiedType.indexOf('.') != -1 && replacementString.startsWith(qualifiedType) && !replacementString.endsWith(String.valueOf(';'))) {
-				IType[] types= impStructure.getCompilationUnit().getTypes();
-				if (types.length > 0 && types[0].getSourceRange().getOffset() <= offset) {
-					// ignore positions above type.
-					setReplacementString(impStructure.addImport(getReplacementString()));
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeReplacementString()
 	 */
 	protected String computeReplacementString() {
-		if (fContext.isInJavadoc()) {
-			 // never qualify types in javadoc, except for local types
+		if (isImportCompletion())
+			return super.computeReplacementString();
+		
+		// TODO add support for informal javadoc references
+//		 if (!fContext.isJavadocFormalReference())
+//			 return getSimpleTypeName();
+		
+		fImportStructure= createImportStructure();
+		if (fImportStructure != null) {
+			return fImportStructure.addImport(getQualifiedTypeName());
+		}
+		
+		if (fCompilationUnit != null) {
+			if (ImportsStructure.isImplicitImport(Signature.getQualifier(getQualifiedTypeName()), fCompilationUnit))
+				return getSimpleTypeName();
+			else
+				return getQualifiedTypeName();
+		}
+		
+		return getQualifiedTypeName();
+	}
+
+	protected final boolean isImportCompletion() {
+		char[] completion= fProposal.getCompletion();
+		return completion.length > 0 && completion[completion.length - 1] == ';';
+	}
+
+	private ImportsStructure createImportStructure() {
+		if (fCompilationUnit != null && allowAddingImports()) {
+			IJavaProject project= fCompilationUnit.getJavaProject();
+			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(project);
+			int threshold= JavaPreferencesSettings.getImportNumberThreshold(project);
 			try {
-				IType[] allTypes= fCompilationUnit.getAllTypes();
-				for (int i= 0; i < allTypes.length; i++) {
-					IType type= allTypes[i];
-					if (type.equals(getProposedType()))
-						return super.computeReplacementString();
-				}
-				return getFullyQualifiedTypeName();
-			} catch (JavaModelException x) {
+				return new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
+			} catch (CoreException x) {
 				JavaPlugin.log(x);
 			}
 		}
-		return super.computeReplacementString();
+		return null;
 	}
 
-	/* (non-Javadoc)
-	 * @see ICompletionProposalExtension#apply(IDocument, char, int)
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#apply(org.eclipse.jface.text.IDocument, char, int)
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
-			ImportsStructure impStructure= null;
-
-			if (fCompilationUnit != null && allowAddingImports()) {
-				IJavaProject project= fCompilationUnit.getJavaProject();
-				String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(project);
-				int threshold= JavaPreferencesSettings.getImportNumberThreshold(project);
-				impStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
-			}
-
-			boolean importAdded= updateReplacementString(document, trigger, offset, impStructure);
-
-			if (importAdded)
-				setCursorPosition(getReplacementString().length());
-
 			super.apply(document, trigger, offset);
 
-			if (importAdded && impStructure != null) {
+			if (fImportStructure != null && fImportStructure.hasChanges()) {
 				int oldLen= document.getLength();
-				impStructure.getResultingEdits(document, new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
+				fImportStructure.getResultingEdits(document, new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
 			}
 			
 			if (trigger == '(' && JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACKETS)) {
 				document.replace(getReplacementOffset() + getCursorPosition(), 0, ")"); //$NON-NLS-1$
-				StringBuffer buf= new StringBuffer();
-				for (int i= 0; i < getCursorPosition() - 1; i++)
-					buf.append(' ');
-				buf.append("()"); //$NON-NLS-1$
-				setUpLinkedMode(document, buf.toString());
+				setUpLinkedMode(document, ')');
 			}
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
@@ -161,9 +154,50 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		}
 	}
 
-	private boolean allowAddingImports() {
+	/**
+	 * Returns <code>true</code> if imports may be added. The return value depends on the context
+	 * and preferences only and does not take into account the contents of the compilation unit or
+	 * the kind of proposal. Even if <code>true</code> is returned, there may be cases where no
+	 * imports are added for the proposal. For example:
+	 * <ul>
+	 * <li>when completing within the import section</li>
+	 * <li>when completing informal javadoc references (e.g. within <code>&lt;code&gt;</code>
+	 * tags)</li>
+	 * <li>when completing a type that conflicts with an existing import</li>
+	 * <li>when completing an implicitly imported type (same package, <code>java.lang</code>
+	 * types)</li>
+	 * </ul>
+	 * <p>
+	 * The decision whether a qualified type or the simple type name should be inserted must take
+	 * into account these different scenarios.
+	 * </p>
+	 * <p>
+	 * Subclasses may extend.
+	 * </p>
+	 * 
+	 * @return <code>true</code> if imports may be added, <code>false</code> if not
+	 */
+	protected boolean allowAddingImports() {
+		if (fContext.isInJavadoc()) {
+//			if (fContext.isJavadocFormalReference())
+//				return false;
+			
+			if (!isJavadocProcessingEnabled())
+				return false;
+		}
+		
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		return !fContext.isInJavadoc() && preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_ADDIMPORT);
+		return preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_ADDIMPORT);
+	}
+
+	private boolean isJavadocProcessingEnabled() {
+		IJavaProject project= fCompilationUnit.getJavaProject();
+		boolean processJavadoc;
+		if (project == null)
+			processJavadoc= JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT));
+		else
+			processJavadoc= JavaCore.ENABLED.equals(project.getOption(JavaCore.COMPILER_DOC_COMMENT_SUPPORT, true));
+		return processJavadoc;
 	}
 
 	/*
@@ -176,21 +210,27 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 			return true;
 
 		return
-			startsWith(document, offset, getUnqualifiedTypeName()) ||
-			startsWith(document, offset, getFullyQualifiedTypeName());
+			startsWith(document, offset, getSimpleTypeName()) ||
+			startsWith(document, offset, getQualifiedTypeName());
 	}
 
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposal#getCompletionText()
 	 */
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-		return getUnqualifiedTypeName();
+		return getSimpleTypeName();
 	}
 	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeTriggerCharacters()
+	 */
 	protected char[] computeTriggerCharacters() {
-		return TYPE_TRIGGERS;
+		return fContext.isInJavadoc() ? JDOC_TYPE_TRIGGERS : TYPE_TRIGGERS;
 	}
 	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeProposalInfo()
+	 */
 	protected ProposalInfo computeProposalInfo() {
 		if (fCompilationUnit != null) {
 			IJavaProject project= fCompilationUnit.getJavaProject();
@@ -200,8 +240,11 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		return super.computeProposalInfo();
 	}
 
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeSortString()
+	 */
 	protected String computeSortString() {
 		// try fast sort string to avoid display string creation
-		return getUnqualifiedTypeName() + Character.MIN_VALUE + getFullyQualifiedTypeName();
+		return getSimpleTypeName() + Character.MIN_VALUE + getQualifiedTypeName();
 	}
 }
