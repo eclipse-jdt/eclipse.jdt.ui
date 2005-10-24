@@ -160,10 +160,10 @@ public class ReorgCorrectionsSubProcessor {
 	}
 
 	public static void removeImportStatementProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		IFix fix= UnusedCodeFix.createFix(context.getASTRoot(), problem, true);
+		IFix fix= UnusedCodeFix.createFix(context.getASTRoot(), problem, true, false, false, false, false, false, false);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnusedCodeMultiFix(true), 6, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnusedCodeMultiFix(true, false, false, false, false, false), 6, image);
 			proposals.add(proposal);
 		}
 		

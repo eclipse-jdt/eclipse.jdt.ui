@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.Hashtable;
@@ -327,7 +337,7 @@ public class CleanUpTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
 	}
 
-	public void testRemoveUnusedImport01() throws Exception {
+	public void testUnusedCode01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -357,7 +367,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new UnusedCodeMultiFix(true);
+		IMultiFix multiFix= new UnusedCodeMultiFix(true, false, false, false, false, false);
 		
 		setOptions(multiFix);
 		
@@ -400,87 +410,78 @@ public class CleanUpTest extends QuickFixTest {
 
 		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
 	}
-
-	public void testAddOverrideAnnotation01() throws Exception {
+	
+	public void testUnusedCode02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
 		buf.append("public class E1 {\n");
-		buf.append("    public void foo(){};\n");
-		buf.append("    protected void bar(){};\n");
-		buf.append("    protected void bar(String s){};\n");
-		buf.append("    protected void foo(Object o){};\n");
-		buf.append("    @SuppressWarnings(\"unused\")\n");
-		buf.append("    private void fooBar(){};\n");
+		buf.append("    private void foo() {}\n");
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1{\n");
-		buf.append("    protected void bar() {}\n");
-		buf.append("    public void foo() {}\n");
-		buf.append("    protected void bar(Object s){};\n");
-		buf.append("    public void foo(Object o){};\n");
-		buf.append("    @SuppressWarnings(\"unused\")\n");
-		buf.append("    private void fooBar(){};\n");
-		buf.append("    public Number getValue(){return null;};\n");
+		buf.append("public class E2 {\n");
+		buf.append("    private void foo() {}\n");
+		buf.append("    private void bar() {}\n");
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
 		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    public void bar() {}\n");
-		buf.append("    public void foo() {}\n");
-		buf.append("    public Integer getValue(){return null;};\n");
+		buf.append("public class E3 {\n");
+		buf.append("    private class E3Inner {\n");
+		buf.append("        private void foo() {}\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Runnable r= new Runnable() {\n");
+		buf.append("            public void run() {}\n");
+		buf.append("            private void foo() {};\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new Java50MultiFix(true, false);
+		IMultiFix multiFix= new UnusedCodeMultiFix(false, true, false, false, false, false);
 		
 		setOptions(multiFix);
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
-		assertNumberOfProblems(units[0], 0);
-		assertNumberOfProblems(units[1], 3);
+		assertNumberOfProblems(units[0], 1);
+		assertNumberOfProblems(units[1], 2);
 		assertNumberOfProblems(units[2], 3);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
-		buf.append("public class E2 extends E1{\n");
-		buf.append("    @Override\n");
-		buf.append("    protected void bar() {}\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo() {}\n");
-		buf.append("    protected void bar(Object s){};\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo(Object o){};\n");
-		buf.append("    @SuppressWarnings(\"unused\")\n");
-		buf.append("    private void fooBar(){};\n");
-		buf.append("    public Number getValue(){return null;};\n");
+		buf.append("public class E1 {\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
 		buf= new StringBuffer();
-		buf.append("package test2;\n");
-		buf.append("import test1.E2;\n");
-		buf.append("public class E3 extends E2 {\n");
-		buf.append("    @Override\n");
-		buf.append("    public void bar() {}\n");
-		buf.append("    @Override\n");
-		buf.append("    public void foo() {}\n");
-		buf.append("    @Override\n");
-		buf.append("    public Integer getValue(){return null;};\n");
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
 		buf.append("}\n");
 		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    private class E3Inner {\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Runnable r= new Runnable() {\n");
+		buf.append("            public void run() {};\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
 
-		int numberOfFixes= 2;
-		int offset= 1;
+		int numberOfFixes= 3;
+		int offset= 0;
 		String[] previews= new String[numberOfFixes];
-		for (int i= offset; i - offset < numberOfFixes; i++) {
+		for (int i= offset; i < numberOfFixes; i++) {
 			IFix fix= multiFix.createFix(units[i]);
 			assertNotNull("There are problems but no fix", fix);
 			TextChange change= fix.createChange();
@@ -488,7 +489,326 @@ public class CleanUpTest extends QuickFixTest {
 			previews[i - offset]= change.getPreviewContent(null);
 		}
 
-		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2});	
+		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
+	}
+	
+	public void testUnusedCode03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private E1(int i) {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    public E2() {}\n");
+		buf.append("    private E2(int i) {}\n");
+		buf.append("    private E2(String s) {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    public class E3Inner {\n");
+		buf.append("        private E3Inner(int i) {}\n");
+		buf.append("    }\n");
+		buf.append("    private void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		
+		IMultiFix multiFix= new UnusedCodeMultiFix(false, false, true, false, false, false);
+		
+		setOptions(multiFix);
+		
+		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
+		assertNumberOfProblems(units[0], 1);
+		assertNumberOfProblems(units[1], 2);
+		assertNumberOfProblems(units[2], 2);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    public E2() {}\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    public class E3Inner {\n");
+		buf.append("    }\n");
+		buf.append("    private void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		int numberOfFixes= 3;
+		int offset= 0;
+		String[] previews= new String[numberOfFixes];
+		for (int i= offset; i < numberOfFixes; i++) {
+			IFix fix= multiFix.createFix(units[i]);
+			assertNotNull("There are problems but no fix", fix);
+			TextChange change= fix.createChange();
+			assertNotNull("Null change for an existing fix", change);
+			previews[i - offset]= change.getPreviewContent(null);
+		}
+
+		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
+	}
+	
+	public void testUnusedCode04() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int i;\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    private int i= 10;\n");
+		buf.append("    private int j= 10;\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    private int i;\n");
+		buf.append("    private int j;\n");
+		buf.append("    private void foo() {\n");
+		buf.append("        i= 10;\n");
+		buf.append("        i= 20;\n");
+		buf.append("        i= j;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		
+		IMultiFix multiFix= new UnusedCodeMultiFix(false, false, false, true, false, false);
+		
+		setOptions(multiFix);
+		
+		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
+		assertNumberOfProblems(units[0], 1);
+		assertNumberOfProblems(units[1], 2);
+		assertNumberOfProblems(units[2], 2);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    private int j;\n");
+		buf.append("    private void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		int numberOfFixes= 3;
+		int offset= 0;
+		String[] previews= new String[numberOfFixes];
+		for (int i= offset; i < numberOfFixes; i++) {
+			IFix fix= multiFix.createFix(units[i]);
+			assertNotNull("There are problems but no fix", fix);
+			TextChange change= fix.createChange();
+			assertNotNull("Null change for an existing fix", change);
+			previews[i - offset]= change.getPreviewContent(null);
+		}
+
+		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
+	}
+	
+	public void testUnusedCode05() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private class E1Inner{}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    private class E2Inner1 {}\n");
+		buf.append("    private class E2Inner2 {}\n");
+		buf.append("    public class E2Inner3 {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    public class E3Inner {\n");
+		buf.append("        private class E3InnerInner {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		
+		IMultiFix multiFix= new UnusedCodeMultiFix(false, false, false, false, true, false);
+		
+		setOptions(multiFix);
+		
+		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
+		assertNumberOfProblems(units[0], 1);
+		assertNumberOfProblems(units[1], 2);
+		assertNumberOfProblems(units[2], 1);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    public class E2Inner3 {}\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    public class E3Inner {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		int numberOfFixes= 3;
+		int offset= 0;
+		String[] previews= new String[numberOfFixes];
+		for (int i= offset; i < numberOfFixes; i++) {
+			IFix fix= multiFix.createFix(units[i]);
+			assertNotNull("There are problems but no fix", fix);
+			TextChange change= fix.createChange();
+			assertNotNull("Null change for an existing fix", change);
+			previews[i - offset]= change.getPreviewContent(null);
+		}
+
+		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
+	}
+	
+	public void testUnusedCode06() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        int j= 10;\n");
+		buf.append("    }\n");
+		buf.append("    private void bar() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    public class E3Inner {\n");
+		buf.append("        public void foo() {\n");
+		buf.append("            int i= 10;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        int j= i;\n");
+		buf.append("        j= 10;\n");
+		buf.append("        j= 20;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		
+		IMultiFix multiFix= new UnusedCodeMultiFix(false, false, false, false, false, true);
+		
+		setOptions(multiFix);
+		
+		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
+		assertNumberOfProblems(units[0], 1);
+		assertNumberOfProblems(units[1], 3);
+		assertNumberOfProblems(units[2], 2);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("    private void bar() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    public class E3Inner {\n");
+		buf.append("        public void foo() {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+
+		int numberOfFixes= 3;
+		int offset= 0;
+		String[] previews= new String[numberOfFixes];
+		for (int i= offset; i < numberOfFixes; i++) {
+			IFix fix= multiFix.createFix(units[i]);
+			assertNotNull("There are problems but no fix", fix);
+			TextChange change= fix.createChange();
+			assertNotNull("Null change for an existing fix", change);
+			previews[i - offset]= change.getPreviewContent(null);
+		}
+
+		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
 	}
 	
 	public void testAddDeprecatedAnnotation01() throws Exception {

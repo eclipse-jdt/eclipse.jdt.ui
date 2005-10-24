@@ -78,6 +78,7 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.StringFix;
+import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
@@ -522,19 +523,11 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addUnusedMemberProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) {
-		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-
-		SimpleName name= null;
-		if (selectedNode instanceof MethodDeclaration) {
-			name= ((MethodDeclaration) selectedNode).getName();
-		} else if (selectedNode instanceof SimpleName) {
-			name= (SimpleName) selectedNode;
-		}
-		if (name != null) {
-			IBinding binding= name.resolveBinding();
-			if (binding != null) {
-				proposals.add(new RemoveDeclarationCorrectionProposal(context.getCompilationUnit(), name, 10));
-			}
+		UnusedCodeFix fix= UnusedCodeFix.createFix(context.getASTRoot(), problem, false, true, true, true, true, true, true);
+		if (fix != null) {
+			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, fix.getMultiFix(), 10, image);
+			proposals.add(proposal);
 		}
 	}
 

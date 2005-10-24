@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
@@ -96,6 +106,10 @@ public class CleanUpRefactoring extends Refactoring {
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
+		if (pm == null)
+			pm= new NullProgressMonitor();
+		pm.beginTask("", 1); //$NON-NLS-1$
+		pm.worked(1);
 		return new RefactoringStatus();
 	}
 
@@ -139,7 +153,7 @@ public class CleanUpRefactoring extends Refactoring {
 				end++;
 			}
 			
-			List workingSet= fCompilationUnits.subList(start, end);
+			final List workingSet= fCompilationUnits.subList(start, end);
 			
 			final SubProgressMonitor sub= new SubProgressMonitor(pm, workingSet.size());
 			ICompilationUnit[] compilationUnits= (ICompilationUnit[])workingSet.toArray(new ICompilationUnit[workingSet.size()]);
@@ -149,14 +163,19 @@ public class CleanUpRefactoring extends Refactoring {
 			parser.setProject(compilationUnits[0].getJavaProject());
 			parser.setCompilerOptions(options);
 			
+			final int[] index= new int[] {start};
+			sub.subTask("Processing " + getTypeName(index[0]) + " (" + index[0] + " of " + fCompilationUnits.size() + ")");
+			
 			try {
 				parser.createASTs(compilationUnits, new String[0], new ASTRequestor() {
 		
 					public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
-						
+
 						calculateSolution(solutions, ast);
-						
-						sub.subTask(source.getElementName());
+						index[0]++;
+						if (index[0] < fCompilationUnits.size()) {
+							sub.subTask("Processing " + getTypeName(index[0]) + " (" + index[0] + " of " + fCompilationUnits.size() + ")");
+						}
 					}
 					
 				}, sub);
@@ -177,6 +196,14 @@ public class CleanUpRefactoring extends Refactoring {
 		pm.done();
 		
 		return result;
+	}
+
+	private String getTypeName(final int index) {
+		String elementName= ((ICompilationUnit)fCompilationUnits.get(index)).getElementName();
+		if (elementName.length() > 5) {
+			return elementName.substring(0, elementName.indexOf('.'));
+		}
+		return elementName;
 	}
 	
 	public ICompilationUnit[] getCompilationUnits() {

@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.text.MessageFormat;
@@ -40,11 +50,13 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * A fix wich fixes code style isuess.
  * Supports:
  * 		Qualifie field with this: f -> this.f if f is a field.
+ * 		Change non static access to static using declaring type.
  */
 public class CodeStyleFix extends AbstractFix {
 	
 	public static final String ADD_THIS_QUALIFIER= "Add 'this' qualifier";
 	public static final String QUALIFY_0_WITH_THIS= "Qualify ''{0}'' with ''this''";
+	
 	private final TupleForUnqualifiedAccess[] fBindingTuples;
 	private final TupleForNonStaticAccess[] fTupleDirects;
 

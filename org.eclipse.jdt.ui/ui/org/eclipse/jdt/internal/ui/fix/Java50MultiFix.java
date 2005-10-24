@@ -1,5 +1,14 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
-
 
 import java.util.ArrayList;
 import java.util.Hashtable;
@@ -9,13 +18,15 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
@@ -38,12 +49,19 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  */
 public class Java50MultiFix extends AbstractMultiFix {
 
+	private static final String ADD_DEPRICATED_ANNOTATION_SETTINGS_ID= "AddDepricatedAnnotation"; //$NON-NLS-1$
+	private static final String ADD_OVERRIDE_ANNOTATION_SETTINGS_ID= "AddOverrideAnnotation"; //$NON-NLS-1$
+	
 	private boolean fAddOverrideAnnotation;
 	private boolean fAddDepricatedAnnotation;
 
 	public Java50MultiFix(boolean addOverrideAnnotation, boolean addDepricatedAnnotation) {
 		fAddOverrideAnnotation= addOverrideAnnotation;
 		fAddDepricatedAnnotation= addDepricatedAnnotation;
+	}
+
+	public Java50MultiFix(IDialogSettings settings) {
+		this(settings.getBoolean(ADD_OVERRIDE_ANNOTATION_SETTINGS_ID), settings.getBoolean(ADD_DEPRICATED_ANNOTATION_SETTINGS_ID));
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
@@ -103,18 +121,15 @@ public class Java50MultiFix extends AbstractMultiFix {
 
 	public Control createConfigurationControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		composite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 		composite.setLayout(new GridLayout(1, true));
 		
 		Button addOverrid= new Button(composite, SWT.CHECK);
 		addOverrid.setText(Java50Fix.ADD_MISSING_OVERRIDE_ANNOTATION);
 		addOverrid.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		addOverrid.setSelection(fAddOverrideAnnotation);
-		addOverrid.addSelectionListener(new SelectionListener() {
+		addOverrid.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				fAddOverrideAnnotation= ((Button)e.getSource()).getSelection();
-			}
-			public void widgetDefaultSelected(SelectionEvent e) {
 				fAddOverrideAnnotation= ((Button)e.getSource()).getSelection();
 			}
 		});
@@ -123,16 +138,18 @@ public class Java50MultiFix extends AbstractMultiFix {
 		addDepricated.setText(Java50Fix.ADD_MISSING_DEPRICATED_ANNOTATION);
 		addDepricated.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		addDepricated.setSelection(fAddDepricatedAnnotation);
-		addDepricated.addSelectionListener(new SelectionListener() {
+		addDepricated.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				fAddDepricatedAnnotation= ((Button)e.getSource()).getSelection();
-			}
-			public void widgetDefaultSelected(SelectionEvent e) {
 				fAddDepricatedAnnotation= ((Button)e.getSource()).getSelection();
 			}
 		});
 		
 		return composite;
+	}
+
+	public void saveSettings(IDialogSettings settings) {
+		settings.put(ADD_OVERRIDE_ANNOTATION_SETTINGS_ID, fAddOverrideAnnotation);
+		settings.put(ADD_DEPRICATED_ANNOTATION_SETTINGS_ID, fAddDepricatedAnnotation);
 	}
 
 }

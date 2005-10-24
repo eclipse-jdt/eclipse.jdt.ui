@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.Hashtable;
@@ -8,13 +18,15 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -36,6 +48,9 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
  */
 public class StringMultiFix extends AbstractMultiFix {
 
+	private static final String REMOVE_NLS_TAG_SETTINGS_ID= "RemoveNlsTag"; //$NON-NLS-1$
+	private static final String ADD_NLS_TAG_SETTINGS_ID= "AddNlsTag"; //$NON-NLS-1$
+	
 	private static final String ADD_NON_NLS_TAG= StringFix.ADD_$NON_NLS$_TAG;
 	private static final String REMOVE_NON_NLS_TAG= StringFix.REMOVE_$NON_NLS$_TAG;
 	
@@ -45,6 +60,10 @@ public class StringMultiFix extends AbstractMultiFix {
 	public StringMultiFix(boolean addNLSTag, boolean removeNLSTag) {
 		fAddNlsTag= addNLSTag;
 		fRemoveNlsTag= removeNLSTag;
+	}
+
+	public StringMultiFix(IDialogSettings settings) {
+		this(settings.getBoolean(ADD_NLS_TAG_SETTINGS_ID), settings.getBoolean(REMOVE_NLS_TAG_SETTINGS_ID));
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
@@ -100,18 +119,15 @@ public class StringMultiFix extends AbstractMultiFix {
 
 	public Control createConfigurationControl(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+		composite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 		composite.setLayout(new GridLayout(1, true));
 		
 		Button addNLSTag= new Button(composite, SWT.CHECK);
 		addNLSTag.setText(ADD_NON_NLS_TAG);
 		addNLSTag.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		addNLSTag.setSelection(fAddNlsTag);
-		addNLSTag.addSelectionListener(new SelectionListener() {
+		addNLSTag.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				fAddNlsTag= ((Button)e.getSource()).getSelection();
-			}
-			public void widgetDefaultSelected(SelectionEvent e) {
 				fAddNlsTag= ((Button)e.getSource()).getSelection();
 			}
 		});
@@ -120,16 +136,18 @@ public class StringMultiFix extends AbstractMultiFix {
 		removeNLSTag.setText(REMOVE_NON_NLS_TAG);
 		removeNLSTag.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		removeNLSTag.setSelection(fRemoveNlsTag);
-		removeNLSTag.addSelectionListener(new SelectionListener() {
+		removeNLSTag.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				fRemoveNlsTag= ((Button)e.getSource()).getSelection();
-			}
-			public void widgetDefaultSelected(SelectionEvent e) {
 				fRemoveNlsTag= ((Button)e.getSource()).getSelection();
 			}
 		});
 		
 		return composite;
+	}
+
+	public void saveSettings(IDialogSettings settings) {
+		settings.put(ADD_NLS_TAG_SETTINGS_ID, fAddNlsTag);
+		settings.put(REMOVE_NLS_TAG_SETTINGS_ID, fRemoveNlsTag);
 	}
 
 }

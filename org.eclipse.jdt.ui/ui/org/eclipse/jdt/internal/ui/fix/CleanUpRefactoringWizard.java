@@ -1,32 +1,33 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
-
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.LabelProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
-import org.eclipse.ui.part.PageBook;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
@@ -128,241 +129,130 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 	}
 	
 	private class SelectSolverPage extends UserInputWizardPage {
-		
-		private abstract class MultiQuickFixTree {
-			private final String fLabel;
-			private MultiQuickFixTree fParent;
-			
-			public MultiQuickFixTree(String label) {
-				this.fLabel= label;
-			}
-			
-			public String getLabel() {
-				return fLabel;
-			}
-			
-			public abstract boolean hasChildren();
-			public abstract List/*<MultiQuickFixTree>*/ getChildren();
 
-			public MultiQuickFixTree getParent() {
-				return fParent;
-			}
-			
-			public void setParent(MultiQuickFixTree parent) {
-				fParent= parent;
-			}
-		}
+		private static final String SERIAL_VERSION_IDS_SECTION_DESCRIPTION= "Serial version ids";
+
+		private static final String CLEAN_UP_WIZARD_SETTINGS_SECTION_ID= "CleanUpWizard"; //$NON-NLS-1$
 		
-		private class MultiQuickFixTreeLeaf extends MultiQuickFixTree {
+		private static final String CODE_STYLE_SECTION_DESCRIPTION= "Code style";
+		private static final String J2SE_5_0_SECTION_DESCRIPTION= "J2SE 5.0";
+		private static final String UNUSED_CODE_SECTION_DESCRIPTION= "Unused code";
+		private static final String STRING_EXTERNALIZATION_SECTION_DESCRIPTION= "String externalization";
+		
+		private class NameFixTuple {
+
 			private final IMultiFix fFix;
-			
-			public MultiQuickFixTreeLeaf(String label, IMultiFix fix) {
-				super(label);
+			private final String fName;
+
+			public NameFixTuple(String name, IMultiFix fix) {
+				fName= name;
 				fFix= fix;
 			}
 
-			public boolean hasChildren() {
-				return false;
-			}
-
-			public List getChildren() {
-				return null;
-			}
-			
 			public IMultiFix getFix() {
 				return fFix;
 			}
+
+			public String getName() {
+				return fName;
+			}
+			
 		}
 		
-		private class MultiQuickFixTreeInner extends MultiQuickFixTree {
-			private final List/*<MultiQuickFixTree>*/ fChildren;
-			
-			public MultiQuickFixTreeInner(String label) {
-				super(label);
-				fChildren= new ArrayList();
-			}
-			
-			public void addChildren(MultiQuickFixTree tree) {
-				fChildren.add(tree);
-				tree.setParent(this);
-			}
-
-			public boolean hasChildren() {
-				return !fChildren.isEmpty();
-			}
-
-			public List getChildren() {
-				return fChildren;
-			}
-		}
-
-		private CheckboxTreeViewer fTreeViewer;
+		private NameFixTuple[] fMultiFixes;
 
 		public SelectSolverPage(String name) {
 			super(name);
 		}
 		
-		private PageBook fBook;
-		
 		public void createControl(Composite parent) {
-			Composite composite= new Composite(parent, SWT.NONE);
-			composite.setLayout(new GridLayout(2, false));
-			composite.setLayoutData(new GridData(SWT.CENTER, SWT.CENTER, true, true));
+			ScrolledComposite scrolled= new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+			scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			scrolled.setLayout(new GridLayout(1, false));
+			scrolled.setExpandHorizontal(true);
+			scrolled.setExpandVertical(true);
+
 			
+			Composite composite= new Composite(scrolled, SWT.NONE);
+			composite.setLayout(new GridLayout(1, false));
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
-			Composite tree= new Composite(composite, SWT.NONE);
-			tree.setLayout(new GridLayout());
-			tree.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			createGroups(composite);
+			scrolled.setContent(composite);
 			
-			createViewer(tree);
-			
-			fBook= new PageBook(composite, SWT.NONE);
-			fBook.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			
-			Composite emptyPage= new Composite(fBook, SWT.NONE);
-			emptyPage.setLayout(new GridLayout(1, false));
-			emptyPage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			fBook.showPage(emptyPage);
-			
-			createTreeListeners();
+			scrolled.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 	
-			setControl(composite);
+			setControl(scrolled);
 			
-			Dialog.applyDialogFont(composite);
+			Dialog.applyDialogFont(scrolled);
 		}
 		
-		private void createTreeListeners() {
-			fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
-				public void selectionChanged(SelectionChangedEvent event) {
-					rebuildPages(event.getSelection(), fTreeViewer.getCheckedElements());
-				}
-			});
+		private void createGroups(Composite parent) {
+			NameFixTuple[] multiFixes= getMultiFixes();
+			for (int i= 0; i < multiFixes.length; i++) {
+				NameFixTuple tuple= multiFixes[i];
+				
+				Group group= new Group(parent, SWT.NONE);
+				group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+				group.setLayout(new GridLayout(1, true));
+				group.setText(tuple.getName());
+				
+				tuple.getFix().createConfigurationControl(group);
+			}
 		}
-
-		private void rebuildPages(ISelection selection, Object[] checkedElements) {
-			if (selection instanceof StructuredSelection) {
-				StructuredSelection strucSelection= (StructuredSelection)selection;
-				Object firstElement= strucSelection.getFirstElement();
-			
-				if (firstElement instanceof MultiQuickFixTreeLeaf) {
-					
-					List checked= Arrays.asList(checkedElements);
-					
-					IMultiFix fix= ((MultiQuickFixTreeLeaf)firstElement).getFix();
-					
-					Control control= fix.createConfigurationControl(fBook);
-					if (!checked.contains(firstElement))
-						disable(control);
-					fBook.showPage(control);
+		
+		private NameFixTuple[] getMultiFixes() {
+			if (fMultiFixes == null) {
+				IDialogSettings settings= CleanUpRefactoringWizard.this.getDialogSettings();
+				IDialogSettings section= settings.getSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);
+				fMultiFixes= new NameFixTuple[4];
+				if (section == null) {
+					settings.addNewSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);
+					fMultiFixes[0]= new NameFixTuple(CODE_STYLE_SECTION_DESCRIPTION, new CodeStyleMultiFix(true, true));
+					fMultiFixes[1]= new NameFixTuple(UNUSED_CODE_SECTION_DESCRIPTION, new UnusedCodeMultiFix(true, true, true, true, true, true));	
+					fMultiFixes[2]= new NameFixTuple(J2SE_5_0_SECTION_DESCRIPTION, new Java50MultiFix(true, true));
+					fMultiFixes[3]= new NameFixTuple(STRING_EXTERNALIZATION_SECTION_DESCRIPTION, new StringMultiFix(false, true));
+					storeSettings();
 				} else {
-					Composite emptyPage= new Composite(fBook, SWT.NONE);
-					emptyPage.setLayout(new GridLayout(1, false));
-					emptyPage.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-					fBook.showPage(emptyPage);
+					fMultiFixes[0]= new NameFixTuple(CODE_STYLE_SECTION_DESCRIPTION, new CodeStyleMultiFix(section));
+					fMultiFixes[1]= new NameFixTuple(UNUSED_CODE_SECTION_DESCRIPTION, new UnusedCodeMultiFix(section));
+					fMultiFixes[2]= new NameFixTuple(J2SE_5_0_SECTION_DESCRIPTION, new Java50MultiFix(section));
+					fMultiFixes[3]= new NameFixTuple(STRING_EXTERNALIZATION_SECTION_DESCRIPTION, new StringMultiFix(section));
 				}
 			}
-		}
-		
-		private void disable(Control control) {
-			if (control instanceof Composite) {
-				Composite composite= (Composite)control;
-				Control[] children= composite.getChildren();
-				for (int i= 0; i < children.length; i++) {
-					disable(children[i]);
-				}
-			}
-			control.setEnabled(false);
-		}
-
-		private TreeViewer createViewer(Composite parent) {
-			MultiQuickFixTree root= getSolutionTree();
-			
-			ProblemSolutionContentProvider contentProvider= new ProblemSolutionContentProvider();
-			ProblemSolutionLabelProvider lableProvider= new ProblemSolutionLabelProvider();
-			
-			fTreeViewer= new ContainerCheckedTreeViewer(parent, SWT.SINGLE | SWT.H_SCROLL | SWT.V_SCROLL | SWT.BORDER);
-			GridData gd= new GridData(GridData.FILL_BOTH);
-			gd.widthHint= convertWidthInCharsToPixels(40);
-			gd.heightHint= convertHeightInCharsToPixels(15);
-			fTreeViewer.getTree().setLayoutData(gd);
-			fTreeViewer.setLabelProvider(lableProvider);
-			fTreeViewer.setContentProvider(contentProvider);
-			fTreeViewer.setInput(root);
-			return fTreeViewer;
-		}
-		
-		private MultiQuickFixTree getSolutionTree() {
-			MultiQuickFixTreeInner root= new MultiQuickFixTreeInner("root"); //$NON-NLS-1$
-			MultiQuickFixTreeLeaf strings= new MultiQuickFixTreeLeaf("String externalization", new StringMultiFix(true, true));
-			root.addChildren(strings);
-			MultiQuickFixTreeLeaf unusedCode= new MultiQuickFixTreeLeaf("Unused code", new UnusedCodeMultiFix(true));
-			root.addChildren(unusedCode);
-			MultiQuickFixTreeLeaf java50= new MultiQuickFixTreeLeaf("J2SE 5.0", new Java50MultiFix(true, true));
-			root.addChildren(java50);
-			MultiQuickFixTreeLeaf codeStyle= new MultiQuickFixTreeLeaf("Code style", new CodeStyleMultiFix(true, true));
-			root.addChildren(codeStyle);
-			return root;
-		}
-
-		private class ProblemSolutionLabelProvider extends LabelProvider {
-			public String getText(Object element) {
-				return ((MultiQuickFixTree)element).getLabel();
-			}
-		}
-		
-		private class ProblemSolutionContentProvider implements ITreeContentProvider {
-
-			public Object[] getChildren(Object parentElement) {
-				MultiQuickFixTree tree= (MultiQuickFixTree)parentElement;
-				if (tree.hasChildren())
-					return tree.getChildren().toArray(new MultiQuickFixTree[tree.getChildren().size()]);
-				return null;
-			}
-
-			public Object getParent(Object element) {
-				MultiQuickFixTree tree= (MultiQuickFixTree)element;
-				return tree.getParent();
-			}
-
-			public boolean hasChildren(Object element) {
-				MultiQuickFixTree tree= (MultiQuickFixTree)element;
-				return tree.hasChildren();
-			}
-
-			public Object[] getElements(Object inputElement) {
-				return getChildren(inputElement);
-			}
-
-			public void dispose() {
-			}
-
-			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
-			}
-			
+			return fMultiFixes;
 		}
 		
 		protected boolean performFinish() {
 			initializeRefactoring();
+			storeSettings();
 			return super.performFinish();
 		}
 	
 		public IWizardPage getNextPage() {
 			initializeRefactoring();
+			storeSettings();
 			return super.getNextPage();
+		}
+		
+		private void storeSettings() {
+			IDialogSettings settings= CleanUpRefactoringWizard.this.getDialogSettings().getSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);
+			NameFixTuple[] fixes= getMultiFixes();
+			for (int i= 0; i < fixes.length; i++) {
+				fixes[i].getFix().saveSettings(settings);
+			}
 		}
 
 		private void initializeRefactoring() {
 			CleanUpRefactoring refactoring= (CleanUpRefactoring)getRefactoring();
 			refactoring.clearProblemSolutions();
-			Object[] checkedElements= fTreeViewer.getCheckedElements();
-			for (int i= 0; i < checkedElements.length; i++) {
-				if (checkedElements[i] instanceof MultiQuickFixTreeLeaf)
-					refactoring.addProblemSolution(((MultiQuickFixTreeLeaf)checkedElements[i]).getFix());
+			NameFixTuple[] multiFixes= getMultiFixes();
+			for (int i= 0; i < multiFixes.length; i++) {
+				refactoring.addProblemSolution(multiFixes[i].getFix());
 			}
-		}
-		
+		}	
 	}
-
+	
 	public CleanUpRefactoringWizard(CleanUpRefactoring refactoring, int flags, boolean showCUPage, boolean showCleanUpPage) {
 		super(refactoring, flags);
 		fShowCUPage= showCUPage;

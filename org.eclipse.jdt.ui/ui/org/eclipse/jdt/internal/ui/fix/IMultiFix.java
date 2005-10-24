@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
 import java.util.Map;
@@ -6,6 +16,8 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+
+import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -49,4 +61,11 @@ public interface IMultiFix {
 	 * @return The control, not null.
 	 */
 	public abstract Control createConfigurationControl(Composite parent);
+
+	/**
+	 * Persist current settings of this in <code>settings</code>
+	 * 
+	 * @param settings The settings to store to, not null
+	 */
+	public abstract void saveSettings(IDialogSettings settings);
 }
