@@ -202,38 +202,28 @@ public class CompletionProposalLabelProvider {
 	}
 	
 	/**
-	 * Creates a display label for the given method proposal. The display label is optionally enclosed in a
-	 * <code>&#x7b;&#x40;link &#x7d;</code> tag and consists of:
+	 * Creates a display label for the given method proposal. The display label consists of:
 	 * <ul>
 	 * <li>the method name</li>
 	 * <li>the raw simple name of the declaring type</li>
 	 * </ul>
 	 * <p>
 	 * Examples: For the <code>get(int)</code> method of a variable of type
-	 * <code>List<? extends Number></code>, the following display name is returned when
-	 * <code>addTag</code> is <code>false</code>: <code>get(int) - List</code>.<br>
+	 * <code>List<? extends Number></code>, the following display name is returned <code>get(int) - List</code>.<br>
 	 * For the <code>add(E)</code> method of a variable of type <code>List</code>, the
-	 * following display name is returned when <code>addTag</code> is <code>true</code>:
-	 * <code>&#x7b;&#x40;link add(Object) &#x7d; - List</code>.<br>
+	 * following display name is returned:
+	 * <code>add(Object) - List</code>.<br>
 	 * </p>
 	 * 
 	 * @param methodProposal the method proposal to display
-	 * @param addTag <code>true</code> to add a surrounding <code>&#x7b;&#x40;link&#x7d;</code> tag
 	 * @return the display label for the given method proposal
 	 * @since 3.2
 	 */
-	String createJavadocMethodProposalLabel(CompletionProposal methodProposal, boolean addTag) {
+	String createJavadocMethodProposalLabel(CompletionProposal methodProposal) {
 		StringBuffer nameBuffer= new StringBuffer();
-		
-		// link tag
-		if (addTag)
-			nameBuffer.append("{@link "); //$NON-NLS-1$
 		
 		// method name
 		nameBuffer.append(methodProposal.getCompletion());
-		
-		if (addTag)
-			nameBuffer.append('}');
 		
 		// declaring type
 		nameBuffer.append(" - "); //$NON-NLS-1$
@@ -430,7 +420,7 @@ public class CompletionProposalLabelProvider {
 			case CompletionProposal.METHOD_REF:
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
 				if (fContext != null && fContext.isInJavadoc())
-					return createJavadocMethodProposalLabel(proposal, false);
+					return createJavadocMethodProposalLabel(proposal);
 				return createMethodProposalLabel(proposal);
 			case CompletionProposal.METHOD_DECLARATION:
 				return createOverrideMethodProposalLabel(proposal);
@@ -447,7 +437,7 @@ public class CompletionProposalLabelProvider {
 			case CompletionProposal.JAVADOC_PARAM_REF:
 				return createJavadocSimpleProposalLabel(proposal);
 			case CompletionProposal.JAVADOC_METHOD_REF:
-				return createJavadocMethodProposalLabel(proposal, true);
+				return createJavadocMethodProposalLabel(proposal);
 			case CompletionProposal.PACKAGE_REF:
 				return createPackageProposalLabel(proposal);
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
