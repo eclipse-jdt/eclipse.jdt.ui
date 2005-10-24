@@ -40,8 +40,10 @@ public final class JavadocInlineTagCompletionProposal extends LazyJavaCompletion
 	 */
 	protected String computeReplacementString() {
 		String replacement= super.computeReplacementString();
-		if (!autocloseBrackets() && replacement.endsWith("}")) //$NON-NLS-1$
-			return replacement.substring(0, replacement.length() - 1);
+		// TODO respect the auto-close preference, but do so consistently with method completions
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544
+//		if (!autocloseBrackets() && replacement.endsWith("}")) //$NON-NLS-1$
+//			return replacement.substring(0, replacement.length() - 1);
 		return replacement;
 	}
 	
@@ -49,7 +51,10 @@ public final class JavadocInlineTagCompletionProposal extends LazyJavaCompletion
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal#apply(org.eclipse.jface.text.IDocument, char, int)
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
-		boolean needsLinkedMode= autocloseBrackets();
+		// TODO respect the auto-close preference, but do so consistently with method completions
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544
+//		boolean needsLinkedMode= autocloseBrackets();
+		boolean needsLinkedMode= true;
 		if (needsLinkedMode)
 			setCursorPosition(getCursorPosition() - 1); // before the closing curly brace
 		

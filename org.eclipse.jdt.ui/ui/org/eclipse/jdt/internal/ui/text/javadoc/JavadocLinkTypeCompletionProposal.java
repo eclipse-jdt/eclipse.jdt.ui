@@ -39,7 +39,10 @@ public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeComplet
 	 */
 	protected String computeReplacementString() {
 		String typeReplacement= super.computeReplacementString();
-		if (autocloseBrackets())
+		// TODO respect the auto-close preference, but do so consistently with method completions
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544
+//		if (autocloseBrackets())
+		if (true)
 			return "{@link " + typeReplacement + "}"; //$NON-NLS-1$ //$NON-NLS-2$
 		else
 			return "{@link " + typeReplacement; //$NON-NLS-1$
@@ -52,7 +55,10 @@ public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeComplet
 		// convert . to #
 		if (trigger == '.')
 			trigger= '#';
-		boolean continueWithMember= trigger == '#' && autocloseBrackets();
+		// TODO respect the auto-close preference, but do so consistently with method completions
+		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=113544
+//		boolean continueWithMember= trigger == '#' && autocloseBrackets();
+		boolean continueWithMember= trigger == '#';
 		if (continueWithMember)
 			setCursorPosition(getCursorPosition() - 1); // before the closing curly brace
 		

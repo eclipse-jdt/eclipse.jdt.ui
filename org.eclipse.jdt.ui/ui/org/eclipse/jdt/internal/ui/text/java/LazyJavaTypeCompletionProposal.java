@@ -144,7 +144,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
 			}
 			
-			if (trigger == '(' && JavaPlugin.getDefault().getPreferenceStore().getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACKETS)) {
+			if (trigger == '(' && autocloseBrackets()) {
 				document.replace(getReplacementOffset() + getCursorPosition(), 0, ")"); //$NON-NLS-1$
 				setUpLinkedMode(document, ')');
 			}
