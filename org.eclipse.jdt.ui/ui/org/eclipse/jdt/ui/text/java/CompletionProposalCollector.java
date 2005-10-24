@@ -202,6 +202,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 */
 	public void acceptContext(CompletionContext context) {
 		fContext= context;
+		fLabelProvider.setContext(context);
 	}
 
 	/**
@@ -629,13 +630,13 @@ public class CompletionProposalCollector extends CompletionRequestor {
 //		javaProposal.setTriggerCharacters(VAR_TRIGGER);
 //
 //		return javaProposal;
-		LazyJavaCompletionProposal proposal = new LazyJavaCompletionProposal(javadocProposal, getContext());
+		LazyJavaCompletionProposal proposal = new LazyJavaCompletionProposal(javadocProposal, getContext(), getLabelProvider());
 //		adaptLength(proposal, javadocProposal);
 		return proposal;
 	}
 	
 	private IJavaCompletionProposal createJavadocInlineTagProposal(CompletionProposal javadocProposal) {
-		LazyJavaCompletionProposal proposal= new JavadocInlineTagCompletionProposal(javadocProposal, getContext());
+		LazyJavaCompletionProposal proposal= new JavadocInlineTagCompletionProposal(javadocProposal, getContext(), getLabelProvider());
 		adaptLength(proposal, javadocProposal);
 		return proposal;
 	}
@@ -695,7 +696,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	private IJavaCompletionProposal createMethodReferenceProposal(CompletionProposal methodProposal) {
-		LazyJavaCompletionProposal proposal= new JavaMethodCompletionProposal(methodProposal, getContext(), getCompilationUnit());
+		LazyJavaCompletionProposal proposal= new JavaMethodCompletionProposal(methodProposal, getContext(), getCompilationUnit(), getLabelProvider());
 		adaptLength(proposal, methodProposal);
 		return proposal;
 	}
@@ -718,13 +719,13 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 
 	private IJavaCompletionProposal createTypeProposal(CompletionProposal typeProposal) {
-		LazyJavaCompletionProposal proposal= new LazyJavaTypeCompletionProposal(typeProposal, getContext(), getCompilationUnit());
+		LazyJavaCompletionProposal proposal= new LazyJavaTypeCompletionProposal(typeProposal, getContext(), getCompilationUnit(), getLabelProvider());
 		adaptLength(proposal, typeProposal);
 		return proposal;
 	}
 	
 	private IJavaCompletionProposal createJavadocLinkTypeProposal(CompletionProposal typeProposal) {
-		LazyJavaCompletionProposal proposal= new JavadocLinkTypeCompletionProposal(typeProposal, getContext(), getCompilationUnit());
+		LazyJavaCompletionProposal proposal= new JavadocLinkTypeCompletionProposal(typeProposal, getContext(), getCompilationUnit(), getLabelProvider());
 		adaptLength(proposal, typeProposal);
 		return proposal;
 	}

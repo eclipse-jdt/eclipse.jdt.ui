@@ -59,6 +59,8 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
+import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -211,8 +213,8 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	private IRegion fSelectedRegion; // initialized by apply()
 	private TypeArgumentProposal[] fTypeArgumentProposals;
 
-	public GenericJavaTypeProposal(CompletionProposal typeProposal, CompletionContext context, ICompilationUnit cu) {
-		super(typeProposal, context, cu);
+	public GenericJavaTypeProposal(CompletionProposal typeProposal, CompletionContext context, ICompilationUnit cu, CompletionProposalLabelProvider labelProvider) {
+		super(typeProposal, context, cu, labelProvider);
 	}
 
 	/*

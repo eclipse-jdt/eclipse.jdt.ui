@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -54,8 +55,8 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	private IType fType;
 	private ImportsStructure fImportStructure;
 
-	public LazyJavaTypeCompletionProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu) {
-		super(proposal, context);
+	public LazyJavaTypeCompletionProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu, CompletionProposalLabelProvider labelProvider) {
+		super(proposal, context, labelProvider);
 		fCompilationUnit= cu;
 		fQualifiedName= null;
 	}
@@ -75,7 +76,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 
 	protected final String getQualifiedTypeName() {
 		if (fQualifiedName == null)
-			fQualifiedName= String.valueOf(Signature.toCharArray(fProposal.getSignature()));
+			fQualifiedName= String.valueOf(Signature.toCharArray(Signature.getTypeErasure(fProposal.getSignature())));
 		return fQualifiedName;
 	}
 	
@@ -92,9 +93,9 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		if (isImportCompletion())
 			return super.computeReplacementString();
 		
-		// TODO add support for informal javadoc references
-//		 if (!fContext.isJavadocFormalReference())
-//			 return getSimpleTypeName();
+		// TODO fix
+		 if (fProposal.getKind() == CompletionProposal.TYPE_REF &&  fContext.isInJavadocText())
+			 return getSimpleTypeName();
 		
 		fImportStructure= createImportStructure();
 		if (fImportStructure != null) {
@@ -179,9 +180,11 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 */
 	protected boolean allowAddingImports() {
 		if (fContext.isInJavadoc()) {
-			// TODO add support for informal javadoc references
-//			if (!fContext.isJavadocFormalReference())
+			// TODO fix
+//			if (!fContext.isInJavadocFormalReference())
 //				return false;
+			if (fProposal.getKind() == CompletionProposal.TYPE_REF &&  fContext.isInJavadocText())
+				return false;
 			
 			if (!isJavadocProcessingEnabled())
 				return false;

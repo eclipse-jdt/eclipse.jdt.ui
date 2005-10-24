@@ -30,7 +30,7 @@ public class JavadocCompletionProposalComputer extends JavaCompletionProposalCom
 		collector.setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, true);
 		collector.setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, true);
 		collector.setIgnored(CompletionProposal.FIELD_REF, false);
-		collector.setIgnored(CompletionProposal.KEYWORD, false);
+		collector.setIgnored(CompletionProposal.KEYWORD, true);
 		collector.setIgnored(CompletionProposal.LABEL_REF, true);
 		collector.setIgnored(CompletionProposal.LOCAL_VARIABLE_REF, true);
 		collector.setIgnored(CompletionProposal.METHOD_DECLARATION, true);
@@ -44,7 +44,6 @@ public class JavadocCompletionProposalComputer extends JavaCompletionProposalCom
 		collector.setIgnored(CompletionProposal.JAVADOC_METHOD_REF, false);
 		collector.setIgnored(CompletionProposal.JAVADOC_PARAM_REF, false);
 		collector.setIgnored(CompletionProposal.JAVADOC_VALUE_REF, false);
-		
 		collector.setIgnored(CompletionProposal.TYPE_REF, false);
 		return collector;
 	}

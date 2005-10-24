@@ -64,7 +64,7 @@ public class JavadocCompletionTest extends TestCase {
 	private static final String CARET= "|";
 	private static final String TYPE_JDOC_START= "/**\n";
 	private static final String TYPE_JDOC_END= " */\n";
-	private static final String TYPE_START= "public class Completion {\n";
+	private static final String TYPE_START= "public class Completion<T> {\n";
 	private static final String TYPE_END= "}\n";
 	private static final String EMPTY_TYPE= TYPE_START + TYPE_END;
 	private static final String METHOD=
@@ -75,14 +75,11 @@ public class JavadocCompletionTest extends TestCase {
 	private static final String MEMBER_JDOC_END= "	 */\n";
 	private static final String FIELD= "	public int fField\n";
 	
-	// TODO re-add param
-	private static final String[] TYPE_BLOCK_TAGS= {"@see", "@since", "@deprecated", "@serial", "@author", "@version", /*"@param",*/ };
+	private static final String[] TYPE_BLOCK_TAGS= {"@see", "@since", "@deprecated", "@serial", "@author", "@version", "@param", };
 	private static final String[] METHOD_BLOCK_TAGS= {"@see", "@since", "@deprecated", "@param", "@return", "@throws", "@exception", "@serialData", };
 	private static final String[] FIELD_BLOCK_TAGS= {"@see", "@since", "@deprecated", "@serial", "@serialField", };
-	// TODO re-add value
-	private static final String[] TYPE_INLINE_TAGS= {"@docRoot", "@link", "@linkplain", /*"@value",*/ "@code", "@literal", };
-	// TODO re-add value
-	private static final String[] METHOD_INLINE_TAGS= {"@docRoot", "@inheritDoc", "@link", "@linkplain", /*"@value",*/ "@code", "@literal", };
+	private static final String[] TYPE_INLINE_TAGS= {"@docRoot", "@link", "@linkplain", "@value", "@code", "@literal", };
+	private static final String[] METHOD_INLINE_TAGS= {"@docRoot", "@inheritDoc", "@link", "@linkplain", "@value", "@code", "@literal", };
 	private static final String[] FIELD_INLINE_TAGS= {"@docRoot", "@link", "@linkplain", "@value", "@code", "@literal", };
 	private static final String[] HTML_TAGS= {"b", "blockquote", "br", "code", "dd", "dl", "dt", "em", "hr", "h1", "h2", "h3", "h4", "h5", "h6", "i", "li", "nl", "ol", "p", "pre", "q", "td", "th", "tr", "tt", "ul",};
 
@@ -227,7 +224,7 @@ public class JavadocCompletionTest extends TestCase {
 		if (OLD) // bug in OLD: have to use erased types 
 			assertTypeJavadocProposal(" * @see java.util.List#add(E)|", " * @see java.util.List#ad|", "add(E");
 		else
-			assertTypeJavadocProposal(" * @see java.util.List#add(Object)|", " * @see java.util.List#ad|", "add(E");
+			assertTypeJavadocProposal(" * @see java.util.List#add(Object)|", " * @see java.util.List#ad|", "add(O");
 	}
 	
 	public void testSeeMethodLocal() throws Exception {
@@ -348,13 +345,13 @@ public class JavadocCompletionTest extends TestCase {
 		if (OLD) // bug in OLD: have to use erased types
 			assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(E)|", " * Prefix {@link java.util.List#ad|", "add(E");
 		else
-			assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(Object)|", " * Prefix {@link java.util.List#ad|", "add(E");
+			assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(Object)|", " * Prefix {@link java.util.List#ad|", "add(O");
 	}
 	public void testLinkMethodWithTypeVariableParameterClosed() throws Exception {
 		if (OLD) // bug in OLD: have to use erased types 
 			assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(E)|}", " * Prefix {@link java.util.List#ad|}", "add(E");
 		else
-			assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(Object)|}", " * Prefix {@link java.util.List#ad|}", "add(E");
+			assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(Object)|}", " * Prefix {@link java.util.List#ad|}", "add(O");
 	}
 	
 	public void testLinkConstant() throws Exception {

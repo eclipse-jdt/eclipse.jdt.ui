@@ -17,6 +17,8 @@ import org.eclipse.jdt.core.CompletionProposal;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
+import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
+
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
 
 /**
@@ -28,8 +30,8 @@ public final class JavadocInlineTagCompletionProposal extends LazyJavaCompletion
 	/** Triggers for types in javadoc. Do not modify. */
 	protected static final char[] JDOC_INLINE_TAG_TRIGGERS= new char[] { '#', '}', ' ' };
 
-	public JavadocInlineTagCompletionProposal(CompletionProposal proposal, CompletionContext context) {
-		super(proposal, context);
+	public JavadocInlineTagCompletionProposal(CompletionProposal proposal, CompletionContext context, CompletionProposalLabelProvider labelProvider) {
+		super(proposal, context, labelProvider);
 		Assert.isTrue(context.isInJavadoc());
 	}
 	

@@ -19,6 +19,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
+
 
 public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	/** Triggers for method proposals without parameters. Do not modify. */
@@ -34,8 +36,8 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	private boolean fHasParametersComputed= false;
 	private int fContextInformationPosition;
 
-	public JavaMethodCompletionProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu) {
-		super(proposal, context);
+	public JavaMethodCompletionProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu, CompletionProposalLabelProvider labelProvider) {
+		super(proposal, context, labelProvider);
 		fCompilationUnit= cu;
 	}
 

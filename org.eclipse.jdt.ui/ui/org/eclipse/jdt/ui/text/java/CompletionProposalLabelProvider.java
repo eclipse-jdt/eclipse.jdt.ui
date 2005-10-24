@@ -14,6 +14,7 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jface.text.Assert;
 
+import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.Signature;
@@ -31,12 +32,19 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 /**
  * Provides labels for java content assist proposals. The functionality is
  * similar to the one provided by {@link org.eclipse.jdt.ui.JavaElementLabels},
- * but the based on signatures and {@link CompletionProposal}s.
+ * but based on signatures and {@link CompletionProposal}s.
  *
  * @see Signature
  * @since 3.1
  */
 public class CompletionProposalLabelProvider {
+
+	/**
+	 * The completion context.
+	 * 
+	 * @since 3.2
+	 */
+	private CompletionContext fContext;
 
 	/**
 	 * Creates a new label provider.
@@ -174,7 +182,7 @@ public class CompletionProposalLabelProvider {
 		// parameters
 		nameBuffer.append('(');
 		appendUnboundedParameterList(nameBuffer, methodProposal);
-		nameBuffer.append(")"); //$NON-NLS-1$
+		nameBuffer.append(')');
 
 		// return type
 		if (!methodProposal.isConstructor()) {
@@ -193,30 +201,49 @@ public class CompletionProposalLabelProvider {
 		return nameBuffer.toString();
 	}
 	
-	String createJavadocTagMethodProposalLabel(CompletionProposal methodProposal) {
-		// TODO merge with method
+	/**
+	 * Creates a display label for the given method proposal. The display label is optionally enclosed in a
+	 * <code>&#x7b;&#x40;link &#x7d;</code> tag and consists of:
+	 * <ul>
+	 * <li>the method name</li>
+	 * <li>the raw simple name of the declaring type</li>
+	 * </ul>
+	 * <p>
+	 * Examples: For the <code>get(int)</code> method of a variable of type
+	 * <code>List<? extends Number></code>, the following display name is returned when
+	 * <code>addTag</code> is <code>false</code>: <code>get(int) - List</code>.<br>
+	 * For the <code>add(E)</code> method of a variable of type <code>List</code>, the
+	 * following display name is returned when <code>addTag</code> is <code>true</code>:
+	 * <code>&#x7b;&#x40;link add(Object) &#x7d; - List</code>.<br>
+	 * </p>
+	 * 
+	 * @param methodProposal the method proposal to display
+	 * @param addTag <code>true</code> to add a surrounding <code>&#x7b;&#x40;link&#x7d;</code> tag
+	 * @return the display label for the given method proposal
+	 * @since 3.2
+	 */
+	String createJavadocMethodProposalLabel(CompletionProposal methodProposal, boolean addTag) {
 		StringBuffer nameBuffer= new StringBuffer();
-
+		
+		// link tag
+		if (addTag)
+			nameBuffer.append("{@link "); //$NON-NLS-1$
+		
 		// method name
 		nameBuffer.append(methodProposal.getCompletion());
-
-		// return type
-		if (!methodProposal.isConstructor()) {
-			// TODO remove SignatureUtil.fix83600 call when bugs are fixed
-			char[] returnType= createTypeDisplayName(SignatureUtil.getUpperBound(Signature.getReturnType(SignatureUtil.fix83600(methodProposal.getSignature()))));
-			nameBuffer.append("  "); //$NON-NLS-1$
-			nameBuffer.append(returnType);
-		}
-
+		
+		if (addTag)
+			nameBuffer.append('}');
+		
 		// declaring type
 		nameBuffer.append(" - "); //$NON-NLS-1$
 		String declaringType= extractDeclaringTypeFQN(methodProposal);
 		declaringType= Signature.getSimpleName(declaringType);
 		nameBuffer.append(declaringType);
-
+		
 		return nameBuffer.toString();
 	}
-
+	
 	String createOverrideMethodProposalLabel(CompletionProposal methodProposal) {
 		StringBuffer nameBuffer= new StringBuffer();
 
@@ -263,7 +290,7 @@ public class CompletionProposalLabelProvider {
 	 * Creates a display label for a given type proposal. The display label
 	 * consists of:
 	 * <ul>
-	 *   <li>the simple type name</li>
+	 *   <li>the simple type name (erased when the context is in javadoc)</li>
 	 *   <li>the package name</li>
 	 * </ul>
 	 * <p>
@@ -276,7 +303,12 @@ public class CompletionProposalLabelProvider {
 	 * @return the display label for the given type proposal
 	 */
 	String createTypeProposalLabel(CompletionProposal typeProposal) {
-		char[] fullName= Signature.toCharArray(typeProposal.getSignature());
+		char[] signature;
+		if (fContext != null && fContext.isInJavadoc())
+			signature= Signature.getTypeErasure(typeProposal.getSignature());
+		else
+			signature= typeProposal.getSignature();
+		char[] fullName= Signature.toCharArray(signature);
 		return createTypeProposalLabel(fullName);
 	}
 	
@@ -309,7 +341,7 @@ public class CompletionProposalLabelProvider {
 		// enclosing types as qualification
 		int qIndex= findSimpleNameStart(fullName);
 		
-		StringBuffer buf= new StringBuffer("{@link ");
+		StringBuffer buf= new StringBuffer("{@link "); //$NON-NLS-1$
 		buf.append(fullName, qIndex, fullName.length - qIndex);
 		buf.append('}');
 		if (qIndex > 0) {
@@ -397,6 +429,8 @@ public class CompletionProposalLabelProvider {
 			case CompletionProposal.METHOD_NAME_REFERENCE:
 			case CompletionProposal.METHOD_REF:
 			case CompletionProposal.POTENTIAL_METHOD_DECLARATION:
+				if (fContext != null && fContext.isInJavadoc())
+					return createJavadocMethodProposalLabel(proposal, false);
 				return createMethodProposalLabel(proposal);
 			case CompletionProposal.METHOD_DECLARATION:
 				return createOverrideMethodProposalLabel(proposal);
@@ -413,7 +447,7 @@ public class CompletionProposalLabelProvider {
 			case CompletionProposal.JAVADOC_PARAM_REF:
 				return createJavadocSimpleProposalLabel(proposal);
 			case CompletionProposal.JAVADOC_METHOD_REF:
-				return createJavadocTagMethodProposalLabel(proposal);
+				return createJavadocMethodProposalLabel(proposal, true);
 			case CompletionProposal.PACKAGE_REF:
 				return createPackageProposalLabel(proposal);
 			case CompletionProposal.ANNOTATION_ATTRIBUTE_REF:
@@ -548,6 +582,16 @@ public class CompletionProposalLabelProvider {
 			adornments |= JavaElementImageDescriptor.ABSTRACT;
 
 		return new JavaElementImageDescriptor(descriptor, adornments, JavaElementImageProvider.SMALL_SIZE);
+	}
+
+	/**
+	 * Sets the completion context.
+	 * 
+	 * @param context the completion context
+	 * @since 3.2
+	 */
+	void setContext(CompletionContext context) {
+		fContext= context;
 	}
 
 }

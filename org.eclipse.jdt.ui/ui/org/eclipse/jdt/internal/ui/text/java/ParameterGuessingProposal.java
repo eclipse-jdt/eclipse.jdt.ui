@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
@@ -69,8 +70,8 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 	private ICompletionProposal[][] fChoices; // initialized by guessParameters()
 	private IPositionUpdater fUpdater;
 
- 	public ParameterGuessingProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu) {
- 		super(proposal, context, cu);
+ 	public ParameterGuessingProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu, CompletionProposalLabelProvider labelProvider) {
+ 		super(proposal, context, cu, labelProvider);
  	}
 
 	private boolean appendArguments(IDocument document, int offset) {

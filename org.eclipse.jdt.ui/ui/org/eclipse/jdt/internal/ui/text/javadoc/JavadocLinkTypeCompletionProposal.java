@@ -18,6 +18,8 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
+import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
+
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
 
 /**
@@ -27,8 +29,8 @@ import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
  */
 public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeCompletionProposal {
 
-	public JavadocLinkTypeCompletionProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu) {
-		super(proposal, context, cu);
+	public JavadocLinkTypeCompletionProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu, CompletionProposalLabelProvider labelProvider) {
+		super(proposal, context, cu, labelProvider);
 		Assert.isTrue(context.isInJavadoc());
 	}
 	

@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
@@ -48,8 +49,8 @@ public final class ExperimentalProposal extends JavaMethodCompletionProposal {
 
 	private IRegion fSelectedRegion; // initialized by apply()
 
-	public ExperimentalProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu) {
-		super(proposal, context, cu);
+	public ExperimentalProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu, CompletionProposalLabelProvider labelProvider) {
+		super(proposal, context, cu, labelProvider);
 	}
 
 	/*

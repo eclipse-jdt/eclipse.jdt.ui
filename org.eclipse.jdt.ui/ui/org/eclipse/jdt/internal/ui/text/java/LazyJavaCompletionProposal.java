@@ -195,15 +195,19 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	
 	protected final CompletionProposal fProposal;
 	protected final CompletionContext fContext;
+	protected final CompletionProposalLabelProvider fLabelProvider;
+	
 	private StyleRange fRememberedStyleRange;
 	private boolean fToggleEating;
 	private ITextViewer fTextViewer;
 
-	public LazyJavaCompletionProposal(CompletionProposal proposal, CompletionContext context) {
+	public LazyJavaCompletionProposal(CompletionProposal proposal, CompletionContext context, CompletionProposalLabelProvider labelProvider) {
 		Assert.isNotNull(proposal);
 		Assert.isNotNull(context);
+		Assert.isNotNull(labelProvider);
 		fProposal= proposal;
 		fContext = context;
+		fLabelProvider= labelProvider;
 	}
 
 	/*
@@ -439,7 +443,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	}
 
 	protected String computeDisplayString() {
-		return new CompletionProposalLabelProvider().createLabel(fProposal);
+		return fLabelProvider.createLabel(fProposal);
 	}
 
 	/*
@@ -549,7 +553,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	}
 
 	protected Image computeImage() {
-		return JavaPlugin.getImageDescriptorRegistry().get(new CompletionProposalLabelProvider().createImageDescriptor(fProposal));
+		return JavaPlugin.getImageDescriptorRegistry().get(fLabelProvider.createImageDescriptor(fProposal));
 	}
 
 	/**

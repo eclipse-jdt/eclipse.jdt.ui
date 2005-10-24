@@ -57,9 +57,9 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		LazyJavaCompletionProposal proposal;
 		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS))
-			proposal= new ParameterGuessingProposal(methodProposal, getContext(), getCompilationUnit());
+			proposal= new ParameterGuessingProposal(methodProposal, getContext(), getCompilationUnit(), getLabelProvider());
 		else
-			proposal= new ExperimentalProposal(methodProposal, getContext(), getCompilationUnit());
+			proposal= new ExperimentalProposal(methodProposal, getContext(), getCompilationUnit(), getLabelProvider());
 		return proposal;
 	}
 
@@ -80,7 +80,7 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		if (completion.length == 0 || completion[completion.length - 1] == ';')
 			return super.createJavaCompletionProposal(typeProposal);
 
-		LazyJavaCompletionProposal newProposal= new GenericJavaTypeProposal(typeProposal, getContext(), cu);
+		LazyJavaCompletionProposal newProposal= new GenericJavaTypeProposal(typeProposal, getContext(), cu, getLabelProvider());
 		return newProposal;
 	}
 
