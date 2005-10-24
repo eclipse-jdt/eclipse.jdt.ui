@@ -20,6 +20,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
 import org.eclipse.jdt.core.dom.Expression;
@@ -419,6 +420,7 @@ public class SemanticHighlightings {
 						|| desc == InfixExpression.RIGHT_OPERAND_PROPERTY
 						|| desc == ConditionalExpression.THEN_EXPRESSION_PROPERTY
 						|| desc == PrefixExpression.OPERAND_PROPERTY
+						|| desc == CastExpression.EXPRESSION_PROPERTY
 						|| desc == ConditionalExpression.ELSE_EXPRESSION_PROPERTY) {
 					ASTNode parent= node.getParent();
 					if (parent instanceof Expression)
