@@ -663,7 +663,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 					final Map arguments= new HashMap();
 					arguments.put(ATTRIBUTE_HANDLE, fType.getHandleIdentifier());
 					arguments.put(ATTRIBUTE_NAME, getNewElementName());
-					if (fFilePatterns != null && "".equals(fFilePatterns)) //$NON-NLS-1$
+					if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
 						arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 					arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
