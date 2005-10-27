@@ -65,7 +65,6 @@ import org.eclipse.jdt.ui.wizards.JavaCapabilityConfigurationPage;
 
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 
 /**
  * As addition to the JavaCapabilityConfigurationPage, the wizard does an
@@ -246,14 +245,12 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	
 	private IClasspathEntry[] getDefaultClasspathEntry() {
 		IClasspathEntry[] defaultJRELibrary= PreferenceConstants.getDefaultJRELibrary();
-		String compliance= fFirstPage.getJRECompliance();
+		IVMInstall inst= fFirstPage.getJVM();
 		IPath jreContainerPath= new Path(JavaRuntime.JRE_CONTAINER);
-		if (compliance == null || defaultJRELibrary.length > 1 || !jreContainerPath.isPrefixOf(defaultJRELibrary[0].getPath())) {
+		if (inst == null || defaultJRELibrary.length > 1 || !jreContainerPath.isPrefixOf(defaultJRELibrary[0].getPath())) {
 			// use default
 			return defaultJRELibrary;
 		}
-		// try to find a compatible JRE
-		IVMInstall inst= BuildPathSupport.findMatchingJREInstall(compliance);
 		if (inst != null) {
 			IPath newPath= jreContainerPath.append(inst.getVMInstallType().getId()).append(inst.getName());
 			return new IClasspathEntry[] { JavaCore.newContainerEntry(newPath) };
@@ -355,13 +352,17 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				updateProject(new SubProgressMonitor(monitor, 1));
 			}
 			configureJavaProject(new SubProgressMonitor(monitor, 2));
-			String compliance= fFirstPage.getJRECompliance();
-			if (compliance != null) {
+//			IVMInstall inst= fFirstPage.getJVM();
+			String compliance= fFirstPage.getCompliance();
+//			if (inst instanceof IVMInstall2) {
+//				compliance= ((IVMInstall2)inst).getJavaVersion();
+//			}
+//			if (compliance != null) {
 				IJavaProject project= JavaCore.create(fCurrProject);
 				Map options= project.getOptions(false);
 				JavaModelUtil.setCompilanceOptions(options, compliance);
 				project.setOptions(options);
-			}
+//			}
 		} finally {
 			monitor.done();
 			fCurrProject= null;

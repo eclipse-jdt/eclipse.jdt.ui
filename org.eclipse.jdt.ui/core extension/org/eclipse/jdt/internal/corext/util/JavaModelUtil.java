@@ -796,4 +796,16 @@ public final class JavaModelUtil {
 			return true; // assume 5.0
 		return javaVersion.startsWith(JavaCore.VERSION_1_5);
 	}
+
+	public static String getCompilerCompliance(IVMInstall2 vMInstall) {
+		String version= vMInstall.getJavaVersion();
+		if (version.startsWith(JavaCore.VERSION_1_5)) {
+			return JavaCore.VERSION_1_5;
+		} else if (version.startsWith(JavaCore.VERSION_1_4)) {
+			return JavaCore.VERSION_1_4;
+		} else if (version.startsWith(JavaCore.VERSION_1_3)) {
+			return JavaCore.VERSION_1_3;
+		}
+		return null;
+	}
 }
