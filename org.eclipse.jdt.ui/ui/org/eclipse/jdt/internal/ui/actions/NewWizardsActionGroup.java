@@ -20,7 +20,6 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.NewWizardMenu;
-
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
@@ -60,9 +59,9 @@ public class NewWizardsActionGroup extends ActionGroup {
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection sel= (IStructuredSelection) selection;
 			if (sel.size() <= 1 && isNewTarget(sel.getFirstElement())) {
-				IMenuManager newMenu= new MenuManager(ActionMessages.NewWizardsActionGroup_new); 
-				menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
-				new NewWizardMenu(newMenu, fSite.getWorkbenchWindow(), false);
+		        MenuManager newMenu = new MenuManager(ActionMessages.NewWizardsActionGroup_new);
+		        menu.appendToGroup(IContextMenuConstants.GROUP_NEW, newMenu);
+		        newMenu.add(new NewWizardMenu(fSite.getWorkbenchWindow()));
 			}
 		}		
 		
