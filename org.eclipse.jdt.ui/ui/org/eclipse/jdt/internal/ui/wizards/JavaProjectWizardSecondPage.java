@@ -352,17 +352,11 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 				updateProject(new SubProgressMonitor(monitor, 1));
 			}
 			configureJavaProject(new SubProgressMonitor(monitor, 2));
-//			IVMInstall inst= fFirstPage.getJVM();
-			String compliance= fFirstPage.getCompliance();
-//			if (inst instanceof IVMInstall2) {
-//				compliance= ((IVMInstall2)inst).getJavaVersion();
-//			}
-//			if (compliance != null) {
-				IJavaProject project= JavaCore.create(fCurrProject);
-				Map options= project.getOptions(false);
-				JavaModelUtil.setCompilanceOptions(options, compliance);
-				project.setOptions(options);
-//			}
+			String compliance= fFirstPage.getCompilerCompliance();
+			IJavaProject project= JavaCore.create(fCurrProject);
+			Map options= project.getOptions(false);
+			JavaModelUtil.setCompilanceOptions(options, compliance);
+			project.setOptions(options);
 		} finally {
 			monitor.done();
 			fCurrProject= null;

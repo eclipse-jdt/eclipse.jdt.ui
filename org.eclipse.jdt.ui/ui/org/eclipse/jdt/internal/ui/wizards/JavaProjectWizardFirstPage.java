@@ -470,7 +470,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			return JavaRuntime.getDefaultVMInstall();
 		}
 		
-		public String getSelecteCompilerCompliance() {
+		public String getSelectedCompilerCompliance() {
 			if (fUseProjectJRE.isSelected()) {
 				int index= fJRECombo.getSelectionIndex();
 				if (index >= 0 && index < fComplianceData.length) { // paranoia
@@ -504,7 +504,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		}
 		
 		public void handlePossibleJVMChange() {
-			String selectedCompliance= fJREGroup.getSelecteCompilerCompliance();
+			String selectedCompliance= fJREGroup.getSelectedCompilerCompliance();
 			IVMInstall selectedJVM= fJREGroup.getSelectedJVM();
 			String jvmCompliance= JavaCore.VERSION_1_4;
 			if (selectedJVM instanceof IVMInstall2) {
@@ -515,6 +515,10 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			}
 			if ((selectedCompliance.equals(JavaCore.VERSION_1_5) && !jvmCompliance.equals(JavaCore.VERSION_1_5)) ||
 				(jvmCompliance.equals(JavaCore.VERSION_1_5) && !selectedCompliance.equals(JavaCore.VERSION_1_5))) {
+				
+				if (selectedCompliance.equals(JavaCore.VERSION_1_5))
+					selectedCompliance= "5.0"; //$NON-NLS-1$
+				
 				fHintText.setText(Messages.format(NewWizardMessages.JavaProjectWizardFirstPage_DetectGroup_jre_message, new String[] {selectedCompliance, jvmCompliance}));
 				fHintText.setVisible(true);
 			} else {
@@ -776,8 +780,8 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		return fJREGroup.getSelectedJVM();
 	}
 	
-	public String getCompliance() {
-		return fJREGroup.getSelecteCompilerCompliance();
+	public String getCompilerCompliance() {
+		return fJREGroup.getSelectedCompilerCompliance();
 	}
 	
 	/*
