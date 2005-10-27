@@ -121,9 +121,8 @@ public class JavaSearchQuery implements ISearchQuery {
 				stringPattern= ((ElementQuerySpecification)fPatternData).getElement().getElementName();
 			} else {
 				PatternQuerySpecification patternSpec = (PatternQuerySpecification) fPatternData;
-				stringPattern = patternSpec.getPattern();
-				int matchMode = stringPattern.indexOf('*') != -1 || stringPattern.indexOf('?') != -1 ? SearchPattern.R_PATTERN_MATCH : SearchPattern.R_EXACT_MATCH;
-				matchMode |= SearchPattern.R_ERASURE_MATCH;
+				stringPattern= patternSpec.getPattern();
+				int matchMode= getMatchMode(stringPattern) | SearchPattern.R_ERASURE_MATCH;
 				if (patternSpec.isCaseSensitive())
 					matchMode |= SearchPattern.R_CASE_SENSITIVE;
 				pattern = SearchPattern.createPattern(patternSpec.getPattern(), patternSpec.getSearchFor(), patternSpec.getLimitTo(), matchMode);
@@ -167,6 +166,15 @@ public class JavaSearchQuery implements ISearchQuery {
 		}
 		String message= Messages.format(SearchMessages.JavaSearchQuery_status_ok_message, String.valueOf(textResult.getMatchCount())); 
 		return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, message, null);
+	}
+	
+	private int getMatchMode(String pattern) {
+		if (pattern.indexOf('*') != -1 || pattern.indexOf('?') != -1) {
+			return SearchPattern.R_PATTERN_MATCH;
+		} else if (SearchUtils.isCamelCasePattern(pattern)) {
+			return SearchPattern.R_CAMELCASE_MATCH;
+		}
+		return SearchPattern.R_EXACT_MATCH;
 	}
 
 	public String getLabel() {

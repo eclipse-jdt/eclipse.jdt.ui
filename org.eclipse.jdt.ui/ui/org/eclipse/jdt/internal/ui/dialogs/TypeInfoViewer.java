@@ -100,15 +100,13 @@ public class TypeInfoViewer {
 	private static class SearchRequestor extends TypeNameRequestor {
 		private volatile boolean fStop;
 		
-		private TypeInfoFilter fFilter;
 		private Set fHistory;
 		
 		private TypeInfoFactory factory= new TypeInfoFactory();
 		private List fResult;
 		
-		public SearchRequestor(TypeInfoFilter filter) {
+		public SearchRequestor() {
 			super();
-			fFilter= filter;
 			fResult= new ArrayList(2048);
 		}
 		public TypeInfo[] getResult() {
@@ -128,8 +126,7 @@ public class TypeInfoViewer {
 			TypeInfo type= factory.create(packageName, simpleTypeName, enclosingTypeNames, modifiers, path);
 			if (fHistory.contains(type))
 				return;
-			if (fFilter.matchesSearchResult(type))
-				fResult.add(type);
+			fResult.add(type);
 		}
 	}
 	
@@ -191,7 +188,7 @@ public class TypeInfoViewer {
 				return 0;
 			if (!fFilter.isCamcelCasePattern())
 				return 0;
-			return fFilter.matchesNameExact(type) ? 0 : 1;
+			return fFilter.matchesRawPattern(type) ? 0 : 1;
 		}
 	}
 	
@@ -607,7 +604,7 @@ public class TypeInfoViewer {
 			super(ticket, viewer, filter, history, numberOfVisibleItems, mode);
 			fScope= scope;
 			fElementKind= elementKind;
-			fReqestor= new SearchRequestor(filter);
+			fReqestor= new SearchRequestor();
 		}
 		public void stop() {
 			fReqestor.cancel();

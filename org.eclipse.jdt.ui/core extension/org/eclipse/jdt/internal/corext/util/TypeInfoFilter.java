@@ -20,44 +20,108 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class TypeInfoFilter {
 	
+	private static class PatternMatcher {
+		
+		private String fPattern;
+		private int fMatchKind;
+		private StringMatcher fStringMatcher;
+
+		private static final char END_SYMBOL= '<';
+		private static final char ANY_STRING= '*';
+		private static final char BLANK= ' ';
+		
+		public PatternMatcher(String pattern, boolean ignoreCase) {
+			this(pattern, SearchPattern.R_EXACT_MATCH | SearchPattern.R_PREFIX_MATCH |
+				SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CAMELCASE_MATCH);
+		}
+		
+		public PatternMatcher(String pattern, int allowedModes) {
+			initializePatternAndMatchKind(pattern);
+			fMatchKind= fMatchKind & allowedModes;
+			if (fMatchKind == SearchPattern.R_PATTERN_MATCH) {
+				fStringMatcher= new StringMatcher(fPattern, true, false);
+			}
+		}
+		
+		public String getPattern() {
+			return fPattern;
+		}
+		
+		public int getMatchKind() {
+			return fMatchKind;
+		}
+		
+		public boolean matches(String text) {
+			if (fMatchKind == SearchPattern.R_PATTERN_MATCH) {
+				return fStringMatcher.match(text);
+			} else if (fMatchKind == SearchPattern.R_CAMELCASE_MATCH) {
+				return SearchPattern.camelCaseMatch(fPattern, text);
+			} else if (fMatchKind == SearchPattern.R_EXACT_MATCH) {
+				return fPattern.equalsIgnoreCase(text);
+			} else /* R_PREFIX_MATCH */ {
+				return Strings.startsWithIgnoreCase(text, fPattern);
+			}
+		}
+		
+		private void initializePatternAndMatchKind(String pattern) {
+			int length= pattern.length();
+			if (length == 0) {
+				fPattern= pattern;
+				fMatchKind= SearchPattern.R_EXACT_MATCH;
+				return;
+			}
+			char last= pattern.charAt(length - 1);
+			
+			if (last == END_SYMBOL) {
+				fPattern= pattern.substring(0, length - 1);
+				fMatchKind= SearchPattern.R_EXACT_MATCH;
+				return;
+			}
+			if (last == BLANK) {
+				fPattern= pattern.trim();
+				fMatchKind= SearchPattern.R_EXACT_MATCH;
+				return;
+			}
+			
+			fPattern= pattern;
+			if (pattern.indexOf('*') != -1 || pattern.indexOf('?') != -1) {
+				fMatchKind= SearchPattern.R_PATTERN_MATCH;
+				if (last != ANY_STRING) {
+					fPattern= fPattern + ANY_STRING;
+				}
+				return;
+			}
+			if (SearchUtils.isCamelCasePattern(pattern)) {
+				fMatchKind= SearchPattern.R_CAMELCASE_MATCH;
+				return;
+			}
+			fMatchKind= SearchPattern.R_PREFIX_MATCH;
+		}		
+	}
+	
 	private String fText;
 	private IJavaSearchScope fSearchScope;
 	private boolean fIsWorkspaceScope;
 	private int fElementKind;
 
-	private StringMatcher fPackageMatcher;
-	private String fPackagePattern;
+	private PatternMatcher fPackageMatcher;
+	private PatternMatcher fNameMatcher;
 
-	String fNamePattern;
-	private StringMatcher fNameMatcher;
-
-	private String fCamelCasePattern;
-	private StringMatcher fCamelCaseTailMatcher;
-	private StringMatcher fExactNameMatcher;
-
-	private static final char END_SYMBOL= '<';
-	private static final char ANY_STRING= '*';
-	private static final char BLANK= ' ';
-	
 	private static final int TYPE_MODIFIERS= Flags.AccEnum | Flags.AccAnnotation | Flags.AccInterface;
-
+	
 	public TypeInfoFilter(String text, IJavaSearchScope scope, int elementKind) {
 		fText= text;
 		fSearchScope= scope;
 		fIsWorkspaceScope= fSearchScope.equals(SearchEngine.createWorkspaceScope());
 		fElementKind= elementKind;
+		
 		int index= text.lastIndexOf("."); //$NON-NLS-1$
 		if (index == -1) {
-			createNamePattern(text);
+			fNameMatcher= new PatternMatcher(text, true);
 		} else {
-			fPackagePattern= text.substring(0, index);
-			fPackageMatcher= new StringMatcher(fPackagePattern, true, false);
-
-			createNamePattern(text.substring(index + 1));
-		}
-		fNameMatcher= new StringMatcher(fNamePattern, true, false);
-		if (fCamelCasePattern != null) {
-			fExactNameMatcher= new StringMatcher(createTextPatternFromText(fText), true, false);
+			fPackageMatcher= new PatternMatcher(text.substring(0, index),
+				SearchPattern.R_EXACT_MATCH | SearchPattern.R_PATTERN_MATCH);
+			fNameMatcher= new PatternMatcher(text.substring(index + 1), true);
 		}
 	}
 
@@ -70,143 +134,49 @@ public class TypeInfoFilter {
 	}
 
 	public boolean isCamcelCasePattern() {
-		return fCamelCasePattern != null;
+		return fNameMatcher.getMatchKind() == SearchPattern.R_CAMELCASE_MATCH;
 	}
 
 	public String getPackagePattern() {
-		return fPackagePattern;
+		if (fPackageMatcher == null)
+			return null;
+		return fPackageMatcher.getPattern();
 	}
 
 	public String getNamePattern() {
-		return fNamePattern;
+		return fNameMatcher.getPattern();
 	}
 
 	public int getSearchFlags() {
-		int result= 0;
-		if (fCamelCasePattern != null) {
-			result= result | SearchPattern.R_CASE_SENSITIVE;
-		}
-		if (fNamePattern.indexOf("*") != -1) { //$NON-NLS-1$
-			result= result | SearchPattern.R_PATTERN_MATCH;
-		}
-		return result;
+		return fNameMatcher.getMatchKind();
 	}
 
-	public boolean matchesNameExact(TypeInfo type) {
-		return fExactNameMatcher.match(type.getTypeName());
-	}
-
-	public boolean matchesSearchResult(TypeInfo type) {
-		return matchesCamelCase(type);
+	public boolean matchesRawPattern(TypeInfo type) {
+		return Strings.startsWithIgnoreCase(type.getTypeName(), fNameMatcher.getPattern());
 	}
 
 	public boolean matchesCachedResult(TypeInfo type) {
-		if (!(matchesName(type) && matchesPackage(type)))
+		if (!(matchesPackage(type)))
 			return false;
-		return matchesCamelCase(type);
+		return matchesName(type);
 	}
 	
 	public boolean matchesHistoryElement(TypeInfo type) {
-		if (!(matchesName(type) && matchesPackage(type) && matchesModifiers(type) && matchesScope(type)))
+		if (!(matchesPackage(type) && matchesModifiers(type) && matchesScope(type)))
 			return false;
-		return matchesCamelCase(type);
-	}
-
-	private boolean matchesCamelCase(TypeInfo type) {
-		if (fCamelCasePattern == null)
-			return true;
-		String name= type.getTypeName();
-		int camelCaseIndex= 0;
-		int lastUpperCase= Integer.MAX_VALUE;
-		for (int i= 0; camelCaseIndex < fCamelCasePattern.length() && i < name.length(); i++) {
-			char c= name.charAt(i);
-			if (Character.isUpperCase(c)) {
-				lastUpperCase= i;
-				if (c != fCamelCasePattern.charAt(camelCaseIndex))
-					return false;
-				camelCaseIndex++;
-			}
-		}
-		if (camelCaseIndex < fCamelCasePattern.length())
-			return false;
-		// The camel case pattern exactly matches the name
-		if (lastUpperCase == name.length() - 1)
-			return fCamelCaseTailMatcher == null;
-		if (fCamelCaseTailMatcher == null)
-			return true;
-		return fCamelCaseTailMatcher.match(name.substring(lastUpperCase + 1));
+		return matchesName(type);
 	}
 
 	private boolean matchesName(TypeInfo type) {
-		return fNameMatcher.match(type.getTypeName());
+		return fNameMatcher.matches(type.getTypeName());
 	}
 
 	private boolean matchesPackage(TypeInfo type) {
 		if (fPackageMatcher == null)
 			return true;
-		return fPackageMatcher.match(type.getTypeContainerName());
+		return fPackageMatcher.matches(type.getTypeContainerName());
 	}
 
-	private void createNamePattern(final String text) {
-		int length= text.length();
-		fCamelCasePattern= null;
-		fNamePattern= text;
-		if (length > 0) {
-			char c= text.charAt(0);
-			if (length > 1 && Character.isUpperCase(c)) {
-				StringBuffer patternBuffer= new StringBuffer();
-				StringBuffer camelCaseBuffer= new StringBuffer();
-				patternBuffer.append(c);
-				camelCaseBuffer.append(c);
-				int index= 1;
-				for (; index < length; index++) {
-					c= text.charAt(index);
-					if (Character.isUpperCase(c)) {
-						patternBuffer.append("*"); //$NON-NLS-1$
-						patternBuffer.append(c);
-						camelCaseBuffer.append(c);
-					} else {
-						break;
-					}
-				}
-				if (camelCaseBuffer.length() > 1) {
-					if (index == length) {
-						fNamePattern= patternBuffer.toString();
-						fCamelCasePattern= camelCaseBuffer.toString();
-					} else if (restIsLowerCase(text, index)) {
-						fNamePattern= patternBuffer.toString();
-						fCamelCasePattern= camelCaseBuffer.toString();
-						fCamelCaseTailMatcher= new StringMatcher(createTextPatternFromText(text.substring(index)), true, false);
-					}
-				}
-			}
-			fNamePattern= createTextPatternFromText(fNamePattern);
-		}
-	}
-
-	private boolean restIsLowerCase(String s, int start) {
-		for (int i= start; i < s.length(); i++) {
-			if (Character.isUpperCase(s.charAt(i)))
-				return false;
-		}
-		return true;
-	}
-
-	private static String createTextPatternFromText(final String text) {
-		int length= text.length();
-		String result= text;
-		switch (text.charAt(length - 1)) {
-			case END_SYMBOL :
-				return text.substring(0, length - 1);
-			case ANY_STRING :
-				return result;
-			case BLANK:
-				return text.trim();
-			default :
-				return text + ANY_STRING;
-		}
-	}
-	
 	private boolean matchesScope(TypeInfo type) {
 		if (fIsWorkspaceScope)
 			return true;
