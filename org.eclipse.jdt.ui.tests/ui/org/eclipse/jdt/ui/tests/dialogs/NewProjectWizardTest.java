@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ICreateFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderValidator;
@@ -136,7 +137,7 @@ public class NewProjectWizardTest extends TestCase {
     
     public void testCreateNormalFolderOnFragRoot() throws CoreException, InvocationTargetException, InterruptedException {
         IPackageFragmentRoot parentRoot= addToClasspath(new Path(fSubFolder));
-        ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
+        ClasspathModifierQueries.ICreateFolderQuery folderQuery= new ClasspathModifierQueries.ICreateFolderQuery() {
 
             public boolean doQuery() {
                 return true;
@@ -163,7 +164,7 @@ public class NewProjectWizardTest extends TestCase {
     
     public void testCreateSourceFolderOnFragRoot() throws CoreException, InvocationTargetException, InterruptedException {
         IPackageFragmentRoot parentRoot= addToClasspath(new Path(fNormalFolder));
-        ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
+        ClasspathModifierQueries.ICreateFolderQuery folderQuery= new ClasspathModifierQueries.ICreateFolderQuery() {
 
             public boolean doQuery() {
                 return true;
@@ -192,7 +193,7 @@ public class NewProjectWizardTest extends TestCase {
         IPackageFragmentRoot root= addToClasspath(new Path(fNormalFolder));
         final IPath nfFolder= new Path(fNormalFolder).append(fSubFolder).append("nfFolder");
         IFolder fragment= getFolderHandle(new Path(fNormalFolder).append(fSubFolder));
-        ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
+        ClasspathModifierQueries.ICreateFolderQuery folderQuery= new ClasspathModifierQueries.ICreateFolderQuery() {
 
             public boolean doQuery() {
                 return true;
@@ -223,7 +224,7 @@ public class NewProjectWizardTest extends TestCase {
         IFolder fragment= getFolderHandle(new Path(fNormalFolder).append(fSubFolder));
         final IPath srcFolder= new Path(fNormalFolder).append(fSubFolder).append("srcFolder");
         
-        ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
+        ClasspathModifierQueries.ICreateFolderQuery folderQuery= new ClasspathModifierQueries.ICreateFolderQuery() {
 
             public boolean doQuery() {
                 return true;
@@ -1029,7 +1030,7 @@ public class NewProjectWizardTest extends TestCase {
     }
     
     // Helper methods
-    protected Object executeOperation(int type, final Object selection, final ClasspathModifierQueries.OutputFolderQuery outputQuery, final ClasspathModifierQueries.IOutputLocationQuery locationQuery, final ClasspathModifierQueries.IFolderCreationQuery creationQuery, final ClasspathModifierQueries.IInclusionExclusionQuery inclQuery) throws InvocationTargetException, InterruptedException {
+    protected Object executeOperation(int type, final Object selection, final ClasspathModifierQueries.OutputFolderQuery outputQuery, final ClasspathModifierQueries.IOutputLocationQuery locationQuery, final ClasspathModifierQueries.ICreateFolderQuery creationQuery, final ClasspathModifierQueries.IInclusionExclusionQuery inclQuery) throws InvocationTargetException, InterruptedException {
         final Object[] returnValue= {null};
         IClasspathInformationProvider provider= new IClasspathInformationProvider() {
 
@@ -1083,6 +1084,10 @@ public class NewProjectWizardTest extends TestCase {
             }
 
 			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
+				return null;
+			}
+
+			public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
 				return null;
 			}
         };
@@ -1242,8 +1247,8 @@ public class NewProjectWizardTest extends TestCase {
         };
     }
     
-    protected ClasspathModifierQueries.IFolderCreationQuery getSourceFolderCreationQuery() {
-        return new ClasspathModifierQueries.IFolderCreationQuery() {
+    protected ClasspathModifierQueries.ICreateFolderQuery getSourceFolderCreationQuery() {
+        return new ClasspathModifierQueries.ICreateFolderQuery() {
 
             public boolean doQuery() {
                 return true;
@@ -1260,8 +1265,8 @@ public class NewProjectWizardTest extends TestCase {
         };
     }
     
-    protected ClasspathModifierQueries.IFolderCreationQuery getNormalFolderCreationQuery() {
-        return new ClasspathModifierQueries.IFolderCreationQuery() {
+    protected ClasspathModifierQueries.ICreateFolderQuery getNormalFolderCreationQuery() {
+        return new ClasspathModifierQueries.ICreateFolderQuery() {
 
             public boolean doQuery() {
                 return true;

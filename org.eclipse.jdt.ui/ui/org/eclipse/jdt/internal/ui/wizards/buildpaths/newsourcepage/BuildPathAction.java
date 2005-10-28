@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ICreateFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
@@ -239,6 +240,16 @@ public class BuildPathAction extends Action implements IClasspathInformationProv
 	 */
 	public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {
 		return ClasspathModifierQueries.getDefaultLibrariesQuery(getShell());
+	}
+	
+	/**
+	 * Return an <code>ICreateFolderQuery</code>.
+	 * 
+	 * @see ClasspathModifierQueries#getDefaultCreateFolderQuery(Shell, IJavaProject)
+	 * @see IClasspathInformationProvider#getCreateFolderQuery()
+	 */
+	public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
+		return ClasspathModifierQueries.getDefaultCreateFolderQuery(getShell(), fJavaProject);
 	}
 
 	/**

@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ICreateFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
@@ -1037,6 +1038,10 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
 			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
 				return null;
 			}
+
+			public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
+				return null;
+			}
         });
         operation.run(null);
         
@@ -1138,6 +1143,10 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
 			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
 				return null;
 			}
+
+			public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
+				return null;
+			}
             
         });
         op.run(null);
@@ -1189,6 +1198,10 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
             }
 
 			public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
+				return null;
+			}
+
+			public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
 				return null;
 			}
             
@@ -1333,6 +1346,10 @@ public class NewProjectWizardOperationTest extends TestCase implements IClasspat
 	 * @see org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider#getRemoveLinkedFolderQuery()
 	 */
 	public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {
+		return null;
+	}
+
+	public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
 		return null;
 	}
 }

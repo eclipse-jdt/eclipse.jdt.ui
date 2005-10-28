@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
@@ -188,7 +189,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         super();
         fLastType= UNDEFINED;
         fListeners= new ArrayList();
-        fActions= new ClasspathModifierAction[7];
+        fActions= new ClasspathModifierAction[8];
         ClasspathModifierOperation op;
         op= new AddSelectedSourceFolderOperation(listener, provider);
         // TODO User disabled image when available
@@ -248,6 +249,10 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_label, 
                 NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_ClearAll_tooltip, IAction.AS_PUSH_BUTTON), 
                 IClasspathInformationProvider.RESET_ALL);
+        op= new CreateFolderOperation(listener, provider);
+        addAction(new ClasspathModifierAction(op, JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT, null, 
+        		NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_CreateSrcFolder_label, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_CreateSrcFolder_tooltip
+        		, IAction.AS_PUSH_BUTTON), 7);
     }
 
     private void addAction(ClasspathModifierAction action, int index) {
@@ -312,8 +317,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
         pane.setTopRight(tb);
         ToolBarManager tbm= new ToolBarManager(tb);
         for (int i= fContextSensitiveActions; i < fActions.length; i++) {
-            if (i != IClasspathInformationProvider.EDIT_OUTPUT)
-                tbm.add(fActions[i]);
+        	tbm.add(fActions[i]);
         }
         tbm.add(new HelpAction());
         tbm.update(true);

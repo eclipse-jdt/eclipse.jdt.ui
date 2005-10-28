@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ICreateFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
@@ -495,6 +496,16 @@ public final class HintTextGroup implements IClasspathInformationProvider, IPack
     public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
         return ClasspathModifierQueries.getDefaultLinkQuery(getShell(), fCurrJProject, new Path(fOutputLocationField.getText()));
     }
+    
+    /**
+     * Return an <code>IFolderCreationQuery</code>.
+     * 
+     * @see ClasspathModifierQueries#getDefaultCreateFolderQuery(Shell, IJavaProject)
+     * @see IClasspathInformationProvider#getCreateFolderQuery()
+     */
+	public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {
+		return ClasspathModifierQueries.getDefaultCreateFolderQuery(getShell(), fCurrJProject);
+	}
 
 	/**
 	 * Get a query to create a linked source folder.

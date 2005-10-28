@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ICreateFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
@@ -158,7 +159,7 @@ public interface IClasspathInformationProvider {
      * <code>null</code>
      * @throws JavaModelException
      * 
-     * @see ClasspathModifierQueries#getDefaultFolderCreationQuery(Shell, Object)
+     * @see ClasspathModifierQueries#getDefaultCreateFolderQuery(Shell, Object)
      */
     public ILinkToQuery getLinkFolderQuery() throws JavaModelException;
     
@@ -197,6 +198,18 @@ public interface IClasspathInformationProvider {
      * @see ClasspathModifierQueries#getDefaultLibrariesQuery(Shell)
      */
     public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException;
+
+    /**
+     * Method to retrieve an <code>ICreateFolderQuery</code> from 
+     * the provider.
+     * 
+     * @return an <code>IFolderCreationQuery</code>, must not be 
+     * <code>null</code>
+     * @throws JavaModelException
+     * 
+     * @see {@link ClasspathModifierQueries#getDefaultCreateFolderQuery(Shell, IJavaProject) }
+     */
+	public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException;
     
     /**
      * Delete all newly created folders and files.

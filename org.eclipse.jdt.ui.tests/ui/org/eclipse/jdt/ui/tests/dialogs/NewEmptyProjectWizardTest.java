@@ -61,7 +61,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     
     public void testCreateSourceFolderOnProjectWithProjAsRoot() throws CoreException, InvocationTargetException, InterruptedException {
         ClasspathModifierQueries.OutputFolderQuery outputFolderQuery= getOutputFolderQueryToKeepProjAsRoot();
-        ClasspathModifierQueries.IFolderCreationQuery folderQuery= getSourceFolderCreationQuery();
+        ClasspathModifierQueries.ICreateFolderQuery folderQuery= getSourceFolderCreationQuery();
         IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.CREATE_FOLDER, null, outputFolderQuery, null, folderQuery, null);
         
         assertTrue(root.getUnderlyingResource().exists());
@@ -86,7 +86,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         IPackageFragmentRoot parentRoot= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_SEL_SF_TO_BP, getFolderHandle(new Path(fNormalFolder)), outputFolderQuery, null, null, null);
         assertTrue(parentRoot != null);
         testProjectIsOnClasspath(true);
-        ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
+        ClasspathModifierQueries.ICreateFolderQuery folderQuery= new ClasspathModifierQueries.ICreateFolderQuery() {
 
             public boolean doQuery() {
                 return true;
@@ -121,7 +121,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         outputFolderQuery= getOutputFolderQueryInternal(fProject.getPath()); // To be able to remove the project, we have to pretend that our 
         // desired output location for the project is the project root itself, because the output location already changed when 
         // executing adding to the buildpath (it is not possible to have a source folder if the output location is equal to the project folder).
-        ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
+        ClasspathModifierQueries.ICreateFolderQuery folderQuery= new ClasspathModifierQueries.ICreateFolderQuery() {
 
             public boolean doQuery() {
                 return true;
@@ -149,7 +149,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     public void testCreateNormalFolderOnFragRootWithProjAsRoot() throws CoreException, InvocationTargetException, InterruptedException {
         ClasspathModifierQueries.OutputFolderQuery outputFolderQuery= getOutputFolderQueryToKeepProjAsRoot();
         IPackageFragmentRoot root= (IPackageFragmentRoot)executeOperation(IClasspathInformationProvider.ADD_SEL_SF_TO_BP, getFolderHandle(new Path(fNormalFolder)), outputFolderQuery, null, null, null);
-        ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
+        ClasspathModifierQueries.ICreateFolderQuery folderQuery= new ClasspathModifierQueries.ICreateFolderQuery() {
 
             public boolean doQuery() {
                 return true;
@@ -180,7 +180,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         assertTrue(fragmentFolder.getParent().equals(parentRoot.getUnderlyingResource()));
         testProjectIsOnClasspath(true);
         
-        ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
+        ClasspathModifierQueries.ICreateFolderQuery folderQuery= new ClasspathModifierQueries.ICreateFolderQuery() {
 
             public boolean doQuery() {
                 return true;
@@ -222,7 +222,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
         assertTrue(fragmentFolder.getParent().equals(parentRoot.getUnderlyingResource()));
         testProjectIsOnClasspath(true);
         
-        ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
+        ClasspathModifierQueries.ICreateFolderQuery folderQuery= new ClasspathModifierQueries.ICreateFolderQuery() {
 
             public boolean doQuery() {
                 return true;
@@ -1326,7 +1326,7 @@ public class NewEmptyProjectWizardTest extends NewProjectWizardTest {
     }
     
     protected IPackageFragmentRoot createFragmentRootAndKeepProjAsRoot() throws CoreException, InvocationTargetException, InterruptedException {
-        ClasspathModifierQueries.IFolderCreationQuery folderQuery= new ClasspathModifierQueries.IFolderCreationQuery() {
+        ClasspathModifierQueries.ICreateFolderQuery folderQuery= new ClasspathModifierQueries.ICreateFolderQuery() {
 
             public boolean doQuery() {
                 return true;

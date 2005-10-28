@@ -1,0 +1,70 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.internal.corext.buildpath;
+
+import java.lang.reflect.InvocationTargetException;
+import java.util.List;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
+
+public class CreateFolderOperation extends ClasspathModifierOperation {
+
+    /**
+     * Creates a new <code>AddFolderOperation</code>.
+     * 
+     * @param listener a <code>IClasspathModifierListener</code> that is notified about 
+     * changes on classpath entries or <code>null</code> if no such notification is 
+     * necessary.
+     * @param informationProvider a provider to offer information to the action
+     * 
+     * @see IClasspathInformationProvider
+     * @see ClasspathModifier
+     */
+	public CreateFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
+		super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip, IClasspathInformationProvider.ADD_LIB_TO_BP);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+        List result= null;
+        fException= null;
+        try {
+            result= createFolder(fInformationProvider.getCreateFolderQuery(), fInformationProvider.getOutputFolderQuery(), fInformationProvider.getJavaProject(), monitor);
+        } catch (CoreException e) {
+            fException= e;
+            result= null;
+        }
+        
+        super.handleResult(result, monitor);	
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean isValid(List elements, int[] types) throws JavaModelException {
+		return types.length == 1 && types[0] == DialogPackageExplorerActionGroup.JAVA_PROJECT;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getDescription(int type) {
+		return NewWizardMessages.PackageExplorerActionGroup_FormText_createNewSourceFolder; 
+	}
+}

@@ -10,22 +10,24 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -36,6 +38,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -46,16 +49,31 @@ import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
+import org.eclipse.jdt.internal.corext.buildpath.LinkedSourceFolderOperation;
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ICreateFolderQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
@@ -82,8 +100,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private SelectionButtonDialogField fUseFolderOutputs;
 	
 	private final int IDX_ADD= 0;
-	private final int IDX_EDIT= 2;
-	private final int IDX_REMOVE= 3;	
+	private final int IDX_ADD_LINK= 1;
+	private final int IDX_EDIT= 3;
+	private final int IDX_REMOVE= 4;	
 
 	public SourceContainerWorkbookPage(ListDialogField classPathList, StringDialogField outputLocationField) {
 		fWorkspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
@@ -99,6 +118,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 
 		buttonLabels= new String[] { 
 			NewWizardMessages.SourceContainerWorkbookPage_folders_add_button, 
+			NewWizardMessages.SourceContainerWorkbookPage_folders_link_source_button,
 			/* 1 */ null,
 			NewWizardMessages.SourceContainerWorkbookPage_folders_edit_button, 
 			NewWizardMessages.SourceContainerWorkbookPage_folders_remove_button
@@ -314,6 +334,106 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 					}
 
 				}				
+			} else if (index == IDX_ADD_LINK) {
+				LinkedSourceFolderOperation op= new LinkedSourceFolderOperation(new IClasspathModifierListener() {
+
+					public void classpathEntryChanged(List newEntries) {
+						fClassPathList.setElements(newEntries);
+						updateFoldersList();
+					}
+					
+				}, new IClasspathInformationProvider() {
+
+					private ArrayList fNewFolders= new ArrayList();
+					private String fOldOutputLocation= fOutputLocationField.getText();
+
+					public void handleResult(List resultElements, CoreException exception, int operationType) {
+				        if (exception != null) {
+				            ExceptionHandler.handle(exception, getShell(), NewWizardMessages.SourceContainerWorkbookPage_error_while_linking, exception.getLocalizedMessage()); 
+				            return;
+				        }
+				        
+				        handleFolderCreation(resultElements);
+					}
+					
+				    private void handleFolderCreation(List result) {
+				        if (result.size() == 1) {
+				            fNewFolders.add(result.get(0));
+				        	fFoldersList.selectElements(new StructuredSelection(result));
+				            setOutputLocationFieldText(getOldOutputLocation());
+				        }
+				    }
+				    
+				    private IPath getOldOutputLocation() {
+				        return new Path(fOutputLocationField.getText()).makeAbsolute();
+				    }
+				    
+				    private void setOutputLocationFieldText(IPath oldOutputLocation) {
+				        try {
+				            if (!fCurrJProject.getOutputLocation().equals(oldOutputLocation)) {
+				                fOutputLocationField.setText(fCurrJProject.getOutputLocation().makeRelative().toString());
+				                IJavaElement element= fCurrJProject.findElement(fCurrJProject.getOutputLocation().removeFirstSegments(1));
+				                if (element != null)
+				                    fNewFolders.add(element);
+				            }
+				        } catch (JavaModelException exception) {
+				            ExceptionHandler.handle(exception, getShell(), NewWizardMessages.HintTextGroup_Exception_Title_output, exception.getMessage()); 
+				        }
+				    }
+
+					public IStructuredSelection getSelection() {
+						return new StructuredSelection(fFoldersList.getSelectedElements());
+					}
+
+					public IJavaProject getJavaProject() {
+						return fCurrJProject;
+					}
+					
+				    public void deleteCreatedResources() {
+				        Iterator iterator= fNewFolders.iterator();
+				        while (iterator.hasNext()) {
+				            Object element= iterator.next();
+				            IFolder folder;
+				            try {
+				                if (element instanceof IFolder)
+				                    folder= (IFolder)element;
+				                else if (element instanceof IJavaElement)
+				                    folder= fCurrJProject.getProject().getWorkspace().getRoot().getFolder(((IJavaElement)element).getPath());
+				                else {
+				                    ((IFile)element).delete(false, null);
+				                    continue;
+				                }
+				                folder.delete(false, null);
+				            } catch (CoreException e) {
+				            }            
+				        }
+				        
+				        fOutputLocationField.setText(fOldOutputLocation);
+				        fNewFolders= new ArrayList();
+				    }
+					
+				    public OutputFolderQuery getOutputFolderQuery() {return null;}
+				    public IInclusionExclusionQuery getInclusionExclusionQuery() {return null;}
+				    public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {return null;}
+					public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {return null;}
+				    public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {return null;}
+				    public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {return null;}
+					public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {return null;}
+
+				    /**
+				     * Return an <code>ILinkToQuery</code>.
+				     * 
+				     * @see ClasspathModifierQueries#getDefaultLinkQuery(Shell, IJavaProject, IPath)
+				     * @see IClasspathInformationProvider#getLinkFolderQuery()
+				     */
+				    public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
+				        return ClasspathModifierQueries.getDefaultLinkQuery(getShell(), fCurrJProject, new Path(fOutputLocationField.getText()));
+				    }
+
+					
+				}
+				);
+				run(op);
 			} else if (index == IDX_EDIT) {
 				editEntry();
 			} else if (index == IDX_REMOVE) {
@@ -321,6 +441,19 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			}
 		}
 	}
+	
+    public void run(LinkedSourceFolderOperation op) {
+        try {
+            op.run(null);
+        } catch (InvocationTargetException e) {
+            // nothing to do
+        } catch (InterruptedException e) {
+            // nothing to do
+        }
+        // Remark: there is nothing to do because the operation that is executed 
+        // ensures that the object receiving the result should do the exception handling
+        // because it needs to implement interface IClasspathInformationProvider
+    }
 
 	private void editEntry() {
 		List selElements= fFoldersList.getSelectedElements();

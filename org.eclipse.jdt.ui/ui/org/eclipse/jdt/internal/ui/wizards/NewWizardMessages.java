@@ -227,6 +227,8 @@ public final class NewWizardMessages extends NLS {
 	public static String SourceContainerWorkbookPage_ExistingSourceFolderDialog_edit_description;
 	public static String SourceContainerWorkbookPage_exclusion_added_title;
 	public static String SourceContainerWorkbookPage_exclusion_added_message;
+	public static String SourceContainerWorkbookPage_folders_link_source_button;
+	public static String SourceContainerWorkbookPage_error_while_linking;
 	
 	public static String ProjectsWorkbookPage_projects_label;
 	public static String ProjectsWorkbookPage_projects_add_button;
@@ -522,6 +524,8 @@ public final class NewWizardMessages extends NLS {
 	public static String NewSourceContainerWorkbookPage_ToolBar_Help_tooltip;
 	public static String NewSourceContainerWorkbookPage_ToolBar_Help_label;
 	public static String NewSourceContainerWorkbookPage_ToolBar_Help_link;
+	public static String NewSourceContainerWorkbookPage_ToolBar_CreateSrcFolder_label;
+	public static String NewSourceContainerWorkbookPage_ToolBar_CreateSrcFolder_tooltip;
 	
 	public static String NewFolderDialog_TypeGroup_title;
 	public static String NewFolderDialog_folderNameGroup_label;
@@ -592,6 +596,7 @@ public final class NewWizardMessages extends NLS {
 	public static String PackageExplorerActionGroup_FormText_Default_toBuildpath_library;
 	public static String PackageExplorerActionGroup_FormText_Default_Reset;
 	public static String PackageExplorerActionGroup_FormText_Default_ResetAll;
+	public static String PackageExplorerActionGroup_FormText_createNewSourceFolder;
 	
 	public static String DialogPackageExplorer_LabelProvider_Excluded;
 	public static String DialogPackageExplorer_LabelProvider_SingleExcluded;

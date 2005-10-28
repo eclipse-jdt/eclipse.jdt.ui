@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -32,6 +33,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.ui.dialogs.NewFolderDialog;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -402,7 +405,7 @@ public class ClasspathModifierQueries {
     /**
 	 * Query to create a folder.
 	 */
-    public static interface IFolderCreationQuery {
+    public static interface ICreateFolderQuery {
         /**
          * Query to create a folder.
          * 
@@ -641,7 +644,7 @@ public class ClasspathModifierQueries {
      * @return an <code>ILinkToQuery</code> showing a dialog
      * to create a linked source folder.
      * 
-     * @see ClasspathModifierQueries.IFolderCreationQuery
+     * @see ClasspathModifierQueries.ICreateFolderQuery
      * @see LinkFolderDialog
      */
     public static ILinkToQuery getDefaultLinkQuery(final Shell shell, final IJavaProject project, final IPath desiredOutputLocation) {
@@ -758,4 +761,49 @@ public class ClasspathModifierQueries {
             }  
         };
     }
+
+    /**
+     * Shows the UI to create a new source folder. 
+     * 
+     * @param shell The parent shell for the dialog, can be <code>null</code>
+     * @param project the Java project to create the source folder for
+     * @return returns the query
+     */
+	public static ICreateFolderQuery getDefaultCreateFolderQuery(final Shell shell, final IJavaProject project) {
+		return new ICreateFolderQuery() {
+
+			private IFolder fNewFolder;
+
+			public boolean doQuery() {
+				final boolean[] isOK= {false};
+                Display.getDefault().syncExec(new Runnable() {
+                    public void run() {
+                        Shell sh= shell != null ? shell : JavaPlugin.getActiveWorkbenchShell();
+                        
+                        NewFolderDialog dialog= new NewFolderDialog(sh, project.getProject());
+                        isOK[0]= dialog.open() == Window.OK;
+                        if (isOK[0]) {
+                        	IResource sourceContainer= (IResource) dialog.getResult()[0];
+                        	if (sourceContainer instanceof IFolder) {
+                        		fNewFolder= (IFolder)sourceContainer;
+                        	} else {
+                        		fNewFolder= null;
+                        	}
+                        }
+                    }
+                });
+                return isOK[0];
+			}
+
+
+			public boolean isSourceFolder() {
+				return true;
+			}
+
+			public IFolder getCreatedFolder() {
+				return fNewFolder;
+			}
+			
+		};
+	}
 }

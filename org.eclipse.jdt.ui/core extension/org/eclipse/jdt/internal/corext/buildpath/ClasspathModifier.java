@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathsBlock.IRemoveOld
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IFolderCreationQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ICreateFolderQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
@@ -142,10 +142,10 @@ public class ClasspathModifier {
 	 * (e.g. the operation was cancelled).
 	 * @throws CoreException 
 	 * @throws OperationCanceledException 
-	 * @see ClasspathModifierQueries.IFolderCreationQuery
+	 * @see ClasspathModifierQueries.ICreateFolderQuery
 	 * @see ClasspathModifierQueries.OutputFolderQuery
 	 */
-	protected List createFolder(IFolderCreationQuery folderQuery, OutputFolderQuery outputQuery, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
+	protected List createFolder(ICreateFolderQuery folderQuery, OutputFolderQuery outputQuery, IJavaProject project, IProgressMonitor monitor) throws OperationCanceledException, CoreException {
 		if (folderQuery.doQuery()) {
 			IFolder folder= folderQuery.getCreatedFolder();
 			if (folder != null) {
