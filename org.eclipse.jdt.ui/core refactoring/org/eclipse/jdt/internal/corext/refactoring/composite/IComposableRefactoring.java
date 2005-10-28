@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.composite;
 
-import org.eclipse.ltk.internal.core.refactoring.history.IInitializableRefactoringComponent;
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
