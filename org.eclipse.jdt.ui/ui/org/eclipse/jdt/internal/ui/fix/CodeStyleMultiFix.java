@@ -41,11 +41,14 @@ import org.eclipse.jdt.internal.corext.fix.CodeStyleFix.TupleForUnqualifiedAcces
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
- * Creates fixes which can resolve code style issuse 
+ * Creates fixes which can resolve code style issues 
  * @see org.eclipse.jdt.internal.corext.fix.CodeStyleFix
  */
 public class CodeStyleMultiFix extends AbstractMultiFix {
 
+	private static final String CHANGE_NON_STATIC_ACCESS_TO_STATIC_MULTI_FIX_DESCRIPTION= MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description;
+	private static final String ADD_THIS_QUALIFIER_MULTI_FIX_DESCRIPTION= MultiFixMessages.CodeStyleMultiFix_AddThisQualifier_description;
+	
 	private static final String CHANGE_NON_STATIC_ACCESS_TO_STATIC_SETTINGS_ID= "ChangeNonStaticAccessToStatic"; //$NON-NLS-1$
 	private static final String ADD_THIS_QUALIFIER_SETTINGS_ID= "AddThisQualifier"; //$NON-NLS-1$
 	
@@ -64,11 +67,12 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
-		
-		List/*<TupleForUnqualifiedAccess>*/ bindingTuples= new ArrayList();
-		List/*<TupleForNonStaticAccess>*/ nonStaticTuples= new ArrayList(); 
-		
+
 		IProblem[] problems= compilationUnit.getProblems();
+		
+		List/*<TupleForNonStaticAccess>*/ nonStaticTuples= new ArrayList(); 
+		List/*<TupleForUnqualifiedAccess>*/ bindingTuples= new ArrayList();
+		
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= getProblemLocation(problems[i]);
 			TupleForNonStaticAccess tupleDirect= null;
@@ -85,6 +89,7 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 			}
 			
 		}
+		
 		if (bindingTuples.size() == 0 && nonStaticTuples.size() == 0)
 			return null;
 		
@@ -109,7 +114,7 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 		composite.setLayout(new GridLayout(1, true));
 		
 		Button addThisQualifier= new Button(composite, SWT.CHECK);
-		addThisQualifier.setText(CodeStyleFix.ADD_THIS_QUALIFIER);
+		addThisQualifier.setText(ADD_THIS_QUALIFIER_MULTI_FIX_DESCRIPTION);
 		addThisQualifier.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		addThisQualifier.setSelection(fAddThisQualifier);
 		addThisQualifier.addSelectionListener(new SelectionAdapter() {
@@ -119,7 +124,7 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 		});
 		
 		Button removeNonStaticAccess= new Button(composite, SWT.CHECK);
-		removeNonStaticAccess.setText("Change access to static using declaring type");
+		removeNonStaticAccess.setText(CHANGE_NON_STATIC_ACCESS_TO_STATIC_MULTI_FIX_DESCRIPTION);
 		removeNonStaticAccess.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		removeNonStaticAccess.setSelection(fChangeNonStaticAccessToStatic);
 		removeNonStaticAccess.addSelectionListener(new SelectionAdapter() {

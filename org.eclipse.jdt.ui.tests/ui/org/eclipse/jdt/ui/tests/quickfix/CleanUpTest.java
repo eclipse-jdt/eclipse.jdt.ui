@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
@@ -1364,6 +1365,53 @@ public class CleanUpTest extends QuickFixTest {
 		}
 
 		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});
+	}
+	
+	public void testCombination01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int i= 10;\n");
+		buf.append("    private int j= 20;\n");
+		buf.append("    \n");
+		buf.append("    public void foo() {\n");
+		buf.append("        i= j;\n");
+		buf.append("        i= 20;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		IMultiFix multiFix1= new CodeStyleMultiFix(true, false);
+		IMultiFix multiFix2= new UnusedCodeMultiFix(false, false, false, true, false, false);
+		
+		setOptions(multiFix1);
+		setOptions(multiFix2);
+		
+		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1});
+		assertNumberOfProblems(units[0], 4);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int j= 20;\n");
+		buf.append("    \n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		IFix fix1= multiFix1.createFix(units[0]);
+		TextChange change1= fix1.createChange();
+		
+		IFix fix2= multiFix2.createFix(units[0]);
+		TextChange change2= fix2.createChange();		
+
+		CleanUpRefactoring.mergeTextChanges(change2, change1);
+
+		assertEquals(expected1, change2.getPreviewContent(null));
 	}
 	
 }

@@ -67,13 +67,13 @@ public class FixCorrectionProposal extends CUCorrectionProposal implements IComp
 		if (stateMask == SWT.CONTROL && fMultiFix != null){
 			CleanUpRefactoring refactoring= new CleanUpRefactoring();
 			refactoring.addCompilationUnit(getCompilationUnit());
-			refactoring.addProblemSolution(fMultiFix);
+			refactoring.addMultiFix(fMultiFix);
 			
 			CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, true, false);
 			
 			RefactoringStarter starter= new RefactoringStarter();
 			try {
-				starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", true);
+				starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), refactoring.getName(), true);
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}

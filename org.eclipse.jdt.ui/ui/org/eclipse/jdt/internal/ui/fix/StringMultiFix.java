@@ -51,8 +51,8 @@ public class StringMultiFix extends AbstractMultiFix {
 	private static final String REMOVE_NLS_TAG_SETTINGS_ID= "RemoveNlsTag"; //$NON-NLS-1$
 	private static final String ADD_NLS_TAG_SETTINGS_ID= "AddNlsTag"; //$NON-NLS-1$
 	
-	private static final String ADD_NON_NLS_TAG= StringFix.ADD_$NON_NLS$_TAG;
-	private static final String REMOVE_NON_NLS_TAG= StringFix.REMOVE_$NON_NLS$_TAG;
+	private static final String ADD_NON_NLS_TAG= MultiFixMessages.StringMultiFix_AddMissingNonNls_description;
+	private static final String REMOVE_NON_NLS_TAG= MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description;
 	
 	private boolean fAddNlsTag;
 	private boolean fRemoveNlsTag;
@@ -107,7 +107,7 @@ public class StringMultiFix extends AbstractMultiFix {
 		if (result == null)
 			return null;
 		
-		return new TextChangeFix("", cu, result);
+		return new TextChangeFix("", cu, result); //$NON-NLS-1$
 	}
 
 	public Map getRequiredOptions() {

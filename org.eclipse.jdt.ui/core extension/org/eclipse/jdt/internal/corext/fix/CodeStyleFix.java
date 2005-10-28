@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEdit;
@@ -47,15 +48,16 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
- * A fix wich fixes code style isuess.
+ * A fix which fixes code style issues.
  * Supports:
- * 		Qualifie field with this: f -> this.f if f is a field.
+ * 		Qualify field with this: f -> this.f if f is a field.
  * 		Change non static access to static using declaring type.
  */
 public class CodeStyleFix extends AbstractFix {
 	
-	public static final String ADD_THIS_QUALIFIER= "Add 'this' qualifier";
-	public static final String QUALIFY_0_WITH_THIS= "Qualify ''{0}'' with ''this''";
+	private static final String CHANGE_ACCESS_TO_STATIC_USING_0_DECLARING_TYPE= FixMessages.CodeStyleFix_ChangeAccessToStatic_description;
+	public static final String ADD_THIS_QUALIFIER= FixMessages.CodeStyleFix_AddThisQualifier_description;
+	public static final String QUALIFY_0_WITH_THIS= FixMessages.CodeStyleFix_QualifyWithThis_description;
 	
 	private final TupleForUnqualifiedAccess[] fBindingTuples;
 	private final TupleForNonStaticAccess[] fTupleDirects;
@@ -85,11 +87,13 @@ public class CodeStyleFix extends AbstractFix {
 		private final ITypeBinding fDeclaringTypeBinding;
 		private final IBinding fAccessBinding;
 		private final Expression fQualifier;
+		private final ASTNode fNode;
 
-		public TupleForNonStaticAccess(ITypeBinding declaringTypeBinding, IBinding accessBinding, Expression qualifier) {
+		public TupleForNonStaticAccess(ITypeBinding declaringTypeBinding, IBinding accessBinding, Expression qualifier, ASTNode node) {
 			fDeclaringTypeBinding= declaringTypeBinding;
 			fAccessBinding= accessBinding;
 			fQualifier= qualifier;
+			fNode= node;
 
 		}
 
@@ -104,6 +108,10 @@ public class CodeStyleFix extends AbstractFix {
 		public Expression getQualifier() {
 			return fQualifier;
 		}
+
+		public ASTNode getNode() {
+			return fNode;
+		}
 		
 	}
 
@@ -113,7 +121,7 @@ public class CodeStyleFix extends AbstractFix {
 			if (tupleDirect != null) {
 
 				ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
-				String label= Messages.format("Change access to static using ''{0}'' (declaring type)", tupleDirect.getDeclaringTypeBinding().getName());
+				String label= Messages.format(CHANGE_ACCESS_TO_STATIC_USING_0_DECLARING_TYPE, tupleDirect.getDeclaringTypeBinding().getName());
 				return new CodeStyleFix(label, cu, null, new TupleForNonStaticAccess[] {tupleDirect});
 			}
 		}
@@ -176,7 +184,7 @@ public class CodeStyleFix extends AbstractFix {
 			if (declaringTypeBinding != null) {
 				declaringTypeBinding= declaringTypeBinding.getTypeDeclaration(); // use generic to avoid any type arguments
 				
-				return new TupleForNonStaticAccess(declaringTypeBinding, accessBinding, qualifier);
+				return new TupleForNonStaticAccess(declaringTypeBinding, accessBinding, qualifier, selectedNode);
 			}
 		}
 		return null;
@@ -253,21 +261,22 @@ public class CodeStyleFix extends AbstractFix {
 		
 		TextEdit edit= applyEdits(getCompilationUnit(), rewrite, imports);
 		
-		CompilationUnitChange result= new CompilationUnitChange(ADD_THIS_QUALIFIER, getCompilationUnit());
+		CompilationUnitChange result= new CompilationUnitChange("", getCompilationUnit()); //$NON-NLS-1$
 		result.setEdit(edit);
 			
-			//Commented out: Lead to no more handle error if applayed to large projects
-//			for (Iterator iter= groups.iterator(); iter.hasNext();) {
-//				TextEditGroup group= (TextEditGroup)iter.next();
-//				result.addTextEditGroup(group);
-//			}
+		for (Iterator iter= groups.iterator(); iter.hasNext();) {
+			TextEditGroup group= (TextEditGroup)iter.next();
+			result.addTextEditGroup(group);
+		}
 			
 		return result;
 	}
 	
 	private void rewriteASTForNonStaticAccess(ImportRewrite imports, AST ast, ITypeBinding declaringTypeBinding, Expression qualifier, ASTRewrite rewrite, List groups) {
 		String typeName= imports.addImport(declaringTypeBinding);
-		rewrite.replace(qualifier, ASTNodeFactory.newName(ast, typeName), null);
+		TextEditGroup group= new TextEditGroup(Messages.format(CHANGE_ACCESS_TO_STATIC_USING_0_DECLARING_TYPE, declaringTypeBinding.getName()));
+		groups.add(group);
+		rewrite.replace(qualifier, ASTNodeFactory.newName(ast, typeName), group);
 	}
 
 	private void rewriteASTForThisQualifier(ImportRewrite imports, SimpleName name, IBinding binding, ASTRewrite rewrite, List editGroups) {

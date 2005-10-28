@@ -18,7 +18,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 /**
  * An <code>IFix</code> can calculate a <code>TextChange</code>
- * which applayed to a <code>ICompilationUnit</code> will fix
+ * which applied to a <code>ICompilationUnit</code> will fix
  * one or several problems.
  * 
  * @since 3.2
@@ -34,7 +34,7 @@ public interface IFix {
 	public abstract String getDescription();
 	
 	/**
-	 * A <code>TextChange</code> which applayed to <code>getCompilationUnit</code>
+	 * A <code>TextChange</code> which applied to <code>getCompilationUnit</code>
 	 * will fix a problem.
 	 * 
 	 * @return The change or null if no fix possible
@@ -44,7 +44,7 @@ public interface IFix {
 	
 	/**
 	 * The <code>ICompilationUnit</code> on which <code>createChange</code> should
-	 * be applayed to fix a problem.
+	 * be applied to fix a problem.
 	 * 
 	 * @return The ICompilationUnit, not null
 	 */

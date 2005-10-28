@@ -51,10 +51,11 @@ import org.eclipse.ltk.core.refactoring.TextChange;
  */
 public class Java50Fix extends AbstractFix {
 	
-	public static final String ADD_MISSING_0_ANNOTATION= "Add missing @{0} annotation";
-	public static final String ADD_MISSING_ANNOTATIONS= "Add missing annotations";
-	public static final String ADD_MISSING_DEPRICATED_ANNOTATION= "Add missing @Deprecated annotation";
-	public static final String ADD_MISSING_OVERRIDE_ANNOTATION= "Add missing @Override annotation";
+	private static final String ADD_MISSING_0_ANNOTATION= FixMessages.Java50Fix_AddMissingAnnotation_description;
+	private static final String ADD_MISSING_ANNOTATIONS= FixMessages.Java50Fix_AddMissingAnnotations_description;
+	private static final String ADD_MISSING_DEPRECATED_ANNOTATION= FixMessages.Java50Fix_AddDeprecated_description;
+	private static final String ADD_MISSING_OVERRIDE_ANNOTATION= FixMessages.Java50Fix_AddOverride_description;
+	
 	private final AnnotationTuple[] fAnnotationTuples;
 
 	public static class AnnotationTuple {
@@ -115,7 +116,7 @@ public class Java50Fix extends AbstractFix {
 		
 		if (addDepricatedAnnotation && isMissingDeprecated(problem)) {
 			annotations.add("Deprecated"); //$NON-NLS-1$
-			name= ADD_MISSING_DEPRICATED_ANNOTATION;
+			name= ADD_MISSING_DEPRECATED_ANNOTATION;
 		}
 		
 		if (annotations.size() == 2) {
@@ -124,18 +125,15 @@ public class Java50Fix extends AbstractFix {
 		return name;
 	}
 
-
 	public static boolean isMissingOverride(IProblemLocation problem) {
 		return problem.getProblemId() == IProblem.MissingOverrideAnnotation;
 	}
-
 
 	public static boolean isMissingDeprecated(IProblemLocation problem) {
 		return problem.getProblemId() == IProblem.FieldMissingDeprecatedAnnotation ||
 		problem.getProblemId() == IProblem.MethodMissingDeprecatedAnnotation ||
 		problem.getProblemId() == IProblem.TypeMissingDeprecatedAnnotation;
 	}
-
 	
 	public static ASTNode getDeclaringNode(ASTNode selectedNode) {
 		ASTNode declaringNode= null;		
@@ -183,7 +181,7 @@ public class Java50Fix extends AbstractFix {
 		return null;
 	}
 	
-	private static void addAnnotation(BodyDeclaration declaration, String[] annotationNames, AST ast, ASTRewrite rewrite, List textEditGroups) {
+	private void addAnnotation(BodyDeclaration declaration, String[] annotationNames, AST ast, ASTRewrite rewrite, List textEditGroups) {
 		ListRewrite listRewrite= rewrite.getListRewrite(declaration, declaration.getModifiersProperty());
 
 		for (int i= 0; i < annotationNames.length; i++) {

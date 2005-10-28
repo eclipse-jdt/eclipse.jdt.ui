@@ -46,6 +46,18 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 public class CleanUpRefactoringWizard extends RefactoringWizard {
 
+	private static final String SELECT_CLEAN_UPS_PAGE_MESSAGE= MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_message;
+	private static final String SELECT_COMPILATION_UNITS_PAGE_MESSAGE= MultiFixMessages.CleanUpRefactoringWizard_SelectCompilationUnitsPage_message;
+	private static final String SELECT_CLEAN_UPS_PAGE_NAME= MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_name;
+	private static final String SELECT_COMPILATION_UNITS_PAGE_NAME= MultiFixMessages.CleanUpRefactoringWizard_SelectCompilationUnitsPage_name;
+	private static final String CLEAN_UP_WIZARD_WINDOW_TITLE= MultiFixMessages.CleanUpRefactoringWizard_WindowTitle;
+	private static final String CLEAN_UP_WIZARD_PAGE_TITLE= MultiFixMessages.CleanUpRefactoringWizard_PageTitle;
+	
+	private static final String CODE_STYLE_SECTION_DESCRIPTION= MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description;
+	private static final String J2SE_5_0_SECTION_DESCRIPTION= MultiFixMessages.CleanUpRefactoringWizard_J2SE50Section_description;
+	private static final String UNUSED_CODE_SECTION_DESCRIPTION= MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description;
+	private static final String STRING_EXTERNALIZATION_SECTION_DESCRIPTION= MultiFixMessages.CleanUpRefactoringWizard_StringExternalization_description;
+	
 	private final boolean fShowCUPage;
 	private final boolean fShowCleanUpPage;
 
@@ -130,14 +142,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 	
 	private class SelectSolverPage extends UserInputWizardPage {
 
-		private static final String SERIAL_VERSION_IDS_SECTION_DESCRIPTION= "Serial version ids";
-
 		private static final String CLEAN_UP_WIZARD_SETTINGS_SECTION_ID= "CleanUpWizard"; //$NON-NLS-1$
-		
-		private static final String CODE_STYLE_SECTION_DESCRIPTION= "Code style";
-		private static final String J2SE_5_0_SECTION_DESCRIPTION= "J2SE 5.0";
-		private static final String UNUSED_CODE_SECTION_DESCRIPTION= "Unused code";
-		private static final String STRING_EXTERNALIZATION_SECTION_DESCRIPTION= "String externalization";
 		
 		private class NameFixTuple {
 
@@ -207,9 +212,9 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				IDialogSettings section= settings.getSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);
 				fMultiFixes= new NameFixTuple[4];
 				if (section == null) {
-					settings.addNewSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);
-					fMultiFixes[0]= new NameFixTuple(CODE_STYLE_SECTION_DESCRIPTION, new CodeStyleMultiFix(true, true));
-					fMultiFixes[1]= new NameFixTuple(UNUSED_CODE_SECTION_DESCRIPTION, new UnusedCodeMultiFix(true, true, true, true, true, true));	
+					section= settings.addNewSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);
+					fMultiFixes[0]= new NameFixTuple(CODE_STYLE_SECTION_DESCRIPTION, new CodeStyleMultiFix(false, true));
+					fMultiFixes[1]= new NameFixTuple(UNUSED_CODE_SECTION_DESCRIPTION, new UnusedCodeMultiFix(true, true, true, false, true, true));	
 					fMultiFixes[2]= new NameFixTuple(J2SE_5_0_SECTION_DESCRIPTION, new Java50MultiFix(true, true));
 					fMultiFixes[3]= new NameFixTuple(STRING_EXTERNALIZATION_SECTION_DESCRIPTION, new StringMultiFix(false, true));
 					storeSettings();
@@ -245,10 +250,10 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 
 		private void initializeRefactoring() {
 			CleanUpRefactoring refactoring= (CleanUpRefactoring)getRefactoring();
-			refactoring.clearProblemSolutions();
+			refactoring.clearMultiFixes();
 			NameFixTuple[] multiFixes= getMultiFixes();
 			for (int i= 0; i < multiFixes.length; i++) {
-				refactoring.addProblemSolution(multiFixes[i].getFix());
+				refactoring.addMultiFix(multiFixes[i].getFix());
 			}
 		}	
 	}
@@ -257,7 +262,9 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		super(refactoring, flags);
 		fShowCUPage= showCUPage;
 		fShowCleanUpPage= showCleanUpPage;
-		setDefaultPageTitle("Clean up wizard");
+		setDefaultPageTitle(CLEAN_UP_WIZARD_PAGE_TITLE);
+		setWindowTitle(CLEAN_UP_WIZARD_WINDOW_TITLE);
+		
 	}
 
 	/* (non-Javadoc)
@@ -265,14 +272,14 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 	 */
 	protected void addUserInputPages() {
 		if (fShowCUPage) {
-			SelectCUPage selectCUPage= new SelectCUPage("Select Compilation units Page");
-			selectCUPage.setMessage("Select compilation units to clean up.");
+			SelectCUPage selectCUPage= new SelectCUPage(SELECT_COMPILATION_UNITS_PAGE_NAME);
+			selectCUPage.setMessage(SELECT_COMPILATION_UNITS_PAGE_MESSAGE);
 			addPage(selectCUPage);
 		}
 		
 		if (fShowCleanUpPage){
-			SelectSolverPage selectSolverPage= new SelectSolverPage("Select clean ups Page");
-			selectSolverPage.setMessage("Select clean ups and set there options to applay to the selected compilation units.");
+			SelectSolverPage selectSolverPage= new SelectSolverPage(SELECT_CLEAN_UPS_PAGE_NAME);
+			selectSolverPage.setMessage(SELECT_CLEAN_UPS_PAGE_MESSAGE);
 			addPage(selectSolverPage);
 		}
 	}

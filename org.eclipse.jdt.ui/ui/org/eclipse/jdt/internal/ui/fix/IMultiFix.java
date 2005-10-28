@@ -24,11 +24,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
 /**
- * A multi fix can solve several differend problems in
+ * A multi-fix can solve several different problems in
  * a given <code>CompilationUnit</code>. The <code>CompilationUnit</code>
- * is compiled by using the compiler options returend by
+ * is compiled by using the compiler options returned by
  * <code>getRequiredOptions</code>. A <code>IMultiFix</code> can have
- * differend options which can be set by using the <code>Control</code>
+ * different options which can be set by using the <code>Control</code>
  * returned by <code>createConfigurationControl</code>
  *
  * @since 3.2
@@ -36,8 +36,8 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 public interface IMultiFix {
 	
 	/**
-	 * Create a <code>IFix</code> which fixes all problems which this multi
-	 * fix can fix in <code>CompilationUnit</code>.
+	 * Create a <code>IFix</code> which fixes all problems which this 
+	 * multi-fix can fix in <code>CompilationUnit</code>.
 	 * 
 	 * @param compilationUnit The compilation unit to fix, may be null
 	 * @return The fix or null if no fixes possible
@@ -49,12 +49,12 @@ public interface IMultiFix {
 	 * Required compiler options to allow <code>createFix</code> to work
 	 * correct.
 	 *
-	 * @return The options als map or null
+	 * @return The options as map or null
 	 */
 	public abstract Map getRequiredOptions();
 	
 	/**
-	 * Create a controll to configure the options for this multi fix
+	 * Create a control to configure the options for this multi-fix
 	 * in a UI.
 	 * 
 	 * @param parent The composite in which the result is contained in

@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
- * Fix which solves varius issues with strings.
+ * Fix which solves various issues with strings.
  * Supported:
  * 		Add missing $NON-NLS$ tag
  * 		Remove unnecessary $NON-NLS$ tag
@@ -38,9 +38,9 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  */
 public class StringFix extends AbstractFix {
 	
-	public static final String ADD_REMOVE_$NON_NLS$_TAG= "Add/Remove '$NON-NLS$' tag";
-	public static final String ADD_$NON_NLS$_TAG= "Add missing '$NON-NLS$' tag";
-	public static final String REMOVE_$NON_NLS$_TAG= "Remove unnecessary '$NON-NLS$' tag";
+	private static final String ADD_REMOVE_$NON_NLS$_TAG= FixMessages.StringFix_AddRemoveNonNls_description;
+	private static final String ADD_$NON_NLS$_TAG= FixMessages.StringFix_AddNonNls_description;
+	private static final String REMOVE_$NON_NLS$_TAG= FixMessages.StringFix_RemoveNonNls_description;
 	
 	private final TextEdit fEdit;
 	private TextChange fChange;

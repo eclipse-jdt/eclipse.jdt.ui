@@ -1,0 +1,47 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+package org.eclipse.jdt.internal.corext.fix;
+
+import org.eclipse.osgi.util.NLS;
+
+public class FixMessages extends NLS {
+	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.corext.fix.FixMessages"; //$NON-NLS-1$
+
+	private FixMessages() {
+	}
+
+	public static String CleanUpRefactoring_Refactoring_name;
+	public static String CleanUpRefactoring_ProcessingCompilationUnit_message;
+	
+	public static String UnusedCodeFix_RemoveFieldOrLocal_description;
+	public static String UnusedCodeFix_RemoveMethod_description;
+	public static String UnusedCodeFix_RemoveConstructor_description;
+	public static String UnusedCodeFix_RemoveType_description;
+	public static String UnusedCodeFix_RemoveImport_description;
+	
+	public static String Java50Fix_AddMissingAnnotation_description;
+	public static String Java50Fix_AddMissingAnnotations_description;
+	public static String Java50Fix_AddDeprecated_description;
+	public static String Java50Fix_AddOverride_description;
+	
+	public static String StringFix_AddRemoveNonNls_description;
+	public static String StringFix_AddNonNls_description;
+	public static String StringFix_RemoveNonNls_description;
+	
+	public static String CodeStyleFix_ChangeAccessToStatic_description;
+	public static String CodeStyleFix_AddThisQualifier_description;
+	public static String CodeStyleFix_QualifyWithThis_description;
+
+	static {
+		// initialize resource bundle
+		NLS.initializeMessages(BUNDLE_NAME, FixMessages.class);
+	}
+}
