@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.workingsets;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
@@ -201,7 +202,7 @@ public class WorkingSetModel {
 			if (obj instanceof List)
 				return (List)obj;
 			if (obj == null)
-				return new ArrayList(0);
+				return Collections.EMPTY_LIST;
 			List result= new ArrayList(1);
 			result.add(obj);
 			return result;
@@ -250,7 +251,7 @@ public class WorkingSetModel {
 	
 	//---- model relationships ---------------------------------------
 	
-    public Object[] getChildren(IWorkingSet workingSet) {
+    public IAdaptable[] getChildren(IWorkingSet workingSet) {
     	return workingSet.getElements();
     }
     

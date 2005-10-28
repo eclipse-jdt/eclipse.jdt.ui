@@ -22,6 +22,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -99,7 +103,19 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			String id= ws.getId();
 			return HistoryWorkingSetUpdater.ID.equals(id) ||
 				OthersWorkingSetUpdater.ID.equals(id) ||
-				JavaWorkingSetUpdater.ID.equals(id);
+				JavaWorkingSetUpdater.ID.equals(id) || isCompatible(ws);
+		}
+		private boolean isCompatible(IWorkingSet set) {
+			IAdaptable[] elements= set.getElements();
+			if (elements.length == 0)
+				return false;
+			for (int i= 0; i < elements.length; i++) {
+				IAdaptable element= elements[i];
+				IProject p= (IProject)element.getAdapter(IProject.class);
+				if (p == null || !p.exists())
+					return false;
+			}
+			return true;
 		}
 	}
 
