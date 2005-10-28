@@ -7,7 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Sebastian Davids - bug 38507
+ *     Sebastian Davids - bug 38507 & 113998
  *******************************************************************************/
 package org.eclipse.jdt.junit.wizards;
 
@@ -355,7 +355,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(elements);
 		
 		try {		
-			SelectionDialog dialog= JavaUI.createTypeDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES, false, getClassUnderTestText());
+			SelectionDialog dialog= JavaUI.createTypeDialog(getShell(), getWizard().getContainer(), scope, IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS, false, getClassUnderTestText());
 			dialog.setTitle(WizardMessages.NewTestCaseWizardPageOne_class_to_test_dialog_title); 
 			dialog.setMessage(WizardMessages.NewTestCaseWizardPageOne_class_to_test_dialog_message); 
 			if (dialog.open() == Window.OK) {
