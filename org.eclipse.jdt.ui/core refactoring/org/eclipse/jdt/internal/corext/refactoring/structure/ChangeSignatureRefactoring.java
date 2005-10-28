@@ -786,7 +786,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 				.append(' ');
 
 		buff.append(JavaElementLabels.getElementLabel(fMethod.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED));
-		buff.append('#');
+		buff.append('.');
 		buff.append(fMethod.getElementName())
 			.append(Signature.C_PARAM_START)
 			.append(getOldMethodParameters())

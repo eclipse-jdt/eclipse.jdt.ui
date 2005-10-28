@@ -78,6 +78,8 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating {
@@ -597,7 +599,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 					IJavaProject javaProject= fMethod.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_RENAME_METHOD, project, MessageFormat.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description, new String[] { fMethod.getElementName(), getNewElementName()}), null, arguments);
+					return new RefactoringDescriptor(ID_RENAME_METHOD, project, MessageFormat.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), null, arguments);
 				}
 			};
 		} finally {
