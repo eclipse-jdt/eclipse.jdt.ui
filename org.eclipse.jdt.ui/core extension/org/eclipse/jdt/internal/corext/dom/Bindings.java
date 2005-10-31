@@ -858,8 +858,8 @@ public class Bindings {
 	 * <code>true</code> is returned if the two type bindings are identical (TODO)
 	 * @param possibleSuperType the type to inspect
 	 * @param type the type whose super types are looked at
-	 * @return <code>true</code> is a super type of one of the candidates; otherwise
-	 *  <code>false</code>
+	 * @return <code>true</code> iff <code>possibleSuperType</code> is
+	 * 		a super type of <code>type</code> or is equal to it
 	 */
 	public static boolean isSuperType(ITypeBinding possibleSuperType, ITypeBinding type) {
 		if (type.isArray() || type.isPrimitive()) {
