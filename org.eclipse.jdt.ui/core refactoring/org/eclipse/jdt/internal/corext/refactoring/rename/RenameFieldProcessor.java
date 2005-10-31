@@ -492,7 +492,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 					IJavaProject javaProject= fField.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_RENAME_FIELD, project, MessageFormat.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "#" + fField.getElementName(), getNewElementName()}), null, arguments); //$NON-NLS-1$
+					return new RefactoringDescriptor(ID_RENAME_FIELD, project, MessageFormat.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "." + fField.getElementName(), getNewElementName()}), null, arguments); //$NON-NLS-1$
 				}
 			};
 		} finally {
