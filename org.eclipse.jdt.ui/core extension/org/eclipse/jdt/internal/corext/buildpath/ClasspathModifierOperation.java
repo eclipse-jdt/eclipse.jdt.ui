@@ -130,4 +130,8 @@ public abstract class ClasspathModifierOperation extends ClasspathModifier imple
     public List getSelectedElements() {
         return fInformationProvider.getSelection().toList();
     }
+    
+    public int getTypeId() {
+    	return fType;
+    }
 }

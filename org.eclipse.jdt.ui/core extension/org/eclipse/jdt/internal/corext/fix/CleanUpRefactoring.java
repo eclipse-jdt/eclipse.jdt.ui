@@ -30,20 +30,21 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.RefactoringTickProvider;
+import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringTickProvider;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.fix.IMultiFix;
@@ -51,8 +52,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class CleanUpRefactoring extends Refactoring {
 
-	private static final String CLEAN_UP_REFACTORING_NAME= FixMessages.CleanUpRefactoring_Refactoring_name;
-	private static final String PROCESSING_COMPILATION_UNIT_MESSAGE= FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message;
+	private static final int BATCH_SIZE= 40;
 
 	private class FixCalculationException extends RuntimeException {
 
@@ -108,7 +108,7 @@ public class CleanUpRefactoring extends Refactoring {
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getName()
 	 */
 	public String getName() {
-		return CLEAN_UP_REFACTORING_NAME;
+		return FixMessages.CleanUpRefactoring_Refactoring_name;
 	}
 
 	/* (non-Javadoc)
@@ -147,7 +147,7 @@ public class CleanUpRefactoring extends Refactoring {
 			pm.beginTask("", 1); //$NON-NLS-1$
 			pm.worked(1);
 			pm.done();
-			return null;
+			return new NullChange();
 		}
 		
 		pm.beginTask("", fCompilationUnits.size()); //$NON-NLS-1$
@@ -156,7 +156,6 @@ public class CleanUpRefactoring extends Refactoring {
 		
 		final List resultingFixes= new ArrayList();
 		
-		int length= 40;
 		int start= 0;
 		int end;
 
@@ -166,7 +165,7 @@ public class CleanUpRefactoring extends Refactoring {
 		do {
 			end= start + 1;
 			while (
-					end - start < length && 
+					end - start < BATCH_SIZE && 
 					end < fCompilationUnits.size() &&
 					compilationUnitsIterator.hasNext() && 
 					beforeEndCU.getJavaProject().equals((endCU= (ICompilationUnit)compilationUnitsIterator.next()).getJavaProject())) {
@@ -204,21 +203,19 @@ public class CleanUpRefactoring extends Refactoring {
 	 */
 	private Map getMultiFixOptions() {
 		Map fixOptions= new Hashtable();
-		
 		for (Iterator iter= fMultiFixes.iterator(); iter.hasNext();) {
 			IMultiFix fix= (IMultiFix)iter.next();
 			Map curFixOptions= fix.getRequiredOptions();
 			if (curFixOptions != null)
 				fixOptions.putAll(curFixOptions);
 		}
-		fixOptions.put(JavaCore.COMPILER_PB_MAX_PER_UNIT, "350"); //$NON-NLS-1$
 		return fixOptions;
 	}
 
 	private void parse(final List solutions, final int start, final ICompilationUnit[] compilationUnits, final SubProgressMonitor sub, ASTParser parser) throws CoreException {
 		final int[] index= new int[] {start};
 		final Integer size= new Integer(fCompilationUnits.size());
-		sub.subTask(Messages.format(PROCESSING_COMPILATION_UNIT_MESSAGE, new Object[] {getTypeName(compilationUnits[index[0]- start]), new Integer(index[0] + 1), size}));
+		sub.subTask(Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {getTypeName(compilationUnits[index[0]- start]), new Integer(index[0] + 1), size}));
 		
 		try {
 			parser.createASTs(compilationUnits, new String[0], new ASTRequestor() {
@@ -228,7 +225,7 @@ public class CleanUpRefactoring extends Refactoring {
 					calculateSolution(solutions, ast);
 					index[0]++;
 					if (index[0] - start < compilationUnits.length) {
-						sub.subTask(Messages.format(PROCESSING_COMPILATION_UNIT_MESSAGE, new Object[] {getTypeName(compilationUnits[index[0] - start]), new Integer(index[0] + 1), size}));
+						sub.subTask(Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {getTypeName(compilationUnits[index[0] - start]), new Integer(index[0] + 1), size}));
 					}
 				}
 				
@@ -242,8 +239,8 @@ public class CleanUpRefactoring extends Refactoring {
 		ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 		parser.setResolveBindings(true);
 		parser.setProject(javaProject);
-		
-		Map options= javaProject.getOptions(true);
+				
+		Map options= RefactoringASTParser.getCompilerOptions(javaProject);
 		options.putAll(fixOptions);
 		parser.setCompilerOptions(options);
 		return parser;

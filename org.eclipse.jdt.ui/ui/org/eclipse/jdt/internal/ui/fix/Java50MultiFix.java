@@ -49,9 +49,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  */
 public class Java50MultiFix extends AbstractMultiFix {
 
-	private static final String ADD_MISSING_DEPRECATED_ANNOTATION_MULTI_FIX_DESCRIPTION= MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description;
-	private static final String ADD_MISSING_OVERRIDE_ANNOTATION_MULTI_FIX_DESCRIPTION= MultiFixMessages.Java50MultiFix_AddMissingOverride_description;
-	
 	private static final String ADD_DEPRICATED_ANNOTATION_SETTINGS_ID= "AddDepricatedAnnotation"; //$NON-NLS-1$
 	private static final String ADD_OVERRIDE_ANNOTATION_SETTINGS_ID= "AddOverrideAnnotation"; //$NON-NLS-1$
 	
@@ -128,7 +125,7 @@ public class Java50MultiFix extends AbstractMultiFix {
 		composite.setLayout(new GridLayout(1, true));
 		
 		Button addOverrid= new Button(composite, SWT.CHECK);
-		addOverrid.setText(ADD_MISSING_OVERRIDE_ANNOTATION_MULTI_FIX_DESCRIPTION);
+		addOverrid.setText(MultiFixMessages.Java50MultiFix_AddMissingOverride_description);
 		addOverrid.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		addOverrid.setSelection(fAddOverrideAnnotation);
 		addOverrid.addSelectionListener(new SelectionAdapter() {
@@ -138,7 +135,7 @@ public class Java50MultiFix extends AbstractMultiFix {
 		});
 		
 		Button addDepricated= new Button(composite, SWT.CHECK);
-		addDepricated.setText(ADD_MISSING_DEPRECATED_ANNOTATION_MULTI_FIX_DESCRIPTION);
+		addDepricated.setText(MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description);
 		addDepricated.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		addDepricated.setSelection(fAddDepricatedAnnotation);
 		addDepricated.addSelectionListener(new SelectionAdapter() {

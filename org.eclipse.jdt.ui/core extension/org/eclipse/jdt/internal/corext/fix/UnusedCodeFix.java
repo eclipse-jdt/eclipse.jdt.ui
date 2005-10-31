@@ -70,12 +70,6 @@ import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
  */
 public class UnusedCodeFix extends AbstractFix {
 	
-	private static final String REMOVE_DECLARATION_AND_ASSIGNMENTS= FixMessages.UnusedCodeFix_RemoveFieldOrLocal_description;
-	private static final String REMOVE_METHOD= FixMessages.UnusedCodeFix_RemoveMethod_description;
-	private static final String REMOVE_CONSTRUCTOR= FixMessages.UnusedCodeFix_RemoveConstructor_description;
-	private static final String REMOVE_TYPE= FixMessages.UnusedCodeFix_RemoveType_description;
-	private static final String REMOVE_UNUSED_IMPORT= FixMessages.UnusedCodeFix_RemoveImport_description;
-
 	private static class SideEffectFinder extends ASTVisitor {
 
 		private ArrayList fSideEffectNodes;
@@ -143,7 +137,7 @@ public class UnusedCodeFix extends AbstractFix {
 		) {
 			ImportDeclaration node= getImportDeclaration(problem, compilationUnit);
 			if (node != null) {
-				return new UnusedCodeFix(REMOVE_UNUSED_IMPORT, cu, new ImportDeclaration[] {node}, null, null);
+				return new UnusedCodeFix(FixMessages.UnusedCodeFix_RemoveImport_description, cu, new ImportDeclaration[] {node}, null, null);
 			}
 		}
 		if (
@@ -185,22 +179,22 @@ public class UnusedCodeFix extends AbstractFix {
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
 				fMultiFix= new UnusedCodeMultiFix(false, false, false, false, true, false);
-				return Messages.format(REMOVE_TYPE, name);
+				return Messages.format(FixMessages.UnusedCodeFix_RemoveType_description, name);
 			case IBinding.METHOD:
 				if (((IMethodBinding) binding).isConstructor()) {
 					fMultiFix= new UnusedCodeMultiFix(false, false, true, false, false, false);
-					return Messages.format(REMOVE_CONSTRUCTOR, name);
+					return Messages.format(FixMessages.UnusedCodeFix_RemoveConstructor_description, name);
 				} else {
 					fMultiFix= new UnusedCodeMultiFix(false, true, false, false, false, false);
-					return Messages.format(REMOVE_METHOD, name);
+					return Messages.format(FixMessages.UnusedCodeFix_RemoveMethod_description, name);
 				}
 			case IBinding.VARIABLE:
 				if (((IVariableBinding) binding).isField()) {
 					fMultiFix= new UnusedCodeMultiFix(false, false, false, true, false, false);
-					return Messages.format(REMOVE_DECLARATION_AND_ASSIGNMENTS, name);
+					return Messages.format(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_description, name);
 				} else {
 					fMultiFix= new UnusedCodeMultiFix(false, false, false, false, false, true);
-					return Messages.format(REMOVE_DECLARATION_AND_ASSIGNMENTS, name);
+					return Messages.format(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_description, name);
 				}
 			default:
 				return ""; //$NON-NLS-1$
@@ -233,7 +227,7 @@ public class UnusedCodeFix extends AbstractFix {
 			rewrite= ASTRewrite.create(fImports[0].getAST());
 			for (int i= 0; i < fImports.length; i++) {
 				ImportDeclaration node= fImports[i];
-				TextEditGroup group= new TextEditGroup(REMOVE_UNUSED_IMPORT + " " + node.getName()); //$NON-NLS-1$
+				TextEditGroup group= new TextEditGroup(FixMessages.UnusedCodeFix_RemoveImport_description + " " + node.getName()); //$NON-NLS-1$
 				rewrite.remove(node, group);
 				groups.add(group);
 			}

@@ -51,11 +51,6 @@ import org.eclipse.ltk.core.refactoring.TextChange;
  */
 public class Java50Fix extends AbstractFix {
 	
-	private static final String ADD_MISSING_0_ANNOTATION= FixMessages.Java50Fix_AddMissingAnnotation_description;
-	private static final String ADD_MISSING_ANNOTATIONS= FixMessages.Java50Fix_AddMissingAnnotations_description;
-	private static final String ADD_MISSING_DEPRECATED_ANNOTATION= FixMessages.Java50Fix_AddDeprecated_description;
-	private static final String ADD_MISSING_OVERRIDE_ANNOTATION= FixMessages.Java50Fix_AddOverride_description;
-	
 	private final AnnotationTuple[] fAnnotationTuples;
 
 	public static class AnnotationTuple {
@@ -111,16 +106,16 @@ public class Java50Fix extends AbstractFix {
 		String name= ""; //$NON-NLS-1$
 		if (addOverrideAnnotation && isMissingOverride(problem)) {
 			annotations.add("Override"); //$NON-NLS-1$
-			name= ADD_MISSING_OVERRIDE_ANNOTATION;
+			name= FixMessages.Java50Fix_AddOverride_description;
 		}
 		
 		if (addDepricatedAnnotation && isMissingDeprecated(problem)) {
 			annotations.add("Deprecated"); //$NON-NLS-1$
-			name= ADD_MISSING_DEPRECATED_ANNOTATION;
+			name= FixMessages.Java50Fix_AddDeprecated_description;
 		}
 		
 		if (annotations.size() == 2) {
-			name= ADD_MISSING_ANNOTATIONS;
+			name= FixMessages.Java50Fix_AddMissingAnnotations_description;
 		}
 		return name;
 	}
@@ -167,7 +162,7 @@ public class Java50Fix extends AbstractFix {
 			
 			TextEdit edit= applyEdits(getCompilationUnit(), rewrite, null);
 			
-			CompilationUnitChange result= new CompilationUnitChange(ADD_MISSING_ANNOTATIONS, getCompilationUnit());
+			CompilationUnitChange result= new CompilationUnitChange(FixMessages.Java50Fix_AddMissingAnnotations_description, getCompilationUnit());
 			result.setEdit(edit);
 			
 			for (Iterator iter= groups.iterator(); iter.hasNext();) {
@@ -187,7 +182,7 @@ public class Java50Fix extends AbstractFix {
 		for (int i= 0; i < annotationNames.length; i++) {
 			Annotation newAnnotation= ast.newMarkerAnnotation();
 			newAnnotation.setTypeName(ast.newSimpleName(annotationNames[i]));
-			TextEditGroup group= new TextEditGroup(MessageFormat.format(ADD_MISSING_0_ANNOTATION, new Object[] {annotationNames[i]}));
+			TextEditGroup group= new TextEditGroup(MessageFormat.format(FixMessages.Java50Fix_AddMissingAnnotation_description, new Object[] {annotationNames[i]}));
 			textEditGroups.add(group);
 			listRewrite.insertFirst(newAnnotation, group);	
 		}

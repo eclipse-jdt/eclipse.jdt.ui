@@ -51,9 +51,6 @@ public class StringMultiFix extends AbstractMultiFix {
 	private static final String REMOVE_NLS_TAG_SETTINGS_ID= "RemoveNlsTag"; //$NON-NLS-1$
 	private static final String ADD_NLS_TAG_SETTINGS_ID= "AddNlsTag"; //$NON-NLS-1$
 	
-	private static final String ADD_NON_NLS_TAG= MultiFixMessages.StringMultiFix_AddMissingNonNls_description;
-	private static final String REMOVE_NON_NLS_TAG= MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description;
-	
 	private boolean fAddNlsTag;
 	private boolean fRemoveNlsTag;
 
@@ -89,7 +86,7 @@ public class StringMultiFix extends AbstractMultiFix {
 				if (edit != null) {
 					if (result == null) 
 						result= new CompilationUnitChange("", cu); //$NON-NLS-1$
-					TextChangeCompatibility.addTextEdit(result, ADD_NON_NLS_TAG, edit);
+					TextChangeCompatibility.addTextEdit(result, MultiFixMessages.StringMultiFix_AddMissingNonNls_description, edit);
 				}
 			}
 			if (fRemoveNlsTag && problem.getID() == IProblem.UnnecessaryNLSTag) {
@@ -99,7 +96,7 @@ public class StringMultiFix extends AbstractMultiFix {
 					if (edit != null) {
 						if (result == null)
 							result= new CompilationUnitChange("", cu); //$NON-NLS-1$
-						TextChangeCompatibility.addTextEdit(result, REMOVE_NON_NLS_TAG, edit);
+						TextChangeCompatibility.addTextEdit(result, MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description, edit);
 					}
 				}
 			}
@@ -123,7 +120,7 @@ public class StringMultiFix extends AbstractMultiFix {
 		composite.setLayout(new GridLayout(1, true));
 		
 		Button addNLSTag= new Button(composite, SWT.CHECK);
-		addNLSTag.setText(ADD_NON_NLS_TAG);
+		addNLSTag.setText(MultiFixMessages.StringMultiFix_AddMissingNonNls_description);
 		addNLSTag.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		addNLSTag.setSelection(fAddNlsTag);
 		addNLSTag.addSelectionListener(new SelectionAdapter() {
@@ -133,7 +130,7 @@ public class StringMultiFix extends AbstractMultiFix {
 		});
 		
 		Button removeNLSTag= new Button(composite, SWT.CHECK);
-		removeNLSTag.setText(REMOVE_NON_NLS_TAG);
+		removeNLSTag.setText(MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description);
 		removeNLSTag.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		removeNLSTag.setSelection(fRemoveNlsTag);
 		removeNLSTag.addSelectionListener(new SelectionAdapter() {

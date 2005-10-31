@@ -55,10 +55,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  */
 public class CodeStyleFix extends AbstractFix {
 	
-	private static final String CHANGE_ACCESS_TO_STATIC_USING_0_DECLARING_TYPE= FixMessages.CodeStyleFix_ChangeAccessToStatic_description;
-	public static final String ADD_THIS_QUALIFIER= FixMessages.CodeStyleFix_AddThisQualifier_description;
-	public static final String QUALIFY_0_WITH_THIS= FixMessages.CodeStyleFix_QualifyWithThis_description;
-	
 	private final TupleForUnqualifiedAccess[] fBindingTuples;
 	private final TupleForNonStaticAccess[] fTupleDirects;
 
@@ -121,7 +117,7 @@ public class CodeStyleFix extends AbstractFix {
 			if (tupleDirect != null) {
 
 				ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
-				String label= Messages.format(CHANGE_ACCESS_TO_STATIC_USING_0_DECLARING_TYPE, tupleDirect.getDeclaringTypeBinding().getName());
+				String label= Messages.format(FixMessages.CodeStyleFix_ChangeAccessToStatic_description, tupleDirect.getDeclaringTypeBinding().getName());
 				return new CodeStyleFix(label, cu, null, new TupleForNonStaticAccess[] {tupleDirect});
 			}
 		}
@@ -132,7 +128,7 @@ public class CodeStyleFix extends AbstractFix {
 				return null;
 			
 			ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
-			String groupName= MessageFormat.format(QUALIFY_0_WITH_THIS, new Object[] {tuple.getName().getFullyQualifiedName()});
+			String groupName= MessageFormat.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {tuple.getName().getFullyQualifiedName()});
 			return new CodeStyleFix(groupName, cu, new TupleForUnqualifiedAccess[] {tuple}, null);
 		}
 		
@@ -274,7 +270,7 @@ public class CodeStyleFix extends AbstractFix {
 	
 	private void rewriteASTForNonStaticAccess(ImportRewrite imports, AST ast, ITypeBinding declaringTypeBinding, Expression qualifier, ASTRewrite rewrite, List groups) {
 		String typeName= imports.addImport(declaringTypeBinding);
-		TextEditGroup group= new TextEditGroup(Messages.format(CHANGE_ACCESS_TO_STATIC_USING_0_DECLARING_TYPE, declaringTypeBinding.getName()));
+		TextEditGroup group= new TextEditGroup(Messages.format(FixMessages.CodeStyleFix_ChangeAccessToStatic_description, declaringTypeBinding.getName()));
 		groups.add(group);
 		rewrite.replace(qualifier, ASTNodeFactory.newName(ast, typeName), group);
 	}
@@ -299,7 +295,7 @@ public class CodeStyleFix extends AbstractFix {
 		}
 
 		String replacement= qualifier + '.' + name.getIdentifier();
-		String groupName= MessageFormat.format(QUALIFY_0_WITH_THIS, new Object[] {name.getFullyQualifiedName()});
+		String groupName= MessageFormat.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {name.getFullyQualifiedName()});
 		TextEditGroup group= new TextEditGroup(groupName);
 		editGroups.add(group);
 		rewrite.replace(name, rewrite.createStringPlaceholder(replacement, ASTNode.SIMPLE_NAME), group);

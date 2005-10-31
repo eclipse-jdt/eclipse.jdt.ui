@@ -38,10 +38,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  */
 public class StringFix extends AbstractFix {
 	
-	private static final String ADD_REMOVE_$NON_NLS$_TAG= FixMessages.StringFix_AddRemoveNonNls_description;
-	private static final String ADD_$NON_NLS$_TAG= FixMessages.StringFix_AddNonNls_description;
-	private static final String REMOVE_$NON_NLS$_TAG= FixMessages.StringFix_RemoveNonNls_description;
-	
 	private final TextEdit fEdit;
 	private TextChange fChange;
 
@@ -64,12 +60,12 @@ public class StringFix extends AbstractFix {
 			MultiTextEdit root= new MultiTextEdit();
 			TextChangeCompatibility.insert(root, addEdit);
 			TextChangeCompatibility.insert(root, removeEdit);
-			StringFix stringFix= new StringFix(ADD_REMOVE_$NON_NLS$_TAG, root, cu);
+			StringFix stringFix= new StringFix(FixMessages.StringFix_AddRemoveNonNls_description, root, cu);
 			return stringFix;
 		} else if (addEdit != null) {
-			return new StringFix(ADD_$NON_NLS$_TAG, addEdit, cu);
+			return new StringFix(FixMessages.StringFix_AddNonNls_description, addEdit, cu);
 		} else {
-			return new StringFix(REMOVE_$NON_NLS$_TAG, removeEdit, cu);
+			return new StringFix(FixMessages.StringFix_RemoveNonNls_description, removeEdit, cu);
 		}
 	}
 	

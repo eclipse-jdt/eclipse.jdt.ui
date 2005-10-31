@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFix.TupleForNonStaticAccess;
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFix.TupleForUnqualifiedAccess;
@@ -46,9 +47,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  */
 public class CodeStyleMultiFix extends AbstractMultiFix {
 
-	private static final String CHANGE_NON_STATIC_ACCESS_TO_STATIC_MULTI_FIX_DESCRIPTION= MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description;
-	private static final String ADD_THIS_QUALIFIER_MULTI_FIX_DESCRIPTION= MultiFixMessages.CodeStyleMultiFix_AddThisQualifier_description;
-	
 	private static final String CHANGE_NON_STATIC_ACCESS_TO_STATIC_SETTINGS_ID= "ChangeNonStaticAccessToStatic"; //$NON-NLS-1$
 	private static final String ADD_THIS_QUALIFIER_SETTINGS_ID= "AddThisQualifier"; //$NON-NLS-1$
 	
@@ -96,13 +94,15 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		TupleForUnqualifiedAccess[] nonQualifiedAccesses= (TupleForUnqualifiedAccess[])bindingTuples.toArray(new TupleForUnqualifiedAccess[bindingTuples.size()]);
 		TupleForNonStaticAccess[] nonStaticAccesses= (TupleForNonStaticAccess[])nonStaticTuples.toArray(new TupleForNonStaticAccess[nonStaticTuples.size()]);
-		return new CodeStyleFix(CodeStyleFix.ADD_THIS_QUALIFIER, cu, nonQualifiedAccesses, nonStaticAccesses);
+		return new CodeStyleFix(FixMessages.CodeStyleFix_AddThisQualifier_description, cu, nonQualifiedAccesses, nonStaticAccesses);
 	}
 
 	public Map getRequiredOptions() {
 		Map options= new Hashtable();
-		if (fAddThisQualifier)
+		if (fAddThisQualifier) {
 			options.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.WARNING);
+			options.put(JavaCore.COMPILER_PB_MAX_PER_UNIT, "350"); //$NON-NLS-1$
+		}
 		if (fChangeNonStaticAccessToStatic)
 			options.put(JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS, JavaCore.WARNING);
 		return options;
@@ -114,7 +114,7 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 		composite.setLayout(new GridLayout(1, true));
 		
 		Button addThisQualifier= new Button(composite, SWT.CHECK);
-		addThisQualifier.setText(ADD_THIS_QUALIFIER_MULTI_FIX_DESCRIPTION);
+		addThisQualifier.setText(MultiFixMessages.CodeStyleMultiFix_AddThisQualifier_description);
 		addThisQualifier.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		addThisQualifier.setSelection(fAddThisQualifier);
 		addThisQualifier.addSelectionListener(new SelectionAdapter() {
@@ -124,7 +124,7 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 		});
 		
 		Button removeNonStaticAccess= new Button(composite, SWT.CHECK);
-		removeNonStaticAccess.setText(CHANGE_NON_STATIC_ACCESS_TO_STATIC_MULTI_FIX_DESCRIPTION);
+		removeNonStaticAccess.setText(MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description);
 		removeNonStaticAccess.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		removeNonStaticAccess.setSelection(fChangeNonStaticAccessToStatic);
 		removeNonStaticAccess.addSelectionListener(new SelectionAdapter() {

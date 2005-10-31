@@ -259,7 +259,11 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
      * @see IClasspathInformationProvider
      */
     public ClasspathModifierAction getAction(int type) {
-        return fActions[type];
+    	for (int i= 0; i < fActions.length; i++) {
+			if (fActions[i].getOperation().getTypeId() == type)
+				return fActions[i];
+		}
+    	throw new ArrayIndexOutOfBoundsException();
     }
     
     /**

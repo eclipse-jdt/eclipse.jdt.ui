@@ -49,13 +49,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  */
 public class UnusedCodeMultiFix extends AbstractMultiFix {
 
-	private static final String REMOVE_UNUSED_LOCAL_VARIABLE_MULTI_FIX_DESCRIPTION= MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description;
-	private static final String REMOVE_UNUSED_FIELD_MULTI_FIX_DESCRIPTION= MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description;
-	private static final String REMOVE_UNUSED_PRIVATE_TYPES_MULTI_FIX_DESCRIPTION= MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedType_description;
-	private static final String REMOVE_UNUSED_PRIVATE_CONSTRUCTORS_MULTI_FIX_DESCRIPTION= MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedConstructor_description;
-	private static final String REMOVE_UNUSED_PRIVATE_METHODS_MULTI_FIX_DESCRIPTION= MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedMethod_description;
-	private static final String REMOVE_UNUSED_IMPORT_MULTI_FIX_DESCRIPTION= MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedImport_description;
-	
 	private static final String REMOVE_UNUSED_PRIVATE_CONSTRUCTORS_SETTINGS_ID= "RemoveUnusedPrivateConstructors"; //$NON-NLS-1$
 	private static final String REMOVE_UNUSED_IMPORTS_SETTINGS_ID= "RemoveUnusedImports"; //$NON-NLS-1$
 	private static final String REMOVE_UNUSED_PRIVATE_METHODES_SETTINGS_ID= "RemoveUnusedPrivateMethods"; //$NON-NLS-1$
@@ -155,7 +148,7 @@ public class UnusedCodeMultiFix extends AbstractMultiFix {
 		composite.setLayout(new GridLayout(1, true));
 		
 		Button removeUnusedImport= new Button(composite, SWT.CHECK);
-		removeUnusedImport.setText(REMOVE_UNUSED_IMPORT_MULTI_FIX_DESCRIPTION);
+		removeUnusedImport.setText(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedImport_description);
 		removeUnusedImport.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		removeUnusedImport.setSelection(fRemoveUnusedImports);
 		removeUnusedImport.addSelectionListener(new SelectionAdapter() {
@@ -165,7 +158,7 @@ public class UnusedCodeMultiFix extends AbstractMultiFix {
 		});
 		
 		Button removePrivateMethods= new Button(composite, SWT.CHECK);
-		removePrivateMethods.setText(REMOVE_UNUSED_PRIVATE_METHODS_MULTI_FIX_DESCRIPTION);
+		removePrivateMethods.setText(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedMethod_description);
 		removePrivateMethods.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		removePrivateMethods.setSelection(fRemoveUnusedPrivateMethods);
 		removePrivateMethods.addSelectionListener(new SelectionAdapter() {
@@ -175,7 +168,7 @@ public class UnusedCodeMultiFix extends AbstractMultiFix {
 		});
 		
 		Button removePrivateConstructors= new Button(composite, SWT.CHECK);
-		removePrivateConstructors.setText(REMOVE_UNUSED_PRIVATE_CONSTRUCTORS_MULTI_FIX_DESCRIPTION);
+		removePrivateConstructors.setText(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedConstructor_description);
 		removePrivateConstructors.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		removePrivateConstructors.setSelection(fRemoveUnusedPrivateConstructors);
 		removePrivateConstructors.addSelectionListener(new SelectionAdapter() {
@@ -185,7 +178,7 @@ public class UnusedCodeMultiFix extends AbstractMultiFix {
 		});
 		
 		Button removePrivateType= new Button(composite, SWT.CHECK);
-		removePrivateType.setText(REMOVE_UNUSED_PRIVATE_TYPES_MULTI_FIX_DESCRIPTION);
+		removePrivateType.setText(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedType_description);
 		removePrivateType.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		removePrivateType.setSelection(fRemoveUnusedPrivateTypes);
 		removePrivateType.addSelectionListener(new SelectionAdapter() {
@@ -195,7 +188,7 @@ public class UnusedCodeMultiFix extends AbstractMultiFix {
 		});
 		
 		Button removePrivateFields= new Button(composite, SWT.CHECK);
-		removePrivateFields.setText(REMOVE_UNUSED_FIELD_MULTI_FIX_DESCRIPTION);
+		removePrivateFields.setText(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description);
 		removePrivateFields.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		removePrivateFields.setSelection(fRemoveUnusedPrivateFields);
 		removePrivateFields.addSelectionListener(new SelectionAdapter() {
@@ -205,7 +198,7 @@ public class UnusedCodeMultiFix extends AbstractMultiFix {
 		});
 		
 		Button removeLocals= new Button(composite, SWT.CHECK);
-		removeLocals.setText(REMOVE_UNUSED_LOCAL_VARIABLE_MULTI_FIX_DESCRIPTION);
+		removeLocals.setText(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description);
 		removeLocals.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		removeLocals.setSelection(fRemoveUnusedLocalVariables);
 		removeLocals.addSelectionListener(new SelectionAdapter() {
