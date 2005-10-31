@@ -35,7 +35,7 @@ public class CreateFolderOperation extends ClasspathModifierOperation {
      * @see ClasspathModifier
      */
 	public CreateFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-		super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip, IClasspathInformationProvider.ADD_LIB_TO_BP);
+		super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_AddLibCP_tooltip, IClasspathInformationProvider.CREATE_FOLDER);
 	}
 
 	/**
