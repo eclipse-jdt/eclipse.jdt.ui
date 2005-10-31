@@ -12,29 +12,29 @@ package org.eclipse.jdt.internal.corext.refactoring.composite;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.ltk.core.refactoring.CompositeTextFileChange;
+import org.eclipse.ltk.core.refactoring.MultiStateTextFileChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
 /**
- * Composite compilation unit change for composite refactorings.
+ * Multi state compilation unit change for composite refactorings.
  * 
  * @since 3.2
  */
-public final class CompositeCompilationUnitChange extends CompositeTextFileChange {
+public final class MultiStateCompilationUnitChange extends MultiStateTextFileChange {
 
 	/** The compilation unit */
 	private final ICompilationUnit fUnit;
 
 	/**
-	 * Creates a new composite compilation unit change.
+	 * Creates a new multi state compilation unit change.
 	 * 
 	 * @param name
 	 *            the name of the change
 	 * @param unit
 	 *            the compilation unit
 	 */
-	public CompositeCompilationUnitChange(final String name, final ICompilationUnit unit) {
+	public MultiStateCompilationUnitChange(final String name, final ICompilationUnit unit) {
 		super(name, (IFile) unit.getResource());
 
 		fUnit= unit;

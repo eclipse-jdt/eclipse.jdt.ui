@@ -117,7 +117,7 @@
 		
         <factory
             class="org.eclipse.jdt.internal.ui.refactoring.RefactoringAdapterFactory"
-            adaptableType="org.eclipse.ltk.core.refactoring.CompositeTextFileChange">
+            adaptableType="org.eclipse.ltk.core.refactoring.MultiStateTextFileChange">
             
             <adapter type="org.eclipse.ltk.ui.refactoring.TextEditChangeNode"/>
         </factory>

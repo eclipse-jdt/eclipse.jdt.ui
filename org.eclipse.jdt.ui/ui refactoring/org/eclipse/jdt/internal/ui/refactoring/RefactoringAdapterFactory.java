@@ -17,7 +17,7 @@ import org.eclipse.ltk.ui.refactoring.TextEditChangeNode;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChange;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.composite.CompositeCompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.composite.MultiStateCompilationUnitChange;
 
 public class RefactoringAdapterFactory implements IAdapterFactory {
 
@@ -32,7 +32,7 @@ public class RefactoringAdapterFactory implements IAdapterFactory {
 	public Object getAdapter(Object object, Class key) {
 		if (!TextEditChangeNode.class.equals(key))
 			return null;
-		if (!(object instanceof CompilationUnitChange) && !(object instanceof CompositeCompilationUnitChange))
+		if (!(object instanceof CompilationUnitChange) && !(object instanceof MultiStateCompilationUnitChange))
 			return null;
 		return new CompilationUnitChangeNode((TextEditBasedChange)object);
 	}

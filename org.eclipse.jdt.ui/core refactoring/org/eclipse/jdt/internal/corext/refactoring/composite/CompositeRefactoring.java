@@ -31,7 +31,7 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.CompositeTextFileChange;
+import org.eclipse.ltk.core.refactoring.MultiStateTextFileChange;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -69,7 +69,7 @@ public class CompositeRefactoring extends Refactoring implements IInitializableR
 
 	/**
 	 * The created changes (element type: &lt;<code>ICompilationUnit</code>,
-	 * <code>CompositeTextFileChange</code>&gt;)
+	 * <code>MultiStateTextFileChange</code>&gt;)
 	 */
 	private final Map fChanges= new HashMap();
 
@@ -416,14 +416,14 @@ public class CompositeRefactoring extends Refactoring implements IInitializableR
 		final ICompilationUnit unit= change.getCompilationUnit().getPrimary();
 		if (!fChanges.containsKey(unit)) {
 
-			final CompositeTextFileChange newChange= new CompositeCompilationUnitChange(unit.getElementName(), unit);
+			final MultiStateTextFileChange newChange= new MultiStateCompilationUnitChange(unit.getElementName(), unit);
 			newChange.addChange(change);
 
 			fChanges.put(unit, newChange);
 
 		} else {
 
-			final CompositeTextFileChange existingChange= (CompositeTextFileChange) fChanges.get(unit);
+			final MultiStateTextFileChange existingChange= (MultiStateTextFileChange) fChanges.get(unit);
 			if (existingChange != null)
 				existingChange.addChange(change);
 		}
