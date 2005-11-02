@@ -22,6 +22,7 @@ import org.eclipse.swt.widgets.Group;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.CheckboxTreeViewer;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -104,6 +105,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				treeViewer.expandToLevel(compilationUnit, 0);
 				treeViewer.setChecked(compilationUnit, true);
 			}
+			treeViewer.setSelection(new StructuredSelection(compilationUnits), true);
 		}
 
 		protected boolean performFinish() {
