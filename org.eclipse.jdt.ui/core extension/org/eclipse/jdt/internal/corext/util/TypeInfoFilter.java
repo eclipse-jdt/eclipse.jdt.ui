@@ -66,36 +66,50 @@ public class TypeInfoFilter {
 		private void initializePatternAndMatchKind(String pattern) {
 			int length= pattern.length();
 			if (length == 0) {
-				fPattern= pattern;
 				fMatchKind= SearchPattern.R_EXACT_MATCH;
+				fPattern= pattern;
 				return;
 			}
 			char last= pattern.charAt(length - 1);
 			
-			if (last == END_SYMBOL) {
-				fPattern= pattern.substring(0, length - 1);
-				fMatchKind= SearchPattern.R_EXACT_MATCH;
-				return;
-			}
-			if (last == BLANK) {
-				fPattern= pattern.trim();
-				fMatchKind= SearchPattern.R_EXACT_MATCH;
-				return;
-			}
-			
-			fPattern= pattern;
 			if (pattern.indexOf('*') != -1 || pattern.indexOf('?') != -1) {
 				fMatchKind= SearchPattern.R_PATTERN_MATCH;
-				if (last != ANY_STRING) {
-					fPattern= fPattern + ANY_STRING;
+				switch (last) {
+					case END_SYMBOL:
+						fPattern= pattern.substring(0, length - 1);
+						break;
+					case BLANK:
+						fPattern= pattern.trim();
+						break;
+					case ANY_STRING:
+						fPattern= pattern;
+						break;
+					default:
+						fPattern= pattern + ANY_STRING;
 				}
 				return;
 			}
-			if (SearchUtils.isCamelCasePattern(pattern)) {
-				fMatchKind= SearchPattern.R_CAMELCASE_MATCH;
+			
+			if (last == END_SYMBOL) {
+				fMatchKind= SearchPattern.R_EXACT_MATCH;
+				fPattern= pattern.substring(0, length - 1);
 				return;
 			}
+			
+			if (last == BLANK) {
+				fMatchKind= SearchPattern.R_EXACT_MATCH;
+				fPattern= pattern.trim();
+				return;
+			}
+			
+			if (SearchUtils.isCamelCasePattern(pattern)) {
+				fMatchKind= SearchPattern.R_CAMELCASE_MATCH;
+				fPattern= pattern;
+				return;
+			}
+			
 			fMatchKind= SearchPattern.R_PREFIX_MATCH;
+			fPattern= pattern;
 		}		
 	}
 	
