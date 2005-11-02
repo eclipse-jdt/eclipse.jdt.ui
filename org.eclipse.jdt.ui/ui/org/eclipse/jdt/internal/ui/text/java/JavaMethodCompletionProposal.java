@@ -43,7 +43,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 
 	public void apply(IDocument document, char trigger, int offset) {
 		super.apply(document, trigger, offset);
-		if (!fContext.isInJavadoc() && getReplacementString().endsWith("()")) { //$NON-NLS-1$
+		if (!fContext.isInJavadoc() && hasParameters() && getReplacementString().endsWith("()")) { //$NON-NLS-1$
 			setUpLinkedMode(document, ')');
 		}
 	}
