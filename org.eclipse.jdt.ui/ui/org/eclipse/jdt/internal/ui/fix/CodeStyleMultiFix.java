@@ -104,7 +104,7 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 			options.put(JavaCore.COMPILER_PB_MAX_PER_UNIT, "350"); //$NON-NLS-1$
 		}
 		if (fChangeNonStaticAccessToStatic)
-			options.put(JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS, JavaCore.WARNING);
+			options.put(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER, JavaCore.WARNING);
 		return options;
 	}
 

@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.tests.quickfix;
 
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.Map;
 
 import junit.framework.Test;
@@ -150,12 +151,28 @@ public class CleanUpTest extends QuickFixTest {
 	}
 	
 	private void setOptions(IMultiFix fix) {
-		Map fixOptions= fix.getRequiredOptions();
-		if (fixOptions != null) {
-			Hashtable options= JavaCore.getOptions();
-			options.putAll(fixOptions);
-			JavaCore.setOptions(options);
+		setOptions(new IMultiFix[] {fix});
+	}
+	
+	private void setOptions(IMultiFix[] fixes) {
+		Hashtable options= JavaCore.getOptions();
+		for (Iterator iter= options.keySet().iterator(); iter.hasNext();) {
+			String key= (String)iter.next();
+			String value= (String)options.get(key);
+			if ("error".equals(value) || "warning".equals(value)) {  
+				options.put(key, "ignore"); 
+			}
 		}
+		
+		for (int i= 0; i < fixes.length; i++) {
+			IMultiFix fix= fixes[i];
+			Map fixOptions= fix.getRequiredOptions();
+			if (fixOptions != null) {
+				options.putAll(fixOptions);
+			}
+		}
+
+		JavaCore.setOptions(options);
 	}
 	
 	public void testAddNLSTag01() throws Exception {
@@ -993,7 +1010,7 @@ public class CleanUpTest extends QuickFixTest {
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2});
 		assertNumberOfProblems(units[0], 1);
-		assertNumberOfProblems(units[1], 4);
+		assertNumberOfProblems(units[1], 2);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1367,6 +1384,49 @@ public class CleanUpTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});
 	}
 	
+	public void testCodeStyleBug114544() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(new E1().i);\n");
+		buf.append("    }\n");
+		buf.append("    public static int i= 10;\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		IMultiFix multiFix= new CodeStyleMultiFix(false, true);
+		
+		setOptions(multiFix);
+		
+		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1});
+		assertNumberOfProblems(units[0], 1);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(E1.i);\n");
+		buf.append("    }\n");
+		buf.append("    public static int i= 10;\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		int numberOfFixes= 1;
+		int offset= 0;
+		String[] previews= new String[numberOfFixes];
+		for (int i= offset; i < numberOfFixes; i++) {
+			IFix fix= multiFix.createFix(units[i]);
+			assertNotNull("There are problems but no fix", fix);
+			TextChange change= fix.createChange();
+			assertNotNull("Null change for an existing fix", change);
+			previews[i - offset]= change.getPreviewContent(null);
+		}
+
+		assertEqualStringsIgnoreOrder(previews, new String[] { expected1});
+	}
+	
 	public void testCombination01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -1386,8 +1446,7 @@ public class CleanUpTest extends QuickFixTest {
 		IMultiFix multiFix1= new CodeStyleMultiFix(true, false);
 		IMultiFix multiFix2= new UnusedCodeMultiFix(false, false, false, true, false, false);
 		
-		setOptions(multiFix1);
-		setOptions(multiFix2);
+		setOptions(new IMultiFix[] {multiFix1, multiFix2});
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1});
 		assertNumberOfProblems(units[0], 4);
