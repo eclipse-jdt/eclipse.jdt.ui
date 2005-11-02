@@ -513,10 +513,15 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 				selectedJVM= JavaRuntime.getDefaultVMInstall();
 			}
 			String jvmCompliance= JavaCore.VERSION_1_4;
+			String selectedVersion= jvmCompliance;
 			if (selectedJVM instanceof IVMInstall2) {
 				jvmCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2)selectedJVM);
 				if (jvmCompliance == null) {
 					jvmCompliance= JavaCore.VERSION_1_4;
+				}
+				selectedVersion= ((IVMInstall2)selectedJVM).getJavaVersion();
+				if (selectedVersion == null) {
+					selectedVersion= JavaCore.VERSION_1_4;
 				}
 			}
 			if ((selectedCompliance.equals(JavaCore.VERSION_1_5) && !jvmCompliance.equals(JavaCore.VERSION_1_5)) ||
@@ -525,7 +530,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 				if (selectedCompliance.equals(JavaCore.VERSION_1_5))
 					selectedCompliance= "5.0"; //$NON-NLS-1$
 				
-				fHintText.setText(Messages.format(NewWizardMessages.JavaProjectWizardFirstPage_DetectGroup_jre_message, new String[] {selectedCompliance, jvmCompliance}));
+				fHintText.setText(Messages.format(NewWizardMessages.JavaProjectWizardFirstPage_DetectGroup_jre_message, new String[] {selectedCompliance, selectedVersion}));
 				fHintText.setVisible(true);
 			} else {
 				fHintText.setVisible(false);

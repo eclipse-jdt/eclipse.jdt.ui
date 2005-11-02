@@ -799,11 +799,19 @@ public final class JavaModelUtil {
 
 	public static String getCompilerCompliance(IVMInstall2 vMInstall) {
 		String version= vMInstall.getJavaVersion();
-		if (version.startsWith(JavaCore.VERSION_1_5)) {
+		if (version == null) {
+			return null;
+		} else if (version.startsWith(JavaCore.VERSION_1_6)) {
+			return JavaCore.VERSION_1_5;
+		} else if (version.startsWith(JavaCore.VERSION_1_5)) {
 			return JavaCore.VERSION_1_5;
 		} else if (version.startsWith(JavaCore.VERSION_1_4)) {
 			return JavaCore.VERSION_1_4;
 		} else if (version.startsWith(JavaCore.VERSION_1_3)) {
+			return JavaCore.VERSION_1_3;
+		} else if (version.startsWith(JavaCore.VERSION_1_2)) {
+			return JavaCore.VERSION_1_3;
+		} else if (version.startsWith(JavaCore.VERSION_1_1)) {
 			return JavaCore.VERSION_1_3;
 		}
 		return null;
