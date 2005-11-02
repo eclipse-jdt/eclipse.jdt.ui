@@ -53,6 +53,7 @@ import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
+import org.eclipse.jdt.internal.corext.template.java.JavaDocContext;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -111,6 +112,8 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 		final int R_INTERESTING= 5;
 		final int R_CASE= 10;
 		final int R_NON_RESTRICTED= 3;
+		final int R_EXACT_NAME = 4;
+		final int R_INLINE_TAG = 31;
 
 		int base= R_DEFAULT + R_INTERESTING + R_NON_RESTRICTED;
 
@@ -122,6 +125,10 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 				String content= document.get(fRegion.getOffset(), fRegion.getLength());
 				if (fTemplate.getName().startsWith(content))
 					base += R_CASE;
+				if (fTemplate.getName().equalsIgnoreCase(content))
+					base += R_EXACT_NAME;
+				if (fContext instanceof JavaDocContext)
+					base += R_INLINE_TAG;
 			}
 		} catch (BadLocationException e) {
 			// ignore - not a case sensitive match then
