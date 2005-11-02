@@ -189,8 +189,6 @@ public final class JarPackagerMessages extends NLS {
 	public static String JarWriter_output_manifestName;
 	public static String JarWriter_output_jarSealed;
 	public static String JarWriter_output_mainClass;
-	public static String ConfirmSaveModifiedResourcesDialog_title;
-	public static String ConfirmSaveModifiedResourcesDialog_message;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JarPackagerMessages.class);
