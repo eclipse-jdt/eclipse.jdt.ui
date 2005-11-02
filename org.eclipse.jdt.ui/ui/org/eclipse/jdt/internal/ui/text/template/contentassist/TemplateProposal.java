@@ -458,6 +458,9 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getReplacementString()
 	 */
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
+		// bug 114360 - don't make selection templates prefix-completable
+		if (isSelectionTemplate())
+			return ""; //$NON-NLS-1$
 		return fTemplate.getName();
 	}
 
@@ -472,6 +475,23 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension4#isAutoInsertable()
 	 */
 	public boolean isAutoInsertable() {
+		if (isSelectionTemplate())
+			return false;
 		return fTemplate.isAutoInsertable();
+	}
+	
+	/**
+	 * Returns <code>true</code> if the proposal has a selection, e.g. will wrap some code.
+	 * 
+	 * @return <code>true</code> if the proposals completion length is non zero
+	 * @since 3.2
+	 */
+	private boolean isSelectionTemplate() {
+		if (fContext instanceof DocumentTemplateContext) {
+			DocumentTemplateContext ctx= (DocumentTemplateContext) fContext;
+			if (ctx.getCompletionLength() > 0)
+				return true;
+		}
+		return false;
 	}
 }
