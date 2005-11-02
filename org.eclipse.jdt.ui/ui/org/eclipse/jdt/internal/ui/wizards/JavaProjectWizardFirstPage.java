@@ -467,7 +467,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 					return fInstalledJVMs[index];
 				}
 			}
-			return JavaRuntime.getDefaultVMInstall();
+			return null;
 		}
 		
 		public String getSelectedCompilerCompliance() {
@@ -477,7 +477,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 					return fComplianceData[index];
 				}
 			}
-			return JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
+			return null;
 		}
 	}
 
@@ -505,7 +505,13 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		
 		public void handlePossibleJVMChange() {
 			String selectedCompliance= fJREGroup.getSelectedCompilerCompliance();
+			if (selectedCompliance == null) {
+				selectedCompliance= JavaCore.getOption(JavaCore.COMPILER_COMPLIANCE);
+			}
 			IVMInstall selectedJVM= fJREGroup.getSelectedJVM();
+			if (selectedJVM == null) {
+				selectedJVM= JavaRuntime.getDefaultVMInstall();
+			}
 			String jvmCompliance= JavaCore.VERSION_1_4;
 			if (selectedJVM instanceof IVMInstall2) {
 				jvmCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2)selectedJVM);
@@ -776,10 +782,16 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		return fLayoutGroup.isSrcBin();
 	}
 	
+	/**
+	 * @return the selected JVM, or <code>null</code> iff the default JVM should be used
+	 */
 	public IVMInstall getJVM() {
 		return fJREGroup.getSelectedJVM();
 	}
 	
+	/**
+	 * @return the selected Compiler Compliance, or <code>null</code> iff the default Compiler Compliance should be used
+	 */
 	public String getCompilerCompliance() {
 		return fJREGroup.getSelectedCompilerCompliance();
 	}

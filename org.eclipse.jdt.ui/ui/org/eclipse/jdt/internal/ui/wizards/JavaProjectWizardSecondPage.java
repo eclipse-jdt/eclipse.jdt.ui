@@ -245,12 +245,13 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	
 	private IClasspathEntry[] getDefaultClasspathEntry() {
 		IClasspathEntry[] defaultJRELibrary= PreferenceConstants.getDefaultJRELibrary();
-		IVMInstall inst= fFirstPage.getJVM();
+		String compliance= fFirstPage.getCompilerCompliance();
 		IPath jreContainerPath= new Path(JavaRuntime.JRE_CONTAINER);
-		if (inst == null || defaultJRELibrary.length > 1 || !jreContainerPath.isPrefixOf(defaultJRELibrary[0].getPath())) {
+		if (compliance == null || defaultJRELibrary.length > 1 || !jreContainerPath.isPrefixOf(defaultJRELibrary[0].getPath())) {
 			// use default
 			return defaultJRELibrary;
 		}
+		IVMInstall inst= fFirstPage.getJVM();
 		if (inst != null) {
 			IPath newPath= jreContainerPath.append(inst.getVMInstallType().getId()).append(inst.getName());
 			return new IClasspathEntry[] { JavaCore.newContainerEntry(newPath) };
@@ -353,10 +354,12 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			}
 			configureJavaProject(new SubProgressMonitor(monitor, 2));
 			String compliance= fFirstPage.getCompilerCompliance();
-			IJavaProject project= JavaCore.create(fCurrProject);
-			Map options= project.getOptions(false);
-			JavaModelUtil.setCompilanceOptions(options, compliance);
-			project.setOptions(options);
+			if (compliance != null) {
+				IJavaProject project= JavaCore.create(fCurrProject);
+				Map options= project.getOptions(false);
+				JavaModelUtil.setCompilanceOptions(options, compliance);
+				project.setOptions(options);
+			}
 		} finally {
 			monitor.done();
 			fCurrProject= null;
