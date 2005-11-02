@@ -46,9 +46,28 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 
 public class CleanUpRefactoringWizard extends RefactoringWizard {
+	
+	private static final String CLEAN_UP_WIZARD_SETTINGS_SECTION_ID= "CleanUpWizard"; //$NON-NLS-1$
+	
+	private class NameFixTuple {
 
-	private final boolean fShowCUPage;
-	private final boolean fShowCleanUpPage;
+		private final IMultiFix fFix;
+		private final String fName;
+
+		public NameFixTuple(String name, IMultiFix fix) {
+			fName= name;
+			fFix= fix;
+		}
+
+		public IMultiFix getFix() {
+			return fFix;
+		}
+
+		public String getName() {
+			return fName;
+		}
+		
+	}
 
 	private class SelectCUPage extends UserInputWizardPage {
 
@@ -126,37 +145,18 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				if (checkedElements[i] instanceof ICompilationUnit)
 					refactoring.addCompilationUnit((ICompilationUnit)checkedElements[i]);
 			}
+			if (!refactoring.hasMultiFix()) {
+				NameFixTuple[] multiFixes= getMultiFixes();
+				for (int i= 0; i < multiFixes.length; i++) {
+					refactoring.addMultiFix(multiFixes[i].getFix());
+				}
+			}
 		}
-
 	}
 	
-	private class SelectSolverPage extends UserInputWizardPage {
-
-		private static final String CLEAN_UP_WIZARD_SETTINGS_SECTION_ID= "CleanUpWizard"; //$NON-NLS-1$
+	private class SelectFixesPage extends UserInputWizardPage {
 		
-		private class NameFixTuple {
-
-			private final IMultiFix fFix;
-			private final String fName;
-
-			public NameFixTuple(String name, IMultiFix fix) {
-				fName= name;
-				fFix= fix;
-			}
-
-			public IMultiFix getFix() {
-				return fFix;
-			}
-
-			public String getName() {
-				return fName;
-			}
-			
-		}
-		
-		private NameFixTuple[] fMultiFixes;
-
-		public SelectSolverPage(String name) {
+		public SelectFixesPage(String name) {
 			super(name);
 		}
 		
@@ -196,28 +196,6 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			}
 		}
 		
-		private NameFixTuple[] getMultiFixes() {
-			if (fMultiFixes == null) {
-				IDialogSettings settings= CleanUpRefactoringWizard.this.getDialogSettings();
-				IDialogSettings section= settings.getSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);
-				fMultiFixes= new NameFixTuple[4];
-				if (section == null) {
-					section= settings.addNewSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);
-					fMultiFixes[0]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description, new CodeStyleMultiFix(false, true));
-					fMultiFixes[1]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description, new UnusedCodeMultiFix(true, true, true, false, true, false));	
-					fMultiFixes[2]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_J2SE50Section_description, new Java50MultiFix(true, true));
-					fMultiFixes[3]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_StringExternalization_description, new StringMultiFix(false, true));
-					storeSettings();
-				} else {
-					fMultiFixes[0]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description, new CodeStyleMultiFix(section));
-					fMultiFixes[1]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description, new UnusedCodeMultiFix(section));
-					fMultiFixes[2]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_J2SE50Section_description, new Java50MultiFix(section));
-					fMultiFixes[3]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_StringExternalization_description, new StringMultiFix(section));
-				}
-			}
-			return fMultiFixes;
-		}
-		
 		protected boolean performFinish() {
 			initializeRefactoring();
 			storeSettings();
@@ -229,14 +207,6 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			storeSettings();
 			return super.getNextPage();
 		}
-		
-		private void storeSettings() {
-			IDialogSettings settings= CleanUpRefactoringWizard.this.getDialogSettings().getSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);
-			NameFixTuple[] fixes= getMultiFixes();
-			for (int i= 0; i < fixes.length; i++) {
-				fixes[i].getFix().saveSettings(settings);
-			}
-		}
 
 		private void initializeRefactoring() {
 			CleanUpRefactoring refactoring= (CleanUpRefactoring)getRefactoring();
@@ -247,6 +217,10 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			}
 		}	
 	}
+	
+	private final boolean fShowCUPage;
+	private final boolean fShowCleanUpPage;
+	private NameFixTuple[] fMultiFixes;
 	
 	public CleanUpRefactoringWizard(CleanUpRefactoring refactoring, int flags, boolean showCUPage, boolean showCleanUpPage) {
 		super(refactoring, flags);
@@ -268,9 +242,39 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 		
 		if (fShowCleanUpPage){
-			SelectSolverPage selectSolverPage= new SelectSolverPage(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_name);
+			SelectFixesPage selectSolverPage= new SelectFixesPage(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_name);
 			selectSolverPage.setMessage(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_message);
 			addPage(selectSolverPage);
+		}
+	}
+		
+	private NameFixTuple[] getMultiFixes() {
+		if (fMultiFixes == null) {
+			IDialogSettings settings= CleanUpRefactoringWizard.this.getDialogSettings();
+			IDialogSettings section= settings.getSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);
+			fMultiFixes= new NameFixTuple[4];
+			if (section == null) {
+				section= settings.addNewSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);
+				fMultiFixes[0]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description, new CodeStyleMultiFix(false, true));
+				fMultiFixes[1]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description, new UnusedCodeMultiFix(true, true, true, false, true, false));	
+				fMultiFixes[2]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_J2SE50Section_description, new Java50MultiFix(true, true));
+				fMultiFixes[3]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_StringExternalization_description, new StringMultiFix(false, true));
+				storeSettings();
+			} else {
+				fMultiFixes[0]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description, new CodeStyleMultiFix(section));
+				fMultiFixes[1]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description, new UnusedCodeMultiFix(section));
+				fMultiFixes[2]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_J2SE50Section_description, new Java50MultiFix(section));
+				fMultiFixes[3]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_StringExternalization_description, new StringMultiFix(section));
+			}
+		}
+		return fMultiFixes;
+	}
+	
+	private void storeSettings() {
+		IDialogSettings settings= CleanUpRefactoringWizard.this.getDialogSettings().getSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);
+		NameFixTuple[] fixes= getMultiFixes();
+		for (int i= 0; i < fixes.length; i++) {
+			fixes[i].getFix().saveSettings(settings);
 		}
 	}
 
