@@ -79,9 +79,11 @@ public class UnusedCodeMultiFix extends AbstractMultiFix {
 		this(	settings.getBoolean(REMOVE_UNUSED_IMPORTS_SETTINGS_ID), 
 				settings.getBoolean(REMOVE_UNUSED_PRIVATE_METHODES_SETTINGS_ID),
 				settings.getBoolean(REMOVE_UNUSED_PRIVATE_CONSTRUCTORS_SETTINGS_ID),
-				settings.getBoolean(REMOVE_UNUSED_PRIVATE_FIELDS_SETTINGS_ID),
+//				settings.getBoolean(REMOVE_UNUSED_PRIVATE_FIELDS_SETTINGS_ID),
+				false,
 				settings.getBoolean(REMOVE_UNUSED_PRIVATE_TYPE_SETTINGS_ID),
-				settings.getBoolean(REMOVE_UNUSED_LOCAL_VARIABLES_SETTINGS_ID)
+//				settings.getBoolean(REMOVE_UNUSED_LOCAL_VARIABLES_SETTINGS_ID)
+				false	
 				);
 	}
 
@@ -187,25 +189,26 @@ public class UnusedCodeMultiFix extends AbstractMultiFix {
 			}
 		});
 		
-		Button removePrivateFields= new Button(composite, SWT.CHECK);
-		removePrivateFields.setText(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description);
-		removePrivateFields.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		removePrivateFields.setSelection(fRemoveUnusedPrivateFields);
-		removePrivateFields.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fRemoveUnusedPrivateFields= ((Button)e.getSource()).getSelection();
-			}
-		});
-		
-		Button removeLocals= new Button(composite, SWT.CHECK);
-		removeLocals.setText(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description);
-		removeLocals.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		removeLocals.setSelection(fRemoveUnusedLocalVariables);
-		removeLocals.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fRemoveUnusedLocalVariables= ((Button)e.getSource()).getSelection();
-			}
-		});
+		//See Bug 114369
+//		Button removePrivateFields= new Button(composite, SWT.CHECK);
+//		removePrivateFields.setText(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description);
+//		removePrivateFields.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+//		removePrivateFields.setSelection(fRemoveUnusedPrivateFields);
+//		removePrivateFields.addSelectionListener(new SelectionAdapter() {
+//			public void widgetSelected(SelectionEvent e) {
+//				fRemoveUnusedPrivateFields= ((Button)e.getSource()).getSelection();
+//			}
+//		});
+//		
+//		Button removeLocals= new Button(composite, SWT.CHECK);
+//		removeLocals.setText(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description);
+//		removeLocals.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+//		removeLocals.setSelection(fRemoveUnusedLocalVariables);
+//		removeLocals.addSelectionListener(new SelectionAdapter() {
+//			public void widgetSelected(SelectionEvent e) {
+//				fRemoveUnusedLocalVariables= ((Button)e.getSource()).getSelection();
+//			}
+//		});
 		
 		return composite;
 	}

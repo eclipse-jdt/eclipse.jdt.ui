@@ -189,11 +189,10 @@ public class UnusedCodeFix extends AbstractFix {
 					return Messages.format(FixMessages.UnusedCodeFix_RemoveMethod_description, name);
 				}
 			case IBinding.VARIABLE:
+				fMultiFix= null;
 				if (((IVariableBinding) binding).isField()) {
-					fMultiFix= new UnusedCodeMultiFix(false, false, false, true, false, false);
 					return Messages.format(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_description, name);
 				} else {
-					fMultiFix= new UnusedCodeMultiFix(false, false, false, false, false, true);
 					return Messages.format(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_description, name);
 				}
 			default:
