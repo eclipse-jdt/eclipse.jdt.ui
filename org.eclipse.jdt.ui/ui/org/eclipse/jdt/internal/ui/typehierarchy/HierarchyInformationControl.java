@@ -15,15 +15,12 @@ import java.lang.reflect.InvocationTargetException;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
 import org.eclipse.swt.events.KeyEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 
-import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -66,7 +63,6 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	
 	private TypeHierarchyLifeCycle fLifeCycle;
 	private HierarchyLabelProvider fLabelProvider;
-	private Label fHeaderLabel;
 	private KeyAdapter fKeyAdapter;
 	
 	private Object[] fOtherExpandedElements;
@@ -113,16 +109,6 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 	protected boolean hasHeader() {
 		return true;
 	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void createHeader(Composite parent) {
-		fHeaderLabel= new Label(parent, SWT.NONE);
-		// text set later
-		fHeaderLabel.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fHeaderLabel.setFont(JFaceResources.getBannerFont());
-	}	
 
 	protected Text createFilterText(Composite parent) {
 		// text set later
@@ -212,23 +198,6 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 		}
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#setForegroundColor(org.eclipse.swt.graphics.Color)
-	 */
-	public void setForegroundColor(Color foreground) {
-		super.setForegroundColor(foreground);
-		fHeaderLabel.setForeground(foreground);
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.text.AbstractInformationControl#setBackgroundColor(org.eclipse.swt.graphics.Color)
-	 */
-	public void setBackgroundColor(Color background) {
-		super.setBackgroundColor(background);
-		fHeaderLabel.setBackground(background);
-	}
-	
-
 	/**
 	 * {@inheritDoc}
 	 */
@@ -288,7 +257,7 @@ public class HierarchyInformationControl extends AbstractInformationControl {
 			JavaPlugin.log(e);
 		}
 		
-		fHeaderLabel.setText(getHeaderLabel(locked == null ? input : locked));
+		super.setTitleText(getHeaderLabel(locked == null ? input : locked));
 		try {
 			fLifeCycle.ensureRefreshedTypeHierarchy(input, JavaPlugin.getActiveWorkbenchWindow());
 		} catch (InvocationTargetException e1) {

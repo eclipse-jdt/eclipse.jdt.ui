@@ -12,9 +12,9 @@ package org.eclipse.jdt.internal.ui.text;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ControlAdapter;
-import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusListener;
@@ -25,48 +25,28 @@ import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.MouseMoveListener;
-import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Font;
-import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.FontMetrics;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Layout;
-import org.eclipse.swt.widgets.Listener;
-import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.ToolBar;
-import org.eclipse.swt.widgets.ToolItem;
-import org.eclipse.swt.widgets.Tracker;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
-import org.eclipse.core.runtime.CoreException;
-
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.GroupMarker;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.PopupDialog;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -78,7 +58,6 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
-import org.eclipse.jface.text.IInformationControlExtension3;
 
 import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IWorkbenchPart;
@@ -99,7 +78,6 @@ import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
@@ -108,9 +86,7 @@ import org.eclipse.jdt.internal.ui.util.StringMatcher;
  *
  * @since 2.1
  */
-public abstract class AbstractInformationControl implements IInformationControl, IInformationControlExtension, IInformationControlExtension2, IInformationControlExtension3, DisposeListener {
-
-
+public abstract class AbstractInformationControl extends PopupDialog implements IInformationControl, IInformationControlExtension, IInformationControlExtension2, DisposeListener {
 
 	/**
 	 * The NamePatternFilter selects the elements which
@@ -150,164 +126,6 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		}
 	}
 
-
-	private static class BorderFillLayout extends Layout {
-
-		/** The border widths. */
-		final int fBorderSize;
-
-		/**
-		 * Creates a fill layout with a border.
-		 *
-		 * @param borderSize the border size
-		 */
-		public BorderFillLayout(int borderSize) {
-			if (borderSize < 0)
-				throw new IllegalArgumentException();
-			fBorderSize= borderSize;
-		}
-
-		/**
-		 * Returns the border size.
-		 *
-		 * @return the border size
-		 */
-		public int getBorderSize() {
-			return fBorderSize;
-		}
-
-		/*
-		 * @see org.eclipse.swt.widgets.Layout#computeSize(org.eclipse.swt.widgets.Composite, int, int, boolean)
-		 */
-		protected Point computeSize(Composite composite, int wHint, int hHint, boolean flushCache) {
-
-			Control[] children= composite.getChildren();
-			Point minSize= new Point(0, 0);
-
-			if (children != null) {
-				for (int i= 0; i < children.length; i++) {
-					Point size= children[i].computeSize(wHint, hHint, flushCache);
-					minSize.x= Math.max(minSize.x, size.x);
-					minSize.y= Math.max(minSize.y, size.y);
-				}
-			}
-
-			minSize.x += fBorderSize * 2 + RIGHT_MARGIN;
-			minSize.y += fBorderSize * 2;
-
-			return minSize;
-		}
-		/*
-		 * @see org.eclipse.swt.widgets.Layout#layout(org.eclipse.swt.widgets.Composite, boolean)
-		 */
-		protected void layout(Composite composite, boolean flushCache) {
-
-			Control[] children= composite.getChildren();
-			Point minSize= new Point(composite.getClientArea().width, composite.getClientArea().height);
-
-			if (children != null) {
-				for (int i= 0; i < children.length; i++) {
-					Control child= children[i];
-					child.setSize(minSize.x - fBorderSize * 2, minSize.y - fBorderSize * 2);
-					child.setLocation(fBorderSize, fBorderSize);
-				}
-			}
-		}
-	}
-
-
-	/**
-	 * The view menu's Remember Size and Location action.
-	 *
-	 * @since 3.0
-	 */
-	private class RememberBoundsAction extends Action {
-
-		RememberBoundsAction() {
-			super(TextMessages.AbstractInformationControl_viewMenu_remember_label, IAction.AS_CHECK_BOX);
-			setChecked(!getDialogSettings().getBoolean(STORE_DISABLE_RESTORE_LOCATION));
-		}
-
-		/*
-		 * @see org.eclipse.jface.action.Action#run()
-		 */
-		public void run() {
-			IDialogSettings settings= getDialogSettings();
-
-			boolean newValue= !isChecked();
-
-			// store new value
-			settings.put(STORE_DISABLE_RESTORE_LOCATION, newValue);
-			settings.put(STORE_DISABLE_RESTORE_SIZE, newValue);
-
-			fIsDecativateListenerActive= true;
-		}
-	}
-
-	/**
-	 * The view menu's Resize action.
-	 *
-	 * @since 3.0
-	 */
-	private class ResizeAction extends Action {
-
-		ResizeAction() {
-			super(TextMessages.AbstractInformationControl_viewMenu_resize_label, IAction.AS_PUSH_BUTTON);
-		}
-
-		/*
-		 * @see org.eclipse.jface.action.Action#run()
-		 */
-		public void run() {
-			Tracker tracker= new Tracker(fShell.getDisplay(), SWT.RESIZE);
-			tracker.setStippled(true);
-			Rectangle[] r= new Rectangle[] { getFilterText().getShell().getBounds() };
-			tracker.setRectangles(r);
-			if (tracker.open())
-				fShell.setBounds(tracker.getRectangles()[0]);
-		}
-	}
-
-	/**
-	 * The view menu's Move action.
-	 *
-	 * @since 3.0
-	 */
-	private class MoveAction extends Action {
-
-		MoveAction() {
-			super(TextMessages.AbstractInformationControl_viewMenu_move_label, IAction.AS_PUSH_BUTTON);
-		}
-
-		/*
-		 * @see org.eclipse.jface.action.Action#run()
-		 */
-		public void run() {
-			Tracker tracker= new Tracker(fShell.getDisplay(), SWT.NONE);
-			tracker.setStippled(true);
-			Rectangle[] r= new Rectangle[] { getFilterText().getShell().getBounds() };
-			tracker.setRectangles(r);
-			if (tracker.open())
-				fShell.setBounds(tracker.getRectangles()[0]);
-		}
-	}
-
-
-	/** Border thickness in pixels. */
-	private static final int BORDER= 1;
-	/** Right margin in pixels. */
-	private static final int RIGHT_MARGIN= 3;
-	/**
-	 * Dialog constants telling whether this control can be resized or move.
-	 * @since 3.0
-	 */
-	private static final String STORE_DISABLE_RESTORE_SIZE= "DISABLE_RESTORE_SIZE"; //$NON-NLS-1$
-	private static final String STORE_DISABLE_RESTORE_LOCATION= "DISABLE_RESTORE_LOCATION"; //$NON-NLS-1$
-
-	/** The control's shell */
-	private Shell fShell;
-	/** The composite */
-	Composite fComposite;
 	/** The control's text widget */
 	private Text fFilterText;
 	/** The control's tree widget */
@@ -315,27 +133,15 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	/** The current string matcher */
 	private StringMatcher fStringMatcher;
 	private ICommand fInvokingCommand;
-	private Label fStatusField;
-	private Font fStatusTextFont;
 	private KeySequence[] fInvokingCommandKeySequences;
-	/**
-	 * Remembers the bounds for this information control.
-	 * @since 3.0
-	 */
-	private Rectangle fBounds;
-	private Rectangle fTrim;
 
 	/**
-	 * Fields for view menu support.
+	 * Fields that support the dialog menu
 	 * @since 3.0
+	 * @since 3.2 - now appended to framework menu
 	 */
-	private Button fViewMenuButton;
-	private ToolBar fToolBar;
 	private Composite fViewMenuButtonComposite;
-	private MenuManager fViewMenuManager;
 
-	private Listener fDeactivateListener;
-	private boolean fIsDecativateListenerActive= false;
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 
 	private IKeyBindingService fKeyBindingService;
@@ -343,6 +149,12 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	private IAction fShowViewMenuAction;
 	private HandlerSubmission fShowViewMenuHandlerSubmission;
 
+	/**
+	 * Field for tree style since it must be remembered by the instance.
+	 * 
+	 * @since 3.2
+	 */
+	private int treeStyle;
 
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
@@ -355,6 +167,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * @param showStatusField <code>true</code> iff the control has a status field at the bottom
 	 */
 	public AbstractInformationControl(Shell parent, int shellStyle, int treeStyle, String invokingCommandId, boolean showStatusField) {
+		super(parent, shellStyle, true, true, true, true, null, null);
 		if (invokingCommandId != null) {
 			ICommandManager commandManager= PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
 			fInvokingCommand= commandManager.getCommand(invokingCommandId);
@@ -364,43 +177,30 @@ public abstract class AbstractInformationControl implements IInformationControl,
 				// Pre-fetch key sequence - do not change because scope will change later.
 				getInvokingCommandKeySequences();
 		}
+		this.treeStyle= treeStyle;
+		// Title and status text must be set to get the title label created, so force empty values here. 
+		if (hasHeader())
+			this.setTitleText(""); //$NON-NLS-1$
+		this.setInfoText(""); //  //$NON-NLS-1$
 
-		fShell= new Shell(parent, shellStyle);
-		Display display= fShell.getDisplay();
-		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
+		// Create all controls early to preserve the life cycle of the original implementation.
+		create();
 
-		// Composite for filter text and tree
+		// Status field text can only be computed after widgets are created.
+		this.setInfoText(getStatusFieldText());
+	}
 
-		fComposite= new Composite(fShell,SWT.RESIZE);
-		GridLayout layout= new GridLayout(1, false);
-		fComposite.setLayout(layout);
-		fComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-
-		fViewMenuButtonComposite= new Composite(fComposite, SWT.NONE);
-		layout= new GridLayout(2, false);
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		fViewMenuButtonComposite.setLayout(layout);
-		fViewMenuButtonComposite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		if (hasHeader()) {
-			createHeader(fViewMenuButtonComposite);
-			fFilterText= createFilterText(fComposite);
-		} else {
-			fFilterText= createFilterText(fViewMenuButtonComposite);
-		}
-
-		createViewMenu(fViewMenuButtonComposite);
-
-		createHorizontalSeparator(fComposite);
-
-		fTreeViewer= createTreeViewer(fComposite, treeStyle);
+	/**
+	 * Create the main content for this information control.
+	 * 
+	 * @param parent The parent composite
+	 * @return The control representing the main content.
+	 * @since 3.2
+	 */
+	protected Control createDialogArea(Composite parent) {
+		fTreeViewer= createTreeViewer(parent, treeStyle);
 
 		fCustomFiltersActionGroup= new CustomFiltersActionGroup(getId(), fTreeViewer);
-
-		if (showStatusField)
-			createStatusField(fComposite);
 
 		final Tree tree= fTreeViewer.getTree();
 		tree.addKeyListener(new KeyListener() {
@@ -471,69 +271,12 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			}
 		});
 
-		int border= ((shellStyle & SWT.NO_TRIM) == 0) ? 0 : BORDER;
-		fShell.setLayout(new BorderFillLayout(border));
-
-		if (hasHeader()) {
-			fComposite.setTabList(new Control[] {fFilterText, fTreeViewer.getTree()});
-		} else {
-			fViewMenuButtonComposite.setTabList(new Control[] {fFilterText});
-			fComposite.setTabList(new Control[] {fViewMenuButtonComposite, fTreeViewer.getTree()});
-		}
-
-		setInfoSystemColor();
 		installFilter();
 
 		addDisposeListener(this);
-		fDeactivateListener= new Listener() {
-			/*
-			 * @see org.eclipse.swt.widgets.Listener#handleEvent(org.eclipse.swt.widgets.Event)
-			 */
-			public void handleEvent(Event event) {
-				if (fIsDecativateListenerActive)
-					dispose();
-			}
-		};
-		fShell.addListener(SWT.Deactivate, fDeactivateListener);
-		fIsDecativateListenerActive= true;
-		fShell.addShellListener(new ShellAdapter() {
-			/*
-			 * @see org.eclipse.swt.events.ShellAdapter#shellActivated(org.eclipse.swt.events.ShellEvent)
-			 */
-			public void shellActivated(ShellEvent e) {
-				if (e.widget == fShell && fShell.getShells().length == 0)
-					fIsDecativateListenerActive= true;
-			}
-		});
-
-		fShell.addControlListener(new ControlAdapter() {
-			/**
-			 * {@inheritDoc}
-			 */
-			public void controlMoved(ControlEvent e) {
-				fBounds= fShell.getBounds();
-				if (fTrim != null) {
-					Point location= fComposite.getLocation();
-					fBounds.x= fBounds.x - fTrim.x + location.x;
-					fBounds.y= fBounds.y - fTrim.y + location.y;
-				}
-
-			}
-
-			/**
-			 * {@inheritDoc}
-			 */
-			public void controlResized(ControlEvent e) {
-				fBounds= fShell.getBounds();
-				if (fTrim != null) {
-					Point location= fComposite.getLocation();
-					fBounds.x= fBounds.x - fTrim.x + location.x;
-					fBounds.y= fBounds.y - fTrim.y + location.y;
-			}
-			}
-		});
+		return fTreeViewer.getControl();
 	}
-
+	
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
 	 * styles are applied to the shell and the tree widget.
@@ -559,6 +302,14 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		return fTreeViewer;
 	}
 
+	/**
+	 * Returns <code>true</code> if the control has a header, <code>false</code> otherwise.
+	 * <p>
+	 * The default is to return <code>false</code>.
+	 * </p>
+	 * 
+	 * @return <code>true</code> if the control has a header
+	 */
 	protected boolean hasHeader() {
 		// default is to have no header
 		return false;
@@ -571,6 +322,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * </p>
 	 *
 	 * @param parent
+	 * @deprecated use PopupDialog#createTitleControl instead.
 	 */
 	protected void createHeader(Composite parent) {
 		// default is to have no header
@@ -618,103 +370,8 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 	}
 
-	private void createViewMenu(Composite toolbar) {
-		fToolBar= new ToolBar(toolbar, SWT.FLAT);
-		ToolItem viewMenuButton= new ToolItem(fToolBar, SWT.PUSH, 0);
-
-		GridData data= new GridData();
-		data.horizontalAlignment= GridData.END;
-		data.verticalAlignment= GridData.BEGINNING;
-		fToolBar.setLayoutData(data);
-
-		viewMenuButton.setImage(JavaPluginImages.get(JavaPluginImages.IMG_ELCL_VIEW_MENU));
-		viewMenuButton.setDisabledImage(JavaPluginImages.get(JavaPluginImages.IMG_DLCL_VIEW_MENU));
-		viewMenuButton.setToolTipText(TextMessages.AbstractInformationControl_viewMenu_toolTipText);
-		viewMenuButton.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				showViewMenu();
-			}
-		});
-
-
-		// Key binding service
-		IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
-		IWorkbenchPartSite site= part.getSite();
-		fKeyBindingService=  site.getKeyBindingService();
-
-		// Remember current scope and then set window context.
-		fKeyBindingScopes= fKeyBindingService.getScopes();
-		fKeyBindingService.setScopes(new String[] {IWorkbenchContextSupport.CONTEXT_ID_WINDOW});
-
-		// Create show view menu action
-		fShowViewMenuAction= new Action("showViewMenu") { //$NON-NLS-1$
-			/*
-			 * @see org.eclipse.jface.action.Action#run()
-			 */
-			public void run() {
-				showViewMenu();
-			}
-		};
-		fShowViewMenuAction.setEnabled(true);
-		fShowViewMenuAction.setActionDefinitionId("org.eclipse.ui.window.showViewMenu"); //$NON-NLS-1$
-
-		// Register action with command support
-		fShowViewMenuHandlerSubmission= new HandlerSubmission(null, fShell, null, fShowViewMenuAction.getActionDefinitionId(), new ActionHandler(fShowViewMenuAction), Priority.MEDIUM);
-		PlatformUI.getWorkbench().getCommandSupport().addHandlerSubmission(fShowViewMenuHandlerSubmission);
-	}
-
-	private MenuManager getViewMenuManager() {
-		if (fViewMenuManager == null) {
-			fViewMenuManager= new MenuManager();
-			fillViewMenu(fViewMenuManager);
-		}
-		return fViewMenuManager;
-	}
-
-	private void showViewMenu( ) {
-		fIsDecativateListenerActive= false;
-
-		Menu aMenu = getViewMenuManager().createContextMenu(fShell);
-
-		Rectangle bounds = fToolBar.getBounds();
-		Point topLeft = new Point(bounds.x, bounds.y + bounds.height);
-		topLeft = fShell.toDisplay(topLeft);
-		aMenu.setLocation(topLeft.x, topLeft.y);
-
-		aMenu.setVisible(true);
-	}
-
-	private void createStatusField(Composite parent) {
-
-		Composite composite= new Composite(parent, SWT.NONE);
-		GridLayout layout= new GridLayout(1, false);
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		composite.setLayout(layout);
-		composite.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		// Horizontal separator line
-		Label separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL | SWT.LINE_DOT);
-		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-		// Status field label
-		fStatusField= new Label(parent, SWT.RIGHT);
-		fStatusField.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fStatusField.setText(getStatusFieldText());
-		Font font= fStatusField.getFont();
-		Display display= parent.getDisplay();
-		FontData[] fontDatas= font.getFontData();
-		for (int i= 0; i < fontDatas.length; i++)
-			fontDatas[i].setHeight(fontDatas[i].getHeight() * 9 / 10);
-		fStatusTextFont= new Font(display, fontDatas);
-		fStatusField.setFont(fStatusTextFont);
-
-		fStatusField.setForeground(display.getSystemColor(SWT.COLOR_WIDGET_DARK_SHADOW));
-	}
-
 	protected void updateStatusFieldText() {
-		if (fStatusField != null)
-			fStatusField.setText(getStatusFieldText());
+		setInfoText(getStatusFieldText());
 	}
 
 	/**
@@ -728,12 +385,6 @@ public abstract class AbstractInformationControl implements IInformationControl,
 
 	protected String getStatusFieldText() {
 		return ""; //$NON-NLS-1$
-	}
-
-	private void setInfoSystemColor() {
-		Display display= fShell.getDisplay();
-		setForegroundColor(display.getSystemColor(SWT.COLOR_INFO_FOREGROUND));
-		setBackgroundColor(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 	}
 
 	private void installFilter() {
@@ -865,13 +516,17 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * @since 3.0
 	 */
 	protected void fillViewMenu(IMenuManager viewMenu) {
-		viewMenu.add(new GroupMarker("SystemMenuStart")); //$NON-NLS-1$
-		viewMenu.add(new MoveAction());
-		viewMenu.add(new ResizeAction());
-		viewMenu.add(new RememberBoundsAction());
-		viewMenu.add(new Separator("SystemMenuEnd")); //$NON-NLS-1$
-
 		fCustomFiltersActionGroup.fillViewMenu(viewMenu);
+	}
+
+	/*
+	 * Overridden to call the old framework method.
+	 * 
+	 * @see org.eclipse.jface.dialogs.PopupDialog#fillDialogMenu(IMenuManager)
+	 */
+	protected void fillDialogMenu(IMenuManager dialogMenu) {
+		super.fillDialogMenu(dialogMenu);
+		fillViewMenu(dialogMenu);
 	}
 
 	protected void inputChanged(Object newInput, Object newSelection) {
@@ -886,18 +541,19 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * {@inheritDoc}
 	 */
 	public void setVisible(boolean visible) {
-		if (visible || fIsDecativateListenerActive)
-			fShell.setVisible(visible);
+		if (visible) {
+			open();
+		} else {
+			saveDialogBounds(getShell());
+			getShell().setVisible(false);
+		}
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public final void dispose() {
-		if (fShell != null && !fShell.isDisposed())
-			fShell.dispose();
-		else
-			widgetDisposed(null);
+		close();
 	}
 
 	/**
@@ -908,14 +564,8 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * </p>
 	 */
 	public void widgetDisposed(DisposeEvent event) {
-		if (fStatusTextFont != null && !fStatusTextFont.isDisposed())
-			fStatusTextFont.dispose();
-
-		fShell= null;
 		fTreeViewer= null;
-		fComposite= null;
 		fFilterText= null;
-		fStatusTextFont= null;
 
 		// Remove handler submission
 		PlatformUI.getWorkbench().getCommandSupport().removeHandlerSubmission(fShowViewMenuHandlerSubmission);
@@ -939,115 +589,70 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * {@inheritDoc}
 	 */
 	public void setSizeConstraints(int maxWidth, int maxHeight) {
-		if (maxWidth > -1 && maxHeight > -1) {
-			GridData gd= new GridData(GridData.FILL_BOTH);
-			if (maxWidth > -1)
-				gd.widthHint= maxWidth;
-			if (maxHeight > -1)
-				gd.heightHint= maxHeight;
-
-			fShell.setLayoutData(gd);
-		}
+		// ignore
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public Point computeSizeHint() {
-		return fShell.computeSize(SWT.DEFAULT, SWT.DEFAULT);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 * @since 3.0
-	 */
-	public Rectangle getBounds() {
-		return fBounds;
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.IInformationControlExtension3#restoresLocation()
-	 */
-	public boolean restoresLocation() {
-		return !getDialogSettings().getBoolean(STORE_DISABLE_RESTORE_LOCATION);
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.IInformationControlExtension3#restoresSize()
-	 */
-	public boolean restoresSize() {
-		return !getDialogSettings().getBoolean(STORE_DISABLE_RESTORE_SIZE);
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.IInformationControlExtension3#computeTrim()
-	 */
-	public Rectangle computeTrim() {
-		if (fTrim != null)
-			return fTrim;
-		return new Rectangle(0, 0, 0, 0);
+		// return the shell's size - note that it already has the persisted size if persisting
+		// is enabled.
+		return getShell().getSize();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void setLocation(Point location) {
-		fTrim= fShell.computeTrim(0, 0, 0, 0);
-		Point compositeLocation= fComposite.getLocation();
-		location.x += fTrim.x - compositeLocation.x;
-		location.y += fTrim.y - compositeLocation.y;
-		fShell.setLocation(location);
+		/*
+		 * If the location is persisted, it gets managed by PopupDialog - fine. Otherwise, the location is
+		 * computed in Window#getInitialLocation, which will center it in the parent shell / main
+		 * monitor, which is wrong for two reasons:
+		 * - we want to center over the editor / subject control, not the parent shell
+		 * - the center is computed via the initalSize, which may be also wrong since the size may 
+		 *   have been updated since via min/max sizing of AbstractInformationControlManager.
+		 * In that case, override the location with the one computed by the manager. Note that
+		 * the call to constrainShellSize in PopupDialog.open will still ensure that the shell is
+		 * entirely visible.
+		 */
+		if (!getPersistBounds() || getDialogSettings() == null)
+			getShell().setLocation(location);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void setSize(int width, int height) {
-		fShell.setSize(width, height);
+		getShell().setSize(width, height);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void addDisposeListener(DisposeListener listener) {
-		fShell.addDisposeListener(listener);
+		getShell().addDisposeListener(listener);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void removeDisposeListener(DisposeListener listener) {
-		fShell.removeDisposeListener(listener);
+		getShell().removeDisposeListener(listener);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void setForegroundColor(Color foreground) {
-		fTreeViewer.getTree().setForeground(foreground);
-		fFilterText.setForeground(foreground);
-		fComposite.setForeground(foreground);
-		fViewMenuButtonComposite.setForeground(foreground);
-		if (fStatusField != null)
-			fStatusField.getParent().setForeground(foreground);
+		applyForegroundColor(foreground, getContents());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void setBackgroundColor(Color background) {
-		fTreeViewer.getTree().setBackground(background);
-		fFilterText.setBackground(background);
-		fComposite.setBackground(background);
-		fViewMenuButtonComposite.setBackground(background);
-		if (fStatusField != null) {
-			fStatusField.setBackground(background);
-			fStatusField.getParent().setBackground(background);
-		}
-		if (fViewMenuButton != null)
-			fViewMenuButton.setBackground(background);
-		if (fToolBar != null)
-			fToolBar.setBackground(background);
+		applyBackgroundColor(background, getContents());
 	}
 
 	/**
@@ -1061,7 +666,7 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * {@inheritDoc}
 	 */
 	public void setFocus() {
-		fShell.forceFocus();
+		getShell().forceFocus();
 		fFilterText.setFocus();
 	}
 
@@ -1069,14 +674,14 @@ public abstract class AbstractInformationControl implements IInformationControl,
 	 * {@inheritDoc}
 	 */
 	public void addFocusListener(FocusListener listener) {
-		fShell.addFocusListener(listener);
+		getShell().addFocusListener(listener);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public void removeFocusListener(FocusListener listener) {
-		fShell.removeFocusListener(listener);
+		getShell().removeFocusListener(listener);
 	}
 
 	final protected ICommand getInvokingCommand() {
@@ -1099,6 +704,9 @@ public abstract class AbstractInformationControl implements IInformationControl,
 		return fInvokingCommandKeySequences;
 	}
 
+	/*
+	 * @see org.eclipse.jface.dialogs.PopupDialog#getDialogSettings()
+	 */
 	protected IDialogSettings getDialogSettings() {
 		String sectionName= getId();
 
@@ -1107,5 +715,74 @@ public abstract class AbstractInformationControl implements IInformationControl,
 			settings= JavaPlugin.getDefault().getDialogSettings().addNewSection(sectionName);
 
 		return settings;
+	}
+	
+	/*
+	 * Overridden to insert the filter text into the title and menu area.
+	 * 
+	 * @since 3.2
+	 */
+	protected Control createTitleMenuArea(Composite parent) {
+		fViewMenuButtonComposite= (Composite) super.createTitleMenuArea(parent);
+
+		// If there is a header, then the filter text must be created
+		// underneath the title and menu area.
+
+		if (hasHeader()) {
+			fFilterText= createFilterText(parent);
+		}
+
+		// Create a key binding for showing the dialog menu
+		// Key binding service
+		IWorkbenchPart part= JavaPlugin.getActivePage().getActivePart();
+		IWorkbenchPartSite site= part.getSite();
+		fKeyBindingService= site.getKeyBindingService();
+
+		// Remember current scope and then set window context.
+		fKeyBindingScopes= fKeyBindingService.getScopes();
+		fKeyBindingService.setScopes(new String[] { IWorkbenchContextSupport.CONTEXT_ID_WINDOW });
+
+		// Create show view menu action
+		fShowViewMenuAction= new Action("showViewMenu") { //$NON-NLS-1$
+			/*
+			 * @see org.eclipse.jface.action.Action#run()
+			 */
+			public void run() {
+				showDialogMenu();
+			}
+		};
+		fShowViewMenuAction.setEnabled(true);
+		fShowViewMenuAction.setActionDefinitionId("org.eclipse.ui.window.showViewMenu"); //$NON-NLS-1$
+
+		// Register action with command support
+		fShowViewMenuHandlerSubmission= new HandlerSubmission(null, getShell(), null, fShowViewMenuAction.getActionDefinitionId(), new ActionHandler(fShowViewMenuAction), Priority.MEDIUM);
+		PlatformUI.getWorkbench().getCommandSupport().addHandlerSubmission(fShowViewMenuHandlerSubmission);
+
+		return fViewMenuButtonComposite;
+	}
+
+	/*
+	 * Overridden to insert the filter text into the title control
+	 * if there is no header specified.
+	 * @since 3.2
+	 */
+	protected Control createTitleControl(Composite parent) {
+		if (hasHeader()) {
+			return super.createTitleControl(parent);
+		}
+		fFilterText= createFilterText(parent);
+		return fFilterText;
+	}
+	
+	/*
+	 * @see org.eclipse.jface.dialogs.PopupDialog#setTabOrder(org.eclipse.swt.widgets.Composite)
+	 */
+	protected void setTabOrder(Composite composite) {
+		if (hasHeader()) {
+			composite.setTabList(new Control[] { fFilterText, fTreeViewer.getTree() });
+		} else {
+			fViewMenuButtonComposite.setTabList(new Control[] { fFilterText });
+			composite.setTabList(new Control[] { fViewMenuButtonComposite, fTreeViewer.getTree() });
+		}
 	}
 }
