@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -336,6 +338,28 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		
 		public JREGroup(Composite composite) {
 			fInstalledJVMs= getWorkspaceJREs();
+			Arrays.sort(fInstalledJVMs, new Comparator() {
+
+				public int compare(Object arg0, Object arg1) {
+					IVMInstall i0= (IVMInstall)arg0;
+					IVMInstall i1= (IVMInstall)arg1;
+					if (i1 instanceof IVMInstall2 && i0 instanceof IVMInstall2) {
+						String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2)i0);
+						if (cc0 == null)
+							cc0= JavaCore.VERSION_1_4;
+						String cc1= JavaModelUtil.getCompilerCompliance((IVMInstall2)i1);
+						if (cc1 == null)
+							cc1= JavaCore.VERSION_1_4;
+						int result= cc1.compareTo(cc0);
+						if (result == 0)
+							result= i0.getName().compareTo(i1.getName());
+						return result;
+					} else {
+						return i0.getName().compareTo(i1.getName());
+					}
+				}
+				
+			});
 			fComplianceLabels= new String[fInstalledJVMs.length];
 			fComplianceData= new String[fInstalledJVMs.length];
 			for (int i= 0; i < fInstalledJVMs.length; i++) {
