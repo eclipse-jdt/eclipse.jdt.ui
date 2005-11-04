@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -29,8 +30,15 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public final class ExperimentalResultCollector extends CompletionProposalCollector {
 
-	public ExperimentalResultCollector(ICompilationUnit cu) {
-		super(cu);
+	private final JavaContentAssistInvocationContext fInvocationContext;
+	private final boolean fIsGuessArguments;
+
+	public ExperimentalResultCollector(JavaContentAssistInvocationContext context) {
+		super(context.computeCompilationUnit());
+		fInvocationContext= context;
+		fInvocationContext.setCollector(this);
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
+		fIsGuessArguments= preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
 	}
 
 	/*
@@ -54,12 +62,12 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		if ((completion.length() == 0) || ((completion.length() == 1) && completion.charAt(0) == ')') || Signature.getParameterCount(methodProposal.getSignature()) == 0 || getContext().isInJavadoc())
 			return super.createJavaCompletionProposal(methodProposal);
 
-		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		LazyJavaCompletionProposal proposal;
-		if (preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS))
-			proposal= new ParameterGuessingProposal(methodProposal, getContext(), getCompilationUnit(), getLabelProvider());
+		ICompilationUnit compilationUnit= getCompilationUnit();
+		if (compilationUnit != null && fIsGuessArguments)
+			proposal= new ParameterGuessingProposal(methodProposal, fInvocationContext, compilationUnit, getLabelProvider());
 		else
-			proposal= new ExperimentalProposal(methodProposal, getContext(), getCompilationUnit(), getLabelProvider());
+			proposal= new ExperimentalProposal(methodProposal, getContext(), compilationUnit, getLabelProvider());
 		return proposal;
 	}
 

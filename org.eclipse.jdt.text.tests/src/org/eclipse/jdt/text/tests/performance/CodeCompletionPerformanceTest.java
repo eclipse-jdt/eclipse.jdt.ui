@@ -17,20 +17,22 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.test.performance.PerformanceMeter;
-
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-
-import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.source.ISourceViewer;
 
-import org.eclipse.ui.PartInitException;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.text.java.ExperimentalResultCollector;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -39,16 +41,11 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
-import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.text.java.ExperimentalResultCollector;
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.test.performance.PerformanceMeter;
+import org.eclipse.ui.PartInitException;
 
 public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 
@@ -221,7 +218,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 			meter.start();
 			
 			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
-				CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
+				CompletionProposalCollector collector= new ExperimentalResultCollector(createContext());
 				codeComplete(collector);
 			}
 			
@@ -238,7 +235,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 	
 	private void measureApplicationWithParamterNames(PerformanceMeter meter, final int runs) throws Exception {
 		for (int run= 0; run < runs; run++) {
-			CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
+			CompletionProposalCollector collector= new ExperimentalResultCollector(createContext());
 			IJavaCompletionProposal[] proposals= codeComplete(collector);
 			
 			meter.start();
@@ -268,7 +265,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 			meter.start();
 			
 			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
-				CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
+				CompletionProposalCollector collector= new ExperimentalResultCollector(createContext());
 				codeComplete(collector);
 			}
 			
@@ -289,7 +286,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		store.setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
 		
 		for (int run= 0; run < runs; run++) {
-			CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
+			CompletionProposalCollector collector= new ExperimentalResultCollector(createContext());
 			IJavaCompletionProposal[] proposals= codeComplete(collector);
 			
 			meter.start();
@@ -354,7 +351,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 			meter.start();
 			
 			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
-				CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
+				CompletionProposalCollector collector= new ExperimentalResultCollector(createContext());
 				codeComplete(collector);
 			}
 			
@@ -377,7 +374,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 		store.setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, true);
 		
 		for (int run= 0; run < runs; run++) {
-			CompletionProposalCollector collector= new ExperimentalResultCollector(fCU);
+			CompletionProposalCollector collector= new ExperimentalResultCollector(createContext());
 			IJavaCompletionProposal[] proposals= codeComplete(collector);
 			
 			meter.start();
@@ -404,5 +401,10 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 			proposal.apply(viewer.getDocument());
 		}
 	}
+	
+	private JavaContentAssistInvocationContext createContext() {
+		return new JavaContentAssistInvocationContext(fEditor.getViewer(), fCodeAssistOffset, fEditor);
+	}
+
 
 }

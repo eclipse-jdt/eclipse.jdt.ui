@@ -20,8 +20,15 @@ import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorReference;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -40,9 +47,11 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.ExperimentalResultCollector;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -106,6 +115,7 @@ public class CodeCompletionTest extends CoreTests {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setValue(PreferenceConstants.CODEGEN_ADD_COMMENTS, true);
 		store.setValue(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS, false);
+		store.setValue(PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS, false);
 
 		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, "/* (non-Javadoc)\n * ${see_to_overridden}\n */", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "//TODO\n${body_statement}", null);
@@ -118,8 +128,28 @@ public class CodeCompletionTest extends CoreTests {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 		store.setToDefault(PreferenceConstants.CODEGEN_ADD_COMMENTS);
 		store.setToDefault(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
-
+		store.setToDefault(PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS);
+		closeAllEditors();
 		JavaProjectHelper.delete(fJProject1);
+	}
+	
+	public static void closeEditor(IEditorPart editor) {
+		IWorkbenchPartSite site;
+		IWorkbenchPage page;
+		if (editor != null && (site= editor.getSite()) != null && (page= site.getPage()) != null)
+			page.closeEditor(editor, false);
+	}
+	
+	public static void closeAllEditors() {
+		IWorkbenchWindow[] windows= PlatformUI.getWorkbench().getWorkbenchWindows();
+		for (int i= 0; i < windows.length; i++) {
+			IWorkbenchPage[] pages= windows[i].getPages();
+			for (int j= 0; j < pages.length; j++) {
+				IEditorReference[] editorReferences= pages[j].getEditorReferences();
+				for (int k= 0; k < editorReferences.length; k++)
+					closeEditor(editorReferences[k].getEditor(false));
+			}
+		}
 	}
 
 	public void testAnonymousTypeCompletion1() throws Exception {
@@ -309,7 +339,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		CompletionProposalCollector collector= new ExperimentalResultCollector(cu);
+		CompletionProposalCollector collector= new ExperimentalResultCollector(createContext(offset, cu));
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -343,6 +373,12 @@ public class CodeCompletionTest extends CoreTests {
 				"}\n";
 
 		assertEqualString(doc.get(), result);
+	}
+
+	private JavaContentAssistInvocationContext createContext(int offset, ICompilationUnit cu) throws PartInitException, JavaModelException {
+		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
+		ISourceViewer viewer= editor.getViewer();
+		return new JavaContentAssistInvocationContext(viewer, offset, editor);
 	}
 
 	public void testGetterCompletion1() throws Exception {
@@ -539,7 +575,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		CompletionProposalCollector collector= new ExperimentalResultCollector(cu);
+		CompletionProposalCollector collector= new ExperimentalResultCollector(createContext(offset, cu));
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -588,7 +624,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		CompletionProposalCollector collector= new ExperimentalResultCollector(cu);
+		CompletionProposalCollector collector= new ExperimentalResultCollector(createContext(offset, cu));
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);

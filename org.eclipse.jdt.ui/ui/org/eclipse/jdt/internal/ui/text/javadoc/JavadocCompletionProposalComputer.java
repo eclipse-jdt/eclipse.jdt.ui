@@ -11,9 +11,9 @@
 package org.eclipse.jdt.internal.ui.text.javadoc;
 
 import org.eclipse.jdt.core.CompletionProposal;
-import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
 
@@ -23,10 +23,10 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer;
  */
 public class JavadocCompletionProposalComputer extends JavaCompletionProposalComputer {
 	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer#createCollector(org.eclipse.jdt.core.ICompilationUnit)
+	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer#createCollector(org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext)
 	 */
-	protected CompletionProposalCollector createCollector(ICompilationUnit unit) {
-		CompletionProposalCollector collector= super.createCollector(unit);
+	protected CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context) {
+		CompletionProposalCollector collector= super.createCollector(context);
 		collector.setIgnored(CompletionProposal.ANNOTATION_ATTRIBUTE_REF, true);
 		collector.setIgnored(CompletionProposal.ANONYMOUS_CLASS_DECLARATION, true);
 		collector.setIgnored(CompletionProposal.FIELD_REF, false);

@@ -200,7 +200,7 @@ public class JavaCompletionProposalComputer implements ICompletionProposalComput
 		
 		ITextViewer viewer= context.getViewer();
 		
-		CompletionProposalCollector collector= createCollector(unit);
+		CompletionProposalCollector collector= createCollector(context);
 		context.setCollector(collector);
 
 		try {
@@ -235,10 +235,10 @@ public class JavaCompletionProposalComputer implements ICompletionProposalComput
 	/**
 	 * Creates the collector used to get proposals from core.
 	 */
-	protected CompletionProposalCollector createCollector(ICompilationUnit unit) {
+	protected CompletionProposalCollector createCollector(JavaContentAssistInvocationContext context) {
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES))
-			return new ExperimentalResultCollector(unit);
+			return new ExperimentalResultCollector(context);
 		else
-			return new CompletionProposalCollector(unit);
+			return new CompletionProposalCollector(context.computeCompilationUnit());
 	}
 }

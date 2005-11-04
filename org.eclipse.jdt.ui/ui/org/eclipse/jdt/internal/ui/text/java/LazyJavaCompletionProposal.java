@@ -826,6 +826,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	protected void setUpLinkedMode(IDocument document, char closingCharacter) {
 		if (getTextViewer() != null && autocloseBrackets()) {
 			int offset= getReplacementOffset() + getCursorPosition();
+			int exit= getReplacementOffset() + getReplacementString().length();
 			try {
 				LinkedPositionGroup group= new LinkedPositionGroup();
 				group.addPosition(new LinkedPosition(document, offset, 0, LinkedPositionGroup.NO_STOP));
@@ -837,7 +838,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 				LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
 				ui.setSimpleMode(true);
 				ui.setExitPolicy(new ExitPolicy(closingCharacter, document));
-				ui.setExitPosition(getTextViewer(), offset + 1, 0, Integer.MAX_VALUE);
+				ui.setExitPosition(getTextViewer(), exit, 0, Integer.MAX_VALUE);
 				ui.setCyclingMode(LinkedModeUI.CYCLE_NEVER);
 				ui.enter();
 			} catch (BadLocationException x) {
