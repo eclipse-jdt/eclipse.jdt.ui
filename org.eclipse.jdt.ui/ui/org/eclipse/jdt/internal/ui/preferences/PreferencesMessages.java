@@ -175,7 +175,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_smartPaste;
 	public static String JavaEditorPreferencePage_link;
 	public static String JavaEditorPreferencePage_link_tooltip;
-	public static String JavaEditorPreferencePage_linking_title;
 	public static String JavaEditorPreferencePage_importsOnPaste;
 	public static String JavaEditorPreferencePage_smartHomeEnd;
 	public static String JavaEditorPreferencePage_subWordNavigation;
@@ -681,14 +680,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_coloring_category_java;
 	public static String JavaEditorPreferencePage_coloring_category_javadoc;
 	public static String JavaEditorPreferencePage_coloring_category_comments;
-	public static String LinkedModeConfigurationBlock_annotationPresentationOptions;
-	public static String LinkedModeConfigurationBlock_SQUIGGLES;
-	public static String LinkedModeConfigurationBlock_UNDERLINE;
-	public static String LinkedModeConfigurationBlock_BOX;
-	public static String LinkedModeConfigurationBlock_IBEAM;
-	public static String LinkedModeConfigurationBlock_HIGHLIGHT;
-	public static String LinkedModeConfigurationBlock_labels_showIn;
-	public static String LinkedModeConfigurationBlock_color;
 	public static String ProjectSelectionDialog_title;
 	public static String ProjectSelectionDialog_desciption;
 	public static String ProjectSelectionDialog_filter;

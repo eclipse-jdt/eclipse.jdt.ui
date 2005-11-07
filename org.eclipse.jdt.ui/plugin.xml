@@ -1026,6 +1026,7 @@
 	  </specification>
 
       <!-- linked annotations -->
+      <!-- these are deprecated as of 3.2, do not use. -->
 	  <specification
             annotationType="org.eclipse.jdt.ui.link.master"
             colorPreferenceValue="70,100,165"
@@ -1350,13 +1351,6 @@
             id="org.eclipse.jdt.ui.preferences.SmartTypingPreferencePage">
          <keywordReference id="org.eclipse.jdt.ui.smarttyping"/>
       </page>
-      <page
-            name="%editorLinkedMode"
-            category="org.eclipse.jdt.ui.preferences.JavaEditorPreferencePage"
-            class="org.eclipse.jdt.internal.ui.preferences.LinkedModePreferencePage"
-            id="org.eclipse.jdt.ui.preferences.LinkedModePreferencePage">
-         <keywordReference id="org.eclipse.jdt.ui.linkedmode"/>
-      </page>
 
       <page
             name="%codeTemplatePreferencePageName"
@@ -1454,9 +1448,6 @@
       <keyword
             label="%preferenceKeywords.smarttyping"
             id="org.eclipse.jdt.ui.smarttyping"/>
-      <keyword
-            label="%preferenceKeywords.linkedmode"
-            id="org.eclipse.jdt.ui.linkedmode"/>
    </extension>  
 <!-- =========================================================================== -->
 <!-- Work in Progress                                                            -->
