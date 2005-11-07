@@ -227,6 +227,7 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_non_externalized_strings_label; 
 		addComboBox(inner, label, PREF_PB_NON_EXTERNALIZED_STRINGS, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
+
 		
 		// --- potential_programming_problems
 		
@@ -262,6 +263,14 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		//label= PreferencesMessages.getString("ProblemSeveritiesConfigurationBlock.pb_inconsistent_null_check.label"); //$NON-NLS-1$
 		//addComboBox(inner, label, PREF_PB_INCONSISTENT_NULL_CHECK, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_inexact_vararg_label; 
+		addComboBox(inner, label, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_autoboxing_problem_label; 
+		addComboBox(inner, label, PREF_15_PB_AUTOBOXING_PROBLEM, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
+
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_incomplete_enum_switch_label; 
+		addComboBox(inner, label, PREF_15_PB_INCOMPLETE_ENUM_SWITCH, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
 		// --- name_shadowing
 		
@@ -357,9 +366,10 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unused_label_label; 
 		addComboBox(inner, label, PREF_PB_UNUSED_LABEL, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 	
-		// --- 1.5
 		
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_jdk50; 
+		// --- generics
+		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_generics;
 		excomposite= createStyleSection(composite, label, nColumns);
 
 		
@@ -376,12 +386,18 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_final_param_bound_label; 
 		addComboBox(inner, label, PREF_15_PB_FINAL_PARAM_BOUND, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
-		
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_inexact_vararg_label; 
-		addComboBox(inner, label, PREF_15_PB_VARARGS_ARGUMENT_NEED_CAST, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_autoboxing_problem_label; 
-		addComboBox(inner, label, PREF_15_PB_AUTOBOXING_PROBLEM, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
+		
+		// --- 1.5
+		
+		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_section_annotations; 
+		excomposite= createStyleSection(composite, label, nColumns);
+
+		
+		inner= new Composite(excomposite, SWT.NONE);
+		inner.setFont(composite.getFont());
+		inner.setLayout(new GridLayout(nColumns, false));
+		excomposite.setClient(inner);
 		
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_missing_override_annotation_label; 
 		addComboBox(inner, label, PREF_15_PB_MISSING_OVERRIDE_ANNOTATION, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
@@ -392,9 +408,6 @@ public class ProblemSeveritiesConfigurationBlock extends OptionsConfigurationBlo
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_annotation_super_interface_label; 
 		addComboBox(inner, label, PREF_15_PB_ANNOTATION_SUPER_INTERFACE, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
-		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_incomplete_enum_switch_label; 
-		addComboBox(inner, label, PREF_15_PB_INCOMPLETE_ENUM_SWITCH, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
-
 		label= PreferencesMessages.ProblemSeveritiesConfigurationBlock_pb_unhandled_surpresswarning_tokens;
 		addComboBox(inner, label, PREF_PB_UNHANDLED_WARNING_TOKEN, errorWarningIgnore, errorWarningIgnoreLabels, defaultIndent);
 		
