@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -28,18 +26,11 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
-import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.IFix;
-import org.eclipse.jdt.internal.corext.fix.CodeStyleFix.TupleForNonStaticAccess;
-import org.eclipse.jdt.internal.corext.fix.CodeStyleFix.TupleForUnqualifiedAccess;
-
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 /**
  * Creates fixes which can resolve code style issues 
@@ -65,44 +56,12 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
-
-		IProblem[] problems= compilationUnit.getProblems();
 		
-		List/*<TupleForNonStaticAccess>*/ nonStaticTuples= new ArrayList(); 
-		List/*<TupleForUnqualifiedAccess>*/ bindingTuples= new ArrayList();
-		
-		for (int i= 0; i < problems.length; i++) {
-			IProblemLocation problem= getProblemLocation(problems[i]);
-			TupleForNonStaticAccess tupleDirect= null;
-			if (fChangeNonStaticAccessToStatic && CodeStyleFix.isNonStaticAccess(problem)) {
-				tupleDirect= CodeStyleFix.getTupleForNonStaticAccess(compilationUnit, problem);
-			}
-			if (tupleDirect != null) {
-				nonStaticTuples.add(tupleDirect);
-			} else if (fAddThisQualifier && problems[i].getID() == IProblem.UnqualifiedFieldAccess) {
-				TupleForUnqualifiedAccess tuple= CodeStyleFix.getBindingTuple(compilationUnit, problem);
-				if (tuple != null) {
-					bindingTuples.add(tuple);
-				}
-			}
-			
-		}
-		
-		if (bindingTuples.size() == 0 && nonStaticTuples.size() == 0)
-			return null;
-		
-		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
-		TupleForUnqualifiedAccess[] nonQualifiedAccesses= (TupleForUnqualifiedAccess[])bindingTuples.toArray(new TupleForUnqualifiedAccess[bindingTuples.size()]);
-		TupleForNonStaticAccess[] nonStaticAccesses= (TupleForNonStaticAccess[])nonStaticTuples.toArray(new TupleForNonStaticAccess[nonStaticTuples.size()]);
-		return new CodeStyleFix(FixMessages.CodeStyleFix_AddThisQualifier_description, cu, nonQualifiedAccesses, nonStaticAccesses);
+		return CodeStyleFix.createCleanUp(compilationUnit, fAddThisQualifier, fChangeNonStaticAccessToStatic);
 	}
 
 	public Map getRequiredOptions() {
 		Map options= new Hashtable();
-		if (fAddThisQualifier) {
-			options.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.WARNING);
-			options.put(JavaCore.COMPILER_PB_MAX_PER_UNIT, "350"); //$NON-NLS-1$
-		}
 		if (fChangeNonStaticAccessToStatic)
 			options.put(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER, JavaCore.WARNING);
 		return options;

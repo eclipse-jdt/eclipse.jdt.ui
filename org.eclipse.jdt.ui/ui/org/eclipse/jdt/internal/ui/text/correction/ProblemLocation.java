@@ -25,11 +25,11 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
  */
 public class ProblemLocation implements IProblemLocation {
 
-	private int fId;
-	private String[] fArguments;
-	private int fOffset;
-	private int fLength;
-	private boolean fIsError;
+	private final int fId;
+	private final String[] fArguments;
+	private final int fOffset;
+	private final int fLength;
+	private final boolean fIsError;
 
 	public ProblemLocation(int offset, int length, IJavaAnnotation annotation) {
 		fId= annotation.getId();
@@ -45,6 +45,14 @@ public class ProblemLocation implements IProblemLocation {
 		fOffset= offset;
 		fLength= length;
 		fIsError= isError;
+	}
+	
+	public ProblemLocation(IProblem problem) {
+		fId= problem.getID();
+		fArguments= problem.getArguments();
+		fOffset= problem.getSourceStart();
+		fLength= problem.getSourceEnd() - fOffset + 1;
+		fIsError= problem.isError();
 	}
 
 
