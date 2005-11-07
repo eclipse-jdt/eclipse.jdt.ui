@@ -184,7 +184,6 @@ import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
 import org.eclipse.jdt.ui.actions.JavaSearchActionGroup;
 import org.eclipse.jdt.ui.actions.OpenEditorActionGroup;
 import org.eclipse.jdt.ui.actions.OpenViewActionGroup;
-import org.eclipse.jdt.ui.actions.ShowActionGroup;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -2296,14 +2295,13 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	protected void createActions() {
 		super.createActions();
 
-		ActionGroup oeg, ovg, jsg, sg;
+		ActionGroup oeg, ovg, jsg;
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
 			oeg= new OpenEditorActionGroup(this),
-			sg= new ShowActionGroup(this),
 			ovg= new OpenViewActionGroup(this),
 			jsg= new JavaSearchActionGroup(this)
 		});
-		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, sg, jsg});
+		fContextMenuGroup= new CompositeActionGroup(new ActionGroup[] {oeg, ovg, jsg});
 
 		fFoldingGroup= new FoldingActionGroup(this, getViewer());
 
