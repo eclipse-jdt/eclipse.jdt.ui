@@ -824,6 +824,9 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InitializableRefactoring_inacceptable_arguments;
 	public static String InitializableRefactoring_input_not_exists;
 	public static String InitializableRefactoring_illegal_argument;
+	
+	public static String RefactoringElementFilterDescriptor_filterDescriptionCreationError_message;
+	public static String RefactoringElementFilterDescriptor_filterCreationError_message;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);

@@ -304,7 +304,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		IJavaSearchScope scope= createRefactoringScope(getMethod());
 		SearchRequestor requestor= new SearchRequestor() {
 			public void acceptSearchMatch(SearchMatch match) throws CoreException {
-				if (RefactoringSearchEngine.isDerived(match.getResource()))
+				if (RefactoringSearchEngine.isFiltered(match))
 					return;
 				IMember member= (IMember) match.getElement();
 				IType declaring= member.getDeclaringType();
@@ -326,7 +326,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		IJavaSearchScope scope= RefactoringScopeFactory.create(getMethod().getJavaProject());
 		SearchRequestor requestor= new SearchRequestor() {
 			public void acceptSearchMatch(SearchMatch match) throws CoreException {
-				if (RefactoringSearchEngine.isDerived(match.getResource()))
+				if (RefactoringSearchEngine.isFiltered(match))
 					return;
 				Object method= match.getElement();
 				if (method instanceof IMethod) // check for bug 90138: [refactoring] [rename] Renaming method throws internal exception
