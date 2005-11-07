@@ -10,13 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -47,6 +51,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String SETTINGS_SECTION_NAME= "JavaBuildConfigurationBlock"; //$NON-NLS-1$
 	
 	private static final Key PREF_PB_MAX_PER_UNIT= getJDTCoreKey(JavaCore.COMPILER_PB_MAX_PER_UNIT);
+	private static final Key PREF_PB_FATAL_OPTIONAL_ERROR= getJDTCoreKey(JavaCore.COMPILER_PB_FATAL_OPTIONAL_ERROR);
 
 	private static final Key PREF_RESOURCE_FILTER= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_RESOURCE_COPY_FILTER);
 	private static final Key PREF_BUILD_INVALID_CLASSPATH= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_INVALID_CLASSPATH);
@@ -59,6 +64,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_PB_INCOMPATIBLE_JDK_LEVEL= getJDTCoreKey(JavaCore.CORE_INCOMPATIBLE_JDK_LEVEL);
 	private static final Key PREF_PB_DUPLICATE_RESOURCE= getJDTCoreKey(JavaCore.CORE_JAVA_BUILD_DUPLICATE_RESOURCE);
 
+	
 	// values
 	private static final String ERROR= JavaCore.ERROR;
 	private static final String WARNING= JavaCore.WARNING;
@@ -83,7 +89,7 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 	private static Key[] getKeys() {
 		Key[] keys= new Key[] {
 				PREF_PB_MAX_PER_UNIT, PREF_RESOURCE_FILTER, PREF_BUILD_INVALID_CLASSPATH, PREF_PB_INCOMPLETE_BUILDPATH, PREF_PB_CIRCULAR_BUILDPATH,
-				PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE,
+				PREF_BUILD_CLEAN_OUTPUT_FOLDER, PREF_PB_DUPLICATE_RESOURCE, PREF_PB_FATAL_OPTIONAL_ERROR,
 				PREF_PB_INCOMPATIBLE_JDK_LEVEL, PREF_ENABLE_EXCLUSION_PATTERNS, PREF_ENABLE_MULTIPLE_OUTPUT_LOCATIONS,
 			};
 		return keys;
@@ -159,6 +165,20 @@ public class JavaBuildConfigurationBlock extends OptionsConfigurationBlock {
 		gd.widthHint= fPixelConverter.convertWidthInCharsToPixels(8);
 		gd.horizontalAlignment= GridData.END;
 		text.setTextLimit(6);
+		
+		
+		label= PreferencesMessages.JavaBuildConfigurationBlock_treat_optional_as_fatal;
+		SelectionListener listener= new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				String pageId= fProject != null ? ProblemSeveritiesPreferencePage.PROP_ID : ProblemSeveritiesPreferencePage.PREF_ID;
+				getPreferenceContainer().openPage(pageId, null);
+			}
+			
+		};
+		
+		int widthHint= fPixelConverter.convertWidthInCharsToPixels(40);
+		addCheckBoxWithLink(othersComposite, label, PREF_PB_FATAL_OPTIONAL_ERROR, enableDisableValues, 0, widthHint, listener);
+
 		
 		label= PreferencesMessages.JavaBuildConfigurationBlock_enable_exclusion_patterns_label; 
 		addCheckBox(othersComposite, label, PREF_ENABLE_EXCLUSION_PATTERNS, enableDisableValues, 0);

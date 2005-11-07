@@ -37,6 +37,7 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Widget;
@@ -325,6 +326,48 @@ public abstract class OptionsConfigurationBlock {
 		checkBox.setLayoutData(gd);
 		checkBox.addSelectionListener(getSelectionListener());
 		
+		makeScrollableCompositeAware(checkBox);
+		
+		String currValue= getValue(key);
+		checkBox.setSelection(data.getSelection(currValue) == 0);
+		
+		fCheckBoxes.add(checkBox);
+		
+		return checkBox;
+	}
+	
+	protected Button addCheckBoxWithLink(Composite parent, String label, Key key, String[] values, int indent, int widthHint, SelectionListener listener) {
+		ControlData data= new ControlData(key, values);
+		
+		GridData gd= new GridData(GridData.FILL, GridData.FILL, true, false);
+		gd.horizontalSpan= 3;
+		gd.horizontalIndent= indent;
+		
+		Composite composite= new Composite(parent, SWT.NONE);
+		GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		layout.numColumns= 2;
+		composite.setLayout(layout);
+		composite.setLayoutData(gd);
+		
+		Button checkBox= new Button(composite, SWT.CHECK);
+		checkBox.setFont(JFaceResources.getDialogFont());
+		checkBox.setData(data);
+		checkBox.setLayoutData(new GridData(GridData.FILL, GridData.BEGINNING, false, false));
+		checkBox.addSelectionListener(getSelectionListener());
+		
+		gd= new GridData(GridData.FILL, GridData.CENTER, true, false);
+		gd.widthHint= widthHint;
+		
+		Link link= new Link(composite, SWT.NONE);
+		link.setText(label);
+		link.setLayoutData(gd);
+		if (listener != null) {
+			link.addSelectionListener(listener);
+		}
+		
+		makeScrollableCompositeAware(link);
 		makeScrollableCompositeAware(checkBox);
 		
 		String currValue= getValue(key);

@@ -341,7 +341,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ProblemSeveritiesConfigurationBlock_section_code_style;
 	public static String ProblemSeveritiesConfigurationBlock_section_deprecations;
 	public static String ProblemSeveritiesConfigurationBlock_section_name_shadowing;
-	public static String ProblemSeveritiesConfigurationBlock_section_jdk50;
+	public static String ProblemSeveritiesConfigurationBlock_section_annotations;
 	public static String ProblemSeveritiesConfigurationBlock_needsbuild_title;
 	public static String ProblemSeveritiesConfigurationBlock_needsfullbuild_message;
 	public static String ProblemSeveritiesConfigurationBlock_needsprojectbuild_message;
@@ -706,5 +706,7 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeAssistConfigurationBlockInProgress_Down;
 	public static String CodeAssistConfigurationBlockInProgress_separator;
 	public static String CodeAssistConfigurationBlockInProgress_include;
+	public static String ProblemSeveritiesConfigurationBlock_section_generics;
+	public static String JavaBuildConfigurationBlock_treat_optional_as_fatal;
 
 }
