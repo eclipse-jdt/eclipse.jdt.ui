@@ -16,6 +16,6 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.ide,
  org.eclipse.ui.views,
  org.eclipse.ui.workbench.texteditor
-Eclipse-AutoStart: true
+Eclipse-LazyStart: true
 Export-Package: org.eclipse.jdt.jeview;x-internal:=true,
  org.eclipse.jdt.jeview.views;x-internal:=true
