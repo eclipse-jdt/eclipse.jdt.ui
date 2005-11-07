@@ -3846,7 +3846,44 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("}\n");
 		assertEqualString(preview, buf.toString());
 	}
+	
+	public void testUnqualifiedFieldAccess_bug115277() throws Exception {
+		Hashtable hashtable= JavaCore.getOptions();
+		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
+		hashtable.put(JavaCore.COMPILER_PB_FIELD_HIDING, JavaCore.ERROR);
+		JavaCore.setOptions(hashtable);
+				
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class F {\n");
+		buf.append("    public abstract class E1Inner1 {\n");
+		buf.append("        public abstract void foo();\n");
+		buf.append("        protected int n;\n");
+		buf.append("    }\n");
+		buf.append("    public abstract class E1Inner2 {\n");
+		buf.append("        public abstract void run();\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        E1Inner1 inner= new E1Inner1() {\n");
+		buf.append("            public void foo() {\n");
+		buf.append("                E1Inner2 inner2= new E1Inner2() {\n");
+		buf.append("                    public void run() {\n");
+		buf.append("                        System.out.println(n);\n");
+		buf.append("                    }\n");
+		buf.append("                };\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("F.java", buf.toString(), false, null);
 
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 0);
+		assertCorrectLabels(proposals);
+	}
+	
 	public void testUnqualifiedFieldAccessWithGenerics() throws Exception {
 		Hashtable hashtable= JavaCore.getOptions();
 		hashtable.put(JavaCore.COMPILER_PB_UNQUALIFIED_FIELD_ACCESS, JavaCore.ERROR);
