@@ -331,51 +331,12 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		private final SelectionButtonDialogField fUseDefaultJRE, fUseProjectJRE;
 		private final ComboDialogField fJRECombo;
 		private final Group fGroup;
-		private final String[] fComplianceLabels;
-		private final String[] fComplianceData;
+		private String[] fComplianceLabels;
+		private String[] fComplianceData;
 		private final Link fPreferenceLink;
-		private final IVMInstall[] fInstalledJVMs;
+		private IVMInstall[] fInstalledJVMs;
 		
 		public JREGroup(Composite composite) {
-			fInstalledJVMs= getWorkspaceJREs();
-			Arrays.sort(fInstalledJVMs, new Comparator() {
-
-				public int compare(Object arg0, Object arg1) {
-					IVMInstall i0= (IVMInstall)arg0;
-					IVMInstall i1= (IVMInstall)arg1;
-					if (i1 instanceof IVMInstall2 && i0 instanceof IVMInstall2) {
-						String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2)i0);
-						if (cc0 == null)
-							cc0= JavaCore.VERSION_1_4;
-						String cc1= JavaModelUtil.getCompilerCompliance((IVMInstall2)i1);
-						if (cc1 == null)
-							cc1= JavaCore.VERSION_1_4;
-						int result= cc1.compareTo(cc0);
-						if (result == 0)
-							result= i0.getName().compareTo(i1.getName());
-						return result;
-					} else {
-						return i0.getName().compareTo(i1.getName());
-					}
-				}
-				
-			});
-			fComplianceLabels= new String[fInstalledJVMs.length];
-			fComplianceData= new String[fInstalledJVMs.length];
-			for (int i= 0; i < fInstalledJVMs.length; i++) {
-				fComplianceLabels[i]= fInstalledJVMs[i].getName();
-				if (fInstalledJVMs[i] instanceof IVMInstall2) {
-					String compliance= JavaModelUtil.getCompilerCompliance((IVMInstall2)fInstalledJVMs[i]);
-					if (compliance != null) {
-						fComplianceData[i]= compliance;
-					} else {
-						fComplianceData[i]= JavaCore.VERSION_1_4;
-					}
-				} else {
-					fComplianceData[i]= JavaCore.VERSION_1_4;
-				}
-			}
-			
 			fGroup= new Group(composite, SWT.NONE);
 			fGroup.setFont(composite.getFont());
 			fGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
@@ -398,8 +359,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			fUseProjectJRE.setDialogFieldListener(this);
 						
 			fJRECombo= new ComboDialogField(SWT.READ_ONLY);
-			fJRECombo.setItems(fComplianceLabels);
-			fJRECombo.selectItem(getDefaultJVMName());
+			fillInstalledJREs(fJRECombo);
 			fJRECombo.setDialogFieldListener(this);
 
 			Combo comboControl= fJRECombo.getComboControl(fGroup);
@@ -409,6 +369,57 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			
 			fUseDefaultJRE.setSelection(true);
 			fJRECombo.setEnabled(fUseProjectJRE.isSelected());
+		}
+
+		private void fillInstalledJREs(ComboDialogField comboField) {
+			String selectedItem= null;
+			int selectionIndex= -1;
+			if (fUseProjectJRE.isSelected()) {
+				selectionIndex= comboField.getSelectionIndex();
+				if (selectionIndex != -1) {//paranoia
+					selectedItem= comboField.getItems()[selectionIndex];
+				}
+			}
+			
+			fInstalledJVMs= getWorkspaceJREs();
+			Arrays.sort(fInstalledJVMs, new Comparator() {
+
+				public int compare(Object arg0, Object arg1) {
+					IVMInstall i0= (IVMInstall)arg0;
+					IVMInstall i1= (IVMInstall)arg1;
+					if (i1 instanceof IVMInstall2 && i0 instanceof IVMInstall2) {
+						String cc0= JavaModelUtil.getCompilerCompliance((IVMInstall2) i0, JavaCore.VERSION_1_4);
+						String cc1= JavaModelUtil.getCompilerCompliance((IVMInstall2) i1, JavaCore.VERSION_1_4);
+						int result= cc1.compareTo(cc0);
+						if (result == 0)
+							result= i0.getName().compareTo(i1.getName());
+						return result;
+					} else {
+						return i0.getName().compareTo(i1.getName());
+					}
+				}
+				
+			});
+			selectionIndex= -1;//find new index
+			fComplianceLabels= new String[fInstalledJVMs.length];
+			fComplianceData= new String[fInstalledJVMs.length];
+			for (int i= 0; i < fInstalledJVMs.length; i++) {
+				fComplianceLabels[i]= fInstalledJVMs[i].getName();
+				if (selectedItem != null && fComplianceLabels[i].equals(selectedItem)) {
+					selectionIndex= i;
+				}
+				if (fInstalledJVMs[i] instanceof IVMInstall2) {
+					fComplianceData[i]= JavaModelUtil.getCompilerCompliance((IVMInstall2) fInstalledJVMs[i], JavaCore.VERSION_1_4);
+				} else {
+					fComplianceData[i]= JavaCore.VERSION_1_4;
+				}
+			}
+			comboField.setItems(fComplianceLabels);
+			if (selectionIndex == -1) {
+				fJRECombo.selectItem(getDefaultJVMName());
+			} else {
+				fJRECombo.selectItem(selectedItem);
+			}
 		}
 		
 		private IVMInstall[] getWorkspaceJREs() {
@@ -469,6 +480,7 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 		
 		public void handlePossibleJVMChange() {
 			fUseDefaultJRE.setLabelText(getDefaultJVMLabel());
+			fillInstalledJREs(fJRECombo);
 		}
 		
 
@@ -539,18 +551,13 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			String jvmCompliance= JavaCore.VERSION_1_4;
 			String selectedVersion= jvmCompliance;
 			if (selectedJVM instanceof IVMInstall2) {
-				jvmCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2)selectedJVM);
-				if (jvmCompliance == null) {
-					jvmCompliance= JavaCore.VERSION_1_4;
-				}
-				selectedVersion= ((IVMInstall2)selectedJVM).getJavaVersion();
+				jvmCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2)selectedJVM, JavaCore.VERSION_1_4);
+				selectedVersion= ((IVMInstall2) selectedJVM).getJavaVersion();
 				if (selectedVersion == null) {
 					selectedVersion= JavaCore.VERSION_1_4;
 				}
 			}
-			if ((selectedCompliance.equals(JavaCore.VERSION_1_5) && !jvmCompliance.equals(JavaCore.VERSION_1_5)) ||
-				(jvmCompliance.equals(JavaCore.VERSION_1_5) && !selectedCompliance.equals(JavaCore.VERSION_1_5))) {
-				
+			if (!selectedCompliance.equals(jvmCompliance) && (selectedCompliance.equals(JavaCore.VERSION_1_5) || jvmCompliance.equals(JavaCore.VERSION_1_5))) {
 				if (selectedCompliance.equals(JavaCore.VERSION_1_5))
 					selectedCompliance= "5.0"; //$NON-NLS-1$
 				
