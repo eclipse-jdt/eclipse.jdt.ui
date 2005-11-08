@@ -8,22 +8,25 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-// AW
 package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
 
@@ -31,11 +34,13 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSavePreferences;
-
-import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.internal.ui.util.SWTUtil;
 	
 /*
  * The page for setting general java plugin preferences.
@@ -160,10 +165,44 @@ public class JavaBasePreferencePage extends PreferencePage implements IWorkbench
 		
 		addCheckBox(group, PreferencesMessages.JavaBasePreferencePage_search_small_menu, PreferenceConstants.SEARCH_USE_REDUCED_MENU); 
 
+		
+		layout= new GridLayout();
+		layout.numColumns= 2;
+		
+		Group dontAskGroup= new Group(result, SWT.NONE);
+		dontAskGroup.setLayout(layout);
+		dontAskGroup.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		dontAskGroup.setText(PreferencesMessages.JavaBasePreferencePage_dialogs); 
+		
+		Label label= new Label(dontAskGroup, SWT.WRAP);
+		label.setText(PreferencesMessages.JavaBasePreferencePage_do_not_hide_description);
+		GridData data= new GridData(GridData.FILL, GridData.CENTER, true, false);
+		data.widthHint= convertVerticalDLUsToPixels(50);
+		label.setLayoutData(data);
+		
+		Button clearButton= new Button(dontAskGroup, SWT.PUSH);
+		clearButton.setText(PreferencesMessages.JavaBasePreferencePage_do_not_hide_button);
+		clearButton.setLayoutData(new GridData(GridData.FILL, GridData.FILL, false, false));
+		clearButton.addSelectionListener(new SelectionListener() {
+			public void widgetSelected(SelectionEvent e) {
+				unhideAllDialogs();
+			}
+			public void widgetDefaultSelected(SelectionEvent e) {
+				unhideAllDialogs();
+			}
+		});
+		
+		
+		SWTUtil.setButtonDimensionHint(clearButton);
 		Dialog.applyDialogFont(result);
 		return result;
 	}
-		
+	
+	protected final void unhideAllDialogs() {
+		OptionalMessageDialog.clearAllRememberedStates();
+		MessageDialog.openInformation(getShell(), PreferencesMessages.JavaBasePreferencePage_do_not_hide_dialog_title, PreferencesMessages.JavaBasePreferencePage_do_not_hide_dialog_message);
+	}
+
 	/*
 	 * @see PreferencePage#performDefaults()
 	 */

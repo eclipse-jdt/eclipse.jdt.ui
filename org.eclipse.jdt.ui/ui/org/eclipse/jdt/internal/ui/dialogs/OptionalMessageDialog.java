@@ -81,7 +81,7 @@ public class OptionalMessageDialog extends MessageDialog {
 		applyDialogFont(fHideDialogCheckBox);
 		return fHideDialogCheckBox;
 	}
-
+	
 	//--------------- Configuration handling --------------
 	
 	/**
@@ -111,5 +111,13 @@ public class OptionalMessageDialog extends MessageDialog {
 	public static void setDialogEnabled(String key, boolean isEnabled) {
 		IDialogSettings settings= getDialogSettings();
 		settings.put(key, !isEnabled);
+	}
+
+	/**
+	 * Clears all remembered information about hidden dialogs
+	 */
+	public static void clearAllRememberedStates() {
+		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
+		settings.addNewSection(STORE_ID);
 	}
 }

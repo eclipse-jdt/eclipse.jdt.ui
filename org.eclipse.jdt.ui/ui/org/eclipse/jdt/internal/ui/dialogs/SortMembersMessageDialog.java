@@ -15,7 +15,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
-import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
@@ -28,7 +28,9 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
-public class SortMembersMessageDialog extends MessageDialog {
+public class SortMembersMessageDialog extends OptionalMessageDialog {
+	
+	private final static String OPTIONAL_ID= "SortMembersMessageDialog.optionalDialog.id"; //$NON-NLS-1$
 	
 	private final static String DIALOG_SETTINGS_SORT_ALL= "SortMembers.sort_all"; //$NON-NLS-1$
 	
@@ -36,13 +38,23 @@ public class SortMembersMessageDialog extends MessageDialog {
 	private SelectionButtonDialogField fSortAllRadio;
 
 	private final IDialogSettings fDialogSettings;
-
+	
 	public SortMembersMessageDialog(Shell parentShell) {
-		super(parentShell, DialogsMessages.SortMembersMessageDialog_dialog_title, null, new String(), INFORMATION, new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 0);
+		super(OPTIONAL_ID, parentShell, DialogsMessages.SortMembersMessageDialog_dialog_title, null, new String(), INFORMATION, new String[] {IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL}, 0);
 		
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		
 		fDialogSettings= JavaPlugin.getDefault().getDialogSettings();
+		
+		boolean isSortAll= fDialogSettings.getBoolean(DIALOG_SETTINGS_SORT_ALL);
+		
+		fNotSortAllRadio= new SelectionButtonDialogField(SWT.RADIO);
+		fNotSortAllRadio.setLabelText(DialogsMessages.SortMembersMessageDialog_do_not_sort_fields_label);
+		fNotSortAllRadio.setSelection(!isSortAll);
+		
+		fSortAllRadio= new SelectionButtonDialogField(SWT.RADIO);
+		fSortAllRadio.setLabelText(DialogsMessages.SortMembersMessageDialog_sort_all_label);
+		fSortAllRadio.setSelection(isSortAll);
 	}
 		
 	private Control createLinkControl(Composite composite) {
@@ -85,19 +97,12 @@ public class SortMembersMessageDialog extends MessageDialog {
 		
 		createLinkControl(messageComposite);
 				
-		boolean isSortAll= fDialogSettings.getBoolean(DIALOG_SETTINGS_SORT_ALL);
 		int indent= convertWidthInCharsToPixels(3);
 		
-		fNotSortAllRadio= new SelectionButtonDialogField(SWT.RADIO);
-		fNotSortAllRadio.setLabelText(DialogsMessages.SortMembersMessageDialog_do_not_sort_fields_label);
 		fNotSortAllRadio.doFillIntoGrid(messageComposite, 1);
-		fNotSortAllRadio.setSelection(!isSortAll);
 		LayoutUtil.setHorizontalIndent(fNotSortAllRadio.getSelectionButton(null), indent);
 		
-		fSortAllRadio= new SelectionButtonDialogField(SWT.RADIO);
-		fSortAllRadio.setLabelText(DialogsMessages.SortMembersMessageDialog_sort_all_label);
 		fSortAllRadio.doFillIntoGrid(messageComposite, 1);
-		fSortAllRadio.setSelection(isSortAll);
 		LayoutUtil.setHorizontalIndent(fSortAllRadio.getSelectionButton(null), indent);
 		
 		final Composite warningComposite= new Composite(messageComposite, SWT.NONE);
@@ -132,6 +137,21 @@ public class SortMembersMessageDialog extends MessageDialog {
 		
 		return messageComposite;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.window.Window#open()
+	 */
+	public int open() {
+		if (isDialogEnabled(OPTIONAL_ID)) {
+			int res= super.open();
+			if (res != Window.OK) {
+				setDialogEnabled(OPTIONAL_ID, true); // don't save state on cancel
+			}
+			return res;
+		}
+		return Window.OK;
+	}
+	
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jface.dialogs.Dialog#close()

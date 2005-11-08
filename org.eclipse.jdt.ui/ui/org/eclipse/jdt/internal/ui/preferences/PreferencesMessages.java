@@ -708,5 +708,10 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeAssistConfigurationBlockInProgress_include;
 	public static String ProblemSeveritiesConfigurationBlock_section_generics;
 	public static String JavaBuildConfigurationBlock_treat_optional_as_fatal;
+	public static String JavaBasePreferencePage_dialogs;
+	public static String JavaBasePreferencePage_do_not_hide_description;
+	public static String JavaBasePreferencePage_do_not_hide_button;
+	public static String JavaBasePreferencePage_do_not_hide_dialog_title;
+	public static String JavaBasePreferencePage_do_not_hide_dialog_message;
 
 }
