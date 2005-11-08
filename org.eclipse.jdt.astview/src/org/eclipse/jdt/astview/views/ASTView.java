@@ -112,6 +112,9 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+
 public class ASTView extends ViewPart implements IShowInSource {
 	
 	private static final int JLS3= AST.JLS3;
@@ -169,6 +172,31 @@ public class ASTView extends ViewPart implements IShowInSource {
 			setASTLevel(fLevel, true);
 		}
 	}
+	
+	private class ASTInputKindAction extends Action {
+		public static final int USE_PARSER= 1;
+		public static final int USE_RECONCILE= 2;
+		public static final int USE_CACHE= 3;
+		
+		private int fInputKind;
+
+		public ASTInputKindAction(String label, int inputKind) {
+			super(label, AS_RADIO_BUTTON);
+			fInputKind= inputKind;
+			if (inputKind == getCurrentInputKind()) {
+				setChecked(true);
+			}
+		}
+	
+		public int getInputKind() {
+			return fInputKind;
+		}
+		
+		public void run() {
+			setASTInputType(fInputKind);
+		}
+	}
+	
 	
 	private static class ListenerMix implements ISelectionListener, IFileBufferListener, IDocumentListener, ISelectionChangedListener, IDoubleClickListener, IPartListener2 {
 		
@@ -353,7 +381,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 		
 	private final static String SETTINGS_LINK_WITH_EDITOR= "link_with_editor"; //$NON-NLS-1$
-	private final static String SETTINGS_USE_RECONCILER= "use_reconciler"; //$NON-NLS-1$
+	private final static String SETTINGS_INPUT_KIND= "input_kind"; //$NON-NLS-1$
 	private final static String SETTINGS_NO_BINDINGS= "create_bindings"; //$NON-NLS-1$
 	private final static String SETTINGS_SHOW_NON_RELEVANT="show_non_relevant";//$NON-NLS-1$
 	private final static String SETTINGS_JLS= "jls"; //$NON-NLS-1$
@@ -363,7 +391,6 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private DrillDownAdapter fDrillDownAdapter;
 	private Action fFocusAction;
 	private Action fRefreshAction;
-	private Action fUseReconcilerAction;
 	private Action fCreateBindingsAction;
 	private Action fFilterNonRelevantAction;
 	private Action fResolveBindingKeyAction;
@@ -377,13 +404,15 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private ASTLevelToggle[] fASTVersionToggleActions;
 	private int fCurrentASTLevel;
 	
+	private ASTInputKindAction[] fASTInputKindActions;
+	private int fCurrentInputKind;
+	
 	private ITextEditor fEditor;
 	private IOpenable fOpenable;
 	private CompilationUnit fRoot;
 	private IDocument fCurrentDocument;
 	
 	private boolean fDoLinkWithEditor;
-	private boolean fDoUseReconciler;
 	private boolean fCreateBindings;
 	private NonRelevantFilter fNonRelevantFilter;
 	
@@ -404,9 +433,13 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fSuperListener= null;
 		fDialogSettings= ASTViewPlugin.getDefault().getDialogSettings();
 		fDoLinkWithEditor= fDialogSettings.getBoolean(SETTINGS_LINK_WITH_EDITOR);
-		fDoUseReconciler= fDialogSettings.getBoolean(SETTINGS_USE_RECONCILER);
+		try {
+			fCurrentInputKind= fDialogSettings.getInt(SETTINGS_INPUT_KIND);
+		} catch (NumberFormatException e) {
+			fCurrentInputKind= ASTInputKindAction.USE_PARSER;
+		}
 		fCreateBindings= !fDialogSettings.getBoolean(SETTINGS_NO_BINDINGS); // inverse so that default is to create bindings
-		fCurrentASTLevel= JLS2;
+		fCurrentASTLevel= JLS3;
 		try {
 			int level= fDialogSettings.getInt(SETTINGS_JLS);
 			if (level == JLS2 || level == JLS3) {
@@ -447,6 +480,10 @@ public class ASTView extends ViewPart implements IShowInSource {
 	public int getCurrentASTLevel() {
 		return fCurrentASTLevel;
 	}
+	
+	public int getCurrentInputKind() {
+		return fCurrentInputKind;
+	}
 
 	public void setInput(ITextEditor editor) throws CoreException {
 		if (fEditor != null) {
@@ -481,7 +518,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		if (JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_SOURCE, true))) {
 			return JLS3;
 		}
-		return JLS2;
+		return fCurrentASTLevel; // use previous level
 	}
 
 	private CompilationUnit internalSetInput(IOpenable input, int offset, int length, int astLevel) throws CoreException {
@@ -491,8 +528,11 @@ public class ASTView extends ViewPart implements IShowInSource {
 		
 		try {
 			CompilationUnit root= createAST(input, astLevel);
-			
 			resetView(root);
+			if (root == null) {
+				setContentDescription("AST could not be created."); //$NON-NLS-1$
+				return null;
+			}
 			ASTNode node= NodeFinder.perform(root, offset, length);
 			if (node != null) {
 				fViewer.getTree().setRedraw(false);
@@ -505,11 +545,16 @@ public class ASTView extends ViewPart implements IShowInSource {
 			throw new CoreException(getErrorStatus("Could not create AST:\n" + e.getMessage(), e)); //$NON-NLS-1$
 		}
 	}
+	
+	private void clearView() {
+		resetView(null);
+		setContentDescription("Open a Java editor and press the 'Show AST of active editor' toolbar button"); //$NON-NLS-1$
+	}
+	
 
 	private void resetView(CompilationUnit root) {
-		if (root == null)
-			setContentDescription("Open a Java editor and press the 'Show AST of active editor' toolbar button"); //$NON-NLS-1$
 		fViewer.setInput(root);
+		fViewer.getTree().setEnabled(root != null);
 		fSash.setMaximizedControl(fViewer.getTree());
 		fTrayRoots= new ArrayList();
 		if (fTray != null)
@@ -523,9 +568,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 		long startTime;
 		long endTime;
 		CompilationUnit root;
-		boolean useReconciler= input instanceof ICompilationUnit && fDoUseReconciler;
 		
-		if (useReconciler) {
+		if (input instanceof ICompilationUnit && (getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE)) {
 			ICompilationUnit wc= ((ICompilationUnit) input).getWorkingCopy(
 					new WorkingCopyOwner() {/*useless subclass*/},
 					new IProblemRequestor() { //TODO: strange: don't get bindings when supplying null as problemRequestor
@@ -549,6 +593,11 @@ public class ASTView extends ViewPart implements IShowInSource {
 			} finally {
 				wc.discardWorkingCopy();
 			}
+		} else if (input instanceof ICompilationUnit && (getCurrentInputKind() == ASTInputKindAction.USE_CACHE)) {
+			ICompilationUnit cu= (ICompilationUnit) input;
+			startTime= System.currentTimeMillis();
+			root= JavaPlugin.getDefault().getASTProvider().getAST(cu, ASTProvider.WAIT_NO, null);
+			endTime= System.currentTimeMillis();
 		} else {
 			ASTParser parser= ASTParser.newParser(astLevel);
 			parser.setResolveBindings(fCreateBindings);
@@ -561,17 +610,19 @@ public class ASTView extends ViewPart implements IShowInSource {
 			root= (CompilationUnit) parser.createAST(null);
 			endTime= System.currentTimeMillis();
 		}
-		if (root == null) {
-			throw new CoreException(getErrorStatus("Could not create AST", null)); //$NON-NLS-1$
+		if (root != null) {
+			updateContentDescription((IJavaElement) input, root, endTime - startTime);
 		}
-		updateContentDescription((IJavaElement) input, root, endTime - startTime, useReconciler);
 		return root;
 	}
 
-	private void updateContentDescription(IJavaElement element, CompilationUnit root, long time, boolean useReconciler) {
+	private void updateContentDescription(IJavaElement element, CompilationUnit root, long time) {
 		String version= root.getAST().apiLevel() == JLS2 ? "AST Level 2" : "AST Level 3";  //$NON-NLS-1$//$NON-NLS-2$
-		if (useReconciler)
+		if (getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE) {		
 			version+= ", from reconciler"; //$NON-NLS-1$
+		} else if (getCurrentInputKind() == ASTInputKindAction.USE_CACHE) {	
+			version+= ", from ASTProvider"; //$NON-NLS-1$
+		}
 		TreeInfoCollector collector= new TreeInfoCollector(root);
 
 		String msg= "{0} ({1}).  Creation time: {2,number} ms.  Size: {3,number} nodes, {4,number} bytes (AST nodes only)."; //$NON-NLS-1$
@@ -696,7 +747,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			// ignore
 		}
 		if (fOpenable == null) {
-			resetView(null);
+			clearView();
 		} else {
 			setASTUptoDate(fOpenable != null);
 		}
@@ -746,13 +797,17 @@ public class ASTView extends ViewPart implements IShowInSource {
 			manager.add(fASTVersionToggleActions[i]);	
 		}
 		manager.add(new Separator());
-		manager.add(fUseReconcilerAction);
 		manager.add(fCreateBindingsAction);
 		manager.add(fFilterNonRelevantAction);
 		manager.add(new Separator());
 		manager.add(fResolveBindingKeyAction);
 		manager.add(new Separator());
 		manager.add(fLinkWithEditor);
+		MenuManager menu= new MenuManager("Advanced Options");
+		manager.add(menu);
+		for (int i= 0; i < fASTInputKindActions.length; i++) {
+			menu.add(fASTInputKindActions[i]);	
+		}
 	}
 
 	protected void fillContextMenu(IMenuManager manager) {
@@ -808,15 +863,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fClearAction.setToolTipText("Clear AST and release memory"); //$NON-NLS-1$
 		fClearAction.setEnabled(false);
 		ASTViewImages.setImageDescriptors(fClearAction, ASTViewImages.CLEAR);
-		
-		fUseReconcilerAction = new Action("&Use Reconciler", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
-			public void run() {
-				performUseReconciler();
-			}
+				
+		fASTInputKindActions= new ASTInputKindAction[] {
+				new ASTInputKindAction("Use ASTParser.createAST", ASTInputKindAction.USE_PARSER), //$NON-NLS-1$
+				new ASTInputKindAction("Use ICompilationUnit.reconcile", ASTInputKindAction.USE_RECONCILE), //$NON-NLS-1$
+				new ASTInputKindAction("Use ASTProvider.getAST", ASTInputKindAction.USE_CACHE) //$NON-NLS-1$
 		};
-		fUseReconcilerAction.setChecked(fDoUseReconciler);
-		fUseReconcilerAction.setToolTipText("Use Reconciler to create AST"); //$NON-NLS-1$
-		fUseReconcilerAction.setEnabled(true);
 		
 		fCreateBindingsAction = new Action("&Create Bindings", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
 			public void run() {
@@ -956,6 +1008,17 @@ public class ASTView extends ViewPart implements IShowInSource {
 		}
 	}
 	
+	protected void setASTInputType(int inputKind) {
+		if (inputKind != fCurrentInputKind) {
+			fCurrentInputKind= inputKind;
+			fDialogSettings.put(SETTINGS_INPUT_KIND, inputKind);
+			for (int i= 0; i < fASTInputKindActions.length; i++) {
+				ASTInputKindAction curr= fASTInputKindActions[i];
+				curr.setChecked(curr.getInputKind() == inputKind);
+			}
+			performRefresh();
+		}
+	}
 	
 	private ASTNode getASTNodeNearSelection(IStructuredSelection selection) {
 		Object elem= selection.getFirstElement();
@@ -1107,7 +1170,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		} catch (CoreException e) {
 			showAndLogError("Could not reset AST view ", e); //$NON-NLS-1$
 		}
-		resetView(null);
+		clearView();
 	}
 
 	private void showAndLogError(String message, CoreException e) {
@@ -1120,14 +1183,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		ASTViewPlugin.log(status);
 		ErrorDialog.openError(getSite().getShell(), "AST View", null, status); //$NON-NLS-1$
 	}
-	
-	protected void performUseReconciler() {
-		fDoUseReconciler= fUseReconcilerAction.isChecked();
-		fDialogSettings.put(SETTINGS_USE_RECONCILER, fDoUseReconciler);
 		
-		performRefresh();
-	}
-	
 	protected void performCreateBindings() {
 		fCreateBindings= fCreateBindingsAction.isChecked();
 		fDialogSettings.put(SETTINGS_NO_BINDINGS, !fCreateBindings);

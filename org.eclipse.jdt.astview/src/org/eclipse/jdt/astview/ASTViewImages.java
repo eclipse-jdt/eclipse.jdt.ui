@@ -10,19 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.astview;
 
-import java.net.MalformedURLException;
 import java.net.URL;
+
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 
+import org.osgi.framework.Bundle;
+
 public class ASTViewImages {
 
-	private static URL fgIconBaseURL= null;
-	
-	static {
-		fgIconBaseURL= ASTViewPlugin.getDefault().getBundle().getEntry("/icons/"); //$NON-NLS-1$
-	}
+	private static final IPath ICONS_PATH= new Path("$nl$/icons"); //$NON-NLS-1$
 	
 	public static final String COLLAPSE= "collapseall.gif"; //$NON-NLS-1$
 	public static final String EXPAND= "expandall.gif"; //$NON-NLS-1$
@@ -37,37 +38,32 @@ public class ASTViewImages {
 	//---- Helper methods to access icons on the file system --------------------------------------
 
 	public static void setImageDescriptors(IAction action, String type) {
-		
-		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("d", type)); //$NON-NLS-1$
-			if (id != null)
-				action.setDisabledImageDescriptor(id);
-		} catch (MalformedURLException e) {
-		}
+		ImageDescriptor id= create("d", type); //$NON-NLS-1$
+		if (id != null)
+			action.setDisabledImageDescriptor(id);
 	
-		try {
-			ImageDescriptor id= ImageDescriptor.createFromURL(makeIconFileURL("c", type)); //$NON-NLS-1$
-			if (id != null)
-				action.setHoverImageDescriptor(id);
-		} catch (MalformedURLException e) {
-		}
-	
-		action.setImageDescriptor(create("e", type)); //$NON-NLS-1$
-	}
-	
-	
-	private static ImageDescriptor create(String path, String name) {
-		try {
-			return ImageDescriptor.createFromURL(makeIconFileURL(path, name));
-		} catch (MalformedURLException e) {
-			return ImageDescriptor.getMissingImageDescriptor();
+		id= create("c", type); //$NON-NLS-1$
+		if (id != null) {
+			action.setHoverImageDescriptor(id);
+			action.setImageDescriptor(id);
+		} else {
+			action.setImageDescriptor(ImageDescriptor.getMissingImageDescriptor());
 		}
 	}
 	
-	private static URL makeIconFileURL(String path, String name) throws MalformedURLException {
-		StringBuffer buffer= new StringBuffer(path);
-		buffer.append('/');
-		buffer.append(name);
-		return new URL(fgIconBaseURL, buffer.toString());
-	}	
+	private static ImageDescriptor create(String prefix, String name) {
+		IPath path= ICONS_PATH.append(prefix).append(name);
+		return createImageDescriptor(ASTViewPlugin.getDefault().getBundle(), path);
+	}
+	
+	/*
+	 * Since 3.1.1. Load from icon paths with $NL$
+	 */
+	public static ImageDescriptor createImageDescriptor(Bundle bundle, IPath path) {
+		URL url= Platform.find(bundle, path);
+		if (url != null) {
+			return ImageDescriptor.createFromURL(url);
+		}
+		return null;
+	}
 }
