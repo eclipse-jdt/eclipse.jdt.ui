@@ -18,6 +18,7 @@ import org.eclipse.core.commands.AbstractHandler;
 import org.eclipse.core.commands.ExecutionEvent;
 import org.eclipse.core.commands.ExecutionException;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyledText;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
@@ -32,12 +33,17 @@ import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.contexts.IContextActivation;
 import org.eclipse.ui.contexts.IContextService;
 import org.eclipse.ui.handlers.IHandlerService;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.JavaWordIterator;
 
 /**
@@ -47,15 +53,23 @@ import org.eclipse.jdt.internal.ui.text.JavaWordIterator;
 public class TextFieldNavigationHandler {
 	
 	public static void install(Text text) {
-		new FocusHandler(new TextNavigable(text));
+		if (isSubWordNavigationEnabled())
+			new FocusHandler(new TextNavigable(text));
 	}
-	
+
 	public static void install(StyledText styledText) {
-		new FocusHandler(new StyledTextNavigable(styledText));
+		if (isSubWordNavigationEnabled())
+			new FocusHandler(new StyledTextNavigable(styledText));
 	}
 	
 	public static void install(Combo combo) {
-		new FocusHandler(new ComboNavigable(combo));
+		if (isSubWordNavigationEnabled())
+			new FocusHandler(new ComboNavigable(combo));
+	}
+	
+	private static boolean isSubWordNavigationEnabled() {
+		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getCombinedPreferenceStore();
+		return preferenceStore.getBoolean(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION);
 	}
 	
 	private abstract static class WorkaroundNavigable extends Navigable {
@@ -96,13 +110,13 @@ public class TextFieldNavigationHandler {
 	}
 	
 	private static class TextNavigable extends WorkaroundNavigable {
-		static final boolean BUG_106024_TEXT_SELECTION= true; //TODO: only wrong on win32?
+		static final boolean BUG_106024_TEXT_SELECTION= "win32".equals(SWT.getPlatform()); //$NON-NLS-1$
 		
 		private final Text fText;
 		
 		public TextNavigable(Text text) {
 			fText= text;
-			//workaround for bug 106024 (Text#setSelection(int, int) does not handle start > end with SWT.SINGLE):
+			// workaround for bug 106024:
 			if (BUG_106024_TEXT_SELECTION) {
 				fLastSelection= getSelection();
 				fCaretPosition= fLastSelection.y;
@@ -149,7 +163,7 @@ public class TextFieldNavigationHandler {
 		}
 	}
 	
-	private static class StyledTextNavigable extends WorkaroundNavigable {
+	private static class StyledTextNavigable extends Navigable {
 		private final StyledText fStyledText;
 		
 		public StyledTextNavigable(StyledText styledText) {
@@ -186,7 +200,7 @@ public class TextFieldNavigationHandler {
 		
 		public ComboNavigable(Combo combo) {
 			fCombo= combo;
-			//workaround for bug 103630 (no API):
+			// workaround for bug 103630:
 			fLastSelection= getSelection();
 			fCaretPosition= fLastSelection.y;
 			fCombo.addKeyListener(new KeyAdapter() {
@@ -220,7 +234,7 @@ public class TextFieldNavigationHandler {
 		public int getCaretPosition() {
 			selectionChanged();
 			return fCaretPosition;
-//			return fCombo.getCaretPosition(); //TODO: not available: bug 103630 (Add API: Combo#getCaretPosition())
+//			return fCombo.getCaretPosition(); // not available: bug 103630
 		}
 		
 		public void setSelection(int start, int end) {
@@ -230,6 +244,7 @@ public class TextFieldNavigationHandler {
 	
 	private static class FocusHandler implements FocusListener {
 	
+		private static final String EMPTY_TEXT= ""; //$NON-NLS-1$
 		private final JavaWordIterator fIterator;
 		private List fHandlerActivations;
 		private IContextActivation fContextActivation;
@@ -274,7 +289,6 @@ public class TextFieldNavigationHandler {
 				return;
 			fHandlerActivations= new ArrayList();
 			
-			//TODO: DELETE_LINE* ?
 			fHandlerActivations.add(handlerService.activateHandler(ITextEditorActionDefinitionIds.SELECT_WORD_NEXT, new AbstractHandler() {
 				public Object execute(ExecutionEvent event) throws ExecutionException {
 					fIterator.setText(fNavigable.getText());
@@ -287,7 +301,7 @@ public class TextFieldNavigationHandler {
 						else
 							fNavigable.setSelection(selection.y, newCaret);
 					}
-					fIterator.setText(""); //$NON-NLS-1$
+					fIterator.setText(EMPTY_TEXT);
 					return null;
 				}
 			}));
@@ -303,7 +317,7 @@ public class TextFieldNavigationHandler {
 						else
 							fNavigable.setSelection(selection.x, newCaret);
 					}
-					fIterator.setText(""); //$NON-NLS-1$
+					fIterator.setText(EMPTY_TEXT);
 					return null;
 				}
 			}));
@@ -313,7 +327,7 @@ public class TextFieldNavigationHandler {
 					int caretPosition= fNavigable.getCaretPosition();
 					int newCaret= fIterator.following(caretPosition);
 					fNavigable.setSelection(newCaret, newCaret);
-					fIterator.setText(""); //$NON-NLS-1$
+					fIterator.setText(EMPTY_TEXT);
 					return null;
 				}
 			}));
@@ -323,7 +337,7 @@ public class TextFieldNavigationHandler {
 					int caretPosition= fNavigable.getCaretPosition();
 					int newCaret= fIterator.preceding(caretPosition);
 					fNavigable.setSelection(newCaret, newCaret);
-					fIterator.setText(""); //$NON-NLS-1$
+					fIterator.setText(EMPTY_TEXT);
 					return null;
 				}
 			}));
@@ -340,7 +354,7 @@ public class TextFieldNavigationHandler {
 						fIterator.setText(text);
 						start= fNavigable.getCaretPosition();
 						end= fIterator.following(start);
-						fIterator.setText(""); //$NON-NLS-1$
+						fIterator.setText(EMPTY_TEXT);
 						if (end == BreakIterator.DONE)
 							return null;
 					}
@@ -362,7 +376,7 @@ public class TextFieldNavigationHandler {
 						fIterator.setText(text);
 						end= fNavigable.getCaretPosition();
 						start= fIterator.preceding(end);
-						fIterator.setText(""); //$NON-NLS-1$
+						fIterator.setText(EMPTY_TEXT);
 						if (start == BreakIterator.DONE)
 							return null;
 					}
