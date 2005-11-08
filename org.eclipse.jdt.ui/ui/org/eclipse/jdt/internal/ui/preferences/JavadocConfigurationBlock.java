@@ -238,8 +238,8 @@ public class JavadocConfigurationBlock {
 				jarPathStr= initialValue.substring(prefix.length(), excIndex);
 				insidePath= initialValue.substring(excIndex + 2);
 			}
-			IPath jarPath= new Path(jarPathStr);
-			fArchivePathField.setText(insidePath);
+			IPath jarPath= new Path(decodeExclamationMarks(jarPathStr));
+			fArchivePathField.setText(decodeExclamationMarks(insidePath));
 			fArchiveField.setText(jarPath.makeAbsolute().toOSString());
 		} else {
 			fURLField.setText(initialValue);
@@ -422,7 +422,35 @@ public class JavadocConfigurationBlock {
 		});
 		return res[0];
 	}
-		
+	
+	private String encodeExclamationMarks(String str) {
+		StringBuffer buf= new StringBuffer(str.length());
+		for (int i= 0; i < str.length(); i++) {
+			char ch= str.charAt(i);
+			if (ch == '!') {
+				buf.append("%21"); //$NON-NLS-1$
+			} else {
+				buf.append(ch);
+			}
+		}
+		return buf.toString();
+	}
+	
+	private String decodeExclamationMarks(String str) {
+		StringBuffer buf= new StringBuffer(str.length());
+		int length= str.length();
+		for (int i= 0; i < length; i++) {
+			char ch= str.charAt(i);
+			if (ch == '%' && (i < length - 2) && str.charAt(i + 1) == '2' && str.charAt(i + 2) == '1') {
+				buf.append('!');
+				i+= 2;
+			} else {
+				buf.append(ch);
+			}
+		}
+		return buf.toString();
+	}
+	
 		
 
 	private String internalChooseArchivePath() {		
@@ -608,7 +636,7 @@ public class JavadocConfigurationBlock {
 		
 		StringBuffer buf= new StringBuffer();
 		buf.append("jar:"); //$NON-NLS-1$
-		buf.append(new File(jarLoc).toURL().toExternalForm());
+		buf.append(encodeExclamationMarks(new File(jarLoc).toURL().toExternalForm()));
 		buf.append('!');
 		if (innerPath.length() > 0) {
 			if (innerPath.charAt(0) != '/') {
