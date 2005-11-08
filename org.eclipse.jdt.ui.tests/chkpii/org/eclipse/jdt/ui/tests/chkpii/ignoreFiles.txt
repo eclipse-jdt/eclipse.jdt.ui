@@ -53,4 +53,6 @@ org.eclipse.sdk-feature/*
 org.eclipse.perfmsr.core/*
 org.eclipse.ui.intro/*
 org.eclipse.pde.source/*
+org.eclipse.ui.examples.recipeeditor/doc/article.html
+org.eclipse.ui.examples.recipeeditor/templates/templates.xml
 Text Team Documents/*
