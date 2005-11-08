@@ -114,7 +114,7 @@ public class CoreUtility {
 			if (other.fProject == null) {
 				return true;
 			}
-			return fProject != null && fProject.equals(fProject);
+			return fProject != null && fProject.equals(other.fProject);
 		}
 		
 		/* (non-Javadoc)
