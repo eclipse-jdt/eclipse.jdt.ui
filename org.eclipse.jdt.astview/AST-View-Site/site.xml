@@ -6,10 +6,10 @@
    <feature url="features/org.eclipse.jdt.astview.feature_1.0.1.jar" id="org.eclipse.jdt.astview.feature" version="1.0.1">
       <category name="ast-view-1.0.1"/>
    </feature>
-   <feature url="features/org.eclipse.jdt.astview.feature_1.0.5.jar" id="org.eclipse.jdt.astview.feature" version="1.0.5">
-      <category name="ast-view-1.0.5"/>
+   <feature url="features/org.eclipse.jdt.astview.feature_1.0.6.jar" id="org.eclipse.jdt.astview.feature" version="1.0.6">
+      <category name="ast-view-1.0.6"/>
    </feature>
-   <category-def name="ast-view-1.0.5" label="AST View for 3.1 (RC1 and higher)">
+   <category-def name="ast-view-1.0.6" label="AST View for 3.1 (RC1 and higher)">
       <description>
          View to visualize the Java compilers abstract syntax tree generated for a Java file.
 
