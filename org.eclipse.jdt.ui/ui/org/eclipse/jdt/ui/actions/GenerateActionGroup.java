@@ -370,6 +370,7 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addEditorAction(source, "RemoveBlockComment"); //$NON-NLS-1$
 		added+= addEditorAction(source, "Format"); //$NON-NLS-1$
 		added+= addEditorAction(source, "Indent"); //$NON-NLS-1$
+		added+= addAction(source, fSortMembers);
 		source.add(new Separator(GROUP_IMPORT));
 		added+= addAction(source, fOrganizeImports);
 		added+= addAction(source, fAddImport);
