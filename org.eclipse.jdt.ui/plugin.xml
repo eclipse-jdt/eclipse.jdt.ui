@@ -1487,7 +1487,7 @@
                label="%OpenPackageWizardAction.label"
                icon="$nl$/icons/full/etool16/newpack_wiz.gif"
                tooltip="%OpenPackageWizardAction.tooltip"
-               class="org.eclipse.jdt.internal.ui.wizards.OpenPackageWizardAction"
+               class="org.eclipse.jdt.internal.ui.wizards.OpenPackageWizardToolbarAction"
                toolbarPath="Normal/JavaWizards"
                id="org.eclipse.jdt.ui.actions.OpenPackageWizard">
          </action>
@@ -1495,7 +1495,7 @@
                label="%OpenProjectWizardAction.label"
                icon="$nl$/icons/full/etool16/newjprj_wiz.gif"
                tooltip="%OpenProjectWizardAction.tooltip"
-               class="org.eclipse.jdt.internal.ui.wizards.OpenProjectWizardAction"
+               class="org.eclipse.jdt.internal.ui.wizards.OpenJavaProjectWizardToolbarAction"
                toolbarPath="Normal/JavaWizards"
                id="org.eclipse.jdt.ui.actions.OpenProjectWizard">
          </action>

@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.ui.wizards.NewAnnotationWizardPage;
 
@@ -27,11 +27,16 @@ public class NewAnnotationCreationWizard extends NewElementWizard {
 
     private NewAnnotationWizardPage fPage;
 	
-	public NewAnnotationCreationWizard() {
-		super();
+	public NewAnnotationCreationWizard(NewAnnotationWizardPage page) {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWANNOT);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(NewWizardMessages.NewAnnotationCreationWizard_title); 
+		setWindowTitle(NewWizardMessages.NewAnnotationCreationWizard_title);
+		
+		fPage= page;
+	}
+	
+	public NewAnnotationCreationWizard() {
+		this(null);
 	}
 
 	/*
@@ -39,9 +44,12 @@ public class NewAnnotationCreationWizard extends NewElementWizard {
 	 */	
 	public void addPages() {
 		super.addPages();		
-		fPage= new NewAnnotationWizardPage();
+		if (fPage == null) {
+			fPage= new NewAnnotationWizardPage();
+			fPage.init(getSelection());
+		}
 		addPage(fPage);
-		fPage.init(getSelection());	
+
 	}
 	
 	/* (non-Javadoc)

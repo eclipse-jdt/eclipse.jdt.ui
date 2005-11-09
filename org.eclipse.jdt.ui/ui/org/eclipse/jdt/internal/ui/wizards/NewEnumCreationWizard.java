@@ -10,13 +10,13 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.ui.wizards.NewEnumWizardPage;
 
@@ -28,20 +28,27 @@ public class NewEnumCreationWizard extends NewElementWizard {
     private NewEnumWizardPage fPage;
 	
 	public NewEnumCreationWizard() {
-		super();
+		this(null);
+	}
+
+	public NewEnumCreationWizard(NewEnumWizardPage page) {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWENUM);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(NewWizardMessages.NewEnumCreationWizard_title); 
+		setWindowTitle(NewWizardMessages.NewEnumCreationWizard_title);
+		
+		fPage= page;
 	}
 
 	/*
 	 * @see Wizard#addPages
 	 */	
 	public void addPages() {
-		super.addPages();		
-		fPage= new NewEnumWizardPage();
+		super.addPages();
+		if (fPage == null) {
+			fPage= new NewEnumWizardPage();
+			fPage.init(getSelection());
+		}
 		addPage(fPage);
-		fPage.init(getSelection());
 	}
 	
 	/* (non-Javadoc)

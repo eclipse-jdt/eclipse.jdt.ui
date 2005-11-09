@@ -57,10 +57,18 @@ public interface IJavaHelpContextIds {
 
 	public static final String OPEN_CLASS_WIZARD_ACTION= 									PREFIX + "open_class_wizard_action"; //$NON-NLS-1$
 	public static final String OPEN_INTERFACE_WIZARD_ACTION= 							PREFIX + "open_interface_wizard_action"; //$NON-NLS-1$
+	/** @since 3.2 */
+	public static final String OPEN_ENUM_WIZARD_ACTION= 							PREFIX + "open_enum_wizard_action"; //$NON-NLS-1$
+	/** @since 3.2 */
+	public static final String OPEN_ANNOTATION_WIZARD_ACTION= 							PREFIX + "open_annotation_wizard_action"; //$NON-NLS-1$
+
 	public static final String SORT_MEMBERS_ACTION=											PREFIX + "sort_members_action"; //$NON-NLS-1$	
 
 	public static final String OPEN_PACKAGE_WIZARD_ACTION= 								PREFIX + "open_package_wizard_action"; //$NON-NLS-1$
 	public static final String OPEN_PROJECT_WIZARD_ACTION= 								PREFIX + "open_project_wizard_action"; //$NON-NLS-1$
+	/** @since 3.2 */
+	public static final String OPEN_SOURCEFOLDER_WIZARD_ACTION= 							PREFIX + "open_sourcefolder_wizard_action"; //$NON-NLS-1$
+
 	public static final String EDIT_WORKING_SET_ACTION= 									PREFIX + "edit_working_set_action"; //$NON-NLS-1$
 	public static final String CLEAR_WORKING_SET_ACTION= 									PREFIX + "clear_working_set_action"; //$NON-NLS-1$
 	public static final String GOTO_MARKER_ACTION= 											PREFIX + "goto_marker_action"; //$NON-NLS-1$
@@ -281,6 +289,7 @@ public interface IJavaHelpContextIds {
 	public static final String NEW_CLASS_WIZARD_PAGE= PREFIX + "new_class_wizard_page_context"; //$NON-NLS-1$
 	public static final String NEW_INTERFACE_WIZARD_PAGE= PREFIX + "new_interface_wizard_page_context"; //$NON-NLS-1$
 	
+	
 	// since 3.1
 	public static final String NEW_ENUM_WIZARD_PAGE= PREFIX + "new_enum_wizard_page_context"; //$NON-NLS-1$
 	// since 3.1
@@ -359,4 +368,6 @@ public interface IJavaHelpContextIds {
 	public static final String CALL_HIERARCHY_TOGGLE_IMPLEMENTORS_ACTION= PREFIX + "call_hierarchy_toggle_implementors_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_OPEN_ACTION= PREFIX + "call_hierarchy_open_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_CANCEL_SEARCH_ACTION= PREFIX + "call_hierarchy_cancel_search_action_context"; //$NON-NLS-1$
+
+
 }

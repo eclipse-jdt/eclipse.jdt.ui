@@ -27,21 +27,28 @@ public class NewInterfaceCreationWizard extends NewElementWizard {
 
 	private NewInterfaceWizardPage fPage;
 	
-	public NewInterfaceCreationWizard() {
-		super();
+	public NewInterfaceCreationWizard(NewInterfaceWizardPage page) {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWINT);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
 		setWindowTitle(NewWizardMessages.NewInterfaceCreationWizard_title); 
+		
+		fPage= page;
+	}
+	
+	public NewInterfaceCreationWizard() {
+		this(null);
 	}
 
 	/*
 	 * @see Wizard#addPages
 	 */	
 	public void addPages() {
-		super.addPages();		
-		fPage= new NewInterfaceWizardPage();
+		super.addPages();	
+		if (fPage == null) {
+			fPage= new NewInterfaceWizardPage();
+			fPage.init(getSelection());
+		}
 		addPage(fPage);
-		fPage.init(getSelection());	
 	}
 	
 	/* (non-Javadoc)

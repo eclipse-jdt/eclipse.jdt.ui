@@ -12,24 +12,36 @@ package org.eclipse.jdt.internal.ui.wizards;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
+import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
+import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.wizard.Wizard;
 
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.ui.actions.AbstractOpenWizardAction;
+import org.eclipse.jdt.ui.actions.OpenNewClassWizardAction;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+
+import org.osgi.framework.Bundle;
 
 
 /**
@@ -49,6 +61,52 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
  */
 public class NewTypeDropDownAction extends Action implements IMenuCreator, IWorkbenchWindowPulldownDelegate2 {
 
+	public static class OpenTypeWizardAction extends AbstractOpenWizardAction {
+
+		private final static String ATT_NAME = "name";//$NON-NLS-1$
+		private final static String ATT_CLASS = "class";//$NON-NLS-1$
+		private final static String ATT_ICON = "icon";//$NON-NLS-1$
+		private static final String TAG_DESCRIPTION = "description";	//$NON-NLS-1$
+		
+		private IConfigurationElement fConfigurationElement;
+
+		public OpenTypeWizardAction(IConfigurationElement element) {
+			fConfigurationElement= element;
+			setText(element.getAttribute(ATT_NAME));
+			
+			String description= getDescriptionFromConfig(fConfigurationElement);
+			setDescription(description);
+			setToolTipText(description);
+			setImageDescriptor(getIconFromConfig(fConfigurationElement));
+		}
+		
+		private String getDescriptionFromConfig(IConfigurationElement config) {
+			IConfigurationElement [] children = config.getChildren(TAG_DESCRIPTION);
+			if (children.length>=1) {
+				return children[0].getValue();
+			}
+			return ""; //$NON-NLS-1$
+		}
+
+		private ImageDescriptor getIconFromConfig(IConfigurationElement config) {
+			String iconName = config.getAttribute(ATT_ICON);
+			if (iconName != null) {
+				Bundle bundle= Platform.getBundle(config.getNamespace());	
+				return JavaPluginImages.createImageDescriptor(bundle, new Path(iconName), true);
+			}
+			return null;
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.wizards.AbstractOpenWizardAction#createWizard()
+		 */
+		protected Wizard createWizard() throws CoreException {
+			return (Wizard) CoreUtility.createExtension(fConfigurationElement, ATT_CLASS);
+		}
+	}
+	
+	
+	
 	private final static String TAG_WIZARD = "wizard";//$NON-NLS-1$
 	private final static String ATT_JAVATYPE = "javatype";//$NON-NLS-1$
 	
@@ -60,6 +118,8 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 	private static final String TAG_CLASS = "class"; //$NON-NLS-1$
 	
 	private Menu fMenu;
+	
+	private Shell fWizardShell;
 	
 	public NewTypeDropDownAction() {
 		fMenu= null;
@@ -81,10 +141,11 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 	public Menu getMenu(Control parent) {
 		if (fMenu == null) {
 			fMenu= new Menu(parent);
-			
-			Action[] actions= getActionFromDescriptors();
+			OpenTypeWizardAction[] actions= getActionFromDescriptors();
 			for (int i= 0; i < actions.length; i++) {
-				ActionContributionItem item= new ActionContributionItem(actions[i]);
+				OpenTypeWizardAction curr= actions[i];
+				curr.setShell(fWizardShell);
+				ActionContributionItem item= new ActionContributionItem(curr);
 				item.fill(fMenu, -1);				
 			}			
 		
@@ -93,10 +154,10 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 	}
 	
 	public void run() {
-		(new OpenClassWizardAction()).run();
+		new OpenNewClassWizardAction().run();
 	}
 	
-	public static Action[] getActionFromDescriptors() {
+	public static OpenTypeWizardAction[] getActionFromDescriptors() {
 		ArrayList containers= new ArrayList();
 		
 		IExtensionPoint extensionPoint = Platform.getExtensionRegistry().getExtensionPoint(PlatformUI.PLUGIN_ID, PL_NEW);
@@ -109,7 +170,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 				}
 			}
 		}
-		return (Action[]) containers.toArray(new Action[containers.size()]);
+		return (OpenTypeWizardAction[]) containers.toArray(new OpenTypeWizardAction[containers.size()]);
 	}
 		
 	private static boolean isJavaTypeWizard(IConfigurationElement element) {

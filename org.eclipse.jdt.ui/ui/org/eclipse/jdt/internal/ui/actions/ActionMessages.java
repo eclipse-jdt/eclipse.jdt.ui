@@ -303,4 +303,26 @@ public final class ActionMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, ActionMessages.class);
 	}
+
+	public static String OpenNewAnnotationWizardAction_text;
+	public static String OpenNewAnnotationWizardAction_description;
+	public static String OpenNewAnnotationWizardAction_tooltip;
+	public static String OpenNewClassWizardAction_text;
+	public static String OpenNewClassWizardAction_description;
+	public static String OpenNewClassWizardAction_tooltip;
+	public static String OpenNewEnumWizardAction_text;
+	public static String OpenNewEnumWizardAction_description;
+	public static String OpenNewEnumWizardAction_tooltip;
+	public static String OpenNewInterfaceWizardAction_text;
+	public static String OpenNewInterfaceWizardAction_description;
+	public static String OpenNewInterfaceWizardAction_tooltip;
+	public static String OpenNewJavaProjectWizardAction_text;
+	public static String OpenNewJavaProjectWizardAction_description;
+	public static String OpenNewJavaProjectWizardAction_tooltip;
+	public static String OpenNewPackageWizardAction_text;
+	public static String OpenNewPackageWizardAction_description;
+	public static String OpenNewPackageWizardAction_tooltip;
+	public static String OpenNewSourceFolderWizardAction_text;
+	public static String OpenNewSourceFolderWizardAction_description;
+	public static String OpenNewSourceFolderWizardAction_tooltip;
 }

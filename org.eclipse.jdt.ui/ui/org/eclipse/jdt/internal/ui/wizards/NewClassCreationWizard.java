@@ -26,22 +26,29 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 public class NewClassCreationWizard extends NewElementWizard {
 
 	private NewClassWizardPage fPage;
-
-	public NewClassCreationWizard() {
-		super();
+	
+	public NewClassCreationWizard(NewClassWizardPage page) {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWCLASS);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(NewWizardMessages.NewClassCreationWizard_title); 
+		setWindowTitle(NewWizardMessages.NewClassCreationWizard_title);
+		
+		fPage= page;
 	}
-
+	
+	public NewClassCreationWizard() {
+		this(null);
+	}
+	
 	/*
 	 * @see Wizard#createPages
 	 */	
 	public void addPages() {
 		super.addPages();
-		fPage= new NewClassWizardPage();
+		if (fPage == null) {
+			fPage= new NewClassWizardPage();
+			fPage.init(getSelection());
+		}
 		addPage(fPage);
-		fPage.init(getSelection());
 	}
 	
 	/*(non-Javadoc)
