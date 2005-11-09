@@ -13,9 +13,12 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.core.resources.IFile;
+
+import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
@@ -29,6 +32,12 @@ import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.Statement;
+
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
+import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
+import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -36,14 +45,10 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
-import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
-import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
-import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTemplateProposal;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
 
 
@@ -110,7 +115,10 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 			}
 			if (startLine  == endLine) {
 				if (length == 0 || offset != endLineRegion.getOffset() || length != endLineRegion.getLength()) {
-					return null;
+					AssistContext invocationContext= new AssistContext(cu, offset, length);
+					Statement[] selectedStatements= SurroundWith.getSelectedStatements(invocationContext);
+					if (selectedStatements == null)
+						return null;
 				}
 			} else {
 				// expand selection
@@ -135,7 +143,7 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		return document;
 	}
 
-	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, Collection result) throws BadLocationException {
+	private void collectSurroundTemplates(IDocument document, ICompilationUnit cu, int offset, int length, Collection result) throws BadLocationException, CoreException {
 		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.NAME);
 		CompilationUnitContext context= contextType.createContext(document, offset, length, cu);
 		context.setVariable("selection", document.get(offset, length)); //$NON-NLS-1$
@@ -145,15 +153,27 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 		int end= context.getEnd();
 		IRegion region= new Region(start, end - start);
 
+		AssistContext invocationContext= new AssistContext(cu, start, end - start);
+		Statement[] selectedStatements= SurroundWith.getSelectedStatements(invocationContext);
+		
 		Template[] templates= JavaPlugin.getDefault().getTemplateStore().getTemplates();
 		for (int i= 0; i != templates.length; i++) {
-			Template curr= templates[i];
-			if (context.canEvaluate(curr) && curr.getContextTypeId().equals(JavaContextType.NAME) && curr.getPattern().indexOf($_LINE_SELECTION) != -1) {
+			Template currentTemplate= templates[i];
+			if (context.canEvaluate(currentTemplate) && currentTemplate.getContextTypeId().equals(JavaContextType.NAME) && currentTemplate.getPattern().indexOf($_LINE_SELECTION) != -1) {
 				// TODO using jdt proposals for the moment, as jdt expects IJavaCompletionProposals
-				TemplateProposal proposal= new TemplateProposal(curr, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
-				String[] arg= new String[] { curr.getName(), curr.getDescription() };
-				proposal.setDisplayString(Messages.format(CorrectionMessages.QuickTemplateProcessor_surround_label, arg));
-				result.add(proposal);
+				
+				if (selectedStatements != null) {
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+					TemplateProposal proposal= new SurroundWithTemplateProposal(cu, currentTemplate, context, region, image, selectedStatements);
+					String[] arg= new String[] { currentTemplate.getName(), currentTemplate.getDescription() };
+					proposal.setDisplayString(Messages.format(CorrectionMessages.QuickTemplateProcessor_surround_label, arg));
+					result.add(proposal);
+				} else {
+					TemplateProposal proposal= new TemplateProposal(currentTemplate, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
+					String[] arg= new String[] { currentTemplate.getName(), currentTemplate.getDescription() };
+					proposal.setDisplayString(Messages.format(CorrectionMessages.QuickTemplateProcessor_surround_label, arg));
+					result.add(proposal);
+				}
 			}
 		}
 	}

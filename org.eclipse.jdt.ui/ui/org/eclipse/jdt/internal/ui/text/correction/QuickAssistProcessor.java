@@ -954,7 +954,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 	
 	private static boolean getSurroundWithRunnableProposal(IInvocationContext context, ASTNode node, ArrayList resultingCollections) throws CoreException {
-		Statement[] selectedStatements= SurroundWithRunnableProposal.getSelectedStatements(context);
+		Statement[] selectedStatements= SurroundWith.getSelectedStatements(context);
 		if (selectedStatements == null)
 			return false;
 		
