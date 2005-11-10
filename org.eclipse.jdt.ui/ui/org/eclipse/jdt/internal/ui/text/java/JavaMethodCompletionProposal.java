@@ -185,10 +185,11 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		buffer.append(LPAREN);
 		
 		if (hasParameters()) {
+			setCursorPosition(buffer.length());
+			
 			if (prefs.afterOpeningParen)
 				buffer.append(SPACE);
 			
-			setCursorPosition(buffer.length());
 
 			// don't add the trailing space, but let the user type it in himself - typing the closing paren will exit
 //			if (prefs.beforeClosingParen)

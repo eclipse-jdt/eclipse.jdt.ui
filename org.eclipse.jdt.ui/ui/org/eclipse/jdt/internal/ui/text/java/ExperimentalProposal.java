@@ -117,6 +117,8 @@ public final class ExperimentalProposal extends JavaMethodCompletionProposal {
 			buffer.append(SPACE);
 		buffer.append(LPAREN);
 		
+		setCursorPosition(buffer.length());
+		
 		if (prefs.afterOpeningParen)
 			buffer.append(SPACE);
 		

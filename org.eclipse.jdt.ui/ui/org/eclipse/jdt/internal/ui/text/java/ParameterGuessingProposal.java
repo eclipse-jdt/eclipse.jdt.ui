@@ -177,6 +177,8 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 			buffer.append(SPACE);
 		buffer.append(LPAREN);
 		
+		setCursorPosition(buffer.length());
+		
 		if (prefs.afterOpeningParen)
 			buffer.append(SPACE);
 		
