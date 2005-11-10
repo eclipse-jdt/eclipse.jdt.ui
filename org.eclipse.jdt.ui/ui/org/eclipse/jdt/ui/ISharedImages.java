@@ -35,13 +35,19 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  */
 public interface ISharedImages {
 			
-	/** Key to access the shared image or image descriptor for a Java compilation unit. */
+	/**
+	 * Key to access the shared image or image descriptor for a Java compilation unit.
+	 */
 	public static final String IMG_OBJS_CUNIT= JavaPluginImages.IMG_OBJS_CUNIT;
 	
-	/** Key to access the shared image or image descriptor for a Java class file. */
+	/**
+	 * Key to access the shared image or image descriptor for a Java class file.
+	 */
 	public static final String IMG_OBJS_CFILE= JavaPluginImages.IMG_OBJS_CFILE; 
 	
-	/** Key to access the shared image or image descriptor for a JAR. */
+	/**
+	 * Key to access the shared image or image descriptor for a JAR archive.
+	 */
 	public static final String IMG_OBJS_JAR= JavaPluginImages.IMG_OBJS_JAR;
 	
 	/**
@@ -49,7 +55,7 @@ public interface ISharedImages {
 	 * @since 3.0
 	 */
 	public static final String IMG_OBJS_JAR_WITH_SOURCE= JavaPluginImages.IMG_OBJS_JAR_WSRC;
-	
+			
 	/**
 	 * Key to access the shared image or image descriptor for external archives. 
 	 * @since 2.1
@@ -61,6 +67,12 @@ public interface ISharedImages {
 	 * @since 2.1
 	 */
 	public static final String IMG_OBJS_EXTERNAL_ARCHIVE_WITH_SOURCE= JavaPluginImages.IMG_OBJS_EXTJAR_WSRC;
+
+	/**
+	 * Key to access the shared image or image descriptor for a classpath variable entry.
+	 * @since 3.2
+	 */
+	public static final String IMG_OBJS_CLASSPATH_VAR_ENTRY= JavaPluginImages.IMG_OBJS_ENV_VAR;
 
 	/**
 	 * Key to access the shared image or image descriptor for a library (class path container).

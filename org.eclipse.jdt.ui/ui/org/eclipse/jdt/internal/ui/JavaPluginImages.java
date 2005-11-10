@@ -114,14 +114,11 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_EMPTY_PACK_RESOURCE= NAME_PREFIX + "empty_pack_fldr_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_EMPTY_PACKAGE= NAME_PREFIX + "empty_pack_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_PACKFRAG_ROOT= NAME_PREFIX + "packagefolder_obj.gif"; //$NON-NLS-1$
-	public static final String IMG_OBJS_MISSING_PACKFRAG_ROOT= NAME_PREFIX + "packagefolder_nonexist_obj.gif"; //$NON-NLS-1$
-	public static final String IMG_OBJS_MISSING_JAR= NAME_PREFIX + "jar_nonexist_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_JAR= NAME_PREFIX + "jar_obj.gif"; 				//$NON-NLS-1$
 	public static final String IMG_OBJS_EXTJAR= NAME_PREFIX + "jar_l_obj.gif"; 			//$NON-NLS-1$
 	public static final String IMG_OBJS_JAR_WSRC= NAME_PREFIX + "jar_src_obj.gif"; 		//$NON-NLS-1$
 	public static final String IMG_OBJS_EXTJAR_WSRC= NAME_PREFIX + "jar_lsrc_obj.gif";	//$NON-NLS-1$
 	public static final String IMG_OBJS_ENV_VAR= NAME_PREFIX + "envvar_obj.gif"; 			//$NON-NLS-1$
-	public static final String IMG_OBJS_MISSING_ENV_VAR= NAME_PREFIX + "envvar_nonexist_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_JAVA_MODEL= NAME_PREFIX + "java_model_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_UNKNOWN= NAME_PREFIX + "unknown_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_LOCAL_VARIABLE= NAME_PREFIX + "localvariable_obj.gif"; //$NON-NLS-1$
@@ -206,7 +203,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_EMPTY_PACKAGE_RESOURCES= createManagedFromKey(T_OBJ, IMG_OBJS_EMPTY_PACK_RESOURCE);
 	public static final ImageDescriptor DESC_OBJS_EMPTY_PACKAGE= createManagedFromKey(T_OBJ, IMG_OBJS_EMPTY_PACKAGE);	
 	public static final ImageDescriptor DESC_OBJS_PACKFRAG_ROOT= createManagedFromKey(T_OBJ, IMG_OBJS_PACKFRAG_ROOT);
-	public static final ImageDescriptor DESC_OBJS_MISSING_PACKFRAG_ROOT= createManagedFromKey(T_OBJ, IMG_OBJS_MISSING_PACKFRAG_ROOT);
+	
 	public static final ImageDescriptor DESC_OBJS_JAVA_MODEL= createManagedFromKey(T_OBJ, IMG_OBJS_JAVA_MODEL);
 
 	public static final ImageDescriptor DESC_OBJS_CLASS= createManagedFromKey(T_OBJ, IMG_OBJS_CLASS);
@@ -242,12 +239,10 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_ENUM_ALT= createManagedFromKey(T_OBJ, IMG_OBJS_ENUM_ALT);
 	
 	public static final ImageDescriptor DESC_OBJS_JAR= createManagedFromKey(T_OBJ, IMG_OBJS_JAR);
-	public static final ImageDescriptor DESC_OBJS_MISSING_JAR= createManagedFromKey(T_OBJ, IMG_OBJS_MISSING_JAR);
 	public static final ImageDescriptor DESC_OBJS_EXTJAR= createManagedFromKey(T_OBJ, IMG_OBJS_EXTJAR);
 	public static final ImageDescriptor DESC_OBJS_JAR_WSRC= createManagedFromKey(T_OBJ, IMG_OBJS_JAR_WSRC);
 	public static final ImageDescriptor DESC_OBJS_EXTJAR_WSRC= createManagedFromKey(T_OBJ, IMG_OBJS_EXTJAR_WSRC);
 	public static final ImageDescriptor DESC_OBJS_ENV_VAR= createManagedFromKey(T_OBJ, IMG_OBJS_ENV_VAR);
-	public static final ImageDescriptor DESC_OBJS_MISSING_ENV_VAR= createManagedFromKey(T_OBJ, IMG_OBJS_MISSING_ENV_VAR);
 	
 	public static final ImageDescriptor DESC_OBJS_LIBRARY= createManagedFromKey(T_OBJ, IMG_OBJS_LIBRARY);
 	

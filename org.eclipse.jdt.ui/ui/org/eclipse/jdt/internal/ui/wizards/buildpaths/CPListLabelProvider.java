@@ -35,7 +35,9 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -46,24 +48,19 @@ import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 public class CPListLabelProvider extends LabelProvider {
 		
 	private String fNewLabel, fClassLabel, fCreateLabel;
-	private ImageDescriptor fJarIcon, fExtJarIcon, fJarWSrcIcon, fExtJarWSrcIcon;
-	private ImageDescriptor fFolderImage, fProjectImage, fVariableImage, fContainerImage;
-	
+		
 	private ImageDescriptorRegistry fRegistry;
+	private ISharedImages fSharedImages;
+
+	private ImageDescriptor fProjectImage;
 	
 	public CPListLabelProvider() {
 		fNewLabel= NewWizardMessages.CPListLabelProvider_new; 
 		fClassLabel= NewWizardMessages.CPListLabelProvider_classcontainer; 
 		fCreateLabel= NewWizardMessages.CPListLabelProvider_willbecreated; 
 		fRegistry= JavaPlugin.getImageDescriptorRegistry();
-		
-		fJarIcon= JavaPluginImages.DESC_OBJS_JAR;
-		fExtJarIcon= JavaPluginImages.DESC_OBJS_EXTJAR;
-		fJarWSrcIcon= JavaPluginImages.DESC_OBJS_JAR_WSRC;
-		fExtJarWSrcIcon= JavaPluginImages.DESC_OBJS_EXTJAR_WSRC;
-		fFolderImage= JavaPluginImages.DESC_OBJS_PACKFRAG_ROOT;
-		fContainerImage= JavaPluginImages.DESC_OBJS_LIBRARY;
-		fVariableImage= JavaPluginImages.DESC_OBJS_ENV_VAR;
+	
+		fSharedImages= JavaUI.getSharedImages();
 
 		IWorkbench workbench= JavaPlugin.getDefault().getWorkbench();
 		
@@ -304,32 +301,32 @@ public class CPListLabelProvider extends LabelProvider {
 				if (cpentry.getPath().segmentCount() == 1) {
 					return fProjectImage;
 				} else {
-					return fFolderImage;
+					return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_PACKFRAG_ROOT);
 				}
 			case IClasspathEntry.CPE_LIBRARY:
 				IResource res= cpentry.getResource();
 				IPath path= (IPath) cpentry.getAttribute(CPListElement.SOURCEATTACHMENT);
 				if (res == null) {
 					if (path == null || path.isEmpty()) {
-						return fExtJarIcon;
+						return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE);
 					} else {
-						return fExtJarWSrcIcon;
+						return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_EXTERNAL_ARCHIVE_WITH_SOURCE);
 					}
 				} else if (res instanceof IFile) {
 					if (path == null || path.isEmpty()) {
-						return fJarIcon;
+						return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_JAR);
 					} else {
-						return fJarWSrcIcon;
+						return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_JAR_WITH_SOURCE);
 					}
 				} else {
-					return fFolderImage;
+					return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_PACKFRAG_ROOT);
 				}
 			case IClasspathEntry.CPE_PROJECT:
 				return fProjectImage;
 			case IClasspathEntry.CPE_VARIABLE:
-				return fVariableImage;
+				return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_CLASSPATH_VAR_ENTRY);
 			case IClasspathEntry.CPE_CONTAINER:
-				return fContainerImage;
+				return fSharedImages.getImageDescriptor(ISharedImages.IMG_OBJS_LIBRARY);
 			default:
 				return null;
 		}
@@ -362,10 +359,9 @@ public class CPListLabelProvider extends LabelProvider {
 			} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
 				return fRegistry.get(JavaPluginImages.DESC_OBJS_NATIVE_LIB_PATH_ATTRIB);
 			}
-			
-			return  fRegistry.get(fVariableImage);
+			return  fSharedImages.getImage(ISharedImages.IMG_OBJS_CLASSPATH_VAR_ENTRY);
 		} else if (element instanceof CPUserLibraryElement) {
-			return fRegistry.get(JavaPluginImages.DESC_OBJS_LIBRARY);
+			return  fSharedImages.getImage(ISharedImages.IMG_OBJS_LIBRARY);
 		} else if (element instanceof IAccessRule) {
 			IAccessRule rule= (IAccessRule) element;
 			return AccessRulesLabelProvider.getResolutionImage(rule.getKind());
