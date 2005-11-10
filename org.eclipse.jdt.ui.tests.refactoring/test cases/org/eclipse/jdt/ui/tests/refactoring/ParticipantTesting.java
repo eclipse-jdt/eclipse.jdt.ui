@@ -142,6 +142,16 @@ public class ParticipantTesting {
 		}
 	}
 	
+	public static void testDerivedElements(List derivedList, List derivedNewNameList) {
+		Assert.assertEquals(derivedList.size(), derivedNewNameList.size());
+		if (derivedList.size() == 0) {
+			TestRenameParticipantShared.testNumberOfDerivedElements(0);
+		} else {
+			TestRenameParticipantShared.testDerivedElements(derivedList, derivedNewNameList);
+		}
+		
+	}	
+	
 	private static void testElementsShared(String[] handles, List list) {
 		testNumberOfElements(handles.length, list);
 		for (int i= 0; i < handles.length; i++) {

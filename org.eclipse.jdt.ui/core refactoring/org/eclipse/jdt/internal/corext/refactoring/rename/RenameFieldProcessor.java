@@ -26,8 +26,10 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
@@ -97,10 +99,24 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	protected boolean fUpdateTextualMatches;
 	private boolean fRenameGetter;
 	private boolean fRenameSetter;
+	private boolean fIsDerived;
+	private GroupCategorySet fCategorySet;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
-	
+
 	public RenameFieldProcessor(IField field) {
+		this(field, new TextChangeManager(true), null);
+		fIsDerived= false;
+	}
+	
+	protected RenameFieldProcessor(IField field, TextChangeManager manager, GroupCategorySet categorySet) {
+		initialize(field);
+		fChangeManager= manager;
+		fCategorySet= categorySet;
+		fIsDerived= true;
+	}
+
+	private void initialize(IField field) {
 		fField= field;
 		if (fField != null)
 			setNewElementName(fField.getElementName());
@@ -178,9 +194,9 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			result.addWarning(RefactoringCoreMessages.RenameFieldRefactoring_should_start_lowercase); 
 			
 		if (Checks.isAlreadyNamed(fField, newName))
-			result.addFatalError(RefactoringCoreMessages.RenameFieldRefactoring_another_name); 
+			result.addFatalError(RefactoringCoreMessages.RenameFieldRefactoring_another_name);
 		if (fField.getDeclaringType().getField(newName).exists())
-			result.addFatalError(RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined); 
+			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined, new String[] { newName, fField.getDeclaringType().getElementName() }));  
 		return result;
 	}
 	
@@ -437,7 +453,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			IField otherField= current.getField(getNewElementName());
 			if (otherField.exists()){
 				String msg= Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_hiding2, 
-				 															new String[]{getNewElementName(), JavaModelUtil.getFullyQualifiedName(current)});
+				 															new String[]{getNewElementName(), JavaModelUtil.getFullyQualifiedName(current), otherField.getElementName()});
 				result.addWarning(msg, JavaStatusContext.create(otherField));
 			}									
 			current= current.getDeclaringType();
@@ -508,7 +524,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private RefactoringStatus createChanges(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.RenameFieldRefactoring_checking, 10); 
 		RefactoringStatus result= new RefactoringStatus();
-		fChangeManager= new TextChangeManager(true);
+		if (!fIsDerived)
+			fChangeManager.clear();
 
 		addDeclarationUpdate();
 		
@@ -546,9 +563,17 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		TextEdit textEdit= new ReplaceEdit(fField.getNameRange().getOffset(), fField.getElementName().length(), getNewElementName());
 		ICompilationUnit cu= fField.getCompilationUnit();
 		String groupName= RefactoringCoreMessages.RenameFieldRefactoring_Update_field_declaration; 
-		TextChangeCompatibility.addTextEdit(fChangeManager.get(cu), groupName, textEdit);
+		addTextEdit(fChangeManager.get(cu), groupName, textEdit);
 	}
 	
+	private void addTextEdit(TextChange change, String groupName, TextEdit textEdit) {
+		if (fIsDerived)
+			TextChangeCompatibility.addTextEdit(change, groupName, textEdit, fCategorySet);
+		else
+			TextChangeCompatibility.addTextEdit(change, groupName, textEdit);
+
+	}
+
 	private void addReferenceUpdates(IProgressMonitor pm) {
 		pm.beginTask("", fReferences.length); //$NON-NLS-1$
 		String editName= RefactoringCoreMessages.RenameFieldRefactoring_Update_field_reference; 
@@ -558,7 +583,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				continue;
 			SearchMatch[] results= fReferences[i].getSearchResults();
 			for (int j= 0; j < results.length; j++){
-				TextChangeCompatibility.addTextEdit(fChangeManager.get(cu), editName, createTextChange(results[j]));
+				addTextEdit(fChangeManager.get(cu), editName, createTextChange(results[j]));
 			}
 			pm.worked(1);			
 		}
@@ -594,7 +619,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			for (int j= 0; j < results.length; j++){
 				SearchMatch searchResult= results[j];
 				TextEdit edit= new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), newAccessorName);
-				TextChangeCompatibility.addTextEdit(fChangeManager.get(cu), editName, edit);
+				addTextEdit(fChangeManager.get(cu), editName, edit);
 			}
 		}
 	}

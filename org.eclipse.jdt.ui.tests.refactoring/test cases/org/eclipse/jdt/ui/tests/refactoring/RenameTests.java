@@ -27,7 +27,8 @@ public class RenameTests {
 		suite.addTest(RenamePrivateMethodTests.suite());	
 		suite.addTest(RenameStaticMethodTests.suite());
 		suite.addTest(RenameParametersTests.suite());
-		suite.addTest(RenameTypeTests.suite());	
+		suite.addTest(RenameTypeTests.suite());
+		suite.addTest(RenamingNameSuggestorTests.suite());
 		suite.addTest(RenamePackageTests.suite());
 		suite.addTest(RenamePrivateFieldTests.suite());
 		suite.addTest(RenameTypeParameterTests.suite());

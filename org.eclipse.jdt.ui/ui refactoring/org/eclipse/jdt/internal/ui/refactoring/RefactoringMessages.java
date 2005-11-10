@@ -338,8 +338,34 @@ public final class RefactoringMessages extends NLS {
 	public static String RenamePackageWizard_rename_subpackages;
 	public static String RenameCuWizard_defaultPageTitle;
 	public static String RenameCuWizard_inputPage_description;
+	
 	public static String RenameTypeWizard_defaultPageTitle;
 	public static String RenameTypeWizard_inputPage_description;
+	public static String RenameTypeWizard_unexpected_exception;
+
+	public static String RenameTypeWizardDerivedElementPage_change_element_name;
+	public static String RenameTypeWizardDerivedElementPage_enter_new_name;
+	public static String RenameTypeWizardDerivedElementPage_name_empty;
+	public static String RenameTypeWizardDerivedElementPage_name_should_start_lowercase;
+	public static String RenameTypeWizardDerivedElementPage_field_exists;
+	public static String RenameTypeWizardDerivedElementPage_method_exists;
+	public static String RenameTypeWizardDerivedElementPage_rename_to;
+	public static String RenameTypeWizardDerivedElementPage_select_derived_elements;
+	public static String RenameTypeWizardDerivedElementPage_review_derived_elements;
+	public static String RenameTypeWizardDerivedElementPage_select_element_to_view_source;
+	public static String RenameTypeWizardDerivedElementPage_restore_defaults;
+	public static String RenameTypeWizardDerivedElementPage_change_name;
+
+	public static String RenameTypeWizardDerivedOptionsDialog_title;
+	public static String RenameTypeWizardDerivedOptionsDialog_select_strategy;
+	public static String RenameTypeWizardDerivedOptionsDialog_strategy_1;
+	public static String RenameTypeWizardDerivedOptionsDialog_strategy_2;
+	public static String RenameTypeWizardDerivedOptionsDialog_strategy_3;
+	public static String RenameTypeWizardDerivedOptionsDialog_warning_short_names;
+
+	public static String RenameTypeWizardInputPage_update_derived_elements;
+	public static String RenameTypeWizardInputPage_update_derived_elements_configure;
+	
 	public static String RenameTypeParameterWizard_defaultPageTitle;
 	public static String RenameTypeParameterWizard_inputPage_description;
 	public static String RenameMethodWizard_defaultPageTitle;

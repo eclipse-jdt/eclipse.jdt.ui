@@ -15,6 +15,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -32,18 +33,24 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.GroupCategory;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
+import org.eclipse.ltk.core.refactoring.IDerivedElementRefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 import org.eclipse.osgi.util.NLS;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -52,6 +59,8 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -77,6 +86,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
@@ -95,7 +105,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
-public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating {
+public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating, IDerivedElementUpdating, IDerivedElementRefactoringProcessor {
 
 	private static final String ID_RENAME_TYPE= "org.eclipse.jdt.ui.rename.type"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_HANDLE= "handle"; //$NON-NLS-1$
@@ -104,7 +114,14 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PATTERNS= "patterns"; //$NON-NLS-1$
-
+	private static final String ATTRIBUTE_DERIVED= "derived"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_DERIVED_MATCHING_STRATEGY= "matchstrategy"; //$NON-NLS-1$
+	
+    public static final GroupCategorySet CATEGORY_TYPE_RENAME= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.refactoring.rename.renameType.type", RefactoringCoreMessages.RenameTypeProcessor_changeCategory_type, RefactoringCoreMessages.RenameTypeProcessor_changeCategory_type_description)); //$NON-NLS-1$
+    public static final GroupCategorySet CATEGORY_METHOD_RENAME= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.refactoring.rename.renameType.method", RefactoringCoreMessages.RenameTypeProcessor_changeCategory_method, RefactoringCoreMessages.RenameTypeProcessor_changeCategory_method_description)); //$NON-NLS-1$
+    public static final GroupCategorySet CATEGORY_FIELD_RENAME= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.refactoring.rename.renameType.field", RefactoringCoreMessages.RenameTypeProcessor_changeCategory_fields, RefactoringCoreMessages.RenameTypeProcessor_changeCategory_fields_description)); //$NON-NLS-1$ 
+    public static final GroupCategorySet CATEGORY_LOCAL_RENAME= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.refactoring.rename.renameType.local", RefactoringCoreMessages.RenameTypeProcessor_changeCategory_local_variables, RefactoringCoreMessages.RenameTypeProcessor_changeCategory_local_variables_description)); //$NON-NLS-1$			
+    
 	private IType fType;
 	private SearchResultGroup[] fReferences;
 	private TextChangeManager fChangeManager;
@@ -119,12 +136,44 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameTypeProcessor"; //$NON-NLS-1$
 	
+	// --- Derived
+
+	private boolean fUpdateDerivedElements;
+	private List/* <RenameProcessor> */fDerivedRenameProcessors= null;
+	private Map/* <IJavaElement, String> */fFinalDerivedElementToName= null;
+	private int fRenamingStrategy;
+
+	// Preloaded information for the UI.
+	private HashMap/* <IJavaElement, String> */fPreloadedElementToName= null;
+	private Map/* <IJavaElement, Boolean> */fPreloadedElementToSelection= null;
+	private Map/* <IJavaElement, String> */fPreloadedElementToNameDefault= null;
+
+	// Cache information to decide whether to
+	// re-update references and preload info
+	private String fCachedNewName= null;
+	private boolean fCachedRenameDerivedElements= false;
+	private int fCachedRenamingStrategy= -1;
+	private RefactoringStatus fCachedRefactoringStatus= null;
+
+	private class NoOverrideProgressMonitor extends SubProgressMonitor {
+
+		public NoOverrideProgressMonitor(IProgressMonitor monitor, int ticks) {
+			super(monitor, ticks, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
+		}
+
+		public void setTaskName(String name) {
+			// do nothing
+		}
+	}
+
 	public RenameTypeProcessor(IType type) {
 		fType= type;
 		if (type != null)
 			setNewElementName(type.getElementName());
 		fUpdateReferences= true; //default is yes
 		fUpdateTextualMatches= false;
+		fUpdateDerivedElements= false; // default is no
+		fRenamingStrategy= RenamingNameSuggestor.STRATEGY_EXACT;
 	}
 	
 	public IType getType() {
@@ -157,7 +206,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	
 	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
 		String newCUName= getNewElementName() + ".java"; //$NON-NLS-1$
-		RenameArguments arguments= new RenameArguments(newCUName, getUpdateReferences());
+		RenameArguments arguments= new RenameArguments(newCUName, getUpdateReferences(), getUpdateDerivedElements());
 		loadDerivedParticipants(status, result, 
 			computeDerivedElements(), arguments, 
 			computeResourceModifications(), natures, shared);
@@ -285,8 +334,11 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		Assert.isNotNull(getNewElementName(), "newName"); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		try{
-			pm.beginTask("", 120); //$NON-NLS-1$
-			pm.setTaskName(RefactoringCoreMessages.RenameTypeRefactoring_checking); 
+			pm.beginTask("", 134); //$NON-NLS-1$
+			pm.setTaskName(RefactoringCoreMessages.RenameTypeRefactoring_checking);
+
+			fChangeManager= new TextChangeManager(true);
+			
 			result.merge(checkNewElementName(getNewElementName()));
 			if (result.hasFatalError())
 				return result;
@@ -337,9 +389,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			if (result.hasFatalError())
 				return result;
 			
-			if (fUpdateReferences){
-				pm.setTaskName(RefactoringCoreMessages.RenameTypeRefactoring_searching);	 
-				fReferences= RefactoringSearchEngine.search(SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE), RefactoringScopeFactory.create(fType), new SubProgressMonitor(pm, 35), result);
+			// Load references, including derived elements
+			if (fUpdateReferences || fUpdateDerivedElements) {
+				pm.setTaskName(RefactoringCoreMessages.RenameTypeRefactoring_searching);
+				result.merge(initializeReferences(new SubProgressMonitor(pm, 35)));
 			} else
 				fReferences= new SearchResultGroup[0];
 				pm.worked(35);
@@ -348,7 +401,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 			
-			if (fUpdateReferences) {
+			if (fUpdateReferences || fUpdateDerivedElements) {
 				result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 25)));
 			} else {
 				Checks.checkCompileErrorsInAffectedFile(result, fType.getResource());
@@ -358,7 +411,14 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			if (result.hasFatalError())
 				return result;
 			
-			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 35));
+			if (fUpdateDerivedElements) {
+				result.merge(initializeDerivedRenameProcessors(new SubProgressMonitor(pm, 35), context));
+				if (result.hasFatalError())
+					return result;
+			} else
+				pm.worked(35);
+
+			createChanges(new SubProgressMonitor(pm, 15));
 	
 			if (fUpdateQualifiedNames)			
 				computeQualifiedNameMatches(new SubProgressMonitor(pm, 10));
@@ -373,6 +433,84 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		}	
 	}
 	
+	/**
+	 * Initializes the references to the type and the derived elements. This
+	 * method creates both the fReferences and the fPreloadedDerivedElements
+	 * fields.
+	 * 
+	 * May be called from the UI.
+	 */
+	public RefactoringStatus initializeReferences(IProgressMonitor monitor) throws JavaModelException {
+
+		Assert.isNotNull(fType);
+		Assert.isNotNull(getNewElementName());
+
+		// Do not search again if the preconditions have not changed.
+		// Search depends on the type, the new name, the derived elements, and
+		// the strategy
+
+		if (fReferences != null && (getNewElementName().equals(fCachedNewName)) && (fCachedRenameDerivedElements == getUpdateDerivedElements()) && (fCachedRenamingStrategy == fRenamingStrategy))
+			return fCachedRefactoringStatus;
+
+		fCachedNewName= getNewElementName();
+		fCachedRenameDerivedElements= fUpdateDerivedElements;
+		fCachedRenamingStrategy= fRenamingStrategy;
+		fCachedRefactoringStatus= new RefactoringStatus();
+
+		fReferences= RefactoringSearchEngine.search(SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE), RefactoringScopeFactory
+				.create(fType), monitor, fCachedRefactoringStatus);
+		fReferences= Checks.excludeCompilationUnits(fReferences, fCachedRefactoringStatus);
+
+		fPreloadedElementToName= new HashMap();
+		fPreloadedElementToSelection= new HashMap();
+
+		final String unQualifiedTypeName= fType.getElementName();
+
+		monitor.beginTask("", fReferences.length); //$NON-NLS-1$
+
+		if (getUpdateDerivedElements()) {
+
+			RenamingNameSuggestor sugg= new RenamingNameSuggestor(fRenamingStrategy);
+
+			for (int i= 0; i < fReferences.length; i++) {
+				final ICompilationUnit cu= fReferences[i].getCompilationUnit();
+				if (cu == null)
+					continue;
+
+				final SearchMatch[] results= fReferences[i].getSearchResults();
+
+				for (int j= 0; j < results.length; j++) {
+					final SearchMatch match= results[j];
+
+					if (match.getElement() instanceof IField) {
+						final IField currentField= (IField) match.getElement();
+						final String newFieldName= sugg.suggestNewFieldName(currentField.getJavaProject(), currentField.getElementName(), Flags.isStatic(currentField.getFlags()), unQualifiedTypeName,
+								getNewElementName());
+
+						if (newFieldName != null)
+							fPreloadedElementToName.put(currentField, newFieldName);
+					}
+
+					if (match.getElement() instanceof IMethod) {
+						final IMethod currentMethod= (IMethod) match.getElement();
+						final String newMethodName= sugg.suggestNewMethodName(currentMethod.getElementName(), unQualifiedTypeName, getNewElementName());
+
+						if (newMethodName != null) {
+							fPreloadedElementToName.put(currentMethod, newMethodName);
+						}
+					}
+				}
+			}
+		}
+
+		for (Iterator iter= fPreloadedElementToName.keySet().iterator(); iter.hasNext();) {
+			IJavaElement element= (IJavaElement) iter.next();
+			fPreloadedElementToSelection.put(element, Boolean.TRUE);
+		}
+		fPreloadedElementToNameDefault= (Map) fPreloadedElementToName.clone();
+		return fCachedRefactoringStatus;
+	}
+
 	private RefactoringStatus checkNewPathValidity() {
 		IContainer c= ResourceUtil.getResource(fType).getParent();
 		
@@ -596,9 +734,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	 */
 	private RefactoringStatus analyzeAffectedCompilationUnits(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
-		fReferences= Checks.excludeCompilationUnits(fReferences, result);
-		if (result.hasFatalError())
-			return result;
 			
 		result.merge(Checks.checkCompileErrorsInAffectedFiles(fReferences, fType.getResource()));	
 		
@@ -668,6 +803,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 					arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
 					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
+					arguments.put(ATTRIBUTE_DERIVED, Boolean.valueOf(fUpdateDerivedElements).toString());
+					arguments.put(ATTRIBUTE_DERIVED_MATCHING_STRATEGY, Integer.toString(fRenamingStrategy));
 					String project= null;
 					IJavaProject javaProject= fType.getJavaProject();
 					if (javaProject != null)
@@ -688,7 +825,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			return result;
 		} finally {
 			fChangeManager= null;
-			fReferences= null;
 		}
 	}
 	
@@ -714,13 +850,15 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		return true;	
 	}
 	
-	private TextChangeManager createChangeManager(IProgressMonitor pm) throws CoreException {
+	private void createChanges(IProgressMonitor pm) throws CoreException {
 		try{
-			pm.beginTask("", 7); //$NON-NLS-1$
-			TextChangeManager manager= new TextChangeManager();
-					
+			pm.beginTask("", 12); //$NON-NLS-1$
+			pm.setTaskName(RefactoringCoreMessages.RenameTypeProcessor_creating_changes); 
+			
 			if (fUpdateReferences)
-				addReferenceUpdates(manager, new SubProgressMonitor(pm, 3));
+				addReferenceUpdates(fChangeManager, new SubProgressMonitor(pm, 3));
+
+			// Derived updates have already been added.
 	
 			pm.worked(1);
 			
@@ -728,10 +866,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			// if we have a linked resource then we don't use CU renaming 
 			// directly. So we have to update the code by ourselves.
 			if ((resource != null && resource.isLinked()) || !willRenameCU()) {
-				addTypeDeclarationUpdate(manager);
+				addTypeDeclarationUpdate(fChangeManager);
 				pm.worked(1);
 				
-				addConstructorRenames(manager);
+				addConstructorRenames(fChangeManager);
 				pm.worked(1);
 			} else {
 				pm.worked(2);
@@ -739,10 +877,11 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			
 			if (fUpdateTextualMatches) {
 				pm.subTask(RefactoringCoreMessages.RenameTypeRefactoring_searching_text); 
-				TextMatchUpdater.perform(new SubProgressMonitor(pm, 1), RefactoringScopeFactory.create(fType), this, manager, fReferences);
+				TextMatchUpdater.perform(new SubProgressMonitor(pm, 1), RefactoringScopeFactory.create(fType), this, fChangeManager, fReferences);
+				if (fUpdateDerivedElements)
+					addDerivedTextualUpdates(fChangeManager, new SubProgressMonitor(pm, 3));
 			}
 			
-			return manager;
 		} finally{
 			pm.done();
 		}	
@@ -787,7 +926,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				SearchMatch match= results[j];
 				String oldName= fType.getElementName();
 				int offset= match.getOffset() + match.getLength() - oldName.length(); // reference may be qualified
-				TextChangeCompatibility.addTextEdit(manager.get(cu), name, new ReplaceEdit(offset, oldName.length(), getNewElementName()));
+				TextChangeCompatibility.addTextEdit(manager.get(cu), name, new ReplaceEdit(offset, oldName.length(), getNewElementName()), CATEGORY_TYPE_RENAME);
 			}
 			pm.worked(1);
 		}
@@ -843,8 +982,482 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				fUpdateQualifiedNames= Boolean.valueOf(qualified).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_QUALIFIED));
+			final String derived= generic.getAttribute(ATTRIBUTE_DERIVED);
+			if (derived != null)
+				fUpdateDerivedElements= Boolean.valueOf(derived).booleanValue();
+			else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DERIVED));
+			final String derivedMatchingStrategy= generic.getAttribute(ATTRIBUTE_DERIVED_MATCHING_STRATEGY);
+			if (derivedMatchingStrategy != null) {
+				try {
+					fRenamingStrategy= Integer.valueOf(derivedMatchingStrategy).intValue();
+				} catch (NumberFormatException e) {
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, derivedMatchingStrategy, ATTRIBUTE_QUALIFIED));
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DERIVED_MATCHING_STRATEGY));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
+	}
+	
+	// --------- Derived
+
+	/**
+	 * Creates and initializes the derived refactoring processors
+	 */
+	private RefactoringStatus initializeDerivedRenameProcessors(IProgressMonitor progressMonitor, CheckConditionsContext context) throws CoreException {
+
+		Assert.isNotNull(fPreloadedElementToName);
+		Assert.isNotNull(fPreloadedElementToSelection);
+
+		final RefactoringStatus status= new RefactoringStatus();
+		final Set handledTopLevelMethods= new HashSet();
+		final Set warnings= new HashSet();
+
+		fFinalDerivedElementToName= new HashMap();
+		fDerivedRenameProcessors= new ArrayList();
+
+		progressMonitor.beginTask("", fPreloadedElementToName.size() * 3); //$NON-NLS-1$
+		progressMonitor.setTaskName(RefactoringCoreMessages.RenameTypeProcessor_checking_derived_refactoring_conditions); 
+
+		for (Iterator iter= fPreloadedElementToName.keySet().iterator(); iter.hasNext();) {
+
+			final IJavaElement element= (IJavaElement) iter.next();
+
+			// not selected? -> skip
+			if (! ((Boolean) (fPreloadedElementToSelection.get(element))).booleanValue())
+				continue;
+
+			// already registered? (may happen with overridden methods) -> skip
+			if (fFinalDerivedElementToName.containsKey(element))
+				continue;
+
+			final String newName= (String) fPreloadedElementToName.get(element);
+			RefactoringProcessor processor= null;
+
+			if (element instanceof IField) {
+				final IField currentField= (IField) element;
+				processor= createFieldRenameProcessor(currentField, newName);
+
+				status.merge(checkForConflictingRename(currentField, newName));
+				if (status.hasFatalError())
+					break;
+				fFinalDerivedElementToName.put(currentField, newName);
+			}
+			if (element instanceof IMethod) {
+				IMethod currentMethod= (IMethod) element;
+				if (MethodChecks.isVirtual(currentMethod)) {
+					final IMethod topmost= MethodChecks.getTopmostMethod(currentMethod, new NoOverrideProgressMonitor(progressMonitor, 1));
+					if (topmost != null)
+						currentMethod= topmost;
+					if (handledTopLevelMethods.contains(currentMethod))
+						continue;
+					handledTopLevelMethods.add(currentMethod);
+					final IMethod[] ripples= MethodChecks.getOverriddenMethods(currentMethod, new NoOverrideProgressMonitor(progressMonitor, 1));
+
+					if (checkForWarnings(warnings, newName, ripples))
+						continue;
+
+					status.merge(checkForConflictingRename(ripples, newName));
+					if (status.hasFatalError())
+						break;
+
+					processor= createVirtualMethodRenameProcessor(currentMethod, newName, ripples);
+					fFinalDerivedElementToName.put(currentMethod, newName);
+					for (int i= 0; i < ripples.length; i++) {
+						fFinalDerivedElementToName.put(ripples[i], newName);
+					}
+				} else {
+					
+					status.merge(checkForConflictingRename(new IMethod[] { currentMethod }, newName));
+					if (status.hasFatalError())
+						break;
+					
+					fFinalDerivedElementToName.put(currentMethod, newName);
+					
+					processor= createNonVirtualMethodRenameProcessor(currentMethod, newName);
+				}
+			}
+
+			status.merge(processor.checkInitialConditions(new NoOverrideProgressMonitor(progressMonitor, 1)));
+
+			if (status.hasFatalError())
+				return status;
+
+			status.merge(processor.checkFinalConditions(new NoOverrideProgressMonitor(progressMonitor, 1), context));
+
+			if (status.hasFatalError())
+				return status;
+
+			fDerivedRenameProcessors.add(processor);
+
+			progressMonitor.worked(1);
+		}
+
+		status.merge(addWarnings(warnings));
+
+
+		progressMonitor.done();
+		return status;
+	}
+
+	// ------------------ Error checking -------------
+
+	/**
+	 * Checks whether one of the given methods, which will all be renamed to
+	 * "newName", shares a type with another already registered method which is
+	 * renamed to the same new name and shares the same parameters.
+	 * 
+	 * @see #checkForConflictingRename(IField, String)
+	 */
+	private RefactoringStatus checkForConflictingRename(IMethod[] methods, String newName) {
+		RefactoringStatus status= new RefactoringStatus();
+		for (Iterator iter= fFinalDerivedElementToName.keySet().iterator(); iter.hasNext();) {
+			IJavaElement element= (IJavaElement) iter.next();
+			if (element instanceof IMethod) {
+				IMethod alreadyRegisteredMethod= (IMethod) element;
+				String alreadyRegisteredMethodName= (String) fFinalDerivedElementToName.get(element);
+				for (int i= 0; i < methods.length; i++) {
+					IMethod method2= methods[i];
+					if ( (alreadyRegisteredMethodName.equals(newName)) && (method2.getDeclaringType().equals(alreadyRegisteredMethod.getDeclaringType()))
+							&& (sameParams(alreadyRegisteredMethod, method2))) {
+						String message= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_cannot_rename_methods_same_new_name, new String[] { alreadyRegisteredMethod.getElementName(),
+								method2.getElementName(), alreadyRegisteredMethod.getDeclaringType().getFullyQualifiedName(), newName });
+						status.addFatalError(message);
+						return status;
+					}
+				}
+			}
+		}
+		return status;
+	}
+
+	private static boolean sameParams(IMethod method, IMethod method2) {
+
+		if (method.getNumberOfParameters() != method2.getNumberOfParameters())
+			return false;
+
+		String[] params= method.getParameterTypes();
+		String[] params2= method2.getParameterTypes();
+
+		for (int i= 0; i < params.length; i++) {
+			String t1= Signature.getSimpleName(Signature.toString(params[i]));
+			String t2= Signature.getSimpleName(Signature.toString(params2[i]));
+			if (!t1.equals(t2)) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	/**
+	 * If suffix matching is enabled, the refactoring may suggest two fields to
+	 * have the same name which reside in the same type. Same thing may also
+	 * happen if the user makes poor choices for the field names.
+	 * 
+	 * Consider: FooBarThing fFooBarThing; FooBarThing fBarThing;
+	 * 
+	 * Rename "FooBarThing" to "DifferentHunk". Suggestion for both fields is
+	 * "fDifferentHunk" (and rightly so).
+	 */
+	private RefactoringStatus checkForConflictingRename(IField currentField, String newName) {
+		RefactoringStatus status= new RefactoringStatus();
+		for (Iterator iter= fFinalDerivedElementToName.keySet().iterator(); iter.hasNext();) {
+			IJavaElement element= (IJavaElement) iter.next();
+			if (element instanceof IField) {
+				IField alreadyRegisteredField= (IField) element;
+				String alreadyRegisteredFieldName= (String) fFinalDerivedElementToName.get(element);
+				if (alreadyRegisteredFieldName.equals(newName)) {
+					if (alreadyRegisteredField.getDeclaringType().equals(currentField.getDeclaringType())) {
+						
+						String message= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_cannot_rename_fields_same_new_name, new String[] { alreadyRegisteredField.getElementName(),
+								currentField.getElementName(), alreadyRegisteredField.getDeclaringType().getFullyQualifiedName(), newName });
+						status.addFatalError(message);
+						return status;
+					}
+				}
+			}
+		}
+		return status;
+	}
+
+	private RefactoringStatus addWarnings(final Set warnings) {
+		RefactoringStatus status= new RefactoringStatus();
+
+		// Remove deleted ripple methods from user selection and add warnings
+		for (Iterator iter= warnings.iterator(); iter.hasNext();) {
+			final Warning warning= (Warning) iter.next();
+			final IMethod[] elements= warning.getRipple();
+			if (warning.isSelectionWarning()) {
+				String message= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_deselected_method_is_overridden,
+						new String[] { JavaElementLabels.getElementLabel(elements[0], JavaElementLabels.ALL_DEFAULT),
+								JavaElementLabels.getElementLabel(elements[0].getDeclaringType(), JavaElementLabels.ALL_DEFAULT) });
+				status.addWarning(message);
+			}
+			if (warning.isNameWarning()) {
+				String message= Messages.format(
+						RefactoringCoreMessages.RenameTypeProcessor_renamed_method_is_overridden, new String[] {
+								JavaElementLabels.getElementLabel(elements[0], JavaElementLabels.ALL_DEFAULT),
+								JavaElementLabels.getElementLabel(elements[0].getDeclaringType(), JavaElementLabels.ALL_DEFAULT) });
+				status.addWarning(message);
+			}
+			for (int i= 0; i < elements.length; i++)
+				fPreloadedElementToSelection.put(elements[i], Boolean.FALSE);
+		}
+		return status;
+	}
+
+	/*
+	 * If one of the methods of this ripple was deselected or renamed by
+	 * the user, deselect the whole chain and add warnings.
+	 */
+	private boolean checkForWarnings(final Set warnings, final String newName, final IMethod[] ripples) {
+
+		boolean addSelectionWarning= false;
+		boolean addNameWarning= false;
+		for (int i= 0; i < ripples.length; i++) {
+			String newNameOfRipple= (String) fPreloadedElementToName.get(ripples[i]);
+			Boolean selected= (Boolean) fPreloadedElementToSelection.get(ripples[i]);
+
+			// selected may be null here due to supermethods like
+			// setSomeClass(Object class) (subsignature match)
+			// Don't add a warning.
+			if (selected == null)
+				continue;
+
+			if (!selected.booleanValue())
+				addSelectionWarning= true;
+
+			if (!newName.equals(newNameOfRipple))
+				addNameWarning= true;
+		}
+		if (addSelectionWarning || addNameWarning)
+			warnings.add(new Warning(ripples, addSelectionWarning, addNameWarning));
+
+		return (addSelectionWarning || addNameWarning);
+	}
+
+	private class Warning {
+
+		private IMethod[] fRipple;
+		private boolean fSelectionWarning;
+		private boolean fNameWarning;
+
+		public Warning(IMethod[] ripple, boolean isSelectionWarning, boolean isNameWarning) {
+			fRipple= ripple;
+			fSelectionWarning= isSelectionWarning;
+			fNameWarning= isNameWarning;
+		}
+
+		public boolean isNameWarning() {
+			return fNameWarning;
+		}
+
+		public IMethod[] getRipple() {
+			return fRipple;
+		}
+
+		public boolean isSelectionWarning() {
+			return fSelectionWarning;
+		}
+	}
+
+	// ----------------- Processor creation --------
+
+	private RenameMethodProcessor createVirtualMethodRenameProcessor(IMethod currentMethod, String newMethodName, IMethod[] ripples) throws JavaModelException {
+		RenameMethodProcessor processor= new RenameVirtualMethodProcessor(currentMethod, ripples, fChangeManager, CATEGORY_METHOD_RENAME);
+		initMethodProcessor(processor, newMethodName);
+		return processor;
+	}
+
+	private RenameMethodProcessor createNonVirtualMethodRenameProcessor(IMethod currentMethod, String newMethodName) {
+		RenameMethodProcessor processor= new RenameNonVirtualMethodProcessor(currentMethod, fChangeManager, CATEGORY_METHOD_RENAME);
+		initMethodProcessor(processor, newMethodName);
+		return processor;
+	}
+
+	private void initMethodProcessor(RenameMethodProcessor processor, String newMethodName) {
+		processor.setNewElementName(newMethodName);
+		processor.setUpdateReferences(getUpdateReferences());
+	}
+
+	private RenameFieldProcessor createFieldRenameProcessor(final IField field, final String newName) {
+		final RenameFieldProcessor processor= new RenameFieldProcessor(field, fChangeManager, CATEGORY_FIELD_RENAME);
+		processor.setNewElementName(newName);
+		processor.setRenameGetter(false);
+		processor.setRenameSetter(false);
+		processor.setUpdateReferences(getUpdateReferences());
+		processor.setUpdateTextualMatches(false);
+		return processor;
+	}
+
+	// ----------- Edit creation -----------
+
+
+	/**
+	 * Updates textual matches for fields.
+	 * 
+	 * Strategy for matching text matches: Match and replace all fully qualified
+	 * field names, but non-qualified field names ony iff there are no fields
+	 * which have the same original, but a different new name. Don't add java
+	 * references; duplicate edits may be created but do not matter.
+	 * 
+	 */
+	private void addDerivedTextualUpdates(TextChangeManager manager, IProgressMonitor monitor) throws CoreException {
+
+		final Map simpleNames= new HashMap();
+		final List forbiddenSimpleNames= new ArrayList();
+
+		for (Iterator iter= fFinalDerivedElementToName.keySet().iterator(); iter.hasNext();) {
+			final IJavaElement element= (IJavaElement) iter.next();
+			if (element instanceof IField) {
+
+				if (forbiddenSimpleNames.contains(element.getElementName()))
+					continue;
+
+				final String registeredNewName= (String) simpleNames.get(element.getElementName());
+				final String newNameToCheck= (String) fFinalDerivedElementToName.get(element);
+				if (registeredNewName == null)
+					simpleNames.put(element.getElementName(), newNameToCheck);
+				else if (!registeredNewName.equals(newNameToCheck))
+					forbiddenSimpleNames.add(element.getElementName());
+			}
+		}
+
+		for (Iterator iter= fFinalDerivedElementToName.keySet().iterator(); iter.hasNext();) {
+			final IJavaElement element= (IJavaElement) iter.next();
+			if (element instanceof IField) {
+				final IField field= (IField) element;
+				final String newName= (String) fFinalDerivedElementToName.get(field);
+				TextMatchUpdater.perform(monitor, RefactoringScopeFactory.create(field), field.getElementName(), field.getDeclaringType().getFullyQualifiedName(), newName, manager,
+						new SearchResultGroup[0], forbiddenSimpleNames.contains(field.getElementName()));
+			}
+		}
+	}
+
+	// ---- IDerivedElementUpdating
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating#canEnableDerivedElementUpdating()
+	 */
+	public boolean canEnableDerivedElementUpdating() {
+		return true;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating#setUpdateDerivedElements(boolean)
+	 */
+	public void setUpdateDerivedElements(boolean update) {
+		fUpdateDerivedElements= update;
+	}
+
+	/*
+	 * (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating#getUpdateDerivedElements()
+	 */
+	public boolean getUpdateDerivedElements() {
+		return fUpdateDerivedElements;
+	}
+
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating#getMatchStrategy()
+	 */
+	public int getMatchStrategy() {
+		return fRenamingStrategy;
+
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating#setMatchStrategy(int)
+	 */
+	public void setMatchStrategy(int selectedStrategy) {
+		fRenamingStrategy= selectedStrategy;
+	}
+
+	// ------------- IDerivedElementRefactoringComponent
+
+	/**
+	 * Returns the derived elements of the type, i.e. IFields, IMethods,
+	 * and ILocalVariables.
+	 * 
+	 */
+	public Object[] getDerivedElements() {
+		if (fFinalDerivedElementToName == null)
+			return null;
+		return fFinalDerivedElementToName.keySet().toArray();
+	}
+
+	/**
+	 * This method is used to ask the refactoring object for an updated element
+	 * handle of ANY member (IType, IField, IMethod, and IInitializer) in the
+	 * project. The new handle reflects all changes and derived changes to the
+	 * java model carried out by the refactoring.
+	 * 
+	 * Note that local variables <strong>cannot</strong> be resolved using this
+	 * method.
+	 * 
+	 */
+	public Object getRefactoredElement(Object element) {
+
+		Assert.isTrue(element instanceof IJavaElement);
+
+		final IType newType= (IType) getNewElement();
+		final RefactoringHandleTransplanter transplanter= new RefactoringHandleTransplanter(fType, newType, fFinalDerivedElementToName);
+		return transplanter.transplantHandle((IJavaElement) element);
+	}
+
+	// ------ UI interaction
+
+	/**
+	 * Returns the map of derived elements (IJavaElement -> String with new name)
+	 * This map is live. Callers may change the new names of the elements; they
+	 * may not change the key set.
+	 */
+	public Map/* <IJavaElement, String> */getDerivedElementsToNewNames() {
+		return fPreloadedElementToName;
+	}
+
+	/**
+	 * Returns the map of derived elements (IJavaElement -> Boolean if selected) This
+	 * map is live. Callers may change the selection status of the elements;
+	 * they may not change the key set.
+	 */
+	public Map/* <IJavaElement, Boolean> */getDerivedElementsToSelection() {
+		return fPreloadedElementToSelection;
+	}
+
+	/**
+	 * Resets the element maps back to the original status. This affects the
+	 * maps returned in {@link #getDerivedElementsToNewNames() } and
+	 * {@link #getDerivedElementsToSelection() }. All new names are reset to
+	 * the calculated ones and every element gets selected.
+	 * 
+	 */
+	public void resetSelectedDerivedElements() {
+		Assert.isNotNull(fPreloadedElementToName);
+		for (Iterator iter= fPreloadedElementToNameDefault.keySet().iterator(); iter.hasNext();) {
+			final IJavaElement element= (IJavaElement) iter.next();
+			fPreloadedElementToName.put(element, fPreloadedElementToNameDefault.get(element));
+			fPreloadedElementToSelection.put(element, Boolean.TRUE);
+		}
+	}
+
+	/**
+	 * Returns true iff the "update derived elements" flag is set AND the
+	 * search yielded some elements to be renamed.
+	 * 
+	 */
+	public boolean hasDerivedElementsToRename() {
+		if (!fUpdateDerivedElements)
+			return false;
+		if (fPreloadedElementToName == null)
+			return false;
+		if (fPreloadedElementToName.size() == 0)
+			return false;
+		return true;
 	}
 }

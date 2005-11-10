@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -38,13 +39,16 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
+	
+	protected RenameNonVirtualMethodProcessor(IMethod method, TextChangeManager manager, GroupCategorySet categorySet) {
+		super(method, manager, categorySet);
+	}
 	
 	public RenameNonVirtualMethodProcessor(IMethod method) {
 		super(method);
@@ -160,7 +164,8 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 			for (int j= 0; j < results.length; j++){
 				String editName= RefactoringCoreMessages.RenamePrivateMethodRefactoring_update; 
 				ReplaceEdit replaceEdit= createReplaceEdit(results[j], cu);
-				TextChangeCompatibility.addTextEdit(change, editName, replaceEdit);
+				addTextEdit(change, editName, replaceEdit);
+				
 			}
 		}	
 	}

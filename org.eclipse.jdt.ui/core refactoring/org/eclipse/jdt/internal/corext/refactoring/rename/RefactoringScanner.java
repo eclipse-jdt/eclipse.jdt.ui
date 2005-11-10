@@ -25,13 +25,36 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.internal.corext.Assert;
 
 public class RefactoringScanner {
+	
+	private static int NO_MATCH= 0;
+	private static int MATCH_QUALIFIED= 1;
+	private static int MATCH_UNQUALIFIED= 2;
+
+	public static class TextMatch {
+
+		private int fStartPosition;
+		private boolean fQualified;
+
+		private TextMatch(int startPosition, boolean qualified) {
+			fStartPosition= startPosition;
+			fQualified= qualified;
+		}
+
+		public int getStartPosition() {
+			return fStartPosition;
+		}
+
+		public boolean isQualified() {
+			return fQualified;
+		}
+	}
 
 	private final String fName;
 	private final String fQualifier;
 	
 	private IScanner fScanner;
 	private ISourceRange fNoFlyZone; // don't scan in ImportContainer (sometimes edited by ImportStructure)
-	private Set fMatches; //Set<Integer>, start positions
+	private Set fMatches; //Set<TextMatch>
 
 	
 	public RefactoringScanner(String name, String qualifier) {
@@ -107,42 +130,52 @@ public class RefactoringScanner {
 		int start= fScanner.getCurrentTokenStartPosition();
 		int index= value.indexOf(fName);
 		while (index != -1) {
-			if (isWholeWord(value, index, index + fName.length())
-					&& isQualifierOK(value, index))
-				addMatch(start + index);
+			if (isWholeWord(value, index, index + fName.length())) {
+				int ok= isQualifierOK(value, index);
+				if (ok > NO_MATCH)
+					addMatch(start + index, ok);
+			}
 			index= value.indexOf(fName, index + 1);
 		}
 	}
 
-	private boolean isQualifierOK(String value, int nameStart) {
+	private int isQualifierOK(String value, int nameStart) {
 		// only works for references without whitespace
 		int qualifierAfter= nameStart - 1;
 		if (qualifierAfter < 0)
-			return true;
+			// there is absolutely nothing before the name itself in the string
+			return MATCH_UNQUALIFIED;
 		
 		char charBeforeName= value.charAt(qualifierAfter);
 		if (! isQualifierSeparator(charBeforeName))
-			return true;
+			// the char before the name is not a # or . - should not get here anyway
+			return MATCH_UNQUALIFIED; // NO_MATCH ?
 		
 		boolean canFinish= charBeforeName == '#';
+		// work through the qualifier from back to front
 		for (int i= 0; i < fQualifier.length() ; i++) {
 			int qualifierCharPos= qualifierAfter - 1 - i;
 			if (qualifierCharPos < 0)
-				return canFinish;
+				// the position does not exist, return OK if last read char was a non-separator
+				return canFinish ? MATCH_UNQUALIFIED : NO_MATCH;
 			
 			char qualifierChar= value.charAt(qualifierCharPos);
 			char goalQualifierChar= fQualifier.charAt(fQualifier.length() - 1 - i);
 			if (qualifierChar != goalQualifierChar)
-				return canFinish && ! isQualifierPart(qualifierChar);
+				// the chars do not match. return OK if last read char was a non-separator and the current one a non-qualifier
+				return (canFinish && !isQualifierPart(qualifierChar)) ? MATCH_UNQUALIFIED : NO_MATCH;
 			
 			canFinish= ! isQualifierSeparator(qualifierChar);
 		}
 		int beforeQualifierPos= qualifierAfter - fQualifier.length() - 1;
 		if (beforeQualifierPos >= 0) {
 			char beforeQualifierChar= value.charAt(beforeQualifierPos);
-			return ! isQualifierPart(beforeQualifierChar);
+			boolean charBeforeQualifierIsQualifierPart= isQualifierPart(beforeQualifierChar);
+			// true if the char before the qualifier is a normal letter
+			// (and therefore invalidates the whole string)
+			return charBeforeQualifierIsQualifierPart ? NO_MATCH : MATCH_QUALIFIED;
 		}
-		return true;
+		return MATCH_QUALIFIED;
 	}
 
 	private boolean isQualifierPart(char ch) {
@@ -153,16 +186,16 @@ public class RefactoringScanner {
 		return ".#".indexOf(c) != -1; //$NON-NLS-1$
 	}
 
-	private void addMatch(int matchStart) {
+	private void addMatch(int matchStart, int matchCode) {
 		if (fNoFlyZone != null 
 				&& fNoFlyZone.getOffset() <= matchStart
 				&& matchStart < fNoFlyZone.getOffset() + fNoFlyZone.getLength())
 			return;
-		fMatches.add(new Integer(matchStart));		
+		fMatches.add(new TextMatch(matchStart, matchCode == MATCH_QUALIFIED));		
 	}
 
 	/**
-	 * @return Set of Integer (start positions of matches)
+	 * @return Set of TextMatch
 	 */
 	public Set getMatches() {
 		return fMatches;

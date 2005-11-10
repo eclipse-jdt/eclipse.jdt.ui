@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -19,8 +20,9 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
-public class RenameCuWizard extends RenameRefactoringWizard {
+public class RenameCuWizard extends RenameTypeWizard {
 	
 	private static final String JAVA_FILE_EXT= ".java";  //$NON-NLS-1$
 	
@@ -38,7 +40,7 @@ public class RenameCuWizard extends RenameRefactoringWizard {
 	}
 	
 	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
-		return new RenameInputWizardPage(message, IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE, true, initialSetting) {
+		return new RenameTypeWizardInputPage(message, IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE, true, initialSetting) {
 			protected RefactoringStatus validateTextField(String text) {
 				return validateNewName(text);
 			}
@@ -50,5 +52,12 @@ public class RenameCuWizard extends RenameRefactoringWizard {
 				return result;
 			}
 		};
+	}
+
+	protected boolean isRenameType() {
+		RenameCompilationUnitProcessor proc= ((RenameCompilationUnitProcessor) ((RenameRefactoring) getRefactoring()).getProcessor());
+		// the flag 'willRenameType' may change in checkInitialConditions(), but
+		// only from true to false.
+		return proc.isWillRenameType(); 
 	}
 }

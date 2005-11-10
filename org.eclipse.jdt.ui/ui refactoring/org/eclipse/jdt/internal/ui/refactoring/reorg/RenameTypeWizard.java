@@ -10,19 +10,69 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import org.eclipse.jface.resource.ImageDescriptor;
+
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
-import org.eclipse.ltk.core.refactoring.Refactoring;
-
+/**
+ * The type renaming wizard.
+ */
 public class RenameTypeWizard extends RenameRefactoringWizard {
-	
+
 	public RenameTypeWizard(Refactoring refactoring) {
-		super(refactoring,
-			RefactoringMessages.RenameTypeWizard_defaultPageTitle, 
-			RefactoringMessages.RenameTypeWizard_inputPage_description, 
-			JavaPluginImages.DESC_WIZBAN_REFACTOR_TYPE,
-			IJavaHelpContextIds.RENAME_TYPE_WIZARD_PAGE);
+		this(refactoring, RefactoringMessages.RenameTypeWizard_defaultPageTitle, RefactoringMessages.RenameTypeWizard_inputPage_description, JavaPluginImages.DESC_WIZBAN_REFACTOR_TYPE,
+				IJavaHelpContextIds.RENAME_TYPE_WIZARD_PAGE);
+	}
+
+	public RenameTypeWizard(Refactoring refactoring, String defaultPageTitle, String inputPageDescription, ImageDescriptor inputPageImageDescriptor, String pageContextHelpId) {
+		super(refactoring, defaultPageTitle, inputPageDescription, inputPageImageDescriptor, pageContextHelpId);
+	}
+
+	/*
+	 * non java-doc
+	 * 
+	 * @see RefactoringWizard#addUserInputPages
+	 */
+	protected void addUserInputPages() {
+		super.addUserInputPages();
+		if (isRenameType())
+			addPage(new RenameTypeWizardDerivedElementPage());
+
+	}
+
+	public RenameTypeProcessor getRenameTypeProcessor() {
+		RefactoringProcessor proc= ((RenameRefactoring) getRefactoring()).getProcessor();
+		if (proc instanceof RenameTypeProcessor)
+			return (RenameTypeProcessor) proc;
+		else if (proc instanceof RenameCompilationUnitProcessor) {
+			RenameCompilationUnitProcessor rcu= (RenameCompilationUnitProcessor) proc;
+			return rcu.getRenameTypeProcessor();
+		}
+		Assert.isTrue(false); // Should never get here
+		return null;
+	}
+
+	protected boolean isRenameType() {
+		return true;
+	}
+
+	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
+		return new RenameTypeWizardInputPage(message, IJavaHelpContextIds.RENAME_TYPE_WIZARD_PAGE, true, initialSetting) {
+
+			protected RefactoringStatus validateTextField(String text) {
+				return validateNewName(text);
+			}
+		};
 	}
 }

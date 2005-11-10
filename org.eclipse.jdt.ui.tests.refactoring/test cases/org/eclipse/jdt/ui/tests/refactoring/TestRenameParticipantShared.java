@@ -11,7 +11,9 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import junit.framework.Assert;
 
@@ -22,7 +24,10 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.IJavaElement;
 
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating;
+
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.IDerivedElementRefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.ISharableParticipant;
@@ -36,6 +41,7 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 	List fElements= new ArrayList(3);
 	List fHandles= new ArrayList(3);
 	List fArguments= new ArrayList(3);
+	Map fDerived= new HashMap();
 
 	public boolean initialize(Object element) {
 		fgInstance= this;
@@ -45,6 +51,17 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 			fHandles.add(((IJavaElement)element).getHandleIdentifier());
 		else
 			fHandles.add(((IResource)element).getFullPath().toString());
+		
+		IDerivedElementRefactoringProcessor updating= (IDerivedElementRefactoringProcessor)getProcessor().getAdapter(IDerivedElementUpdating.class);
+		if ((updating != null) && (getArguments().getUpdateDerivedElements())) { 
+			Object[] elements= updating.getDerivedElements();
+			for (int i= 0; i < elements.length; i++) {
+				IJavaElement updated= (IJavaElement)updating.getRefactoredElement(elements[i]);
+				if (updated!=null) 
+					fDerived.put(((IJavaElement) elements[i]).getHandleIdentifier(), updated.getElementName());
+			}
+		}
+		
 		return true;
 	}
 
@@ -90,5 +107,23 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 	
 	public static void reset() {
 		fgInstance= null;
+	}
+
+	public static void testNumberOfDerivedElements(int expected) {
+		if (expected == 0)
+			Assert.assertTrue(fgInstance == null);
+		else
+			Assert.assertEquals(expected, fgInstance.fDerived.size());
+	}
+
+	public static void testDerivedElements(List derivedList, List derivedNewNameList) {
+		for (int i=0; i< derivedList.size(); i++) {
+			String handle= (String) derivedList.get(i);
+			String newName= (String)derivedNewNameList.get(i);
+			String actualNewName= (String)fgInstance.fDerived.get(handle);
+			Assert.assertNotNull(actualNewName);
+			Assert.assertEquals(newName, actualNewName);
+		}
+		Assert.assertEquals(derivedList.size(), fgInstance.fDerived.size());
 	}
 }

@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScanner.TextMatch;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 
@@ -56,29 +57,35 @@ class TextMatchUpdater {
 			RefactoringCoreMessages.TextMatchUpdater_textualMatches_name, 
 			RefactoringCoreMessages.TextMatchUpdater_textualMatches_description));
 	
-	private IJavaSearchScope fScope;
-	private TextChangeManager fManager;
-	private SearchResultGroup[] fReferences;
+	private final IJavaSearchScope fScope;
+	private final TextChangeManager fManager;
+	private final SearchResultGroup[] fReferences;
+	private final boolean fOnlyQualified;
 
-	private RefactoringScanner fScanner;
-	private String fNewName;
-	private int fCurrentNameLength;
+	private final RefactoringScanner fScanner;
+	private final String fNewName;
+	private final int fCurrentNameLength;
 	
-	private TextMatchUpdater(TextChangeManager manager, IJavaSearchScope scope, ITextUpdating processor, SearchResultGroup[] references){
+	private TextMatchUpdater(TextChangeManager manager, IJavaSearchScope scope, String currentName, String currentQualifier, String newName, SearchResultGroup[] references, boolean onlyQualified){
 		Assert.isNotNull(manager);
 		Assert.isNotNull(scope);
 		Assert.isNotNull(references);
 		fManager= manager;
 		fScope= scope;
 		fReferences= references;
+		fOnlyQualified= onlyQualified;
 
-		fNewName= processor.getNewElementName();
-		fCurrentNameLength= processor.getCurrentElementName().length();
-		fScanner= new RefactoringScanner(processor.getCurrentElementName(), processor.getCurrentElementQualifier());
+		fNewName= newName;
+		fCurrentNameLength= currentName.length();
+		fScanner= new RefactoringScanner(currentName, currentQualifier);
+	}
+
+	static void perform(IProgressMonitor pm, IJavaSearchScope scope, String currentName, String currentQualifier, String newName, TextChangeManager manager, SearchResultGroup[] references, boolean onlyQualified) throws JavaModelException{
+		new TextMatchUpdater(manager, scope, currentName, currentQualifier, newName, references, onlyQualified).updateTextMatches(pm);
 	}
 
 	static void perform(IProgressMonitor pm, IJavaSearchScope scope, ITextUpdating processor, TextChangeManager manager, SearchResultGroup[] references) throws JavaModelException{
-		new TextMatchUpdater(manager, scope, processor, references).updateTextMatches(pm);
+		new TextMatchUpdater(manager, scope, processor.getCurrentElementName(), processor.getCurrentElementQualifier(), processor.getNewElementName(), references, false).updateTextMatches(pm);
 	}
 
 	private void updateTextMatches(IProgressMonitor pm) throws JavaModelException {	
@@ -148,7 +155,7 @@ class TextMatchUpdater {
 	
 	private void addCuTextMatches(ICompilationUnit cu) throws JavaModelException{
 		fScanner.scan(cu);
-		Set matches= fScanner.getMatches(); //Set of Integer (start position)
+		Set matches= fScanner.getMatches(); //Set of TextMatch
 		if (matches.size() == 0)
 			return;
 
@@ -171,13 +178,20 @@ class TextMatchUpdater {
 		for (int r= 0; r < searchResults.length; r++) {
 			//int start= searchResults[r].getStart(); // doesn't work for pack.ReferencedType
 			int unqualifiedStart= searchResults[r].getOffset() + searchResults[r].getLength() - fCurrentNameLength;
-			matches.remove(new Integer(unqualifiedStart));
+			for (Iterator iter= matches.iterator(); iter.hasNext();) {
+				TextMatch element= (TextMatch) iter.next();
+				if (element.getStartPosition() == unqualifiedStart)
+					iter.remove();
+			}
 		}
 	}
 
 	private void addTextUpdates(ICompilationUnit cu, Set matches) {
 		for (Iterator resultIter= matches.iterator(); resultIter.hasNext();){
-			int matchStart= ((Integer) resultIter.next()).intValue();
+			TextMatch match= (TextMatch) resultIter.next();
+			if (!match.isQualified() && fOnlyQualified)
+				continue;
+			int matchStart= match.getStartPosition();
 			ReplaceEdit edit= new ReplaceEdit(matchStart, fCurrentNameLength, fNewName);
 			TextChangeCompatibility.addTextEdit(fManager.get(cu), TEXT_EDIT_LABEL, edit, TEXTUAL_MATCHES);
 		}

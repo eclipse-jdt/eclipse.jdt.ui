@@ -11,7 +11,10 @@
 package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.io.ByteArrayInputStream;
+import java.io.IOException;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -29,11 +32,21 @@ import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
@@ -65,9 +78,8 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 		
 	private RenameRefactoring createRefactoring(IType type, String newName) throws CoreException {
-		RenameTypeProcessor processor= new RenameTypeProcessor(type);
-		RenameRefactoring ref= new RenameRefactoring(processor);
-		processor.setNewElementName(newName);
+		RenameRefactoring ref= new RenameRefactoring(new RenameTypeProcessor(type));
+		((INameUpdating)ref.getAdapter(INameUpdating.class)).setNewElementName(newName);
 		return ref;
 	}
 	
@@ -96,18 +108,22 @@ public class RenameTypeTests extends RefactoringTest {
 			renameHandles= ParticipantTesting.createHandles(classA);
 		}
 		RenameRefactoring ref= createRefactoring(classA, newName);
-		RenameTypeProcessor processor= (RenameTypeProcessor)ref.getProcessor();
-		processor.setUpdateReferences(updateReferences);
-		processor.setUpdateTextualMatches(updateTextualMatches);
+		IReferenceUpdating refUpdating= (IReferenceUpdating)ref.getAdapter(IReferenceUpdating.class);
+		refUpdating.setUpdateReferences(updateReferences);
+		ITextUpdating textUpdating= (ITextUpdating)ref.getAdapter(ITextUpdating.class);
+		textUpdating.setUpdateTextualMatches(updateTextualMatches);
+		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		ICompilationUnit newcu= pack.getCompilationUnit(newCUName + ".java");
 		assertTrue("cu " + newcu.getElementName()+ " does not exist", newcu.exists());
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName(newCUName)), newcu.getSource());
-		IType newElement = (IType) processor.getNewElement();
+		
+		INameUpdating nameUpdating= ((INameUpdating)ref.getAdapter(INameUpdating.class));
+		IType newElement = (IType) nameUpdating.getNewElement();
 		assertTrue("new element does not exist:\n" + newElement.toString(), newElement.exists());
 		return renameHandles;
 	}
-	
+
 	private String[] helper2_0(String oldName, String newName, String newCUName, boolean updateReferences) throws Exception{
 		return helperWithTextual(oldName, oldName, newName, newCUName, updateReferences, false);
 	}
@@ -119,6 +135,96 @@ public class RenameTypeTests extends RefactoringTest {
 	private String[] helper2(String oldName, String newName) throws Exception{
 		return helper2_0(oldName, newName, newName, true);
 	}
+	
+	// <--------------------- Derived Member ---------------------------->
+	
+	protected void setUp() throws Exception {
+		super.setUp();
+		setSomeFieldOptions(getPackageP().getJavaProject(), "f", "Suf1", false);
+		setSomeFieldOptions(getPackageP().getJavaProject(), "fs", "_suffix", true);
+		setSomeLocalOptions(getPackageP().getJavaProject(), "lv", "_lv");
+		setSomeArgumentOptions(getPackageP().getJavaProject(), "pm", "_pm");
+	}
+	
+	private void helper3(String oldName, String newName, boolean updateRef, boolean updateTextual, boolean updateDerived, String nonJavaFiles) throws JavaModelException, CoreException, IOException, Exception {
+		RenameRefactoring ref= initWithAllOptions(oldName, oldName, newName, newName, updateRef, updateTextual, updateDerived, nonJavaFiles, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		RefactoringStatus status= performRefactoring(ref);
+		assertNull("was supposed to pass", status);
+		checkResultInClass(newName);
+	}
+	
+	private void helper3_inner(String oldName, String oldInnerName, String newName, String innerNewName, boolean updateRef, boolean updateTextual, boolean updateDerived, String nonJavaFiles) throws JavaModelException, CoreException, IOException, Exception {
+		RenameRefactoring ref= initWithAllOptions(oldName, oldInnerName, newName, innerNewName, updateRef, updateTextual, updateDerived, nonJavaFiles, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		assertNull("was supposed to pass", performRefactoring(ref));
+		checkResultInClass(newName);
+	}
+	
+	private void helper3(String oldName, String newName, boolean updateDerived, boolean updateTextual, boolean updateRef) throws JavaModelException, CoreException, IOException, Exception {
+		helper3(oldName, newName, updateDerived, updateTextual, updateRef, null);
+	}
+	
+	private void helper3_fail(String oldName, String newName, boolean updateDerived, boolean updateTextual, boolean updateRef, int matchStrategy) throws JavaModelException, CoreException, IOException, Exception {
+		RenameRefactoring ref= initWithAllOptions(oldName, oldName, newName, newName, updateRef, updateTextual, updateRef, null, matchStrategy);
+		assertNotNull("was supposed to fail", performRefactoring(ref));
+	}
+	
+	private void helper3_fail(String oldName, String newName, boolean updateDerived, boolean updateTextual, boolean updateRef) throws JavaModelException, CoreException, IOException, Exception {
+		RenameRefactoring ref= initWithAllOptions(oldName, oldName, newName, newName, updateRef, updateTextual, updateRef, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		assertNotNull("was supposed to fail", performRefactoring(ref));
+	}
+
+	private RenameRefactoring initWithAllOptions(String oldName, String innerOldName, String newName, String innerNewName, boolean updateReferences, boolean updateTextualMatches, boolean updateDerived, String nonJavaFiles, int matchStrategy) throws Exception, JavaModelException, CoreException {
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), oldName);
+		IType classA= getType(cu, innerOldName);
+		RenameRefactoring ref= createRefactoring(classA, innerNewName);
+		setTheOptions(ref, updateReferences, updateTextualMatches, updateDerived, nonJavaFiles, matchStrategy);
+		return ref;
+	}
+
+	private void setTheOptions(RenameRefactoring ref, boolean updateReferences, boolean updateTextualMatches, boolean updateDerived, String nonJavaFiles, int matchStrategy) {
+		IReferenceUpdating refUpdating= (IReferenceUpdating)ref.getAdapter(IReferenceUpdating.class);
+		refUpdating.setUpdateReferences(updateReferences);
+		ITextUpdating textUpdating= (ITextUpdating)ref.getAdapter(ITextUpdating.class);
+		textUpdating.setUpdateTextualMatches(updateTextualMatches);
+		if (nonJavaFiles!=null) {
+			IQualifiedNameUpdating qnUpdating= (IQualifiedNameUpdating)ref.getAdapter(IQualifiedNameUpdating.class);
+			qnUpdating.setUpdateQualifiedNames(true);
+			qnUpdating.setFilePatterns(nonJavaFiles);
+		}
+		
+		IDerivedElementUpdating p= (IDerivedElementUpdating)ref.getAdapter(IDerivedElementUpdating.class);
+		p.setUpdateDerivedElements(updateDerived);
+		p.setMatchStrategy(matchStrategy);
+	}
+	
+	private void checkResultInClass(String typeName) throws JavaModelException, IOException {
+		ICompilationUnit newcu= getPackageP().getCompilationUnit(typeName + ".java");
+		assertTrue("cu " + newcu.getElementName()+ " does not exist", newcu.exists());
+		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName(typeName)), newcu.getSource());
+	}
+	
+	private void setSomeFieldOptions(IJavaProject project, String prefixes, String suffixes, boolean forStatic) {
+		if (forStatic) {
+			project.setOption(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, prefixes);
+			project.setOption(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, suffixes);
+		}
+		else {
+			project.setOption(JavaCore.CODEASSIST_FIELD_PREFIXES, prefixes);
+			project.setOption(JavaCore.CODEASSIST_FIELD_SUFFIXES, suffixes);
+		}
+	}
+	
+	private void setSomeLocalOptions(IJavaProject project, String prefixes, String suffixes) {
+			project.setOption(JavaCore.CODEASSIST_LOCAL_PREFIXES, prefixes);
+			project.setOption(JavaCore.CODEASSIST_LOCAL_SUFFIXES, suffixes);
+	}
+	
+	private void setSomeArgumentOptions(IJavaProject project, String prefixes, String suffixes) {
+		project.setOption(JavaCore.CODEASSIST_ARGUMENT_PREFIXES, prefixes);
+		project.setOption(JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, suffixes);
+	}
+	
+	// </------------------------------------ Derived Member --------------------------------->
 	
 	public void testIllegalInnerClass() throws Exception {
 		helper1();
@@ -1044,7 +1150,7 @@ public class RenameTypeTests extends RefactoringTest {
 				
 		RenameRefactoring ref= createRefactoring(classA, "B");
 		
-		IQualifiedNameUpdating qr= (IQualifiedNameUpdating)ref.getProcessor();
+		IQualifiedNameUpdating qr= (IQualifiedNameUpdating)ref.getAdapter(IQualifiedNameUpdating.class);
 		qr.setUpdateQualifiedNames(true);
 		qr.setFilePatterns("*.xml");
 		
@@ -1125,6 +1231,210 @@ public class RenameTypeTests extends RefactoringTest {
 	
 	public void testAnnotation3() throws Exception {
 		helperWithTextual("A" , "A", "B", "A", true, true);
+	}
+	
+	// --------------- Derived  tests -----------------
+	
+	public void testDerivedElements00() throws Exception {
+		// Very basic test, one field, two methods
+		helper3("SomeClass", "SomeClass2", true, false, true);
+	}
+	
+	public void testDerivedElements01() throws Exception {
+		// Already existing field with new name, shadow-error from field refac
+		helper3_fail("SomeClass", "SomeClass2", true, false, true);
+	}
+	
+	public void testDerivedElements02() throws Exception {
+		// Already existing method like new setter, shadow-error from field refac
+		helper3_fail("SomeClass", "SomeClass2", true, false, true);
+	}
+	
+	public void testDerivedElements03() throws Exception {
+		// more methods
+		helper3("SomeClass", "SomeClass2", true, false, true);
+	}
+	public void testDerivedElements04() throws Exception {
+		//Additional field with exactly the same name and getters and setters in another class
+		getClassFromTestFile(getPackageP(), "SomeOtherClass");
+		helper3("SomeClass", "SomeClass2", true, false, true);
+		checkResultInClass("SomeOtherClass");
+	}
+	
+	public void testDerivedElements05() throws Exception {
+		//rename textual and qualified
+		String content= getFileContents(getTestPath() + "testDerivedElements05/in/test.html");
+		IProject project= getPackageP().getJavaProject().getProject();
+		IFile file= project.getFile("test.html");
+		file.create(new ByteArrayInputStream(content.getBytes()), true, null);
+		
+		helper3("SomeClass", "SomeDifferentClass", true, true, true, "test.html");
+		
+		InputStreamReader reader= new InputStreamReader(file.getContents(true));
+		StringBuffer newContent= new StringBuffer();
+		int ch;
+		try {
+			while((ch= reader.read()) != -1)
+				newContent.append((char)ch);
+		} finally {
+			if (reader != null)
+				reader.close();
+		}
+		String definedContent= getFileContents(getTestPath() + "testDerivedElements05/out/test.html");
+		assertEqualLines("invalid updating test.html", newContent.toString(), definedContent);
+		
+	}
+	
+	public void testDerivedElements06() throws Exception {
+		//Additional field with exactly the same name and getters and setters in another class
+		//incl. textual
+		// printTestDisabledMessage("potential matches in comments issue (bug 111891)");
+		getClassFromTestFile(getPackageP(), "SomeNearlyIdenticalClass");
+		helper3("SomeClass", "SomeOtherClass", true, true, true);
+		checkResultInClass("SomeNearlyIdenticalClass");
+	}
+	
+	public void testDerivedElements07() throws Exception {
+		//Test 4 fields in one file, different suffixes/prefixes, incl. 2x setters/getters
+		helper3("SomeClass", "SomeDiffClass", true, true, true);
+	}
+	
+	public void testDerivedElements08() throws Exception {
+		//Interface renaming fun, this time without textual
+		helper3("ISomeIf", "ISomeIf2", true, false, true);
+	}
+
+	public void testDerivedElements09() throws Exception {
+		//Some inner types
+		getClassFromTestFile(getPackageP(), "SomeOtherClass");
+		helper3_inner("SomeClass", "SomeInnerClass", "SomeClass", "SomeNewInnerClass", true, true, true, null);
+		checkResultInClass("SomeOtherClass");
+	}
+	
+	public void testDerivedElements10() throws Exception {
+		//Two static fields
+		getClassFromTestFile(getPackageP(), "SomeOtherClass");
+		helper3("SomeClass", "SomeClass2", true, true, true, null);
+		checkResultInClass("SomeOtherClass");
+	}
+	
+	public void testDerivedElements11() throws Exception {
+		//Assure participants get notified of normal stuff (type rename
+		//and resource changes) AND derived elements. 
+		ParticipantTesting.reset();
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "SomeClass");
+		IType someClass= getType(cu, "SomeClass");
+		IType other= getClassFromTestFile(getPackageP(), "SomeOtherClass");
+		
+		List handleList= new ArrayList();
+		List argumentList= new ArrayList();
+		
+		List derivedList= new ArrayList();
+		List derivedNewNameList= new ArrayList();
+		
+		final String newName= "SomeNewClass";
+		
+		// f-Field + getters/setters
+		IField f3= other.getField("fSomeClass");
+		derivedList.add(f3.getHandleIdentifier());
+		derivedNewNameList.add("fSomeNewClass");
+		IMethod m3= other.getMethod("getSomeClass", new String[0]);
+		derivedList.add(m3.getHandleIdentifier());
+		derivedNewNameList.add("getSomeNewClass");
+		IMethod m4= other.getMethod("setSomeClass", new String[] {"QSomeClass;"});
+		derivedList.add(m4.getHandleIdentifier());
+		derivedNewNameList.add("setSomeNewClass");
+		
+		// non-f-field + getter/setters
+		IField f1= someClass.getField("someClass");
+		derivedList.add(f1.getHandleIdentifier());
+		derivedNewNameList.add("someNewClass");
+		IMethod m1= someClass.getMethod("getSomeClass", new String[0]);
+		derivedList.add(m1.getHandleIdentifier());
+		derivedNewNameList.add("getSomeNewClass");
+		IMethod m2= someClass.getMethod("setSomeClass", new String[] {"QSomeClass;"});
+		derivedList.add(m2.getHandleIdentifier());
+		derivedNewNameList.add("setSomeNewClass");
+
+		// fs-field
+		IField f2= someClass.getField("fsSomeClass");
+		derivedList.add(f2.getHandleIdentifier());
+		derivedNewNameList.add("fsSomeNewClass");
+		
+		// Type Stuff
+		handleList.add(someClass);
+		argumentList.add(new RenameArguments(newName, true));
+		handleList.add(cu);
+		argumentList.add(new RenameArguments(newName + ".java", true));
+		handleList.add(cu.getResource());
+		argumentList.add(new RenameArguments(newName + ".java", true));
+		
+		String[] handles= ParticipantTesting.createHandles(handleList.toArray());
+		RenameArguments[] arguments= (RenameArguments[])argumentList.toArray(new RenameArguments[0]);
+		
+		RenameRefactoring ref= createRefactoring(someClass, newName);
+		setTheOptions(ref, true, true, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		RefactoringStatus status= performRefactoring(ref);
+		assertNull("was supposed to pass", status);
+		
+		checkResultInClass(newName);
+		checkResultInClass("SomeOtherClass");
+		
+		ParticipantTesting.testRename(handles, arguments);
+		ParticipantTesting.testDerivedElements(derivedList, derivedNewNameList);
+	}
+	
+	public void testDerivedElements12() throws Exception {
+		// Test updating of references
+		helper3("SomeFieldClass", "SomeOtherFieldClass", true, true, true);
+	}
+	
+	public void testDerivedElements13() throws Exception {
+		// Test various locals and parameters with and without prefixes.
+		// tests not renaming parameters with local prefixes and locals with parameter prefixes
+		printTestDisabledMessage("Local variables not currently supported.");
+		//helper3("SomeClass", "SomeOtherClass", true, false, true, true);
+	}
+	
+	public void testDerivedElements14() throws Exception {
+		// Test for loop variables
+		printTestDisabledMessage("Local variables not currently supported.");
+		//helper3("SomeClass2", "SomeOtherClass2", true, false, true, true);
+	}
+	
+	public void testDerivedElements15() throws Exception {
+		// Test catch block variables (exceptions)
+		printTestDisabledMessage("Local variables not currently supported.");
+		//helper3("SomeClass3", "SomeOtherClass3", true, false, true, true);
+	}
+	
+	public void testDerivedElements16() throws Exception {
+		// Test updating of references
+		printTestDisabledMessage("Local variables not currently supported.");
+		//helper3("SomeClass4", "SomeOtherClass4", true, false, true, true);
+	}
+	
+	public void testDerivedElements17() throws Exception {
+		// Local with this name already exists - do not pass.
+		printTestDisabledMessage("Local variables not currently supported.");
+		//helper3_fail("SomeClass6", "SomeOtherClass6", true, false, true, true);
+	}
+	
+	public void testDerivedElements18() throws Exception {
+		// factory method
+		helper3("SomeClass", "SomeOtherClass", true, false, true);
+	}
+	
+	public void testDerivedElements19() throws Exception {
+		// Test detection of same target
+		helper3_fail("ThreeHunkClass", "TwoHunk", true, false, true, RenamingNameSuggestor.STRATEGY_SUFFIX);
+	}
+	
+	public void testDerivedElements20() throws Exception {
+		// Overridden method, check both are renamed
+		getClassFromTestFile(getPackageP(), "OtherClass");
+		helper3("OverriddenMethodClass", "ThirdClass", true, true, true);
+		checkResultInClass("OtherClass");
 	}
 	
 }

@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -128,5 +129,43 @@ public class MethodChecks {
 			return found;
 		else
 			return null;
+	}
+	
+	/**
+	 * Locates the topmost method of an override ripple and returns it. If none
+	 * is found, null is returned.
+	 * 
+	 */
+	public static IMethod getTopmostMethod(IMethod method, IProgressMonitor monitor) throws JavaModelException {
+
+		Assert.isNotNull(method);
+
+		ITypeHierarchy hierarchy= null;
+		IMethod topmostMethod= null;
+		final IType declaringType= method.getDeclaringType();
+		if (!declaringType.isInterface()) {
+			hierarchy= declaringType.newTypeHierarchy(monitor);
+			IMethod inInterface= isDeclaredInInterface(method, hierarchy, monitor);
+			if (inInterface != null && !inInterface.equals(method))
+				topmostMethod= inInterface;
+		}
+		if (topmostMethod == null) {
+			if (hierarchy == null)
+				hierarchy= declaringType.newSupertypeHierarchy(monitor);
+			IMethod overrides= overridesAnotherMethod(method, hierarchy);
+			if (overrides != null && !overrides.equals(method))
+				topmostMethod= overrides;
+		}
+		return topmostMethod;
+	}
+
+	/**
+	 * Finds all overridden methods of a certain method.
+	 * 
+	 */
+	public static IMethod[] getOverriddenMethods(IMethod method, IProgressMonitor monitor) throws CoreException {
+
+		Assert.isNotNull(method);
+		return RippleMethodFinder2.getRelatedMethods(method, monitor, null);
 	}
 }

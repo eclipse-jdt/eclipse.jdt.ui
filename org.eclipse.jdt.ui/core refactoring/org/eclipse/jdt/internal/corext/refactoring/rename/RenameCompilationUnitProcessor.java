@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.IDerivedElementRefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnit
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
@@ -55,7 +57,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
+public class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, IDerivedElementUpdating, IDerivedElementRefactoringProcessor {
 	
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
@@ -100,7 +102,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 
 	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
 		String newTypeName= removeFileNameExtension(getNewElementName());
-		RenameArguments arguments= new RenameArguments(newTypeName, getUpdateReferences());
+		RenameArguments arguments= new RenameArguments(newTypeName, getUpdateReferences(), getUpdateDerivedElements());
 		loadDerivedParticipants(status, result, 
 			computeDerivedElements(), arguments, 
 			computeResourceModifications(), natures, shared);
@@ -229,7 +231,55 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		fRenameTypeProcessor.setFilePatterns(patterns);
 	}
 	
-	//--- preconditions ----------------------------------
+	// ---- IDerivedElementUpdating ------------------------------
+
+	public boolean canEnableDerivedElementUpdating() {
+		if (fRenameTypeProcessor == null)
+			return false;
+		else
+			return fRenameTypeProcessor.canEnableDerivedElementUpdating();
+	}
+
+	public void setUpdateDerivedElements(boolean update) {
+		if (fRenameTypeProcessor == null)
+			return;
+		fRenameTypeProcessor.setUpdateDerivedElements(update);
+	}
+
+	public boolean getUpdateDerivedElements() {
+		if (fRenameTypeProcessor == null)
+			return false;
+		return fRenameTypeProcessor.getUpdateDerivedElements();
+	}
+
+	public int getMatchStrategy() {
+		if (fRenameTypeProcessor == null)
+			return RenamingNameSuggestor.STRATEGY_EXACT; // method should not be called in this case anyway ...
+		return fRenameTypeProcessor.getMatchStrategy();
+	}
+
+	public void setMatchStrategy(int selectedStrategy) {
+		if (fRenameTypeProcessor == null)
+			return;
+		fRenameTypeProcessor.setMatchStrategy(selectedStrategy);
+	}
+
+	// ------- IDerivedElementRefactoringComponent
+
+	public Object[] getDerivedElements() {
+		if (fRenameTypeProcessor == null)
+			return null;
+		else
+			return fRenameTypeProcessor.getDerivedElements();
+	}
+
+	public Object getRefactoredElement(Object element) {
+		if (fRenameTypeProcessor == null)
+			return element;
+		return fRenameTypeProcessor.getRefactoredElement(element);
+	}
+	
+	// --- preconditions ----------------------------------
 	
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		if (fRenameTypeProcessor != null && ! fCu.isStructureKnown()){
@@ -385,5 +435,13 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
+	}
+
+	public RenameTypeProcessor getRenameTypeProcessor() {
+		return fRenameTypeProcessor;
+	}
+
+	public boolean isWillRenameType() {
+		return fWillRenameType;
 	}
 }

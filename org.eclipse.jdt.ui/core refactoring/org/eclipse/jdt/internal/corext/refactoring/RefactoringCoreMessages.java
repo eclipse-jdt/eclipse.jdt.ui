@@ -318,6 +318,21 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameTypeRefactoring_member_type;
 	public static String RenameTypeRefactoring_another_type;
 	
+	public static String RenameTypeProcessor_changeCategory_type;
+	public static String RenameTypeProcessor_changeCategory_type_description;
+	public static String RenameTypeProcessor_changeCategory_method;
+	public static String RenameTypeProcessor_changeCategory_method_description;
+	public static String RenameTypeProcessor_changeCategory_fields;
+	public static String RenameTypeProcessor_changeCategory_fields_description;
+	public static String RenameTypeProcessor_changeCategory_local_variables;
+	public static String RenameTypeProcessor_changeCategory_local_variables_description;
+	public static String RenameTypeProcessor_creating_changes;
+	public static String RenameTypeProcessor_checking_derived_refactoring_conditions;
+	public static String RenameTypeProcessor_cannot_rename_methods_same_new_name;
+	public static String RenameTypeProcessor_cannot_rename_fields_same_new_name;
+	public static String RenameTypeProcessor_deselected_method_is_overridden;
+	public static String RenameTypeProcessor_renamed_method_is_overridden;
+	
 	public static String TextMatchUpdater_update;
 	public static String TextMatchUpdater_searching;
 	public static String TextMatchUpdater_textualMatches_name;

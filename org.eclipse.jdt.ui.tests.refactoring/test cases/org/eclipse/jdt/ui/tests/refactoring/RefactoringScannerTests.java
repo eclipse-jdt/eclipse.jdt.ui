@@ -12,11 +12,14 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Iterator;
+import java.util.Set;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScanner;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringScanner.TextMatch;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 
@@ -69,7 +72,12 @@ public class RefactoringScannerTests extends RefactoringTest{
 		ArrayList expectedMatchesList= new ArrayList(expectedMatches.length);
 		for (int i= 0; i < expectedMatches.length; i++)
 			expectedMatchesList.add(new Integer(TextRangeUtil.getOffset(text, expectedMatches[i].fLine, expectedMatches[i].fColumn)));
-		ArrayList matchesList= new ArrayList(fScanner.getMatches());
+		ArrayList matchesList= new ArrayList();
+		Set matches= fScanner.getMatches();
+		for (Iterator iter= matches.iterator(); iter.hasNext();) {
+			TextMatch element= (TextMatch) iter.next();
+			matchesList.add(new Integer(element.getStartPosition()));
+		}
 		Collections.sort(matchesList);
 		assertEquals("results", expectedMatchesList, matchesList);
 	}

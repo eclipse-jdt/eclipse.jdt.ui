@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -95,11 +96,21 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private Set/*<IMethod>*/ fMethodsToRename;
 	private TextChangeManager fChangeManager;
 	private WorkingCopyOwner fWorkingCopyOwner;
+	private boolean fIsDerived;
+	private GroupCategorySet fCategorySet;
 	
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
 	
-	public RenameMethodProcessor(IMethod method) {
+	protected RenameMethodProcessor(IMethod method) {
+		this(method, new TextChangeManager(true), null);
+		fIsDerived= false;
+	}
+	
+	protected RenameMethodProcessor(IMethod method, TextChangeManager manager, GroupCategorySet categorySet) {
 		initialize(method);
+		fChangeManager= manager;
+		fCategorySet= categorySet;
+		fIsDerived= true;
 	}
 	
 	protected void initialize(IMethod method) {
@@ -175,7 +186,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 	
 	private void initializeMethodsToRename(IProgressMonitor pm) throws CoreException {
-		fMethodsToRename= new HashSet(Arrays.asList(RippleMethodFinder2.getRelatedMethods(fMethod, pm, null)));
+		if (fMethodsToRename == null)
+			fMethodsToRename= new HashSet(Arrays.asList(MethodChecks.getOverriddenMethods(getMethod(), pm)));
+	}
+	
+	protected void setMethodsToRename(IMethod[] methods) {
+		fMethodsToRename= new HashSet(Arrays.asList(methods));
 	}
 	
 	protected Set getMethodsToRename() {
@@ -284,7 +300,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			if (result.hasFatalError())
 				return result;
 			
-			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
+			createChanges(new SubProgressMonitor(pm, 1), result);
 			if (fUpdateReferences & mustAnalyzeShadowing)
 				result.merge(analyzeRenameChanges(new SubProgressMonitor(pm, 1)));
 			else
@@ -610,17 +626,18 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		}
 	}
 	
-	private TextChangeManager createChangeManager(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
-		TextChangeManager manager= new TextChangeManager(true);
+	private TextChangeManager createChanges(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
+		if (!fIsDerived)
+			fChangeManager.clear();
 		
 		/* don't really want to add declaration and references separetely in this refactoring 
 		* (declarations of methods are different than declarations of anything else)
 		*/
 		if (! fUpdateReferences)
-			addDeclarationUpdate(manager); // TODO: only one declaration updated, not all of them
+			addDeclarationUpdate(fChangeManager); // TODO: only one declaration updated, not all of them
 		else
-			addOccurrences(manager, pm, status);	
-		return manager;
+			addOccurrences(fChangeManager, pm, status);	
+		return fChangeManager;
 	}
 	
 	void addOccurrences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException/*thrown in subtype*/{
@@ -635,7 +652,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			for (int j= 0; j < results.length; j++){
 				String editName= RefactoringCoreMessages.RenameMethodRefactoring_update_occurrence; 
 				ReplaceEdit replaceEdit= createReplaceEdit(results[j], cu);
-				TextChangeCompatibility.addTextEdit(textChange, editName, replaceEdit);
+				addTextEdit(textChange, editName, replaceEdit);
 			}
 			pm.worked(1);
 			if (pm.isCanceled())
@@ -668,7 +685,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		String editName= RefactoringCoreMessages.RenameMethodRefactoring_update_declaration; 
 		ISourceRange nameRange= fMethod.getNameRange();
 		ReplaceEdit replaceEdit= new ReplaceEdit(nameRange.getOffset(), nameRange.getLength(), getNewElementName());
-		TextChangeCompatibility.addTextEdit(change, editName, replaceEdit);
+		addTextEdit(change, editName, replaceEdit);
 	}
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
@@ -704,5 +721,13 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
+	}
+
+	protected void addTextEdit(TextChange change, String editName, ReplaceEdit replaceEdit) {
+		if (fIsDerived)
+			TextChangeCompatibility.addTextEdit(change, editName, replaceEdit, fCategorySet);
+		else
+			TextChangeCompatibility.addTextEdit(change, editName, replaceEdit);
+
 	}
 }	

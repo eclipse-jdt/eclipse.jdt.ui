@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -36,6 +37,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -51,6 +53,21 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		fOriginalMethod= getMethod();
 	}
 	
+	/*
+	 * int. not javadoc'd
+	 * 
+	 * Protected constructor; only called from RenameTypeProcessor. Initializes
+	 * the method processor with an already resolved top level and ripple
+	 * methods.
+	 * 
+	 */
+	protected RenameVirtualMethodProcessor(IMethod topLevel, IMethod[] ripples, TextChangeManager changeManager, GroupCategorySet categorySet) {
+		super(topLevel, changeManager, categorySet);
+		fOriginalMethod= getMethod();
+		fActivationChecked= true; // is top level
+		setMethodsToRename(ripples);
+	}
+
 	public IMethod getOriginalMethod() {
 		return fOriginalMethod;
 	}
@@ -74,31 +91,15 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			return result;
 		try{
 			monitor.beginTask("", 3); //$NON-NLS-1$
-		if (!fActivationChecked) {
-			fActivationChecked= true;
-			
-			IMethod method= getMethod();
-			// super check activation might change the method to be changed.
-			fOriginalMethod= method;
-			
-			ITypeHierarchy hierarchy= null;
-			final IType declaringType= method.getDeclaringType();
-			if (!declaringType.isInterface()) {
-				hierarchy= getCachedHierarchy(declaringType, new SubProgressMonitor(monitor, 1));
-				IMethod inInterface= MethodChecks.isDeclaredInInterface(method, hierarchy, monitor);
-				if (inInterface != null && !inInterface.equals(method)) {
-					initialize(inInterface);
-					return result;	
-				}
+			if (!fActivationChecked) {
+				// the following code may change the method to be changed.
+				IMethod method= getMethod();
+				fOriginalMethod= method;
+				IMethod topmost= MethodChecks.getTopmostMethod(getMethod(), monitor);
+				if (topmost!=null)
+					initialize(topmost);
+				fActivationChecked= true;
 			}
-			if (hierarchy == null)
-				hierarchy= declaringType.newSupertypeHierarchy(monitor);
-			IMethod overrides= MethodChecks.overridesAnotherMethod(method, hierarchy);
-			if (overrides != null && !overrides.equals(method)) {
-				initialize(overrides);
-				return result;
-			}
-		}
 		} finally{
 			monitor.done();
 		}

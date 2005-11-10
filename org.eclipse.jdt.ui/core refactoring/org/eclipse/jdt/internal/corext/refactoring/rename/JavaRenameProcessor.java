@@ -34,7 +34,7 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements IIn
 	private String fNewElementName;
 	
 	public final RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants sharedParticipants) throws CoreException {
-		RenameArguments arguments= new RenameArguments(getNewElementName(), getUpdateReferences());
+		RenameArguments arguments= new RenameArguments(getNewElementName(), getUpdateReferences(), getUpdateDerivedElements());
 		String[] natures= getAffectedProjectNatures();
 		List result= new ArrayList();
 		loadElementParticipants(status, result, arguments, natures, sharedParticipants);
@@ -80,6 +80,10 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements IIn
 	protected abstract String[] getAffectedProjectNatures() throws CoreException;
 	
 	public abstract boolean getUpdateReferences();	
+	
+	public boolean getUpdateDerivedElements() {
+		return false;
+	}
 	
 	/**
 	 * <code>true</code> by default, subclasses may override.
