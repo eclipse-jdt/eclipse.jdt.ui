@@ -27,7 +27,7 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.wizards.JavaProjectWizard;
 
 /**
- * <p>Action that opens the new Java project wizard. The action is not a selection listener, but takes the
+ * <p>Action that opens the new Java project wizard. The action initializes the wizard with the
  * selection as configured by {@link #setSelection(IStructuredSelection)} or the selection of
  * the active workbench window.</p>
  * 

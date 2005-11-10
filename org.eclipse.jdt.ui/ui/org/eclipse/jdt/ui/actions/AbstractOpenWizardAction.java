@@ -32,9 +32,12 @@ import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.NewProjectAction;
 
+import org.eclipse.jdt.core.IJavaElement;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
+import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
@@ -49,6 +52,7 @@ public abstract class AbstractOpenWizardAction extends Action {
 	
 	private Shell fShell;
 	private IStructuredSelection fSelection;
+	private IJavaElement fCreatedElement;
 	
 	/**
 	 * Creates the action.
@@ -56,6 +60,7 @@ public abstract class AbstractOpenWizardAction extends Action {
 	protected AbstractOpenWizardAction() {
 		fShell= null;
 		fSelection= null;
+		fCreatedElement= null;
 	}
 
 	/* (non-Javadoc)
@@ -79,6 +84,9 @@ public abstract class AbstractOpenWizardAction extends Action {
 			}
 			dialog.create();
 			int res= dialog.open();
+			if (res == Window.OK && wizard instanceof NewElementWizard) {
+				fCreatedElement= ((NewElementWizard)wizard).getCreatedElement();
+			}
 			
 			notifyResult(res == Window.OK);
 		} catch (CoreException e) {
@@ -96,7 +104,7 @@ public abstract class AbstractOpenWizardAction extends Action {
 	abstract protected Wizard createWizard() throws CoreException;
 	
 	/**
-	 * Returns the configured selection. If no selection has been configured using {@link #setSelection(IStructuredSelection)}},
+	 * Returns the configured selection. If no selection has been configured using {@link #setSelection(IStructuredSelection)},
 	 * the currently selected element of the active workbench is returned.
 	 * @return the configured selection
 	 */
@@ -127,8 +135,8 @@ public abstract class AbstractOpenWizardAction extends Action {
 	}
 	
 	/**
-	 * Returns the configured selection. If no shell has been configured using {@link #setShell(Shell)}},
-	 * <code>null</code> is returned.
+	 * Returns the configured shell. If no shell has been configured using {@link #setShell(Shell)},
+	 * 	the shell of the currently active workbench is returned.
 	 * @return the configured shell
 	 */
 	protected Shell getShell() {
@@ -164,6 +172,14 @@ public abstract class AbstractOpenWizardAction extends Action {
 			return false;
 		}
 		return true;
+	}
+	
+	/**
+	 * Returns the created element or <code>null</code> if the wizard has not run or was canceled.
+	 * @return the created element or <code>null</code>
+	 */
+	public IJavaElement getCreatedElement() {
+		return fCreatedElement;
 	}
 	
 	

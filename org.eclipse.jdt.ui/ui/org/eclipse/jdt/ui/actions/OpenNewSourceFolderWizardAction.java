@@ -19,13 +19,12 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard;
 
 /**
- * <p>Action that opens the new source folder wizard. The action is not a selection listener, but takes the
+ * <p>Action that opens the new source folder wizard. The action initializes the wizard with the
  * selection as configured by {@link #setSelection(IStructuredSelection)} or the selection of
  * the active workbench window.</p>
  * 
@@ -46,7 +45,6 @@ public class OpenNewSourceFolderWizardAction extends AbstractOpenWizardAction {
 		setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
-		setShell(JavaPlugin.getActiveWorkbenchShell());
 	}
 	
 	/* (non-Javadoc)

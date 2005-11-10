@@ -27,9 +27,10 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard;
 
 /**
- * <p>Action that opens the new annotation wizard. The action is not a selection listener, but takes the
- * selection as configured by {@link #setSelection(IStructuredSelection)} or the selection of
- * the active workbench window.</p>
+* <p>Action that opens the new annotation wizard.The action initialized the wizard with either the selection
+ * as configured by {@link #setSelection(IStructuredSelection)} or takes a preconfigured
+ * new annotation wizard page, see {@link #setConfiguredWizardPage(NewAnnotationWizardPage)}.
+ * </p>
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.

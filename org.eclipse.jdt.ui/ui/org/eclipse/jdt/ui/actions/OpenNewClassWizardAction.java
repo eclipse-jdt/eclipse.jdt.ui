@@ -21,15 +21,14 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.ui.wizards.NewClassWizardPage;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.wizards.NewClassCreationWizard;
 
 /**
- * <p>Action that opens the new class wizard. The action is not a selection listener, but takes the
- * current selection (see {@link #getSelection()} and {@link #setSelection(IStructuredSelection)}) and } or takes a preconfigured
- * new class wizard page, see {@link #setConfiguredWizardPage(NewClassWizardPage)}.
+ * <p>Action that opens the new class wizard. The action initialized the wizard with either the selection
+ * as configured by {@link #setSelection(IStructuredSelection)} or takes a preconfigured
+ * new class wizard page, see {@link #setConfiguredWizardPage(NewClassWizardPage)}.</p>
  * 
  * <p>
  * This class may be instantiated; it is not intended to be subclassed.
@@ -50,7 +49,6 @@ public class OpenNewClassWizardAction extends AbstractOpenWizardAction {
 		setToolTipText(ActionMessages.OpenNewClassWizardAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWCLASS);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_CLASS_WIZARD_ACTION);
-		setShell(JavaPlugin.getActiveWorkbenchShell());
 		
 		fPage= null;
 	}

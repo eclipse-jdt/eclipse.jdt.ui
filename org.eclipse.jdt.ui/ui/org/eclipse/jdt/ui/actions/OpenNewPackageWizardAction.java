@@ -19,13 +19,12 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.wizards.NewPackageCreationWizard;
 
 /**
- * <p>Action that opens the new package wizard. The action is not a selection listener, but takes the
+ * <p>Action that opens the new package wizard. The action initializes the wizard with the
  * selection as configured by {@link #setSelection(IStructuredSelection)} or the selection of
  * the active workbench window.</p>
  * 
@@ -46,7 +45,6 @@ public class OpenNewPackageWizardAction extends AbstractOpenWizardAction {
 		setToolTipText(ActionMessages.OpenNewPackageWizardAction_tooltip); 
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWPACK);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_PACKAGE_WIZARD_ACTION);
-		setShell(JavaPlugin.getActiveWorkbenchShell());
 	}
 	
 	/* (non-Javadoc)
