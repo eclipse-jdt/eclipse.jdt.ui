@@ -154,7 +154,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * 
 	 * @since 3.2
 	 */
-	private int treeStyle;
+	private int fTreeStyle;
 
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
@@ -177,7 +177,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 				// Pre-fetch key sequence - do not change because scope will change later.
 				getInvokingCommandKeySequences();
 		}
-		this.treeStyle= treeStyle;
+		this.fTreeStyle= treeStyle;
 		// Title and status text must be set to get the title label created, so force empty values here. 
 		if (hasHeader())
 			this.setTitleText(""); //$NON-NLS-1$
@@ -198,7 +198,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * @since 3.2
 	 */
 	protected Control createDialogArea(Composite parent) {
-		fTreeViewer= createTreeViewer(parent, treeStyle);
+		fTreeViewer= createTreeViewer(parent, fTreeStyle);
 
 		fCustomFiltersActionGroup= new CustomFiltersActionGroup(getId(), fTreeViewer);
 
@@ -541,12 +541,11 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * {@inheritDoc}
 	 */
 	public void setVisible(boolean visible) {
-		if (visible) {
+		if (visible)
 			open();
-		} else {
-			saveDialogBounds(getShell());
-			getShell().setVisible(false);
-		}
+		else
+			// FIXME: workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=115785
+			dispose();
 	}
 
 	/**
