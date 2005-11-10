@@ -1883,7 +1883,7 @@ public class ClasspathModifier {
 				exclude(entry.getPath(), existingEntries, new ArrayList(), project, null);
 
 			IPath outputLocation= project.getOutputLocation();
-			existingEntries.add(entry);
+			insertAtEndOfCategory(entry, existingEntries);
 
 			IClasspathEntry[] entries= convert(existingEntries);
 
@@ -1911,6 +1911,36 @@ public class ClasspathModifier {
 
 			rootStatus.setOK();
 			return;
+		}
+	}
+
+	private void insertAtEndOfCategory(CPListElement entry, List existingEntries) {
+		int length= existingEntries.size();
+		CPListElement[] elements= (CPListElement[])existingEntries.toArray(new CPListElement[length]);
+		int i= 0;
+		while (i < length && elements[i].getClasspathEntry().getEntryKind() != entry.getClasspathEntry().getEntryKind()) {
+			i++;
+		}
+		if (i < length) {
+			i++;
+			while (i < length && elements[i].getClasspathEntry().getEntryKind() == entry.getClasspathEntry().getEntryKind()) {
+				i++;
+			}
+			existingEntries.add(i, entry);
+			return;
+		}
+		
+		switch (entry.getClasspathEntry().getEntryKind()) {
+		case IClasspathEntry.CPE_SOURCE:
+			existingEntries.add(0, entry);
+			break;
+		case IClasspathEntry.CPE_CONTAINER:
+		case IClasspathEntry.CPE_LIBRARY:
+		case IClasspathEntry.CPE_PROJECT:
+		case IClasspathEntry.CPE_VARIABLE:
+		default:
+			existingEntries.add(entry);
+			break;
 		}
 	}
 
