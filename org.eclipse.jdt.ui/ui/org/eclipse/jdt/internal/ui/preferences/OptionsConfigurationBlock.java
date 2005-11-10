@@ -615,7 +615,7 @@ public abstract class OptionsConfigurationBlock {
 	}
 
 	/**
-	 * Retuens the value as actually stored in the preference store.
+	 * Returns the value as actually stored in the preference store.
 	 * @param key
 	 * @return the value as actually stored in the preference store.
 	 */
@@ -700,7 +700,7 @@ public abstract class OptionsConfigurationBlock {
 
 		IScopeContext currContext= fLookupOrder[0];
 	
-		List /* <PropertyChange>*/ changedOptions= new ArrayList();
+		List /* <Key>*/ changedOptions= new ArrayList();
 		boolean needsBuild= getChanges(currContext, changedOptions);
 		if (changedOptions.isEmpty()) {
 			return true;
@@ -720,7 +720,7 @@ public abstract class OptionsConfigurationBlock {
 			}
 		}
 		if (container != null) {
-			// no need to apply the changes to the original store: will be done by the page  container
+			// no need to apply the changes to the original store: will be done by the page container
 			if (doBuild) { // post build
 				container.registerUpdateJob(CoreUtility.getBuildJob(fProject));
 			}
