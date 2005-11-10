@@ -1117,7 +1117,7 @@ public class CleanUpTest extends QuickFixTest {
 		refactoring.addCompilationUnit(cu1);
 		refactoring.addCompilationUnit(cu2);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, false);
+		IMultiFix multiFix= new CodeStyleMultiFix(true, false, false, false);
 		refactoring.addMultiFix(multiFix);
 		
 		buf= new StringBuffer();
@@ -1181,7 +1181,7 @@ public class CleanUpTest extends QuickFixTest {
 		refactoring.addCompilationUnit(cu1);
 		refactoring.addCompilationUnit(cu2);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true);
+		IMultiFix multiFix= new CodeStyleMultiFix(true, true, false, false);
 		refactoring.addMultiFix(multiFix);
 		
 		buf= new StringBuffer();
@@ -1237,7 +1237,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(false, true);
+		IMultiFix multiFix= new CodeStyleMultiFix(false, true, false, false);
 		
 		setOptions(multiFix);
 		
@@ -1338,7 +1338,7 @@ public class CleanUpTest extends QuickFixTest {
 		refactoring.addCompilationUnit(cu2);
 		refactoring.addCompilationUnit(cu3);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(false, true);
+		IMultiFix multiFix= new CodeStyleMultiFix(false, true, false, false);
 		refactoring.addMultiFix(multiFix);
 		
 		buf= new StringBuffer();
@@ -1425,7 +1425,7 @@ public class CleanUpTest extends QuickFixTest {
 		refactoring.addCompilationUnit(cu2);
 		refactoring.addCompilationUnit(cu3);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true);
+		IMultiFix multiFix= new CodeStyleMultiFix(true, true, false, false);
 		refactoring.addMultiFix(multiFix);
 		
 		buf= new StringBuffer();
@@ -1469,7 +1469,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true);
+		IMultiFix multiFix= new CodeStyleMultiFix(true, true, false, false);
 		refactoring.addMultiFix(multiFix);
 		
 		assertRefactoringHasNoChange(refactoring);
@@ -1491,7 +1491,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true);
+		IMultiFix multiFix= new CodeStyleMultiFix(true, true, false, false);
 		refactoring.addMultiFix(multiFix);
 		
 		assertRefactoringHasNoChange(refactoring);
@@ -1519,7 +1519,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true);
+		IMultiFix multiFix= new CodeStyleMultiFix(true, true, false, false);
 		refactoring.addMultiFix(multiFix);
 		
 		assertRefactoringHasNoChange(refactoring);
@@ -1554,10 +1554,353 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true);
+		IMultiFix multiFix= new CodeStyleMultiFix(true, true, false, false);
 		refactoring.addMultiFix(multiFix);
 		
 		assertRefactoringHasNoChange(refactoring);
+	}
+	
+	public void testCodeStyle10() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private static final int N;\n");
+		buf.append("    static {N= 10;}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		IMultiFix multiFix= new CodeStyleMultiFix(true, true, true, false);
+		refactoring.addMultiFix(multiFix);
+		
+		assertRefactoringHasNoChange(refactoring);
+	}
+	
+	public void testCodeStyle11() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {    \n");
+		buf.append("    public static int E1N = 10;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(E1N);\n");
+		buf.append("        E1N = 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 extends E1 {\n");
+		buf.append("    public static int E2N = 10;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(E1N);\n");
+		buf.append("        E1N = 10;\n");
+		buf.append("        System.out.println(E2N);\n");
+		buf.append("        E2N = 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import test1.E2;\n");
+		buf.append("public class E3 extends E2 {\n");
+		buf.append("    private static int E3N = 10;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(E1N);\n");
+		buf.append("        E1N = 10;\n");
+		buf.append("        System.out.println(E2N);\n");
+		buf.append("        E2N = 10;\n");
+		buf.append("        System.out.println(E3N);\n");
+		buf.append("        E3N = 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		refactoring.addCompilationUnit(cu3);
+		
+		IMultiFix multiFix= new CodeStyleMultiFix(true, true, true, false);
+		refactoring.addMultiFix(multiFix);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {    \n");
+		buf.append("    public static int E1N = 10;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(E1.E1N);\n");
+		buf.append("        E1.E1N = 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 extends E1 {\n");
+		buf.append("    public static int E2N = 10;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(E1.E1N);\n");
+		buf.append("        E1.E1N = 10;\n");
+		buf.append("        System.out.println(E2.E2N);\n");
+		buf.append("        E2.E2N = 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import test1.E1;\n");
+		buf.append("import test1.E2;\n");
+		buf.append("public class E3 extends E2 {\n");
+		buf.append("    private static int E3N = 10;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(E1.E1N);\n");
+		buf.append("        E1.E1N = 10;\n");
+		buf.append("        System.out.println(E2.E2N);\n");
+		buf.append("        E2.E2N = 10;\n");
+		buf.append("        System.out.println(E3.E3N);\n");
+		buf.append("        E3.E3N = 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});
+
+	}
+	
+	public void testCodeStyle12() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public final static int N1 = 10;\n");
+		buf.append("    public static int N2 = N1;\n");
+		buf.append("    {\n");
+		buf.append("        System.out.println(N1);\n");
+		buf.append("        N2 = 10;\n");
+		buf.append("        System.out.println(N2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		IMultiFix multiFix= new CodeStyleMultiFix(true, true, true, false);
+		refactoring.addMultiFix(multiFix);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public final static int N1 = 10;\n");
+		buf.append("    public static int N2 = E1.N1;\n");
+		buf.append("    {\n");
+		buf.append("        System.out.println(E1.N1);\n");
+		buf.append("        E1.N2 = 10;\n");
+		buf.append("        System.out.println(E1.N2);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testCodeStyle13() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private static class E1Inner {\n");
+		buf.append("        private static class E1InnerInner {\n");
+		buf.append("            public static int N = 10;\n");
+		buf.append("            static {\n");
+		buf.append("                System.out.println(N);\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		IMultiFix multiFix= new CodeStyleMultiFix(true, true, true, false);
+		refactoring.addMultiFix(multiFix);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private static class E1Inner {\n");
+		buf.append("        private static class E1InnerInner {\n");
+		buf.append("            public static int N = 10;\n");
+		buf.append("            static {\n");
+		buf.append("                System.out.println(E1InnerInner.N);\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testCodeStyle14() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    static class E1Inner {\n");
+		buf.append("        public static class E1InnerInner {\n");
+		buf.append("            public static int N = 10;\n");
+		buf.append("            public void foo() {\n");
+		buf.append("                System.out.println(N);\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		IMultiFix multiFix= new CodeStyleMultiFix(true, true, true, false);
+		refactoring.addMultiFix(multiFix);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    static class E1Inner {\n");
+		buf.append("        public static class E1InnerInner {\n");
+		buf.append("            public static int N = 10;\n");
+		buf.append("            public void foo() {\n");
+		buf.append("                System.out.println(E1InnerInner.N);\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testCodeStyle15() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    static class E1Inner {\n");
+		buf.append("        public static class E1InnerInner {\n");
+		buf.append("            public static int N = 10;\n");
+		buf.append("            public void foo() {\n");
+		buf.append("                System.out.println((new E1InnerInner()).N);\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		IMultiFix multiFix= new CodeStyleMultiFix(true, true, true, false);
+		refactoring.addMultiFix(multiFix);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    static class E1Inner {\n");
+		buf.append("        public static class E1InnerInner {\n");
+		buf.append("            public static int N = 10;\n");
+		buf.append("            public void foo() {\n");
+		buf.append("                System.out.println(E1InnerInner.N);\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testCodeStyle16() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public static int E1N;\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 extends E1 {\n");
+		buf.append("    public static int E2N = 10;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(E1.E1N);\n");
+		buf.append("        System.out.println(E2.E1N);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import test1.E1;\n");
+		buf.append("import test1.E2;\n");
+		buf.append("public class E3 extends E2 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(E1.E1N);\n");
+		buf.append("        System.out.println(E2.E1N);\n");
+		buf.append("        System.out.println(E3.E1N);\n");
+		buf.append("        System.out.println(E2.E2N);\n");
+		buf.append("        System.out.println(E3.E2N);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		refactoring.addCompilationUnit(cu3);
+		
+		IMultiFix multiFix= new CodeStyleMultiFix(true, true, true, true);
+		refactoring.addMultiFix(multiFix);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 extends E1 {\n");
+		buf.append("    public static int E2N = 10;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(E1.E1N);\n");
+		buf.append("        System.out.println(E1.E1N);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import test1.E1;\n");
+		buf.append("import test1.E2;\n");
+		buf.append("public class E3 extends E2 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(E1.E1N);\n");
+		buf.append("        System.out.println(E1.E1N);\n");
+		buf.append("        System.out.println(E1.E1N);\n");
+		buf.append("        System.out.println(E2.E2N);\n");
+		buf.append("        System.out.println(E2.E2N);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2});
+
 	}
 
 	public void testCodeStyleBug114544() throws Exception {
@@ -1572,7 +1915,7 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(false, true);
+		IMultiFix multiFix= new CodeStyleMultiFix(false, true, false, false);
 		
 		setOptions(multiFix);
 		
@@ -1622,7 +1965,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix1= new CodeStyleMultiFix(true, false);
+		IMultiFix multiFix1= new CodeStyleMultiFix(true, false, false, false);
 		IMultiFix multiFix2= new UnusedCodeMultiFix(false, false, false, true, false, false);
 		refactoring.addMultiFix(multiFix1);
 		refactoring.addMultiFix(multiFix2);

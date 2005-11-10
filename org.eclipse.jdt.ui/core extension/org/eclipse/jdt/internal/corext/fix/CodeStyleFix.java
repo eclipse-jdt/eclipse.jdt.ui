@@ -547,16 +547,10 @@ public class CodeStyleFix extends AbstractFix {
 	}
 	
 	private boolean doesDeclare(ITypeBinding declaredClass, ITypeBinding declaringClass) {
-		ITypeBinding[] declaredTypes= declaringClass.getDeclaredTypes();
-		for (int i= 0; i < declaredTypes.length; i++) {
-			if (declaredTypes[i] == declaredClass) {
-				return true;
-			} else {
-				if (doesDeclare(declaredClass, declaredTypes[i])) {
-					return true;
-				}
-			}
+		ITypeBinding curr= declaredClass.getDeclaringClass();
+		while (curr != null && declaringClass != curr) {
+			curr= curr.getDeclaringClass();
 		}
-		return false;
+		return curr != null;
 	}
 }
