@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
@@ -33,17 +34,20 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.ThisExpression;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -57,21 +61,25 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
  * A fix which fixes code style issues.
  * Supports:
  * 		Qualify field with this: f -> this.f if f is a field.
+ * 		Qualify static field access with declaring class
  * 		Change non static access to static using declaring type.
  */
 public class CodeStyleFix extends AbstractFix {
 	
 	private final UnqualifiedFieldAccessInformation[] fUnqualifiedFieldAccesses;
-	private final NonStaticAccessInformation[] fNonStaticAccesses;
+	private final StaticAccessInformation[] fNonStaticAccesses;
 	private final AST fAst;
+	private final UnqualifiedStaticFieldAccessInformation[] fUnqualifiedStatiFieldAccesses;
 	
 	private final static class FieldAccessFinder extends GenericVisitor {
 		
 		private List/*<UnqualifiedFieldAccessInformation>*/ fUnqualifiedAccesses;
+		private List/*<UnqualifiedStaticFieldAccessInformation>*/ fUnqualifiedStaticAccesses;
 		private ImportRewrite fImportRewrite;
 		
 		public FieldAccessFinder(ICompilationUnit compilationUnit) throws CoreException {
 			fUnqualifiedAccesses= new ArrayList();
+			fUnqualifiedStaticAccesses= new ArrayList();
 			fImportRewrite= new ImportRewrite(compilationUnit);
 		}
 		
@@ -113,19 +121,32 @@ public class CodeStyleFix extends AbstractFix {
 				return;
 			
 			IBinding binding= node.resolveBinding();
-			if (binding == null || (binding.getKind() != IBinding.VARIABLE) || !((IVariableBinding) binding).isField()
-				|| Modifier.isStatic(binding.getModifiers()))//Don't qualify accesses to static fields, maybe we want to add a separate clean up for this?
+			if (binding == null || (binding.getKind() != IBinding.VARIABLE) || !((IVariableBinding) binding).isField())
 				return;
-			
-			String qualifier= getQualifier((IVariableBinding)binding, fImportRewrite, node);
-			if (qualifier == null)
-				return;
-			
-			fUnqualifiedAccesses.add(new UnqualifiedFieldAccessInformation(qualifier, node));
+
+			if (Modifier.isStatic(binding.getModifiers())) {
+				Initializer initializer= (Initializer) ASTNodes.getParent(node, Initializer.class);
+				//Do not qualify assignments to static final fields in static initializers (would result in compile error)
+				if (initializer != null && Modifier.isStatic(initializer.getModifiers())
+						&& Modifier.isFinal(binding.getModifiers()) && node.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY)
+					return;
+
+				fUnqualifiedStaticAccesses.add(new UnqualifiedStaticFieldAccessInformation((IVariableBinding) binding, node));
+			} else {
+				String qualifier= getQualifier((IVariableBinding) binding, fImportRewrite, node);
+				if (qualifier == null)
+					return;
+
+				fUnqualifiedAccesses.add(new UnqualifiedFieldAccessInformation(qualifier, node));
+			}
 		}
 
 		public UnqualifiedFieldAccessInformation[] getUnqualifiedAccesses() {
 			return (UnqualifiedFieldAccessInformation[])fUnqualifiedAccesses.toArray(new UnqualifiedFieldAccessInformation[fUnqualifiedAccesses.size()]);
+		}
+		
+		public UnqualifiedStaticFieldAccessInformation[] getUnqualifiedStaticAccesses() {
+			return (UnqualifiedStaticFieldAccessInformation[])fUnqualifiedStaticAccesses.toArray(new UnqualifiedStaticFieldAccessInformation[fUnqualifiedStaticAccesses.size()]);
 		}
 	}
 
@@ -149,14 +170,34 @@ public class CodeStyleFix extends AbstractFix {
 		
 	}
 	
-	private final static class NonStaticAccessInformation {
+	private final static class UnqualifiedStaticFieldAccessInformation {
+
+		private final IVariableBinding fBinding;
+		private final SimpleName fName;
+		
+		public UnqualifiedStaticFieldAccessInformation(IVariableBinding binding, SimpleName name) {
+			fBinding= binding;
+			fName= name;
+		}
+
+		public IVariableBinding getBinding() {
+			return fBinding;
+		}
+
+		public SimpleName getName() {
+			return fName;
+		}
+		
+	}
+	
+	private final static class StaticAccessInformation {
 
 		private final ITypeBinding fDeclaringTypeBinding;
 		private final IBinding fAccessBinding;
 		private final Expression fQualifier;
 		private final ASTNode fNode;
 
-		public NonStaticAccessInformation(ITypeBinding declaringTypeBinding, IBinding accessBinding, Expression qualifier, ASTNode node) {
+		public StaticAccessInformation(ITypeBinding declaringTypeBinding, IBinding accessBinding, Expression qualifier, ASTNode node) {
 			fDeclaringTypeBinding= declaringTypeBinding;
 			fAccessBinding= accessBinding;
 			fQualifier= qualifier;
@@ -180,15 +221,38 @@ public class CodeStyleFix extends AbstractFix {
 		}
 		
 	}
-
-	public static CodeStyleFix createFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean addThisQualifier, boolean changeNonStaticAccessToStatic) throws CoreException {
-		if (changeNonStaticAccessToStatic && isNonStaticAccess(problem)) {
-			NonStaticAccessInformation nonStaticAccessInformation= getNonStaticAccessInformation(compilationUnit, problem);
+	
+	public static CodeStyleFix[] createFixForNonStaticAccess(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+		if (isNonStaticAccess(problem)) {
+			StaticAccessInformation nonStaticAccessInformation[]= getNonStaticAccessInformation(compilationUnit, problem);
 			if (nonStaticAccessInformation != null) {
 
 				ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
-				String label= Messages.format(FixMessages.CodeStyleFix_ChangeAccessToStatic_description, nonStaticAccessInformation.getDeclaringTypeBinding().getName());
-				return new CodeStyleFix(label, cu, null, new NonStaticAccessInformation[] {nonStaticAccessInformation}, compilationUnit.getAST());
+				String label1= Messages.format(FixMessages.CodeStyleFix_ChangeAccessToStatic_description, nonStaticAccessInformation[0].getDeclaringTypeBinding().getName());
+				CodeStyleFix fix1= new CodeStyleFix(label1, cu, null, new StaticAccessInformation[] {nonStaticAccessInformation[0]}, null, compilationUnit.getAST());
+
+				if (nonStaticAccessInformation.length > 1) {
+					String label2= Messages.format(FixMessages.CodeStyleFix_ChangeAccessToStaticUsingInstanceType_description, nonStaticAccessInformation[1].getDeclaringTypeBinding().getName());
+					CodeStyleFix fix2= new CodeStyleFix(label2, cu, null, new StaticAccessInformation[] {nonStaticAccessInformation[1]}, null, compilationUnit.getAST());
+					return new CodeStyleFix[] {fix1, fix2};
+				}
+				return new CodeStyleFix[] {fix1};
+			}
+		}
+		return null;
+	}
+
+	public static CodeStyleFix createFix(CompilationUnit compilationUnit, IProblemLocation problem, 
+			boolean addThisQualifier, 
+			boolean changeIndirectStaticAccessToDirect) throws CoreException {
+		
+		if (changeIndirectStaticAccessToDirect && isIndirectStaticAccess(problem)) {
+			StaticAccessInformation nonStaticAccessInformation[]= getNonStaticAccessInformation(compilationUnit, problem);
+			if (nonStaticAccessInformation != null) {
+
+				ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
+				String label= Messages.format(FixMessages.CodeStyleFix_ChangeStaticAccess_description, nonStaticAccessInformation[0].getDeclaringTypeBinding().getName());
+				return new CodeStyleFix(label, cu, null, new StaticAccessInformation[] {nonStaticAccessInformation[0]}, null, compilationUnit.getAST());
 			}
 		}
 		
@@ -199,50 +263,72 @@ public class CodeStyleFix extends AbstractFix {
 			
 			ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 			String groupName= MessageFormat.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {unqualifiedFieldAccessInformation.getName().getIdentifier(), unqualifiedFieldAccessInformation.getQualifier()});
-			return new CodeStyleFix(groupName, cu, new UnqualifiedFieldAccessInformation[] {unqualifiedFieldAccessInformation}, null, compilationUnit.getAST());
+			return new CodeStyleFix(groupName, cu, new UnqualifiedFieldAccessInformation[] {unqualifiedFieldAccessInformation}, null, null, compilationUnit.getAST());
 		}
 		
 		return null;
 	}
 	
-	public static CodeStyleFix createCleanUp(CompilationUnit compilationUnit, boolean addThisQualifier, boolean changeNonStaticAccessToStatic) throws CoreException {
+	public static CodeStyleFix createCleanUp(CompilationUnit compilationUnit, 
+			boolean addThisQualifier, 
+			boolean changeNonStaticAccessToStatic, 
+			boolean qualifyStaticFieldAccess,
+			boolean changeIndirectStaticAccessToDirect) throws CoreException {
+		
+		if (!addThisQualifier && !changeNonStaticAccessToStatic && !qualifyStaticFieldAccess && !changeIndirectStaticAccessToDirect)
+			return null;
+		
 		IProblem[] problems= compilationUnit.getProblems();
 		
-		List/*<NonStaticAccessInformation>*/ nonStaticAccesses= new ArrayList(); 
+		List/*<StaticAccessInformation>*/ nonStaticAccesses= new ArrayList(); 
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= new ProblemLocation(problems[i]);
-			NonStaticAccessInformation nonStaticAccessInformation= null;
-			if (changeNonStaticAccessToStatic && isNonStaticAccess(problem)) {
-				nonStaticAccessInformation= getNonStaticAccessInformation(compilationUnit, problem);
-				if (nonStaticAccessInformation != null)
-					nonStaticAccesses.add(nonStaticAccessInformation);
+			boolean isNonStaticAccess= changeNonStaticAccessToStatic && isNonStaticAccess(problem);
+			boolean isIndirectStaticAccess= changeIndirectStaticAccessToDirect && isIndirectStaticAccess(problem);
+			if (isNonStaticAccess || isIndirectStaticAccess) {
+				StaticAccessInformation[] nonStaticAccessInformation= getNonStaticAccessInformation(compilationUnit, problem);
+				if (nonStaticAccessInformation != null) {
+					nonStaticAccesses.add(nonStaticAccessInformation[0]);
+				}
 			}
 		}
 		
-		if (!addThisQualifier && nonStaticAccesses.size() == 0)
+		if (!addThisQualifier && !qualifyStaticFieldAccess && nonStaticAccesses.isEmpty())
 			return null;
 
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		UnqualifiedFieldAccessInformation[] unqualifiedFieldAccessesArray= null;
-		if (addThisQualifier) {
+		UnqualifiedStaticFieldAccessInformation[] unqualifiedStaticFieldAccessesArray= null;
+		if (addThisQualifier || qualifyStaticFieldAccess) {
 			FieldAccessFinder fieldAccessFinder= new FieldAccessFinder(cu);
 			compilationUnit.accept(fieldAccessFinder);
-			unqualifiedFieldAccessesArray= fieldAccessFinder.getUnqualifiedAccesses();
 			
-			if (unqualifiedFieldAccessesArray.length == 0 && nonStaticAccesses.size() == 0)
+			if (addThisQualifier)
+				unqualifiedFieldAccessesArray= fieldAccessFinder.getUnqualifiedAccesses();
+			
+			if (qualifyStaticFieldAccess)
+				unqualifiedStaticFieldAccessesArray= fieldAccessFinder.getUnqualifiedStaticAccesses();
+			
+			if (nonStaticAccesses.isEmpty() && 
+					(!addThisQualifier || unqualifiedFieldAccessesArray.length == 0) &&
+					(!qualifyStaticFieldAccess || unqualifiedStaticFieldAccessesArray.length == 0))
 				return null;
 		}
-		
-		NonStaticAccessInformation[] nonStaticAccessesArray= (NonStaticAccessInformation[])nonStaticAccesses.toArray(new NonStaticAccessInformation[nonStaticAccesses.size()]);
-		return new CodeStyleFix(FixMessages.CodeStyleFix_AddThisQualifier_description, cu, unqualifiedFieldAccessesArray, nonStaticAccessesArray, compilationUnit.getAST());
+		StaticAccessInformation[] nonStaticAccessesArray= (StaticAccessInformation[])nonStaticAccesses.toArray(new StaticAccessInformation[nonStaticAccesses.size()]);
+		return new CodeStyleFix(FixMessages.CodeStyleFix_AddThisQualifier_description, cu, unqualifiedFieldAccessesArray, nonStaticAccessesArray, unqualifiedStaticFieldAccessesArray, compilationUnit.getAST());
 	}
 
-	private static boolean isNonStaticAccess(IProblemLocation problem) {
-		return (problem.getProblemId() == IProblem.NonStaticAccessToStaticField ||
-		 problem.getProblemId() == IProblem.NonStaticAccessToStaticMethod);
+	private static boolean isIndirectStaticAccess(IProblemLocation problem) {
+		return (problem.getProblemId() == IProblem.IndirectAccessToStaticField
+				|| problem.getProblemId() == IProblem.IndirectAccessToStaticMethod);
 	}
 	
-	private static NonStaticAccessInformation getNonStaticAccessInformation(CompilationUnit astRoot, IProblemLocation problem) {
+	private static boolean isNonStaticAccess(IProblemLocation problem) {
+		return (problem.getProblemId() == IProblem.NonStaticAccessToStaticField
+				|| problem.getProblemId() == IProblem.NonStaticAccessToStaticMethod);
+	}
+	
+	private static StaticAccessInformation[] getNonStaticAccessInformation(CompilationUnit astRoot, IProblemLocation problem) {
 		ASTNode selectedNode= problem.getCoveringNode(astRoot);
 		if (selectedNode == null) {
 			return null;
@@ -276,13 +362,26 @@ public class CodeStyleFix extends AbstractFix {
 			accessBinding= fieldAccess.getName().resolveBinding();
 		}
         
-		ITypeBinding declaringTypeBinding= null;
 		if (accessBinding != null) {
-			declaringTypeBinding= getDeclaringTypeBinding(accessBinding);
+			StaticAccessInformation declaring= null;
+			ITypeBinding declaringTypeBinding= getDeclaringTypeBinding(accessBinding);
 			if (declaringTypeBinding != null) {
 				declaringTypeBinding= declaringTypeBinding.getTypeDeclaration(); // use generic to avoid any type arguments
 				
-				return new NonStaticAccessInformation(declaringTypeBinding, accessBinding, qualifier, selectedNode);
+				declaring= new StaticAccessInformation(declaringTypeBinding, accessBinding, qualifier, selectedNode);
+			}
+			StaticAccessInformation instance= null;
+			ITypeBinding instanceTypeBinding= Bindings.normalizeTypeBinding(qualifier.resolveTypeBinding());
+			if (instanceTypeBinding != null) {
+				instanceTypeBinding= instanceTypeBinding.getTypeDeclaration();  // use generic to avoid any type arguments
+				if (instanceTypeBinding.getTypeDeclaration() != declaringTypeBinding) {
+					instance= new StaticAccessInformation(instanceTypeBinding, accessBinding, qualifier, selectedNode);
+				}
+			}
+			if (declaring != null && instance != null) {
+				return new StaticAccessInformation[] {declaring, instance};
+			} else {
+				return new StaticAccessInformation[] {declaring};
 			}
 		}
 		return null;
@@ -355,10 +454,11 @@ public class CodeStyleFix extends AbstractFix {
 		return (SimpleName) selectedNode;
 	}
 	
-	public CodeStyleFix(String name, ICompilationUnit compilationUnit, UnqualifiedFieldAccessInformation[] unqualifiedFieldAccesses, NonStaticAccessInformation[] nonStaticAccesses, AST ast) {
+	public CodeStyleFix(String name, ICompilationUnit compilationUnit, UnqualifiedFieldAccessInformation[] unqualifiedFieldAccesses, StaticAccessInformation[] nonStaticAccesses, UnqualifiedStaticFieldAccessInformation[] unqualifiedStatiFieldAccesses, AST ast) {
 		super(name, compilationUnit);
 		fUnqualifiedFieldAccesses= unqualifiedFieldAccesses;
 		fNonStaticAccesses= nonStaticAccesses;
+		fUnqualifiedStatiFieldAccesses= unqualifiedStatiFieldAccesses;
 		fAst= ast;
 	}
 
@@ -378,9 +478,16 @@ public class CodeStyleFix extends AbstractFix {
 			}
 		}
 		
+		if (fUnqualifiedStatiFieldAccesses != null) {
+			for (int i= 0; i < fUnqualifiedStatiFieldAccesses.length; i++) {
+				UnqualifiedStaticFieldAccessInformation information= fUnqualifiedStatiFieldAccesses[i];
+				rewriteASTForDeclaringClassQualifier(information.getName(), information.getBinding(), imports, rewrite, groups);
+			}
+		}
+		
 		if (fNonStaticAccesses != null) {
 			for (int i= 0; i < fNonStaticAccesses.length; i++) {
-				NonStaticAccessInformation information= fNonStaticAccesses[i];
+				StaticAccessInformation information= fNonStaticAccesses[i];
 				rewriteASTForNonStaticAccess(imports, ast, information.getDeclaringTypeBinding(), information.getQualifier(), rewrite, groups);
 			}
 		}
@@ -399,7 +506,7 @@ public class CodeStyleFix extends AbstractFix {
 	}
 	
 	private void rewriteASTForNonStaticAccess(ImportRewrite imports, AST ast, ITypeBinding declaringTypeBinding, Expression qualifier, ASTRewrite rewrite, List groups) {
-		String typeName= imports.addImport(declaringTypeBinding);
+		String typeName= importClass(declaringTypeBinding, qualifier, imports);
 		TextEditGroup group= new TextEditGroup(Messages.format(FixMessages.CodeStyleFix_ChangeAccessToStatic_description, declaringTypeBinding.getName()));
 		groups.add(group);
 		rewrite.replace(qualifier, ASTNodeFactory.newName(ast, typeName), group);
@@ -411,5 +518,45 @@ public class CodeStyleFix extends AbstractFix {
 		editGroups.add(group);
 		rewrite.replace(name, rewrite.createStringPlaceholder(qualifier  + '.' + name.getIdentifier(), ASTNode.SIMPLE_NAME), group);
 	}
+	
+	private void rewriteASTForDeclaringClassQualifier(SimpleName name, IVariableBinding binding, ImportRewrite imports, ASTRewrite rewrite, List groups) {
+		ITypeBinding declaringClass= binding.getDeclaringClass();
+		String qualifier= importClass(declaringClass, name, imports);
+		TextEditGroup group= new TextEditGroup(Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {name.getIdentifier(), qualifier}));
+		groups.add(group);
+		rewrite.replace(name, rewrite.createStringPlaceholder(qualifier  + '.' + name.getIdentifier(), ASTNode.SIMPLE_NAME), group);
+	}
 
+	private String importClass(ITypeBinding toImport, ASTNode accessor, ImportRewrite imports) {
+		String qualifier= imports.addImport(toImport);
+		if (doesDeclare(toImport, getWrittenIn(accessor))) {
+			//The import is not required but is added by the ImportRewrite
+			imports.removeImport(toImport);
+		}
+		return qualifier;
+	}
+	
+	private ITypeBinding getWrittenIn(ASTNode node) {
+		TypeDeclaration current= (TypeDeclaration)ASTNodes.getParent(node, TypeDeclaration.class);
+		TypeDeclaration importingClass= null;
+		do {
+			importingClass= current;
+			current= (TypeDeclaration)ASTNodes.getParent(current, TypeDeclaration.class);
+		} while (current != null);
+		return importingClass.resolveBinding();
+	}
+	
+	private boolean doesDeclare(ITypeBinding declaredClass, ITypeBinding declaringClass) {
+		ITypeBinding[] declaredTypes= declaringClass.getDeclaredTypes();
+		for (int i= 0; i < declaredTypes.length; i++) {
+			if (declaredTypes[i] == declaredClass) {
+				return true;
+			} else {
+				if (doesDeclare(declaredClass, declaredTypes[i])) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
 }

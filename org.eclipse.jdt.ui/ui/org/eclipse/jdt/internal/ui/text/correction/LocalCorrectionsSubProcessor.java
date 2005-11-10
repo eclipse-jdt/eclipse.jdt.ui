@@ -52,12 +52,10 @@ import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
-import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
@@ -310,119 +308,31 @@ public class LocalCorrectionsSubProcessor {
 	 * Fix instance accesses and indirect (static) accesses to static fields/methods
 	 */
 	public static void addCorrectAccessToStaticProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		ICompilationUnit cu= context.getCompilationUnit();
-
-		CompilationUnit astRoot= context.getASTRoot();
-		ASTNode selectedNode= problem.getCoveringNode(astRoot);
-		if (selectedNode == null) {
+		IFix fix= CodeStyleFix.createFix(context.getASTRoot(), problem, false, true);
+		if (fix != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleMultiFix(false, false, false, true), 6, image);
+			proposal.setCommandId(ADD_STATIC_ACCESS_ID);
+			proposals.add(proposal);
 			return;
 		}
-
-		Expression qualifier= null;
-		IBinding accessBinding= null;
-
-        if (selectedNode instanceof QualifiedName) {
-        	QualifiedName name= (QualifiedName) selectedNode;
-        	qualifier= name.getQualifier();
-        	accessBinding= name.resolveBinding();
-        } else if (selectedNode instanceof SimpleName) {
-        	ASTNode parent= selectedNode.getParent();
-        	if (parent instanceof FieldAccess) {
-        		FieldAccess fieldAccess= (FieldAccess) parent;
-        		qualifier= fieldAccess.getExpression();
-        		accessBinding= fieldAccess.getName().resolveBinding();
-        	} else if (parent instanceof QualifiedName) {
-        		QualifiedName qualifiedName= (QualifiedName) parent;
-        		qualifier= qualifiedName.getQualifier();
-        		accessBinding= qualifiedName.getName().resolveBinding();
-        	}
-        } else if (selectedNode instanceof MethodInvocation) {
-        	MethodInvocation methodInvocation= (MethodInvocation) selectedNode;
-        	qualifier= methodInvocation.getExpression();
-        	accessBinding= methodInvocation.getName().resolveBinding();
-        } else if (selectedNode instanceof FieldAccess) {
-			FieldAccess fieldAccess= (FieldAccess) selectedNode;
-			qualifier= fieldAccess.getExpression();
-			accessBinding= fieldAccess.getName().resolveBinding();
-		}
-
-		if (problem.getProblemId() == IProblem.IndirectAccessToStaticField || problem.getProblemId() == IProblem.IndirectAccessToStaticMethod) {
-			// indirectAccessToStaticProposal
-			if (accessBinding != null) {
-				ITypeBinding declaringTypeBinding= getDeclaringTypeBinding(accessBinding);
-				if (declaringTypeBinding != null) {
-					declaringTypeBinding= declaringTypeBinding.getTypeDeclaration(); // use generic to avoid any type arguments
-					ASTRewrite rewrite= ASTRewrite.create(selectedNode.getAST());
-					ImportRewrite imports= new ImportRewrite(cu);
-
-					String typeName= imports.addImport(declaringTypeBinding);
-					rewrite.replace(qualifier, ASTNodeFactory.newName(astRoot.getAST(), typeName), null);
-
-					String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_indirectaccesstostatic_description, declaringTypeBinding.getName());
-					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
-					proposal.setImportRewrite(imports);
-					proposal.setCommandId(ADD_STATIC_ACCESS_ID);
-					proposals.add(proposal);
-				}
-			}
-			return;
-		}
-
-
-		ITypeBinding declaringTypeBinding= null;
-		if (accessBinding != null) {
-			declaringTypeBinding= getDeclaringTypeBinding(accessBinding);
-			if (declaringTypeBinding != null) {
-				declaringTypeBinding= declaringTypeBinding.getTypeDeclaration(); // use generic to avoid any type arguments
-				ASTRewrite rewrite= ASTRewrite.create(selectedNode.getAST());
-				ImportRewrite imports= new ImportRewrite(cu);
-
-				String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_changeaccesstostaticdefining_description, declaringTypeBinding.getName());
-				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 6, image);
-				proposal.setImportRewrite(imports);
-				proposal.setCommandId(ADD_STATIC_ACCESS_ID);
-
-				String typeName= imports.addImport(declaringTypeBinding);
-				rewrite.replace(qualifier, ASTNodeFactory.newName(astRoot.getAST(), typeName), null);
-
+		
+		IFix[] fixes= CodeStyleFix.createFixForNonStaticAccess(context.getASTRoot(), problem);
+		if (fixes != null) {
+			IFix fix1= fixes[0];
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix1, new CodeStyleMultiFix(false, true, false, true), 6, image);
+			proposal.setCommandId(ADD_STATIC_ACCESS_ID);
+			proposals.add(proposal);
+			
+			if (fixes.length > 1) {
+				IFix fix2= fixes[1];
+				proposal= new FixCorrectionProposal(fix2, new CodeStyleMultiFix(false, true, false, true), 5, image);
 				proposals.add(proposal);
-			}
-		}
-		if (qualifier != null) {
-			ITypeBinding instanceTypeBinding= Bindings.normalizeTypeBinding(qualifier.resolveTypeBinding());
-			if (instanceTypeBinding != null) {
-				instanceTypeBinding= instanceTypeBinding.getTypeDeclaration();  // use generic to avoid any type arguments
-				if (instanceTypeBinding.getTypeDeclaration() != declaringTypeBinding) {
-					ASTRewrite rewrite= ASTRewrite.create(selectedNode.getAST());
-					ImportRewrite imports= new ImportRewrite(cu);
-
-					String label= Messages.format(CorrectionMessages.LocalCorrectionsSubProcessor_changeaccesstostatic_description, instanceTypeBinding.getName());
-					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, 5, image);
-					proposal.setImportRewrite(imports);
-
-					String typeName= imports.addImport(instanceTypeBinding);
-					rewrite.replace(qualifier, ASTNodeFactory.newName(astRoot.getAST(), typeName), null);
-
-					proposals.add(proposal);
-				}
 			}
 		}
 		ModifierCorrectionSubProcessor.addNonAccessibleReferenceProposal(context, problem, proposals, ModifierCorrectionSubProcessor.TO_NON_STATIC, 4);
 	}
-
-	private static ITypeBinding getDeclaringTypeBinding(IBinding accessBinding) {
-		if (accessBinding instanceof IMethodBinding) {
-			return ((IMethodBinding) accessBinding).getDeclaringClass();
-		} else if (accessBinding instanceof IVariableBinding) {
-			return ((IVariableBinding) accessBinding).getDeclaringClass();
-		}
-		return null;
-	}
-
-
 
 	public static void addUnimplementedMethodsProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
@@ -630,7 +540,7 @@ public class LocalCorrectionsSubProcessor {
 		IFix fix= CodeStyleFix.createFix(context.getASTRoot(), problem, true, false);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleMultiFix(true, false), 5, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleMultiFix(true, false, false, false), 5, image);
 			proposal.setCommandId(ADD_FIELD_QUALIFICATION_ID);
 			proposals.add(proposal);
 		}

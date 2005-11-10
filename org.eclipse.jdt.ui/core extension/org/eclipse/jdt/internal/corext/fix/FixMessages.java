@@ -39,6 +39,8 @@ public class FixMessages extends NLS {
 	public static String CodeStyleFix_ChangeAccessToStatic_description;
 	public static String CodeStyleFix_AddThisQualifier_description;
 	public static String CodeStyleFix_QualifyWithThis_description;
+	public static String CodeStyleFix_ChangeAccessToStaticUsingInstanceType_description;
+	public static String CodeStyleFix_ChangeStaticAccess_description;
 
 	static {
 		// initialize resource bundle

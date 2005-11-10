@@ -38,32 +38,46 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
  */
 public class CodeStyleMultiFix extends AbstractMultiFix {
 
+	private static final String CHANGE_INDIRECT_STATIC_ACCESS_TO_STATIC_SETTINGS_ID= "ChangeIndirectStaticAccessToStatic"; //$NON-NLS-1$
+	private static final String QUALIFY_STATIC_FIELD_ACCESS_SETTINGS_ID= "QualifyStaticFieldAccessWithDeclaringClass"; //$NON-NLS-1$
 	private static final String CHANGE_NON_STATIC_ACCESS_TO_STATIC_SETTINGS_ID= "ChangeNonStaticAccessToStatic"; //$NON-NLS-1$
 	private static final String ADD_THIS_QUALIFIER_SETTINGS_ID= "AddThisQualifier"; //$NON-NLS-1$
 	
 	private boolean fAddThisQualifier;
 	private boolean fChangeNonStaticAccessToStatic;
+	private boolean fQualifyStaticFieldAccessWithDeclaringClass;
+	private boolean fChangeIndirectStaticAccessToDirect;
 	
-	public CodeStyleMultiFix(boolean addThisQualifier, boolean changeNonStaticAccessToStatic) {
-		fAddThisQualifier= addThisQualifier;
+	public CodeStyleMultiFix(boolean qualifyFieldAccess, 
+			boolean changeNonStaticAccessToStatic, 
+			boolean qualifyStaticFieldAccess, boolean changeIndirectStaticAccessToDirect) {
+		
+		fAddThisQualifier= qualifyFieldAccess;
 		fChangeNonStaticAccessToStatic= changeNonStaticAccessToStatic;
+		fQualifyStaticFieldAccessWithDeclaringClass= qualifyStaticFieldAccess;
+		fChangeIndirectStaticAccessToDirect= changeIndirectStaticAccessToDirect;
 	}
 
 	public CodeStyleMultiFix(IDialogSettings settings) {
-		this(settings.getBoolean(ADD_THIS_QUALIFIER_SETTINGS_ID), settings.getBoolean(CHANGE_NON_STATIC_ACCESS_TO_STATIC_SETTINGS_ID));
+		this(settings.getBoolean(ADD_THIS_QUALIFIER_SETTINGS_ID), 
+				settings.getBoolean(CHANGE_NON_STATIC_ACCESS_TO_STATIC_SETTINGS_ID),
+				settings.getBoolean(QUALIFY_STATIC_FIELD_ACCESS_SETTINGS_ID),
+				settings.getBoolean(CHANGE_INDIRECT_STATIC_ACCESS_TO_STATIC_SETTINGS_ID));
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
-		return CodeStyleFix.createCleanUp(compilationUnit, fAddThisQualifier, fChangeNonStaticAccessToStatic);
+		return CodeStyleFix.createCleanUp(compilationUnit, fAddThisQualifier, fChangeNonStaticAccessToStatic, fQualifyStaticFieldAccessWithDeclaringClass, fChangeIndirectStaticAccessToDirect);
 	}
 
 	public Map getRequiredOptions() {
 		Map options= new Hashtable();
 		if (fChangeNonStaticAccessToStatic)
 			options.put(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER, JavaCore.WARNING);
+		if (fChangeIndirectStaticAccessToDirect)
+			options.put(JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS, JavaCore.WARNING);
 		return options;
 	}
 
@@ -82,6 +96,16 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 			}
 		});
 		
+		Button qualifyStaticAccess= new Button(composite, SWT.CHECK);
+		qualifyStaticAccess.setText(MultiFixMessages.CodeStyleMultiFix_QualifyAccessToStaticField);
+		qualifyStaticAccess.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		qualifyStaticAccess.setSelection(fQualifyStaticFieldAccessWithDeclaringClass);
+		qualifyStaticAccess.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fQualifyStaticFieldAccessWithDeclaringClass= ((Button)e.getSource()).getSelection();
+			}
+		});
+		
 		Button removeNonStaticAccess= new Button(composite, SWT.CHECK);
 		removeNonStaticAccess.setText(MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description);
 		removeNonStaticAccess.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
@@ -92,12 +116,24 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 			}
 		});
 		
+		Button indirectStaticAccess= new Button(composite, SWT.CHECK);
+		indirectStaticAccess.setText(MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect);
+		indirectStaticAccess.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		indirectStaticAccess.setSelection(fChangeIndirectStaticAccessToDirect);
+		indirectStaticAccess.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fChangeIndirectStaticAccessToDirect= ((Button)e.getSource()).getSelection();
+			}
+		});
+		
 		return composite;
 	}
 
 	public void saveSettings(IDialogSettings settings) {
 		settings.put(ADD_THIS_QUALIFIER_SETTINGS_ID, fAddThisQualifier);
 		settings.put(CHANGE_NON_STATIC_ACCESS_TO_STATIC_SETTINGS_ID, fChangeNonStaticAccessToStatic);
+		settings.put(QUALIFY_STATIC_FIELD_ACCESS_SETTINGS_ID, fQualifyStaticFieldAccessWithDeclaringClass);
+		settings.put(CHANGE_INDIRECT_STATIC_ACCESS_TO_STATIC_SETTINGS_ID, fChangeIndirectStaticAccessToDirect);
 	}
 
 }

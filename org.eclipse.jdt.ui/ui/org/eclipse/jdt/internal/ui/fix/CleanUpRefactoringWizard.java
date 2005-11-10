@@ -255,7 +255,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			fMultiFixes= new NameFixTuple[4];
 			if (section == null) {
 				section= settings.addNewSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);
-				fMultiFixes[0]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description, new CodeStyleMultiFix(false, true));
+				fMultiFixes[0]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description, new CodeStyleMultiFix(false, true, false, false));
 				fMultiFixes[1]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description, new UnusedCodeMultiFix(true, true, true, false, true, false));	
 				fMultiFixes[2]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_J2SE50Section_description, new Java50MultiFix(true, true));
 				fMultiFixes[3]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_StringExternalization_description, new StringMultiFix(false, true));
