@@ -27,11 +27,9 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
-import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
-import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
@@ -46,8 +44,8 @@ public final class ExperimentalProposal extends JavaMethodCompletionProposal {
 	private int[] fArgumentOffsets;
 	private int[] fArgumentLengths;
 
-	public ExperimentalProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu, CompletionProposalLabelProvider labelProvider) {
-		super(proposal, context, cu, labelProvider);
+	public ExperimentalProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
+		super(proposal, context);
 	}
 
 	/*

@@ -3297,6 +3297,16 @@ public class PreferenceConstants {
 	 */
 	public static final String PROPERTIES_FILE_COLORING_ARGUMENT_UNDERLINE= PROPERTIES_FILE_COLORING_ARGUMENT + EDITOR_UNDERLINE_SUFFIX;
 
+	/**
+	 * A named preference that stores the content assist LRU history
+	 * <p>
+	 * Value is an XML encoded version of the history.
+	 * </p>
+	 * 
+	 * @since 3.2
+	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory#load(org.eclipse.core.runtime.Preferences, String)
+	 */
+	public static final String CODEASSIST_LRU_HISTORY= "content_assist_lru_history"; //$NON-NLS-1$
 
 	
 	/**
@@ -3479,6 +3489,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION, false);
 		store.setDefault(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES, "org.eclipse.jdt.ui.spellingProposalCategory\0org.eclipse.jdt.ui.textProposalCategory\0"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_CATEGORY_ORDER, "org.eclipse.jdt.ui.spellingProposalCategory:65545\0org.eclipse.jdt.ui.javaTypeProposalCategory:65540\0org.eclipse.jdt.ui.javaNoTypeProposalCategory:65539\0org.eclipse.jdt.ui.textProposalCategory:65541\0org.eclipse.jdt.ui.templateProposalCategory:2\0"); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.CODEASSIST_LRU_HISTORY, ""); //$NON-NLS-1$
 
 		store.setDefault(PreferenceConstants.EDITOR_SMART_HOME_END, true);
 		store.setDefault(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, true);

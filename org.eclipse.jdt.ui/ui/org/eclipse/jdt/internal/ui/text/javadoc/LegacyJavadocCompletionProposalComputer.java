@@ -76,7 +76,7 @@ public class LegacyJavadocCompletionProposalComputer implements ICompletionPropo
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
 			
-			ICompilationUnit cu= javaContext.computeCompilationUnit();
+			ICompilationUnit cu= javaContext.getCompilationUnit();
 			int offset= javaContext.getInvocationOffset();
 			
 			ArrayList result= new ArrayList();
@@ -103,7 +103,7 @@ public class LegacyJavadocCompletionProposalComputer implements ICompletionPropo
 		if (context instanceof JavadocContentAssistInvocationContext) {
 			JavadocContentAssistInvocationContext javaContext= (JavadocContentAssistInvocationContext) context;
 			
-			ICompilationUnit cu= javaContext.computeCompilationUnit();
+			ICompilationUnit cu= javaContext.getCompilationUnit();
 			int offset= javaContext.getInvocationOffset();
 			int length= javaContext.getSelectionLength();
 			Point selection= javaContext.getViewer().getSelectedRange();

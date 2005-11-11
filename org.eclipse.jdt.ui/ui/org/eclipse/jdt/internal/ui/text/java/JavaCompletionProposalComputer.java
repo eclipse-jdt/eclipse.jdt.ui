@@ -194,14 +194,14 @@ public class JavaCompletionProposalComputer implements ICompletionProposalComput
 	}
 
 	private List internalComputeCompletionProposals(int offset, JavaContentAssistInvocationContext context, IProgressMonitor monitor) {
-		ICompilationUnit unit= context.computeCompilationUnit();
+		ICompilationUnit unit= context.getCompilationUnit();
 		if (unit == null)
 			return Collections.EMPTY_LIST;
 		
 		ITextViewer viewer= context.getViewer();
 		
 		CompletionProposalCollector collector= createCollector(context);
-		context.setCollector(collector);
+		collector.setInvocationContext(context);
 
 		try {
 			Point selection= viewer.getSelectedRange();
@@ -239,6 +239,6 @@ public class JavaCompletionProposalComputer implements ICompletionProposalComput
 		if (PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES))
 			return new ExperimentalResultCollector(context);
 		else
-			return new CompletionProposalCollector(context.computeCompilationUnit());
+			return new CompletionProposalCollector(context.getCompilationUnit());
 	}
 }

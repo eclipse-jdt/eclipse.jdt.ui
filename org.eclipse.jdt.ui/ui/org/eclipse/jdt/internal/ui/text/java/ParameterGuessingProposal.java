@@ -45,7 +45,6 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -67,12 +66,8 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 	private IRegion fSelectedRegion; // initialized by apply()
 	private IPositionUpdater fUpdater;
 
-	private final JavaContentAssistInvocationContext fInvocationContext;
-
-
- 	public ParameterGuessingProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context, ICompilationUnit cu, CompletionProposalLabelProvider labelProvider) {
- 		super(proposal, context.getContext(), cu, labelProvider);
-		fInvocationContext= context;
+ 	public ParameterGuessingProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
+ 		super(proposal, context);
  	}
 
 	/*
@@ -245,9 +240,10 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 		fChoices= new ICompletionProposal[count][];
 
 		IDocument document= fInvocationContext.getDocument();
-		JavaModelUtil.reconcile(fCompilationUnit);
+		ICompilationUnit cu= fInvocationContext.getCompilationUnit();
+		JavaModelUtil.reconcile(cu);
 		String[][] parameterTypes= getParameterSignatures();
-		ParameterGuesser guesser= new ParameterGuesser(fProposal.getCompletionLocation() + 1, fCompilationUnit);
+		ParameterGuesser guesser= new ParameterGuesser(fProposal.getCompletionLocation() + 1, cu);
 		
 		for (int i= count - 1; i >= 0; i--) {
 			String paramName= new String(parameterNames[i]);

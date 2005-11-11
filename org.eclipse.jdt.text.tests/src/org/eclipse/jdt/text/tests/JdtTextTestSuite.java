@@ -13,8 +13,9 @@ package org.eclipse.jdt.text.tests;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
+
 import org.eclipse.jdt.text.tests.comments.CommentsTestSuite;
-import org.eclipse.jdt.text.tests.contentassist.JavadocCompletionTest;
+import org.eclipse.jdt.text.tests.contentassist.ContentAssistTestSuite;
 import org.eclipse.jdt.text.tests.spelling.SpellingTestSuite;
 
 
@@ -52,7 +53,7 @@ public class JdtTextTestSuite {
 		suite.addTest(NewForLoopJavaContextTest.suite());
 		suite.addTest(JavaDoubleClickSelectorTest.suite());
 		suite.addTest(BreakContinueTargetFinderTest.suite());
-		suite.addTest(JavadocCompletionTest.suite());
+		suite.addTest(ContentAssistTestSuite.suite());
 		//$JUnit-END$
 		
 		return suite;

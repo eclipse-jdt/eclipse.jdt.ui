@@ -30,13 +30,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public final class ExperimentalResultCollector extends CompletionProposalCollector {
 
-	private final JavaContentAssistInvocationContext fInvocationContext;
 	private final boolean fIsGuessArguments;
 
 	public ExperimentalResultCollector(JavaContentAssistInvocationContext context) {
-		super(context.computeCompilationUnit());
-		fInvocationContext= context;
-		fInvocationContext.setCollector(this);
+		super(context.getCompilationUnit());
+		setInvocationContext(context);
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		fIsGuessArguments= preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_GUESS_METHOD_ARGUMENTS);
 	}
@@ -65,9 +63,9 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		LazyJavaCompletionProposal proposal;
 		ICompilationUnit compilationUnit= getCompilationUnit();
 		if (compilationUnit != null && fIsGuessArguments)
-			proposal= new ParameterGuessingProposal(methodProposal, fInvocationContext, compilationUnit, getLabelProvider());
+			proposal= new ParameterGuessingProposal(methodProposal, getInvocationContext());
 		else
-			proposal= new ExperimentalProposal(methodProposal, getContext(), compilationUnit, getLabelProvider());
+			proposal= new ExperimentalProposal(methodProposal, getInvocationContext());
 		return proposal;
 	}
 
@@ -88,7 +86,7 @@ public final class ExperimentalResultCollector extends CompletionProposalCollect
 		if (completion.length == 0 || completion[completion.length - 1] == ';')
 			return super.createJavaCompletionProposal(typeProposal);
 
-		LazyJavaCompletionProposal newProposal= new GenericJavaTypeProposal(typeProposal, getContext(), cu, getLabelProvider());
+		LazyJavaCompletionProposal newProposal= new GenericJavaTypeProposal(typeProposal, getInvocationContext());
 		return newProposal;
 	}
 

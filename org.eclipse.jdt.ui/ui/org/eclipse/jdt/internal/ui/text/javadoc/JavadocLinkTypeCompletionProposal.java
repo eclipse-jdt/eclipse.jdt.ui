@@ -12,13 +12,11 @@ package org.eclipse.jdt.internal.ui.text.javadoc;
 
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
-import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
 
@@ -29,9 +27,9 @@ import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
  */
 public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeCompletionProposal {
 
-	public JavadocLinkTypeCompletionProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu, CompletionProposalLabelProvider labelProvider) {
-		super(proposal, context, cu, labelProvider);
-		Assert.isTrue(context.isInJavadoc());
+	public JavadocLinkTypeCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
+		super(proposal, context);
+		Assert.isTrue(fInvocationContext.getCoreContext().isInJavadoc());
 	}
 	
 	/*

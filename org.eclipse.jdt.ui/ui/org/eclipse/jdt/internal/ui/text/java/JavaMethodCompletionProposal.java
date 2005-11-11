@@ -15,16 +15,14 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
-import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -75,16 +73,13 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	protected static final String COMMA= ","; //$NON-NLS-1$
 	protected static final String SPACE= " "; //$NON-NLS-1$
 
-	protected final ICompilationUnit fCompilationUnit;
-	
 	private boolean fHasParameters;
 	private boolean fHasParametersComputed= false;
 	private int fContextInformationPosition;
 	private FormatterPrefs fFormatterPrefs;
 
-	public JavaMethodCompletionProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu, CompletionProposalLabelProvider labelProvider) {
-		super(proposal, context, labelProvider);
-		fCompilationUnit= cu;
+	public JavaMethodCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
+		super(proposal, context);
 	}
 
 	public void apply(IDocument document, char trigger, int offset) {
@@ -156,7 +151,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		boolean noOverwrite= preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION) ^ isToggleEating();
 		char[] completion= fProposal.getCompletion();
-		return !fContext.isInJavadoc() && completion.length > 0 && (noOverwrite  || completion[completion.length - 1] == ')');
+		return !fInvocationContext.getCoreContext().isInJavadoc() && completion.length > 0 && (noOverwrite  || completion[completion.length - 1] == ')');
 	}
 
 	/**
@@ -166,7 +161,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	 */
 	protected final FormatterPrefs getFormatterPrefs() {
 		if (fFormatterPrefs == null)
-			fFormatterPrefs= new FormatterPrefs(fCompilationUnit == null ? null : fCompilationUnit.getJavaProject());
+			fFormatterPrefs= new FormatterPrefs(fInvocationContext.getProject());
 		return fFormatterPrefs;
 	}
 	
@@ -208,11 +203,9 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	}
 	
 	protected ProposalInfo computeProposalInfo() {
-		if (fCompilationUnit != null) {
-			IJavaProject project= fCompilationUnit.getJavaProject();
-			if (project != null)
-				return new MethodProposalInfo(project, fProposal);
-		}
+		IJavaProject project= fInvocationContext.getProject();
+		if (project != null)
+			return new MethodProposalInfo(project, fProposal);
 		return super.computeProposalInfo();
 	}
 	

@@ -26,17 +26,20 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
+import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDocCompletionEvaluator;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.text.javadoc.JavadocCompletionProcessor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -100,6 +103,7 @@ public class JavadocCompletionTest extends TestCase {
 	private IPackageFragment fPackage;
 	private String fTypeDeclaration;
 	private ICompilationUnit fCU;
+	private JavaEditor fEditor;
 
 	public JavadocCompletionTest(String name) {
 		super(name);
@@ -454,8 +458,10 @@ public class JavadocCompletionTest extends TestCase {
  		}
 		tearDown();
 		for (int i= 0; i < TYPE_BLOCK_TAGS.length; i++) {
-			setUp();
 			String tag= TYPE_BLOCK_TAGS[i];
+			if ("@author".equals(tag))
+				continue;
+			setUp();
 			assertNoProposals(" * {@|", tag);
 			tearDown();
 		}
@@ -519,16 +525,16 @@ public class JavadocCompletionTest extends TestCase {
 	
 	private void assertJavadocProposal(String selector, StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection) throws JavaModelException, PartInitException {
 		fCU= createCU(fPackage, contents.toString());
-		ITextEditor editor= (ITextEditor) EditorUtility.openInEditor(fCU);
+		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
 		IDocument doc;
 		ITextSelection postSelection;
 		try {
-			IJavaCompletionProposal proposal= findNonNullProposal(selector, fCU, preSelection);
-			doc= editor.getDocumentProvider().getDocument(editor.getEditorInput());
-			apply(editor, doc, proposal, preSelection);
-			postSelection= (ITextSelection) editor.getSelectionProvider().getSelection();
+			ICompletionProposal proposal= findNonNullProposal(selector, fCU, preSelection);
+			doc= fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+			apply(fEditor, doc, proposal, preSelection);
+			postSelection= (ITextSelection) fEditor.getSelectionProvider().getSelection();
 		} finally {
-			EditorTestHelper.closeEditor(editor);
+			EditorTestHelper.closeEditor(fEditor);
 		}
 
 		assertEquals(result.toString(), doc.get());
@@ -541,11 +547,11 @@ public class JavadocCompletionTest extends TestCase {
 		IRegion preSelection= assembleTestCUExtractSelection(contents, javadocLine, "");
 		ICompilationUnit cu= createCU(fPackage, contents.toString());
 
-		ITextEditor editor= (ITextEditor) EditorUtility.openInEditor(cu);
+		fEditor= (JavaEditor) EditorUtility.openInEditor(cu);
 		try {
-			assertNull(findNamedProposal(selector, cu, preSelection));
+			assertNull("illegal proposal for \"" + selector +"\"", findNamedProposal(selector, cu, preSelection));
 		} finally {
-			EditorTestHelper.closeEditor(editor);
+			EditorTestHelper.closeEditor(fEditor);
 		}
 		
 	}
@@ -602,44 +608,37 @@ public class JavadocCompletionTest extends TestCase {
 		return new Region(firstPipe + prefix.length(), secondPipe - firstPipe);
 	}
 
-	private IJavaCompletionProposal findNonNullProposal(String prefix, ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
-		IJavaCompletionProposal proposal= findNamedProposal(prefix, cu, selection);
+	private ICompletionProposal findNonNullProposal(String prefix, ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
+		ICompletionProposal proposal= findNamedProposal(prefix, cu, selection);
 		assertNotNull("no proposal starting with \"" + prefix + "\"", proposal);
 		return proposal;
 	}
 	
-	private IJavaCompletionProposal findNamedProposal(String prefix, ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
-		IJavaCompletionProposal[] proposals= collectProposals(cu, selection);
+	private ICompletionProposal findNamedProposal(String prefix, ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
+		ICompletionProposal[] proposals= collectProposals(cu, selection);
 		
+		ICompletionProposal found= null;
 		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith(prefix)) {
-				return proposals[i];
+			String displayString= proposals[i].getDisplayString();
+			if (displayString.startsWith(prefix)) {
+				if (found == null || displayString.equals(prefix))
+					found= proposals[i];
 			}
 		}
-		return null;
+		return found;
 	}
 
-	private IJavaCompletionProposal[] collectProposals(ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
-		if (OLD) {
-			JavaDocCompletionEvaluator evaluator= new JavaDocCompletionEvaluator();
-			IJavaCompletionProposal[] proposals= evaluator.computeCompletionProposals(cu, selection.getOffset(), selection.getLength(), 0);
-			return proposals == null ? new IJavaCompletionProposal[0] : proposals;
-		}
+	private ICompletionProposal[] collectProposals(ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
 		
-		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
-		if (selection.getLength() > 0)
-			collector.setReplacementLength(selection.getLength());
-		codeComplete(cu, selection.getOffset(), collector);
+		ContentAssistant assistant= new ContentAssistant();
+		assistant.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
+		IContentAssistProcessor javaProcessor= new JavadocCompletionProcessor(fEditor, assistant);
 
-		IJavaCompletionProposal[] proposals= collector.getJavaCompletionProposals();
+		ICompletionProposal[] proposals= javaProcessor.computeCompletionProposals(fEditor.getViewer(), selection.getOffset());
 		return proposals;
 	}
 
-	private void codeComplete(ICompilationUnit cu, int offset, CompletionProposalCollector collector) throws JavaModelException {
-		cu.codeComplete(offset, collector);
-	}
-
-	private void apply(ITextEditor editor, IDocument doc, IJavaCompletionProposal proposal, IRegion selection) {
+	private void apply(ITextEditor editor, IDocument doc, ICompletionProposal proposal, IRegion selection) {
 		if (proposal instanceof ICompletionProposalExtension2) {
 			ICompletionProposalExtension2 ext= (ICompletionProposalExtension2) proposal;
 			ITextViewer viewer= (ITextViewer) editor.getAdapter(ITextOperationTarget.class);

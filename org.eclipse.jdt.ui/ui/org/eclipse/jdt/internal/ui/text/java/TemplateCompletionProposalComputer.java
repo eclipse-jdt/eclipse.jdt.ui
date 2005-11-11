@@ -31,7 +31,6 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
-import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
@@ -89,7 +88,7 @@ public final class TemplateCompletionProposalComputer implements ICompletionProp
 				return Collections.EMPTY_LIST;
 
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
-			ICompilationUnit unit= javaContext.computeCompilationUnit();
+			ICompilationUnit unit= javaContext.getCompilationUnit();
 			if (unit == null)
 				return Collections.EMPTY_LIST;
 			
@@ -99,8 +98,8 @@ public final class TemplateCompletionProposalComputer implements ICompletionProp
 			TemplateProposal[] templateProposals= engine.getResults();
 			List result= new ArrayList(Arrays.asList(templateProposals));
 
-			CompletionProposalCollector collector= javaContext.getCollector();
-			if (collector != null) {
+			IJavaCompletionProposal[] keyWordResults= javaContext.getKeywordProposals();
+			if (keyWordResults.length > 0) {
 				List removals= new ArrayList();
 				
 				// update relevance of template proposals that match with a keyword
@@ -108,7 +107,6 @@ public final class TemplateCompletionProposalComputer implements ICompletionProp
 				// sort them first
 				// remove keyword templates that don't have an equivalent
 				// keyword proposal
-				IJavaCompletionProposal[] keyWordResults= collector.getKeywordCompletionProposals();
 				if (keyWordResults.length > 0) {
 					outer: for (int k= 0; k < templateProposals.length; k++) {
 						TemplateProposal curr= templateProposals[k];

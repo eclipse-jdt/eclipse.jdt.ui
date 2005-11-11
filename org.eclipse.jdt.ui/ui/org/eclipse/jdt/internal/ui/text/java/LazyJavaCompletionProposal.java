@@ -53,15 +53,14 @@ import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
-import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.JavaTextTools;
-import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -193,21 +192,25 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	private boolean fRelevanceComputed;
 	private int fRelevance;
 	
+	/**
+	 * The core proposal wrapped by this completion proposal.
+	 */
 	protected final CompletionProposal fProposal;
-	protected final CompletionContext fContext;
-	protected final CompletionProposalLabelProvider fLabelProvider;
+	/**
+	 * The invocation context of this completion proposal.
+	 */
+	protected final JavaContentAssistInvocationContext fInvocationContext;
 	
 	private StyleRange fRememberedStyleRange;
 	private boolean fToggleEating;
 	private ITextViewer fTextViewer;
 
-	public LazyJavaCompletionProposal(CompletionProposal proposal, CompletionContext context, CompletionProposalLabelProvider labelProvider) {
+	public LazyJavaCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
 		Assert.isNotNull(proposal);
 		Assert.isNotNull(context);
-		Assert.isNotNull(labelProvider);
+		Assert.isNotNull(context.getCoreContext());
+		fInvocationContext= context;
 		fProposal= proposal;
-		fContext = context;
-		fLabelProvider= labelProvider;
 	}
 
 	/*
@@ -373,7 +376,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 		
 		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96059
 		// don't apply the proposal if for some reason we're not valid any longer
-		if (!fContext.isInJavadoc() && !validate(document, offset, null)) {
+		if (!fInvocationContext.getCoreContext().isInJavadoc() && !validate(document, offset, null)) {
 			setCursorPosition(offset - getReplacementOffset());
 			if (trigger != '\0') {
 				try {
@@ -443,7 +446,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	}
 
 	protected String computeDisplayString() {
-		return fLabelProvider.createLabel(fProposal);
+		return fInvocationContext.getLabelProvider().createLabel(fProposal);
 	}
 
 	/*
@@ -553,7 +556,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	}
 
 	protected Image computeImage() {
-		return JavaPlugin.getImageDescriptorRegistry().get(fLabelProvider.createImageDescriptor(fProposal));
+		return JavaPlugin.getImageDescriptorRegistry().get(fInvocationContext.getLabelProvider().createImageDescriptor(fProposal));
 	}
 
 	/**

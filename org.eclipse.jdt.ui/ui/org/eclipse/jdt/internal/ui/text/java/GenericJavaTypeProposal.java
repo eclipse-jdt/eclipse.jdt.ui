@@ -40,7 +40,6 @@ import org.eclipse.jface.text.link.LinkedPositionGroup;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
-import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -59,7 +58,7 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
-import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
@@ -213,8 +212,8 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	private IRegion fSelectedRegion; // initialized by apply()
 	private TypeArgumentProposal[] fTypeArgumentProposals;
 
-	public GenericJavaTypeProposal(CompletionProposal typeProposal, CompletionContext context, ICompilationUnit cu, CompletionProposalLabelProvider labelProvider) {
-		super(typeProposal, context, cu, labelProvider);
+	public GenericJavaTypeProposal(CompletionProposal typeProposal, JavaContentAssistInvocationContext context) {
+		super(typeProposal, context);
 	}
 
 	/*
@@ -605,7 +604,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	 * @return the binding of the expected type
 	 */
 	private ITypeBinding getExpectedType() {
-		char[][] chKeys= fContext.getExpectedTypesKeys();
+		char[][] chKeys= fInvocationContext.getCoreContext().getExpectedTypesKeys();
 		if (chKeys == null || chKeys.length == 0)
 			return null;
 

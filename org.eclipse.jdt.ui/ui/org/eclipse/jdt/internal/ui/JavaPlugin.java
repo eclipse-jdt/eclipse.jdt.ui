@@ -14,6 +14,7 @@ package org.eclipse.jdt.internal.ui;
 import java.io.IOException;
 import java.util.LinkedHashMap;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -88,6 +89,7 @@ import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileStore;
 import org.eclipse.jdt.internal.ui.propertiesfileeditor.PropertiesFileDocumentProvider;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.folding.JavaFoldingStructureProviderRegistry;
+import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory;
 import org.eclipse.jdt.internal.ui.text.java.hover.JavaEditorTextHoverDescriptor;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemMarkerManager;
@@ -209,6 +211,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 3.1
 	 */
 	private IDocumentProvider fPropertiesFileDocumentProvider;
+	/**
+	 * Content assist history.
+	 * 
+	 * @since 3.2
+	 */
+	private ContentAssistHistory fContentAssistHistory;
 	
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
@@ -501,6 +509,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 			if (fTypeFilter != null) {
 				fTypeFilter.dispose();
 				fTypeFilter= null;
+			}
+			
+			if (fContentAssistHistory != null) {
+				ContentAssistHistory.store(fContentAssistHistory, getPluginPreferences(), PreferenceConstants.CODEASSIST_LRU_HISTORY);
+				fContentAssistHistory= null;
 			}
 			
 			uninstallPreferenceStoreBackwardsCompatibility();
@@ -804,5 +817,25 @@ public class JavaPlugin extends AbstractUIPlugin {
 		if (fFoldingStructureProviderRegistry == null)
 			fFoldingStructureProviderRegistry= new JavaFoldingStructureProviderRegistry();
 		return fFoldingStructureProviderRegistry;
+	}
+
+	/**
+	 * Returns the Java content assist history.
+	 * 
+	 * @return the Java content assist history
+	 * @since 3.2
+	 */
+	public ContentAssistHistory getContentAssistHistory() {
+		if (fContentAssistHistory == null) {
+			try {
+				fContentAssistHistory= ContentAssistHistory.load(getPluginPreferences(), PreferenceConstants.CODEASSIST_LRU_HISTORY);
+			} catch (CoreException x) {
+				log(x);
+			}
+			if (fContentAssistHistory == null)
+				fContentAssistHistory= new ContentAssistHistory();
+		}
+
+		return fContentAssistHistory;
 	}
 }

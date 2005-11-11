@@ -59,4 +59,6 @@ final class JavaTextMessages extends NLS {
 	public static String ContentAssistProcessor_toggle_affordance_click_gesture;
 	public static String ContentAssistProcessor_toggle_affordance_update_message;
 	public static String ContentAssistProcessor_empty_message;
+	public static String ContentAssistHistory_serialize_error;
+	public static String ContentAssistHistory_deserialize_error;
 }

@@ -21,7 +21,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 
-import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -33,7 +32,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.java.CompletionProposalLabelProvider;
+import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -55,9 +54,9 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	private IType fType;
 	private ImportsStructure fImportStructure;
 
-	public LazyJavaTypeCompletionProposal(CompletionProposal proposal, CompletionContext context, ICompilationUnit cu, CompletionProposalLabelProvider labelProvider) {
-		super(proposal, context, labelProvider);
-		fCompilationUnit= cu;
+	public LazyJavaTypeCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
+		super(proposal, context);
+		fCompilationUnit= context.getCompilationUnit();
 		fQualifiedName= null;
 	}
 	
@@ -94,7 +93,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 			return super.computeReplacementString();
 		
 		// TODO fix
-		 if (fProposal.getKind() == CompletionProposal.TYPE_REF &&  fContext.isInJavadocText())
+		 if (fProposal.getKind() == CompletionProposal.TYPE_REF &&  fInvocationContext.getCoreContext().isInJavadocText())
 			 return getSimpleTypeName();
 		
 		fImportStructure= createImportStructure();
@@ -148,11 +147,27 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 				document.replace(getReplacementOffset() + getCursorPosition(), 0, ")"); //$NON-NLS-1$
 				setUpLinkedMode(document, ')');
 			}
+			
+			rememberSelection();
+			
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
+	}
+
+	/**
+	 * Remembers the selection in the content assist history.
+	 * 
+	 * @throws JavaModelException if anything goes wrong
+	 * @since 3.2
+	 */
+	protected final void rememberSelection() throws JavaModelException {
+		IType lhs= fInvocationContext.getExpectedType();
+		IType rhs= getProposedType();
+		if (lhs != null && rhs != null)
+			JavaPlugin.getDefault().getContentAssistHistory().remember(lhs, rhs);
 	}
 
 	/**
@@ -179,11 +194,11 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 * @return <code>true</code> if imports may be added, <code>false</code> if not
 	 */
 	protected boolean allowAddingImports() {
-		if (fContext.isInJavadoc()) {
+		if (fInvocationContext.getCoreContext().isInJavadoc()) {
 			// TODO fix
 //			if (!fContext.isInJavadocFormalReference())
 //				return false;
-			if (fProposal.getKind() == CompletionProposal.TYPE_REF &&  fContext.isInJavadocText())
+			if (fProposal.getKind() == CompletionProposal.TYPE_REF &&  fInvocationContext.getCoreContext().isInJavadocText())
 				return false;
 			
 			if (!isJavadocProcessingEnabled())
@@ -229,7 +244,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeTriggerCharacters()
 	 */
 	protected char[] computeTriggerCharacters() {
-		return fContext.isInJavadoc() ? JDOC_TYPE_TRIGGERS : TYPE_TRIGGERS;
+		return fInvocationContext.getCoreContext().isInJavadoc() ? JDOC_TYPE_TRIGGERS : TYPE_TRIGGERS;
 	}
 	
 	/*
@@ -250,5 +265,12 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	protected String computeSortString() {
 		// try fast sort string to avoid display string creation
 		return getSimpleTypeName() + Character.MIN_VALUE + getQualifiedTypeName();
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeRelevance()
+	 */
+	protected int computeRelevance() {
+		return super.computeRelevance() + fInvocationContext.getRHSHistory().getRank(getQualifiedTypeName());
 	}
 }
