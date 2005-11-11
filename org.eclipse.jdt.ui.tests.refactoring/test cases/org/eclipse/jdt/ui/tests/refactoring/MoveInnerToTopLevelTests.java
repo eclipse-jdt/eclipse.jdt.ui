@@ -301,6 +301,8 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		// validatePassingTest("A", "Inner", "", new String[]{"A"}, new String[]{""}, null, false, true, true, true);
 	}
 	
+	// ---- Visibility issues with the moved member itself and its parents
+	
 	// Move inner class; enclosing class must remain private if not  used
 	public void test32() throws Exception{
 		validatePassingTest("A", "Inner", "MoreInner", "p1", new String[]{"A"}, new String[]{"p1"}, null, false, false, false, false);
@@ -310,6 +312,26 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 	public void test33() throws Exception{
 		validatePassingTest("A", "Inner", "MoreInner", "p2", new String[]{"A"}, new String[]{"p2"}, null, false, false, false, false);
 	}
+	
+	// --- Visibility issues with members of moved members
+	
+	// Move inner class which has private members, which are accessed from enclosing types.
+	public void test34() throws Exception {
+		validatePassingTest("A", "SomeClass", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
+	}
+	
+	// Move inner class which has private members, but they are unused (and must remain private)
+	public void test35() throws Exception {
+		validatePassingTest("A", "Inner", "p", new String[] { "A"}, new String[] { "p"}, null, false, true, false, false);
+	}
+	
+	// Move inner class which has access private members, and accessing private members of
+	// enclosing class (4 visibility increments)
+	public void test36() throws Exception {
+		validatePassingTest("A", "SomeInner", "Inner", "p", new String[] { "A"}, new String[] { "p"}, null, false, false, false, false);
+	}
+	
+	// --- Non static
 	
 	public void test_nonstatic_0() throws Exception{
 		validatePassingTest("A", "Inner", new String[]{"A"}, new String[]{"p"}, "a", true, false);

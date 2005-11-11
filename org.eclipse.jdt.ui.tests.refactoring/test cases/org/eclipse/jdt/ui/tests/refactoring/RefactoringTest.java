@@ -397,7 +397,15 @@ public abstract class RefactoringTest extends TestCase {
 			return new IType[0];
 		Set memberTypes= new HashSet();
 		for (int i = 0; i < names.length; i++) {
-			IType memberType= type.getType(names[i]);
+			IType memberType;
+			if (names[i].indexOf('.') != -1) {
+				String[] path= names[i].split("\\.");
+				memberType= type.getType(path[0]);
+				for (int j= 1; j < path.length; j++) {
+					memberType= memberType.getType(path[j]);
+				}
+			} else
+				memberType= type.getType(names[i]);
 			assertTrue("member type " + memberType.getElementName() + " does not exist", memberType.exists());
 			memberTypes.add(memberType);
 		}

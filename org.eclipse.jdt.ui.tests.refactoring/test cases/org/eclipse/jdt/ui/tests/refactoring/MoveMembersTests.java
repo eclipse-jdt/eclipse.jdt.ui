@@ -435,6 +435,8 @@ public class MoveMembersTests extends RefactoringTest {
 		}	
 	}
 	
+	// --- Visibility issues of the moved member itself
+	
 	public void test49() throws Exception{
 		//Move protected used field into another package
 		IPackageFragment packageForB= null;
@@ -452,7 +454,59 @@ public class MoveMembersTests extends RefactoringTest {
 		//Move private used method into subtype.
 		methodHelper_passing(new String[]{"foo"}, new String[][]{new String[0]});
 	}
+	
+	public void test51() throws Exception {
+		//Move private static inner class with private field (but used in outer class)
+		//assure both class and field get their visibility increased
+		typeHelper_passing(new String[] { "Inner" });
+	}
+	
+	public void test52() throws Exception {
+		// assure moved unused field keeps its visibility
+		fieldHelper_passing(new String[] { "a" });
+	}
+	
+	public void test53() throws Exception {
+		// assure moved unusued class keeps its visibility
+		typeHelper_passing(new String[] { "C" });
+	}
+	
+	public void test54() throws Exception {
+		// moved used method is changed in visibility
+		methodHelper_passing(new String[] { "b" }, new String[][]{new String[0]});
+	}
+	
+	public void test55() throws Exception {
+		// moved used method is changed in visibility
+		typeHelper_passing(new String[] { "C" });
+	}
+	
+	// --- Visibility of members of the moved type 
+	
+	public void test56() throws Exception {
+		// Move an inner class with two USED members
+		typeHelper_passing(new String[] { "Inner" });
+	}
+	
+	public void test57() throws Exception {
+		// Move an inner class with two UNUSED members
+		typeHelper_passing(new String[] { "Inner" });
+	}
+	
+	// --- Visibility of used outer members
+	
+	public void test58() throws Exception {
+		// Move a type which references a field in an enclosing type
+		// and a field in a sibling
+		typeHelper_passing(new String[] { "Inner" });
+	}
 
+	public void test59() throws Exception {
+		// Move a type which references a field in an enclosing type,
+		// and the enclosing type is private
+		typeHelper_passing(new String[] { "SomeInner.Inner" });
+	}
+	
 	//---
 	public void testFail0() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],

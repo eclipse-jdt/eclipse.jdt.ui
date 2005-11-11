@@ -551,54 +551,65 @@ public final class MemberVisibilityAdjustor {
 	/**
 	 * Adjusts the visibility of the specified member.
 	 * 
-	 * @param member the member to adjust its visibility
+	 * @param element the "source" point from which to calculate the visibility
+	 * @param referencedMovedElement the moved element which may be adjusted in visibility
 	 * @param monitor the progress monitor to use
 	 * @throws JavaModelException if the visibility adjustment could not be computed
 	 */
-	private void adjustIncomingVisibility(final IMember member, final IProgressMonitor monitor) throws JavaModelException {
-		final ModifierKeyword threshold= computeIncomingVisibilityThreshold(member, fReferenced, monitor);
-		if (hasLowerVisibility(fReferenced.getFlags(), threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(fReferenced, threshold))
-			fAdjustments.put(fReferenced, new IncomingMemberVisibilityAdjustment(fReferenced, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, Messages.format(getMessage(fReferenced), new String[] { getLabel(fReferenced), getLabel(threshold)}), JavaStatusContext.create(fReferenced), null, RefactoringStatusEntry.NO_CODE, null)));
+	private void adjustIncomingVisibility(final IJavaElement element, IMember referencedMovedElement, final IProgressMonitor monitor) throws JavaModelException {
+		final ModifierKeyword threshold= computeIncomingVisibilityThreshold(element, referencedMovedElement, monitor);
+		if (hasLowerVisibility(referencedMovedElement.getFlags(), threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(referencedMovedElement, threshold))
+			fAdjustments.put(referencedMovedElement, new IncomingMemberVisibilityAdjustment(referencedMovedElement, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, Messages.format(getMessage(referencedMovedElement), new String[] { getLabel(referencedMovedElement), getLabel(threshold)}), JavaStatusContext.create(referencedMovedElement), null, RefactoringStatusEntry.NO_CODE, null)));
 	}
 
 	/**
-	 * Adjusts the visibility of all members declared in the specified type.
-	 * 
-	 * @param types the types to adjust its visibility
-	 * @param methods the methods to adjust its visibility
-	 * @param fields the fields to adjust its visibility
-	 * @param monitor the progress monitor to use
-	 * @throws JavaModelException if an error occurs
+	 * Check whether anyone accesses the members of the moved type from the
+	 * outside. Those may need to have their visibility adjusted.
 	 */
-	private void adjustIncomingVisibility(final IType[] types, final IMethod[] methods, final IField[] fields, final IProgressMonitor monitor) throws JavaModelException {
-		try {
-			monitor.beginTask("", fields.length + methods.length + types.length); //$NON-NLS-1$
-			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
-			IField field= null;
-			for (int index= 0; index < fields.length; index++) {
-				field= fields[index];
-				if (!field.isBinary() && !field.isReadOnly())
-					adjustIncomingVisibility(field, new SubProgressMonitor(monitor, 1));
+	private void adjustMemberVisibility(final IMember memberToMove, final IProgressMonitor pm) throws JavaModelException {
+
+		if (memberToMove instanceof IType) {
+			// recursively check accessibility of member type's members
+			final IJavaElement[] typeMembers= ((IType) memberToMove).getChildren();
+			for (int i= 0; i < typeMembers.length; i++) {
+				if (! (typeMembers[i] instanceof IInitializer))
+					adjustMemberVisibility((IMember) typeMembers[i], pm);
 			}
-			IMethod method= null;
-			for (int index= 0; index < methods.length; index++) {
-				method= methods[index];
-				if (!method.isBinary() && !method.isReadOnly() && !method.isMainMethod())
-					adjustIncomingVisibility(method, new SubProgressMonitor(monitor, 1));
-			}
-			IType type= null;
-			for (int index= 0; index < types.length; index++) {
-				type= types[index];
-				if (!type.isBinary() && !type.isReadOnly()) {
-					adjustIncomingVisibility(type, new SubProgressMonitor(monitor, 1));
-					IMethod[] constructors= type.getMethods();
-					for (int offset= 0; offset < constructors.length; offset++)
-						adjustIncomingVisibility(constructors[offset], new SubProgressMonitor(monitor, 1));
+		}
+
+		if ((memberToMove.equals(fReferenced)) || (Modifier.isPublic(memberToMove.getFlags())))
+			return;
+
+		final SearchResultGroup[] references= findReferences(memberToMove, pm);
+		for (int i= 0; i < references.length; i++) {
+			final SearchMatch[] searchResults= references[i].getSearchResults();
+			for (int k= 0; k < searchResults.length; k++) {
+				final IJavaElement referenceToMember= (IJavaElement) searchResults[i].getElement();
+				if (fAdjustments.get(memberToMove) == null && referenceToMember instanceof IMember && !isInsideMovedMember(referenceToMember)) {
+					// check whether the member is still visible from the
+					// destination. As we are moving a type, the destination is
+					// a package or another type.
+					adjustIncomingVisibility(fReferencing, memberToMove, new SubProgressMonitor(pm, 1));
 				}
 			}
-		} finally {
-			monitor.done();
 		}
+	}
+
+	private boolean isInsideMovedMember(IJavaElement element) {
+		IJavaElement current= element;
+		while ((current= current.getParent()) != null)
+			if (current.equals(fReferenced))
+				return true;
+		return false;
+	}
+
+	private static SearchResultGroup[] findReferences(IMember member, IProgressMonitor monitor) throws JavaModelException {
+		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(SearchPattern.createPattern(member, IJavaSearchConstants.REFERENCES,
+				SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
+		engine.setFiltering(true, true);
+		engine.setScope(RefactoringScopeFactory.create(member));
+		engine.searchPattern(new SubProgressMonitor(monitor, 1));
+		return (SearchResultGroup[]) engine.getResults();
 	}
 
 	/**
@@ -610,12 +621,17 @@ public final class MemberVisibilityAdjustor {
 	 */
 	private void adjustIncomingVisibility(final SearchMatch match, final IProgressMonitor monitor) throws JavaModelException {
 		final Object element= match.getElement();
-		if (element instanceof IMember) {
-			IMember member= (IMember) element;
-			if (member instanceof IInitializer)
-				member= member.getDeclaringType();
-			if (member != null)
-				adjustIncomingVisibility(member, monitor);
+		// Only adjust if not yet adjusted - all adjustments are from the same source
+		final IncomingMemberVisibilityAdjustment adjustment= (IncomingMemberVisibilityAdjustment) fAdjustments.get(fReferenced);
+		if (adjustment == null && element instanceof IMember) {
+			IMember referenceToMovedElement= (IMember) element;
+			if (referenceToMovedElement instanceof IInitializer)
+				referenceToMovedElement= referenceToMovedElement.getDeclaringType();
+			if ((referenceToMovedElement != null) && (!isInsideMovedMember(referenceToMovedElement)))
+				// The moved element is used from outside the moved element
+				// check if the moved element is still visible from the new
+				// location.
+				adjustIncomingVisibility(fReferencing, fReferenced, monitor);
 		}
 	}
 
@@ -647,12 +663,11 @@ public final class MemberVisibilityAdjustor {
 	/**
 	 * Adjusts the visibility of the referenced field found in a compilation unit.
 	 * 
-	 * @param unit the compilation unit
 	 * @param field the referenced field to adjust
 	 * @param threshold the visibility threshold, or <code>null</code> for default visibility
 	 * @throws JavaModelException if an error occurs
 	 */
-	private void adjustOutgoingVisibility(final ICompilationUnit unit, final IField field, final ModifierKeyword threshold) throws JavaModelException {
+	private void adjustOutgoingVisibility(final IField field, final ModifierKeyword threshold) throws JavaModelException {
 		Assert.isTrue(!field.isBinary() && !field.isReadOnly());
 		//bug 100555 (moving inner class to top level class; taking private fields with you)
 		final IType declaring= field.getDeclaringType();
@@ -662,7 +677,7 @@ public final class MemberVisibilityAdjustor {
 				try {
 					final IMethod getter= GetterSetterUtil.getGetter(field);
 					if (getter != null && getter.exists()) {
-						adjustOutgoingVisibility(unit, getter, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning);
+						adjustOutgoingVisibility(getter, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning);
 						fAdjustments.put(field, new OutgoingAccessorVisibilityAdjustment(field, getter, true, threshold, new RefactoringStatus()));
 					}
 				} catch (JavaModelException exception) {
@@ -672,59 +687,67 @@ public final class MemberVisibilityAdjustor {
 				try {
 					final IMethod setter= GetterSetterUtil.getSetter(field);
 					if (setter != null && setter.exists()) {
-						adjustOutgoingVisibility(unit, setter, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning);
+						adjustOutgoingVisibility(setter, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning);
 						fAdjustments.put(field, new OutgoingAccessorVisibilityAdjustment(field, setter, false, threshold, new RefactoringStatus()));
 					}
 				} catch (JavaModelException exception) {
 					JavaPlugin.log(exception);
 				}
 			}
-			adjustOutgoingVisibility(unit, field, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_field_warning);
+			adjustOutgoingVisibility(field, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_field_warning);
 		}
 	}
 
 	/**
 	 * Adjusts the visibility of the referenced body declaration.
 	 * 
-	 * @param unit the compilation unit
 	 * @param member the member where to adjust the visibility
 	 * @param threshold the visibility keyword representing the required visibility, or <code>null</code> for default visibility
 	 * @param template the message template to use
 	 * @throws JavaModelException if an error occurs
 	 */
-	private void adjustOutgoingVisibility(final ICompilationUnit unit, final IMember member, final ModifierKeyword threshold, final String template) throws JavaModelException {
+	private void adjustOutgoingVisibility(final IMember member, final ModifierKeyword threshold, final String template) throws JavaModelException {
 		Assert.isTrue(!member.isBinary() && !member.isReadOnly());
 		boolean adjust= true;
 		final IType declaring= member.getDeclaringType();
 		if (declaring != null && (JavaModelUtil.isInterfaceOrAnnotation(declaring) || declaring.equals(fReferenced)))
 			adjust= false;
 		if (adjust && hasLowerVisibility(member.getFlags(), keywordToVisibility(threshold)) && needsVisibilityAdjustment(member, threshold))
-			fAdjustments.put(member, new OutgoingMemberVisibilityAdjustment(member, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, Messages.format(template, new String[] { JavaElementLabels.getTextLabel(member, JavaElementLabels.M_PARAMETER_TYPES), getLabel(threshold)}), JavaStatusContext.create(member), null, RefactoringStatusEntry.NO_CODE, null)));
+			fAdjustments.put(member, new OutgoingMemberVisibilityAdjustment(member, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, Messages.format(template, new String[] { JavaElementLabels.getTextLabel(member, JavaElementLabels.M_PARAMETER_TYPES | JavaElementLabels.ALL_FULLY_QUALIFIED), getLabel(threshold)}), JavaStatusContext.create(member), null, RefactoringStatusEntry.NO_CODE, null)));
 	}
 
 	/**
 	 * Adjusts the visibilities of the referenced element from the search match found in a compilation unit.
 	 * 
-	 * @param unit the compilation unit
 	 * @param match the search match representing the element declaration
 	 * @param monitor the progress monitor to use
 	 * @throws JavaModelException if the visibility could not be determined
 	 */
-	private void adjustOutgoingVisibility(final ICompilationUnit unit, final SearchMatch match, final IProgressMonitor monitor) throws JavaModelException {
+	private void adjustOutgoingVisibility(final SearchMatch match, final IProgressMonitor monitor) throws JavaModelException {
 		final Object element= match.getElement();
 		if (element instanceof IMember) {
 			final IMember member= (IMember) element;
-			if (!member.isBinary() && !member.isReadOnly()) {
-				final ModifierKeyword threshold= computeOutgoingVisibilityThreshold(fReferencing, member, monitor);
-				if (element instanceof IMethod) {
-					adjustOutgoingVisibility(unit, member, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning);
-				} else if (element instanceof IField) {
-					adjustOutgoingVisibility(unit, (IField) member, threshold);
-				} else if (element instanceof IType) {
-					adjustOutgoingVisibility(unit, member, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_type_warning);
-				}
+			if (!member.isBinary() && !member.isReadOnly() && !isInsideMovedMember(member)) {
+				adjustOutgoingVisibilityChain(member, monitor);
 			}
 		}
+	}
+
+	private void adjustOutgoingVisibilityChain(IMember member, IProgressMonitor monitor) throws JavaModelException {
+
+		if (!Modifier.isPublic(member.getFlags())) {
+			final ModifierKeyword threshold= computeOutgoingVisibilityThreshold(fReferencing, member, monitor);
+			if (member instanceof IMethod) {
+				adjustOutgoingVisibility(member, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning);
+			} else if (member instanceof IField) {
+				adjustOutgoingVisibility((IField) member, threshold);
+			} else if (member instanceof IType) {
+				adjustOutgoingVisibility(member, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_type_warning);
+			}
+		}
+
+		if (member.getDeclaringType() != null)
+			adjustOutgoingVisibilityChain(member.getDeclaringType(), monitor);
 	}
 
 	/**
@@ -739,17 +762,15 @@ public final class MemberVisibilityAdjustor {
 			monitor.beginTask("", groups.length); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
 			IJavaElement element= null;
-			ICompilationUnit unit= null;
 			SearchMatch[] matches= null;
 			SearchResultGroup group= null;
 			for (int index= 0; index < groups.length; index++) {
 				group= groups[index];
 				element= JavaCore.create(group.getResource());
 				if (element instanceof ICompilationUnit) {
-					unit= (ICompilationUnit) element;
 					matches= group.getSearchResults();
 					for (int offset= 0; offset < matches.length; offset++)
-						adjustOutgoingVisibility(unit, matches[offset], new SubProgressMonitor(monitor, 1));
+						adjustOutgoingVisibility(matches[offset], new SubProgressMonitor(monitor, 1));
 				} // else if (element != null)
 				// fStatus.merge(RefactoringStatus.createStatus(fFailureSeverity, RefactoringCoreMessages.getFormattedString("MemberVisibilityAdjustor.binary.outgoing.project", new String[] { element.getJavaProject().getElementName(), getLabel(fReferenced)}), null, null, RefactoringStatusEntry.NO_CODE, null)); //$NON-NLS-1$
 				// else if (group.getResource() != null)
@@ -783,9 +804,11 @@ public final class MemberVisibilityAdjustor {
 				engine.searchPattern(new SubProgressMonitor(monitor, 1));
 				adjustIncomingVisibility((SearchResultGroup[]) engine.getResults(), new SubProgressMonitor(monitor, 1));
 				engine.clearResults();
+				// If the moved element is a type: Adjust visibility of members
+				// of the type if they are accessed outside of the moved type
 				if (fReferenced instanceof IType) {
 					final IType type= (IType) fReferenced;
-					adjustIncomingVisibility(type.getTypes(), type.getMethods(), type.getFields(), new SubProgressMonitor(monitor, 1));
+					adjustMemberVisibility(type, new SubProgressMonitor(monitor, 1));
 				}
 			}
 			if (fOutgoing) {
@@ -815,7 +838,7 @@ public final class MemberVisibilityAdjustor {
 	 * @return the visibility keyword corresponding to the threshold, or <code>null</code> for default visibility
 	 * @throws JavaModelException if the java elements could not be accessed
 	 */
-	private ModifierKeyword computeIncomingVisibilityThreshold(final IMember referencing, final IMember referenced, final IProgressMonitor monitor) throws JavaModelException {
+	private ModifierKeyword computeIncomingVisibilityThreshold(final IJavaElement referencing, final IMember referenced, final IProgressMonitor monitor) throws JavaModelException {
 		Assert.isTrue(!(referencing instanceof IInitializer));
 		Assert.isTrue(!(referenced instanceof IInitializer));
 		ModifierKeyword keyword= ModifierKeyword.PUBLIC_KEYWORD;
@@ -833,23 +856,20 @@ public final class MemberVisibilityAdjustor {
 							keyword= thresholdTypeToType((IType) referencing, typeReferenced, monitor);
 							break;
 						}
-						case IJavaElement.FIELD: {
-							final IField field= (IField) referencing;
-							if (typeReferenced.equals(field.getDeclaringType()))
+						case IJavaElement.FIELD:
+						case IJavaElement.METHOD: {
+							final IMember member= (IMember) referencing;
+							if (typeReferenced.equals(member.getDeclaringType()))
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (referencedUnit != null && referencedUnit.equals(field.getCompilationUnit()))
+							else if (referencedUnit != null && referencedUnit.equals(member.getCompilationUnit()))
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (typeReferenced.getPackageFragment().equals(field.getDeclaringType().getPackageFragment()))
+							else if (typeReferenced.getPackageFragment().equals(member.getDeclaringType().getPackageFragment()))
 								keyword= null;
 							break;
 						}
-						case IJavaElement.METHOD: {
-							final IMethod method= (IMethod) referencing;
-							if (typeReferenced.equals(method.getDeclaringType()))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (referencedUnit != null && referencedUnit.equals(method.getCompilationUnit()))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (typeReferenced.getPackageFragment().equals(method.getDeclaringType().getPackageFragment()))
+						case IJavaElement.PACKAGE_FRAGMENT: {
+							final IPackageFragment fragment= (IPackageFragment) referencing;
+							if (typeReferenced.getPackageFragment().equals(fragment))
 								keyword= null;
 							break;
 						}
@@ -866,23 +886,20 @@ public final class MemberVisibilityAdjustor {
 							keyword= thresholdTypeToField((IType) referencing, fieldReferenced, monitor);
 							break;
 						}
-						case IJavaElement.FIELD: {
-							final IField field= (IField) referencing;
-							if (fieldReferenced.getDeclaringType().equals(field.getDeclaringType()))
+						case IJavaElement.FIELD:
+						case IJavaElement.METHOD: {
+							final IMember member= (IMember) referencing;
+							if (fieldReferenced.getDeclaringType().equals(member.getDeclaringType()))
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (referencedUnit != null && referencedUnit.equals(field.getCompilationUnit()))
+							else if (referencedUnit != null && referencedUnit.equals(member.getCompilationUnit()))
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (fieldReferenced.getDeclaringType().getPackageFragment().equals(field.getDeclaringType().getPackageFragment()))
+							else if (fieldReferenced.getDeclaringType().getPackageFragment().equals(member.getDeclaringType().getPackageFragment()))
 								keyword= null;
 							break;
 						}
-						case IJavaElement.METHOD: {
-							final IMethod method= (IMethod) referencing;
-							if (fieldReferenced.getDeclaringType().equals(method.getDeclaringType()))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (referencedUnit != null && referencedUnit.equals(method.getCompilationUnit()))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (fieldReferenced.getDeclaringType().getPackageFragment().equals(method.getDeclaringType().getPackageFragment()))
+						case IJavaElement.PACKAGE_FRAGMENT: {
+							final IPackageFragment fragment= (IPackageFragment) referencing;
+							if (fieldReferenced.getDeclaringType().getPackageFragment().equals(fragment))
 								keyword= null;
 							break;
 						}
@@ -899,23 +916,20 @@ public final class MemberVisibilityAdjustor {
 							keyword= thresholdTypeToMethod((IType) referencing, methodReferenced, monitor);
 							break;
 						}
-						case IJavaElement.FIELD: {
-							final IField field= (IField) referencing;
-							if (methodReferenced.getDeclaringType().equals(field.getDeclaringType()))
+						case IJavaElement.FIELD: 
+						case IJavaElement.METHOD: {
+							final IMember member= (IMember) referencing;
+							if (methodReferenced.getDeclaringType().equals(member.getDeclaringType()))
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (referencedUnit != null && referencedUnit.equals(field.getCompilationUnit()))
+							else if (referencedUnit != null && referencedUnit.equals(member.getCompilationUnit()))
 								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (methodReferenced.getDeclaringType().getPackageFragment().equals(field.getDeclaringType().getPackageFragment()))
+							else if (methodReferenced.getDeclaringType().getPackageFragment().equals(member.getDeclaringType().getPackageFragment()))
 								keyword= null;
 							break;
 						}
-						case IJavaElement.METHOD: {
-							final IMethod method= (IMethod) referencing;
-							if (methodReferenced.getDeclaringType().equals(method.getDeclaringType()))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (referencedUnit != null && referencedUnit.equals(method.getCompilationUnit()))
-								keyword= ModifierKeyword.PRIVATE_KEYWORD;
-							else if (methodReferenced.getDeclaringType().getPackageFragment().equals(method.getDeclaringType().getPackageFragment()))
+						case IJavaElement.PACKAGE_FRAGMENT: {
+							final IPackageFragment fragment= (IPackageFragment) referencing;
+							if (methodReferenced.getDeclaringType().getPackageFragment().equals(fragment))
 								keyword= null;
 							break;
 						}
