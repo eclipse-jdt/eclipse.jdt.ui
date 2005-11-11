@@ -99,7 +99,9 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	}
 	
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
-		return String.valueOf(fProposal.getName());
+		if (hasArgumentList())
+			return String.valueOf(fProposal.getName());
+		return super.getPrefixCompletionText(document, completionOffset);
 	}
 	
 	protected IContextInformation computeContextInformation() {
@@ -154,7 +156,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		boolean noOverwrite= preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION) ^ isToggleEating();
 		char[] completion= fProposal.getCompletion();
-		return !fContext.isInJavadoc() && (noOverwrite  || completion.length != 0 && completion[completion.length - 1] == ')');
+		return !fContext.isInJavadoc() && completion.length > 0 && (noOverwrite  || completion[completion.length - 1] == ')');
 	}
 
 	/**
