@@ -31,6 +31,7 @@
  </package>
 
  <package name="org.eclipse.jdt.ui.actions">
+   <type name="AbstractOpenWizardAction" subclass="false"/>
    <type name="AddDelegateMethodsAction" subclass="false"/>
    <type name="AddGetterSetterAction" subclass="false"/>
    <type name="AddJavaDocStubAction" subclass="false"/>
@@ -96,6 +97,13 @@
    <type name="OpenExternalJavadocAction" subclass="false"/>
    <type name="OpenJavaBrowsingPerspectiveAction" subclass="false"/>
    <type name="OpenJavaPerspectiveAction" subclass="false"/>
+   <type name="OpenNewAnnotationWizardAction" subclass="false"/>
+   <type name="OpenNewClassWizardAction" subclass="false"/>
+   <type name="OpenNewEnumWizardAction" subclass="false"/>
+   <type name="OpenNewInterfaceWizardAction" subclass="false"/>
+   <type name="OpenNewJavaProjectWizardAction" subclass="false"/>
+   <type name="OpenNewPackageWizardAction" subclass="false"/>
+   <type name="OpenNewSourceFolderWizardAction" subclass="false"/>
    <type name="OpenProjectAction" subclass="false"/>
    <type name="OpenSuperImplementationAction" subclass="false"/>
    <type name="OpenTypeHierarchyAction" subclass="false"/>
