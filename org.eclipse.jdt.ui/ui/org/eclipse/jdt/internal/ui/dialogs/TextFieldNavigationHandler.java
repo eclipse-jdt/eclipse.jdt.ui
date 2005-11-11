@@ -250,7 +250,7 @@ public class TextFieldNavigationHandler {
 		
 		private final JavaWordIterator fIterator;
 		private final Navigable fNavigable;
-		private KeyAdapter fKeyAdapter;
+		private KeyAdapter fKeyListener;
 		
 		private FocusHandler(Navigable navigable) {
 			fIterator= new JavaWordIterator();
@@ -276,19 +276,21 @@ public class TextFieldNavigationHandler {
 		}
 
 		private void activate() {
-			fNavigable.getControl().addKeyListener(getKeyAdapter());
+			fNavigable.getControl().addKeyListener(getKeyListener());
 		}
 		
 		private void deactivate() {
-			if (fKeyAdapter != null) {
-				fNavigable.getControl().addKeyListener(fKeyAdapter);
-				fKeyAdapter= null;
+			if (fKeyListener != null) {
+				Control control= fNavigable.getControl();
+				if (! control.isDisposed())
+					control.removeKeyListener(fKeyListener);
+				fKeyListener= null;
 			}
 		}
 		
-		private KeyAdapter getKeyAdapter() {
-			if (fKeyAdapter == null) {
-				fKeyAdapter= new KeyAdapter() {
+		private KeyAdapter getKeyListener() {
+			if (fKeyListener == null) {
+				fKeyListener= new KeyAdapter() {
 					private static final String TEXT_EDITOR_CONTEXT_ID= "org.eclipse.ui.textEditorScope"; //$NON-NLS-1$
 					
 					private List/*<Submission>*/ fSubmissions;
@@ -429,7 +431,7 @@ public class TextFieldNavigationHandler {
 					
 				};
 			}
-			return fKeyAdapter;
+			return fKeyListener;
 		}
 	}
 	
