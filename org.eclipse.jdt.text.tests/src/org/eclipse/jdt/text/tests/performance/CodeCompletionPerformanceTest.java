@@ -181,7 +181,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 			meter.start();
 			for (int accumulated= 0; accumulated < ACC_COMPLETION; accumulated++) {
 				
-				CompletionProposalCollector collector= new CompletionProposalCollector(fCU);
+				CompletionProposalCollector collector= createCollector();
 				codeComplete(collector);
 				
 			}
@@ -191,7 +191,7 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 	
 	private void measureApplicationNoParameters(PerformanceMeter meter, final int runs) throws Exception {
 		for (int run= 0; run < runs; run++) {
-			CompletionProposalCollector collector= new CompletionProposalCollector(fCU);
+			CompletionProposalCollector collector= createCollector();
 			IJavaCompletionProposal[] proposals= codeComplete(collector);
 			
 			meter.start();
@@ -204,6 +204,12 @@ public class CodeCompletionPerformanceTest extends TextPerformanceTestCase {
 			}
 			meter.stop();
 		}
+	}
+
+	private CompletionProposalCollector createCollector() {
+		CompletionProposalCollector collector= new CompletionProposalCollector(fCU);
+		collector.setInvocationContext(createContext());
+		return collector;
 	}
 	
 	public void testCompletionWithParamterNames() throws Exception {
