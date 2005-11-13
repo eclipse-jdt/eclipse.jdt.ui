@@ -122,6 +122,7 @@ public class CodeCompletionTest extends CoreTests {
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORCOMMENT_ID, "/**\n * Constructor.\n */", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODCOMMENT_ID, "/**\n * Method.\n */", null);
 		StubUtility.setCodeTemplate(CodeTemplateContextType.CONSTRUCTORSTUB_ID, "//TODO\n${body_statement}", null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.GETTERCOMMENT_ID, "/**\n * @return the ${bare_field_name}\n */", fJProject1);
 	}
 
 	protected void tearDown() throws Exception {
@@ -171,7 +172,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str) + str.length();
 
-		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -221,7 +222,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str) + str.length();
 
-		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -275,7 +276,7 @@ public class CodeCompletionTest extends CoreTests {
 
 			int offset= contents.indexOf(str);
 
-			CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+			CompletionProposalCollector collector= createCollector(cu, offset);
 			collector.setReplacementLength(0);
 	
 			codeComplete(cu, offset, collector);
@@ -374,6 +375,12 @@ public class CodeCompletionTest extends CoreTests {
 
 		assertEqualString(doc.get(), result);
 	}
+	
+	private CompletionProposalCollector createCollector(ICompilationUnit cu, int offset) throws PartInitException, JavaModelException {
+		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+		collector.setInvocationContext(createContext(offset, cu));
+		return collector;
+	}
 
 	private JavaContentAssistInvocationContext createContext(int offset, ICompilationUnit cu) throws PartInitException, JavaModelException {
 		JavaEditor editor= (JavaEditor) EditorUtility.openInEditor(cu);
@@ -404,7 +411,7 @@ public class CodeCompletionTest extends CoreTests {
 
 			int offset= contents.indexOf(str);
 
-			CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+			CompletionProposalCollector collector= createCollector(cu, offset);
 			collector.setReplacementLength(0);
 	
 			codeComplete(cu, offset, collector);
@@ -431,7 +438,7 @@ public class CodeCompletionTest extends CoreTests {
 			buf.append("public class A {\n");
 			buf.append("    private BufferedWriter fWriter;\n");
 			buf.append("    /**\n");
-			buf.append("     * @return Returns the writer.\n");
+			buf.append("     * @return the writer\n");
 			buf.append("     */\n");
 			buf.append("    public BufferedWriter getWriter() {\n");
 			buf.append("        return fWriter;\n");
@@ -466,7 +473,7 @@ public class CodeCompletionTest extends CoreTests {
 
 			int offset= contents.indexOf(str);
 
-			CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+			CompletionProposalCollector collector= createCollector(cu, offset);
 			collector.setReplacementLength(0);
 	
 			codeComplete(cu, offset, collector);
@@ -524,7 +531,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -670,7 +677,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -722,7 +729,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -783,7 +790,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -845,7 +852,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -920,7 +927,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
 		JavaModelUtil.reconcile(cu);
 		codeComplete(cu, offset, collector);
@@ -981,7 +988,7 @@ public class CodeCompletionTest extends CoreTests {
 
 		int offset= contents.indexOf(str);
 
-		CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+		CompletionProposalCollector collector= createCollector(cu, offset);
 		collector.setReplacementLength(0);
 
 		codeComplete(cu, offset, collector);
@@ -1042,7 +1049,7 @@ public class CodeCompletionTest extends CoreTests {
 
 			int offset= contents.indexOf(str);
 
-			CompletionProposalCollector collector= new CompletionProposalCollector(cu);
+			CompletionProposalCollector collector= createCollector(cu, offset);
 			collector.setReplacementLength(0);
 	
 			codeComplete(cu, offset, collector);
@@ -1069,7 +1076,7 @@ public class CodeCompletionTest extends CoreTests {
 			buf.append("public class A {\n");
 			buf.append("    private BufferedWriter writer;\n");
 			buf.append("    /**\n");
-			buf.append("     * @param writer The writer to set.\n");
+			buf.append("     * @param writer the writer to set\n");
 			buf.append("     */\n");
 			buf.append("    public void setWriter(BufferedWriter writer) {\n");
 			buf.append("        this.writer = writer;\n");
