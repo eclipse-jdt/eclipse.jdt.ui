@@ -199,7 +199,7 @@ public class Checks {
 			return new RefactoringStatus();
 	}
 		
-	private static boolean startsWithUpperCase(String s) {
+	public static boolean startsWithUpperCase(String s) {
 		if (s == null)
 			return false;
 		else if ("".equals(s)) //$NON-NLS-1$
@@ -395,9 +395,16 @@ public class Checks {
 		return false;
 	}
 
-	//---- Private helpers ----------------------------------------------------------------------
-	
-	private static RefactoringStatus checkName(String name, IStatus status) {
+	/**
+	 * Returns a fatal error in case the name is empty. In all other cases, an
+	 * error based on the given status is returned.
+	 * 
+	 * @param name a name
+	 * @param status a status
+	 * @return RefactoringStatus based on the given status or the name, if
+	 *         empty.
+	 */
+	public static RefactoringStatus checkName(String name, IStatus status) {
 		RefactoringStatus result= new RefactoringStatus();
 		if ("".equals(name)) //$NON-NLS-1$
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.Checks_Choose_name); 

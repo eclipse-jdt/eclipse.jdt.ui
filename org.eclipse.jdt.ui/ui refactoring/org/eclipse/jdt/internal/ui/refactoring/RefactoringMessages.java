@@ -340,7 +340,6 @@ public final class RefactoringMessages extends NLS {
 	public static String RenameCuWizard_inputPage_description;
 	
 	public static String RenameTypeWizard_defaultPageTitle;
-	public static String RenameTypeWizard_inputPage_description;
 	public static String RenameTypeWizard_unexpected_exception;
 
 	public static String RenameTypeWizardDerivedElementPage_change_element_name;
@@ -356,7 +355,6 @@ public final class RefactoringMessages extends NLS {
 	public static String RenameTypeWizardDerivedElementPage_restore_defaults;
 	public static String RenameTypeWizardDerivedElementPage_change_name;
 
-	public static String RenameTypeWizardDerivedOptionsDialog_title;
 	public static String RenameTypeWizardDerivedOptionsDialog_select_strategy;
 	public static String RenameTypeWizardDerivedOptionsDialog_strategy_1;
 	public static String RenameTypeWizardDerivedOptionsDialog_strategy_2;
@@ -365,6 +363,7 @@ public final class RefactoringMessages extends NLS {
 
 	public static String RenameTypeWizardInputPage_update_derived_elements;
 	public static String RenameTypeWizardInputPage_update_derived_elements_configure;
+	public static String RenameTypeWizardInputPage_description;
 	
 	public static String RenameTypeParameterWizard_defaultPageTitle;
 	public static String RenameTypeParameterWizard_inputPage_description;

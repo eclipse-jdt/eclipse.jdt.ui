@@ -189,14 +189,23 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	public RefactoringStatus checkNewElementName(String newName) throws CoreException {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		RefactoringStatus result= Checks.checkFieldName(newName);
-		
-		if (isInstanceField(fField) && (! Checks.startsWithLowerCase(newName)))
-			result.addWarning(RefactoringCoreMessages.RenameFieldRefactoring_should_start_lowercase); 
-			
+
+		if (isInstanceField(fField) && (!Checks.startsWithLowerCase(newName)))
+			result.addWarning(fIsDerived
+					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_should_start_lowercase2, new String[] { newName, fField.getDeclaringType().getElementName() })
+					: RefactoringCoreMessages.RenameFieldRefactoring_should_start_lowercase);
+
 		if (Checks.isAlreadyNamed(fField, newName))
-			result.addFatalError(RefactoringCoreMessages.RenameFieldRefactoring_another_name);
+			result.addFatalError(fIsDerived
+					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_another_name2, new String[] { newName, fField.getDeclaringType().getElementName() })
+					: RefactoringCoreMessages.RenameFieldRefactoring_another_name,
+					JavaStatusContext.create(fField));
+		
 		if (fField.getDeclaringType().getField(newName).exists())
-			result.addFatalError(Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined, new String[] { newName, fField.getDeclaringType().getElementName() }));  
+			result.addFatalError(fIsDerived 
+					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined2, new String[] { newName, fField.getDeclaringType().getElementName() }) 
+					: RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined,
+					JavaStatusContext.create(fField.getDeclaringType().getField(newName)));
 		return result;
 	}
 	

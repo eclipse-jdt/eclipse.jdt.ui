@@ -45,6 +45,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String Checks_has_main;
 	public static String Checks_constructor_name;
 	public static String Checks_method_names_lowercase;
+	public static String Checks_method_names_lowercase2;
 	public static String Checks_validateEdit;
 	
 	public static String Change_does_not_exist;
@@ -246,7 +247,9 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameFieldRefactoring_hiding;
 	public static String RenameFieldRefactoring_hiding2;
 	public static String RenameFieldRefactoring_another_name;
+	public static String RenameFieldRefactoring_another_name2;
 	public static String RenameFieldRefactoring_field_already_defined;
+	public static String RenameFieldRefactoring_field_already_defined2;
 	public static String RenameFieldRefactoring_deleted;
 	public static String RenameFieldRefactoring_already_exists;
 	public static String RenameFieldRefactoring_overridden;
@@ -256,6 +259,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameFieldRefactoring_Update_field_declaration;
 	public static String RenameFieldRefactoring_Update_field_reference;
 	public static String RenameFieldRefactoring_should_start_lowercase;
+	public static String RenameFieldRefactoring_should_start_lowercase2;
 	public static String RenameFieldRefactoring_declared_in_supertype;
 	public static String RenameTypeParameterRefactoring_deleted;
 	public static String RenameTypeParameterProcessor_name;
@@ -286,6 +290,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameMethodRefactoring_no_read_only;
 	public static String RenameMethodRefactoring_not_in_model;
 	public static String RenameMethodRefactoring_same_name;
+	public static String RenameMethodRefactoring_same_name2;
 	public static String RenamePrivateMethodRefactoring_hierarchy_defines;
 	public static String RenamePrivateMethodRefactoring_hierarchy_defines2;
 	public static String RenamePrivateMethodRefactoring_update;

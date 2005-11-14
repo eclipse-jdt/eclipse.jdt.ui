@@ -48,7 +48,7 @@ public class RenameTypeWizardDerivedOptionsDialog extends MessageDialog {
 	private int fSelectedStrategy;
 
 	public RenameTypeWizardDerivedOptionsDialog(Shell parentShell, int defaultStrategy) {
-		super(parentShell, RefactoringMessages.RenameTypeWizardDerivedOptionsDialog_title, null, new String(), INFORMATION, new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
+		super(parentShell, RefactoringMessages.RenameTypeWizard_defaultPageTitle, null, new String(), INFORMATION, new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		fSelectedStrategy= defaultStrategy;
 	}

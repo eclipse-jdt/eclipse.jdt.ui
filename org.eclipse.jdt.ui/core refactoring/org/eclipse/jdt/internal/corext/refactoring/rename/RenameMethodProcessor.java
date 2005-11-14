@@ -48,6 +48,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
@@ -171,10 +172,19 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		
 	public final RefactoringStatus checkNewElementName(String newName) {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
-		RefactoringStatus result= Checks.checkMethodName(newName);
+				
+		RefactoringStatus status= Checks.checkName(newName, JavaConventions.validateMethodName(newName));
+		if (status.isOK() && Checks.startsWithUpperCase(newName))
+			status= RefactoringStatus.createWarningStatus(fIsDerived 
+					? Messages.format(RefactoringCoreMessages.Checks_method_names_lowercase2, new String[] { newName, fMethod.getDeclaringType().getElementName()})
+					: RefactoringCoreMessages.Checks_method_names_lowercase);
+		
 		if (Checks.isAlreadyNamed(fMethod, newName))
-			result.addFatalError(RefactoringCoreMessages.RenameMethodRefactoring_same_name); 
-		return result;
+			status.addFatalError(fIsDerived 
+					? Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_same_name2, new String[] { newName, fMethod.getDeclaringType().getElementName() } ) 
+					: RefactoringCoreMessages.RenameMethodRefactoring_same_name,
+					JavaStatusContext.create(fMethod)); 
+		return status;
 	}
 	
 	public Object getNewElement() {

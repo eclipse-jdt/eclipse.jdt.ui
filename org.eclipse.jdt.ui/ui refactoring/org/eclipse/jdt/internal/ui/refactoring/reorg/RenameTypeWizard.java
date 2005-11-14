@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 public class RenameTypeWizard extends RenameRefactoringWizard {
 
 	public RenameTypeWizard(Refactoring refactoring) {
-		this(refactoring, RefactoringMessages.RenameTypeWizard_defaultPageTitle, RefactoringMessages.RenameTypeWizard_inputPage_description, JavaPluginImages.DESC_WIZBAN_REFACTOR_TYPE,
+		this(refactoring, RefactoringMessages.RenameTypeWizard_defaultPageTitle, RefactoringMessages.RenameTypeWizardInputPage_description, JavaPluginImages.DESC_WIZBAN_REFACTOR_TYPE,
 				IJavaHelpContextIds.RENAME_TYPE_WIZARD_PAGE);
 	}
 
