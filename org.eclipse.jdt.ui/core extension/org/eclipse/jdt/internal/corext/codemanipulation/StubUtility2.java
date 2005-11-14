@@ -628,7 +628,7 @@ public final class StubUtility2 {
 			for (int i= 0; i < typeMethods.length; i++) {
 				IMethodBinding curr= typeMethods[i];
 				IMethodBinding impl= findMethodBinding(curr, allMethods);
-				if (impl == null || !Bindings.isVisibleInHierarchy(impl, currPack) || ((curr.getExceptionTypes().length < impl.getExceptionTypes().length) && !Modifier.isFinal(impl.getModifiers()))) {
+				if (impl == null || !Bindings.isVisibleInHierarchy(impl, currPack)) {
 					if (impl != null)
 						allMethods.remove(impl);
 					toImplement.add(curr);
