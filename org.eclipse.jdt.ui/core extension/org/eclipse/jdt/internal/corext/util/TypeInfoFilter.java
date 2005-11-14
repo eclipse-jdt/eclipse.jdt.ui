@@ -135,7 +135,10 @@ public class TypeInfoFilter {
 		} else {
 			fPackageMatcher= new PatternMatcher(text.substring(0, index),
 				SearchPattern.R_EXACT_MATCH | SearchPattern.R_PATTERN_MATCH);
-			fNameMatcher= new PatternMatcher(text.substring(index + 1), true);
+			String name= text.substring(index + 1);
+			if (name.length() == 0)
+				name= "*"; //$NON-NLS-1$
+			fNameMatcher= new PatternMatcher(name, true);
 		}
 	}
 
@@ -144,7 +147,10 @@ public class TypeInfoFilter {
 	}
 
 	public boolean isSubFilter(String text) {
-		return fText.startsWith(text);
+		if (! fText.startsWith(text))
+			return false;
+		
+		return fText.indexOf('.', text.length()) == -1;
 	}
 
 	public boolean isCamcelCasePattern() {
