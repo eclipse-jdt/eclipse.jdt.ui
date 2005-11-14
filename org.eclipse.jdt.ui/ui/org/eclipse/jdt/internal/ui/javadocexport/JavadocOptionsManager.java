@@ -22,26 +22,18 @@ import java.util.StringTokenizer;
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.transform.TransformerException;
 
-import org.eclipse.jdt.launching.ExecutionArguments;
-import org.eclipse.jdt.launching.IVMInstall;
-import org.eclipse.jdt.launching.IVMInstallType;
-import org.eclipse.jdt.launching.JavaRuntime;
-import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.SAXException;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IAdaptable;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -54,11 +46,24 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.launching.ExecutionArguments;
+import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstallType;
+import org.eclipse.jdt.launching.JavaRuntime;
+
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
+import org.xml.sax.SAXException;
 
 public class JavadocOptionsManager {
 
@@ -680,8 +685,9 @@ public class JavadocOptionsManager {
 	}
 	
 
-	public void getArgumentArray(List vmArgs, List toolArgs) {
-
+	public IStatus getArgumentArray(List vmArgs, List toolArgs) {
+		MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, JavadocExportMessages.JavadocOptionsManager_status_title, null);
+		
 		//bug 38692
 		vmArgs.add(getJavadocCommandHistory()[0]);
 		
@@ -775,10 +781,15 @@ public class JavadocOptionsManager {
 				// Since the Javadoc tool is running locally we can only  create
 				// Javadoc for local resources. So using the location is fine here.
 				IPath p= curr.getResource().getLocation();
-				if (p != null)
+				if (p != null) {
 					toolArgs.add(p.toOSString());
+				} else {
+					String message= JavadocExportMessages.JavadocOptionsManager_status_non_local;
+					status.add(new StatusInfo(IStatus.WARNING, Messages.format(message, curr.getPath().makeRelative().toString())));
+				}
 			}
 		}
+		return status;
 	}
 	
 	private void addProxyOptions(List vmOptions) {
@@ -806,7 +817,7 @@ public class JavadocOptionsManager {
 	public File createXML(IJavaProject[] projects) throws CoreException {
 		FileOutputStream objectStreamOutput= null;
 		//@change
-		//for now only writting ant files for single project selection
+		//for now only writing ant files for single project selection
 		String antpath= fAntpath;
 		try {
 			if (antpath.length() > 0) {

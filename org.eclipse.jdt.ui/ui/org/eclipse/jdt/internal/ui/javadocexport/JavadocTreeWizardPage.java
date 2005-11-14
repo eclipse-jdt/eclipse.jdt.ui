@@ -481,7 +481,7 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 
 	/**
 	 * Gets a list of elements to generated javadoc for from each project. 
-	 * Javadoc can be generated for either a IPackageFragmentRoot or a ICompilationUnit.
+	 * Javadoc can be generated for either a IPackageFragment or a ICompilationUnit.
 	 */
 	private IJavaElement[] getSourceElements(IJavaProject[] projects) {
 		ArrayList res= new ArrayList();
@@ -496,12 +496,14 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 				for (int i= 0; i < roots.length; i++) {
 					IPackageFragmentRoot root= roots[i];
 					if (root.getKind() == IPackageFragmentRoot.K_SOURCE) {
+						IPath rootLocation= root.getResource().getLocation();
 						IJavaElement[] packs= root.getChildren();
 						for (int k= 0; k < packs.length; k++) {
 							IJavaElement curr= packs[k];
 							if (curr.getElementType() == IJavaElement.PACKAGE_FRAGMENT) {
 								// default packages are always incomplete
-								if (curr.getElementName().length() == 0 || !allChecked.contains(curr) || fInputGroup.isTreeItemGreyChecked(curr)) {
+								if (curr.getElementName().length() == 0 || !allChecked.contains(curr)
+										|| fInputGroup.isTreeItemGreyChecked(curr) || !isAccessibleLocation(curr.getResource().getLocation(), rootLocation)) {
 									incompletePackages.add(curr.getElementName());
 								}
 							}
@@ -540,6 +542,10 @@ public class JavadocTreeWizardPage extends JavadocWizardPage {
 			JavaPlugin.log(e);
 		}
 		return (IJavaElement[]) res.toArray(new IJavaElement[res.size()]);
+	}
+
+	private boolean isAccessibleLocation(IPath packageLocation, IPath rootLocation) {
+		return rootLocation != null && packageLocation != null && rootLocation.isPrefixOf(packageLocation);
 	}
 
 	protected void updateStore(IJavaProject[] checkedProjects) {

@@ -123,4 +123,8 @@ public final class JavadocExportMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavadocExportMessages.class);
 	}
+
+	public static String JavadocOptionsManager_status_title;
+	public static String JavadocOptionsManager_status_non_local;
+	public static String JavadocWizard_warning_starting_message;
 }

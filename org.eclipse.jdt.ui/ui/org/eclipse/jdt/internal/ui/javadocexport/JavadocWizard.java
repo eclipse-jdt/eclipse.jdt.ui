@@ -74,6 +74,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.OpenBrowserUtil;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
+import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringSaveHelper;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -144,7 +145,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		IJavaProject[] checkedProjects= fJTWPage.getCheckedProjects();
 		updateStore(checkedProjects);
 		
-		//If the wizard was not launched from an ant file store the setttings 
+		//If the wizard was not launched from an ant file store the settings 
 		if (fXmlJavadocFile == null) {
 			fStore.updateDialogSettings(getDialogSettings(), checkedProjects);
 		}
@@ -226,7 +227,7 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 		IJavaProject[] checkedProjects= fJTWPage.getCheckedProjects();
 		updateStore(checkedProjects);
 		
-		//If the wizard was not launched from an ant file store the setttings 
+		//If the wizard was not launched from an ant file store the settings 
 		if (fXmlJavadocFile == null) {
 			fStore.updateDialogSettings(getDialogSettings(), checkedProjects);
 		}
@@ -270,7 +271,10 @@ public class JavadocWizard extends Wizard implements IExportWizard {
 			ArrayList vmArgs= new ArrayList();
 			ArrayList progArgs= new ArrayList();
 			
-			fStore.getArgumentArray(vmArgs, progArgs);
+			IStatus status= fStore.getArgumentArray(vmArgs, progArgs);
+			if (!status.isOK()) {
+				ProblemDialog.open(getShell(), JavadocExportMessages.JavadocWizard_error_title , JavadocExportMessages.JavadocWizard_warning_starting_message, status);
+			}
 			
 			File file= File.createTempFile("javadoc-arguments", ".tmp");  //$NON-NLS-1$//$NON-NLS-2$
 			vmArgs.add('@' + file.getAbsolutePath());
