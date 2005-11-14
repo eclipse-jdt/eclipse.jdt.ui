@@ -10,13 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedList;
 import java.util.Map;
 
+import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
@@ -59,26 +58,33 @@ public class RefactoringHandleTransplanter {
 	 * @param handle
 	 * @return the new handle
 	 */
-	public IJavaElement transplantHandle(IJavaElement handle) {
+	public IMember transplantHandle(IMember handle) {
 
 		/*
 		 * Create a list of handles from top-level type to the handle
 		 */
-		final List oldElements= new ArrayList();
+		final LinkedList oldElements= new LinkedList();
 		addElements(handle, oldElements);
 
 		/*
 		 * Step through the elements and re-locate them in the new parents.
 		 */
-		final IJavaElement[] newElements= convertElements((IJavaElement[]) oldElements.toArray(new IJavaElement[0]));
+		final IMember[] newElements= convertElements((IMember[]) oldElements.toArray(new IMember[0]));
 
 		return newElements[newElements.length - 1];
 	}
 
-	private IJavaElement[] convertElements(IJavaElement[] oldElements) {
+	private void addElements(IMember element, LinkedList chain) {
+		chain.addFirst(element);
+		IJavaElement parent= element.getParent();
+		if (parent instanceof IMember)
+			addElements((IMember) parent, chain);
+	}
+	
+	private IMember[] convertElements(IMember[] oldElements) {
 
-		final IJavaElement[] newElements= new IJavaElement[oldElements.length];
-		final IJavaElement first= oldElements[0];
+		final IMember[] newElements= new IMember[oldElements.length];
+		final IMember first= oldElements[0];
 
 		Assert.isTrue(first instanceof IType);
 
@@ -140,6 +146,17 @@ public class RefactoringHandleTransplanter {
 							break;
 						}
 					}
+					break;
+				}
+				case IJavaElement.FIELD: {
+					switch (currentElement.getElementType()) {
+						case IJavaElement.TYPE: {
+							// anonymous type in field declaration
+							newElements[i]= resolveTypeInMember((IField) newParent, (IType) currentElement);
+							break;
+						}
+					}
+					break;
 				}
 			}
 		}
@@ -167,7 +184,7 @@ public class RefactoringHandleTransplanter {
 		for (int i= 0; i < oldParameterTypes.length; i++) {
 			newparams[i]= oldParameterTypes[i];
 			for (int j= 0; j < possibleOldSigs.length; j++) {
-				newparams[i]= newparams[i].replaceAll(possibleOldSigs[j], possibleNewSigs[j]);
+				newparams[i]= replaceAll(newparams[i], possibleOldSigs[j], possibleNewSigs[j]);
 			}
 		}
 		return newparams;
@@ -181,7 +198,7 @@ public class RefactoringHandleTransplanter {
 			return method.getElementName();
 	}
 
-	private IJavaElement resolveTypeInMember(IMember newParent, IType oldChild) {
+	private IMember resolveTypeInMember(final IMember newParent, IType oldChild) {
 		// Local type or anonymous type. Only local types can be renamed.
 		final SourceRefElement type= (SourceRefElement) oldChild;
 		String newName= ""; //$NON-NLS-1$
@@ -194,11 +211,16 @@ public class RefactoringHandleTransplanter {
 		return type.equals(fOldType) ? fNewType.getElementName() : type.getElementName();
 	}
 
-	private void addElements(IJavaElement element, List chain) {
-		if ( (element instanceof IMember) || (element instanceof ILocalVariable)) {
-			chain.add(0, element);
-			if (element.getParent() != null)
-				addElements(element.getParent(), chain);
+    private static String replaceAll(final String source, final String replaceFrom, final String replaceTo) {
+		final StringBuffer buf= new StringBuffer(source.length());
+		int currentIndex= 0;
+		int matchIndex;
+		while ((matchIndex= source.indexOf(replaceFrom, currentIndex)) != -1) {
+			buf.append(source.substring(currentIndex, matchIndex));
+			buf.append(replaceTo);
+			currentIndex= matchIndex + replaceFrom.length();
 		}
+		buf.append(source.substring(currentIndex));
+		return buf.toString();
 	}
 }

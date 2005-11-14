@@ -54,6 +54,7 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
@@ -249,17 +250,21 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	
 	public Object getNewElement() {
 		if (Checks.isTopLevel(fType)) {
-			ICompilationUnit cu;
-			if (fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java")) { //$NON-NLS-1$
-				IPackageFragment parent= fType.getPackageFragment();
-				cu= parent.getCompilationUnit(getNewElementName() + ".java"); //$NON-NLS-1$
-			} else {
-				cu= fType.getCompilationUnit();
-			}
-			return cu.getType(getNewElementName());
+			return getNewCompilationUnit().getType(getNewElementName());
 		} else {
 			return fType.getDeclaringType().getType(getNewElementName());
 		}
+	}
+
+	private ICompilationUnit getNewCompilationUnit() {
+		ICompilationUnit cu;
+		if (fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java")) { //$NON-NLS-1$
+			IPackageFragment parent= fType.getPackageFragment();
+			cu= parent.getCompilationUnit(getNewElementName() + ".java"); //$NON-NLS-1$
+		} else {
+			cu= fType.getCompilationUnit();
+		}
+		return cu;
 	}
 
 	//---- ITextUpdating -------------------------------------------------
@@ -439,8 +444,12 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	 * fields.
 	 * 
 	 * May be called from the UI.
+	 * 
+	 * @throws JavaModelException some fundamental error with the underlying model
+	 * @throws OperationCanceledException if user canceled the task
+	 * 
 	 */
-	public RefactoringStatus initializeReferences(IProgressMonitor monitor) throws JavaModelException {
+	public RefactoringStatus initializeReferences(IProgressMonitor monitor) throws JavaModelException, OperationCanceledException {
 
 		Assert.isNotNull(fType);
 		Assert.isNotNull(getNewElementName());
@@ -457,57 +466,68 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		fCachedRenamingStrategy= fRenamingStrategy;
 		fCachedRefactoringStatus= new RefactoringStatus();
 
-		fReferences= RefactoringSearchEngine.search(SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE), RefactoringScopeFactory
-				.create(fType), monitor, fCachedRefactoringStatus);
-		fReferences= Checks.excludeCompilationUnits(fReferences, fCachedRefactoringStatus);
+		
+		try {
+			fReferences= RefactoringSearchEngine.search(SearchPattern.createPattern(fType, IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE), RefactoringScopeFactory
+					.create(fType), monitor, fCachedRefactoringStatus);
+			fReferences= Checks.excludeCompilationUnits(fReferences, fCachedRefactoringStatus);
 
-		fPreloadedElementToName= new HashMap();
-		fPreloadedElementToSelection= new HashMap();
+			fPreloadedElementToName= new HashMap();
+			fPreloadedElementToSelection= new HashMap();
 
-		final String unQualifiedTypeName= fType.getElementName();
+			final String unQualifiedTypeName= fType.getElementName();
 
-		monitor.beginTask("", fReferences.length); //$NON-NLS-1$
+			monitor.beginTask("", fReferences.length); //$NON-NLS-1$
 
-		if (getUpdateDerivedElements()) {
+			if (getUpdateDerivedElements()) {
 
-			RenamingNameSuggestor sugg= new RenamingNameSuggestor(fRenamingStrategy);
+				RenamingNameSuggestor sugg= new RenamingNameSuggestor(fRenamingStrategy);
 
-			for (int i= 0; i < fReferences.length; i++) {
-				final ICompilationUnit cu= fReferences[i].getCompilationUnit();
-				if (cu == null)
-					continue;
+				for (int i= 0; i < fReferences.length; i++) {
+					final ICompilationUnit cu= fReferences[i].getCompilationUnit();
+					if (cu == null)
+						continue;
 
-				final SearchMatch[] results= fReferences[i].getSearchResults();
+					final SearchMatch[] results= fReferences[i].getSearchResults();
 
-				for (int j= 0; j < results.length; j++) {
-					final SearchMatch match= results[j];
+					for (int j= 0; j < results.length; j++) {
+						final SearchMatch match= results[j];
 
-					if (match.getElement() instanceof IField) {
-						final IField currentField= (IField) match.getElement();
-						final String newFieldName= sugg.suggestNewFieldName(currentField.getJavaProject(), currentField.getElementName(), Flags.isStatic(currentField.getFlags()), unQualifiedTypeName,
-								getNewElementName());
+						if (match.getElement() instanceof IField) {
+							final IField currentField= (IField) match.getElement();
+							final String newFieldName= sugg.suggestNewFieldName(currentField.getJavaProject(), currentField.getElementName(), Flags.isStatic(currentField.getFlags()),
+									unQualifiedTypeName, getNewElementName());
 
-						if (newFieldName != null)
-							fPreloadedElementToName.put(currentField, newFieldName);
-					}
+							if (newFieldName != null)
+								fPreloadedElementToName.put(currentField, newFieldName);
+						}
 
-					if (match.getElement() instanceof IMethod) {
-						final IMethod currentMethod= (IMethod) match.getElement();
-						final String newMethodName= sugg.suggestNewMethodName(currentMethod.getElementName(), unQualifiedTypeName, getNewElementName());
+						if (match.getElement() instanceof IMethod) {
+							final IMethod currentMethod= (IMethod) match.getElement();
+							if (!currentMethod.isConstructor()) {
+								final String newMethodName= sugg.suggestNewMethodName(currentMethod.getElementName(), unQualifiedTypeName, getNewElementName());
 
-						if (newMethodName != null) {
-							fPreloadedElementToName.put(currentMethod, newMethodName);
+								if (newMethodName != null)
+									fPreloadedElementToName.put(currentMethod, newMethodName);
+							}
 						}
 					}
+					if (monitor.isCanceled())
+						throw new OperationCanceledException();
 				}
 			}
-		}
 
-		for (Iterator iter= fPreloadedElementToName.keySet().iterator(); iter.hasNext();) {
-			IJavaElement element= (IJavaElement) iter.next();
-			fPreloadedElementToSelection.put(element, Boolean.TRUE);
+			for (Iterator iter= fPreloadedElementToName.keySet().iterator(); iter.hasNext();) {
+				IJavaElement element= (IJavaElement) iter.next();
+				fPreloadedElementToSelection.put(element, Boolean.TRUE);
+			}
+			fPreloadedElementToNameDefault= (Map) fPreloadedElementToName.clone();
+
+		} catch (OperationCanceledException e) {
+			fReferences= null;
+			fPreloadedElementToName= null;
+			throw new OperationCanceledException();
 		}
-		fPreloadedElementToNameDefault= (Map) fPreloadedElementToName.clone();
 		return fCachedRefactoringStatus;
 	}
 
@@ -1393,9 +1413,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 	/**
 	 * This method is used to ask the refactoring object for an updated element
-	 * handle of ANY member (IType, IField, IMethod, and IInitializer) in the
-	 * project. The new handle reflects all changes and derived changes to the
-	 * java model carried out by the refactoring.
+	 * handle of java elements and resources in the project. The returned handle
+	 * is either an updated handle of the given handle which reflects all
+	 * changes to the project - or the original handle if it is not affected by
+	 * the changes.
 	 * 
 	 * Note that local variables <strong>cannot</strong> be resolved using this
 	 * method.
@@ -1403,11 +1424,19 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	 */
 	public Object getRefactoredElement(Object element) {
 
-		Assert.isTrue(element instanceof IJavaElement);
-
-		final IType newType= (IType) getNewElement();
-		final RefactoringHandleTransplanter transplanter= new RefactoringHandleTransplanter(fType, newType, fFinalDerivedElementToName);
-		return transplanter.transplantHandle((IJavaElement) element);
+		if (element instanceof IFile) {
+			if (Checks.isTopLevel(fType) && element.equals(fType.getResource()))
+				return getNewCompilationUnit().getResource();
+		} else if (element instanceof ICompilationUnit) {
+			if (Checks.isTopLevel(fType) && element.equals(fType.getCompilationUnit()))
+				return getNewCompilationUnit();
+		} else if (element instanceof IMember) {
+			final IType newType= (IType) getNewElement();
+			final RefactoringHandleTransplanter transplanter= new RefactoringHandleTransplanter(fType, newType, fFinalDerivedElementToName);
+			return transplanter.transplantHandle((IMember) element);
+		} 
+			
+		return element;
 	}
 
 	// ------ UI interaction

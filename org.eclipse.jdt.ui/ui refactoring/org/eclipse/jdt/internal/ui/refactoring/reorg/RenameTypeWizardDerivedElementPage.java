@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.ImageDescriptor;
@@ -119,6 +120,7 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		public EditElementDialog(Shell parent, IJavaElement elementToEdit, String newName) {
 			super(parent);
 			setTitle(RefactoringMessages.RenameTypeWizardDerivedElementPage_change_element_name);
+			setShellStyle(getShellStyle() | SWT.RESIZE);
 
 			fElementToEdit= elementToEdit;
 
@@ -138,6 +140,9 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 			final Composite composite= (Composite) super.createDialogArea(parent);
 			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fNameField }, true, SWT.DEFAULT, SWT.DEFAULT);
 			fNameField.postSetFocusOnDialogField(parent.getDisplay());
+			
+			LayoutUtil.setWidthHint(fNameField.getLabelControl(composite), convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH));
+			LayoutUtil.setHorizontalGrabbing(fNameField.getTextControl(composite));	
 
 			Dialog.applyDialogFont(composite);
 			return composite;

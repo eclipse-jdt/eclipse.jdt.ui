@@ -1329,37 +1329,46 @@ public class RenameTypeTests extends RefactoringTest {
 		List handleList= new ArrayList();
 		List argumentList= new ArrayList();
 		
-		List derivedList= new ArrayList();
+		List derivedOldHandleList= new ArrayList();
 		List derivedNewNameList= new ArrayList();
+		List derivedNewHandleList= new ArrayList();
 		
 		final String newName= "SomeNewClass";
 		
 		// f-Field + getters/setters
 		IField f3= other.getField("fSomeClass");
-		derivedList.add(f3.getHandleIdentifier());
+		derivedOldHandleList.add(f3.getHandleIdentifier());
+		derivedNewHandleList.add("Lp/SomeOtherClass;.fSomeNewClass");
 		derivedNewNameList.add("fSomeNewClass");
+		
 		IMethod m3= other.getMethod("getSomeClass", new String[0]);
-		derivedList.add(m3.getHandleIdentifier());
+		derivedOldHandleList.add(m3.getHandleIdentifier());
 		derivedNewNameList.add("getSomeNewClass");
+		derivedNewHandleList.add("Lp/SomeOtherClass;.getSomeNewClass()V");
 		IMethod m4= other.getMethod("setSomeClass", new String[] {"QSomeClass;"});
-		derivedList.add(m4.getHandleIdentifier());
+		derivedOldHandleList.add(m4.getHandleIdentifier());
 		derivedNewNameList.add("setSomeNewClass");
+		derivedNewHandleList.add("Lp/SomeOtherClass;.setSomeNewClass(QSomeNewClass;)V");
 		
 		// non-f-field + getter/setters
 		IField f1= someClass.getField("someClass");
-		derivedList.add(f1.getHandleIdentifier());
+		derivedOldHandleList.add(f1.getHandleIdentifier());
 		derivedNewNameList.add("someNewClass");
+		derivedNewHandleList.add("Lp/SomeNewClass;.someNewClass");
 		IMethod m1= someClass.getMethod("getSomeClass", new String[0]);
-		derivedList.add(m1.getHandleIdentifier());
+		derivedOldHandleList.add(m1.getHandleIdentifier());
 		derivedNewNameList.add("getSomeNewClass");
+		derivedNewHandleList.add("Lp/SomeNewClass;.getSomeNewClass()V");
 		IMethod m2= someClass.getMethod("setSomeClass", new String[] {"QSomeClass;"});
-		derivedList.add(m2.getHandleIdentifier());
+		derivedOldHandleList.add(m2.getHandleIdentifier());
 		derivedNewNameList.add("setSomeNewClass");
+		derivedNewHandleList.add("Lp/SomeNewClass;.setSomeNewClass(QSomeNewClass;)V");
 
 		// fs-field
 		IField f2= someClass.getField("fsSomeClass");
-		derivedList.add(f2.getHandleIdentifier());
+		derivedOldHandleList.add(f2.getHandleIdentifier());
 		derivedNewNameList.add("fsSomeNewClass");
+		derivedNewHandleList.add("Lp/SomeNewClass;.fsSomeNewClass");
 		
 		// Type Stuff
 		handleList.add(someClass);
@@ -1381,7 +1390,7 @@ public class RenameTypeTests extends RefactoringTest {
 		checkResultInClass("SomeOtherClass");
 		
 		ParticipantTesting.testRename(handles, arguments);
-		ParticipantTesting.testDerivedElements(derivedList, derivedNewNameList);
+		ParticipantTesting.testDerivedElements(derivedOldHandleList, derivedNewNameList, derivedNewHandleList);
 	}
 	
 	public void testDerivedElements12() throws Exception {
@@ -1435,6 +1444,141 @@ public class RenameTypeTests extends RefactoringTest {
 		getClassFromTestFile(getPackageP(), "OtherClass");
 		helper3("OverriddenMethodClass", "ThirdClass", true, true, true);
 		checkResultInClass("OtherClass");
+	}
+	
+	public void testDerivedElements21() throws Exception {
+		// Constructors may not be renamed
+		getClassFromTestFile(getPackageP(), "SomeClassSecond");
+		helper3("SomeClass", "SomeNewClass", true, false, true);
+		checkResultInClass("SomeClassSecond");
+	}
+	
+	public void testDerivedElements22() throws Exception {
+		// Test transplanter for fields in types inside of initializers
+
+		ParticipantTesting.reset();
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "SomeClass");
+		IType someClass= getType(cu, "SomeClass");
+		
+		List handleList= new ArrayList();
+		List argumentList= new ArrayList();
+		
+		List derivedOldHandleList= new ArrayList();
+		List derivedNewNameList= new ArrayList();
+		List derivedNewHandleList= new ArrayList();
+		
+		final String newName= "SomeNewClass";
+		
+		// field in class in initializer
+		IField inInitializer= someClass.getInitializer(1).getType("InInitializer", 1).getField("someClassInInitializer");
+		derivedOldHandleList.add(inInitializer.getHandleIdentifier());
+		derivedNewNameList.add("someNewClassInInitializer");
+		derivedNewHandleList.add("Lp/SomeNewClass$InInitializer;.someNewClassInInitializer");
+		
+		// Type Stuff
+		handleList.add(someClass);
+		argumentList.add(new RenameArguments(newName, true));
+		handleList.add(cu);
+		argumentList.add(new RenameArguments(newName + ".java", true));
+		handleList.add(cu.getResource());
+		argumentList.add(new RenameArguments(newName + ".java", true));
+		
+		String[] handles= ParticipantTesting.createHandles(handleList.toArray());
+		RenameArguments[] arguments= (RenameArguments[])argumentList.toArray(new RenameArguments[0]);
+		
+		RenameRefactoring ref= createRefactoring(someClass, newName);
+		setTheOptions(ref, true, true, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		RefactoringStatus status= performRefactoring(ref);
+		assertNull("was supposed to pass", status);
+		
+		checkResultInClass(newName);
+		
+		ParticipantTesting.testRename(handles, arguments);
+		ParticipantTesting.testDerivedElements(derivedOldHandleList, derivedNewNameList, derivedNewHandleList);
+		
+	}
+	
+	public void testDerivedElements23() throws Exception {
+		// Test transplanter for elements inside types inside fields
+
+		ParticipantTesting.reset();
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "SomeClass");
+		IType someClass= getType(cu, "SomeClass");
+		
+		List handleList= new ArrayList();
+		List argumentList= new ArrayList();
+		
+		List derivedOldHandleList= new ArrayList();
+		List derivedNewNameList= new ArrayList();
+		List derivedNewHandleList= new ArrayList();
+		
+		final String newName= "SomeNewClass";
+		
+		// some field 
+		IField anotherSomeClass= someClass.getField("anotherSomeClass");
+		derivedOldHandleList.add(anotherSomeClass.getHandleIdentifier());
+		derivedNewNameList.add("anotherSomeNewClass");
+		derivedNewHandleList.add("Lp/SomeNewClass;.anotherSomeNewClass");
+		
+		// field in class in method in field declaration ;)
+		IField inInner= anotherSomeClass.getType("", 1).getMethod("foo", new String[0]).getType("X", 1).getField("someClassInInner");
+		derivedOldHandleList.add(inInner.getHandleIdentifier());
+		derivedNewNameList.add("someNewClassInInner");
+		derivedNewHandleList.add("Lp/SomeNewClass$1$X;.someNewClassInInner");
+		
+		// Type Stuff
+		handleList.add(someClass);
+		argumentList.add(new RenameArguments(newName, true));
+		handleList.add(cu);
+		argumentList.add(new RenameArguments(newName + ".java", true));
+		handleList.add(cu.getResource());
+		argumentList.add(new RenameArguments(newName + ".java", true));
+		
+		String[] handles= ParticipantTesting.createHandles(handleList.toArray());
+		RenameArguments[] arguments= (RenameArguments[])argumentList.toArray(new RenameArguments[0]);
+		
+		RenameRefactoring ref= createRefactoring(someClass, newName);
+		setTheOptions(ref, true, true, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		RefactoringStatus status= performRefactoring(ref);
+		assertNull("was supposed to pass", status);
+		
+		checkResultInClass(newName);
+		
+		ParticipantTesting.testRename(handles, arguments);
+		ParticipantTesting.testDerivedElements(derivedOldHandleList, derivedNewNameList, derivedNewHandleList);
+	}
+	
+	public void testDerivedElements24() throws Exception {
+		// Test transplanter for ICompilationUnit and IFile
+		
+		ParticipantTesting.reset();
+		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "SomeClass");
+		IType someClass= getType(cu, "SomeClass");
+		
+		RenameRefactoring ref= createRefactoring(someClass, "SomeNewClass");
+		setTheOptions(ref, true, true, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		RefactoringStatus status= performRefactoring(ref);
+		assertNull("was supposed to pass", status);
+		
+		checkResultInClass("SomeNewClass");
+		
+		RenameTypeProcessor rtp= (RenameTypeProcessor)ref.getProcessor();
+		ICompilationUnit newUnit= (ICompilationUnit) rtp.getRefactoredElement(someClass.getCompilationUnit());
+		
+		assertTrue(newUnit.exists());
+		assertTrue(newUnit.getElementName().equals("SomeNewClass.java"));
+		assertFalse(someClass.getCompilationUnit().exists());
+		
+		IFile newFile= (IFile) rtp.getRefactoredElement(someClass.getResource());
+		
+		assertTrue(newFile.exists());
+		assertTrue(newFile.getName().equals("SomeNewClass.java"));
+		assertFalse(someClass.getResource().exists());
+		
+		IPackageFragment oldPackage= (IPackageFragment) cu.getParent();
+		IPackageFragment newPackage= (IPackageFragment) rtp.getRefactoredElement(oldPackage);
+		assertEquals(oldPackage, newPackage);
+		
 	}
 	
 }

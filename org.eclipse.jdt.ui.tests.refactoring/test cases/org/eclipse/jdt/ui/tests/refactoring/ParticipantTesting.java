@@ -142,12 +142,12 @@ public class ParticipantTesting {
 		}
 	}
 	
-	public static void testDerivedElements(List derivedList, List derivedNewNameList) {
+	public static void testDerivedElements(List derivedList, List derivedNewNameList, List derivedNewHandleList) {
 		Assert.assertEquals(derivedList.size(), derivedNewNameList.size());
 		if (derivedList.size() == 0) {
 			TestRenameParticipantShared.testNumberOfDerivedElements(0);
 		} else {
-			TestRenameParticipantShared.testDerivedElements(derivedList, derivedNewNameList);
+			TestRenameParticipantShared.testDerivedElements(derivedList, derivedNewNameList, derivedNewHandleList);
 		}
 		
 	}	
