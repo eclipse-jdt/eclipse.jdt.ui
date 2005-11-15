@@ -158,6 +158,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			if (filter.select(null, null, workingSets[i]))
 				fElements.add(workingSets[i]);
 		}
+		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
 
 	/**
