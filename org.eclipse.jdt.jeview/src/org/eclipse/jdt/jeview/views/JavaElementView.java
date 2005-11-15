@@ -17,6 +17,8 @@ import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.Set;
 
+import org.eclipse.core.commands.util.ListenerList;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
@@ -42,7 +44,6 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -182,6 +183,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	public void createPartControl(Composite parent) {
 		fViewer = new TreeViewer(parent, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		fDrillDownAdapter = new DrillDownAdapter(fViewer) {
+			@SuppressWarnings("synthetic-access")
 			@Override
 			protected void updateNavigationButtons() {
 				super.updateNavigationButtons();
