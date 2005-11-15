@@ -592,7 +592,8 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		// computes the input successor page
 		// (=create changes)
 		IWizardPage nextPage= super.getNextPage();
-		nextPage.setPreviousPage(this);
+		if (nextPage != this) // if user pressed cancel, then the next page is the current page
+			nextPage.setPreviousPage(this);
 		return nextPage;
 	}
 
