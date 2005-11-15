@@ -59,10 +59,10 @@ import org.eclipse.jdt.testplugin.TestOptions;
 
 public class CodeCompletionTest extends CoreTests {
 
-	private final static boolean BUG_80782= true;
+	private static final boolean BUG_80782= true;
+	private static final boolean BUG_116419= true;
 
 	private static final Class THIS= CodeCompletionTest.class;
-
 
 	public static Test allTests() {
 		return new ProjectTestSetup(new TestSuite(THIS));
@@ -255,6 +255,11 @@ public class CodeCompletionTest extends CoreTests {
 	}
 
 	public void testConstructorCompletion() throws Exception {
+		if (BUG_116419) {
+			return;
+		}
+		
+		
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
 		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
