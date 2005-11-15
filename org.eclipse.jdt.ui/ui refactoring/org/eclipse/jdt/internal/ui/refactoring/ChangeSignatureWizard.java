@@ -42,6 +42,7 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
@@ -185,6 +186,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			final Text text= new Text(returnType, SWT.BORDER);
 			text.setText(getChangeMethodSignatureRefactoring().getReturnTypeString());
 			text.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
+			TextFieldNavigationHandler.install(text);
 
 			if (getChangeMethodSignatureRefactoring().canChangeNameAndReturnType()) {
 				text.addModifyListener(new ModifyListener(){
@@ -217,6 +219,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			final Text text= new Text(name, SWT.BORDER);
 			text.setText(getChangeMethodSignatureRefactoring().getMethodName());
 			text.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
+			TextFieldNavigationHandler.install(text);
 
 			if (getChangeMethodSignatureRefactoring().canChangeNameAndReturnType()) {
 				text.addModifyListener(new ModifyListener(){

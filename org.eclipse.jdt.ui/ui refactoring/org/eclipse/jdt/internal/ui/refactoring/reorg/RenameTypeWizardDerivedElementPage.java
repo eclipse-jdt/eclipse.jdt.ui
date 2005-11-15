@@ -33,6 +33,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -92,6 +93,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -141,8 +143,10 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 			LayoutUtil.doDefaultLayout(composite, new DialogField[] { fNameField }, true, SWT.DEFAULT, SWT.DEFAULT);
 			fNameField.postSetFocusOnDialogField(parent.getDisplay());
 			
-			LayoutUtil.setWidthHint(fNameField.getLabelControl(composite), convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH));
-			LayoutUtil.setHorizontalGrabbing(fNameField.getTextControl(composite));	
+			LayoutUtil.setWidthHint(fNameField.getLabelControl(null), convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH));
+			Text text= fNameField.getTextControl(null);
+			LayoutUtil.setHorizontalGrabbing(text);
+			TextFieldNavigationHandler.install(text);
 
 			Dialog.applyDialogFont(composite);
 			return composite;

@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefa
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 
@@ -99,6 +100,7 @@ public class ParameterEditDialog extends StatusDialog {
 						validate((Text)e.widget);
 					}
 				});
+			TextFieldNavigationHandler.install(fType);
 			JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(true, false);
 			processor.setCompletionContext(fContext.getCuHandle(), fContext.getBeforeString(), fContext.getAfterString());
 			ControlContentAssistHelper.createTextContentAssistant(fType, processor);
@@ -118,6 +120,7 @@ public class ParameterEditDialog extends StatusDialog {
 					validate((Text)e.widget);
 				}
 			});
+		TextFieldNavigationHandler.install(fName);
 
 		if (fEditDefault && fParameter.isAdded()) {
 			label= new Label(result, SWT.NONE);
@@ -132,6 +135,7 @@ public class ParameterEditDialog extends StatusDialog {
 						validate((Text)e.widget);
 					}
 				});
+			TextFieldNavigationHandler.install(fDefaultValue);
 		}
 		applyDialogFont(result);		
 		return result;

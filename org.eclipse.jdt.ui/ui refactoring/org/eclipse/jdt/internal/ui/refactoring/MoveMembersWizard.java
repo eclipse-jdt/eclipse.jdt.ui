@@ -55,6 +55,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
@@ -179,6 +180,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 			IPackageFragment context= (IPackageFragment) getMoveProcessor().getDeclaringType().getAncestor(IJavaElement.PACKAGE_FRAGMENT);
 			processor.setPackageFragment(context);
 			ControlContentAssistHelper.createComboContentAssistant(fDestinationField, processor);
+			TextFieldNavigationHandler.install(fDestinationField);
 			
 			Button button= new Button(composite, SWT.PUSH);
 			button.setText(RefactoringMessages.MoveMembersInputPage_browse); 

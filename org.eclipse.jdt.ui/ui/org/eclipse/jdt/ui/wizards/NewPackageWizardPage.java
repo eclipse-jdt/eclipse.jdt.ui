@@ -29,6 +29,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
@@ -46,6 +47,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -171,9 +173,12 @@ public class NewPackageWizardPage extends NewContainerWizardPage {
 
 	private void createPackageControls(Composite composite, int nColumns) {
 		fPackageDialogField.doFillIntoGrid(composite, nColumns - 1);
-		LayoutUtil.setWidthHint(fPackageDialogField.getTextControl(null), getMaxFieldWidth());
-		LayoutUtil.setHorizontalGrabbing(fPackageDialogField.getTextControl(null));
-		DialogField.createEmptySpace(composite);		
+		Text text= fPackageDialogField.getTextControl(null);
+		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
+		LayoutUtil.setHorizontalGrabbing(text);
+		DialogField.createEmptySpace(composite);
+		
+		TextFieldNavigationHandler.install(text);
 	}
 				
 	// -------- PackageFieldAdapter --------

@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Text;
 
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPackageCompletionProcessor;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -58,6 +59,7 @@ class PackageFragmentSelection extends StringButtonStatusDialogField implements 
 		LayoutUtil.setWidthHint(text, textWidth);
 		LayoutUtil.setHorizontalGrabbing(text);
 		ControlContentAssistHelper.createTextContentAssistant(text, fCurrPackageCompletionProcessor);
+		TextFieldNavigationHandler.install(text);
 
 		return res;
 	}

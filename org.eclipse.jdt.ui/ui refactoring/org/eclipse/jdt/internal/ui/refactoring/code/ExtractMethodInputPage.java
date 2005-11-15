@@ -55,6 +55,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeParametersControl;
@@ -259,6 +260,7 @@ public class ExtractMethodInputPage extends UserInputWizardPage {
 				textModified(getText());
 			}
 		});
+		TextFieldNavigationHandler.install(result);
 		return result;
 	}
 	

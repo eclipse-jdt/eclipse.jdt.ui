@@ -196,6 +196,8 @@ public class TypeSelectionComponent extends Composite {
 				}
 			}
 		});
+		TextFieldNavigationHandler.install(fFilter);
+		
 		Label label= new Label(this, SWT.NONE);
 		label.setFont(font);
 		label.setText(JavaUIMessages.TypeSelectionComponent_label);

@@ -29,6 +29,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
@@ -89,6 +90,7 @@ public class ConvertAnonymousToNestedWizard extends RefactoringWizard {
 					ConvertAnonymousToNestedInputPage.this.updateStatus();
 				}
 			});
+			TextFieldNavigationHandler.install(classNameField);
 			return classNameField;
 		}
 	

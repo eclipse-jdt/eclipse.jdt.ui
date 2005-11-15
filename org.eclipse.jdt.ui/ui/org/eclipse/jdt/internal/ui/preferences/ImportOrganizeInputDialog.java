@@ -19,6 +19,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 import org.eclipse.jface.operation.IRunnableContext;
@@ -41,6 +42,7 @@ import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.preferences.ImportOrganizeConfigurationBlock.ImportOrderEntry;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -137,8 +139,10 @@ public class ImportOrganizeInputDialog extends StatusDialog {
 		LayoutUtil.setHorizontalSpan(fNameDialogField.getLabelControl(null), 2);
 		
 		int fieldWidthHint= convertWidthInCharsToPixels(60);
-		LayoutUtil.setWidthHint(fNameDialogField.getTextControl(null), fieldWidthHint);
-		LayoutUtil.setHorizontalGrabbing(fNameDialogField.getTextControl(null));
+		Text text= fNameDialogField.getTextControl(null);
+		LayoutUtil.setWidthHint(text, fieldWidthHint);
+		LayoutUtil.setHorizontalGrabbing(text);
+		TextFieldNavigationHandler.install(text);
 		
 		DialogField.createEmptySpace(composite, 1);
 		fBrowseTypeButton.doFillIntoGrid(composite, 1);

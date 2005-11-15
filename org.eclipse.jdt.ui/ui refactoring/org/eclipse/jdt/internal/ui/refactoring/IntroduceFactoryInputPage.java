@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
@@ -65,6 +66,7 @@ public class IntroduceFactoryInputPage extends UserInputWizardPage {
 	private Text createTextInputField(Composite result) {
 		final Text textField = new Text(result, SWT.SINGLE | SWT.LEFT | SWT.BORDER);
 		textField.selectAll();
+		TextFieldNavigationHandler.install(textField);
 		return textField;
 	}
 

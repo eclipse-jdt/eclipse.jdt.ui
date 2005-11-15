@@ -127,6 +127,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TableTextCellEditor;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage;
@@ -579,6 +580,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		LayoutUtil.setWidthHint(text, getMaxFieldWidth());	
 		LayoutUtil.setHorizontalGrabbing(text);
 		ControlContentAssistHelper.createTextContentAssistant(text, fCurrPackageCompletionProcessor);
+		TextFieldNavigationHandler.install(text);
 	}
 
 	/**
@@ -614,6 +616,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		gd.widthHint = SWTUtil.getButtonWidthHint(button);
 		button.setLayoutData(gd);
 		ControlContentAssistHelper.createTextContentAssistant(text, fEnclosingTypeCompletionProcessor);
+		TextFieldNavigationHandler.install(text);
 	}	
 
 	/**
@@ -627,7 +630,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fTypeNameDialogField.doFillIntoGrid(composite, nColumns - 1);
 		DialogField.createEmptySpace(composite);
 		
-		LayoutUtil.setWidthHint(fTypeNameDialogField.getTextControl(null), getMaxFieldWidth());
+		Text text= fTypeNameDialogField.getTextControl(null);
+		LayoutUtil.setWidthHint(text, getMaxFieldWidth());
+		TextFieldNavigationHandler.install(text);
 	}
 
 	/**
@@ -679,6 +684,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		});
 
 		ControlContentAssistHelper.createTextContentAssistant(text, superClassCompletionProcessor);
+		TextFieldNavigationHandler.install(text);
 	}
 
 	/**
@@ -712,7 +718,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 		});
 		SubjectControlContentAssistant contentAssistant= ControlContentAssistHelper.createJavaContentAssistant(superInterfaceCompletionProcessor);
-		ContentAssistHandler.createHandlerForText(cellEditor.getText(), contentAssistant);
+		Text cellEditorText= cellEditor.getText();
+		ContentAssistHandler.createHandlerForText(cellEditorText, contentAssistant);
+		TextFieldNavigationHandler.install(cellEditorText);
 		cellEditor.setContentAssistant(contentAssistant);
 		
 		tableViewer.setCellEditors(new CellEditor[] { cellEditor });

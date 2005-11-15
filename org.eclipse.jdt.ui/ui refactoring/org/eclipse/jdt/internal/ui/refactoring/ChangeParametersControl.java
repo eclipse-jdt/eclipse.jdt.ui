@@ -58,6 +58,7 @@ import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 
 import org.eclipse.jdt.internal.ui.dialogs.TableTextCellEditor;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.VariableNamesProcessor;
@@ -598,6 +599,7 @@ public class ChangeParametersControl extends Composite {
 					}
 				}
 			});
+			TextFieldNavigationHandler.install(editor.getText());
 		}
 		
 		editors[NEWNAME_PROP].setActivationListener(new TableTextCellEditor.IActivationListener(){

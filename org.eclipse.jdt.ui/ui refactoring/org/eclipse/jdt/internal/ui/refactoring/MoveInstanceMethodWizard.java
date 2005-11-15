@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
@@ -191,6 +192,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 					handleStatusChanged();
 				}
 			});
+			TextFieldNavigationHandler.install(fMethodNameField);
 
 			fTargetNameLabel= new Label(control, SWT.SINGLE);
 			fTargetNameLabel.setText(RefactoringMessages.MoveInstanceMethodPage_Target_name); 
@@ -212,6 +214,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 					handleStatusChanged();
 				}
 			});
+			TextFieldNavigationHandler.install(fTargetNameField);
 
 			label= new Label(control, SWT.NONE);
 

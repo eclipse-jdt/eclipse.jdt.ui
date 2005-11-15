@@ -32,6 +32,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.code.PromoteTempToFieldRefactoring;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.FieldNameProcessor;
 
@@ -109,6 +110,7 @@ public class PromoteTempWizard extends RefactoringWizard {
 			});
 			IContentAssistProcessor processor= new FieldNameProcessor(getPromoteTempRefactoring());
 			ControlContentAssistHelper.createTextContentAssistant(fNameField, processor);
+			TextFieldNavigationHandler.install(fNameField);
 		}
 
 		private void updateStatus() {

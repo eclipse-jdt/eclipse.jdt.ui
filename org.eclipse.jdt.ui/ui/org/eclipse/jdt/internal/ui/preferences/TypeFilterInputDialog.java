@@ -18,6 +18,7 @@ import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.StatusDialog;
@@ -35,6 +36,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -98,8 +100,10 @@ public class TypeFilterInputDialog extends StatusDialog {
 		LayoutUtil.doDefaultLayout(inner, new DialogField[] { fNameDialogField }, true, 0, 0);
 		
 		int fieldWidthHint= convertWidthInCharsToPixels(60);
-		LayoutUtil.setWidthHint(fNameDialogField.getTextControl(null), fieldWidthHint);
-		LayoutUtil.setHorizontalGrabbing(fNameDialogField.getTextControl(null));
+		Text text= fNameDialogField.getTextControl(null);
+		LayoutUtil.setWidthHint(text, fieldWidthHint);
+		LayoutUtil.setHorizontalGrabbing(text);
+		TextFieldNavigationHandler.install(text);
 		
 		fNameDialogField.postSetFocusOnDialogField(parent.getDisplay());
 		

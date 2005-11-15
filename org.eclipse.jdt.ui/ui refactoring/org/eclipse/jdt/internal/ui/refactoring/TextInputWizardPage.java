@@ -19,9 +19,16 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
+/**
+ * A TextInputWizardPage is a simple UserInputWizardPage with facilities
+ * to create a text input field and validate its contents.
+ * The text is assumed to be a java identifier, hence CamelCase word jumping is installed.
+ */
 public abstract class TextInputWizardPage extends UserInputWizardPage{
 
 	private String fInitialValue;
@@ -132,6 +139,7 @@ public abstract class TextInputWizardPage extends UserInputWizardPage{
 			}
 		});
 		fTextField.setText(fInitialValue);
+		TextFieldNavigationHandler.install(fTextField);
 		return fTextField;
 	}
 	

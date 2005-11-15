@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.StatusDialog;
@@ -54,6 +55,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -189,10 +191,14 @@ public class NLSAccessorConfigurationDialog extends StatusDialog {
 		fAccessorPackage.createControl(parent, nOfColumns, textWidth);
 
 		fAccessorClassName.doFillIntoGrid(parent, nOfColumns);
-		LayoutUtil.setWidthHint(fAccessorClassName.getTextControl(null), convertWidthInCharsToPixels(60));
-
+		Text accessorClassText= fAccessorClassName.getTextControl(null);
+		LayoutUtil.setWidthHint(accessorClassText, convertWidthInCharsToPixels(60));
+		TextFieldNavigationHandler.install(accessorClassText);
+		
 		fSubstitutionPattern.doFillIntoGrid(parent, nOfColumns);
-		LayoutUtil.setWidthHint(fSubstitutionPattern.getTextControl(null), convertWidthInCharsToPixels(60));
+		Text substitutionPatternText= fSubstitutionPattern.getTextControl(null);
+		LayoutUtil.setWidthHint(substitutionPatternText, convertWidthInCharsToPixels(60));
+		TextFieldNavigationHandler.install(substitutionPatternText);
 		
 		fSubstitutionPattern.setEnabled(!fRefactoring.isEclipseNLS());
 	}

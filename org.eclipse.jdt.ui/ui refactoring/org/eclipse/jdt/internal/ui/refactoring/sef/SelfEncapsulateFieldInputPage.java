@@ -41,6 +41,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
@@ -87,6 +88,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 				processValidation();
 			}
 		});
+		TextFieldNavigationHandler.install(getter);
 		
 		if (needsSetter()) {
 			label= new Label(result, SWT.LEFT);
@@ -100,6 +102,7 @@ public class SelfEncapsulateFieldInputPage extends UserInputWizardPage {
 					processValidation();
 				}
 			});
+			TextFieldNavigationHandler.install(setter);
 		}			
 		
 		// createSeparator(result, layouter);

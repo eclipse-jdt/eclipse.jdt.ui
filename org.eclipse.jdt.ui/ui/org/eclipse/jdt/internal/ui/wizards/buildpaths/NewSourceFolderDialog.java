@@ -26,6 +26,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.StatusDialog;
 
@@ -35,6 +36,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -121,8 +123,9 @@ public class NewSourceFolderDialog extends StatusDialog {
 			int horizontalIndent= convertWidthInCharsToPixels(3);
 			data.horizontalIndent= horizontalIndent;
 		}
-		Control control= fContainerDialogField.getTextControl(null);
-		control.setLayoutData(data);	
+		Text text= fContainerDialogField.getTextControl(null);
+		text.setLayoutData(data);
+		TextFieldNavigationHandler.install(text);
 				
 		fContainerDialogField.postSetFocusOnDialogField(parent.getDisplay());
 		applyDialogFont(composite);		
