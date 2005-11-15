@@ -9,6 +9,9 @@
    <feature url="features/org.eclipse.jdt.astview.feature_1.0.6.jar" id="org.eclipse.jdt.astview.feature" version="1.0.6">
       <category name="ast-view-1.0.6"/>
    </feature>
+   <feature url="features/org.eclipse.jdt.jeview.feature_1.0.0.jar" id="org.eclipse.jdt.jeview.feature" version="1.0.0">
+      <category name="java-element-view-1.0.0"/>
+   </feature>
    <category-def name="ast-view-1.0.6" label="AST View for 3.1 (RC1 and higher)">
       <description>
          View to visualize the Java compilers abstract syntax tree generated for a Java file.
@@ -21,6 +24,11 @@ Use this version Eclipse 3.1 builds RC1 and higher
          View to visualize the Java compilers abstract syntax tree generated for a Java file.
 
 Use this version of the AST view for Eclipse 3.0
+      </description>
+   </category-def>
+   <category-def name="java-element-view-1.0.0" label="JavaElement View (requires JDK 1.5)">
+      <description>
+         View to visualize IJavaElement and IResource handles in the Eclpse SDK.
       </description>
    </category-def>
 </site>
