@@ -49,8 +49,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.JavaWordIterator;
 
 /**
- * This class is not to be used yet. We have to sort out some pending SWT bugs first.
- * The class will finally fix bug 64665 (JDT controls with symbol names should be camel-case aware [refactoring]).
+ * Support for camelCase-aware sub-word navigation in dialog fields.
  */
 public class TextFieldNavigationHandler {
 	
@@ -292,10 +291,38 @@ public class TextFieldNavigationHandler {
 			if (fKeyListener == null) {
 				fKeyListener= new KeyAdapter() {
 					private static final String TEXT_EDITOR_CONTEXT_ID= "org.eclipse.ui.textEditorScope"; //$NON-NLS-1$
-					
+					private final boolean IS_WORKAROUND= (fNavigable instanceof ComboNavigable)
+							|| (fNavigable instanceof TextNavigable && TextNavigable.BUG_106024_TEXT_SELECTION);
 					private List/*<Submission>*/ fSubmissions;
 
 					public void keyPressed(KeyEvent e) {
+						if (IS_WORKAROUND) {
+							if (e.keyCode == SWT.ARROW_LEFT && e.stateMask == SWT.MOD2) {
+								int caretPosition= fNavigable.getCaretPosition();
+								if (caretPosition != 0) {
+									Point selection= fNavigable.getSelection();
+									if (caretPosition == selection.x)
+										fNavigable.setSelection(selection.y, caretPosition - 1);
+									else
+										fNavigable.setSelection(selection.x, caretPosition - 1);
+								}
+								e.doit= false;
+								return;
+								
+							} else if (e.keyCode == SWT.ARROW_RIGHT && e.stateMask == SWT.MOD2) {
+								String text= fNavigable.getText();
+								int caretPosition= fNavigable.getCaretPosition();
+								if (caretPosition != text.length()) {
+									Point selection= fNavigable.getSelection();
+									if (caretPosition == selection.y)
+										fNavigable.setSelection(selection.x, caretPosition + 1);
+									else
+										fNavigable.setSelection(selection.y, caretPosition + 1);
+								}
+								e.doit= false;
+								return;
+							}
+						}
 						int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
 						KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
 						getSubmissions();
