@@ -32,6 +32,10 @@
 		<copy file="about.html" todir="${dest}"/>
 		<copy todir= "${dest}/META-INF">
 			<fileset dir="META-INF"/>
-		</copy>		
+		</copy>
+		
+		<replaceregexp file="${dest}/META-INF/MANIFEST.MF" match="Bundle-Version: ((\d)+\.(\d)+\.(\d)+\.)qualifier" replace="Bundle-Version: \1zzz" byline="true" />
+		<replaceregexp file="${dest}/plugin.xml" match="version=&quot;((\d)+\.(\d)+\.(\d)+\.)qualifier" replace="version=&quot;\1zzz" byline="true" />
+		
 	</target>
 </project>

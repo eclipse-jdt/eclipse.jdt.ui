@@ -20,6 +20,7 @@
 			basedir="bin"
 		/>
 		<copy file="plugin.xml" todir="${dest}"/>
+		<replaceregexp file="${dest}/plugin.xml" match="version=&quot;((\d)+\.(\d)+\.(\d)+\.)qualifier" replace="version=\&quot;\1zzz" byline="true" />
 		<copy file="plugin.properties" todir="${dest}"/>
 		<copy todir="${dest}/icons">
 			<fileset dir="icons" />

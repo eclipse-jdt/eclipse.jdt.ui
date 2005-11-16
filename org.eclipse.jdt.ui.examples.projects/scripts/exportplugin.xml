@@ -26,7 +26,8 @@
 		</copy>
 		<copy todir="${dest}/META-INF">
 			<fileset dir="META-INF" />
-		</copy>		
+		</copy>
+		<replaceregexp file="${dest}/META-INF/MANIFEST.MF" match="Bundle-Version: ((\d)+\.(\d)+\.(\d)+\.)qualifier" replace="Bundle-Version: \1zzz" byline="true" />
 		<copy todir="${dest}/archive">
 			<fileset dir="archive" />
 		</copy>
