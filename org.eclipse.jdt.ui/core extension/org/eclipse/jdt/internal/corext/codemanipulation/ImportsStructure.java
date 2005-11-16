@@ -44,22 +44,21 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IImportContainer;
-import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageDeclaration;
-import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
+import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Type;
@@ -71,11 +70,9 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.ValidateEditException;
-import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Resources;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
@@ -97,11 +94,17 @@ public final class ImportsStructure implements IImportsStructure {
 	
 	private List fImportsCreated;
 	private List fStaticImportsCreated;
-	private boolean fHasChanges= false;
+
 	private IRegion fReplaceRange;
+
+	private int fFlags= 0;
+	
+	private static final int F_HAS_CHANGES= 1;
+	private static final int F_NEEDS_LEADING_DELIM= 2;
+	private static final int F_NEEDS_TRAILING_DELIM= 4;
 	
 	private static final String JAVA_LANG= "java.lang"; //$NON-NLS-1$
-		
+	
 	/**
 	 * Creates an ImportsStructure for a compilation unit. New imports
 	 * are added next to the existing import that is matching best. 
@@ -114,10 +117,7 @@ public final class ImportsStructure implements IImportsStructure {
 	 */	
 	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws CoreException {
 		fCompilationUnit= cu;
-		JavaModelUtil.reconcile(cu);
-	
-		IImportContainer container= cu.getImportContainer();
-		
+				
 		fImportOnDemandThreshold= importThreshold;
 		fFilterImplicitImports= true;
 		fFindAmbiguousImports= true; //!restoreExistingImports;
@@ -125,14 +125,17 @@ public final class ImportsStructure implements IImportsStructure {
 		fPackageEntries= new ArrayList(20);
 		fImportsCreated= null; // initialized on 'create'
 		fStaticImportsCreated= null;
+		fFlags= 0;
+
+		CompilationUnit root= getASTRoot(cu);
 		
 		IProgressMonitor monitor= new NullProgressMonitor();
 		IDocument document= null;
 		try {
 			document= aquireDocument(monitor);
-			fReplaceRange= evaluateReplaceRange(document);
-			if (restoreExistingImports && container.exists()) {
-				addExistingImports(document, cu.getImports(), fReplaceRange);
+			fReplaceRange= evaluateReplaceRange(root, document);
+			if (restoreExistingImports) {
+				addExistingImports(document, root.imports(), fReplaceRange);
 			}
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
@@ -153,8 +156,14 @@ public final class ImportsStructure implements IImportsStructure {
 		}
 		
 		addPreferenceOrderHolders(order);
-		
-		fHasChanges= false;
+	}
+	
+	private CompilationUnit getASTRoot(ICompilationUnit cu) {
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setSource(cu);
+		parser.setFocalPosition(0); // reduced AST
+		parser.setResolveBindings(false);
+		return (CompilationUnit) parser.createAST(null);
 	}
 	
 	private void addPreferenceOrderHolders(PackageEntry[] preferenceOrder) {
@@ -216,33 +225,41 @@ public final class ImportsStructure implements IImportsStructure {
 		}
 	}
 
+	private static String getQualifier(ImportDeclaration decl) {
+		String name= decl.getName().getFullyQualifiedName();
+		return decl.isOnDemand() ? name : Signature.getQualifier(name);
+	}
+
+	private static String getFullName(ImportDeclaration decl) {
+		String name= decl.getName().getFullyQualifiedName();
+		return decl.isOnDemand() ? name + ".*": name; //$NON-NLS-1$
+	}
 	
-	private void addExistingImports(IDocument document, IImportDeclaration[] decls, IRegion replaceRange) throws JavaModelException, BadLocationException {
-		if (decls.length == 0) {
+	
+	
+	private void addExistingImports(IDocument document, List/*ImportDeclaration*/ decls, IRegion replaceRange) throws BadLocationException {
+		if (decls.isEmpty()) {
 			return;
 		}				
 		PackageEntry currPackage= null;
 			
-		IImportDeclaration curr= decls[0];
-		ISourceRange sourceRange= curr.getSourceRange();
-		int currOffset= sourceRange.getOffset();
-		int currLength= sourceRange.getLength();
+		ImportDeclaration curr= (ImportDeclaration) decls.get(0);
+		int currOffset= curr.getStartPosition();
+		int currLength= curr.getLength();
 		int currEndLine= document.getLineOfOffset(currOffset + currLength);
 			
-		for (int i= 1; i < decls.length; i++) {
-			String name= curr.getElementName();
-			boolean isStatic= Flags.isStatic(curr.getFlags());
-				
-			String packName= Signature.getQualifier(name);
+		for (int i= 1; i < decls.size(); i++) {
+			boolean isStatic= curr.isStatic();
+			String name= getFullName(curr);
+			String packName= getQualifier(curr);
 			if (currPackage == null || currPackage.compareTo(packName, isStatic) != 0) {
 				currPackage= new PackageEntry(packName, null, isStatic);
 				fPackageEntries.add(currPackage);
 			}
 
-			IImportDeclaration next= decls[i];
-			sourceRange= next.getSourceRange();
-			int nextOffset= sourceRange.getOffset();
-			int nextLength= sourceRange.getLength();
+			ImportDeclaration next= (ImportDeclaration) decls.get(i);
+			int nextOffset= next.getStartPosition();
+			int nextLength= next.getLength();
 			int nextOffsetLine= document.getLineOfOffset(nextOffset);
 
 			// if next import is on a different line, modify the end position to the next line begin offset
@@ -267,17 +284,16 @@ public final class ImportsStructure implements IImportsStructure {
 			currEndLine= document.getLineOfOffset(nextOffset + nextLength);
 		}
 
-		String name= curr.getElementName();
-		boolean isStatic= Flags.isStatic(curr.getFlags());
-		String packName= Signature.getQualifier(name);
+		boolean isStatic= curr.isStatic();
+		String name= getFullName(curr);
+		String packName= getQualifier(curr);
 		if (currPackage == null || currPackage.compareTo(packName, isStatic) != 0) {
 			currPackage= new PackageEntry(packName, null, isStatic);
 			fPackageEntries.add(currPackage);
 		}
-		ISourceRange range= curr.getSourceRange();			
-		int length= replaceRange.getOffset() + replaceRange.getLength() - range.getOffset();
-		currPackage.add(new ImportDeclEntry(name, isStatic, new Region(range.getOffset(), length)));
-	}		
+		int length= replaceRange.getOffset() + replaceRange.getLength() - curr.getStartPosition();
+		currPackage.add(new ImportDeclEntry(name, isStatic, new Region(curr.getStartPosition(), length)));
+	}
 		
 	/**
 	 * @return Returns the compilation unit of this import structure.
@@ -360,7 +376,7 @@ public final class ImportsStructure implements IImportsStructure {
 						return false; // keep curr and best together, new should be before both
 					} else {
 						return currChar < bestChar; // -> (c < b)
-				}
+					}
 				}
 			} else {
 				if (bestChar > newChar) {								// c < n < b
@@ -370,11 +386,10 @@ public final class ImportsStructure implements IImportsStructure {
 						return true; // keep curr and best together, new should be ahead of both
 					} else {
 						return currChar > bestChar; // -> (c > b)
+					}
 				}
 			}
 		}
-		}
-			
 	}
 
 	private static int getCommonPrefixLength(String s, String t) {
@@ -451,7 +466,7 @@ public final class ImportsStructure implements IImportsStructure {
 	 * a best match algorithm. If an import already exists, the import is
 	 * not added.
 	 * @param binding The type binding of the type to be added
-	 * @param ast The ast to create the type for
+	 * @param ast The AST to create the type for
 	 * @return Returns the a new AST node that is either simple if the import was successful or 
 	 * fully qualified type name if the import could not be added due to a conflict. 
 	 */
@@ -484,13 +499,13 @@ public final class ImportsStructure implements IImportsStructure {
 			return ast.newArrayType(elementType, normalizedBinding.getDimensions());
 		}
 		
-		String qualifiedName= Bindings.getRawQualifiedName(normalizedBinding);
+		String qualifiedName= getRawQualifiedName(normalizedBinding);
 		if (qualifiedName.length() > 0) {
 			String res= internalAddImport(qualifiedName);
 			
 			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
 			if (typeArguments.length > 0) {
-				Type erasureType= ast.newSimpleType(ASTNodeFactory.newName(ast,res));
+				Type erasureType= ast.newSimpleType(ast.newName(res));
 				ParameterizedType paramType= ast.newParameterizedType(erasureType);
 				List arguments= paramType.typeArguments();
 				for (int i= 0; i < typeArguments.length; i++) {
@@ -498,17 +513,27 @@ public final class ImportsStructure implements IImportsStructure {
 				}
 				return paramType;
 			}
-			return ast.newSimpleType(ASTNodeFactory.newName(ast, res));
+			return ast.newSimpleType(ast.newName(res));
 		}
-		return ast.newSimpleType(ASTNodeFactory.newName(ast, Bindings.getRawName(normalizedBinding)));
+		return ast.newSimpleType(ast.newName(getRawName(normalizedBinding)));
 	}
 	
+	private static String getRawName(ITypeBinding normalizedBinding) {
+		return normalizedBinding.getTypeDeclaration().getName();
+	}
+
+
+	private static String getRawQualifiedName(ITypeBinding normalizedBinding) {
+		return normalizedBinding.getTypeDeclaration().getQualifiedName();
+	}
+
+
 	/**
 	 * Adds a new import declaration that is sorted in the structure using
 	 * a best match algorithm. If an import already exists, the import is
 	 * not added.
 	 * @param typeSig The type in signature notation
-	 * @param ast The ast to create the type for
+	 * @param ast The AST to create the type for
 	 * @return Returns the a new AST node that is either simple if the import was successful or 
 	 * fully qualified type name if the import could not be added due to a conflict. 
 	 */
@@ -530,7 +555,7 @@ public final class ImportsStructure implements IImportsStructure {
 				if (erasureSig.charAt(0) == Signature.C_RESOLVED) {
 					erasureName= internalAddImport(erasureName);
 				}
-				Type baseType= ast.newSimpleType(ASTNodeFactory.newName(ast, erasureName));
+				Type baseType= ast.newSimpleType(ast.newName(erasureName));
 				String[] typeArguments= Signature.getTypeArguments(typeSig);
 				if (typeArguments.length > 0) {
 					ParameterizedType type= ast.newParameterizedType(baseType);
@@ -600,10 +625,8 @@ public final class ImportsStructure implements IImportsStructure {
 			}
 			return res.toString();
 		}
-		
-
-		
-		String qualifiedName= Bindings.getRawQualifiedName(normalizedBinding);
+	
+		String qualifiedName= getRawQualifiedName(normalizedBinding);
 		if (qualifiedName.length() > 0) {
 			String str= internalAddImport(qualifiedName);
 			
@@ -622,7 +645,7 @@ public final class ImportsStructure implements IImportsStructure {
 			}
 			return str;
 		}
-		return Bindings.getRawName(normalizedBinding);
+		return getRawName(normalizedBinding);
 	}
 		
 	/**
@@ -648,10 +671,10 @@ public final class ImportsStructure implements IImportsStructure {
 	public String addStaticImport(IBinding binding) {
 		if (binding instanceof IVariableBinding) {
 			ITypeBinding declaringType= ((IVariableBinding) binding).getDeclaringClass();
-			return addStaticImport(Bindings.getRawQualifiedName(declaringType), binding.getName(), true);
+			return addStaticImport(getRawQualifiedName(declaringType), binding.getName(), true);
 		} else if (binding instanceof IMethodBinding) {
 			ITypeBinding declaringType= ((IMethodBinding) binding).getDeclaringClass();
-			return addStaticImport(Bindings.getRawQualifiedName(declaringType), binding.getName(), false);
+			return addStaticImport(getRawQualifiedName(declaringType), binding.getName(), false);
 		}
 		return binding.getName();
 	}
@@ -773,7 +796,7 @@ public final class ImportsStructure implements IImportsStructure {
 				}
 			}
 		}
-		fHasChanges= true;
+		fFlags |= F_HAS_CHANGES;
 	}
 
 	/**
@@ -793,7 +816,7 @@ public final class ImportsStructure implements IImportsStructure {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
 			if (entry.compareTo(typeContainerName, false) == 0) {
 				if (entry.remove(qualifiedName, false)) {
-					fHasChanges= true;
+					fFlags |= F_HAS_CHANGES;
 					return true;
 				}
 			}
@@ -814,7 +837,7 @@ public final class ImportsStructure implements IImportsStructure {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
 			if (entry.compareTo(containerName, true) == 0) {
 				if (entry.remove(qualifiedName, true)) {
-					fHasChanges= true;
+					fFlags |= F_HAS_CHANGES;
 					return true;
 				}
 			}
@@ -833,7 +856,7 @@ public final class ImportsStructure implements IImportsStructure {
 		if (binding == null) {
 			return false;
 		}		
-		String qualifiedName= Bindings.getRawQualifiedName(binding);
+		String qualifiedName= getRawQualifiedName(binding);
 		if (qualifiedName.length() > 0) {
 			return removeImport(qualifiedName);
 		}
@@ -952,7 +975,7 @@ public final class ImportsStructure implements IImportsStructure {
 				if (!status.isOK()) {
 					throw new ValidateEditException(status);
 				}
-				edit.apply(document); // apply after file is committable
+				edit.apply(document); // apply after file is commitable
 				
 				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
 				bufferManager.getTextFileBuffer(file.getFullPath()).commit(monitor, true);
@@ -963,29 +986,24 @@ public final class ImportsStructure implements IImportsStructure {
 		edit.apply(document);
 	}
 		
-	private IRegion evaluateReplaceRange(IDocument document) throws JavaModelException, BadLocationException {
-		JavaModelUtil.reconcile(fCompilationUnit);
-
-		IImportContainer container= fCompilationUnit.getImportContainer();
-		if (container.exists()) {
-			ISourceRange importSourceRange= container.getSourceRange();
-			int startPos= importSourceRange.getOffset();
-			int endPos= startPos + importSourceRange.getLength();
-			if (!Strings.isLineDelimiterChar(document.getChar(endPos - 1))) {
-				// if not already after a new line, go to beginning of next line
-				// (if last char in new line -> import ends with a comment, see 10557)
-				int nextLine= document.getLineOfOffset(endPos) + 1;
-				if (nextLine < document.getNumberOfLines()) {
-					int stopPos= document.getLineInformation(nextLine).getOffset();
-					// read to beginning of next character or beginning of next line
-					while (endPos < stopPos && Character.isWhitespace(document.getChar(endPos))) {
-						endPos++;
-					}
+	private IRegion evaluateReplaceRange(CompilationUnit root, IDocument document) throws BadLocationException {
+		List imports= root.imports();
+		if (!imports.isEmpty()) {
+			ImportDeclaration first= (ImportDeclaration) imports.get(0);
+			ImportDeclaration last= (ImportDeclaration) imports.get(imports.size() - 1);
+			
+			int startPos= root.getExtendedStartPosition(first);
+			int endPos= root.getExtendedStartPosition(last) + root.getExtendedLength(last);
+			int stopPos= root.getPosition(root.lineNumber(endPos) + 1, 0);
+			if (stopPos != 0) {
+				// read to beginning of next character or beginning of next line
+				while (endPos < stopPos && Character.isWhitespace(document.getChar(endPos))) {
+					endPos++;
 				}
 			}
 			return new Region(startPos, endPos - startPos);
 		} else {
-			int start= getPackageStatementEndPos(document);
+			int start= getPackageStatementEndPos(root, document);
 			return new Region(start, 0);
 		}		
 	}
@@ -1007,9 +1025,9 @@ public final class ImportsStructure implements IImportsStructure {
 			int currPos= importsStart;
 			MultiTextEdit resEdit= new MultiTextEdit();
 			
-			if (importsLen == 0) {
+			if ((fFlags & F_NEEDS_LEADING_DELIM) != 0) {
 				// new import container
-				resEdit.addChild(new InsertEdit(currPos, lineDelim)); // first entry, might be removed later
+				resEdit.addChild(new InsertEdit(currPos, lineDelim));
 			}
 			
 			PackageEntry lastPackage= null;
@@ -1080,15 +1098,8 @@ public final class ImportsStructure implements IImportsStructure {
 			
 			if (importsLen == 0) {
 				if (!fImportsCreated.isEmpty() || !fStaticImportsCreated.isEmpty()) { // new import container
-					if (fCompilationUnit.getPackageDeclarations().length == 0) { // no package statement
-						resEdit.removeChild(0);
-					}
-					// check if a space between import and first type is needed
-					IType[] types= fCompilationUnit.getTypes();
-					if (types.length > 0) {
-						if (types[0].getSourceRange().getOffset() == importsStart) {
-							resEdit.addChild(new InsertEdit(currPos, lineDelim));
-						}
+					if ((fFlags & F_NEEDS_TRAILING_DELIM) != 0) {
+						resEdit.addChild(new InsertEdit(currPos, lineDelim));
 					}
 				} else {
 					return new MultiTextEdit(); // no changes
@@ -1251,20 +1262,30 @@ public final class ImportsStructure implements IImportsStructure {
 		return buf.toString();
 	}
 	
-	private int getPackageStatementEndPos(IDocument document) throws JavaModelException, BadLocationException {
-		IPackageDeclaration[] packDecls= fCompilationUnit.getPackageDeclarations();
-		if (packDecls != null && packDecls.length > 0) {
-			ISourceRange range= packDecls[0].getSourceRange();
-			int line= document.getLineOfOffset(range.getOffset() + range.getLength());
+	private int getPackageStatementEndPos(CompilationUnit root, IDocument document) throws BadLocationException {
+		PackageDeclaration packDecl= root.getPackage();
+		if (packDecl != null) {
+			int line= document.getLineOfOffset(packDecl.getStartPosition() + packDecl.getLength());
 			IRegion region= document.getLineInformation(line + 1);
 			if (region != null) {
-				IType[] types= fCompilationUnit.getTypes();
-				if (types.length > 0) {
-					return Math.min(types[0].getSourceRange().getOffset(), region.getOffset());
+				int afterPackageStatementPos= region.getOffset();
+			
+				List types= root.types();
+				if (!types.isEmpty()) {
+					int firstTypePos= ((ASTNode) types.get(0)).getStartPosition();
+					if (firstTypePos <= afterPackageStatementPos) {
+						fFlags |= F_NEEDS_TRAILING_DELIM;
+						if (firstTypePos == afterPackageStatementPos) {
+							fFlags |= F_NEEDS_LEADING_DELIM;
+						}
+						return firstTypePos;
+					}
 				}
-				return region.getOffset();
+				fFlags |= F_NEEDS_LEADING_DELIM;
+				return afterPackageStatementPos; // insert a line after after package statement
 			}
 		}
+		fFlags |= F_NEEDS_TRAILING_DELIM;
 		return 0;
 	}
 	
@@ -1562,9 +1583,6 @@ public final class ImportsStructure implements IImportsStructure {
 	 * @return boolean
 	 */
 	public boolean hasChanges() {
-		return fHasChanges;
+		return (fFlags & F_HAS_CHANGES) != 0;
 	}
-
-
-
 }
