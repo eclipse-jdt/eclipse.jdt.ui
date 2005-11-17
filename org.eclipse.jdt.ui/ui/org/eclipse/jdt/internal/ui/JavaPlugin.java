@@ -19,10 +19,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.IJobManager;
-import org.eclipse.core.runtime.jobs.Job;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
@@ -377,25 +374,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 		factory.registerCreator("org.eclipse.jdt.ui.rename.type.parameter", new RenameTypeParameterRefactoringInstanceCreator()); //$NON-NLS-1$
 		factory.registerCreator("org.eclipse.jdt.ui.rename.type", new RenameTypeRefactoringInstanceCreator()); //$NON-NLS-1$
 	}
-
-	/* package */ static void initializeAfterLoad() {
-		Job job = new Job(JavaUIMessages.JavaPlugin_initializing_ui) {
-			protected IStatus run(IProgressMonitor monitor) {
-				IJobManager manager= Platform.getJobManager();
-				try {
-					manager.join(JavaCore.PLUGIN_ID, monitor);
-				} catch (InterruptedException e) {
-					// Ignore interruption and proceed
-				}
-				TypeInfoHistory.getInstance().checkConsistency(monitor);
-				return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
-			}
-			public boolean belongsTo(Object family) {
-				return JavaUI.ID_PLUGIN.equals(family);
-			}
-		};
-		job.setPriority(Job.SHORT);
-		job.schedule();
+	
+	/* package */ static void initializeAfterLoad(IProgressMonitor monitor) {
+		TypeInfoHistory.getInstance().checkConsistency(monitor);
 	}
 	
 	/** @deprecated */

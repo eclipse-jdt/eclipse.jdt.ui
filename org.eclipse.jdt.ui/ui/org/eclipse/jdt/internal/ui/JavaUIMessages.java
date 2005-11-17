@@ -161,7 +161,6 @@ public final class JavaUIMessages extends NLS {
 	public static String TypeInfoViewer_library_name_format;
 	
 	public static String InitializeAfterLoadJob_starter_job_name;
-	public static String InitializeAfterLoadJob_real_job_name;
 	
 	public static String SortMembersMessageDialog_configure_preferences_tool_tip;
 	
