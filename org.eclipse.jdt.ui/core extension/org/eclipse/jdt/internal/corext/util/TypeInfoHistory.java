@@ -292,6 +292,8 @@ public class TypeInfoHistory {
 			} catch (JavaModelException e) {
 				fHistory.remove(type);
 			}
+			if (monitor.isCanceled())
+				throw new OperationCanceledException();
 			monitor.worked(1);
 		}
 		monitor.done();
