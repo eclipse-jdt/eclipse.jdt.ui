@@ -61,9 +61,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.IWorkingSetEditWizard;
 import org.eclipse.ui.dialogs.IWorkingSetNewWizard;
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.internal.WorkbenchPlugin;
-import org.eclipse.ui.internal.registry.WorkingSetDescriptor;
-import org.eclipse.ui.internal.registry.WorkingSetRegistry;
 
 public class WorkingSetConfigurationDialog extends SelectionDialog {
 
@@ -109,12 +106,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 				JavaWorkingSetUpdater.ID.equals(id) || isCompatible(ws);
 		}
 		private boolean isCompatible(IWorkingSet set) {
-			WorkingSetRegistry registry = WorkbenchPlugin.getDefault().getWorkingSetRegistry();
-			String workingSetId= set.getId();
-			if (workingSetId == null)
-				return false;
-			WorkingSetDescriptor descriptor= registry.getWorkingSetDescriptor(workingSetId);
-			if (descriptor == null || descriptor.getUpdaterClassName() == null)
+			if (!set.isSelfUpdating() || set.isAggregateWorkingSet())
 				return false;
 			IAdaptable[] elements= set.getElements();
 			if (elements.length == 0)
