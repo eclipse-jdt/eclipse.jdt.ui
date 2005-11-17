@@ -20,6 +20,8 @@ import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
@@ -57,7 +59,22 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
      * @param site the site providing context information for this action
      */
     public OpenCallHierarchyAction(IWorkbenchSite site) {
-        super(site);
+        this(site, site.getSelectionProvider());
+    }
+    
+    /**
+     * Creates a new <code>OpenCallHierarchyAction</code>. The action requires
+     * that the selection provided by the given selection provider is of type <code>
+     * org.eclipse.jface.viewers.IStructuredSelection</code>.
+     * 
+     * @param site the site providing context information for this action
+	 * @param provider a special selection provider which is used instead 
+	 *  of the site's selection provider
+     * 
+     * @since 3.2
+     */
+    public OpenCallHierarchyAction(IWorkbenchSite site, ISelectionProvider provider) {
+        super(site, provider);
         setText(CallHierarchyMessages.OpenCallHierarchyAction_label); 
         setToolTipText(CallHierarchyMessages.OpenCallHierarchyAction_tooltip); 
         setDescription(CallHierarchyMessages.OpenCallHierarchyAction_description); 

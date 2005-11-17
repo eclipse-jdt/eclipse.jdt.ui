@@ -13,13 +13,14 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 
@@ -50,6 +51,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 public abstract class SelectionDispatchAction extends Action implements ISelectionChangedListener {
 	
 	private IWorkbenchSite fSite;
+	private ISelectionProvider fSelectionProvider;
 	
 	/**
 	 * Creates a new action with no text and no image.
@@ -62,6 +64,27 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	protected SelectionDispatchAction(IWorkbenchSite site) {
 		Assert.isNotNull(site);
 		fSite= site;
+		fSelectionProvider= fSite.getSelectionProvider();
+	}
+
+	/**
+	 * Creates a new action with no text and no image.
+	 * 
+	 * <p>
+	 * Configure the action later using the set methods.
+	 * </p>
+	 * 
+	 * @param site the site this action is working on
+	 * @param provider a special selection provider which is used
+	 *  instead of the site's selection provider.
+	 *  
+	 * @since 3.2
+	 */
+	protected SelectionDispatchAction(IWorkbenchSite site, ISelectionProvider provider) {
+		Assert.isNotNull(site);
+		Assert.isNotNull(provider);
+		fSite= site;
+		fSelectionProvider= provider;
 	}
 
 	/**
@@ -100,7 +123,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	 * @return the site's selection provider	
 	 */
 	public ISelectionProvider getSelectionProvider() {
-		return fSite.getSelectionProvider();
+		return fSelectionProvider;
 	}
 
 	/**

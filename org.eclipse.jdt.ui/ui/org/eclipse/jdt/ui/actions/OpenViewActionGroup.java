@@ -45,7 +45,8 @@ public class OpenViewActionGroup extends ActionGroup {
     private boolean fEditorIsOwner;
 	private boolean fIsTypeHiararchyViewerOwner;
     private boolean fIsCallHiararchyViewerOwner;
-	private IWorkbenchSite fSite;
+    
+	private ISelectionProvider fSelectionProvider;
 
 	private OpenSuperImplementationAction fOpenSuperImplementation;
 	private OpenExternalJavadocAction fOpenExternalJavadoc;
@@ -66,15 +67,47 @@ public class OpenViewActionGroup extends ActionGroup {
 	
 	/**
 	 * Creates a new <code>OpenActionGroup</code>. The group requires
+	 * that the selection provided by the given selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * 
+	 * @param page the page that owns this action group
+	 * @param selectionProvider the selection provider used instead of the
+	 *  page selection provider.
+	 * 
+	 * @since 3.2
+	 */
+	public OpenViewActionGroup(Page page, ISelectionProvider selectionProvider) {
+		createSiteActions(page.getSite(), selectionProvider);
+	}
+	
+	/**
+	 * Creates a new <code>OpenActionGroup</code>. The group requires
 	 * that the selection provided by the part's selection provider is of type <code>
 	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
 	 * 
 	 * @param part the view part that owns this action group
 	 */
 	public OpenViewActionGroup(IViewPart part) {
-		createSiteActions(part.getSite());
-	//	fIsTypeHiararchyViewerOwner= part instanceof TypeHierarchyViewPart;
-     //   fIsCallHiararchyViewerOwner= part instanceof ICallHierarchyViewPart;
+		this(part, part.getSite().getSelectionProvider());
+	}
+	
+	/**
+	 * Creates a new <code>OpenActionGroup</code>. The group requires
+	 * that the selection provided by the given selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * 
+	 * @param part the view part that owns this action group
+	 * @param selectionProvider the selection provider used instead of the
+	 *  page selection provider.
+	 *  
+	 * @since 3.2
+	 */
+	public OpenViewActionGroup(IViewPart part, ISelectionProvider selectionProvider) {
+		createSiteActions(part.getSite(), selectionProvider);
+		// we do a name check here to avoid class loading. 
+		String partName= part.getClass().getName();
+		fIsTypeHiararchyViewerOwner= "org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart".equals(partName); //$NON-NLS-1$
+		fIsCallHiararchyViewerOwner= "org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyViewPart".equals(partName); //$NON-NLS-1$
 	}
 	
 	/**
@@ -100,31 +133,34 @@ public class OpenViewActionGroup extends ActionGroup {
         fOpenCallHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
         part.setAction("OpenCallHierarchy", fOpenCallHierarchy); //$NON-NLS-1$
 
-		initialize(part.getEditorSite());
+		initialize(part.getEditorSite().getSelectionProvider());
 	}
 
 	private void createSiteActions(IWorkbenchSite site) {
-		fOpenSuperImplementation= new OpenSuperImplementationAction(site);
+		createSiteActions(site, site.getSelectionProvider());
+	}
+	
+	private void createSiteActions(IWorkbenchSite site, ISelectionProvider provider) {
+		fOpenSuperImplementation= new OpenSuperImplementationAction(site, provider);
 		fOpenSuperImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_SUPER_IMPLEMENTATION);
 
-		fOpenExternalJavadoc= new OpenExternalJavadocAction(site);
+		fOpenExternalJavadoc= new OpenExternalJavadocAction(site, provider);
 		fOpenExternalJavadoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EXTERNAL_JAVADOC);
 
-		fOpenTypeHierarchy= new OpenTypeHierarchyAction(site);
+		fOpenTypeHierarchy= new OpenTypeHierarchyAction(site, provider);
 		fOpenTypeHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_TYPE_HIERARCHY);
 
-		fOpenCallHierarchy= new OpenCallHierarchyAction(site);
+		fOpenCallHierarchy= new OpenCallHierarchyAction(site, provider);
         fOpenCallHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
 
-        fOpenPropertiesDialog= new PropertyDialogAction(site, site.getSelectionProvider());
+        fOpenPropertiesDialog= new PropertyDialogAction(site, provider);
         fOpenPropertiesDialog.setActionDefinitionId(IWorkbenchActionDefinitionIds.PROPERTIES);
 		
-        initialize(site);
+        initialize(provider);
 	}
 
-	private void initialize(IWorkbenchSite site) {
-		fSite= site;
-		ISelectionProvider provider= fSite.getSelectionProvider();
+	private void initialize(ISelectionProvider provider) {
+		fSelectionProvider= provider;
 		ISelection selection= provider.getSelection();
 		fOpenSuperImplementation.update(selection);
 		fOpenExternalJavadoc.update(selection);
@@ -172,11 +208,10 @@ public class OpenViewActionGroup extends ActionGroup {
 	 * @see ActionGroup#dispose()
 	 */
 	public void dispose() {
-		ISelectionProvider provider= fSite.getSelectionProvider();
-		provider.removeSelectionChangedListener(fOpenSuperImplementation);
-		provider.removeSelectionChangedListener(fOpenExternalJavadoc);
-		provider.removeSelectionChangedListener(fOpenTypeHierarchy);
-        provider.removeSelectionChangedListener(fOpenCallHierarchy);
+		fSelectionProvider.removeSelectionChangedListener(fOpenSuperImplementation);
+		fSelectionProvider.removeSelectionChangedListener(fOpenExternalJavadoc);
+		fSelectionProvider.removeSelectionChangedListener(fOpenTypeHierarchy);
+		fSelectionProvider.removeSelectionChangedListener(fOpenCallHierarchy);
 		super.dispose();
 	}
 	

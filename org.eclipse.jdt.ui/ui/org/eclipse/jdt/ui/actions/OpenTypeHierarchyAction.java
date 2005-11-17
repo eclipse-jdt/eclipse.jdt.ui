@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -70,7 +71,22 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	 * @param site the site providing context information for this action
 	 */
 	public OpenTypeHierarchyAction(IWorkbenchSite site) {
-		super(site);
+		this(site, site.getSelectionProvider());
+	}
+	
+	/**
+	 * Creates a new <code>OpenTypeHierarchyAction</code>. The action requires
+	 * that the selection provided by the given selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * 
+	 * @param site the site providing context information for this action
+	 * @param provider a special selection provider which is used instead 
+	 *  of the site's selection provider
+	 * 
+	 * @since 3.2
+	 */
+	public OpenTypeHierarchyAction(IWorkbenchSite site, ISelectionProvider provider) {
+		super(site, provider);
 		setText(ActionMessages.OpenTypeHierarchyAction_label); 
 		setToolTipText(ActionMessages.OpenTypeHierarchyAction_tooltip); 
 		setDescription(ActionMessages.OpenTypeHierarchyAction_description); 

@@ -21,6 +21,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
@@ -68,7 +70,22 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	 * @param site the site providing additional context information for this action
 	 */ 
 	public OpenExternalJavadocAction(IWorkbenchSite site) {
-		super(site);
+		this(site, site.getSelectionProvider());
+	}
+	
+	/**
+	 * Creates a new <code>OpenExternalJavadocAction</code>. The action requires
+	 * that the selection provided by the given selection provider is of type <code>
+	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * 
+	 * @param site the site providing additional context information for this action
+	 * @param provider a special selection provider which is used instead 
+	 *  of the site's selection provider
+	 * 
+	 * @since 3.2
+	 */ 
+	public OpenExternalJavadocAction(IWorkbenchSite site, ISelectionProvider provider) {
+		super(site, provider);
 		setText(ActionMessages.OpenExternalJavadocAction_label); 
 		setDescription(ActionMessages.OpenExternalJavadocAction_description); 
 		setToolTipText(ActionMessages.OpenExternalJavadocAction_tooltip); 
@@ -199,4 +216,3 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 		return getTitle();
 	}	
 }
-		
