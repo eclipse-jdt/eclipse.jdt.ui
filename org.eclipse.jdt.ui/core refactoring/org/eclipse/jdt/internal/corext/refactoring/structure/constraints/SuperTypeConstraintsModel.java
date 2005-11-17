@@ -389,7 +389,7 @@ public final class SuperTypeConstraintsModel {
 			ConstraintVariable2 variable= null;
 			final TType type= createTType(binding);
 			if (method.getDeclaringClass().isFromSource())
-				variable= new ParameterTypeVariable2(type, index, method);
+				variable= new ParameterTypeVariable2(type, index, method.getMethodDeclaration());
 			else
 				variable= new ImmutableTypeVariable2(type);
 			return (ConstraintVariable2) fConstraintVariables.addExisting(variable);
