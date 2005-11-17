@@ -77,6 +77,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -547,6 +548,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 
 			}
 		});
+		TextFieldNavigationHandler.install(fPattern);
 		GridData data= new GridData(GridData.FILL, GridData.FILL, true, false, 1, 1);
 		data.widthHint= convertWidthInCharsToPixels(50);
 		fPattern.setLayoutData(data);
