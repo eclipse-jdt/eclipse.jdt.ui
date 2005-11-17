@@ -4,6 +4,7 @@
 		<tstamp/>
 		<property name="destdir" value="../../plugin-export" />
 		<property name="plugin"  value="org.eclipse.jdt.junit" />
+		<property name="qualifier" value="zzz${DSTAMP}-${TSTAMP}" />
 		<property name="plugin_version"  value="_3.1.0" />
 		<property name="dest"  value="${destdir}/${plugin}${plugin_version}" />
 	</target>
@@ -37,7 +38,7 @@
 			<fileset dir="META-INF"/>
 		</copy>
 		
-		<replaceregexp file="${dest}/META-INF/MANIFEST.MF" match="Bundle-Version: ((\d)+\.(\d)+\.(\d)+\.)qualifier" replace="Bundle-Version: \1zzz" byline="true" />
+		<replaceregexp file="${dest}/META-INF/MANIFEST.MF" match="Bundle-Version: ((\d)+\.(\d)+\.(\d)+\.)qualifier" replace="Bundle-Version: \1${qualifier}" byline="true" />
 
 	</target>
 </project>

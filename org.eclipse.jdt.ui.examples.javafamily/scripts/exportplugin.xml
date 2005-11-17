@@ -3,7 +3,8 @@
 		<tstamp/>
 		<property name="destdir" value="../../plugin-export" />
 		<property name="plugin"  value="org.eclipse.jdt.ui.examples.javafamily" />
-		<property name="plugin_version"  value="_3.0.0" />
+		<property name="qualifier" value="zzz${DSTAMP}-${TSTAMP}" />
+		<property name="plugin_version"  value="_3.1.100.${qualifier}" />
 		<property name="dest"  value="${destdir}/${plugin}${plugin_version}" />
 	</target>
 
@@ -20,7 +21,7 @@
 			basedir="bin"
 		/>
 		<copy file="plugin.xml" todir="${dest}"/>
-		<replaceregexp file="${dest}/plugin.xml" match="version=&quot;((\d)+\.(\d)+\.(\d)+\.)qualifier" replace="version=\&quot;\1zzz" byline="true" />
+		<replaceregexp file="${dest}/plugin.xml" match="version=&quot;((\d)+\.(\d)+\.(\d)+\.)qualifier" replace="version=\&quot;\1${qualifier}" byline="true" />
 		<copy file="plugin.properties" todir="${dest}"/>
 		<copy todir="${dest}/icons">
 			<fileset dir="icons" />
