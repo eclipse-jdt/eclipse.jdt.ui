@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.launcher;
 
- 
 import java.io.File;
 import java.text.MessageFormat;
 import java.util.HashSet;
@@ -22,19 +21,18 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
+
 import org.eclipse.core.variables.VariablesPlugin;
-import org.eclipse.debug.core.DebugPlugin;
+
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
-import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
-import org.eclipse.jdt.internal.junit.util.IJUnitStatusConstants;
-import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
+
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
 import org.eclipse.jdt.launching.ExecutionArguments;
 import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
@@ -42,6 +40,11 @@ import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMRunner;
 import org.eclipse.jdt.launching.SocketUtil;
 import org.eclipse.jdt.launching.VMRunnerConfiguration;
+
+import org.eclipse.jdt.internal.junit.ui.JUnitMessages;
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.util.IJUnitStatusConstants;
+import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 /**
  * Abstract launch configuration delegate for a JUnit test.
@@ -117,7 +120,7 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		// Program & VM args
 		String vmArgs= getVMArguments(configuration);
 		ExecutionArguments execArgs = new ExecutionArguments(vmArgs, ""); //$NON-NLS-1$
-		String[] envp= DebugPlugin.getDefault().getLaunchManager().getEnvironment(configuration);
+		String[] envp= getEnvironment(configuration);
 
 		VMRunnerConfiguration runConfig= createVMRunner(configuration, tests, port, mode);
 		runConfig.setVMArguments(execArgs.getVMArgumentsArray());
@@ -147,12 +150,6 @@ public abstract class JUnitBaseLaunchConfiguration extends AbstractJavaLaunchCon
 		return findTestsInContainer(containerHandle, pm);
 	}
 	
-	/**
-	 * @inheritdoc 
-	 * @param containerHandle
-	 * @param pm
-	 * @return
-	 */
 	private IType[] findTestsInContainer(String containerHandle, IProgressMonitor pm) {
 		IJavaElement container= JavaCore.create(containerHandle);
 		Set result= new HashSet();
