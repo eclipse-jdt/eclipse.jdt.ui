@@ -143,6 +143,7 @@ public class Binding extends ASTAttribute {
 
 					res.add(new Binding(this, "PACKAGE", typeBinding.getPackage(), isRefType)); //$NON-NLS-1$
 					res.add(new Binding(this, "DECLARING CLASS", typeBinding.getDeclaringClass(), isRefType)); //$NON-NLS-1$
+					res.add(new Binding(this, "DECLARING METHOD", typeBinding.getDeclaringMethod(), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "BINARY NAME", typeBinding.getBinaryName(), true)); //$NON-NLS-1$
 					
