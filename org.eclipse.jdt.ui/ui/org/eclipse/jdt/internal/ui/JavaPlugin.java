@@ -59,12 +59,25 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 
+import org.eclipse.ltk.internal.core.refactoring.history.RefactoringInstanceFactory;
+
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameCompilationUnitRefactoringInstanceCreator;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameEnumConstRefactoringInstanceCreator;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameFieldRefactoringInstanceCreator;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameJavaProjectRefactoringInstanceCreator;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameLocalVariableRefactoringInstanceCreator;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameMethodRefactoringInstanceCreator;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.RenamePackageRefactoringInstanceCreator;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameResourceRefactoringInstanceCreator;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameSourceFolderRefactoringInstanceCreator;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeParameterRefactoringInstanceCreator;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeRefactoringInstanceCreator;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
@@ -340,12 +353,31 @@ public class JavaPlugin extends AbstractUIPlugin {
 		});
 
 		ensurePreferenceStoreBackwardsCompatibility();
-		
+		// Initialize refactoring creators
+		initializeRefactoringCreators();
 		// Initialize AST provider
 		getASTProvider();
 		new InitializeAfterLoadJob().schedule();
 	}
-	
+
+	/**
+	 * Initializes the refactoring instance creators for the JDT refactorings.
+	 */
+	private static void initializeRefactoringCreators() {
+		final RefactoringInstanceFactory factory= RefactoringInstanceFactory.getInstance();
+		factory.registerCreator("org.eclipse.jdt.ui.rename.resource", new RenameResourceRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.rename.compilationunit", new RenameCompilationUnitRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.rename.enum.constant", new RenameEnumConstRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.rename.field", new RenameFieldRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.rename.java.project", new RenameJavaProjectRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.rename.local.variable", new RenameLocalVariableRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.rename.method", new RenameMethodRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.rename.package", new RenamePackageRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.rename.source.folder", new RenameSourceFolderRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.rename.type.parameter", new RenameTypeParameterRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.rename.type", new RenameTypeRefactoringInstanceCreator()); //$NON-NLS-1$
+	}
+
 	/* package */ static void initializeAfterLoad() {
 		Job job = new Job(JavaUIMessages.JavaPlugin_initializing_ui) {
 			protected IStatus run(IProgressMonitor monitor) {

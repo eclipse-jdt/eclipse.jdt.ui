@@ -87,7 +87,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 
 	private static final String ID_RENAME_METHOD= "org.eclipse.jdt.ui.rename.method"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_HANDLE= "handle"; //$NON-NLS-1$
+	public static final String ATTRIBUTE_HANDLE= "handle"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 
