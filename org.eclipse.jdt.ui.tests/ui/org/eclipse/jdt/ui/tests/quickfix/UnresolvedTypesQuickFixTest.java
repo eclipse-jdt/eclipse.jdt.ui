@@ -997,7 +997,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("public class E<T> {\n");
-		buf.append("    class SomeType { }\n");
+		buf.append("    static class SomeType { }\n");
 		buf.append("    void foo() {\n");
 		buf.append("        E<Map<String, ? extends XYX>> list= new E<Map<String, ? extends SomeType>>() {\n");
 		buf.append("        };\n");
@@ -1015,7 +1015,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("public class E<T> {\n");
-		buf.append("    class SomeType { }\n");
+		buf.append("    static class SomeType { }\n");
 		buf.append("    void foo() {\n");
 		buf.append("        E<Map<String, ? extends SomeType>> list= new E<Map<String, ? extends SomeType>>() {\n");
 		buf.append("        };\n");
@@ -1053,7 +1053,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("public class E<T> {\n");
-		buf.append("    class SomeType { }\n");
+		buf.append("    static class SomeType { }\n");
 		buf.append("    <XYX> void foo() {\n");
 		buf.append("        E<Map<String, ? extends XYX>> list= new E<Map<String, ? extends SomeType>>() {\n");
 		buf.append("        };\n");
@@ -1065,7 +1065,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("public class E<T, XYX> {\n");
-		buf.append("    class SomeType { }\n");
+		buf.append("    static class SomeType { }\n");
 		buf.append("    void foo() {\n");
 		buf.append("        E<Map<String, ? extends XYX>> list= new E<Map<String, ? extends SomeType>>() {\n");
 		buf.append("        };\n");
@@ -1121,7 +1121,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("public class E<T> {\n");
-		buf.append("    class SomeType<S1, S2> { }\n");
+		buf.append("    static class SomeType<S1, S2> { }\n");
 		buf.append("    void foo() {\n");
 		buf.append("        SomeType<String, String> list= new XXY<String, String>() { };\n");
 		buf.append("    }\n");
@@ -1139,7 +1139,7 @@ public class UnresolvedTypesQuickFixTest extends QuickFixTest {
 		buf.append("package test1;\n");
 		buf.append("import java.util.Map;\n");
 		buf.append("public class E<T> {\n");
-		buf.append("    class SomeType<S1, S2> { }\n");
+		buf.append("    static class SomeType<S1, S2> { }\n");
 		buf.append("    void foo() {\n");
 		buf.append("        SomeType<String, String> list= new SomeType<String, String>() { };\n");
 		buf.append("    }\n");
