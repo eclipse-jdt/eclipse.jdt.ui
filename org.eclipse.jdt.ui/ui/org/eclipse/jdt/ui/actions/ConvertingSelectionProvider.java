@@ -55,7 +55,7 @@ public final class ConvertingSelectionProvider implements ISelectionProvider {
 	 * 
 	 * @return a new selection converter
 	 */
-	public ISelectionConverter createDefaultConverter() {
+	public static ISelectionConverter createDefaultConverter() {
 		return new DefaultJavaConverter();
 	}
 	
