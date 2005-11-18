@@ -35,6 +35,8 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateBuffer;
+import org.eclipse.jface.text.templates.TemplateException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -166,35 +168,57 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		fRegion= region;
 		fSelectedStatements= selectedStatements;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal#getAdditionalProposalInfo()
+	 */
+	public String getPreviewContent() {
+		try {
+			IDocument document= new Document(fCompilationUnit.getBuffer().getContents());
+			CompilationUnitContext context= createNewContext(document);
+			
+			int offset= context.getCompletionOffset();
+			int start= context.getStart();
+			int end= context.getEnd();
+			IRegion region= new Region(start, end - start);
+			
+			context.setReadOnly(false);
+			TemplateBuffer templateBuffer;
+			try {
+				templateBuffer= context.evaluate(fTemplate);
+			} catch (TemplateException e1) {
+				JavaPlugin.log(e1);
+				return null;
+			}
+			
+			start= region.getOffset();
+			end= region.getOffset() + region.getLength();
+			end= Math.max(end, offset);
 
+			String templateString= templateBuffer.getString();
+			document.replace(start, end - start, templateString);
+			
+			return document.get();
+			
+		} catch (MalformedTreeException e) {
+			JavaPlugin.log(e);
+		} catch (IllegalArgumentException e) {
+			JavaPlugin.log(e);
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
+		}
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
+	 */
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
 		try {
 			IDocument document= viewer.getDocument();
-			AssistContext invocationContext= new AssistContext(fCompilationUnit, fContext.getStart(), fContext.getEnd() - fContext.getStart());
-			
-			SurroundWithTemplate surroundWith= new SurroundWithTemplate(invocationContext, fSelectedStatements, fTemplate);
-			Map options= fCompilationUnit.getJavaProject().getOptions(true);
-			MultiTextEdit allEdits= (MultiTextEdit)surroundWith.getRewrite().rewriteAST(document, options);
-			removeBlockStartAndEnd(allEdits);
-			MultiTextEdit blockFreeEdits= (MultiTextEdit)allEdits.copy();
-			removeBlock(blockFreeEdits);
-			
-			String newSelection= calculateNewSelection(document, surroundWith.getNewBodyPosition(), allEdits);
-			
-			//Change the document such that it contains the new variable declarations (i.e. with final keyword)
-			blockFreeEdits.apply(document);
-			
-			//The document may have changed and we need a new context
-			
-			//Find position for template insertion in new document (no leading indentation)
-			int replaceOffset= surroundWith.getNewBodyPosition().getStartPosition();
-			int lineStart= document.getLineOffset(document.getLineOfOffset(replaceOffset));
-			
-			//Create the new context
-			CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.NAME);
-			CompilationUnitContext context= contextType.createContext(document, lineStart, replaceOffset - lineStart, fCompilationUnit);
-			context.setVariable("selection", newSelection); //$NON-NLS-1$
-			context.setForceEvaluation(true);
+			CompilationUnitContext context= createNewContext(document);
 			
 			int start= context.getStart();
 			int end= context.getEnd();
@@ -202,7 +226,7 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 
 			//Evaluate the template within the new context
 			fProposal= new TemplateProposal(fTemplate, context, region, null);
-			fProposal.apply(viewer, trigger, stateMask, lineStart);
+			fProposal.apply(viewer, trigger, stateMask, context.getCompletionOffset());
 		} catch (MalformedTreeException e) {
 			handleException(viewer, e, fRegion);
 		} catch (IllegalArgumentException e) {
@@ -222,6 +246,35 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		} else {
 			return null;
 		}
+	}
+	
+	private CompilationUnitContext createNewContext(IDocument document) throws CoreException, BadLocationException {
+		AssistContext invocationContext= new AssistContext(fCompilationUnit, fContext.getStart(), fContext.getEnd() - fContext.getStart());
+		
+		SurroundWithTemplate surroundWith= new SurroundWithTemplate(invocationContext, fSelectedStatements, fTemplate);
+		Map options= fCompilationUnit.getJavaProject().getOptions(true);
+		MultiTextEdit allEdits= (MultiTextEdit)surroundWith.getRewrite().rewriteAST(document, options);
+		removeBlockStartAndEnd(allEdits);
+		MultiTextEdit blockFreeEdits= (MultiTextEdit)allEdits.copy();
+		removeBlock(blockFreeEdits);
+		
+		String newSelection= calculateNewSelection(document, surroundWith.getNewBodyPosition(), allEdits);
+		
+		//Change the document such that it contains the new variable declarations (i.e. with final keyword)
+		blockFreeEdits.apply(document);
+		
+		//The document may have changed and we need a new context
+		
+		//Find position for template insertion in new document (no leading indentation)
+		int replaceOffset= surroundWith.getNewBodyPosition().getStartPosition();
+		int offset= document.getLineOffset(document.getLineOfOffset(replaceOffset));
+		
+		//Create the new context
+		CompilationUnitContextType contextType= (CompilationUnitContextType) JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.NAME);
+		CompilationUnitContext context= contextType.createContext(document, offset, replaceOffset - offset, fCompilationUnit);
+		context.setVariable("selection", newSelection); //$NON-NLS-1$
+		context.setForceEvaluation(true);
+		return context;
 	}
 
 	private void removeBlockStartAndEnd(MultiTextEdit edits) {

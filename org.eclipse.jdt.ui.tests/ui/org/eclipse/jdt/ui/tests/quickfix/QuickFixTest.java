@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 import org.eclipse.jdt.internal.ui.text.correction.LinkedNamesAssistProposal;
 import org.eclipse.jdt.internal.ui.text.correction.NewCUCompletionUsingWizardProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+import org.eclipse.jdt.internal.ui.text.template.contentassist.SurroundWithTemplateProposal;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.StringAsserts;
@@ -322,11 +323,17 @@ public class QuickFixTest extends TestCase {
 				res[i]= getPreviewContent((CUCorrectionProposal) curr);
 			} else if (curr instanceof NewCUCompletionUsingWizardProposal) {
 				res[i]= getWizardPreviewContent((NewCUCompletionUsingWizardProposal) curr);
+			} else if (curr instanceof SurroundWithTemplateProposal) {
+				res[i]= getTemplatePreviewContent((SurroundWithTemplateProposal)curr);
 			}
 		}
 		return res;
 	}
 	
+	private static String getTemplatePreviewContent(SurroundWithTemplateProposal proposal) {
+		return proposal.getPreviewContent();
+	}
+
 	protected static String getPreviewContent(CUCorrectionProposal proposal) throws CoreException {
 		return proposal.getPreviewContent();
 	}

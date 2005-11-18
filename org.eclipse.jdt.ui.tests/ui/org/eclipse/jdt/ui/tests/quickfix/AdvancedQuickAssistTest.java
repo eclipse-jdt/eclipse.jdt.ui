@@ -1586,6 +1586,479 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 
 	}
 	
+	public void testSurroundWithTemplate01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        System.out.println(1);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		String selection= "System.out.println(1);";
+		int offset= buf.toString().indexOf(selection);
+		
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 8);
+
+		String[] expected= new String[7];
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        do {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        } while (condition);        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = 0; i < array.length; i++) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        }        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (condition) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        }        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                System.out.println(1);\n");
+		buf.append("            }\n");
+		buf.append("        }        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        synchronized (mutex) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        }        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[4]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        try {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        } catch (Exception e) {\n");
+		buf.append("            // TODO: handle exception\n");
+		buf.append("        }        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[5]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        while (condition) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        }        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[6]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
 	
+	public void testSurroundWithTemplate02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		String selection= "System.out.println(i);";
+		int offset= buf.toString().indexOf(selection);
+		
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 8);
+
+		String[] expected= new String[7];
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        do {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        } while (condition);        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        for (int j = 0; j < array.length; j++) {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        if (condition) {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        final int i= 10;\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                System.out.println(i);\n");
+		buf.append("            }\n");
+		buf.append("        }        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        synchronized (mutex) {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[4]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        try {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        } catch (Exception e) {\n");
+		buf.append("            // TODO: handle exception\n");
+		buf.append("        }        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[5]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        while (condition) {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }        \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[6]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
 	
+	public void testSurroundWithTemplate03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		String selection= "int i= 10;\n        System.out.println(i);";
+		int offset= buf.toString().indexOf(selection);
+		
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 9);
+
+		String[] expected= new String[7];
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i;\n");
+		buf.append("        do {\n");
+		buf.append("            i = 10;\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        } while (condition);        \n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i;\n");
+		buf.append("        for (int j = 0; j < array.length; j++) {\n");
+		buf.append("            i = 10;\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }        \n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i;\n");
+		buf.append("        if (condition) {\n");
+		buf.append("            i = 10;\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }        \n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i;\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                i = 10;\n");
+		buf.append("                System.out.println(i);\n");
+		buf.append("            }\n");
+		buf.append("        }        \n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i;\n");
+		buf.append("        synchronized (mutex) {\n");
+		buf.append("            i = 10;\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }        \n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[4]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i;\n");
+		buf.append("        try {\n");
+		buf.append("            i = 10;\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        } catch (Exception e) {\n");
+		buf.append("            // TODO: handle exception\n");
+		buf.append("        }        \n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[5]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i;\n");
+		buf.append("        while (condition) {\n");
+		buf.append("            i = 10;\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }        \n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[6]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testSurroundWithTemplate04() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		String selection= "System.out.println(i);";
+		int offset= buf.toString().indexOf(selection);
+		
+		AssistContext context= getCorrectionContext(cu, offset, selection.length());
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 8);
+
+		String[] expected= new String[7];
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        do {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        } while (condition);        \n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        for (int j = 0; j < array.length; j++) {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }        \n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        if (condition) {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }        \n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        final int i= 10;\n");
+		buf.append("        new Runnable() {\n");
+		buf.append("            public void run() {\n");
+		buf.append("                System.out.println(i);\n");
+		buf.append("            }\n");
+		buf.append("        }        \n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        synchronized (mutex) {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }        \n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[4]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        try {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        } catch (Exception e) {\n");
+		buf.append("            // TODO: handle exception\n");
+		buf.append("        }        \n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[5]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        while (condition) {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }        \n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[6]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 }

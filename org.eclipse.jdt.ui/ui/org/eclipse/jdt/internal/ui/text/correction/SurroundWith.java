@@ -220,7 +220,7 @@ public abstract class SurroundWith {
 		for (int i= 0; i < reads.length; i++) {
 			IVariableBinding read= reads[i];
 			if (!read.isField()) {
-				ASTNode readDecl= fRootNode.findDeclaringNode(read);
+				ASTNode readDecl= getRootNode().findDeclaringNode(read);
 				if (readDecl instanceof VariableDeclaration) {
 					result.add(readDecl);
 				}
@@ -257,7 +257,7 @@ public abstract class SurroundWith {
 			for (int i= 0; i < accesses.length; i++) {
 				IVariableBinding curVar= accesses[i];
 				if (!curVar.isField()) {
-					ASTNode readDecl= ASTNodes.findDeclaration(curVar, fRootNode);
+					ASTNode readDecl= ASTNodes.findDeclaration(curVar, getRootNode());
 					if (readDecl instanceof VariableDeclarationFragment) {
 						result.add(readDecl);
 					}
@@ -458,11 +458,17 @@ public abstract class SurroundWith {
 	}
 
 	protected final AST getAst() {
-		return fRootNode.getAST();
+		return getRootNode().getAST();
 	}
 
 	protected final Statement[] getSelectedStatements() {
 		return fSelectedStatements;
+	}
+
+	private CompilationUnit getRootNode() {
+		if (fSelectedStatements.length > 0)
+			return (CompilationUnit)fSelectedStatements[0].getRoot();
+		return fRootNode;
 	}
 
 }
