@@ -275,6 +275,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 
 	private void validateInput() {
 		String errorMessage= null; 
+		String infoMessage= null;
 		String newText= fWorkingSetName.getText();
 
 		if (newText.equals(newText.trim()) == false)
@@ -299,9 +300,11 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 				}
 			}
 		}
-		if (errorMessage == null && !hasCheckedElement())
-			errorMessage= WorkingSetMessages.JavaWorkingSetPage_warning_resourceMustBeChecked; 
+		
+		if (infoMessage == null && !hasCheckedElement())
+			infoMessage= WorkingSetMessages.JavaWorkingSetPage_warning_resourceMustBeChecked;
 
+		setMessage(infoMessage, INFORMATION);
 		setErrorMessage(errorMessage);
 		setPageComplete(errorMessage == null);
 	}
