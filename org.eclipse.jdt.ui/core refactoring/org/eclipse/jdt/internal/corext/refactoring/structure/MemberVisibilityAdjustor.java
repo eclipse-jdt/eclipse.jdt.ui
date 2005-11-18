@@ -613,30 +613,14 @@ public final class MemberVisibilityAdjustor {
 	}
 
 	/**
-	 * Adjusts the visibility of the specified search match found in a compilation unit.
+	 * Adjusts the visibility of the member based on the incoming references
+	 * represented by the specified search result groups.
 	 * 
-	 * @param match the search match that has been found
-	 * @param monitor the progress monitor to use
-	 * @throws JavaModelException if the visibility adjustment could not be computed
-	 */
-	private void adjustIncomingVisibility(final SearchMatch match, final IProgressMonitor monitor) throws JavaModelException {
-		final Object element= match.getElement();
-		// Only adjust if not yet adjusted - all adjustments are from the same source
-		final IncomingMemberVisibilityAdjustment adjustment= (IncomingMemberVisibilityAdjustment) fAdjustments.get(fReferenced);
-		if (adjustment == null && element instanceof IMember) {
-			IMember referenceToMovedElement= (IMember) element;
-			if (referenceToMovedElement instanceof IInitializer)
-				referenceToMovedElement= referenceToMovedElement.getDeclaringType();
-			if ((referenceToMovedElement != null) && (!isInsideMovedMember(referenceToMovedElement)))
-				// The moved element is used from outside the moved element
-				// check if the moved element is still visible from the new
-				// location.
-				adjustIncomingVisibility(fReferencing, fReferenced, monitor);
-		}
-	}
-
-	/**
-	 * Adjusts the visibility of the member based on the incoming references represented by the specified search result groups.
+	 * If there is at least one reference to the moved element from outside the
+	 * moved element, visibility must be increased such that the moved element
+	 * (fReferenced) is still visible at the target from all references. This
+	 * effectively means that the old element (fReferenced) must be visible from
+	 * the new location (fReferencing).
 	 * 
 	 * @param groups the search result groups representing the references
 	 * @param monitor the progress monitor to use
@@ -647,12 +631,21 @@ public final class MemberVisibilityAdjustor {
 			monitor.beginTask("", groups.length); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MemberVisibilityAdjustor_checking);
 			SearchMatch[] matches= null;
-			SearchResultGroup group= null;
+			boolean adjusted= false;
 			for (int index= 0; index < groups.length; index++) {
-				group= groups[index];
-				matches= group.getSearchResults();
-				for (int offset= 0; offset < matches.length; offset++)
-					adjustIncomingVisibility(matches[offset], new SubProgressMonitor(monitor, 1));
+				matches= groups[index].getSearchResults();
+				for (int offset= 0; offset < matches.length; offset++) {
+					final Object element= matches[offset].getElement();
+					if (element instanceof IMember && !isInsideMovedMember((IMember) element)) {
+						// found one reference which is not inside the moved
+						// element => adjust visibility of the moved element
+						adjustIncomingVisibility(fReferencing, fReferenced, monitor);
+						adjusted= true; // one adjustment is enough
+						break;
+					}
+				}
+				if (adjusted)
+					break;
 				monitor.worked(1);
 			}
 		} finally {
