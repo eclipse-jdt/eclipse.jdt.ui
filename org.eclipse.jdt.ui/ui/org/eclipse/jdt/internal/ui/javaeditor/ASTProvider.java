@@ -496,8 +496,14 @@ public final class ASTProvider {
 			else if (DEBUG && ast != null)
 				System.err.println(getThreadName() + " - " + DEBUG_PREFIX + "created AST for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 		} finally {
-			if (isActiveElement)
-				reconciled(ast, je);
+			if (isActiveElement) {
+				if (fAST != null) {
+					if (DEBUG)
+						System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "Ignore created AST for " + je.getElementName() + "- AST from reconciler is newer"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+					reconciled(fAST, je);
+				} else
+					reconciled(ast, je);
+			}
 		}
 
 		return ast;
@@ -535,7 +541,7 @@ public final class ASTProvider {
 	 */
 	private boolean isReconciling(IJavaElement javaElement) {
 		synchronized (fReconcileLock) {
-			return javaElement.equals(fReconcilingJavaElement) && fIsReconciling;
+			return javaElement != null && javaElement.equals(fReconcilingJavaElement) && fIsReconciling;
 		}
 	}
 
@@ -634,5 +640,6 @@ public final class ASTProvider {
 		else
 			return Thread.currentThread().toString();
 	}
+	
 }
 
