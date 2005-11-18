@@ -33,12 +33,17 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ISelection;
 
+import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -170,6 +175,19 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		} catch (InterruptedException e) {
 			// cancelled by user
 			return CANCEL;
+		}
+		if (fInitialFilter == null) {
+			IWorkbenchWindow window= JavaPlugin.getActiveWorkbenchWindow();
+			if (window != null) {
+				ISelection selection= window.getSelectionService().getSelection();
+				if (selection instanceof ITextSelection) {
+					String text= ((ITextSelection)selection).getText().trim();
+					if (text.length() > 0 && JavaConventions.validateJavaTypeName(text).isOK()) {
+						fInitialFilter= text;
+						fSelectionMode= FULL_SELECTION;
+					}
+				}
+			}
 		}
 		return super.open();
 	}
