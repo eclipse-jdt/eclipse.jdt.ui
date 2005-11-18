@@ -21,6 +21,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
+import org.eclipse.jface.util.Assert;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultInformationControl;
 import org.eclipse.jface.text.IDocument;
@@ -32,11 +34,13 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
-import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditor;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -44,6 +48,7 @@ import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 
 
@@ -186,6 +191,9 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		if (model == null) {
 			return invocationLocation;
 		}
+		
+		ensureUpdatedAnnotations(editor);
+		
 		Iterator iter= model.getAnnotationIterator();
 		if (goToClosest) {
 			IRegion lineInfo= getRegionOfInterest(editor, invocationLocation);
@@ -230,6 +238,13 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 				}
 			}
 			return invocationLocation;
+		}
+	}
+
+	private static void ensureUpdatedAnnotations(ITextEditor editor) {
+		Object inputElement= editor.getEditorInput().getAdapter(IJavaElement.class);
+		if (inputElement instanceof ICompilationUnit) {
+			JavaPlugin.getDefault().getASTProvider().getAST((ICompilationUnit) inputElement, ASTProvider.WAIT_ACTIVE_ONLY, null);
 		}
 	}
 
