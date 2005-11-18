@@ -104,7 +104,7 @@ public class JavadocContentAccess {
 	 * @param member The member to get the Javadoc of.
 	 * @param allowInherited For methods with no (Javadoc) comment, the comment of the overridden class
 	 * is returned if <code>allowInherited</code> is <code>true</code>.
-	 * @return Returns a reader for the Javadoc comment content in HTLM or <code>null</code> if the member
+	 * @return Returns a reader for the Javadoc comment content in HTML or <code>null</code> if the member
 	 * does not contain a Javadoc comment or if no source is available
 	 * @throws JavaModelException is thrown when the elements javadoc can not be accessed
 	 */
