@@ -44,6 +44,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+import org.eclipse.jdt.internal.ui.refactoring.model.JavaRefactoringModelProvider;
 
 /**
  * An abstract super class to describe mappings from a Java element to a
@@ -76,6 +77,10 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			return super.hashCode();
 		
 		return javaElement.hashCode();
+	}
+	
+	public String getModelProviderId() {
+		return JavaRefactoringModelProvider.JAVA_REFACTORING_MODEL_PROVIDER_ID;
 	}
 	
 	//---- the factory code ---------------------------------------------------------------
@@ -290,6 +295,10 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 				}
 			}
 			return (ResourceTraversal[])result.toArray(new ResourceTraversal[result.size()]);
+		}
+		
+		public String getModelProviderId() {
+			return JavaRefactoringModelProvider.JAVA_REFACTORING_MODEL_PROVIDER_ID;
 		}
 	}
 	
