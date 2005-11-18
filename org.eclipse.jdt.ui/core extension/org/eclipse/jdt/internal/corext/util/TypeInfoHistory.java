@@ -266,7 +266,11 @@ public class TypeInfoHistory {
 				Platform.getJobManager().join(UpdateJob.FAMILY, monitor);
 				success= true;
 			} catch (OperationCanceledException e) {
+				// Ignore and do the consistency check without
+				// waiting for the update job.
 			} catch (InterruptedException e) {
+				// Ignore and do the consistency check without
+				// waiting for the update job.
 			}
 			if (success && !fNeedsConsistencyCheck)
 				return;
