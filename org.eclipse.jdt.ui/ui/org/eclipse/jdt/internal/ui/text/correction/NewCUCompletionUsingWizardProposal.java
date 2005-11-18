@@ -82,6 +82,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	private int fTypeKind;
 	private IJavaElement fTypeContainer; // IType or IPackageFragment
 	private String fTypeNameWithParameters;
+	private IType fCreatedType;
 
 	private boolean fShowDialog;
 
@@ -93,6 +94,8 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 		fTypeKind= typeKind;
 		fTypeContainer= typeContainer;
 		fTypeNameWithParameters= getTypeName(typeKind, node);
+		
+		fCreatedType= null;
 		
 		String containerName= ASTNodes.getQualifier(node);
 		String typeName= fTypeNameWithParameters;
@@ -242,6 +245,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 				} catch (CoreException e) {
 				}
 			}
+			fCreatedType= createdType;
 		}
 		
 	}
@@ -440,11 +444,7 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 	}
 
 	public IType getCreatedType() {
-		String name= ASTNodes.getSimpleNameIdentifier(fNode);
-		if (fTypeContainer instanceof IPackageFragment) {
-			return ((IPackageFragment) fTypeContainer).getCompilationUnit(name + ".java").getType(name); //$NON-NLS-1$
-		}
-		return  ((IType) fTypeContainer).getType(name);
+		return  fCreatedType;
 	}
 
 

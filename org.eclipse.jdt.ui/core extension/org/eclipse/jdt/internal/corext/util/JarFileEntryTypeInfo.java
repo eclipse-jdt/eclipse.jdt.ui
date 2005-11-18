@@ -101,11 +101,12 @@ public class JarFileEntryTypeInfo extends TypeInfo {
 		IJavaElement res;
 		IPackageFragment frag= root.getPackageFragment(getPackageName());
 		String extension= getExtension();
-
+		String fullName= getFileName() + '.' + extension;
+		
 		if ("class".equals(extension)) { //$NON-NLS-1$
-			res=  frag.getClassFile(getFileName() + ".class"); //$NON-NLS-1$
-		} else if ("java".equals(extension)) { //$NON-NLS-1$
-			res=  frag.getCompilationUnit(getFileName() + ".java"); //$NON-NLS-1$
+			res=  frag.getClassFile(fullName);
+		} else if (JavaCore.isJavaLikeFileName(fullName)) {
+			res=  frag.getCompilationUnit(fullName);
 		} else {
 			return null;
 		}

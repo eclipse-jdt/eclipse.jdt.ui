@@ -12,13 +12,10 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IProject;
@@ -40,10 +37,6 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
-
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -208,74 +201,13 @@ public class ExclusionInclusionDialog extends StatusDialog {
 	protected void doSelectionChanged(ListDialogField field) {
 		List selected= field.getSelectedElements();
 		field.enableButton(IDX_EDIT, canEdit(selected));
-        IStatus status= canRemove(selected);
-        field.enableButton(IDX_REMOVE, status.isOK());
-        updateStatus(status);
 	}
-    
-    protected IStatus canRemove(List selected) {
-        IJavaProject project= fCurrElement.getJavaProject();
-        IClasspathEntry entry= fCurrElement.getClasspathEntry();
-        IPath rootPath= fCurrElement.getPath();
-        boolean hasSrcEntry= false;
-        boolean hasOutputFolder= false;
-        
-        try {
-            IClasspathEntry[] cpEntries= project.getRawClasspath();
-            for(int i= 0; i < cpEntries.length; i++) {
-                if (cpEntries[i].getEntryKind() != IClasspathEntry.CPE_SOURCE)
-                    continue;
-                Iterator iterator= selected.iterator();
-                while(iterator.hasNext()) {
-                    IPath path= rootPath.append((String)iterator.next()).removeTrailingSeparator();
-                    if (cpEntries[i].getPath().equals(path)) {
-                        hasSrcEntry= true;
-                        break;
-                    }
-                }
-                if(hasSrcEntry)
-                    break;
-            }
-        } catch(JavaModelException e) {
-            JavaPlugin.log(e);
-        }
-        
-        Iterator iterator= selected.iterator();
-        if (entry.getOutputLocation() != null) {
-            while(iterator.hasNext()) {
-                if (completeName(entry.getOutputLocation().lastSegment()).equals(iterator.next())) {
-                    hasOutputFolder= true;
-                    break;
-                }
-            }
-        }
-        if (!hasSrcEntry && ! hasOutputFolder)
-            return new Status(IStatus.OK, JavaPlugin.getPluginId(),  IStatus.OK, "", null); //$NON-NLS-1$
-        String message;
-        if (hasSrcEntry && hasOutputFolder)
-            message= NewWizardMessages.ExclusionInclusionDialog_Info_SrcAndOutput; 
-        else if(hasSrcEntry)
-            message= NewWizardMessages.ExclusionInclusionDialog_Info_Src; 
-        else
-            message= NewWizardMessages.ExclusionInclusionDialog_Info_Output; 
-        return new Status(IStatus.INFO, JavaPlugin.getPluginId(),  IStatus.INFO, message, null);
-    }
-    
-    private String completeName(String name) {
-        if (!name.endsWith(".java")) { //$NON-NLS-1$
-            name= name + "/"; //$NON-NLS-1$
-            name= name.replace('.', '/');
-            return name;
-        }
-        return name;
-    }
-	
+        	
 	private boolean canEdit(List selected) {
 		return selected.size() == 1;
 	}
 	
 	private void editEntry(ListDialogField field) {
-		
 		List selElements= field.getSelectedElements();
 		if (selElements.size() != 1) {
 			return;

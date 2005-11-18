@@ -817,5 +817,18 @@ public final class JavaModelUtil {
 		return defaultCompliance;
 	}
 
-
+	/**
+	 * Return the extension of a compilation unit, which is
+	 * usually (but not always) ".java"
+	 * @param cu a compilation unit
+	 * @return the extension for the compilation unit
+	 */
+	public static String getCompilationUnitExtension(ICompilationUnit cu) {
+		String name = cu.getElementName();
+		int i = name.lastIndexOf('.');
+		if (i != -1) {
+			return name.substring(i);
+		}
+		return ".java"; //$NON-NLS-1$
+	}
 }

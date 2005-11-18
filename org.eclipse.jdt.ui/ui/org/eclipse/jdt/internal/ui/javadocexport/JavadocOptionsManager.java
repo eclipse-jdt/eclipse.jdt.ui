@@ -518,7 +518,7 @@ public class JavadocOptionsManager {
 			StringTokenizer tokenizer= new StringTokenizer(sourcefiles, ","); //$NON-NLS-1$
 			while (tokenizer.hasMoreTokens()) {
 				String name= tokenizer.nextToken().trim();
-				if (name.endsWith(".java")) { //$NON-NLS-1$
+				if (JavaCore.isJavaLikeFileName(name)) {
 					IPath path= makeAbsolutePathFromRelative(new Path(name));
 					//if unable to create an absolute path the the resource skip it
 					if (path != null) {

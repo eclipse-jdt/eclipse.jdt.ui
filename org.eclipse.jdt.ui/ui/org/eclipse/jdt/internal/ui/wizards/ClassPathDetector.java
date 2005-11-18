@@ -370,7 +370,7 @@ public class ClassPathDetector implements IResourceProxyVisitor {
 		
 		if (proxy.getType() == IResource.FILE) {
 			String name= proxy.getName();
-			if (hasExtension(name, ".java") && isValidCUName(name)) { //$NON-NLS-1$
+			if (isValidCUName(name)) {
 				visitCompilationUnit((IFile) proxy.requestResource());
 			} else if (hasExtension(name, ".class")) { //$NON-NLS-1$
 				fClassFiles.add(proxy.requestResource());

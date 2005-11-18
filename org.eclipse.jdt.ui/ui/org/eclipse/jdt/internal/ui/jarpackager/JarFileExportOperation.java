@@ -586,7 +586,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 	 * @param	pathInJar		the path that the file has in the JAR (i.e. project and source folder segments removed)
 	 * @param	javaProject		the javaProject that contains the file
 	 * @return	the iterator over the corresponding classpath files for the given file
-	 * @deprecated As of 2.1 use the method with additional IPackageFragmentRoot paramter
+	 * @deprecated As of 2.1 use the method with additional IPackageFragmentRoot parameter
 	 */
 	protected Iterator filesOnClasspath(IFile file, IPath pathInJar, IJavaProject javaProject, IProgressMonitor progressMonitor) throws CoreException {
 		return filesOnClasspath(file, pathInJar, javaProject, null, progressMonitor);
@@ -677,7 +677,8 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 
 	/**
 	 * Answers whether the given resource is a Java file.
-	 * The resource must be a file whose file name ends with ".java".
+	 * The resource must be a file whose file name ends with ".java",
+	 * or an extension defined as Java source.
 	 * 
 	 * @return a <code>true<code> if the given resource is a Java file
 	 */
@@ -685,7 +686,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		return file != null
 			&& file.getType() == IResource.FILE
 			&& file.getFileExtension() != null
-			&& file.getFileExtension().equalsIgnoreCase("java"); //$NON-NLS-1$
+			&& JavaCore.isJavaLikeFileName(file.getName());
 	}
 
 	/**

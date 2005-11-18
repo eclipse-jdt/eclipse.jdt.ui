@@ -18,8 +18,6 @@ import java.util.Set;
 
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.resources.mapping.ResourceMapping;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -36,6 +34,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourceAttributes;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
@@ -1448,8 +1447,7 @@ public class ReorgPolicyFactory {
 			}
 		}
 		private static String removeTrailingJava(String name) {
-			Assert.isTrue(name.endsWith(".java")); //$NON-NLS-1$
-			return name.substring(0, name.length() - ".java".length()); //$NON-NLS-1$
+			return JavaCore.removeJavaLikeExtension(name);
 		}
 		public String createNewName(IResource res, IContainer destination){
 			if (isNewNameOk(destination, res.getName()))

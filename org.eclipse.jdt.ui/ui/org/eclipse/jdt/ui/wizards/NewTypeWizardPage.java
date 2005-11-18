@@ -1228,7 +1228,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		IPackageFragment pack= getPackageFragment();
 		if (pack != null) {
-			return pack.getCompilationUnit(getTypeNameWithoutParameters() + ".java").getResource(); //$NON-NLS-1$
+			String cuName= getCompilationUnitName(getTypeNameWithoutParameters());
+			return pack.getCompilationUnit(cuName).getResource();
 		}
 		return null;
 	}
@@ -1420,6 +1421,20 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	/**
+	 * Hook method that is called when evaluating the name of the compilation unit to create. By default, a file extension
+	 * <code>java</code> is added to the given type name, but implementors can override this behavior.
+	 * 
+	 * @param typeName the name of the type to create the compilation unit for.
+	 * @return the name of the compilation unit to be created for the given name
+	 * 
+	 * @since 3.2
+	 */
+	protected String getCompilationUnitName(String typeName) {
+		return typeName + ".java"; //$NON-NLS-1$
+	}
+	
+	
+	/**
 	 * Hook method that gets called when the type name has changed. The method validates the 
 	 * type name and returns the status of the validation.
 	 * <p>
@@ -1456,7 +1471,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (!isEnclosingTypeSelected()) {
 			IPackageFragment pack= getPackageFragment();
 			if (pack != null) {
-				ICompilationUnit cu= pack.getCompilationUnit(typeName + ".java"); //$NON-NLS-1$
+				ICompilationUnit cu= pack.getCompilationUnit(getCompilationUnitName(typeName));
 				fCurrType= cu.getType(typeName);
 				IResource resource= cu.getResource();
 
@@ -1763,7 +1778,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		ICompilationUnit connectedCU= null;
 		
 		try {	
-			String clName= getTypeNameWithoutParameters();
+			String typeName= getTypeNameWithoutParameters();
 			
 			boolean isInnerClass= isEnclosingTypeSelected();
 		
@@ -1776,8 +1791,9 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			String lineDelimiter= null;	
 			if (!isInnerClass) {
 				lineDelimiter= StubUtility.getLineDelimiterUsed(pack.getJavaProject());
-										
-				ICompilationUnit parentCU= pack.createCompilationUnit(clName + ".java", "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$ //$NON-NLS-2$
+				
+				String cuName= getCompilationUnitName(typeName);
+				ICompilationUnit parentCU= pack.createCompilationUnit(cuName, "", false, new SubProgressMonitor(monitor, 2)); //$NON-NLS-1$
 				// create a working copy with a new owner
 				
 				needsSave= true;
@@ -1793,7 +1809,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 							
 				imports= new ImportsManager(parentCU);
 				// add an import that will be removed again. Having this import solves 14661
-				imports.addImport(JavaModelUtil.concatenateName(pack.getElementName(), clName));
+				imports.addImport(JavaModelUtil.concatenateName(pack.getElementName(), typeName));
 				
 				String typeContent= constructTypeStub(parentCU, imports, lineDelimiter);
 				
@@ -1801,7 +1817,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				
 				parentCU.getBuffer().setContents(cuContent);
 				
-				createdType= parentCU.getType(clName);
+				createdType= parentCU.getType(typeName);
 			} else {
 				IType enclosingType= getEnclosingType();
 				

@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 
@@ -35,7 +37,7 @@ public class RenameCuWizard extends RenameTypeWizard {
 	}
 	
 	protected RefactoringStatus validateNewName(String newName) {
-		String fullName= newName + ".java";  //$NON-NLS-1$
+		String fullName= newName + JAVA_FILE_EXT;
 		return super.validateNewName(fullName);
 	}
 	
@@ -47,9 +49,7 @@ public class RenameCuWizard extends RenameTypeWizard {
 			protected String getNewName(INameUpdating nameUpdating) {
 				String result= nameUpdating.getNewElementName();
 				// If renaming a CU we have to remove the java file extension
-				if (result != null && result.endsWith(JAVA_FILE_EXT))
-					result= result.substring(0, result.length() - JAVA_FILE_EXT.length());
-				return result;
+				return JavaCore.removeJavaLikeExtension(result);
 			}
 		};
 	}

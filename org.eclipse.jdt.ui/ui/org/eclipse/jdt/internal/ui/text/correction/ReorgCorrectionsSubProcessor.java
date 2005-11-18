@@ -115,8 +115,7 @@ public class ReorgCorrectionsSubProcessor {
 			String currTypeName= buffer.getText(problem.getOffset(), problem.getLength());
 			
 			proposals.add(new CorrectMainTypeNameProposal(cu, context, currTypeName, 5));
-			
-			String newCUName= currTypeName + ".java"; //$NON-NLS-1$
+			String newCUName= currTypeName + JavaModelUtil.getCompilationUnitExtension(cu);
 			ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
 			if (!newCU.exists() && !isLinked && !JavaConventions.validateCompilationUnitName(newCUName).matches(IStatus.ERROR)) {
 				RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);

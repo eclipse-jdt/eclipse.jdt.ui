@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -71,13 +72,8 @@ public class NewNameQueries implements INewNameQueries {
 		return JavaPlugin.getActiveWorkbenchShell();
 	}
 
-	private static String removeTrailingJava(String name) {
-		Assert.isTrue(name.endsWith(".java")); //$NON-NLS-1$
-		return name.substring(0, name.length() - ".java".length()); //$NON-NLS-1$
-	}
-
 	public INewNameQuery createNewCompilationUnitNameQuery(ICompilationUnit cu, String initialSuggestedName) {
-		String[] keys= {removeTrailingJava(cu.getElementName())};
+		String[] keys= {JavaCore.removeJavaLikeExtension(cu.getElementName())};
 		String message= Messages.format(ReorgMessages.ReorgQueries_enterNewNameQuestion, keys); 
 		return createStaticQuery(createCompilationUnitNameValidator(cu), message, initialSuggestedName, getShell());
 	}

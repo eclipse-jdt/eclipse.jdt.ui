@@ -271,7 +271,7 @@ public class NLSRefactoring extends Refactoring {
 	}
 	
 	public IPath getAccessorClassFilePath() {
-		return fAccessorClassPackage.getPath().append(fAccessorClassName).addFileExtension("java"); //$NON-NLS-1$
+		return getAccessorCUPath();
 	}
 
 	private RefactoringStatus validateModifiesFiles() {
@@ -419,12 +419,11 @@ public class NLSRefactoring extends Refactoring {
 	}
 
 	private String getAccessorCUName() {
-		return fAccessorClassName + ".java"; //$NON-NLS-1$
+		return getAccessorClassName() + ".java"; //$NON-NLS-1$
 	}
 
 	private IPath getAccessorCUPath() {
-		IPath res= fAccessorClassPackage.getPath().append(getAccessorCUName());
-		return res;
+		return fAccessorClassPackage.getPath().append(getAccessorCUName());
 	}
 
 	public NLSSubstitution[] getSubstitutions() {
@@ -488,7 +487,7 @@ public class NLSRefactoring extends Refactoring {
 	 */
 	public boolean detectIsEclipseNLS() {
 		if (getAccessorClassPackage() != null) {
-			ICompilationUnit accessorCU= getAccessorClassPackage().getCompilationUnit(getAccessorClassName() + ".java"); //$NON-NLS-1$
+			ICompilationUnit accessorCU= getAccessorClassPackage().getCompilationUnit(getAccessorCUName());
 			IType type= accessorCU.getType(getAccessorClassName());
 			if (type.exists()) {
 				try {

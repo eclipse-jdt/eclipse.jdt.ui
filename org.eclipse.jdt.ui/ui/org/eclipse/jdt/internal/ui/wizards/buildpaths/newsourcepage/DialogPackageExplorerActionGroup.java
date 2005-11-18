@@ -41,10 +41,10 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
+import org.eclipse.jdt.internal.corext.buildpath.CreateFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation;
 import org.eclipse.jdt.internal.corext.buildpath.EditOutputFolderOperation;
 import org.eclipse.jdt.internal.corext.buildpath.ExcludeOperation;
@@ -621,7 +621,7 @@ public class DialogPackageExplorerActionGroup extends CompositeActionGroup {
     private static int getFileType(IFile file, IJavaProject project) throws JavaModelException {
         if (ClasspathModifier.isArchive(file, project))
             return ARCHIVE;
-        if (!file.getName().endsWith(".java")) //$NON-NLS-1$
+        if (!JavaCore.isJavaLikeFileName(file.getName()))
             return FILE;
         IContainer fileParent= file.getParent();
 		if (fileParent.getFullPath().equals(project.getPath())) {

@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
@@ -111,7 +112,7 @@ public class JavaElementImageProvider {
 			return getJavaImageDescriptor((IJavaElement) element, flags);
 		} else if (element instanceof IFile) {
 			IFile file= (IFile) element;
-			if ("java".equals(file.getFileExtension())) { //$NON-NLS-1$
+			if (JavaCore.isJavaLikeFileName(file.getName())) {
 				return getCUResourceImageDescriptor(file, flags); // image for a CU not on the build path
 			}
 			return getWorkbenchImageDescriptor(file, flags);

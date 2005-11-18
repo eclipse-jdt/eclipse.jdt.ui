@@ -1691,14 +1691,14 @@ public class ClasspathModifier {
 
 	/**
 	 * Add a '/' at the end of the name if
-	 * it does not end with '.java'.
+	 * it does not end with '.java', or other Java-like extension.
 	 * 
 	 * @param name append '/' at the end if
 	 * necessary
 	 * @return modified string
 	 */
 	private static String completeName(String name) {
-		if (!name.endsWith(".java")) { //$NON-NLS-1$
+		if (!JavaCore.isJavaLikeFileName(name)) {
 			name= name + "/"; //$NON-NLS-1$
 			name= name.replace('.', '/');
 			return name;

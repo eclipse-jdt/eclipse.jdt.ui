@@ -836,9 +836,11 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			if (willRenameCU()) {
 				IResource resource= ResourceUtil.getResource(fType);
 				if (resource != null && resource.isLinked()) {
-					result.add(new RenameResourceChange(ResourceUtil.getResource(fType), getNewElementName() + ".java")); //$NON-NLS-1$)
+					String ext = '.' + resource.getFileExtension();
+					result.add(new RenameResourceChange(ResourceUtil.getResource(fType), getNewElementName() + ext));
 				} else {
-					result.add(new RenameCompilationUnitChange(fType.getCompilationUnit(), getNewElementName() + ".java")); //$NON-NLS-1$
+					String ext = JavaModelUtil.getCompilationUnitExtension(fType.getCompilationUnit());
+					result.add(new RenameCompilationUnitChange(fType.getCompilationUnit(), getNewElementName() + ext));
 				}
 			}
 			monitor.worked(1);
@@ -861,7 +863,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 	
 	private boolean willRenameCU() throws CoreException{
-		if (! (Checks.isTopLevel(fType) && fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java"))) //$NON-NLS-1$
+		String name = JavaCore.removeJavaLikeExtension(fType.getCompilationUnit().getElementName());
+		if (! (Checks.isTopLevel(fType) && name.equals(fType.getElementName())))
 			return false;
 		if (! checkNewPathValidity().isOK())
 			return false;

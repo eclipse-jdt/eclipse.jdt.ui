@@ -48,7 +48,7 @@ public final class TemplateCompletionProposalComputer implements ICompletionProp
 	private final TemplateEngine fJavadocTemplateEngine;
 
 	public TemplateCompletionProposalComputer() {
-		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType("java"); //$NON-NLS-1$
+		TemplateContextType contextType= JavaPlugin.getDefault().getTemplateContextRegistry().getContextType(JavaContextType.NAME);
 		if (contextType == null) {
 			contextType= new JavaContextType();
 			JavaPlugin.getDefault().getTemplateContextRegistry().addContextType(contextType);
