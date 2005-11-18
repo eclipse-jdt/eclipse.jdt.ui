@@ -52,13 +52,15 @@ public final class CaptureType extends AbstractTypeVariable {
 	protected boolean doCanAssignTo(TType lhs) {
 		switch (lhs.getKind()) {
 			case NULL_TYPE: 
-			case VOID_TYPE: return false;
+			case VOID_TYPE:
 			case PRIMITIVE_TYPE:
+				return false;
 				
 			case ARRAY_TYPE:
 				return canAssignFirstBoundTo(lhs);
 			
-			case GENERIC_TYPE: return false;
+			case GENERIC_TYPE:
+				return false;
 			
 			case STANDARD_TYPE: 
 			case PARAMETERIZED_TYPE:
@@ -88,15 +90,10 @@ public final class CaptureType extends AbstractTypeVariable {
 	}
 	
 	private boolean canAssignFirstBoundTo(TType lhs) {
-		if (fWildcard.isExtendsWildcardType() && fWildcard.getBound().isArrayType()) {
+		if (fBounds.length > 0 && fBounds[0].isArrayType()) {
 			// capture of ? extends X[]
-			return fWildcard.getBound().canAssignTo(lhs);
+			return fBounds[0].canAssignTo(lhs);
 		}
-		// TODO: doesn't work due to bug 93093:
-//		if (fBounds.length > 0 && fBounds[0].isArrayType()) {
-//			// capture of ? extends X[]
-//			return fBounds[0].canAssignTo(lhs);
-//		}
 		return false;
 	}
 	

@@ -46,7 +46,6 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
 public class TypeEnvironmentTests extends AbstractCUTestCase {
 
 	private static final boolean BUG_83616_core_wildcard_assignments= true;
-	private static final boolean BUG_93102_core_restore_capture_binding= true;
 
 	private static class MyTestSetup extends RefactoringTestSetup {
 		private static IPackageFragment fSignaturePackage;
@@ -259,8 +258,6 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		ITypeBinding[] restoredBindings= TypeEnvironment.createTypeBindings(types, RefactoringTestSetup.getProject());
 		assertEquals("Not same length", restoredBindings.length, bindings.length);
 		for (int i= 0; i < restoredBindings.length; i++) {
-			if (BUG_93102_core_restore_capture_binding && bindings[i].getKey().indexOf('!') != -1)
-				continue;
 			assertTrue("Not same binding", bindings[i].isEqualTo(restoredBindings[i]));
 		}
 	}
@@ -269,7 +266,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 		boolean coreResult= rhsBinding.isAssignmentCompatible(lhsBinding);
 		boolean uiResult= rhs.canAssignTo(lhs);
 		if (coreResult != uiResult) {
-			if (lhs.isCaptureType() || rhs.isCaptureType()) { // see bugs 83616, 93082
+			if (lhs.isCaptureType() || rhs.isCaptureType()) { // see bug 93082
 				System.out.println("Different assignment rule(" +
 					PrettySignatures.get(lhsBinding) + "= " + PrettySignatures.get(rhsBinding) + 
 					"): Bindings<" + coreResult +
@@ -284,9 +281,6 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 	}
 	
 	private void testAssignment(ITypeBinding[] bindings) {
-		if (true)
-			return; // see bug 83616
-		
 		TType[] types= new TType[bindings.length];
 		TypeEnvironment environment= new TypeEnvironment();
 		for (int i= 0; i < bindings.length; i++) {
@@ -300,7 +294,7 @@ public class TypeEnvironmentTests extends AbstractCUTestCase {
 				TType oType= types[o];
 				TType iType= types[i];
 				boolean uiResult= oType.canAssignTo(iType);
-				if (coreResult != uiResult && !oType.isWildcardType()) { // see bug 83616
+				if (coreResult != uiResult && !oType.isWildcardType() && ! BUG_83616_core_wildcard_assignments) { // see bug 83616
 					System.out.println("Different assignment rule(" +
 						PrettySignatures.get(iBinding) + "= " + PrettySignatures.get(oBinding) + 
 						"): Bindings<" + coreResult +
