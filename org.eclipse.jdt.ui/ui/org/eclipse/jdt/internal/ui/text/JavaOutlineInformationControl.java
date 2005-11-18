@@ -47,7 +47,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.keys.KeySequence;
 import org.eclipse.ui.keys.SWTKeySupport;
 
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -674,25 +673,6 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 		viewMenu.add(fSortByDefiningTypeAction);
 	}
 	
-	private IType getDefiningTypeForMethod(IMethod method) throws JavaModelException {
-		IType declaringType= method.getDeclaringType();
-		int flags= method.getFlags();
-		if (Flags.isPrivate(flags) || Flags.isStatic(flags) || method.isConstructor()) {
-			return null;
-		}
-		ITypeHierarchy superTypeHierarchy= getSuperTypeHierarchy(declaringType);
-		if (superTypeHierarchy == null) {
-			return null;
-		}
-		
-		MethodOverrideTester tester= new MethodOverrideTester(declaringType, superTypeHierarchy);
-		IMethod res= tester.findDeclaringMethod(method, true);
-		if (res == null || method.equals(res)) {
-			return null;
-		}
-		return res.getDeclaringType();
-	}
-
 	private ITypeHierarchy getSuperTypeHierarchy(IType type) {
 		ITypeHierarchy th= (ITypeHierarchy)fTypeHierarchies.get(type);
 		if (th == null) {
