@@ -97,13 +97,13 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		}
 	}
 	
-	private static class Filter extends ViewerFilter {
+	private class Filter extends ViewerFilter {
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			IWorkingSet ws= (IWorkingSet)element;
 			String id= ws.getId();
 			return HistoryWorkingSetUpdater.ID.equals(id) ||
 				OthersWorkingSetUpdater.ID.equals(id) ||
-				JavaWorkingSetUpdater.ID.equals(id) || isCompatible(ws);
+				JavaWorkingSetUpdater.ID.equals(id) || isCompatible(ws) || isActive(ws);
 		}
 		private boolean isCompatible(IWorkingSet set) {
 			if (!set.isSelfUpdating() || set.isAggregateWorkingSet())
@@ -119,9 +119,13 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			}
 			return true;
 		}
+		private boolean isActive(IWorkingSet workingSet) {
+			return fActiveWorkingSets.contains(workingSet);
+		}
 	}
 
-	private List fElements;
+	private List fAllWorkingSets;
+	private List fActiveWorkingSets;
 	private CheckboxTableViewer fTableViewer;
 
 	private Button fNewButton;
@@ -140,15 +144,16 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 	private int nextButtonId= IDialogConstants.CLIENT_ID + 1;
 
-	public WorkingSetConfigurationDialog(Shell parentShell, IWorkingSet[] workingSets) {
+	public WorkingSetConfigurationDialog(Shell parentShell, IWorkingSet[] allWorkingSets, IWorkingSet[] activeWorkingSets) {
 		super(parentShell);
 		setTitle(WorkingSetMessages.WorkingSetConfigurationDialog_title); 
 		setMessage(WorkingSetMessages.WorkingSetConfigurationDialog_message); 
-		fElements= new ArrayList(workingSets.length);
+		fAllWorkingSets= new ArrayList(allWorkingSets.length);
+		fActiveWorkingSets= Arrays.asList(activeWorkingSets);
 		Filter filter= new Filter();
-		for (int i= 0; i < workingSets.length; i++) {
-			if (filter.select(null, null, workingSets[i]))
-				fElements.add(workingSets[i]);
+		for (int i= 0; i < allWorkingSets.length; i++) {
+			if (filter.select(null, null, allWorkingSets[i]))
+				fAllWorkingSets.add(allWorkingSets[i]);
 		}
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 	}
@@ -201,7 +206,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 		createTableViewer(inner);
 		createOrderButtons(inner);
 		createModifyButtons(composite);
-		fTableViewer.setInput(fElements);
+		fTableViewer.setInput(fAllWorkingSets);
 
 		return composite;
 	}
@@ -366,7 +371,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 			IWorkingSet workingSet= wizard.getSelection();
 			Filter filter= new Filter();
 			if (filter.select(null, null, workingSet)) {
-				fElements.add(workingSet);
+				fAllWorkingSets.add(workingSet);
 				fTableViewer.add(workingSet);
 				fTableViewer.setSelection(new StructuredSelection(workingSet), true);
 				fTableViewer.setChecked(workingSet, true);
@@ -446,7 +451,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 					}
 					fRemovedWorkingSets.add(workingSet);
 				}
-				fElements.remove(workingSet);
+				fAllWorkingSets.remove(workingSet);
 				manager.removeWorkingSet(workingSet);
 			}
 			fTableViewer.remove(((IStructuredSelection)selection).toArray());
@@ -529,21 +534,21 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 	
 	private void moveUp(List toMoveUp) {
 		if (toMoveUp.size() > 0) {
-			setElements(moveUp(fElements, toMoveUp));
+			setElements(moveUp(fAllWorkingSets, toMoveUp));
 			fTableViewer.reveal(toMoveUp.get(0));
 		}
 	}
 
 	private void moveDown(List toMoveDown) {
 		if (toMoveDown.size() > 0) {
-			setElements(reverse(moveUp(reverse(fElements), toMoveDown)));
+			setElements(reverse(moveUp(reverse(fAllWorkingSets), toMoveDown)));
 			fTableViewer.reveal(toMoveDown.get(toMoveDown.size() - 1));
 		}
 	}
 
 	private void setElements(List elements) {
-		fElements= elements;
-		fTableViewer.setInput(fElements);
+		fAllWorkingSets= elements;
+		fTableViewer.setInput(fAllWorkingSets);
 		updateButtonAvailability();
 	}
 
@@ -588,7 +593,7 @@ public class WorkingSetConfigurationDialog extends SelectionDialog {
 
 	private boolean canMoveDown() {
 		int[] indc= fTableViewer.getTable().getSelectionIndices();
-		int k= fElements.size() - 1;
+		int k= fAllWorkingSets.size() - 1;
 		for (int i= indc.length - 1; i >= 0; i--, k--) {
 			if (indc[i] != k) {
 				return true;
