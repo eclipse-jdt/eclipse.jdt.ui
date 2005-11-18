@@ -129,7 +129,7 @@ public class Binding extends ASTAttribute {
 					res.add(new Binding(this, "ELEMENT TYPE", typeBinding.getElementType(), isType(typeKind, ARRAY_TYPE))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "DIMENSIONS", typeBinding.getDimensions(), isType(typeKind, ARRAY_TYPE))); //$NON-NLS-1$
 					
-					res.add(new BindingProperty(this, "TYPE BOUNDS", typeBinding.getTypeBounds(), isType(typeKind, VARIABLE_TYPE))); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "TYPE BOUNDS", typeBinding.getTypeBounds(), isType(typeKind, VARIABLE_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
 					
 					StringBuffer origin= new StringBuffer("ORIGIN:"); //$NON-NLS-1$
 					if (typeBinding.isTopLevel()) origin.append(" isTopLevel"); //$NON-NLS-1$
@@ -139,11 +139,11 @@ public class Binding extends ASTAttribute {
 					if (typeBinding.isAnonymous()) kinds.append(" isAnonymous"); //$NON-NLS-1$
 					res.add(new BindingProperty(this, origin, isRefType));
 					
-					res.add(new BindingProperty(this, "IS FROM SOURCE", typeBinding.isFromSource(), isType(typeKind, VARIABLE_TYPE | REF_TYPE))); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "IS FROM SOURCE", typeBinding.isFromSource(), isType(typeKind, REF_TYPE | VARIABLE_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
 
 					res.add(new Binding(this, "PACKAGE", typeBinding.getPackage(), isRefType)); //$NON-NLS-1$
-					res.add(new Binding(this, "DECLARING CLASS", typeBinding.getDeclaringClass(), isRefType)); //$NON-NLS-1$
-					res.add(new Binding(this, "DECLARING METHOD", typeBinding.getDeclaringMethod(), isRefType)); //$NON-NLS-1$
+					res.add(new Binding(this, "DECLARING CLASS", typeBinding.getDeclaringClass(), isType(typeKind, REF_TYPE | VARIABLE_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
+					res.add(new Binding(this, "DECLARING METHOD", typeBinding.getDeclaringMethod(), isType(typeKind, REF_TYPE | VARIABLE_TYPE | CAPTURE_TYPE))); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()), isRefType)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "BINARY NAME", typeBinding.getBinaryName(), true)); //$NON-NLS-1$
 					
