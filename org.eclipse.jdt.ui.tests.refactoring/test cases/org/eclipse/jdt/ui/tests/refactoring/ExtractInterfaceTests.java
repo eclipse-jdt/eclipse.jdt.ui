@@ -703,14 +703,14 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		String[] names= new String[]{};
 		String[][] signatures= new String[][]{};
 		
-//		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
+		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
 	}
 
 	public void test103() throws Exception{
 		String[] names= new String[]{};
 		String[][] signatures= new String[][]{};
 		
-//		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
+		validatePassingTest("C", new String[]{"A", "B", "C"}, "I", true, names, signatures, null);
 	}
 
 	public void testPaperExample0() throws Exception{
