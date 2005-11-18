@@ -13,36 +13,36 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaElementSorter;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 abstract class ReorgUserInputPage extends UserInputWizardPage{
@@ -76,7 +76,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		Dialog.applyDialogFont(result);
 	}
 	
-	private void addLabel(Composite parent) {
+	protected Control addLabel(Composite parent) {
 		Label label= new Label(parent, SWT.NONE);
 		String text;
 		int resources= getResources().length;
@@ -97,7 +97,8 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		}
 
 		label.setText(text);
-		label.setLayoutData(new GridData());
+		label.setLayoutData(new GridData(SWT.BEGINNING, SWT.END, false, false));
+		return label;
 	}
 	
 	private void viewerSelectionChanged(SelectionChangedEvent event) {
@@ -144,9 +145,7 @@ abstract class ReorgUserInputPage extends UserInputWizardPage{
 		return treeViewer;
 	}
 	
-	protected void addElementToTree(Object newElement) {
-		ITreeContentProvider contentProvider= (ITreeContentProvider) fViewer.getContentProvider();
-		fViewer.refresh(contentProvider.getParent(newElement));
-		fViewer.setSelection(new StructuredSelection(newElement), true);
+	protected TreeViewer getTreeViewer() {
+		return fViewer;
 	}
 }

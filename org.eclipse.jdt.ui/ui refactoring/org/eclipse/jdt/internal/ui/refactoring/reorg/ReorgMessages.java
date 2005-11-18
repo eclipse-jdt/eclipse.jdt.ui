@@ -129,7 +129,7 @@ public final class ReorgMessages extends NLS {
 	public static String ReorgMoveWizard_3;
 	public static String ReorgMoveWizard_4;
 	public static String ReorgMoveWizard_textual_move;
-	public static String ReorgMoveWizard_new;
+	public static String ReorgMoveWizard_newPackage;
 	public static String ReorgUserInputPage_choose_destination_single;
 	public static String ReorgUserInputPage_choose_destination_multi;
 	public static String RenameMethodUserInterfaceStarter_name;

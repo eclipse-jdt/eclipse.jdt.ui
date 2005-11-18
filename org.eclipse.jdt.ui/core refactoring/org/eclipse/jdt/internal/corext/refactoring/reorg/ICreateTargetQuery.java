@@ -13,5 +13,16 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 
 public interface ICreateTargetQuery {
+	/**
+	 * Creates and returns a new target.
+	 * 
+	 * @param selection the current destination
+	 * @return the newly created target
+	 */
 	Object getCreatedTarget(Object selection);
+
+	/**
+	 * @return the label for the "Create ***..." button
+	 */
+	String getNewButtonLabel();
 }

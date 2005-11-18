@@ -62,9 +62,12 @@ public class CreateTargetQueries implements ICreateTargetQueries {
 				
 				IWizardPage[] pages= openNewElementWizard(packageCreationWizard, getShell(), selection);
 				
-				Assert.isTrue(pages.length > 0 && pages[0] instanceof NewPackageWizardPage);
 				NewPackageWizardPage page= (NewPackageWizardPage) pages[0];
 				return page.getNewPackageFragment();
+			}
+			
+			public String getNewButtonLabel() {
+				return ReorgMessages.ReorgMoveWizard_newPackage;
 			}
 		};
 	}

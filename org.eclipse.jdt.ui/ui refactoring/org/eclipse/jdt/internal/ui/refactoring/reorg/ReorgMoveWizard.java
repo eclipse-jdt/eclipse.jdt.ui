@@ -12,18 +12,28 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.viewers.TreeViewer;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
@@ -31,10 +41,6 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 
 public class ReorgMoveWizard extends RefactoringWizard {
@@ -72,6 +78,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 		private Button fReferenceCheckbox;
 		private Button fQualifiedNameCheckbox;
 		private QualifiedNameComponent fQualifiedNameComponent;
+		private ICreateTargetQuery fCreateTargetQuery;
 		
 		private Object fDestination;
 		
@@ -195,7 +202,9 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			
 			boolean showDestinationTree= ! getJavaMoveProcessor().hasDestinationSet();
 			if (showDestinationTree) {
+				fCreateTargetQuery= getJavaMoveProcessor().getCreateTargetQuery();
 				super.createControl(parent);
+				getTreeViewer().getTree().setFocus();
 				result= (Composite)super.getControl();
 			} else  {
 				initializeDialogUnits(parent);
@@ -204,39 +213,48 @@ public class ReorgMoveWizard extends RefactoringWizard {
 				result.setLayout(new GridLayout());
 				Dialog.applyDialogFont(result);
 			}
-			if (showDestinationTree && getJavaMoveProcessor().getCreateTargetQuery() != null) {
-				addUpdateArea(result);
-			} else {
-				addUpdateReferenceComponent(result);
-				addUpdateQualifiedNameComponent(result, ((GridLayout)result.getLayout()).marginWidth);
-			}
+			addUpdateReferenceComponent(result);
+			addUpdateQualifiedNameComponent(result, ((GridLayout)result.getLayout()).marginWidth);
 			setControl(result);
 			Dialog.applyDialogFont(result);
 		}
 		
-		protected void addUpdateArea(Composite parent) {
-			Composite firstLine= new Composite(parent, SWT.NONE);
-			GridLayout layout= new GridLayout(1, false);
-			layout.marginHeight= layout.marginWidth= 0;
-			firstLine.setLayout(layout);
-			firstLine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-			Button newButton= new Button(firstLine, SWT.PUSH);
-			newButton.setText(ReorgMessages.ReorgMoveWizard_new); 
-			GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-			gd.widthHint = SWTUtil.getButtonWidthHint(newButton);
-			newButton.setLayoutData(gd);
-			newButton.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					doNewButtonPressed();
-				}
-			});
-			
-			if (getJavaMoveProcessor().canUpdateReferences()) {
-				addUpdateReferenceComponent(firstLine);
-				addUpdateQualifiedNameComponent(firstLine, layout.marginWidth);
-			} else if (getJavaMoveProcessor().canUpdateQualifiedNames()) {
-				addUpdateQualifiedNameComponent(firstLine, layout.marginWidth);
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgUserInputPage#addLabel(org.eclipse.swt.widgets.Composite)
+		 */
+		protected Control addLabel(Composite parent) {
+			if (fCreateTargetQuery != null) {
+				Composite firstLine= new Composite(parent, SWT.NONE);
+				GridLayout layout= new GridLayout(2, false);
+				layout.marginHeight= layout.marginWidth= 0;
+				firstLine.setLayout(layout);
+				firstLine.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+				
+				Control label= super.addLabel(firstLine);
+				label.addTraverseListener(new TraverseListener() {
+					public void keyTraversed(TraverseEvent e) {
+						if (e.detail == SWT.TRAVERSE_MNEMONIC && e.doit) {
+							e.detail= SWT.TRAVERSE_NONE;
+							getTreeViewer().getTree().setFocus();
+						}
+					}
+				});
+				
+				Button newButton= new Button(firstLine, SWT.PUSH);
+				newButton.setText(fCreateTargetQuery.getNewButtonLabel());
+				GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_END | GridData.GRAB_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
+				gd.widthHint = SWTUtil.getButtonWidthHint(newButton);
+				newButton.setLayoutData(gd);
+				newButton.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+						doNewButtonPressed();
+					}
+				});
+				
+				return firstLine;
+				
+			} else {
+				return super.addLabel(parent);
 			}
 		}
 		
@@ -245,10 +263,14 @@ public class ReorgMoveWizard extends RefactoringWizard {
 		}
 
 		private void doNewButtonPressed() {
-			ICreateTargetQuery createTargetQuery= getJavaMoveProcessor().getCreateTargetQuery();
-			Object newElement= createTargetQuery.getCreatedTarget(fDestination);
-			if (newElement != null)
-				addElementToTree(newElement);
+			Object newElement= fCreateTargetQuery.getCreatedTarget(fDestination);
+			if (newElement != null) {
+				TreeViewer viewer= getTreeViewer();
+				ITreeContentProvider contentProvider= (ITreeContentProvider) viewer.getContentProvider();
+				viewer.refresh(contentProvider.getParent(newElement));
+				viewer.setSelection(new StructuredSelection(newElement), true);
+				viewer.getTree().setFocus();
+			}
 		}
 	}
 }
