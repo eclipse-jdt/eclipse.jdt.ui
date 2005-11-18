@@ -25,11 +25,16 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.window.Window;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IObjectActionDelegate;
 import org.eclipse.ui.IWorkbenchPart;
@@ -189,27 +194,28 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				return;
 				
 			ISourceRange range= fSuiteMethod.getSourceRange();
-			IBuffer buf= fTestSuite.getBuffer();
-			String originalContent= buf.getText(range.getOffset(), range.getLength());
+			IDocument fullSource= new Document(fTestSuite.getBuffer().getContents());
+			String originalContent= fullSource.get(range.getOffset(), range.getLength());
 			StringBuffer source= new StringBuffer(originalContent);
 			TestSuiteClassListRange classRange = getTestSuiteClassListRange(source.toString());
 			if (classRange != null) {
 				monitor.worked(1);
 				//					String updatableCode= source.substring(start,end+NewTestSuiteCreationWizardPage.endMarker.length());
 				source.replace(classRange.getStart(), classRange.getEnd(), getUpdatableString(fSelectedTestCases));
-				buf.replace(range.getOffset(), range.getLength(), source.toString());
+				fullSource.replace(range.getOffset(), range.getLength(), source.toString());
 				monitor.worked(1);
-				fTestSuite.reconcile();
-				originalContent= buf.getText(0, buf.getLength());
-				monitor.worked(1);
-				String formattedContent= JUnitStubUtility.formatCompilationUnit(fTestSuite.getJavaProject(), originalContent, StubUtility.getLineDelimiterUsed(fTestSuite));
+				String formattedContent= JUnitStubUtility.formatCompilationUnit(fTestSuite.getJavaProject(), fullSource.get(), StubUtility.getLineDelimiterUsed(fTestSuite));
 				//buf.replace(range.getOffset(), range.getLength(), formattedContent);
+				IBuffer buf= fTestSuite.getBuffer();
 				buf.replace(0, buf.getLength(), formattedContent);
 				monitor.worked(1);
 				fTestSuite.save(new SubProgressMonitor(monitor, 1), true);
+				monitor.worked(1);
 			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, fShell, WizardMessages.UpdateTestSuite_update, WizardMessages.UpdateTestSuite_error); 
+		} catch (BadLocationException e) {
+			Assert.isTrue(false, "Should never happen"); //$NON-NLS-1$
 		} finally{
 			monitor.done();
 		}

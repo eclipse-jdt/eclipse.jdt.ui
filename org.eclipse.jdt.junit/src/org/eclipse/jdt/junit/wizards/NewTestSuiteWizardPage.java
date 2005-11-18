@@ -27,14 +27,18 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
@@ -49,6 +53,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
+
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 import org.eclipse.jdt.internal.junit.Messages;
@@ -56,8 +61,8 @@ import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.util.JUnitStatus;
 import org.eclipse.jdt.internal.junit.util.JUnitStubUtility;
 import org.eclipse.jdt.internal.junit.util.LayoutUtil;
-import org.eclipse.jdt.internal.junit.wizards.SuiteClassesContentProvider;
 import org.eclipse.jdt.internal.junit.wizards.MethodStubsSelectionButtonGroup;
+import org.eclipse.jdt.internal.junit.wizards.SuiteClassesContentProvider;
 import org.eclipse.jdt.internal.junit.wizards.TestSuiteClassListRange;
 import org.eclipse.jdt.internal.junit.wizards.UpdateTestSuite;
 import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
@@ -382,23 +387,27 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		if (suiteMethod.exists()) {
 			ISourceRange range= suiteMethod.getSourceRange();
 			if (range != null) {
-				IBuffer buf= cu.getBuffer();
-				String originalContent= buf.getText(range.getOffset(), range.getLength());
-				StringBuffer source= new StringBuffer(originalContent);
-				TestSuiteClassListRange classListRange = UpdateTestSuite.getTestSuiteClassListRange(originalContent);
-				if (classListRange != null) {
-					// TODO: copied
-					monitor.subTask(WizardMessages.NewTestSuiteWizPage_createType_updating_suite_method); 
-					monitor.worked(1);
-					source.replace(classListRange.getStart(), classListRange.getEnd(), getUpdatableString());
-					buf.replace(range.getOffset(), range.getLength(), source.toString());
-					monitor.worked(1);
-					String formattedContent= JUnitStubUtility.formatCompilationUnit(cu.getJavaProject(), cu.getSource(), lineDelimiter);
-					buf.setContents(formattedContent);
-					monitor.worked(1);
-					cu.save(new SubProgressMonitor(monitor, 1), false);
-				} else {
-					cannotUpdateSuiteError();
+				try {
+					IDocument fullSource= new Document(cu.getBuffer().getContents());
+					String originalContent= fullSource.get(range.getOffset(), range.getLength());
+					StringBuffer source= new StringBuffer(originalContent);
+					TestSuiteClassListRange classListRange = UpdateTestSuite.getTestSuiteClassListRange(originalContent);
+					if (classListRange != null) {
+						// TODO: copied
+						monitor.subTask(WizardMessages.NewTestSuiteWizPage_createType_updating_suite_method); 
+						monitor.worked(1);
+						source.replace(classListRange.getStart(), classListRange.getEnd(), getUpdatableString());
+						fullSource.replace(range.getOffset(), range.getLength(), source.toString());
+						monitor.worked(1);
+						String formattedContent= JUnitStubUtility.formatCompilationUnit(cu.getJavaProject(), fullSource.get(), lineDelimiter);
+						cu.getBuffer().setContents(formattedContent);
+						monitor.worked(1);
+						cu.save(new SubProgressMonitor(monitor, 1), false);
+					} else {
+						cannotUpdateSuiteError();
+					}
+				} catch (BadLocationException e) {
+					Assert.isTrue(false, "Should never happen"); //$NON-NLS-1$
 				}
 			} else {
 				MessageDialog.openError(getShell(), WizardMessages.NewTestSuiteWizPage_createType_updateErrorDialog_title, WizardMessages.NewTestSuiteWizPage_createType_updateErrorDialog_message); 
