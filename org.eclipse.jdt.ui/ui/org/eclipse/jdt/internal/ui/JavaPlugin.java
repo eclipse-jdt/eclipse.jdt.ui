@@ -397,6 +397,11 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 		IPreferenceStore store= getPreferenceStore();
 		
+		// must add here to guarantee that it is the first in the listener list
+		fMembersOrderPreferenceCache= new MembersOrderPreferenceCache();
+		fMembersOrderPreferenceCache.install(store);
+		
+		
 		/*
 		 * Installs backwards compatibility: propagate the Java editor font from a
 		 * pre-2.1 plug-in to the Platform UI's preference store to preserve
@@ -404,7 +409,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		 * once.
 		 */
 		String fontPropagatedKey= "fontPropagated"; //$NON-NLS-1$
-		if (store.contains(JFaceResources.TEXT_FONT) && !getPreferenceStore().isDefault(JFaceResources.TEXT_FONT)) {
+		if (store.contains(JFaceResources.TEXT_FONT) && !store.isDefault(JFaceResources.TEXT_FONT)) {
 			if (!store.getBoolean(fontPropagatedKey))
 				PreferenceConverter.setValue(
 						getDeprecatedWorkbenchPreferenceStore(), PreferenceConstants.EDITOR_TEXT_FONT, PreferenceConverter.getFontDataArray(store, JFaceResources.TEXT_FONT));
@@ -530,6 +535,14 @@ public class JavaPlugin extends AbstractUIPlugin {
 			}
 			
 			uninstallPreferenceStoreBackwardsCompatibility();
+			
+			if (fMembersOrderPreferenceCache != null) {
+				fMembersOrderPreferenceCache.dispose();
+				fMembersOrderPreferenceCache= null;
+			}
+			
+			// must add here to guarantee that it is the first in the listener list
+
 			TypeInfoHistory.shutdown();
 		} finally {	
 			super.stop(context);
@@ -611,10 +624,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 		
 	public synchronized MembersOrderPreferenceCache getMemberOrderPreferenceCache() {
-		if (fMembersOrderPreferenceCache == null)
-			fMembersOrderPreferenceCache= new MembersOrderPreferenceCache();
+		// initialized on startup
 		return fMembersOrderPreferenceCache;
-	}	
+	}
 	
 	
 	public synchronized TypeFilter getTypeFilter() {

@@ -25,9 +25,12 @@ public class JavaUIPreferenceInitializer extends AbstractPreferenceInitializer {
 	 */
 	public void initializeDefaultPreferences() {
 		IPreferenceStore store = PreferenceConstants.getPreferenceStore();
+		
 		EditorsUI.useAnnotationsPreferencePage(store);
 		EditorsUI.useQuickDiffPreferencePage(store);
 		PreferenceConstants.initializeDefaultValues(store);
 	}
 
+	
+	
 }

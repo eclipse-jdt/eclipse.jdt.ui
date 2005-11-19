@@ -46,10 +46,24 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 	private boolean fSortByVisibility;
 	private int[] fVisibilityOffsets= null;
 	
+	private IPreferenceStore fPreferenceStore;
+	
 	public MembersOrderPreferenceCache() {
+		fPreferenceStore= null;
 		fCategoryOffsets= null;
-		fSortByVisibility= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
+		fSortByVisibility= false;
 		fVisibilityOffsets= null;
+	}
+	
+	public void install(IPreferenceStore store) {
+		fPreferenceStore= store;
+		store.addPropertyChangeListener(this);
+		fSortByVisibility= store.getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);	
+	}
+	
+	public void dispose() {
+		fPreferenceStore.removePropertyChangeListener(this);
+		fPreferenceStore= null;
 	}
 	
 	public static boolean isMemberOrderProperty(String property) {
@@ -66,7 +80,7 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 		} else if (PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER.equals(property)) {
 			fVisibilityOffsets= null;
 		} else if (PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER.equals(property)) {
-			fSortByVisibility= PreferenceConstants.getPreferenceStore().getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
+			fSortByVisibility= fPreferenceStore.getBoolean(PreferenceConstants.APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER);
 		}
 	}
 
@@ -79,7 +93,7 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 	
 	private int[] getCategoryOffsets() {
 		int[] offsets= new int[N_CATEGORIES];
-		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		IPreferenceStore store= fPreferenceStore;
 		String key= PreferenceConstants.APPEARANCE_MEMBER_SORT_ORDER;
 		boolean success= fillCategoryOffsetsFromPreferenceString(store.getString(key), offsets);
 		if (!success) {
@@ -139,7 +153,7 @@ public class MembersOrderPreferenceCache implements IPropertyChangeListener {
 	
 	private int[] getVisibilityOffsets() {
 		int[] offsets= new int[N_VISIBILITIES];
-		IPreferenceStore store= PreferenceConstants.getPreferenceStore();
+		IPreferenceStore store= fPreferenceStore;
 		String key= PreferenceConstants.APPEARANCE_VISIBILITY_SORT_ORDER;
 		boolean success= fillVisibilityOffsetsFromPreferenceString(store.getString(key), offsets);
 		if (!success) {
