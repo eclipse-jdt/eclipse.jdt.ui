@@ -117,8 +117,13 @@ public class JavaSearchQuery implements ISearchQuery {
 			String stringPattern= null;
 			
 			if (fPatternData instanceof ElementQuerySpecification) {
-				pattern= SearchPattern.createPattern(((ElementQuerySpecification)fPatternData).getElement(), fPatternData.getLimitTo(), SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
-				stringPattern= ((ElementQuerySpecification)fPatternData).getElement().getElementName();
+				IJavaElement element= ((ElementQuerySpecification) fPatternData).getElement();
+				if (!element.exists()) {
+					String elementLabel= JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT);
+					return new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, Messages.format(SearchMessages.JavaSearchQuery_error_element_does_not_exist, elementLabel), null);  
+				}
+				pattern= SearchPattern.createPattern(element, fPatternData.getLimitTo(), SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+				stringPattern= element.getElementName();
 			} else {
 				PatternQuerySpecification patternSpec = (PatternQuerySpecification) fPatternData;
 				stringPattern= patternSpec.getPattern();

@@ -206,4 +206,6 @@ public final class SearchMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, SearchMessages.class);
 	}
+
+	public static String JavaSearchQuery_error_element_does_not_exist;
 }
