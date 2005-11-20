@@ -56,8 +56,8 @@ public class OpenViewActionGroup extends ActionGroup {
 
 	/**
 	 * Creates a new <code>OpenActionGroup</code>. The group requires
-	 * that the selection provided by the page's selection provider is of type <code>
-	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * that the selection provided by the page's selection provider is 
+	 * of type {@link IStructuredSelection}.
 	 * 
 	 * @param page the page that owns this action group
 	 */
@@ -67,8 +67,8 @@ public class OpenViewActionGroup extends ActionGroup {
 	
 	/**
 	 * Creates a new <code>OpenActionGroup</code>. The group requires
-	 * that the selection provided by the given selection provider is of type <code>
-	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * that the selection provided by the given selection provider is 
+	 * of type {@link IStructuredSelection}.
 	 * 
 	 * @param page the page that owns this action group
 	 * @param selectionProvider the selection provider used instead of the
@@ -82,8 +82,8 @@ public class OpenViewActionGroup extends ActionGroup {
 	
 	/**
 	 * Creates a new <code>OpenActionGroup</code>. The group requires
-	 * that the selection provided by the part's selection provider is of type <code>
-	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * that the selection provided by the part's selection provider is 
+	 * of type {@link IStructuredSelection}.
 	 * 
 	 * @param part the view part that owns this action group
 	 */
@@ -93,8 +93,8 @@ public class OpenViewActionGroup extends ActionGroup {
 	
 	/**
 	 * Creates a new <code>OpenActionGroup</code>. The group requires
-	 * that the selection provided by the given selection provider is of type <code>
-	 * org.eclipse.jface.viewers.IStructuredSelection</code>.
+	 * that the selection provided by the given selection provider is of type
+	 * {@link IStructuredSelection}.
 	 * 
 	 * @param part the view part that owns this action group
 	 * @param selectionProvider the selection provider used instead of the
@@ -108,6 +108,21 @@ public class OpenViewActionGroup extends ActionGroup {
 		String partName= part.getClass().getName();
 		fIsTypeHiararchyViewerOwner= "org.eclipse.jdt.internal.ui.typehierarchy.TypeHierarchyViewPart".equals(partName); //$NON-NLS-1$
 		fIsCallHiararchyViewerOwner= "org.eclipse.jdt.internal.ui.callhierarchy.CallHierarchyViewPart".equals(partName); //$NON-NLS-1$
+	}
+	
+	/**
+	 * Creates a new <code>OpenActionGroup</code>. The group requires
+	 * that the selection provided by the given selection provider is of type 
+	 * {@link IStructuredSelection}.
+	 * 
+	 * @param site the site that will own the action group.
+	 * @param selectionProvider the selection provider used instead of the
+	 *  page selection provider.
+	 *  
+	 * @since 3.2
+	 */
+	public OpenViewActionGroup(IWorkbenchSite site, ISelectionProvider selectionProvider) {
+		createSiteActions(site, selectionProvider);
 	}
 	
 	/**
