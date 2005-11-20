@@ -19,19 +19,26 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.text.edits.MultiTextEdit;
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
-import org.eclipse.text.edits.TextEditGroup;
+import org.eclipse.core.resources.IFile;
 
+import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextUtilities;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -70,10 +77,9 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchPattern;
 
-import org.eclipse.jdt.ui.CodeGeneration;
-
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
@@ -92,12 +98,9 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
+import org.eclipse.jdt.ui.CodeGeneration;
 
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
 /**
  * Encapsulates a field into getter and setter calls.
@@ -110,6 +113,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 	private CompilationUnit fRoot;
 	private VariableDeclarationFragment fFieldDeclaration;
 	private ASTRewrite fRewriter;
+	private ImportRewrite fImportRewrite;
 
 	private int fVisibility;
 	private String fGetterName;
@@ -303,23 +307,28 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			((AbstractTypeDeclaration)ASTNodes.getParent(fFieldDeclaration, AbstractTypeDeclaration.class)).resolveBinding();
 		List ownerDescriptions= new ArrayList();
 		ICompilationUnit owner= fField.getCompilationUnit();
+		fImportRewrite= new ImportRewrite(owner);
+		
 		for (int i= 0; i < affectedCUs.length; i++) {
 			ICompilationUnit unit= affectedCUs[i];
 			sub.subTask(unit.getElementName());
 			CompilationUnit root= null;
 			ASTRewrite rewriter= null;
+			ImportRewrite importRewrite= new ImportRewrite(unit);
 			List descriptions;
 			if (owner.equals(unit)) {
 				root= fRoot;
 				rewriter= fRewriter;
+				importRewrite= fImportRewrite;
 				descriptions= ownerDescriptions;
 			} else {
 				root= new RefactoringASTParser(AST.JLS3).parse(unit, true);
 				rewriter= ASTRewrite.create(root.getAST());
 				descriptions= new ArrayList();
+				importRewrite= new ImportRewrite(unit);
 			}
 			checkCompileErrors(result, root, unit);
-			AccessAnalyzer analyzer= new AccessAnalyzer(this, unit, fieldIdentifier, declaringClass, rewriter);
+			AccessAnalyzer analyzer= new AccessAnalyzer(this, unit, fieldIdentifier, declaringClass, rewriter, importRewrite);
 			root.accept(analyzer);
 			result.merge(analyzer.getStatus());
 			if (!fSetterMustReturnValue) 
@@ -330,7 +339,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			}
 			descriptions.addAll(analyzer.getGroupDescriptions());
 			if (!owner.equals(unit))
-				createEdits(unit, rewriter, descriptions);
+				createEdits(unit, rewriter, descriptions, importRewrite);
 			sub.worked(1);
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
@@ -338,7 +347,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		try {
 			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(owner);
 			ownerDescriptions.addAll(addGetterSetterChanges(fRoot, fRewriter, TextUtilities.getDefaultLineDelimiter(buffer.getDocument())));
-			createEdits(owner, fRewriter, ownerDescriptions, buffer);
+			createEdits(owner, fRewriter, ownerDescriptions, fImportRewrite, buffer);
 		} finally {
 			RefactoringFileBuffers.release(owner);
 		}
@@ -347,18 +356,22 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		return result;
 	}
 
-	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups) throws CoreException {
+	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups, ImportRewrite importRewrite) throws CoreException {
 		try {
 		ITextFileBuffer buffer= RefactoringFileBuffers.acquire(unit);
-			createEdits(unit, rewriter, groups, buffer);
+			createEdits(unit, rewriter, groups, importRewrite, buffer);
 		} finally {
 			RefactoringFileBuffers.release(unit);
 		}
 	}
 
-	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups, ITextFileBuffer buffer) {
+	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups, ImportRewrite importRewrite, ITextFileBuffer buffer) throws CoreException {
 		TextChange change= fChangeManager.get(unit);
-		change.setEdit(rewriter.rewriteAST(buffer.getDocument(), fField.getJavaProject().getOptions(true)));
+		MultiTextEdit root= new MultiTextEdit();
+		change.setEdit(root);
+		IDocument document= buffer.getDocument();
+		root.addChild(importRewrite.createEdit(document, null));
+		root.addChild(rewriter.rewriteAST(document, fField.getJavaProject().getOptions(true)));
 		for (Iterator iter= groups.iterator(); iter.hasNext();) {
 			change.addTextEditGroup((TextEditGroup)iter.next());
 		}

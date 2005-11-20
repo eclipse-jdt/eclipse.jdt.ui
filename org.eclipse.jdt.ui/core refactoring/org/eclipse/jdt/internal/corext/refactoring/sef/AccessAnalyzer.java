@@ -17,6 +17,8 @@ import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -25,12 +27,14 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
@@ -42,11 +46,11 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 /**
  * Analyzer to find all references to the field and to determine how to convert 
@@ -60,27 +64,34 @@ class AccessAnalyzer extends ASTVisitor {
 	private String fGetter;
 	private String fSetter;
 	private ASTRewrite fRewriter;
+	private ImportRewrite fImportRewriter;
 	private List fGroupDescriptions;
 	private RefactoringStatus fStatus;
 	private boolean fSetterMustReturnValue;
 	private boolean fEncapsulateDeclaringClass;
 	private boolean fIsFieldFinal;
+	
+	private boolean fRemoveStaticImport;
+	private boolean fReferencingGetter;
+	private boolean fReferencingSetter;
 
 	private static final String READ_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_read_access; 
 	private static final String WRITE_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_write_access; 
 	private static final String PREFIX_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_prefix_access; 
 	private static final String POSTFIX_ACCESS= RefactoringCoreMessages.SelfEncapsulateField_AccessAnalyzer_encapsulate_postfix_access; 
 		
-	public AccessAnalyzer(SelfEncapsulateFieldRefactoring refactoring, ICompilationUnit unit, IVariableBinding field, ITypeBinding declaringClass, ASTRewrite rewriter) {
+	public AccessAnalyzer(SelfEncapsulateFieldRefactoring refactoring, ICompilationUnit unit, IVariableBinding field, ITypeBinding declaringClass, ASTRewrite rewriter, ImportRewrite importRewrite) {
 		Assert.isNotNull(refactoring);
 		Assert.isNotNull(unit);
 		Assert.isNotNull(field);
 		Assert.isNotNull(declaringClass);
 		Assert.isNotNull(rewriter);
+		Assert.isNotNull(importRewrite);
 		fCUnit= unit;
 		fFieldBinding= field.getVariableDeclaration();
 		fDeclaringClassBinding= declaringClass;
 		fRewriter= rewriter;
+		fImportRewriter= importRewrite;
 		fGroupDescriptions= new ArrayList();
 		fGetter= refactoring.getGetterName();
 		fSetter= refactoring.getSetterName();
@@ -116,6 +127,7 @@ class AccessAnalyzer extends ASTVisitor {
 			AST ast= node.getAST();
 			MethodInvocation invocation= ast.newMethodInvocation();
 			invocation.setName(ast.newSimpleName(fSetter));
+			fReferencingSetter= true;
 			Expression receiver= getReceiver(lhs);
 			if (receiver != null)
 				invocation.setExpression((Expression)fRewriter.createCopyTarget(receiver));
@@ -129,6 +141,7 @@ class AccessAnalyzer extends ASTVisitor {
 				exp.setOperator(ASTNodes.convertToInfixOperator(node.getOperator()));
 				MethodInvocation getter= ast.newMethodInvocation();
 				getter.setName(ast.newSimpleName(fGetter));
+				fReferencingGetter= true;
 				if (receiver != null)
 					getter.setExpression((Expression)fRewriter.createCopyTarget(receiver));
 				exp.setLeftOperand(getter);
@@ -149,12 +162,20 @@ class AccessAnalyzer extends ASTVisitor {
 
 	public boolean visit(SimpleName node) {
 		if (!node.isDeclaration() && considerBinding(node.resolveBinding(), node)) {
+			fReferencingGetter= true;
 			fRewriter.replace(
 				node, 
 				fRewriter.createStringPlaceholder(fGetter + "()", ASTNode.METHOD_INVOCATION), //$NON-NLS-1$
 				createGroupDescription(READ_ACCESS));
 		}
 		return true;
+	}
+	
+	public boolean visit(ImportDeclaration node) {
+		if (considerBinding(node.resolveBinding(), node)) {
+			fRemoveStaticImport= true;
+		}
+		return false;
 	}
 	
 	public boolean visit(PrefixExpression node) {
@@ -189,6 +210,27 @@ class AccessAnalyzer extends ASTVisitor {
 			createInvocation(node.getAST(), node.getOperand(), node.getOperator().toString()), 
 			createGroupDescription(POSTFIX_ACCESS));
 		return false;
+	}
+	
+	public void endVisit(CompilationUnit node) {
+		// If we don't had a static import to the field we don't
+		// have to add any, even if we generated a setter or 
+		// getter access.
+		if (!fRemoveStaticImport)
+			return;
+		
+		ITypeBinding type= fFieldBinding.getDeclaringClass();
+		String fieldName= fFieldBinding.getName();
+		String typeName= type.getQualifiedName();
+		if (fRemoveStaticImport) {
+			fImportRewriter.removeStaticImport(typeName + "." + fieldName); //$NON-NLS-1$
+		}
+		if (fReferencingGetter) {
+			fImportRewriter.addStaticImport(typeName, fGetter, false);
+		}
+		if (fReferencingSetter) {
+			fImportRewriter.addStaticImport(typeName, fSetter, false);
+		}
 	}
 	
 	private boolean considerBinding(IBinding binding, ASTNode node) {
@@ -259,6 +301,9 @@ class AccessAnalyzer extends ASTVisitor {
 		argument.setLeftOperand(getter);
 		argument.setRightOperand(ast.newNumberLiteral("1")); //$NON-NLS-1$
 
+		fReferencingGetter= true;
+		fReferencingSetter= true;
+		
 		return invocation;
 	}
 	

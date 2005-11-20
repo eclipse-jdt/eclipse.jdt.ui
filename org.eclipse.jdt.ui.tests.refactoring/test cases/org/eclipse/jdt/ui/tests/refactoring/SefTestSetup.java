@@ -20,6 +20,8 @@ public class SefTestSetup extends RefactoringTestSetup {
 	private IPackageFragment fBaseTypes;
 	private IPackageFragment fObjectTypes;
 	private IPackageFragment fInvalid;
+	private IPackageFragment fStatic;
+	private IPackageFragment fStaticRef;
 	
 	public SefTestSetup(Test test) {
 		super(test);
@@ -33,6 +35,8 @@ public class SefTestSetup extends RefactoringTestSetup {
 		fBaseTypes= root.createPackageFragment("base_in", true, null);
 		fObjectTypes= root.createPackageFragment("object_in", true, null);
 		fInvalid= root.createPackageFragment("invalid", true, null);
+		fStatic= root.createPackageFragment("static_in", true, null);
+		fStaticRef= root.createPackageFragment("static_ref_in", true, null);
 	}
 
 	public IPackageFragment getBasePackage() {
@@ -45,6 +49,13 @@ public class SefTestSetup extends RefactoringTestSetup {
 
 	public IPackageFragment getInvalidPackage() {
 		return fInvalid;
+	}
+	
+	public IPackageFragment getStaticPackage() {
+		return fStatic;
+	}
+	
+	public IPackageFragment getStaticRefPackage() {
+		return fStaticRef;
 	}	
 }
-

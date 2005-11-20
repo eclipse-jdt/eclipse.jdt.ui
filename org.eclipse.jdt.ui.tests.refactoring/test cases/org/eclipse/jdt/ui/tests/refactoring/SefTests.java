@@ -19,13 +19,14 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 
@@ -43,7 +44,8 @@ public class SefTests extends AbstractSelectionTestCase {
 	}
 	
 	public static Test setUpTest(Test test) {
-		return new SefTestSetup(test);
+		fgTestSetup= new SefTestSetup(test);
+		return fgTestSetup;
 	}
 
 	protected String getResourceLocation() {
@@ -59,27 +61,18 @@ public class SefTests extends AbstractSelectionTestCase {
 		IField field= getField(unit, fieldName);
 		assertNotNull(field);
 		
-		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
-		preferences.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
-		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
-		preferences.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
-		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
+		initializePreferences();
 
 		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field);
 		performTest(unit, refactoring, COMPARE_WITH_OUTPUT, getProofedContent(outputFolder, id), true);
 	}
-	
+
 	protected void performInvalidTest(IPackageFragment packageFragment, String id, String fieldName) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		IField field= getField(unit, fieldName);
 		assertNotNull(field);
 
-		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
-		preferences.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
-		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
-		preferences.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
-		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
-
+		initializePreferences();
 
 		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field);
 		if (refactoring != null) {
@@ -87,6 +80,14 @@ public class SefTests extends AbstractSelectionTestCase {
 			assertTrue(status.hasError());
 		}
 	}	
+	
+	private void initializePreferences() {
+		Preferences preferences= JavaCore.getPlugin().getPluginPreferences();
+		preferences.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
+		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
+		preferences.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
+		preferences.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");
+	}
 	
 	private static IField getField(ICompilationUnit unit, String fieldName) throws Exception {
 		IField result= null;
@@ -234,5 +235,41 @@ public class SefTests extends AbstractSelectionTestCase {
 
 	public void testGenericReadWrite() throws Exception {
 		objectTest("field");
+	}
+	
+	//=====================================================================================
+	// static import tests
+	//=====================================================================================
+
+	private void performStaticImportTest(String referenceName) throws Exception, JavaModelException {
+		ICompilationUnit provider= createCU(fgTestSetup.getStaticPackage(), getName());
+		ICompilationUnit reference= createCU(fgTestSetup.getStaticRefPackage(), referenceName);
+		
+		IField field= getField(provider, "x");
+		assertNotNull(field);
+		
+		initializePreferences();
+
+		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field);
+		performTest(provider, refactoring, COMPARE_WITH_OUTPUT, getProofedContent("static_out", getName()), false);
+		String refContentOut= getProofedContent("static_ref_out", referenceName);
+		refContentOut= refContentOut.replaceAll("import static static_out", "import static static_in");
+		compareSource(reference.getSource(), refContentOut);
+	}
+	
+	public void testStaticImportRead() throws Exception {
+		performStaticImportTest("StaticImportReadReference");	
+	}
+	
+	public void testStaticImportWrite() throws Exception {
+		performStaticImportTest("StaticImportWriteReference");	
+	}
+	
+	public void testStaticImportReadWrite() throws Exception {
+		performStaticImportTest("StaticImportReadWriteReference");	
+	}
+	
+	public void testStaticImportNone() throws Exception {
+		performStaticImportTest("StaticImportNoReference");	
 	}
 }
