@@ -15,9 +15,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.core.resources.IWorkspace;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class ASTViewPlugin extends AbstractUIPlugin {
@@ -25,7 +22,7 @@ public class ASTViewPlugin extends AbstractUIPlugin {
 	private static ASTViewPlugin fgDefault;
 
 	public ASTViewPlugin() {
-		fgDefault = this;
+		fgDefault= this;
 	}
 	
 	public static String getPluginId() {
@@ -37,13 +34,6 @@ public class ASTViewPlugin extends AbstractUIPlugin {
 	 */
 	public static ASTViewPlugin getDefault() {
 		return fgDefault;
-	}
-
-	/**
-	 * @return the workspace instance
-	 */
-	public static IWorkspace getWorkspace() {
-		return ResourcesPlugin.getWorkspace();
 	}
 	
 	public static void log(IStatus status) {
@@ -65,7 +55,7 @@ public class ASTViewPlugin extends AbstractUIPlugin {
 	}
 	
 	public static void log(String message, Throwable e) {
-		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, e)); //$NON-NLS-1$
+		log(new Status(IStatus.ERROR, getPluginId(), IStatus.ERROR, message, e));
 	}
 	
 }
