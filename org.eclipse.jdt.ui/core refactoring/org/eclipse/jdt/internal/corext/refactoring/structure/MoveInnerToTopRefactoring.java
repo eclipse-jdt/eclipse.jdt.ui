@@ -690,12 +690,12 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 			if (JdtFlags.isStatic(fType))
 				result.merge(checkEnclosingInstanceName(fEnclosingInstanceFieldName));
 
-			if (fType.getPackageFragment().getCompilationUnit((fType.getElementName() + ".java")).exists()) { //$NON-NLS-1$
-				String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_compilation_Unit_exists, new String[] { (fType.getElementName() + ".java"), fType.getPackageFragment().getElementName()});  //$NON-NLS-1$
+			if (fType.getPackageFragment().getCompilationUnit((getCompilationUnitName())).exists()) {
+				String message= Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_compilation_Unit_exists, new String[] { (getCompilationUnitName()), fType.getPackageFragment().getElementName()});
 				result.addFatalError(message);
 			}
 			result.merge(checkEnclosingInstanceName(fEnclosingInstanceFieldName));
-			result.merge(Checks.checkCompilationUnitName((fType.getElementName() + ".java"))); //$NON-NLS-1$
+			result.merge(Checks.checkCompilationUnitName((getCompilationUnitName())));
 			result.merge(checkConstructorParameterNames());
 			result.merge(checkTypeNameInPackage());
 			fChangeManager= createChangeManager(new SubProgressMonitor(pm, 1), result);
@@ -820,13 +820,17 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 	private Change createCompilationUnitForMovedType(IProgressMonitor pm) throws CoreException {
 		ICompilationUnit newCuWC= null;
 		try {
-			newCuWC= WorkingCopyUtil.getNewWorkingCopy(fType.getPackageFragment(), (fType.getElementName() + ".java")); //$NON-NLS-1$
+			newCuWC= WorkingCopyUtil.getNewWorkingCopy(fType.getPackageFragment(), (getCompilationUnitName()));
 			String source= createSourceForNewCu(newCuWC, pm);
-			return new CreateTextFileChange(ResourceUtil.getFile(fType.getCompilationUnit()).getFullPath().removeLastSegments(1).append((fType.getElementName() + ".java")), source, null, "java"); //$NON-NLS-1$ //$NON-NLS-2$
+			return new CreateTextFileChange(ResourceUtil.getFile(fType.getCompilationUnit()).getFullPath().removeLastSegments(1).append((getCompilationUnitName())), source, null, "java"); //$NON-NLS-1$
 		} finally {
 			if (newCuWC != null)
 				newCuWC.discardWorkingCopy();
 		}
+	}
+
+	private String getCompilationUnitName() {
+		return fType.getElementName() + JavaModelUtil.getCompilationUnitExtension(fType.getCompilationUnit());
 	}
 
 	private void createCompilationUnitRewrite(final ITypeBinding[] parameters, final CompilationUnitRewrite targetRewrite, final Map typeReferences, final Map constructorReferences, boolean visibilityWasAdjusted, final ICompilationUnit sourceUnit, final ICompilationUnit targetUnit, final boolean remove, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
