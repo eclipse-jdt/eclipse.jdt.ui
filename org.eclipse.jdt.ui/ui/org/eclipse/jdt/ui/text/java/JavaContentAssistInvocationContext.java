@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.text.java;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 
@@ -21,7 +22,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -65,6 +65,17 @@ public class JavaContentAssistInvocationContext extends TextContentAssistInvocat
 	}
 	
 	/**
+	 * Creates a new context.
+	 * 
+	 * @param viewer the viewer used by the editor
+	 * @param offset the invocation offset
+	 */
+	public JavaContentAssistInvocationContext(ITextViewer viewer, int offset) {
+		super(viewer, offset);
+		fEditor= null;
+	}
+	
+	/**
 	 * Returns the compilation unit that content assist is invoked in, <code>null</code> if there
 	 * is none.
 	 * 
@@ -75,7 +86,7 @@ public class JavaContentAssistInvocationContext extends TextContentAssistInvocat
 			fCUComputed= true;
 			if (fCollector != null)
 				fCU= fCollector.getCompilationUnit();
-			else
+			else if (fEditor != null)
 				fCU= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
 		}
 		return fCU;
