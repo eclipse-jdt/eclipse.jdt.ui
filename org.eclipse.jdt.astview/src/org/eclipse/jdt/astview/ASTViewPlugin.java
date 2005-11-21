@@ -22,10 +22,10 @@ import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 public class ASTViewPlugin extends AbstractUIPlugin {
 
-	private static ASTViewPlugin fDefault;
+	private static ASTViewPlugin fgDefault;
 
 	public ASTViewPlugin() {
-		fDefault = this;
+		fgDefault = this;
 	}
 	
 	public static String getPluginId() {
@@ -36,7 +36,7 @@ public class ASTViewPlugin extends AbstractUIPlugin {
 	 * @return the shared instance
 	 */
 	public static ASTViewPlugin getDefault() {
-		return fDefault;
+		return fgDefault;
 	}
 
 	/**
