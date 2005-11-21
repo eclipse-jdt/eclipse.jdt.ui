@@ -9,14 +9,14 @@
    <feature url="features/org.eclipse.jdt.jeview.feature_1.0.0.jar" id="org.eclipse.jdt.jeview.feature" version="1.0.0">
       <category name="java-element-view-1.0.0"/>
    </feature>
-   <feature url="features/org.eclipse.jdt.astview.feature_1.0.7.jar" id="org.eclipse.jdt.astview.feature" version="1.0.7">
-      <category name="ast-view-1.0.7"/>
+   <feature url="features/org.eclipse.jdt.astview.feature_1.0.8.jar" id="org.eclipse.jdt.astview.feature" version="1.0.8">
+      <category name="ast-view-1.0.8"/>
    </feature>
-   <category-def name="ast-view-1.0.7" label="AST View for 3.1">
+   <category-def name="ast-view-1.0.8" label="AST View for 3.1">
       <description>
          View to visualize the Java compilers abstract syntax tree generated for a Java file.
 
-Use this version Eclipse 3.1 builds RC1 and higher
+Use this version Eclipse 3.1 and higher
       </description>
    </category-def>
    <category-def name="java-element-view-1.0.0" label="JavaElement View (requires Java 5.0)">

@@ -2,9 +2,8 @@
 <feature
       id="org.eclipse.jdt.astview.feature"
       label="org.eclipse.jdt.astview.feature"
-      version="1.0.2"
+      version="1.0.8"
       provider-name="Eclipse.org">
-
    <install-handler/>
 
    <description>
@@ -17,6 +16,7 @@
 
    <url>
       <update label="AST View update site" url="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/jdt-ui-home/plugins/org.eclipse.jdt.astview/AST-View-Site"/>
+      <discovery label="AST View Site" url="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/jdt-ui-home/plugins/org.eclipse.jdt.astview/AST-View-Site"/>
    </url>
 
    <requires>
@@ -37,6 +37,7 @@
          id="org.eclipse.jdt.astview"
          download-size="0"
          install-size="0"
-         version="1.0.2"/>
+         version="0.0.0"
+         unpack="false"/>
 
 </feature>
