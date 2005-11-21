@@ -21,6 +21,7 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Type;
@@ -38,6 +39,13 @@ public final class ImportRewrite {
 	
 	private ImportsStructure fImportsStructure;
 	
+	private ImportRewrite(ICompilationUnit cu, CompilationUnit unit, String[] preferenceOrder, int importThreshold) throws CoreException {
+		Assert.isNotNull(cu);
+		Assert.isNotNull(unit);
+		Assert.isNotNull(preferenceOrder);
+		fImportsStructure= new ImportsStructure(cu, unit, preferenceOrder, importThreshold, true);
+	}
+
 	private ImportRewrite(ICompilationUnit cu, String[] preferenceOrder, int importThreshold) throws CoreException {
 		Assert.isNotNull(cu);
 		Assert.isNotNull(preferenceOrder);
@@ -46,11 +54,21 @@ public final class ImportRewrite {
 	
 	/**
 	 * Creates a import rewriter with the settings as configured in the preferences
-	 * @param cunit The compilation unit that contains the imports to change.
+	 * @param cu The compilation unit that contains the imports to change.
+	 * @param unit The compilation unit node
 	 * @throws CoreException
 	 */
-	public ImportRewrite(ICompilationUnit cunit) throws CoreException {
-		this(cunit, JavaPreferencesSettings.getImportOrderPreference(cunit.getJavaProject()), JavaPreferencesSettings.getImportNumberThreshold(cunit.getJavaProject()));
+	public ImportRewrite(ICompilationUnit cu, CompilationUnit unit) throws CoreException {
+		this(cu, unit, JavaPreferencesSettings.getImportOrderPreference(cu.getJavaProject()), JavaPreferencesSettings.getImportNumberThreshold(cu.getJavaProject()));
+	}
+	
+	/**
+	 * Creates a import rewriter with the settings as configured in the preferences
+	 * @param cu The compilation unit that contains the imports to change.
+	 * @throws CoreException
+	 */
+	public ImportRewrite(ICompilationUnit cu) throws CoreException {
+		this(cu, JavaPreferencesSettings.getImportOrderPreference(cu.getJavaProject()), JavaPreferencesSettings.getImportNumberThreshold(cu.getJavaProject()));
 	}
 	
 	/**

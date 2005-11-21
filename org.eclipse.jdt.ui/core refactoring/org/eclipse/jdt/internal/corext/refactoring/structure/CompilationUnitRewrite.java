@@ -210,7 +210,7 @@ public class CompilationUnitRewrite {
 		if (fImportRewrite == null) {
 			// lazily initialized to avoid lengthy processing in checkInitialConditions(..)
 			try {
-				fImportRewrite= new ImportRewrite(fCu);
+				fImportRewrite= new ImportRewrite(fCu, getRoot());
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 				throw new IllegalStateException(e.getMessage()); // like ASTParser#createAST(..) does

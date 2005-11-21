@@ -109,13 +109,14 @@ public final class ImportsStructure implements IImportsStructure {
 	 * Creates an ImportsStructure for a compilation unit. New imports
 	 * are added next to the existing import that is matching best. 
 	 * @param cu The compilation unit
+	 * @param unit The compilation unit node
 	 * @param preferenceOrder Defines the preferred order of imports.
 	 * @param importThreshold Defines the number of imports in a package needed to introduce a
 	 * import on demand instead (e.g. java.util.*).
 	 * @param restoreExistingImports If set, existing imports are kept. No imports are deleted, only new added.
 	 * @throws CoreException
 	 */	
-	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws CoreException {
+	public ImportsStructure(ICompilationUnit cu, CompilationUnit unit, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws CoreException {
 		fCompilationUnit= cu;
 				
 		fImportOnDemandThreshold= importThreshold;
@@ -127,15 +128,13 @@ public final class ImportsStructure implements IImportsStructure {
 		fStaticImportsCreated= null;
 		fFlags= 0;
 
-		CompilationUnit root= getASTRoot(cu);
-		
 		IProgressMonitor monitor= new NullProgressMonitor();
 		IDocument document= null;
 		try {
 			document= aquireDocument(monitor);
-			fReplaceRange= evaluateReplaceRange(root, document);
+			fReplaceRange= evaluateReplaceRange(unit, document);
 			if (restoreExistingImports) {
-				addExistingImports(document, root.imports(), fReplaceRange);
+				addExistingImports(document, unit.imports(), fReplaceRange);
 			}
 		} catch (BadLocationException e) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
@@ -158,7 +157,21 @@ public final class ImportsStructure implements IImportsStructure {
 		addPreferenceOrderHolders(order);
 	}
 	
-	private CompilationUnit getASTRoot(ICompilationUnit cu) {
+	/**
+	 * Creates an ImportsStructure for a compilation unit. New imports
+	 * are added next to the existing import that is matching best. 
+	 * @param cu The compilation unit
+	 * @param preferenceOrder Defines the preferred order of imports.
+	 * @param importThreshold Defines the number of imports in a package needed to introduce a
+	 * import on demand instead (e.g. java.util.*).
+	 * @param restoreExistingImports If set, existing imports are kept. No imports are deleted, only new added.
+	 * @throws CoreException
+	 */	
+	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws CoreException {
+		this(cu, getASTRoot(cu), preferenceOrder, importThreshold, restoreExistingImports);
+	}
+	
+	private static CompilationUnit getASTRoot(ICompilationUnit cu) {
 		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setSource(cu);
 		parser.setFocalPosition(0); // reduced AST
