@@ -18,28 +18,16 @@ import java.util.Set;
 
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
-
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-
-import org.eclipse.core.resources.IFile;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.DocumentRewriteSession;
-import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
@@ -49,40 +37,19 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.PackageDeclaration;
-import org.eclipse.jdt.core.dom.ParameterizedType;
-import org.eclipse.jdt.core.dom.PrimitiveType;
-import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.WildcardType;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
-import org.eclipse.jdt.internal.corext.ValidateEditException;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Resources;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
-
-/**
- * Created on a Compilation unit, the ImportsStructure allows to add
- * Import Declarations that are added next to the existing import that
- * has the best match.
- */
-public final class ImportsStructure implements IImportsStructure {
+public final class ImportRewriteComputer {
 	
 	private ICompilationUnit fCompilationUnit;
 	private ArrayList fPackageEntries;
@@ -105,32 +72,8 @@ public final class ImportsStructure implements IImportsStructure {
 	
 	private static final String JAVA_LANG= "java.lang"; //$NON-NLS-1$
 	
-	/**
-	 * Creates an ImportsStructure for a compilation unit. New imports
-	 * are added next to the existing import that is matching best. 
-	 * @param cu The compilation unit
-	 * @param preferenceOrder Defines the preferred order of imports.
-	 * @param importThreshold Defines the number of imports in a package needed to introduce a
-	 * import on demand instead (e.g. java.util.*).
-	 * @param restoreExistingImports If set, existing imports are kept. No imports are deleted, only new added.
-	 * @throws CoreException
-	 */	
-	public ImportsStructure(ICompilationUnit cu, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws CoreException {
-		this(cu, getASTRoot(cu), preferenceOrder, importThreshold, restoreExistingImports);
-	}
-	
-	/**
-	 * Creates an ImportsStructure for a compilation unit. New imports
-	 * are added next to the existing import that is matching best. 
-	 * @param cu The compilation unit
-	 * @param preferenceOrder Defines the preferred order of imports.
-	 * @param importThreshold Defines the number of imports in a package needed to introduce a
-	 * import on demand instead (e.g. java.util.*).
-	 * @param restoreExistingImports If set, existing imports are kept. No imports are deleted, only new added.
-	 * @throws CoreException
-	 */	
-	public ImportsStructure(ICompilationUnit cu, CompilationUnit root, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws CoreException {
-		fCompilationUnit= cu;
+	public ImportRewriteComputer(CompilationUnit root, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws CoreException {
+		fCompilationUnit= (ICompilationUnit) root.getJavaElement();
 				
 		fImportOnDemandThreshold= importThreshold;
 		fFilterImplicitImports= true;
@@ -158,14 +101,6 @@ public final class ImportsStructure implements IImportsStructure {
 		}
 		
 		addPreferenceOrderHolders(order);
-	}
-	
-	private static CompilationUnit getASTRoot(ICompilationUnit cu) {
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
-		parser.setSource(cu);
-		parser.setFocalPosition(0); // reduced AST
-		parser.setResolveBindings(false);
-		return (CompilationUnit) parser.createAST(null);
 	}
 	
 	private void addPreferenceOrderHolders(PackageEntry[] preferenceOrder) {
@@ -237,8 +172,6 @@ public final class ImportsStructure implements IImportsStructure {
 		return decl.isOnDemand() ? name + ".*": name; //$NON-NLS-1$
 	}
 	
-	
-	
 	private void addExistingImports(CompilationUnit root, IRegion replaceRange) {
 		List/*ImportDeclaration*/ decls= root.imports();
 		if (decls.isEmpty()) {
@@ -297,16 +230,9 @@ public final class ImportsStructure implements IImportsStructure {
 		int length= replaceRange.getOffset() + replaceRange.getLength() - curr.getStartPosition();
 		currPackage.add(new ImportDeclEntry(name, isStatic, new Region(curr.getStartPosition(), length)));
 	}
-		
+			
 	/**
-	 * @return Returns the compilation unit of this import structure.
-	 */
-	public ICompilationUnit getCompilationUnit() {
-		return fCompilationUnit;
-	}
-	
-	/**
-	 * Sets that implicit imports (types in default package, cu- package and
+	 * Sets that implicit imports (types in default package, CU- package and
 	 * 'java.lang') should not be created. Note that this is a heuristic filter and can
 	 * lead to missing imports, e.g. in cases where a type is forced to be specified
 	 * due to a name conflict.
@@ -364,7 +290,7 @@ public final class ImportsStructure implements IImportsStructure {
 		private boolean sameMatchLenTest(String currName) {
 			int matchLen= fBestMatchLen;
 			// known: bestName and currName differ from newName at position 'matchLen'
-			// currName and bestName dont have to differ at position 'matchLen'
+			// currName and bestName don't have to differ at position 'matchLen'
 
 			// determine the order and return true if currName is closer to newName
 			char newChar= getCharAt(fNewName, matchLen);
@@ -452,7 +378,7 @@ public final class ImportsStructure implements IImportsStructure {
 		return bestMatch;
 	}
 		
-	public static boolean isImplicitImport(String qualifier, ICompilationUnit cu) {
+	private static boolean isImplicitImport(String qualifier, ICompilationUnit cu) {
 		if (JAVA_LANG.equals(qualifier)) { 
 			return true;
 		}
@@ -464,300 +390,26 @@ public final class ImportsStructure implements IImportsStructure {
 		return qualifier.equals(mainTypeName);
 	}
 	
-	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param binding The type binding of the type to be added
-	 * @param ast The AST to create the type for
-	 * @return Returns the a new AST node that is either simple if the import was successful or 
-	 * fully qualified type name if the import could not be added due to a conflict. 
-	 */
-	public Type addImport(ITypeBinding binding, AST ast) {
-		if (binding.isPrimitive()) {
-			return ast.newPrimitiveType(PrimitiveType.toCode(binding.getName()));
-		}
-		
-		ITypeBinding normalizedBinding= Bindings.normalizeTypeBinding(binding);
-		if (normalizedBinding == null) {
-			return ast.newSimpleType(ast.newSimpleName("invalid")); //$NON-NLS-1$
-		}
-		
-		if (normalizedBinding.isTypeVariable()) {
-			// no import
-			return ast.newSimpleType(ast.newSimpleName(binding.getName()));
-		}
-		if (normalizedBinding.isWildcardType()) {
-			WildcardType wcType= ast.newWildcardType();
-			ITypeBinding bound= normalizedBinding.getBound();
-			if (bound != null && !bound.isWildcardType() && !bound.isCapture()) { // bug 96942
-				Type boundType= addImport(bound, ast);
-				wcType.setBound(boundType, normalizedBinding.isUpperbound());
-			}
-			return wcType;
-		}
-		
-		if (normalizedBinding.isArray()) {
-			Type elementType= addImport(normalizedBinding.getElementType(), ast);
-			return ast.newArrayType(elementType, normalizedBinding.getDimensions());
-		}
-		
-		String qualifiedName= getRawQualifiedName(normalizedBinding);
-		if (qualifiedName.length() > 0) {
-			String res= internalAddImport(qualifiedName);
-			
-			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
-			if (typeArguments.length > 0) {
-				Type erasureType= ast.newSimpleType(ast.newName(res));
-				ParameterizedType paramType= ast.newParameterizedType(erasureType);
-				List arguments= paramType.typeArguments();
-				for (int i= 0; i < typeArguments.length; i++) {
-					arguments.add(addImport(typeArguments[i], ast));
-				}
-				return paramType;
-			}
-			return ast.newSimpleType(ast.newName(res));
-		}
-		return ast.newSimpleType(ast.newName(getRawName(normalizedBinding)));
+	public void addImport(String fullTypeName, boolean isStatic) {
+		String typeContainerName= Signature.getQualifier(fullTypeName);
+		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, isStatic, null);
+		sortIn(typeContainerName, decl, isStatic);
 	}
 	
-	private static String getRawName(ITypeBinding normalizedBinding) {
-		return normalizedBinding.getTypeDeclaration().getName();
-	}
-
-
-	private static String getRawQualifiedName(ITypeBinding normalizedBinding) {
-		return normalizedBinding.getTypeDeclaration().getQualifiedName();
-	}
-
-
-	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param typeSig The type in signature notation
-	 * @param ast The AST to create the type for
-	 * @return Returns the a new AST node that is either simple if the import was successful or 
-	 * fully qualified type name if the import could not be added due to a conflict. 
-	 */
-	public Type addImportFromSignature(String typeSig, AST ast) {
-		if (typeSig == null || typeSig.length() == 0) {
-			throw new IllegalArgumentException("Invalid type signature: empty or null"); //$NON-NLS-1$
-		}
-		int sigKind= Signature.getTypeSignatureKind(typeSig);
-		switch (sigKind) {
-			case Signature.BASE_TYPE_SIGNATURE:
-				return ast.newPrimitiveType(PrimitiveType.toCode(Signature.toString(typeSig)));
-			case Signature.ARRAY_TYPE_SIGNATURE:
-				Type elementType= addImportFromSignature(Signature.getElementType(typeSig), ast);
-				return ast.newArrayType(elementType, Signature.getArrayCount(typeSig));
-			case Signature.CLASS_TYPE_SIGNATURE:
-				String erasureSig= Signature.getTypeErasure(typeSig);
-
-				String erasureName= Signature.toString(erasureSig);
-				if (erasureSig.charAt(0) == Signature.C_RESOLVED) {
-					erasureName= internalAddImport(erasureName);
-				}
-				Type baseType= ast.newSimpleType(ast.newName(erasureName));
-				String[] typeArguments= Signature.getTypeArguments(typeSig);
-				if (typeArguments.length > 0) {
-					ParameterizedType type= ast.newParameterizedType(baseType);
-					List argNodes= type.typeArguments();
-					for (int i= 0; i < typeArguments.length; i++) {
-						argNodes.add(addImportFromSignature(typeArguments[i], ast));
-					}
-					return type;
-				}
-				return baseType;
-			case Signature.TYPE_VARIABLE_SIGNATURE:
-				return ast.newSimpleType(ast.newSimpleName(Signature.toString(typeSig)));
-			case Signature.WILDCARD_TYPE_SIGNATURE:
-				WildcardType wildcardType= ast.newWildcardType();
-				char ch= typeSig.charAt(0);
-				if (ch != Signature.C_STAR) {
-					Type bound= addImportFromSignature(typeSig.substring(1), ast);
-					wildcardType.setBound(bound, ch == Signature.C_EXTENDS);
-				}
-				return wildcardType;
-			case Signature.CAPTURE_TYPE_SIGNATURE:
-				return addImportFromSignature(typeSig.substring(1), ast);
-			default:
-				JavaPlugin.logErrorMessage("Unknown type signature kind: " + typeSig); //$NON-NLS-1$
-		}
-		return ast.newSimpleType(ast.newSimpleName("invalid")); //$NON-NLS-1$
-	}
-	
-
-	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param binding The type binding of the type to be added
-	 * @return Returns the name to use in the code: Simple name if the import
-	 * was added, fully qualified type name if the import could not be added due
-	 * to a conflict. 
-	 */
-	public String addImport(ITypeBinding binding) {
+	public boolean removeImport(String qualifiedName, boolean isStatic) {
+		String containerName= Signature.getQualifier(qualifiedName);
 		
-		if (binding.isPrimitive() || binding.isTypeVariable()) {
-			return binding.getName();
-		}
-		
-		ITypeBinding normalizedBinding= Bindings.normalizeTypeBinding(binding);
-		if (normalizedBinding == null) {
-			return "invalid"; //$NON-NLS-1$
-		}
-		if (normalizedBinding.isWildcardType()) {
-			StringBuffer res= new StringBuffer("?"); //$NON-NLS-1$
-			ITypeBinding bound= normalizedBinding.getBound();
-			if (bound != null && !bound.isWildcardType() && !bound.isCapture()) { // bug 95942
-				if (normalizedBinding.isUpperbound()) {
-					res.append(" extends "); //$NON-NLS-1$
-				} else {
-					res.append(" super "); //$NON-NLS-1$
-				}
-				res.append(addImport(bound));
-			}
-			return res.toString();
-		}
-		
-		if (normalizedBinding.isArray()) {
-			StringBuffer res= new StringBuffer(addImport(normalizedBinding.getElementType()));
-			for (int i= normalizedBinding.getDimensions(); i > 0; i--) {
-				res.append("[]"); //$NON-NLS-1$
-			}
-			return res.toString();
-		}
-	
-		String qualifiedName= getRawQualifiedName(normalizedBinding);
-		if (qualifiedName.length() > 0) {
-			String str= internalAddImport(qualifiedName);
-			
-			ITypeBinding[] typeArguments= normalizedBinding.getTypeArguments();
-			if (typeArguments.length > 0) {
-				StringBuffer res= new StringBuffer(str);
-				res.append('<');
-				for (int i= 0; i < typeArguments.length; i++) {
-					if (i > 0) {
-						res.append(','); 
-					}
-					res.append(addImport(typeArguments[i]));
-				}
-				res.append('>');
-				return res.toString();
-			}
-			return str;
-		}
-		return getRawName(normalizedBinding);
-	}
-		
-	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param qualifiedTypeName The fully qualified name of the type to import
-	 * @return Returns either the simple type name if the import was successful or else the qualified type name
-	 */
-	public String addImport(String qualifiedTypeName) {
-		int angleBracketOffset= qualifiedTypeName.indexOf('<');
-		if (angleBracketOffset != -1) {
-			return internalAddImport(qualifiedTypeName.substring(0, angleBracketOffset)) + qualifiedTypeName.substring(angleBracketOffset);
-		}
-		int bracketOffset= qualifiedTypeName.indexOf('[');
-		if (bracketOffset != -1) {
-			return internalAddImport(qualifiedTypeName.substring(0, bracketOffset)) + qualifiedTypeName.substring(bracketOffset);
-		}
-		return internalAddImport(qualifiedTypeName);
-	}
-	
-	
-	public String addStaticImport(IBinding binding) {
-		if (binding instanceof IVariableBinding) {
-			ITypeBinding declaringType= ((IVariableBinding) binding).getDeclaringClass();
-			return addStaticImport(getRawQualifiedName(declaringType), binding.getName(), true);
-		} else if (binding instanceof IMethodBinding) {
-			ITypeBinding declaringType= ((IMethodBinding) binding).getDeclaringClass();
-			return addStaticImport(getRawQualifiedName(declaringType), binding.getName(), false);
-		}
-		return binding.getName();
-	}
-	
-	/**
-	 * Adds a new static import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param declaringTypeName The qualified name of the static's member declaring type
-	 * @return Returns either the simple type name if the import was successful or else the qualified type name
-	 */
-	public String addStaticImport(String declaringTypeName, String simpleName, boolean isField) {
-		String containerName= Signature.getQualifier(declaringTypeName);
-		String fullName= declaringTypeName + '.' + simpleName;
-		
-		if (containerName.length() == 0) {
-			return declaringTypeName + '.' + simpleName;
-		}
-		if (!"*".equals(simpleName)) { //$NON-NLS-1$
-			if (isField) {
-				String existing= findStaticImport(null, simpleName);
-				if (existing != null) {
-					if (existing.equals(fullName)) {
-						return simpleName;
-					} else {
-						return fullName;
-					}
-				}
-			} else {
-				String existing= findStaticImport(declaringTypeName, simpleName);
-				if (existing != null) {
-					return simpleName;
+		int nPackages= fPackageEntries.size();
+		for (int i= 0; i < nPackages; i++) {
+			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
+			if (entry.compareTo(containerName, isStatic) == 0) {
+				if (entry.remove(qualifiedName, isStatic)) {
+					fFlags |= F_HAS_CHANGES;
+					return true;
 				}
 			}
 		}
-		ImportDeclEntry decl= new ImportDeclEntry(fullName, true, null);
-		
-		sortIn(declaringTypeName, decl, true);
-		return simpleName;
-	}
-	
-	private String internalAddImport(String fullTypeName) {
-		int idx= fullTypeName.lastIndexOf('.');	
-		String typeContainerName, typeName;
-		if (idx != -1) {
-			typeContainerName= fullTypeName.substring(0, idx);
-			typeName= fullTypeName.substring(idx + 1);
-		} else {
-			typeContainerName= ""; //$NON-NLS-1$
-			typeName= fullTypeName;
-		}
-		
-		if (typeContainerName.length() == 0 && PrimitiveType.toCode(typeName) != null) {
-			return fullTypeName;
-		}
-		
-		if (!"*".equals(typeName)) { //$NON-NLS-1$
-			String topLevelTypeName= Signature.getQualifier(fCompilationUnit.getElementName());
-			
-			if (typeName.equals(topLevelTypeName)) {
-				if (!typeContainerName.equals(fCompilationUnit.getParent().getElementName())) {
-					return fullTypeName;
-				} else {
-					return typeName;
-				}
-			}
-			String existing= findImport(typeName);
-			if (existing != null) {
-				if (fullTypeName.equals(existing)) {
-					return typeName;
-				} else {
-					return fullTypeName;
-				}
-			}
-		}
-		
-		ImportDeclEntry decl= new ImportDeclEntry(fullTypeName, false, null);
-			
-		sortIn(typeContainerName, decl, false);
-		return typeName;
+		return false;
 	}
 	
 	private int getIndexAfterStatics() {
@@ -801,182 +453,7 @@ public final class ImportsStructure implements IImportsStructure {
 		}
 		fFlags |= F_HAS_CHANGES;
 	}
-
-	/**
-	 * Removes an import from the structure.
-	 * @param qualifiedName The qualified type name to remove from the imports
-	 * @return Returns <code>true</code> if the import was found and removed
-	 */
-	public boolean removeImport(String qualifiedName) {
-		String typeContainerName= Signature.getQualifier(qualifiedName);
-		int bracketOffset= qualifiedName.indexOf('[');
-		if (bracketOffset != -1) {
-			qualifiedName= qualifiedName.substring(0, bracketOffset);
-		}		
-		
-		int nPackages= fPackageEntries.size();
-		for (int i= 0; i < nPackages; i++) {
-			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
-			if (entry.compareTo(typeContainerName, false) == 0) {
-				if (entry.remove(qualifiedName, false)) {
-					fFlags |= F_HAS_CHANGES;
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
-	/**
-	 * Removes an import from the structure.
-	 * @param qualifiedName The qualified member name to remove from the imports
-	 * @return Returns <code>true</code> if the import was found and removed
-	 */
-	public boolean removeStaticImport(String qualifiedName) {
-		String containerName= Signature.getQualifier(qualifiedName);
-		
-		int nPackages= fPackageEntries.size();
-		for (int i= 0; i < nPackages; i++) {
-			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
-			if (entry.compareTo(containerName, true) == 0) {
-				if (entry.remove(qualifiedName, true)) {
-					fFlags |= F_HAS_CHANGES;
-					return true;
-				}
-			}
-		}
-		return false;
-	}
-	
-	
-	/**
-	 * Removes an import from the structure.
-	 * @param binding The type to remove from the imports
-	 * @return Returns <code>true</code> if the import was found and removed
-	 */
-	public boolean removeImport(ITypeBinding binding) {
-		binding= Bindings.normalizeTypeBinding(binding);
-		if (binding == null) {
-			return false;
-		}		
-		String qualifiedName= getRawQualifiedName(binding);
-		if (qualifiedName.length() > 0) {
-			return removeImport(qualifiedName);
-		}
-		return false;
-	}	
-
-	/**
-	 * Looks if there already is single import for the given type name.
-	 * @param simpleName The simple name to find
-	 * @return Returns the qualified import name or <code>null</code>.
-	 */	
-	public String findImport(String simpleName) {		
-		int nPackages= fPackageEntries.size();
-		for (int i= 0; i < nPackages; i++) {
-			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
-			if (!entry.isStatic()) {
-				ImportDeclEntry found= entry.find(simpleName);
-				if (found != null) {
-					return found.getElementName();
-				}
-			}
-		}
-		return null;		
-	}
-		
-	public String findStaticImport(String typeContainerName, String typeSimpleName) {		
-		int nPackages= fPackageEntries.size();
-		for (int i= 0; i < nPackages; i++) {
-			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
-			if (entry.isStatic()) {
-				if (typeContainerName == null || entry.getName().equals(typeContainerName)) {
-					ImportDeclEntry found= entry.find(typeSimpleName);
-					if (found != null) {
-						return found.getElementName();
-					}
-				}
-			}
-		}
-		return null;		
-	}
-	
-	/**
-	 * Creates all new elements in the import structure.
-	 * @param save Save the CU after the import have been changed
-	 * @param monitor The progress monitor to use
-	 * @throws CoreException Thrown when the access to the CU failed
-	 */	
-	public void create(boolean save, IProgressMonitor monitor) throws CoreException {
-
-		if (monitor == null) {
-			monitor= new NullProgressMonitor();
-		}
-		monitor.beginTask(CodeGenerationMessages.ImportsStructure_operation_description, 4); 
-		
-		IDocument document= null;
-		DocumentRewriteSession session= null;
-		try {
-			document= aquireDocument(new SubProgressMonitor(monitor, 1));
-			if (document instanceof IDocumentExtension4) {
-				 session= ((IDocumentExtension4)document).startRewriteSession(
-					DocumentRewriteSessionType.UNRESTRICTED);
-			}
-			MultiTextEdit edit= getResultingEdits(document, new SubProgressMonitor(monitor, 1));
-			if (edit.hasChildren()) {
-				if (save) {
-					commitDocument(document, edit, new SubProgressMonitor(monitor, 1));
-				} else {
-					edit.apply(document);
-				}
-			}
-		} catch (BadLocationException e) {
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
-		} finally {
-			try {
-				if (session != null) {
-					((IDocumentExtension4)document).stopRewriteSession(session);
-				}
-			} finally {
-				releaseDocument(document, new SubProgressMonitor(monitor, 1));
-			}
-			monitor.done();
-		}
-	}
-	
-	private IDocument aquireDocument(IProgressMonitor monitor) throws CoreException {
-		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
-			IFile file= (IFile) fCompilationUnit.getResource();
-			if (file.exists()) {
-				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				IPath path= fCompilationUnit.getPath();
-				bufferManager.connect(path, monitor);
-				return bufferManager.getTextFileBuffer(path).getDocument();
-			}
-		}
-		monitor.done();
-		return new Document(fCompilationUnit.getSource());
-	}
-	
-	private void commitDocument(IDocument document, MultiTextEdit edit, IProgressMonitor monitor) throws CoreException, MalformedTreeException, BadLocationException {
-		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
-			IFile file= (IFile) fCompilationUnit.getResource();
-			if (file.exists()) {
-				IStatus status= Resources.makeCommittable(file, null);
-				if (!status.isOK()) {
-					throw new ValidateEditException(status);
-				}
-				edit.apply(document); // apply after file is commitable
-				
-				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				bufferManager.getTextFileBuffer(file.getFullPath()).commit(monitor, true);
-				return;
-			}
-		}
-		// no commit possible, make sure changes are in
-		edit.apply(document);
-	}
-		
+			
 	private IRegion evaluateReplaceRange(CompilationUnit root) {
 		List imports= root.imports();
 		if (!imports.isEmpty()) {
@@ -1105,19 +582,6 @@ public final class ImportsStructure implements IImportsStructure {
 		} finally {
 			monitor.done();
 		}
-	}
-	
-	private void releaseDocument(IDocument document, IProgressMonitor monitor) throws CoreException {
-		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
-			IFile file= (IFile) fCompilationUnit.getResource();
-			if (file.exists()) {
-				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				bufferManager.disconnect(file.getFullPath(), monitor);
-				return;
-			}
-		}
-		fCompilationUnit.getBuffer().setContents(document.get());
-		monitor.done();
 	}
 
 	private void removeAndInsertNew(IDocument doc, int contentOffset, int contentEnd, ArrayList stringsToInsert, MultiTextEdit resEdit) throws BadLocationException {
@@ -1283,23 +747,21 @@ public final class ImportsStructure implements IImportsStructure {
 	private int getPackageStatementEndPos(CompilationUnit root) {
 		PackageDeclaration packDecl= root.getPackage();
 		if (packDecl != null) {
-			int lineOfPackage= root.getLineNumber(packDecl.getStartPosition() + packDecl.getLength());
-			if (lineOfPackage > 0) {
-				int afterPackageStatementPos= root.getPosition(lineOfPackage + 1, 0);
-				if (afterPackageStatementPos >= 0) {
-					int firstTypePos= getFirstTypeBeginPos(root);
-					if (firstTypePos != -1 && firstTypePos <= afterPackageStatementPos) {
-						if (firstTypePos <= afterPackageStatementPos) {
-							fFlags |= F_NEEDS_TRAILING_DELIM;
-							if (firstTypePos == afterPackageStatementPos) {
-								fFlags |= F_NEEDS_LEADING_DELIM;
-							}
-							return firstTypePos;
+			int lineAfterPackage= root.getLineNumber(packDecl.getStartPosition() + packDecl.getLength()) + 1;
+			int afterPackageStatementPos= root.getPosition(lineAfterPackage, 0);
+			if (afterPackageStatementPos != 0) {
+				int firstTypePos= getFirstTypeBeginPos(root);
+				if (firstTypePos != -1 && firstTypePos <= afterPackageStatementPos) {
+					if (firstTypePos <= afterPackageStatementPos) {
+						fFlags |= F_NEEDS_TRAILING_DELIM;
+						if (firstTypePos == afterPackageStatementPos) {
+							fFlags |= F_NEEDS_LEADING_DELIM;
 						}
+						return firstTypePos;
 					}
-					fFlags |= F_NEEDS_LEADING_DELIM;
-					return afterPackageStatementPos; // insert a line after after package statement
 				}
+				fFlags |= F_NEEDS_LEADING_DELIM;
+				return afterPackageStatementPos; // insert a line after after package statement
 			}
 		}
 		fFlags |= F_NEEDS_TRAILING_DELIM;

@@ -364,7 +364,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 							save= textFileBuffer != null && !textFileBuffer.isDirty(); // save when not dirty
 						}
 						
-						OrganizeImportsOperation op= new OrganizeImportsOperation(cu, settings.importOrder, settings.importThreshold, settings.importIgnoreLowercase, save, true, query);
+						OrganizeImportsOperation op= new OrganizeImportsOperation(cu, settings.importIgnoreLowercase, save, true, query);
 						runInSync(op, cuLocation, status, monitor);
 
 						IProblem parseError= op.getParseError();
@@ -444,7 +444,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					fEditor= (JavaEditor) editor;
 				}			
 			}
-			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, settings.importOrder, settings.importThreshold, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, createChooseImportQuery());
+			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, createChooseImportQuery());
 		
 			IRewriteTarget target= null;
 			if (fEditor != null) {
