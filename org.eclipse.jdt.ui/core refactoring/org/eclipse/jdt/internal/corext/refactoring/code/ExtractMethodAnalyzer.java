@@ -15,6 +15,8 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.jface.text.IRegion;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -399,9 +401,13 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 		FlowInfo returnInfo= new InOutFlowAnalyzer(flowContext).perform(getSelectedNodes());
 		IVariableBinding[] returnValues= returnInfo.get(flowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN);
 		
+		// Compute a selection that exactly covers the selected nodes
+		IRegion region= getSelectedNodeRange();
+		Selection selection= Selection.createFromStartLength(region.getOffset(), region.getLength());
+		
 		int counter= 0;
 		flowContext.setComputeMode(FlowContext.ARGUMENTS);
-		FlowInfo argInfo= new InputFlowAnalyzer(flowContext, getSelection(), true).perform(fEnclosingBodyDeclaration);
+		FlowInfo argInfo= new InputFlowAnalyzer(flowContext, selection, true).perform(fEnclosingBodyDeclaration);
 		IVariableBinding[] reads= argInfo.get(flowContext, FlowInfo.READ | FlowInfo.READ_POTENTIAL | FlowInfo.UNKNOWN);
 		outer: for (int i= 0; i < returnValues.length && counter <= 1; i++) {
 			IVariableBinding binding= returnValues[i];
@@ -425,7 +431,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 				return;
 		}
 		List callerLocals= new ArrayList(5);
-		FlowInfo localInfo= new InputFlowAnalyzer(flowContext, getSelection(), false).perform(fEnclosingBodyDeclaration);
+		FlowInfo localInfo= new InputFlowAnalyzer(flowContext, selection, false).perform(fEnclosingBodyDeclaration);
 		IVariableBinding[] writes= localInfo.get(flowContext, FlowInfo.WRITE | FlowInfo.WRITE_POTENTIAL | FlowInfo.UNKNOWN);
 		for (int i= 0; i < writes.length; i++) {
 			IVariableBinding write= writes[i];
@@ -618,7 +624,13 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 	public boolean visit(MethodDeclaration node) {
 		Block body= node.getBody();
-		if (body == null || !getSelection().enclosedBy(body))
+		if (body == null)
+			return false;
+		Selection selection= getSelection();
+		int nodeStart= body.getStartPosition();
+		int nodeExclusiveEnd= nodeStart + body.getLength();
+		// if selection node inside of the method body ignore method
+		if (!(nodeStart < selection.getOffset() && selection.getExclusiveEnd() < nodeExclusiveEnd))
 			return false;
 		return super.visit(node);
 	}

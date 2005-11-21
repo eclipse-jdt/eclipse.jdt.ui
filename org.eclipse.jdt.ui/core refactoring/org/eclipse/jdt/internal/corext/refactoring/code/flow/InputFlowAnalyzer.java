@@ -253,7 +253,7 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 	}
 	
 	private void handleLoopReentrance(ASTNode node) {
-		if (!fSelection.enclosedBy(node) || fLoopReentranceVisitor == null || fLoopReentranceVisitor.getLoopNode() != node)
+		if (!fSelection.coveredBy(node) || fLoopReentranceVisitor == null || fLoopReentranceVisitor.getLoopNode() != node)
 			return;
 		
 		fLoopReentranceVisitor.process(node);

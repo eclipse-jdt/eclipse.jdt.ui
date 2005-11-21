@@ -1289,6 +1289,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		localsTest();
 	}
 	
+	public void test577() throws Exception {
+		localsTest();
+	}
+	
 	//---- Test expressions
 	
 	public void test600() throws Exception {

@@ -122,17 +122,6 @@ public class Selection {
 		return INTERSECTS;
 	}
 	
-	// enclosed* methods do an open interval check.
-	
-	public boolean enclosedBy(ASTNode node) {
-		int nodeStart= node.getStartPosition();
-		return nodeStart < fStart && fExclusiveEnd < nodeStart + node.getLength();
-	}
-	
-//	public boolean enclosedBy(int nodeStart, int nodeLength) {
-//		return nodeStart < fStart && fStart + fLength < nodeStart + nodeLength;
-//	}
-	
 	// cover* methods do a closed interval check.
 	
 	public boolean covers(int position) {
@@ -144,10 +133,6 @@ public class Selection {
 		return fStart <= nodeStart && nodeStart + node.getLength() <= fExclusiveEnd;
 	}
 	
-//	public boolean covers(int nodeStart, int nodeLength) {
-//		return fStart <= nodeStart && nodeStart + nodeLength <= fExclusiveEnd;
-//	}
-	
 	public boolean coveredBy(ASTNode node) {
 		int nodeStart= node.getStartPosition();
 		return nodeStart <= fStart && fExclusiveEnd <= nodeStart + node.getLength();
@@ -158,10 +143,6 @@ public class Selection {
 		return rangeStart <= fStart && fExclusiveEnd <= rangeStart + region.getLength();
 	}
 	
-//	public boolean coveredBy(int sourceStart, int sourceEnd) {
-//		return sourceStart <= start && end <= sourceEnd;
-//	}
-//	
 	public boolean endsIn(ASTNode node) {
 		int nodeStart= node.getStartPosition();
 		return nodeStart < fExclusiveEnd && fExclusiveEnd < nodeStart + node.getLength();
@@ -175,18 +156,6 @@ public class Selection {
 		return nodeBeforeSelection || selectionBeforeNode;
 	}
 	
-//	public boolean intersects(int sourceStart, int sourceEnd) {
-//		return sourceStart < start && start <= sourceEnd && sourceEnd <= end ||
-//		       start <= sourceStart && sourceStart <= end && end < sourceEnd;
-//	}
-//	
-//	public boolean intersects(AstNode node) {
-//		return intersects(node.sourceStart, node.sourceEnd);
-//	}
-	
-	/* non javadoc
-	 * for debugging only
-	 */
 	public String toString() {
 		return "<start == " + fStart + ", length == " + fLength + "/>";  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 	}	
