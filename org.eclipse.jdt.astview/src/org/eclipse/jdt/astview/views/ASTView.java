@@ -118,7 +118,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 public class ASTView extends ViewPart implements IShowInSource {
 	
 	private static final int JLS3= AST.JLS3;
-	/** (Used to get rid of depracation warnings in code)
+	/** (Used to get rid of depreciation warnings in code)
 	 * @deprecated
 	 */
 	private static final int JLS2= AST.JLS2;
@@ -496,7 +496,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		if (editor != null) {
 			IOpenable openable= EditorUtility.getJavaInput(editor);
 			if (openable == null) {
-				throw new CoreException(getErrorStatus("Editor not showing a CU or classfile", null)); //$NON-NLS-1$
+				throw new CoreException(getErrorStatus("Editor not showing a CU or class file", null)); //$NON-NLS-1$
 			}
 			fOpenable= openable;
 			int astLevel= getInitialASTLevel((IJavaElement) openable);
