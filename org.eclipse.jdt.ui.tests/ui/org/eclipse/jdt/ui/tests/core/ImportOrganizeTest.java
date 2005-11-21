@@ -11,45 +11,40 @@
 package org.eclipse.jdt.ui.tests.core;
 
 import java.io.File;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.JavaTestPlugin;
-import org.eclipse.jdt.testplugin.TestOptions;
-
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.jface.text.Region;
-
-import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.JavaTestPlugin;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 public class ImportOrganizeTest extends CoreTests {
 	
 	private static final Class THIS= ImportOrganizeTest.class;
 	
 	private IJavaProject fJProject1;
-
-	private static final boolean BUG_87929= true;
 
 	public ImportOrganizeTest(String name) {
 		super(name);
@@ -112,7 +107,7 @@ public class ImportOrganizeTest extends CoreTests {
 	
 	private void assertImports(ICompilationUnit cu, String[] imports) throws Exception {
 		IImportDeclaration[] desc= cu.getImports();
-		assertEquals(cu.getElementName() + "-count", desc.length, imports.length);
+		assertEquals(cu.getElementName() + "-count", imports.length, desc.length);
 		for (int i= 0; i < imports.length; i++) {
 			assertEquals(cu.getElementName() + "-cmpentries" + i, desc[i].getElementName(), imports[i]);
 		}
@@ -137,7 +132,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("BaseTestRunner", new String[] { "junit.framework.TestListener" }, new int[] { 2 });
 		
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {
@@ -181,7 +176,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "junit", "java.text", "java.io", "java" };
 		IChooseImportQuery query= createQuery("BaseTestRunner", new String[] { "junit.framework.TestListener" }, new int[] { 2 });
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		assertImports(cu, new String[] {
@@ -219,7 +214,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("LoadingTestCollector", new String[] { }, new int[] { });
 		
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {
@@ -242,7 +237,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("TestCaseClassLoader", new String[] { }, new int[] { });
 		
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 3, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 3, false, true, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {
@@ -266,7 +261,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("TestRunner", new String[] {}, new int[] {});
 		
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {
@@ -316,7 +311,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("ImportTest", new String[] {}, new int[] {});
 	
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		assertImports(cu, new String[] {
@@ -393,7 +388,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("A", new String[] {}, new int[] {});
 	
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu2, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu2, order, 99, false, true, true, query);
 		op.run(null);
 		
 		assertImports(cu2, new String[] {
@@ -420,7 +415,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 	
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -444,7 +439,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 	
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -474,7 +469,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 	
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -501,7 +496,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 	
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -523,7 +518,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 	
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -549,7 +544,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 	
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -579,7 +574,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[0];
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 	
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -627,7 +622,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 2, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 2, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -689,7 +684,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 2, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 2, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -744,7 +739,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 1, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 1, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -803,7 +798,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 1, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 1, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -864,7 +859,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 1, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 1, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -940,7 +935,7 @@ public class ImportOrganizeTest extends CoreTests {
 			String[] order= new String[] { "java", "pack" };
 			IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 		
-			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 1, false, true, true, query);
+			OrganizeImportsOperation op= createOperation(cu, order, 1, false, true, true, query);
 			op.run(null);
 		
 			buf= new StringBuffer();
@@ -995,7 +990,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 2, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 2, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1050,7 +1045,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 2, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 2, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1093,7 +1088,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1141,7 +1136,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java.io", "java.util" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1192,7 +1187,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "java.io" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1243,7 +1238,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1285,7 +1280,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("TestFile", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1328,7 +1323,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("TestFile", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1368,7 +1363,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1411,7 +1406,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("testVisibility_bug67644", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1448,7 +1443,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("testVisibility_bug85831", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1495,7 +1490,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("testVisibility_bug79174", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1552,7 +1547,7 @@ public class ImportOrganizeTest extends CoreTests {
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1624,7 +1619,7 @@ public class ImportOrganizeTest extends CoreTests {
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, threshold, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, threshold, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1692,7 +1687,7 @@ public class ImportOrganizeTest extends CoreTests {
 		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, threshold, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, threshold, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -1710,294 +1705,6 @@ public class ImportOrganizeTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
-	public void testImportStructureOnNonExistingCU() throws Exception {
-	
-		IJavaProject project1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(project1, "src");
-		
-		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		ICompilationUnit unit= pack1.getCompilationUnit("A.java");
-		unit.becomeWorkingCopy(null, null);
-		try {
-			StringBuffer buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("public class A {\n");
-			buf.append("    public Object foo() {\n");
-			buf.append("    }\n");
-			buf.append("}\n");	
-			unit.getBuffer().setContents(buf.toString());
-			
-			String[] order= new String[] { "com", "com.foreigncompany", "com.mycompany" };
-			int threshold= 99;
-	
-			ImportsStructure importsStructure= new ImportsStructure(unit, order, threshold, true);
-			importsStructure.addImport("java.util.HashMap");
-			importsStructure.create(false, null);
-	
-			buf= new StringBuffer();
-			buf.append("package test1;\n");
-			buf.append("\n");
-			buf.append("import java.util.HashMap;\n");
-			buf.append("\n");		
-			buf.append("public class A {\n");
-			buf.append("    public Object foo() {\n");
-			buf.append("    }\n");
-			buf.append("}\n");	
-			
-			assertEqualStringIgnoreDelim(unit.getSource(), buf.toString());
-		} finally {
-			unit.discardWorkingCopy();
-		}
-	}
-	
-	public void testImportStructureWithSignatures() throws Exception {
-		
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-		
-		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.*;\n");
-		buf.append("import java.net.*;\n");
-		buf.append("import java.io.*;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        IOException s;\n");
-		buf.append("        URL[][] t;\n");
-		buf.append("        List<SocketAddress> x;\n");
-		buf.append("    }\n");
-		buf.append("}\n");	
-		String content= buf.toString();
-		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", content, false, null);
-		
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class B {\n");
-		buf.append("}\n");	
-		String content2= buf.toString();
-		ICompilationUnit cu2= pack1.createCompilationUnit("B.java", content2, false, null);
-		
-		
-		
-		String[] order= new String[] { "java.util", "java.io", "java.net" };
-		int threshold= 99;
-		AST ast= AST.newAST(AST.JLS3);
-		ImportsStructure importsStructure= new ImportsStructure(cu2, order, threshold, true);
-		{
-			IJavaElement[] elements= cu1.codeSelect(content.indexOf("IOException"), "IOException".length());
-			assertEquals(1, elements.length);
-			String key= ((IType) elements[0]).getKey();
-			String signature= new BindingKey(key).internalToSignature();
-			
-			importsStructure.addImportFromSignature(signature, ast);
-		}
-		{
-			IJavaElement[] elements= cu1.codeSelect(content.indexOf("URL"), "URL".length());
-			assertEquals(1, elements.length);
-			String key= ((IType) elements[0]).getKey();
-			String signature= new BindingKey(key).internalToSignature();
-			
-			importsStructure.addImportFromSignature(signature, ast);
-		}
-		{
-			IJavaElement[] elements= cu1.codeSelect(content.indexOf("List"), "List".length());
-			assertEquals(1, elements.length);
-			String key= ((IType) elements[0]).getKey();
-			String signature= new BindingKey(key).internalToSignature();
-			
-			importsStructure.addImportFromSignature(signature, ast);
-		}
-
-		
-		importsStructure.create(true, null);
-		
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.List;\n");
-		buf.append("\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("\n");
-		buf.append("import java.net.SocketAddress;\n");
-		buf.append("import java.net.URL;\n");
-		buf.append("\n");
-		buf.append("public class B {\n");
-		buf.append("}\n");	
-		
-		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
-		
-	}
-
-	public void testImportStructureWithSignatures2() throws Exception {
-		if (BUG_87929) {
-			return;
-		}
-		
-		
-		
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-		
-		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.*;\n");
-		buf.append("import java.net.*;\n");
-		buf.append("import java.io.*;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo() {\n");
-		buf.append("        Map<?, ? extends Set<? super ServerSocket>> z;\n");
-		buf.append("    }\n");
-		buf.append("}\n");	
-		String content= buf.toString();
-		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", content, false, null);
-		
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("public class B {\n");
-		buf.append("}\n");	
-		String content2= buf.toString();
-		ICompilationUnit cu2= pack1.createCompilationUnit("B.java", content2, false, null);
-		
-		
-		
-		String[] order= new String[] { "java.util", "java.io", "java.net" };
-		int threshold= 99;
-		AST ast= AST.newAST(AST.JLS3);
-		ImportsStructure importsStructure= new ImportsStructure(cu2, order, threshold, true);
-		{
-			IJavaElement[] elements= cu1.codeSelect(content.indexOf("Map"), "Map".length());
-			assertEquals(1, elements.length);
-			String key= ((IType) elements[0]).getKey();
-			String signature= new BindingKey(key).internalToSignature();
-			
-			importsStructure.addImportFromSignature(signature, ast);
-		}			
-		
-		importsStructure.create(true, null);
-		
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("import java.util.Set;\n");
-		buf.append("\n");
-		buf.append("import java.io.IOException;\n");
-		buf.append("\n");
-		buf.append("import java.net.ServerSocket;\n");
-		buf.append("\n");
-		buf.append("public class B {\n");
-		buf.append("}\n");	
-		
-		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
-		
-	}
-
-	
-	
-	public void testOrganizeImportOnRange() throws Exception {
-	
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-		
-		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Vector vec) {\n");
-		buf.append("        HashMap map;\n");
-		buf.append("        /*b*/\n");
-		buf.append("        Iterator iter= ((Collection) vec).iterator();\n");
-		buf.append("        /*e*/\n");
-		buf.append("    }\n");
-		buf.append("}\n");	
-		String content= buf.toString();
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", content, false, null);
-
-		int start= content.indexOf("/*b*/");
-		int end= content.indexOf("/*e*/");
-		Region sel= new Region(start, end);
-
-		String[] order= new String[] { };
-		int threshold= 99;
-				
-		ImportsStructure structure= new ImportsStructure(cu, order, threshold, true);
-		OrganizeImportsOperation op= new OrganizeImportsOperation(structure, sel, true, true, null);
-		op.run(null);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Collection;\n");
-		buf.append("import java.util.Iterator;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Vector vec) {\n");
-		buf.append("        HashMap map;\n");
-		buf.append("        /*b*/\n");
-		buf.append("        Iterator iter= ((Collection) vec).iterator();\n");
-		buf.append("        /*e*/\n");
-		buf.append("    }\n");
-		buf.append("}\n");	
-		assertEqualStringIgnoreDelim(cu.getSource(), buf.toString());
-
-	}
-	
-	public void testOrganizeImportOnRange2() throws Exception {
-	
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-		
-		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
-		StringBuffer buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Vector vec) {\n");
-		buf.append("        /*b*/HashMap map;\n");
-		buf.append("    }\n");
-		buf.append("}\n");	
-		String content= buf.toString();
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", content, false, null);
-
-		int start= content.indexOf("/*b*/");
-		Region sel= new Region(start, 5);
-
-		String[] order= new String[] { };
-		int threshold= 99;
-				
-		ImportsStructure structure= new ImportsStructure(cu, order, threshold, true);
-		OrganizeImportsOperation op= new OrganizeImportsOperation(structure, sel, true, true, null);
-		op.run(null);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Vector vec) {\n");
-		buf.append("        /*b*/HashMap map;\n");
-		buf.append("    }\n");
-		buf.append("}\n");	
-		assertEqualStringIgnoreDelim(cu.getSource(), buf.toString());
-		
-		sel= new Region(start, 9);
-		
-		structure= new ImportsStructure(cu, order, threshold, true);
-		op= new OrganizeImportsOperation(structure, sel, true, true, null);
-		op.run(null);
-
-		buf= new StringBuffer();
-		buf.append("package test1;\n");
-		buf.append("import java.util.HashMap;\n");
-		buf.append("import java.util.Vector;\n");
-		buf.append("import java.util.Map;\n");
-		buf.append("public class A {\n");
-		buf.append("    public void foo(Vector vec) {\n");
-		buf.append("        /*b*/HashMap map;\n");
-		buf.append("    }\n");
-		buf.append("}\n");	
-		assertEqualStringIgnoreDelim(cu.getSource(), buf.toString());		
-	}			
-
 	public void testStaticImports1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -2019,7 +1726,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack", "#java" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -2058,7 +1765,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "#java.io.File", "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -2107,7 +1814,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -2149,7 +1856,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("ManufacturerMainPanel", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -2194,7 +1901,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -2233,7 +1940,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -2276,7 +1983,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -2318,7 +2025,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -2362,7 +2069,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 2, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 2, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -2407,7 +2114,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -2452,7 +2159,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -2499,7 +2206,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -2547,7 +2254,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "java", "pack", "#" };
 		IChooseImportQuery query= createQuery("C", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 		
 		buf= new StringBuffer();
@@ -2586,7 +2293,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -2612,7 +2319,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -2652,7 +2359,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "", "#"};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -2697,7 +2404,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] { "", "#"};
 		IChooseImportQuery query= createQuery("B", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -2767,7 +2474,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -2816,7 +2523,7 @@ public class ImportOrganizeTest extends CoreTests {
 		String[] order= new String[] {};
 		IChooseImportQuery query= createQuery("MyClass", new String[] {}, new int[] {});
 
-		OrganizeImportsOperation op= new OrganizeImportsOperation(cu, order, 99, false, true, true, query);
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
 		op.run(null);
 
 		buf= new StringBuffer();
@@ -2833,5 +2540,23 @@ public class ImportOrganizeTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 
+	
+	private OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean doResolve, IChooseImportQuery chooseImportQuery) throws CoreException {
+		OrganizeImportsOperation operation= new OrganizeImportsOperation(cu, ignoreLowerCaseNames, save, doResolve, chooseImportQuery);
+		Map options= new HashMap();
+		options.put(NewImportRewrite.IMPORTS_ORDER, concatenate(order));
+		options.put(NewImportRewrite.IMPORTS_ONDEMAND_THRESHOLD, String.valueOf(threshold));
+		operation.setOptions(options);
+		return operation;
+	}
+	
+	private String concatenate(String[] order) {
+		StringBuffer buf= new StringBuffer();
+		for (int i= 0; i < order.length; i++) {
+			buf.append(order[i]);
+			buf.append(';');
+		}
+		return buf.toString();
+	}
 	
 }
