@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.InsertEdit;
@@ -54,9 +55,11 @@ import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -64,6 +67,7 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
@@ -856,4 +860,52 @@ public class LocalCorrectionsSubProcessor {
 		return new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, relevance, image);
 	}
 
+	public static void addTypeParametersToClassInstanceCreation(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ASTNode coveringNode= problem.getCoveredNode(context.getASTRoot());
+		if (coveringNode instanceof ClassInstanceCreation) {
+			ClassInstanceCreation creation= (ClassInstanceCreation)coveringNode;
+			
+			if (coveringNode.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
+				VariableDeclarationStatement declStmt= (VariableDeclarationStatement)ASTNodes.getParent(coveringNode, VariableDeclarationStatement.class);
+				if (declStmt.getType() instanceof ParameterizedType && creation.getType() instanceof SimpleType) {
+					ParameterizedType type = (ParameterizedType)declStmt.getType();
+					
+					AST ast= context.getASTRoot().getAST();
+					ASTRewrite rewrite= ASTRewrite.create(ast);
+					
+					ParameterizedType copy= (ParameterizedType)ASTNode.copySubtree(ast, type);
+					SimpleType moveSimpleType= (SimpleType)rewrite.createMoveTarget(creation.getType());
+					
+					rewrite.replace(copy.getType(), moveSimpleType, null);
+					rewrite.replace(creation.getType(), copy, null);
+					
+					Name name= ((SimpleType)creation.getType()).getName();
+					String typeName;
+					if (name.isSimpleName())
+						typeName= ((SimpleName)name).getIdentifier();
+					else
+						typeName= name.getFullyQualifiedName();
+					
+					StringBuffer buf= new StringBuffer();
+					List typeArguments= type.typeArguments();
+					Iterator iter= typeArguments.iterator();
+					Type cur= (Type)iter.next();
+					buf.append('<').append(ASTResolving.getTypeSignature(cur.resolveBinding()));
+					while (iter.hasNext()) {
+						cur= (Type)iter.next();
+						buf.append(", ").append(ASTResolving.getTypeSignature(cur.resolveBinding())); //$NON-NLS-1$
+					}
+					buf.append('>');
+					
+					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+					String label= Messages.format(CorrectionMessages.CorrectionMessages_add_type_parameters_to_instantiation, new String[] {buf.toString(), typeName});
+					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
+					proposals.add(proposal);			
+				}
+			}
+		}
+	}
+
+
+	
 }

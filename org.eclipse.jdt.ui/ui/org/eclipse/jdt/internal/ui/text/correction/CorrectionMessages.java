@@ -304,4 +304,5 @@ final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_remove_nls_tag_description;
 	public static String LocalCorrectionsSubProcessor_qualify_left_hand_side_description;
 	public static String LocalCorrectionsSubProcessor_LocalCorrectionsSubProcessor_qualify_right_hand_side_description;
+	public static String CorrectionMessages_add_type_parameters_to_instantiation;
 }

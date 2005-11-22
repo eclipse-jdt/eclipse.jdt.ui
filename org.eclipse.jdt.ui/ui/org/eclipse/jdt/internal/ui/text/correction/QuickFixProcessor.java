@@ -173,6 +173,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.DiscouragedReference:
 			case IProblem.UnnecessaryNLSTag:
 			case IProblem.AssignmentHasNoEffect:
+			case IProblem.UnsafeTypeConversion:
 			//case IProblem.NonGenericType:
 				return true;
 			default:
@@ -491,6 +492,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.AssignmentHasNoEffect:
 				LocalCorrectionsSubProcessor.getAssignmentHasNoEffectProposals(context, problem, proposals);
+				break;
+			case IProblem.UnsafeTypeConversion:
+				LocalCorrectionsSubProcessor.addTypeParametersToClassInstanceCreation(context, problem, proposals);
 				break;
 			default:
 		}
