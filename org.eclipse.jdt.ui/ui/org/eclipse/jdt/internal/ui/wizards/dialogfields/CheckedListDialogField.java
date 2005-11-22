@@ -244,6 +244,13 @@ public class CheckedListDialogField extends ListDialogField {
 		return true;
 	}
 	
+	public void refresh() {
+		super.refresh();
+		if (isOkToUse(fTableControl)) {
+			((CheckboxTableViewer)fTable).setCheckedElements(fCheckElements.toArray());
+		}
+	}
+	
 				
 	
 	
