@@ -10,15 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
+
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
@@ -38,8 +43,11 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
+import org.eclipse.jdt.internal.ui.fix.IMultiFix;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 
 public class CleanUpAction extends SelectionDispatchAction {
@@ -71,7 +79,7 @@ public class CleanUpAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		ICompilationUnit cu= getCompilationUnit(fEditor);
 		if (cu != null) {
-			run(cu, true);
+			runLight(cu);
 		}
 	}
 	
@@ -83,7 +91,7 @@ public class CleanUpAction extends SelectionDispatchAction {
 		if (cus.length == 0)
 			return;
 		if (cus.length == 1) {
-			run(cus[0], false);
+			run(cus[0]);
 		} else {
 			runOnMultiple(cus);
 		}
@@ -142,28 +150,38 @@ public class CleanUpAction extends SelectionDispatchAction {
 	 * Note: This method is for internal use only. Clients should not call this method.
 	 * @param cu The compilation unit to process
 	 */
-	public void run(ICompilationUnit cu, boolean selectUnits) {
+	public void run(ICompilationUnit cu) {
 		if (!ElementValidator.check(cu, getShell(), ActionMessages.OrganizeImportsAction_error_title, fEditor != null)) 
 			return;
 		if (!ActionUtil.isProcessable(getShell(), cu))
 			return;
 		
+		runOnMultiple(new ICompilationUnit[] {cu});
+	}
+
+	private void runLight(ICompilationUnit cu) {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
-		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, selectUnits, true);
+		IMultiFix[] fixes= CleanUpRefactoringWizard.createAllMultiFixes();
+		for (int i= 0; i < fixes.length; i++) {
+			refactoring.addMultiFix(fixes[i]);
+		}
 		
-		RefactoringStarter starter= new RefactoringStarter();
+		int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
+		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+		BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
+		RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, true, shell, context);
 		try {
-			starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", true); //$NON-NLS-1$
-		} catch (JavaModelException e) {
+			executer.perform();
+		} catch (InterruptedException e) {
+		} catch (InvocationTargetException e) {
 			JavaPlugin.log(e);
 		}
-		return;
 	}
-	
+
 	/**
-	 * Perform organize import on multiple compilation units. No editors are opened.
+	 * Perform on multiple compilation units. No editors are opened.
 	 * @param cus The compilation units to run on
 	 */
 	public void runOnMultiple(final ICompilationUnit[] cus) {
@@ -172,7 +190,7 @@ public class CleanUpAction extends SelectionDispatchAction {
 			refactoring.addCompilationUnit(cus[i]);
 		}
 		
-		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, false, true);
+		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, true, true);
 		
 		RefactoringStarter starter= new RefactoringStarter();
 		try {

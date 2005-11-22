@@ -67,24 +67,52 @@ public class UnusedCodeMultiFix extends AbstractMultiFix {
 			boolean removeUnusedPrivateConstructors, boolean removeUnusedPrivateFields,
 			boolean removeUnusedPrivateTypes, boolean removeUnusedLocalVariables) {
 		
+		init(	removeUnusedImports, 
+				removeUnusedPrivateMethods,
+				removeUnusedPrivateConstructors,
+				removeUnusedPrivateFields,
+				removeUnusedPrivateTypes,
+				removeUnusedLocalVariables);
+	}
+
+	public UnusedCodeMultiFix(IDialogSettings settings) {
+		if (settings.get(REMOVE_UNUSED_IMPORTS_SETTINGS_ID) == null) {
+			settings.put(REMOVE_UNUSED_IMPORTS_SETTINGS_ID, true);
+		}
+		if (settings.get(REMOVE_UNUSED_PRIVATE_METHODES_SETTINGS_ID) == null) {
+			settings.put(REMOVE_UNUSED_PRIVATE_METHODES_SETTINGS_ID, false);
+		}
+		if (settings.get(REMOVE_UNUSED_PRIVATE_CONSTRUCTORS_SETTINGS_ID) == null) {
+			settings.put(REMOVE_UNUSED_PRIVATE_CONSTRUCTORS_SETTINGS_ID, false);
+		}
+//		if (settings.get(REMOVE_UNUSED_PRIVATE_FIELDS_SETTINGS_ID) == null) {
+			settings.put(REMOVE_UNUSED_PRIVATE_FIELDS_SETTINGS_ID, false);
+//		}
+		if (settings.get(REMOVE_UNUSED_PRIVATE_TYPE_SETTINGS_ID) == null) {
+			settings.put(REMOVE_UNUSED_PRIVATE_TYPE_SETTINGS_ID, false);
+		}
+//		if (settings.get(REMOVE_UNUSED_LOCAL_VARIABLES_SETTINGS_ID) == null) {
+			settings.put(REMOVE_UNUSED_LOCAL_VARIABLES_SETTINGS_ID, false);
+//		}
+		init(	settings.getBoolean(REMOVE_UNUSED_IMPORTS_SETTINGS_ID), 
+				settings.getBoolean(REMOVE_UNUSED_PRIVATE_METHODES_SETTINGS_ID),
+				settings.getBoolean(REMOVE_UNUSED_PRIVATE_CONSTRUCTORS_SETTINGS_ID),
+				settings.getBoolean(REMOVE_UNUSED_PRIVATE_FIELDS_SETTINGS_ID),
+				settings.getBoolean(REMOVE_UNUSED_PRIVATE_TYPE_SETTINGS_ID),
+				settings.getBoolean(REMOVE_UNUSED_LOCAL_VARIABLES_SETTINGS_ID)
+				);
+	}
+
+	private void init(boolean removeUnusedImports, boolean removeUnusedPrivateMethods, 
+			boolean removeUnusedPrivateConstructors, boolean removeUnusedPrivateFields,
+			boolean removeUnusedPrivateTypes, boolean removeUnusedLocalVariables) {
+		
 		fRemoveUnusedImports= removeUnusedImports;
 		fRemoveUnusedPrivateMethods= removeUnusedPrivateMethods;
 		fRemoveUnusedPrivateConstructors= removeUnusedPrivateConstructors;
 		fRemoveUnusedPrivateFields= removeUnusedPrivateFields;
 		fRemoveUnusedPrivateTypes= removeUnusedPrivateTypes;
 		fRemoveUnusedLocalVariables= removeUnusedLocalVariables;
-	}
-
-	public UnusedCodeMultiFix(IDialogSettings settings) {
-		this(	settings.getBoolean(REMOVE_UNUSED_IMPORTS_SETTINGS_ID), 
-				settings.getBoolean(REMOVE_UNUSED_PRIVATE_METHODES_SETTINGS_ID),
-				settings.getBoolean(REMOVE_UNUSED_PRIVATE_CONSTRUCTORS_SETTINGS_ID),
-//				settings.getBoolean(REMOVE_UNUSED_PRIVATE_FIELDS_SETTINGS_ID),
-				false,
-				settings.getBoolean(REMOVE_UNUSED_PRIVATE_TYPE_SETTINGS_ID),
-//				settings.getBoolean(REMOVE_UNUSED_LOCAL_VARIABLES_SETTINGS_ID)
-				false	
-				);
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {

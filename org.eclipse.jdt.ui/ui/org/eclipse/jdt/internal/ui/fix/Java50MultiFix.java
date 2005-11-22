@@ -56,12 +56,24 @@ public class Java50MultiFix extends AbstractMultiFix {
 	private boolean fAddDepricatedAnnotation;
 
 	public Java50MultiFix(boolean addOverrideAnnotation, boolean addDepricatedAnnotation) {
-		fAddOverrideAnnotation= addOverrideAnnotation;
-		fAddDepricatedAnnotation= addDepricatedAnnotation;
+		init(	addOverrideAnnotation,
+				addDepricatedAnnotation);
 	}
 
 	public Java50MultiFix(IDialogSettings settings) {
-		this(settings.getBoolean(ADD_OVERRIDE_ANNOTATION_SETTINGS_ID), settings.getBoolean(ADD_DEPRICATED_ANNOTATION_SETTINGS_ID));
+		if (settings.get(ADD_OVERRIDE_ANNOTATION_SETTINGS_ID) == null) {
+			settings.put(ADD_OVERRIDE_ANNOTATION_SETTINGS_ID, true);
+		}
+		if (settings.get(ADD_DEPRICATED_ANNOTATION_SETTINGS_ID) == null) {
+			settings.put(ADD_DEPRICATED_ANNOTATION_SETTINGS_ID, true);
+		}
+		init(	settings.getBoolean(ADD_OVERRIDE_ANNOTATION_SETTINGS_ID), 
+				settings.getBoolean(ADD_DEPRICATED_ANNOTATION_SETTINGS_ID));
+	}
+
+	private void init(boolean addOverrideAnnotation, boolean addDepricatedAnnotation) {
+		fAddOverrideAnnotation= addOverrideAnnotation;
+		fAddDepricatedAnnotation= addDepricatedAnnotation;
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {

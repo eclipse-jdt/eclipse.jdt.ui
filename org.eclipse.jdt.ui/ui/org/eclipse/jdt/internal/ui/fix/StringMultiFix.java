@@ -55,12 +55,23 @@ public class StringMultiFix extends AbstractMultiFix {
 	private boolean fRemoveNlsTag;
 
 	public StringMultiFix(boolean addNLSTag, boolean removeNLSTag) {
-		fAddNlsTag= addNLSTag;
-		fRemoveNlsTag= removeNLSTag;
+		init(addNLSTag, removeNLSTag);
 	}
 
 	public StringMultiFix(IDialogSettings settings) {
-		this(settings.getBoolean(ADD_NLS_TAG_SETTINGS_ID), settings.getBoolean(REMOVE_NLS_TAG_SETTINGS_ID));
+		if (settings.get(ADD_NLS_TAG_SETTINGS_ID) == null) {
+			settings.put(ADD_NLS_TAG_SETTINGS_ID, false);
+		}
+		if (settings.get(REMOVE_NLS_TAG_SETTINGS_ID) == null) {
+			settings.put(REMOVE_NLS_TAG_SETTINGS_ID, true);
+		}
+		init(	settings.getBoolean(ADD_NLS_TAG_SETTINGS_ID), 
+				settings.getBoolean(REMOVE_NLS_TAG_SETTINGS_ID));
+	}
+
+	private void init(boolean addNLSTag, boolean removeNLSTag) {
+		fAddNlsTag= addNLSTag;
+		fRemoveNlsTag= removeNLSTag;
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
