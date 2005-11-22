@@ -14,6 +14,22 @@ import java.text.MessageFormat;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Composite;
+
+import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -28,11 +44,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.MessageWizardPage;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 public class DeleteWizard extends RefactoringWizard {
 
@@ -70,6 +81,8 @@ public class DeleteWizard extends RefactoringWizard {
 	
 	private static class DeleteInputPage extends MessageWizardPage {
 		private static final String PAGE_NAME= "DeleteInputPage"; //$NON-NLS-1$
+		private static final String DIALOG_SETTINGS_DELETE_SUB_PACKAGES= "deleteSubPackages"; //$NON-NLS-1$
+		private Button fDeleteSubPackagesCheckBox;
 
 		public DeleteInputPage() {
 			super(PAGE_NAME, true, MessageWizardPage.STYLE_QUESTION);
@@ -94,6 +107,47 @@ public class DeleteWizard extends RefactoringWizard {
 					return RefactoringMessages.DeleteWizard_12; 
 				return RefactoringMessages.DeleteWizard_2; 
 			}
+		}
+
+		public void createControl(Composite parent) {
+			super.createControl(parent);
+
+			if (getDeleteProcessor().hasSubPackagesToDelete())
+				addDeleteSubPackagesCheckBox();
+		}
+
+		/**
+		 * Adds the "delete subpackages" checkbox to the composite. Note that
+		 * this code assumes that the control of the parent is a Composite with
+		 * GridLayout and a horizontal span of 2.
+		 * 
+		 * @see MessageWizardPage#createControl(Composite)
+		 */
+		private void addDeleteSubPackagesCheckBox() {
+
+			Composite c= new Composite((Composite) getControl(), SWT.NONE);
+			GridLayout gd= new GridLayout();
+			gd.horizontalSpacing= 10;
+			c.setLayout(gd);
+
+			GridData data= new GridData(GridData.FILL_HORIZONTAL);
+			data.horizontalSpan= 2;
+			c.setLayoutData(data);
+
+			final boolean selection= getRefactoringSettings().getBoolean(DIALOG_SETTINGS_DELETE_SUB_PACKAGES);
+
+			fDeleteSubPackagesCheckBox= new Button(c, SWT.CHECK);
+			fDeleteSubPackagesCheckBox.setText(RefactoringMessages.DeleteWizard_also_delete_sub_packages);
+			fDeleteSubPackagesCheckBox.setSelection(selection);
+
+			fDeleteSubPackagesCheckBox.addSelectionListener(new SelectionAdapter() {
+
+				public void widgetSelected(SelectionEvent event) {
+					getDeleteProcessor().setDeleteSubPackages(fDeleteSubPackagesCheckBox.getSelection());
+				}
+			});
+
+			getDeleteProcessor().setDeleteSubPackages(fDeleteSubPackagesCheckBox.getSelection());
 		}
 
 		private String getNameOfSingleSelectedElement() throws JavaModelException {
@@ -121,7 +175,19 @@ public class DeleteWizard extends RefactoringWizard {
 		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
 		 */
 		protected boolean performFinish() {
-			return super.performFinish() || ((JavaDeleteProcessor)((DeleteRefactoring)getRefactoring()).getProcessor()).wasCanceled(); //close the dialog if canceled
+			return super.performFinish() || getDeleteProcessor().wasCanceled(); //close the dialog if canceled
+		}
+		
+		protected boolean saveSettings() {
+			if (getContainer() instanceof Dialog)
+				return ((Dialog) getContainer()).getReturnCode() == IDialogConstants.OK_ID;
+			return true;
+		}
+
+		public void dispose() {
+			if (fDeleteSubPackagesCheckBox != null && saveSettings())
+				getRefactoringSettings().put(DIALOG_SETTINGS_DELETE_SUB_PACKAGES, fDeleteSubPackagesCheckBox.getSelection());
+			super.dispose();
 		}
 
 		private String createConfirmationStringForOneElement() throws JavaModelException {
@@ -213,11 +279,16 @@ public class DeleteWizard extends RefactoringWizard {
 		}
 
 		private IJavaElement[] getSelectedJavaElements() {
-			return ((JavaDeleteProcessor)((DeleteRefactoring)getRefactoring()).getProcessor()).getJavaElementsToDelete();
+			return getDeleteProcessor().getJavaElementsToDelete();
 		}
 
 		private IResource[] getSelectedResources() {
-			return ((JavaDeleteProcessor)((DeleteRefactoring)getRefactoring()).getProcessor()).getResourcesToDelete();
+			return getDeleteProcessor().getResourcesToDelete();
 		}
+		
+		private JavaDeleteProcessor getDeleteProcessor() {
+			return (JavaDeleteProcessor) ((DeleteRefactoring) getRefactoring()).getProcessor();
+		}
+		
 	}
 }

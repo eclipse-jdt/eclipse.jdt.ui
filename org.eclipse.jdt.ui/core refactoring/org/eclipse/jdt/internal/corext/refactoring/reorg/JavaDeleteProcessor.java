@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -67,6 +69,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 public final class JavaDeleteProcessor extends DeleteProcessor {
 	
 	private boolean fWasCanceled;
@@ -77,6 +81,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private IReorgQueries fDeleteQueries;	
 
 	private Change fDeleteChange;
+	private boolean fDeleteSubPackages;
 	
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.DeleteProcessor"; //$NON-NLS-1$
 	
@@ -85,6 +90,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		fResources= RefactoringAvailabilityTester.getResources(elements);
 		fJavaElements= RefactoringAvailabilityTester.getJavaElements(elements);
 		fSuggestGetterSetterDeletion= true;
+		fDeleteSubPackages= false;
 		fWasCanceled= false;
 	}
 	
@@ -168,7 +174,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 					mod.addDelete(element.getResource());
 				return;
 			case IJavaElement.PACKAGE_FRAGMENT:
-				handlePackageFragmentDelete(collected, (IPackageFragment)element, natures, mod, shared);
+				handlePackageFragmentDelete(collected, (IPackageFragment)element, mod);
 				return;
 			case IJavaElement.COMPILATION_UNIT:
 				collected.add(element);
@@ -194,25 +200,86 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		}
 	}
 
-	private void handlePackageFragmentDelete(List collected, IPackageFragment pack, String[] natures, ResourceModifications mod, SharableParticipants shared) throws CoreException {
+	/**
+	 * This method collects file and folder deletion for notifying
+	 * participants. Participants will get notified of 
+	 * 
+	 * * deletion of the package (in any case)
+	 * * deletion of files within the package if only the files are deleted without 
+	 *   the package folder ("package cleaning")
+	 * * deletion of the package folder if it is not only cleared and if its parent
+	 *   is not removed as well.
+	 *   
+	 */
+	private void handlePackageFragmentDelete(List collected, IPackageFragment pack, ResourceModifications mod) throws CoreException {
+
+		// The package is reported in any case.
 		collected.add(pack);
-		IContainer container= (IContainer)pack.getResource();
+		
+		final List/* <IPackageFragment */packagesToDelete= ReorgUtils.getElementsOfType(fJavaElements, IJavaElement.PACKAGE_FRAGMENT);
+		
+		final IContainer container= (IContainer)pack.getResource();
 		if (container == null)
 			return;
-		IResource[] members= container.members();
-		int files= 0;
-		for (int m= 0; m < members.length; m++) {
-			IResource member= members[m];
-			if (member instanceof IFile) {
-				files++;
-				IFile file= (IFile)member;
-				if ("class".equals(file.getFileExtension()) && file.isDerived()) //$NON-NLS-1$
-					continue;
-				mod.addDelete(member);
+		
+		final IResource[] members= container.members();
+
+		/*
+		 * Check whether this package is removed completely or only cleared.
+		 * The default package can never be removed completely.
+		 */
+		if (!pack.isDefaultPackage() && canRemoveCompletely(pack, packagesToDelete)) {
+			// This package is removed completely, which means its folder will be
+			// deleted as well. We only notify participants of the folder deletion
+			// if the parent folder of this folder will not be deleted as well:
+			boolean parentIsMarked= false;
+			final IPackageFragment parent= JavaElementUtil.getParentSubpackage(pack);
+			if (parent != null && parent.isDefaultPackage()) {
+				// Parent is the default package which will never be
+				// deleted physically
+				parentIsMarked= false;
+			} else {
+				// Parent is marked if it is in the list
+				parentIsMarked= packagesToDelete.contains(parent);
 			}
-		}
-		if (files == members.length) {
-			mod.addDelete(container);
+			
+			if (parentIsMarked) {
+				// Parent is marked, but is it really deleted or only cleared?
+				if (canRemoveCompletely(parent, packagesToDelete)) {
+					// Parent can be removed completely, so we do not add
+					// this folder to the list.
+				} else {
+					// Parent cannot be removed completely, but as this folder
+					// can be removed, we notify the participant
+					mod.addDelete(container);
+				}
+			} else {
+				// Parent will not be removed, but we will 
+				mod.addDelete(container);
+			}
+		} else {
+			// This package is only cleared because it has subpackages (=subfolders)
+			// which are not deleted. As the package is only cleared, its folder
+			// will not be removed and so we must notify the participant of the deleted children.
+			for (int m= 0; m < members.length; m++) {
+				IResource member= members[m];
+				if (member instanceof IFile) {
+					IFile file= (IFile)member;
+					if ("class".equals(file.getFileExtension()) && file.isDerived()) //$NON-NLS-1$
+						continue;
+					if (!"java".equals(file.getFileExtension()) && pack.isDefaultPackage()) //$NON-NLS-1$
+						continue;
+					mod.addDelete(member);
+				}
+				if (!pack.isDefaultPackage() && member instanceof IFolder) {
+					// Normally, folder children of packages are packages
+					// as well, but in case they have been removed from the build
+					// path, notify the participant
+					IPackageFragment frag= (IPackageFragment) JavaCore.create(member);
+					if (frag == null)
+						mod.addDelete(member);
+				}
+			}
 		}
 	}
 	
@@ -237,6 +304,26 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 		fSuggestGetterSetterDeletion= suggest;
 	}
 	
+	public void setDeleteSubPackages(boolean selection) {
+		fDeleteSubPackages= selection;
+	}
+	
+	public boolean getDeleteSubPackages() {
+		return fDeleteSubPackages;
+	}
+	
+	public boolean hasSubPackagesToDelete() {
+		try {
+			for (int i= 0; i < fJavaElements.length; i++) {
+				if (fJavaElements[i] instanceof IPackageFragment && ((IPackageFragment) fJavaElements[i]).hasSubpackages())
+					return true;
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
+		return false;
+	}
+
 	public void setQueries(IReorgQueries queries){
 		Assert.isNotNull(queries);
 		fDeleteQueries= queries;
@@ -368,6 +455,9 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private void recalculateElementsToDelete() throws CoreException {
 		//the sequence is critical here
 		
+		if (fDeleteSubPackages) /* add subpackages first, to allow removing elements with parents in selection etc. */
+			addSubPackages();
+		
 		removeElementsWithParentsInSelection(); /*ask before adding empty cus - you don't want to ask if you, for example delete 
 												 *the package, in which the cus live*/
 		removeUnconfirmedFoldersThatContainSourceFolders(); /* a selected folder may be a parent of a source folder
@@ -380,9 +470,155 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	
 		if (fSuggestGetterSetterDeletion)
 			addGettersSetters();/*at the end - this cannot invalidate anything*/
+		
+		addDeletableParentPackagesOnPackageDeletion(); /* do not change the sequence in fJavaElements after this method */
 	}
-	
-	//ask for confirmation of deletion of all package fragment roots that are on classpaths of other projects
+
+	/**
+	 * Adds all subpackages of the selected packages to the list of items to be
+	 * deleted.
+	 * 
+	 * @throws JavaModelException
+	 */
+	private void addSubPackages() throws JavaModelException {
+
+		final Set javaElements= new HashSet();
+		for (int i= 0; i < fJavaElements.length; i++) {
+			if (fJavaElements[i] instanceof IPackageFragment) {
+				javaElements.addAll(Arrays.asList(JavaElementUtil.getPackageAndSubpackages((IPackageFragment) fJavaElements[i])));
+			} else {
+				javaElements.add(fJavaElements[i]);
+			}
+		}
+
+		fJavaElements= (IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]);
+	}
+
+	/**
+	 * Add deletable parent packages to the list of items to delete.
+	 * 
+	 * @throws CoreException
+	 */
+	private void addDeletableParentPackagesOnPackageDeletion() throws CoreException {
+
+		final List/* <IPackageFragment */initialPackagesToDelete= ReorgUtils.getElementsOfType(fJavaElements, IJavaElement.PACKAGE_FRAGMENT);
+
+		if (initialPackagesToDelete.size() == 0)
+			return;
+
+		// Move from inner to outer packages
+		Collections.sort(initialPackagesToDelete, new Comparator() {
+			public int compare(Object arg0, Object arg1) {
+				IPackageFragment one= (IPackageFragment) arg0;
+				IPackageFragment two= (IPackageFragment) arg1;
+				return two.getElementName().compareTo(one.getElementName());
+			}
+		});
+
+		// Get resources and java elements which will be deleted as well
+		final Set/* <IResource> */deletedChildren= new HashSet();
+		deletedChildren.addAll(Arrays.asList(fResources));
+		for (int i= 0; i < fJavaElements.length; i++) {
+			if (!ReorgUtils.isInsideCompilationUnit(fJavaElements[i]))
+				deletedChildren.add(fJavaElements[i].getResource());
+		}
+
+		// new package list in the right sequence
+		final List/* <IPackageFragment */allFragmentsToDelete= new ArrayList();
+
+		for (Iterator outerIter= initialPackagesToDelete.iterator(); outerIter.hasNext();) {
+			final IPackageFragment currentPackageFragment= (IPackageFragment) outerIter.next();
+			
+			// The package will at least be cleared
+			allFragmentsToDelete.add(currentPackageFragment);
+
+			if (canRemoveCompletely(currentPackageFragment, initialPackagesToDelete)) {
+				
+				final IPackageFragment parent= JavaElementUtil.getParentSubpackage(currentPackageFragment);
+				if (parent != null && !parent.isDefaultPackage() && !initialPackagesToDelete.contains(parent)) {
+
+					final List/* <IPackageFragment> */emptyParents= new ArrayList();
+					addDeletableParentPackages(parent, initialPackagesToDelete, deletedChildren, emptyParents);
+
+					// Add parents in the right sequence (inner to outer)
+					allFragmentsToDelete.addAll(emptyParents);
+				}
+			}
+		}
+
+		// Remove resources in deleted packages; and the packages as well
+		final List/* <IJavaElement> */javaElements= new ArrayList();
+		for (int i= 0; i < fJavaElements.length; i++) {
+			if (!(fJavaElements[i] instanceof IPackageFragment)) {
+				// remove children of deleted packages
+				final IPackageFragment frag= (IPackageFragment) fJavaElements[i].getAncestor(IJavaElement.PACKAGE_FRAGMENT);
+				if (!allFragmentsToDelete.contains(frag))
+					javaElements.add(fJavaElements[i]);
+			}
+		}
+		// Re-add deleted packages - note the (new) sequence
+		javaElements.addAll(allFragmentsToDelete);
+
+		// Remove resources in deleted folders
+		final List/* <IResource> */resources= new ArrayList();
+		for (int i= 0; i < fResources.length; i++) {
+			IResource parent= fResources[i];
+			if (parent.getType() == IResource.FILE)
+				parent= parent.getParent();
+			if (!deletedChildren.contains(parent))
+				resources.add(fResources[i]);
+		}
+
+		fJavaElements= (IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]);
+		fResources= (IResource[]) resources.toArray(new IResource[resources.size()]);
+	}
+
+	/**
+	 * Returns true if this initially selected package is really deletable
+	 * (if it has non-selected subpackages, it may only be cleared).
+	 * 
+	 */
+	private boolean canRemoveCompletely(IPackageFragment pack, List packagesToDelete) throws JavaModelException {
+		final IPackageFragment[] subPackages= JavaElementUtil.getPackageAndSubpackages(pack);
+		for (int i= 0; i < subPackages.length; i++) {
+			if (!(subPackages[i].equals(pack)) && !(packagesToDelete.contains(subPackages[i])))
+				return false;
+		}
+		return true;
+	}
+
+	/**
+	 * Adds deletable parent packages of the fragment "frag" to the list
+	 * "deletableParentPackages"; also adds the resources of those packages to the
+	 * set "resourcesToDelete".
+	 * 
+	 */
+	private void addDeletableParentPackages(IPackageFragment frag, List initialPackagesToDelete, Set resourcesToDelete, List deletableParentPackages)
+			throws CoreException {
+
+		if (frag.getResource().isLinked()) {
+			final IConfirmQuery query= fDeleteQueries.createYesNoQuery(RefactoringCoreMessages.JavaDeleteProcessor_confirm_linked_folder_delete, false, IReorgQueries.CONFIRM_DELETE_LINKED_PARENT);
+			if (!query.confirm(Messages.format(RefactoringCoreMessages.JavaDeleteProcessor_delete_linked_folder_question, new String[] { frag.getResource().getName() })))
+					return;
+		}
+		
+		final IResource[] children= (((IContainer) frag.getResource())).members();
+		for (int i= 0; i < children.length; i++) {
+			// Child must be a package fragment already in the list,
+			// or a resource which is deleted as well.
+			if (!resourcesToDelete.contains(children[i]))
+				return;
+		}
+		resourcesToDelete.add(frag.getResource());
+		deletableParentPackages.add(frag);
+
+		final IPackageFragment parent= JavaElementUtil.getParentSubpackage(frag);
+		if (parent != null && !parent.isDefaultPackage() && !initialPackagesToDelete.contains(parent))
+			addDeletableParentPackages(parent, initialPackagesToDelete, resourcesToDelete, deletableParentPackages);
+	}
+
+	// ask for confirmation of deletion of all package fragment roots that are
+	// on classpaths of other projects
 	private void removeUnconfirmedReferencedArchives() throws JavaModelException {
 		String queryTitle= RefactoringCoreMessages.DeleteRefactoring_2; 
 		IConfirmQuery query= fDeleteQueries.createYesYesToAllNoNoToAllQuery(queryTitle, true, IReorgQueries.CONFIRM_DELETE_REFERENCED_ARCHIVES);

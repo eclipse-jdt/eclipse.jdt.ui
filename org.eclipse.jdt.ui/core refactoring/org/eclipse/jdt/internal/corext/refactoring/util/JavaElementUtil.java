@@ -179,7 +179,7 @@ public class JavaElementUtil {
 	}
 	
 	/**
-	 * @param pack a package fragment, except default packages
+	 * @param pack a package fragment
 	 * @return an array containing the given package and all subpackages 
 	 * @throws JavaModelException 
 	 */
@@ -187,14 +187,44 @@ public class JavaElementUtil {
 		IPackageFragmentRoot root= (IPackageFragmentRoot) pack.getParent();
 		IJavaElement[] allPackages= root.getChildren();
 		ArrayList subpackages= new ArrayList();
-		subpackages.add(pack);
-		String prefix= pack.getElementName() + '.';
-		for (int i= 0; i < allPackages.length; i++) {
-			IPackageFragment currentPackage= (IPackageFragment) allPackages[i];
-			if (currentPackage.getElementName().startsWith(prefix))
-				subpackages.add(currentPackage);
+		if (pack.isDefaultPackage()) {
+			subpackages.addAll(Arrays.asList(allPackages));
+		} else {
+			subpackages.add(pack);
+			String prefix= pack.getElementName() + '.';
+			for (int i= 0; i < allPackages.length; i++) {
+				IPackageFragment currentPackage= (IPackageFragment) allPackages[i];
+				if (currentPackage.getElementName().startsWith(prefix))
+					subpackages.add(currentPackage);
+			}
 		}
 		return (IPackageFragment[]) subpackages.toArray(new IPackageFragment[subpackages.size()]);
+	}
+	
+	/**
+	 * Returns the parent package fragment for this package fragment.
+	 * 
+	 * @param pack the package fragment; may not be null
+	 * @return the parent package fragment, or null if the given package fragment is the default package.
+	 */
+	public static IPackageFragment getParentSubpackage(IPackageFragment pack) {
+
+		if (pack.isDefaultPackage())
+			return null;
+		
+		final int index= pack.getElementName().lastIndexOf('.');
+		final IPackageFragmentRoot root= (IPackageFragmentRoot) pack.getParent();
+		
+		if (index == -1)
+			return root.getPackageFragment("");  //$NON-NLS-1$
+
+		final String newPackageName= pack.getElementName().substring(0, index);
+		final IPackageFragment parent= root.getPackageFragment(newPackageName);
+		
+		if (parent.exists())
+			return parent;
+		else
+			return null;
 	}
 	
 	public static IMember[] sortByOffset(IMember[] members){

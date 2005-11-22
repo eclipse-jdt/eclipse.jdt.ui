@@ -214,11 +214,6 @@ public final class RefactoringAvailabilityTester {
 			if (root.isExternal() || Checks.isClasspathDelete(root)) // TODO rename isClasspathDelete
 				return false;
 		}
-		if (element instanceof IPackageFragment) {
-			final IPackageFragment fragment= (IPackageFragment) element;
-			if (fragment.hasSubpackages() && fragment.getNonJavaResources().length == 0 && fragment.getChildren().length == 0)
-				return false;
-		}
 		if (element.getResource() == null && !RefactoringAvailabilityTester.isWorkingCopyElement(element))
 			return false;
 		if (element instanceof IMember && ((IMember) element).isBinary())

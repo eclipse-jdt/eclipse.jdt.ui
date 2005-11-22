@@ -374,6 +374,7 @@ public final class RefactoringMessages extends NLS {
 	public static String ExtractInterfaceWizard_12;
 	public static String ParameterEditDialog_type_invalid;
 	public static String UseSupertypeWizard_10;
+
 	public static String DeleteWizard_1;
 	public static String DeleteWizard_2;
 	public static String DeleteWizard_3;
@@ -386,6 +387,8 @@ public final class RefactoringMessages extends NLS {
 	public static String DeleteWizard_10;
 	public static String DeleteWizard_11;
 	public static String DeleteWizard_12;
+	public static String DeleteWizard_also_delete_sub_packages;
+	
 	public static String IntroduceParameterAction_label;
 	public static String IntroduceParameterAction_dialog_title;
 	public static String IntroduceParameterWizard_defaultPageTitle;

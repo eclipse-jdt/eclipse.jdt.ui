@@ -153,11 +153,11 @@ public class ParticipantTesting {
 	}	
 	
 	private static void testElementsShared(String[] handles, List list) {
-		testNumberOfElements(handles.length, list);
 		for (int i= 0; i < handles.length; i++) {
 			String handle= handles[i];
-			Assert.assertTrue(list.contains(handle));
+			Assert.assertTrue("Handle not found: " + handle, list.contains(handle));
 		}
+		testNumberOfElements(handles.length, list);
 	}
 	
 	private static void testNumberOfElements(int expected, List list) {

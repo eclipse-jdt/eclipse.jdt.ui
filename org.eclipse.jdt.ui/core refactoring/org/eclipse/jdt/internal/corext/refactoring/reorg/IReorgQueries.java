@@ -19,6 +19,7 @@ public interface IReorgQueries {
 	public static final int CONFIRM_READ_ONLY_ELEMENTS= 						5;
 	public static final int CONFIRM_OVERWRITTING=								6;
 	public static final int CONFIRM_SKIPPING=									7;
+	public static final int CONFIRM_DELETE_LINKED_PARENT=						8;
 	
 	/*
 	 * The ID is used to uniquely identify a query. It's also useful for testing.

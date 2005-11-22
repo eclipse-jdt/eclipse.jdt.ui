@@ -742,6 +742,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ReorgUtils_19;
 	public static String ReorgUtils_20;
 	public static String DeleteChangeCreator_1;
+	
 	public static String DeleteRefactoring_1;
 	public static String DeleteRefactoring_2;
 	public static String DeleteRefactoring_3;
@@ -750,6 +751,10 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String DeleteRefactoring_7;
 	public static String DeleteRefactoring_8;
 	public static String DeleteRefactoring_9;
+	public static String JavaDeleteProcessor_unsaved_changes;
+	public static String JavaDeleteProcessor_confirm_linked_folder_delete;
+	public static String JavaDeleteProcessor_delete_linked_folder_question;
+	
 	public static String MoveStaticMemberAnalyzer_nonStatic;
 	public static String IntroduceFactory_name;
 	public static String IntroduceFactory_checkingActivation;
@@ -820,7 +825,6 @@ public final class RefactoringCoreMessages extends NLS {
 	
 	public static String QualifiedNameSearchResult_change_name;
 	public static String ASTData_update_imports;
-	public static String JavaDeleteProcessor_unsaved_changes;
 
 	public static String RenameSourceFolderChange_rename_archive;
 	public static String RenameSourceFolderChange_rename_external;

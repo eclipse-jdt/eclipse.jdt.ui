@@ -11,6 +11,9 @@
 package org.eclipse.jdt.ui.tests.reorg;
 
 import java.io.File;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
@@ -26,6 +29,7 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
@@ -118,6 +122,76 @@ public class DeleteTest extends RefactoringTest{
 			}
 		}	
 	}
+	
+	private DeleteRefactoring createRefactoring(Object[] elements) throws CoreException {
+		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
+		DeleteRefactoring result= new DeleteRefactoring(processor);
+		processor.setQueries(createReorgQueries());
+		return result;		
+	}
+	
+	// package helpers
+	
+	private void assertPackagesAreDeleted(IPackageFragment[] frags) {
+		for (int i= 0; i < frags.length; i++) { 
+			assertFalse(frags[i].exists());
+			assertFalse(frags[i].getResource().exists());
+		}
+	}
+
+	private IPackageFragment[] createPackagePath(int no) throws JavaModelException {
+		IPackageFragment[] frags= new IPackageFragment[no];
+		for (int i=0; i<no; i++) {
+			frags[i]= getRoot().createPackageFragment(getPackageName(i), true, new NullProgressMonitor());
+		}
+		return frags;
+	}
+
+	private String getPackageName(int i) {
+		StringBuffer buf= new StringBuffer();
+		for (int j= 0; j <= i; j++) {
+			if (j>0)
+				buf.append(".");
+			buf.append("a");
+			buf.append(j);
+		}
+		return buf.toString();
+	}
+
+	private void executeDeletePackage(Object[] markedForDelete, IPackageFragment[] packsToBeDeleted, Object[] othersToBeDeleted) throws CoreException, Exception {
+		executeDeletePackage(markedForDelete, packsToBeDeleted, othersToBeDeleted, false);
+	}
+	
+	/**
+	 * Execute a package delete. 
+	 * @param markedForDelete The elements selected for deletion ("in the UI")
+	 * @param packsToBeDeleted First half of elements which must be deleted after the refactoring
+	 * @param othersToBeDeleted Second half (halfs will be merged).
+	 * @param deleteSubs true if subpackages should be deleted as well.
+	 * @throws CoreException 
+	 * @throws Exception 
+	 */
+	private void executeDeletePackage(Object[] markedForDelete, IPackageFragment[] packsToBeDeleted, Object[] othersToBeDeleted, boolean deleteSubs) throws CoreException, Exception {
+		
+		List allList= new ArrayList();
+		allList.addAll(Arrays.asList(packsToBeDeleted));
+		allList.addAll(Arrays.asList(othersToBeDeleted));
+		
+		Object[] all= allList.toArray();
+
+		ParticipantTesting.reset();
+		String[] deleteHandles= ParticipantTesting.createHandles(all);
+		
+		verifyEnabled(markedForDelete);
+		performDummySearch();
+		DeleteRefactoring ref= createRefactoring(markedForDelete);
+		((JavaDeleteProcessor)ref.getProcessor()).setDeleteSubPackages(deleteSubs);
+		RefactoringStatus status= performRefactoring(ref, false);
+		assertEquals("expected to pass", null, status);
+		
+		// assure participants got notified of everything.
+		ParticipantTesting.testDelete(deleteHandles);
+	}
 
 	//---- tests
 	
@@ -177,23 +251,6 @@ public class DeleteTest extends RefactoringTest{
 
 	public void testDisabled_archiveFromAnotherProject() throws Exception{
 		//TODO implement me
-	}
-
-	public void testDisabled_emptySuperPackage() throws Exception{
-		IPackageFragment superPackage= getRoot().createPackageFragment("superPackage", false, new NullProgressMonitor());
-		IPackageFragment subPackage= getRoot().createPackageFragment("superPackage.subPackage", false, new NullProgressMonitor());
-		try{
-			assertTrue(superPackage.exists());
-			assertTrue(subPackage.exists());
-			assertTrue(superPackage.hasSubpackages());
-		
-			Object[] elements= {superPackage};
-			verifyDisabled(elements);
-		} finally {
-			performDummySearch();
-			subPackage.delete(true, new NullProgressMonitor());
-			superPackage.delete(true, new NullProgressMonitor());
-		}
 	}
 
 	public void testDisabled_binaryMember() throws Exception{
@@ -681,50 +738,6 @@ public class DeleteTest extends RefactoringTest{
 		ParticipantTesting.testDelete(handles);
 	}
 	
-	public void testDeletePackage() throws Exception{
-		ParticipantTesting.reset();
-		IPackageFragment newPackage= getRoot().createPackageFragment("newPackage", true, new NullProgressMonitor());
-		assertTrue("package not created", newPackage.exists());
-		ICompilationUnit cu= newPackage.createCompilationUnit("A.java", "public class A {}", false, null);
-		IFile file= ((IContainer)newPackage.getResource()).getFile(new Path("Z.txt"));
-		file.create(getStream("123"), true, null);
-		
-		Object[] elements= {newPackage};
-		verifyEnabled(elements);			
-		performDummySearch();			
-		String[] deleteHandles= ParticipantTesting.createHandles(newPackage, newPackage.getResource(), cu.getResource(), file);
-		
-		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref, false);
-		assertEquals("expected to pass", null, status);
-		assertTrue("package not deleted", ! newPackage.exists());
-		
-		ParticipantTesting.testDelete(deleteHandles);
-	}
-
-	public void testDeletePackage2() throws Exception{
-		ParticipantTesting.reset();
-		IPackageFragment newPackage= getRoot().createPackageFragment("p1", true, new NullProgressMonitor());
-		getRoot().createPackageFragment("p1.p2", true, new NullProgressMonitor());
-		assertTrue("package not created", newPackage.exists());
-		ICompilationUnit cu= newPackage.createCompilationUnit("A.java", "public class A {}", false, null);
-		IFile file= ((IContainer)newPackage.getResource()).getFile(new Path("Z.txt"));
-		file.create(getStream("123"), true, null);
-		
-		Object[] elements= {newPackage};
-		verifyEnabled(elements);			
-		performDummySearch();			
-		String[] deleteHandles= ParticipantTesting.createHandles(newPackage, cu.getResource(), file);
-		
-		DeleteRefactoring ref= createRefactoring(elements);
-		RefactoringStatus status= performRefactoring(ref, false);
-		assertEquals("expected to pass", null, status);
-		//Package is not delete since it had sub packages
-		assertTrue("package deleted", newPackage.exists());
-		
-		ParticipantTesting.testDelete(deleteHandles);
-	}
-
 	public void testDeleteCu() throws Exception{
 		ParticipantTesting.reset();
 		ICompilationUnit newCU= getPackageP().createCompilationUnit("X.java", "package p; class X{}", true, new NullProgressMonitor());
@@ -781,10 +794,266 @@ public class DeleteTest extends RefactoringTest{
 		//TODO implement me - how do i get a handle to a class file?
 	}
 	
-	private DeleteRefactoring createRefactoring(Object[] elements) throws CoreException {
-		JavaDeleteProcessor processor= new JavaDeleteProcessor(elements);
-		DeleteRefactoring result= new DeleteRefactoring(processor);
-		processor.setQueries(createReorgQueries());
-		return result;		
-	}	
+	public void testDeletePackage() throws Exception{
+		// newPackage    <- delete
+		// newPackage.A
+		// newPackage.file
+		// all three items must be deleted.
+		// Notification of package delete and folder delete
+		ParticipantTesting.reset();
+		IPackageFragment newPackage= getRoot().createPackageFragment("newPackage", true, new NullProgressMonitor());
+		assertTrue("package not created", newPackage.exists());
+		ICompilationUnit cu= newPackage.createCompilationUnit("A.java", "public class A {}", false, null);
+		IFile file= ((IContainer)newPackage.getResource()).getFile(new Path("Z.txt"));
+		file.create(getStream("123"), true, null);
+		
+		Object[] elements= {newPackage};
+		verifyEnabled(elements);			
+		performDummySearch();			
+		String[] deleteHandles= ParticipantTesting.createHandles(newPackage, newPackage.getResource());
+		
+		DeleteRefactoring ref= createRefactoring(elements);
+		RefactoringStatus status= performRefactoring(ref, false);
+		assertEquals("expected to pass", null, status);
+		assertTrue("package not deleted", ! newPackage.exists());
+		
+		ParticipantTesting.testDelete(deleteHandles);
+	}
+
+	public void testDeletePackage2() throws Exception{
+		// p1   <- delete
+		// p1.A
+		// p1.file
+		// p1.p2
+		// this tests cleaning of packages (p2 is not deleted)
+		ParticipantTesting.reset();
+		IPackageFragment newPackage= getRoot().createPackageFragment("p1", true, new NullProgressMonitor());
+		getRoot().createPackageFragment("p1.p2", true, new NullProgressMonitor());
+		assertTrue("package not created", newPackage.exists());
+		ICompilationUnit cu= newPackage.createCompilationUnit("A.java", "public class A {}", false, null);
+		IFile file= ((IContainer)newPackage.getResource()).getFile(new Path("Z.txt"));
+		file.create(getStream("123"), true, null);
+		
+		Object[] elements= {newPackage};
+		verifyEnabled(elements);			
+		performDummySearch();			
+		String[] deleteHandles= ParticipantTesting.createHandles(newPackage, cu.getResource(), file);
+		
+		DeleteRefactoring ref= createRefactoring(elements);
+		RefactoringStatus status= performRefactoring(ref, false);
+		assertEquals("expected to pass", null, status);
+		//Package is not delete since it had sub packages
+		assertTrue("package deleted", newPackage.exists());
+		
+		ParticipantTesting.testDelete(deleteHandles);
+	}
+	
+	public void testDeletePackage3() throws Exception {
+		// a0.a1.a2.a3 <- delete
+		// a0.a1.a2.a3.A
+		// all packages must be removed; folder a0 must be removed.
+		IPackageFragment[] frags= createPackagePath(4);
+		ICompilationUnit a= frags[3].createCompilationUnit("A.java", "public class A {}", false, null);
+		executeDeletePackage(new Object[] { frags[3] }, frags, new Object[] {  frags[0].getResource() } );
+		assertPackagesAreDeleted(frags);
+		assertFalse(a.exists());
+	}
+	
+	public void testDeletePackage4() throws Exception {
+		// a0.a1.a2.a3 <- delete
+		// a0.a1.a2.a3.A <- delete
+		// all packages must be removed; folder a0 must be removed.
+		IPackageFragment[] frags= createPackagePath(4);
+		ICompilationUnit a= frags[3].createCompilationUnit("A.java", "public class A {}", false, null);
+		executeDeletePackage(new Object[] { frags[3], a }, frags, new Object[] {  frags[0].getResource() } );
+		assertPackagesAreDeleted(frags);
+		assertFalse(a.exists());
+	}
+	
+	public void testDeletePackage5() throws Exception {
+		// a0.a1.a2.A <- not deleted
+		// a0.a1.a2.a3.a4.a5 <- delete
+		// only a3, a4, a5 are to be deleted; folder a3 must be removed.
+		IPackageFragment[] frags= createPackagePath(6);
+		ICompilationUnit a= frags[2].createCompilationUnit("A.java", "public class A {}", false, null);
+		executeDeletePackage(new Object[] { frags[5] }, new IPackageFragment[] { frags[5], frags[4], frags[3] }, new Object[] { frags[3].getResource() });
+		assertPackagesAreDeleted(new IPackageFragment[] { frags[5], frags[4], frags[3] });
+		assertTrue(a.exists());
+	}
+	
+	public void testDeletePackage6() throws Exception {
+		// a0.a1.a2.anotherPackage
+		// a0.a1.a2.a3.a4.a5 <- delete
+		// only a3, a4, a5 are to be deleted; folder a3 must be removed
+		IPackageFragment[] frags= createPackagePath(6);
+		IPackageFragment another= getRoot().createPackageFragment("a0.a1.a2.anotherPackage", true, null);
+		executeDeletePackage(new Object[] { frags[5] }, new IPackageFragment[] { frags[5], frags[4], frags[3] }, new Object[] { frags[3].getResource() });
+		assertPackagesAreDeleted(new IPackageFragment[] { frags[5], frags[4], frags[3] });
+		assertTrue(another.exists());
+	}
+	
+	public void testDeletePackage7() throws Exception {
+		// a0.a1.a2.A <- delete
+		// a0.a1.a2.a3.a4.a5 <- delete
+		// all packages must be deleted; folder a0 must be removed
+		IPackageFragment[] frags= createPackagePath(6);
+		ICompilationUnit a= frags[2].createCompilationUnit("A.java", "public class A {}", false, null);
+		executeDeletePackage(new Object[] { frags[5], a }, frags, new Object[] { frags[0].getResource() });
+		assertPackagesAreDeleted(frags);
+		assertFalse(a.exists());
+	}
+	
+	public void testDeletePackage8() throws Exception {
+		// a0.a1.a2.A <- delete
+		// a0.a1.a2.a3.Z <- don't delete
+		// a0.a1.a2.a3.a4.a5 <- delete
+		// only someFile, a4, and a5 are to be deleted; notification about a4, a5, A
+		IPackageFragment[] frags= createPackagePath(6);
+		ICompilationUnit a= frags[2].createCompilationUnit("A.java", "public class A {}", false, null);
+		IFile file= ((IContainer)frags[3].getResource()).getFile(new Path("Z.txt"));
+		file.create(getStream("123"), true, null);
+		executeDeletePackage(new Object[] { frags[5], a }, new IPackageFragment[] { frags[5], frags[4] }, new Object[] { frags[4].getResource(), a.getResource(), a, a.getType("A") });
+		assertPackagesAreDeleted(new IPackageFragment[] { frags[5], frags[4] });
+		assertFalse(a.exists());
+		assertTrue(file.exists());
+	}
+	
+	public void testDeletePackage9() throws Exception {
+		// a0.a1.a2.A <- delete
+		// a0.a1.a2.a3.Z <- delete
+		// a0.a1.a2.a3.a4.a5 <- delete
+		// all packages must be removed; folder a0 must be removed
+		IPackageFragment[] frags= createPackagePath(6);
+		ICompilationUnit a= frags[2].createCompilationUnit("A.java", "public class A {}", false, null);
+		IFile file= ((IContainer)frags[3].getResource()).getFile(new Path("Z.txt"));
+		file.create(getStream("123"), true, null);
+		executeDeletePackage(new Object[] { frags[5], a, file }, frags, new Object[] {  frags[0].getResource() });
+		assertPackagesAreDeleted(frags);
+		assertFalse(a.exists());
+		assertFalse(file.exists());
+	}
+	
+	public void testDeletePackage10() throws Exception {
+		// a0.a1.a2 <- delete
+		// a0.a1.a2.A <- delete
+		// a0.a1.a2.a3 <- do not delete
+		// only A must be removed
+		// This tests "cleaning" of packages -> folder a0.a1.a2 does NOT get removed.
+		IPackageFragment[] frags= createPackagePath(4);
+		ICompilationUnit a= frags[2].createCompilationUnit("A.java", "public class A {}", false, null);
+		
+		ParticipantTesting.reset();
+		final Object[] markedForDelete= new Object[] { frags[2], a.getResource() };
+		String[] deleteHandles= ParticipantTesting.createHandles(markedForDelete);
+		
+		verifyEnabled(markedForDelete);
+		performDummySearch();
+		DeleteRefactoring ref= createRefactoring(markedForDelete);
+		RefactoringStatus status= performRefactoring(ref, false);
+		assertEquals("expected to pass", null, status);
+
+		// test handles (!! only the package, not the resource)
+		ParticipantTesting.testDelete(deleteHandles);
+		// Package is not deleted since it had sub packages
+		assertTrue(frags[2].exists());
+		assertTrue(frags[2].getResource().exists());
+		assertFalse(a.exists());
+	}
+	
+	public void testDeletePackage11() throws Exception {
+		// Test deletion of default package of a project which is its own source folder
+		// (default) <- delete
+		// (default) x.txt <- don't delete
+		// expected: x.txt must not be deleted
+
+		IJavaProject newJavaProject= JavaProjectHelper.createJavaProject("TestProject"+System.currentTimeMillis(), "bin");
+		JavaProjectHelper.addRTJar(newJavaProject);
+		IPackageFragmentRoot root= JavaProjectHelper.addSourceContainer(newJavaProject, null);
+		
+		IPackageFragment defaultP= root.getPackageFragment("");
+		IFile file= ((IContainer)defaultP.getResource()).getFile(new Path("Z.txt"));
+		file.create(getStream("123"), true, null);
+		
+		ICompilationUnit a= defaultP.createCompilationUnit("A.java", "public class A {}", false, null);
+		
+		ParticipantTesting.reset();
+		final Object[] markedForDelete= new Object[] { defaultP };
+		String[] deleteHandles= ParticipantTesting.createHandles(new Object[] { defaultP, a.getResource() });
+		
+		verifyEnabled(markedForDelete);
+		performDummySearch();
+		DeleteRefactoring ref= createRefactoring(markedForDelete);
+		RefactoringStatus status= performRefactoring(ref, false);
+		assertEquals("expected to pass", null, status);
+
+		ParticipantTesting.testDelete(deleteHandles);
+		assertTrue(defaultP.exists());
+		assertTrue(defaultP.getResource().exists());
+		assertTrue(file.exists());
+		assertFalse(a.exists());
+		assertFalse(a.getResource().exists());
+	}
+	
+	public void testDeletePackage12() throws Exception {
+		// a0		<- delete
+		// a0.a1	<- delete
+		// a0.a1.a2
+		// a0 and a1 are to be cleaned, do not report any folder deletions
+		IPackageFragment[] frags= createPackagePath(3);
+		executeDeletePackage(new Object[] { frags[0], frags[1] }, new IPackageFragment[] { frags[0], frags[1] }, new Object[] { });
+		assertTrue(frags[0].exists());
+		assertTrue(frags[1].exists());
+		assertTrue(frags[2].exists());
+	}
+	
+	public void testDeletePackageSub1() throws Exception {
+		// a0.a1.a2 <-delete with subs
+		// a0.a1.a2.a3
+		// a0.a1.a2.a3.file
+		// a0.a1.a2.a3.A
+		// a0.a1.a2.a3.a4
+		// expected: everything deleted
+		IPackageFragment[] frags= createPackagePath(5);
+		ICompilationUnit a= frags[3].createCompilationUnit("A.java", "public class A {}", false, null);
+		IFile file= ((IContainer)frags[3].getResource()).getFile(new Path("Z.txt"));
+		file.create(getStream("123"), true, null);
+		executeDeletePackage(new Object[] { frags[2] }, frags, new Object[] {  frags[0].getResource() }, true);
+		assertPackagesAreDeleted(frags);
+		assertFalse(a.exists());
+		assertFalse(file.exists());
+	}
+	
+	public void testDeletePackageSub2() throws Exception {
+		// (default)	<- delete
+		// a0
+		// a0.a1
+		// expected: everything deleted; notification about deletion of: 
+		// PackageFragments: a0, a0.a1, <default>
+		// Folders: a0 (NOT the folder of the default package)
+		IPackageFragment[] frags= createPackagePath(2);
+		IPackageFragment p= getRoot().getPackageFragment("p");
+		if (p.exists()) p.delete(true, null);
+		final IPackageFragment defaultPackage= getRoot().getPackageFragment("");
+		executeDeletePackage(new Object[] { defaultPackage }, frags, new Object[] { defaultPackage, frags[0].getResource() } , true);
+		assertPackagesAreDeleted(frags);
+	}
+	
+	public void testDeletePackageSub3() throws Exception {
+		// (default)	<- delete
+		// (default).A
+		// a0
+		// a0.a1
+		// expected: everything deleted; notification about deletion of: 
+		// PackageFragments: a0, a0.a1, <default>
+		// Folders: a0 (NOT the folder of the default package)
+		// Files: A.java (NOT other files in root, like .classpath).
+		IPackageFragment[] frags= createPackagePath(2);
+		final IPackageFragment defaultPackage= getRoot().getPackageFragment("");
+		IPackageFragment p= getRoot().getPackageFragment("p");
+		if (p.exists()) p.delete(true, null);
+		ICompilationUnit a= defaultPackage.createCompilationUnit("A.java", "public class A {}", false, null);
+		executeDeletePackage(new Object[] { defaultPackage }, frags, new Object[] { defaultPackage, a.getResource(), frags[0].getResource() } , true);
+		assertPackagesAreDeleted(frags);
+	}
+
 }
