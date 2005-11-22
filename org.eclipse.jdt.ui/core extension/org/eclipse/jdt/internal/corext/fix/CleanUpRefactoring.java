@@ -11,12 +11,14 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.eclipse.text.edits.DeleteEdit;
+import org.eclipse.text.edits.MoveSourceEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -37,13 +39,18 @@ import org.eclipse.ltk.core.refactoring.RefactoringTickProvider;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.composite.MultiStateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -69,6 +76,44 @@ public class CleanUpRefactoring extends Refactoring {
 		}
 		
 	}
+	
+	private class ParseListElement {
+
+		private final ICompilationUnit fUnit;
+		private List fFixes;
+		private IMultiFix[] fFixesArray;
+
+		public ParseListElement(ICompilationUnit unit) {
+			fUnit= unit;
+			fFixes= new ArrayList();
+			fFixesArray= new IMultiFix[0];
+		}
+		
+		public ParseListElement(ICompilationUnit unit, IMultiFix[] fixes) {
+			fUnit= unit;
+			fFixesArray= fixes;
+			fFixes= null;
+		}
+
+		public void addMultiFix(IMultiFix multiFix) {
+			if (fFixes == null) {
+				fFixes= Arrays.asList(fFixesArray);
+			}
+			fFixes.add(multiFix);
+			fFixesArray= null;
+		}
+
+		public ICompilationUnit getCompilationUnit() {
+			return fUnit;
+		}
+
+		public IMultiFix[] getMultiFixes() {
+			if (fFixesArray == null) {
+				fFixesArray= (IMultiFix[])fFixes.toArray(new IMultiFix[fFixes.size()]);
+			}
+			return fFixesArray;
+		}
+	}
 
 	private static final RefactoringTickProvider CLEAN_UP_REFACTORING_TICK_PROVIDER= new RefactoringTickProvider(0, 0, 1, 0);
 	
@@ -90,6 +135,10 @@ public class CleanUpRefactoring extends Refactoring {
 	
 	public boolean hasCompilationUnits() {
 		return !fCompilationUnits.isEmpty();
+	}
+	
+	public ICompilationUnit[] getCompilationUnits() {
+		return (ICompilationUnit[])fCompilationUnits.toArray(new ICompilationUnit[fCompilationUnits.size()]);
 	}
 	
 	public void addMultiFix(IMultiFix fix) {
@@ -154,41 +203,45 @@ public class CleanUpRefactoring extends Refactoring {
 		
 		Map fixOptions= getMultiFixOptions();
 		
-		final List resultingFixes= new ArrayList();
+		Hashtable resultingFixes= new Hashtable();
+		
+		IMultiFix[] fixes= (IMultiFix[])fMultiFixes.toArray(new IMultiFix[fMultiFixes.size()]);
+		List toGo= new ArrayList();
+		for (Iterator iter= fCompilationUnits.iterator(); iter.hasNext();) {
+			ICompilationUnit cu= (ICompilationUnit)iter.next();
+			toGo.add(new ParseListElement(cu, fixes));
+		}
 		
 		int start= 0;
-		int end;
-
-		Iterator compilationUnitsIterator= fCompilationUnits.iterator();
-		ICompilationUnit beforeEndCU= (ICompilationUnit)compilationUnitsIterator.next();
-		ICompilationUnit endCU= null;
-		do {
-			end= start + 1;
-			while (
-					end - start < BATCH_SIZE && 
-					end < fCompilationUnits.size() &&
-					compilationUnitsIterator.hasNext() && 
-					beforeEndCU.getJavaProject().equals((endCU= (ICompilationUnit)compilationUnitsIterator.next()).getJavaProject())) {
+		int end= 0;
+		ICompilationUnit beforeEndUnit= ((ParseListElement)toGo.get(start)).getCompilationUnit();
+		while (end < toGo.size()) {
+			while (end - start < BATCH_SIZE && end < toGo.size()) {
 				end++;
-				beforeEndCU= endCU;
+				if (end == toGo.size()) {
+					break;
+				} else {
+					ICompilationUnit endUnit = ((ParseListElement)toGo.get(end)).getCompilationUnit();
+					if (endUnit.getJavaProject() != beforeEndUnit.getJavaProject()) {
+						beforeEndUnit= endUnit;
+						break;
+					} else {
+						beforeEndUnit= endUnit;
+					}
+				}
 			}
-			if (compilationUnitsIterator.hasNext()) {
-				beforeEndCU= endCU;
-			}
+			List toParse= toGo.subList(start, end);
 			
-			final List workingSet= fCompilationUnits.subList(start, end);
-			ICompilationUnit[] compilationUnits= (ICompilationUnit[])workingSet.toArray(new ICompilationUnit[workingSet.size()]);
-			IJavaProject javaProject= compilationUnits[0].getJavaProject();
-
+			IJavaProject javaProject= ((ParseListElement)toParse.get(0)).getCompilationUnit().getJavaProject();
 			ASTParser parser= createParser(fixOptions, javaProject);
-			parse(resultingFixes, start, compilationUnits, new SubProgressMonitor(pm, workingSet.size()), parser);
+			List redoList= parse(resultingFixes, start, toParse, new SubProgressMonitor(pm, toParse.size()), parser, toGo.size());
+			toGo.addAll(redoList);
 			
 			start= end;
-		
-		} while (end < fCompilationUnits.size());
+		}
 		
 		CompositeChange result= new CompositeChange(getName());
-		for (Iterator iter= resultingFixes.iterator(); iter.hasNext();) {
+		for (Iterator iter= resultingFixes.values().iterator(); iter.hasNext();) {
 			Change element= (Change)iter.next();
 			result.add(element);
 		}
@@ -212,27 +265,98 @@ public class CleanUpRefactoring extends Refactoring {
 		return fixOptions;
 	}
 
-	private void parse(final List solutions, final int start, final ICompilationUnit[] compilationUnits, final SubProgressMonitor sub, ASTParser parser) throws CoreException {
-		final int[] index= new int[] {start};
-		final Integer size= new Integer(fCompilationUnits.size());
-		sub.subTask(Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {getTypeName(compilationUnits[index[0]- start]), new Integer(index[0] + 1), size}));
+	private List/*<ParseListElement>*/ parse(final Hashtable solutions, final int start, List/*<ParseListElement*/ toParse, final SubProgressMonitor sub, ASTParser parser, int totalElementsCount) throws CoreException {
+		
+		final ICompilationUnit[] compilationUnits= new ICompilationUnit[toParse.size()];
+		final IMultiFix[][] multiFixes= new IMultiFix[toParse.size()][];
+		final List workingCopys= new ArrayList();
 		
 		try {
-			parser.createASTs(compilationUnits, new String[0], new ASTRequestor() {
+			int i= 0;
+			for (Iterator iter= toParse.iterator(); iter.hasNext();) {
+				ParseListElement element= (ParseListElement) iter.next();
 
-				public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
+				ICompilationUnit compilationUnit= element.getCompilationUnit();
+				if (solutions.containsKey(compilationUnit)) {
 
-					calculateSolution(solutions, ast);
-					index[0]++;
-					if (index[0] - start < compilationUnits.length) {
-						sub.subTask(Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {getTypeName(compilationUnits[index[0] - start]), new Integer(index[0] + 1), size}));
-					}
+					ICompilationUnit workingCopy= createWorkingCopy(solutions, compilationUnit);
+
+					compilationUnits[i]= workingCopy;
+					workingCopys.add(workingCopy);
+				} else {
+					compilationUnits[i]= compilationUnit;
 				}
-				
-			}, sub);
-		} catch(FixCalculationException e) {
-			throw e.getException();
+				multiFixes[i]= element.getMultiFixes();
+				i++;
+			}
+			final List result= new ArrayList();
+			final int[] index= new int[] {start};
+			final Integer size= new Integer(totalElementsCount);
+			sub.subTask(Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {getTypeName(compilationUnits[index[0] - start]), new Integer(index[0] + 1), size}));
+			try {
+				parser.createASTs(compilationUnits, new String[0], new ASTRequestor() {
+
+					public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
+						ParseListElement tuple= calculateSolution(solutions, ast, multiFixes[index[0] - start]);
+						if (tuple != null) {
+							result.add(tuple);
+						}
+						index[0]++;
+						if (index[0] - start < compilationUnits.length) {
+							sub.subTask(Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {getTypeName(compilationUnits[index[0] - start]), new Integer(index[0] + 1), size}));
+						}
+					}
+
+				}, sub);
+			} catch (FixCalculationException e) {
+				throw e.getException();
+			}
+			return result;
+		} finally { 
+			for (Iterator iter= workingCopys.iterator(); iter.hasNext();) {
+				ICompilationUnit cu= (ICompilationUnit)iter.next();
+				cu.discardWorkingCopy();
+			}
 		}
+	}
+
+	private ICompilationUnit createWorkingCopy(final Hashtable solutions, ICompilationUnit compilationUnit) throws JavaModelException, CoreException {
+		Change oldChange= (Change)solutions.get(compilationUnit);
+		
+		MultiStateCompilationUnitChange mscuc;
+		if (!(oldChange instanceof MultiStateCompilationUnitChange)) {
+			mscuc= new MultiStateCompilationUnitChange(getChangeName(compilationUnit), compilationUnit);
+			mscuc.setKeepPreviewEdits(true);
+			mscuc.addChange((TextChange)oldChange);
+			solutions.remove(compilationUnit);
+			solutions.put(compilationUnit, mscuc);
+		} else {
+			mscuc= (MultiStateCompilationUnitChange)oldChange;
+		}
+
+		ICompilationUnit workingCopy= compilationUnit.getWorkingCopy(new WorkingCopyOwner() {}, null, null);
+		
+		IBuffer buffer= workingCopy.getBuffer();
+		buffer.setContents(mscuc.getPreviewContent(null));
+		return workingCopy;
+	}
+
+	private String getChangeName(ICompilationUnit compilationUnit) {
+		StringBuffer buf= new StringBuffer();
+		IJavaElement p= compilationUnit.getParent();
+		if (p != null) {
+			buf.insert(0, p.getElementName());
+			p= p.getParent();
+			while (p != null) {
+				if (p.getElementName().length() > 0) {
+					buf.insert(0, p.getElementName() + "/"); //$NON-NLS-1$
+				}
+				p= p.getParent();
+			}
+		}
+		buf.insert(0, " - "); //$NON-NLS-1$
+		buf.insert(0, compilationUnit.getElementName());
+		return buf.toString();
 	}
 
 	private ASTParser createParser(Map fixOptions, IJavaProject javaProject) {
@@ -254,37 +378,122 @@ public class CleanUpRefactoring extends Refactoring {
 		return elementName;
 	}
 	
-	public ICompilationUnit[] getCompilationUnits() {
-		return (ICompilationUnit[])fCompilationUnits.toArray(new ICompilationUnit[fCompilationUnits.size()]);
-	}
-
-	private void calculateSolution(final List solutions, CompilationUnit ast) {
+	private ParseListElement calculateSolution(Hashtable solutions, CompilationUnit ast, IMultiFix[] fixes) {
 		TextChange solution= null;
-		for (Iterator iterator= fMultiFixes.iterator(); iterator.hasNext();) {
-			IMultiFix problemSolution= (IMultiFix)iterator.next();
+		ParseListElement result= null;
+		for (int i= 0; i < fixes.length; i++) {
+			IMultiFix multiFix= fixes[i];
 			try {
-				IFix fix= problemSolution.createFix(ast);
+				IFix fix= multiFix.createFix(ast);
 				if (fix != null) {
 					TextChange current= fix.createChange();
-					if (solution != null)
-						mergeTextChanges(current, solution);
-					solution= current;
+					if (solution != null) {
+						if (intersects(current.getEdit(),solution.getEdit())) {
+							if (result == null) {
+								result= new ParseListElement((ICompilationUnit)ast.getJavaElement());
+							}
+							result.addMultiFix(multiFix);
+						} else {
+							mergeTextChanges(current, solution);
+							solution= current;
+						}
+					} else {
+						solution= current;
+					}
 				}
 			} catch (CoreException e) {
 				throw new FixCalculationException(e);
 			}
 		}
-		if (solution != null)
-			solutions.add(solution);
+		
+		if (solution != null) {
+			if (solutions.containsKey(ast.getJavaElement().getPrimaryElement())) {
+				MultiStateCompilationUnitChange oldChange= (MultiStateCompilationUnitChange)solutions.get(ast.getJavaElement().getPrimaryElement());
+				oldChange.addChange(solution);
+			} else {
+				solutions.put(ast.getJavaElement(), solution);
+			}
+		}
+		
+		return result;
+	}
+
+	private boolean intersects(TextEdit edit1, TextEdit edit2) {
+		if (edit1 instanceof MultiTextEdit && edit2 instanceof MultiTextEdit) {
+			MultiTextEdit multiTextEdit1= (MultiTextEdit)edit1;
+			TextEdit[] children1= multiTextEdit1.getChildren();
+			
+			MultiTextEdit multiTextEdit2= (MultiTextEdit)edit2;
+			TextEdit[] children2= multiTextEdit2.getChildren();
+			
+			int i1= 0;
+			int i2= 0;
+			while (i1 < children1.length && i2 < children2.length) {
+				while (i1 + 1 < children1.length && children1[i1 + 1].getOffset() < children2[i2].getOffset()) {
+					i1++;
+				}
+				while (i2 + 1 < children2.length && children2[i2 + 1].getOffset() < children1[i1].getOffset()) {
+					i2++;
+				}
+				if (intersects(children1[i1], children2[i2]))
+					return true;
+				
+				if (children1[i1].getOffset() < children2[i2].getOffset()) {
+					i1++;
+				} else {
+					i2++;
+				}
+			}
+			
+			return false;
+			
+		} else if (edit1 instanceof MultiTextEdit) {
+			MultiTextEdit multiTextEdit1= (MultiTextEdit)edit1;
+			TextEdit[] children= multiTextEdit1.getChildren();
+			for (int i= 0; i < children.length; i++) {
+				TextEdit child= children[i];
+				if (intersects(child, edit2))
+					return true;
+			}
+			return false;
+			
+		} else if (edit2 instanceof MultiTextEdit) {
+			MultiTextEdit multiTextEdit2= (MultiTextEdit)edit2;
+			TextEdit[] children= multiTextEdit2.getChildren();
+			for (int i= 0; i < children.length; i++) {
+				TextEdit child= children[i];
+				if (intersects(child, edit1))
+					return true;
+			}
+			return false;
+			
+		} else {
+			int start1= edit1.getOffset();
+			int end1= start1 + edit1.getLength();
+			int start2= edit2.getOffset();
+			int end2= start2 + edit2.getLength();
+			
+			if (start1 > end2)
+				return false;
+			
+			if (start2 > end1)
+				return false;
+			
+			return true;
+		}
 	}
 
 	public static void mergeTextChanges(TextChange target, TextChange source) {
 		final List edits= new ArrayList();
 		source.getEdit().accept(new TextEditVisitor() {
 			public boolean visitNode(TextEdit edit) {
-				if (!(edit instanceof MultiTextEdit)) {
-					edits.add(edit);
-				}
+				if (edit instanceof MoveSourceEdit)
+					return false;
+				
+				if (edit instanceof MultiTextEdit)
+					return true;
+					
+				edits.add(edit);
 				return super.visitNode(edit);
 			}
 			

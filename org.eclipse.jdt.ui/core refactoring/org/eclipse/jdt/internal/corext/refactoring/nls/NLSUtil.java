@@ -16,25 +16,20 @@ import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.Arrays;
 
-import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.IRegion;
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.text.Region;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.corext.util.Strings;
 
 public class NLSUtil {
 
@@ -88,19 +83,14 @@ public class NLSUtil {
 			return null;
 		NLSElement[] elements= nlsLine.getElements();
 		int indexInElementList= Arrays.asList(elements).indexOf(element);
-		try {
-			int editOffset= computeInsertOffset(elements, indexInElementList, cu);
-			String editText= " " + NLSElement.createTagText(indexInElementList + 1); //tags are 1-based //$NON-NLS-1$
-			return new InsertEdit(editOffset, editText);
-		} catch (BadLocationException exception) {
-			JavaPlugin.log(exception);
-			return null;
-		}
+		int editOffset= computeInsertOffset(elements, indexInElementList, cu);
+		String editText= ' ' + NLSElement.createTagText(indexInElementList + 1); //tags are 1-based
+		return new InsertEdit(editOffset, editText);
 	}
 
 	private static NLSLine scanCurrentLine(ICompilationUnit cu, int position) throws JavaModelException {
 		try {
-			Assert.isTrue(position >= 0 && position <= cu.getSourceRange().getLength());
+			Assert.isTrue(position >= 0 && position <= cu.getBuffer().getLength());
 			NLSLine[] allLines= NLSScanner.scan(cu);
 			for (int i= 0; i < allLines.length; i++) {
 				NLSLine line= allLines[i];
@@ -132,7 +122,7 @@ public class NLSUtil {
 	//first, try to find the previous nlsed-string and try putting after its tag
 	//if no such string exists, try finding the next nlsed-string try putting before its tag
 	//otherwise, find the line end and put the tag there
-	private static int computeInsertOffset(NLSElement[] elements, int index, ICompilationUnit cu) throws CoreException, BadLocationException {
+	private static int computeInsertOffset(NLSElement[] elements, int index, ICompilationUnit cu) throws CoreException {
 		NLSElement previousTagged= findPreviousTagged(index, elements);
 		if (previousTagged != null)
 			return previousTagged.getTagPosition().getOffset() + previousTagged.getTagPosition().getLength();
@@ -162,13 +152,14 @@ public class NLSUtil {
 		return null;
 	}
 
-	private static int findLineEnd(ICompilationUnit cu, int position) throws CoreException, BadLocationException {
-		try {
-			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(cu);
-			IRegion lineInfo= buffer.getDocument().getLineInformationOfOffset(position);
-			return lineInfo.getOffset() + lineInfo.getLength();
-		} finally {
-			RefactoringFileBuffers.release(cu);
+	private static int findLineEnd(ICompilationUnit cu, int position) throws JavaModelException {
+		IBuffer buffer= cu.getBuffer();
+		int length= buffer.getLength();
+		for (int i= position; i < length; i++) {
+			if (Strings.isLineDelimiterChar(buffer.getChar(i))) {
+				return i;
+			}
 		}
+		return length;
 	}
 }

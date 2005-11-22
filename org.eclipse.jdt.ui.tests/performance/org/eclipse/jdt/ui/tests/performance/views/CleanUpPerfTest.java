@@ -118,7 +118,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 	public void testAllCleanUp() throws Exception {
 		CleanUpRefactoring cleanUp= new CleanUpRefactoring();
 		addAllCUs(cleanUp, MyTestSetup.fJProject1.getChildren());
-		cleanUp.addMultiFix(new CodeStyleMultiFix(true, true, true, true));
+		cleanUp.addMultiFix(new CodeStyleMultiFix(true, true, true, true, true));
 		cleanUp.addMultiFix(new Java50MultiFix(true, true));
 		cleanUp.addMultiFix(new StringMultiFix(true, true));
 		cleanUp.addMultiFix(new UnusedCodeMultiFix(true, true, true, false, true, false));

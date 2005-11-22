@@ -311,7 +311,7 @@ public class LocalCorrectionsSubProcessor {
 		IFix fix= CodeStyleFix.createFix(context.getASTRoot(), problem, false, true);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleMultiFix(false, false, false, true), 6, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleMultiFix(false, false, false, true, false), 6, image);
 			proposal.setCommandId(ADD_STATIC_ACCESS_ID);
 			proposals.add(proposal);
 			return;
@@ -321,13 +321,13 @@ public class LocalCorrectionsSubProcessor {
 		if (fixes != null) {
 			IFix fix1= fixes[0];
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix1, new CodeStyleMultiFix(false, true, false, true), 6, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix1, new CodeStyleMultiFix(false, true, false, true, false), 6, image);
 			proposal.setCommandId(ADD_STATIC_ACCESS_ID);
 			proposals.add(proposal);
 			
 			if (fixes.length > 1) {
 				IFix fix2= fixes[1];
-				proposal= new FixCorrectionProposal(fix2, new CodeStyleMultiFix(false, true, false, true), 5, image);
+				proposal= new FixCorrectionProposal(fix2, new CodeStyleMultiFix(false, true, false, true, false), 5, image);
 				proposals.add(proposal);
 			}
 		}
@@ -540,7 +540,7 @@ public class LocalCorrectionsSubProcessor {
 		IFix fix= CodeStyleFix.createFix(context.getASTRoot(), problem, true, false);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleMultiFix(true, false, false, false), 5, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleMultiFix(true, false, false, false, false), 5, image);
 			proposal.setCommandId(ADD_FIELD_QUALIFICATION_ID);
 			proposals.add(proposal);
 		}

@@ -38,6 +38,7 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
  */
 public class CodeStyleMultiFix extends AbstractMultiFix {
 
+	private static final String ADD_BLOCK_TO_CONTROL_STATEMENTS_SETTINGS_ID= "AddBlockToControlStatements"; //$NON-NLS-1$
 	private static final String CHANGE_INDIRECT_STATIC_ACCESS_TO_STATIC_SETTINGS_ID= "ChangeIndirectStaticAccessToStatic"; //$NON-NLS-1$
 	private static final String QUALIFY_STATIC_FIELD_ACCESS_SETTINGS_ID= "QualifyStaticFieldAccessWithDeclaringClass"; //$NON-NLS-1$
 	private static final String CHANGE_NON_STATIC_ACCESS_TO_STATIC_SETTINGS_ID= "ChangeNonStaticAccessToStatic"; //$NON-NLS-1$
@@ -47,29 +48,38 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 	private boolean fChangeNonStaticAccessToStatic;
 	private boolean fQualifyStaticFieldAccessWithDeclaringClass;
 	private boolean fChangeIndirectStaticAccessToDirect;
+	private boolean fAddBlockToControlStatements;
 	
 	public CodeStyleMultiFix(boolean qualifyFieldAccess, 
 			boolean changeNonStaticAccessToStatic, 
-			boolean qualifyStaticFieldAccess, boolean changeIndirectStaticAccessToDirect) {
+			boolean qualifyStaticFieldAccess, boolean changeIndirectStaticAccessToDirect, 
+			boolean addBlockToControlStatements) {
 		
 		fAddThisQualifier= qualifyFieldAccess;
 		fChangeNonStaticAccessToStatic= changeNonStaticAccessToStatic;
 		fQualifyStaticFieldAccessWithDeclaringClass= qualifyStaticFieldAccess;
 		fChangeIndirectStaticAccessToDirect= changeIndirectStaticAccessToDirect;
+		fAddBlockToControlStatements= addBlockToControlStatements;
 	}
 
 	public CodeStyleMultiFix(IDialogSettings settings) {
 		this(settings.getBoolean(ADD_THIS_QUALIFIER_SETTINGS_ID), 
 				settings.getBoolean(CHANGE_NON_STATIC_ACCESS_TO_STATIC_SETTINGS_ID),
 				settings.getBoolean(QUALIFY_STATIC_FIELD_ACCESS_SETTINGS_ID),
-				settings.getBoolean(CHANGE_INDIRECT_STATIC_ACCESS_TO_STATIC_SETTINGS_ID));
+				settings.getBoolean(CHANGE_INDIRECT_STATIC_ACCESS_TO_STATIC_SETTINGS_ID),
+				settings.getBoolean(ADD_BLOCK_TO_CONTROL_STATEMENTS_SETTINGS_ID));
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
-		return CodeStyleFix.createCleanUp(compilationUnit, fAddThisQualifier, fChangeNonStaticAccessToStatic, fQualifyStaticFieldAccessWithDeclaringClass, fChangeIndirectStaticAccessToDirect);
+		return CodeStyleFix.createCleanUp(compilationUnit, 
+				fAddThisQualifier, 
+				fChangeNonStaticAccessToStatic, 
+				fQualifyStaticFieldAccessWithDeclaringClass, 
+				fChangeIndirectStaticAccessToDirect,
+				fAddBlockToControlStatements);
 	}
 
 	public Map getRequiredOptions() {
@@ -126,6 +136,16 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 			}
 		});
 		
+		Button addBlock= new Button(composite, SWT.CHECK);
+		addBlock.setText(MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description);
+		addBlock.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		addBlock.setSelection(fAddBlockToControlStatements);
+		addBlock.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				fAddBlockToControlStatements= ((Button)e.getSource()).getSelection();
+			}
+		});
+		
 		return composite;
 	}
 
@@ -134,6 +154,7 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 		settings.put(CHANGE_NON_STATIC_ACCESS_TO_STATIC_SETTINGS_ID, fChangeNonStaticAccessToStatic);
 		settings.put(QUALIFY_STATIC_FIELD_ACCESS_SETTINGS_ID, fQualifyStaticFieldAccessWithDeclaringClass);
 		settings.put(CHANGE_INDIRECT_STATIC_ACCESS_TO_STATIC_SETTINGS_ID, fChangeIndirectStaticAccessToDirect);
+		settings.put(ADD_BLOCK_TO_CONTROL_STATEMENTS_SETTINGS_ID, fAddBlockToControlStatements);
 	}
 
 }
