@@ -92,8 +92,8 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.fix.CodeStyleMultiFix;
-import org.eclipse.jdt.internal.ui.fix.StringMultiFix;
+import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
+import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.ChangeDescription;
@@ -291,7 +291,7 @@ public class LocalCorrectionsSubProcessor {
 		IFix fix= StringFix.createFix(context.getASTRoot(), problem, false, true);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
-			FixCorrectionProposal addNLS= new FixCorrectionProposal(fix, new StringMultiFix(true, false), 6, image);
+			FixCorrectionProposal addNLS= new FixCorrectionProposal(fix, new StringCleanUp(true, false), 6, image);
 			addNLS.setCommandId(ADD_NON_NLS_ID);
 			proposals.add(addNLS);
 		}
@@ -301,7 +301,7 @@ public class LocalCorrectionsSubProcessor {
 		IFix fix= StringFix.createFix(context.getASTRoot(), problem, true, false);
 		if (fix != null) {
 			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new StringMultiFix(false, true), 6, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new StringCleanUp(false, true), 6, image);
 			proposal.setCommandId(REMOVE_UNNECESSARY_NLS_TAG_ID);
 			proposals.add(proposal);
 		}
@@ -315,7 +315,7 @@ public class LocalCorrectionsSubProcessor {
 		IFix fix= CodeStyleFix.createFix(context.getASTRoot(), problem, false, true);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleMultiFix(false, false, false, true, false), 6, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUp(false, false, false, true, false), 6, image);
 			proposal.setCommandId(ADD_STATIC_ACCESS_ID);
 			proposals.add(proposal);
 			return;
@@ -325,13 +325,13 @@ public class LocalCorrectionsSubProcessor {
 		if (fixes != null) {
 			IFix fix1= fixes[0];
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix1, new CodeStyleMultiFix(false, true, false, true, false), 6, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix1, new CodeStyleCleanUp(false, true, false, true, false), 6, image);
 			proposal.setCommandId(ADD_STATIC_ACCESS_ID);
 			proposals.add(proposal);
 			
 			if (fixes.length > 1) {
 				IFix fix2= fixes[1];
-				proposal= new FixCorrectionProposal(fix2, new CodeStyleMultiFix(false, true, false, true, false), 5, image);
+				proposal= new FixCorrectionProposal(fix2, new CodeStyleCleanUp(false, true, false, true, false), 5, image);
 				proposals.add(proposal);
 			}
 		}
@@ -440,7 +440,7 @@ public class LocalCorrectionsSubProcessor {
 		UnusedCodeFix fix= UnusedCodeFix.createFix(context.getASTRoot(), problem, false, true, true, true, true, true, true);
 		if (fix != null) {
 			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, fix.getMultiFix(), 10, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, fix.getCleanUp(), 10, image);
 			proposals.add(proposal);
 		}
 	}
@@ -544,7 +544,7 @@ public class LocalCorrectionsSubProcessor {
 		IFix fix= CodeStyleFix.createFix(context.getASTRoot(), problem, true, false);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleMultiFix(true, false, false, false, false), 5, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUp(true, false, false, false, false), 5, image);
 			proposal.setCommandId(ADD_FIELD_QUALIFICATION_ID);
 			proposals.add(proposal);
 		}

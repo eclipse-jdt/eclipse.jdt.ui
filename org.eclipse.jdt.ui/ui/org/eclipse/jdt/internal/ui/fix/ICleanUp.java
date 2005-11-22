@@ -24,16 +24,16 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
 /**
- * A multi-fix can solve several different problems in
+ * A clean up can solve several different problems in
  * a given <code>CompilationUnit</code>. The <code>CompilationUnit</code>
  * is compiled by using the compiler options returned by
- * <code>getRequiredOptions</code>. A <code>IMultiFix</code> can have
+ * <code>getRequiredOptions</code>. A <code>ICleanUp</code> can have
  * different options which can be set by using the <code>Control</code>
  * returned by <code>createConfigurationControl</code>
  *
  * @since 3.2
  */
-public interface IMultiFix {
+public interface ICleanUp {
 	
 	/**
 	 * Create a <code>IFix</code> which fixes all problems which this 

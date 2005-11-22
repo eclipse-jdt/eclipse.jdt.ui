@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.corext.refactoring.composite.MultiStateCompilati
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.fix.IMultiFix;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class CleanUpRefactoring extends Refactoring {
@@ -80,48 +80,48 @@ public class CleanUpRefactoring extends Refactoring {
 	private class ParseListElement {
 
 		private final ICompilationUnit fUnit;
-		private List fFixes;
-		private IMultiFix[] fFixesArray;
+		private List fCleanUps;
+		private ICleanUp[] fCleanUpsArray;
 
 		public ParseListElement(ICompilationUnit unit) {
 			fUnit= unit;
-			fFixes= new ArrayList();
-			fFixesArray= new IMultiFix[0];
+			fCleanUps= new ArrayList();
+			fCleanUpsArray= new ICleanUp[0];
 		}
 		
-		public ParseListElement(ICompilationUnit unit, IMultiFix[] fixes) {
+		public ParseListElement(ICompilationUnit unit, ICleanUp[] cleanUps) {
 			fUnit= unit;
-			fFixesArray= fixes;
-			fFixes= null;
+			fCleanUpsArray= cleanUps;
+			fCleanUps= null;
 		}
 
-		public void addMultiFix(IMultiFix multiFix) {
-			if (fFixes == null) {
-				fFixes= Arrays.asList(fFixesArray);
+		public void addCleanUp(ICleanUp multiFix) {
+			if (fCleanUps == null) {
+				fCleanUps= Arrays.asList(fCleanUpsArray);
 			}
-			fFixes.add(multiFix);
-			fFixesArray= null;
+			fCleanUps.add(multiFix);
+			fCleanUpsArray= null;
 		}
 
 		public ICompilationUnit getCompilationUnit() {
 			return fUnit;
 		}
 
-		public IMultiFix[] getMultiFixes() {
-			if (fFixesArray == null) {
-				fFixesArray= (IMultiFix[])fFixes.toArray(new IMultiFix[fFixes.size()]);
+		public ICleanUp[] getCleanUps() {
+			if (fCleanUpsArray == null) {
+				fCleanUpsArray= (ICleanUp[])fCleanUps.toArray(new ICleanUp[fCleanUps.size()]);
 			}
-			return fFixesArray;
+			return fCleanUpsArray;
 		}
 	}
 
 	private static final RefactoringTickProvider CLEAN_UP_REFACTORING_TICK_PROVIDER= new RefactoringTickProvider(0, 0, 1, 0);
 	
 	private List/*<ICompilationUnit>*/ fCompilationUnits;
-	private List/*<IMultiFix>*/ fMultiFixes;
+	private List/*<ICleanUp>*/ fCleanUps;
 	
 	public CleanUpRefactoring() {
-		fMultiFixes= new ArrayList();
+		fCleanUps= new ArrayList();
 		fCompilationUnits= new ArrayList();
 	}
 	
@@ -141,16 +141,16 @@ public class CleanUpRefactoring extends Refactoring {
 		return (ICompilationUnit[])fCompilationUnits.toArray(new ICompilationUnit[fCompilationUnits.size()]);
 	}
 	
-	public void addMultiFix(IMultiFix fix) {
-		fMultiFixes.add(fix);
+	public void addCleanUp(ICleanUp fix) {
+		fCleanUps.add(fix);
 	}
 	
-	public void clearMultiFixes() {
-		fMultiFixes.clear();
+	public void clearCleanUps() {
+		fCleanUps.clear();
 	}
 	
-	public boolean hasMultiFix() {
-		return !fMultiFixes.isEmpty();
+	public boolean hasCleanUps() {
+		return !fCleanUps.isEmpty();
 	}
 
 	/* (non-Javadoc)
@@ -192,7 +192,7 @@ public class CleanUpRefactoring extends Refactoring {
 		if (pm == null)
 			pm= new NullProgressMonitor();
 		
-		if (fCompilationUnits.size() == 0 || fMultiFixes.size() == 0) {
+		if (fCompilationUnits.size() == 0 || fCleanUps.size() == 0) {
 			pm.beginTask("", 1); //$NON-NLS-1$
 			pm.worked(1);
 			pm.done();
@@ -201,15 +201,15 @@ public class CleanUpRefactoring extends Refactoring {
 		
 		pm.beginTask("", fCompilationUnits.size()); //$NON-NLS-1$
 		
-		Map fixOptions= getMultiFixOptions();
+		Map cleanUpOptions= getCleanUpOptions();
 		
 		Hashtable resultingFixes= new Hashtable();
 		
-		IMultiFix[] fixes= (IMultiFix[])fMultiFixes.toArray(new IMultiFix[fMultiFixes.size()]);
+		ICleanUp[] cleanUps= (ICleanUp[])fCleanUps.toArray(new ICleanUp[fCleanUps.size()]);
 		List toGo= new ArrayList();
 		for (Iterator iter= fCompilationUnits.iterator(); iter.hasNext();) {
 			ICompilationUnit cu= (ICompilationUnit)iter.next();
-			toGo.add(new ParseListElement(cu, fixes));
+			toGo.add(new ParseListElement(cu, cleanUps));
 		}
 		
 		int start= 0;
@@ -233,7 +233,7 @@ public class CleanUpRefactoring extends Refactoring {
 			List toParse= toGo.subList(start, end);
 			
 			IJavaProject javaProject= ((ParseListElement)toParse.get(0)).getCompilationUnit().getJavaProject();
-			ASTParser parser= createParser(fixOptions, javaProject);
+			ASTParser parser= createParser(cleanUpOptions, javaProject);
 			List redoList= parse(resultingFixes, start, toParse, new SubProgressMonitor(pm, toParse.size()), parser, toGo.size());
 			toGo.addAll(redoList);
 			
@@ -254,21 +254,21 @@ public class CleanUpRefactoring extends Refactoring {
 	/**
 	 * @return Options for all multi-fixes in <code>fMultiFixes</code>
 	 */
-	private Map getMultiFixOptions() {
-		Map fixOptions= new Hashtable();
-		for (Iterator iter= fMultiFixes.iterator(); iter.hasNext();) {
-			IMultiFix fix= (IMultiFix)iter.next();
-			Map curFixOptions= fix.getRequiredOptions();
-			if (curFixOptions != null)
-				fixOptions.putAll(curFixOptions);
+	private Map getCleanUpOptions() {
+		Map cleanUpOptions= new Hashtable();
+		for (Iterator iter= fCleanUps.iterator(); iter.hasNext();) {
+			ICleanUp cleanUp= (ICleanUp)iter.next();
+			Map currentCleanUpOption= cleanUp.getRequiredOptions();
+			if (currentCleanUpOption != null)
+				cleanUpOptions.putAll(currentCleanUpOption);
 		}
-		return fixOptions;
+		return cleanUpOptions;
 	}
 
 	private List/*<ParseListElement>*/ parse(final Hashtable solutions, final int start, List/*<ParseListElement*/ toParse, final SubProgressMonitor sub, ASTParser parser, int totalElementsCount) throws CoreException {
 		
 		final ICompilationUnit[] compilationUnits= new ICompilationUnit[toParse.size()];
-		final IMultiFix[][] multiFixes= new IMultiFix[toParse.size()][];
+		final ICleanUp[][] cleanUps= new ICleanUp[toParse.size()][];
 		final List workingCopys= new ArrayList();
 		
 		try {
@@ -286,7 +286,7 @@ public class CleanUpRefactoring extends Refactoring {
 				} else {
 					compilationUnits[i]= compilationUnit;
 				}
-				multiFixes[i]= element.getMultiFixes();
+				cleanUps[i]= element.getCleanUps();
 				i++;
 			}
 			final List result= new ArrayList();
@@ -297,7 +297,7 @@ public class CleanUpRefactoring extends Refactoring {
 				parser.createASTs(compilationUnits, new String[0], new ASTRequestor() {
 
 					public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
-						ParseListElement tuple= calculateSolution(solutions, ast, multiFixes[index[0] - start]);
+						ParseListElement tuple= calculateSolution(solutions, ast, cleanUps[index[0] - start]);
 						if (tuple != null) {
 							result.add(tuple);
 						}
@@ -359,13 +359,13 @@ public class CleanUpRefactoring extends Refactoring {
 		return buf.toString();
 	}
 
-	private ASTParser createParser(Map fixOptions, IJavaProject javaProject) {
+	private ASTParser createParser(Map cleanUpOptions, IJavaProject javaProject) {
 		ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 		parser.setResolveBindings(true);
 		parser.setProject(javaProject);
 				
 		Map options= RefactoringASTParser.getCompilerOptions(javaProject);
-		options.putAll(fixOptions);
+		options.putAll(cleanUpOptions);
 		parser.setCompilerOptions(options);
 		return parser;
 	}
@@ -378,13 +378,13 @@ public class CleanUpRefactoring extends Refactoring {
 		return elementName;
 	}
 	
-	private ParseListElement calculateSolution(Hashtable solutions, CompilationUnit ast, IMultiFix[] fixes) {
+	private ParseListElement calculateSolution(Hashtable solutions, CompilationUnit ast, ICleanUp[] cleanUps) {
 		TextChange solution= null;
 		ParseListElement result= null;
-		for (int i= 0; i < fixes.length; i++) {
-			IMultiFix multiFix= fixes[i];
+		for (int i= 0; i < cleanUps.length; i++) {
+			ICleanUp cleanUp= cleanUps[i];
 			try {
-				IFix fix= multiFix.createFix(ast);
+				IFix fix= cleanUp.createFix(ast);
 				if (fix != null) {
 					TextChange current= fix.createChange();
 					if (solution != null) {
@@ -392,7 +392,7 @@ public class CleanUpRefactoring extends Refactoring {
 							if (result == null) {
 								result= new ParseListElement((ICompilationUnit)ast.getJavaElement());
 							}
-							result.addMultiFix(multiFix);
+							result.addCleanUp(cleanUp);
 						} else {
 							mergeTextChanges(current, solution);
 							solution= current;

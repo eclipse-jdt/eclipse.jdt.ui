@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
  * @see org.eclipse.jdt.internal.corext.fix.StringFix
  *
  */
-public class StringMultiFix extends AbstractMultiFix {
+public class StringCleanUp extends AbstractCleanUp {
 
 	private static final String REMOVE_NLS_TAG_SETTINGS_ID= "RemoveNlsTag"; //$NON-NLS-1$
 	private static final String ADD_NLS_TAG_SETTINGS_ID= "AddNlsTag"; //$NON-NLS-1$
@@ -55,11 +55,11 @@ public class StringMultiFix extends AbstractMultiFix {
 	private boolean fAddNlsTag;
 	private boolean fRemoveNlsTag;
 
-	public StringMultiFix(boolean addNLSTag, boolean removeNLSTag) {
+	public StringCleanUp(boolean addNLSTag, boolean removeNLSTag) {
 		init(addNLSTag, removeNLSTag);
 	}
 
-	public StringMultiFix(IDialogSettings settings) {
+	public StringCleanUp(IDialogSettings settings) {
 		if (settings.get(ADD_NLS_TAG_SETTINGS_ID) == null) {
 			settings.put(ADD_NLS_TAG_SETTINGS_ID, false);
 		}

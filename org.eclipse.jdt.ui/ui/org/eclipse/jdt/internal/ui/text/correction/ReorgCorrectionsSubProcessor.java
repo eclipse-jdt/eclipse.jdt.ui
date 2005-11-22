@@ -97,7 +97,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
-import org.eclipse.jdt.internal.ui.fix.UnusedCodeMultiFix;
+import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
@@ -162,7 +162,7 @@ public class ReorgCorrectionsSubProcessor {
 		IFix fix= UnusedCodeFix.createFix(context.getASTRoot(), problem, true, false, false, false, false, false, false);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnusedCodeMultiFix(true, false, false, false, false, false), 6, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnusedCodeCleanUp(true, false, false, false, false, false), 6, image);
 			proposals.add(proposal);
 		}
 		

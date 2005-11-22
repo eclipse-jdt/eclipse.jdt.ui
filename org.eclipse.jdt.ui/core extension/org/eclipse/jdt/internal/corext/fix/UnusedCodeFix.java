@@ -60,7 +60,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.fix.UnusedCodeMultiFix;
+import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
 
 /**
@@ -112,7 +112,7 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 	}
 
-	private static UnusedCodeMultiFix fMultiFix;
+	private static UnusedCodeCleanUp fCleanUp;
 	private final ImportDeclaration[] fImports;
 	private final SimpleName[] fUnused;
 	private final CompilationUnit fAstRoot;
@@ -178,18 +178,18 @@ public class UnusedCodeFix extends AbstractFix {
 		String name= simpleName.getIdentifier();
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
-				fMultiFix= new UnusedCodeMultiFix(false, false, false, false, true, false);
+				fCleanUp= new UnusedCodeCleanUp(false, false, false, false, true, false);
 				return Messages.format(FixMessages.UnusedCodeFix_RemoveType_description, name);
 			case IBinding.METHOD:
 				if (((IMethodBinding) binding).isConstructor()) {
-					fMultiFix= new UnusedCodeMultiFix(false, false, true, false, false, false);
+					fCleanUp= new UnusedCodeCleanUp(false, false, true, false, false, false);
 					return Messages.format(FixMessages.UnusedCodeFix_RemoveConstructor_description, name);
 				} else {
-					fMultiFix= new UnusedCodeMultiFix(false, true, false, false, false, false);
+					fCleanUp= new UnusedCodeCleanUp(false, true, false, false, false, false);
 					return Messages.format(FixMessages.UnusedCodeFix_RemoveMethod_description, name);
 				}
 			case IBinding.VARIABLE:
-				fMultiFix= null;
+				fCleanUp= null;
 				if (((IVariableBinding) binding).isField()) {
 					return Messages.format(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_description, name);
 				} else {
@@ -357,7 +357,7 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 	}
 
-	public UnusedCodeMultiFix getMultiFix() {
-		return fMultiFix;
+	public UnusedCodeCleanUp getCleanUp() {
+		return fCleanUp;
 	}
 }

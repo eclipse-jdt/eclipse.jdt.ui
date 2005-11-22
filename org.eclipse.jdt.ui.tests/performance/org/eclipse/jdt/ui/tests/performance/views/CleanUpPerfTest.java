@@ -35,11 +35,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
-import org.eclipse.jdt.internal.ui.fix.CodeStyleMultiFix;
-import org.eclipse.jdt.internal.ui.fix.IMultiFix;
-import org.eclipse.jdt.internal.ui.fix.Java50MultiFix;
-import org.eclipse.jdt.internal.ui.fix.StringMultiFix;
-import org.eclipse.jdt.internal.ui.fix.UnusedCodeMultiFix;
+import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 
 import org.eclipse.test.performance.Dimension;
 
@@ -97,9 +97,9 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 	}
 	
 	public void testNullCleanUp() throws Exception {
-		CleanUpRefactoring cleanUp= new CleanUpRefactoring();
-		addAllCUs(cleanUp, MyTestSetup.fJProject1.getChildren());
-		cleanUp.addMultiFix(new IMultiFix() {
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+		cleanUpRefactoring.addCleanUp(new ICleanUp() {
 			public IFix createFix(CompilationUnit compilationUnit) throws CoreException {return null;}
 			public Map getRequiredOptions() {return null;}
 			public Control createConfigurationControl(Composite parent) {return null;}
@@ -110,24 +110,24 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		joinBackgroudActivities();
 		startMeasuring();
 		
-		cleanUp.createChange(null);
+		cleanUpRefactoring.createChange(null);
 
 		finishMeasurements();
 	}
 	
 	public void testAllCleanUp() throws Exception {
-		CleanUpRefactoring cleanUp= new CleanUpRefactoring();
-		addAllCUs(cleanUp, MyTestSetup.fJProject1.getChildren());
-		cleanUp.addMultiFix(new CodeStyleMultiFix(true, true, true, true, true));
-		cleanUp.addMultiFix(new Java50MultiFix(true, true));
-		cleanUp.addMultiFix(new StringMultiFix(true, true));
-		cleanUp.addMultiFix(new UnusedCodeMultiFix(true, true, true, false, true, false));
+		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
+		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
+		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUp(true, true, true, true, true));
+		cleanUpRefactoring.addCleanUp(new Java50CleanUp(true, true));
+		cleanUpRefactoring.addCleanUp(new StringCleanUp(true, true));
+		cleanUpRefactoring.addCleanUp(new UnusedCodeCleanUp(true, true, true, false, true, false));
 		tagAsSummary("Code clean up - all fixes", Dimension.ELAPSED_PROCESS);
 		
 		joinBackgroudActivities();
 		startMeasuring();
 		
-		cleanUp.createChange(null);
+		cleanUpRefactoring.createChange(null);
 
 		finishMeasurements();
 	}

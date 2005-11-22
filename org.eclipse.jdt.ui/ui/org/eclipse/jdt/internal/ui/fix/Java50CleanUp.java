@@ -42,12 +42,14 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+
 /**
  * Create fixes which can transform pre Java50 code to Java50 code
  * @see org.eclipse.jdt.internal.corext.fix.Java50Fix
  *
  */
-public class Java50MultiFix extends AbstractMultiFix {
+public class Java50CleanUp extends AbstractCleanUp {
 
 	private static final String ADD_DEPRICATED_ANNOTATION_SETTINGS_ID= "AddDepricatedAnnotation"; //$NON-NLS-1$
 	private static final String ADD_OVERRIDE_ANNOTATION_SETTINGS_ID= "AddOverrideAnnotation"; //$NON-NLS-1$
@@ -55,12 +57,12 @@ public class Java50MultiFix extends AbstractMultiFix {
 	private boolean fAddOverrideAnnotation;
 	private boolean fAddDepricatedAnnotation;
 
-	public Java50MultiFix(boolean addOverrideAnnotation, boolean addDepricatedAnnotation) {
+	public Java50CleanUp(boolean addOverrideAnnotation, boolean addDepricatedAnnotation) {
 		init(	addOverrideAnnotation,
 				addDepricatedAnnotation);
 	}
 
-	public Java50MultiFix(IDialogSettings settings) {
+	public Java50CleanUp(IDialogSettings settings) {
 		if (settings.get(ADD_OVERRIDE_ANNOTATION_SETTINGS_ID) == null) {
 			settings.put(ADD_OVERRIDE_ANNOTATION_SETTINGS_ID, true);
 		}
@@ -162,6 +164,19 @@ public class Java50MultiFix extends AbstractMultiFix {
 	public void saveSettings(IDialogSettings settings) {
 		settings.put(ADD_OVERRIDE_ANNOTATION_SETTINGS_ID, fAddOverrideAnnotation);
 		settings.put(ADD_DEPRICATED_ANNOTATION_SETTINGS_ID, fAddDepricatedAnnotation);
+	}
+	
+	/**
+	 * Helper method to convert an <code>IProblem</code> into an
+	 * <code>IProblemLocation</code>.
+	 * 
+	 * @param problem The <code>IProblem</code> not null
+	 * @return The <code>IProblemLocation</code> not null
+	 */
+	private IProblemLocation getProblemLocation(IProblem problem) {
+		int offset= problem.getSourceStart();
+		int length= problem.getSourceEnd() - offset + 1;
+		return new ProblemLocation(offset, length, problem.getID(), problem.getArguments(), problem.isError());
 	}
 
 }

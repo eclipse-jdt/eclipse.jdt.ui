@@ -42,12 +42,14 @@ import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+
 /**
  * Create fixes which can remove unused code
  * @see org.eclipse.jdt.internal.corext.fix.UnusedCodeFix
  *
  */
-public class UnusedCodeMultiFix extends AbstractMultiFix {
+public class UnusedCodeCleanUp extends AbstractCleanUp {
 
 	private static final String REMOVE_UNUSED_PRIVATE_CONSTRUCTORS_SETTINGS_ID= "RemoveUnusedPrivateConstructors"; //$NON-NLS-1$
 	private static final String REMOVE_UNUSED_IMPORTS_SETTINGS_ID= "RemoveUnusedImports"; //$NON-NLS-1$
@@ -63,7 +65,7 @@ public class UnusedCodeMultiFix extends AbstractMultiFix {
 	private boolean fRemoveUnusedPrivateTypes;
 	private boolean fRemoveUnusedLocalVariables;
 
-	public UnusedCodeMultiFix(boolean removeUnusedImports, boolean removeUnusedPrivateMethods, 
+	public UnusedCodeCleanUp(boolean removeUnusedImports, boolean removeUnusedPrivateMethods, 
 			boolean removeUnusedPrivateConstructors, boolean removeUnusedPrivateFields,
 			boolean removeUnusedPrivateTypes, boolean removeUnusedLocalVariables) {
 		
@@ -75,7 +77,7 @@ public class UnusedCodeMultiFix extends AbstractMultiFix {
 				removeUnusedLocalVariables);
 	}
 
-	public UnusedCodeMultiFix(IDialogSettings settings) {
+	public UnusedCodeCleanUp(IDialogSettings settings) {
 		if (settings.get(REMOVE_UNUSED_IMPORTS_SETTINGS_ID) == null) {
 			settings.put(REMOVE_UNUSED_IMPORTS_SETTINGS_ID, true);
 		}
@@ -248,6 +250,19 @@ public class UnusedCodeMultiFix extends AbstractMultiFix {
 		settings.put(REMOVE_UNUSED_PRIVATE_FIELDS_SETTINGS_ID, fRemoveUnusedPrivateFields);
 		settings.put(REMOVE_UNUSED_PRIVATE_TYPE_SETTINGS_ID, fRemoveUnusedPrivateTypes);
 		settings.put(REMOVE_UNUSED_LOCAL_VARIABLES_SETTINGS_ID, fRemoveUnusedLocalVariables);
+	}
+	
+	/**
+	 * Helper method to convert an <code>IProblem</code> into an
+	 * <code>IProblemLocation</code>.
+	 * 
+	 * @param problem The <code>IProblem</code> not null
+	 * @return The <code>IProblemLocation</code> not null
+	 */
+	private IProblemLocation getProblemLocation(IProblem problem) {
+		int offset= problem.getSourceStart();
+		int length= problem.getSourceEnd() - offset + 1;
+		return new ProblemLocation(offset, length, problem.getID(), problem.getArguments(), problem.isError());
 	}
 
 }

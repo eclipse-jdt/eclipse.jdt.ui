@@ -92,7 +92,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.fix.Java50MultiFix;
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.LinkedCorrectionProposal.ILinkedModeProposal;
 
 /**
@@ -616,7 +616,7 @@ public class ModifierCorrectionSubProcessor {
 		IFix fix= Java50Fix.createFix(context.getASTRoot(), problem, true, false);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50MultiFix(true, false), 5, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(true, false), 5, image);
 			proposals.add(proposal);
 		}
 	}
@@ -625,7 +625,7 @@ public class ModifierCorrectionSubProcessor {
 		IFix fix= Java50Fix.createFix(context.getASTRoot(), problem, false, true);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50MultiFix(false, true), 5, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(false, true), 5, image);
 			proposals.add(proposal);
 		}
 	}

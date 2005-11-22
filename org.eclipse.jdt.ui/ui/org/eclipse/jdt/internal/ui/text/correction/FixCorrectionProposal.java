@@ -30,7 +30,7 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
-import org.eclipse.jdt.internal.ui.fix.IMultiFix;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 
 /**
@@ -41,12 +41,12 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 public class FixCorrectionProposal extends CUCorrectionProposal implements ICompletionProposalExtension2 {
 
 	private final IFix fFix;
-	private final IMultiFix fMultiFix;
+	private final ICleanUp fCleanUp;
 
-	public FixCorrectionProposal(IFix fix, IMultiFix multiFix, int relevance, Image image) {
+	public FixCorrectionProposal(IFix fix, ICleanUp cleanUp, int relevance, Image image) {
 		super(fix.getDescription(), fix.getCompilationUnit(), relevance, image);
 		fFix= fix;
-		fMultiFix= multiFix;
+		fCleanUp= cleanUp;
 	}
 	
 	public IFix getFix() {
@@ -64,10 +64,10 @@ public class FixCorrectionProposal extends CUCorrectionProposal implements IComp
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 	 */
 	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
-		if (stateMask == SWT.CONTROL && fMultiFix != null){
+		if (stateMask == SWT.CONTROL && fCleanUp != null){
 			CleanUpRefactoring refactoring= new CleanUpRefactoring();
 			refactoring.addCompilationUnit(getCompilationUnit());
-			refactoring.addMultiFix(fMultiFix);
+			refactoring.addCleanUp(fCleanUp);
 			
 			CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, true, false);
 			

@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
  * Creates fixes which can resolve code style issues 
  * @see org.eclipse.jdt.internal.corext.fix.CodeStyleFix
  */
-public class CodeStyleMultiFix extends AbstractMultiFix {
+public class CodeStyleCleanUp extends AbstractCleanUp {
 
 	private static final String ADD_BLOCK_TO_CONTROL_STATEMENTS_SETTINGS_ID= "AddBlockToControlStatements"; //$NON-NLS-1$
 	private static final String CHANGE_INDIRECT_STATIC_ACCESS_TO_STATIC_SETTINGS_ID= "ChangeIndirectStaticAccessToStatic"; //$NON-NLS-1$
@@ -50,7 +50,7 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 	private boolean fChangeIndirectStaticAccessToDirect;
 	private boolean fAddBlockToControlStatements;
 	
-	public CodeStyleMultiFix(boolean qualifyFieldAccess, 
+	public CodeStyleCleanUp(boolean qualifyFieldAccess, 
 			boolean changeNonStaticAccessToStatic, 
 			boolean qualifyStaticFieldAccess, boolean changeIndirectStaticAccessToDirect, 
 			boolean addBlockToControlStatements) {
@@ -62,7 +62,7 @@ public class CodeStyleMultiFix extends AbstractMultiFix {
 		fAddBlockToControlStatements= addBlockToControlStatements;
 	}
 
-	public CodeStyleMultiFix(IDialogSettings settings) {
+	public CodeStyleCleanUp(IDialogSettings settings) {
 		this(settings.getBoolean(ADD_THIS_QUALIFIER_SETTINGS_ID), 
 				settings.getBoolean(CHANGE_NON_STATIC_ACCESS_TO_STATIC_SETTINGS_ID),
 				settings.getBoolean(QUALIFY_STATIC_FIELD_ACCESS_SETTINGS_ID),

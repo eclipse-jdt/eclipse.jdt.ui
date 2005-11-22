@@ -54,26 +54,6 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 	
 	private static final String CLEAN_UP_WIZARD_SETTINGS_SECTION_ID= "CleanUpWizard"; //$NON-NLS-1$
 	
-	private class NameFixTuple {
-
-		private final IMultiFix fFix;
-		private final String fName;
-
-		public NameFixTuple(String name, IMultiFix fix) {
-			fName= name;
-			fFix= fix;
-		}
-
-		public IMultiFix getFix() {
-			return fFix;
-		}
-
-		public String getName() {
-			return fName;
-		}
-		
-	}
-
 	private class SelectCUPage extends UserInputWizardPage {
 
 		private ContainerCheckedTreeViewer fTreeViewer;
@@ -197,20 +177,39 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				if (checkedElements[i] instanceof ICompilationUnit)
 					refactoring.addCompilationUnit((ICompilationUnit)checkedElements[i]);
 			}
-			if (!refactoring.hasMultiFix()) {
-				IMultiFix[] multiFixes= createAllMultiFixes();
-				for (int i= 0; i < multiFixes.length; i++) {
-					refactoring.addMultiFix(multiFixes[i]);
+			if (!refactoring.hasCleanUps()) {
+				ICleanUp[] cleanUps= createAllCleanUps();
+				for (int i= 0; i < cleanUps.length; i++) {
+					refactoring.addCleanUp(cleanUps[i]);
 				}
 			}
 		}
 	}
 	
-	private class SelectFixesPage extends UserInputWizardPage {
+	private class SelectCleanUpPage extends UserInputWizardPage {
 		
-		private NameFixTuple[] fMultiFixes;
+		private class NameCleanUpTuple {
+
+			private final ICleanUp fCleanUp;
+			private final String fName;
+
+			public NameCleanUpTuple(String name, ICleanUp cleanUp) {
+				fName= name;
+				fCleanUp= cleanUp;
+			}
+
+			public ICleanUp getCleanUp() {
+				return fCleanUp;
+			}
+
+			public String getName() {
+				return fName;
+			}
+		}
 		
-		public SelectFixesPage(String name) {
+		private NameCleanUpTuple[] fCleanUps;
+		
+		public SelectCleanUpPage(String name) {
 			super(name);
 		}
 		
@@ -237,16 +236,16 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 		
 		private void createGroups(Composite parent) {
-			NameFixTuple[] multiFixes= getMultiFixes();
-			for (int i= 0; i < multiFixes.length; i++) {
-				NameFixTuple tuple= multiFixes[i];
+			NameCleanUpTuple[] cleanUps= getNamedCleanUps();
+			for (int i= 0; i < cleanUps.length; i++) {
+				NameCleanUpTuple tuple= cleanUps[i];
 				
 				Group group= new Group(parent, SWT.NONE);
 				group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 				group.setLayout(new GridLayout(1, true));
 				group.setText(tuple.getName());
 				
-				tuple.getFix().createConfigurationControl(group);
+				tuple.getCleanUp().createConfigurationControl(group);
 			}
 		}
 		
@@ -264,31 +263,31 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		
 		private void storeSettings() {
 			IDialogSettings settings= getCleanUpWizardSettings();
-			NameFixTuple[] fixes= getMultiFixes();
-			for (int i= 0; i < fixes.length; i++) {
-				fixes[i].getFix().saveSettings(settings);
+			NameCleanUpTuple[] tuple= getNamedCleanUps();
+			for (int i= 0; i < tuple.length; i++) {
+				tuple[i].getCleanUp().saveSettings(settings);
 			}
 		}
 
 		private void initializeRefactoring() {
 			CleanUpRefactoring refactoring= (CleanUpRefactoring)getRefactoring();
-			refactoring.clearMultiFixes();
-			NameFixTuple[] multiFixes= getMultiFixes();
-			for (int i= 0; i < multiFixes.length; i++) {
-				refactoring.addMultiFix(multiFixes[i].getFix());
+			refactoring.clearCleanUps();
+			NameCleanUpTuple[] tuple= getNamedCleanUps();
+			for (int i= 0; i < tuple.length; i++) {
+				refactoring.addCleanUp(tuple[i].getCleanUp());
 			}
 		}	
 		
-		private NameFixTuple[] getMultiFixes() {
-			if (fMultiFixes == null) {
-				IMultiFix[] fixes= createAllMultiFixes();
-				fMultiFixes= new NameFixTuple[4];
-				fMultiFixes[0]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description, fixes[0]);
-				fMultiFixes[1]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description, fixes[1]);
-				fMultiFixes[2]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_J2SE50Section_description, fixes[2]);
-				fMultiFixes[3]= new NameFixTuple(MultiFixMessages.CleanUpRefactoringWizard_StringExternalization_description, fixes[3]);
+		private NameCleanUpTuple[] getNamedCleanUps() {
+			if (fCleanUps == null) {
+				ICleanUp[] fixes= createAllCleanUps();
+				fCleanUps= new NameCleanUpTuple[4];
+				fCleanUps[0]= new NameCleanUpTuple(MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description, fixes[0]);
+				fCleanUps[1]= new NameCleanUpTuple(MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description, fixes[1]);
+				fCleanUps[2]= new NameCleanUpTuple(MultiFixMessages.CleanUpRefactoringWizard_J2SE50Section_description, fixes[2]);
+				fCleanUps[3]= new NameCleanUpTuple(MultiFixMessages.CleanUpRefactoringWizard_StringExternalization_description, fixes[3]);
 			}
-			return fMultiFixes;
+			return fCleanUps;
 		}
 	}
 	
@@ -315,20 +314,20 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 		
 		if (fShowCleanUpPage){
-			SelectFixesPage selectSolverPage= new SelectFixesPage(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_name);
+			SelectCleanUpPage selectSolverPage= new SelectCleanUpPage(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_name);
 			selectSolverPage.setMessage(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_message);
 			addPage(selectSolverPage);
 		}
 	}
 		
-	public static IMultiFix[] createAllMultiFixes() {
+	public static ICleanUp[] createAllCleanUps() {
 		IDialogSettings section= getCleanUpWizardSettings();
 		
-		IMultiFix[] result= new IMultiFix[4];
-		result[0]= new CodeStyleMultiFix(section);
-		result[1]= new UnusedCodeMultiFix(section);
-		result[2]= new Java50MultiFix(section);
-		result[3]= new StringMultiFix(section);
+		ICleanUp[] result= new ICleanUp[4];
+		result[0]= new CodeStyleCleanUp(section);
+		result[1]= new UnusedCodeCleanUp(section);
+		result[2]= new Java50CleanUp(section);
+		result[3]= new StringCleanUp(section);
 		
 		return result;
 	}

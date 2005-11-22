@@ -43,7 +43,7 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
-import org.eclipse.jdt.internal.ui.fix.IMultiFix;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
@@ -163,9 +163,9 @@ public class CleanUpAction extends SelectionDispatchAction {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
-		IMultiFix[] fixes= CleanUpRefactoringWizard.createAllMultiFixes();
-		for (int i= 0; i < fixes.length; i++) {
-			refactoring.addMultiFix(fixes[i]);
+		ICleanUp[] cleanUps= CleanUpRefactoringWizard.createAllCleanUps();
+		for (int i= 0; i < cleanUps.length; i++) {
+			refactoring.addCleanUp(cleanUps[i]);
 		}
 		
 		int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();

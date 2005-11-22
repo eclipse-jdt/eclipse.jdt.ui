@@ -46,11 +46,11 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.CodeStyleMultiFix;
-import org.eclipse.jdt.internal.ui.fix.IMultiFix;
-import org.eclipse.jdt.internal.ui.fix.Java50MultiFix;
-import org.eclipse.jdt.internal.ui.fix.StringMultiFix;
-import org.eclipse.jdt.internal.ui.fix.UnusedCodeMultiFix;
+import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -154,11 +154,11 @@ public class CleanUpTest extends QuickFixTest {
 		return result;
 	}
 	
-	private void setOptions(IMultiFix fix) {
-		setOptions(new IMultiFix[] {fix});
+	private void setOptions(ICleanUp fix) {
+		setOptions(new ICleanUp[] {fix});
 	}
 	
-	private void setOptions(IMultiFix[] fixes) {
+	private void setOptions(ICleanUp[] fixes) {
 		Hashtable options= JavaCore.getOptions();
 		for (Iterator iter= options.keySet().iterator(); iter.hasNext();) {
 			String key= (String)iter.next();
@@ -169,7 +169,7 @@ public class CleanUpTest extends QuickFixTest {
 		}
 		
 		for (int i= 0; i < fixes.length; i++) {
-			IMultiFix fix= fixes[i];
+			ICleanUp fix= fixes[i];
 			Map fixOptions= fix.getRequiredOptions();
 			if (fixOptions != null) {
 				options.putAll(fixOptions);
@@ -237,9 +237,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new StringMultiFix(true, false);
+		ICleanUp cleanUp= new StringCleanUp(true, false);
 		
-		setOptions(multiFix);
+		setOptions(cleanUp);
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
 		assertNumberOfProblems(units[0], 1);
@@ -282,7 +282,7 @@ public class CleanUpTest extends QuickFixTest {
 		int offset= 0;
 		String[] previews= new String[numberOfFixes];
 		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= multiFix.createFix(units[i]);
+			IFix fix= cleanUp.createFix(units[i]);
 			assertNotNull("There are problems but no fix", fix);
 			TextChange change= fix.createChange();
 			assertNotNull("Null change for an existing fix", change);
@@ -327,9 +327,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 
-		IMultiFix multiFix= new StringMultiFix(false, true);
+		ICleanUp cleanUp= new StringCleanUp(false, true);
 		
-		setOptions(multiFix);
+		setOptions(cleanUp);
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
 		assertNumberOfProblems(units[0], 1);
@@ -372,7 +372,7 @@ public class CleanUpTest extends QuickFixTest {
 		int offset= 0;
 		String[] previews= new String[numberOfFixes];
 		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= multiFix.createFix(units[i]);
+			IFix fix= cleanUp.createFix(units[i]);
 			assertNotNull("There are problems but no fix", fix);
 			TextChange change= fix.createChange();
 			assertNotNull("Null change for an existing fix", change);
@@ -412,9 +412,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new UnusedCodeMultiFix(true, false, false, false, false, false);
+		ICleanUp cleanUp= new UnusedCodeCleanUp(true, false, false, false, false, false);
 		
-		setOptions(multiFix);
+		setOptions(cleanUp);
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
 		assertNumberOfProblems(units[0], 1);
@@ -446,7 +446,7 @@ public class CleanUpTest extends QuickFixTest {
 		int offset= 0;
 		String[] previews= new String[numberOfFixes];
 		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= multiFix.createFix(units[i]);
+			IFix fix= cleanUp.createFix(units[i]);
 			assertNotNull("There are problems but no fix", fix);
 			TextChange change= fix.createChange();
 			assertNotNull("Null change for an existing fix", change);
@@ -489,9 +489,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new UnusedCodeMultiFix(false, true, false, false, false, false);
+		ICleanUp cleanUp= new UnusedCodeCleanUp(false, true, false, false, false, false);
 		
-		setOptions(multiFix);
+		setOptions(cleanUp);
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
 		assertNumberOfProblems(units[0], 1);
@@ -527,7 +527,7 @@ public class CleanUpTest extends QuickFixTest {
 		int offset= 0;
 		String[] previews= new String[numberOfFixes];
 		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= multiFix.createFix(units[i]);
+			IFix fix= cleanUp.createFix(units[i]);
 			assertNotNull("There are problems but no fix", fix);
 			TextChange change= fix.createChange();
 			assertNotNull("Null change for an existing fix", change);
@@ -567,9 +567,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new UnusedCodeMultiFix(false, false, true, false, false, false);
+		ICleanUp cleanUp= new UnusedCodeCleanUp(false, false, true, false, false, false);
 		
-		setOptions(multiFix);
+		setOptions(cleanUp);
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
 		assertNumberOfProblems(units[0], 1);
@@ -603,7 +603,7 @@ public class CleanUpTest extends QuickFixTest {
 		int offset= 0;
 		String[] previews= new String[numberOfFixes];
 		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= multiFix.createFix(units[i]);
+			IFix fix= cleanUp.createFix(units[i]);
 			assertNotNull("There are problems but no fix", fix);
 			TextChange change= fix.createChange();
 			assertNotNull("Null change for an existing fix", change);
@@ -644,9 +644,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new UnusedCodeMultiFix(false, false, false, true, false, false);
+		ICleanUp cleanUp= new UnusedCodeCleanUp(false, false, false, true, false, false);
 		
-		setOptions(multiFix);
+		setOptions(cleanUp);
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
 		assertNumberOfProblems(units[0], 1);
@@ -678,7 +678,7 @@ public class CleanUpTest extends QuickFixTest {
 		int offset= 0;
 		String[] previews= new String[numberOfFixes];
 		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= multiFix.createFix(units[i]);
+			IFix fix= cleanUp.createFix(units[i]);
 			assertNotNull("There are problems but no fix", fix);
 			TextChange change= fix.createChange();
 			assertNotNull("Null change for an existing fix", change);
@@ -716,9 +716,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new UnusedCodeMultiFix(false, false, false, false, true, false);
+		ICleanUp cleanUp= new UnusedCodeCleanUp(false, false, false, false, true, false);
 		
-		setOptions(multiFix);
+		setOptions(cleanUp);
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
 		assertNumberOfProblems(units[0], 1);
@@ -750,7 +750,7 @@ public class CleanUpTest extends QuickFixTest {
 		int offset= 0;
 		String[] previews= new String[numberOfFixes];
 		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= multiFix.createFix(units[i]);
+			IFix fix= cleanUp.createFix(units[i]);
 			assertNotNull("There are problems but no fix", fix);
 			TextChange change= fix.createChange();
 			assertNotNull("Null change for an existing fix", change);
@@ -802,9 +802,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new UnusedCodeMultiFix(false, false, false, false, false, true);
+		ICleanUp cleanUp= new UnusedCodeCleanUp(false, false, false, false, false, true);
 		
-		setOptions(multiFix);
+		setOptions(cleanUp);
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
 		assertNumberOfProblems(units[0], 1);
@@ -846,7 +846,7 @@ public class CleanUpTest extends QuickFixTest {
 		int offset= 0;
 		String[] previews= new String[numberOfFixes];
 		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= multiFix.createFix(units[i]);
+			IFix fix= cleanUp.createFix(units[i]);
 			assertNotNull("There are problems but no fix", fix);
 			TextChange change= fix.createChange();
 			assertNotNull("Null change for an existing fix", change);
@@ -882,9 +882,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new Java50MultiFix(false, true);
+		ICleanUp cleanUp= new Java50CleanUp(false, true);
 		
-		setOptions(multiFix);
+		setOptions(cleanUp);
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2});
 		assertNumberOfProblems(units[0], 1);
@@ -921,7 +921,7 @@ public class CleanUpTest extends QuickFixTest {
 		int offset= 0;
 		String[] previews= new String[numberOfFixes];
 		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= multiFix.createFix(units[i]);
+			IFix fix= cleanUp.createFix(units[i]);
 			assertNotNull("There are problems but no fix", fix);
 			TextChange change= fix.createChange();
 			assertNotNull("Null change for an existing fix", change);
@@ -957,9 +957,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new Java50MultiFix(false, true);
+		ICleanUp cleanUp= new Java50CleanUp(false, true);
 		
-		setOptions(multiFix);
+		setOptions(cleanUp);
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2});
 		assertNumberOfProblems(units[0], 1);
@@ -996,7 +996,7 @@ public class CleanUpTest extends QuickFixTest {
 		int offset= 0;
 		String[] previews= new String[numberOfFixes];
 		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= multiFix.createFix(units[i]);
+			IFix fix= cleanUp.createFix(units[i]);
 			assertNotNull("There are problems but no fix", fix);
 			TextChange change= fix.createChange();
 			assertNotNull("Null change for an existing fix", change);
@@ -1031,9 +1031,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new Java50MultiFix(false, true);
+		ICleanUp cleanUp= new Java50CleanUp(false, true);
 		
-		setOptions(multiFix);
+		setOptions(cleanUp);
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2});
 		assertNumberOfProblems(units[0], 1);
@@ -1069,7 +1069,7 @@ public class CleanUpTest extends QuickFixTest {
 		int offset= 0;
 		String[] previews= new String[numberOfFixes];
 		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= multiFix.createFix(units[i]);
+			IFix fix= cleanUp.createFix(units[i]);
 			assertNotNull("There are problems but no fix", fix);
 			TextChange change= fix.createChange();
 			assertNotNull("Null change for an existing fix", change);
@@ -1118,8 +1118,8 @@ public class CleanUpTest extends QuickFixTest {
 		refactoring.addCompilationUnit(cu1);
 		refactoring.addCompilationUnit(cu2);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, false, false, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(true, false, false, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1182,8 +1182,8 @@ public class CleanUpTest extends QuickFixTest {
 		refactoring.addCompilationUnit(cu1);
 		refactoring.addCompilationUnit(cu2);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true, false, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(true, true, false, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1238,9 +1238,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(false, true, false, false, false);
+		ICleanUp cleanUp= new CodeStyleCleanUp(false, true, false, false, false);
 		
-		setOptions(multiFix);
+		setOptions(cleanUp);
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
 		assertNumberOfProblems(units[0], 1);
@@ -1286,7 +1286,7 @@ public class CleanUpTest extends QuickFixTest {
 		int offset= 0;
 		String[] previews= new String[numberOfFixes];
 		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= multiFix.createFix(units[i]);
+			IFix fix= cleanUp.createFix(units[i]);
 			assertNotNull("There are problems but no fix", fix);
 			TextChange change= fix.createChange();
 			assertNotNull("Null change for an existing fix", change);
@@ -1339,8 +1339,8 @@ public class CleanUpTest extends QuickFixTest {
 		refactoring.addCompilationUnit(cu2);
 		refactoring.addCompilationUnit(cu3);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(false, true, false, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(false, true, false, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1426,8 +1426,8 @@ public class CleanUpTest extends QuickFixTest {
 		refactoring.addCompilationUnit(cu2);
 		refactoring.addCompilationUnit(cu3);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true, false, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(true, true, false, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test2;\n");
@@ -1470,8 +1470,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true, false, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(true, true, false, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		assertRefactoringHasNoChange(refactoring);
 	}
@@ -1492,8 +1492,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true, false, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(true, true, false, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		assertRefactoringHasNoChange(refactoring);
 	}
@@ -1520,8 +1520,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true, false, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(true, true, false, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		assertRefactoringHasNoChange(refactoring);
 	}
@@ -1555,8 +1555,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true, false, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(true, true, false, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		assertRefactoringHasNoChange(refactoring);
 	}
@@ -1574,8 +1574,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true, true, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(true, true, true, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		assertRefactoringHasNoChange(refactoring);
 	}
@@ -1628,8 +1628,8 @@ public class CleanUpTest extends QuickFixTest {
 		refactoring.addCompilationUnit(cu2);
 		refactoring.addCompilationUnit(cu3);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true, true, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(true, true, true, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1694,8 +1694,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true, true, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(true, true, true, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1732,8 +1732,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true, true, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(true, true, true, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1771,8 +1771,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true, true, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(true, true, true, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1810,8 +1810,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true, true, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(true, true, true, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1871,8 +1871,8 @@ public class CleanUpTest extends QuickFixTest {
 		refactoring.addCompilationUnit(cu2);
 		refactoring.addCompilationUnit(cu3);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(true, true, true, true, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(true, true, true, true, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1935,8 +1935,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(false, false, false, false, true);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(false, false, false, false, true);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1995,8 +1995,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(false, false, false, false, true);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(false, false, false, false, true);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2046,8 +2046,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(false, false, false, false, true);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(false, false, false, false, true);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2103,8 +2103,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(false, false, false, false, true);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(false, false, false, false, true);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2163,8 +2163,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(false, false, false, false, true);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(false, false, false, false, true);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2220,8 +2220,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(false, false, true, false, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(false, false, true, false, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		assertRefactoringHasNoChange(refactoring);
 	}
@@ -2243,10 +2243,10 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix codeStyle= new CodeStyleMultiFix(true, false, false, false, true);
-		refactoring.addMultiFix(codeStyle);
-		IMultiFix stringFix= new StringMultiFix(false, true);
-		refactoring.addMultiFix(stringFix);
+		ICleanUp codeStyle= new CodeStyleCleanUp(true, false, false, false, true);
+		refactoring.addCleanUp(codeStyle);
+		ICleanUp stringFix= new StringCleanUp(false, true);
+		refactoring.addCleanUp(stringFix);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2279,10 +2279,10 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix codeStyle= new CodeStyleMultiFix(true, false, false, false, true);
-		refactoring.addMultiFix(codeStyle);
-		IMultiFix stringFix= new StringMultiFix(true, true);
-		refactoring.addMultiFix(stringFix);
+		ICleanUp codeStyle= new CodeStyleCleanUp(true, false, false, false, true);
+		refactoring.addCleanUp(codeStyle);
+		ICleanUp stringFix= new StringCleanUp(true, true);
+		refactoring.addCleanUp(stringFix);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2332,8 +2332,8 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(false, false, false, true, false);
-		refactoring.addMultiFix(multiFix);
+		ICleanUp cleanUp= new CodeStyleCleanUp(false, false, false, true, false);
+		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2360,9 +2360,9 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("}\n");
 		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		IMultiFix multiFix= new CodeStyleMultiFix(false, true, false, false, false);
+		ICleanUp cleanUp= new CodeStyleCleanUp(false, true, false, false, false);
 		
-		setOptions(multiFix);
+		setOptions(cleanUp);
 		
 		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1});
 		assertNumberOfProblems(units[0], 1);
@@ -2381,7 +2381,7 @@ public class CleanUpTest extends QuickFixTest {
 		int offset= 0;
 		String[] previews= new String[numberOfFixes];
 		for (int i= offset; i < numberOfFixes; i++) {
-			IFix fix= multiFix.createFix(units[i]);
+			IFix fix= cleanUp.createFix(units[i]);
 			assertNotNull("There are problems but no fix", fix);
 			TextChange change= fix.createChange();
 			assertNotNull("Null change for an existing fix", change);
@@ -2410,10 +2410,10 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix1= new CodeStyleMultiFix(true, false, false, false, false);
-		IMultiFix multiFix2= new UnusedCodeMultiFix(false, false, false, true, false, false);
-		refactoring.addMultiFix(multiFix1);
-		refactoring.addMultiFix(multiFix2);
+		ICleanUp cleanUp1= new CodeStyleCleanUp(true, false, false, false, false);
+		ICleanUp cleanUp2= new UnusedCodeCleanUp(false, false, false, true, false, false);
+		refactoring.addCleanUp(cleanUp1);
+		refactoring.addCleanUp(cleanUp2);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -2449,10 +2449,10 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		IMultiFix multiFix1= new CodeStyleMultiFix(false, false, false, false, true);
-		IMultiFix multiFix2= new StringMultiFix(true, false);
-		refactoring.addMultiFix(multiFix1);
-		refactoring.addMultiFix(multiFix2);
+		ICleanUp cleanUp1= new CodeStyleCleanUp(false, false, false, false, true);
+		ICleanUp cleanUp2= new StringCleanUp(true, false);
+		refactoring.addCleanUp(cleanUp1);
+		refactoring.addCleanUp(cleanUp2);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
