@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -22,7 +21,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -38,7 +36,6 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -49,31 +46,17 @@ import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.buildpath.IClasspathInformationProvider;
-import org.eclipse.jdt.internal.corext.buildpath.LinkedSourceFolderOperation;
-import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier.IClasspathModifierListener;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddArchivesQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IAddLibrariesQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ICreateFolderQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IOutputLocationQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IRemoveLinkedFolderQuery;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.OutputFolderQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.LinkFolderDialog;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.ITreeListAdapter;
@@ -289,25 +272,32 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 	protected void sourcePageCustomButtonPressed(DialogField field, int index) {
 		if (field == fFoldersList) {
-			if (index == IDX_ADD) {
+			if (index == IDX_ADD || index == IDX_ADD_LINK) {
 				List elementsToAdd= new ArrayList(10);
-				IProject project= fCurrJProject.getProject();
-				if (project.exists()) {
-					if (hasFolders(project)) {
-						CPListElement[] srcentries= openSourceContainerDialog(null);
-						if (srcentries != null) {
-							for (int i= 0; i < srcentries.length; i++) {
-								elementsToAdd.add(srcentries[i]);
+				if (index == IDX_ADD) {
+					IProject project= fCurrJProject.getProject();
+					if (project.exists()) {
+						if (hasFolders(project)) {
+							CPListElement[] srcentries= openSourceContainerDialog(null);
+							if (srcentries != null) {
+								for (int i= 0; i < srcentries.length; i++) {
+									elementsToAdd.add(srcentries[i]);
+								}
 							}
+						} else {
+							CPListElement entry= openNewSourceContainerDialog(null, true);
+							if (entry != null) {
+								elementsToAdd.add(entry);
+							}	
 						}
 					} else {
-						CPListElement entry= openNewSourceContainerDialog(null, true);
+						CPListElement entry= openNewSourceContainerDialog(null, false);
 						if (entry != null) {
 							elementsToAdd.add(entry);
-						}	
+						}
 					}
 				} else {
-					CPListElement entry= openNewSourceContainerDialog(null, false);
+					CPListElement entry= openNewLinkedSourceContainerDialog(null);
 					if (entry != null) {
 						elementsToAdd.add(entry);
 					}
@@ -334,106 +324,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 					}
 
 				}				
-			} else if (index == IDX_ADD_LINK) {
-				LinkedSourceFolderOperation op= new LinkedSourceFolderOperation(new IClasspathModifierListener() {
-
-					public void classpathEntryChanged(List newEntries) {
-						fClassPathList.setElements(newEntries);
-						updateFoldersList();
-					}
-					
-				}, new IClasspathInformationProvider() {
-
-					private ArrayList fNewFolders= new ArrayList();
-					private String fOldOutputLocation= fOutputLocationField.getText();
-
-					public void handleResult(List resultElements, CoreException exception, int operationType) {
-				        if (exception != null) {
-				            ExceptionHandler.handle(exception, getShell(), NewWizardMessages.SourceContainerWorkbookPage_error_while_linking, exception.getLocalizedMessage()); 
-				            return;
-				        }
-				        
-				        handleFolderCreation(resultElements);
-					}
-					
-				    private void handleFolderCreation(List result) {
-				        if (result.size() == 1) {
-				            fNewFolders.add(result.get(0));
-				        	fFoldersList.selectElements(new StructuredSelection(result));
-				            setOutputLocationFieldText(getOldOutputLocation());
-				        }
-				    }
-				    
-				    private IPath getOldOutputLocation() {
-				        return new Path(fOutputLocationField.getText()).makeAbsolute();
-				    }
-				    
-				    private void setOutputLocationFieldText(IPath oldOutputLocation) {
-				        try {
-				            if (!fCurrJProject.getOutputLocation().equals(oldOutputLocation)) {
-				                fOutputLocationField.setText(fCurrJProject.getOutputLocation().makeRelative().toString());
-				                IJavaElement element= fCurrJProject.findElement(fCurrJProject.getOutputLocation().removeFirstSegments(1));
-				                if (element != null)
-				                    fNewFolders.add(element);
-				            }
-				        } catch (JavaModelException exception) {
-				            ExceptionHandler.handle(exception, getShell(), NewWizardMessages.HintTextGroup_Exception_Title_output, exception.getMessage()); 
-				        }
-				    }
-
-					public IStructuredSelection getSelection() {
-						return new StructuredSelection(fFoldersList.getSelectedElements());
-					}
-
-					public IJavaProject getJavaProject() {
-						return fCurrJProject;
-					}
-					
-				    public void deleteCreatedResources() {
-				        Iterator iterator= fNewFolders.iterator();
-				        while (iterator.hasNext()) {
-				            Object element= iterator.next();
-				            IFolder folder;
-				            try {
-				                if (element instanceof IFolder)
-				                    folder= (IFolder)element;
-				                else if (element instanceof IJavaElement)
-				                    folder= fCurrJProject.getProject().getWorkspace().getRoot().getFolder(((IJavaElement)element).getPath());
-				                else {
-				                    ((IFile)element).delete(false, null);
-				                    continue;
-				                }
-				                folder.delete(false, null);
-				            } catch (CoreException e) {
-				            }            
-				        }
-				        
-				        fOutputLocationField.setText(fOldOutputLocation);
-				        fNewFolders= new ArrayList();
-				    }
-					
-				    public OutputFolderQuery getOutputFolderQuery() {return null;}
-				    public IInclusionExclusionQuery getInclusionExclusionQuery() {return null;}
-				    public IOutputLocationQuery getOutputLocationQuery() throws JavaModelException {return null;}
-					public IRemoveLinkedFolderQuery getRemoveLinkedFolderQuery() throws JavaModelException {return null;}
-				    public IAddArchivesQuery getExternalArchivesQuery() throws JavaModelException {return null;}
-				    public IAddLibrariesQuery getLibrariesQuery() throws JavaModelException {return null;}
-					public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException {return null;}
-
-				    /**
-				     * Return an <code>ILinkToQuery</code>.
-				     * 
-				     * @see ClasspathModifierQueries#getDefaultLinkQuery(Shell, IJavaProject, IPath)
-				     * @see IClasspathInformationProvider#getLinkFolderQuery()
-				     */
-				    public ILinkToQuery getLinkFolderQuery() throws JavaModelException {
-				        return ClasspathModifierQueries.getDefaultLinkQuery(getShell(), fCurrJProject, new Path(fOutputLocationField.getText()));
-				    }
-
-					
-				}
-				);
-				run(op);
 			} else if (index == IDX_EDIT) {
 				editEntry();
 			} else if (index == IDX_REMOVE) {
@@ -441,19 +331,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			}
 		}
 	}
-	
-    public void run(LinkedSourceFolderOperation op) {
-        try {
-            op.run(null);
-        } catch (InvocationTargetException e) {
-            // nothing to do
-        } catch (InterruptedException e) {
-            // nothing to do
-        }
-        // Remark: there is nothing to do because the operation that is executed 
-        // ensures that the object receiving the result should do the exception handling
-        // because it needs to implement interface IClasspathInformationProvider
-    }
 
 	private void editEntry() {
 		List selElements= fFoldersList.getSelectedElements();
@@ -471,10 +348,21 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private void editElementEntry(CPListElement elem) {
 		CPListElement res= null;
 		
-		res= openNewSourceContainerDialog(elem, true);
-		
-		if (res != null) {
-			fFoldersList.replaceElement(elem, res);
+		if (elem.getResource().isLinked()) {
+			removeEntry();
+			CPListElement entry= openNewLinkedSourceContainerDialog(elem.getResource());
+			
+			if (entry == null)
+				entry= elem;
+			
+			fFoldersList.addElement(entry);
+			fFoldersList.postSetSelection(new StructuredSelection(entry));
+		} else {
+			res= openNewSourceContainerDialog(elem, true);
+			
+			if (res != null) {
+				fFoldersList.replaceElement(elem, res);
+			}
 		}
 	}
 
@@ -572,6 +460,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 		Object elem= selElements.get(0);
 		if (elem instanceof CPListElement) {
+			if (((CPListElement)elem).getResource().isLinked())
+				return true;
+			
 			return false;
 		}
 		if (elem instanceof CPListElementAttribute) {
@@ -630,6 +521,20 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		if (lastRemovePos != nEntries || !srcelements.isEmpty()) {
 			fClassPathList.setElements(cpelements);
 		}
+	}
+	
+    private CPListElement openNewLinkedSourceContainerDialog(IResource resource) {
+    	
+    	LinkFolderDialog dialog= new LinkFolderDialog(getShell(), fCurrJProject.getProject(), resource, false);
+    	
+        if (dialog.open() == Window.OK) {
+            IResource createdLink= dialog.getCreatedFolder();
+            IPath linkTarget= dialog.getLinkTarget();
+            CPListElement result= new CPListElement(fCurrJProject, IClasspathEntry.CPE_SOURCE, createdLink.getFullPath(), createdLink);
+            result.setLinkTarget(linkTarget);
+			return result;
+        }
+		return null;
 	}
 		
 	private CPListElement openNewSourceContainerDialog(CPListElement existing, boolean includeLinked) {	

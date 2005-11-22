@@ -59,6 +59,7 @@ public class CPListElement {
 		
 	private IClasspathEntry fCachedEntry;
 	private ArrayList fChildren;
+	private IPath fLinkTarget;
 	
 	public CPListElement(IJavaProject project, int entryKind, IPath path, IResource res) {
 		this(null, project, entryKind, path, res);
@@ -390,7 +391,8 @@ public class CPListElement {
 		// get the resource
 		IResource res= null;
 		boolean isMissing= false;
-
+		IPath linkTarget= null;
+		
 		switch (curr.getEntryKind()) {
 			case IClasspathEntry.CPE_CONTAINER:
 				res= null;
@@ -415,6 +417,8 @@ public class CPListElement {
 						}
 					}
 					isMissing= !path.toFile().isFile(); // look for external JARs
+				} else if (res.isLinked()) {
+					linkTarget= res.getLocation();
 				}
 				break;
 			case IClasspathEntry.CPE_SOURCE:
@@ -425,6 +429,8 @@ public class CPListElement {
 						res= root.getFolder(path);
 					}
 					isMissing= true;
+				} else if (res.isLinked()) {
+					linkTarget= res.getLocation();
 				}
 				break;
 			case IClasspathEntry.CPE_PROJECT:
@@ -447,6 +453,8 @@ public class CPListElement {
 			elem.setAttribute(attrib.getName(), attrib.getValue());
 		}
 
+		elem.setLinkTarget(linkTarget);
+		
 		if (project != null && project.exists()) {
 			elem.setIsMissing(isMissing);
 		}
@@ -500,7 +508,17 @@ public class CPListElement {
 
 	public StringBuffer appendEncodedSettings(StringBuffer buf) {
 		buf.append(fEntryKind).append(';');
-		appendEncodePath(fPath, buf).append(';');
+		if (getLinkTarget() == null) {
+			appendEncodePath(fPath, buf).append(';');
+		} else {
+			if (fPath != null) {
+				String str= getLinkTarget().toString();
+				buf.append('[').append(str.length()).append(']').append(str);
+			} else {
+				buf.append('[').append(']');
+			}
+			buf.append(';');
+		}
 		buf.append(Boolean.valueOf(fIsExported)).append(';');
 		for (int i= 0; i < fChildren.size(); i++) {
 			Object curr= fChildren.get(i);
@@ -523,6 +541,14 @@ public class CPListElement {
 			}
 		}
 		return buf;
+	}
+
+	public IPath getLinkTarget() {
+		return fLinkTarget;
+	}
+
+	public void setLinkTarget(IPath linkTarget) {
+		fLinkTarget= linkTarget;
 	}
 
 }

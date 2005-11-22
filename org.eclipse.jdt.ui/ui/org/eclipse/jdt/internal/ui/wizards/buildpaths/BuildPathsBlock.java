@@ -721,8 +721,17 @@ public class BuildPathsBlock {
 		for (int i= 0; i < nEntries; i++) {
 			CPListElement entry= ((CPListElement)classPathEntries.get(i));
 			IResource res= entry.getResource();
-			if ((res instanceof IFolder) && !res.exists()) {
-				CoreUtility.createFolder((IFolder)res, true, true, null);
+			if (res instanceof IFolder) {
+				if (entry.getLinkTarget() != null) {
+					if (!res.exists()) {
+						((IFolder)res).createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, monitor);
+					} else if (!entry.getLinkTarget().equals(res.getLocation())) {
+						((IFolder)res).delete(true, monitor);
+						((IFolder)res).createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, monitor);
+					}
+				} else if (!res.exists()) {
+					CoreUtility.createFolder((IFolder)res, true, true, null);
+				}
 			}
 			if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 				IPath folderOutput= (IPath) entry.getAttribute(CPListElement.OUTPUT);

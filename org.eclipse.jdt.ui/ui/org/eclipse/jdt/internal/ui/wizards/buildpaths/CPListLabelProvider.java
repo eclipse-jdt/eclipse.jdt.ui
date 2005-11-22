@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.ISharedImages;
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -218,6 +219,11 @@ public class CPListLabelProvider extends LabelProvider {
 				IResource resource= cpentry.getResource();
 				if (resource instanceof IContainer) {
 					StringBuffer buf= new StringBuffer(path.makeRelative().toString());
+					IPath linkTarget= cpentry.getLinkTarget();
+					if (linkTarget != null) {
+						buf.append(JavaElementLabels.CONCAT_STRING);
+						buf.append(linkTarget.toOSString());
+					}
 					buf.append(' ');
 					buf.append(fClassLabel);
 					if (!resource.exists()) {
@@ -257,6 +263,11 @@ public class CPListLabelProvider extends LabelProvider {
 				return path.toString();
 			case IClasspathEntry.CPE_SOURCE: {
 				StringBuffer buf= new StringBuffer(path.makeRelative().toString());
+				IPath linkTarget= cpentry.getLinkTarget();
+				if (linkTarget != null) {
+					buf.append(JavaElementLabels.CONCAT_STRING);
+					buf.append(linkTarget.toOSString());
+				}
 				IResource resource= cpentry.getResource();
 				if (resource != null && !resource.exists()) {
 					buf.append(' ');
