@@ -1310,7 +1310,7 @@
             <keywordReference id="org.eclipse.jdt.ui.contentassist"/>
       </page>
       <page
-            name="Work in Progress"
+            name="%workInProgress.name"
             category="org.eclipse.jdt.ui.preferences.CodeAssistPreferencePage"
             class="org.eclipse.jdt.internal.ui.preferences.CodeAssistPreferencePageInProgress"
             id="org.eclipse.jdt.ui.preferences.CodeAssistPreferencePageInProgress">
@@ -4650,5 +4650,31 @@
     <extension point="org.eclipse.core.runtime.preferences">
         <initializer class="org.eclipse.jdt.internal.ui.JavaUIPreferenceInitializer"/>
     </extension>
+
+   <extension
+         id="modelProvider"
+         point="org.eclipse.core.resources.modelProviders">
+      <modelProvider
+            class="org.eclipse.jdt.internal.ui.refactoring.model.JavaRefactoringModelProvider"
+            name="%RefactoringModelProvider.name"/>
+      <extends-model id="org.eclipse.core.resources.modelProvider"/>
+      <enablement>
+         <with variable="affectedNatures">
+            <iterate operator="or">
+               <equals value="org.eclipse.jdt.core.javanature"/>
+            </iterate>
+         </with>
+      </enablement>
+   </extension>
+
+   <extension
+         point="org.eclipse.compare.streamMergers">
+      <streamMerger
+            class="org.eclipse.jdt.internal.ui.refactoring.merge.JavaFileStreamMerger"
+            id="org.eclipse.jdt.ui.refactoring.model.JavaFileStreamMerger"/>
+      <contentTypeBinding
+            contentTypeId="org.eclipse.jdt.core.javaSource"
+            streamMergerId="org.eclipse.jdt.ui.refactoring.model.JavaFileStreamMerger"/>
+   </extension>
 
 </plugin>
