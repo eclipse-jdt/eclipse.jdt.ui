@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.StringFix;
 import org.eclipse.jdt.internal.corext.fix.TextChangeFix;
@@ -97,7 +98,7 @@ public class StringMultiFix extends AbstractMultiFix {
 				if (edit != null) {
 					if (result == null) 
 						result= new CompilationUnitChange("", cu); //$NON-NLS-1$
-					TextChangeCompatibility.addTextEdit(result, MultiFixMessages.StringMultiFix_AddMissingNonNls_description, edit);
+					TextChangeCompatibility.addTextEdit(result, FixMessages.StringFix_AddNonNls_description, edit);
 				}
 			}
 			if (fRemoveNlsTag && problem.getID() == IProblem.UnnecessaryNLSTag) {
@@ -107,7 +108,7 @@ public class StringMultiFix extends AbstractMultiFix {
 					if (edit != null) {
 						if (result == null)
 							result= new CompilationUnitChange("", cu); //$NON-NLS-1$
-						TextChangeCompatibility.addTextEdit(result, MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description, edit);
+						TextChangeCompatibility.addTextEdit(result, FixMessages.StringFix_RemoveNonNls_description, edit);
 					}
 				}
 			}
