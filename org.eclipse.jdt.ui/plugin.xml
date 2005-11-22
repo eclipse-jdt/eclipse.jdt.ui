@@ -4650,7 +4650,7 @@
     <extension point="org.eclipse.core.runtime.preferences">
         <initializer class="org.eclipse.jdt.internal.ui.JavaUIPreferenceInitializer"/>
     </extension>
-
+<!--
    <extension
          id="modelProvider"
          point="org.eclipse.core.resources.modelProviders">
@@ -4666,7 +4666,7 @@
          </with>
       </enablement>
    </extension>
-
+-->
    <extension
          point="org.eclipse.compare.streamMergers">
       <streamMerger
