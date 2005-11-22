@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 public abstract class SelectionDispatchAction extends Action implements ISelectionChangedListener {
 	
 	private IWorkbenchSite fSite;
-	private ISelectionProvider fSelectionProvider;
+	private ISelectionProvider fExtraSelectionProvider;
 	
 	/**
 	 * Creates a new action with no text and no image.
@@ -64,11 +64,11 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	protected SelectionDispatchAction(IWorkbenchSite site) {
 		Assert.isNotNull(site);
 		fSite= site;
-		fSelectionProvider= fSite.getSelectionProvider();
+		fExtraSelectionProvider= null;
 	}
 
 	/**
-	 * Creates a new action with no text and no image.
+	 * Creates a new action with no text and no image
 	 * 
 	 * <p>
 	 * Configure the action later using the set methods.
@@ -84,7 +84,7 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 		Assert.isNotNull(site);
 		Assert.isNotNull(provider);
 		fSite= site;
-		fSelectionProvider= provider;
+		fExtraSelectionProvider= provider;
 	}
 
 	/**
@@ -118,12 +118,16 @@ public abstract class SelectionDispatchAction extends Action implements ISelecti
 	}
 	
 	/**
-	 * Returns the selection provider managed by the site owning this action.
+	 * Returns the selection provider managed by the site owning this action or the selection provider explicitly set in
+	 * {@link #SelectionDispatchAction(IWorkbenchSite, ISelectionProvider)}.
 	 * 
 	 * @return the site's selection provider	
 	 */
 	public ISelectionProvider getSelectionProvider() {
-		return fSelectionProvider;
+		if (fExtraSelectionProvider != null) {
+			return fExtraSelectionProvider;
+		}
+		return fSite.getSelectionProvider();
 	}
 
 	/**
