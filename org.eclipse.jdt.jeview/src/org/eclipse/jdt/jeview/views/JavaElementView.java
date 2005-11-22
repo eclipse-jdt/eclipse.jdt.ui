@@ -74,6 +74,7 @@ import org.eclipse.ui.part.IShowInTarget;
 import org.eclipse.ui.part.ShowInContext;
 import org.eclipse.ui.part.ViewPart;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 
 import org.eclipse.ui.views.properties.IPropertySheetPage;
 import org.eclipse.ui.views.properties.IPropertySource;
@@ -106,6 +107,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	private DrillDownAdapter fDrillDownAdapter;
 	JERoot fInput;
 	
+	private Action fFocusAction;
 	private Action fResetAction;
 	private Action fCodeSelectAction;
 	private Action fElementAtAction;
@@ -247,6 +249,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		fillLocalPullDown(bars.getMenuManager());
 		fillLocalToolBar(bars.getToolBarManager());
 		bars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fRefreshAction);
+		bars.setGlobalActionHandler(ActionFactory.PROPERTIES.getId(), fPropertiesAction);
 	}
 
 	private void fillLocalPullDown(IMenuManager manager) {
@@ -259,6 +262,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	}
 
 	void fillContextMenu(IMenuManager manager) {
+		addFocusActionOrNot(manager);
 		manager.add(fResetAction);
 		manager.add(fRefreshAction);
 		manager.add(new Separator());
@@ -268,6 +272,20 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		manager.add(new Separator());
 		manager.add(fPropertiesAction);
+	}
+
+	private void addFocusActionOrNot(IMenuManager manager) {
+		if (fViewer.getSelection() instanceof IStructuredSelection) {
+			IStructuredSelection structuredSelection= (IStructuredSelection) fViewer.getSelection();
+			if (structuredSelection.size() == 1) {
+				Object first= structuredSelection.getFirstElement();
+				if (first instanceof JavaElement) {
+					String name= ((JavaElement) first).getJavaElement().getElementName();
+					fFocusAction.setText("Fo&cus On '" + name + '\'');
+					manager.add(fFocusAction);
+				}
+			}
+		}
 	}
 	
 	private void fillLocalToolBar(IToolBarManager manager) {
@@ -345,14 +363,22 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		};
 		
-		fResetAction= new Action("Reset View", getJavaModelImageDescriptor()) {
+		fFocusAction= new Action() {
+			@Override public void run() {
+				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
+				setInput(((JavaElement) selected).getJavaElement());
+			}
+		};
+		fFocusAction.setToolTipText("Focus on Selection");
+		
+		fResetAction= new Action("&Reset View", getJavaModelImageDescriptor()) {
 			@Override public void run() {
 				reset();
 			}
 		};
 		fResetAction.setToolTipText("Reset View to JavaModel");
 		
-		fRefreshAction= new Action("Refresh", JEPluginImages.IMG_REFRESH) {
+		fRefreshAction= new Action("Re&fresh", JEPluginImages.IMG_REFRESH) {
 			@Override public void run() {
 				BusyIndicator.showWhile(getSite().getShell().getDisplay(), new Runnable() {
 					public void run() {
@@ -379,6 +405,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				}
 			}
 		};
+		fPropertiesAction.setActionDefinitionId(IWorkbenchActionDefinitionIds.PROPERTIES);
 		
 		fDoubleClickAction = new Action() {
 			private Object fPreviousDouble;
