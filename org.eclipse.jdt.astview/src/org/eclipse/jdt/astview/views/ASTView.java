@@ -118,7 +118,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 public class ASTView extends ViewPart implements IShowInSource {
 	
 	private static final int JLS3= AST.JLS3;
-	/** (Used to get rid of depreciation warnings in code)
+	/** (Used to get rid of deprecation warnings in code)
 	 * @deprecated
 	 */
 	private static final int JLS2= AST.JLS2;
