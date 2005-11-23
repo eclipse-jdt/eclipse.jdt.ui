@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -128,7 +129,7 @@ public class RenameResourceProcessor extends RenameProcessor implements IInitial
 	//--- Condition checking --------------------------------------------
 
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-		return new RefactoringStatus();
+		return RefactoringStatus.create(Resources.checkInSync(fResource));
 	}
 	
 	/* non java-doc
