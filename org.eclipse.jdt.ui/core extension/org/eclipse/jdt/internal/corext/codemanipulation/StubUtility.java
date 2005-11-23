@@ -33,8 +33,6 @@ import org.eclipse.core.runtime.preferences.InstanceScope;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ProjectScope;
 
-import org.eclipse.swt.SWT;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -52,6 +50,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IParent;
 import org.eclipse.jdt.core.ISourceReference;
@@ -733,35 +732,19 @@ public class StubUtility {
 		return Platform.getPreferencesService().getString(Platform.PI_RUNTIME, Platform.PREF_LINE_SEPARATOR, platformDefault, scopeContext);
 	}
 	
-
 	/**
 	 * Examines a string and returns the first line delimiter found.
 	 */
 	public static String getLineDelimiterUsed(IJavaElement elem) {
-		ICompilationUnit cu= null;
-		if (elem != null)
-			cu= (ICompilationUnit)elem.getAncestor(IJavaElement.COMPILATION_UNIT);
-		if (cu != null && cu.exists()) {
+		while (elem != null && !(elem instanceof IOpenable)) {
+			elem= elem.getParent();
+		}
+		if (elem != null) {
 			try {
-				IBuffer buf= cu.getBuffer();
-				int length= buf.getLength();
-				for (int i= 0; i < length; i++) {
-					char ch= buf.getChar(i);
-					if (ch == SWT.CR) {
-						if (i + 1 < length) {
-							if (buf.getChar(i + 1) == SWT.LF) {
-								return "\r\n"; //$NON-NLS-1$
-							}
-						}
-						return "\r"; //$NON-NLS-1$
-					} else if (ch == SWT.LF) {
-						return "\n"; //$NON-NLS-1$
-					}
-				}
+				return ((IOpenable) elem).findRecommendedLineSeparator();
 			} catch (JavaModelException exception) {
 				// Use project setting
 			}
-			return getProjectLineDelimiter(cu.getJavaProject());
 		}
 		return getProjectLineDelimiter(null);
 	}
