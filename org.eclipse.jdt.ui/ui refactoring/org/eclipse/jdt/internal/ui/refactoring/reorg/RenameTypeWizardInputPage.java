@@ -120,7 +120,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 
 	public void dispose() {
 		if (saveSettings())
-			if (fUpdateDerivedElements.isEnabled()) {
+			if (fUpdateDerivedElements != null && !fUpdateDerivedElements.isDisposed() && fUpdateDerivedElements.isEnabled()) {
 				saveBooleanSetting(UPDATE_DERIVED_ELEMENTS, fUpdateDerivedElements);
 				getRefactoringSettings().put(DIALOG_SETTINGS_DERIVED_MATCH_STRATEGY, fSelectedStrategy);
 			}
@@ -146,35 +146,43 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 	 */
 	public IWizardPage getNextPage() {
 		RenameTypeWizard wizard= (RenameTypeWizard) getWizard();
-		final RenameTypeProcessor renameTypeProcessor= wizard.getRenameTypeProcessor();
-		try {
-			getContainer().run(true, true, new IRunnableWithProgress() {
-
-				public void run(IProgressMonitor pm) throws InterruptedException {
-					try {
-						renameTypeProcessor.initializeReferences(pm);
-					} catch (OperationCanceledException e) {
-						throw new InterruptedException();
-					} catch (CoreException e) {
-						ExceptionHandler.handle(e, RefactoringMessages.RenameTypeWizard_defaultPageTitle, RefactoringMessages.RenameTypeWizard_unexpected_exception);
-					} finally {
-						pm.done();
-					}
-				}
-			});
-		} catch (InvocationTargetException e) {
-			ExceptionHandler.handle(e, getShell(), RefactoringMessages.RenameTypeWizard_defaultPageTitle, RefactoringMessages.RenameTypeWizard_unexpected_exception);
-		} catch (InterruptedException e) {
-			// user canceled
-			return this;
-		}
-
 		IWizardPage nextPage;
-		if (renameTypeProcessor.hasDerivedElementsToRename()) {
-			nextPage= super.getNextPage();
-		} else {
+		
+		if (wizard.isRenameType()) {
+			final RenameTypeProcessor renameTypeProcessor= wizard.getRenameTypeProcessor();
+			try {
+				getContainer().run(true, true, new IRunnableWithProgress() {
+
+					public void run(IProgressMonitor pm) throws InterruptedException {
+						try {
+							renameTypeProcessor.initializeReferences(pm);
+						} catch (OperationCanceledException e) {
+							throw new InterruptedException();
+						} catch (CoreException e) {
+							ExceptionHandler.handle(e, RefactoringMessages.RenameTypeWizard_defaultPageTitle,
+									RefactoringMessages.RenameTypeWizard_unexpected_exception);
+						} finally {
+							pm.done();
+						}
+					}
+				});
+			} catch (InvocationTargetException e) {
+				ExceptionHandler.handle(e, getShell(), RefactoringMessages.RenameTypeWizard_defaultPageTitle,
+						RefactoringMessages.RenameTypeWizard_unexpected_exception);
+			} catch (InterruptedException e) {
+				// user canceled
+				return this;
+			}
+
+			if (renameTypeProcessor.hasDerivedElementsToRename()) {
+				nextPage= super.getNextPage();
+			} else {
+				nextPage= computeSuccessorPage();
+			}
+			
+		} else
 			nextPage= computeSuccessorPage();
-		}
+		
 		nextPage.setPreviousPage(this);
 		return nextPage;
 	}
