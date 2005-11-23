@@ -179,6 +179,9 @@ public class TypeSelectionComponent extends Composite {
 		
 		fFilter= new Text(this, SWT.BORDER | SWT.FLAT);
 		fFilter.setFont(font);
+		if (fInitialFilterText != null) {
+			fFilter.setText(fInitialFilterText);
+		}
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.horizontalSpan= 2;
 		fFilter.setLayoutData(gd);
@@ -260,7 +263,6 @@ public class TypeSelectionComponent extends Composite {
 	
 	public void populate(int selectionMode) {
 		if (fInitialFilterText != null) {
-			fFilter.setText(fInitialFilterText);
 			switch(selectionMode) {
 				case CARET_BEGINNING:
 					fFilter.setSelection(0, 0);
@@ -269,9 +271,9 @@ public class TypeSelectionComponent extends Composite {
 					fFilter.setSelection(0, fInitialFilterText.length());
 					break;
 			}
-		}
-		fViewer.reset();
+		} 
 		fFilter.setFocus();
+		fViewer.startup();
 	}
 	
 	private void patternChanged(Text text) {

@@ -885,7 +885,20 @@ public class TypeInfoViewer {
 		} finally {
 			gc.dispose();
 		}
-		scheduleSyncJob();
+		// If we do have a type info filter then we are
+		// scheduling a search job in startup. So no
+		// need to sync the search indices.
+		if (fTypeInfoFilter == null) {
+			scheduleSyncJob();
+		}
+	}
+	
+	/* package */ void startup() {
+		if (fTypeInfoFilter == null) {
+			reset();
+		} else {
+			scheduleSearchJob(FULL);
+		}
 	}
 
 	public Table getTable() {
