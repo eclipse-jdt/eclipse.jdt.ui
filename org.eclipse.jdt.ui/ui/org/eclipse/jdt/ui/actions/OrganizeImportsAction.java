@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
@@ -83,6 +84,7 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -364,7 +366,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 							save= textFileBuffer != null && !textFileBuffer.isDirty(); // save when not dirty
 						}
 						
-						OrganizeImportsOperation op= new OrganizeImportsOperation(cu, settings.importIgnoreLowercase, save, true, query);
+						OrganizeImportsOperation op= new OrganizeImportsOperation(cu, null, settings.importIgnoreLowercase, save, true, query);
 						runInSync(op, cuLocation, status, monitor);
 
 						IProblem parseError= op.getParseError();
@@ -444,7 +446,10 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					fEditor= (JavaEditor) editor;
 				}			
 			}
-			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, createChooseImportQuery());
+			
+			CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(cu, ASTProvider.WAIT_ACTIVE_ONLY, null);
+			
+			OrganizeImportsOperation op= new OrganizeImportsOperation(cu, astRoot, settings.importIgnoreLowercase, !cu.isWorkingCopy(), true, createChooseImportQuery());
 		
 			IRewriteTarget target= null;
 			if (fEditor != null) {

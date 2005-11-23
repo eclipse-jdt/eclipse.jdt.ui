@@ -138,11 +138,12 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		}
 		try {
 			monitor.beginTask(CodeGenerationMessages.AddImportsOperation_description, 15); 
-
-			ImportRewrite importRewrite= new ImportRewrite(fCompilationUnit);
-			importRewrite.setFindAmbiguosImports(true);
 			
 			CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 5));
+
+			ImportRewrite importRewrite= new ImportRewrite(fCompilationUnit, astRoot);
+			importRewrite.setFindAmbiguosImports(true);
+			
 			TextEdit edit= evaluateEdits(astRoot, importRewrite, fSelectionOffset, fSelectionLength, new SubProgressMonitor(monitor, 5));
 			if (edit != null) {
 				edit.apply(fDocument, 0);

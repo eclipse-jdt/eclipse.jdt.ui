@@ -14,9 +14,7 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 
-import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -28,7 +26,6 @@ import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
@@ -79,11 +76,7 @@ public final class ImportRewrite {
 	}
 	
 	public final TextEdit createEdit(IDocument document, IProgressMonitor monitor) throws CoreException {
-		try {
-			return fImportsStructure.getResultingEdits(document, monitor);
-		} catch (BadLocationException e) {
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
-		}
+		return fImportsStructure.getResultingEdits(monitor);
 	}
 			
 	public ICompilationUnit getCompilationUnit() {

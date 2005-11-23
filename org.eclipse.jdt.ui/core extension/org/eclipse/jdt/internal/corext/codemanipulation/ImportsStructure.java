@@ -18,32 +18,21 @@ import java.util.Set;
 
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.InsertEdit;
-import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-
-import org.eclipse.core.resources.IFile;
-
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.DocumentRewriteSession;
-import org.eclipse.jface.text.DocumentRewriteSessionType;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension4;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.TextUtilities;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -69,13 +58,10 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
 
-import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
  * Created on a Compilation unit, the ImportsStructure allows to add
@@ -908,75 +894,18 @@ public final class ImportsStructure implements IImportsStructure {
 	 * @throws CoreException Thrown when the access to the CU failed
 	 */	
 	public void create(boolean save, IProgressMonitor monitor) throws CoreException {
-
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
 		monitor.beginTask(CodeGenerationMessages.ImportsStructure_operation_description, 4); 
 		
-		IDocument document= null;
-		DocumentRewriteSession session= null;
-		try {
-			document= aquireDocument(new SubProgressMonitor(monitor, 1));
-			if (document instanceof IDocumentExtension4) {
-				 session= ((IDocumentExtension4)document).startRewriteSession(
-					DocumentRewriteSessionType.UNRESTRICTED);
-			}
-			MultiTextEdit edit= getResultingEdits(document, new SubProgressMonitor(monitor, 1));
-			if (edit.hasChildren()) {
-				if (save) {
-					commitDocument(document, edit, new SubProgressMonitor(monitor, 1));
-				} else {
-					edit.apply(document);
-				}
-			}
-		} catch (BadLocationException e) {
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
-		} finally {
-			try {
-				if (session != null) {
-					((IDocumentExtension4)document).stopRewriteSession(session);
-				}
-			} finally {
-				releaseDocument(document, new SubProgressMonitor(monitor, 1));
-			}
-			monitor.done();
-		}
-	}
-	
-	private IDocument aquireDocument(IProgressMonitor monitor) throws CoreException {
-		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
-			IFile file= (IFile) fCompilationUnit.getResource();
-			if (file.exists()) {
-				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				IPath path= fCompilationUnit.getPath();
-				bufferManager.connect(path, monitor);
-				return bufferManager.getTextFileBuffer(path).getDocument();
-			}
+		MultiTextEdit edit= getResultingEdits(new SubProgressMonitor(monitor, 3));
+		if (edit.hasChildren()) {
+			JavaModelUtil.applyEdit(fCompilationUnit, edit, save, new SubProgressMonitor(monitor, 1));
 		}
 		monitor.done();
-		return new Document(fCompilationUnit.getSource());
 	}
 	
-	private void commitDocument(IDocument document, MultiTextEdit edit, IProgressMonitor monitor) throws CoreException, MalformedTreeException, BadLocationException {
-		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
-			IFile file= (IFile) fCompilationUnit.getResource();
-			if (file.exists()) {
-				IStatus status= Resources.makeCommittable(file, null);
-				if (!status.isOK()) {
-					throw new ValidateEditException(status);
-				}
-				edit.apply(document); // apply after file is commitable
-				
-				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				bufferManager.getTextFileBuffer(file.getFullPath()).commit(monitor, true);
-				return;
-			}
-		}
-		// no commit possible, make sure changes are in
-		edit.apply(document);
-	}
-		
 	private IRegion evaluateReplaceRange(CompilationUnit root) {
 		List imports= root.imports();
 		if (!imports.isEmpty()) {
@@ -1004,7 +933,12 @@ public final class ImportsStructure implements IImportsStructure {
 		}		
 	}
 	
-	public MultiTextEdit getResultingEdits(IDocument document, IProgressMonitor monitor) throws JavaModelException, BadLocationException {
+	public MultiTextEdit getResultingEdits(IDocument document, IProgressMonitor monitor) throws JavaModelException {
+		return getResultingEdits(monitor);
+	}
+	
+	
+	public MultiTextEdit getResultingEdits(IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
@@ -1015,7 +949,8 @@ public final class ImportsStructure implements IImportsStructure {
 			int importsStart=  fReplaceRange.getOffset();
 			int importsLen= fReplaceRange.getLength();
 					
-			String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
+			String lineDelim= fCompilationUnit.findRecommendedLineSeparator();
+			IBuffer buffer= fCompilationUnit.getBuffer();
 			boolean useSpaceBetween= useSpaceBetweenGroups();
 						
 			int currPos= importsStart;
@@ -1081,7 +1016,7 @@ public final class ImportsStructure implements IImportsStructure {
 					} else {
 						if (!doStarImport || currDecl.isOnDemand() || onDemandConflicts == null || onDemandConflicts.contains(currDecl.getSimpleName())) {
 							int offset= region.getOffset();
-							removeAndInsertNew(document, currPos, offset, stringsToInsert, resEdit);
+							removeAndInsertNew(buffer, currPos, offset, stringsToInsert, resEdit);
 							stringsToInsert.clear();
 							currPos= offset + region.getLength();
 						}
@@ -1090,7 +1025,7 @@ public final class ImportsStructure implements IImportsStructure {
 			}
 			
 			int end= importsStart + importsLen;
-			removeAndInsertNew(document, currPos, end, stringsToInsert, resEdit);
+			removeAndInsertNew(buffer, currPos, end, stringsToInsert, resEdit);
 			
 			if (importsLen == 0) {
 				if (!fImportsCreated.isEmpty() || !fStaticImportsCreated.isEmpty()) { // new import container
@@ -1106,25 +1041,12 @@ public final class ImportsStructure implements IImportsStructure {
 			monitor.done();
 		}
 	}
-	
-	private void releaseDocument(IDocument document, IProgressMonitor monitor) throws CoreException {
-		if (JavaModelUtil.isPrimary(fCompilationUnit)) {
-			IFile file= (IFile) fCompilationUnit.getResource();
-			if (file.exists()) {
-				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				bufferManager.disconnect(file.getFullPath(), monitor);
-				return;
-			}
-		}
-		fCompilationUnit.getBuffer().setContents(document.get());
-		monitor.done();
-	}
 
-	private void removeAndInsertNew(IDocument doc, int contentOffset, int contentEnd, ArrayList stringsToInsert, MultiTextEdit resEdit) throws BadLocationException {
+	private void removeAndInsertNew(IBuffer buffer, int contentOffset, int contentEnd, ArrayList stringsToInsert, MultiTextEdit resEdit) {
 		int pos= contentOffset;
 		for (int i= 0; i < stringsToInsert.size(); i++) {
 			String curr= (String) stringsToInsert.get(i);
-			int idx= findInDocument(doc, curr, pos, contentEnd);
+			int idx= findInDocument(buffer, curr, pos, contentEnd);
 			if (idx != -1) {
 				if (idx != pos) {
 					resEdit.addChild(new DeleteEdit(pos, idx - pos));
@@ -1139,7 +1061,7 @@ public final class ImportsStructure implements IImportsStructure {
 		}
 	}
 
-	private int findInDocument(IDocument doc, String str, int start, int end) throws BadLocationException {
+	private int findInDocument(IBuffer buffer, String str, int start, int end) {
 		int pos= start;
 		int len= str.length();
 		if (pos + len > end || str.length() == 0) {
@@ -1151,9 +1073,9 @@ public final class ImportsStructure implements IImportsStructure {
 			step= len;
 		}
 		while (pos + len <= end) {
-			if (doc.getChar(pos) == first) {
+			if (buffer.getChar(pos) == first) {
 				int k= 1;
-				while (k < len && doc.getChar(pos + k) == str.charAt(k)) {
+				while (k < len && buffer.getChar(pos + k) == str.charAt(k)) {
 					k++;
 				}
 				if (k == len) {

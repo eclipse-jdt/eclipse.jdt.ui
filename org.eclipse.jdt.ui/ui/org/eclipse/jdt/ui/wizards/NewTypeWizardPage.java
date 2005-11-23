@@ -18,6 +18,8 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 
@@ -105,7 +107,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstruc
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -166,6 +168,8 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
  * 
  * @see org.eclipse.jdt.ui.wizards.NewClassWizardPage
  * @see org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage
+ * @see org.eclipse.jdt.ui.wizards.NewEnumWizardPage
+ * @see org.eclipse.jdt.ui.wizards.NewAnnotationWizardPage
  * 
  * @since 2.0
  */
@@ -177,22 +181,16 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	public static class ImportsManager {
 
-		private ImportsStructure fImportsStructure;
-		
-		/* package */ ImportsManager(IImportsStructure importsStructure) {
-			fImportsStructure= (ImportsStructure) importsStructure;
-		}
-		
-		/* package */ ImportsManager(ICompilationUnit createdWorkingCopy) throws CoreException {
-			IJavaProject javaProject= createdWorkingCopy.getJavaProject();
-			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(javaProject);
-			int threshold= JavaPreferencesSettings.getImportNumberThreshold(javaProject);
-			
-			fImportsStructure= new ImportsStructure(createdWorkingCopy, prefOrder, threshold, true);
+		private NewImportRewrite fImportsRewrite;
+		private final CompilationUnit fAstRoot;
+				
+		/* package */ ImportsManager(CompilationUnit astRoot) throws CoreException {
+			fAstRoot= astRoot;
+			fImportsRewrite= NewImportRewrite.create(astRoot, true);
 		}
 
 		/* package */ ICompilationUnit getCompilationUnit() {
-			return fImportsStructure.getCompilationUnit();
+			return fImportsRewrite.getCompilationUnit();
 		}
 						
 		/**
@@ -206,7 +204,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		 * fully qualified type name if an import conflict prevented the import.
 		 */				
 		public String addImport(String qualifiedTypeName) {
-			return fImportsStructure.addImport(qualifiedTypeName);
+			return fImportsRewrite.addImport(qualifiedTypeName);
 		}
 				
 		/**
@@ -220,20 +218,20 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		 * fully qualified type name if an import conflict prevented the import.
 		 */				
 		public String addImport(ITypeBinding typeBinding) {
-			// don't know what's added -> add created imports in getAddedTypes()
-			return fImportsStructure.addImport(typeBinding);
+			return fImportsRewrite.addImport(typeBinding);
 		}
 				
-		/* package */ void create(boolean needsSave, SubProgressMonitor monitor) throws CoreException {
-			fImportsStructure.create(needsSave, monitor);
+		/* package */ void create(boolean needsSave, IProgressMonitor monitor) throws CoreException {
+			TextEdit edit= fImportsRewrite.rewriteImports(fAstRoot, monitor);
+			JavaModelUtil.applyEdit(fImportsRewrite.getCompilationUnit(), edit, needsSave, null);
 		}
 		
 		/* package */ void removeImport(String qualifiedName) {
-			fImportsStructure.removeImport(qualifiedName);
+			fImportsRewrite.removeImport(qualifiedName);
 		}
 		
 		/* package */ void removeStaticImport(String qualifiedName) {
-			fImportsStructure.removeStaticImport(qualifiedName);
+			fImportsRewrite.removeStaticImport(qualifiedName);
 		}
 	}
 		
@@ -1805,9 +1803,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				if (content != null) {
 					parentCU.getBuffer().setContents(content);
 				}
-				existingImports= getExistingImports(parentCU);
+				CompilationUnit astRoot= createASTForImports(parentCU);
+				existingImports= getExistingImports(astRoot);
 							
-				imports= new ImportsManager(parentCU);
+				imports= new ImportsManager(astRoot);
 				// add an import that will be removed again. Having this import solves 14661
 				imports.addImport(JavaModelUtil.concatenateName(pack.getElementName(), typeName));
 				
@@ -1827,9 +1826,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				parentCU.becomeWorkingCopy(null, new SubProgressMonitor(monitor, 1)); // cu is now for sure (primary) a working copy
 				connectedCU= parentCU;
 				
-				imports= new ImportsManager(parentCU);
-				
-				existingImports= getExistingImports(parentCU);
+				CompilationUnit astRoot= createASTForImports(parentCU);
+				imports= new ImportsManager(astRoot);
+				existingImports= getExistingImports(astRoot);
+
 	
 				// add imports that will be removed again. Having the imports solves 14661
 				IType[] topLevelTypes= parentCU.getTypes();
@@ -1884,7 +1884,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			}
 			
 			// set up again
-			imports= new ImportsManager(imports.getCompilationUnit());
+			CompilationUnit astRoot= createASTForImports(imports.getCompilationUnit());
+			imports= new ImportsManager(astRoot);
 			
 			createTypeMembers(createdType, imports, new SubProgressMonitor(monitor, 1));
 	
@@ -1925,11 +1926,16 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 	}	
 	
-	private Set /* String */ getExistingImports(ICompilationUnit cu) {
+	private CompilationUnit createASTForImports(ICompilationUnit cu) {
 		ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 		parser.setSource(cu);
 		parser.setResolveBindings(false);
-		CompilationUnit root= (CompilationUnit) parser.createAST(null);
+		parser.setFocalPosition(0);
+		return (CompilationUnit) parser.createAST(null);
+	}
+	
+	
+	private Set /* String */ getExistingImports(CompilationUnit root) {
 		List imports= root.imports();
 		Set res= new HashSet(imports.size());
 		for (int i= 0; i < imports.size(); i++) {
@@ -1952,7 +1958,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (importsDecls.isEmpty()) {
 			return;
 		}
-		ImportsManager imports= new ImportsManager(cu);
+		ImportsManager imports= new ImportsManager(root);
 		
 		int importsEnd= ASTNodes.getExclusiveEnd((ASTNode) importsDecls.get(importsDecls.size() - 1));
 		IProblem[] problems= root.getProblems();
@@ -2142,9 +2148,17 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * 
 	 * @see #createType(IProgressMonitor)
 	 */		
-	protected void createTypeMembers(IType newType, ImportsManager imports, IProgressMonitor monitor) throws CoreException {
+	protected void createTypeMembers(IType newType, final ImportsManager imports, IProgressMonitor monitor) throws CoreException {
 		// call for compatibility
-		createTypeMembers(newType, imports.fImportsStructure, monitor);
+		IImportsStructure wrapper= new IImportsStructure() {
+			public String addImport(String qualifiedTypeName) {
+				return imports.addImport(qualifiedTypeName);
+			}
+			public String addStaticImport(String qualifiedTypeName, String selector, boolean isField) {
+				return qualifiedTypeName + '.' + selector;
+			}
+		};
+		createTypeMembers(newType, wrapper, monitor);
 		
 		// default implementation does nothing
 		// example would be
@@ -2351,7 +2365,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @deprecated Use createInheritedMethods(IType,boolean,boolean,IImportsManager,IProgressMonitor)
 	 */
 	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
-		return createInheritedMethods(type, doConstructors, doUnimplementedMethods, new ImportsManager(imports), monitor);
+		return createInheritedMethods(type, doConstructors, doUnimplementedMethods, new ImportsManager(createASTForImports(type.getCompilationUnit())), monitor);
 	}
 	
 	// ---- creation ----------------

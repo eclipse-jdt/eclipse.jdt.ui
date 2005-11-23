@@ -12,37 +12,20 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.text.edits.MalformedTreeException;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-
-import org.eclipse.core.resources.IFile;
-
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.DocumentRewriteSession;
-import org.eclipse.jface.text.DocumentRewriteSessionType;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension4;
-
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -54,17 +37,25 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.WildcardType;
 
-import org.eclipse.jdt.internal.corext.ValidateEditException;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Resources;
-
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
-
 /**
+ * The {@link NewImportRewrite} helps updating imports following a import order and on-demand imports threshold as configured by a project.
+ * <p>
+ * The import rewrite is created on a compilation unit and collects references to types that are added or removed. When adding imports, e.g. using
+ * {@link #addImport(String)}, the import rewrite evaluates if the type can be imported and returns the a reference to the type that can be used in code.
+ * This reference is either unqualified if the import could be added, or fully qualified if the import failed due to a conflict with another element of the same name.
+ * </p>
+ * <p>
+ * On {@link #rewriteImports(CompilationUnit, IProgressMonitor)} the rewrite translates these descriptions into text edits that can then be applied to
+ * the original source. The rewrite infrastructure tries to generate minimal text changes and only works on the import statements. It is possible to
+ * combine the result of an import rewrite with the result of a {@link org.eclipse.jdt.core.dom.rewrite.ASTRewrite} as long as no import statements
+ * are modified by the AST rewrite.
+ * </p>
  * 
+ * This class is not intended to be subclassed.
+ * </p>
+ * @since 3.2
  */
 public class NewImportRewrite {
 	
@@ -79,14 +70,11 @@ public class NewImportRewrite {
 		public final static int KIND_STATIC_METHOD= 3;
 		
 		public abstract int findInContext(String qualifier, String name, int kind);
-		
 	}
 
 	
-	private static final String PLUGIN_ID= "org.eclipse.jdt.core" ; //$NON-NLS-1$
-	
-	public static final String IMPORTS_ORDER= PLUGIN_ID + ".importorder.order"; //$NON-NLS-1$
-	public static final String IMPORTS_ONDEMAND_THRESHOLD= PLUGIN_ID + ".importorder.threshold"; //$NON-NLS-1$
+	public static final String IMPORTS_ORDER= PreferenceConstants.ORGIMPORTS_IMPORTORDER;
+	public static final String IMPORTS_ONDEMAND_THRESHOLD= PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD;
 	
 	private static final String ON_DEMAND_IMPORT_NAME= "*"; //$NON-NLS-1$
 	
@@ -100,68 +88,66 @@ public class NewImportRewrite {
 	
 	private List fExistingImports;
 
-	private final CompilationUnit fRoot;
+	private final ICompilationUnit fCompilationUnit;
 
 	private final boolean fRestoreExistingImports;
 
 	private String[] fCreatedImports;
 	private String[] fCreatedStaticImports;
 	
-	public NewImportRewrite(ICompilationUnit cu, boolean restoreExistingImports) {
-		this(getASTRoot(cu), restoreExistingImports);
+	public static NewImportRewrite create(ICompilationUnit cu, boolean restoreExistingImports) throws JavaModelException {
+		List existingImport= null;
+		if (restoreExistingImports) {
+			existingImport= new ArrayList();
+			IImportDeclaration[] imports= cu.getImports();
+			for (int i= 0; i < imports.length; i++) {
+				IImportDeclaration curr= imports[i];
+				char prefix= Flags.isStatic(curr.getFlags()) ? STATIC_PREFIX : NORMAL_PREFIX;			
+				existingImport.add(prefix + curr.getElementName());
+			}
+		}
+		return new NewImportRewrite(cu, existingImport);
 	}
 	
-	private static CompilationUnit getASTRoot(ICompilationUnit cu) {
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
-		parser.setSource(cu);
-		parser.setFocalPosition(0); // reduced AST
-		parser.setResolveBindings(false);
-		return (CompilationUnit) parser.createAST(null);
-	}
-	
-	public NewImportRewrite(CompilationUnit root, boolean restoreExistingImports) {
-		fRoot= root;
-		fRestoreExistingImports= restoreExistingImports;
-		if (!(root.getJavaElement() instanceof ICompilationUnit)) {
+	public static NewImportRewrite create(CompilationUnit astRoot, boolean restoreExistingImports) throws JavaModelException {
+		if (!(astRoot.getJavaElement() instanceof ICompilationUnit)) {
 			throw new IllegalArgumentException("AST must have been constructed from a Java element"); //$NON-NLS-1$
 		}
+		List existingImport= null;
+		if (restoreExistingImports) {
+			existingImport= new ArrayList();
+			List imports= astRoot.imports();
+			for (int i= 0; i < imports.size(); i++) {
+				ImportDeclaration curr= (ImportDeclaration) imports.get(i);
+				StringBuffer buf= new StringBuffer();
+				buf.append(curr.isStatic() ? STATIC_PREFIX : NORMAL_PREFIX).append(curr.getName().getFullyQualifiedName());
+				if (curr.isOnDemand()) {
+					if (buf.length() > 1)
+						buf.append('.');
+					buf.append('*');
+				}
+				existingImport.add(buf.toString());
+			}
+		}
+		return new NewImportRewrite((ICompilationUnit) astRoot.getJavaElement(), existingImport);
+	}
+		
+	private NewImportRewrite(ICompilationUnit cu, List existingImports) {
+		fCompilationUnit= cu;
+		fRestoreExistingImports= existingImports != null;
 
 		fDefaultContext= new ImportRewriteContext() {
 			public int findInContext(String qualifier, String name, int kind) {
 				return findInImports(qualifier, name, kind);
 			}
 		};
-		fAddedImports= null;
-		fRemovedImports= null;
-		
-		fExistingImports= new ArrayList();
-				
-		List imports= root.imports();
-		for (int i= 0; i < imports.size(); i++) {
-			ImportDeclaration curr= (ImportDeclaration) imports.get(0);
-			if (curr.getStartPosition() == -1) {
-				throw new IllegalArgumentException("AST must be created from existing source must not be modified"); //$NON-NLS-1$
-			}
-			String name= curr.getName().getFullyQualifiedName();
-			if (curr.isOnDemand()) {
-				if (name.length() == 0)
-					name = String.valueOf('*');
-				else 
-					name= name += ".*"; //$NON-NLS-1$
-			}
-			
-			if (restoreExistingImports) {
-				if (curr.isStatic()) {
-					fExistingImports.add(STATIC_PREFIX + name);
-				} else {
-					fExistingImports.add(NORMAL_PREFIX + name);
-				}
-			}
-		}
+		fAddedImports= null; // Initialized on use
+		fRemovedImports= null; // Initialized on use
+		fExistingImports= fRestoreExistingImports ? existingImports : new ArrayList();
 	}
 	
 	public ICompilationUnit getCompilationUnit() {
-		return (ICompilationUnit) fRoot.getJavaElement();
+		return fCompilationUnit;
 	}
 
 	private static int compareImport(char prefix, String qualifier, String name, String curr) {
@@ -271,9 +257,8 @@ public class NewImportRewrite {
 			case Signature.CAPTURE_TYPE_SIGNATURE:
 				return addImportFromSignature(typeSig.substring(1), ast);
 			default:
-				JavaPlugin.logErrorMessage("Unknown type signature kind: " + typeSig); //$NON-NLS-1$
+				throw new IllegalArgumentException("Unknown type signature kind: " + typeSig); //$NON-NLS-1$
 		}
-		return ast.newSimpleType(ast.newSimpleName("invalid")); //$NON-NLS-1$
 	}
 	
 
@@ -610,11 +595,16 @@ public class NewImportRewrite {
 	}
 	
 	
-	public final TextEdit createEdit(IDocument document, Map options, IProgressMonitor monitor) throws CoreException {
-		String[] order= getImportOrderPreference(options);
-		int threshold= getImportNumberThreshold(options);
+	public final TextEdit rewriteImports(CompilationUnit root, IProgressMonitor monitor) throws CoreException {
+		if (!fCompilationUnit.equals(root.getJavaElement())) {
+			throw new IllegalArgumentException("AST is not from the compilation unit that was used when creating the rewriter."); //$NON-NLS-1$
+		}
 		
-		ImportRewriteComputer computer= new ImportRewriteComputer(fRoot, order, threshold, fRestoreExistingImports);
+		IJavaProject project= fCompilationUnit.getJavaProject();
+		String[] order= getImportOrderPreference(project);
+		int threshold= getImportNumberThreshold(project);
+		
+		ImportRewriteComputer computer= new ImportRewriteComputer(fCompilationUnit, root, order, threshold, fRestoreExistingImports);
 		
 		if (fAddedImports != null) {
 			for (int i= 0; i < fAddedImports.size(); i++) {
@@ -630,15 +620,10 @@ public class NewImportRewrite {
 			}
 		}
 			
-		try {
-			TextEdit result= computer.getResultingEdits(document, monitor);
-			fCreatedImports= computer.getCreatedImports();
-			fCreatedStaticImports= computer.getCreatedStaticImports();
-
-			return result;
-		} catch (BadLocationException e) {
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
-		}
+		TextEdit result= computer.getResultingEdits(monitor);
+		fCreatedImports= computer.getCreatedImports();
+		fCreatedStaticImports= computer.getCreatedStaticImports();
+		return result;
 	}
 	
 	public String[] getCreatedImports() {
@@ -650,8 +635,10 @@ public class NewImportRewrite {
 	}
 	
 	
-	private static int getImportNumberThreshold(Map options) {
-		Object threshold= options.get(IMPORTS_ONDEMAND_THRESHOLD);
+	private static int getImportNumberThreshold(IJavaProject project) {
+		Object threshold= PreferenceConstants.getPreference(IMPORTS_ONDEMAND_THRESHOLD, project);
+		//Object threshold= project.getOption(IMPORTS_ONDEMAND_THRESHOLD, true);
+
 		if (threshold instanceof String) {
 			try {
 				return Integer.parseInt((String) threshold);
@@ -661,115 +648,14 @@ public class NewImportRewrite {
 		return 999;
 	}
 	
-	private static String[] getImportOrderPreference(Map options) {
-		Object order= options.get(IMPORTS_ORDER);
+	private static String[] getImportOrderPreference(IJavaProject project) {
+		Object order= PreferenceConstants.getPreference(IMPORTS_ORDER, project);
+		//Object threshold= project.getOption(IMPORTS_ORDER, true);
+
 		if (order instanceof String) {
 			return ((String) order).split(String.valueOf(';'));
 		}
 		return new String[0];
-	}
-
-	/**
-	 * Creates all new elements in the import structure.
-	 * @param save Save the CU after the import have been changed
-	 * @param monitor The progress monitor to use
-	 * @throws CoreException Thrown when the access to the CU failed
-	 */	
-	public static void applyRewrite(NewImportRewrite rewrite, ICompilationUnit cu, Map options, boolean save, IProgressMonitor monitor) throws CoreException {
-		
-		if (monitor == null) {
-			monitor= new NullProgressMonitor();
-		}
-		monitor.beginTask(CodeGenerationMessages.ImportsStructure_operation_description, 4); 
-		
-		IDocument document= null;
-		DocumentRewriteSession session= null;
-		try {
-			document= aquireDocument(cu, new SubProgressMonitor(monitor, 1));
-			if (document instanceof IDocumentExtension4) {
-				 session= ((IDocumentExtension4)document).startRewriteSession(
-					DocumentRewriteSessionType.UNRESTRICTED);
-			}
-		
-			if (options == null) {
-				options= getOptions(cu.getJavaProject());
-			}
-			
-			TextEdit edit= rewrite.createEdit(document, options, new SubProgressMonitor(monitor, 1));
-			if (edit.hasChildren()) {
-				if (save) {
-					commitDocument(cu, document, edit, new SubProgressMonitor(monitor, 1));
-				} else {
-					edit.apply(document);
-				}
-			}
-		} catch (BadLocationException e) {
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
-		} finally {
-			try {
-				if (session != null) {
-					((IDocumentExtension4)document).stopRewriteSession(session);
-				}
-			} finally {
-				releaseDocument(cu, document, new SubProgressMonitor(monitor, 1));
-			}
-			monitor.done();
-		}
-	}
-	
-	private static IDocument aquireDocument(ICompilationUnit cu, IProgressMonitor monitor) throws CoreException {
-		if (JavaModelUtil.isPrimary(cu)) {
-			IFile file= (IFile) cu.getResource();
-			if (file.exists()) {
-				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				IPath path= cu.getPath();
-				bufferManager.connect(path, monitor);
-				return bufferManager.getTextFileBuffer(path).getDocument();
-			}
-		}
-		monitor.done();
-		return new Document(cu.getSource());
-	}
-	
-	private static void commitDocument(ICompilationUnit cu, IDocument document, TextEdit edit, IProgressMonitor monitor) throws CoreException, MalformedTreeException, BadLocationException {
-		if (JavaModelUtil.isPrimary(cu)) {
-			IFile file= (IFile) cu.getResource();
-			if (file.exists()) {
-				IStatus status= Resources.makeCommittable(file, null);
-				if (!status.isOK()) {
-					throw new ValidateEditException(status);
-				}
-				edit.apply(document); // apply after file is commitable
-				
-				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				bufferManager.getTextFileBuffer(file.getFullPath()).commit(monitor, true);
-				return;
-			}
-		}
-		// no commit possible, make sure changes are in
-		edit.apply(document);
-	}
-	
-	private static void releaseDocument(ICompilationUnit cu, IDocument document, IProgressMonitor monitor) throws CoreException {
-		if (JavaModelUtil.isPrimary(cu)) {
-			IFile file= (IFile) cu.getResource();
-			if (file.exists()) {
-				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
-				bufferManager.disconnect(file.getFullPath(), monitor);
-				return;
-			}
-		}
-		cu.getBuffer().setContents(document.get());
-		monitor.done();
-	}
-
-	private static Map getOptions(IJavaProject project) {
-		String order= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IMPORTORDER, project);
-		String threshold= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, project);
-		Map options= new HashMap();
-		options.put(NewImportRewrite.IMPORTS_ORDER, order);
-		options.put(NewImportRewrite.IMPORTS_ONDEMAND_THRESHOLD, threshold);
-		return options;
 	}
 		
 }

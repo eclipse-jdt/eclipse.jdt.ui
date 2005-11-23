@@ -19,6 +19,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -337,7 +339,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 	}	
 
-	private NewImportRewrite fImportsRewrite;	
 	private boolean fDoSave;
 	
 	private boolean fIgnoreLowerCaseNames;
@@ -348,17 +349,14 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	private int fNumberOfImportsRemoved;
 
 	private IProblem fParsingError;
+	private ICompilationUnit fCompilationUnit;
+	
 	private CompilationUnit fASTRoot;
 	
-	private Map fOptions; // null for default options 
-	
-	public OrganizeImportsOperation(ICompilationUnit cu, boolean ignoreLowerCaseNames, boolean save, boolean doResolve, IChooseImportQuery chooseImportQuery) throws CoreException {
-		ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
-		parser.setSource(cu);
-		parser.setResolveBindings(true);
-		fASTRoot= (CompilationUnit) parser.createAST(null);
-		
-		fImportsRewrite= new NewImportRewrite(fASTRoot, false);
+	public OrganizeImportsOperation(ICompilationUnit cu, CompilationUnit astRoot, boolean ignoreLowerCaseNames, boolean save, boolean doResolve, IChooseImportQuery chooseImportQuery) throws CoreException {
+		fCompilationUnit= cu;
+		fASTRoot= astRoot;
+
 		fDoSave= save;
 		fIgnoreLowerCaseNames= ignoreLowerCaseNames;
 		fChooseImportQuery= chooseImportQuery;
@@ -367,13 +365,6 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		fNumberOfImportsRemoved= 0;
 		
 		fParsingError= null;
-
-		fOptions= null; // undefined, use project settings
-	}
-	
-	
-	public void setOptions(Map options) {
-		fOptions= options;
 	}
 
 	/**
@@ -385,25 +376,36 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			monitor= new NullProgressMonitor();
 		}
 		try {
-			ICompilationUnit cu= fImportsRewrite.getCompilationUnit();
 			fNumberOfImportsAdded= 0;
 			fNumberOfImportsRemoved= 0;
 			
-			monitor.beginTask(Messages.format(CodeGenerationMessages.OrganizeImportsOperation_description, cu.getElementName()), 5); 
+			monitor.beginTask(Messages.format(CodeGenerationMessages.OrganizeImportsOperation_description, fCompilationUnit.getElementName()), 10);
+			
+			CompilationUnit astRoot= fASTRoot;
+			if (astRoot == null) {
+				ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
+				parser.setSource(fCompilationUnit);
+				parser.setResolveBindings(true);
+				astRoot= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 2));
+			} else {
+				monitor.worked(2);
+			}
+			
+			NewImportRewrite importsRewrite= NewImportRewrite.create(astRoot, false);
 
 			Set/*<String>*/ oldSingleImports= new HashSet();
 			Set/*<String>*/  oldDemandImports= new HashSet();
 			List/*<SimpleName>*/ typeReferences= new ArrayList();
 			List/*<SimpleName>*/ staticReferences= new ArrayList();
 			
-			boolean res= collectReferences(typeReferences, staticReferences, oldSingleImports, oldDemandImports);
+			boolean res= collectReferences(astRoot, typeReferences, staticReferences, oldSingleImports, oldDemandImports);
 			if (!res) {
 				return;
 			}
 						
 			monitor.worked(1);
 		
-			TypeReferenceProcessor processor= new TypeReferenceProcessor(oldSingleImports, oldDemandImports, fASTRoot, fImportsRewrite, fIgnoreLowerCaseNames);
+			TypeReferenceProcessor processor= new TypeReferenceProcessor(oldSingleImports, oldDemandImports, astRoot, importsRewrite, fIgnoreLowerCaseNames);
 			
 			Iterator refIterator= typeReferences.iterator();
 			while (refIterator.hasNext()) {
@@ -412,7 +414,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 			
 			boolean hasOpenChoices= processor.process(new SubProgressMonitor(monitor, 3));
-			addStaticImports(staticReferences, fImportsRewrite);
+			addStaticImports(staticReferences, importsRewrite);
 			
 			if (hasOpenChoices && fChooseImportQuery != null) {
 				TypeInfo[][] choices= processor.getChoices();
@@ -424,13 +426,14 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}
 				for (int i= 0; i < chosen.length; i++) {
 					TypeInfo typeInfo= chosen[i];
-					fImportsRewrite.addImport(typeInfo.getFullyQualifiedName());
+					importsRewrite.addImport(typeInfo.getFullyQualifiedName());
 				}				
 			}
 			
-			NewImportRewrite.applyRewrite(fImportsRewrite, cu, fOptions, fDoSave, new SubProgressMonitor(monitor, 1));
+			TextEdit edit= importsRewrite.rewriteImports(astRoot, new SubProgressMonitor(monitor, 3));
+			JavaModelUtil.applyEdit(fCompilationUnit, edit, fDoSave, new SubProgressMonitor(monitor, 1));
 						
-			determineImportDifferences(fImportsRewrite, oldSingleImports, oldDemandImports);
+			determineImportDifferences(importsRewrite, oldSingleImports, oldDemandImports);
 			processor= null;
 		} finally {
 			monitor.done();
@@ -471,8 +474,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 
 	
 	// find type references in a compilation unit
-	private boolean collectReferences(List typeReferences, List staticReferences, Set oldSingleImports, Set oldDemandImports) {
-		IProblem[] problems= fASTRoot.getProblems();
+	private boolean collectReferences(CompilationUnit astRoot, List typeReferences, List staticReferences, Set oldSingleImports, Set oldDemandImports) {
+		IProblem[] problems= astRoot.getProblems();
 		for (int i= 0; i < problems.length; i++) {
 			IProblem curr= problems[i];
 			if (curr.isError() && (curr.getID() & IProblem.Syntax) != 0) {
@@ -480,7 +483,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				return false;
 			}
 		}
-		List imports= fASTRoot.imports();
+		List imports= astRoot.imports();
 		for (int i= 0; i < imports.size(); i++) {
 			ImportDeclaration curr= (ImportDeclaration) imports.get(i);
 			String id= ASTResolving.getFullName(curr.getName());
@@ -491,8 +494,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 		}
 		
-		IJavaProject project= fImportsRewrite.getCompilationUnit().getJavaProject();
-		ImportReferencesCollector.collect(fASTRoot, project, null, typeReferences, staticReferences);
+		IJavaProject project= fCompilationUnit.getJavaProject();
+		ImportReferencesCollector.collect(astRoot, project, null, typeReferences, staticReferences);
 
 		return true;
 	}	

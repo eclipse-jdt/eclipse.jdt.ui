@@ -21,17 +21,15 @@ import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.TextUtilities;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -72,16 +70,16 @@ public final class ImportRewriteComputer {
 	
 	private static final String JAVA_LANG= "java.lang"; //$NON-NLS-1$
 	
-	public ImportRewriteComputer(CompilationUnit root, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) throws CoreException {
-		fCompilationUnit= (ICompilationUnit) root.getJavaElement();
+	public ImportRewriteComputer(ICompilationUnit cu, CompilationUnit root, String[] preferenceOrder, int importThreshold, boolean restoreExistingImports) {
+		fCompilationUnit= cu;
 				
 		fImportOnDemandThreshold= importThreshold;
 		fFilterImplicitImports= true;
 		fFindAmbiguousImports= true; //!restoreExistingImports;
 		
 		fPackageEntries= new ArrayList(20);
-		fImportsCreated= null; // initialized on 'create'
-		fStaticImportsCreated= null;
+		fImportsCreated= new ArrayList();
+		fStaticImportsCreated= new ArrayList();
 		fFlags= 0;
 		
 		fReplaceRange= evaluateReplaceRange(root);
@@ -481,18 +479,17 @@ public final class ImportRewriteComputer {
 		}		
 	}
 	
-	public MultiTextEdit getResultingEdits(IDocument document, IProgressMonitor monitor) throws JavaModelException, BadLocationException {
+	public MultiTextEdit getResultingEdits(IProgressMonitor monitor) throws JavaModelException {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
-		try {
-			fImportsCreated= new ArrayList();
-			fStaticImportsCreated= new ArrayList();
-		
+		try {		
 			int importsStart=  fReplaceRange.getOffset();
 			int importsLen= fReplaceRange.getLength();
 					
-			String lineDelim= TextUtilities.getDefaultLineDelimiter(document);
+			String lineDelim= fCompilationUnit.findRecommendedLineSeparator();
+			IBuffer buffer= fCompilationUnit.getBuffer();
+			
 			boolean useSpaceBetween= useSpaceBetweenGroups();
 						
 			int currPos= importsStart;
@@ -558,7 +555,7 @@ public final class ImportRewriteComputer {
 					} else {
 						if (!doStarImport || currDecl.isOnDemand() || onDemandConflicts == null || onDemandConflicts.contains(currDecl.getSimpleName())) {
 							int offset= region.getOffset();
-							removeAndInsertNew(document, currPos, offset, stringsToInsert, resEdit);
+							removeAndInsertNew(buffer, currPos, offset, stringsToInsert, resEdit);
 							stringsToInsert.clear();
 							currPos= offset + region.getLength();
 						}
@@ -567,7 +564,7 @@ public final class ImportRewriteComputer {
 			}
 			
 			int end= importsStart + importsLen;
-			removeAndInsertNew(document, currPos, end, stringsToInsert, resEdit);
+			removeAndInsertNew(buffer, currPos, end, stringsToInsert, resEdit);
 			
 			if (importsLen == 0) {
 				if (!fImportsCreated.isEmpty() || !fStaticImportsCreated.isEmpty()) { // new import container
@@ -584,11 +581,11 @@ public final class ImportRewriteComputer {
 		}
 	}
 
-	private void removeAndInsertNew(IDocument doc, int contentOffset, int contentEnd, ArrayList stringsToInsert, MultiTextEdit resEdit) throws BadLocationException {
+	private void removeAndInsertNew(IBuffer buffer, int contentOffset, int contentEnd, ArrayList stringsToInsert, MultiTextEdit resEdit) {
 		int pos= contentOffset;
 		for (int i= 0; i < stringsToInsert.size(); i++) {
 			String curr= (String) stringsToInsert.get(i);
-			int idx= findInDocument(doc, curr, pos, contentEnd);
+			int idx= findInBuffer(buffer, curr, pos, contentEnd);
 			if (idx != -1) {
 				if (idx != pos) {
 					resEdit.addChild(new DeleteEdit(pos, idx - pos));
@@ -603,7 +600,7 @@ public final class ImportRewriteComputer {
 		}
 	}
 
-	private int findInDocument(IDocument doc, String str, int start, int end) throws BadLocationException {
+	private int findInBuffer(IBuffer buffer, String str, int start, int end) {
 		int pos= start;
 		int len= str.length();
 		if (pos + len > end || str.length() == 0) {
@@ -615,9 +612,9 @@ public final class ImportRewriteComputer {
 			step= len;
 		}
 		while (pos + len <= end) {
-			if (doc.getChar(pos) == first) {
+			if (buffer.getChar(pos) == first) {
 				int k= 1;
-				while (k < len && doc.getChar(pos + k) == str.charAt(k)) {
+				while (k < len && buffer.getChar(pos + k) == str.charAt(k)) {
 					k++;
 				}
 				if (k == len) {
@@ -1044,16 +1041,10 @@ public final class ImportRewriteComputer {
 	}	
 	
 	public String[] getCreatedImports() {
-		if (fImportsCreated == null) {
-			return new String[0];
-		}
 	    return (String[]) fImportsCreated.toArray(new String[fImportsCreated.size()]);
 	}
 	
 	public String[] getCreatedStaticImports() {
-		if (fStaticImportsCreated == null) {
-			return new String[0];
-		}
 	    return (String[]) fStaticImportsCreated.toArray(new String[fStaticImportsCreated.size()]);
 	}
 

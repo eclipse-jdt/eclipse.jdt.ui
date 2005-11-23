@@ -19,7 +19,7 @@ public interface IImportsStructure {
 	 * same package as the compilation unit.
 	 * @param qualifiedTypeName The fully qualified name of the type to import
 	 *        (dot separated)
-	 * @return Retuns the simple type name that can be used in the code or the
+	 * @return Returns the simple type name that can be used in the code or the
 	 * fully qualified type name if an import conflict prevented the import.
 	 */		
 	String addImport(String qualifiedTypeName);
@@ -31,7 +31,7 @@ public interface IImportsStructure {
 	 * same package as the compilation unit.
 	 * @param qualifiedTypeName The fully qualified name of the type to import
 	 *        (dot separated)
-	 * @return Retuns the simple type name that can be used in the code or the
+	 * @return Returns the simple type name that can be used in the code or the
 	 * fully qualified type name if an import conflict prevented the import.
 	 */		
 	String addStaticImport(String qualifiedTypeName, String selector, boolean isField);

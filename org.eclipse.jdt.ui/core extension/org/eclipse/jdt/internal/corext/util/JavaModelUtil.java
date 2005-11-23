@@ -14,12 +14,29 @@ import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Map;
 
+import org.eclipse.text.edits.MalformedTreeException;
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
+import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.DocumentRewriteSession;
+import org.eclipse.jface.text.DocumentRewriteSessionType;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension4;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.Flags;
@@ -41,11 +58,15 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.CharOperation;
 
+import org.eclipse.jdt.internal.corext.CorextMessages;
+import org.eclipse.jdt.internal.corext.ValidateEditException;
+
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
  * Utility methods for the Java Model.
@@ -843,8 +864,94 @@ public final class JavaModelUtil {
 		} else {
 			return newMainName;
 		}
+	}	
+	
+	/**
+	 * Applies an text edit to a compilation unit. Filed bug 117694 against jdt.core. 
+	 * 	@param cu the compilation unit to apply the edit to
+	 * 	@param edit the edit to apply
+	 * @param save is set, save the CU after the edit has been applied
+	 * @param monitor the progress monitor to use
+	 * @throws CoreException Thrown when the access to the CU failed
+	 * @throws ValidateEditException if validate edit fails
+	 */	
+	public static void applyEdit(ICompilationUnit cu, TextEdit edit, boolean save, IProgressMonitor monitor) throws CoreException, ValidateEditException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
+		monitor.beginTask(CorextMessages.JavaModelUtil_applyedit_operation, 3); 
 		
-		
+		IDocument document= null;
+		DocumentRewriteSession session= null;
+		try {
+			document= aquireDocument(cu, new SubProgressMonitor(monitor, 1));
+			if (document instanceof IDocumentExtension4) {
+				 session= ((IDocumentExtension4)document).startRewriteSession(
+					DocumentRewriteSessionType.UNRESTRICTED);
+			}
+			if (save) {
+				commitDocument(cu, document, edit, new SubProgressMonitor(monitor, 1));
+			} else {
+				edit.apply(document);
+			}
+		} catch (BadLocationException e) {
+			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
+		} finally {
+			try {
+				if (session != null) {
+					((IDocumentExtension4)document).stopRewriteSession(session);
+				}
+			} finally {
+				releaseDocument(cu, document, new SubProgressMonitor(monitor, 1));
+			}
+			monitor.done();
+		}
 	}
 	
+	private static IDocument aquireDocument(ICompilationUnit cu, IProgressMonitor monitor) throws CoreException {
+		if (JavaModelUtil.isPrimary(cu)) {
+			IFile file= (IFile) cu.getResource();
+			if (file.exists()) {
+				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
+				IPath path= cu.getPath();
+				bufferManager.connect(path, monitor);
+				return bufferManager.getTextFileBuffer(path).getDocument();
+			}
+		}
+		monitor.done();
+		return new Document(cu.getSource());
+	}
+	
+	private static void commitDocument(ICompilationUnit cu, IDocument document, TextEdit edit, IProgressMonitor monitor) throws CoreException, MalformedTreeException, BadLocationException {
+		if (JavaModelUtil.isPrimary(cu)) {
+			IFile file= (IFile) cu.getResource();
+			if (file.exists()) {
+				IStatus status= Resources.makeCommittable(file, null);
+				if (!status.isOK()) {
+					throw new ValidateEditException(status);
+				}
+				edit.apply(document); // apply after file is commitable
+				
+				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
+				bufferManager.getTextFileBuffer(file.getFullPath()).commit(monitor, true);
+				return;
+			}
+		}
+		// no commit possible, make sure changes are in
+		edit.apply(document);
+	}
+
+	
+	private static void releaseDocument(ICompilationUnit cu, IDocument document, IProgressMonitor monitor) throws CoreException {
+		if (JavaModelUtil.isPrimary(cu)) {
+			IFile file= (IFile) cu.getResource();
+			if (file.exists()) {
+				ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
+				bufferManager.disconnect(file.getFullPath(), monitor);
+				return;
+			}
+		}
+		cu.getBuffer().setContents(document.get());
+		monitor.done();
+	}
 }

@@ -11,15 +11,16 @@
 package org.eclipse.jdt.ui.tests.core;
 
 import java.io.File;
-import java.util.HashMap;
 import java.util.Hashtable;
-import java.util.Map;
 
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -36,9 +37,13 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.osgi.service.prefs.BackingStoreException;
 
 public class ImportOrganizeTest extends CoreTests {
 	
@@ -2541,12 +2546,13 @@ public class ImportOrganizeTest extends CoreTests {
 	}
 
 	
-	private OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean doResolve, IChooseImportQuery chooseImportQuery) throws CoreException {
-		OrganizeImportsOperation operation= new OrganizeImportsOperation(cu, ignoreLowerCaseNames, save, doResolve, chooseImportQuery);
-		Map options= new HashMap();
-		options.put(NewImportRewrite.IMPORTS_ORDER, concatenate(order));
-		options.put(NewImportRewrite.IMPORTS_ONDEMAND_THRESHOLD, String.valueOf(threshold));
-		operation.setOptions(options);
+	private OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean doResolve, IChooseImportQuery chooseImportQuery) throws CoreException, BackingStoreException {
+		OrganizeImportsOperation operation= new OrganizeImportsOperation(cu, null, ignoreLowerCaseNames, save, doResolve, chooseImportQuery);
+		
+		IEclipsePreferences scope= new ProjectScope(cu.getJavaProject().getProject()).getNode(JavaUI.ID_PLUGIN);
+		scope.put(NewImportRewrite.IMPORTS_ORDER, concatenate(order));
+		scope.put(NewImportRewrite.IMPORTS_ONDEMAND_THRESHOLD, String.valueOf(threshold));
+		scope.flush();
 		return operation;
 	}
 	

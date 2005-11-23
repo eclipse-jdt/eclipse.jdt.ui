@@ -39,4 +39,6 @@ public final class CorextMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, CorextMessages.class);
 	}
+
+	public static String JavaModelUtil_applyedit_operation;
 }
