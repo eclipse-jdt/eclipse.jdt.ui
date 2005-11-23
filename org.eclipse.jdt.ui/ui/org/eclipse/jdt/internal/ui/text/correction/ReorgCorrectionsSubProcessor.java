@@ -162,7 +162,7 @@ public class ReorgCorrectionsSubProcessor {
 		IFix fix= UnusedCodeFix.createFix(context.getASTRoot(), problem, true, false, false, false, false, false, false);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_DELETE_IMPORT);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnusedCodeCleanUp(true, false, false, false, false, false), 6, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS), 6, image);
 			proposals.add(proposal);
 		}
 		

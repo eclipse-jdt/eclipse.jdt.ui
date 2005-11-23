@@ -616,7 +616,7 @@ public class ModifierCorrectionSubProcessor {
 		IFix fix= Java50Fix.createFix(context.getASTRoot(), problem, true, false);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(true, false), 5, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(Java50CleanUp.ADD_OVERRIDE_ANNOATION), 5, image);
 			proposals.add(proposal);
 		}
 	}
@@ -625,7 +625,7 @@ public class ModifierCorrectionSubProcessor {
 		IFix fix= Java50Fix.createFix(context.getASTRoot(), problem, false, true);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(false, true), 5, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(Java50CleanUp.ADD_DEPRECATED_ANNOTATION), 5, image);
 			proposals.add(proposal);
 		}
 	}

@@ -20,6 +20,8 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -69,7 +71,48 @@ public class StringFix extends AbstractFix {
 		}
 	}
 	
-	public static ReplaceEdit getReplace(int offset, int length, IBuffer buffer, boolean removeLeadingIndents) {
+	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
+		if (!addNLSTag && !removeNLSTag)
+			return null;
+		
+		IProblem[] problems= compilationUnit.getProblems();
+		
+		if (problems.length == 0)
+			return null;
+		
+		CompilationUnitChange result= null;
+		
+		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
+		
+		for (int i= 0; i < problems.length; i++) {
+			IProblem problem= problems[i];
+			if (addNLSTag && problem.getID() == IProblem.NonExternalizedStringLiteral) {
+				TextEdit edit= NLSUtil.createNLSEdit(cu, problem.getSourceStart());
+				if (edit != null) {
+					if (result == null) 
+						result= new CompilationUnitChange("", cu); //$NON-NLS-1$
+					TextChangeCompatibility.addTextEdit(result, FixMessages.StringFix_AddNonNls_description, edit);
+				}
+			}
+			if (removeNLSTag && problem.getID() == IProblem.UnnecessaryNLSTag) {
+				IBuffer buffer= cu.getBuffer();
+				if (buffer != null) {
+					TextEdit edit= StringFix.getReplace(problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart() + 1, buffer, false);
+					if (edit != null) {
+						if (result == null)
+							result= new CompilationUnitChange("", cu); //$NON-NLS-1$
+						TextChangeCompatibility.addTextEdit(result, FixMessages.StringFix_RemoveNonNls_description, edit);
+					}
+				}
+			}
+		}
+		if (result == null)
+			return null;
+		
+		return new TextChangeFix("", cu, result); //$NON-NLS-1$
+	}
+	
+	private static ReplaceEdit getReplace(int offset, int length, IBuffer buffer, boolean removeLeadingIndents) {
 		
 		String replaceString= new String();
 		boolean hasMoreInComment= false;

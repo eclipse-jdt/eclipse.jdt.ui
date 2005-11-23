@@ -118,10 +118,28 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 	public void testAllCleanUp() throws Exception {
 		CleanUpRefactoring cleanUpRefactoring= new CleanUpRefactoring();
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
-		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUp(true, true, true, true, true));
-		cleanUpRefactoring.addCleanUp(new Java50CleanUp(true, true));
-		cleanUpRefactoring.addCleanUp(new StringCleanUp(true, true));
-		cleanUpRefactoring.addCleanUp(new UnusedCodeCleanUp(true, true, true, false, true, false));
+		
+		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUp(
+				CodeStyleCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS | 
+				CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT | 
+				CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC | 
+				CodeStyleCleanUp.QUALIFY_FIELD_ACCESS |
+				CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS));
+		
+		cleanUpRefactoring.addCleanUp(new Java50CleanUp(
+				Java50CleanUp.ADD_DEPRECATED_ANNOTATION | 
+				Java50CleanUp.ADD_OVERRIDE_ANNOATION));
+		
+		cleanUpRefactoring.addCleanUp(new StringCleanUp(
+				StringCleanUp.ADD_MISSING_NLS_TAG |
+				StringCleanUp.REMOVE_UNNECESSARY_NLS_TAG));
+		
+		cleanUpRefactoring.addCleanUp(new UnusedCodeCleanUp(
+				UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS |
+				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_CONSTRUCTORS |
+				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_METHODS |
+				UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_TYPES));
+		
 		tagAsSummary("Code clean up - all fixes", Dimension.ELAPSED_PROCESS);
 		
 		joinBackgroudActivities();

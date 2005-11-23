@@ -40,6 +40,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 /**
@@ -53,7 +55,7 @@ public class Java50Fix extends AbstractFix {
 	
 	private final AnnotationTuple[] fAnnotationTuples;
 
-	public static class AnnotationTuple {
+	private static class AnnotationTuple {
 		private final BodyDeclaration fBodyDeclaration;
 		private final String[] fAnnotations;
 
@@ -100,9 +102,49 @@ public class Java50Fix extends AbstractFix {
 		
 		return new Java50Fix(name, cu, new AnnotationTuple[] {tuple});
 	}
+	
+	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean addOverrideAnnotation, boolean addDeprecatedAnnotation) {
+		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
+		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
+			return null;
+		
+		if (!addOverrideAnnotation && !addDeprecatedAnnotation)
+			return null;
+		
+		List/*<AnnotationTuple>*/ annotationTuples= new ArrayList();
+		IProblem[] problems= compilationUnit.getProblems();
+		for (int i= 0; i < problems.length; i++) {
+			IProblemLocation problem= getProblemLocation(problems[i]);
+			
+			if (isMissingDeprecated(problem) || isMissingOverride(problem)) {				
+				
+				ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
+				if (selectedNode != null) { 
+				
+					ASTNode declaringNode= getDeclaringNode(selectedNode);
+					if (declaringNode instanceof BodyDeclaration) {
+					
+						List/*<String>*/ annotations= new ArrayList();
+						
+						addAnnotations(problem, addOverrideAnnotation, addDeprecatedAnnotation, annotations);
+						
+						if (!annotations.isEmpty()) {
+							BodyDeclaration declaration= (BodyDeclaration) declaringNode;
+							AnnotationTuple tuple= new AnnotationTuple(declaration, (String[])annotations.toArray(new String[annotations.size()]));
+							annotationTuples.add(tuple);
+						}
+						
+					}
+				}
+			}
+		}
+		if (annotationTuples.isEmpty()) 
+			return null;
+		
+		return new Java50Fix("", cu, (AnnotationTuple[])annotationTuples.toArray(new AnnotationTuple[annotationTuples.size()])); //$NON-NLS-1$
+	}
 
-
-	public static String addAnnotations(IProblemLocation problem, boolean addOverrideAnnotation, boolean addDepricatedAnnotation, List annotations) {
+	private static String addAnnotations(IProblemLocation problem, boolean addOverrideAnnotation, boolean addDepricatedAnnotation, List annotations) {
 		String name= ""; //$NON-NLS-1$
 		if (addOverrideAnnotation && isMissingOverride(problem)) {
 			annotations.add("Override"); //$NON-NLS-1$
@@ -120,17 +162,17 @@ public class Java50Fix extends AbstractFix {
 		return name;
 	}
 
-	public static boolean isMissingOverride(IProblemLocation problem) {
+	private static boolean isMissingOverride(IProblemLocation problem) {
 		return problem.getProblemId() == IProblem.MissingOverrideAnnotation;
 	}
 
-	public static boolean isMissingDeprecated(IProblemLocation problem) {
+	private static boolean isMissingDeprecated(IProblemLocation problem) {
 		return problem.getProblemId() == IProblem.FieldMissingDeprecatedAnnotation ||
 		problem.getProblemId() == IProblem.MethodMissingDeprecatedAnnotation ||
 		problem.getProblemId() == IProblem.TypeMissingDeprecatedAnnotation;
 	}
 	
-	public static ASTNode getDeclaringNode(ASTNode selectedNode) {
+	private static ASTNode getDeclaringNode(ASTNode selectedNode) {
 		ASTNode declaringNode= null;		
 		if (selectedNode instanceof MethodDeclaration) {
 			declaringNode= selectedNode;
@@ -145,7 +187,7 @@ public class Java50Fix extends AbstractFix {
 		return declaringNode;
 	}
 
-	public Java50Fix(String name, ICompilationUnit compilationUnit, AnnotationTuple[] annotationTuples) {
+	private Java50Fix(String name, ICompilationUnit compilationUnit, AnnotationTuple[] annotationTuples) {
 		super(name, compilationUnit);
 		fAnnotationTuples= annotationTuples;
 	}
@@ -186,6 +228,12 @@ public class Java50Fix extends AbstractFix {
 			textEditGroups.add(group);
 			listRewrite.insertFirst(newAnnotation, group);	
 		}
+	}
+
+	private static IProblemLocation getProblemLocation(IProblem problem) {
+		int offset= problem.getSourceStart();
+		int length= problem.getSourceEnd() - offset + 1;
+		return new ProblemLocation(offset, length, problem.getID(), problem.getArguments(), problem.isError());
 	}
 
 }

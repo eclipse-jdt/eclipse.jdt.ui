@@ -10,39 +10,24 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
-import java.util.ArrayList;
 import java.util.Hashtable;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
-import org.eclipse.jdt.internal.corext.fix.Java50Fix.AnnotationTuple;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.ui.text.java.IProblemLocation;
-
-import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * Create fixes which can transform pre Java50 code to Java50 code
@@ -50,86 +35,56 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
  *
  */
 public class Java50CleanUp extends AbstractCleanUp {
-
-	private static final String ADD_DEPRICATED_ANNOTATION_SETTINGS_ID= "AddDepricatedAnnotation"; //$NON-NLS-1$
-	private static final String ADD_OVERRIDE_ANNOTATION_SETTINGS_ID= "AddOverrideAnnotation"; //$NON-NLS-1$
 	
-	private boolean fAddOverrideAnnotation;
-	private boolean fAddDepricatedAnnotation;
+	/**
+	 * Add '@Deprecated' annotation in front of deprecated members.<p>
+	 * i.e.:<pre><code>
+	 *      &#x2f;**@deprecated*&#x2f;
+	 *      int i;
+	 *  ->
+	 *      &#x2f;**@deprecated*&#x2f;
+	 *      &#x40;Deprecated
+	 *      int i;</pre></code>  
+	 */
+	public static final int ADD_DEPRECATED_ANNOTATION= 1;
+	
+	/**
+	 * Add '@Override' annotation in front of overriding methods.<p>
+	 * i.e.:<pre><code>
+	 * class E1 {void foo();}
+	 * class E2 extends E1 {
+	 * 	 void foo(); -> &#x40;Override void foo();
+	 * }</pre></code>  
+	 */
+	public static final int ADD_OVERRIDE_ANNOATION= 2;
+	
+	private static final int DEFAULT_FLAG= ADD_DEPRECATED_ANNOTATION | ADD_OVERRIDE_ANNOATION;
+	private static final String SECTION_NAME= "CleanUp_Java50"; //$NON-NLS-1$
 
-	public Java50CleanUp(boolean addOverrideAnnotation, boolean addDepricatedAnnotation) {
-		init(	addOverrideAnnotation,
-				addDepricatedAnnotation);
+	public Java50CleanUp(int flag) {
+		super(flag);
 	}
 
 	public Java50CleanUp(IDialogSettings settings) {
-		if (settings.get(ADD_OVERRIDE_ANNOTATION_SETTINGS_ID) == null) {
-			settings.put(ADD_OVERRIDE_ANNOTATION_SETTINGS_ID, true);
-		}
-		if (settings.get(ADD_DEPRICATED_ANNOTATION_SETTINGS_ID) == null) {
-			settings.put(ADD_DEPRICATED_ANNOTATION_SETTINGS_ID, true);
-		}
-		init(	settings.getBoolean(ADD_OVERRIDE_ANNOTATION_SETTINGS_ID), 
-				settings.getBoolean(ADD_DEPRICATED_ANNOTATION_SETTINGS_ID));
-	}
-
-	private void init(boolean addOverrideAnnotation, boolean addDepricatedAnnotation) {
-		fAddOverrideAnnotation= addOverrideAnnotation;
-		fAddDepricatedAnnotation= addDepricatedAnnotation;
+		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
 		
-		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
-		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
-			return null;
-		
-		if (!fAddOverrideAnnotation && !fAddDepricatedAnnotation)
-			return null;
-		
-		List/*<AnnotationTuple>*/ annotationTuples= new ArrayList();
-		IProblem[] problems= compilationUnit.getProblems();
-		for (int i= 0; i < problems.length; i++) {
-			IProblemLocation problem= getProblemLocation(problems[i]);
-			
-			if (Java50Fix.isMissingDeprecated(problem) || Java50Fix.isMissingOverride(problem)) {				
-				
-				ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
-				if (selectedNode != null) { 
-				
-					ASTNode declaringNode= Java50Fix.getDeclaringNode(selectedNode);
-					if (declaringNode instanceof BodyDeclaration) {
-					
-						List/*<String>*/ annotations= new ArrayList();
-						
-						Java50Fix.addAnnotations(problem, fAddOverrideAnnotation, fAddDepricatedAnnotation, annotations);
-						
-						if (!annotations.isEmpty()) {
-							BodyDeclaration declaration= (BodyDeclaration) declaringNode;
-							AnnotationTuple tuple= new AnnotationTuple(declaration, (String[])annotations.toArray(new String[annotations.size()]));
-							annotationTuples.add(tuple);
-						}
-						
-					}
-				}
-			}
-		}
-		if (annotationTuples.isEmpty()) 
-			return null;
-		
-		return new Java50Fix("", cu, (AnnotationTuple[])annotationTuples.toArray(new AnnotationTuple[annotationTuples.size()])); //$NON-NLS-1$
+		return Java50Fix.createCleanUp(compilationUnit, 
+				isFlag(ADD_OVERRIDE_ANNOATION), 
+				isFlag(ADD_DEPRECATED_ANNOTATION));
 	}
 
 	public Map getRequiredOptions() {
 		Map options= new Hashtable();
-		if (fAddOverrideAnnotation) {
+		if (isFlag(ADD_OVERRIDE_ANNOATION))
 			options.put(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION, JavaCore.WARNING);
-		}
-		if (fAddDepricatedAnnotation) {
+		
+		if (isFlag(ADD_DEPRECATED_ANNOTATION))
 			options.put(JavaCore.COMPILER_PB_MISSING_DEPRECATED_ANNOTATION, JavaCore.WARNING);
-		}
 		return options;
 	}
 
@@ -138,45 +93,14 @@ public class Java50CleanUp extends AbstractCleanUp {
 		composite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 		composite.setLayout(new GridLayout(1, true));
 		
-		Button addOverrid= new Button(composite, SWT.CHECK);
-		addOverrid.setText(MultiFixMessages.Java50MultiFix_AddMissingOverride_description);
-		addOverrid.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		addOverrid.setSelection(fAddOverrideAnnotation);
-		addOverrid.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fAddOverrideAnnotation= ((Button)e.getSource()).getSelection();
-			}
-		});
-		
-		Button addDepricated= new Button(composite, SWT.CHECK);
-		addDepricated.setText(MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description);
-		addDepricated.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		addDepricated.setSelection(fAddDepricatedAnnotation);
-		addDepricated.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fAddDepricatedAnnotation= ((Button)e.getSource()).getSelection();
-			}
-		});
+		addCheckBox(composite, ADD_OVERRIDE_ANNOATION, MultiFixMessages.Java50MultiFix_AddMissingOverride_description);
+		addCheckBox(composite, ADD_DEPRECATED_ANNOTATION, MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description);
 		
 		return composite;
 	}
-
-	public void saveSettings(IDialogSettings settings) {
-		settings.put(ADD_OVERRIDE_ANNOTATION_SETTINGS_ID, fAddOverrideAnnotation);
-		settings.put(ADD_DEPRICATED_ANNOTATION_SETTINGS_ID, fAddDepricatedAnnotation);
-	}
 	
-	/**
-	 * Helper method to convert an <code>IProblem</code> into an
-	 * <code>IProblemLocation</code>.
-	 * 
-	 * @param problem The <code>IProblem</code> not null
-	 * @return The <code>IProblemLocation</code> not null
-	 */
-	private IProblemLocation getProblemLocation(IProblem problem) {
-		int offset= problem.getSourceStart();
-		int length= problem.getSourceEnd() - offset + 1;
-		return new ProblemLocation(offset, length, problem.getID(), problem.getArguments(), problem.isError());
+	public void saveSettings(IDialogSettings settings) {
+		super.saveSettings(getSection(settings, SECTION_NAME));
 	}
 
 }

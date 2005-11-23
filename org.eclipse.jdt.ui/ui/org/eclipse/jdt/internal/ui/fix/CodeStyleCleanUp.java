@@ -16,11 +16,8 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -37,37 +34,61 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
  * @see org.eclipse.jdt.internal.corext.fix.CodeStyleFix
  */
 public class CodeStyleCleanUp extends AbstractCleanUp {
+	
+	/**
+	 * Adds a 'this' qualifier to field accesses.<p>
+	 * i.e.:<pre><code>
+	 *   int fField;
+	 *   void foo() {fField= 10;} -> void foo() {this.fField= 10;}</pre></code>
+	 */
+	public static final int QUALIFY_FIELD_ACCESS= 1;
+	
+	/**
+	 * Changes non static accesses to static members to static accesses.<p>
+	 * i.e.:<pre><code>
+	 * class E {
+	 *   public static int i;
+	 *   void foo() {(new E()).i= 10;} -> void foo() {E.i= 10;}
+	 * }</code></pre>
+	 */
+	public static final int CHANGE_NON_STATIC_ACCESS_TO_STATIC= 2;
+	
+	/**
+	 * Qualifies static field accesses with declaring type.<p>
+	 * i.e.:<pre><code>
+	 * class E {
+	 *   public static int i;
+	 *   void foo() {i= 10;} -> void foo() {E.i= 10;}
+	 * }</code></pre>
+	 */
+	public static final int QUALIFY_STATIC_FIELD_ACCESS= 4;
+	
+	/**
+	 * Changes indirect accesses to static members to direct ones.<p>
+	 * i.e.:<pre><code>
+	 * class E {public static int i;}
+	 * class ESub extends E {
+	 *   void foo() {ESub.i= 10;} -> void foo() {E.i= 10;}
+	 * }</code></pre>
+	 */
+	public static final int CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT= 8;
+	
+	/**
+	 * Adds block to control statement body if the body is not a block.<p>
+	 * i.e.:<pre><code>
+	 * 	 if (b) foo(); -> if (b) {foo();}</code></pre>
+	 */
+	public static final int ADD_BLOCK_TO_CONTROL_STATEMENTS= 16;
 
-	private static final String ADD_BLOCK_TO_CONTROL_STATEMENTS_SETTINGS_ID= "AddBlockToControlStatements"; //$NON-NLS-1$
-	private static final String CHANGE_INDIRECT_STATIC_ACCESS_TO_STATIC_SETTINGS_ID= "ChangeIndirectStaticAccessToStatic"; //$NON-NLS-1$
-	private static final String QUALIFY_STATIC_FIELD_ACCESS_SETTINGS_ID= "QualifyStaticFieldAccessWithDeclaringClass"; //$NON-NLS-1$
-	private static final String CHANGE_NON_STATIC_ACCESS_TO_STATIC_SETTINGS_ID= "ChangeNonStaticAccessToStatic"; //$NON-NLS-1$
-	private static final String ADD_THIS_QUALIFIER_SETTINGS_ID= "AddThisQualifier"; //$NON-NLS-1$
-	
-	private boolean fAddThisQualifier;
-	private boolean fChangeNonStaticAccessToStatic;
-	private boolean fQualifyStaticFieldAccessWithDeclaringClass;
-	private boolean fChangeIndirectStaticAccessToDirect;
-	private boolean fAddBlockToControlStatements;
-	
-	public CodeStyleCleanUp(boolean qualifyFieldAccess, 
-			boolean changeNonStaticAccessToStatic, 
-			boolean qualifyStaticFieldAccess, boolean changeIndirectStaticAccessToDirect, 
-			boolean addBlockToControlStatements) {
-		
-		fAddThisQualifier= qualifyFieldAccess;
-		fChangeNonStaticAccessToStatic= changeNonStaticAccessToStatic;
-		fQualifyStaticFieldAccessWithDeclaringClass= qualifyStaticFieldAccess;
-		fChangeIndirectStaticAccessToDirect= changeIndirectStaticAccessToDirect;
-		fAddBlockToControlStatements= addBlockToControlStatements;
+	private static final int DEFAULT_FLAG= CHANGE_NON_STATIC_ACCESS_TO_STATIC | CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT;
+	private static final String SECTION_NAME= "CleanUp_CodeStyle"; //$NON-NLS-1$
+
+	public CodeStyleCleanUp(int flag) {
+		super(flag);
 	}
 
 	public CodeStyleCleanUp(IDialogSettings settings) {
-		this(settings.getBoolean(ADD_THIS_QUALIFIER_SETTINGS_ID), 
-				settings.getBoolean(CHANGE_NON_STATIC_ACCESS_TO_STATIC_SETTINGS_ID),
-				settings.getBoolean(QUALIFY_STATIC_FIELD_ACCESS_SETTINGS_ID),
-				settings.getBoolean(CHANGE_INDIRECT_STATIC_ACCESS_TO_STATIC_SETTINGS_ID),
-				settings.getBoolean(ADD_BLOCK_TO_CONTROL_STATEMENTS_SETTINGS_ID));
+		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
@@ -75,18 +96,18 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 			return null;
 		
 		return CodeStyleFix.createCleanUp(compilationUnit, 
-				fAddThisQualifier, 
-				fChangeNonStaticAccessToStatic, 
-				fQualifyStaticFieldAccessWithDeclaringClass, 
-				fChangeIndirectStaticAccessToDirect,
-				fAddBlockToControlStatements);
+				isFlag(QUALIFY_FIELD_ACCESS), 
+				isFlag(CHANGE_NON_STATIC_ACCESS_TO_STATIC), 
+				isFlag(QUALIFY_STATIC_FIELD_ACCESS), 
+				isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT),
+				isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS));
 	}
 
 	public Map getRequiredOptions() {
 		Map options= new Hashtable();
-		if (fChangeNonStaticAccessToStatic)
+		if (isFlag(CHANGE_NON_STATIC_ACCESS_TO_STATIC))
 			options.put(JavaCore.COMPILER_PB_STATIC_ACCESS_RECEIVER, JavaCore.WARNING);
-		if (fChangeIndirectStaticAccessToDirect)
+		if (isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT))
 			options.put(JavaCore.COMPILER_PB_INDIRECT_STATIC_ACCESS, JavaCore.WARNING);
 		return options;
 	}
@@ -96,65 +117,17 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 		composite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 		composite.setLayout(new GridLayout(1, true));
 		
-		Button addThisQualifier= new Button(composite, SWT.CHECK);
-		addThisQualifier.setText(MultiFixMessages.CodeStyleMultiFix_AddThisQualifier_description);
-		addThisQualifier.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		addThisQualifier.setSelection(fAddThisQualifier);
-		addThisQualifier.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fAddThisQualifier= ((Button)e.getSource()).getSelection();
-			}
-		});
-		
-		Button qualifyStaticAccess= new Button(composite, SWT.CHECK);
-		qualifyStaticAccess.setText(MultiFixMessages.CodeStyleMultiFix_QualifyAccessToStaticField);
-		qualifyStaticAccess.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		qualifyStaticAccess.setSelection(fQualifyStaticFieldAccessWithDeclaringClass);
-		qualifyStaticAccess.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fQualifyStaticFieldAccessWithDeclaringClass= ((Button)e.getSource()).getSelection();
-			}
-		});
-		
-		Button removeNonStaticAccess= new Button(composite, SWT.CHECK);
-		removeNonStaticAccess.setText(MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description);
-		removeNonStaticAccess.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		removeNonStaticAccess.setSelection(fChangeNonStaticAccessToStatic);
-		removeNonStaticAccess.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fChangeNonStaticAccessToStatic= ((Button)e.getSource()).getSelection();
-			}
-		});
-		
-		Button indirectStaticAccess= new Button(composite, SWT.CHECK);
-		indirectStaticAccess.setText(MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect);
-		indirectStaticAccess.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		indirectStaticAccess.setSelection(fChangeIndirectStaticAccessToDirect);
-		indirectStaticAccess.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fChangeIndirectStaticAccessToDirect= ((Button)e.getSource()).getSelection();
-			}
-		});
-		
-		Button addBlock= new Button(composite, SWT.CHECK);
-		addBlock.setText(MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description);
-		addBlock.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		addBlock.setSelection(fAddBlockToControlStatements);
-		addBlock.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fAddBlockToControlStatements= ((Button)e.getSource()).getSelection();
-			}
-		});
+		addCheckBox(composite, QUALIFY_FIELD_ACCESS, MultiFixMessages.CodeStyleMultiFix_AddThisQualifier_description);
+		addCheckBox(composite, QUALIFY_STATIC_FIELD_ACCESS, MultiFixMessages.CodeStyleMultiFix_QualifyAccessToStaticField);
+		addCheckBox(composite, CHANGE_NON_STATIC_ACCESS_TO_STATIC, MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description);
+		addCheckBox(composite, CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT, MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect);
+		addCheckBox(composite, ADD_BLOCK_TO_CONTROL_STATEMENTS, MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description);
 		
 		return composite;
 	}
 
 	public void saveSettings(IDialogSettings settings) {
-		settings.put(ADD_THIS_QUALIFIER_SETTINGS_ID, fAddThisQualifier);
-		settings.put(CHANGE_NON_STATIC_ACCESS_TO_STATIC_SETTINGS_ID, fChangeNonStaticAccessToStatic);
-		settings.put(QUALIFY_STATIC_FIELD_ACCESS_SETTINGS_ID, fQualifyStaticFieldAccessWithDeclaringClass);
-		settings.put(CHANGE_INDIRECT_STATIC_ACCESS_TO_STATIC_SETTINGS_ID, fChangeIndirectStaticAccessToDirect);
-		settings.put(ADD_BLOCK_TO_CONTROL_STATEMENTS_SETTINGS_ID, fAddBlockToControlStatements);
+		super.saveSettings(getSection(settings, SECTION_NAME));
 	}
-
+	
 }

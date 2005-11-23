@@ -291,7 +291,7 @@ public class LocalCorrectionsSubProcessor {
 		IFix fix= StringFix.createFix(context.getASTRoot(), problem, false, true);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
-			FixCorrectionProposal addNLS= new FixCorrectionProposal(fix, new StringCleanUp(true, false), 6, image);
+			FixCorrectionProposal addNLS= new FixCorrectionProposal(fix, new StringCleanUp(StringCleanUp.ADD_MISSING_NLS_TAG), 6, image);
 			addNLS.setCommandId(ADD_NON_NLS_ID);
 			proposals.add(addNLS);
 		}
@@ -301,7 +301,7 @@ public class LocalCorrectionsSubProcessor {
 		IFix fix= StringFix.createFix(context.getASTRoot(), problem, true, false);
 		if (fix != null) {
 			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new StringCleanUp(false, true), 6, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new StringCleanUp(StringCleanUp.REMOVE_UNNECESSARY_NLS_TAG), 6, image);
 			proposal.setCommandId(REMOVE_UNNECESSARY_NLS_TAG_ID);
 			proposals.add(proposal);
 		}
@@ -315,7 +315,7 @@ public class LocalCorrectionsSubProcessor {
 		IFix fix= CodeStyleFix.createFix(context.getASTRoot(), problem, false, true);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUp(false, false, false, true, false), 6, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT), 6, image);
 			proposal.setCommandId(ADD_STATIC_ACCESS_ID);
 			proposals.add(proposal);
 			return;
@@ -325,13 +325,13 @@ public class LocalCorrectionsSubProcessor {
 		if (fixes != null) {
 			IFix fix1= fixes[0];
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix1, new CodeStyleCleanUp(false, true, false, true, false), 6, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix1, new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC), 6, image);
 			proposal.setCommandId(ADD_STATIC_ACCESS_ID);
 			proposals.add(proposal);
 			
 			if (fixes.length > 1) {
 				IFix fix2= fixes[1];
-				proposal= new FixCorrectionProposal(fix2, new CodeStyleCleanUp(false, true, false, true, false), 5, image);
+				proposal= new FixCorrectionProposal(fix2, new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC | CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT), 5, image);
 				proposals.add(proposal);
 			}
 		}
@@ -544,7 +544,7 @@ public class LocalCorrectionsSubProcessor {
 		IFix fix= CodeStyleFix.createFix(context.getASTRoot(), problem, true, false);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUp(true, false, false, false, false), 5, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS), 5, image);
 			proposal.setCommandId(ADD_FIELD_QUALIFICATION_ID);
 			proposals.add(proposal);
 		}

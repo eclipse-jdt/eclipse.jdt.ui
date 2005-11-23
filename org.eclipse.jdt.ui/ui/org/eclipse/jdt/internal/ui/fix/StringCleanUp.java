@@ -13,34 +13,21 @@ package org.eclipse.jdt.internal.ui.fix;
 import java.util.Hashtable;
 import java.util.Map;
 
-import org.eclipse.text.edits.TextEdit;
-
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
-import org.eclipse.jdt.core.IBuffer;
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.StringFix;
-import org.eclipse.jdt.internal.corext.fix.TextChangeFix;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
-import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
 
 /**
  * Create fixes which can solve problems in connection with Strings
@@ -48,81 +35,47 @@ import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
  *
  */
 public class StringCleanUp extends AbstractCleanUp {
-
-	private static final String REMOVE_NLS_TAG_SETTINGS_ID= "RemoveNlsTag"; //$NON-NLS-1$
-	private static final String ADD_NLS_TAG_SETTINGS_ID= "AddNlsTag"; //$NON-NLS-1$
 	
-	private boolean fAddNlsTag;
-	private boolean fRemoveNlsTag;
+	/**
+	 * Add '$NON-NLS$' tags to non externalized strings.<p>
+	 * i.e.:<pre><code>
+	 * 	 String s= ""; -> String s= ""; //$NON-NLS-1$</code></pre>  
+	 */
+	public static final int ADD_MISSING_NLS_TAG= 1;
+	
+	/**
+	 * Remove unnecessary '$NON-NLS$' tags.<p>
+	 * i.e.:<pre><code>
+	 *   String s; //$NON-NLS-1$ -> String s;</code></pre>
+	 */
+	public static final int REMOVE_UNNECESSARY_NLS_TAG= 2;
+	
+	private static final int DEFAULT_FLAG= REMOVE_UNNECESSARY_NLS_TAG;
+	private static final String SECTION_NAME= "CleanUp_Strings"; //$NON-NLS-1$
 
-	public StringCleanUp(boolean addNLSTag, boolean removeNLSTag) {
-		init(addNLSTag, removeNLSTag);
+	public StringCleanUp(int flag) {
+		super(flag);
 	}
 
 	public StringCleanUp(IDialogSettings settings) {
-		if (settings.get(ADD_NLS_TAG_SETTINGS_ID) == null) {
-			settings.put(ADD_NLS_TAG_SETTINGS_ID, false);
-		}
-		if (settings.get(REMOVE_NLS_TAG_SETTINGS_ID) == null) {
-			settings.put(REMOVE_NLS_TAG_SETTINGS_ID, true);
-		}
-		init(	settings.getBoolean(ADD_NLS_TAG_SETTINGS_ID), 
-				settings.getBoolean(REMOVE_NLS_TAG_SETTINGS_ID));
-	}
-
-	private void init(boolean addNLSTag, boolean removeNLSTag) {
-		fAddNlsTag= addNLSTag;
-		fRemoveNlsTag= removeNLSTag;
+		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
 	}
 
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
-		
-		if (!fAddNlsTag && !fRemoveNlsTag)
-			return null;
-		
-		IProblem[] problems= compilationUnit.getProblems();
-		
-		if (problems.length == 0)
-			return null;
-		
-		CompilationUnitChange result= null;
-		
-		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
-		
-		for (int i= 0; i < problems.length; i++) {
-			IProblem problem= problems[i];
-			if (fAddNlsTag && problem.getID() == IProblem.NonExternalizedStringLiteral) {
-				TextEdit edit= NLSUtil.createNLSEdit(cu, problem.getSourceStart());
-				if (edit != null) {
-					if (result == null) 
-						result= new CompilationUnitChange("", cu); //$NON-NLS-1$
-					TextChangeCompatibility.addTextEdit(result, FixMessages.StringFix_AddNonNls_description, edit);
-				}
-			}
-			if (fRemoveNlsTag && problem.getID() == IProblem.UnnecessaryNLSTag) {
-				IBuffer buffer= cu.getBuffer();
-				if (buffer != null) {
-					TextEdit edit= StringFix.getReplace(problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart() + 1, buffer, false);
-					if (edit != null) {
-						if (result == null)
-							result= new CompilationUnitChange("", cu); //$NON-NLS-1$
-						TextChangeCompatibility.addTextEdit(result, FixMessages.StringFix_RemoveNonNls_description, edit);
-					}
-				}
-			}
-		}
-		if (result == null)
-			return null;
-		
-		return new TextChangeFix("", cu, result); //$NON-NLS-1$
+
+		return StringFix.createCleanUp(compilationUnit, 
+				isFlag(ADD_MISSING_NLS_TAG), 
+				isFlag(REMOVE_UNNECESSARY_NLS_TAG));
 	}
 
 	public Map getRequiredOptions() {
 		Map result= new Hashtable();
-		if (fAddNlsTag || fRemoveNlsTag)
+		
+		if (isFlag(ADD_MISSING_NLS_TAG) || isFlag(REMOVE_UNNECESSARY_NLS_TAG))
 			result.put(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.WARNING);
+		
 		return result;
 	}
 
@@ -131,32 +84,14 @@ public class StringCleanUp extends AbstractCleanUp {
 		composite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
 		composite.setLayout(new GridLayout(1, true));
 		
-		Button addNLSTag= new Button(composite, SWT.CHECK);
-		addNLSTag.setText(MultiFixMessages.StringMultiFix_AddMissingNonNls_description);
-		addNLSTag.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		addNLSTag.setSelection(fAddNlsTag);
-		addNLSTag.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fAddNlsTag= ((Button)e.getSource()).getSelection();
-			}
-		});
-		
-		Button removeNLSTag= new Button(composite, SWT.CHECK);
-		removeNLSTag.setText(MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description);
-		removeNLSTag.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		removeNLSTag.setSelection(fRemoveNlsTag);
-		removeNLSTag.addSelectionListener(new SelectionAdapter() {
-			public void widgetSelected(SelectionEvent e) {
-				fRemoveNlsTag= ((Button)e.getSource()).getSelection();
-			}
-		});
+		addCheckBox(composite, ADD_MISSING_NLS_TAG, MultiFixMessages.StringMultiFix_AddMissingNonNls_description);
+		addCheckBox(composite, REMOVE_UNNECESSARY_NLS_TAG, MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description);
 		
 		return composite;
 	}
-
+	
 	public void saveSettings(IDialogSettings settings) {
-		settings.put(ADD_NLS_TAG_SETTINGS_ID, fAddNlsTag);
-		settings.put(REMOVE_NLS_TAG_SETTINGS_ID, fRemoveNlsTag);
+		super.saveSettings(getSection(settings, SECTION_NAME));
 	}
 
 }

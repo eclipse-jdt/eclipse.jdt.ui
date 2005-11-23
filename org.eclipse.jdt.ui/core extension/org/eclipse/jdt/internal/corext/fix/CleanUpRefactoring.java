@@ -80,26 +80,26 @@ public class CleanUpRefactoring extends Refactoring {
 	private class ParseListElement {
 
 		private final ICompilationUnit fUnit;
-		private List fCleanUps;
+		private List fCleanUpsToGo;
 		private ICleanUp[] fCleanUpsArray;
 
 		public ParseListElement(ICompilationUnit unit) {
 			fUnit= unit;
-			fCleanUps= new ArrayList();
+			fCleanUpsToGo= new ArrayList();
 			fCleanUpsArray= new ICleanUp[0];
 		}
 		
 		public ParseListElement(ICompilationUnit unit, ICleanUp[] cleanUps) {
 			fUnit= unit;
 			fCleanUpsArray= cleanUps;
-			fCleanUps= null;
+			fCleanUpsToGo= null;
 		}
 
 		public void addCleanUp(ICleanUp multiFix) {
-			if (fCleanUps == null) {
-				fCleanUps= Arrays.asList(fCleanUpsArray);
+			if (fCleanUpsToGo == null) {
+				fCleanUpsToGo= Arrays.asList(fCleanUpsArray);
 			}
-			fCleanUps.add(multiFix);
+			fCleanUpsToGo.add(multiFix);
 			fCleanUpsArray= null;
 		}
 
@@ -109,7 +109,7 @@ public class CleanUpRefactoring extends Refactoring {
 
 		public ICleanUp[] getCleanUps() {
 			if (fCleanUpsArray == null) {
-				fCleanUpsArray= (ICleanUp[])fCleanUps.toArray(new ICleanUp[fCleanUps.size()]);
+				fCleanUpsArray= (ICleanUp[])fCleanUpsToGo.toArray(new ICleanUp[fCleanUpsToGo.size()]);
 			}
 			return fCleanUpsArray;
 		}
@@ -483,7 +483,7 @@ public class CleanUpRefactoring extends Refactoring {
 		}
 	}
 
-	public static void mergeTextChanges(TextChange target, TextChange source) {
+	private static void mergeTextChanges(TextChange target, TextChange source) {
 		final List edits= new ArrayList();
 		source.getEdit().accept(new TextEditVisitor() {
 			public boolean visitNode(TextEdit edit) {

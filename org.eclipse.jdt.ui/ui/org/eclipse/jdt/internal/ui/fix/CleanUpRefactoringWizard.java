@@ -33,7 +33,6 @@ import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
 
-import org.eclipse.ltk.internal.ui.refactoring.RefactoringUIPlugin;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
@@ -49,6 +48,7 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CleanUpRefactoringWizard extends RefactoringWizard {
 	
@@ -333,7 +333,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 	}
 	
 	private static IDialogSettings getCleanUpWizardSettings() {
-		IDialogSettings settings= RefactoringUIPlugin.getDefault().getDialogSettings();
+		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
 		IDialogSettings section= settings.getSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);
 		if (section == null) {
 			section= settings.addNewSection(CLEAN_UP_WIZARD_SETTINGS_SECTION_ID);

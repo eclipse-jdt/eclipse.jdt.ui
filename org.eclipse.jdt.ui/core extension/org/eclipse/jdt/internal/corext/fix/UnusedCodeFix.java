@@ -62,6 +62,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.text.correction.JavadocTagsSubProcessor;
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * Fix which removes unused code.
@@ -112,11 +113,6 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 	}
 
-	private static UnusedCodeCleanUp fCleanUp;
-	private final ImportDeclaration[] fImports;
-	private final SimpleName[] fUnused;
-	private final CompilationUnit fAstRoot;
-
 	public static UnusedCodeFix createFix(CompilationUnit compilationUnit, IProblemLocation problem, 
 									boolean removeUnusedImports, 
 									boolean removeUnusedPrivateMethod, 
@@ -137,7 +133,7 @@ public class UnusedCodeFix extends AbstractFix {
 		) {
 			ImportDeclaration node= getImportDeclaration(problem, compilationUnit);
 			if (node != null) {
-				return new UnusedCodeFix(FixMessages.UnusedCodeFix_RemoveImport_description, cu, new ImportDeclaration[] {node}, null, null);
+				return new UnusedCodeFix(FixMessages.UnusedCodeFix_RemoveImport_description, cu, new ImportDeclaration[] {node}, null, null, UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS);
 			}
 		}
 		if (
@@ -152,14 +148,56 @@ public class UnusedCodeFix extends AbstractFix {
 			if (name != null) {
 				IBinding binding= name.resolveBinding();
 				if (binding != null) {
-					return new UnusedCodeFix(getDisplayString(name, binding), cu, null, new SimpleName[] {name}, compilationUnit);
+					return new UnusedCodeFix(getDisplayString(name, binding), cu, null, new SimpleName[] {name}, compilationUnit, getCleanUpFlag(binding));
 				}
 			}
 		}
 		return null;
 	}
 	
-	public static SimpleName getUnusedName(CompilationUnit compilationUnit, IProblemLocation problem) {
+	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean removeUnusedPrivateMethods, boolean removeUnusedPrivateConstructors, boolean removeUnusedPrivateFields, boolean removeUnusedPrivateTypes, boolean removeUnusedLovalVariables, boolean removeUnusedImports) {
+		List/*<ImportDeclaration>*/ removeImports= new ArrayList();
+		List/*<SimpleName>*/ removeNames= new ArrayList();
+
+		IProblem[] problems= compilationUnit.getProblems();
+
+		for (int i= 0; i < problems.length; i++) {
+			IProblemLocation problem= getProblemLocation(problems[i]);
+			if (removeUnusedImports && problem.getProblemId() == IProblem.UnusedImport) {
+				
+				ImportDeclaration node= UnusedCodeFix.getImportDeclaration(problem, compilationUnit);
+				
+				if (node != null) {
+					removeImports.add(node);
+				}
+			}
+
+			if (	(removeUnusedPrivateMethods && problem.getProblemId() == IProblem.UnusedPrivateMethod) ||
+					(removeUnusedPrivateConstructors && problem.getProblemId() == IProblem.UnusedPrivateConstructor) ||
+					(removeUnusedPrivateFields && problem.getProblemId() == IProblem.UnusedPrivateField) ||
+					(removeUnusedPrivateTypes && problem.getProblemId() == IProblem.UnusedPrivateType) ||
+					(removeUnusedLovalVariables && problem.getProblemId() == IProblem.LocalVariableIsNeverUsed)
+					) {
+				SimpleName name= UnusedCodeFix.getUnusedName(compilationUnit, problem);
+				if (name != null) {
+					IBinding binding= name.resolveBinding();
+					if (binding != null) {
+						removeNames.add(name);
+					}
+				}
+			}
+		}
+		
+		if (removeImports.size() == 0 && removeNames.size() == 0)
+			return null;
+		
+		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
+		ImportDeclaration[] imports= (ImportDeclaration[])removeImports.toArray(new ImportDeclaration[removeImports.size()]);
+		SimpleName[] names= (SimpleName[])removeNames.toArray(new SimpleName[removeNames.size()]);
+		return new UnusedCodeFix("", cu, imports, names, (names.length == 0)?null:compilationUnit); //$NON-NLS-1$
+	}
+	
+	private static SimpleName getUnusedName(CompilationUnit compilationUnit, IProblemLocation problem) {
 		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 
 		SimpleName name= null;
@@ -178,18 +216,14 @@ public class UnusedCodeFix extends AbstractFix {
 		String name= simpleName.getIdentifier();
 		switch (binding.getKind()) {
 			case IBinding.TYPE:
-				fCleanUp= new UnusedCodeCleanUp(false, false, false, false, true, false);
 				return Messages.format(FixMessages.UnusedCodeFix_RemoveType_description, name);
 			case IBinding.METHOD:
 				if (((IMethodBinding) binding).isConstructor()) {
-					fCleanUp= new UnusedCodeCleanUp(false, false, true, false, false, false);
 					return Messages.format(FixMessages.UnusedCodeFix_RemoveConstructor_description, name);
 				} else {
-					fCleanUp= new UnusedCodeCleanUp(false, true, false, false, false, false);
 					return Messages.format(FixMessages.UnusedCodeFix_RemoveMethod_description, name);
 				}
 			case IBinding.VARIABLE:
-				fCleanUp= null;
 				if (((IVariableBinding) binding).isField()) {
 					return Messages.format(FixMessages.UnusedCodeFix_RemoveFieldOrLocal_description, name);
 				} else {
@@ -200,7 +234,22 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 	}
 	
-	public static ImportDeclaration getImportDeclaration(IProblemLocation problem, CompilationUnit compilationUnit) {
+	private static int getCleanUpFlag(IBinding binding) {
+		switch (binding.getKind()) {
+			case IBinding.TYPE:
+				return UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_TYPES;
+			case IBinding.METHOD:
+				if (((IMethodBinding) binding).isConstructor()) {
+					return UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_CONSTRUCTORS;
+				} else {
+					return UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_METHODS;
+				}
+			default:
+				return 0;
+		}
+	}
+	
+	private static ImportDeclaration getImportDeclaration(IProblemLocation problem, CompilationUnit compilationUnit) {
 		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 		if (selectedNode != null) {
 			ASTNode node= ASTNodes.getParent(selectedNode, ASTNode.IMPORT_DECLARATION);
@@ -210,12 +259,22 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 		return null;
 	}
+	
+	private final ImportDeclaration[] fImports;
+	private final SimpleName[] fUnused;
+	private final CompilationUnit fAstRoot;
+	private final int fCleanUpFlags;
 
-	public UnusedCodeFix(String name, ICompilationUnit compilationUnit, ImportDeclaration[] imports, SimpleName[] unused, CompilationUnit astRoot) {
+	private UnusedCodeFix(String name, ICompilationUnit compilationUnit, ImportDeclaration[] imports, SimpleName[] unused, CompilationUnit astRoot) {
+		this(name, compilationUnit, imports, unused, astRoot, 0);
+	}
+
+	private UnusedCodeFix(String name, ICompilationUnit compilationUnit, ImportDeclaration[] imports, SimpleName[] unused, CompilationUnit astRoot, int cleanUpFlag) {
 		super(name, compilationUnit);
 		fImports= imports;
 		fUnused= unused;
 		fAstRoot= astRoot;
+		fCleanUpFlags= cleanUpFlag;
 	}
 
 	public TextChange createChange() throws CoreException {
@@ -358,6 +417,12 @@ public class UnusedCodeFix extends AbstractFix {
 	}
 
 	public UnusedCodeCleanUp getCleanUp() {
-		return fCleanUp;
+		return new UnusedCodeCleanUp(fCleanUpFlags);
+	}
+
+	private static IProblemLocation getProblemLocation(IProblem problem) {
+		int offset= problem.getSourceStart();
+		int length= problem.getSourceEnd() - offset + 1;
+		return new ProblemLocation(offset, length, problem.getID(), problem.getArguments(), problem.isError());
 	}
 }
