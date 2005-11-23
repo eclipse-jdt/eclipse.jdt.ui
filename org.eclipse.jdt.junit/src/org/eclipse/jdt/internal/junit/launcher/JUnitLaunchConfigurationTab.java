@@ -13,21 +13,30 @@ package org.eclipse.jdt.internal.junit.launcher;
  
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
-import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
-import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
+
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.*;
+
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.debug.core.ILaunchConfigurationWorkingCopy;
+
+import org.eclipse.debug.ui.AbstractLaunchConfigurationTab;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.launching.IJavaLaunchConfigurationConstants;
+
+import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 
 /**
  * Common function for Java launch configuration tabs.
@@ -41,7 +50,11 @@ public abstract class JUnitLaunchConfigurationTab extends AbstractLaunchConfigur
 	 * @return Java element context.
 	 */
 	protected IJavaElement getContext() {
-		IWorkbenchPage page = JavaPlugin.getActivePage();
+		IWorkbenchWindow activeWorkbenchWindow= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
+		if (activeWorkbenchWindow == null) {
+			return null;
+		}
+		IWorkbenchPage page = activeWorkbenchWindow.getActivePage();
 		if (page != null) {
 			ISelection selection = page.getSelection();
 			if (selection instanceof IStructuredSelection) {
@@ -74,6 +87,8 @@ public abstract class JUnitLaunchConfigurationTab extends AbstractLaunchConfigur
 	
 	/**
 	 * Set the java project attribute based on the IJavaElement.
+	 * @param javaElement 
+	 * @param config 
 	 */
 	protected void initializeJavaProject(IJavaElement javaElement, ILaunchConfigurationWorkingCopy config) {
 		IJavaProject javaProject = javaElement.getJavaProject();
@@ -87,7 +102,7 @@ public abstract class JUnitLaunchConfigurationTab extends AbstractLaunchConfigur
 	protected void setButtonGridData(Button button) {
 		GridData gridData= new GridData();
 		button.setLayoutData(gridData);
-		SWTUtil.setButtonDimensionHint(button);
+		LayoutUtil.setButtonDimensionHint(button);
 	}
 	
 }

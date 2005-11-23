@@ -49,12 +49,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
-
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
@@ -298,7 +294,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			Button selectAllButton= new Button(buttonContainer, SWT.PUSH);
 			selectAllButton.setText(WizardMessages.NewTestSuiteWizPage_selectAll); 
 			GridData bgd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-			bgd.widthHint = SWTUtil.getButtonWidthHint(selectAllButton);
+			bgd.widthHint = LayoutUtil.getButtonWidthHint(selectAllButton);
 			selectAllButton.setLayoutData(bgd);
 			selectAllButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
@@ -310,7 +306,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 			Button deselectAllButton= new Button(buttonContainer, SWT.PUSH);
 			deselectAllButton.setText(WizardMessages.NewTestSuiteWizPage_deselectAll); 
 			bgd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
-			bgd.widthHint = SWTUtil.getButtonWidthHint(deselectAllButton);
+			bgd.widthHint = LayoutUtil.getButtonWidthHint(deselectAllButton);
 			deselectAllButton.setLayoutData(bgd);
 			deselectAllButton.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
@@ -383,7 +379,7 @@ public class NewTestSuiteWizardPage extends NewTypeWizardPage {
 		monitor.beginTask(WizardMessages.NewTestSuiteWizPage_createType_beginTask, 10); 
 		IMethod suiteMethod= suiteType.getMethod("suite", new String[] {}); //$NON-NLS-1$
 		monitor.worked(1);
-		String lineDelimiter= StubUtility.getLineDelimiterUsed(cu);
+		String lineDelimiter= cu.findRecommendedLineSeparator();
 		if (suiteMethod.exists()) {
 			ISourceRange range= suiteMethod.getSourceRange();
 			if (range != null) {

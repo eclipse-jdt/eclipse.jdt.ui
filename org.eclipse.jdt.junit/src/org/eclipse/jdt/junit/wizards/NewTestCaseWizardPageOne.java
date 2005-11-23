@@ -57,8 +57,6 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -67,7 +65,6 @@ import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.ControlContentAssistHelper;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
@@ -332,7 +329,7 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		gd.horizontalAlignment= GridData.FILL;
 		gd.grabExcessHorizontalSpace= false;
 		gd.horizontalSpan= 1;
-		gd.widthHint = SWTUtil.getButtonWidthHint(fClassUnderTestButton);		
+		gd.widthHint = LayoutUtil.getButtonWidthHint(fClassUnderTestButton);		
 		fClassUnderTestButton.setLayoutData(gd);
 
 		ControlContentAssistHelper.createTextContentAssistant(fClassUnderTestControl, fClassToTestCompletionProcessor);
@@ -687,13 +684,13 @@ public class NewTestCaseWizardPageOne extends NewTypeWizardPage {
 		}
 	}
 
-	private String getLineDelimiter(){
+	private String getLineDelimiter() throws JavaModelException{
 		IType classToTest= getClassUnderTest();
 		
-		if (classToTest != null && classToTest.exists())
-			return StubUtility.getLineDelimiterUsed(classToTest);
+		if (classToTest != null && classToTest.exists() && classToTest.getCompilationUnit() != null)
+			return classToTest.getCompilationUnit().findRecommendedLineSeparator();
 		
-		return StubUtility.getLineDelimiterUsed(getPackageFragment());
+		return getPackageFragment().findRecommendedLineSeparator();
 	}
 
 	private void appendTestMethodBody(StringBuffer buffer, String name, IMethod method) throws CoreException {

@@ -76,6 +76,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 
 import org.eclipse.jdt.internal.junit.util.ExceptionHandler;
+import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 
 /**
  * Preference page for JUnit settings. Supports to define the failure
@@ -326,7 +327,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		return composite;
 	}
 
-	/**
+	/*
 	 * Create a group to contain the step filter related widgetry
 	 */
 	private void createStackFilterPreferences(Composite composite) {
@@ -388,7 +389,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fAddFilterButton.setToolTipText(JUnitMessages.JUnitPreferencePage_addfilterbutton_tooltip); 
 		gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		fAddFilterButton.setLayoutData(gd);
-		SWTUtil.setButtonDimensionHint(fAddFilterButton);
+		LayoutUtil.setButtonDimensionHint(fAddFilterButton);
 		fAddFilterButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event e) {
 				editFilter();
@@ -400,7 +401,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fAddTypeButton.setToolTipText(JUnitMessages.JUnitPreferencePage_addtypebutton_tooltip); 
 		gd= getButtonGridData(fAddTypeButton);
 		fAddTypeButton.setLayoutData(gd);
-		SWTUtil.setButtonDimensionHint(fAddTypeButton);
+		LayoutUtil.setButtonDimensionHint(fAddTypeButton);
 		fAddTypeButton.addListener(SWT.Selection, new Listener() {
 			public void handleEvent(Event e) {
 				addType();
@@ -462,7 +463,6 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL | GridData.VERTICAL_ALIGN_BEGINNING);
 		int widthHint= convertHorizontalDLUsToPixels(IDialogConstants.BUTTON_WIDTH);
 		gd.widthHint= Math.max(widthHint, button.computeSize(SWT.DEFAULT, SWT.DEFAULT, true).x);
-		gd.heightHint= convertVerticalDLUsToPixels(IDialogConstants.BUTTON_HEIGHT);
 		return gd;
 	}
 
@@ -572,7 +572,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		cleanupEditor();
 	}
 
-	/**
+	/*
 	 * Cleanup all widgetry & resources used by the in-place editing
 	 */
 	private void cleanupEditor() {
@@ -590,7 +590,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		fStackFilterContentProvider.removeFilters(new Object[] { fNewStackFilter });
 	}
 
-	/**
+	/*
 	 * A valid step filter is simply one that is a valid Java identifier.
 	 * and, as defined in the JDI spec, the regular expressions used for
 	 * step filtering must be limited to exact matches or patterns that
@@ -753,10 +753,8 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 		store.setValue(JUnitPreferencesConstants.DO_FILTER_STACK, filter);
 	}
 
-	/**
+	/*
 	 * Parses the comma separated string into an array of strings
-	 * 
-	 * @return list
 	 */
 	private static String[] parseList(String listString) {
 		List list= new ArrayList(10);

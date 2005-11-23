@@ -11,14 +11,16 @@
 package org.eclipse.jdt.internal.junit.launcher;
 
 import org.eclipse.core.expressions.PropertyTester;
+
 import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.internal.corext.Assert;
+
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 /**
@@ -37,12 +39,11 @@ public class ResourceExtender extends PropertyTester {
 		if (PROPERTY_IS_TEST.equals(method)) { 
 			return isJUnitTest(resource);
 		}
-		Assert.isTrue(false);
-		return false;
+		throw new IllegalArgumentException("Method must be 'isTest' method"); //$NON-NLS-1$
 	}
 	
 	/*
-	 * Return wether the target resource is a JUnit test.
+	 * Return whether the target resource is a JUnit test.
 	 */
 	private boolean isJUnitTest(IResource target) {
 		if (target != null) {

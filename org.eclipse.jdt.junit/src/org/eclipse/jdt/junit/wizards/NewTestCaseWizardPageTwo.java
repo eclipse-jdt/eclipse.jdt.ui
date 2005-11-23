@@ -45,11 +45,11 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.ui.IJUnitHelpContextIds;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
+import org.eclipse.jdt.internal.junit.util.LayoutUtil;
 import org.eclipse.jdt.internal.junit.wizards.WizardMessages;
 
 /**
@@ -201,7 +201,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 				doCheckedStateChanged();
 			}
 		});
-		SWTUtil.setButtonDimensionHint(fSelectAllButton);
+		LayoutUtil.setButtonDimensionHint(fSelectAllButton);
 
 		fDeselectAllButton= new Button(buttonContainer, SWT.PUSH);
 		fDeselectAllButton.setText(WizardMessages.NewTestCaseWizardPageTwo_deselectAll); 
@@ -213,7 +213,7 @@ public class NewTestCaseWizardPageTwo extends WizardPage {
 				doCheckedStateChanged();
 			}
 		});
-		SWTUtil.setButtonDimensionHint(fDeselectAllButton);
+		LayoutUtil.setButtonDimensionHint(fDeselectAllButton);
 
 		/* No of selected methods label */
 		fSelectedMethodsLabel= new Label(container, SWT.LEFT);

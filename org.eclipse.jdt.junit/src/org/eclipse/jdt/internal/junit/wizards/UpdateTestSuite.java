@@ -50,8 +50,6 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.junit.wizards.NewTestSuiteWizardPage;
@@ -204,7 +202,7 @@ public class UpdateTestSuite implements IObjectActionDelegate {
 				source.replace(classRange.getStart(), classRange.getEnd(), getUpdatableString(fSelectedTestCases));
 				fullSource.replace(range.getOffset(), range.getLength(), source.toString());
 				monitor.worked(1);
-				String formattedContent= JUnitStubUtility.formatCompilationUnit(fTestSuite.getJavaProject(), fullSource.get(), StubUtility.getLineDelimiterUsed(fTestSuite));
+				String formattedContent= JUnitStubUtility.formatCompilationUnit(fTestSuite.getJavaProject(), fullSource.get(), fTestSuite.findRecommendedLineSeparator());
 				//buf.replace(range.getOffset(), range.getLength(), formattedContent);
 				IBuffer buf= fTestSuite.getBuffer();
 				buf.replace(0, buf.getLength(), formattedContent);
