@@ -23,6 +23,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IInputValidator;
@@ -38,6 +40,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -115,7 +118,16 @@ public class NewNameQueries implements INewNameQueries {
 	private static INewNameQuery createStaticQuery(final IInputValidator validator, final String message, final String initial, final Shell shell){
 		return new INewNameQuery(){
 			public String getNewName() {
-				InputDialog dialog= new InputDialog(shell, ReorgMessages.ReorgQueries_nameConflictMessage, message, initial, validator); 
+				InputDialog dialog= new InputDialog(shell, ReorgMessages.ReorgQueries_nameConflictMessage, message, initial, validator) {
+					/* (non-Javadoc)
+					 * @see org.eclipse.jface.dialogs.InputDialog#createDialogArea(org.eclipse.swt.widgets.Composite)
+					 */
+					protected Control createDialogArea(Composite parent) {
+						Control area= super.createDialogArea(parent);
+						TextFieldNavigationHandler.install(getText());
+						return area;
+					}
+				};
 				if (dialog.open() == Window.CANCEL)
 					throw new OperationCanceledException();
 				return dialog.getValue();
