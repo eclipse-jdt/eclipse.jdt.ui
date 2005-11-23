@@ -678,7 +678,7 @@ public class UnresolvedElementsSubProcessor {
 					rel += 3;
 				}
 
-				if ((enclosingPackage != null && !enclosingPackage.getCompilationUnit(typeName + ".java").exists()) // new top level type //$NON-NLS-1$
+				if ((enclosingPackage != null && !enclosingPackage.getCompilationUnit(typeName + JavaModelUtil.DEFAULT_CU_SUFFIX).exists()) // new top level type
 						|| (enclosingType != null && !enclosingType.isReadOnly() && !enclosingType.getType(typeName).exists())) { // new member type
 					IJavaElement enclosing= enclosingPackage != null ? (IJavaElement) enclosingPackage : enclosingType;
 

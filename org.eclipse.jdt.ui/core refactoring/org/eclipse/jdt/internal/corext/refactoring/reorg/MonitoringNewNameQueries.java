@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
 public class MonitoringNewNameQueries implements INewNameQueries {
@@ -34,7 +35,7 @@ public class MonitoringNewNameQueries implements INewNameQueries {
 		return new INewNameQuery() {
 			public String getNewName() {
 				String result= fDelegate.createNewCompilationUnitNameQuery(cu, initialSuggestedName).getNewName();
-				String newName= result + ".java"; //$NON-NLS-1$
+				String newName= JavaModelUtil.getRenamedCUName(cu, result);
 				fExecutionLog.setNewName(cu, newName);
 				ResourceMapping mapping= JavaElementResourceMapping.create(cu);
 				if (mapping != null) {

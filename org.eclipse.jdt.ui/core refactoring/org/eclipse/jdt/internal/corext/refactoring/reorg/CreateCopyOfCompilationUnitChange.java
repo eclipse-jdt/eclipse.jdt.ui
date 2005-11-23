@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
@@ -112,7 +113,8 @@ public class CreateCopyOfCompilationUnitChange extends CreateTextFileChange {
 	}
 
 	private IPath constructNewPath(String newTypeName) {
-		return ResourceUtil.getResource(fOldCu).getParent().getFullPath().append(newTypeName + ".java"); //$NON-NLS-1$
+		String newCUName= JavaModelUtil.getRenamedCUName(fOldCu, newTypeName);
+		return ResourceUtil.getResource(fOldCu).getParent().getFullPath().append(newCUName);
 	}
 
 	private static String getCopiedFileSource(IProgressMonitor pm, ICompilationUnit cu, String newTypeName) throws CoreException {

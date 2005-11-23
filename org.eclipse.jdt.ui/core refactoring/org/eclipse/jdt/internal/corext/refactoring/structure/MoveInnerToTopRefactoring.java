@@ -830,7 +830,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 	}
 
 	private String getCompilationUnitName() {
-		return fType.getElementName() + JavaModelUtil.getCompilationUnitExtension(fType.getCompilationUnit());
+		return JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), fType.getElementName());
 	}
 
 	private void createCompilationUnitRewrite(final ITypeBinding[] parameters, final CompilationUnitRewrite targetRewrite, final Map typeReferences, final Map constructorReferences, boolean visibilityWasAdjusted, final ICompilationUnit sourceUnit, final ICompilationUnit targetUnit, final boolean remove, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {

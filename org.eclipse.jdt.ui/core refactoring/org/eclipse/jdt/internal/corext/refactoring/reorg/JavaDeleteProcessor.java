@@ -267,7 +267,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 					IFile file= (IFile)member;
 					if ("class".equals(file.getFileExtension()) && file.isDerived()) //$NON-NLS-1$
 						continue;
-					if (!"java".equals(file.getFileExtension()) && pack.isDefaultPackage()) //$NON-NLS-1$
+					if (pack.isDefaultPackage() && ! JavaCore.isJavaLikeFileName(file.getName()))
 						continue;
 					mod.addDelete(member);
 				}

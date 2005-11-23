@@ -206,7 +206,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 	
 	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
-		String newCUName= getNewElementName() + ".java"; //$NON-NLS-1$
+		String newCUName= getNewCompilationUnit().getElementName();
 		RenameArguments arguments= new RenameArguments(newCUName, getUpdateReferences(), getUpdateDerivedElements());
 		loadDerivedParticipants(status, result, 
 			computeDerivedElements(), arguments, 
@@ -214,22 +214,33 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 	
 	private Object[] computeDerivedElements() {
-		if (!(Checks.isTopLevel(fType) && fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java"))) //$NON-NLS-1$
+		if (! isPrimaryType())
 			return new Object[0];
 		return new Object[] { fType.getCompilationUnit() };
 	}
-	
+
 	private ResourceModifications computeResourceModifications() {
-		if (!(Checks.isTopLevel(fType) && fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java"))) //$NON-NLS-1$
+		if (! isPrimaryType())
 			return null;
-		IResource resource= fType.getCompilationUnit().getResource();
+		ICompilationUnit cu= fType.getCompilationUnit();
+		IResource resource= cu.getResource();
 		if (resource == null)
 			return null;
 		ResourceModifications result= new ResourceModifications();
-		result.setRename(resource, new RenameArguments(getNewElementName() + ".java", getUpdateReferences())); //$NON-NLS-1$
+		String renamedCUName= JavaModelUtil.getRenamedCUName(cu, getNewElementName());
+		result.setRename(resource, new RenameArguments(renamedCUName, getUpdateReferences()));
 		return result;		
 	}
 		
+	/*
+	 * Note: this is a handle-only method!
+	 */
+	private boolean isPrimaryType() {
+		String cuName= fType.getCompilationUnit().getElementName();
+		String typeName= fType.getElementName();
+		return Checks.isTopLevel(fType) && JavaCore.removeJavaLikeExtension(cuName).equals(typeName);
+	}
+	
 	//---- IRenameProcessor ----------------------------------------------
 	
 	public String getCurrentElementName(){
@@ -257,14 +268,14 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 
 	private ICompilationUnit getNewCompilationUnit() {
-		ICompilationUnit cu;
-		if (fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java")) { //$NON-NLS-1$
+		ICompilationUnit cu= fType.getCompilationUnit();
+		if (isPrimaryType()) {
 			IPackageFragment parent= fType.getPackageFragment();
-			cu= parent.getCompilationUnit(getNewElementName() + ".java"); //$NON-NLS-1$
+			String renamedCUName= JavaModelUtil.getRenamedCUName(cu, getNewElementName());
+			return parent.getCompilationUnit(renamedCUName);
 		} else {
-			cu= fType.getCompilationUnit();
+			return cu;
 		}
-		return cu;
 	}
 
 	//---- ITextUpdating -------------------------------------------------
@@ -365,7 +376,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				result.merge(Checks.checkCompilationUnitNewName(fType.getCompilationUnit(), getNewElementName()));
 			pm.worked(1);	
 			
-			if (Checks.isTopLevel(fType) && fType.getCompilationUnit().getElementName().equals(fType.getElementName() + ".java")) //$NON-NLS-1$
+			if (isPrimaryType())
 				result.merge(checkNewPathValidity());
 			pm.worked(1);	
 			
@@ -836,11 +847,16 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			if (willRenameCU()) {
 				IResource resource= ResourceUtil.getResource(fType);
 				if (resource != null && resource.isLinked()) {
-					String ext = '.' + resource.getFileExtension();
-					result.add(new RenameResourceChange(ResourceUtil.getResource(fType), getNewElementName() + ext));
+					String ext= resource.getFileExtension();
+					String renamedResourceName;
+					if (ext == null)
+						renamedResourceName= getNewElementName();
+					else
+						renamedResourceName= getNewElementName() + '.' + ext;
+					result.add(new RenameResourceChange(ResourceUtil.getResource(fType), renamedResourceName));
 				} else {
-					String ext = JavaModelUtil.getCompilationUnitExtension(fType.getCompilationUnit());
-					result.add(new RenameCompilationUnitChange(fType.getCompilationUnit(), getNewElementName() + ext));
+					String renamedCUName= JavaModelUtil.getRenamedCUName(fType.getCompilationUnit(), getNewElementName());
+					result.add(new RenameCompilationUnitChange(fType.getCompilationUnit(), renamedCUName));
 				}
 			}
 			monitor.worked(1);

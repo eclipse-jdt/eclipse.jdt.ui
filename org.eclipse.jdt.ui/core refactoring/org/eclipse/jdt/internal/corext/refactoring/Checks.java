@@ -193,7 +193,8 @@ public class Checks {
 	 * @return the status
 	 */
 	public static RefactoringStatus checkCompilationUnitNewName(ICompilationUnit cu, String newName) {
-		if (resourceExists(RenameResourceChange.renamedResourcePath(ResourceUtil.getResource(cu).getFullPath(), newName + ".java"))) //$NON-NLS-1$
+		String newCUName= JavaModelUtil.getRenamedCUName(cu, newName);
+		if (resourceExists(RenameResourceChange.renamedResourcePath(ResourceUtil.getResource(cu).getFullPath(), newCUName)))
 			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.Checks_cu_name_used, newName));
 		else
 			return new RefactoringStatus();

@@ -52,6 +52,16 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public final class JavaModelUtil {
 	
+	/**
+	 * Only use this suffix for creating new .java files.
+	 * In general, use one of the three *JavaLike*(..) methods in JavaCore.
+	 * 
+	 * @see JavaCore#getJavaLikeExtensions() 
+	 * @see JavaCore#isJavaLikeFileName(String)
+	 * @see JavaCore#removeJavaLikeExtension(String)
+	 */
+	public static final String DEFAULT_CU_SUFFIX= ".java"; //$NON-NLS-1$
+	
 	/** 
 	 * Finds a type by its qualified type name (dot separated).
 	 * @param jproject The java project to search in
@@ -822,6 +832,7 @@ public final class JavaModelUtil {
 	 * usually (but not always) ".java"
 	 * @param cu a compilation unit
 	 * @return the extension for the compilation unit
+	 * @deprecated
 	 */
 	public static String getCompilationUnitExtension(ICompilationUnit cu) {
 		String name = cu.getElementName();
@@ -829,6 +840,27 @@ public final class JavaModelUtil {
 		if (i != -1) {
 			return name.substring(i);
 		}
-		return ".java"; //$NON-NLS-1$
+		return DEFAULT_CU_SUFFIX;
 	}
+
+	/**
+	 * Compute a new name for a compilation unt, given the name of the new main type.
+	 * This query tries to maintain the existing extension (e.g. ".java").
+	 * 
+	 * @param cu a compilation unit
+	 * @param newMainName the new name of the cu's main type (without extension)
+	 * @return the new name for the compilation unit  
+	 */
+	public static String getRenamedCUName(ICompilationUnit cu, String newMainName) {
+		String oldName = cu.getElementName();
+		int i = oldName.lastIndexOf('.');
+		if (i != -1) {
+			return newMainName + oldName.substring(i);
+		} else {
+			return newMainName;
+		}
+		
+		
+	}
+	
 }

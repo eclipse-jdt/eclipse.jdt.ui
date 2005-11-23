@@ -1430,7 +1430,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @since 3.2
 	 */
 	protected String getCompilationUnitName(String typeName) {
-		return typeName + ".java"; //$NON-NLS-1$
+		return typeName + JavaModelUtil.DEFAULT_CU_SUFFIX;
 	}
 	
 	

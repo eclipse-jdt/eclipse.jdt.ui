@@ -40,6 +40,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -419,7 +420,7 @@ public class NLSRefactoring extends Refactoring {
 	}
 
 	private String getAccessorCUName() {
-		return getAccessorClassName() + ".java"; //$NON-NLS-1$
+		return getAccessorClassName() + JavaModelUtil.DEFAULT_CU_SUFFIX;
 	}
 
 	private IPath getAccessorCUPath() {

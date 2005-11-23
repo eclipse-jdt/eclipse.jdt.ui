@@ -30,6 +30,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.ltk.core.refactoring.Change;
@@ -197,7 +198,7 @@ public class NLSSourceModifier {
 		try {
 			manager.connect(path, null);
 			
-			IType type= accessorPackage.getCompilationUnit(accessorClassName + ".java").getType(accessorClassName); //$NON-NLS-1$
+			IType type= accessorPackage.getCompilationUnit(accessorClassName + JavaModelUtil.DEFAULT_CU_SUFFIX).getType(accessorClassName);
 			String fullyQualifiedName= type.getFullyQualifiedName();
 
 			ImportRewrite importRewrite= new ImportRewrite(cu);
