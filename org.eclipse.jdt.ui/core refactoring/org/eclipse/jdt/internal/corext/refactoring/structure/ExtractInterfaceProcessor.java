@@ -278,13 +278,13 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			final RefactoringStatus result= Checks.checkTypeName(name);
 			if (result.hasFatalError())
 				return result;
-			result.merge(Checks.checkCompilationUnitName(name + ".java")); //$NON-NLS-1$
+			final String unitName= JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), name);
+			result.merge(Checks.checkCompilationUnitName(unitName));
 			if (result.hasFatalError())
 				return result;
-			final String path= fSuperName + ".java"; //$NON-NLS-1$
 			final IPackageFragment fragment= fSubType.getPackageFragment();
-			if (fragment.getCompilationUnit(path).exists()) {
-				result.addFatalError(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_compilation_unit, new String[] { path, fragment.getElementName()}));
+			if (fragment.getCompilationUnit(unitName).exists()) {
+				result.addFatalError(Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_existing_compilation_unit, new String[] { unitName, fragment.getElementName()}));
 				return result;
 			}
 			result.merge(checkSuperType());
@@ -305,7 +305,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			final DynamicValidationStateChange change= new DynamicValidationStateChange(RefactoringCoreMessages.ExtractInterfaceRefactoring_name, fChangeManager.getAllChanges());
 			final IFile file= ResourceUtil.getFile(fSubType.getCompilationUnit());
 			if (fSuperSource != null && fSuperSource.length() > 0)
-				change.add(new CreateTextFileChange(file.getFullPath().removeLastSegments(1).append(fSuperName + ".java"), fSuperSource, file.getCharset(false), "java")); //$NON-NLS-1$ //$NON-NLS-2$
+				change.add(new CreateTextFileChange(file.getFullPath().removeLastSegments(1).append(JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName)), fSuperSource, file.getCharset(false), "java")); //$NON-NLS-1$
 			return change;
 		} finally {
 			monitor.done();
@@ -343,7 +343,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				}
 				ICompilationUnit superUnit= null;
 				try {
-					superUnit= WorkingCopyUtil.getNewWorkingCopy(fSubType.getPackageFragment(), fSuperName + ".java", fOwner, new SubProgressMonitor(monitor, 1)); //$NON-NLS-1$
+					superUnit= WorkingCopyUtil.getNewWorkingCopy(fSubType.getPackageFragment(), JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName), fOwner, new SubProgressMonitor(monitor, 1));
 					fSuperSource= createTypeSource(superUnit, sourceRewrite, declaration, status, new SubProgressMonitor(monitor, 3));
 					if (fSuperSource != null) {
 						superUnit.getBuffer().setContents(fSuperSource);
@@ -490,7 +490,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					}
 				}
 			}
-			final String comment= CodeGeneration.getMethodComment(fSubType.getCompilationUnit(), fSubType.getElementName(), declaration, false, string, names, StubUtility.getLineDelimiterUsed(fSubType.getJavaProject())); 
+			final String comment= CodeGeneration.getMethodComment(fSubType.getCompilationUnit(), fSubType.getElementName(), declaration, false, string, names, StubUtility.getLineDelimiterUsed(fSubType.getJavaProject()));
 			if (comment != null) {
 				if (declaration.getJavadoc() != null) {
 					rewrite.replace(declaration.getJavadoc(), rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC), null);
