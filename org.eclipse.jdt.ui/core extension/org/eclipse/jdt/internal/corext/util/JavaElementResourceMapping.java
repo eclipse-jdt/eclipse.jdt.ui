@@ -15,6 +15,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
+import org.eclipse.core.resources.mapping.ModelProvider;
 import org.eclipse.core.resources.mapping.RemoteResourceMappingContext;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 import org.eclipse.core.resources.mapping.ResourceMappingContext;
@@ -44,7 +45,6 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
-import org.eclipse.jdt.internal.ui.refactoring.model.JavaRefactoringModelProvider;
 
 /**
  * An abstract super class to describe mappings from a Java element to a
@@ -80,7 +80,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 	}
 	
 	public String getModelProviderId() {
-		return JavaRefactoringModelProvider.JAVA_REFACTORING_MODEL_PROVIDER_ID;
+		return ModelProvider.RESOURCE_MODEL_PROVIDER_ID;
 	}
 	
 	//---- the factory code ---------------------------------------------------------------
@@ -298,7 +298,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 		
 		public String getModelProviderId() {
-			return JavaRefactoringModelProvider.JAVA_REFACTORING_MODEL_PROVIDER_ID;
+			return ModelProvider.RESOURCE_MODEL_PROVIDER_ID;
 		}
 	}
 	
