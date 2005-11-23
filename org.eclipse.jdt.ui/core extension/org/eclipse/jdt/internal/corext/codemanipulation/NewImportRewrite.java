@@ -18,6 +18,8 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -26,6 +28,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -59,16 +62,59 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  */
 public class NewImportRewrite {
 	
+	/**
+	 * A {@link ImportRewriteContext} can optionally be used in {@link NewImportRewrite#addImport(ITypeBinding, ImportRewriteContext)},
+	 * {@link NewImportRewrite#addImport(String, ImportRewriteContext)} and {@link NewImportRewrite#addImportFromSignature(String, AST, ImportRewriteContext)} to
+	 * give more information about the types visible in the scope. These types can be for example inherited inner types where it is
+	 * unnecessary to add import statements for.
+	 * 
+	 * </p>
+	 * This class can be implemented by clients.
+	 * </p>
+	 */
 	public static abstract class ImportRewriteContext {
 		
+		/**
+		 * Result constant signaling that the given element is know in the context. 
+		 */
 		public final static int RES_NAME_FOUND= 1;
+		
+		/**
+		 * Result constant signaling that the given element is not know in the context. 
+		 */
 		public final static int RES_NAME_UNKNOWN= 2;
+		
+		/**
+		 * Result constant signaling that the given element is conflicting with an other element in the context. 
+		 */
 		public final static int RES_NAME_CONFLICT= 3;
 		
+		/**
+		 * Kind constant specifying that the element is a type import.
+		 */
 		public final static int KIND_TYPE= 1;
+		
+		/**
+		 * Kind constant specifying that the element is a static field import.
+		 */
 		public final static int KIND_STATIC_FIELD= 2;
+		
+		/**
+		 * Kind constant specifying that the element is a static method import.
+		 */
 		public final static int KIND_STATIC_METHOD= 3;
 		
+		/**
+		 * Looks for the given element in the context and returns if the element is known ({@link #RES_NAME_FOUND}),
+		 * unknown ({@link #RES_NAME_UNKNOWN}) or conflicts ({@link #RES_NAME_CONFLICT}) with an element.
+		 * @param qualifier The qualifier of the element, can be package or the qualified name of a type 
+		 * @param name The simple name of the element. Either a type, method or field name.
+		 * @param kind The kind of the element. Can be either {@link #KIND_TYPE}, {@link #KIND_STATIC_FIELD} or
+		 * {@link #KIND_STATIC_METHOD}. Implementors should be prepared for new, currently unspecified kinds and return
+		 * {@link #RES_NAME_UNKNOWN} by default.
+		 * @return Returns the result of the lookup. Can be either {@link #RES_NAME_FOUND}, {@link #RES_NAME_UNKNOWN} or
+		 * {@link #RES_NAME_CONFLICT}.
+		 */
 		public abstract int findInContext(String qualifier, String name, int kind);
 	}
 
@@ -95,6 +141,16 @@ public class NewImportRewrite {
 	private String[] fCreatedImports;
 	private String[] fCreatedStaticImports;
 	
+	/**
+	 * Creates a {@link NewImportRewrite} from a {@link ICompilationUnit}. If <code>restoreExistingImports</code>
+	 * is <code>true</code>, all existing imports are kept, and new imports will be inserted at best matching locations. If
+	 * <code>restoreExistingImports</code> is <code>false</code>, the existing imports will be removed and only the
+	 * newly added imports will be created.
+	 * @param cu the compilation unit to create the imports for
+	 * @param restoreExistingImports specifies if the existing imports should be kept or removed.
+	 * @return the created import rewriter.
+	 * @throws JavaModelException thrown when the compilation unit could not be accessed.
+	 */
 	public static NewImportRewrite create(ICompilationUnit cu, boolean restoreExistingImports) throws JavaModelException {
 		List existingImport= null;
 		if (restoreExistingImports) {
@@ -109,6 +165,18 @@ public class NewImportRewrite {
 		return new NewImportRewrite(cu, existingImport);
 	}
 	
+	/**
+	 * Creates a {@link NewImportRewrite} from a an AST ({@link CompilationUnit}). The AST has to be created from a
+	 * {@link ICompilationUnit}, that means {@link ASTParser#setSource(ICompilationUnit)} has been used when creating the
+	 * AST. If <code>restoreExistingImports</code>
+	 * is <code>true</code>, all existing imports are kept, and new imports will be inserted at best matching locations. If
+	 * <code>restoreExistingImports</code> is <code>false</code>, the existing imports will be removed and only the
+	 * newly added imports will be created.
+	 * @param astRoot the AST root node to create the imports for
+	 * @param restoreExistingImports specifies if the existing imports should be kept or removed.
+	 * @return the created import rewriter.
+	 * @throws JavaModelException thrown when the compilation unit could not be accessed.
+	 */
 	public static NewImportRewrite create(CompilationUnit astRoot, boolean restoreExistingImports) throws JavaModelException {
 		if (!(astRoot.getJavaElement() instanceof ICompilationUnit)) {
 			throw new IllegalArgumentException("AST must have been constructed from a Java element"); //$NON-NLS-1$
@@ -146,6 +214,10 @@ public class NewImportRewrite {
 		fExistingImports= fRestoreExistingImports ? existingImports : new ArrayList();
 	}
 	
+	/**
+	 * The compilation unit for which this import rewrite was created for.
+	 * @return the compilation unit for which this import rewrite was created for.
+	 */
 	public ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
@@ -194,26 +266,42 @@ public class NewImportRewrite {
 	}
 
 	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param typeSig The type in signature notation
-	 * @param ast The AST to create the type for
-	 * @return Returns the a new AST node that is either simple if the import was successful or 
-	 * fully qualified type name if the import could not be added due to a conflict. 
+	 * Adds a new import to the rewriter and returns a {@link Type} node that can be used
+	 * in the code as a reference to the type. If an import already exists, the import is
+	 * not added.  The type binding can be an array binding, type variable or wildcard.
+	 * If the binding is a generic type, the type parameters are ignored. For parameterized types, also the type
+	 * arguments are processed and imports added if necessary. Anonymous types inside type arguments are normalized to their base type, wildcard
+	 * of wildcards are ignored.
+	 * <p>
+	 * The content of the compilation unit itself is actually not modified
+	 * in any way by this method; rather, the rewriter just records that a new import has been added.
+	 * </p>
+	 * @param typeSig the signature of the type to be added.
+	 * @param ast the AST to create the returned type for.
+	 * @return returns a type to which the type binding can be assigned to. The returned type contains is unqualified
+	 * when an import could be added or was already known. It is fully qualified, if an import conflict prevented the import.
 	 */
 	public Type addImportFromSignature(String typeSig, AST ast) {
 		return addImportFromSignature(typeSig, ast, fDefaultContext);
 	}
 	
 	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param typeSig The type in signature notation
-	 * @param ast The AST to create the type for
-	 * @return Returns the a new AST node that is either simple if the import was successful or 
-	 * fully qualified type name if the import could not be added due to a conflict. 
+	 * Adds a new import to the rewriter and returns a {@link Type} node that can be used
+	 * in the code as a reference to the type. If an import already exists, the import is
+	 * not added.  The type binding can be an array binding, type variable or wildcard.
+	 * If the binding is a generic type, the type parameters are ignored. For parameterized types, also the type
+	 * arguments are processed and imports added if necessary. Anonymous types inside type arguments are normalized to their base type, wildcard
+	 * of wildcards are ignored.
+	 * <p>
+	 * The content of the compilation unit itself is actually not modified
+	 * in any way by this method; rather, the rewriter just records that a new import has been added.
+	 * </p>
+	 * @param typeSig the signature of the type to be added.
+	 * @param ast the AST to create the returned type for.
+	 * @param context an optional context that knows about types visible in the current scope or <code>null</code>
+	 * to use the default context only using the available imports.
+	 * @return returns a type to which the type binding can be assigned to. The returned type contains is unqualified
+	 * when an import could be added or was already known. It is fully qualified, if an import conflict prevented the import.
 	 */
 	public Type addImportFromSignature(String typeSig, AST ast, ImportRewriteContext context) {	
 		if (typeSig == null || typeSig.length() == 0) {
@@ -261,28 +349,39 @@ public class NewImportRewrite {
 		}
 	}
 	
-
 	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param binding The type binding of the type to be added
-	 * @return Returns the name to use in the code: Simple name if the import
-	 * was added, fully qualified type name if the import could not be added due
-	 * to a conflict. 
+	 * Adds a new import to the rewriter and returns a type reference that can be used
+	 * in the code. The type binding can be an array binding, type variable or wildcard.
+	 * If the binding is a generic type, the type parameters are ignored. For parameterized types, also the type
+	 * arguments are processed and imports added if necessary. Anonymous types inside type arguments are normalized to their base type, wildcard
+	 * of wildcards are ignored. If an import already exists, the import is not added. 
+	 * <p>
+	 * The content of the compilation unit itself is actually not modified
+	 * in any way by this method; rather, the rewriter just records that a new import has been added.
+	 * </p>
+	 * @param binding the signature of the type to be added.
+	 * @return returns a type to which the type binding can be assigned to. The returned type contains is unqualified
+	 * when an import could be added or was already known. It is fully qualified, if an import conflict prevented the import.
 	 */
 	public String addImport(ITypeBinding binding) {
 		return addImport(binding, fDefaultContext);
 	}
 		
 	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param binding The type binding of the type to be added
-	 * @return Returns the name to use in the code: Simple name if the import
-	 * was added, fully qualified type name if the import could not be added due
-	 * to a conflict. 
+	 * Adds a new import to the rewriter and returns a type reference that can be used
+	 * in the code. The type binding can be an array binding, type variable or wildcard.
+	 * If the binding is a generic type, the type parameters are ignored. For parameterized types, also the type
+	 * arguments are processed and imports added if necessary. Anonymous types inside type arguments are normalized to their base type, wildcard
+	 * of wildcards are ignored. If an import already exists, the import is not added. 
+	 * <p>
+	 * The content of the compilation unit itself is actually not modified
+	 * in any way by this method; rather, the rewriter just records that a new import has been added.
+	 * </p>
+	 * @param binding the signature of the type to be added.
+	 * @param context an optional context that knows about types visible in the current scope or <code>null</code>
+	 * to use the default context only using the available imports.
+	 * @return returns a type to which the type binding can be assigned to. The returned type contains is unqualified
+	 * when an import could be added or was already known. It is fully qualified, if an import conflict prevented the import.
 	 */
 	public String addImport(ITypeBinding binding, ImportRewriteContext context) {
 		if (binding.isPrimitive() || binding.isTypeVariable()) {
@@ -355,26 +454,40 @@ public class NewImportRewrite {
 	}
 	
 	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param binding The type binding of the type to be added
-	 * @param ast The AST to create the type for
-	 * @return Returns the a new AST node that is either simple if the import was successful or 
-	 * fully qualified type name if the import could not be added due to a conflict. 
+	 * Adds a new import to the rewriter and returns a {@link Type} that can be used
+	 * in the code. The type binding can be an array binding, type variable or wildcard.
+	 * If the binding is a generic type, the type parameters are ignored. For parameterized types, also the type
+	 * arguments are processed and imports added if necessary. Anonymous types inside type arguments are normalized to their base type, wildcard
+	 * of wildcards are ignored. If an import already exists, the import is not added. 
+	 * <p>
+	 * The content of the compilation unit itself is actually not modified
+	 * in any way by this method; rather, the rewriter just records that a new import has been added.
+	 * </p>
+	 * @param binding the signature of the type to be added.
+	 * @param ast the AST to create the returned type for.
+	 * @return returns a type to which the type binding can be assigned to. The returned type contains is unqualified
+	 * when an import could be added or was already known. It is fully qualified, if an import conflict prevented the import.
 	 */
 	public Type addImport(ITypeBinding binding, AST ast) {
 		return addImport(binding, ast, fDefaultContext);
 	}
 	
 	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param binding The type binding of the type to be added
-	 * @param ast The AST to create the type for
-	 * @return Returns the a new AST node that is either simple if the import was successful or 
-	 * fully qualified type name if the import could not be added due to a conflict. 
+	 * Adds a new import to the rewriter and returns a {@link Type} that can be used
+	 * in the code. The type binding can be an array binding, type variable or wildcard.
+	 * If the binding is a generic type, the type parameters are ignored. For parameterized types, also the type
+	 * arguments are processed and imports added if necessary. Anonymous types inside type arguments are normalized to their base type, wildcard
+	 * of wildcards are ignored. If an import already exists, the import is not added. 
+	 * <p>
+	 * The content of the compilation unit itself is actually not modified
+	 * in any way by this method; rather, the rewriter just records that a new import has been added.
+	 * </p>
+	 * @param binding the signature of the type to be added.
+	 * @param ast the AST to create the returned type for.
+	 * @param context an optional context that knows about types visible in the current scope or <code>null</code>
+	 * to use the default context only using the available imports.
+	 * @return returns a type to which the type binding can be assigned to. The returned type contains is unqualified
+	 * when an import could be added or was already known. It is fully qualified, if an import conflict prevented the import.
 	 */
 	public Type addImport(ITypeBinding binding, AST ast, ImportRewriteContext context) {
 		if (binding.isPrimitive()) {
@@ -426,11 +539,18 @@ public class NewImportRewrite {
 
 	
 	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param qualifiedTypeName The fully qualified name of the type to import
-	 * @return Returns either the simple type name if the import was successful or else the qualified type name
+	 * Adds a new import to the rewriter and returns a type reference that can be used
+	 * in the code. The type binding can only be an array or non-generic type.
+ 	 * If an import already exists, the import is not added. 
+	 * <p>
+	 * The content of the compilation unit itself is actually not modified
+	 * in any way by this method; rather, the rewriter just records that a new import has been added.
+	 * </p>
+	 * @param qualifiedTypeName the qualified type name of the type to be added
+	 * @param context an optional context that knows about types visible in the current scope or <code>null</code>
+	 * to use the default context only using the available imports.
+	 * @return returns a type to which the type binding can be assigned to. The returned type contains is unqualified
+	 * when an import could be added or was already known. It is fully qualified, if an import conflict prevented the import.
 	 */
 	public String addImport(String qualifiedTypeName, ImportRewriteContext context) {
 		int angleBracketOffset= qualifiedTypeName.indexOf('<');
@@ -445,11 +565,16 @@ public class NewImportRewrite {
 	}
 	
 	/**
-	 * Adds a new import declaration that is sorted in the structure using
-	 * a best match algorithm. If an import already exists, the import is
-	 * not added.
-	 * @param qualifiedTypeName The fully qualified name of the type to import
-	 * @return Returns either the simple type name if the import was successful or else the qualified type name
+	 * Adds a new import to the rewriter and returns a type reference that can be used
+	 * in the code. The type binding can only be an array or non-generic type.
+ 	 * If an import already exists, the import is not added. 
+	 * <p>
+	 * The content of the compilation unit itself is actually not modified
+	 * in any way by this method; rather, the rewriter just records that a new import has been added.
+	 * </p>
+	 * @param qualifiedTypeName the qualified type name of the type to be added
+	 * @return returns a type to which the type binding can be assigned to. The returned type contains is unqualified
+	 * when an import could be added or was already known. It is fully qualified, if an import conflict prevented the import.
 	 */
 	public String addImport(String qualifiedTypeName) {
 		return addImport(qualifiedTypeName, fDefaultContext);
@@ -594,6 +719,24 @@ public class NewImportRewrite {
 		return normalizedBinding.getTypeDeclaration().getQualifiedName();
 	}
 	
+
+	public final TextEdit rewriteImports(IProgressMonitor monitor) throws CoreException {
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
+		}
+		
+		monitor.beginTask("Updating imports", 2); 
+		try {
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setSource(fCompilationUnit);
+			parser.setFocalPosition(0); // reduced AST
+			parser.setResolveBindings(false);
+			CompilationUnit astRoot= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 1));
+			return rewriteImports(astRoot, new SubProgressMonitor(monitor, 1));
+		} finally {
+			monitor.done();
+		}
+	}
 	
 	public final TextEdit rewriteImports(CompilationUnit root, IProgressMonitor monitor) throws CoreException {
 		if (!fCompilationUnit.equals(root.getJavaElement())) {
