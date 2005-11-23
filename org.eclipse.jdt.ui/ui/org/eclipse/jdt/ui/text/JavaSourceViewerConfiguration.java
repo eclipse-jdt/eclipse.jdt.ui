@@ -429,6 +429,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 			JavaCompositeReconcilingStrategy strategy= new JavaCompositeReconcilingStrategy(editor, getConfiguredDocumentPartitioning(sourceViewer));
 			JavaReconciler reconciler= new JavaReconciler(editor, strategy, false);
 			reconciler.setIsIncrementalReconciler(false);
+			reconciler.setIsAllowedToModifyDocument(false);
 			reconciler.setProgressMonitor(new NullProgressMonitor());
 			reconciler.setDelay(500);
 
