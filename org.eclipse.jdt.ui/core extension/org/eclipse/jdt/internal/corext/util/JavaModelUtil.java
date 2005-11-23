@@ -828,22 +828,6 @@ public final class JavaModelUtil {
 	}
 
 	/**
-	 * Return the extension of a compilation unit, which is
-	 * usually (but not always) ".java"
-	 * @param cu a compilation unit
-	 * @return the extension for the compilation unit
-	 * @deprecated
-	 */
-	public static String getCompilationUnitExtension(ICompilationUnit cu) {
-		String name = cu.getElementName();
-		int i = name.lastIndexOf('.');
-		if (i != -1) {
-			return name.substring(i);
-		}
-		return DEFAULT_CU_SUFFIX;
-	}
-
-	/**
 	 * Compute a new name for a compilation unt, given the name of the new main type.
 	 * This query tries to maintain the existing extension (e.g. ".java").
 	 * 
