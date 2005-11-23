@@ -20,6 +20,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
@@ -67,11 +69,17 @@ public class QualifiedNameFinder {
 		public void accept(IResourceProxy proxy, int start, int length) throws CoreException {
 			if (proxy.getType() != IResource.FILE)
 				return;
+			
 			// Make sure we don't change Compilation Units
 			IFile file= (IFile)proxy.requestResource();
 			IJavaElement element= JavaCore.create(file);
 			if ((element != null && element.exists()))
 				return;
+			
+			// Only touch text files (see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=114153 ):
+			if (! FileBuffers.getTextFileBufferManager().isTextFileLocation(proxy.requestFullPath(), false))
+				return;
+			
 			TextChange change= fResult.getChange(file);
 			TextChangeCompatibility.addTextEdit(
 				change, 
