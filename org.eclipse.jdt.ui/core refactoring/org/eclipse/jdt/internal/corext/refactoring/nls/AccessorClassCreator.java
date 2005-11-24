@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.nls;
 
+import org.eclipse.text.edits.TextEdit;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,16 +32,16 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 class AccessorClassCreator {
 
@@ -120,16 +122,15 @@ class AccessorClassCreator {
 	}
 
 	private void addImportsToAccessorCu(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
-		String[] order= JavaPreferencesSettings.getImportOrderPreference(newCu.getJavaProject());
-		int importThreshold= JavaPreferencesSettings.getImportNumberThreshold(newCu.getJavaProject());
-		ImportsStructure is= new ImportsStructure(newCu, order, importThreshold, true);
+		NewImportRewrite is= NewImportRewrite.create(newCu, true);
 		if (fIsEclipseNLS) {
 			is.addImport("org.eclipse.osgi.util.NLS"); //$NON-NLS-1$
 		} else {
 			is.addImport("java.util.MissingResourceException"); //$NON-NLS-1$
 			is.addImport("java.util.ResourceBundle"); //$NON-NLS-1$
 		}
-		is.create(false, pm);
+		TextEdit edit= is.rewriteImports(pm);
+		JavaModelUtil.applyEdit(newCu, edit, false, null);
 	}
 
 	private String createClass(String lineDelim) throws CoreException {
