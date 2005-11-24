@@ -67,7 +67,7 @@ public final class NewImportRewrite {
 	/**
 	 * A {@link ImportRewriteContext} can optionally be used in e.g. {@link NewImportRewrite#addImport(String, ImportRewriteContext)} to
 	 * give more information about the types visible in the scope. These types can be for example inherited inner types where it is
-	 * unnecessary to add import statements for.
+	 * unnecessary to add import statements for. 
 	 * 
 	 * </p>
 	 * This class can be implemented by clients.
@@ -145,6 +145,10 @@ public final class NewImportRewrite {
 	 * is <code>true</code>, all existing imports are kept, and new imports will be inserted at best matching locations. If
 	 * <code>restoreExistingImports</code> is <code>false</code>, the existing imports will be removed and only the
 	 * newly added imports will be created.
+	 * <p>
+	 * Note that {@link #create(ICompilationUnit, boolean)} is more efficient than this method if an AST for
+	 * the compilation unit is already available.
+	 * </p>
 	 * @param cu the compilation unit to create the imports for
 	 * @param restoreExistingImports specifies if the existing imports should be kept or removed.
 	 * @return the created import rewriter.
@@ -170,16 +174,18 @@ public final class NewImportRewrite {
 	/**
 	 * Creates a {@link NewImportRewrite} from a an AST ({@link CompilationUnit}). The AST has to be created from a
 	 * {@link ICompilationUnit}, that means {@link ASTParser#setSource(ICompilationUnit)} has been used when creating the
-	 * AST. If <code>restoreExistingImports</code>
-	 * is <code>true</code>, all existing imports are kept, and new imports will be inserted at best matching locations. If
-	 * <code>restoreExistingImports</code> is <code>false</code>, the existing imports will be removed and only the
-	 * newly added imports will be created.
+	 * AST. If <code>restoreExistingImports</code> is <code>true</code>, all existing imports are kept, and new imports
+	 * will be inserted at best matching locations. If <code>restoreExistingImports</code> is <code>false</code>, the
+	 * existing imports will be removed and only the newly added imports will be created.
+	 * <p>
+	 * Note that this method is more efficient than using {@link #create(ICompilationUnit, boolean)} if an AST is already available.
+	 * </p>
 	 * @param astRoot the AST root node to create the imports for
 	 * @param restoreExistingImports specifies if the existing imports should be kept or removed.
 	 * @return the created import rewriter.
-	 * @throws JavaModelException thrown when the compilation unit could not be accessed.
+	 * @throws IllegalArgumentException thrown when the passed AST is null or was not created from a compilation unit.
 	 */
-	public static NewImportRewrite create(CompilationUnit astRoot, boolean restoreExistingImports) throws JavaModelException {
+	public static NewImportRewrite create(CompilationUnit astRoot, boolean restoreExistingImports) {
 		if (astRoot == null) {
 			throw new IllegalArgumentException("AST must not be null"); //$NON-NLS-1$
 		}
