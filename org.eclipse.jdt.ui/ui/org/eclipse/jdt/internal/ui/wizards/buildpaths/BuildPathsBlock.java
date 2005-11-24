@@ -548,6 +548,9 @@ public class BuildPathsBlock {
 				if (!isChecked) {
 					fClassPathList.setCheckedWithoutUpdate(currElement, true);
 				}
+				if (!fClassPathList.isGrayed(currElement)) {
+					fClassPathList.setGrayedWithoutUpdate(currElement, true);
+				}
 			} else {
 				currElement.setExported(isChecked);
 			}
