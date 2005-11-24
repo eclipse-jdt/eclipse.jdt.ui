@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
 /**
  * A list with a button bar.
  * Typical buttons are 'Add', 'Remove', 'Up' and 'Down'.
- * List model is independend of widget creation.
+ * List model is independent of widget creation.
  * DialogFields controls are: Label, List and Composite containing buttons.
  */
 public class ListDialogField extends DialogField {
@@ -155,8 +155,8 @@ public class ListDialogField extends DialogField {
 		
 	/**
 	 * Sets the index of the 'remove' button in the button label array passed in the constructor.
-	 * The behaviour of the button marked as the 'remove' button will then be handled internally.
-	 * (enable state, button invocation behaviour)
+	 * The behavior of the button marked as the 'remove' button will then be handled internally.
+	 * (enable state, button invocation behavior)
 	 */	
 	public void setRemoveButtonIndex(int removeButtonIndex) {
 		Assert.isTrue(removeButtonIndex < fButtonLabels.length);
@@ -165,8 +165,8 @@ public class ListDialogField extends DialogField {
 
 	/**
 	 * Sets the index of the 'up' button in the button label array passed in the constructor.
-	 * The behaviour of the button marked as the 'up' button will then be handled internally.
-	 * (enable state, button invocation behaviour)
+	 * The behavior of the button marked as the 'up' button will then be handled internally.
+	 * (enable state, button invocation behavior)
 	 */	
 	public void setUpButtonIndex(int upButtonIndex) {
 		Assert.isTrue(upButtonIndex < fButtonLabels.length);
@@ -175,8 +175,8 @@ public class ListDialogField extends DialogField {
 
 	/**
 	 * Sets the index of the 'down' button in the button label array passed in the constructor.
-	 * The behaviour of the button marked as the 'down' button will then be handled internally.
-	 * (enable state, button invocation behaviour)
+	 * The behavior of the button marked as the 'down' button will then be handled internally.
+	 * (enable state, button invocation behavior)
 	 */	
 	public void setDownButtonIndex(int downButtonIndex) {
 		Assert.isTrue(downButtonIndex < fButtonLabels.length);
@@ -285,7 +285,7 @@ public class ListDialogField extends DialogField {
 	}
 	
 	
-	// ------ ui creation
+	// ------ UI creation
 	
 	/**
 	 * Returns the list control. When called the first time, the control will be created.
