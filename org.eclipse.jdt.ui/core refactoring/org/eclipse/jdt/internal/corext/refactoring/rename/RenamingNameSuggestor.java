@@ -114,6 +114,10 @@ public class RenamingNameSuggestor {
 	private String[] fFieldSuffixes;
 	private String[] fStaticFieldPrefixes;
 	private String[] fStaticFieldSuffixes;
+	private String[] fLocalPrefixes;
+	private String[] fLocalSuffixes;
+	private String[] fArgumentPrefixes;
+	private String[] fArgumentSuffixes;
 
 	public RenamingNameSuggestor() {
 		this(STRATEGY_SUFFIX);
@@ -137,6 +141,16 @@ public class RenamingNameSuggestor {
 			return suggestNewVariableName(fStaticFieldPrefixes, fStaticFieldSuffixes, oldFieldName, oldTypeName, newTypeName);
 		else
 			return suggestNewVariableName(fFieldPrefixes, fFieldSuffixes, oldFieldName, oldTypeName, newTypeName);
+	}
+
+	public String suggestNewLocalName(IJavaProject project, String oldLocalName, boolean isArgument, String oldTypeName, String newTypeName) {
+
+		initializePrefixesAndSuffixes(project);
+
+		if (isArgument)
+			return suggestNewVariableName(fArgumentPrefixes, fArgumentSuffixes, oldLocalName, oldTypeName, newTypeName);
+		else
+			return suggestNewVariableName(fLocalPrefixes, fLocalSuffixes, oldLocalName, oldTypeName, newTypeName);
 	}
 
 	public String suggestNewMethodName(String oldMethodName, String oldTypeName, String newTypeName) {
@@ -240,6 +254,10 @@ public class RenamingNameSuggestor {
 		for (int i= 0; i < suffixesOldEqual.length; i++) {
 			String oldCamelCaseMatch= concatToEndOfArray(suffixesOldEqual, i);
 			String newCamelCaseMatch= concatToEndOfArray(suffixesNewEqual, i);
+			
+			if (oldCamelCaseMatch.equals(newCamelCaseMatch))
+				return null; // only silly suggestions from here on.
+			
 			String newName= embeddedDirectMatch(oldCamelCaseMatch, newCamelCaseMatch, strippedVariableName);
 
 			if (newName != null)
@@ -269,11 +287,17 @@ public class RenamingNameSuggestor {
 
 			if (suffix.length() == 0)
 				return prefix + newTypeName;
-			else if (Character.isDigit(suffix.charAt(0)) || Character.isUpperCase(suffix.charAt(0)))
+			else if (isNextCamelCaseHunk(suffix.charAt(0)))
 				return prefix + newTypeName + suffix;
 		}
 
 		return null;
+	}
+
+	private boolean isNextCamelCaseHunk(char c) {
+		if (Character.isLetter(c))
+			return Character.isUpperCase(c);
+		return true;
 	}
 
 	/**
@@ -354,6 +378,10 @@ public class RenamingNameSuggestor {
 		fFieldSuffixes= new String[0];
 		fStaticFieldPrefixes= new String[0];
 		fStaticFieldSuffixes= new String[0];
+		fLocalPrefixes= new String[0];
+		fLocalSuffixes= new String[0];
+		fArgumentPrefixes= new String[0];
+		fArgumentSuffixes= new String[0];
 	}
 
 	private void initializePrefixesAndSuffixes(IJavaProject project) {
@@ -383,6 +411,30 @@ public class RenamingNameSuggestor {
 			fStaticFieldSuffixes= staticFieldSuffixes.split(","); //$NON-NLS-1$
 		else
 			fStaticFieldPrefixes= new String[0];
+
+		String localPrefixes= project.getOption(JavaCore.CODEASSIST_LOCAL_PREFIXES, true);
+		if (localPrefixes != null)
+			fLocalPrefixes= localPrefixes.split(","); //$NON-NLS-1$
+		else
+			fLocalPrefixes= new String[0];
+
+		String localSuffixes= project.getOption(JavaCore.CODEASSIST_LOCAL_SUFFIXES, true);
+		if (localSuffixes != null)
+			fLocalSuffixes= localSuffixes.split(","); //$NON-NLS-1$
+		else
+			fLocalSuffixes= new String[0];
+
+		String argumentPrefixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_PREFIXES, true);
+		if (argumentPrefixes != null)
+			fArgumentPrefixes= localPrefixes.split(","); //$NON-NLS-1$
+		else
+			fArgumentPrefixes= new String[0];
+
+		String argumentSuffixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, true);
+		if (argumentSuffixes != null)
+			fArgumentSuffixes= localSuffixes.split(","); //$NON-NLS-1$
+		else
+			fArgumentSuffixes= new String[0];
 	}
 
 }

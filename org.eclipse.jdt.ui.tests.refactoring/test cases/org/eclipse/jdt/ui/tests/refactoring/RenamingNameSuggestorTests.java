@@ -110,21 +110,22 @@ public class RenamingNameSuggestorTests extends TestCase {
 	
 	}
 	
-	public void testMethodRenaming() {
+	public void testEmbeddedMatching() {
 		
 		prefixes= new String[0];
 		suffixes= new String[0];
 		
-		assertEquals("getNewJavaElement", mHelper("getJavaElement", "JavaElement", "NewJavaElement"));
-		assertEquals("newJavaElement", mHelper("javaElement", "JavaElement", "NewJavaElement"));
-		assertEquals("createNewJavaElementCache", mHelper("createJavaElementCache", "JavaElement", "NewJavaElement"));
+		mh("getJavaElement", "getNewJavaElement", "JavaElement", "NewJavaElement");
+		mh("javaElement", "newJavaElement", "JavaElement", "NewJavaElement");
 		
-		assertNull(mHelper("createJavaElementcache", "JavaElement", "NewJavaElement"));
+		mh("createjavaElement", "createnewJavaElement", "JavaElement", "NewJavaElement");
+		mh("getJavaElement", "getNewJavaElement", "IJavaElement", "INewJavaElement");
 		
-		//debate this
-		assertEquals("createnewJavaElement", mHelper("createjavaElement", "JavaElement", "NewJavaElement"));
+		mhf("createJavaElementcache", "JavaElement", "NewJavaElement");
 		
-		assertEquals("getNewJavaElement", mHelper("getJavaElement", "IJavaElement", "INewJavaElement"));
+		// match with "_" or "$" and other non-letters and non-digits at the next hunk
+		mh("someClass_pm", "someDifferentClass_pm", "SomeClass", "SomeDifferentClass");
+		mh("someClass$$", "someDifferentClass$$", "SomeClass", "SomeDifferentClass");
 	}
 	
 	public void testCamelCaseMatching() {
@@ -172,6 +173,10 @@ public class RenamingNameSuggestorTests extends TestCase {
 		mhf("getElementlabel", "JavaElement", "JavaMember");
 		
 		fhf("myClass", "A", "B");
+		
+		// avoid "silly" name suggestions
+		
+		fhf("fElement", "SomeLongElement", "AnotherDifferentElement"); //-> don't suggest renaming fElement to fElement!
 		
 	}
 	
