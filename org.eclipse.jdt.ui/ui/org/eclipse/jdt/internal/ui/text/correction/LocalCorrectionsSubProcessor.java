@@ -312,7 +312,7 @@ public class LocalCorrectionsSubProcessor {
 	 * Fix instance accesses and indirect (static) accesses to static fields/methods
 	 */
 	public static void addCorrectAccessToStaticProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		IFix fix= CodeStyleFix.createFix(context.getASTRoot(), problem, false, true);
+		IFix fix= CodeStyleFix.createIndirectAccessToStaticFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT), 6, image);
@@ -321,7 +321,7 @@ public class LocalCorrectionsSubProcessor {
 			return;
 		}
 		
-		IFix[] fixes= CodeStyleFix.createFixForNonStaticAccess(context.getASTRoot(), problem);
+		IFix[] fixes= CodeStyleFix.createNonStaticAccessFixes(context.getASTRoot(), problem);
 		if (fixes != null) {
 			IFix fix1= fixes[0];
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
@@ -541,7 +541,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addUnqualifiedFieldAccessProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		IFix fix= CodeStyleFix.createFix(context.getASTRoot(), problem, true, false);
+		IFix fix= CodeStyleFix.createAddFieldQualifierFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS), 5, image);
