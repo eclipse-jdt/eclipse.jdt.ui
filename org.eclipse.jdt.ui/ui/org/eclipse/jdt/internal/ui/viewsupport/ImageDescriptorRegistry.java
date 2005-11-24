@@ -49,7 +49,7 @@ public class ImageDescriptorRegistry {
 	}
 	
 	/**
-	 * Returns the image assiciated with the given image descriptor.
+	 * Returns the image associated with the given image descriptor.
 	 * 
 	 * @param descriptor the image descriptor for which the registry manages an image
 	 * @return the image associated with the image descriptor or <code>null</code>
@@ -89,4 +89,3 @@ public class ImageDescriptorRegistry {
 		});
 	}
 }
-
