@@ -374,67 +374,31 @@ public class RenamingNameSuggestor {
 	}
 
 	private void resetPrefixes() {
-		fFieldPrefixes= new String[0];
-		fFieldSuffixes= new String[0];
-		fStaticFieldPrefixes= new String[0];
-		fStaticFieldSuffixes= new String[0];
-		fLocalPrefixes= new String[0];
-		fLocalSuffixes= new String[0];
-		fArgumentPrefixes= new String[0];
-		fArgumentSuffixes= new String[0];
+		String[] empty= new String[0];
+		fFieldPrefixes= empty;
+		fFieldSuffixes= empty;
+		fStaticFieldPrefixes= empty;
+		fStaticFieldSuffixes= empty;
+		fLocalPrefixes= empty;
+		fLocalSuffixes= empty;
+		fArgumentPrefixes= empty;
+		fArgumentSuffixes= empty;
 	}
 
 	private void initializePrefixesAndSuffixes(IJavaProject project) {
+		fFieldPrefixes= readCommaSeparatedPreference(project, JavaCore.CODEASSIST_FIELD_PREFIXES);
+		fFieldSuffixes= readCommaSeparatedPreference(project, JavaCore.CODEASSIST_FIELD_SUFFIXES);
+		fStaticFieldPrefixes= readCommaSeparatedPreference(project, JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES);
+		fStaticFieldSuffixes= readCommaSeparatedPreference(project, JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES);
+		fLocalPrefixes= readCommaSeparatedPreference(project, JavaCore.CODEASSIST_LOCAL_PREFIXES);
+		fLocalSuffixes= readCommaSeparatedPreference(project, JavaCore.CODEASSIST_LOCAL_SUFFIXES);
+		fArgumentPrefixes= readCommaSeparatedPreference(project, JavaCore.CODEASSIST_ARGUMENT_PREFIXES);
+		fArgumentSuffixes= readCommaSeparatedPreference(project, JavaCore.CODEASSIST_ARGUMENT_SUFFIXES);
+	}
 
-		Assert.isNotNull(project);
-
-		String fieldPrefixes= project.getOption(JavaCore.CODEASSIST_FIELD_PREFIXES, true);
-		if (fieldPrefixes != null)
-			fFieldPrefixes= fieldPrefixes.split(","); //$NON-NLS-1$
-		else
-			fFieldPrefixes= new String[0];
-
-		String fieldSuffixes= project.getOption(JavaCore.CODEASSIST_FIELD_SUFFIXES, true);
-		if (fieldSuffixes != null)
-			fFieldSuffixes= fieldSuffixes.split(","); //$NON-NLS-1$
-		else
-			fFieldSuffixes= new String[0];
-
-		String staticFieldPrefixes= project.getOption(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, true);
-		if (staticFieldPrefixes != null)
-			fStaticFieldPrefixes= staticFieldPrefixes.split(","); //$NON-NLS-1$
-		else
-			fStaticFieldPrefixes= new String[0];
-
-		String staticFieldSuffixes= project.getOption(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, true);
-		if (staticFieldSuffixes != null)
-			fStaticFieldSuffixes= staticFieldSuffixes.split(","); //$NON-NLS-1$
-		else
-			fStaticFieldPrefixes= new String[0];
-
-		String localPrefixes= project.getOption(JavaCore.CODEASSIST_LOCAL_PREFIXES, true);
-		if (localPrefixes != null)
-			fLocalPrefixes= localPrefixes.split(","); //$NON-NLS-1$
-		else
-			fLocalPrefixes= new String[0];
-
-		String localSuffixes= project.getOption(JavaCore.CODEASSIST_LOCAL_SUFFIXES, true);
-		if (localSuffixes != null)
-			fLocalSuffixes= localSuffixes.split(","); //$NON-NLS-1$
-		else
-			fLocalSuffixes= new String[0];
-
-		String argumentPrefixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_PREFIXES, true);
-		if (argumentPrefixes != null)
-			fArgumentPrefixes= localPrefixes.split(","); //$NON-NLS-1$
-		else
-			fArgumentPrefixes= new String[0];
-
-		String argumentSuffixes= project.getOption(JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, true);
-		if (argumentSuffixes != null)
-			fArgumentSuffixes= localSuffixes.split(","); //$NON-NLS-1$
-		else
-			fArgumentSuffixes= new String[0];
+	private String[] readCommaSeparatedPreference(IJavaProject project, String option) {
+		String list= project.getOption(option, true);
+		return list == null ? new String[0] : list.split(","); //$NON-NLS-1$
 	}
 
 }
