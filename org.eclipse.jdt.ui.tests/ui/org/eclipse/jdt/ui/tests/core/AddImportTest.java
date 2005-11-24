@@ -15,11 +15,15 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
+import org.eclipse.text.edits.TextEdit;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jface.text.IDocument;
 
@@ -31,7 +35,16 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.osgi.service.prefs.BackingStoreException;
 
 public class AddImportTest extends CoreTests {
 	
@@ -93,12 +106,12 @@ public class AddImportTest extends CoreTests {
 		
 		String[] order= new String[] { "java", "com", "pack" };
 		
-		ImportsStructure imports= new ImportsStructure(cu, order, 2, true);
+		NewImportRewrite imports= newImportsRewrite(cu, order, 2, true);
 		imports.addImport("java.net.Socket");
 		imports.addImport("p.A");
 		imports.addImport("com.something.Foo");
 		
-		imports.create(true, null);
+		apply(imports);
 
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
@@ -136,10 +149,10 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "java", "java.util", "com", "pack" };
 
-		ImportsStructure imports= new ImportsStructure(cu, order, 2, true);
+		NewImportRewrite imports= newImportsRewrite(cu, order, 2, true);
 		imports.addImport("java.x.Socket");
 
-		imports.create(true, null);
+		apply(imports);
 
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
@@ -170,10 +183,10 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "java", "java.util", "com", "pack" };
 
-		ImportsStructure imports= new ImportsStructure(cu, order, 99, true);
+		NewImportRewrite imports= newImportsRewrite(cu, order, 99, true);
 		imports.addImport("java.util.Vector");
 
-		imports.create(true, null);
+		apply(imports);
 
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
@@ -206,11 +219,11 @@ public class AddImportTest extends CoreTests {
 		
 		String[] order= new String[] { "java", "com", "pack" };
 		
-		ImportsStructure imports= new ImportsStructure(cu, order, 2, true);
+		NewImportRewrite imports= newImportsRewrite(cu, order, 2, true);
 		imports.removeImport("java.util.Set");
 		imports.removeImport("pack.List");
 		
-		imports.create(true, null);
+		apply(imports);
 
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
@@ -241,10 +254,10 @@ public class AddImportTest extends CoreTests {
 		
 		String[] order= new String[] { "java", "com", "pack" };
 		
-		ImportsStructure imports= new ImportsStructure(cu, order, 2, true);
+		NewImportRewrite imports= newImportsRewrite(cu, order, 2, true);
 		imports.removeImport("java.util.Vector");
 		
-		imports.create(true, null);
+		apply(imports);
 
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
@@ -272,10 +285,10 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { };
 
-		ImportsStructure imports= new ImportsStructure(cu, order, 2, true);
+		NewImportRewrite imports= newImportsRewrite(cu, order, 2, true);
 		imports.addImport("p.Inner");
 
-		imports.create(true, null);
+		apply(imports);
 
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
@@ -305,10 +318,10 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "java.awt", "java" };
 
-		ImportsStructure imports= new ImportsStructure(cu, order, 99, true);
+		NewImportRewrite imports= newImportsRewrite(cu, order, 99, true);
 		imports.addImport("java.applet.Applet");
 
-		imports.create(true, null);
+		apply(imports);
 
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
@@ -338,10 +351,10 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "java" };
 
-		ImportsStructure imports= new ImportsStructure(cu, order, 99, true);
+		NewImportRewrite imports= newImportsRewrite(cu, order, 99, true);
 		imports.addImport("java.io.Exception");
 
-		imports.create(true, null);
+		apply(imports);
 
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
@@ -369,12 +382,12 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "#", "java" };
 
-		ImportsStructure imports= new ImportsStructure(cu, order, 99, true);
+		NewImportRewrite imports= newImportsRewrite(cu, order, 99, true);
 		imports.addStaticImport("java.lang.Math", "min", true);
 		imports.addImport("java.lang.Math");
 		imports.addStaticImport("java.lang.Math", "max", true);
 
-		imports.create(true, null);
+		apply(imports);
 
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
@@ -404,12 +417,12 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "#", "java" };
 
-		ImportsStructure imports= new ImportsStructure(cu, order, 99, true);
+		NewImportRewrite imports= newImportsRewrite(cu, order, 99, true);
 		imports.addStaticImport("xx.MyConstants", "SIZE", true);
 		imports.addStaticImport("xy.MyConstants", "*", true);
 		imports.addImport("xy.MyConstants");
 		
-		imports.create(true, null);
+		apply(imports);
 
 		buf= new StringBuffer();
 		buf.append("package pack1;\n");
@@ -667,4 +680,20 @@ public class AddImportTest extends CoreTests {
 		}
 	}	
 
+	private NewImportRewrite newImportsRewrite(ICompilationUnit cu, String[] order, int threshold, boolean restoreExistingImports) throws CoreException, BackingStoreException {
+		NewImportRewrite rewrite= NewImportRewrite.create(cu, restoreExistingImports);
+		
+		IEclipsePreferences scope= new ProjectScope(cu.getJavaProject().getProject()).getNode(JavaUI.ID_PLUGIN);
+		scope.put(PreferenceConstants.ORGIMPORTS_IMPORTORDER, getImportOrderString(order));
+		scope.put(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, String.valueOf(threshold));
+		scope.flush();
+		
+		return rewrite;
+	}
+	
+	private void apply(NewImportRewrite rewrite) throws CoreException {
+		TextEdit edit= rewrite.rewriteImports(null);
+		JavaModelUtil.applyEdit(rewrite.getCompilationUnit(), edit, true, null);
+	}
+	
 }

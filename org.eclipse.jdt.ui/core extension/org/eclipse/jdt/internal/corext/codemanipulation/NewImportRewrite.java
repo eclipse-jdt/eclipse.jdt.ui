@@ -109,7 +109,7 @@ public final class NewImportRewrite {
 		 * Searches for the given element in the context and reports if the element is known ({@link #RES_NAME_FOUND}),
 		 * unknown ({@link #RES_NAME_UNKNOWN}) or if its name conflicts ({@link #RES_NAME_CONFLICT}) with an other element.
 		 * @param qualifier The qualifier of the element, can be package or the qualified name of a type 
-		 * @param name The simple name of the element; either a type, method or field name.
+		 * @param name The simple name of the element; either a type, method or field name or * for on-demand imports.
 		 * @param kind The kind of the element. Can be either {@link #KIND_TYPE}, {@link #KIND_STATIC_FIELD} or
 		 * {@link #KIND_STATIC_METHOD}. Implementors should be prepared for new, currently unspecified kinds and return
 		 * {@link #RES_NAME_UNKNOWN} by default.
@@ -122,8 +122,6 @@ public final class NewImportRewrite {
 	// TODO: Use jdt.core preferences
 	private static final String IMPORTS_ORDER= PreferenceConstants.ORGIMPORTS_IMPORTORDER;
 	private static final String IMPORTS_ONDEMAND_THRESHOLD= PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD;
-	
-	private static final String ON_DEMAND_IMPORT_NAME= "*"; //$NON-NLS-1$
 	
 	private static final char STATIC_PREFIX= 's';
 	private static final char NORMAL_PREFIX= 'n';
@@ -275,7 +273,7 @@ public final class NewImportRewrite {
 	}
 	
 	private int findInImports(String qualifier, String name, int kind) {
-		boolean allowAmbiguity=  (kind == ImportRewriteContext.KIND_STATIC_METHOD);
+		boolean allowAmbiguity=  (kind == ImportRewriteContext.KIND_STATIC_METHOD) || (name.length() == 1 && name.charAt(0) == '*');
 		List imports= fExistingImports;
 		char prefix= (kind == ImportRewriteContext.KIND_TYPE) ? NORMAL_PREFIX : STATIC_PREFIX;
 		
@@ -684,15 +682,13 @@ public final class NewImportRewrite {
 		if (containerName.length() == 0) {
 			return declaringTypeName + '.' + simpleName;
 		}
-		if (!ON_DEMAND_IMPORT_NAME.equals(simpleName)) {
-			int kind= isField ? ImportRewriteContext.KIND_STATIC_FIELD : ImportRewriteContext.KIND_STATIC_METHOD;
-			int res= fDefaultContext.findInContext(containerName, simpleName, kind);
-			if (res == ImportRewriteContext.RES_NAME_CONFLICT) {
-				return fullName;
-			}
-			if (res == ImportRewriteContext.RES_NAME_UNKNOWN) {
-				addEntry(STATIC_PREFIX + fullName);
-			}
+		int kind= isField ? ImportRewriteContext.KIND_STATIC_FIELD : ImportRewriteContext.KIND_STATIC_METHOD;
+		int res= fDefaultContext.findInContext(containerName, simpleName, kind);
+		if (res == ImportRewriteContext.RES_NAME_CONFLICT) {
+			return fullName;
+		}
+		if (res == ImportRewriteContext.RES_NAME_UNKNOWN) {
+			addEntry(STATIC_PREFIX + fullName);
 		}
 		return simpleName;
 	}
@@ -712,14 +708,12 @@ public final class NewImportRewrite {
 			return fullTypeName;
 		}
 		
-		if (!ON_DEMAND_IMPORT_NAME.equals(typeName)) {
-			int res= context.findInContext(typeContainerName, typeName, ImportRewriteContext.KIND_TYPE);
-			if (res == ImportRewriteContext.RES_NAME_CONFLICT) {
-				return fullTypeName;
-			}
-			if (res == ImportRewriteContext.RES_NAME_UNKNOWN) {
-				addEntry(NORMAL_PREFIX + fullTypeName);
-			}
+		int res= context.findInContext(typeContainerName, typeName, ImportRewriteContext.KIND_TYPE);
+		if (res == ImportRewriteContext.RES_NAME_CONFLICT) {
+			return fullTypeName;
+		}
+		if (res == ImportRewriteContext.RES_NAME_UNKNOWN) {
+			addEntry(NORMAL_PREFIX + fullTypeName);
 		}
 		return typeName;
 	}

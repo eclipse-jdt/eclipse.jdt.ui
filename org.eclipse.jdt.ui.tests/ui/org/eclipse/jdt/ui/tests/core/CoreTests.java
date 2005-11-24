@@ -73,4 +73,13 @@ public class CoreTests extends TestCase {
 		assertTrue("Wrong number of " + name + ", is: " + is + ", expected: " + expected, is == expected);
 	}
 	
+	protected static String getImportOrderString(String[] order) {
+		StringBuffer buf= new StringBuffer();
+		for (int i= 0; i < order.length; i++) {
+			buf.append(order[i]);
+			buf.append(';');
+		}
+		return buf.toString();
+	}
+	
 }

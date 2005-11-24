@@ -2550,19 +2550,9 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation operation= new OrganizeImportsOperation(cu, null, ignoreLowerCaseNames, save, doResolve, chooseImportQuery);
 		
 		IEclipsePreferences scope= new ProjectScope(cu.getJavaProject().getProject()).getNode(JavaUI.ID_PLUGIN);
-		scope.put(PreferenceConstants.ORGIMPORTS_IMPORTORDER, concatenate(order));
+		scope.put(PreferenceConstants.ORGIMPORTS_IMPORTORDER, getImportOrderString(order));
 		scope.put(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, String.valueOf(threshold));
 		scope.flush();
 		return operation;
 	}
-	
-	private String concatenate(String[] order) {
-		StringBuffer buf= new StringBuffer();
-		for (int i= 0; i < order.length; i++) {
-			buf.append(order[i]);
-			buf.append(';');
-		}
-		return buf.toString();
-	}
-	
 }

@@ -55,6 +55,7 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -100,10 +101,10 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 	 * Elements must be of type IType (-> single import) or IPackageFragment
 	 * (on-demand-import). Other JavaElements are ignored
 	 * @param cu The compilation unit
-	 * @param document Document corrsponding to the compilation unit
+	 * @param document Document corresponding to the compilation unit
 	 * @param selectionOffset Start of the current text selection
 	 * 	@param selectionLength End of the current text selection
-	 * @param query Query element to be used fo UI interaction or <code>null</code> to not select anything
+	 * @param query Query element to be used for UI interaction or <code>null</code> to not select anything
 	 * when multiple possibilities are available
 	 */
 	public AddImportsOperation(ICompilationUnit cu, IDocument document, int selectionOffset, int selectionLength, IChooseImportQuery query) {
@@ -128,9 +129,9 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 
 	/**
 	 * Runs the operation.
-	 * @param monitor The progress monito
+	 * @param monitor The progress monitor
 	 * @throws CoreException  
-	 * @throws OperationCanceledException Runtime error thrown when operation is cancelled.
+	 * @throws OperationCanceledException Runtime error thrown when operation is canceled.
 	 */
 	public void run(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
 		if (monitor == null) {
@@ -141,14 +142,13 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			
 			CompilationUnit astRoot= JavaPlugin.getDefault().getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 5));
 
-			ImportRewrite importRewrite= new ImportRewrite(fCompilationUnit, astRoot);
-			importRewrite.setFindAmbiguosImports(true);
+			NewImportRewrite importRewrite= NewImportRewrite.create(astRoot, true);
 			
 			TextEdit edit= evaluateEdits(astRoot, importRewrite, fSelectionOffset, fSelectionLength, new SubProgressMonitor(monitor, 5));
 			if (edit != null) {
 				edit.apply(fDocument, 0);
 				
-				TextEdit importsEdit= importRewrite.createEdit(fDocument, new SubProgressMonitor(monitor, 5));
+				TextEdit importsEdit= importRewrite.rewriteImports(astRoot, new SubProgressMonitor(monitor, 5));
 				importsEdit.apply(fDocument, 0);
 			}
 		} catch (BadLocationException e) {
@@ -158,7 +158,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 		}
 	}
 	
-	private TextEdit evaluateEdits(CompilationUnit root, ImportRewrite importRewrite, int offset, int length, IProgressMonitor monitor) throws BadLocationException, JavaModelException {
+	private TextEdit evaluateEdits(CompilationUnit root, NewImportRewrite importRewrite, int offset, int length, IProgressMonitor monitor) throws BadLocationException, JavaModelException {
 		SimpleName nameNode= null;
 		if (root != null) { // got an AST
 			ASTNode node= NodeFinder.perform(root, offset, length);
@@ -250,16 +250,11 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			
 			simpleNameStart= getSimpleNameStart(fDocument, qualifierStart, containerName);
 			
-			String existingImport= importRewrite.findImport(simpleName);
-			if (existingImport != null) {
-				if (containerName.length() == 0) {
-					return null;
-				}
-				if (!existingImport.equals(name)) {
-					fStatus= JavaUIStatus.createError(IStatus.ERROR, Messages.format(CodeGenerationMessages.AddImportsOperation_error_importclash, existingImport), null); 
-					return null;
-				}
-
+			int res= importRewrite.getDefaultImportRewriteContext().findInContext(containerName, simpleName, ImportRewriteContext.KIND_TYPE);
+			if (res == ImportRewriteContext.RES_NAME_CONFLICT) {
+				fStatus= JavaUIStatus.createError(IStatus.ERROR, CodeGenerationMessages.AddImportsOperation_error_importclash, null); 
+				return null;
+			} else if (res == ImportRewriteContext.RES_NAME_FOUND) {
 				return new ReplaceEdit(qualifierStart, simpleNameStart - qualifierStart, ""); //$NON-NLS-1$
 			}
 		}
