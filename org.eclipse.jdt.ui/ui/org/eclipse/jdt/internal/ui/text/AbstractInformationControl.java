@@ -177,17 +177,17 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 				// Pre-fetch key sequence - do not change because scope will change later.
 				getInvokingCommandKeySequences();
 		}
-		this.fTreeStyle= treeStyle;
+		fTreeStyle= treeStyle;
 		// Title and status text must be set to get the title label created, so force empty values here. 
 		if (hasHeader())
-			this.setTitleText(""); //$NON-NLS-1$
-		this.setInfoText(""); //  //$NON-NLS-1$
+			setTitleText(""); //$NON-NLS-1$
+		setInfoText(""); //  //$NON-NLS-1$
 
 		// Create all controls early to preserve the life cycle of the original implementation.
 		create();
 
 		// Status field text can only be computed after widgets are created.
-		this.setInfoText(getStatusFieldText());
+		setInfoText(getStatusFieldText());
 	}
 
 	/**
@@ -543,9 +543,10 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	public void setVisible(boolean visible) {
 		if (visible)
 			open();
-		else
-			// FIXME: workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=115785
-			dispose();
+		else {
+			saveDialogBounds(getShell());
+			getShell().setVisible(false);
+		}
 	}
 
 	/**
