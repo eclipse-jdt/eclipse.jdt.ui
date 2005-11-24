@@ -32,6 +32,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
@@ -44,8 +45,6 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.TypeNameRequestor;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public final class ImportRewriteComputer {
 	
@@ -64,7 +63,6 @@ public final class ImportRewriteComputer {
 
 	private int fFlags= 0;
 	
-	private static final int F_HAS_CHANGES= 1;
 	private static final int F_NEEDS_LEADING_DELIM= 2;
 	private static final int F_NEEDS_TRAILING_DELIM= 4;
 	
@@ -384,8 +382,11 @@ public final class ImportRewriteComputer {
 		if (qualifier.equals(packageName)) {
 			return true;
 		}
-		String mainTypeName= JavaModelUtil.concatenateName(packageName, Signature.getQualifier(cu.getElementName()));
-		return qualifier.equals(mainTypeName);
+		String mainTypeName= JavaCore.removeJavaLikeExtension(cu.getElementName());
+		if (packageName.length() == 0) {
+			return qualifier.equals(mainTypeName);
+		}
+		return qualifier.equals(packageName +'.' + mainTypeName);
 	}
 	
 	public void addImport(String fullTypeName, boolean isStatic) {
@@ -402,7 +403,6 @@ public final class ImportRewriteComputer {
 			PackageEntry entry= (PackageEntry) fPackageEntries.get(i);
 			if (entry.compareTo(containerName, isStatic) == 0) {
 				if (entry.remove(qualifiedName, isStatic)) {
-					fFlags |= F_HAS_CHANGES;
 					return true;
 				}
 			}
@@ -449,7 +449,6 @@ public final class ImportRewriteComputer {
 				}
 			}
 		}
-		fFlags |= F_HAS_CHANGES;
 	}
 			
 	private IRegion evaluateReplaceRange(CompilationUnit root) {
@@ -483,7 +482,7 @@ public final class ImportRewriteComputer {
 		if (monitor == null) {
 			monitor= new NullProgressMonitor();
 		}
-		try {		
+		try {	
 			int importsStart=  fReplaceRange.getOffset();
 			int importsLen= fReplaceRange.getLength();
 					
@@ -1046,13 +1045,5 @@ public final class ImportRewriteComputer {
 	
 	public String[] getCreatedStaticImports() {
 	    return (String[]) fStaticImportsCreated.toArray(new String[fStaticImportsCreated.size()]);
-	}
-
-	/**
-	 * Returns <code>true</code> if imports have been added or removed.
-	 * @return boolean
-	 */
-	public boolean hasChanges() {
-		return (fFlags & F_HAS_CHANGES) != 0;
 	}
 }

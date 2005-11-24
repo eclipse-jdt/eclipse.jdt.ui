@@ -32,12 +32,12 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -2550,8 +2550,8 @@ public class ImportOrganizeTest extends CoreTests {
 		OrganizeImportsOperation operation= new OrganizeImportsOperation(cu, null, ignoreLowerCaseNames, save, doResolve, chooseImportQuery);
 		
 		IEclipsePreferences scope= new ProjectScope(cu.getJavaProject().getProject()).getNode(JavaUI.ID_PLUGIN);
-		scope.put(NewImportRewrite.IMPORTS_ORDER, concatenate(order));
-		scope.put(NewImportRewrite.IMPORTS_ONDEMAND_THRESHOLD, String.valueOf(threshold));
+		scope.put(PreferenceConstants.ORGIMPORTS_IMPORTORDER, concatenate(order));
+		scope.put(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, String.valueOf(threshold));
 		scope.flush();
 		return operation;
 	}
