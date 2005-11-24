@@ -95,6 +95,6 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 				label= unit.getElementName();
 		} else
 			label= getOldName();
-		return new RefactoringDescriptor(ID_RENAME_COMPILATION_UNIT, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, getNewName()}), null, arguments);
+		return new RefactoringDescriptor(ID_RENAME_COMPILATION_UNIT, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, getNewName()}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
 	}
 }

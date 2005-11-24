@@ -423,7 +423,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 						IJavaProject javaProject= fCu.getJavaProject();
 						if (javaProject != null)
 							project= javaProject.getElementName();
-						return new RefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, MessageFormat.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName}), null, arguments);
+						return new RefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, MessageFormat.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName}), null, arguments, RefactoringDescriptor.NONE);
 					}
 				};
 				composite.markAsSynthetic();

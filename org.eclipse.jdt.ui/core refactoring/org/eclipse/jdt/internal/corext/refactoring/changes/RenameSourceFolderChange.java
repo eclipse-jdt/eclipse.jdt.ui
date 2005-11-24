@@ -138,6 +138,6 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 		final IProject container= getResource().getProject();
 		if (container != null)
 			project= container.getName();
-		return new RefactoringDescriptor(ID_RENAME_SOURCE_FOLDER, project, MessageFormat.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { getResourcePath().toString(), getNewName()}), null, arguments);
+		return new RefactoringDescriptor(ID_RENAME_SOURCE_FOLDER, project, MessageFormat.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { getResourcePath().toString(), getNewName()}), null, arguments, RefactoringDescriptor.NONE);
 	}
 }

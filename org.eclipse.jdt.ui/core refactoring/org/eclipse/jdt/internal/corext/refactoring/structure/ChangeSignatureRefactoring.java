@@ -1118,6 +1118,13 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					IJavaProject javaProject= fMethod.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
+					int flags= RefactoringDescriptor.NONE;
+					try {
+						if (!Flags.isPrivate(fMethod.getFlags()))
+							flags|= RefactoringDescriptor.STRUCTURAL_CHANGE;
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
 					try {
 						return new RefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, MessageFormat.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), null, arguments);
 					} catch (JavaModelException exception) {

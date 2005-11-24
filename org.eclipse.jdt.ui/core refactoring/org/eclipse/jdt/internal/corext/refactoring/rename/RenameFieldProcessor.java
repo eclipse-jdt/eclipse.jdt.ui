@@ -40,6 +40,7 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 import org.eclipse.osgi.util.NLS;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -48,6 +49,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -505,6 +507,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, fChangeManager.getAllChanges()) {
+
 				public final RefactoringDescriptor getRefactoringDescriptor() {
 					final Map arguments= new HashMap();
 					arguments.put(ATTRIBUTE_HANDLE, fField.getHandleIdentifier());
@@ -517,7 +520,14 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 					IJavaProject javaProject= fField.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_RENAME_FIELD, project, MessageFormat.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "." + fField.getElementName(), getNewElementName()}), null, arguments); //$NON-NLS-1$
+					int flags= RefactoringDescriptor.NONE;
+					try {
+						if (!Flags.isPrivate(fField.getFlags()))
+							flags|= RefactoringDescriptor.STRUCTURAL_CHANGE;
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
+					return new RefactoringDescriptor(ID_RENAME_FIELD, project, MessageFormat.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "." + fField.getElementName(), getNewElementName()}), null, arguments, flags); //$NON-NLS-1$
 				}
 			};
 		} finally {
@@ -527,7 +537,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			pm.done();
 		}
 	}
-	
+
 	//----------
 	
 	private RefactoringStatus createChanges(IProgressMonitor pm) throws CoreException {

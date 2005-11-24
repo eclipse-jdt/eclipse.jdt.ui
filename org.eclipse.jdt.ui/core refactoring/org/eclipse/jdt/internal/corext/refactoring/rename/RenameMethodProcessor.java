@@ -40,6 +40,7 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 import org.eclipse.osgi.util.NLS;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -612,10 +613,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 				
 	//-------- changes -----
-	
+
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, fChangeManager.getAllChanges()) {
+
 				public RefactoringDescriptor getRefactoringDescriptor() {
 					final Map arguments= new HashMap();
 					arguments.put(ATTRIBUTE_HANDLE, fMethod.getHandleIdentifier());
@@ -625,7 +627,14 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 					IJavaProject javaProject= fMethod.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_RENAME_METHOD, project, MessageFormat.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), null, arguments);
+					int flags= RefactoringDescriptor.NONE;
+					try {
+						if (!Flags.isPrivate(fMethod.getFlags()))
+							flags|= RefactoringDescriptor.STRUCTURAL_CHANGE;
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
+					return new RefactoringDescriptor(ID_RENAME_METHOD, project, MessageFormat.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), null, arguments, flags);
 				}
 			};
 		} finally {
@@ -635,7 +644,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			monitor.done();
 		}
 	}
-	
+
 	private TextChangeManager createChanges(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		if (!fIsDerived)
 			fChangeManager.clear();

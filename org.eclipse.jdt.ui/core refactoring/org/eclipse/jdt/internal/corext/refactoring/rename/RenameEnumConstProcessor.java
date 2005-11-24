@@ -27,10 +27,13 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.osgi.util.NLS;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
@@ -108,17 +111,27 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 		Change change= super.createChange(monitor);
 		if (change != null) {
 			final CompositeChange composite= new CompositeChange("", new Change[] { change}) { //$NON-NLS-1$
+
 				public final RefactoringDescriptor getRefactoringDescriptor() {
 					final Map arguments= new HashMap();
-					arguments.put(ATTRIBUTE_HANDLE, getField().getHandleIdentifier());
+					final IField field= getField();
+					arguments.put(ATTRIBUTE_HANDLE, field.getHandleIdentifier());
 					arguments.put(ATTRIBUTE_NAME, getNewElementName());
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
 					String project= null;
-					IJavaProject javaProject= getField().getJavaProject();
+					IJavaProject javaProject= field.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_RENAME_ENUM_CONSTANT, project, MessageFormat.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description, new String[] { getField().getElementName(), JavaElementLabels.getElementLabel(getField().getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), null, arguments);
+					int flags= RefactoringDescriptor.NONE;
+					final IType declaring= field.getDeclaringType();
+					try {
+						if (!Flags.isPrivate(declaring.getFlags()))
+							flags|= RefactoringDescriptor.STRUCTURAL_CHANGE;
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
+					return new RefactoringDescriptor(ID_RENAME_ENUM_CONSTANT, project, MessageFormat.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description, new String[] { field.getElementName(), JavaElementLabels.getElementLabel(field.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), null, arguments, flags);
 				}
 			};
 			composite.markAsSynthetic();
