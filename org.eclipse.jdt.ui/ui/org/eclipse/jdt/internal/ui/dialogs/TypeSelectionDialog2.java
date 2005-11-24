@@ -56,6 +56,7 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -74,6 +75,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	private int fSelectionMode;
 	private ISelectionStatusValidator fValidator;
 	private TypeSelectionComponent fContent;
+	private TypeSelectionExtension fExtension;
 	
 	public static final int NONE= TypeSelectionComponent.NONE;
 	public static final int CARET_BEGINNING= TypeSelectionComponent.CARET_BEGINNING;
@@ -93,7 +95,13 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		}
 	}
 	
-	public TypeSelectionDialog2(Shell parent, boolean multi, IRunnableContext context, IJavaSearchScope scope, int elementKinds) {
+	public TypeSelectionDialog2(Shell parent, boolean multi, IRunnableContext context, 
+			IJavaSearchScope scope, int elementKinds) {
+		this(parent, multi, context, scope, elementKinds, null);
+	}
+	
+	public TypeSelectionDialog2(Shell parent, boolean multi, IRunnableContext context, 
+			IJavaSearchScope scope, int elementKinds, TypeSelectionExtension extension) {
 		super(parent);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		fMultipleSelection= multi;
@@ -101,6 +109,10 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		fScope= scope;
 		fElementKind= elementKinds;
 		fSelectionMode= NONE;
+		fExtension= extension;
+		if (fExtension != null) {
+			fValidator= fExtension.getSelectionValidator();
+		}
 	}
 	
 	public void setFilter(String filter) {
@@ -132,7 +144,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 		Composite area= (Composite)super.createDialogArea(parent);
 		fContent= new TypeSelectionComponent(area, SWT.NONE, getMessage(), 
 			fMultipleSelection, fScope, fElementKind, fInitialFilter,
-			new TitleLabel());
+			new TitleLabel(), fExtension);
 		GridData gd= new GridData(GridData.FILL_BOTH);
 		fContent.setLayoutData(gd);
 		fContent.addSelectionListener(new SelectionListener() {
@@ -153,15 +165,34 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	}
 	
 	protected void handleWidgetSelected(TypeInfo[] selection) {
-		IStatus status;
+		IStatus status= null;
 		if (selection.length == 0) {
 	    	status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, "",null); //$NON-NLS-1$
 	    } else {
-		    if (fValidator != null) {
-		    	status= fValidator.validate(selection);
-		    } else {
-		    	status= new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "",null); //$NON-NLS-1$
-		    }
+		    try {
+				if (fValidator != null) {
+					List jElements= new ArrayList();
+					for (int i= 0; i < selection.length; i++) {
+						IType type= selection[i].resolveType(fScope);
+						if (type != null) {
+							jElements.add(type);
+						} else {
+				    		status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR,
+				    			Messages.format(JavaUIMessages.TypeSelectionDialog_error_type_doesnot_exist, selection[i].getFullyQualifiedName()),
+				    			null);
+				    		break;
+						}
+					}
+					if (status == null) {
+						status= fValidator.validate(jElements.toArray());
+					}
+				} else {
+					status= new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "",null); //$NON-NLS-1$
+				}
+			} catch (JavaModelException e) {
+	    		status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.ERROR, 
+	    			e.getStatus().getMessage(), null);
+			}
 	    }
     	updateStatus(status);
 	}

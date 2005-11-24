@@ -24,6 +24,8 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -38,7 +40,12 @@ public class OpenTypeSelectionDialog2 extends TypeSelectionDialog2 {
 	private static final String HEIGHT= "height"; //$NON-NLS-1$
 	
 	public OpenTypeSelectionDialog2(Shell parent, boolean multi, IRunnableContext context, IJavaSearchScope scope, int elementKinds) {
-		super(parent, multi, context, scope, elementKinds);
+		this(parent, multi, context, scope, elementKinds, null);
+	}
+	
+	public OpenTypeSelectionDialog2(Shell parent, boolean multi, IRunnableContext context, 
+			IJavaSearchScope scope, int elementKinds, TypeSelectionExtension extension) {
+		super(parent, multi, context, scope, elementKinds, extension);
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
 		fSettings= settings.getSection(DIALOG_SETTINGS);
 		if (fSettings == null) {

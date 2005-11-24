@@ -60,6 +60,9 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
+import org.eclipse.jdt.ui.dialogs.ITypeSelectionComponent;
+import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -69,7 +72,7 @@ import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 
-public class TypeSelectionComponent extends Composite {
+public class TypeSelectionComponent extends Composite implements ITypeSelectionComponent {
 	
 	private IDialogSettings fSettings;
 	private boolean fMultipleSelection;
@@ -80,6 +83,7 @@ public class TypeSelectionComponent extends Composite {
 	private MenuManager fMenuManager;
 	private WorkingSetFilterActionGroup fFilterActionGroup;
 	
+	private TypeSelectionExtension fTypeSelectionExtension;
 	private Text fFilter;
 	private String fInitialFilterText;
 	private IJavaSearchScope fScope;
@@ -104,12 +108,10 @@ public class TypeSelectionComponent extends Composite {
 			if (fForm == null)
 				return;
 			GridData gd= (GridData)fForm.getLayoutData();
-			if (isChecked()) {
-				gd.exclude= false;
-			} else {
-				gd.exclude= true;
-			}
-			fSettings.put(SHOW_STATUS_LINE, !gd.exclude);
+			boolean checked= isChecked();
+			gd.exclude= !checked;
+			fForm.setVisible(checked);
+			fSettings.put(SHOW_STATUS_LINE, checked);
 			TypeSelectionComponent.this.layout();
 		}
 	}
@@ -138,13 +140,16 @@ public class TypeSelectionComponent extends Composite {
 		public void setText(String text);
 	}
 	
-	public TypeSelectionComponent(Composite parent, int style, String message, boolean multi, IJavaSearchScope scope, int elementKind, String initialFilter, ITitleLabel titleLabel) {
+	public TypeSelectionComponent(Composite parent, int style, String message, boolean multi, 
+			IJavaSearchScope scope, int elementKind, String initialFilter, ITitleLabel titleLabel,
+			TypeSelectionExtension extension) {
 		super(parent, style);
 		setFont(parent.getFont());
 		fMultipleSelection= multi;
 		fScope= scope;
 		fInitialFilterText= initialFilter;
 		fTitleLabel= titleLabel;
+		fTypeSelectionExtension= extension;
 		IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
 		fSettings= settings.getSection(DIALOG_SETTINGS);
 		if (fSettings == null) {
@@ -155,6 +160,10 @@ public class TypeSelectionComponent extends Composite {
 			fSettings.put(SHOW_STATUS_LINE, true);
 		}
 		createContent(message, elementKind);
+	}
+	
+	public void triggerSearch() {
+		fViewer.forceSearch();
 	}
 	
 	public TypeInfo[] getSelection() {
@@ -216,7 +225,10 @@ public class TypeSelectionComponent extends Composite {
 		label.setFont(font);
 		gd= new GridData(GridData.FILL_HORIZONTAL);
 		label.setLayoutData(gd);
-		fViewer= new TypeInfoViewer(this, fMultipleSelection ? SWT.MULTI : SWT.NONE, label, fScope, elementKind, fInitialFilterText);
+		fViewer= new TypeInfoViewer(this, fMultipleSelection ? SWT.MULTI : SWT.NONE, label, 
+			fScope, elementKind, fInitialFilterText, 
+			fTypeSelectionExtension != null ? fTypeSelectionExtension.getFilterExtension() : null,
+			fTypeSelectionExtension != null ? fTypeSelectionExtension.getImageProvider() : null);
 		gd= new GridData(GridData.FILL_BOTH);
 		PixelConverter converter= new PixelConverter(fViewer.getTable());
 		gd.widthHint= converter.convertWidthInCharsToPixels(70);
@@ -224,12 +236,20 @@ public class TypeSelectionComponent extends Composite {
 		gd.horizontalSpan= 2;
 		fViewer.getTable().setLayoutData(gd);
 		fViewer.setFullyQualifyDuplicates(fSettings.getBoolean(FULLY_QUALIFY_DUPLICATES), false);
+		if (fTypeSelectionExtension != null) {
+			Control addition= fTypeSelectionExtension.createContentArea(this);
+			if (addition != null) {
+				addition.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			}
+		}
 		if (!fMultipleSelection) {
 			fForm= new ViewForm(this, SWT.BORDER | SWT.FLAT);
 			fForm.setFont(font);
 			gd= new GridData(GridData.FILL_HORIZONTAL);
 			gd.horizontalSpan= 2;
-			gd.exclude= !fSettings.getBoolean(SHOW_STATUS_LINE);
+			boolean showStatusLine= fSettings.getBoolean(SHOW_STATUS_LINE);
+			gd.exclude= !showStatusLine;
+			fForm.setVisible(showStatusLine);
 			fForm.setLayoutData(gd);
 			fLabel= new CLabel(fForm, SWT.FLAT);
 			fLabel.setFont(fForm.getFont());
@@ -255,6 +275,9 @@ public class TypeSelectionComponent extends Composite {
 				disposeComponent();
 			}
 		});
+		if (fTypeSelectionExtension != null) {
+			fTypeSelectionExtension.initialize(this);
+		}
 	}
 
 	public void addSelectionListener(SelectionListener listener) {

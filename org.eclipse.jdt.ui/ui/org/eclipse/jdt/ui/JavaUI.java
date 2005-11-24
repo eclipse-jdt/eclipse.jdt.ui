@@ -48,6 +48,8 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 
+import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.SharedImages;
@@ -393,6 +395,65 @@ public final class JavaUI {
 	}
 
 	/**
+	 * Creates a selection dialog that lists all types in the given project.
+	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
+	 * and subsequently extracting the selected type(s) (of type
+	 * <code>IType</code>) via <code>SelectionDialog.getResult</code>.
+	 * 
+	 * @param parent the parent shell of the dialog to be created
+	 * @param context the runnable context used to show progress when the dialog
+	 *   is being populated
+	 * @param project the Java project
+	 * @param style flags defining the style of the dialog; the only valid values are
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_INTERFACES</code>, 
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ENUMS</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ALL_TYPES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES</code>
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS</code>. Please note that
+	 *   the bitwise OR combination of the elementary constants is not supported.
+	 * @param multipleSelection <code>true</code> if multiple selection is allowed
+	 * 
+	 * @return a new selection dialog
+	 * 
+	 * @exception JavaModelException if the selection dialog could not be opened
+	 */
+	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IProject project, int style, boolean multipleSelection) throws JavaModelException {
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaProject[] { JavaCore.create(project) });
+		return createTypeDialog(parent, context, scope, style, multipleSelection);
+	}
+	
+	/**
+	 * Creates a selection dialog that lists all types in the given scope.
+	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
+	 * and subsequently extracting the selected type(s) (of type
+	 * <code>IType</code>) via <code>SelectionDialog.getResult</code>.
+	 * 
+	 * @param parent the parent shell of the dialog to be created
+	 * @param context the runnable context used to show progress when the dialog
+	 *   is being populated
+	 * @param scope the scope that limits which types are included
+	 * @param style flags defining the style of the dialog; the only valid values are
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_INTERFACES</code>, 
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ENUMS</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ALL_TYPES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES</code>
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS</code>. Please note that
+	 *   the bitwise OR combination of the elementary constants is not supported.
+	 * @param multipleSelection <code>true</code> if multiple selection is allowed
+	 * 
+	 * @return a new selection dialog
+	 * 
+	 * @exception JavaModelException if the selection dialog could not be opened
+	 */
+	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) throws JavaModelException {
+		return createTypeDialog(parent, context, scope, style, multipleSelection, "");//$NON-NLS-1$
+	}
+		
+	/**
 	 * Creates a selection dialog that lists all types in the given scope.
 	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
 	 * and subsequently extracting the selected type(s) (of type
@@ -413,15 +474,55 @@ public final class JavaUI {
 	 *   the bitwise OR combination of the elementary constants is not supported.
 	 * @param multipleSelection <code>true</code> if multiple selection is allowed
 	 * @param filter the initial pattern to filter the set of types. For example "Abstract" shows 
-	 * all types starting with "abstract". The meta character '?' representing any character and 
-	 * '*' representing any string are supported. Clients can pass an empty string if no filtering 
-	 * is required.
+	 *  all types starting with "abstract". The meta character '?' representing any character and 
+	 *  '*' representing any string are supported. Clients can pass an empty string if no filtering 
+	 *  is required.
+	 *  
 	 * @return a new selection dialog
+	 * 
 	 * @exception JavaModelException if the selection dialog could not be opened
 	 * 
 	 * @since 2.0
 	 */
 	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection, String filter) throws JavaModelException {
+		return createTypeDialog(parent, context, scope, style, multipleSelection, filter, null);
+	}
+	
+	/**
+	 * Creates a selection dialog that lists all types in the given scope.
+	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
+	 * and subsequently extracting the selected type(s) (of type
+	 * <code>IType</code>) via <code>SelectionDialog.getResult</code>.
+	 * 
+	 * @param parent the parent shell of the dialog to be created
+	 * @param context the runnable context used to show progress when the dialog
+	 *   is being populated
+	 * @param scope the scope that limits which types are included
+	 * @param style flags defining the style of the dialog; the only valid values are
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_INTERFACES</code>, 
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ENUMS</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_ALL_TYPES</code>,
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES</code>
+	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS</code>. Please note that
+	 *   the bitwise OR combination of the elementary constants is not supported.
+	 * @param multipleSelection <code>true</code> if multiple selection is allowed
+	 * @param filter the initial pattern to filter the set of types. For example "Abstract" shows 
+	 *  all types starting with "abstract". The meta character '?' representing any character and 
+	 *  '*' representing any string are supported. Clients can pass an empty string if no filtering
+	 *  is required.
+	 * @param extension a user interface extension to the type selection dialog or <code>null</code>
+	 *  if no extension is desired
+	 *  
+	 * @return a new selection dialog
+	 * 
+	 * @exception JavaModelException if the selection dialog could not be opened
+	 * 
+	 * @since 3.2
+	 */
+	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, 
+			boolean multipleSelection, String filter, TypeSelectionExtension extension) throws JavaModelException {
 		int elementKinds= 0;
 		if (style == IJavaElementSearchConstants.CONSIDER_ALL_TYPES) {
 			elementKinds= IJavaSearchConstants.TYPE;
@@ -443,39 +544,12 @@ public final class JavaUI {
 			Assert.isTrue(false, "illegal style"); //$NON-NLS-1$
 		}
 		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(parent, multipleSelection, 
-			context, scope, elementKinds);
+			context, scope, elementKinds, extension);
 		dialog.setMessage(JavaUIMessages.JavaUI_defaultDialogMessage); 
 		dialog.setFilter(filter);
 		return dialog;
 	}
 
-	/**
-	 * Creates a selection dialog that lists all types in the given scope.
-	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
-	 * and subsequently extracting the selected type(s) (of type
-	 * <code>IType</code>) via <code>SelectionDialog.getResult</code>.
-	 * 
-	 * @param parent the parent shell of the dialog to be created
-	 * @param context the runnable context used to show progress when the dialog
-	 *   is being populated
-	 * @param scope the scope that limits which types are included
-	 * @param style flags defining the style of the dialog; the only valid values are
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_INTERFACES</code>, 
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ENUMS</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ALL_TYPES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES</code>
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS</code>. Please note that
-	 *   the bitwise OR combination of the elementary constants is not supported.
-	 * @param multipleSelection <code>true</code> if multiple selection is allowed
-	 * @return a new selection dialog
-	 * @exception JavaModelException if the selection dialog could not be opened
-	 */
-	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) throws JavaModelException {
-		return createTypeDialog(parent, context, scope, style, multipleSelection, "");//$NON-NLS-1$
-	}
-		
 	/**
 	 * Creates a selection dialog that lists all types in the given scope containing 
 	 * a standard <code>main</code> method.
@@ -530,34 +604,6 @@ public final class JavaUI {
 	 */
 	public static SelectionDialog createMainTypeDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, int style, boolean multipleSelection) {
 		return createMainTypeDialog(parent, context, scope, style, multipleSelection, "");//$NON-NLS-1$
-	}
-	
-	/**
-	 * Creates a selection dialog that lists all types in the given project.
-	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
-	 * and subsequently extracting the selected type(s) (of type
-	 * <code>IType</code>) via <code>SelectionDialog.getResult</code>.
-	 * 
-	 * @param parent the parent shell of the dialog to be created
-	 * @param context the runnable context used to show progress when the dialog
-	 *   is being populated
-	 * @param project the Java project
-	 * @param style flags defining the style of the dialog; the only valid values are
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_INTERFACES</code>, 
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ANNOTATION_TYPES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ENUMS</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_ALL_TYPES</code>,
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_INTERFACES</code>
-	 *   <code>IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS</code>. Please note that
-	 *   the bitwise OR combination of the elementary constants is not supported.
-	 * @param multipleSelection <code>true</code> if multiple selection is allowed
-	 * @return a new selection dialog
-	 * @exception JavaModelException if the selection dialog could not be opened
-	 */
-	public static SelectionDialog createTypeDialog(Shell parent, IRunnableContext context, IProject project, int style, boolean multipleSelection) throws JavaModelException {
-		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaProject[] { JavaCore.create(project) });
-		return createTypeDialog(parent, context, scope, style, multipleSelection);
 	}
 	
 	/**

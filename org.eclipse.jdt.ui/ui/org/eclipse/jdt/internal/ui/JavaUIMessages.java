@@ -54,6 +54,7 @@ public final class JavaUIMessages extends NLS {
 	public static String TypeSelectionDialog_error3Message;
 	public static String TypeSelectionDialog_error3Title;
 	public static String TypeSelectionDialog_progress_consistency;
+	public static String TypeSelectionDialog_error_type_doesnot_exist;
 
 	public static String ExceptionDialog_seeErrorLogMessage;
 	
@@ -167,5 +168,4 @@ public final class JavaUIMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaUIMessages.class);
 	}
-
 }

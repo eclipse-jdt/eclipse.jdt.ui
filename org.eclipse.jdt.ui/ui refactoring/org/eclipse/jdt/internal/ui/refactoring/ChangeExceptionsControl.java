@@ -53,7 +53,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -251,10 +250,8 @@ public class ChangeExceptionsControl extends Composite {
 			public IStatus validate(Object[] selection) {
 				if (selection.length == 0)
 					return new StatusInfo(IStatus.ERROR, ""); //$NON-NLS-1$
-				TypeInfo info= (TypeInfo) selection[0];
 				try {
-					IType type= info.resolveType(scope);
-					return checkException(type);
+					return checkException((IType)selection[0]);
 				} catch (JavaModelException e) {
 					JavaPlugin.log(e);
 					return StatusInfo.OK_STATUS;

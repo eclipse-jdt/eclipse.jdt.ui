@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -74,6 +75,7 @@ import org.eclipse.jdt.internal.corext.util.TypeInfoFactory;
 import org.eclipse.jdt.internal.corext.util.TypeInfoFilter;
 import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 import org.eclipse.jdt.internal.corext.util.UnresolvableTypeInfo;
+import org.eclipse.jdt.internal.corext.util.TypeInfo.TypeInfoAdapter;
 
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstallType;
@@ -81,11 +83,12 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.launching.LibraryLocation;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
+import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
+import org.eclipse.jdt.ui.dialogs.ITypeInfoImageProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
-import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
@@ -101,13 +104,15 @@ public class TypeInfoViewer {
 		private volatile boolean fStop;
 		
 		private Set fHistory;
-		
-		private TypeInfoFactory factory= new TypeInfoFactory();
+
+		private TypeInfoFilter fFilter;
+		private TypeInfoFactory fFactory= new TypeInfoFactory();
 		private List fResult;
 		
-		public SearchRequestor() {
+		public SearchRequestor(TypeInfoFilter filter) {
 			super();
 			fResult= new ArrayList(2048);
+			fFilter= filter;
 		}
 		public TypeInfo[] getResult() {
 			return (TypeInfo[])fResult.toArray(new TypeInfo[fResult.size()]);
@@ -123,10 +128,11 @@ public class TypeInfoViewer {
 				return;
 			if (TypeFilter.isFiltered(packageName, simpleTypeName))
 				return;
-			TypeInfo type= factory.create(packageName, simpleTypeName, enclosingTypeNames, modifiers, path);
+			TypeInfo type= fFactory.create(packageName, simpleTypeName, enclosingTypeNames, modifiers, path);
 			if (fHistory.contains(type))
 				return;
-			fResult.add(type);
+			if (fFilter.matchesFilterExtension(type))
+				fResult.add(type);
 		}
 	}
 	
@@ -188,11 +194,14 @@ public class TypeInfoViewer {
 				return 0;
 			if (!fFilter.isCamcelCasePattern())
 				return 0;
-			return fFilter.matchesRawPattern(type) ? 0 : 1;
+			return fFilter.matchesRawNamePattern(type) ? 0 : 1;
 		}
 	}
 	
 	protected static class TypeInfoLabelProvider {
+
+		private ITypeInfoImageProvider fProviderExtension;
+		private TypeInfoAdapter fAdapter= new TypeInfoAdapter();
 		
 		private Map fLib2Name= new HashMap();
 		private String[] fInstallLocations;
@@ -200,7 +209,8 @@ public class TypeInfoViewer {
 
 		private boolean fFullyQualifyDuplicates;
 		
-		public TypeInfoLabelProvider() {
+		public TypeInfoLabelProvider(ITypeInfoImageProvider extension) {
+			fProviderExtension= extension;
 			List locations= new ArrayList();
 			List labels= new ArrayList();
 			IVMInstallType[] installs= JavaRuntime.getVMInstallTypes();
@@ -329,6 +339,10 @@ public class TypeInfoViewer {
 		}
 		public ImageDescriptor getImageDescriptor(Object element) {
 			TypeInfo type= (TypeInfo)element;
+			if (fProviderExtension != null) {
+				fAdapter.setInfo(type);
+				return fProviderExtension.getImageDescriptor(fAdapter);
+			}
 			int modifiers= type.getModifiers();
 			return JavaElementImageProvider.getTypeImageDescriptor(
 				type.isInnerType(), false, modifiers, false);
@@ -604,7 +618,7 @@ public class TypeInfoViewer {
 			super(ticket, viewer, filter, history, numberOfVisibleItems, mode);
 			fScope= scope;
 			fElementKind= elementKind;
-			fReqestor= new SearchRequestor();
+			fReqestor= new SearchRequestor(filter);
 		}
 		public void stop() {
 			fReqestor.cancel();
@@ -716,6 +730,31 @@ public class TypeInfoViewer {
 		}
 	}
 	
+	private static class ImageManager {
+		private Map fImages= new HashMap(20);
+		
+		public Image get(ImageDescriptor descriptor) {
+			if (descriptor == null)
+				descriptor= ImageDescriptor.getMissingImageDescriptor();
+			
+			Image result= (Image)fImages.get(descriptor);
+			if (result != null)
+				return result;
+			result= descriptor.createImage();
+			if (result != null)
+				fImages.put(descriptor, result);
+			return result;
+		}
+		
+		public void dispose() {
+			for (Iterator iter= fImages.values().iterator(); iter.hasNext(); ) {
+				Image image= (Image)iter.next();
+				image.dispose();
+			}
+			fImages.clear();
+		}
+	}
+	
 	private Display fDisplay;
 	
 	private String fProgressMessage;
@@ -748,13 +787,14 @@ public class TypeInfoViewer {
 	private String[] fLastLabels;
 	
 	private TypeInfoLabelProvider fLabelProvider;
-	private ImageDescriptorRegistry fImageDescriptorRegistry;
+	private ImageManager fImageManager;
 	
 	private Table fTable;
 	
 	private SyncJob fSyncJob;
 	
 	private TypeInfoFilter fTypeInfoFilter;
+	private ITypeInfoFilterExtension fFilterExtension;
 	private TypeInfo[] fLastCompletedResult;
 	private TypeInfoFilter fLastCompletedFilter;
 	
@@ -777,16 +817,19 @@ public class TypeInfoViewer {
 	// only needed when in virtual table mode
 	private static final TypeInfo DASH_LINE= new UnresolvableTypeInfo(null, null, null, 0, null);
 
-	public TypeInfoViewer(Composite parent, int flags, Label progressLabel, IJavaSearchScope scope, int elementKind, String initialFilter) {
+	public TypeInfoViewer(Composite parent, int flags, Label progressLabel, 
+			IJavaSearchScope scope, int elementKind, String initialFilter,
+			ITypeInfoFilterExtension filterExtension, ITypeInfoImageProvider imageExtension) {
 		Assert.isNotNull(scope);
 		fDisplay= parent.getDisplay();
 		fProgressLabel= progressLabel;
 		fSearchScope= scope;
 		fElementKind= elementKind;
+		fFilterExtension= filterExtension;
 		fFullyQualifySelection= (flags & SWT.MULTI) != 0;
 		fTable= new Table(parent, SWT.V_SCROLL | SWT.H_SCROLL | SWT.BORDER | SWT.FLAT | flags | (VIRTUAL ? SWT.VIRTUAL : SWT.NONE));
 		fTable.setFont(parent.getFont());
-		fLabelProvider= createLabelProvider();
+		fLabelProvider= new TypeInfoLabelProvider(imageExtension);
 		fItems= new ArrayList(500);
 		fTable.setHeaderVisible(false);
 		addPopupMenu();
@@ -822,7 +865,7 @@ public class TypeInfoViewer {
 					for (int i= 0; i < fLastSelection.length; i++) {
 						TableItem item= fLastSelection[i];
 						// could be disposed by deleting element from 
-						// type inof history
+						// type info history
 						if (!item.isDisposed())
 							item.setText(fLastLabels[i]);
 					}
@@ -848,6 +891,7 @@ public class TypeInfoViewer {
 				stop(true, true);
 				fDashLineColor.dispose();
 				fSeparatorIcon.dispose();
+				fImageManager.dispose();
 				if (fProgressUpdateJob != null) {
 					fProgressUpdateJob.stop();
 					fProgressUpdateJob= null;
@@ -869,10 +913,10 @@ public class TypeInfoViewer {
 		fScrollbarWidth= computeScrollBarWidth();
 		fTableWidthDelta= fTable.computeTrim(0, 0, 0, 0).width - fScrollbarWidth;
 		fSeparatorIcon= JavaPluginImages.DESC_OBJS_TYPE_SEPARATOR.createImage(fTable.getDisplay());
-		// Access the image descriptor registry from the UI thread to make
-		// sure that first initialization takes place in UI thread. Otherwise
-		// it could happen in search job which will result in an invalid thread access.
-		fImageDescriptorRegistry= JavaPlugin.getImageDescriptorRegistry();
+		// Use a new image manager since an extension can provide its own
+		// image descriptors. To avoid thread problems with SWT the registry
+		// must be created in the UI thread.
+		fImageManager= new ImageManager();
 		
 		fHistory= TypeInfoHistory.getInstance();
 		if (initialFilter != null && initialFilter.length() > 0)
@@ -960,6 +1004,18 @@ public class TypeInfoViewer {
 		}
 	}
 	
+	public void forceSearch() {
+		stop(false, false);
+		if (fTypeInfoFilter == null) {
+			reset();
+		} else {
+			// clear last results
+			fLastCompletedFilter= null;
+			fLastCompletedResult= null;
+			scheduleSearchJob(isSyncJobRunning() ? HISTORY : FULL);
+		}
+	}
+	
 	public void setSearchPattern(String text) {
 		stop(false, false);
 		if (text.length() == 0 || "*".equals(text)) { //$NON-NLS-1$
@@ -1004,7 +1060,7 @@ public class TypeInfoViewer {
 		fDashLineIndex= -1;
 		TypeInfoFilter filter= (fTypeInfoFilter != null)
 			? fTypeInfoFilter
-			: new TypeInfoFilter("*", fSearchScope, fElementKind); //$NON-NLS-1$
+			: new TypeInfoFilter("*", fSearchScope, fElementKind, fFilterExtension); //$NON-NLS-1$
 		if (VIRTUAL) {
 			fHistoryMatches= fHistory.getFilteredTypeInfos(filter);
 			fExpectedItemCount= fHistoryMatches.length;
@@ -1028,7 +1084,7 @@ public class TypeInfoViewer {
 			for (int i= 0; i < historyItems.length; i++) {
 				TypeInfo next= i == lastIndex ? null : historyItems[i + 1];
 				addSingleElement(type,
-					fImageDescriptorRegistry.get(fLabelProvider.getImageDescriptor(type)),
+					fLabelProvider.getImageDescriptor(type),
 					fLabelProvider.getText(last, type, next));
 				last= type;
 				type= next;
@@ -1040,13 +1096,9 @@ public class TypeInfoViewer {
 	protected TypeInfoFilter createTypeInfoFilter(String text) {
 		if ("**".equals(text)) //$NON-NLS-1$
 			text= "*"; //$NON-NLS-1$
-		return new TypeInfoFilter(text, fSearchScope, fElementKind);
+		return new TypeInfoFilter(text, fSearchScope, fElementKind, fFilterExtension);
 	}
 	
-	protected TypeInfoLabelProvider createLabelProvider() {
-		return new TypeInfoLabelProvider();
-	}
-
 	private void addPopupMenu() {
 		Menu menu= new Menu(fTable.getShell(), SWT.POP_UP);
 		fTable.setMenu(menu);
@@ -1078,6 +1130,7 @@ public class TypeInfoViewer {
 		}
 		return true;
 	}
+	
 	//---- History management -------------------------------------------------------
 	
 	private void deleteHistoryEntry() {
@@ -1149,7 +1202,7 @@ public class TypeInfoViewer {
 				int size= elements.size();
 				for(int i= 0; i < size; i++) {
 					addSingleElement(elements.get(i),
-						fImageDescriptorRegistry.get((ImageDescriptor)imageDescriptors.get(i)),
+						(ImageDescriptor)imageDescriptors.get(i),
 						(String)labels.get(i));
 				}
 			}
@@ -1190,7 +1243,7 @@ public class TypeInfoViewer {
 		fNextElement++;
 	}
 	
-	private void addSingleElement(Object element, Image image, String label) {
+	private void addSingleElement(Object element, ImageDescriptor imageDescriptor, String label) {
 		TableItem item= null;
 		Object old= null;
 		if (fItems.size() > fNextElement) {
@@ -1202,7 +1255,7 @@ public class TypeInfoViewer {
 			fItems.add(item);
 		}
 		item.setData(element);
-		item.setImage(image);
+		item.setImage(fImageManager.get(imageDescriptor));
 		if (fNextElement == 0) {
 			if (needsSelectionChange(old, element) || fLastSelection != null) {
 				item.setText(label);
@@ -1326,7 +1379,7 @@ public class TypeInfoViewer {
 			fillDashLine(item);
 		} else {
 			item.setData(type);
-			item.setImage(fImageDescriptorRegistry.get(fLabelProvider.getImageDescriptor(type)));
+			item.setImage(fImageManager.get(fLabelProvider.getImageDescriptor(type)));
 			item.setText(fLabelProvider.getText(
 				getTypeInfo(index - 1), 
 				type, 

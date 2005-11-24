@@ -21,8 +21,29 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CharOperation;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.ui.dialogs.ITypeInfoRequestor;
+
 public abstract class TypeInfo {
 
+	public static class TypeInfoAdapter implements ITypeInfoRequestor {
+		private TypeInfo fInfo;
+		public void setInfo(TypeInfo info) {
+			fInfo= info;
+		}
+		public int getModifiers() {
+			return fInfo.getModifiers();
+		}
+		public String getTypeName() {
+			return fInfo.getTypeName();
+		}
+		public String getPackageName() {
+			return fInfo.getPackageName();
+		}
+		public String getEnclosingName() {
+			return fInfo.getEnclosingName();
+		}
+	}
+	
 	final String fName;
 	final String fPackage;
 	final char[][] fEnclosingNames;
@@ -36,6 +57,8 @@ public abstract class TypeInfo {
 	static final char SEPARATOR= '/';
 	static final char EXTENSION_SEPARATOR= '.';
 	static final char PACKAGE_PART_SEPARATOR='.';
+	
+	static final String EMPTY_STRING= ""; //$NON-NLS-1$
 	
 	protected TypeInfo(String pkg, String name, char[][] enclosingTypes, int modifiers) {
 		fPackage= pkg;
@@ -139,14 +162,14 @@ public abstract class TypeInfo {
 	 * Gets the enclosing name (dot separated).
 	 */
 	public String getEnclosingName() {
+		if (fEnclosingNames == null || fEnclosingNames.length == 0)
+			return EMPTY_STRING;
 		StringBuffer buf= new StringBuffer();
-		if (fEnclosingNames != null) {
-			for (int i= 0; i < fEnclosingNames.length; i++) {
-				if (i != 0) {
-					buf.append('.');
-				}			
-				buf.append(fEnclosingNames[i]);
-			}
+		for (int i= 0; i < fEnclosingNames.length; i++) {
+			if (i != 0) {
+				buf.append('.');
+			}			
+			buf.append(fEnclosingNames[i]);
 		}
 		return buf.toString();
 	}

@@ -16,6 +16,10 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchPattern;
 
+import org.eclipse.jdt.internal.corext.util.TypeInfo.TypeInfoAdapter;
+
+import org.eclipse.jdt.ui.dialogs.ITypeInfoFilterExtension;
+
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 public class TypeInfoFilter {
@@ -117,17 +121,20 @@ public class TypeInfoFilter {
 	private IJavaSearchScope fSearchScope;
 	private boolean fIsWorkspaceScope;
 	private int fElementKind;
+	private ITypeInfoFilterExtension fFilterExtension;
+	private TypeInfoAdapter fAdapter= new TypeInfoAdapter();
 
 	private PatternMatcher fPackageMatcher;
 	private PatternMatcher fNameMatcher;
-
+	
 	private static final int TYPE_MODIFIERS= Flags.AccEnum | Flags.AccAnnotation | Flags.AccInterface;
 	
-	public TypeInfoFilter(String text, IJavaSearchScope scope, int elementKind) {
+	public TypeInfoFilter(String text, IJavaSearchScope scope, int elementKind, ITypeInfoFilterExtension extension) {
 		fText= text;
 		fSearchScope= scope;
 		fIsWorkspaceScope= fSearchScope.equals(SearchEngine.createWorkspaceScope());
 		fElementKind= elementKind;
+		fFilterExtension= extension;
 		
 		int index= text.lastIndexOf("."); //$NON-NLS-1$
 		if (index == -1) {
@@ -171,22 +178,29 @@ public class TypeInfoFilter {
 		return fNameMatcher.getMatchKind();
 	}
 
-	public boolean matchesRawPattern(TypeInfo type) {
+	public boolean matchesRawNamePattern(TypeInfo type) {
 		return Strings.startsWithIgnoreCase(type.getTypeName(), fNameMatcher.getPattern());
 	}
 
 	public boolean matchesCachedResult(TypeInfo type) {
-		if (!(matchesPackage(type)))
+		if (!(matchesPackage(type) && matchesFilterExtension(type)))
 			return false;
 		return matchesName(type);
 	}
 	
 	public boolean matchesHistoryElement(TypeInfo type) {
-		if (!(matchesPackage(type) && matchesModifiers(type) && matchesScope(type)))
+		if (!(matchesPackage(type) && matchesModifiers(type) && matchesScope(type) && matchesFilterExtension(type)))
 			return false;
 		return matchesName(type);
 	}
 
+	public boolean matchesFilterExtension(TypeInfo type) {
+		if (fFilterExtension == null)
+			return true;
+		fAdapter.setInfo(type);
+		return fFilterExtension.select(fAdapter);
+	}
+	
 	private boolean matchesName(TypeInfo type) {
 		return fNameMatcher.matches(type.getTypeName());
 	}
