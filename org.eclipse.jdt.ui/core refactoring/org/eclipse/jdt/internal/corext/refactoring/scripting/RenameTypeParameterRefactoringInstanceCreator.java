@@ -12,7 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.scripting;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
-import org.eclipse.ltk.internal.core.refactoring.history.RefactoringInstanceCreator;
+import org.eclipse.ltk.core.refactoring.RefactoringInstanceCreator;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeParameterProcessor;
