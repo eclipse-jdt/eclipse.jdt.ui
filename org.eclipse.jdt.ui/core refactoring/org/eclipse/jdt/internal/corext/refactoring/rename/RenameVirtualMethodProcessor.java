@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -222,14 +221,6 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 			}
 		}
 		return false;
-	}
-
-	public Change createChange(IProgressMonitor monitor) throws CoreException {
-		try {
-			return super.createChange(monitor);
-		} finally {
-			fCachedHierarchy= null;
-		}
 	}
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {

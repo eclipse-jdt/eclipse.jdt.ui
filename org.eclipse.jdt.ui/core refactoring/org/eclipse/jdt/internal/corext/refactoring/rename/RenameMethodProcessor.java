@@ -638,9 +638,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				}
 			};
 		} finally {
-			fChangeManager= null;
-			fMethodsToRename= null;
-			fOccurrences= null;
 			monitor.done();
 		}
 	}

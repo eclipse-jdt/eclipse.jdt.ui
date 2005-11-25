@@ -531,9 +531,6 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				}
 			};
 		} finally {
-			fChangeManager= null;
-			fNewWorkingCopies= null;
-			fReferences= null;
 			pm.done();
 		}
 	}
