@@ -114,17 +114,17 @@ public class ASTResolving {
 				// boolean operation
 				return infix.getAST().resolveWellKnownType("boolean"); //$NON-NLS-1$
 			} else if (op == InfixExpression.Operator.LEFT_SHIFT || op == InfixExpression.Operator.RIGHT_SHIFT_UNSIGNED || op == InfixExpression.Operator.RIGHT_SHIFT_SIGNED) {
-				// assymetric operation
+				// asymmetric operation
 				return infix.getAST().resolveWellKnownType("int"); //$NON-NLS-1$
 			}
 			if (node.equals(infix.getLeftOperand())) {
-				//	xx op expression
+				//	xx operation expression
 				ITypeBinding rigthHandBinding= infix.getRightOperand().resolveTypeBinding();
 				if (rigthHandBinding != null) {
 					return rigthHandBinding;
 				}
 			} else {
-				// expression op xx
+				// expression operation xx
 				ITypeBinding leftHandBinding= infix.getLeftOperand().resolveTypeBinding();
 				if (leftHandBinding != null) {
 					return leftHandBinding;
@@ -160,12 +160,6 @@ public class ASTResolving {
 		case ASTNode.SUPER_CONSTRUCTOR_INVOCATION: {
 			SuperConstructorInvocation superInvocation= (SuperConstructorInvocation) parent;
 			IMethodBinding superBinding= superInvocation.resolveConstructorBinding();
-			if (superBinding == null) { // jdt.core does not guess contructors with problems in arguments
-				ITypeBinding parentType= Bindings.getBindingOfParentType(parent);
-				if (parentType != null && parentType.getSuperclass() != null) {
-					superBinding= guessContructorBinding(parentType.getSuperclass(), superInvocation.arguments());
-				}
-			}
 			if (superBinding != null) {
 				return getParameterTypeBinding(node, superInvocation.arguments(), superBinding);
 			}
@@ -174,12 +168,6 @@ public class ASTResolving {
 		case ASTNode.CONSTRUCTOR_INVOCATION: {
 			ConstructorInvocation constrInvocation= (ConstructorInvocation) parent;
 			IMethodBinding constrBinding= constrInvocation.resolveConstructorBinding();
-			if (constrBinding == null) { // jdt.core does not guess contructors with problems in arguments
-				ITypeBinding parentType= Bindings.getBindingOfParentType(parent);
-				if (parentType != null) {
-					constrBinding= guessContructorBinding(parentType, constrInvocation.arguments());
-				}
-			}
 			if (constrBinding != null) {
 				return getParameterTypeBinding(node, constrInvocation.arguments(), constrBinding);
 			}
@@ -188,12 +176,6 @@ public class ASTResolving {
 		case ASTNode.CLASS_INSTANCE_CREATION: {
 			ClassInstanceCreation creation= (ClassInstanceCreation) parent;
 			IMethodBinding creationBinding= creation.resolveConstructorBinding();
-			if (creationBinding == null) { // jdt.core does not guess contructors with problems in arguments
-				ITypeBinding type= creation.getType().resolveBinding();
-				if (type != null) {
-					creationBinding= guessContructorBinding(type, creation.arguments());
-				}
-			}
 			if (creationBinding != null) {
 				return getParameterTypeBinding(node, creation.arguments(), creationBinding);
 			}
@@ -296,17 +278,6 @@ public class ASTResolving {
 			// do nothing
 		}
 
-		return null;
-	}
-
-	private static IMethodBinding guessContructorBinding(ITypeBinding superclass, List arguments) {
-		IMethodBinding[] declaredMethods= superclass.getDeclaredMethods();
-		for (int i= 0; i < declaredMethods.length; i++) {
-			IMethodBinding curr= declaredMethods[i];
-			if (curr.isConstructor() && curr.getParameterTypes().length == arguments.size()) {
-				return curr;
-			}
-		}
 		return null;
 	}
 
@@ -520,7 +491,7 @@ public class ASTResolving {
 					return true;
 				}
 				if (node.isGenericType()) {
-					return true; // only look at  parametrized types
+					return true; // only look at  parameterized types
 				}
 				if (context != null && !isUseableTypeInContext(node, context, false)) {
 					return true;
@@ -613,7 +584,7 @@ public class ASTResolving {
 
 	/**
 	 * Returns the method binding of the node's parent method declaration or <code>null</code> if the node
-	 * is not inside a metho
+	 * is not inside a method
 	 * @param node
 	 * @return CompilationUnit
 	 */
