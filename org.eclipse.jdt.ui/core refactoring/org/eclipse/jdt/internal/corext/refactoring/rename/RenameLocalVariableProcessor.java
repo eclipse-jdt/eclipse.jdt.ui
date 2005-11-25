@@ -165,7 +165,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	private VariableDeclaration fTempDeclarationNode;
 	private TextChange fChange;
 
-	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameTypeParameterProcessor"; //$NON-NLS-1$
+	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameLocalVariableProcessor"; //$NON-NLS-1$
 	
 	public RenameLocalVariableProcessor(ILocalVariable localVariable) {
 		fLocalVariable= localVariable;
