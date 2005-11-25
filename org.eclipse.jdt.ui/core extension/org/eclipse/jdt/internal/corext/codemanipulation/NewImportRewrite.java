@@ -138,6 +138,8 @@ public final class NewImportRewrite {
 	private String[] fCreatedImports;
 	private String[] fCreatedStaticImports;
 	
+	private boolean fFilterImplicitImports;
+	
 	/**
 	 * Creates a {@link NewImportRewrite} from a {@link ICompilationUnit}. If <code>restoreExistingImports</code>
 	 * is <code>true</code>, all existing imports are kept, and new imports will be inserted at best matching locations. If
@@ -218,6 +220,7 @@ public final class NewImportRewrite {
 			fExistingImports= new ArrayList();
 			fRestoreExistingImports= false;
 		}
+		fFilterImplicitImports= true;
 
 		fDefaultContext= new ImportRewriteContext() {
 			public int findInContext(String qualifier, String name, int kind) {
@@ -247,6 +250,16 @@ public final class NewImportRewrite {
 		return fDefaultContext;
 	}
 	
+	/**
+	 * Specifies that implicit imports (types in default package, package <code>java.lang</code> or
+	 * in the same package as the rewrite compilation unit should not be created except if necessary
+	 * to resolve an on-demand import conflict. The filter is enabled by default.
+	 * @param filterImplicitImports if set, implicit imports will be filtered.
+	 */
+	public void setFilterImplicitImports(boolean filterImplicitImports) {
+		fFilterImplicitImports= filterImplicitImports;
+	}
+	
 	private static int compareImport(char prefix, String qualifier, String name, String curr) {
 		if (curr.charAt(0) != prefix || !curr.endsWith(name)) {
 			return ImportRewriteContext.RES_NAME_UNKNOWN;
@@ -262,11 +275,11 @@ public final class NewImportRewrite {
 		}
 		// at this place: curr.length > name.length
 		
-		int dotPos= curr.length() - name.length();
+		int dotPos= curr.length() - name.length() - 1;
 		if (curr.charAt(dotPos) != '.') {
 			return ImportRewriteContext.RES_NAME_UNKNOWN;
 		}
-		if (qualifier.length() != dotPos - 1 || !curr.startsWith(qualifier)) {
+		if (qualifier.length() != dotPos || !curr.startsWith(qualifier)) {
 			return ImportRewriteContext.RES_NAME_CONFLICT; 
 		}
 		return ImportRewriteContext.RES_NAME_FOUND; 
@@ -676,19 +689,16 @@ public final class NewImportRewrite {
 	 * an import conflict prevented the import.
 	 */
 	public String addStaticImport(String declaringTypeName, String simpleName, boolean isField) {
-		String containerName= Signature.getQualifier(declaringTypeName);
-		String fullName= declaringTypeName + '.' + simpleName;
-		
-		if (containerName.length() == 0) {
+		if (declaringTypeName.indexOf('.') == -1) {
 			return declaringTypeName + '.' + simpleName;
 		}
 		int kind= isField ? ImportRewriteContext.KIND_STATIC_FIELD : ImportRewriteContext.KIND_STATIC_METHOD;
-		int res= fDefaultContext.findInContext(containerName, simpleName, kind);
+		int res= fDefaultContext.findInContext(declaringTypeName, simpleName, kind);
 		if (res == ImportRewriteContext.RES_NAME_CONFLICT) {
-			return fullName;
+			return declaringTypeName + '.' + simpleName;
 		}
 		if (res == ImportRewriteContext.RES_NAME_UNKNOWN) {
-			addEntry(STATIC_PREFIX + fullName);
+			addEntry(STATIC_PREFIX + declaringTypeName + '.' + simpleName);
 		}
 		return simpleName;
 	}
@@ -863,6 +873,7 @@ public final class NewImportRewrite {
 		int threshold= getImportNumberThreshold(project);
 		
 		ImportRewriteComputer computer= new ImportRewriteComputer(fCompilationUnit, astRoot, order, threshold, fRestoreExistingImports);
+		computer.setFilterImplicitImports(fFilterImplicitImports);
 		
 		if (fAddedImports != null) {
 			for (int i= 0; i < fAddedImports.size(); i++) {
@@ -946,11 +957,11 @@ public final class NewImportRewrite {
 		return filterFromList(fRemovedImports, STATIC_PREFIX);
 	}
 	
-	/*
+	/**
 	 * Returns <code>true</code> if imports have been recorded to be added or removed.
 	 * @return boolean returns if any changes to imports have been recorded.
 	 */
-	private boolean hasRecordedChanges() {
+	public boolean hasRecordedChanges() {
 		return !fRestoreExistingImports ||
 			(fAddedImports != null && !fAddedImports.isEmpty()) ||
 			(fRemovedImports != null && !fRemovedImports.isEmpty());

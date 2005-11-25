@@ -745,7 +745,7 @@ public final class ImportRewriteComputer {
 		if (packDecl != null) {
 			int lineAfterPackage= root.getLineNumber(packDecl.getStartPosition() + packDecl.getLength()) + 1;
 			int afterPackageStatementPos= root.getPosition(lineAfterPackage, 0);
-			if (afterPackageStatementPos != 0) {
+			if (afterPackageStatementPos >= 0) {
 				int firstTypePos= getFirstTypeBeginPos(root);
 				if (firstTypePos != -1 && firstTypePos <= afterPackageStatementPos) {
 					if (firstTypePos <= afterPackageStatementPos) {

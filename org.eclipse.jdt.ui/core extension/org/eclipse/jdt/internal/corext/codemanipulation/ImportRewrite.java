@@ -24,39 +24,28 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Type;
 
-import org.eclipse.jdt.internal.corext.Assert;
-
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
-
 /**
  * A rewriter for imports that considers the organize import 
  * settings.
  */
 public final class ImportRewrite {
 	
-	private ImportsStructure fImportsStructure;
+	private NewImportRewrite fImportsStructure;
+	private final CompilationUnit fASTRoot;
 	
-	private ImportRewrite(ICompilationUnit cu, CompilationUnit unit, String[] preferenceOrder, int importThreshold) throws CoreException {
-		Assert.isNotNull(cu);
-		Assert.isNotNull(unit);
-		Assert.isNotNull(preferenceOrder);
-		fImportsStructure= new ImportsStructure(cu, unit, preferenceOrder, importThreshold, true);
+	private ImportRewrite(NewImportRewrite rewrite, CompilationUnit root) {
+		fImportsStructure= rewrite;
+		fASTRoot= root;
 	}
 
-	private ImportRewrite(ICompilationUnit cu, String[] preferenceOrder, int importThreshold) throws CoreException {
-		Assert.isNotNull(cu);
-		Assert.isNotNull(preferenceOrder);
-		fImportsStructure= new ImportsStructure(cu, preferenceOrder, importThreshold, true);
-	}
-	
 	/**
 	 * Creates a import rewriter with the settings as configured in the preferences
 	 * @param cu The compilation unit that contains the imports to change.
-	 * @param unit The compilation unit node
+	 * @param root The compilation unit node
 	 * @throws CoreException
 	 */
-	public ImportRewrite(ICompilationUnit cu, CompilationUnit unit) throws CoreException {
-		this(cu, unit, JavaPreferencesSettings.getImportOrderPreference(cu.getJavaProject()), JavaPreferencesSettings.getImportNumberThreshold(cu.getJavaProject()));
+	public ImportRewrite(ICompilationUnit cu, CompilationUnit root) throws CoreException {
+		this(NewImportRewrite.create(root, true), root);
 	}
 	
 	/**
@@ -65,7 +54,7 @@ public final class ImportRewrite {
 	 * @throws CoreException
 	 */
 	public ImportRewrite(ICompilationUnit cu) throws CoreException {
-		this(cu, JavaPreferencesSettings.getImportOrderPreference(cu.getJavaProject()), JavaPreferencesSettings.getImportNumberThreshold(cu.getJavaProject()));
+		this(NewImportRewrite.create(cu, true), null);
 	}
 	
 	/**
@@ -76,7 +65,11 @@ public final class ImportRewrite {
 	}
 	
 	public final TextEdit createEdit(IDocument document, IProgressMonitor monitor) throws CoreException {
-		return fImportsStructure.getResultingEdits(monitor);
+		if (fASTRoot == null) {
+			return fImportsStructure.rewriteImports(monitor);
+		} else {
+			return fImportsStructure.rewriteImports(fASTRoot, monitor);
+		}
 	}
 			
 	public ICompilationUnit getCompilationUnit() {
@@ -89,14 +82,7 @@ public final class ImportRewrite {
 	public void setFilterImplicitImports(boolean filterImplicitImports) {
 		fImportsStructure.setFilterImplicitImports(filterImplicitImports);
 	}
-	
-	/**
-	 * @see ImportsStructure#setFindAmbiguousImports(boolean)
-	 */
-	public void setFindAmbiguosImports(boolean findAmbiguosImports) {
-		fImportsStructure.setFindAmbiguousImports(findAmbiguosImports);
-	}	
-	
+		
 	/**
 	 * Adds a new import declaration that is sorted in the structure using
 	 * a best match algorithm. If an import already exists, the import is
@@ -138,7 +124,7 @@ public final class ImportRewrite {
 	 * Adds a new import declaration that is sorted in the structure using
 	 * a best match algorithm. If an import already exists, the import is
 	 * not added.  The type binding can be an array binding, type variable or wildcard.
-	 * If the binding is a generic type, the type parameters are ignored. For parametrized types, also the type
+	 * If the binding is a generic type, the type parameters are ignored. For parameterized types, also the type
 	 * arguments are processed and imports added if necessary.
 	 * @param binding The type binding of the type to be added
 	 * @return Returns the unqualified type if the import could be added or a fully qualified type if
@@ -184,16 +170,6 @@ public final class ImportRewrite {
 	public Type addImportFromSignature(String typeSig, AST ast) {
 		return fImportsStructure.addImportFromSignature(typeSig, ast);
 	}
-	
-	/**
-	 * Looks if there already is single import for the given name.
-	 * @param simpleName The simple name to find
-	 * @return Returns the qualified import name or <code>null</code>.
-	 */	
-	public String findImport(String simpleName) {
-		return fImportsStructure.findImport(simpleName);
-	}
-	
 
 	/**
 	 * Removes an import declaration if it exists. Does not touch on-demand imports.
@@ -201,7 +177,7 @@ public final class ImportRewrite {
 	 * @return Returns true if an import for the given type existed.
 	 */
 	public boolean removeImport(ITypeBinding binding) {
-		return fImportsStructure.removeImport(binding);
+		return fImportsStructure.removeImport(binding.getTypeDeclaration().getQualifiedName());
 	}
 	
 	/**
@@ -230,7 +206,7 @@ public final class ImportRewrite {
 	 * 	container; otherwise <code>false</code> is returned
 	 */
 	public boolean isEmpty() {
-		return !fImportsStructure.hasChanges();
+		return !fImportsStructure.hasRecordedChanges();
 	}
 
 	public String[] getCreatedImports() {

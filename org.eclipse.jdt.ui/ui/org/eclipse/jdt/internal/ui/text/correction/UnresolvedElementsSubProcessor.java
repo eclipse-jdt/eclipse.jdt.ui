@@ -579,7 +579,6 @@ public class UnresolvedElementsSubProcessor {
 		String packName= Signature.getQualifier(fullName);
 		if (packName.length() > 0) { // no imports for primitive types, type variables
 			importRewrite= new ImportRewrite(cu);
-			importRewrite.setFindAmbiguosImports(true);
 			simpleName= importRewrite.addImport(fullName);
 		}
 		
@@ -1488,7 +1487,6 @@ public class UnresolvedElementsSubProcessor {
 				String qualifiedTypeName= JavaModelUtil.getFullyQualifiedName((IType) curr);
 
 				ImportRewrite imports= new ImportRewrite(cu);
-				imports.setFindAmbiguosImports(true);
 				imports.addImport(qualifiedTypeName);
 
 				String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_importexplicit_description, qualifiedTypeName);
