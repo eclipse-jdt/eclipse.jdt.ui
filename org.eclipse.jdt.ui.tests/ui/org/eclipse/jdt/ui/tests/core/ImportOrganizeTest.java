@@ -18,9 +18,6 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
-
-import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -35,9 +32,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
-
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -78,6 +72,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 
 	protected void tearDown() throws Exception {
+		setOrganizeImportSettings(null, 99, fJProject1);
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 	
@@ -2547,12 +2542,7 @@ public class ImportOrganizeTest extends CoreTests {
 
 	
 	private OrganizeImportsOperation createOperation(ICompilationUnit cu, String[] order, int threshold, boolean ignoreLowerCaseNames, boolean save, boolean doResolve, IChooseImportQuery chooseImportQuery) throws CoreException, BackingStoreException {
-		OrganizeImportsOperation operation= new OrganizeImportsOperation(cu, null, ignoreLowerCaseNames, save, doResolve, chooseImportQuery);
-		
-		IEclipsePreferences scope= new ProjectScope(cu.getJavaProject().getProject()).getNode(JavaUI.ID_PLUGIN);
-		scope.put(PreferenceConstants.ORGIMPORTS_IMPORTORDER, getImportOrderString(order));
-		scope.put(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, String.valueOf(threshold));
-		scope.flush();
-		return operation;
+		setOrganizeImportSettings(order, threshold, cu.getJavaProject());
+		return new OrganizeImportsOperation(cu, null, ignoreLowerCaseNames, save, doResolve, chooseImportQuery);
 	}
 }

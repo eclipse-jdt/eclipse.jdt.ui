@@ -19,27 +19,25 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 
-import org.eclipse.core.resources.ProjectScope;
-
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -83,6 +81,7 @@ public class AddImportTest extends CoreTests {
 
 
 	protected void tearDown() throws Exception {
+		setOrganizeImportSettings(null, 99, fJProject1);
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 	
@@ -439,7 +438,217 @@ public class AddImportTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
+	public void testImportStructureWithSignatures() throws Exception {
+		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("import java.net.*;\n");
+		buf.append("import java.io.*;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        IOException s;\n");
+		buf.append("        URL[][] t;\n");
+		buf.append("        List<SocketAddress> x;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		String content= buf.toString();
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", content, false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("}\n");	
+		String content2= buf.toString();
+		ICompilationUnit cu2= pack1.createCompilationUnit("B.java", content2, false, null);
+		
+		
+		
+		String[] order= new String[] { "java.util", "java.io", "java.net" };
+		int threshold= 99;
+		AST ast= AST.newAST(AST.JLS3);
+		NewImportRewrite importsRewrite= newImportsRewrite(cu2, order, threshold, true);
+		{
+			IJavaElement[] elements= cu1.codeSelect(content.indexOf("IOException"), "IOException".length());
+			assertEquals(1, elements.length);
+			String key= ((IType) elements[0]).getKey();
+			String signature= new BindingKey(key).internalToSignature();
+			
+			importsRewrite.addImportFromSignature(signature, ast);
+		}
+		{
+			IJavaElement[] elements= cu1.codeSelect(content.indexOf("URL"), "URL".length());
+			assertEquals(1, elements.length);
+			String key= ((IType) elements[0]).getKey();
+			String signature= new BindingKey(key).internalToSignature();
+			
+			importsRewrite.addImportFromSignature(signature, ast);
+		}
+		{
+			IJavaElement[] elements= cu1.codeSelect(content.indexOf("List"), "List".length());
+			assertEquals(1, elements.length);
+			String key= ((IType) elements[0]).getKey();
+			String signature= new BindingKey(key).internalToSignature();
+			
+			importsRewrite.addImportFromSignature(signature, ast);
+		}
+		apply(importsRewrite);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.List;\n");
+		buf.append("\n");
+		buf.append("import java.io.IOException;\n");
+		buf.append("\n");
+		buf.append("import java.net.SocketAddress;\n");
+		buf.append("import java.net.URL;\n");
+		buf.append("\n");
+		buf.append("public class B {\n");
+		buf.append("}\n");	
+		
+		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
+		
+	}
+
+	private static final boolean BUG_87929= false;
 	
+	public void testImportStructureWithSignatures2() throws Exception {
+		if (BUG_87929) {
+			return;
+		}
+		
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+		
+		IPackageFragment pack1= sourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.*;\n");
+		buf.append("import java.net.*;\n");
+		buf.append("import java.io.*;\n");
+		buf.append("public class A {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Map<?, ? extends Set<? super ServerSocket>> z;\n");
+		buf.append("    }\n");
+		buf.append("}\n");	
+		String content= buf.toString();
+		ICompilationUnit cu1= pack1.createCompilationUnit("A.java", content, false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class B {\n");
+		buf.append("}\n");	
+		String content2= buf.toString();
+		ICompilationUnit cu2= pack1.createCompilationUnit("B.java", content2, false, null);
+		
+		String[] order= new String[] { "java.util", "java.io", "java.net" };
+		int threshold= 99;
+		AST ast= AST.newAST(AST.JLS3);
+		NewImportRewrite importsRewrite= newImportsRewrite(cu2, order, threshold, true);
+		{
+			IJavaElement[] elements= cu1.codeSelect(content.indexOf("Map"), "Map".length());
+			assertEquals(1, elements.length);
+			String key= ((IType) elements[0]).getKey();
+			String signature= new BindingKey(key).internalToSignature();
+			
+			importsRewrite.addImportFromSignature(signature, ast);
+		}			
+		
+		apply(importsRewrite);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("import java.util.Set;\n");
+		buf.append("\n");
+		buf.append("import java.net.ServerSocket;\n");
+		buf.append("\n");
+		buf.append("public class B {\n");
+		buf.append("}\n");	
+		
+		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
+		
+	}
+	
+	
+	public void testAddedRemovedImportsAPI() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");		
+		buf.append("public class C {\n");
+		buf.append("    public final static int CONST= 9;\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("C.java", buf.toString(), false, null);
+
+		String[] order= new String[] { "#", "java" };
+
+		NewImportRewrite imports= newImportsRewrite(cu, order, 99, true);
+		imports.addStaticImport("java.lang.Math", "min", true);
+		imports.addImport("java.lang.Math");
+
+		assertAddedAndRemoved(imports,
+				new String[] { "java.lang.Math" }, new String[] {},
+				new String[] { "java.lang.Math.min" }, new String[] {}
+		);
+		
+		imports.addImport("java.lang.Math");
+		imports.addStaticImport("java.lang.Math", "max", true);
+
+		assertAddedAndRemoved(imports,
+				new String[] { "java.lang.Math" }, new String[] {},
+				new String[] { "java.lang.Math.min", "java.lang.Math.max" }, new String[] {}
+		);
+		
+		imports.removeImport("java.lang.Math");
+		imports.removeImport("java.util.Vector");
+		imports.removeStaticImport("java.lang.Math.dup");
+
+		assertAddedAndRemoved(imports,
+				new String[] { }, new String[] { "java.util.Vector"},
+				new String[] { "java.lang.Math.min", "java.lang.Math.max" }, new String[] {}
+		);
+		
+		imports.addImport("java.util.Vector");
+		imports.addStaticImport("pack1.C", "CONST", true);
+		
+		assertAddedAndRemoved(imports,
+				new String[] { }, new String[] { },
+				new String[] { "java.lang.Math.min", "java.lang.Math.max", "pack1.C.CONST" }, new String[] {}
+		);
+		
+		apply(imports);
+
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");
+		buf.append("import static java.lang.Math.max;\n");
+		buf.append("import static java.lang.Math.min;\n");
+		buf.append("import static pack1.C.CONST;\n");
+		buf.append("\n");
+		buf.append("import java.util.Vector;\n");
+		buf.append("\n");
+		buf.append("public class C {\n");
+		buf.append("    public final static int CONST= 9;\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
+	private void assertAddedAndRemoved(NewImportRewrite imports, String[] expectedAdded, String[] expectedRemoved, String[] expectedAddedStatic, String[] expectedRemovedStatic) {
+		assertEqualStringsIgnoreOrder(imports.getAddedImports(), expectedAdded);
+		assertEqualStringsIgnoreOrder(imports.getAddedStaticImports(), expectedAddedStatic);
+		assertEqualStringsIgnoreOrder(imports.getRemovedImports(), expectedRemoved);
+		assertEqualStringsIgnoreOrder(imports.getRemovedStaticImports(), expectedRemovedStatic);
+	}
+
 	public void testAddImportAction1() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
@@ -681,16 +890,10 @@ public class AddImportTest extends CoreTests {
 	}	
 
 	private NewImportRewrite newImportsRewrite(ICompilationUnit cu, String[] order, int threshold, boolean restoreExistingImports) throws CoreException, BackingStoreException {
-		NewImportRewrite rewrite= NewImportRewrite.create(cu, restoreExistingImports);
-		
-		IEclipsePreferences scope= new ProjectScope(cu.getJavaProject().getProject()).getNode(JavaUI.ID_PLUGIN);
-		scope.put(PreferenceConstants.ORGIMPORTS_IMPORTORDER, getImportOrderString(order));
-		scope.put(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, String.valueOf(threshold));
-		scope.flush();
-		
-		return rewrite;
+		setOrganizeImportSettings(order, threshold, cu.getJavaProject());
+		return NewImportRewrite.create(cu, restoreExistingImports);
 	}
-	
+		
 	private void apply(NewImportRewrite rewrite) throws CoreException {
 		TextEdit edit= rewrite.rewriteImports(null);
 		JavaModelUtil.applyEdit(rewrite.getCompilationUnit(), edit, true, null);
