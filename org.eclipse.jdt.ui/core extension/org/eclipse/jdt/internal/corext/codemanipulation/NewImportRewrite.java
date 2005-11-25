@@ -119,9 +119,35 @@ public final class NewImportRewrite {
 		public abstract int findInContext(String qualifier, String name, int kind);
 	}
 
-	// TODO: Use jdt.core preferences
-	private static final String IMPORTS_ORDER= PreferenceConstants.ORGIMPORTS_IMPORTORDER;
-	private static final String IMPORTS_ONDEMAND_THRESHOLD= PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD;
+	/**
+	 * A named preference that holds a list of semicolon separated import group names. The list specifies the preferred import order.
+	 * Imports are added to the group matching their qualified name most. The empty group name groups all imports not matching
+	 * any other group.
+	 * Static imports are managed in separate groups. Static import group names are prefixed with a '#' character. The group called '#'
+	 * matches all imports not matching any other static import group.
+	 * <p>
+	 * For example the import order <code>'java.util;java.net;#java.util.Math;;#'</code> specifies 5 order groups:
+	 * <dl>
+	 *   <li>'java.util': Grouping all import starting with 'java.util'</li>
+	 *   <li>'java.net': Grouping all import starting with 'java.net'</li>
+	 *   <li>'#java.util.Math': Grouping all static import starting with 'java.util.Math'</li>
+	 *   <li>'': Grouping all imports not matching any other group</li>
+	 *   <li>'#': Grouping all static imports not matching any other group</li>
+	 * </dl>
+	 * </p> 
+	 * <p>
+	 * Value is of type <code>String</code> representing a semicolon separated list of import group names.
+	 * </p>
+	 */
+	public static final String IMPORTREWRITE_IMPORT_ORDER= PreferenceConstants.ORGIMPORTS_IMPORTORDER;
+	
+	/**
+	 * A named preference that specifies the number of imports added before a star-import declaration is used.
+	 * <p>
+	 * Value is of type <code>String</code> representing a positive integer.
+	 * </p>
+	 */
+	public static final String IMPORTREWRITE_ONDEMAND_THRESHOLD= PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD;
 	
 	private static final char STATIC_PREFIX= 's';
 	private static final char NORMAL_PREFIX= 'n';
@@ -985,7 +1011,7 @@ public final class NewImportRewrite {
 	private static int getImportNumberThreshold(IJavaProject project) {
 		// TODO: Use jdt.core preferences
 		//Object threshold= project.getOption(IMPORTS_ONDEMAND_THRESHOLD, true);
-		Object threshold= PreferenceConstants.getPreference(IMPORTS_ONDEMAND_THRESHOLD, project);
+		Object threshold= PreferenceConstants.getPreference(IMPORTREWRITE_ONDEMAND_THRESHOLD, project);
 		if (threshold instanceof String) {
 			try {
 				return Integer.parseInt((String) threshold);
@@ -998,7 +1024,7 @@ public final class NewImportRewrite {
 	private static String[] getImportOrderPreference(IJavaProject project) {
 		// TODO: Use jdt.core preferences
 		//Object threshold= project.getOption(IMPORTS_ORDER, true);
-		Object order= PreferenceConstants.getPreference(IMPORTS_ORDER, project);
+		Object order= PreferenceConstants.getPreference(IMPORTREWRITE_IMPORT_ORDER, project);
 		if (order instanceof String) {
 			return ((String) order).split(String.valueOf(';'));
 		}
