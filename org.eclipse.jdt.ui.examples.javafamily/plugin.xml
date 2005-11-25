@@ -119,7 +119,7 @@
             targetID="org.eclipse.jdt.ui.examples.JSPEditor"
             id="org.eclipse.jsp.BreakpointRulerActions">
          <action
-               label="%Dummy.label"
+               label="%ToggleJspBreakpointAction.label"
                class="org.eclipse.jsp.launching.ToggleJspBreakpointRulerActionDelegate"
                actionID="RulerDoubleClick"
                id="org.eclipse.jsp.actions.ToggleJspBreakpointAction">
