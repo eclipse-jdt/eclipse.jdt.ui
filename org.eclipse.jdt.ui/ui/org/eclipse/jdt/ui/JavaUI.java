@@ -32,13 +32,11 @@ import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
-import org.eclipse.jdt.core.IBufferFactory;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IWorkingCopy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -254,6 +252,12 @@ public final class JavaUI {
 	 * @deprecated
 	 */
 	public final static String ATTR_CMDLINE= "org.eclipse.jdt.ui.launcher.cmdLine"; //$NON-NLS-1$
+	
+	
+	/**
+	 * @deprecated Constant introduced to avoid deprecated warning
+	 */
+	private final static int DEPRECATED_CONSIDER_TYPES= IJavaElementSearchConstants.CONSIDER_TYPES;
 
 	/**
 	 * Returns the shared images for the Java UI.
@@ -538,10 +542,10 @@ public final class JavaUI {
 			elementKinds= IJavaSearchConstants.CLASS_AND_INTERFACE;
 		} else if (style == IJavaElementSearchConstants.CONSIDER_CLASSES_AND_ENUMS) {
 			elementKinds= IJavaSearchConstants.CLASS_AND_ENUM;
-		} else if (style == IJavaElementSearchConstants.CONSIDER_TYPES) {
+		} else if (style == DEPRECATED_CONSIDER_TYPES) {
 			elementKinds= IJavaSearchConstants.CLASS_AND_INTERFACE;
 		} else {	
-			Assert.isTrue(false, "illegal style"); //$NON-NLS-1$
+			throw new IllegalArgumentException("Invalid style constant."); //$NON-NLS-1$
 		}
 		TypeSelectionDialog2 dialog= new TypeSelectionDialog2(parent, multipleSelection, 
 			context, scope, elementKinds, extension);
@@ -674,7 +678,7 @@ public final class JavaUI {
 	 * @deprecated Use {@link JavaCore#getWorkingCopies(org.eclipse.jdt.core.WorkingCopyOwner)} instead with <code>null</code> as
 	 * argument for owner.
 	 */
-	public static IWorkingCopy[] getSharedWorkingCopies() {
+	public static org.eclipse.jdt.core.IWorkingCopy[] getSharedWorkingCopies() {
 		return JavaCore.getSharedWorkingCopies(getBufferFactory());
 	}
 	
@@ -690,11 +694,11 @@ public final class JavaUI {
 	 * @deprecated Use {@link JavaCore#getWorkingCopies(org.eclipse.jdt.core.WorkingCopyOwner)} instead and filter the list
 	 * with {@link IJavaProject#isOnClasspath(IJavaElement)}.
 	 */
-	public static IWorkingCopy[] getSharedWorkingCopiesOnClasspath() {
-		IWorkingCopy[] wcs= getSharedWorkingCopies();
+	public static org.eclipse.jdt.core.IWorkingCopy[] getSharedWorkingCopiesOnClasspath() {
+		org.eclipse.jdt.core.IWorkingCopy[] wcs= getSharedWorkingCopies();
 		List result= new ArrayList(wcs.length);
 		for (int i = 0; i < wcs.length; i++) {
-			IWorkingCopy wc= wcs[i];
+			org.eclipse.jdt.core.IWorkingCopy wc= wcs[i];
 			if (wc instanceof IJavaElement) {
 				IJavaElement je= (IJavaElement)wc;
 				if (je.getJavaProject().isOnClasspath(je)) {
@@ -702,7 +706,7 @@ public final class JavaUI {
 				}
 			}
 		}
-		return (IWorkingCopy[])result.toArray(new IWorkingCopy[result.size()]);
+		return (org.eclipse.jdt.core.IWorkingCopy[])result.toArray(new org.eclipse.jdt.core.IWorkingCopy[result.size()]);
 	}
 	
 	/**
@@ -712,11 +716,11 @@ public final class JavaUI {
 	 * 
 	 * @see org.eclipse.jdt.core.IBufferFactory
 	 * @since 2.0
-	 * @deprecated {@link IBufferFactory} has been replaced by {@link org.eclipse.jdt.core.WorkingCopyOwner}.
+	 * @deprecated {@link org.eclipse.jdt.core.IBufferFactory} has been replaced by {@link org.eclipse.jdt.core.WorkingCopyOwner}.
 	 * The Java UI plug-in uses the <i>primary working copy owner</i> that can be accessed with <code>null</code> in
 	 * API's that require an owner
 	 */
-	public static IBufferFactory getBufferFactory() {
+	public static org.eclipse.jdt.core.IBufferFactory getBufferFactory() {
 		return JavaPlugin.getDefault().getBufferFactory();
 	}
 
