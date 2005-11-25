@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.javaeditor.selectionactions;
 
-import java.util.Collection;
 import java.util.List;
 
 import org.eclipse.jface.action.Action;
@@ -115,14 +114,15 @@ public abstract class StructureSelectionAction extends Action {
 	}
 
 	/**
-	 * This is the default implementation - it goes up one level in the AST.
-	 * Subclasses may implement different behavior and/or use this implementation as a fallback for cases they do not handle..
+	 * Subclasses determine the actual new selection.
 	 */
 	abstract ISourceRange internalGetNewSelectionRange(ISourceRange oldSourceRange, ISourceReference sr, SelectionAnalyzer selAnalyzer) throws JavaModelException;
 
 	protected final ITextSelection getTextSelection() {
 		return (ITextSelection)fEditor.getSelectionProvider().getSelection();
 	}
+	
+	// -- helper methods for subclasses to fit a node range into the source range
 
 	protected static ISourceRange getLastCoveringNodeRange(ISourceRange oldSourceRange, ISourceReference sr, SelectionAnalyzer selAnalyzer) throws JavaModelException {
 		if (selAnalyzer.getLastCoveringNode() == null)
@@ -152,7 +152,7 @@ public abstract class StructureSelectionAction extends Action {
 		}
 	}
 
-	private CompilationUnit getAST(ISourceReference sr) {
+	private static CompilationUnit getAST(ISourceReference sr) {
 
 		if (sr instanceof ICompilationUnit) {
 			CompilationUnit sharedAST= JavaPlugin.getDefault().getASTProvider().getAST((ICompilationUnit) sr, ASTProvider.WAIT_NO, null);
@@ -187,13 +187,9 @@ public abstract class StructureSelectionAction extends Action {
 		StructuralPropertyDescriptor locationInParent= node.getLocationInParent();
 		if (locationInParent.isChildListProperty()) {
 			List siblings= (List) parent.getStructuralProperty(locationInParent);
-			return convertToNodeArray(siblings);
+			return (ASTNode[]) siblings.toArray(new ASTNode[siblings.size()]);
 		}
 		return null;
-	}
-
-	private static ASTNode[] convertToNodeArray(Collection nodes){
-		return (ASTNode[]) nodes.toArray(new ASTNode[nodes.size()]);
 	}
 
 	static int findIndex(Object[] array, Object o){
