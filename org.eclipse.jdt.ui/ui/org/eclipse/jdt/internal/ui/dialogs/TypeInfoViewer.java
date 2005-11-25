@@ -341,11 +341,12 @@ public class TypeInfoViewer {
 			TypeInfo type= (TypeInfo)element;
 			if (fProviderExtension != null) {
 				fAdapter.setInfo(type);
-				return fProviderExtension.getImageDescriptor(fAdapter);
+				ImageDescriptor descriptor= fProviderExtension.getImageDescriptor(fAdapter);
+				if (descriptor != null) 
+					return descriptor;
 			}
-			int modifiers= type.getModifiers();
 			return JavaElementImageProvider.getTypeImageDescriptor(
-				type.isInnerType(), false, modifiers, false);
+				type.isInnerType(), false, type.getModifiers(), false);
 		}
 		
 		private String getTypeContainerName(TypeInfo info) {
