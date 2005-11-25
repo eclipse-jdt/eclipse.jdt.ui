@@ -90,6 +90,7 @@ Export-Package: org.eclipse.jdt.internal.corext;x-friends:="org.eclipse.jdt.juni
  org.eclipse.jdt.internal.ui.workingsets;x-internal:=true,
  org.eclipse.jdt.ui,
  org.eclipse.jdt.ui.actions,
+ org.eclipse.jdt.ui.dialogs,
  org.eclipse.jdt.ui.jarpackager,
  org.eclipse.jdt.ui.refactoring,
  org.eclipse.jdt.ui.search,

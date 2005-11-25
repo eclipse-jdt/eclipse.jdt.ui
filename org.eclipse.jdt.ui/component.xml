@@ -131,6 +131,11 @@
    <type name="WriteReferencesSearchGroup" subclass="false"/>
  </package>
 
+ <package name="org.eclipse.jdt.ui.dialogs">
+   <type name="ITypeInfoRequestor" implement="false"/>
+   <type name="ITypeSelectionComponent" implement="false"/>
+ </package>
+
  <package name="org.eclipse.jdt.ui.jarpackager">
  </package>
 
