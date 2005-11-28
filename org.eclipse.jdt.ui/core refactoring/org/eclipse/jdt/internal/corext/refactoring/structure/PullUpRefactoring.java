@@ -899,7 +899,8 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		try {
 			monitor.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, 6); 
 			final ICompilationUnit source= getDeclaringType().getCompilationUnit();
-			final ICompilationUnit target= getTargetClass().getCompilationUnit();
+			final IType targetClass= getTargetClass();
+			final ICompilationUnit target= targetClass.getCompilationUnit();
 			final CompilationUnitRewrite sourceRewriter= new CompilationUnitRewrite(source);
 			final CompilationUnitRewrite targetRewriter= new CompilationUnitRewrite(target);
 			final Map rewrites= new HashMap(2);
@@ -922,24 +923,24 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 						continue;
 					}
 					rewrite= getCompilationUnitRewrite(rewrites, unit);
-					if (deleteMap.containsKey(unit))
+					if (deleteMap.containsKey(unit) && !targetClass.isInterface())
 						deleteDeclarationNodes(sourceRewriter, sourceRewriter.getCu().equals(targetRewriter.getCu()), rewrite, (List) deleteMap.get(unit));
 					final CompilationUnit root= sourceRewriter.getRoot();
 					if (unit.equals(target)) {
 						final ASTRewrite rewriter= rewrite.getASTRewrite();
-						if (!JdtFlags.isAbstract(getTargetClass()) && getAbstractMethods().length > 0) {
-							final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetClass(), rewrite.getRoot());
+						if (!JdtFlags.isAbstract(targetClass) && !targetClass.isInterface() && getAbstractMethods().length > 0) {
+							final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(targetClass, rewrite.getRoot());
 							ModifierRewrite.create(rewriter, declaration).setModifiers(declaration.getModifiers() | Modifier.ABSTRACT, rewrite.createGroupDescription(RefactoringCoreMessages.PullUpRefactoring_make_target_abstract)); 
 						}
-						final TypeVariableMaplet[] mapping= TypeVariableUtil.subTypeToSuperType(getDeclaringType(), getTargetClass());
+						final TypeVariableMaplet[] mapping= TypeVariableUtil.subTypeToSuperType(getDeclaringType(), targetClass);
 						final IProgressMonitor subsub= new SubProgressMonitor(sub, 1);
-						final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(getTargetClass(), rewrite.getRoot());
+						final AbstractTypeDeclaration declaration= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(targetClass, rewrite.getRoot());
 						fMembersToMove= JavaElementUtil.sortByOffset(fMembersToMove);
 						subsub.beginTask(RefactoringCoreMessages.PullUpRefactoring_checking, fMembersToMove.length); 
 						IMember member= null;
 						for (int offset= fMembersToMove.length - 1; offset >= 0; offset--) {
 							member= fMembersToMove[offset];
-							adjustor= new MemberVisibilityAdjustor(getTargetClass(), member);
+							adjustor= new MemberVisibilityAdjustor(targetClass, member);
 							adjustor.setRewrite(sourceRewriter.getASTRewrite(), root);
 
 							// TW: set to error if bug 78387 is fixed
@@ -986,7 +987,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 						IMethod method= null;
 						for (int offset= 0; offset < fMethodsToDeclareAbstract.length; offset++) {
 							method= fMethodsToDeclareAbstract[offset];
-							adjustor= new MemberVisibilityAdjustor(getTargetClass(), method);
+							adjustor= new MemberVisibilityAdjustor(targetClass, method);
 							adjustor.setRewrite(sourceRewriter.getASTRewrite(), root);
 							adjustor.setRewrites(rewrites);
 
@@ -1057,7 +1058,8 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		ASTRewrite rewrite= targetRewrite.getASTRewrite();
 		AST ast= rewrite.getAST();
 		MethodDeclaration newMethod= ast.newMethodDeclaration();
-		copyBodyOfPulledUpMethod(sourceRewrite, targetRewrite, sourceMethod, oldMethod, newMethod, mapping, pm);
+		if (!getTargetClass().isInterface())
+			copyBodyOfPulledUpMethod(sourceRewrite, targetRewrite, sourceMethod, oldMethod, newMethod, mapping, pm);
 		newMethod.setConstructor(oldMethod.isConstructor());
 		newMethod.setExtraDimensions(oldMethod.getExtraDimensions());
 		copyJavadocNode(rewrite, sourceMethod, oldMethod, newMethod);
@@ -1263,7 +1265,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 	}
 
 	public IType[] getPossibleTargetClasses(RefactoringStatus status, IProgressMonitor pm) throws JavaModelException {
-		IType[] superClasses= getDeclaringType().newSupertypeHierarchy(pm).getAllSuperclasses(getDeclaringType());
+		IType[] superClasses= getDeclaringType().newSupertypeHierarchy(pm).getAllSupertypes(getDeclaringType());
 		List superClassList= new ArrayList(superClasses.length);
 		int binary= 0;
 		for (int i= 0; i < superClasses.length; i++) {
