@@ -33,6 +33,8 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.launching.IVMInstall;
 import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.IVMInstallType;
@@ -297,7 +299,7 @@ public class BuildPathSupport {
 		if (!(inst instanceof IVMInstall2))
 			return false;
 		
-		String version= ((IVMInstall2) inst).getJavaVersion();
+		String version= JavaModelUtil.getCompilerCompliance((IVMInstall2) inst, null);
 		if (version != null && version.startsWith(compliance)) {
 			return true;
 		}

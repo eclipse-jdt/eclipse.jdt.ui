@@ -815,17 +815,19 @@ public final class JavaModelUtil {
 	
 	
 	public static boolean is50OrHigher(IJavaProject project) {
-		return JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
+		String compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
+		return JavaCore.VERSION_1_5.equals(compliance);
 	}
 	
 	public static boolean is50OrHigherJRE(IJavaProject project) throws CoreException {
 		IVMInstall vmInstall= JavaRuntime.getVMInstall(project);
 		if (!(vmInstall instanceof IVMInstall2))
 			return true; // assume 5.0.
-		String javaVersion = ((IVMInstall2)vmInstall).getJavaVersion();
-		if (javaVersion == null)
+		
+		String compliance= getCompilerCompliance((IVMInstall2) vmInstall, null);
+		if (compliance == null)
 			return true; // assume 5.0
-		return javaVersion.startsWith(JavaCore.VERSION_1_5);
+		return compliance.startsWith(JavaCore.VERSION_1_5);
 	}
 	
 	public static String getCompilerCompliance(IVMInstall2 vMInstall, String defaultCompliance) {
