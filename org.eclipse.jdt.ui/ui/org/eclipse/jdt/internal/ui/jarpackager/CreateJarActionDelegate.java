@@ -90,7 +90,8 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 		Shell shell= getShell();
 		IJarExportRunnable op= jarPackages[0].createJarExportRunnable(jarPackages, shell);
 		try {
-			PlatformUI.getWorkbench().getProgressService().run(true, true, op);
+			PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, true, op);
+			//PlatformUI.getWorkbench().getProgressService().run(false, true, op); // see bug 118152
 		} catch (InvocationTargetException ex) {
 			if (ex.getTargetException() != null) {
 				ExceptionHandler.handle(ex, shell, JarPackagerMessages.CreateJarActionDelegate_jarExportError_title, JarPackagerMessages.CreateJarActionDelegate_jarExportError_message); 
