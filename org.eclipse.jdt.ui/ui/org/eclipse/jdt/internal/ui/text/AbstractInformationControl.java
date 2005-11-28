@@ -315,19 +315,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		return false;
 	}
 
-	/**
-	 * Creates a header for this information control.
-	 * <p>
-	 * Note: The header is only be created if {@link #hasHeader()} returns <code>true</code>.
-	 * </p>
-	 *
-	 * @param parent
-	 * @deprecated use PopupDialog#createTitleControl instead.
-	 */
-	protected void createHeader(Composite parent) {
-		// default is to have no header
-	}
-
 	protected Text getFilterText() {
 		return fFilterText;
 	}
