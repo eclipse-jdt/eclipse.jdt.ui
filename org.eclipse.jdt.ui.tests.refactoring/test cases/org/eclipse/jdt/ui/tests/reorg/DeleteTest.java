@@ -803,7 +803,7 @@ public class DeleteTest extends RefactoringTest{
 		ParticipantTesting.reset();
 		IPackageFragment newPackage= getRoot().createPackageFragment("newPackage", true, new NullProgressMonitor());
 		assertTrue("package not created", newPackage.exists());
-		ICompilationUnit cu= newPackage.createCompilationUnit("A.java", "public class A {}", false, null);
+		newPackage.createCompilationUnit("A.java", "public class A {}", false, null);
 		IFile file= ((IContainer)newPackage.getResource()).getFile(new Path("Z.txt"));
 		file.create(getStream("123"), true, null);
 		
