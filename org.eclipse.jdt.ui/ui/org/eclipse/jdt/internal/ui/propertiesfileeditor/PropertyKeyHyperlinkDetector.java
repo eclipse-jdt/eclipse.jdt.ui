@@ -118,7 +118,7 @@ public class PropertyKeyHyperlinkDetector implements IHyperlinkDetector {
 		if (region == null || region.getOffset() < 0)
 			return false;
 
-		 // XXX: Must be changed to IStorageEditorInput once support for	JARs is available (see class Javadoc for details)
+		 // XXX: Must be changed to IStorageEditorInput once support for JARs is available (see class Javadoc for details)
 		return fTextEditor.getEditorInput() instanceof IFileEditorInput;
 	}
 }
