@@ -12,10 +12,10 @@ public interface ISomeIf2 {
 			return fISomeIf2;
 		}
 		/**
-		 * @param someIf The iSomeIf to set.
+		 * @param a The a to set.
 		 */
-		public void setISomeIf2(ISomeIf2 someIf) {
-			fISomeIf2 = someIf;
+		public void setISomeIf2(ISomeIf2 a) {
+			fISomeIf2 = a;
 		}
 		/**
 		 * @return Returns the someIf.
@@ -24,10 +24,10 @@ public interface ISomeIf2 {
 			return fSomeIf2;
 		}
 		/**
-		 * @param someIf The someIf to set.
+		 * @param a The a to set.
 		 */
-		public void setSomeIf2(ISomeIf2 someIf) {
-			fSomeIf2 = someIf;
+		public void setSomeIf2(ISomeIf2 a) {
+			fSomeIf2 = a;
 		}
 	}
 	

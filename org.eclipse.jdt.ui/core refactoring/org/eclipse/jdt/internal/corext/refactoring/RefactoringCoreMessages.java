@@ -335,6 +335,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameTypeProcessor_checking_derived_refactoring_conditions;
 	public static String RenameTypeProcessor_cannot_rename_methods_same_new_name;
 	public static String RenameTypeProcessor_cannot_rename_fields_same_new_name;
+	public static String RenameTypeProcessor_cannot_rename_locals_same_new_name;
 	public static String RenameTypeProcessor_deselected_method_is_overridden;
 	public static String RenameTypeProcessor_renamed_method_is_overridden;
 	
@@ -361,6 +362,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameTempRefactoring_must_select_local;
 	public static String RenameTempRefactoring_only_in_methods_and_initializers;
 	public static String RenameTempRefactoring_lowercase;
+	public static String RenameTempRefactoring_lowercase2;
 	public static String RenameTempRefactoring_rename;
 	public static String RenameTempRefactoring_changeName;
 	public static String MethodChecks_overrides;

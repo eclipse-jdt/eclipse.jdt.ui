@@ -11,7 +11,7 @@ public class SomeOtherFieldClass {
 			
 	}
 
-	private void foo2(SomeOtherFieldClass pmSomeFieldClass_pm) {
+	private void foo2(SomeOtherFieldClass x) {
 		// TODO Auto-generated method stub
 		
 	}

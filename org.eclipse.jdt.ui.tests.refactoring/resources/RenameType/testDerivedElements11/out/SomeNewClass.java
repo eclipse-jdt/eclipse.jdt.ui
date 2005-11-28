@@ -5,17 +5,17 @@ public class SomeNewClass{
 	static SomeNewClass fsSomeNewClass;
 
 	/**
-	 * @return Returns the someNewClass.
+	 * @return Returns the someClass.
 	 */
 	public SomeNewClass getSomeNewClass() {
 		return someNewClass;
 	}
 
 	/**
-	 * @param someNewClass The someNewClass to set.
+	 * @param a The a to set.
 	 */
-	public void setSomeNewClass(SomeNewClass someClass) {
-		this.someNewClass = someClass;
+	public void setSomeNewClass(SomeNewClass a) {
+		this.someNewClass = a;
 	}
 
 	

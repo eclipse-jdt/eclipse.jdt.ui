@@ -12,10 +12,10 @@ public class SomeOtherClass {
 	}
 
 	/**
-	 * @param someClass The someClass to set.
+	 * @param a The a to set.
 	 */
-	public void setSomeClass(SomeClass someClass) {
-		fSomeClass = someClass;
+	public void setSomeClass(SomeClass a) {
+		fSomeClass = a;
 	}
 	
 }

@@ -21,6 +21,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -167,7 +168,7 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 			if (name.length() == 0) {
 				return new StatusInfo(IStatus.ERROR, RefactoringMessages.RenameTypeWizardDerivedElementPage_name_empty);
 			}
-			IStatus status= JavaConventions.validateFieldName(name);
+			IStatus status= JavaConventions.validateIdentifier(name);
 			if (status.matches(IStatus.ERROR))
 				return status;
 			if (!Checks.startsWithLowerCase(name))
@@ -186,6 +187,8 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 						return new StatusInfo(IStatus.ERROR, RefactoringMessages.RenameTypeWizardDerivedElementPage_method_exists);
 				}
 			}
+			
+			// cannot check local variables; no .getLocalVariable(String) in IMember
 
 			return StatusInfo.OK_STATUS;
 		}
@@ -204,8 +207,9 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		 * @see ITreeContentProvider#getChildren(Object)
 		 */
 		public Object[] getChildren(Object parentElement) {
-			if (parentElement instanceof ICompilationUnit || parentElement instanceof IType)
-				return ((Set) fTreeElementMap.get(parentElement)).toArray();
+			final Set children= (Set) fTreeElementMap.get(parentElement);
+			if (children != null)
+				return children.toArray();
 			else
 				return new Object[0];
 		}
@@ -214,12 +218,8 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		 * @see ITreeContentProvider#getParent(Object)
 		 */
 		public Object getParent(Object element) {
-			if (element instanceof IMember) {
-				final IType declaring= ((IMember) element).getDeclaringType();
-				if (declaring != null)
-					return declaring;
-				else
-					return ((IMember) element).getCompilationUnit();
+			if (element instanceof IMember || element instanceof ILocalVariable) {
+				return ((IJavaElement) element).getParent();
 			}
 			if (element instanceof ICompilationUnit)
 				return null;
@@ -231,7 +231,7 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		 * @see ITreeContentProvider#hasChildren(Object)
 		 */
 		public boolean hasChildren(Object element) {
-			return (!isDerivedElement(element));
+			return fTreeElementMap.containsKey(element);
 		}
 
 		/*
@@ -263,30 +263,33 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 			fTreeElementMap= new HashMap();
 			fTopLevelElements= new HashSet();
 			for (int i= 0; i < derivedElements.length; i++) {
-				final IType declaring;
-				if (derivedElements[i] instanceof IMember)
-					declaring= ((IMember) derivedElements[i]).getDeclaringType();
-				else {
+				final IType declaring= (IType) derivedElements[i].getAncestor(IJavaElement.TYPE);
+				if (derivedElements[i] instanceof IMember) {
+					// methods, fields, initializers, inner types
+					addToMap(declaring, derivedElements[i]);
+				} else {
+					// local variables
 					final IJavaElement parent= derivedElements[i].getParent();
-					if (parent instanceof IMember)
+					if (parent instanceof IMember) {
+						// parent is a method or an initializer
 						addToMap(parent, derivedElements[i]);
-					declaring= (IType) derivedElements[i].getAncestor(IJavaElement.TYPE);
+						addToMap(declaring, parent);
+					}
 				}
-				addToMap(declaring, derivedElements[i]);
 				handleDeclaring(declaring);
 			}
 		}
 
-		private void handleDeclaring(final IType someType) {
-			if (someType.getDeclaringType() == null) {
-				fTopLevelElements.add(someType.getCompilationUnit());
-				addToMap(someType.getCompilationUnit(), someType);
-				return;
-			}
+		private void handleDeclaring(final IJavaElement someType) {
 
-			final IType enclosing= someType.getDeclaringType();
-			addToMap(enclosing, someType);
-			handleDeclaring(enclosing);
+			final IJavaElement enclosing= someType.getParent();
+			if (enclosing instanceof ICompilationUnit) {
+				fTopLevelElements.add(someType.getParent());
+				addToMap(someType.getParent(), someType);
+			} else {
+				addToMap(enclosing, someType);
+				handleDeclaring(enclosing);
+			}
 		}
 
 		private void addToMap(final IJavaElement key, final IJavaElement element) {
@@ -346,7 +349,11 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 			}
 			return super.getText(element);
 		}
-
+		
+		private boolean isDerivedElement(Object element) {
+			return fElementToNewName.containsKey(element);
+		}
+		
 	}
 
 	public static final String PAGE_NAME= "DerivedElementSelectionPage"; //$NON-NLS-1$
@@ -354,14 +361,14 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 	private final long LABEL_FLAGS= JavaElementLabels.DEFAULT_QUALIFIED | JavaElementLabels.ROOT_POST_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH | JavaElementLabels.M_PARAMETER_TYPES
 			| JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.M_EXCEPTIONS | JavaElementLabels.F_APP_TYPE_SIGNATURE | JavaElementLabels.T_TYPE_PARAMETERS;
 
-	private Label fDerivedCountLabel;
+	private Label fDerivedLabel;
 	private SourceViewer fSourceViewer;
 	private ContainerCheckedTreeViewer fTreeViewer;
 	private DerivedLabelProvider fTreeViewerLabelProvider;
 	private Map fDerivedElementsToNewName;
 	private Button fEditElementButton;
 	private boolean fWasInitialized;
-	private Label fCurrentElementLabel;
+	private CLabel fCurrentElementLabel;
 
 	public RenameTypeWizardDerivedElementPage() {
 		super(PAGE_NAME);
@@ -419,11 +426,11 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 	}
 
 	private void createTypeHierarchyLabel(Composite composite) {
-		fDerivedCountLabel= new Label(composite, SWT.WRAP);
+		fDerivedLabel= new Label(composite, SWT.WRAP);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.heightHint= JavaElementImageProvider.SMALL_SIZE.x;
-		fDerivedCountLabel.setLayoutData(gd);
-		fDerivedCountLabel.setText(RefactoringMessages.RenameTypeWizardDerivedElementPage_review_derived_elements);
+		fDerivedLabel.setLayoutData(gd);
+		fDerivedLabel.setText(RefactoringMessages.RenameTypeWizardDerivedElementPage_review_derived_elements);
 	}
 
 	private void createTreeViewer(Composite composite) {
@@ -462,7 +469,7 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 	}
 
 	private void createSourceViewerLabel(Composite c) {
-		fCurrentElementLabel= new Label(c, SWT.NONE);
+		fCurrentElementLabel= new CLabel(c, SWT.NONE);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.heightHint= JavaElementImageProvider.SMALL_SIZE.x;
 		fCurrentElementLabel.setText(RefactoringMessages.RenameTypeWizardDerivedElementPage_select_element_to_view_source);
@@ -617,8 +624,11 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 
 	// ------------ Helper
 
-	private static boolean isDerivedElement(Object element) {
-		return ( (element instanceof IMethod) || (element instanceof IField) || (element instanceof ILocalVariable));
+	private boolean isDerivedElement(Object element) {
+		if (!fWasInitialized)
+			return false;
+		
+		return fDerivedElementsToNewName.containsKey(element);
 	}
 
 	private void treeViewerSelectionChanged(SelectionChangedEvent event) {

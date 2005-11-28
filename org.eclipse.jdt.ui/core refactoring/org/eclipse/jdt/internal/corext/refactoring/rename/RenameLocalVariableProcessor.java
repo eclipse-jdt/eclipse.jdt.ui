@@ -34,6 +34,7 @@ import org.eclipse.jface.text.Region;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -48,6 +49,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
+import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -73,11 +75,13 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -164,6 +168,10 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	private CompilationUnit fCompilationUnitNode;
 	private VariableDeclaration fTempDeclarationNode;
 	private TextChange fChange;
+	
+	private boolean fIsDerived;
+	private GroupCategorySet fCategorySet;
+	private TextChangeManager fChangeManager;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameLocalVariableProcessor"; //$NON-NLS-1$
 	
@@ -173,6 +181,15 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		if (localVariable != null)
 			fCu= (ICompilationUnit) localVariable.getAncestor(IJavaElement.COMPILATION_UNIT);
 		fNewName= ""; //$NON-NLS-1$
+		fIsDerived= false;
+	}
+	
+	protected RenameLocalVariableProcessor(ILocalVariable localVariable, TextChangeManager manager, CompilationUnit compilUnit, GroupCategorySet categorySet) {
+		this(localVariable);
+		fChangeManager= manager;
+		fCategorySet= categorySet;
+		fCompilationUnitNode= compilUnit;
+		fIsDerived= true;
 	}
 
 	/*
@@ -291,7 +308,8 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	}
 
 	private void initAST() throws JavaModelException {
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true);
+		if (!fIsDerived)
+			fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true);
 		ISourceRange sourceRange= fLocalVariable.getNameRange();
 		ASTNode name= NodeFinder.perform(fCompilationUnitNode, sourceRange);
 		if (name == null)
@@ -323,6 +341,12 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			return result;
 		} finally {
 			pm.done();
+			if (fIsDerived) {
+				// end of life cycle for this processor
+				fChange= null;
+				fCompilationUnitNode= null;
+				fTempDeclarationNode= null;
+			}
 		}	
 	}
 		
@@ -332,7 +356,13 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	public RefactoringStatus checkNewElementName(String newName) throws JavaModelException {
 		RefactoringStatus result= Checks.checkFieldName(newName);
 		if (! Checks.startsWithLowerCase(newName))
-			result.addWarning(RefactoringCoreMessages.RenameTempRefactoring_lowercase); 
+			if (fIsDerived) {
+				final String nameOfParent= (fLocalVariable.getParent() instanceof IMethod) ? fLocalVariable.getParent().getElementName() : RefactoringCoreMessages.JavaElementUtil_initializer;
+				final String nameOfType= fLocalVariable.getAncestor(IJavaElement.TYPE).getElementName();
+				result.addWarning(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_lowercase2, new String[] { newName, nameOfParent, nameOfType }));
+			} else {
+				result.addWarning(RefactoringCoreMessages.RenameTempRefactoring_lowercase);
+			}
 		return result;		
 	}
 		
@@ -346,6 +376,11 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 
 		String changeName= Messages.format(RefactoringCoreMessages.RenameTempRefactoring_changeName, new String[]{fCurrentName, fNewName}); 
 		for (int i= 0; i < allRenameEdits.length; i++) {
+			if (fIsDerived) {
+				// Add a copy of the text edit (text edit may only have one
+				// parent) to keep problem reporting code clean
+				TextChangeCompatibility.addTextEdit(fChangeManager.get(fCu), changeName, allRenameEdits[i].copy(), fCategorySet);
+			}
 			rootEdit.addChild(allRenameEdits[i]);
 			fChange.addTextEditGroup(new TextEditGroup(changeName, allRenameEdits[i]));
 		}
@@ -431,9 +466,6 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			}
 			return change;
 		} finally {
-			fChange= null;
-			fCompilationUnitNode= null;
-			fTempDeclarationNode= null;
 			monitor.done();
 		}
 	}

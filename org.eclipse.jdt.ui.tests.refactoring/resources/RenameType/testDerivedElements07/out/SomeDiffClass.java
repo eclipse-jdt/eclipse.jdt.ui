@@ -15,8 +15,8 @@ public class SomeDiffClass {
 	/**
 	 * @param someDiffClass The someDiffClass to set.
 	 */
-	public void setSomeDiffClass(SomeDiffClass someClass) {
-		fSomeDiffClass = someClass;
+	public void setSomeDiffClass(SomeDiffClass someDiffClass) {
+		fSomeDiffClass = someDiffClass;
 	}
 	/**
 	 * @return Returns the someDiffClassSuf1.
@@ -27,8 +27,8 @@ public class SomeDiffClass {
 	/**
 	 * @param someDiffClassSuf1 The someDiffClassSuf1 to set.
 	 */
-	public void setSomeDiffClassSuf1(SomeDiffClass someClassSuf1) {
-		fSomeDiffClassSuf1 = someClassSuf1;
+	public void setSomeDiffClassSuf1(SomeDiffClass someDiffClassSuf1) {
+		fSomeDiffClassSuf1 = someDiffClassSuf1;
 	}
 
 

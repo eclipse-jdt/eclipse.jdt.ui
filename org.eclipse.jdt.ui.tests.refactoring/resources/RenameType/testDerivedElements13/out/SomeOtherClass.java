@@ -11,10 +11,10 @@ public class SomeOtherClass {
 		SomeOtherClass lvSomeOtherClass;
 		SomeOtherClass lvSomeOtherClass_lv;
 		SomeOtherClass someOtherClass_lv;
-		SomeOtherClass pmSomeClass_pm; // do not rename this!
+		SomeOtherClass pmSomeOtherClass_pm; // wrong prefixes, but rename anyway.
 	}
 	
-	public void foo2(SomeClass pmSomeClass_pm, SomeClass lvSomeClass) { // don't rename the second param.
+	public void foo2(SomeOtherClass pmSomeOtherClass_pm) {
 	}
 	
 	public void foo3(SomeOtherClass someOtherClass_pm) {

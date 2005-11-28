@@ -14,8 +14,8 @@ public class SomeDifferentClass {
 	/**
 	 * @param someDifferentClass The someDifferentClass to set.
 	 */
-	public void setSomeDifferentClass(SomeDifferentClass someClass) {
-		this.someDifferentClass = someClass;
+	public void setSomeDifferentClass(SomeDifferentClass someDifferentClass) {
+		this.someDifferentClass = someDifferentClass;
 	}
 	
 }

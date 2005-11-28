@@ -18,7 +18,7 @@ public class SomeClass {
 		this.someClass = someClass;
 	}
 	
-	public void setSomeClass2(SomeClass someClass) {
+	public void setSomeDifferentClass(SomeClass someClass) {
 		
 	}
 }

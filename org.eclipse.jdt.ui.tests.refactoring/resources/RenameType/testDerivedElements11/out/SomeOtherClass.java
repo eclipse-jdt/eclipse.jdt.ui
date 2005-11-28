@@ -5,17 +5,17 @@ public class SomeOtherClass {
 	SomeNewClass fSomeNewClass;
 
 	/**
-	 * @return Returns the someNewClass.
+	 * @return Returns the someClass.
 	 */
 	public SomeNewClass getSomeNewClass() {
 		return fSomeNewClass;
 	}
 
 	/**
-	 * @param someNewClass The someNewClass to set.
+	 * @param a The a to set.
 	 */
-	public void setSomeNewClass(SomeNewClass someClass) {
-		fSomeNewClass = someClass;
+	public void setSomeNewClass(SomeNewClass a) {
+		fSomeNewClass = a;
 	}
 	
 }

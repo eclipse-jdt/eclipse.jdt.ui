@@ -21,8 +21,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.internal.core.SourceRefElement;
-
 import org.eclipse.jdt.internal.corext.Assert;
 
 /**
@@ -33,8 +31,6 @@ import org.eclipse.jdt.internal.corext.Assert;
  * renames, and a number of method renames including signature changes.
  * 
  * The returned handle exists in the target model state.
- * 
- * TODO This class still references internal API, see bug 115040
  * 
  * @since 3.2
  * 
@@ -118,8 +114,8 @@ public class RefactoringHandleTransplanter {
 							break;
 						}
 						case IJavaElement.INITIALIZER: {
-							final SourceRefElement initializer= (SourceRefElement) currentElement;
-							newElements[i]= ((IType) newParent).getInitializer(initializer.occurrenceCount);
+							final IInitializer initializer= (IInitializer) currentElement;
+							newElements[i]= ((IType) newParent).getInitializer(initializer.getOccurrenceCount());
 							break;
 						}
 						case IJavaElement.FIELD: {
@@ -200,11 +196,10 @@ public class RefactoringHandleTransplanter {
 
 	private IMember resolveTypeInMember(final IMember newParent, IType oldChild) {
 		// Local type or anonymous type. Only local types can be renamed.
-		final SourceRefElement type= (SourceRefElement) oldChild;
 		String newName= ""; //$NON-NLS-1$
 		if (oldChild.getElementName().length() != 0)
 			newName= resolveTypeName(oldChild);
-		return newParent.getType(newName, type.occurrenceCount);
+		return newParent.getType(newName, oldChild.getOccurrenceCount());
 	}
 
 	private String resolveTypeName(IType type) {

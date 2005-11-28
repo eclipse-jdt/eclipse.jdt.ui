@@ -12,9 +12,9 @@ public class SomeClass {
 	}
 
 	/**
-	 * @param someClass The someClass to set.
+	 * @param a The a to set.
 	 */
-	public void setSomeClass(SomeClass someClass) {
-		this.someClass = someClass;
+	public void setSomeClass(SomeClass a) {
+		this.someClass = a;
 	}
 }

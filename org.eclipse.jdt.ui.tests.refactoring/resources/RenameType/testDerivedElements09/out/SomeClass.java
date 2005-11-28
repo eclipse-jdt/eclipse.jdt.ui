@@ -22,8 +22,8 @@ public class SomeClass{
 	/**
 	 * @param someNewInnerClass The someNewInnerClass to set.
 	 */
-	public void setSomeNewInnerClass(SomeNewInnerClass someInnerClass) {
-		this.someNewInnerClass = someInnerClass;
+	public void setSomeNewInnerClass(SomeNewInnerClass someNewInnerClass) {
+		this.someNewInnerClass = someNewInnerClass;
 	}
 	
 };

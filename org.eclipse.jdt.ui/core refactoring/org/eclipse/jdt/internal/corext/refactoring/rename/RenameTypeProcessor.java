@@ -16,6 +16,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
@@ -52,8 +53,10 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
+import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -72,6 +75,7 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.TypeReferenceMatch;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -142,14 +146,13 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	// --- Derived
 
 	private boolean fUpdateDerivedElements;
-	private List/* <RenameProcessor> */fDerivedRenameProcessors= null;
 	private Map/* <IJavaElement, String> */fFinalDerivedElementToName= null;
 	private int fRenamingStrategy;
 
 	// Preloaded information for the UI.
-	private HashMap/* <IJavaElement, String> */fPreloadedElementToName= null;
+	private LinkedHashMap/* <IJavaElement, String> */fPreloadedElementToName= null;
 	private Map/* <IJavaElement, Boolean> */fPreloadedElementToSelection= null;
-	private Map/* <IJavaElement, String> */fPreloadedElementToNameDefault= null;
+	private LinkedHashMap/* <IJavaElement, String> */fPreloadedElementToNameDefault= null;
 
 	// Cache information to decide whether to
 	// re-update references and preload info
@@ -485,7 +488,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 					.create(fType), monitor, fCachedRefactoringStatus);
 			fReferences= Checks.excludeCompilationUnits(fReferences, fCachedRefactoringStatus);
 
-			fPreloadedElementToName= new HashMap();
+			fPreloadedElementToName= new LinkedHashMap();
 			fPreloadedElementToSelection= new HashMap();
 
 			final String unQualifiedTypeName= fType.getElementName();
@@ -504,24 +507,60 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 					final SearchMatch[] results= fReferences[i].getSearchResults();
 
 					for (int j= 0; j < results.length; j++) {
-						final SearchMatch match= results[j];
 
-						if (match.getElement() instanceof IField) {
-							final IField currentField= (IField) match.getElement();
-							final String newFieldName= sugg.suggestNewFieldName(currentField.getJavaProject(), currentField.getElementName(), Flags.isStatic(currentField.getFlags()),
-									unQualifiedTypeName, getNewElementName());
+						if (! (results[j] instanceof TypeReferenceMatch))
+							continue;
 
-							if (newFieldName != null)
-								fPreloadedElementToName.put(currentField, newFieldName);
-						}
+						final TypeReferenceMatch match= (TypeReferenceMatch) results[j];
+						final List matches= new ArrayList();
 
-						if (match.getElement() instanceof IMethod) {
-							final IMethod currentMethod= (IMethod) match.getElement();
-							if (!currentMethod.isConstructor()) {
-								final String newMethodName= sugg.suggestNewMethodName(currentMethod.getElementName(), unQualifiedTypeName, getNewElementName());
+						if (match.getLocalElement() != null)
+							matches.add(match.getLocalElement());
+						else
+							matches.add(match.getElement());
 
-								if (newMethodName != null)
-									fPreloadedElementToName.put(currentMethod, newMethodName);
+						final IJavaElement[] others= match.getOtherElements();
+						if (others != null)
+							matches.addAll(Arrays.asList(others));
+
+						for (Iterator iter= matches.iterator(); iter.hasNext();) {
+							final IJavaElement element= (IJavaElement) iter.next();
+
+							if (! (element instanceof IMethod) && ! (element instanceof IField) && ! (element instanceof ILocalVariable))
+								continue;
+							
+							if (!isInDeclaredType(match.getOffset(), element))
+								continue;
+
+							if (element instanceof IField) {
+								final IField currentField= (IField) element;
+								final String newFieldName= sugg.suggestNewFieldName(currentField.getJavaProject(), currentField.getElementName(), Flags.isStatic(currentField.getFlags()),
+										unQualifiedTypeName, getNewElementName());
+
+								if (newFieldName != null)
+									fPreloadedElementToName.put(currentField, newFieldName);
+							}
+
+							if (element instanceof IMethod) {
+								final IMethod currentMethod= (IMethod) element;
+								addMethodRename(unQualifiedTypeName, sugg, currentMethod);
+							}
+
+							if (element instanceof ILocalVariable) {
+								final ILocalVariable currentLocal= (ILocalVariable) element;
+								final boolean isParameter;
+								
+								if (isParameter(currentLocal)) {
+									addMethodRename(unQualifiedTypeName, sugg, (IMethod) currentLocal.getParent());
+									isParameter= true;
+								} else
+									isParameter= false;
+
+								final String newLocalName= sugg
+										.suggestNewLocalName(currentLocal.getJavaProject(), currentLocal.getElementName(), isParameter, unQualifiedTypeName, getNewElementName());
+
+								if (newLocalName != null)
+									fPreloadedElementToName.put(currentLocal, newLocalName);
 							}
 						}
 					}
@@ -534,7 +573,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				IJavaElement element= (IJavaElement) iter.next();
 				fPreloadedElementToSelection.put(element, Boolean.TRUE);
 			}
-			fPreloadedElementToNameDefault= (Map) fPreloadedElementToName.clone();
+			fPreloadedElementToNameDefault= (LinkedHashMap) fPreloadedElementToName.clone();
 
 		} catch (OperationCanceledException e) {
 			fReferences= null;
@@ -542,6 +581,55 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			throw new OperationCanceledException();
 		}
 		return fCachedRefactoringStatus;
+	}
+
+	/**
+	 * Returns true iff the given local variable is a parameter of its
+	 * declaring method.
+	 * 
+	 * TODO replace this method with new API when available: 
+	 * 		https://bugs.eclipse.org/bugs/show_bug.cgi?id=48420
+	 */
+	private boolean isParameter(ILocalVariable currentLocal) throws JavaModelException {
+
+		final IJavaElement parent= currentLocal.getParent();
+		if (parent instanceof IMethod) {
+			final String[] params= ((IMethod) parent).getParameterNames();
+			for (int i= 0; i < params.length; i++) {
+				if (params[i].equals(currentLocal.getElementName()))
+					return true;
+			}
+		}
+		return false;
+	}
+
+	/**
+	 * Returns true iff the given search match offset (must be a match of a type
+	 * reference) lies before the element name of its enclosing java element,
+	 * false if not. In other words: If this method returns true, the match is
+	 * the declared type (or return type) of the enclosing element.
+	 * 
+	 */
+	private boolean isInDeclaredType(int matchOffset, IJavaElement parentElement) throws JavaModelException {
+		if (parentElement != null) {
+			int enclosingNameOffset= 0;
+			if (parentElement instanceof IMethod || parentElement instanceof IField)
+				enclosingNameOffset= ((IMember) parentElement).getNameRange().getOffset();
+			else if (parentElement instanceof ILocalVariable)
+				enclosingNameOffset= ((ILocalVariable) parentElement).getNameRange().getOffset();
+
+			return (matchOffset < enclosingNameOffset);
+		}
+		return false;
+	}
+	
+	private void addMethodRename(final String unQualifiedTypeName, RenamingNameSuggestor sugg, final IMethod currentMethod) throws JavaModelException {
+		if (!currentMethod.isConstructor()) {
+			final String newMethodName= sugg.suggestNewMethodName(currentMethod.getElementName(), unQualifiedTypeName, getNewElementName());
+
+			if (newMethodName != null)
+				fPreloadedElementToName.put(currentMethod, newMethodName);
+		}
 	}
 
 	private RefactoringStatus checkNewPathValidity() {
@@ -1064,7 +1152,9 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		final Set warnings= new HashSet();
 
 		fFinalDerivedElementToName= new HashMap();
-		fDerivedRenameProcessors= new ArrayList();
+		
+		CompilationUnit currentResolvedCU= null;
+		ICompilationUnit currentCU= null;
 
 		progressMonitor.beginTask("", fPreloadedElementToName.size() * 3); //$NON-NLS-1$
 		progressMonitor.setTaskName(RefactoringCoreMessages.RenameTypeProcessor_checking_derived_refactoring_conditions); 
@@ -1080,10 +1170,28 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			// already registered? (may happen with overridden methods) -> skip
 			if (fFinalDerivedElementToName.containsKey(element))
 				continue;
+			
+			// CompilationUnit changed? (note: fPreloadedElementToName is sorted by CompilationUnit)
+			currentCU= (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
+			if (currentResolvedCU != null && !currentResolvedCU.getJavaElement().equals(currentCU))
+				currentResolvedCU= null;
 
 			final String newName= (String) fPreloadedElementToName.get(element);
 			RefactoringProcessor processor= null;
+			
+			if (element instanceof ILocalVariable) {
+				final ILocalVariable currentLocal= (ILocalVariable) element;
 
+				if (currentResolvedCU == null)
+					currentResolvedCU= new RefactoringASTParser(AST.JLS3).parse(currentCU, true);
+				
+				processor= createLocalRenameProcessor(currentLocal, newName, currentResolvedCU);
+
+				status.merge(checkForConflictingRename(currentLocal, newName));
+				if (status.hasFatalError())
+					break;
+				fFinalDerivedElementToName.put(currentLocal, newName);
+			}
 			if (element instanceof IField) {
 				final IField currentField= (IField) element;
 				processor= createFieldRenameProcessor(currentField, newName);
@@ -1137,8 +1245,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 			if (status.hasFatalError())
 				return status;
-
-			fDerivedRenameProcessors.add(processor);
 
 			progressMonitor.worked(1);
 		}
@@ -1222,6 +1328,30 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 						String message= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_cannot_rename_fields_same_new_name, new String[] { alreadyRegisteredField.getElementName(),
 								currentField.getElementName(), alreadyRegisteredField.getDeclaringType().getFullyQualifiedName(), newName });
 						status.addFatalError(message);
+						return status;
+					}
+				}
+			}
+		}
+		return status;
+	}
+	
+	private RefactoringStatus checkForConflictingRename(ILocalVariable currentLocal, String newName) {
+		RefactoringStatus status= new RefactoringStatus();
+		for (Iterator iter= fFinalDerivedElementToName.keySet().iterator(); iter.hasNext();) {
+			IJavaElement element= (IJavaElement) iter.next();
+			if (element instanceof ILocalVariable) {
+				ILocalVariable alreadyRegisteredLocalVariable= (ILocalVariable) element;
+				String alreadyRegisteredLocalVariableName= (String) fFinalDerivedElementToName.get(element);
+				if (alreadyRegisteredLocalVariableName.equals(newName)) {
+					if (alreadyRegisteredLocalVariable.getParent().equals(currentLocal.getParent())) {
+						
+						final IJavaElement parent= alreadyRegisteredLocalVariable.getParent();
+						final String nameOfParent= (parent instanceof IInitializer) ? RefactoringCoreMessages.JavaElementUtil_initializer : parent.getElementName();
+						final IJavaElement declaringType= parent.getAncestor(IJavaElement.TYPE);
+						String message= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_cannot_rename_locals_same_new_name, new String[] { alreadyRegisteredLocalVariable.getElementName(),
+								currentLocal.getElementName(), nameOfParent, declaringType.getElementName(), newName });
+						status.addWarning(message);
 						return status;
 					}
 				}
@@ -1337,6 +1467,13 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		processor.setRenameSetter(false);
 		processor.setUpdateReferences(getUpdateReferences());
 		processor.setUpdateTextualMatches(false);
+		return processor;
+	}
+	
+	private RenameLocalVariableProcessor createLocalRenameProcessor(final ILocalVariable local, final String newName, final CompilationUnit compilationUnit) {
+		final RenameLocalVariableProcessor processor= new RenameLocalVariableProcessor(local, fChangeManager, compilationUnit, CATEGORY_LOCAL_RENAME);
+		processor.setNewElementName(newName);
+		processor.setUpdateReferences(getUpdateReferences());
 		return processor;
 	}
 

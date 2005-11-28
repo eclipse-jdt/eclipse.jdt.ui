@@ -1246,8 +1246,8 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void testDerivedElements02() throws Exception {
-		// Already existing method like new setter, shadow-error from field refac
-		helper3_fail("SomeClass", "SomeClass2", true, false, true);
+		// Already existing method 
+		helper3_fail("SomeClass", "SomeDifferentClass", true, false, true);
 	}
 	
 	public void testDerivedElements03() throws Exception {
@@ -1262,7 +1262,8 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	public void testDerivedElements05() throws Exception {
-		//rename textual and qualified
+		//qualified name updating
+		//includes textual updating
 		String content= getFileContents(getTestPath() + "testDerivedElements05/in/test.html");
 		IProject project= getPackageP().getJavaProject().getProject();
 		IFile file= project.getFile("test.html");
@@ -1287,7 +1288,7 @@ public class RenameTypeTests extends RefactoringTest {
 	
 	public void testDerivedElements06() throws Exception {
 		//Additional field with exactly the same name and getters and setters in another class
-		//incl. textual
+		//includes textual updating
 		// printTestDisabledMessage("potential matches in comments issue (bug 111891)");
 		getClassFromTestFile(getPackageP(), "SomeNearlyIdenticalClass");
 		helper3("SomeClass", "SomeOtherClass", true, true, true);
@@ -1296,6 +1297,7 @@ public class RenameTypeTests extends RefactoringTest {
 	
 	public void testDerivedElements07() throws Exception {
 		//Test 4 fields in one file, different suffixes/prefixes, incl. 2x setters/getters
+		//includes textual updating
 		helper3("SomeClass", "SomeDiffClass", true, true, true);
 	}
 	
@@ -1306,6 +1308,7 @@ public class RenameTypeTests extends RefactoringTest {
 
 	public void testDerivedElements09() throws Exception {
 		//Some inner types
+		//includes textual updating
 		getClassFromTestFile(getPackageP(), "SomeOtherClass");
 		helper3_inner("SomeClass", "SomeInnerClass", "SomeClass", "SomeNewInnerClass", true, true, true, null);
 		checkResultInClass("SomeOtherClass");
@@ -1314,7 +1317,7 @@ public class RenameTypeTests extends RefactoringTest {
 	public void testDerivedElements10() throws Exception {
 		//Two static fields
 		getClassFromTestFile(getPackageP(), "SomeOtherClass");
-		helper3("SomeClass", "SomeClass2", true, true, true, null);
+		helper3("SomeClass", "SomeClass2", true, false, true, null);
 		checkResultInClass("SomeOtherClass");
 	}
 	
@@ -1382,7 +1385,7 @@ public class RenameTypeTests extends RefactoringTest {
 		RenameArguments[] arguments= (RenameArguments[])argumentList.toArray(new RenameArguments[0]);
 		
 		RenameRefactoring ref= createRefactoring(someClass, newName);
-		setTheOptions(ref, true, true, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		setTheOptions(ref, true, false, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
 		RefactoringStatus status= performRefactoring(ref);
 		assertNull("was supposed to pass", status);
 		
@@ -1395,38 +1398,33 @@ public class RenameTypeTests extends RefactoringTest {
 	
 	public void testDerivedElements12() throws Exception {
 		// Test updating of references
-		helper3("SomeFieldClass", "SomeOtherFieldClass", true, true, true);
+		helper3("SomeFieldClass", "SomeOtherFieldClass", true, false, true);
 	}
 	
 	public void testDerivedElements13() throws Exception {
 		// Test various locals and parameters with and without prefixes.
 		// tests not renaming parameters with local prefixes and locals with parameter prefixes
-		printTestDisabledMessage("Local variables not currently supported.");
-		//helper3("SomeClass", "SomeOtherClass", true, false, true, true);
+		helper3("SomeClass", "SomeOtherClass", true, false, true);
 	}
 	
 	public void testDerivedElements14() throws Exception {
 		// Test for loop variables
-		printTestDisabledMessage("Local variables not currently supported.");
-		//helper3("SomeClass2", "SomeOtherClass2", true, false, true, true);
+		helper3("SomeClass2", "SomeOtherClass2", true, false, true);
 	}
 	
 	public void testDerivedElements15() throws Exception {
 		// Test catch block variables (exceptions)
-		printTestDisabledMessage("Local variables not currently supported.");
-		//helper3("SomeClass3", "SomeOtherClass3", true, false, true, true);
+		helper3("SomeClass3", "SomeOtherClass3", true, false, true);
 	}
 	
 	public void testDerivedElements16() throws Exception {
 		// Test updating of references
-		printTestDisabledMessage("Local variables not currently supported.");
-		//helper3("SomeClass4", "SomeOtherClass4", true, false, true, true);
+		helper3("SomeClass4", "SomeOtherClass4", true, false,  true);
 	}
 	
 	public void testDerivedElements17() throws Exception {
 		// Local with this name already exists - do not pass.
-		printTestDisabledMessage("Local variables not currently supported.");
-		//helper3_fail("SomeClass6", "SomeOtherClass6", true, false, true, true);
+		helper3_fail("SomeClass6", "SomeOtherClass6", true, false, true);
 	}
 	
 	public void testDerivedElements18() throws Exception {
@@ -1442,7 +1440,7 @@ public class RenameTypeTests extends RefactoringTest {
 	public void testDerivedElements20() throws Exception {
 		// Overridden method, check both are renamed
 		getClassFromTestFile(getPackageP(), "OtherClass");
-		helper3("OverriddenMethodClass", "ThirdClass", true, true, true);
+		helper3("OverriddenMethodClass", "ThirdClass", true, false, true);
 		checkResultInClass("OtherClass");
 	}
 	
@@ -1487,7 +1485,7 @@ public class RenameTypeTests extends RefactoringTest {
 		RenameArguments[] arguments= (RenameArguments[])argumentList.toArray(new RenameArguments[0]);
 		
 		RenameRefactoring ref= createRefactoring(someClass, newName);
-		setTheOptions(ref, true, true, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		setTheOptions(ref, true, false, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
 		RefactoringStatus status= performRefactoring(ref);
 		assertNull("was supposed to pass", status);
 		
@@ -1538,7 +1536,7 @@ public class RenameTypeTests extends RefactoringTest {
 		RenameArguments[] arguments= (RenameArguments[])argumentList.toArray(new RenameArguments[0]);
 		
 		RenameRefactoring ref= createRefactoring(someClass, newName);
-		setTheOptions(ref, true, true, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		setTheOptions(ref, true, false, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
 		RefactoringStatus status= performRefactoring(ref);
 		assertNull("was supposed to pass", status);
 		
@@ -1556,7 +1554,7 @@ public class RenameTypeTests extends RefactoringTest {
 		IType someClass= getType(cu, "SomeClass");
 		
 		RenameRefactoring ref= createRefactoring(someClass, "SomeNewClass");
-		setTheOptions(ref, true, true, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		setTheOptions(ref, true, false, true, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
 		RefactoringStatus status= performRefactoring(ref);
 		assertNull("was supposed to pass", status);
 		
@@ -1578,7 +1576,44 @@ public class RenameTypeTests extends RefactoringTest {
 		IPackageFragment oldPackage= (IPackageFragment) cu.getParent();
 		IPackageFragment newPackage= (IPackageFragment) rtp.getRefactoredElement(oldPackage);
 		assertEquals(oldPackage, newPackage);
-		
 	}
 	
+	public void testDerivedElements25() throws Exception {
+		// Test renaming of several-in-one field declarations
+		helper3("ScrewUp", "ScrewDown", true, false, true);
+	}
+	
+	public void testDerivedElements26() throws Exception {
+		// Test renaming of several-in-one local variable declarations
+		helper3("ScrewUp", "ScrewDown", true, false, true);
+	}
+	
+	public void testDerivedElements27() throws Exception {
+		// Test methods are not renamed if the match is
+		// not either a parameter or a return type
+		helper3("ScrewUp", "ScrewDown", true, false, true);
+	}
+	
+	public void testDerivedElements28() throws Exception {
+		// Test local variables are not renamed if the match is
+		// not the type of the local variable itself
+		helper3("ScrewUp", "ScrewDown", true, false, true);
+	}
+	
+	public void testDerivedElements29() throws Exception {
+		// Test fields are not renamed if the match is
+		// not the type of the field itself
+		helper3("ScrewUp", "ScrewDown", true, false, true);
+	}
+	
+	public void testDerivedElements30() throws Exception {
+		// Test local variables in initializers
+		helper3("SomeClass", "SomeNewClass", true, false, true);
+	}
+	
+	public void testDerivedElements31() throws Exception {
+		// Test references and textual references to local elements
+		helper3("SomeClass", "SomeDiffClass", true, true, true);
+	}
+
 }
