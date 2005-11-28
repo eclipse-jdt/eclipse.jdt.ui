@@ -108,7 +108,7 @@ public class ExtractConstantRefactoring extends Refactoring {
 	private final ICompilationUnit fCu;
 
 	private IExpressionFragment fSelectedExpression;
-	private Type fConstantType;
+	private Type fConstantTypeCache;
 	private boolean fReplaceAllOccurrences= true; //default value
 	private boolean fQualifyReferencesWithDeclaringClassName= false;	//default value
 
@@ -517,6 +517,9 @@ public class ExtractConstantRefactoring extends Refactoring {
 				if (problem.isError())
 					result.addEntry(JavaRefactorings.createStatusEntry(problem, newCuSource));
 			}
+			
+			fConstantTypeCache= null;
+			fCuRewrite.clearASTAndImportRewrites();
 
 			return result;
 		} finally {
@@ -563,14 +566,14 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	private Type getConstantType() throws JavaModelException {
-		if (fConstantType == null) {
+		if (fConstantTypeCache == null) {
 			IExpressionFragment fragment= getSelectedExpression();
 			ITypeBinding typeBinding= fragment.getAssociatedExpression().resolveTypeBinding();
 			AST ast= fCuRewrite.getAST();
 			typeBinding= Bindings.normalizeForDeclarationUse(typeBinding, ast);
-			fConstantType= fCuRewrite.getImportRewrite().addImport(typeBinding, ast);
+			fConstantTypeCache= fCuRewrite.getImportRewrite().addImport(typeBinding, ast);
 		}
-		return fConstantType;
+		return fConstantTypeCache;
 	}
 
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
