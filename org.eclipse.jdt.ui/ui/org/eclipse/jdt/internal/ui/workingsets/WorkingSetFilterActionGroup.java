@@ -142,7 +142,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	public void setWorkingSet(IWorkingSet workingSet, boolean refreshViewer) {
 		// Update action
 		fClearWorkingSetAction.setEnabled(workingSet != null);
-		fEditWorkingSetAction.setEnabled(workingSet != null);
+		fEditWorkingSetAction.setEnabled(workingSet != null && !workingSet.isAggregateWorkingSet());
 
 		fWorkingSet= workingSet;
 

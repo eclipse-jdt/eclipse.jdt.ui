@@ -63,7 +63,7 @@ public class EditWorkingSetAction extends Action {
 		Shell shell= getShell();
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 		IWorkingSet workingSet= fActionGroup.getWorkingSet();
-		if (workingSet == null) {
+		if (workingSet == null || workingSet.isAggregateWorkingSet()) {
 			setEnabled(false);
 			return;
 		}
