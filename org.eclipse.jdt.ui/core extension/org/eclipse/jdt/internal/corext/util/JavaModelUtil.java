@@ -80,6 +80,8 @@ public final class JavaModelUtil {
 	 * @see JavaCore#getJavaLikeExtensions() 
 	 * @see JavaCore#isJavaLikeFileName(String)
 	 * @see JavaCore#removeJavaLikeExtension(String)
+	 * 
+	 * @see #getRenamedCUName(ICompilationUnit, String)
 	 */
 	public static final String DEFAULT_CU_SUFFIX= ".java"; //$NON-NLS-1$
 	
@@ -835,7 +837,7 @@ public final class JavaModelUtil {
 		if (version == null) {
 			return defaultCompliance;
 		} else if (version.startsWith(JavaCore.VERSION_1_6)) {
-			return JavaCore.VERSION_1_5;
+			return JavaCore.VERSION_1_5; // Note: 1_5 (until 1_6 is available in the UI)
 		} else if (version.startsWith(JavaCore.VERSION_1_5)) {
 			return JavaCore.VERSION_1_5;
 		} else if (version.startsWith(JavaCore.VERSION_1_4)) {
