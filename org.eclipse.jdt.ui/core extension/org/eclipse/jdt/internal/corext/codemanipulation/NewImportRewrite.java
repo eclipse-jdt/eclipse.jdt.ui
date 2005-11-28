@@ -52,7 +52,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * This reference is either unqualified if the import could be added, or fully qualified if the import failed due to a conflict with another element of the same name.
  * </p>
  * <p>
- * On {@link #rewriteImports(CompilationUnit, IProgressMonitor)} or {@link #rewriteImports(IProgressMonitor)} the rewrite translates these descriptions into
+ * On {@link #intrenalerewriteImports(CompilationUnit, IProgressMonitor)} or {@link #rewriteImports(IProgressMonitor)} the rewrite translates these descriptions into
  * text edits that can then be applied to the original source. The rewrite infrastructure tries to generate minimal text changes and only
  * works on the import statements. It is possible to combine the result of an import rewrite with the result of a {@link org.eclipse.jdt.core.dom.rewrite.ASTRewrite}
  * as long as no import statements are modified by the AST rewrite.
@@ -155,6 +155,8 @@ public final class NewImportRewrite {
 	private final ImportRewriteContext fDefaultContext;
 
 	private final ICompilationUnit fCompilationUnit;
+	private final CompilationUnit fASTRoot;
+	
 	private final boolean fRestoreExistingImports;
 	private final List fExistingImports;
 	
@@ -194,7 +196,7 @@ public final class NewImportRewrite {
 				existingImport.add(prefix + curr.getElementName());
 			}
 		}
-		return new NewImportRewrite(cu, existingImport);
+		return new NewImportRewrite(cu, null, existingImport);
 	}
 	
 	/**
@@ -234,11 +236,12 @@ public final class NewImportRewrite {
 				existingImport.add(buf.toString());
 			}
 		}
-		return new NewImportRewrite((ICompilationUnit) astRoot.getJavaElement(), existingImport);
+		return new NewImportRewrite((ICompilationUnit) astRoot.getJavaElement(), astRoot, existingImport);
 	}
 		
-	private NewImportRewrite(ICompilationUnit cu, List existingImports) {
+	private NewImportRewrite(ICompilationUnit cu, CompilationUnit astRoot, List existingImports) {
 		fCompilationUnit= cu;
+		fASTRoot= null; // might be null
 		if (existingImports != null) {
 			fExistingImports= existingImports;
 			fRestoreExistingImports= !existingImports.isEmpty();
@@ -830,10 +833,6 @@ public final class NewImportRewrite {
 	 * to the ones already on record. If this method is called again later, the resulting text edit object will accurately
 	 * reflect the net cumulative affect of all those changes.
 	 * </p>
-	 * <p>
-	 * Note that it is more efficient to use {@link #rewriteImports(CompilationUnit, IProgressMonitor)} if a
-	 * AST of the current compilation unit is already available.
-	 * </p>
 	 * @param monitor the progress monitor or <code>null</code>
 	 * @return text edit object describing the changes to the document corresponding to the changes
 	 * recorded by this rewriter
@@ -852,12 +851,41 @@ public final class NewImportRewrite {
 				fCreatedStaticImports= new String[0];
 				return new MultiTextEdit();
 			}
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
-			parser.setSource(fCompilationUnit);
-			parser.setFocalPosition(0); // reduced AST
-			parser.setResolveBindings(false);
-			CompilationUnit astRoot= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 1));
-			return rewriteImports(astRoot, new SubProgressMonitor(monitor, 1));
+			
+			CompilationUnit astRoot= fASTRoot;
+			if (astRoot == null) {
+				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				parser.setSource(fCompilationUnit);
+				parser.setFocalPosition(0); // reduced AST
+				parser.setResolveBindings(false);
+				astRoot= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 1));
+			}
+			
+			IJavaProject project= fCompilationUnit.getJavaProject();
+			String[] order= getImportOrderPreference(project);
+			int threshold= getImportNumberThreshold(project);
+			
+			ImportRewriteComputer computer= new ImportRewriteComputer(fCompilationUnit, astRoot, order, threshold, fRestoreExistingImports);
+			computer.setFilterImplicitImports(fFilterImplicitImports);
+			
+			if (fAddedImports != null) {
+				for (int i= 0; i < fAddedImports.size(); i++) {
+					String curr= (String) fAddedImports.get(i);
+					computer.addImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0));
+				}
+			}
+			
+			if (fRemovedImports != null) {
+				for (int i= 0; i < fRemovedImports.size(); i++) {
+					String curr= (String) fRemovedImports.get(i);
+					computer.removeImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0));
+				}
+			}
+				
+			TextEdit result= computer.getResultingEdits(new SubProgressMonitor(monitor, 1));
+			fCreatedImports= computer.getCreatedImports();
+			fCreatedStaticImports= computer.getCreatedStaticImports();
+			return result;
 		} finally {
 			monitor.done();
 		}
@@ -883,7 +911,7 @@ public final class NewImportRewrite {
 	 * recorded by this rewriter
 	 * @throws CoreException the exception is thrown if the rewrite failed.
 	 */
-	public final TextEdit rewriteImports(CompilationUnit astRoot, IProgressMonitor monitor) throws CoreException {
+	public final TextEdit intrenalerewriteImports(CompilationUnit astRoot, IProgressMonitor monitor) throws CoreException {
 		if (!fCompilationUnit.equals(astRoot.getJavaElement())) {
 			throw new IllegalArgumentException("AST is not from the compilation unit that was used when creating the import rewrite."); //$NON-NLS-1$
 		}
@@ -922,7 +950,7 @@ public final class NewImportRewrite {
 	}
 	
 	/**
-	 * Returns all new non-static imports created by the last invocation of {@link #rewriteImports(CompilationUnit, IProgressMonitor)} or {@link #rewriteImports(IProgressMonitor)}
+	 * Returns all new non-static imports created by the last invocation of {@link #intrenalerewriteImports(CompilationUnit, IProgressMonitor)} or {@link #rewriteImports(IProgressMonitor)}
 	 * or <code>null</code> if these methods have not been called yet.
 	 * <p>
 	 * 	Note that this list doesn't need to be the same as the added imports (see {@link #getAddedImports()}) as
@@ -935,7 +963,7 @@ public final class NewImportRewrite {
 	}
 	
 	/**
-	 * Returns all new static imports created by the last invocation of {@link #rewriteImports(CompilationUnit, IProgressMonitor)} or {@link #rewriteImports(IProgressMonitor)}
+	 * Returns all new static imports created by the last invocation of {@link #intrenalerewriteImports(CompilationUnit, IProgressMonitor)} or {@link #rewriteImports(IProgressMonitor)}
 	 * or <code>null</code> if these methods have not been called yet.
 	 * <p>
 	 * Note that this list doesn't need to be the same as the added static imports ({@link #getAddedStaticImports()}) as

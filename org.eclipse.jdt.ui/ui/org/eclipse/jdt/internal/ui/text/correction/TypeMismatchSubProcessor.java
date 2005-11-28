@@ -40,7 +40,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -134,7 +134,7 @@ public class TypeMismatchSubProcessor {
 				}
 
 				ASTRewrite rewrite= ASTRewrite.create(ast);
-				ImportRewrite imports= new ImportRewrite(cu);
+				NewImportRewrite imports= NewImportRewrite.create(astRoot, true);
 
 				Type newReturnType= imports.addImport(currBinding, ast);
 				rewrite.replace(methodDeclaration.getReturnType2(), newReturnType, null);

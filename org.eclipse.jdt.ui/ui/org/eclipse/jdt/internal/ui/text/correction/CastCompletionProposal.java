@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -28,6 +29,7 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -52,13 +54,13 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 		setCommandId(ADD_CAST_ID);
 	}
 
-	private Type getNewCastTypeNode(ASTRewrite rewrite) throws CoreException {
+	private Type getNewCastTypeNode(ASTRewrite rewrite, NewImportRewrite importRewrite) throws CoreException {
 		AST ast= rewrite.getAST();
 		if (fCastType != null) {
 			if (fCastType instanceof ITypeBinding) {
-				return getImportRewrite().addImport((ITypeBinding) fCastType, ast);
+				return importRewrite.addImport((ITypeBinding) fCastType, ast);
 			} else {
-				String string= getImportRewrite().addImport((String) fCastType);
+				String string= importRewrite.addImport((String) fCastType);
 				return ASTNodeFactory.newType(ast, string);
 			}
 		}
@@ -81,7 +83,7 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 				if (bindings.length > 0) {
 					ITypeBinding first= getCastFavorite(bindings, fNodeToCast.resolveTypeBinding());
 
-					Type newTypeNode= getImportRewrite().addImport(first, ast);
+					Type newTypeNode= importRewrite.addImport(first, ast);
 					addLinkedPosition(rewrite.track(newTypeNode), true, "casttype"); //$NON-NLS-1$
 					for (int i= 0; i < bindings.length; i++) {
 						addLinkedPositionProposal("casttype", bindings[i]); //$NON-NLS-1$
@@ -116,8 +118,9 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 	protected ASTRewrite getRewrite() throws CoreException {
 		AST ast= fNodeToCast.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
+		NewImportRewrite importRewrite= createImportRewrite((CompilationUnit) fNodeToCast.getRoot());
 
-		Type newTypeNode= getNewCastTypeNode(rewrite);
+		Type newTypeNode= getNewCastTypeNode(rewrite, importRewrite);
 
 		if (fNodeToCast.getNodeType() == ASTNode.CAST_EXPRESSION) {
 			CastExpression expression= (CastExpression) fNodeToCast;

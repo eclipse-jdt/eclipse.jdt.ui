@@ -68,6 +68,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 			setDisplayName(CorrectionMessages.AssignToVariableAssistProposal_assigntofield_description);
 			setImage(JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE));
 		}
+		createImportRewrite((CompilationUnit) node.getRoot());
 	}
 
 	public AssignToVariableAssistProposal(ICompilationUnit cu, SingleVariableDeclaration parameter, VariableDeclarationFragment existingFragment, ITypeBinding typeBinding, int relevance) {
@@ -99,6 +100,8 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		AST ast= fNodeToAssign.getAST();
 
 		ASTRewrite rewrite= ASTRewrite.create(ast);
+		
+		createImportRewrite((CompilationUnit) fNodeToAssign.getRoot());
 
 		String[] varNames= suggestLocalVariableNames(fTypeBinding, expression);
 		for (int i= 0; i < varNames.length; i++) {
@@ -137,6 +140,8 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		AST ast= newTypeDecl.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
+		createImportRewrite((CompilationUnit) fNodeToAssign.getRoot());
+		
 		BodyDeclaration bodyDecl= ASTResolving.findParentBodyDeclaration(fNodeToAssign);
 		Block body;
 		if (bodyDecl instanceof MethodDeclaration) {
@@ -244,7 +249,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		for (int i= 0; i < proposals.length; i++) {
 			addLinkedPositionProposal(KEY_TYPE, proposals[i]);
 		}
-		return getImportRewrite().addImport(fTypeBinding, ast);
+		return getImportRewrite1().addImport(fTypeBinding, ast);
 	}
 
 	private String[] suggestLocalVariableNames(ITypeBinding binding, Expression expression) {

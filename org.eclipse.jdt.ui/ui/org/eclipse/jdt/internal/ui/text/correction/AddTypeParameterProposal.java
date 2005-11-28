@@ -78,12 +78,14 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
+			createImportRewrite(fAstRoot);
 		} else {
 			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
 			CompilationUnit newRoot= (CompilationUnit) astParser.createAST(null);
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());
+			createImportRewrite(newRoot);
 		}
 		AST ast= declNode.getAST();
 		TypeParameter newTypeParam= ast.newTypeParameter();
@@ -91,7 +93,7 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 		if (fBounds != null && fBounds.length > 0) {
 			List typeBounds= newTypeParam.typeBounds();
 			for (int i= 0; i < fBounds.length; i++) {
-				Type newBound= getImportRewrite().addImport(fBounds[i], ast);
+				Type newBound= getImportRewrite1().addImport(fBounds[i], ast);
 				typeBounds.add(newBound);
 			}
 		}

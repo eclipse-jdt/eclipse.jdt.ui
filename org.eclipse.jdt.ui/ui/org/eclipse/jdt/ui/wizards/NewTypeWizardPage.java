@@ -182,10 +182,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	public static class ImportsManager {
 
 		private NewImportRewrite fImportsRewrite;
-		private final CompilationUnit fAstRoot;
 				
 		/* package */ ImportsManager(CompilationUnit astRoot) throws CoreException {
-			fAstRoot= astRoot;
 			fImportsRewrite= NewImportRewrite.create(astRoot, true);
 		}
 
@@ -222,7 +220,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 				
 		/* package */ void create(boolean needsSave, IProgressMonitor monitor) throws CoreException {
-			TextEdit edit= fImportsRewrite.rewriteImports(fAstRoot, monitor);
+			TextEdit edit= fImportsRewrite.rewriteImports(monitor);
 			JavaModelUtil.applyEdit(fImportsRewrite.getCompilationUnit(), edit, needsSave, null);
 		}
 		

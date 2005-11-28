@@ -148,7 +148,7 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 			if (edit != null) {
 				edit.apply(fDocument, 0);
 				
-				TextEdit importsEdit= importRewrite.rewriteImports(astRoot, new SubProgressMonitor(monitor, 5));
+				TextEdit importsEdit= importRewrite.rewriteImports(new SubProgressMonitor(monitor, 5));
 				importsEdit.apply(fDocument, 0);
 			}
 		} catch (BadLocationException e) {

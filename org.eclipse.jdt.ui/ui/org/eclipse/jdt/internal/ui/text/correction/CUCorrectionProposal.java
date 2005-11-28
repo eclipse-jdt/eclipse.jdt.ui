@@ -14,20 +14,14 @@ package org.eclipse.jdt.internal.ui.text.correction;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.compare.rangedifferencer.IRangeComparator;
-import org.eclipse.compare.rangedifferencer.RangeDifference;
-import org.eclipse.compare.rangedifferencer.RangeDifferencer;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.dialogs.ErrorDialog;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -36,24 +30,30 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.compare.rangedifferencer.IRangeComparator;
+import org.eclipse.compare.rangedifferencer.RangeDifference;
+import org.eclipse.compare.rangedifferencer.RangeDifferencer;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextFileChange;
+
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.compare.JavaTokenComparator;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.JavaUI;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.DocumentChange;
-import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.TextFileChange;
 
 /**
  * A proposal for quick fixes and quick assist that work on a single compilation unit.
@@ -68,7 +68,6 @@ import org.eclipse.ltk.core.refactoring.TextFileChange;
 public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	private ICompilationUnit fCompilationUnit;
-	private ImportRewrite fImportRewrite;
 
 	/**
 	 * Constructs a compilation unit correction proposal.
@@ -93,7 +92,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance, Image image) {
 		super(name, change, relevance, image);
 		fCompilationUnit= cu;
-		fImportRewrite= null;
 	}
 
 	/**
@@ -107,25 +105,6 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		if (false) {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, "Implementors can throw an exception", null)); //$NON-NLS-1$
 		}
-	}
-
-	// import management
-
-	/**
-	 * Returns the import rewriter used for this compilation unit.
-	 */
-	public ImportRewrite getImportRewrite() throws CoreException {
-		if (fImportRewrite == null) {
-			fImportRewrite= new ImportRewrite(getCompilationUnit());
-		}
-		return fImportRewrite;
-	}
-
-	/**
-	 * Sets the import rewriter used for this compilation unit.
-	 */
-	public void setImportRewrite(ImportRewrite rewrite) {
-		fImportRewrite= rewrite;
 	}
 
 	/*
@@ -289,12 +268,9 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		TextEdit rootEdit= new MultiTextEdit();
 		change.setEdit(rootEdit);
 
-		// initialialize text change
+		// initialize text change
 		IDocument document= change.getCurrentDocument(new NullProgressMonitor());
 		addEdits(document, rootEdit);
-		if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
-			rootEdit.addChild(fImportRewrite.createEdit(document, new NullProgressMonitor()));
-		}
 		return change;
 	}
 		

@@ -97,21 +97,10 @@ public abstract class AbstractFix implements IFix {
 	 * @throws CoreException
 	 */
 	protected TextEdit applyEdits(CompilationUnit compilationUnit, ASTRewrite rewrite, NewImportRewrite imports) throws CoreException {
-		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
-		IPath path= compilationUnit.getJavaElement().getPath();
-		manager.connect(path, null);
-		try {
-			IDocument document= manager.getTextFileBuffer(path).getDocument();
-			
-			Map options= compilationUnit.getJavaElement().getJavaProject().getOptions(true);
-			TextEdit edit= rewrite.rewriteAST(document, options);
-	
-			if (imports != null) {
-				edit.addChild(imports.rewriteImports(compilationUnit, new NullProgressMonitor()));
-			}
-			return edit;
-		} finally {
-			manager.disconnect(path, null);
+		TextEdit edit= rewrite.rewriteAST();
+		if (imports != null) {
+			edit.addChild(imports.rewriteImports(new NullProgressMonitor()));
 		}
+		return edit;
 	}
 }

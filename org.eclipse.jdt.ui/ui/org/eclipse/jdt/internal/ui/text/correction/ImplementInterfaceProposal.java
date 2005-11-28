@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -57,21 +58,23 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 	protected ASTRewrite getRewrite() throws CoreException {
 		ASTNode boundNode= fAstRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
-
+		CompilationUnit newRoot= fAstRoot;
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
 		} else {
 			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
-			CompilationUnit newRoot= (CompilationUnit) astParser.createAST(null);
+			newRoot= (CompilationUnit) astParser.createAST(null);
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());
 		}
+		NewImportRewrite imports= createImportRewrite(newRoot);
+		
 		if (declNode instanceof TypeDeclaration) {
 			AST ast= declNode.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 
-			Type newInterface= getImportRewrite().addImport(fNewInterface, ast);
+			Type newInterface= imports.addImport(fNewInterface, ast);
 			ListRewrite listRewrite= rewrite.getListRewrite(declNode, TypeDeclaration.SUPER_INTERFACE_TYPES_PROPERTY);
 			listRewrite.insertLast(newInterface, null);
 

@@ -34,6 +34,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -81,21 +82,22 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 	protected ASTRewrite getRewrite() throws CoreException {
 		ASTNode boundNode= fAstRoot.findDeclaringNode(fBinding);
 		ASTNode declNode= null;
-
+		CompilationUnit newRoot= fAstRoot;
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
 		} else {
 			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
 			astParser.setSource(getCompilationUnit());
 			astParser.setResolveBindings(true);
-			CompilationUnit newRoot= (CompilationUnit) astParser.createAST(null);
+			newRoot= (CompilationUnit) astParser.createAST(null);
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());
 		}
 		if (declNode != null) {
 			AST ast= declNode.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
+			NewImportRewrite imports= createImportRewrite(newRoot);
 
-			Type type= getImportRewrite().addImport(fNewType, ast);
+			Type type= imports.addImport(fNewType, ast);
 
 			if (declNode instanceof MethodDeclaration) {
 				MethodDeclaration methodDecl= (MethodDeclaration) declNode;

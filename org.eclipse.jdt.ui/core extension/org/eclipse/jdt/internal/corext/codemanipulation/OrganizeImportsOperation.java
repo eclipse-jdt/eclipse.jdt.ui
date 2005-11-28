@@ -430,7 +430,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				}				
 			}
 			
-			TextEdit edit= importsRewrite.rewriteImports(astRoot, new SubProgressMonitor(monitor, 3));
+			TextEdit edit= importsRewrite.rewriteImports(new SubProgressMonitor(monitor, 3));
 			JavaModelUtil.applyEdit(fCompilationUnit, edit, fDoSave, new SubProgressMonitor(monitor, 1));
 						
 			determineImportDifferences(importsRewrite, oldSingleImports, oldDemandImports);

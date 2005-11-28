@@ -18,7 +18,6 @@ import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
-
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -30,9 +29,10 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
@@ -68,7 +68,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 	 */
 	protected void addNewParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException {
 		AST ast= rewrite.getAST();
-		ImportRewrite importRewrite= getImportRewrite();
+		NewImportRewrite importRewrite= getImportRewrite1();
 		ITypeBinding[] bindings= fMethod.getParameterTypes();
 
 		IJavaProject project= getCompilationUnit().getJavaProject();
@@ -118,7 +118,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getNewMethodType(org.eclipse.jdt.core.dom.rewrite.ASTRewrite)
 	 */
 	protected Type getNewMethodType(ASTRewrite rewrite) throws CoreException {
-		Type newTypeNode= getImportRewrite().addImport(fMethod.getReturnType(), rewrite.getAST());
+		Type newTypeNode= getImportRewrite1().addImport(fMethod.getReturnType(), rewrite.getAST());
 
 		addLinkedPosition(rewrite.track(newTypeNode), false, KEY_TYPE);
 		return newTypeNode;
@@ -129,7 +129,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 	 */
 	protected void addNewExceptions(ASTRewrite rewrite, List exceptions) throws CoreException {
 		AST ast= rewrite.getAST();
-		ImportRewrite importRewrite= getImportRewrite();
+		NewImportRewrite importRewrite= getImportRewrite1();
 		ITypeBinding[] bindings= fMethod.getExceptionTypes();
 		for (int i= 0; i < bindings.length; i++) {
 			String typeName= importRewrite.addImport(bindings[i]);

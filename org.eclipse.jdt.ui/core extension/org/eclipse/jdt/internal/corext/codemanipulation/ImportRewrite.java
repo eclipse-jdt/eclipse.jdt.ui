@@ -30,12 +30,10 @@ import org.eclipse.jdt.core.dom.Type;
  */
 public final class ImportRewrite {
 	
-	private NewImportRewrite fImportsStructure;
-	private final CompilationUnit fASTRoot;
+	private NewImportRewrite fNewImportRewrite;
 	
-	private ImportRewrite(NewImportRewrite rewrite, CompilationUnit root) {
-		fImportsStructure= rewrite;
-		fASTRoot= root;
+	public ImportRewrite(NewImportRewrite rewrite) {
+		fNewImportRewrite= rewrite;
 	}
 
 	/**
@@ -45,7 +43,7 @@ public final class ImportRewrite {
 	 * @throws CoreException
 	 */
 	public ImportRewrite(ICompilationUnit cu, CompilationUnit root) throws CoreException {
-		this(NewImportRewrite.create(root, true), root);
+		this(NewImportRewrite.create(root, true));
 	}
 	
 	/**
@@ -54,33 +52,37 @@ public final class ImportRewrite {
 	 * @throws CoreException
 	 */
 	public ImportRewrite(ICompilationUnit cu) throws CoreException {
-		this(NewImportRewrite.create(cu, true), null);
+		this(NewImportRewrite.create(cu, true));
+	}
+	
+	public NewImportRewrite getNewImportRewrite() {
+		return fNewImportRewrite;
 	}
 	
 	/**
 	 * @deprecated Use #createEdit(IDocument, IProgressMonitor) instead
 	 */
 	public final TextEdit createEdit(IDocument document) throws CoreException {
-		return createEdit(document, null);
+		return createEdit((IProgressMonitor) null);
 	}
 	
 	public final TextEdit createEdit(IDocument document, IProgressMonitor monitor) throws CoreException {
-		if (fASTRoot == null) {
-			return fImportsStructure.rewriteImports(monitor);
-		} else {
-			return fImportsStructure.rewriteImports(fASTRoot, monitor);
-		}
+		return createEdit(monitor);
+	}
+	
+	public final TextEdit createEdit(IProgressMonitor monitor) throws CoreException {
+		return fNewImportRewrite.rewriteImports(monitor);
 	}
 			
 	public ICompilationUnit getCompilationUnit() {
-		return fImportsStructure.getCompilationUnit();
+		return fNewImportRewrite.getCompilationUnit();
 	}
 	
 	/**
 	 * @see ImportsStructure#setFilterImplicitImports(boolean)
 	 */
 	public void setFilterImplicitImports(boolean filterImplicitImports) {
-		fImportsStructure.setFilterImplicitImports(filterImplicitImports);
+		fNewImportRewrite.setFilterImplicitImports(filterImplicitImports);
 	}
 		
 	/**
@@ -93,7 +95,7 @@ public final class ImportRewrite {
 	 * The type name can contain dimensions.
 	 */
 	public String addImport(String qualifiedTypeName) {
-		return fImportsStructure.addImport(qualifiedTypeName);
+		return fNewImportRewrite.addImport(qualifiedTypeName);
 	}
 	
 	/**
@@ -106,7 +108,7 @@ public final class ImportRewrite {
 	 * The type name can contain dimensions.
 	 */
 	public String addStaticImport(String qualifiedName, String selector, boolean isField) {
-		return fImportsStructure.addStaticImport(qualifiedName, selector, isField);
+		return fNewImportRewrite.addStaticImport(qualifiedName, selector, isField);
 	}
 	
 	/**
@@ -117,7 +119,7 @@ public final class ImportRewrite {
 	 * fully qualified type name if an import conflict prevented the import.
 	 */
 	public String addStaticImport(IBinding binding) {
-		return fImportsStructure.addStaticImport(binding);
+		return fNewImportRewrite.addStaticImport(binding);
 	}
 	
 	/**
@@ -133,7 +135,7 @@ public final class ImportRewrite {
 	 * of wildcards are ignored.
 	 */
 	public String addImport(ITypeBinding binding) {
-		return fImportsStructure.addImport(binding);
+		return fNewImportRewrite.addImport(binding);
 	}
 	
 	
@@ -151,7 +153,7 @@ public final class ImportRewrite {
 	 * wildcards are ignored.
 	 */
 	public Type addImport(ITypeBinding binding, AST ast) {
-		return fImportsStructure.addImport(binding, ast);
+		return fNewImportRewrite.addImport(binding, ast);
 	}
 	
 	/**
@@ -168,7 +170,7 @@ public final class ImportRewrite {
 	 * wildcards are ignored.
 	 */
 	public Type addImportFromSignature(String typeSig, AST ast) {
-		return fImportsStructure.addImportFromSignature(typeSig, ast);
+		return fNewImportRewrite.addImportFromSignature(typeSig, ast);
 	}
 
 	/**
@@ -177,7 +179,7 @@ public final class ImportRewrite {
 	 * @return Returns true if an import for the given type existed.
 	 */
 	public boolean removeImport(ITypeBinding binding) {
-		return fImportsStructure.removeImport(binding.getTypeDeclaration().getQualifiedName());
+		return fNewImportRewrite.removeImport(binding.getTypeDeclaration().getQualifiedName());
 	}
 	
 	/**
@@ -186,7 +188,7 @@ public final class ImportRewrite {
 	 * @return Returns true if an import for the given type existed.
 	 */
 	public boolean removeImport(String qualifiedTypeName) {
-		return fImportsStructure.removeImport(qualifiedTypeName);
+		return fNewImportRewrite.removeImport(qualifiedTypeName);
 	}
 	
 	/**
@@ -195,7 +197,7 @@ public final class ImportRewrite {
 	 * @return Returns true if an import for the given type existed.
 	 */
 	public boolean removeStaticImport(String qualifiedName) {
-		return fImportsStructure.removeStaticImport(qualifiedName);
+		return fNewImportRewrite.removeStaticImport(qualifiedName);
 	}
 	
 	/**
@@ -206,18 +208,18 @@ public final class ImportRewrite {
 	 * 	container; otherwise <code>false</code> is returned
 	 */
 	public boolean isEmpty() {
-		return !fImportsStructure.hasRecordedChanges();
+		return !fNewImportRewrite.hasRecordedChanges();
 	}
 
 	public String[] getCreatedImports() {
-	    return fImportsStructure.getCreatedImports();
+	    return fNewImportRewrite.getCreatedImports();
 	}
 	
 	public String[] getCreatedStaticImports() {
-	    return fImportsStructure.getCreatedStaticImports();
+	    return fNewImportRewrite.getCreatedStaticImports();
 	}
 	
 	public String toString() {
-		return fImportsStructure.toString();
+		return fNewImportRewrite.toString();
 	}
 }

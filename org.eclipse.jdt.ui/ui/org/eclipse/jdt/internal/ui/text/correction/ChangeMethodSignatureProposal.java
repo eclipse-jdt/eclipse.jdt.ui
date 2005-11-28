@@ -42,7 +42,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -123,6 +123,8 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			astRoot= (CompilationUnit) astParser.createAST(null);
 			newMethodDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 		}
+		createImportRewrite(astRoot);
+		
 		if (newMethodDecl instanceof MethodDeclaration) {
 			MethodDeclaration decl= (MethodDeclaration) newMethodDecl;
 
@@ -149,7 +151,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			usedNames.add(declaredFields[i].getName());
 		}
 
-		ImportRewrite imports= getImportRewrite();
+		NewImportRewrite imports= getImportRewrite1();
 		ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.PARAMETERS_PROPERTY);
 
 		List parameters= methodDecl.parameters(); // old parameters
@@ -335,7 +337,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	private void modifyExceptions(ASTRewrite rewrite, MethodDeclaration methodDecl) throws CoreException {
 		AST ast= methodDecl.getAST();
 
-		ImportRewrite imports= getImportRewrite();
+		NewImportRewrite imports= getImportRewrite1();
 		ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY);
 
 		List exceptions= methodDecl.thrownExceptions(); // old exceptions

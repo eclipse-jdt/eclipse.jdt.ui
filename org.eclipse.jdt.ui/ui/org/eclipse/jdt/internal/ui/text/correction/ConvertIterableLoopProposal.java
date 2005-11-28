@@ -45,7 +45,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
@@ -191,7 +191,8 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 		final AST ast= fStatement.getAST();
 		final ASTRewrite astRewrite= ASTRewrite.create(ast);
 		
-		final ImportRemover remover= new ImportRemover(getCompilationUnit().getJavaProject(), (CompilationUnit) fStatement.getRoot());
+		CompilationUnit astRoot= (CompilationUnit) fStatement.getRoot();
+		final ImportRemover remover= new ImportRemover(getCompilationUnit().getJavaProject(), astRoot);
 		
 		final EnhancedForStatement statement= ast.newEnhancedForStatement();
 		final List names= computeElementNames();
@@ -265,7 +266,7 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 		addLinkedPosition(astRewrite.track(simple), true, GROUP_ELEMENT);
 		declaration.setName(simple);
 		final ITypeBinding iterable= getIterableType(fIterator.getType());
-		final ImportRewrite imports= getImportRewrite();
+		final NewImportRewrite imports= createImportRewrite(astRoot);
 		declaration.setType(imports.addImport(iterable, ast));
 		remover.registerAddedImport(iterable.getQualifiedName());
 		statement.setParameter(declaration);

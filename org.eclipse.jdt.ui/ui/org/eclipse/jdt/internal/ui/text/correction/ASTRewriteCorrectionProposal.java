@@ -10,20 +10,21 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.Map;
-
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
@@ -37,6 +38,7 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	private ASTRewrite fRewrite;
+	private NewImportRewrite fImportRewrite;
 
 	/**
 	 * Constructs a AST rewrite correction proposal.
@@ -53,6 +55,29 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 		fRewrite= rewrite;
 	}
 
+	/**
+	 * Returns the import rewriter used for this compilation unit.
+	 */
+	public NewImportRewrite getImportRewrite1() throws CoreException {
+		return fImportRewrite;
+	}
+
+	/**
+	 * Sets the import rewriter used for this compilation unit.
+	 */
+	public void setImportRewrite(NewImportRewrite rewrite) {
+		fImportRewrite= rewrite;
+	}
+	
+	/**
+	 * Sets the import rewriter used for this compilation unit.
+	 */
+	public NewImportRewrite createImportRewrite(CompilationUnit astRoot) {
+		fImportRewrite= NewImportRewrite.create(astRoot, true);
+		return fImportRewrite;
+	}
+	
+	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#addEdits(org.eclipse.jface.text.IDocument)
 	 */
@@ -61,12 +86,14 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 		ASTRewrite rewrite= getRewrite();
 		if (rewrite != null) {
 			try {
-				Map options= getCompilationUnit().getJavaProject().getOptions(true);
-				TextEdit edit= rewrite.rewriteAST(document, options);
+				TextEdit edit= rewrite.rewriteAST();
 				editRoot.addChild(edit);
 			} catch (IllegalArgumentException e) {
 				throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 			}
+		}
+		if (fImportRewrite != null) {
+			editRoot.addChild(fImportRewrite.rewriteImports(new NullProgressMonitor()));
 		}
 	}
 

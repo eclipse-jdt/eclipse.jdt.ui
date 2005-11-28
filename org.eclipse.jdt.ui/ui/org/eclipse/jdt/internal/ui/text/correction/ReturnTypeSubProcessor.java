@@ -42,7 +42,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -159,8 +159,8 @@ public class ReturnTypeSubProcessor {
 				String label= Messages.format(CorrectionMessages.ReturnTypeSubProcessor_voidmethodreturns_description, BindingLabelProvider.getBindingLabel(binding, BindingLabelProvider.DEFAULT_TEXTFLAGS));
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
-
-				Type newReturnType= proposal.getImportRewrite().addImport(binding, ast);
+				NewImportRewrite imports= proposal.createImportRewrite(astRoot);
+				Type newReturnType= imports.addImport(binding, ast);
 
 				if (methodDeclaration.isConstructor()) {
 					rewrite.set(methodDeclaration, MethodDeclaration.CONSTRUCTOR_PROPERTY, Boolean.FALSE, null);
@@ -227,7 +227,7 @@ public class ReturnTypeSubProcessor {
 			}
 			
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			ImportRewrite imports= new ImportRewrite(cu);
+			NewImportRewrite imports= NewImportRewrite.create(astRoot, true);
 
 			Type type= imports.addImport(typeBinding, ast);
 
