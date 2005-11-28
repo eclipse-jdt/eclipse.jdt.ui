@@ -124,7 +124,7 @@ public class JavaReconciler extends MonoReconciler {
 		 * @see org.eclipse.swt.events.ShellListener#shellDeactivated(org.eclipse.swt.events.ShellEvent)
 		 */
 		public void shellDeactivated(ShellEvent e) {
-			if (!fControl.isDisposed() && fControl.isVisible()) {
+			if (!fControl.isDisposed() && fControl.getShell() == e.getSource()) {
 				setJavaModelChanged(false);
 				setEditorActive(false);
 			}
