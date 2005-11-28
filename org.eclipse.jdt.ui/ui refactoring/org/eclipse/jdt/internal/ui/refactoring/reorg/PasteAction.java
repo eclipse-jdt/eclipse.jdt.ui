@@ -418,7 +418,7 @@ public class PasteAction extends SelectionDispatchAction{
 					else
 						pm.worked(1);
 					
-					final String cuName= fCuParser.getTypeName() + ".java"; //$NON-NLS-1$
+					final String cuName= fCuParser.getTypeName() + JavaModelUtil.DEFAULT_CU_SUFFIX;
 					final ICompilationUnit cu= fDestinationPack.getCompilationUnit(cuName);
 					boolean alreadyExists= cu.exists();
 					if (alreadyExists) {

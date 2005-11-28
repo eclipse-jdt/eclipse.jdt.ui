@@ -37,6 +37,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.INewNameQuery;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -162,7 +163,7 @@ public class NewNameQueries implements INewNameQueries {
 			public String isValid(String newText) {
 				if (newText == null || "".equals(newText)) //$NON-NLS-1$
 					return INVALID_NAME_NO_MESSAGE;
-				String newCuName= newText + ".java"; //$NON-NLS-1$
+				String newCuName= JavaModelUtil.getRenamedCUName(cu, newText);
 				IStatus status= JavaConventions.validateCompilationUnitName(newCuName);	
 				if (status.getSeverity() == IStatus.ERROR)
 					return status.getMessage();

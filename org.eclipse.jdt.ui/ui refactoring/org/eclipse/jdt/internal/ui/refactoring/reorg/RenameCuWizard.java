@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -26,8 +27,6 @@ import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameCuWizard extends RenameTypeWizard {
 	
-	private static final String JAVA_FILE_EXT= ".java";  //$NON-NLS-1$
-	
 	public RenameCuWizard(Refactoring refactoring) {
 		super(refactoring,
 			RefactoringMessages.RenameCuWizard_defaultPageTitle, 
@@ -37,7 +36,7 @@ public class RenameCuWizard extends RenameTypeWizard {
 	}
 	
 	protected RefactoringStatus validateNewName(String newName) {
-		String fullName= newName + JAVA_FILE_EXT;
+		String fullName= JavaModelUtil.getRenamedCUName(getRenameTypeProcessor().getType().getCompilationUnit(), newName);
 		return super.validateNewName(fullName);
 	}
 	

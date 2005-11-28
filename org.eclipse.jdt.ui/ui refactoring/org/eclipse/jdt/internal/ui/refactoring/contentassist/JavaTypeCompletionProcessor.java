@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -34,7 +35,7 @@ public class JavaTypeCompletionProcessor extends CUPositionCompletionProcessor {
 	 * The CU name to be used if no parent ICompilationUnit is available.
 	 * The main type of this class will be filtered out from the proposals list.
 	 */
-	public static final String DUMMY_CU_NAME= DUMMY_CLASS_NAME + ".java"; //$NON-NLS-1$
+	public static final String DUMMY_CU_NAME= DUMMY_CLASS_NAME + JavaModelUtil.DEFAULT_CU_SUFFIX;
 	
 	/**
 	 * Creates a <code>JavaTypeCompletionProcessor</code>.
