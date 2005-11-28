@@ -15,17 +15,14 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.util.ArrayList;
 
-import org.eclipse.search.ui.ISearchPage;
-import org.eclipse.search.ui.ISearchPageContainer;
-import org.eclipse.search.ui.NewSearchUI;
-
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
@@ -46,24 +43,29 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogPage;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.window.Window;
 
+import org.eclipse.jface.text.ITextSelection;
+
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.ElementTreeSelectionDialog;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 import org.eclipse.ui.dialogs.SelectionDialog;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.model.IWorkbenchAdapter;
+
+import org.eclipse.search.ui.ISearchPage;
+import org.eclipse.search.ui.ISearchPageContainer;
+import org.eclipse.search.ui.NewSearchUI;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
@@ -79,15 +81,15 @@ import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
-
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -633,31 +635,42 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 			if (o instanceof IFile && ((IFile) o).getFileExtension().equalsIgnoreCase("properties")) { //$NON-NLS-1$
 				IPath propertyFullPath= ((IFile)o).getFullPath();
 				String typePathStr= null;
-
-				// try to be smarter and find a corresponding CU
-				IPath cuPath= propertyFullPath.removeFileExtension().addFileExtension("java"); //$NON-NLS-1$
-				IFile cuFile= (IFile)JavaPlugin.getWorkspace().getRoot().findMember(cuPath);
-				if (cuFile == null) { //try with uppercase first char
-					String filename= cuPath.removeFileExtension().lastSegment();
-					if (filename != null && filename.length() > 0) {
-						filename= Character.toUpperCase(filename.charAt(0)) + filename.substring(1);
-						IPath dirPath= propertyFullPath.removeLastSegments(1).addTrailingSeparator();
-						cuPath= dirPath.append(filename).addFileExtension("java"); //$NON-NLS-1$
-						cuFile= (IFile)JavaPlugin.getWorkspace().getRoot().findMember(cuPath);
-					}
-				}
 				IType type= null;
-				if (cuFile != null && cuFile.exists()) {
-					IJavaElement  cu= JavaCore.create(cuFile);
-					if (cu != null && cu.exists() && cu.getElementType() == IJavaElement.COMPILATION_UNIT)
-						type= ((ICompilationUnit)cu).findPrimaryType();
+				
+				String[] javaExtensions= JavaCore.getJavaLikeExtensions();
+				for (int i= 0; i < javaExtensions.length; i++) { 
+					String extension= javaExtensions[i];
+					
+					// XXX, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=118246
+					extension= extension.substring(1);
+				
+					// try to be smarter and find a corresponding CU
+					IPath cuPath= propertyFullPath.removeFileExtension().addFileExtension(extension);
+					IFile cuFile= (IFile)JavaPlugin.getWorkspace().getRoot().findMember(cuPath);
+					if (cuFile == null) { //try with uppercase first char
+						String filename= cuPath.removeFileExtension().lastSegment();
+						if (filename != null && filename.length() > 0) {
+							filename= Character.toUpperCase(filename.charAt(0)) + filename.substring(1);
+							IPath dirPath= propertyFullPath.removeLastSegments(1).addTrailingSeparator();
+							cuPath= dirPath.append(filename).addFileExtension(extension);
+							cuFile= (IFile)JavaPlugin.getWorkspace().getRoot().findMember(cuPath);
+						}
+					}
+					
+					if (cuFile != null && cuFile.exists()) {
+						IJavaElement  cu= JavaCore.create(cuFile);
+						if (cu != null && cu.exists() && cu.getElementType() == IJavaElement.COMPILATION_UNIT)
+							type= ((ICompilationUnit)cu).findPrimaryType();
 						if (type != null)
 							typePathStr= JavaModelUtil.getFullyQualifiedName(type);
 						else {
 							IPath propertyFile= propertyFullPath.removeFirstSegments(propertyFullPath.segmentCount() - 1);
 							typePathStr= propertyFile.removeFileExtension().toString();
 						}
+						break;
+					}
 				}
+				
 				return new SearchPatternData(typePathStr, type, propertyFullPath.toString());
 			}
 		}

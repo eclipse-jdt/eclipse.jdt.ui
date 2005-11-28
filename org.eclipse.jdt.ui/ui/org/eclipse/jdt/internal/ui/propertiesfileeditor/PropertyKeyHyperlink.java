@@ -61,6 +61,7 @@ import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
 import org.eclipse.search.internal.core.text.MatchLocator;
 import org.eclipse.search.internal.core.text.TextSearchEngine;
 
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -457,7 +458,12 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		SearchScope result= SearchScope.newSearchScope("", new IResource[] { scope }); //$NON-NLS-1$
 
 		// XXX: Should be configurable via preference, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81117
-		result.addFileNamePattern("*.java"); //$NON-NLS-1$
+		String[] javaExtensions= JavaCore.getJavaLikeExtensions();
+		for (int i= 0; i < javaExtensions.length; i++)
+			/*
+			 * XXX: no dot added due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=118246
+			 */ 
+			result.addFileNamePattern("*" + javaExtensions[i]); //$NON-NLS-1$
 		result.addFileNamePattern("*.xml"); //$NON-NLS-1$
 		result.addFileNamePattern("*.ini"); //$NON-NLS-1$
 
