@@ -222,9 +222,15 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		//force events from display
 		pushDisplay();
 		
+		assertPack81RefreshedOnce();
+	}
+
+	private void assertPack81RefreshedOnce() {
 		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(fPack81)); //$NON-NLS-1$
-		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+		if (! fMyPart.getRefreshedObject().contains(fPack81))
+			fail("fPack81 not refreshed:\n" + fMyPart.getRefreshedObject());
+		if (fMyPart.getRefreshedObject().size() != 1)
+			fail("Too many refreshes (" + fMyPart.getRefreshedObject().size() + "):\n" + fMyPart.getRefreshedObject());
 	}
 	
 	public void testAddCUFromPackageNotLogicalPackage() throws Exception {
@@ -243,9 +249,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		//force events from display
 		pushDisplay();
 		
-		assertTrue("Refresh happened", fMyPart.hasRefreshHappened()); //$NON-NLS-1$
-		assertTrue("Correct package refreshed", fMyPart.getRefreshedObject().contains(fPack81)); //$NON-NLS-1$
-		assertEquals("Correct number of refreshes", 1, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+		assertPack81RefreshedOnce();
 	}
 
 	public void testAddFragmentToLogicalPackage() throws Exception {
