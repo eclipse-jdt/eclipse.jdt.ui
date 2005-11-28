@@ -141,6 +141,14 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 		return (IDerivedElementUpdating) getRefactoring().getAdapter(IDerivedElementUpdating.class);
 	}
 	
+	protected boolean performFinish() {
+		boolean returner= super.performFinish();
+		// check if we got deferred to the error page
+		if (!returner && getContainer().getCurrentPage() != null)
+			getContainer().getCurrentPage().setPreviousPage(this);
+		return returner;
+	}
+
 	/* (non-Javadoc)
 	 * @see org.eclipse.ltk.ui.refactoring.UserInputWizardPage#getNextPage()
 	 */
