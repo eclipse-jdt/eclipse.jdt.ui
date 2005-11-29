@@ -93,7 +93,7 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 		if (fBounds != null && fBounds.length > 0) {
 			List typeBounds= newTypeParam.typeBounds();
 			for (int i= 0; i < fBounds.length; i++) {
-				Type newBound= getImportRewrite1().addImport(fBounds[i], ast);
+				Type newBound= getImportRewrite().addImport(fBounds[i], ast);
 				typeBounds.add(newBound);
 			}
 		}

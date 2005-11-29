@@ -167,7 +167,7 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 			if (parent.getExpression() == node) {
 				ITypeBinding[] bindings= ASTResolving.getQualifierGuess(node.getRoot(), parent.getName().getIdentifier(), parent.arguments(), getSenderBinding());
 				if (bindings.length > 0) {
-					newTypeNode= getImportRewrite1().addImport(bindings[0], ast);
+					newTypeNode= getImportRewrite().addImport(bindings[0], ast);
 					otherProposals= bindings;
 				}
 			}
@@ -178,7 +178,7 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 				binding= ASTResolving.normalizeWildcardType(binding, false, ast);
 			}
 			if (binding != null) {
-				newTypeNode= getImportRewrite1().addImport(binding, ast);
+				newTypeNode= getImportRewrite().addImport(binding, ast);
 			} else {
 				ASTNode parent= node.getParent();
 				if (parent instanceof ExpressionStatement) {
@@ -240,7 +240,7 @@ public class NewMethodCompletionProposal extends AbstractMethodCompletionProposa
 			for (int i= 0; i < typeProposals.length; i++) {
 				addLinkedPositionProposal(key, typeProposals[i]);
 			}
-			return getImportRewrite1().addImport(binding, ast);
+			return getImportRewrite().addImport(binding, ast);
 		}
 		return ast.newSimpleType(ast.newSimpleName("Object")); //$NON-NLS-1$
 	}

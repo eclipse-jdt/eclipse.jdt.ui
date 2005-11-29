@@ -1734,7 +1734,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				try {
 					CastExpression castException= ast.newCastExpression();
 					proposal.createImportRewrite(context.getASTRoot());
-					castException.setType(proposal.getImportRewrite1().addImport(exprBinding, ast));
+					castException.setType(proposal.getImportRewrite().addImport(exprBinding, ast));
 					castException.setExpression(elseCopy);
 					elseCopy= castException;
 				} catch (CoreException e) {

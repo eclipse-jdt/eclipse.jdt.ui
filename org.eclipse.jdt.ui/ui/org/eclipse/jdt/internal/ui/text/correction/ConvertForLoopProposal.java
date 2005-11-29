@@ -562,7 +562,7 @@ public class ConvertForLoopProposal extends LinkedCorrectionProposal {
 				fParameterDeclaration= fAst.newSingleVariableDeclaration();
 				SimpleName name= fAst.newSimpleName(ELEMENT_KEY_REFERENCE);
 				fParameterDeclaration.setName(name);
-				Type theType= getImportRewrite1().addImport(elementType, fAst);
+				Type theType= getImportRewrite().addImport(elementType, fAst);
 				if (fOldCollectionTypeBinding.getDimensions() != 1) {
 					theType= fAst.newArrayType(theType, fOldCollectionTypeBinding.getDimensions() - 1);
 				}

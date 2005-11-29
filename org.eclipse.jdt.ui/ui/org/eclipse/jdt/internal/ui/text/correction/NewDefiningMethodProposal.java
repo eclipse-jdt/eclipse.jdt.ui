@@ -68,7 +68,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 	 */
 	protected void addNewParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException {
 		AST ast= rewrite.getAST();
-		NewImportRewrite importRewrite= getImportRewrite1();
+		NewImportRewrite importRewrite= getImportRewrite();
 		ITypeBinding[] bindings= fMethod.getParameterTypes();
 
 		IJavaProject project= getCompilationUnit().getJavaProject();
@@ -118,7 +118,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractMethodCompletionProposal#getNewMethodType(org.eclipse.jdt.core.dom.rewrite.ASTRewrite)
 	 */
 	protected Type getNewMethodType(ASTRewrite rewrite) throws CoreException {
-		Type newTypeNode= getImportRewrite1().addImport(fMethod.getReturnType(), rewrite.getAST());
+		Type newTypeNode= getImportRewrite().addImport(fMethod.getReturnType(), rewrite.getAST());
 
 		addLinkedPosition(rewrite.track(newTypeNode), false, KEY_TYPE);
 		return newTypeNode;
@@ -129,7 +129,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 	 */
 	protected void addNewExceptions(ASTRewrite rewrite, List exceptions) throws CoreException {
 		AST ast= rewrite.getAST();
-		NewImportRewrite importRewrite= getImportRewrite1();
+		NewImportRewrite importRewrite= getImportRewrite();
 		ITypeBinding[] bindings= fMethod.getExceptionTypes();
 		for (int i= 0; i < bindings.length; i++) {
 			String typeName= importRewrite.addImport(bindings[i]);

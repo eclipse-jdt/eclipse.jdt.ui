@@ -151,7 +151,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			usedNames.add(declaredFields[i].getName());
 		}
 
-		NewImportRewrite imports= getImportRewrite1();
+		NewImportRewrite imports= getImportRewrite();
 		ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.PARAMETERS_PROPERTY);
 
 		List parameters= methodDecl.parameters(); // old parameters
@@ -337,7 +337,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	private void modifyExceptions(ASTRewrite rewrite, MethodDeclaration methodDecl) throws CoreException {
 		AST ast= methodDecl.getAST();
 
-		NewImportRewrite imports= getImportRewrite1();
+		NewImportRewrite imports= getImportRewrite();
 		ListRewrite listRewrite= rewrite.getListRewrite(methodDecl, MethodDeclaration.THROWN_EXCEPTIONS_PROPERTY);
 
 		List exceptions= methodDecl.thrownExceptions(); // old exceptions
