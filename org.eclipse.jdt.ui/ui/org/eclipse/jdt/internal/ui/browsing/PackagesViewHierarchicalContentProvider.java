@@ -139,7 +139,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		return NO_CHILDREN;
 	}
 
-		private IPackageFragment[] findNextLevelChildrenByElementName(IPackageFragmentRoot parent, IPackageFragment fragment) {
+	private IPackageFragment[] findNextLevelChildrenByElementName(IPackageFragmentRoot parent, IPackageFragment fragment) {
 		List list= new ArrayList();
 		try {
 
@@ -153,7 +153,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 					String name= element.getElementName();
 					if (name.length() > fragmentname.length() && name.charAt(fragmentname.length()) == '.' && frag.exists() && !IPackageFragment.DEFAULT_PACKAGE_NAME.equals(fragmentname) && name.startsWith(fragmentname) && !name.equals(fragmentname)) {
 						String tail= name.substring(fragmentname.length() + 1);
-						if (!IPackageFragment.DEFAULT_PACKAGE_NAME.equals(tail) && tail.indexOf(".") == -1) { //$NON-NLS-1$
+						if (!IPackageFragment.DEFAULT_PACKAGE_NAME.equals(tail) && tail.indexOf('.') == -1) {
 							list.add(frag);
 						}
 					}
@@ -171,7 +171,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement iJavaElement= elements[i];
 			//if the name of the PackageFragment is the top level package it will contain no "." separators
-			if((iJavaElement.getElementName().indexOf(".")==-1) && (iJavaElement instanceof IPackageFragment)){ //$NON-NLS-1$
+			if (iJavaElement instanceof IPackageFragment && iJavaElement.getElementName().indexOf('.')==-1){
 				topLevelElements.add(iJavaElement);
 			}
 		}
@@ -275,7 +275,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		if ((parent instanceof IPackageFragmentRoot) && parent.exists()) {
 			IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
 			if (root.isArchive() || !fragment.exists()) {
-				return findNextLevelParentByElementName(fragment, root);
+				return findNextLevelParentByElementName(fragment);
 			} else {
 				IResource resource= fragment.getUnderlyingResource();
 				if ((resource != null) && (resource instanceof IFolder)) {
@@ -290,35 +290,18 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		return parent;
 	}
 
-
-	private Object findNextLevelParentByElementName(IJavaElement child, IJavaElement parent) {
+	private Object findNextLevelParentByElementName(IPackageFragment child) {
 		String name= child.getElementName();
-
-		if(name.indexOf(".")==-1) //$NON-NLS-1$
-			return parent;
-
-		try {
-			String realParentName= child.getElementName().substring(0,name.lastIndexOf(".")); //$NON-NLS-1$
-			IJavaElement[] children= new IJavaElement[0];
-
-			if(parent instanceof IPackageFragmentRoot){
-				IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
-				children= root.getChildren();
-			} else if(parent instanceof IJavaProject){
-				IJavaProject project= (IJavaProject) parent;
-				children= project.getPackageFragments();
+		
+		int index= name.lastIndexOf('.');
+		if (index != -1) {
+			String realParentName= name.substring(0, index);
+			IPackageFragment element= ((IPackageFragmentRoot) child.getParent()).getPackageFragment(realParentName);
+			if (element.exists()) {
+				return element;
 			}
-
-			for (int i= 0; i < children.length; i++) {
-				IJavaElement element= children[i];
-				if(element.getElementName().equals(realParentName))
-					return element;
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
 		}
-
-		return parent;
+		return child.getParent();
 	}
 
 
@@ -491,7 +474,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 			//add new LogicalPackage to LogicalPackages map
 			fMapToLogicalPackage.put(key, lp);
 
-			//determin who to refresh
+			//determine who to refresh
 			if (parent instanceof IPackageFragmentRoot){
 				IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
 				if (fInputIsProject){
@@ -500,7 +483,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 					postRefresh(root);
 				}
 			} else {
-				//@Improve: Shoud this be replaced by a refresh?
+				//@Improve: Should this be replaced by a refresh?
 				postAdd(lp, parent);
 				postRemove(iPackageFragment);
 			}
@@ -510,7 +493,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 		else {
 			fMapToPackageFragments.put(key, frag);
 
-			//determin who to refresh
+			//determine who to refresh
 			if (parent instanceof IPackageFragmentRoot) {
 				IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
 				if (fInputIsProject) {
@@ -538,7 +521,7 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 				fMapToPackageFragments.put(key, fragment);
 				fMapToLogicalPackage.remove(key);
 
-				//remove the LogicalPackage frome viewer
+				//remove the LogicalPackage from viewer
 				postRemove(lp);
 
 				Object parent= getParent(fragment);

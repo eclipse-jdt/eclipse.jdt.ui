@@ -519,7 +519,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				break;
 			case IJavaElement.COMPILATION_UNIT :
 				ICompilationUnit cu= (ICompilationUnit) element;
-				String mainTypeName= element.getElementName().substring(0, element.getElementName().indexOf(".")); //$NON-NLS-1$
+				String mainTypeName= JavaCore.removeJavaLikeExtension(cu.getElementName());
 				mainType= cu.getType(mainTypeName);
 				mainTypeName= JavaModelUtil.getTypeQualifiedName(mainType);
 				try {

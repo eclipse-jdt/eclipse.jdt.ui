@@ -206,7 +206,7 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement iJavaElement= elements[i];
 			//if the name of the PackageFragment is the top level package it will contain no "." separators
-			if((iJavaElement.getElementName().indexOf(".")==-1) && (iJavaElement instanceof IPackageFragment)){ //$NON-NLS-1$
+			if(iJavaElement instanceof IPackageFragment && iJavaElement.getElementName().indexOf('.')==-1){
 				topLevelElements.add(iJavaElement);
 			}
 		}	
@@ -254,7 +254,7 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 				if ((parent instanceof IPackageFragmentRoot) && parent.exists()) {
 					IPackageFragmentRoot root = (IPackageFragmentRoot) parent;
 					if (root.isArchive()) {
-						return findNextLevelChildrenByElementName(fragment, root);
+						return findNextLevelParentByElementName(fragment);
 					} else {
 
 						IResource resource = fragment.getUnderlyingResource();
@@ -297,34 +297,18 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 	}
 
 
-	private Object findNextLevelChildrenByElementName(IJavaElement child, IJavaElement parent) {
+	private Object findNextLevelParentByElementName(IPackageFragment child) {
 		String name= child.getElementName();
 		
-		if(name.indexOf(".")==-1) //$NON-NLS-1$
-			return parent;
-		
-		try {
-			String realParentName= child.getElementName().substring(0,name.lastIndexOf(".")); //$NON-NLS-1$
-			IJavaElement[] children= new IJavaElement[0];			
-			
-			if(parent instanceof IPackageFragmentRoot){
-				IPackageFragmentRoot root = (IPackageFragmentRoot) parent;
-				children= root.getChildren();
-			} else if (parent instanceof IJavaProject) {
-				IJavaProject project = (IJavaProject) parent;
-				children= project.getPackageFragments();
+		int index= name.lastIndexOf('.');
+		if (index != -1) {
+			String realParentName= name.substring(0, index);
+			IPackageFragment element= ((IPackageFragmentRoot) child.getParent()).getPackageFragment(realParentName);
+			if (element.exists()) {
+				return element;
 			}
-			
-			for (int i= 0; i < children.length; i++) {
-				IJavaElement element= children[i];
-				if(element.getElementName().equals(realParentName))
-					return element;
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
 		}
-		
-		return parent;
+		return child.getParent();
 	}
 
 
@@ -428,7 +412,7 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 
 	private Object getGrandParent(IPackageFragment element) {
 
-		Object parent= findNextLevelChildrenByElementName(element, element.getParent());
+		Object parent= findNextLevelParentByElementName(element);
 		if (parent instanceof IPackageFragmentRoot) {
 			IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
 			if(isRootProject(root))

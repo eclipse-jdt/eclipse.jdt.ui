@@ -16,7 +16,7 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -46,7 +46,7 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	public CorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContext context, String oldTypeName, int relevance) {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
 		fContext= context;
-		fNewName= Signature.getQualifier(cu.getElementName());
+		fNewName= JavaCore.removeJavaLikeExtension(cu.getElementName());
 
 		setDisplayName(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renametype_description, fNewName));
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));

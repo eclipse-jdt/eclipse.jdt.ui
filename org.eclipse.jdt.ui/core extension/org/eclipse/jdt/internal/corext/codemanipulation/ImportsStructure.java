@@ -35,6 +35,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.ToolFactory;
@@ -446,7 +447,8 @@ public final class ImportsStructure implements IImportsStructure {
 		if (qualifier.equals(packageName)) {
 			return true;
 		}
-		String mainTypeName= JavaModelUtil.concatenateName(packageName, Signature.getQualifier(cu.getElementName()));
+		String typeName= JavaCore.removeJavaLikeExtension(cu.getElementName());
+		String mainTypeName= JavaModelUtil.concatenateName(packageName, typeName);
 		return qualifier.equals(mainTypeName);
 	}
 	
@@ -721,7 +723,7 @@ public final class ImportsStructure implements IImportsStructure {
 		}
 		
 		if (!"*".equals(typeName)) { //$NON-NLS-1$
-			String topLevelTypeName= Signature.getQualifier(fCompilationUnit.getElementName());
+			String topLevelTypeName= JavaCore.removeJavaLikeExtension(fCompilationUnit.getElementName());
 			
 			if (typeName.equals(topLevelTypeName)) {
 				if (!typeContainerName.equals(fCompilationUnit.getParent().getElementName())) {

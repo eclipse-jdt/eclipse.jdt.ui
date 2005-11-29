@@ -108,7 +108,7 @@ public class JavaElementUtil {
 
 
 	private static boolean isPrimaryType(IType type){
-		return type.getElementName().equals(Signature.getQualifier(type.getCompilationUnit().getElementName()));
+		return type.equals(type.getCompilationUnit().findPrimaryType());
 	}
 
 

@@ -330,12 +330,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			if (compilationUnit == null)
 				return null;
 
-			String name= compilationUnit.getElementName();
-			int index= name.indexOf('.');
-			if (index != -1)
-				name= name.substring(0, index);
-			IType type= compilationUnit.getType(name);
-			return type.exists() ? type : null;
+			return compilationUnit.findPrimaryType();
 		}
 
 		/**

@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -342,6 +343,7 @@ public class CleanUpRefactoring extends Refactoring {
 	}
 
 	private String getChangeName(ICompilationUnit compilationUnit) {
+		// TODO: Use JavaElementLabels for labels
 		StringBuffer buf= new StringBuffer();
 		IJavaElement p= compilationUnit.getParent();
 		if (p != null) {
@@ -371,11 +373,7 @@ public class CleanUpRefactoring extends Refactoring {
 	}
 
 	private String getTypeName(final ICompilationUnit unit) {
-		String elementName= unit.getElementName();
-		if (elementName.length() > 5) {
-			return elementName.substring(0, elementName.indexOf('.'));
-		}
-		return elementName;
+		return JavaCore.removeJavaLikeExtension(unit.getElementName());
 	}
 	
 	private ParseListElement calculateSolution(Hashtable solutions, CompilationUnit ast, ICleanUp[] cleanUps) {

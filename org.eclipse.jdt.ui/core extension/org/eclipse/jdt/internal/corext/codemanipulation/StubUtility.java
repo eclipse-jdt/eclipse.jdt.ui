@@ -186,7 +186,7 @@ public class StubUtility {
 		context.setVariable(CodeTemplateContextType.TYPE_COMMENT, typeComment != null ? typeComment : ""); //$NON-NLS-1$
 		context.setVariable(CodeTemplateContextType.FILE_COMMENT, fileComment != null ? fileComment : ""); //$NON-NLS-1$
 		context.setVariable(CodeTemplateContextType.TYPE_DECLARATION, typeContent);
-		context.setVariable(CodeTemplateContextType.TYPENAME, Signature.getQualifier(cu.getElementName()));
+		context.setVariable(CodeTemplateContextType.TYPENAME, JavaCore.removeJavaLikeExtension(cu.getElementName()));
 		
 		String[] fullLine= { CodeTemplateContextType.PACKAGE_DECLARATION, CodeTemplateContextType.FILE_COMMENT, CodeTemplateContextType.TYPE_COMMENT };
 		return evaluateTemplate(context, template, fullLine);
@@ -206,7 +206,7 @@ public class StubUtility {
 		IJavaProject project= cu.getJavaProject();
 		CodeTemplateContext context= new CodeTemplateContext(template.getContextTypeId(), project, lineDelimiter);
 		context.setCompilationUnitVariables(cu);
-		context.setVariable(CodeTemplateContextType.TYPENAME, Signature.getQualifier(cu.getElementName()));
+		context.setVariable(CodeTemplateContextType.TYPENAME, JavaCore.removeJavaLikeExtension(cu.getElementName()));
 		return evaluateTemplate(context, template);
 	}	
 

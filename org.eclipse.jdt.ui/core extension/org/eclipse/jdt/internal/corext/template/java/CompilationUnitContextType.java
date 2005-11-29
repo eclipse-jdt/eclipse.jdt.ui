@@ -21,6 +21,7 @@ import org.eclipse.jface.text.templates.TemplateVariableResolver;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
@@ -74,8 +75,7 @@ public abstract class CompilationUnitContextType extends TemplateContextType {
 			ICompilationUnit unit= ((CompilationUnitContext) context).getCompilationUnit();
 			if (unit == null) 
 				return null;
-			String elementName= unit.getElementName();
-			return elementName.substring(0, elementName.lastIndexOf('.'));
+			return JavaCore.removeJavaLikeExtension(unit.getElementName());
 		}
 	 	
 		/*

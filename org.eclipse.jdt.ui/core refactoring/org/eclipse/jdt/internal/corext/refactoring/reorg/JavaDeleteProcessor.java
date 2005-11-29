@@ -187,6 +187,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 				collected.add(element);
 				IType type= (IType)element;
 				ICompilationUnit unit= type.getCompilationUnit();
+				//TODO: Looks like a bug: unit.getElementName().endsWith(type.getElementName())
 				if (type.getDeclaringType() == null && unit.getElementName().endsWith(type.getElementName())) {
 					if (unit.getTypes().length == 1) {
 						collected.add(unit);
