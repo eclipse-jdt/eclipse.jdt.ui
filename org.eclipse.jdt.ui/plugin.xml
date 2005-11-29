@@ -4650,9 +4650,10 @@
     <extension point="org.eclipse.core.runtime.preferences">
         <initializer class="org.eclipse.jdt.internal.ui.JavaUIPreferenceInitializer"/>
     </extension>
-<!--
+
    <extension
          id="modelProvider"
+         name="%RefactoringModelProvider.name"
          point="org.eclipse.core.resources.modelProviders">
       <modelProvider
             class="org.eclipse.jdt.internal.ui.refactoring.model.JavaRefactoringModelProvider"
@@ -4666,15 +4667,24 @@
          </with>
       </enablement>
    </extension>
--->
+
    <extension
          point="org.eclipse.compare.streamMergers">
       <streamMerger
-            class="org.eclipse.jdt.internal.ui.refactoring.merge.JavaFileStreamMerger"
-            id="org.eclipse.jdt.ui.refactoring.model.JavaFileStreamMerger"/>
+            class="org.eclipse.jdt.internal.ui.refactoring.merge.JavaStreamMerger"
+            id="org.eclipse.jdt.ui.refactoring.model.JavaStreamMerger"/>
       <contentTypeBinding
             contentTypeId="org.eclipse.jdt.core.javaSource"
-            streamMergerId="org.eclipse.jdt.ui.refactoring.model.JavaFileStreamMerger"/>
+            streamMergerId="org.eclipse.jdt.ui.refactoring.model.JavaStreamMerger"/>
+   </extension>
+
+   <extension
+         point="org.eclipse.core.runtime.adapters">
+      <factory
+            adaptableType="org.eclipse.ltk.core.refactoring.model.AbstractRefactoringModelProvider"
+            class="org.eclipse.jdt.internal.ui.refactoring.model.JavaRefactoringAdapterFactory">
+         <adapter type="org.eclipse.team.ui.mapping.IResourceMappingMerger"/>
+      </factory>
    </extension>
 
 </plugin>
