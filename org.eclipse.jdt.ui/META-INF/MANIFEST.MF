@@ -16,6 +16,7 @@ Export-Package: org.eclipse.jdt.internal.corext;x-friends:="org.eclipse.jdt.juni
  org.eclipse.jdt.internal.corext.javadoc;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.base;x-internal:=true,
+ org.eclipse.jdt.internal.corext.refactoring.binary;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.changes;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.code;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.code.flow;x-internal:=true,
@@ -99,8 +100,7 @@ Export-Package: org.eclipse.jdt.internal.corext;x-friends:="org.eclipse.jdt.juni
  org.eclipse.jdt.ui.text.java,
  org.eclipse.jdt.ui.text.java.hover,
  org.eclipse.jdt.ui.wizards
-Require-Bundle: 
- org.eclipse.ui,
+Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.console,
  org.eclipse.help,
  org.eclipse.core.expressions,
@@ -112,6 +112,7 @@ Require-Bundle:
  org.eclipse.debug.ui,
  org.eclipse.jdt.launching,
  org.eclipse.compare,
+ org.eclipse.team.ui,
  org.eclipse.team.core,
  org.eclipse.jface.text,
  org.eclipse.ui.workbench.texteditor,
