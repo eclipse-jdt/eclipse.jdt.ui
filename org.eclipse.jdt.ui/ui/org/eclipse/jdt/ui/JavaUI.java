@@ -13,7 +13,6 @@ package org.eclipse.jdt.ui;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
@@ -28,7 +27,6 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 
@@ -53,8 +51,10 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.SharedImages;
 import org.eclipse.jdt.internal.ui.dialogs.MainTypeSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.MultiMainTypeSelectionDialog;
+import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 /**
  * Central access point for the Java UI plug-in (id <code>"org.eclipse.jdt.ui"</code>).
@@ -318,23 +318,45 @@ public final class JavaUI {
 			}
 		}
 		
-		int flags= JavaElementLabelProvider.SHOW_DEFAULT;
-		if (consideredRoots.size() > 1)
-			flags= flags | JavaElementLabelProvider.SHOW_ROOT;
-
-		List packages= new ArrayList();
-		Iterator iter= consideredRoots.iterator();
-		while(iter.hasNext()) {
-			IPackageFragmentRoot root= (IPackageFragmentRoot)iter.next();
-			packages.addAll(Arrays.asList(root.getChildren()));
-		}			
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(flags));
-		dialog.setIgnoreCase(false);
-		dialog.setElements(packages.toArray()); // XXX inefficient
+		IJavaSearchScope searchScope= SearchEngine.createJavaSearchScope((IJavaElement[])consideredRoots.toArray(new IJavaElement[consideredRoots.size()]));
+		BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
+		if (style == 0 || style == IJavaElementSearchConstants.CONSIDER_REQUIRED_PROJECTS) {
+			return createPackageDialog(parent, context, searchScope, false, true, filter);
+		} else {
+			return createPackageDialog(parent, context, searchScope, false, false, filter);
+		}
+	}
+	
+	/**
+	 * Creates a selection dialog that lists all packages of the given Java search scope.
+	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
+	 * and subsequently extracting the selected package (of type
+	 * <code>IPackageFragment</code>) via <code>SelectionDialog.getResult</code>.
+	 * 
+	 * @param parent the parent shell of the dialog to be created
+	 * @param context the runnable context to run the search in
+	 * @param scope the scope defining the available packages.
+	 * @param multipleSelection true if multiple selection is allowed
+	 * @param removeDuplicates true if only one package is shown per package name
+	 * @param filter the initial pattern to filter the set of packages. For example "com" shows 
+	 * all packages starting with "com". The meta character '?' representing any character and 
+	 * '*' representing any string are supported. Clients can pass an empty string if no filtering 
+	 * is required.
+	 * @return a new selection dialog
+	 * 
+	 * @since 3.2
+	 */
+	public static SelectionDialog createPackageDialog(Shell parent, IRunnableContext context, IJavaSearchScope scope, 
+			boolean multipleSelection, boolean removeDuplicates, String filter) {
+		
+		int flag= removeDuplicates ? PackageSelectionDialog.F_REMOVE_DUPLICATES : 0;
+		PackageSelectionDialog dialog= new PackageSelectionDialog(parent, context, flag, scope);
 		dialog.setFilter(filter);
+		dialog.setIgnoreCase(false);
+		dialog.setMultipleSelection(multipleSelection);
 		return dialog;
 	}
-
+	
 	/**
 	 * Creates a selection dialog that lists all packages of the given Java project.
 	 * The caller is responsible for opening the dialog with <code>Window.open</code>,
@@ -375,11 +397,9 @@ public final class JavaUI {
 	 * @since 2.0
 	 */
 	public static SelectionDialog createPackageDialog(Shell parent, IPackageFragmentRoot root, String filter) throws JavaModelException {
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(parent, new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
-		dialog.setIgnoreCase(false);
-		dialog.setElements(root.getChildren());
-		dialog.setFilter(filter);
-		return dialog;
+		IJavaSearchScope scope= SearchEngine.createJavaSearchScope(new IJavaElement[] {root});
+		BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
+		return createPackageDialog(parent, context, scope, false, true, filter);
 	}
 
 	/**

@@ -10,24 +10,33 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.dialogs;
 
+import java.io.IOException;
+import java.lang.reflect.InvocationTargetException;
+
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
+
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.ui.dialogs.CheckedTreeSelectionDialog;
+import org.eclipse.ui.dialogs.SelectionDialog;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.ui.IJavaElementSearchConstants;
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.util.DialogCheck;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 public class DialogsTest2 extends TestCase {
 	
@@ -37,6 +46,8 @@ public class DialogsTest2 extends TestCase {
 		TestSuite suite= new TestSuite(DialogsTest2.class.getName());
 		suite.addTest(new DialogsTest2("testCheckedTreeSelectionDialog"));
 		suite.addTest(new DialogsTest2("testCheckedTreeSelectionDialog"));
+		suite.addTest(new DialogsTest2("testPackageSelectionDialog01"));
+		suite.addTest(new DialogsTest2("testPackageSelectionDialog02"));
 		return suite;
 	}
 
@@ -78,6 +89,30 @@ public class DialogsTest2 extends TestCase {
 		JavaProjectHelper.delete(jproject);	
 		JavaProjectHelper.delete(jproject2);
 	}
+	
+	public void testPackageSelectionDialog01() throws CoreException, IOException, InvocationTargetException {
+		IJavaProject jproject= JavaProjectHelper.createJavaProjectWithJUnitSource(PROJECT_NAME, "src", "bin");
+
+		SelectionDialog dialog= JavaUI.createPackageDialog(getShell(), jproject, IJavaElementSearchConstants.CONSIDER_BINARIES, "");	
+		dialog.setBlockOnOpen(false);
+		dialog.open();
+		
+		DialogCheck.assertDialog(dialog);
+		
+		JavaProjectHelper.delete(jproject);	
+	}
+	
+	public void testPackageSelectionDialog02() throws CoreException, IOException, InvocationTargetException {
+		IJavaProject jproject= JavaProjectHelper.createJavaProjectWithJUnitSource(PROJECT_NAME, "src", "bin");
+
+		IPackageFragmentRoot root= jproject.getPackageFragmentRoots()[0];
+		SelectionDialog dialog= JavaUI.createPackageDialog(getShell(), root, "");	
+		dialog.setBlockOnOpen(false);
+		dialog.open();
+		
+		DialogCheck.assertDialog(dialog);
+		
+		JavaProjectHelper.delete(jproject);	
+	}
 
 }
-
