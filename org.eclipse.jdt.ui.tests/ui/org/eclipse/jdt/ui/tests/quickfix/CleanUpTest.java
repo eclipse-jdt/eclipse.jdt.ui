@@ -613,81 +613,68 @@ public class CleanUpTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
 	}
 	
-	//See bug 114734
-//	public void testUnusedCode04() throws Exception {
-//		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-//		StringBuffer buf= new StringBuffer();
-//		buf.append("package test1;\n");
-//		buf.append("public class E1 {\n");
-//		buf.append("    private int i;\n");
-//		buf.append("}\n");
-//		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-//		
-//		buf= new StringBuffer();
-//		buf.append("package test1;\n");
-//		buf.append("public class E2 {\n");
-//		buf.append("    private int i= 10;\n");
-//		buf.append("    private int j= 10;\n");
-//		buf.append("}\n");
-//		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
-//		
-//		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-//		buf= new StringBuffer();
-//		buf.append("package test2;\n");
-//		buf.append("public class E3 {\n");
-//		buf.append("    private int i;\n");
-//		buf.append("    private int j;\n");
-//		buf.append("    private void foo() {\n");
-//		buf.append("        i= 10;\n");
-//		buf.append("        i= 20;\n");
-//		buf.append("        i= j;\n");
-//		buf.append("    }\n");
-//		buf.append("}\n");
-//		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
-//		
-//		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS);
-//		
-//		setOptions(cleanUp);
-//		
-//		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
-//		assertNumberOfProblems(units[0], 1);
-//		assertNumberOfProblems(units[1], 2);
-//		assertNumberOfProblems(units[2], 2);
-//		
-//		buf= new StringBuffer();
-//		buf.append("package test1;\n");
-//		buf.append("public class E1 {\n");
-//		buf.append("}\n");
-//		String expected1= buf.toString();
-//		
-//		buf= new StringBuffer();
-//		buf.append("package test1;\n");
-//		buf.append("public class E2 {\n");
-//		buf.append("}\n");
-//		String expected2= buf.toString();
-//		
-//		buf= new StringBuffer();
-//		buf.append("package test2;\n");
-//		buf.append("public class E3 {\n");
-//		buf.append("    private int j;\n");
-//		buf.append("    private void foo() {\n");
-//		buf.append("    }\n");
-//		buf.append("}\n");
-//		String expected3= buf.toString();
-//
-//		int numberOfFixes= 3;
-//		int offset= 0;
-//		String[] previews= new String[numberOfFixes];
-//		for (int i= offset; i < numberOfFixes; i++) {
-//			IFix fix= cleanUp.createFix(units[i]);
-//			assertNotNull("There are problems but no fix", fix);
-//			TextChange change= fix.createChange();
-//			assertNotNull("Null change for an existing fix", change);
-//			previews[i - offset]= change.getPreviewContent(null);
-//		}
-//
-//		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
-//	}
+	public void testUnusedCode04() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int i;\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    private int i= 10;\n");
+		buf.append("    private int j= 10;\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    private int i;\n");
+		buf.append("    private int j;\n");
+		buf.append("    private void foo() {\n");
+		buf.append("        i= 10;\n");
+		buf.append("        i= 20;\n");
+		buf.append("        i= j;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		refactoring.addCompilationUnit(cu3);
+		
+		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    private int j;\n");
+		buf.append("    private void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});
+	}
 	
 	public void testUnusedCode05() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -761,102 +748,219 @@ public class CleanUpTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
 	}
 	
-	//See bug 1147345
-//	public void testUnusedCode06() throws Exception {
-//		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-//		StringBuffer buf= new StringBuffer();
-//		buf.append("package test1;\n");
-//		buf.append("public class E1 {\n");
-//		buf.append("    public void foo() {\n");
-//		buf.append("        int i= 10;\n");
-//		buf.append("    }\n");
-//		buf.append("}\n");
-//		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-//		
-//		buf= new StringBuffer();
-//		buf.append("package test1;\n");
-//		buf.append("public class E2 {\n");
-//		buf.append("    public void foo() {\n");
-//		buf.append("        int i= 10;\n");
-//		buf.append("        int j= 10;\n");
-//		buf.append("    }\n");
-//		buf.append("    private void bar() {\n");
-//		buf.append("        int i= 10;\n");
-//		buf.append("    }\n");
-//		buf.append("}\n");
-//		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
-//		
-//		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
-//		buf= new StringBuffer();
-//		buf.append("package test2;\n");
-//		buf.append("public class E3 {\n");
-//		buf.append("    public class E3Inner {\n");
-//		buf.append("        public void foo() {\n");
-//		buf.append("            int i= 10;\n");
-//		buf.append("        }\n");
-//		buf.append("    }\n");
-//		buf.append("    public void foo() {\n");
-//		buf.append("        int i= 10;\n");
-//		buf.append("        int j= i;\n");
-//		buf.append("        j= 10;\n");
-//		buf.append("        j= 20;\n");
-//		buf.append("    }\n");
-//		buf.append("}\n");
-//		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
-//		
-//		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES);
-//		
-//		setOptions(cleanUp);
-//		
-//		CompilationUnit[] units= compile(new ICompilationUnit[] {cu1, cu2, cu3});
-//		assertNumberOfProblems(units[0], 1);
-//		assertNumberOfProblems(units[1], 3);
-//		assertNumberOfProblems(units[2], 2);
-//		
-//		buf= new StringBuffer();
-//		buf.append("package test1;\n");
-//		buf.append("public class E1 {\n");
-//		buf.append("    public void foo() {\n");
-//		buf.append("    }\n");
-//		buf.append("}\n");
-//		String expected1= buf.toString();
-//		
-//		buf= new StringBuffer();
-//		buf.append("package test1;\n");
-//		buf.append("public class E2 {\n");
-//		buf.append("    public void foo() {\n");
-//		buf.append("    }\n");
-//		buf.append("    private void bar() {\n");
-//		buf.append("    }\n");
-//		buf.append("}\n");
-//		String expected2= buf.toString();
-//		
-//		buf= new StringBuffer();
-//		buf.append("package test2;\n");
-//		buf.append("public class E3 {\n");
-//		buf.append("    public class E3Inner {\n");
-//		buf.append("        public void foo() {\n");
-//		buf.append("        }\n");
-//		buf.append("    }\n");
-//		buf.append("    public void foo() {\n");
-//		buf.append("        int i= 10;\n");
-//		buf.append("    }\n");
-//		buf.append("}\n");
-//		String expected3= buf.toString();
-//
-//		int numberOfFixes= 3;
-//		int offset= 0;
-//		String[] previews= new String[numberOfFixes];
-//		for (int i= offset; i < numberOfFixes; i++) {
-//			IFix fix= cleanUp.createFix(units[i]);
-//			assertNotNull("There are problems but no fix", fix);
-//			TextChange change= fix.createChange();
-//			assertNotNull("Null change for an existing fix", change);
-//			previews[i - offset]= change.getPreviewContent(null);
-//		}
-//
-//		assertEqualStringsIgnoreOrder(previews, new String[] { expected1, expected2, expected3});	
-//	}
+	public void testUnusedCode06() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        int j= 10;\n");
+		buf.append("    }\n");
+		buf.append("    private void bar() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    public class E3Inner {\n");
+		buf.append("        public void foo() {\n");
+		buf.append("            int i= 10;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("        int j= i;\n");
+		buf.append("        j= 10;\n");
+		buf.append("        j= 20;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu3= pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		refactoring.addCompilationUnit(cu3);
+		
+		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("    private void bar() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    public class E3Inner {\n");
+		buf.append("        public void foo() {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 10;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected3= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2, expected3});
+	}
+	
+	public void testUnusedCode07() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= bar();\n");
+		buf.append("        int j= 1;\n");
+		buf.append("    }\n");
+		buf.append("    public int bar() {return 1;}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= bar();\n");
+		buf.append("    }\n");
+		buf.append("    public int bar() {return 1;}\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testUnusedCode08() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int i= bar();\n");
+		buf.append("    private int j= 1;\n");
+		buf.append("    public int bar() {return 1;}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int i= bar();\n");
+		buf.append("    public int bar() {return 1;}\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testUnusedCode09() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 1;\n");
+		buf.append("        i= bar();\n");
+		buf.append("        int j= 1;\n");
+		buf.append("        j= 1;\n");
+		buf.append("    }\n");
+		buf.append("    public int bar() {return 1;}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 1;\n");
+		buf.append("        i= bar();\n");
+		buf.append("    }\n");
+		buf.append("    public int bar() {return 1;}\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testUnusedCode10() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int i= 1;\n");
+		buf.append("    private int j= 1;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        i= bar();\n");
+		buf.append("        j= 1;\n");
+		buf.append("    }\n");
+		buf.append("    public int bar() {return 1;}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int i= 1;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        i= bar();\n");
+		buf.append("    }\n");
+		buf.append("    public int bar() {return 1;}\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
 	
 	public void testJava5001() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -2633,44 +2737,43 @@ public class CleanUpTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(previews, new String[] { expected1});
 	}
 	
-	//See bug 114734
-//	public void testCombination01() throws Exception {
-//		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
-//		StringBuffer buf= new StringBuffer();
-//		buf.append("package test1;\n");
-//		buf.append("\n");
-//		buf.append("public class E1 {\n");
-//		buf.append("    private int i= 10;\n");
-//		buf.append("    private int j= 20;\n");
-//		buf.append("    \n");
-//		buf.append("    public void foo() {\n");
-//		buf.append("        i= j;\n");
-//		buf.append("        i= 20;\n");
-//		buf.append("    }\n");
-//		buf.append("}\n");
-//		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
-//		
-//		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-//		refactoring.addCompilationUnit(cu1);
-//		
-//		ICleanUp cleanUp1= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS);
-//		ICleanUp cleanUp2= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS);
-//		refactoring.addCleanUp(cleanUp1);
-//		refactoring.addCleanUp(cleanUp2);
-//		
-//		buf= new StringBuffer();
-//		buf.append("package test1;\n");
-//		buf.append("\n");
-//		buf.append("public class E1 {\n");
-//		buf.append("    private int j= 20;\n");
-//		buf.append("    \n");
-//		buf.append("    public void foo() {\n");
-//		buf.append("    }\n");
-//		buf.append("}\n");
-//		String expected1= buf.toString();
-//		
-//		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
-//	}
+	public void testCombination01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int i= 10;\n");
+		buf.append("    private int j= 20;\n");
+		buf.append("    \n");
+		buf.append("    public void foo() {\n");
+		buf.append("        i= j;\n");
+		buf.append("        i= 20;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp1= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS);
+		ICleanUp cleanUp2= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS);
+		refactoring.addCleanUp(cleanUp1);
+		refactoring.addCleanUp(cleanUp2);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int j= 20;\n");
+		buf.append("    \n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
 	
 	public void testCombination02() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
