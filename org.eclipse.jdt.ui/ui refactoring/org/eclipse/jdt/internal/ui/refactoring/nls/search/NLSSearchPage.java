@@ -637,14 +637,10 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				String typePathStr= null;
 				IType type= null;
 				
+				// Try to find a corresponding CU
 				String[] javaExtensions= JavaCore.getJavaLikeExtensions();
 				for (int i= 0; i < javaExtensions.length; i++) { 
 					String extension= javaExtensions[i];
-					
-					// XXX, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=118246
-					extension= extension.substring(1);
-				
-					// try to be smarter and find a corresponding CU
 					IPath cuPath= propertyFullPath.removeFileExtension().addFileExtension(extension);
 					IFile cuFile= (IFile)JavaPlugin.getWorkspace().getRoot().findMember(cuPath);
 					if (cuFile == null) { //try with uppercase first char
@@ -789,7 +785,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 			int lastDot= filter.lastIndexOf('.');
 			if (lastDot > -1 && lastDot != filter.length() - 1)
 				filter= filter.substring(lastDot + 1);
-			dialog= JavaUI.createTypeDialog(shell, new ProgressMonitorDialog(shell), SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_TYPES, false, filter);
+			dialog= JavaUI.createTypeDialog(shell, new ProgressMonitorDialog(shell), SearchEngine.createWorkspaceScope(), IJavaElementSearchConstants.CONSIDER_CLASSES, false, filter);
 			if (fWrapperClass != null)
 				dialog.setInitialSelections(new Object[] {fWrapperClass});
 		} catch (JavaModelException e) {

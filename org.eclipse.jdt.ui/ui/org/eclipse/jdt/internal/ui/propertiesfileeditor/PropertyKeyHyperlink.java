@@ -460,10 +460,7 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		// XXX: Should be configurable via preference, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81117
 		String[] javaExtensions= JavaCore.getJavaLikeExtensions();
 		for (int i= 0; i < javaExtensions.length; i++)
-			/*
-			 * XXX: no dot added due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=118246
-			 */ 
-			result.addFileNamePattern("*" + javaExtensions[i]); //$NON-NLS-1$
+			result.addFileNamePattern("*." + javaExtensions[i]); //$NON-NLS-1$
 		result.addFileNamePattern("*.xml"); //$NON-NLS-1$
 		result.addFileNamePattern("*.ini"); //$NON-NLS-1$
 
