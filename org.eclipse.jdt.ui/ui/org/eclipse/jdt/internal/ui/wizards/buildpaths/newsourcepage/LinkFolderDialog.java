@@ -170,7 +170,7 @@ public class LinkFolderDialog extends StatusDialog {
             final String selectedDirectory = dialog.open();
             if (selectedDirectory != null) {
                 fLinkLocation.setText(selectedDirectory);
-                if (fResource == null) {
+                if (fName == null) {
                 	fFolderNameField.setText(selectedDirectory.substring(selectedDirectory.lastIndexOf(File.separatorChar) + 1));
                 }
                 JavaPlugin.getDefault().getDialogSettings().put(DIALOGSTORE_LAST_EXTERNAL_LOC, selectedDirectory);
@@ -193,7 +193,7 @@ public class LinkFolderDialog extends StatusDialog {
                 String[] variableNames = (String[]) dialog.getResult();
                 if (variableNames != null && variableNames.length == 1) {
                     fLinkLocation.setText(variableNames[0]);
-                    if (fResource == null) {
+                    if (fName == null) {
                         fFolderNameField.setText(variableNames[0]);	
                     }
                 }
@@ -313,8 +313,9 @@ public class LinkFolderDialog extends StatusDialog {
     private LinkFields fDependenciesGroup;
     private IContainer fContainer;
 	private IFolder fCreatedFolder;
-	private final IResource fResource;
 	private boolean fCreateLink;
+	private String fName;
+	private String fTarget;
 
     /**
      * Creates a NewFolderDialog
@@ -325,17 +326,16 @@ public class LinkFolderDialog extends StatusDialog {
      * @see HintTextGroup
      */
     public LinkFolderDialog(Shell parentShell, IContainer container) {
-    	this(parentShell, container, null, true);
+    	this(parentShell, container, true);
     }
 
-    public LinkFolderDialog(Shell parentShell, IContainer container, IResource resource, boolean createLink) {
+    public LinkFolderDialog(Shell parentShell, IContainer container, boolean createLink) {
     	super(parentShell);
     	fContainer = container;
 		fCreateLink= createLink;
         setTitle(NewWizardMessages.LinkFolderDialog_title); 
         setShellStyle(getShellStyle() | SWT.RESIZE);
-        setStatusLineAboveButtons(true); 
-		fResource= resource;
+        setStatusLineAboveButtons(true);
 	}
 
 	/* (non-Javadoc)
@@ -353,6 +353,20 @@ public class LinkFolderDialog extends StatusDialog {
         // initially disable the ok button since we don't preset the
         // folder name field
         getButton(IDialogConstants.OK_ID).setEnabled(false);
+    }
+    
+    public void setName(String name) {
+		if (fFolderNameField != null) {
+    		fFolderNameField.setText(name);
+    	}
+    	fName= name;
+    }
+    
+    public void setLinkTarget(String target) {
+		if (fDependenciesGroup != null) {
+    		fDependenciesGroup.setLinkTarget(target);
+    	}
+    	fTarget= target;
     }
 
     /* (non-Javadoc)
@@ -379,12 +393,12 @@ public class LinkFolderDialog extends StatusDialog {
 		label.setLayoutData(new GridData(SWT.FILL, SWT.CENTER, false, false, numOfColumns, 1));
         
         fDependenciesGroup= new LinkFields(composite, numOfColumns);
-        if (fResource != null) {
-        	fDependenciesGroup.setLinkTarget(fResource.getLocation().toOSString());
+        if (fTarget != null) {
+        	fDependenciesGroup.setLinkTarget(fTarget);
         }
         fFolderNameField= new FolderNameField(composite, numOfColumns);
-        if (fResource != null) {
-        	fFolderNameField.setText(fResource.getName());
+        if (fName != null) {
+        	fFolderNameField.setText(fName);
         }
         
         Validator validator= new Validator();

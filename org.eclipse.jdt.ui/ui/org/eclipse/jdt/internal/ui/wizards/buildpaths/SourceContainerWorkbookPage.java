@@ -348,9 +348,9 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private void editElementEntry(CPListElement elem) {
 		CPListElement res= null;
 		
-		if (elem.getResource().isLinked()) {
+		if (elem.getLinkTarget() != null) {
 			removeEntry();
-			CPListElement entry= openNewLinkedSourceContainerDialog(elem.getResource());
+			CPListElement entry= openNewLinkedSourceContainerDialog(elem);
 			
 			if (entry == null)
 				entry= elem;
@@ -460,7 +460,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 		Object elem= selElements.get(0);
 		if (elem instanceof CPListElement) {
-			if (((CPListElement)elem).getResource().isLinked())
+			if (((CPListElement)elem).getLinkTarget() != null)
 				return true;
 			
 			return false;
@@ -523,9 +523,13 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 	}
 	
-    private CPListElement openNewLinkedSourceContainerDialog(IResource resource) {
+    private CPListElement openNewLinkedSourceContainerDialog(CPListElement element) {
     	
-    	LinkFolderDialog dialog= new LinkFolderDialog(getShell(), fCurrJProject.getProject(), resource, false);
+    	LinkFolderDialog dialog= new LinkFolderDialog(getShell(), fCurrJProject.getProject(), false);
+    	if (element != null) {
+	    	dialog.setName(element.getResource().getName());
+	    	dialog.setLinkTarget(element.getLinkTarget().toOSString());
+    	}
     	
         if (dialog.open() == Window.OK) {
             IResource createdLink= dialog.getCreatedFolder();
