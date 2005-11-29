@@ -58,7 +58,7 @@ public class IFileTypeInfo extends TypeInfo {
 		IResource resource= root.findMember(path);
 		if (resource != null) {
 			IJavaElement elem= JavaCore.create(resource);
-			if (elem.exists()) {
+			if (elem != null && elem.exists()) {
 				return elem;
 			}
 		}
