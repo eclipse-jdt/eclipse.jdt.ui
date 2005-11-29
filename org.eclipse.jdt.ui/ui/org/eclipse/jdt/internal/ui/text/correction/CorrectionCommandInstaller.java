@@ -16,7 +16,6 @@ import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.ui.ISources;
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.LegacyHandlerSubmissionExpression;
 import org.eclipse.ui.PlatformUI;
@@ -64,7 +63,7 @@ public class CorrectionCommandInstaller {
 			if (id.startsWith(COMMAND_PREFIX)) {
 				boolean isAssist= id.endsWith(ASSIST_SUFFIX);
 				CorrectionCommandHandler handler= new CorrectionCommandHandler(editor, id, isAssist);
-				IHandlerActivation activation= handlerService.activateHandler(id, handler, new LegacyHandlerSubmissionExpression(null, null, editor.getSite()), ISources.ACTIVE_SITE);
+				IHandlerActivation activation= handlerService.activateHandler(id, handler, new LegacyHandlerSubmissionExpression(null, null, editor.getSite()));
 				fCorrectionHandlerActivations.add(activation);
 			}
 		}
