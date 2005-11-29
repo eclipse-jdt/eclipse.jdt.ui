@@ -1351,7 +1351,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 						final IJavaElement declaringType= parent.getAncestor(IJavaElement.TYPE);
 						String message= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_cannot_rename_locals_same_new_name, new String[] { alreadyRegisteredLocalVariable.getElementName(),
 								currentLocal.getElementName(), nameOfParent, declaringType.getElementName(), newName });
-						status.addWarning(message);
+						status.addWarning(message, JavaStatusContext.create((IMember) parent));
 						return status;
 					}
 				}
