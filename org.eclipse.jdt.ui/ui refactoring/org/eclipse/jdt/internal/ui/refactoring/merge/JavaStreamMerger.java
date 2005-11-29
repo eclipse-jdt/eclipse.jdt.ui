@@ -36,7 +36,7 @@ import org.eclipse.jdt.internal.corext.Assert;
  * 
  * @since 3.2
  */
-public final class JavaFileStreamMerger implements IStreamMerger {
+public final class JavaStreamMerger implements IStreamMerger {
 
 	/** Range comparator for Java files */
 	private static final class JavaLineComparator implements IRangeComparator {
