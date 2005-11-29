@@ -716,7 +716,7 @@ public class CodeStyleFix extends AbstractFix {
 					}
 
 					public boolean visit(SimpleName node) {
-						if (node.getIdentifier().equals(name) && node.resolveTypeBinding().getErasure() != erasure) {
+						if (node.getIdentifier().equals(name) && ASTNodes.getParent(node, Type.class) != null && node.resolveTypeBinding().getErasure() != erasure) {
 							conflict[0]= true;
 							return false;
 						}
