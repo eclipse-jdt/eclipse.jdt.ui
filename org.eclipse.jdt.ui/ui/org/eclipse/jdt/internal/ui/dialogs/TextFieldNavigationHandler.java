@@ -111,7 +111,10 @@ public class TextFieldNavigationHandler {
 	}
 	
 	private static class TextNavigable extends WorkaroundNavigable {
-		static final boolean BUG_106024_TEXT_SELECTION= "win32".equals(SWT.getPlatform()); //$NON-NLS-1$
+		static final boolean BUG_106024_TEXT_SELECTION=
+				"win32".equals(SWT.getPlatform()) //$NON-NLS-1$
+				// on carbon, getCaretPosition() always returns getSelection().x
+				|| "carbon".equals(SWT.getPlatform()); //$NON-NLS-1$
 		
 		private final Text fText;
 		
@@ -393,7 +396,8 @@ public class TextFieldNavigationHandler {
 								fIterator.setText(fNavigable.getText());
 								int caretPosition= fNavigable.getCaretPosition();
 								int newCaret= fIterator.following(caretPosition);
-								fNavigable.setSelection(newCaret, newCaret);
+								if (newCaret != BreakIterator.DONE)
+									fNavigable.setSelection(newCaret, newCaret);
 								fIterator.setText(EMPTY_TEXT);
 							}
 						});
@@ -402,7 +406,8 @@ public class TextFieldNavigationHandler {
 								fIterator.setText(fNavigable.getText());
 								int caretPosition= fNavigable.getCaretPosition();
 								int newCaret= fIterator.preceding(caretPosition);
-								fNavigable.setSelection(newCaret, newCaret);
+								if (newCaret != BreakIterator.DONE)
+									fNavigable.setSelection(newCaret, newCaret);
 								fIterator.setText(EMPTY_TEXT);
 							}
 						});
