@@ -75,12 +75,15 @@ public final class JavaModelUtil {
 	
 	/**
 	 * Only use this suffix for creating new .java files.
-	 * In general, use one of the three *JavaLike*(..) methods in JavaCore.
+	 * In general, use one of the three *JavaLike*(..) methods in JavaCore or create
+	 * a name from an existing compilation unit with {@link #getRenamedCUName(ICompilationUnit, String)}
+	 * <p> 
+	 * Note: Unlike {@link JavaCore#getJavaLikeExtensions()}, this suffix includes a leading ".".
+	 * </p>
 	 * 
 	 * @see JavaCore#getJavaLikeExtensions() 
 	 * @see JavaCore#isJavaLikeFileName(String)
 	 * @see JavaCore#removeJavaLikeExtension(String)
-	 * 
 	 * @see #getRenamedCUName(ICompilationUnit, String)
 	 */
 	public static final String DEFAULT_CU_SUFFIX= ".java"; //$NON-NLS-1$
