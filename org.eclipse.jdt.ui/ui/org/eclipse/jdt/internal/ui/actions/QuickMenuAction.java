@@ -171,8 +171,9 @@ public abstract class QuickMenuAction extends Action {
 	 *  be computed
 	 */
 	protected Point computeMenuLocation(StyledText text) {
-		Point result= text.getLocationAtOffset(text.getCaretOffset());
-		result.y+= text.getLineHeight();
+		int offset= text.getCaretOffset();
+		Point result= text.getLocationAtOffset(offset);
+		result.y+= text.getLineHeight(offset);
 		if (!text.getClientArea().contains(result))
 			return null;
 		return result;

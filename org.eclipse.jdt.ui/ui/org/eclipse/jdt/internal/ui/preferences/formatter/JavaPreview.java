@@ -157,19 +157,27 @@ public abstract class JavaPreview {
 		final int height= widget.getClientArea().height;
 		final int top0= widget.getTopPixel();
 		
-		final int totalPixels0= widget.getLineCount() * widget.getLineHeight();
+		final int totalPixels0= getHeightOfAllLines(widget);
 		final int topPixelRange0= totalPixels0 > height ? totalPixels0 - height : 0;
 		
 		widget.setRedraw(false);
 		doFormatPreview();
 		fSourceViewer.setSelection(null);
 		
-		final int totalPixels1= widget.getLineCount() * widget.getLineHeight();
+		final int totalPixels1= getHeightOfAllLines(widget);
 		final int topPixelRange1= totalPixels1 > height ? totalPixels1 - height : 0;
 
 		final int top1= topPixelRange0 > 0 ? (int)(topPixelRange1 * top0 / (double)topPixelRange0) : 0;
 		widget.setTopPixel(top1);
 		widget.setRedraw(true);
+	}
+	
+	private int getHeightOfAllLines(StyledText styledText) {
+		int height= 0;
+		int lineCount= styledText.getLineCount();
+		for (int i= 0; i < lineCount; i++)
+			height= height + styledText.getLineHeight(styledText.getOffsetAtLine(i));
+		return height;
 	}
 	
 	protected abstract void doFormatPreview();

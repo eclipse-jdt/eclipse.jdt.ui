@@ -56,7 +56,7 @@ public abstract class JDTQuickMenuAction extends QuickMenuAction {
 				
 		StyledText styledText= fEditor.getViewer().getTextWidget();
 		Point result= styledText.getLocationAtOffset(start);
-		result.y+= styledText.getLineHeight();
+		result.y+= styledText.getLineHeight(start);
 		
 		if (!styledText.getClientArea().contains(result))
 			return null;
