@@ -10,17 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
-
+import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -32,6 +30,14 @@ import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 
 
 public abstract class AbstractFix implements IFix {
+	
+	public interface IFixRewriteOperation {
+		public void rewriteAST(
+				ASTRewrite rewrite, 
+				NewImportRewrite importRewrite, 
+				CompilationUnit compilationUnit,
+				List/*<TextEditGroup>*/ textEditGroups) throws CoreException;
+	}
 	
 	private final String fName;
 	private final ICompilationUnit fCompilationUnit;
@@ -65,24 +71,17 @@ public abstract class AbstractFix implements IFix {
 	 * @param imports Import rewrites to apply, may be null
 	 * @return The TextEdit
 	 * @throws CoreException
+	 * @deprecated
 	 */
 	protected TextEdit applyEdits(ICompilationUnit compilationUnit, ASTRewrite rewrite, ImportRewrite imports) throws CoreException {
-		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
-		IPath path= compilationUnit.getPath();
-		manager.connect(path, null);
-		try {
-			IDocument document= manager.getTextFileBuffer(path).getDocument();
-			
-			Map options= compilationUnit.getJavaProject().getOptions(true);
-			TextEdit edit= rewrite.rewriteAST(document, options);
-	
-			if (imports != null && !imports.isEmpty()) {
-				edit.addChild(imports.createEdit(document, new NullProgressMonitor()));
-			}
-			return edit;
-		} finally {
-			manager.disconnect(path, null);
+		Map options= compilationUnit.getJavaProject().getOptions(true);
+		IDocument document1= new Document(compilationUnit.getBuffer().getContents());
+		TextEdit edit= rewrite.rewriteAST(document1, options);
+
+		if (imports != null && !imports.isEmpty()) {
+			edit.addChild(imports.createEdit(document1, new NullProgressMonitor()));
 		}
+		return edit;
 	}
 	
 	/**
@@ -98,6 +97,7 @@ public abstract class AbstractFix implements IFix {
 	 */
 	protected TextEdit applyEdits(CompilationUnit compilationUnit, ASTRewrite rewrite, NewImportRewrite imports) throws CoreException {
 		TextEdit edit= rewrite.rewriteAST();
+
 		if (imports != null) {
 			edit.addChild(imports.rewriteImports(new NullProgressMonitor()));
 		}

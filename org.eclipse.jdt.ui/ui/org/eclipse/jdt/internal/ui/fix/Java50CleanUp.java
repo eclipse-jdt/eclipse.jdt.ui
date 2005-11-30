@@ -58,6 +58,13 @@ public class Java50CleanUp extends AbstractCleanUp {
 	 */
 	public static final int ADD_OVERRIDE_ANNOATION= 2;
 	
+	/**
+	 * Convert for loops to enhanced for loops.<p>
+	 * i.e.:<pre><code>
+	 * for (int i = 0; i < array.length; i++) {} -> for (int element : array) {}</code></pre>
+	 */
+	public static final int CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP= 4;
+	
 	private static final int DEFAULT_FLAG= ADD_DEPRECATED_ANNOTATION | ADD_OVERRIDE_ANNOATION;
 	private static final String SECTION_NAME= "CleanUp_Java50"; //$NON-NLS-1$
 
@@ -75,7 +82,8 @@ public class Java50CleanUp extends AbstractCleanUp {
 		
 		return Java50Fix.createCleanUp(compilationUnit, 
 				isFlag(ADD_OVERRIDE_ANNOATION), 
-				isFlag(ADD_DEPRECATED_ANNOTATION));
+				isFlag(ADD_DEPRECATED_ANNOTATION),
+				isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP));
 	}
 
 	public Map getRequiredOptions() {
@@ -95,6 +103,7 @@ public class Java50CleanUp extends AbstractCleanUp {
 		
 		addCheckBox(composite, ADD_OVERRIDE_ANNOATION, MultiFixMessages.Java50MultiFix_AddMissingOverride_description);
 		addCheckBox(composite, ADD_DEPRECATED_ANNOTATION, MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description);
+		addCheckBox(composite, CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP, MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description);
 		
 		return composite;
 	}

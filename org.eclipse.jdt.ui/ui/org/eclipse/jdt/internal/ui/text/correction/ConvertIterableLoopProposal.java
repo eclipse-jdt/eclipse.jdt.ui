@@ -14,9 +14,9 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
+import org.eclipse.text.edits.TextEditGroup;
 
-import org.eclipse.swt.graphics.Image;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -49,18 +49,19 @@ import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.fix.FixMessages;
+import org.eclipse.jdt.internal.corext.fix.LinkedFix;
+import org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.LinkedFix.IPositionLinkable;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
- * Correction proposal to convert for loops over iterables to enhanced for loops.
+ * Operation to convert for loops over iterables to enhanced for loops.
  * 
  * @since 3.1
  */
-public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal {
-
-	/** The linked position group for the element variable */
-	private static final String GROUP_ELEMENT= "element"; //$NON-NLS-1$
+public final class ConvertIterableLoopProposal implements ILinkedFixRewriteOperation {
 
 	/**
 	 * Returns the supertype of the given type with the qualified name.
@@ -116,25 +117,27 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 	/** The for statement to convert */
 	private final ForStatement fStatement;
 
+	private final ICompilationUnit fCompilationUnit;
+
+	private final String fIdentifierName;
+
 	/**
 	 * Creates a new convert iterable loop proposal.
 	 * 
-	 * @param name the name of the correction proposal
 	 * @param unit the compilation unit containing the for statement
 	 * @param statement the for statement to be converted
-	 * @param relevance the relevance of the proposal
-	 * @param image the image of the proposal
 	 */
-	public ConvertIterableLoopProposal(final String name, final ICompilationUnit unit, final ForStatement statement, final int relevance, final Image image) {
-		super(name, unit, null, relevance, image);
+	public ConvertIterableLoopProposal(final CompilationUnit unit, final ForStatement statement, String identifierName) {
+		fIdentifierName= identifierName;
+		fCompilationUnit= (ICompilationUnit)unit.getJavaElement();
 		fStatement= statement;
 		fRoot= (CompilationUnit) statement.getRoot();
 	}
 
 	private List computeElementNames() {
 		final List names= new ArrayList();
-		final IJavaProject project= getCompilationUnit().getJavaProject();
-		String name= GROUP_ELEMENT;
+		final IJavaProject project= fCompilationUnit.getJavaProject();
+		String name= fIdentifierName;
 		final ITypeBinding binding= fIterator.getType();
 		if (binding != null && binding.isParameterizedType())
 			name= binding.getTypeArguments()[0].getName();
@@ -160,7 +163,7 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 	/**
 	 * Returns the expression for the enhanced for statement.
 	 * 
-	 * @param rewrite the ast rewrite to use
+	 * @param rewrite the AST rewrite to use
 	 * @return the expression node
 	 */
 	private Expression getExpression(final ASTRewrite rewrite) {
@@ -184,19 +187,12 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 		return fRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
-	 */
-	protected final ASTRewrite getRewrite() throws CoreException {
-		final AST ast= fStatement.getAST();
-		final ASTRewrite astRewrite= ASTRewrite.create(ast);
-		
-		CompilationUnit astRoot= (CompilationUnit) fStatement.getRoot();
-		final ImportRemover remover= new ImportRemover(getCompilationUnit().getJavaProject(), astRoot);
+	private void rewriteAST(final AST ast, final ASTRewrite astRewrite, final IPositionLinkable callback, final NewImportRewrite importRewrite, final TextEditGroup group) throws CoreException {
+		final ImportRemover remover= new ImportRemover(fCompilationUnit.getJavaProject(), (CompilationUnit) fStatement.getRoot());
 		
 		final EnhancedForStatement statement= ast.newEnhancedForStatement();
 		final List names= computeElementNames();
-		String name= GROUP_ELEMENT;
+		String name= fIdentifierName;
 		if (fElement != null) {
 			name= fElement.getName();
 			if (!names.contains(name))
@@ -206,7 +202,7 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 				name= (String) names.get(0);
 		}
 		for (final Iterator iterator= names.iterator(); iterator.hasNext();)
-			addLinkedPositionProposal(GROUP_ELEMENT, (String) iterator.next(), null);
+			callback.addLinkedPositionProposal(fIdentifierName, (String) iterator.next(), null);
 		final Statement body= fStatement.getBody();
 		if (body != null) {
 			if (body instanceof Block) {
@@ -223,9 +219,9 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 
 					private boolean replace(final Expression expression) {
 						final SimpleName node= ast.newSimpleName(text);
-						astRewrite.replace(expression, node, null);
+						astRewrite.replace(expression, node, group);
 						remover.registerRemovedNode(expression);
-						addLinkedPosition(astRewrite.track(node), false, GROUP_ELEMENT);
+						callback.addLinkedPosition(astRewrite.track(node), false, fIdentifierName);
 						return false;
 					}
 
@@ -252,7 +248,7 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 							if (binding != null && binding.equals(fElement)) {
 								final Statement parent= (Statement) ASTNodes.getParent(node, Statement.class);
 								if (parent != null && list.getRewrittenList().contains(parent))
-									addLinkedPosition(astRewrite.track(node), false, GROUP_ELEMENT);
+									callback.addLinkedPosition(astRewrite.track(node), false, fIdentifierName);
 							}
 						}
 						return false;
@@ -263,19 +259,17 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 		}
 		final SingleVariableDeclaration declaration= ast.newSingleVariableDeclaration();
 		final SimpleName simple= ast.newSimpleName(name);
-		addLinkedPosition(astRewrite.track(simple), true, GROUP_ELEMENT);
+		callback.addLinkedPosition(astRewrite.track(simple), true, fIdentifierName);
 		declaration.setName(simple);
 		final ITypeBinding iterable= getIterableType(fIterator.getType());
-		final NewImportRewrite imports= createImportRewrite(astRoot);
+		final NewImportRewrite imports= importRewrite;
 		declaration.setType(imports.addImport(iterable, ast));
 		remover.registerAddedImport(iterable.getQualifiedName());
 		statement.setParameter(declaration);
 		statement.setExpression(getExpression(astRewrite));
-		astRewrite.replace(fStatement, statement, null);
+		astRewrite.replace(fStatement, statement, group);
 		remover.registerRemovedNode(fStatement);
 		remover.applyRemoves(imports);
-
-		return astRewrite;
 	}
 
 	/**
@@ -284,7 +278,7 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 	 * @return <code>true</code> if it is applicable, <code>false</code> otherwise
 	 */
 	public final boolean isApplicable() {
-		if (JavaModelUtil.is50OrHigher(getCompilationUnit().getJavaProject())) {
+		if (JavaModelUtil.is50OrHigher(fCompilationUnit.getJavaProject())) {
 			for (final Iterator outer= fStatement.initializers().iterator(); outer.hasNext();) {
 				final Expression initializer= (Expression) outer.next();
 				if (initializer instanceof VariableDeclarationExpression) {
@@ -428,5 +422,21 @@ public final class ConvertIterableLoopProposal extends LinkedCorrectionProposal 
 			}
 		}
 		return fExpression != null && fIterable != null && fIterator != null && !fAssigned;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List, org.eclipse.jdt.internal.corext.fix.LinkedFix.IPositionLinkable)
+	 */
+	public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups, IPositionLinkable callback) throws CoreException {
+		TextEditGroup group= new TextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
+		textEditGroups.add(group);
+		rewriteAST(compilationUnit.getAST(), rewrite, callback, importRewrite, group);
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.FixRewriteAdapter#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
+	 */
+	public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
+		rewriteAST(rewrite, importRewrite, compilationUnit, textEditGroups, LinkedFix.NULL_LINKABLE);
 	}
 }

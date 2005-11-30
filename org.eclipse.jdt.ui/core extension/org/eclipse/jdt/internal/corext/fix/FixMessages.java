@@ -31,6 +31,7 @@ public class FixMessages extends NLS {
 	public static String Java50Fix_AddMissingAnnotations_description;
 	public static String Java50Fix_AddDeprecated_description;
 	public static String Java50Fix_AddOverride_description;
+	public static String Java50Fix_ConvertToEnhancedForLoop_description;
 	
 	public static String StringFix_AddRemoveNonNls_description;
 	public static String StringFix_AddNonNls_description;
@@ -49,4 +50,5 @@ public class FixMessages extends NLS {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, FixMessages.class);
 	}
+
 }

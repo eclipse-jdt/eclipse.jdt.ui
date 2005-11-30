@@ -613,7 +613,7 @@ public class ModifierCorrectionSubProcessor {
 	}
 	
 	public static void addOverrideAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		IFix fix= Java50Fix.createFix(context.getASTRoot(), problem, true, false);
+		IFix fix= Java50Fix.createAddOverrideAnnotationFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(Java50CleanUp.ADD_OVERRIDE_ANNOATION), 5, image);
@@ -622,7 +622,7 @@ public class ModifierCorrectionSubProcessor {
 	}
 	
 	public static void addDeprecatedAnnotationProposal(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
-		IFix fix= Java50Fix.createFix(context.getASTRoot(), problem, false, true);
+		IFix fix= Java50Fix.createAddDeprectatedAnnotation(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new Java50CleanUp(Java50CleanUp.ADD_DEPRECATED_ANNOTATION), 5, image);
@@ -692,11 +692,11 @@ public class ModifierCorrectionSubProcessor {
 					while (k < documentLen && Strings.isIndentChar(document.getChar(k))) {
 						k++;
 					}
-					// first remove space then replace range (remove space can destoy empty positon)
+					// first remove space then replace range (remove space can destroy empty position)
 					document.replace(end, k - end, new String()); // remove extra spaces
 					document.replace(currentPosition.offset, currentPosition.length, new String());
 				} else {
-					// first then replace range the insert space (insert space can destoy empty positon)
+					// first then replace range the insert space (insert space can destroy empty position)
 					document.replace(currentPosition.offset, currentPosition.length, ModifierKeyword.fromFlagValue(fModifier).toString());
 					int end= currentPosition.offset + currentPosition.length; // current end position
 					if (end < documentLen && !Character.isWhitespace(document.getChar(end))) {
@@ -750,7 +750,7 @@ public class ModifierCorrectionSubProcessor {
 	}
 
 	public static final boolean hasSuppressWarningsProposal(int problemId) {
-		return CorrectionEngine.getWarningToken(problemId) != null; // Surpress warning annotations
+		return CorrectionEngine.getWarningToken(problemId) != null; // Suppress warning annotations
 	}
 	
 	

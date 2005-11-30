@@ -12,10 +12,9 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
-import java.util.Iterator;
+import java.util.Hashtable;
 import java.util.List;
 
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
@@ -27,6 +26,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -35,14 +36,16 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
+import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.text.correction.ConvertForLoopProposal;
+import org.eclipse.jdt.internal.ui.text.correction.ConvertIterableLoopProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
-
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 /**
  * Fix which introduce new language constructs to pre Java50 code.
@@ -50,30 +53,117 @@ import org.eclipse.ltk.core.refactoring.TextChange;
  * Supported:
  * 		Add missing @Override annotation
  * 		Add missing @Deprecated annotation
+ * 		Convert for loop to enhanced for loop
  */
-public class Java50Fix extends AbstractFix {
+public class Java50Fix extends LinkedFix {
 	
-	private final AnnotationTuple[] fAnnotationTuples;
+	private static final String FOR_LOOP_ELEMENT_IDENTIFIER= "element"; //$NON-NLS-1$
 
-	private static class AnnotationTuple {
+	private static class ForLoopConverterGenerator extends GenericVisitor {
+
+		private final List fForConverters;
+		private final Hashtable fUsedNames;
+		private final CompilationUnit fCompilationUnit;
+		
+		public ForLoopConverterGenerator(List forConverters, CompilationUnit compilationUnit) {
+			fForConverters= forConverters;
+			fCompilationUnit= compilationUnit;
+			fUsedNames= new Hashtable();
+		}
+		
+		public boolean visit(ForStatement node) {
+			List usedVaribles= getUsedVariableNames(node);
+			usedVaribles.addAll(fUsedNames.values());
+			String[] used= (String[])usedVaribles.toArray(new String[usedVaribles.size()]);
+
+			String identifierName= FOR_LOOP_ELEMENT_IDENTIFIER;
+			int count= 0;
+			for (int i= 0; i < used.length; i++) {
+				if (used[i].equals(identifierName)) {
+					identifierName= FOR_LOOP_ELEMENT_IDENTIFIER + count;
+					count++;
+					i= 0;
+				}
+			}
+			
+			ConvertForLoopProposal forAdapter= new ConvertForLoopProposal(fCompilationUnit, node, identifierName);
+			if (forAdapter.satisfiesPreconditions()) {
+				fForConverters.add(forAdapter);
+				fUsedNames.put(node, identifierName);
+			} else {
+				ConvertIterableLoopProposal iterableAdapter= new ConvertIterableLoopProposal(fCompilationUnit, node, identifierName);
+				if (iterableAdapter.isApplicable()) {
+					fForConverters.add(iterableAdapter);
+					fUsedNames.put(node, identifierName);
+				}
+			}
+			return super.visit(node);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#endVisit(org.eclipse.jdt.core.dom.ForStatement)
+		 */
+		public void endVisit(ForStatement node) {
+			fUsedNames.remove(node);
+			super.endVisit(node);
+		}
+
+		private List getUsedVariableNames(ASTNode node) {
+			CompilationUnit root= (CompilationUnit)node.getRoot();
+			IBinding[] varsBefore= (new ScopeAnalyzer(root)).getDeclarationsInScope(node.getStartPosition(),
+				ScopeAnalyzer.VARIABLES);
+			IBinding[] varsAfter= (new ScopeAnalyzer(root)).getDeclarationsAfter(node.getStartPosition()
+				+ node.getLength(), ScopeAnalyzer.VARIABLES);
+
+			List names= new ArrayList();
+			for (int i= 0; i < varsBefore.length; i++) {
+				names.add(varsBefore[i].getName());
+			}
+			for (int i= 0; i < varsAfter.length; i++) {
+				names.add(varsAfter[i].getName());
+			}
+			return names;
+		}
+	}
+	
+	private static class AnnotationRewriteOperation implements IFixRewriteOperation {
 		private final BodyDeclaration fBodyDeclaration;
 		private final String[] fAnnotations;
 
-		public AnnotationTuple(BodyDeclaration bodyDeclaration, String[] annotations) {
+		public AnnotationRewriteOperation(BodyDeclaration bodyDeclaration, String[] annotations) {
 			fBodyDeclaration= bodyDeclaration;
 			fAnnotations= annotations;
 		}
 
-		public BodyDeclaration getBodyDeclaration() {
-			return fBodyDeclaration;
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
+		 */
+		public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
+			addAnnotation(fBodyDeclaration, fAnnotations, compilationUnit.getAST(), rewrite, textEditGroups);
 		}
+		
+		private void addAnnotation(BodyDeclaration declaration, String[] annotationNames, AST ast, ASTRewrite rewrite, List textEditGroups) {
+			ListRewrite listRewrite= rewrite.getListRewrite(declaration, declaration.getModifiersProperty());
 
-		public String[] getAnnotations() {
-			return fAnnotations;
+			for (int i= 0; i < annotationNames.length; i++) {
+				Annotation newAnnotation= ast.newMarkerAnnotation();
+				newAnnotation.setTypeName(ast.newSimpleName(annotationNames[i]));
+				TextEditGroup group= new TextEditGroup(MessageFormat.format(FixMessages.Java50Fix_AddMissingAnnotation_description, new Object[] {annotationNames[i]}));
+				textEditGroups.add(group);
+				listRewrite.insertFirst(newAnnotation, group);	
+			}
 		}
 	}
 	
-	public static Java50Fix createFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean addOverrideAnnotation, boolean addDepricatedAnnotation) {
+	public static Java50Fix createAddOverrideAnnotationFix(CompilationUnit compilationUnit, IProblemLocation problem) {
+		return createFix(compilationUnit, problem, true, false);
+	}
+	
+	public static Java50Fix createAddDeprectatedAnnotation(CompilationUnit compilationUnit, IProblemLocation problem) {
+		return createFix(compilationUnit, problem, false, true);
+	}
+	
+	private static Java50Fix createFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean addOverrideAnnotation, boolean addDepricatedAnnotation) {
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
@@ -98,50 +188,79 @@ public class Java50Fix extends AbstractFix {
 		
 		BodyDeclaration declaration= (BodyDeclaration) declaringNode;
 		
-		AnnotationTuple tuple= new AnnotationTuple(declaration, (String[])annotations.toArray(new String[annotations.size()]));
+		AnnotationRewriteOperation operation= new AnnotationRewriteOperation(declaration, (String[])annotations.toArray(new String[annotations.size()]));
 		
-		return new Java50Fix(name, cu, new AnnotationTuple[] {tuple});
+		return new Java50Fix(name, compilationUnit, new IFixRewriteOperation[] {operation});
 	}
 	
-	public static IFix createCleanUp(CompilationUnit compilationUnit, boolean addOverrideAnnotation, boolean addDeprecatedAnnotation) {
+	public static Java50Fix createConvertForLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
+		ConvertForLoopProposal loopConverter= new ConvertForLoopProposal(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER);
+		if (!loopConverter.satisfiesPreconditions())
+			return null;
+		
+		return new Java50Fix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {loopConverter});
+	}
+	
+	public static Java50Fix createConvertIterableLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
+		ConvertIterableLoopProposal loopConverter= new ConvertIterableLoopProposal(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER);
+		if (!loopConverter.isApplicable())
+			return null;
+
+		return new Java50Fix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {loopConverter});
+	}
+	
+	public static IFix createCleanUp(CompilationUnit compilationUnit, 
+			boolean addOverrideAnnotation, 
+			boolean addDeprecatedAnnotation, 
+			boolean convertToEnhancedForLoop) {
+		
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
 		
-		if (!addOverrideAnnotation && !addDeprecatedAnnotation)
+		if (!addOverrideAnnotation && !addDeprecatedAnnotation && !convertToEnhancedForLoop)
 			return null;
+
+		List/*<IFixRewriteOperation>*/ operations= new ArrayList();
 		
-		List/*<AnnotationTuple>*/ annotationTuples= new ArrayList();
-		IProblem[] problems= compilationUnit.getProblems();
-		for (int i= 0; i < problems.length; i++) {
-			IProblemLocation problem= getProblemLocation(problems[i]);
-			
-			if (isMissingDeprecated(problem) || isMissingOverride(problem)) {				
+		if (addOverrideAnnotation || addDeprecatedAnnotation) {
+			IProblem[] problems= compilationUnit.getProblems();
+			for (int i= 0; i < problems.length; i++) {
+				IProblemLocation problem= getProblemLocation(problems[i]);
 				
-				ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
-				if (selectedNode != null) { 
-				
-					ASTNode declaringNode= getDeclaringNode(selectedNode);
-					if (declaringNode instanceof BodyDeclaration) {
+				if (isMissingDeprecated(problem) || isMissingOverride(problem)) {				
 					
-						List/*<String>*/ annotations= new ArrayList();
+					ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
+					if (selectedNode != null) { 
+					
+						ASTNode declaringNode= getDeclaringNode(selectedNode);
+						if (declaringNode instanceof BodyDeclaration) {
 						
-						addAnnotations(problem, addOverrideAnnotation, addDeprecatedAnnotation, annotations);
-						
-						if (!annotations.isEmpty()) {
-							BodyDeclaration declaration= (BodyDeclaration) declaringNode;
-							AnnotationTuple tuple= new AnnotationTuple(declaration, (String[])annotations.toArray(new String[annotations.size()]));
-							annotationTuples.add(tuple);
+							List/*<String>*/ annotations= new ArrayList();
+							
+							addAnnotations(problem, addOverrideAnnotation, addDeprecatedAnnotation, annotations);
+							
+							if (!annotations.isEmpty()) {
+								BodyDeclaration declaration= (BodyDeclaration) declaringNode;
+								AnnotationRewriteOperation annotationAdapter= new AnnotationRewriteOperation(declaration, (String[])annotations.toArray(new String[annotations.size()]));
+								operations.add(annotationAdapter);
+							}
 						}
-						
 					}
 				}
 			}
 		}
-		if (annotationTuples.isEmpty()) 
+		
+		if (convertToEnhancedForLoop) {
+			ForLoopConverterGenerator forLoopFinder= new ForLoopConverterGenerator(operations, compilationUnit);
+			compilationUnit.accept(forLoopFinder);
+		}
+		
+		if (operations.size() == 0)
 			return null;
 		
-		return new Java50Fix("", cu, (AnnotationTuple[])annotationTuples.toArray(new AnnotationTuple[annotationTuples.size()])); //$NON-NLS-1$
+		IFixRewriteOperation[] operationsArray= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
+		return new Java50Fix("", compilationUnit, operationsArray); //$NON-NLS-1$
 	}
 
 	private static String addAnnotations(IProblemLocation problem, boolean addOverrideAnnotation, boolean addDepricatedAnnotation, List annotations) {
@@ -186,54 +305,15 @@ public class Java50Fix extends AbstractFix {
 		}
 		return declaringNode;
 	}
-
-	private Java50Fix(String name, ICompilationUnit compilationUnit, AnnotationTuple[] annotationTuples) {
-		super(name, compilationUnit);
-		fAnnotationTuples= annotationTuples;
-	}
-
-	public TextChange createChange() throws CoreException {
-		if (fAnnotationTuples != null && fAnnotationTuples.length > 0) {
-			AST ast= fAnnotationTuples[0].getBodyDeclaration().getAST();
-			ASTRewrite rewrite= ASTRewrite.create(ast);
-			List/*<TextEditGroup>*/ groups= new ArrayList();
-			for (int i= 0; i < fAnnotationTuples.length; i++) {
-				AnnotationTuple tuple= fAnnotationTuples[i];
-				addAnnotation(tuple.getBodyDeclaration(), tuple.getAnnotations(), ast, rewrite, groups);	
-			}
-			
-			TextEdit edit= applyEdits(getCompilationUnit(), rewrite, null);
-			
-			CompilationUnitChange result= new CompilationUnitChange(FixMessages.Java50Fix_AddMissingAnnotations_description, getCompilationUnit());
-			result.setEdit(edit);
-			
-			for (Iterator iter= groups.iterator(); iter.hasNext();) {
-				TextEditGroup group= (TextEditGroup)iter.next();
-				result.addTextEditGroup(group);
-			}
-			
-			return result;
-			
-		}
-		return null;
-	}
 	
-	private void addAnnotation(BodyDeclaration declaration, String[] annotationNames, AST ast, ASTRewrite rewrite, List textEditGroups) {
-		ListRewrite listRewrite= rewrite.getListRewrite(declaration, declaration.getModifiersProperty());
-
-		for (int i= 0; i < annotationNames.length; i++) {
-			Annotation newAnnotation= ast.newMarkerAnnotation();
-			newAnnotation.setTypeName(ast.newSimpleName(annotationNames[i]));
-			TextEditGroup group= new TextEditGroup(MessageFormat.format(FixMessages.Java50Fix_AddMissingAnnotation_description, new Object[] {annotationNames[i]}));
-			textEditGroups.add(group);
-			listRewrite.insertFirst(newAnnotation, group);	
-		}
-	}
-
 	private static IProblemLocation getProblemLocation(IProblem problem) {
 		int offset= problem.getSourceStart();
 		int length= problem.getSourceEnd() - offset + 1;
 		return new ProblemLocation(offset, length, problem.getID(), problem.getArguments(), problem.isError());
 	}
-
+	
+	private Java50Fix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewrites) {
+		super(name, compilationUnit, fixRewrites);
+	}
+	
 }

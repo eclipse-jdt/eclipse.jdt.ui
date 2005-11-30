@@ -344,7 +344,7 @@ public class UnusedCodeFix extends AbstractFix {
 				removeUnusedName(rewrite, name, fCompilationUnit, groups);
 			}
 			
-		TextEdit edit= applyEdits(getCompilationUnit(), rewrite, null);
+		TextEdit edit= applyEdits(fCompilationUnit, rewrite, null);
 			
 		CompilationUnitChange result= new CompilationUnitChange("", getCompilationUnit()); //$NON-NLS-1$
 		result.setEdit(edit);

@@ -27,6 +27,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.fix.LinkedFix.IPositionLinkable;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
@@ -38,13 +39,12 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
  * fix a problem. A fix correction proposal may have an @see org.eclipse.jdt.internal.corext.fix.IMultiFix
  * attachet which can be executed instead of the provided IFix.
  */
-public class FixCorrectionProposal extends CUCorrectionProposal implements ICompletionProposalExtension2 {
-
+public class FixCorrectionProposal extends LinkedCorrectionProposal implements IPositionLinkable, ICompletionProposalExtension2 {
 	private final IFix fFix;
 	private final ICleanUp fCleanUp;
 
 	public FixCorrectionProposal(IFix fix, ICleanUp cleanUp, int relevance, Image image) {
-		super(fix.getDescription(), fix.getCompilationUnit(), relevance, image);
+		super(fix.getDescription(), fix.getCompilationUnit(), null, relevance, image);
 		fFix= fix;
 		fCleanUp= cleanUp;
 	}

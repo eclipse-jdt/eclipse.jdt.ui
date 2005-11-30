@@ -695,6 +695,7 @@ public class CodeStyleFix extends AbstractFix {
 
 	private Type importClass(final ITypeBinding toImport, ASTNode accessor, NewImportRewrite imports) {
 		final ITypeBinding erasure= toImport.getErasure();
+		imports.setFilterImplicitImports(true);
 		return imports.addImport(toImport, fCompilationUnit.getAST(), new ImportRewriteContext() {
 
 			public int findInContext(String qualifier, final String name, int kind) {

@@ -80,6 +80,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.fix.Java50Fix;
+import org.eclipse.jdt.internal.corext.fix.LinkedFix;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -89,6 +91,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 
 /**
   */
@@ -1129,17 +1132,18 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		if (resultingCollections == null)
 			return true;
-
-		ConvertForLoopProposal convertForLoopProposal= new ConvertForLoopProposal(
-				CorrectionMessages.QuickAssistProcessor_forLoop_description,
-				context.getCompilationUnit(),
-				forStatement, 1,
+		
+		LinkedFix fix= Java50Fix.createConvertForLoopToEnhancedFix(context.getASTRoot(), forStatement);
+		if (fix == null)
+			return false;
+		
+		FixCorrectionProposal proposal= new FixCorrectionProposal(
+				fix, 
+				new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP), 
+				1, 
 				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-
-		if (!convertForLoopProposal.satisfiesPreconditions())
-		    return false;
-
-		resultingCollections.add(convertForLoopProposal);
+		
+		resultingCollections.add(proposal);
 		return true;
 	}
 
@@ -1150,17 +1154,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 
 		if (resultingCollections == null)
 			return true;
-
-		ConvertIterableLoopProposal convertForLoopProposal= new ConvertIterableLoopProposal(
-				CorrectionMessages.QuickAssistProcessor_forLoop_description,
-				context.getCompilationUnit(),
-				forStatement, 1,
+		
+		LinkedFix fix= Java50Fix.createConvertIterableLoopToEnhancedFix(context.getASTRoot(), forStatement);
+		if (fix == null)
+			return false;
+		
+		FixCorrectionProposal proposal= new FixCorrectionProposal(
+				fix, new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP),
+				1,
 				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
-
-		if (!convertForLoopProposal.isApplicable())
-		    return false;
-
-		resultingCollections.add(convertForLoopProposal);
+		
+		resultingCollections.add(proposal);
 		return true;
 	}
 
