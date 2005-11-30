@@ -1126,7 +1126,7 @@ public class ChangeSignatureRefactoring extends Refactoring {
 						JavaPlugin.log(exception);
 					}
 					try {
-						return new RefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, MessageFormat.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), null, arguments);
+						return new RefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, MessageFormat.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), null, arguments, flags);
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 						return null;
