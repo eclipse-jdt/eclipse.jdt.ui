@@ -205,8 +205,13 @@ public class JavaTextTools {
 	/**
 	 * Returns the color manager which is used to manage
 	 * any Java-specific colors needed for such things like syntax highlighting.
+	 * <p>
+	 * Clients which are only interested in the color manager of the Java UI
+	 * plug-in should use {@link org.eclipse.jdt.ui.JavaUI#getColorManager()}.
+	 * </p>
 	 *
 	 * @return the color manager to be used for Java text viewers
+	 * @see org.eclipse.jdt.ui.JavaUI#getColorManager()
 	 */
 	public IColorManager getColorManager() {
 		return fColorManager;

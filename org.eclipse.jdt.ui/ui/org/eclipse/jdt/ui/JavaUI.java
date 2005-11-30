@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaElementTransfer;
 
 import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
+import org.eclipse.jdt.ui.text.IColorManager;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
@@ -917,5 +918,16 @@ public final class JavaUI {
 	 */
 	public static Transfer getJavaElementClipboardTransfer() {
 		return JavaElementTransfer.getInstance();
+	}
+	
+	/**
+	 * Returns the color manager the Java UI plug-in which is used to manage
+	 * any Java-specific colors needed for such things like syntax highlighting.
+	 *
+	 * @return the color manager to be used for Java text viewers
+	 * @since 3.2
+	 */
+	public static IColorManager getColorManager() {
+		return JavaPlugin.getDefault().getJavaTextTools().getColorManager();
 	}
 }
