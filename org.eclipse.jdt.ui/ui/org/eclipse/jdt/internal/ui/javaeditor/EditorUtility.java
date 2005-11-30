@@ -300,7 +300,10 @@ public class EditorUtility {
 	public static String getEditorID(IEditorInput input, Object inputObject) {
 		IEditorDescriptor editorDescriptor;
 		try {
-			editorDescriptor= IDE.getEditorDescriptor(input.getName());
+			if (input instanceof IFileEditorInput)
+				editorDescriptor= IDE.getEditorDescriptor(((IFileEditorInput)input).getFile());
+			else
+				editorDescriptor= IDE.getEditorDescriptor(input.getName());
 		} catch (PartInitException e) {
 			return null;
 		}
