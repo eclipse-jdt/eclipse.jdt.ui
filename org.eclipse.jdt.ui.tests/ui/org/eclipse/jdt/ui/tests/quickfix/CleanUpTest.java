@@ -2737,6 +2737,491 @@ public class CleanUpTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(previews, new String[] { expected1});
 	}
 	
+	public void testJava50ForLoop01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        List<E1> list= new ArrayList<E1>();\n");
+		buf.append("        for (Iterator<E1> iter = list.iterator(); iter.hasNext();) {\n");
+		buf.append("            E1 e = iter.next();\n");
+		buf.append("            System.out.println(e);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        List<E1> list= new ArrayList<E1>();\n");
+		buf.append("        for (E1 e : list) {\n");
+		buf.append("            System.out.println(e);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testJava50ForLoop02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        List<E1> list1= new ArrayList<E1>();\n");
+		buf.append("        List<E1> list2= new ArrayList<E1>();\n");
+		buf.append("        for (Iterator<E1> iter = list1.iterator(); iter.hasNext();) {\n");
+		buf.append("            E1 e1 = iter.next();\n");
+		buf.append("            for (Iterator iterator = list2.iterator(); iterator.hasNext();) {\n");
+		buf.append("                E1 e2 = (E1) iterator.next();\n");
+		buf.append("                System.out.println(e2);\n");
+		buf.append("            }\n");
+		buf.append("            System.out.println(e1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.ArrayList;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        List<E1> list1= new ArrayList<E1>();\n");
+		buf.append("        List<E1> list2= new ArrayList<E1>();\n");
+		buf.append("        for (E1 e1 : list1) {\n");
+		buf.append("            for (Object element0 : list2) {\n");
+		buf.append("                E1 e2 = (E1) element0;\n");
+		buf.append("                System.out.println(e2);\n");
+		buf.append("            }\n");
+		buf.append("            System.out.println(e1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testJava50ForLoop03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int[] array={1,2,3,4};\n");
+		buf.append("        for (int i=0;i<array.length;i++) {\n");
+		buf.append("            String[] strs={\"1\",\"2\"};\n");
+		buf.append("            for (int j = 0; j < strs.length; j++) {\n");
+		buf.append("                System.out.println(array[i]+strs[j]);\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int[] array={1,2,3,4};\n");
+		buf.append("        for (int element : array) {\n");
+		buf.append("            String[] strs={\"1\",\"2\"};\n");
+		buf.append("            for (String element0 : strs) {\n");
+		buf.append("                System.out.println(element+element0);\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testJava50ForLoop04() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int[] array= new int[10];\n");
+		buf.append("        for (int i = 0; i < array.length; i++) {\n");
+		buf.append("            for (int j = 0; j < array.length; j++) {\n");
+		buf.append("                for (int k = 0; k < array.length; k++) {\n");
+		buf.append("                }\n");
+		buf.append("                for (int k = 0; k < array.length; k++) {\n");
+		buf.append("                }\n");
+		buf.append("            }\n");
+		buf.append("            for (int j = 0; j < array.length; j++) {\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int[] array= new int[10];\n");
+		buf.append("        for (int element : array) {\n");
+		buf.append("            for (int element0 : array) {\n");
+		buf.append("                for (int element1 : array) {\n");
+		buf.append("                }\n");
+		buf.append("                for (int element1 : array) {\n");
+		buf.append("                }\n");
+		buf.append("            }\n");
+		buf.append("            for (int element0 : array) {\n");
+		buf.append("            }\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testJava50ForLoop05() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int[] array= null;\n");
+		buf.append("        for (int i = 0; --i < array.length;) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp);
+		
+		assertRefactoringHasNoChange(refactoring);
+	}
+	
+	public void testJava50ForLoop06() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int a= 0;\n");
+		buf.append("        for (a=0;a>0;a++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp);
+		
+		assertRefactoringHasNoChange(refactoring);
+	}
+	
+	public void testJava50ForLoop07() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int a= 0;\n");
+		buf.append("        for (a=0;;a++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp);
+		
+		assertRefactoringHasNoChange(refactoring);
+	}
+	
+	public void testJava50ForLoop08() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int[] array= null;\n");
+		buf.append("        int a= 0;\n");
+		buf.append("        for (;a<array.length;a++) {}\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp);
+		
+		assertRefactoringHasNoChange(refactoring);
+	}
+	
+	public void testJava50ForLoop09() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int[] array= null;\n");
+		buf.append("        for (int i = 0; i < array.length; i++) {\n");
+		buf.append("            final int element= array[i];\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int[] array= null;\n");
+		buf.append("        for (final int element : array) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testJava50ForLoop10() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int[] array= null;\n");
+		buf.append("        int i;\n");
+		buf.append("        for (i = 0; i < array.length; i++) {}\n");
+		buf.append("        System.out.println(i);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp);
+		
+		assertRefactoringHasNoChange(refactoring);
+	}
+	
+	public void testJava50ForLoop11() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private class E1Sub {\n");
+		buf.append("        public int[] array;    \n");
+		buf.append("    }\n");
+		buf.append("    private E1Sub e1sub;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = this.e1sub.array.length;i < 1;i++) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private class E1Sub {\n");
+		buf.append("        public int[] array;    \n");
+		buf.append("    }\n");
+		buf.append("    private E1Sub e1sub;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int element : this.e1sub.array) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testJava50ForLoop12() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int[] array;    \n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = this.array.length;i < 1;i++) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int[] array;    \n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int element : this.array) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testJava50ForLoop13() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int[] array1, array2;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int i = array1.length - array2.length; i < 1; i++) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp);
+		
+		assertRefactoringHasNoChange(refactoring);
+	}
+	
+	public void testJava50ForLoop14() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.E3;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        E2 e2= new E2();\n");
+		buf.append("        e2.foo();\n");
+		buf.append("        E3 e3= new E3();\n");
+		buf.append("        for (int i = e3.array.length; i < 1; i++) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    public void foo() {};\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E2 {}\n");
+		pack2.createCompilationUnit("E2.java", buf.toString(), false, null);
+
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E3 {\n");
+		buf.append("    public E2[] array;\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("E3.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.E3;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        E2 e2= new E2();\n");
+		buf.append("        e2.foo();\n");
+		buf.append("        E3 e3= new E3();\n");
+		buf.append("        for (test2.E2 element : e3.array) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+
+	
 	public void testCombination01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

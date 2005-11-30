@@ -31,7 +31,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.ConvertForLoopProposal;
+import org.eclipse.jdt.internal.ui.text.correction.FixCorrectionProposal;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -46,7 +46,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 	private IPackageFragmentRoot fSourceFolder;
 
-	private ConvertForLoopProposal fConvertLoopProposal;
+	private FixCorrectionProposal fConvertLoopProposal;
 
 	public ConvertForLoopQuickFixTest(String name) {
 		super(name);
@@ -438,7 +438,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("public class A {\n");
 		buf.append("	private Weirdy[] weirdies;\n");
 		buf.append("    public void foo(){\n");
-		buf.append("		for (Weirdy p : weirdies) {\n");
+		buf.append("		for (Weirdy p : this.weirdies) {\n");
 		buf.append("			System.out.println();\n");
 		buf.append("		    if (p != null){\n");
 		buf.append("				System.out.println(p);\n");
@@ -997,8 +997,8 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		for (Iterator it= proposals.iterator(); it.hasNext();) {
 			CUCorrectionProposal proposal= (CUCorrectionProposal)it.next();
-			if (proposal instanceof ConvertForLoopProposal) {
-				fConvertLoopProposal= (ConvertForLoopProposal)proposal;
+			if (proposal instanceof FixCorrectionProposal) {
+				fConvertLoopProposal= (FixCorrectionProposal)proposal;
 			}
 		}
 		return proposals;
