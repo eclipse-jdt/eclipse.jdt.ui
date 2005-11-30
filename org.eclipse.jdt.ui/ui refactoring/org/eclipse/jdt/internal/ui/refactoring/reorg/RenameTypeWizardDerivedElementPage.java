@@ -372,7 +372,6 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 
 	public RenameTypeWizardDerivedElementPage() {
 		super(PAGE_NAME);
-		setMessage(RefactoringMessages.RenameTypeWizardDerivedElementPage_select_derived_elements);
 	}
 
 	// --- UI creation

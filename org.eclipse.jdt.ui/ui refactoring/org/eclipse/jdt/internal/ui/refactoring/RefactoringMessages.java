@@ -349,7 +349,6 @@ public final class RefactoringMessages extends NLS {
 	public static String RenameTypeWizardDerivedElementPage_field_exists;
 	public static String RenameTypeWizardDerivedElementPage_method_exists;
 	public static String RenameTypeWizardDerivedElementPage_rename_to;
-	public static String RenameTypeWizardDerivedElementPage_select_derived_elements;
 	public static String RenameTypeWizardDerivedElementPage_review_derived_elements;
 	public static String RenameTypeWizardDerivedElementPage_select_element_to_view_source;
 	public static String RenameTypeWizardDerivedElementPage_restore_defaults;
