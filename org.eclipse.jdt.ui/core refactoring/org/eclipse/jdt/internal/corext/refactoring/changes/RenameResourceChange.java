@@ -36,10 +36,6 @@ public class RenameResourceChange extends JDTChange {
 
 	private static final String ID_RENAME_RESOURCE= "org.eclipse.jdt.ui.rename.resource"; //$NON-NLS-1$
 
-	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
-
-	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
-
 	/*
 	 * we cannot use handles because they became invalid when you rename the resource.
 	 * paths do not.
@@ -131,8 +127,8 @@ public class RenameResourceChange extends JDTChange {
 	 */
 	public RefactoringDescriptor getRefactoringDescriptor() {
 		final Map arguments= new HashMap();
-		arguments.put(ATTRIBUTE_PATH, fResourcePath.toPortableString());
-		arguments.put(ATTRIBUTE_NAME, fNewName);
+		arguments.put(RefactoringDescriptor.INPUT, fResourcePath.toPortableString());
+		arguments.put(RefactoringDescriptor.NAME, fNewName);
 		return new RefactoringDescriptor(ID_RENAME_RESOURCE, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { getResource().getFullPath().toString(), fNewName}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
 	}
 

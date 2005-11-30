@@ -132,8 +132,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class ChangeSignatureRefactoring extends Refactoring {
 	
 	private static final String ID_CHANGE_METHOD_SIGNATURE= "org.eclipse.jdt.ui.change.method.signature"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_HANDLE= "handle"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RETURN= "return"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PARAMETER= "parameter"; //$NON-NLS-1$
@@ -1078,8 +1076,8 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return new DynamicValidationStateChange(RefactoringCoreMessages.ChangeSignatureRefactoring_restructure_parameters, fChangeManager.getAllChanges()) {
 				public RefactoringDescriptor getRefactoringDescriptor() {
 					final Map arguments= new HashMap();
-					arguments.put(ATTRIBUTE_HANDLE, fMethod.getHandleIdentifier());
-					arguments.put(ATTRIBUTE_NAME, fMethodName);
+					arguments.put(RefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
+					arguments.put(RefactoringDescriptor.NAME, fMethodName);
 					if (fReturnTypeInfo.isTypeNameChanged())
 						arguments.put(ATTRIBUTE_RETURN, fReturnTypeInfo.getNewTypeName());
 					try {

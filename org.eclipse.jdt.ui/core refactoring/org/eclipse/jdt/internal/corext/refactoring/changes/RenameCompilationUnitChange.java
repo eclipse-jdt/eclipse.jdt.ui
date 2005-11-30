@@ -38,8 +38,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange {
 
 	private static final String ID_RENAME_COMPILATION_UNIT= "org.eclipse.jdt.ui.rename.compilationunit"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 
 	public RenameCompilationUnitChange(ICompilationUnit cu, String newName) {
 		this(ResourceUtil.getResource(cu).getFullPath(), cu.getElementName(), newName, IResource.NULL_STAMP);
@@ -83,8 +81,8 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 	 */
 	public RefactoringDescriptor getRefactoringDescriptor() {
 		final Map arguments= new HashMap();
-		arguments.put(ATTRIBUTE_PATH, getResourcePath().toPortableString());
-		arguments.put(ATTRIBUTE_NAME, getNewName());
+		arguments.put(RefactoringDescriptor.INPUT, getResourcePath().toPortableString());
+		arguments.put(RefactoringDescriptor.NAME, getNewName());
 		String label= null;
 		final ICompilationUnit unit= (ICompilationUnit) getModifiedElement();
 		if (unit != null) {

@@ -115,8 +115,8 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 				public final RefactoringDescriptor getRefactoringDescriptor() {
 					final Map arguments= new HashMap();
 					final IField field= getField();
-					arguments.put(ATTRIBUTE_HANDLE, field.getHandleIdentifier());
-					arguments.put(ATTRIBUTE_NAME, getNewElementName());
+					arguments.put(RefactoringDescriptor.INPUT, field.getHandleIdentifier());
+					arguments.put(RefactoringDescriptor.NAME, getNewElementName());
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
 					String project= null;
@@ -146,7 +146,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (arguments instanceof GenericRefactoringArguments) {
 			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
-			final String handle= generic.getAttribute(ATTRIBUTE_HANDLE);
+			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
@@ -154,8 +154,8 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 				else
 					fField= (IField) element;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_HANDLE));
-			final String name= generic.getAttribute(ATTRIBUTE_NAME);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
 			if (name != null) {
 				if (fField != null) {
 					RefactoringStatus status= new RefactoringStatus();
@@ -170,7 +170,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 						return status;
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_NAME));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
 			final String references= generic.getAttribute(ATTRIBUTE_REFERENCES);
 			if (references != null) {
 				setUpdateReferences(Boolean.valueOf(references).booleanValue());

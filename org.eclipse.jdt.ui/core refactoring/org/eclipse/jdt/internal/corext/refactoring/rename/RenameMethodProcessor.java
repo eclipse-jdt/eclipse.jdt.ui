@@ -88,8 +88,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 
 	private static final String ID_RENAME_METHOD= "org.eclipse.jdt.ui.rename.method"; //$NON-NLS-1$
-	public static final String ATTRIBUTE_HANDLE= "handle"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 
 	private SearchResultGroup[] fOccurrences;
@@ -620,8 +618,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 
 				public RefactoringDescriptor getRefactoringDescriptor() {
 					final Map arguments= new HashMap();
-					arguments.put(ATTRIBUTE_HANDLE, fMethod.getHandleIdentifier());
-					arguments.put(ATTRIBUTE_NAME, getNewElementName());
+					arguments.put(RefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
+					arguments.put(RefactoringDescriptor.NAME, getNewElementName());
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 					String project= null;
 					IJavaProject javaProject= fMethod.getJavaProject();
@@ -707,7 +705,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (arguments instanceof GenericRefactoringArguments) {
 			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
-			final String handle= generic.getAttribute(ATTRIBUTE_HANDLE);
+			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
@@ -717,8 +715,8 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 					initializeWorkingCopyOwner();
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_HANDLE));
-			final String name= generic.getAttribute(ATTRIBUTE_NAME);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
 			if (name != null) {
 				if (fMethod != null) {
 					final RefactoringStatus status= checkNewElementName(name);
@@ -728,7 +726,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 						return status;
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_NAME));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
 			final String references= generic.getAttribute(ATTRIBUTE_REFERENCES);
 			if (references != null) {
 				fUpdateReferences= Boolean.valueOf(references).booleanValue();

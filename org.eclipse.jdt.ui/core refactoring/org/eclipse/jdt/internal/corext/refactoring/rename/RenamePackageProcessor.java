@@ -107,8 +107,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class RenamePackageProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
 	
 	private static final String ID_RENAME_PACKAGE= "org.eclipse.jdt.ui.rename.package"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_HANDLE= "handle"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
@@ -496,8 +494,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 
 				public RefactoringDescriptor getRefactoringDescriptor() {
 					final Map arguments= new HashMap();
-					arguments.put(ATTRIBUTE_HANDLE, fPackage.getHandleIdentifier());
-					arguments.put(ATTRIBUTE_NAME, getNewElementName());
+					arguments.put(RefactoringDescriptor.INPUT, fPackage.getHandleIdentifier());
+					arguments.put(RefactoringDescriptor.NAME, getNewElementName());
 					if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
 						arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
@@ -977,7 +975,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (arguments instanceof GenericRefactoringArguments) {
 			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
-			final String handle= generic.getAttribute(ATTRIBUTE_HANDLE);
+			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
@@ -985,8 +983,8 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				else
 					fPackage= (IPackageFragment) element;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_HANDLE));
-			final String name= generic.getAttribute(ATTRIBUTE_NAME);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
 			if (name != null) {
 				if (fPackage != null) {
 					RefactoringStatus status= new RefactoringStatus();
@@ -1001,7 +999,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 						return status;
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_NAME));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
 			final String patterns= generic.getAttribute(ATTRIBUTE_PATTERNS);
 			if (patterns != null && !"".equals(patterns)) //$NON-NLS-1$
 				fFilePatterns= patterns;

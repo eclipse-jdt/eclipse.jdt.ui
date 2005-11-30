@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
@@ -38,7 +37,7 @@ public final class RenameMethodRefactoringInstanceCreator extends RefactoringIns
 	 */
 	public Refactoring createRefactoring(final RefactoringDescriptor descriptor) throws JavaModelException {
 		RenameProcessor processor= null;
-		final String handle= (String) descriptor.getArguments().get(RenameMethodProcessor.ATTRIBUTE_HANDLE);
+		final String handle= (String) descriptor.getArguments().get(RefactoringDescriptor.INPUT);
 		if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 			final IJavaElement element= JavaCore.create(handle);
 			if (element instanceof IMethod && element.exists()) {
