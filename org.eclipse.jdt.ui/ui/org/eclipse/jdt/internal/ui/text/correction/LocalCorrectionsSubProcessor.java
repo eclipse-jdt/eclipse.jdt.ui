@@ -438,7 +438,7 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addUnusedMemberProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) {
-		UnusedCodeFix fix= UnusedCodeFix.createFix(context.getASTRoot(), problem, false, true, true, true, true, true, true);
+		UnusedCodeFix fix= UnusedCodeFix.createUnusedMemberFix(context.getASTRoot(), problem);
 		if (fix != null) {
 			Image image= JavaPlugin.getDefault().getWorkbench().getSharedImages().getImage(ISharedImages.IMG_TOOL_DELETE);
 			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, fix.getCleanUp(), 10, image);

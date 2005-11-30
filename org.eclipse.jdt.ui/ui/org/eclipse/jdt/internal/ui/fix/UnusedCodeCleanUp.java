@@ -55,7 +55,7 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 	/**
 	 * Removes unused private fields.
 	 */
-	private static final int REMOVE_UNUSED_PRIVATE_FIELDS= 8;
+	public static final int REMOVE_UNUSED_PRIVATE_FIELDS= 8;
 	
 	/**
 	 * Removes unused private types.
@@ -65,7 +65,7 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 	/**
 	 * Removes unused local variables.
 	 */
-	private static final int REMOVE_UNUSED_LOCAL_VARIABLES= 32;
+	public static final int REMOVE_UNUSED_LOCAL_VARIABLES= 32;
 	
 	private static final int DEFAULT_FLAG= REMOVE_UNUSED_IMPORTS;
 	private static final String SECTION_NAME= "CleanUp_UnusedCode"; //$NON-NLS-1$
@@ -115,9 +115,8 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 		addCheckBox(composite, REMOVE_UNUSED_PRIVATE_METHODS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedMethod_description);
 		addCheckBox(composite, REMOVE_UNUSED_PRIVATE_CONSTRUCTORS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedConstructor_description);
 		addCheckBox(composite, REMOVE_UNUSED_PRIVATE_TYPES, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedType_description);
-		//See Bug 114369
-//		addCheckBox(composite, REMOVE_UNUSED_PRIVATE_FIELDS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description);
-//		addCheckBox(composite, REMOVE_UNUSED_LOCAL_VARIABLES, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description);
+		addCheckBox(composite, REMOVE_UNUSED_PRIVATE_FIELDS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description);
+		addCheckBox(composite, REMOVE_UNUSED_LOCAL_VARIABLES, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description);
 		
 		return composite;
 	}
