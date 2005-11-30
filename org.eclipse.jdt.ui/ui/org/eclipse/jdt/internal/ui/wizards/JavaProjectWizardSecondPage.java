@@ -34,7 +34,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -78,7 +77,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 
 	private final JavaProjectWizardFirstPage fFirstPage;
 
-	private URI fCurrProjectLocation;
+	private URI fCurrProjectLocation; // null if location is platform location
 	private IProject fCurrProject;
 	
 	private boolean fKeepContent;
@@ -162,12 +161,13 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-						
+			
 			URI realLocation= fCurrProjectLocation;
-			if (ResourcesPlugin.getWorkspace().getRoot().getLocationURI().equals(fCurrProjectLocation)) {
+			if (fCurrProjectLocation == null) {  // inside workspace
 				try {
-					realLocation= new URI(fCurrProjectLocation.getScheme(), null,
-						Path.fromPortableString(fCurrProjectLocation.getPath()).append(fCurrProject.getName()).toString(),
+					URI rootLocation= ResourcesPlugin.getWorkspace().getRoot().getLocationURI();
+					realLocation= new URI(rootLocation.getScheme(), null,
+						Path.fromPortableString(rootLocation.getPath()).append(fCurrProject.getName()).toString(),
 						null);
 				} catch (URISyntaxException e) {
 					Assert.isTrue(false, "Can't happen"); //$NON-NLS-1$
@@ -240,6 +240,9 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	}
 	
 	private URI getProjectLocationURI() throws CoreException {
+		if (fFirstPage.isInWorkspace()) {
+			return null;
+		}
 		return fFirstPage.getLocationPath().toFile().toURI();
 	}
 	
@@ -303,7 +306,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	
 	private File createBackup(IFileStore source, String name) throws CoreException {
 		try {
-			File bak= File.createTempFile("eclipse-" + name, "bak");  //$NON-NLS-1$//$NON-NLS-2$
+			File bak= File.createTempFile("eclipse-" + name, ".bak");  //$NON-NLS-1$//$NON-NLS-2$
 			copyFile(source, bak);
 			return bak;
 		} catch (IOException e) {
@@ -393,7 +396,7 @@ public class JavaProjectWizardSecondPage extends JavaCapabilityConfigurationPage
 	}
 	
 	final void doRemoveProject(IProgressMonitor monitor) throws InvocationTargetException {
-		final boolean noProgressMonitor= Platform.getLocation().equals(fCurrProjectLocation);
+		final boolean noProgressMonitor= (fCurrProjectLocation == null); // inside workspace
 		if (monitor == null || noProgressMonitor) {
 			monitor= new NullProgressMonitor();
 		}

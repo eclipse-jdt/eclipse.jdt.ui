@@ -592,7 +592,7 @@ public class UnresolvedElementsSubProcessor {
 			String[] arg= { simpleName, packName };
 			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_importtype_description, arg);
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);
-			proposal= new ASTRewriteCorrectionProposal(label, cu, null, relevance + 100, image);
+			proposal= new ASTRewriteCorrectionProposal(label, cu, ASTRewrite.create(node.getAST()), relevance + 100, image);
 			proposal.setCommandId(ADD_IMPORT_ID);
 		} else {
 			String label;
