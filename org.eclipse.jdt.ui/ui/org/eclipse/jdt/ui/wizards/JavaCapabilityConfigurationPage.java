@@ -203,7 +203,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * is configured. No natures are added.
 	 * 
 	 * @param project The handle of the project to create.
-	 * @param locationPath The location of the project.
+	 * @param locationPath The location of the project <code>null</code> to create the project in the workspace
 	 * @param monitor a progress monitor to report progress or <code>null</code> if
 	 *  progress reporting is not desired
 	 * @throws CoreException if the project couldn't be created
@@ -219,7 +219,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * is configured. No natures are added.
 	 * 
 	 * @param project The handle of the project to create.
-	 * @param locationURI The location of the project.
+	 * @param locationURI The location of the project or <code>null</code> to create the project in the workspace
 	 * @param monitor a progress monitor to report progress or <code>null</code> if
 	 *  progress reporting is not desired
 	 * @throws CoreException if the project couldn't be created

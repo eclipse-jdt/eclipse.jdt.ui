@@ -634,7 +634,7 @@ public class BuildPathsBlock {
 		try {
 			if (!project.exists()) {
 				IProjectDescription desc= project.getWorkspace().newProjectDescription(project.getName());
-				if (ResourcesPlugin.getWorkspace().getRoot().getLocationURI().equals(locationURI)) {
+				if (locationURI != null && ResourcesPlugin.getWorkspace().getRoot().getLocationURI().equals(locationURI)) {
 					locationURI= null;
 				}
 				desc.setLocationURI(locationURI);
