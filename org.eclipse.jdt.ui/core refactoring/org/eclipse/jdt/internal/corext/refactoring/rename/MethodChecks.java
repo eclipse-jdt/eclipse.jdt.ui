@@ -134,17 +134,24 @@ public class MethodChecks {
 	/**
 	 * Locates the topmost method of an override ripple and returns it. If none
 	 * is found, null is returned.
-	 * 
+	 *
+	 * @param method the IMethod which may be part of a ripple
+	 * @param typeHierarchy a ITypeHierarchy of the declaring type of the method. May be null
+	 * @param monitor an IProgressMonitor
+	 * @return the topmost method of the ripple, or null if none
+	 * @throws JavaModelException
 	 */
-	public static IMethod getTopmostMethod(IMethod method, IProgressMonitor monitor) throws JavaModelException {
+	public static IMethod getTopmostMethod(IMethod method, ITypeHierarchy typeHierarchy, IProgressMonitor monitor) throws JavaModelException {
 
 		Assert.isNotNull(method);
 
-		ITypeHierarchy hierarchy= null;
+		ITypeHierarchy hierarchy= typeHierarchy;
 		IMethod topmostMethod= null;
 		final IType declaringType= method.getDeclaringType();
 		if (!declaringType.isInterface()) {
-			hierarchy= declaringType.newTypeHierarchy(monitor);
+			if ((hierarchy == null) || !declaringType.equals(hierarchy.getType()))
+				hierarchy= declaringType.newTypeHierarchy(monitor);
+			
 			IMethod inInterface= isDeclaredInInterface(method, hierarchy, monitor);
 			if (inInterface != null && !inInterface.equals(method))
 				topmostMethod= inInterface;

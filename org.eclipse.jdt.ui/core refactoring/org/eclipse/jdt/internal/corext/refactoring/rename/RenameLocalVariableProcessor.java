@@ -11,11 +11,7 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.text.MessageFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
@@ -27,10 +23,7 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-
-import org.eclipse.jface.text.Region;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
@@ -53,27 +46,18 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -94,68 +78,6 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	private static final String ATTRIBUTE_RANGE= "variable"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 
-	private static class ProblemNodeFinder {
-	
-		private ProblemNodeFinder() {
-			//static
-		}
-		
-		public static SimpleName[] getProblemNodes(ASTNode methodNode, TextEdit[] edits, TextChange change, String key) {
-			NameNodeVisitor visitor= new NameNodeVisitor(edits, change, key);
-			methodNode.accept(visitor);
-			return visitor.getProblemNodes();
-		}
-		
-		private static class NameNodeVisitor extends ASTVisitor {
-	
-			private Collection fRanges;
-			private Collection fProblemNodes;
-			private String fKey;
-	
-			public NameNodeVisitor(TextEdit[] edits, TextChange change, String key) {
-				Assert.isNotNull(edits);
-				Assert.isNotNull(key);
-				fRanges= new HashSet(Arrays.asList(RefactoringAnalyzeUtil.getNewRanges(edits, change)));
-				fProblemNodes= new ArrayList(0);
-				fKey= key;
-			}
-	
-			public SimpleName[] getProblemNodes() {
-				return (SimpleName[]) fProblemNodes.toArray(new SimpleName[fProblemNodes.size()]);
-			}
-	
-			private static VariableDeclaration getVariableDeclaration(Name node) {
-				IBinding binding= node.resolveBinding();
-				if (binding == null && node.getParent() instanceof VariableDeclaration)
-					return (VariableDeclaration) node.getParent();
-	
-				if (binding != null && binding.getKind() == IBinding.VARIABLE) {
-					CompilationUnit cu= (CompilationUnit) ASTNodes.getParent(node, CompilationUnit.class);
-					return ASTNodes.findVariableDeclaration(((IVariableBinding) binding), cu);
-				}
-				return null;
-			}
-	
-			//----- visit methods 
-	
-			public boolean visit(SimpleName node) {
-				VariableDeclaration decl= getVariableDeclaration(node);
-				if (decl == null)
-					return super.visit(node);
-				boolean keysEqual= fKey.equals(RefactoringAnalyzeUtil.getFullBindingKey(decl));
-				boolean rangeInSet= fRanges.contains(new Region(node.getStartPosition(), node.getLength()));
-	
-				if (keysEqual && !rangeInSet)
-					fProblemNodes.add(node);
-	
-				if (!keysEqual && rangeInSet)
-					fProblemNodes.add(node);
-	
-				return super.visit(node);
-			}
-		}
-	}
-	
 	private ILocalVariable fLocalVariable;
 	private ICompilationUnit fCu;
 	
@@ -170,6 +92,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	private boolean fIsDerived;
 	private GroupCategorySet fCategorySet;
 	private TextChangeManager fChangeManager;
+	private RenameAnalyzeUtil.LocalAnalyzePackage fLocalAnalyzePackage;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameLocalVariableProcessor"; //$NON-NLS-1$
 	
@@ -335,7 +258,9 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			RefactoringStatus result= checkNewElementName(fNewName);
 			if (result.hasFatalError())
 				return result;
-			result.merge(analyzeAST());
+			createEdits();
+			if (!fIsDerived)
+				result.merge(RenameAnalyzeUtil.analyzeLocalRenames(new RenameAnalyzeUtil.LocalAnalyzePackage[] { fLocalAnalyzePackage }, fChange, fCompilationUnitNode));
 			return result;
 		} finally {
 			pm.done();
@@ -364,9 +289,13 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		return result;		
 	}
 		
-	private RefactoringStatus analyzeAST() throws CoreException{
+	private void createEdits() {
 		TextEdit declarationEdit= createRenameEdit(fTempDeclarationNode.getName().getStartPosition());
 		TextEdit[] allRenameEdits= getAllRenameEdits(declarationEdit);
+		
+		TextEdit[] allUnparentedRenameEdits= new TextEdit[allRenameEdits.length];
+		TextEdit unparentedDeclarationEdit= null;
+		
 		fChange= new CompilationUnitChange(RefactoringCoreMessages.RenameTempRefactoring_rename, fCu); 
 		MultiTextEdit rootEdit= new MultiTextEdit();
 		fChange.setEdit(rootEdit);
@@ -378,30 +307,23 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 				// Add a copy of the text edit (text edit may only have one
 				// parent) to keep problem reporting code clean
 				TextChangeCompatibility.addTextEdit(fChangeManager.get(fCu), changeName, allRenameEdits[i].copy(), fCategorySet);
+				
+				// Add a separate copy for problem reporting
+				allUnparentedRenameEdits[i]= allRenameEdits[i].copy();
+				if (allRenameEdits[i].equals(declarationEdit))
+					unparentedDeclarationEdit= allUnparentedRenameEdits[i];
 			}
 			rootEdit.addChild(allRenameEdits[i]);
 			fChange.addTextEditGroup(new TextEditGroup(changeName, allRenameEdits[i]));
 		}
-		String newCuSource= fChange.getPreviewContent(new NullProgressMonitor());
-		ASTParser p= ASTParser.newParser(AST.JLS3);
-		p.setSource(newCuSource.toCharArray());
-		p.setUnitName(fCu.getElementName());
-		p.setProject(fCu.getJavaProject());
-		p.setCompilerOptions(RefactoringASTParser.getCompilerOptions(fCu));
-		CompilationUnit newCUNode= (CompilationUnit) p.createAST(null);
 
-		RefactoringStatus result= new RefactoringStatus();
-		result.merge(analyzeCompileErrors(newCuSource, newCUNode));
-		if (result.hasError())
-			return result;
-		
-		String fullKey= RefactoringAnalyzeUtil.getFullBindingKey(fTempDeclarationNode);	
-		ASTNode enclosing= getEnclosingBlockOrMethod(declarationEdit, fChange, newCUNode);
-		SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(enclosing, allRenameEdits, fChange, fullKey);
-		result.merge(RefactoringAnalyzeUtil.reportProblemNodes(newCuSource, problemNodes));
-		return result;
+		// store information for analysis
+		if (fIsDerived) {
+			fLocalAnalyzePackage= new RenameAnalyzeUtil.LocalAnalyzePackage(unparentedDeclarationEdit, allUnparentedRenameEdits);
+		} else 
+			fLocalAnalyzePackage= new RenameAnalyzeUtil.LocalAnalyzePackage(declarationEdit, allRenameEdits);
 	}
-
+	
 	private TextEdit[] getAllRenameEdits(TextEdit declarationEdit) {
 		if (! fUpdateReferences)
 			return new TextEdit[] { declarationEdit };
@@ -421,24 +343,6 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		return new ReplaceEdit(offset, fCurrentName.length(), fNewName);
 	}
 	
-	private ASTNode getEnclosingBlockOrMethod(TextEdit declarationEdit, TextChange change, CompilationUnit newCUNode) {
-		ASTNode enclosing= RefactoringAnalyzeUtil.getBlock(declarationEdit, change, newCUNode);
-		if (enclosing == null)	
-			enclosing= RefactoringAnalyzeUtil.getMethodDeclaration(declarationEdit, change, newCUNode);
-		return enclosing;
-	}
-	
-    private RefactoringStatus analyzeCompileErrors(String newCuSource, CompilationUnit newCUNode) {
-    	RefactoringStatus result= new RefactoringStatus();
-    	IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCompilationUnitNode);
-    	for (int i= 0; i < newProblems.length; i++) {
-            IProblem problem= newProblems[i];
-            if (problem.isError())
-            	result.addEntry(JavaRefactorings.createStatusEntry(problem, newCuSource));
-        }
-        return result;
-    }
-
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
 			Change change= fChange;
@@ -532,5 +436,9 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
+	}
+
+	public RenameAnalyzeUtil.LocalAnalyzePackage getLocalAnalyzePackage() {
+		return fLocalAnalyzePackage;
 	}
 }

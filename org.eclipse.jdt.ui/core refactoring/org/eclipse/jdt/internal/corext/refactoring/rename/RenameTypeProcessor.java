@@ -26,6 +26,7 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -40,6 +41,7 @@ import org.eclipse.ltk.core.refactoring.IDerivedElementRefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -53,7 +55,6 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ILocalVariable;
@@ -62,6 +63,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
@@ -352,8 +354,15 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		Assert.isNotNull(fType, "type"); //$NON-NLS-1$
 		Assert.isNotNull(getNewElementName(), "newName"); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
+		
+		int referenceSearchTicks= fUpdateReferences || fUpdateDerivedElements ? 15 : 0;
+		int affectedCusTicks= fUpdateReferences || fUpdateDerivedElements ? 10 : 1;
+		int derivedTicks= fUpdateDerivedElements ? 85 : 0;
+		int createChangeTicks = 5;
+		int qualifiedNamesTicks= fUpdateQualifiedNames ? 50 : 0;
+		
 		try{
-			pm.beginTask("", 134); //$NON-NLS-1$
+			pm.beginTask("", 12 + referenceSearchTicks + affectedCusTicks + derivedTicks + createChangeTicks + qualifiedNamesTicks); //$NON-NLS-1$
 			pm.setTaskName(RefactoringCoreMessages.RenameTypeRefactoring_checking);
 
 			fChangeManager= new TextChangeManager(true);
@@ -364,7 +373,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			result.merge(Checks.checkIfCuBroken(fType));
 			if (result.hasFatalError())
 				return result;
-			pm.worked(2);
+			pm.worked(1);
 		
 			result.merge(checkTypesInCompilationUnit());
 			pm.worked(1);
@@ -396,7 +405,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			pm.worked(1);	
 		
 			result.merge(Checks.checkForMainAndNativeMethods(fType));
-			pm.worked(2);	
+			pm.worked(1);	
 		
 			// before doing any expensive analysis
 			if (result.hasFatalError())
@@ -411,38 +420,35 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			// Load references, including derived elements
 			if (fUpdateReferences || fUpdateDerivedElements) {
 				pm.setTaskName(RefactoringCoreMessages.RenameTypeRefactoring_searching);
-				result.merge(initializeReferences(new SubProgressMonitor(pm, 35)));
-			} else
+				result.merge(initializeReferences(new SubProgressMonitor(pm, referenceSearchTicks)));
+			} else {
 				fReferences= new SearchResultGroup[0];
-				pm.worked(35);
+			}
 	
 			pm.setTaskName(RefactoringCoreMessages.RenameTypeRefactoring_checking); 
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 			
 			if (fUpdateReferences || fUpdateDerivedElements) {
-				result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, 25)));
+				result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, affectedCusTicks)));
 			} else {
 				Checks.checkCompileErrorsInAffectedFile(result, fType.getResource());
-				pm.worked(25);
+				pm.worked(affectedCusTicks);
 			}
 			
 			if (result.hasFatalError())
 				return result;
 			
 			if (fUpdateDerivedElements) {
-				result.merge(initializeDerivedRenameProcessors(new SubProgressMonitor(pm, 35), context));
+				result.merge(initializeDerivedRenameProcessors(new SubProgressMonitor(pm, derivedTicks), context));
 				if (result.hasFatalError())
 					return result;
-			} else
-				pm.worked(35);
+			}
 
-			createChanges(new SubProgressMonitor(pm, 15));
+			createChanges(new SubProgressMonitor(pm, createChangeTicks));
 	
 			if (fUpdateQualifiedNames)			
-				computeQualifiedNameMatches(new SubProgressMonitor(pm, 10));
-			else
-				pm.worked(10);
+				computeQualifiedNameMatches(new SubProgressMonitor(pm, qualifiedNamesTicks));
 	
 			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
 			checker.addFiles(getAllFilesToModify());
@@ -1148,18 +1154,24 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		final RefactoringStatus status= new RefactoringStatus();
 		final Set handledTopLevelMethods= new HashSet();
 		final Set warnings= new HashSet();
-
+		final List processors= new ArrayList();
 		fFinalDerivedElementToName= new HashMap();
 		
 		CompilationUnit currentResolvedCU= null;
 		ICompilationUnit currentCU= null;
+		
+		int current= 0;
+		final int max= fPreloadedElementToName.size();
 
-		progressMonitor.beginTask("", fPreloadedElementToName.size() * 3); //$NON-NLS-1$
+		progressMonitor.beginTask("", max * 3); //$NON-NLS-1$
 		progressMonitor.setTaskName(RefactoringCoreMessages.RenameTypeProcessor_checking_derived_refactoring_conditions); 
 
 		for (Iterator iter= fPreloadedElementToName.keySet().iterator(); iter.hasNext();) {
 
 			final IJavaElement element= (IJavaElement) iter.next();
+			
+			current++;
+			progressMonitor.worked(3);
 
 			// not selected? -> skip
 			if (! ((Boolean) (fPreloadedElementToSelection.get(element))).booleanValue())
@@ -1170,10 +1182,21 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				continue;
 			
 			// CompilationUnit changed? (note: fPreloadedElementToName is sorted by CompilationUnit)
-			currentCU= (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
-			if (currentResolvedCU != null && !currentResolvedCU.getJavaElement().equals(currentCU))
-				currentResolvedCU= null;
+			ICompilationUnit newCU= (ICompilationUnit) element.getAncestor(IJavaElement.COMPILATION_UNIT);
+			
+			if (!newCU.equals(currentCU)) {
 
+				checkCUCompleteConditions(status, currentResolvedCU, currentCU, processors);
+				
+				if (status.hasFatalError())
+					return status;
+				
+				// reset values
+				currentResolvedCU= null;
+				currentCU= newCU;
+				processors.clear();
+			}
+			
 			final String newName= (String) fPreloadedElementToName.get(element);
 			RefactoringProcessor processor= null;
 			
@@ -1185,9 +1208,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				
 				processor= createLocalRenameProcessor(currentLocal, newName, currentResolvedCU);
 
-				status.merge(checkForConflictingRename(currentLocal, newName));
+				// don't check for conflicting rename => is done by #checkCUCompleteConditions().
+				
 				if (status.hasFatalError())
-					break;
+					return status;
 				fFinalDerivedElementToName.put(currentLocal, newName);
 			}
 			if (element instanceof IField) {
@@ -1196,28 +1220,34 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 				status.merge(checkForConflictingRename(currentField, newName));
 				if (status.hasFatalError())
-					break;
+					return status;
 				fFinalDerivedElementToName.put(currentField, newName);
 			}
 			if (element instanceof IMethod) {
 				IMethod currentMethod= (IMethod) element;
 				if (MethodChecks.isVirtual(currentMethod)) {
-					final IMethod topmost= MethodChecks.getTopmostMethod(currentMethod, new NoOverrideProgressMonitor(progressMonitor, 1));
+					
+					final IType declaringType= currentMethod.getDeclaringType();
+					ITypeHierarchy hierarchy= null;
+					if (!declaringType.isInterface()) 
+						hierarchy= declaringType.newTypeHierarchy(new NullProgressMonitor());
+					
+					final IMethod topmost= MethodChecks.getTopmostMethod(currentMethod, hierarchy, new NullProgressMonitor());
 					if (topmost != null)
 						currentMethod= topmost;
 					if (handledTopLevelMethods.contains(currentMethod))
 						continue;
 					handledTopLevelMethods.add(currentMethod);
-					final IMethod[] ripples= MethodChecks.getOverriddenMethods(currentMethod, new NoOverrideProgressMonitor(progressMonitor, 1));
+					final IMethod[] ripples= MethodChecks.getOverriddenMethods(currentMethod, new NullProgressMonitor());
 
 					if (checkForWarnings(warnings, newName, ripples))
 						continue;
 
 					status.merge(checkForConflictingRename(ripples, newName));
 					if (status.hasFatalError())
-						break;
+						return status;
 
-					processor= createVirtualMethodRenameProcessor(currentMethod, newName, ripples);
+					processor= createVirtualMethodRenameProcessor(currentMethod, newName, ripples, hierarchy);
 					fFinalDerivedElementToName.put(currentMethod, newName);
 					for (int i= 0; i < ripples.length; i++) {
 						fFinalDerivedElementToName.put(ripples[i], newName);
@@ -1233,6 +1263,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 					processor= createNonVirtualMethodRenameProcessor(currentMethod, newName);
 				}
 			}
+			
+			progressMonitor.subTask(Messages.format(RefactoringCoreMessages.RenameTypeProcessor_progress_current_total, new Object[] { String.valueOf(current), String.valueOf(max)}));
 
 			status.merge(processor.checkInitialConditions(new NoOverrideProgressMonitor(progressMonitor, 1)));
 
@@ -1243,15 +1275,62 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 			if (status.hasFatalError())
 				return status;
+			
+			processors.add(processor);
 
 			progressMonitor.worked(1);
+			
+			if (progressMonitor.isCanceled())
+				throw new OperationCanceledException();
 		}
 
+		// check last CU
+		checkCUCompleteConditions(status, currentResolvedCU, currentCU, processors);
+		
 		status.merge(addWarnings(warnings));
-
 
 		progressMonitor.done();
 		return status;
+	}
+
+	private void checkCUCompleteConditions(final RefactoringStatus status, CompilationUnit currentResolvedCU, ICompilationUnit currentCU, List processors) throws CoreException {
+
+		// check local variable conditions
+		List locals= getProcessorsOfType(processors, RenameLocalVariableProcessor.class);
+		if (!locals.isEmpty()) {
+			RenameAnalyzeUtil.LocalAnalyzePackage[] analyzePackages= new RenameAnalyzeUtil.LocalAnalyzePackage[locals.size()];
+			TextChangeManager manager= new TextChangeManager();
+			int current= 0;
+			TextChange textChange= manager.get(currentCU);
+			textChange.setKeepPreviewEdits(true);
+			for (Iterator iterator= locals.iterator(); iterator.hasNext();) {
+				RenameLocalVariableProcessor localProcessor= (RenameLocalVariableProcessor) iterator.next();
+				RenameAnalyzeUtil.LocalAnalyzePackage analyzePackage= localProcessor.getLocalAnalyzePackage();
+				analyzePackages[current]= analyzePackage;
+				for (int i= 0; i < analyzePackage.fOccurenceEdits.length; i++) {
+					TextChangeCompatibility.addTextEdit(textChange, "", analyzePackage.fOccurenceEdits[i], GroupCategorySet.NONE); //$NON-NLS-1$
+				}
+				current++;
+			}
+			status.merge(RenameAnalyzeUtil.analyzeLocalRenames(analyzePackages, textChange, currentResolvedCU));
+		}
+
+		/*
+		 * There is room for performance improvement here: One could move
+		 * shadowing analyses out of the field and method processors and perform
+		 * it here, thus saving on working copy creation. Drawback is increased
+		 * heap consumption.
+		 */
+	}
+
+	private List getProcessorsOfType(List processors, Class type) {
+		List tmp= new ArrayList();
+		for (Iterator iter= processors.iterator(); iter.hasNext();) {
+			RefactoringProcessor element= (RefactoringProcessor) iter.next();
+			if (element.getClass().equals(type))
+				tmp.add(element);
+		}
+		return tmp;
 	}
 
 	// ------------------ Error checking -------------
@@ -1326,30 +1405,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 						String message= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_cannot_rename_fields_same_new_name, new String[] { alreadyRegisteredField.getElementName(),
 								currentField.getElementName(), alreadyRegisteredField.getDeclaringType().getFullyQualifiedName(), newName });
 						status.addFatalError(message);
-						return status;
-					}
-				}
-			}
-		}
-		return status;
-	}
-	
-	private RefactoringStatus checkForConflictingRename(ILocalVariable currentLocal, String newName) {
-		RefactoringStatus status= new RefactoringStatus();
-		for (Iterator iter= fFinalDerivedElementToName.keySet().iterator(); iter.hasNext();) {
-			IJavaElement element= (IJavaElement) iter.next();
-			if (element instanceof ILocalVariable) {
-				ILocalVariable alreadyRegisteredLocalVariable= (ILocalVariable) element;
-				String alreadyRegisteredLocalVariableName= (String) fFinalDerivedElementToName.get(element);
-				if (alreadyRegisteredLocalVariableName.equals(newName)) {
-					if (alreadyRegisteredLocalVariable.getParent().equals(currentLocal.getParent())) {
-						
-						final IJavaElement parent= alreadyRegisteredLocalVariable.getParent();
-						final String nameOfParent= (parent instanceof IInitializer) ? RefactoringCoreMessages.JavaElementUtil_initializer : parent.getElementName();
-						final IJavaElement declaringType= parent.getAncestor(IJavaElement.TYPE);
-						String message= Messages.format(RefactoringCoreMessages.RenameTypeProcessor_cannot_rename_locals_same_new_name, new String[] { alreadyRegisteredLocalVariable.getElementName(),
-								currentLocal.getElementName(), nameOfParent, declaringType.getElementName(), newName });
-						status.addWarning(message, JavaStatusContext.create((IMember) parent));
 						return status;
 					}
 				}
@@ -1441,8 +1496,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 	// ----------------- Processor creation --------
 
-	private RenameMethodProcessor createVirtualMethodRenameProcessor(IMethod currentMethod, String newMethodName, IMethod[] ripples) throws JavaModelException {
-		RenameMethodProcessor processor= new RenameVirtualMethodProcessor(currentMethod, ripples, fChangeManager, CATEGORY_METHOD_RENAME);
+	private RenameMethodProcessor createVirtualMethodRenameProcessor(IMethod currentMethod, String newMethodName, IMethod[] ripples, ITypeHierarchy hierarchy) throws JavaModelException {
+		RenameMethodProcessor processor= new RenameVirtualMethodProcessor(currentMethod, ripples, fChangeManager, hierarchy, CATEGORY_METHOD_RENAME);
 		initMethodProcessor(processor, newMethodName);
 		return processor;
 	}

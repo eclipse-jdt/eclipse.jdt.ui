@@ -338,6 +338,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameTypeProcessor_cannot_rename_locals_same_new_name;
 	public static String RenameTypeProcessor_deselected_method_is_overridden;
 	public static String RenameTypeProcessor_renamed_method_is_overridden;
+	public static String RenameTypeProcessor_progress_current_total;
 	
 	public static String TextMatchUpdater_update;
 	public static String TextMatchUpdater_searching;

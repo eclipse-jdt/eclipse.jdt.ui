@@ -169,7 +169,7 @@ public class RenameTypeTests extends RefactoringTest {
 	}
 	
 	private void helper3_fail(String oldName, String newName, boolean updateDerived, boolean updateTextual, boolean updateRef) throws JavaModelException, CoreException, IOException, Exception {
-		RenameRefactoring ref= initWithAllOptions(oldName, oldName, newName, newName, updateRef, updateTextual, updateRef, null, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		RenameRefactoring ref= initWithAllOptions(oldName, oldName, newName, newName, updateRef, updateTextual, updateDerived, null, RenamingNameSuggestor.STRATEGY_SUFFIX);
 		assertNotNull("was supposed to fail", performRefactoring(ref));
 	}
 
@@ -1614,6 +1614,16 @@ public class RenameTypeTests extends RefactoringTest {
 	public void testDerivedElements31() throws Exception {
 		// Test references and textual references to local elements
 		helper3("SomeClass", "SomeDiffClass", true, true, true);
+	}
+	
+	public void testDerivedElements32() throws Exception {
+		// Test whether local variable problem reporting still works
+		helper3_fail("SomeClass", "SomeDifferentClass", true, false, true);
+	}
+	
+	public void testDerivedElements33() throws Exception {
+		// Test two local variables inside anonymous types do not generate warnings
+		helper3("Why", "WhyNot", true, false, true);
 	}
 
 }

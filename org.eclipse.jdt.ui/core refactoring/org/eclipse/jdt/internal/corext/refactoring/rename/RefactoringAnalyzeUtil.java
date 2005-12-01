@@ -19,10 +19,12 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.jface.text.IRegion;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.TextChange;
+
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -35,10 +37,6 @@ import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 public class RefactoringAnalyzeUtil {
 	
@@ -63,42 +61,6 @@ public class RefactoringAnalyzeUtil {
 		return result;
 	}
 	
-	public static String getFullBindingKey(VariableDeclaration decl){
-		StringBuffer buff= new StringBuffer();
-		if (decl.resolveBinding() != null) {
-			buff.append(decl.resolveBinding().getVariableId());
-			buff.append('/');
-		} else {
-			buff.append(decl.getStartPosition()).append('*').append('/'); //ensure unique key if unresolvable
-		}
-		
-		AnonymousClassDeclaration acd= (AnonymousClassDeclaration)ASTNodes.getParent(decl, AnonymousClassDeclaration.class);
-		if (acd != null && acd.resolveBinding() != null){
-			if (acd.resolveBinding().getKey() != null)
-				buff.append(acd.resolveBinding().getKey());
-			else
-				buff.append("AnonymousClassDeclaration");	 //$NON-NLS-1$
-			buff.append('/');	
-		}	
-		
-		AbstractTypeDeclaration td= (AbstractTypeDeclaration)ASTNodes.getParent(decl, AbstractTypeDeclaration.class);
-		if (td != null && td.resolveBinding() != null){
-			if (td.resolveBinding().getKey() != null)
-				buff.append(td.resolveBinding().getKey());
-			else
-				buff.append("TypeDeclaration");	 //$NON-NLS-1$
-			buff.append('/');	
-		}
-		
-		MethodDeclaration md= (MethodDeclaration)ASTNodes.getParent(decl, MethodDeclaration.class);
-		if (md != null && md.resolveBinding() != null){
-			if (md.resolveBinding().getKey() != null)
-				buff.append(md.resolveBinding().getKey());
-			else
-				buff.append("MethodDeclaration");	 //$NON-NLS-1$
-		}
-		return buff.toString();
-	}
 
 	public static MethodDeclaration getMethodDeclaration(TextEdit edit, TextChange change, CompilationUnit cuNode){
 		ASTNode decl= RefactoringAnalyzeUtil.findSimpleNameNode(RefactoringAnalyzeUtil.getNewTextRange(edit, change), cuNode);
@@ -120,6 +82,10 @@ public class RefactoringAnalyzeUtil {
 				subResult.add(newProblems[i]);
 		}
 		return (IProblem[]) subResult.toArray(new IProblem[subResult.size()]);
+	}
+	
+	public static IRegion getNewTextRange(TextEdit edit, TextChange change){
+		return change.getPreviewEdit(edit).getRegion();
 	}
 	
 	private static IProblem findCorrespondingProblem(Set oldProblems, IProblem iProblem) {
@@ -150,10 +116,6 @@ public class RefactoringAnalyzeUtil {
 	private static SimpleName findSimpleNameNode(IRegion range, CompilationUnit cuNode) {
 		ASTNode node= NodeFinder.perform(cuNode, range.getOffset(), range.getLength());
 		return getSimpleName(node);
-	}
-
-	private static IRegion getNewTextRange(TextEdit edit, TextChange change){
-		return change.getPreviewEdit(edit).getRegion();
 	}
 
 	private static Set getOldProblems(CompilationUnit oldCuNode) {

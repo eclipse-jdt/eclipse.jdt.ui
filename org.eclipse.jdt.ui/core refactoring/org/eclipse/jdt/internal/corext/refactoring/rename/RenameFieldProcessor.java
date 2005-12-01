@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -50,6 +51,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -59,6 +61,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -94,7 +97,6 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	protected IField fField;
 	private SearchResultGroup[] fReferences;
 	private TextChangeManager fChangeManager;
-	private ICompilationUnit[] fNewWorkingCopies;
 	protected boolean fUpdateReferences;
 	protected boolean fUpdateTextualMatches;
 	private boolean fRenameGetter;
@@ -644,29 +646,43 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	
 	//----------------
 	private RefactoringStatus analyzeRenameChanges(IProgressMonitor pm) throws CoreException {
+		ICompilationUnit[] newWorkingCopies= null;
+		WorkingCopyOwner newWCOwner= new WorkingCopyOwner() { /* must subclass */ };
 		try {
 			pm.beginTask("", 2); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 			SearchResultGroup[] oldReferences= fReferences;
-			SearchResultGroup[] newReferences= getNewReferences(new SubProgressMonitor(pm, 1), fChangeManager, result);
+
+			List compilationUnitsToModify= new ArrayList();
+			if (fIsDerived) {
+				// limited change set, no accessors.
+				for (int i= 0; i < oldReferences.length; i++) 
+					compilationUnitsToModify.add(oldReferences[i].getCompilationUnit());
+				compilationUnitsToModify.add(fField.getCompilationUnit());
+			} else {
+				// include all cus, including accessors
+				compilationUnitsToModify.addAll(Arrays.asList(fChangeManager.getAllCompilationUnits()));
+			}
+			
+			newWorkingCopies= RenameAnalyzeUtil.createNewWorkingCopies((ICompilationUnit[]) compilationUnitsToModify.toArray(new ICompilationUnit[compilationUnitsToModify.size()]),
+					fChangeManager, newWCOwner, new SubProgressMonitor(pm, 1));
+			
+			SearchResultGroup[] newReferences= getNewReferences(new SubProgressMonitor(pm, 1), result, newWCOwner, newWorkingCopies);
 			result.merge(RenameAnalyzeUtil.analyzeRenameChanges2(fChangeManager, oldReferences, newReferences, getNewElementName()));
 			return result;
 		} finally{
 			pm.done();
-			if (fNewWorkingCopies != null){
-				for (int i= 0; i < fNewWorkingCopies.length; i++) {
-					fNewWorkingCopies[i].destroy();
+			if (newWorkingCopies != null){
+				for (int i= 0; i < newWorkingCopies.length; i++) {
+					newWorkingCopies[i].discardWorkingCopy();
 				}
-			}	
+			}
 		}
 	}
 
-	private SearchResultGroup[] getNewReferences(IProgressMonitor pm, TextChangeManager manager, RefactoringStatus status) throws CoreException {
+	private SearchResultGroup[] getNewReferences(IProgressMonitor pm, RefactoringStatus status, WorkingCopyOwner owner, ICompilationUnit[] newWorkingCopies) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
-		ICompilationUnit[] compilationUnitsToModify= manager.getAllCompilationUnits();
-		fNewWorkingCopies= RenameAnalyzeUtil.getNewWorkingCopies(compilationUnitsToModify, manager, new SubProgressMonitor(pm, 1));
-		
-		ICompilationUnit declaringCuWorkingCopy= RenameAnalyzeUtil.findWorkingCopyForCu(fNewWorkingCopies, fField.getCompilationUnit());
+		ICompilationUnit declaringCuWorkingCopy= RenameAnalyzeUtil.findWorkingCopyForCu(newWorkingCopies, fField.getCompilationUnit());
 		if (declaringCuWorkingCopy == null)
 			return new SearchResultGroup[0];
 		
@@ -675,7 +691,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			return new SearchResultGroup[0];
 		
 		SearchPattern newPattern= SearchPattern.createPattern(field, IJavaSearchConstants.REFERENCES);			
-		return RefactoringSearchEngine.search(newPattern, createRefactoringScope(), new SubProgressMonitor(pm, 1), fNewWorkingCopies, status);
+		return RefactoringSearchEngine.search(newPattern, createRefactoringScope(), new CollectingSearchRequestor(), new SubProgressMonitor(pm, 1), owner, status);
 	}
 
 	private IField getNewField(ICompilationUnit newWorkingCopyOfDeclaringCu) throws CoreException{

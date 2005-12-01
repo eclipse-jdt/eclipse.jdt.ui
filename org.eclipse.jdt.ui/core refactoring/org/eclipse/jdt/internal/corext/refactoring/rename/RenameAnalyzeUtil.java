@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -18,11 +22,18 @@ import java.util.Map.Entry;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Region;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -30,29 +41,112 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.search.FieldDeclarationMatch;
 import org.eclipse.jdt.core.search.MethodDeclarationMatch;
 import org.eclipse.jdt.core.search.SearchMatch;
 
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.Region;
-
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
-import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
-
 class RenameAnalyzeUtil {
 	
+	private static class ProblemNodeFinder {
+		
+		private ProblemNodeFinder() {
+			//static
+		}
+		
+		public static SimpleName[] getProblemNodes(ASTNode methodNode, VariableDeclaration variableNode, TextEdit[] edits, TextChange change) {
+			String key= variableNode.resolveBinding().getKey();
+			NameNodeVisitor visitor= new NameNodeVisitor(edits, change, key);
+			methodNode.accept(visitor);
+			return visitor.getProblemNodes();
+		}
+		
+		private static class NameNodeVisitor extends ASTVisitor {
+	
+			private Collection fRanges;
+			private Collection fProblemNodes;
+			private String fKey;
+	
+			public NameNodeVisitor(TextEdit[] edits, TextChange change, String key) {
+				Assert.isNotNull(edits);
+				Assert.isNotNull(key);
+				
+				fRanges= new HashSet(Arrays.asList(RefactoringAnalyzeUtil.getNewRanges(edits, change)));
+				fProblemNodes= new ArrayList(0);
+				fKey= key;
+			}
+	
+			public SimpleName[] getProblemNodes() {
+				return (SimpleName[]) fProblemNodes.toArray(new SimpleName[fProblemNodes.size()]);
+			}
+	
+			//----- visit methods 
+	
+			public boolean visit(SimpleName node) {
+				VariableDeclaration decl= getVariableDeclaration(node);
+				if (decl == null)
+					return super.visit(node);
+				
+				IVariableBinding binding= decl.resolveBinding();
+				if (binding == null)
+					return super.visit(node);
+				
+				boolean keysEqual= fKey.equals(binding.getKey()); 
+				boolean rangeInSet= fRanges.contains(new Region(node.getStartPosition(), node.getLength()));
+	
+				if (keysEqual && !rangeInSet)
+					fProblemNodes.add(node);
+	
+				if (!keysEqual && rangeInSet)
+					fProblemNodes.add(node);
+				
+				/*
+				 * if (!keyEquals && !rangeInSet) 
+				 * 		ok, different local variable.
+				 * 
+				 * if (keyEquals && rangeInSet) 
+				 * 		ok, renamed local variable & has been renamed.
+				 */
+	
+				return super.visit(node);
+			}
+		}
+	}
+
+	static class LocalAnalyzePackage {
+		public final TextEdit fDeclarationEdit;
+		public final TextEdit[] fOccurenceEdits;
+		
+		public LocalAnalyzePackage(final TextEdit declarationEdit, final TextEdit[] occurenceEdits) {
+			fDeclarationEdit = declarationEdit;
+			fOccurenceEdits = occurenceEdits;
+		}
+	}
+
 	private RenameAnalyzeUtil() {
 		//no instance
 	}
@@ -83,21 +177,6 @@ class RenameAnalyzeUtil {
 		}
 		return null;
 	}
-
-	/** @deprecated TODO: use WorkingCopyOwner in RenameFieldProcessor */
-	static ICompilationUnit[] getNewWorkingCopies(ICompilationUnit[] compilationUnitsToModify, TextChangeManager manager, IProgressMonitor pm) throws CoreException{
-		pm.beginTask("", compilationUnitsToModify.length); //$NON-NLS-1$
-		ICompilationUnit[] newWorkingCopies= new ICompilationUnit[compilationUnitsToModify.length];
-		for (int i= 0; i < compilationUnitsToModify.length; i++) {
-			ICompilationUnit cu= compilationUnitsToModify[i];
-			newWorkingCopies[i]= WorkingCopyUtil.getNewWorkingCopy(cu);
-			String previewContent= manager.get(cu).getPreviewContent(new NullProgressMonitor());
-			newWorkingCopies[i].getBuffer().setContents(previewContent);
-			newWorkingCopies[i].reconcile(ICompilationUnit.NO_AST, false, null, new SubProgressMonitor(pm, 1));
-		}
-		return newWorkingCopies;
-	}
-	
 
 	static ICompilationUnit[] createNewWorkingCopies(ICompilationUnit[] compilationUnitsToModify, TextChangeManager manager, WorkingCopyOwner owner, SubProgressMonitor pm) throws CoreException {
 		pm.beginTask("", compilationUnitsToModify.length); //$NON-NLS-1$
@@ -306,5 +385,83 @@ class RenameAnalyzeUtil {
 		RefactoringStatusContext context= JavaStatusContext.create(cu, range);
 		String message= Messages.format(RefactoringCoreMessages.RenameAnalyzeUtil_shadows, cu.getElementName()); 
 		result.addError(message, context);
+	}
+
+	/**
+	 * This method analyzes a set of local variable renames inside one cu. It checks whether
+	 * any new compile errors have been introduced by the rename(s) and whether the correct
+	 * node(s) has/have been renamed.
+	 * 
+	 * @param analyzePackages the LocalAnalyzePackages containing the information about the local renames
+	 * @param cuChange the TextChange containing all local variable changes to be applied.
+	 * @param oldCUNode the fully (incl. bindings) resolved AST node of the original compilation unit
+	 * @return a RefactoringStatus containing errors if compile errors or wrongly renamed nodes are found
+	 * @throws CoreException thrown if there was an error greating the preview content of the change
+	 */
+	public static RefactoringStatus analyzeLocalRenames(LocalAnalyzePackage[] analyzePackages, TextChange cuChange, CompilationUnit oldCUNode) throws CoreException {
+
+		RefactoringStatus result= new RefactoringStatus();
+		ICompilationUnit compilationUnit= (ICompilationUnit) oldCUNode.getJavaElement();
+
+		String newCuSource= cuChange.getPreviewContent(new NullProgressMonitor());
+		// note: although bindings are not explicitly requested,
+		// they will be resolved during parsing anyway
+		ASTParser p= ASTParser.newParser(AST.JLS3);
+		p.setSource(newCuSource.toCharArray());
+		p.setUnitName(compilationUnit.getElementName());
+		p.setProject(compilationUnit.getJavaProject());
+		p.setCompilerOptions(RefactoringASTParser.getCompilerOptions(compilationUnit));
+		p.setResolveBindings(true);
+		CompilationUnit newCUNode= (CompilationUnit) p.createAST(null);
+
+		result.merge(analyzeCompileErrors(newCuSource, newCUNode, oldCUNode));
+		if (result.hasError())
+			return result;
+
+		for (int i= 0; i < analyzePackages.length; i++) {
+			ASTNode enclosing= getEnclosingBlockOrMethod(analyzePackages[i].fDeclarationEdit, cuChange, newCUNode);
+
+			// get new declaration
+			IRegion newRegion= RefactoringAnalyzeUtil.getNewTextRange(analyzePackages[i].fDeclarationEdit, cuChange);
+			ASTNode newDeclaration= NodeFinder.perform(newCUNode, newRegion.getOffset(), newRegion.getLength());
+			Assert.isTrue(newDeclaration instanceof Name);
+
+			VariableDeclaration declaration= getVariableDeclaration((Name) newDeclaration);
+			Assert.isNotNull(declaration);
+
+			SimpleName[] problemNodes= ProblemNodeFinder.getProblemNodes(enclosing, declaration, analyzePackages[i].fOccurenceEdits, cuChange);
+			result.merge(RefactoringAnalyzeUtil.reportProblemNodes(newCuSource, problemNodes));
+		}
+		return result;
+	}
+
+	private static VariableDeclaration getVariableDeclaration(Name node) {
+		IBinding binding= node.resolveBinding();
+		if (binding == null && node.getParent() instanceof VariableDeclaration)
+			return (VariableDeclaration) node.getParent();
+
+		if (binding != null && binding.getKind() == IBinding.VARIABLE) {
+			CompilationUnit cu= (CompilationUnit) ASTNodes.getParent(node, CompilationUnit.class);
+			return ASTNodes.findVariableDeclaration( ((IVariableBinding) binding), cu);
+		}
+		return null;
+	}
+
+	private static ASTNode getEnclosingBlockOrMethod(TextEdit declarationEdit, TextChange change, CompilationUnit newCUNode) {
+		ASTNode enclosing= RefactoringAnalyzeUtil.getBlock(declarationEdit, change, newCUNode);
+		if (enclosing == null)
+			enclosing= RefactoringAnalyzeUtil.getMethodDeclaration(declarationEdit, change, newCUNode);
+		return enclosing;
+	}
+
+	private static RefactoringStatus analyzeCompileErrors(String newCuSource, CompilationUnit newCUNode, CompilationUnit oldCUNode) {
+		RefactoringStatus result= new RefactoringStatus();
+		IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, oldCUNode);
+		for (int i= 0; i < newProblems.length; i++) {
+			IProblem problem= newProblems[i];
+			if (problem.isError())
+				result.addEntry(JavaRefactorings.createStatusEntry(problem, newCuSource));
+		}
+		return result;
 	}
 }

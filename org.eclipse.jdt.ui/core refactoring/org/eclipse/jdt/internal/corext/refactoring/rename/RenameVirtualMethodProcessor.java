@@ -60,10 +60,11 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	 * methods.
 	 * 
 	 */
-	protected RenameVirtualMethodProcessor(IMethod topLevel, IMethod[] ripples, TextChangeManager changeManager, GroupCategorySet categorySet) {
+	protected RenameVirtualMethodProcessor(IMethod topLevel, IMethod[] ripples, TextChangeManager changeManager, ITypeHierarchy hierarchy, GroupCategorySet categorySet) {
 		super(topLevel, changeManager, categorySet);
 		fOriginalMethod= getMethod();
 		fActivationChecked= true; // is top level
+		fCachedHierarchy= hierarchy; // may be null
 		setMethodsToRename(ripples);
 	}
 
@@ -94,8 +95,14 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 				// the following code may change the method to be changed.
 				IMethod method= getMethod();
 				fOriginalMethod= method;
-				IMethod topmost= MethodChecks.getTopmostMethod(getMethod(), monitor);
-				if (topmost!=null)
+				
+				ITypeHierarchy hierarchy= null;
+				IType declaringType= method.getDeclaringType();
+				if (!declaringType.isInterface())
+					hierarchy= getCachedHierarchy(declaringType, new SubProgressMonitor(monitor, 1));
+
+				IMethod topmost= MethodChecks.getTopmostMethod(getMethod(), hierarchy, monitor);
+				if (topmost != null)
 					initialize(topmost);
 				fActivationChecked= true;
 			}
