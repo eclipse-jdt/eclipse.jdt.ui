@@ -165,6 +165,8 @@ public abstract class OptionsConfigurationBlock {
 		}
 	}
 	
+	private static final String REBUILD_COUNT_KEY= "preferences_build_requested"; //$NON-NLS-1$
+	
 	private static final String SETTINGS_EXPANDED= "expanded"; //$NON-NLS-1$
 
 	protected final ArrayList fCheckBoxes;
@@ -188,6 +190,8 @@ public abstract class OptionsConfigurationBlock {
 	private IWorkbenchPreferenceContainer fContainer;
 
 	private Map fDisabledProjectSettings; // null when project specific settings are turned off
+	
+	private int fRebuildCount; /// used to prevent multiple dialogs that ask for a rebuild
 	
 	public OptionsConfigurationBlock(IStatusChangeListener context, IProject project, Key[] allKeys, IWorkbenchPreferenceContainer container) {
 		fContext= context;
@@ -231,7 +235,9 @@ public abstract class OptionsConfigurationBlock {
 		fTextBoxes= new ArrayList(2);
 		fLabels= new HashMap();
 		fExpandedComposites= new ArrayList();
-	}
+		
+		fRebuildCount= getRebuildCount();
+	}	
 	
 	protected final IWorkbenchPreferenceContainer getPreferenceContainer() {
 		return fContainer;
@@ -257,6 +263,16 @@ public abstract class OptionsConfigurationBlock {
 			}
 		}
 	}
+	
+	private int getRebuildCount() {
+		return fManager.getWorkingCopy(new DefaultScope().getNode(JavaUI.ID_PLUGIN)).getInt(REBUILD_COUNT_KEY, 0);
+	}
+	
+	private void incrementRebuildCount() {
+		fRebuildCount++;
+		fManager.getWorkingCopy(new DefaultScope().getNode(JavaUI.ID_PLUGIN)).putInt(REBUILD_COUNT_KEY, fRebuildCount);
+	}
+	
 	
 	protected void settingsUpdated() {
 	}
@@ -698,14 +714,23 @@ public abstract class OptionsConfigurationBlock {
 	
 	protected boolean processChanges(IWorkbenchPreferenceContainer container) {
 
+
+		
 		IScopeContext currContext= fLookupOrder[0];
-	
+		
 		List /* <Key>*/ changedOptions= new ArrayList();
 		boolean needsBuild= getChanges(currContext, changedOptions);
 		if (changedOptions.isEmpty()) {
 			return true;
 		}
-		
+		if (needsBuild) {
+			int count= getRebuildCount();
+			if (count > fRebuildCount) {
+				needsBuild= false; // build already requested
+				fRebuildCount= count;
+			}
+		}
+
 		boolean doBuild= false;
 		if (needsBuild) {
 			String[] strings= getFullBuildDialogStrings(fProject == null);
@@ -722,6 +747,7 @@ public abstract class OptionsConfigurationBlock {
 		if (container != null) {
 			// no need to apply the changes to the original store: will be done by the page container
 			if (doBuild) { // post build
+				incrementRebuildCount();
 				container.registerUpdateJob(CoreUtility.getBuildJob(fProject));
 			}
 		} else {
