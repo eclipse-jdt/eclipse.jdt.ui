@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -404,15 +403,7 @@ class RenameAnalyzeUtil {
 		ICompilationUnit compilationUnit= (ICompilationUnit) oldCUNode.getJavaElement();
 
 		String newCuSource= cuChange.getPreviewContent(new NullProgressMonitor());
-		// note: although bindings are not explicitly requested,
-		// they will be resolved during parsing anyway
-		ASTParser p= ASTParser.newParser(AST.JLS3);
-		p.setSource(newCuSource.toCharArray());
-		p.setUnitName(compilationUnit.getElementName());
-		p.setProject(compilationUnit.getJavaProject());
-		p.setCompilerOptions(RefactoringASTParser.getCompilerOptions(compilationUnit));
-		p.setResolveBindings(true);
-		CompilationUnit newCUNode= (CompilationUnit) p.createAST(null);
+		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, compilationUnit, true, null);
 
 		result.merge(analyzeCompileErrors(newCuSource, newCUNode, oldCUNode));
 		if (result.hasError())

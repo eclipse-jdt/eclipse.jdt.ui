@@ -42,7 +42,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -448,12 +447,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private void checkNewSource(TextChange change, RefactoringStatus result) throws CoreException {
 		String newCuSource= change.getPreviewContent(new NullProgressMonitor());
-		ASTParser p= ASTParser.newParser(AST.JLS3);
-		p.setSource(newCuSource.toCharArray());
-		p.setUnitName(fCu.getElementName());
-		p.setProject(fCu.getJavaProject());
-		p.setCompilerOptions(RefactoringASTParser.getCompilerOptions(fCu));
-		CompilationUnit newCUNode= (CompilationUnit) p.createAST(null);
+		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, fCu, true, null);
 		IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCompilationUnitNode);
 		for (int i= 0; i < newProblems.length; i++) {
 			IProblem problem= newProblems[i];

@@ -884,12 +884,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 		ICompilationUnit cu= getCu();
 		TextChange change= fChangeManager.get(cu);
 		String newCuSource= change.getPreviewContent(new NullProgressMonitor());
-		ASTParser p= ASTParser.newParser(AST.JLS3);
-		p.setSource(newCuSource.toCharArray());
-		p.setUnitName(cu.getElementName());
-		p.setProject(cu.getJavaProject());
-		p.setCompilerOptions(RefactoringASTParser.getCompilerOptions(cu));
-		CompilationUnit newCUNode= (CompilationUnit) p.createAST(null);
+		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, cu, true, null);
 		IProblem[] problems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fBaseCuRewrite.getRoot());
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problems.length; i++) {

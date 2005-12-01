@@ -53,6 +53,23 @@ public class RefactoringASTParser {
 		return result;
 	}
 
+	/**
+	 * @param newCuSource the source
+	 * @param originalCu the compilation unit to get the name and project from
+	 * @param resolveBindings <code>true</code> is bindings are to be resolved
+	 * @param pm an {@link IProgressMonitor}, or <code>null</code>
+	 * @return the parsed CompilationUnit
+	 */
+	public CompilationUnit parse(String newCuSource, ICompilationUnit originalCu, boolean resolveBindings, IProgressMonitor pm) {
+		fParser.setResolveBindings(resolveBindings);
+		fParser.setSource(newCuSource.toCharArray());
+		fParser.setUnitName(originalCu.getElementName());
+		fParser.setProject(originalCu.getJavaProject());
+		fParser.setCompilerOptions(getCompilerOptions(originalCu));
+		CompilationUnit newCUNode= (CompilationUnit) fParser.createAST(pm);
+		return newCUNode;
+	}
+	
 	public static ICompilationUnit getCompilationUnit(ASTNode node) {
 		Object source= node.getRoot().getProperty(SOURCE_PROPERTY);
 		if (source instanceof ICompilationUnit)

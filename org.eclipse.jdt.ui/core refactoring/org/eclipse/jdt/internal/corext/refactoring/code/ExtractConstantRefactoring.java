@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -505,12 +504,8 @@ public class ExtractConstantRefactoring extends Refactoring {
 			pm.worked(1);
 			
 			String newCuSource= fChange.getPreviewContent(new NullProgressMonitor());
-			ASTParser p= ASTParser.newParser(AST.JLS3);
-			p.setSource(newCuSource.toCharArray());
-			p.setUnitName(fCu.getElementName());
-			p.setProject(fCu.getJavaProject());
-			p.setCompilerOptions(RefactoringASTParser.getCompilerOptions(fCu));
-			CompilationUnit newCUNode= (CompilationUnit) p.createAST(null);
+			CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, fCu, true, null);
+			
 			IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCuRewrite.getRoot());
 			for (int i= 0; i < newProblems.length; i++) {
 				IProblem problem= newProblems[i];
