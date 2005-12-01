@@ -8,33 +8,33 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.refactoring.rename;
+package org.eclipse.jdt.internal.corext.refactoring.structure;
 
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
-import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 /**
- * A rename refactoring which can be initialized with refactoring arguments.
+ * A move refactoring which can be initialized with refactoring arguments.
  * 
  * @since 3.2
  */
-public class JavaRenameRefactoring extends RenameRefactoring implements IInitializableRefactoringComponent {
+public class JavaMoveRefactoring extends MoveRefactoring implements IInitializableRefactoringComponent {
 
 	/**
-	 * Creates a new java rename refactoring.
+	 * Creates a new java move refactoring.
 	 * 
 	 * @param processor
-	 *            the rename processor to use
+	 *            the move processor to use
 	 */
-	public JavaRenameRefactoring(final RenameProcessor processor) {
+	public JavaMoveRefactoring(final MoveProcessor processor) {
 		super(processor);
 	}
 

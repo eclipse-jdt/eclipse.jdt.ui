@@ -10,45 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
-
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 /**
  * Refactoring to move an instance method to another class.
  */
-public final class MoveInstanceMethodRefactoring extends MoveRefactoring {
-
-	/**
-	 * Creates a new move instance method refactoring.
-	 * 
-	 * @param method
-	 *        the method to move
-	 * @param settings
-	 *        the code generation settings to apply
-	 * @return the created refactoring
-	 * @throws JavaModelException
-	 *         if the the refactoring could not be tested for availability
-	 */
-	public static MoveInstanceMethodRefactoring create(final IMethod method, final CodeGenerationSettings settings) throws JavaModelException {
-		Assert.isNotNull(method);
-		Assert.isNotNull(settings);
-		Assert.isTrue(method.exists() && !method.isConstructor() && !method.isBinary() && !method.isReadOnly());
-		return new MoveInstanceMethodRefactoring(new MoveInstanceMethodProcessor(method, settings));
-	}
+public final class MoveInstanceMethodRefactoring extends JavaMoveRefactoring {
 
 	/**
 	 * Creates a new move instance method refactoring.
 	 * 
 	 * @param processor
-	 *        the processor to use
+	 *            the move instance method processor to use
 	 */
-	private MoveInstanceMethodRefactoring(final MoveInstanceMethodProcessor processor) {
+	public MoveInstanceMethodRefactoring(final MoveInstanceMethodProcessor processor) {
 		super(processor);
 	}
 
@@ -61,10 +36,10 @@ public final class MoveInstanceMethodRefactoring extends MoveRefactoring {
 		return (MoveInstanceMethodProcessor) getMoveProcessor();
 	}
 
-	/*
-	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getName()
+	/**
+	 * {@inheritDoc}
 	 */
 	public final String getName() {
-		return RefactoringCoreMessages.MoveInstanceMethodRefactoring_name; 
+		return RefactoringCoreMessages.MoveInstanceMethodRefactoring_name;
 	}
 }

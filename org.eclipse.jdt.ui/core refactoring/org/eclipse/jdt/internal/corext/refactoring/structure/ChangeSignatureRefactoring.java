@@ -31,11 +31,13 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -98,7 +100,6 @@ import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
@@ -129,7 +130,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class ChangeSignatureRefactoring extends Refactoring {
+public class ChangeSignatureRefactoring extends Refactoring implements IInitializableRefactoringComponent {
 	
 	private static final String ID_CHANGE_METHOD_SIGNATURE= "org.eclipse.jdt.ui.change.method.signature"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RETURN= "return"; //$NON-NLS-1$
@@ -162,24 +163,19 @@ public class ChangeSignatureRefactoring extends Refactoring {
 
 	private ITypeHierarchy fCachedTypeHierarchy= null;
 
-	private ChangeSignatureRefactoring(IMethod method) throws JavaModelException{
-		Assert.isNotNull(method);
+	public ChangeSignatureRefactoring(IMethod method) throws JavaModelException {
 		fMethod= method;
-		fParameterInfos= createParameterInfoList(method);
-		//fExceptionInfos is created in checkInitialConditions
-		String initialReturnTypeName= Signature.toString(Signature.getReturnType(fMethod.getSignature()));
-		fReturnTypeInfo= new ReturnTypeInfo(initialReturnTypeName);
-		fMethodName= fMethod.getElementName();
-		fVisibility= JdtFlags.getVisibilityCode(fMethod);
+		if (fMethod != null) {
+			fParameterInfos= createParameterInfoList(method);
+			// fExceptionInfos is created in checkInitialConditions
+			String initialReturnTypeName= Signature.toString(Signature.getReturnType(fMethod.getSignature()));
+			fReturnTypeInfo= new ReturnTypeInfo(initialReturnTypeName);
+			fMethodName= fMethod.getElementName();
+			fVisibility= JdtFlags.getVisibilityCode(fMethod);
+		}
 		fOldVarargIndex= -1;
 	}
-	
-	public static ChangeSignatureRefactoring create(IMethod method) throws JavaModelException{
-		if (!RefactoringAvailabilityTester.isChangeSignatureAvailable(method))
-			return null;
-		return new ChangeSignatureRefactoring(method);
-	}
-	
+
 	private static List createParameterInfoList(IMethod method) {
 		try {
 			String[] typeNames= method.getParameterTypes();
@@ -1116,10 +1112,10 @@ public class ChangeSignatureRefactoring extends Refactoring {
 					IJavaProject javaProject= fMethod.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					int flags= RefactoringDescriptor.NONE;
+					int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
 					try {
 						if (!Flags.isPrivate(fMethod.getFlags()))
-							flags|= RefactoringDescriptor.STRUCTURAL_CHANGE;
+							flags|= RefactoringDescriptor.CLOSURE_CHANGE;
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
@@ -2251,5 +2247,9 @@ public class ChangeSignatureRefactoring extends Refactoring {
 			return null;
 		}
 	}
-}
 
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		// TODO: implement
+		return new RefactoringStatus();
+	}
+}

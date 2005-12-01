@@ -518,10 +518,10 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 					IJavaProject javaProject= fField.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					int flags= RefactoringDescriptor.NONE;
+					int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
 					try {
 						if (!Flags.isPrivate(fField.getFlags()))
-							flags|= RefactoringDescriptor.STRUCTURAL_CHANGE;
+							flags|= RefactoringDescriptor.CLOSURE_CHANGE;
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}

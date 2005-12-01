@@ -15,6 +15,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -32,9 +33,8 @@ public class AbstractMoveStaticMemberPrefTest extends RepeatingRefactoringPerfor
 		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
 		IType type= cunit.findPrimaryType();
 		IMember member= type.getField("VALUE");
-		MoveStaticMembersProcessor processor= MoveStaticMembersProcessor.create(
-			new IMember[] {member},
-			JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject()));
+		IMember[] elements= new IMember[] {member};
+		MoveStaticMembersProcessor processor= (RefactoringAvailabilityTester.isMoveStaticMembersAvailable(elements) ? new MoveStaticMembersProcessor(elements, JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject())) : null);
 		IPackageFragment destPack= fTestProject.getSourceFolder().createPackageFragment("destination", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package destination;\n");

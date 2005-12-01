@@ -62,6 +62,7 @@ import org.eclipse.jdt.internal.corext.dom.fragments.IASTFragment;
 import org.eclipse.jdt.internal.corext.dom.fragments.IExpressionFragment;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.BodyUpdater;
@@ -123,7 +124,7 @@ public class IntroduceParameterRefactoring extends Refactoring {
 			pm.worked(1);
 			
 			// first try:
-			fChangeSignatureRefactoring= ChangeSignatureRefactoring.create(fMethod);
+			fChangeSignatureRefactoring= RefactoringAvailabilityTester.isChangeSignatureAvailable(fMethod) ? new ChangeSignatureRefactoring(fMethod) : null;
 			if (fChangeSignatureRefactoring == null)
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method); 
 			fChangeSignatureRefactoring.setValidationContext(getValidationContext());
@@ -133,7 +134,8 @@ public class IntroduceParameterRefactoring extends Refactoring {
 				RefactoringStatusEntry entry= result.getEntryMatchingSeverity(RefactoringStatus.FATAL);
 				if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
 					// second try:
-					fChangeSignatureRefactoring= ChangeSignatureRefactoring.create((IMethod) entry.getData());
+					IMethod method= (IMethod) entry.getData();
+					fChangeSignatureRefactoring= RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null;
 					if (fChangeSignatureRefactoring == null) {
 						String msg= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_cannot_introduce, entry.getMessage());
 						return RefactoringStatus.createFatalErrorStatus(msg);

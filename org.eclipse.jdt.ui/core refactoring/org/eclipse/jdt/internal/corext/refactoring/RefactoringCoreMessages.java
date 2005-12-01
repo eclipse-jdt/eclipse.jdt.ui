@@ -832,6 +832,9 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameSourceFolderChange_rename_external;
 	public static String RenameSourceFolderChange_rename_linked;
 
+	public static String MoveInstanceMethodProcessor_descriptor_description;
+	public static String MoveStaticMembersProcessor_descriptor_description_single;
+	public static String MoveStaticMembersProcessor_descriptor_description_multi;
 	public static String RenameCompilationUnitChange_descriptor_description;
 	public static String RenameResourceChange_descriptor_description;
 	public static String RenameFieldProcessor_descriptor_description;

@@ -67,7 +67,9 @@ import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefac
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
@@ -146,7 +148,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startChangeSignatureRefactoring(final IMethod method, final SelectionDispatchAction action, final Shell shell) throws JavaModelException {
-		final ChangeSignatureRefactoring change= ChangeSignatureRefactoring.create(method);
+		final ChangeSignatureRefactoring change= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		if (!ActionUtil.isProcessable(shell, change.getMethod()))
 			return;
 		final UserInterfaceStarter starter= new UserInterfaceStarter() {
@@ -281,7 +283,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startMoveMethodRefactoring(final IMethod method, final Shell shell) throws JavaModelException {
-		final MoveInstanceMethodRefactoring refactoring= MoveInstanceMethodRefactoring.create(method, JavaPreferencesSettings.getCodeGenerationSettings(method.getJavaProject()));
+		final MoveInstanceMethodRefactoring refactoring= new MoveInstanceMethodRefactoring(new MoveInstanceMethodProcessor(method, JavaPreferencesSettings.getCodeGenerationSettings(method.getJavaProject())));
 		if (refactoring == null)
 			MessageDialog.openInformation(shell, RefactoringMessages.MoveInstanceMethodAction_dialog_title, RefactoringMessages.MoveInstanceMethodAction_No_reference_or_declaration);
 		else
@@ -295,7 +297,7 @@ public final class RefactoringExecutionStarter {
 		IJavaProject project= null;
 		if (elements.length > 0)
 			project= elements[0].getJavaProject();
-		final MoveRefactoring refactoring= new MoveRefactoring(MoveStaticMembersProcessor.create(elements, JavaPreferencesSettings.getCodeGenerationSettings(project)));
+		final JavaMoveRefactoring refactoring= new JavaMoveRefactoring((RefactoringAvailabilityTester.isMoveStaticMembersAvailable(elements) ? new MoveStaticMembersProcessor(elements, JavaPreferencesSettings.getCodeGenerationSettings(project)) : null));
 		if (ActionUtil.isProcessable(shell, ((MoveStaticMembersProcessor) refactoring.getAdapter(MoveStaticMembersProcessor.class)).getMembersToMove()[0].getCompilationUnit()))
 			new RefactoringStarter().activate(refactoring, new MoveMembersWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}

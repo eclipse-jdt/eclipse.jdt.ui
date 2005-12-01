@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 
 import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -114,7 +115,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
+		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -135,7 +136,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method m does not exist in A", method.exists());
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
+		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		ref.setNewMethodName(newMethodName);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -163,7 +164,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, typeName);
 		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method " + methodName +" does not exist", method.exists());
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
+		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		if (returnTypeName != null)
 			ref.setNewReturnTypeName(returnTypeName);
 		markAsDeleted(ref.getParameterInfos(), deleted);	
@@ -198,7 +199,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
+		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		modifyInfos(ref.getParameterInfos(), newOrder, oldNames, newNames);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -293,7 +294,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	private void helperFail(String[] newOrder, String[] signature, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(classA.getMethod("m", signature));
+		IMethod method= classA.getMethod("m", signature);
+		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		modifyInfos(ref.getParameterInfos(), newOrder, null, null);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
@@ -302,7 +304,8 @@ public class ChangeSignatureTests extends RefactoringTest {
 
 	private void helperAddFail(String[] signature, ParameterInfo[] newParamInfos, int[] newIndices, int expectedSeverity) throws Exception{
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(classA.getMethod("m", signature));
+		IMethod method= classA.getMethod("m", signature);
+		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
 		RefactoringStatus result= performRefactoring(ref);
 		assertNotNull("precondition was supposed to fail", result);		
@@ -323,7 +326,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
+		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		markAsDeleted(ref.getParameterInfos(), deleted);	
 		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation);
 		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
@@ -351,7 +354,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, typeName);
 		IMethod method = classA.getMethod(methodName, signature);
 		assertTrue("method " + methodName +" does not exist", method.exists());
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
+		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		if (returnTypeName != null)
 		ref.setNewReturnTypeName(returnTypeName);
 		markAsDeleted(ref.getParameterInfos(), deleted);	
@@ -384,7 +387,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
+		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 	
 		// from RefactoringTest#performRefactoring():
 		RefactoringStatus status= ref.checkInitialConditions(new NullProgressMonitor());
@@ -530,7 +533,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IType classA= getType(createCUfromTestFile(getPackageP(), false, false), "A");
 		IMethod method= classA.getMethod("name", new String[0]);
 		assertNotNull(method);
-		ChangeSignatureRefactoring ref= ChangeSignatureRefactoring.create(method);
+		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		assertNull(ref);
 	}
 	

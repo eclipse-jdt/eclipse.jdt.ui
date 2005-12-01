@@ -123,11 +123,11 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 					IJavaProject javaProject= field.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					int flags= RefactoringDescriptor.NONE;
+					int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
 					final IType declaring= field.getDeclaringType();
 					try {
 						if (!Flags.isPrivate(declaring.getFlags()))
-							flags|= RefactoringDescriptor.STRUCTURAL_CHANGE;
+							flags|= RefactoringDescriptor.CLOSURE_CHANGE;
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}

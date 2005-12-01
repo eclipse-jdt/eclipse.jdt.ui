@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -42,11 +43,14 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
@@ -134,13 +138,16 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
 /**
  * Refactoring processor to move instance methods.
  */
-public final class MoveInstanceMethodProcessor extends MoveProcessor {
+public final class MoveInstanceMethodProcessor extends MoveProcessor implements IInitializableRefactoringComponent {
 
 	/**
 	 * AST visitor to find references to parameters occurring in anonymous classes of a method body.
@@ -379,14 +386,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		/** The source ast rewrite to use */
 		protected final ASTRewrite fRewrite;
 
+		/** The existing static imports */
+		protected final Set fStaticImports= new HashSet();
+
 		/** The refactoring status */
 		protected final RefactoringStatus fStatus= new RefactoringStatus();
 
 		/** The target compilation unit rewrite to use */
 		protected final CompilationUnitRewrite fTargetRewrite;
-
-		/** The existing static imports */
-		protected final Set fStaticImports= new HashSet();
 
 		/**
 		 * Creates a new method body rewriter.
@@ -893,6 +900,22 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 		}
 	}
 
+	private static final String ATTRIBUTE_DEPRECATE= "deprecate"; //$NON-NLS-1$
+
+	private static final String ATTRIBUTE_INLINE= "inline"; //$NON-NLS-1$
+
+	private static final String ATTRIBUTE_REMOVE= "remove"; //$NON-NLS-1$
+
+	private static final String ATTRIBUTE_TARGET_INDEX= "targetIndex"; //$NON-NLS-1$
+
+	private static final String ATTRIBUTE_TARGET_NAME= "targetName"; //$NON-NLS-1$
+
+	private static final String ATTRIBUTE_USE_GETTER= "getter"; //$NON-NLS-1$
+
+	private static final String ATTRIBUTE_USE_SETTER= "setter"; //$NON-NLS-1$
+
+	private static final String ID_MOVE_METHOD= "org.eclipse.jdt.ui.move.method"; //$NON-NLS-1$
+
 	/** The identifier of this processor */
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.moveInstanceMethodProcessor"; //$NON-NLS-1$
 
@@ -996,7 +1019,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	private final CodeGenerationSettings fSettings;
 
 	/** The source compilation unit rewrite */
-	private final CompilationUnitRewrite fSourceRewrite;
+	private CompilationUnitRewrite fSourceRewrite;
 
 	/** The new target */
 	private IVariableBinding fTarget= null;
@@ -1023,13 +1046,13 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	 * @param settings the code generation settings to apply
 	 */
 	public MoveInstanceMethodProcessor(final IMethod method, final CodeGenerationSettings settings) {
-		Assert.isNotNull(method);
-		Assert.isNotNull(settings);
-		fMethod= method;
 		fSettings= settings;
-		fSourceRewrite= new CompilationUnitRewrite(fMethod.getCompilationUnit());
-		fMethodName= method.getElementName();
-		fTargetName= suggestTargetName();
+		fMethod= method;
+		if (method != null) {
+			fSourceRewrite= new CompilationUnitRewrite(fMethod.getCompilationUnit());
+			fMethodName= method.getElementName();
+			fTargetName= suggestTargetName();
+		}
 	}
 
 	/**
@@ -1512,7 +1535,26 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			final TextChange[] changes= fChangeManager.getAllChanges();
 			if (changes.length == 1)
 				return changes[0];
-			return new DynamicValidationStateChange(RefactoringCoreMessages.MoveInstanceMethodRefactoring_name, changes); 
+			return new DynamicValidationStateChange(RefactoringCoreMessages.MoveInstanceMethodRefactoring_name, changes) {
+
+				public final RefactoringDescriptor getRefactoringDescriptor() {
+					final Map arguments= new HashMap();
+					arguments.put(RefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
+					arguments.put(RefactoringDescriptor.NAME, fMethodName);
+					arguments.put(ATTRIBUTE_TARGET_NAME, fTargetName);
+					arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDeprecated).toString());
+					arguments.put(ATTRIBUTE_REMOVE, Boolean.valueOf(fRemove).toString());
+					arguments.put(ATTRIBUTE_INLINE, Boolean.valueOf(fInline).toString());
+					arguments.put(ATTRIBUTE_USE_GETTER, Boolean.valueOf(fUseGetters).toString());
+					arguments.put(ATTRIBUTE_USE_SETTER, Boolean.valueOf(fUseSetters).toString());
+					arguments.put(ATTRIBUTE_TARGET_INDEX, new Integer(getTargetIndex()).toString());
+					String project= null;
+					final IJavaProject javaProject= fMethod.getJavaProject();
+					if (javaProject != null)
+						project= javaProject.getElementName();
+					return new RefactoringDescriptor(ID_MOVE_METHOD, project, MessageFormat.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), new BindingLabelProvider(JavaElementLabels.ALL_FULLY_QUALIFIED, 0).getText(fTarget)}), null, arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE));
+				}
+			}; 
 		} finally {
 			monitor.done();
 		}
@@ -2431,6 +2473,23 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 	}
 
 	/**
+	 * Returns the index of the chosen target.
+	 * 
+	 * @return the target index
+	 */
+	protected final int getTargetIndex() {
+		final IVariableBinding[] targets= getPossibleTargets();
+		int result= -1;
+		for (int index= 0; index < targets.length; index++) {
+			if (Bindings.equals(fTarget, targets[index])) {
+				result= index;
+				break;
+			}
+		}
+		return result;
+	}
+
+	/**
 	 * Returns the possible targets for the method to move.
 	 * 
 	 * @return the possible targets as variable bindings of read-only fields and parameters
@@ -2656,5 +2715,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor {
 			JavaPlugin.log(exception);
 		}
 		return "arg"; //$NON-NLS-1$
+	}
+
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		// TODO: implement
+		return new RefactoringStatus();
 	}
 }

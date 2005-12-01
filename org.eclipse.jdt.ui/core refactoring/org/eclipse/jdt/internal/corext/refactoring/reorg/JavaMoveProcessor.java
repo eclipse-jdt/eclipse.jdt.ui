@@ -35,6 +35,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatin
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
@@ -172,6 +173,10 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 				public Change perform(IProgressMonitor pm2) throws CoreException {
 					super.perform(pm2);
 					return null;
+				}
+
+				public RefactoringDescriptor getRefactoringDescriptor() {
+					return super.getRefactoringDescriptor();
 				}
 			};
 			Change change= fMovePolicy.createChange(pm);

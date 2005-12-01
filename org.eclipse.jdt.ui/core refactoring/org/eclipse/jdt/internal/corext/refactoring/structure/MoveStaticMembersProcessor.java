@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collections;
@@ -38,12 +39,15 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
@@ -53,6 +57,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IInitializer;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
@@ -100,13 +105,17 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public final class MoveStaticMembersProcessor extends MoveProcessor {
-	
+public final class MoveStaticMembersProcessor extends MoveProcessor implements IInitializableRefactoringComponent {
+
+	private static final String ID_STATIC_MOVE= "org.eclipse.jdt.ui.move.static"; //$NON-NLS-1$
+
 	private static final String TRACKED_POSITION_PROPERTY= "MoveStaticMembersProcessor.trackedPosition"; //$NON-NLS-1$
+
 	private IMember[] fMembersToMove;
 	private IType fDestinationType;
 	private String fDestinationTypeName;
@@ -151,17 +160,9 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 		}
 	}
 
-	private MoveStaticMembersProcessor(IMember[] elements, CodeGenerationSettings preferenceSettings) {
-		Assert.isNotNull(elements);
-		Assert.isNotNull(preferenceSettings);
+	public MoveStaticMembersProcessor(IMember[] elements, CodeGenerationSettings preferenceSettings) {
 		fMembersToMove= elements;
 		fPreferences= preferenceSettings;
-	}
-	
-	public static MoveStaticMembersProcessor create(IMember[] elements, CodeGenerationSettings preferenceSettings) throws JavaModelException{
-		if (! RefactoringAvailabilityTester.isMoveStaticMembersAvailable(elements))
-			return null;
-		return new MoveStaticMembersProcessor(elements, preferenceSettings);
 	}
 	
 	/**
@@ -620,7 +621,26 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 	
 	private void createChange(List modifiedCus, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
 		monitor.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, 5); 
-		fChange= new DynamicValidationStateChange(RefactoringCoreMessages.MoveMembersRefactoring_move_members); 
+		fChange= new DynamicValidationStateChange(RefactoringCoreMessages.MoveMembersRefactoring_move_members) {
+
+			public final RefactoringDescriptor getRefactoringDescriptor() {
+				final Map arguments= new HashMap();
+				arguments.put(RefactoringDescriptor.INPUT, fDestinationType.getHandleIdentifier());
+				final IMember[] members= getMembersToMove();
+				for (int index= 0; index < members.length; index++)
+					arguments.put(RefactoringDescriptor.ELEMENT + (index + 1), members[index].getHandleIdentifier());
+				String project= null;
+				final IJavaProject javaProject= getDeclaringType().getJavaProject();
+				if (javaProject != null)
+					project= javaProject.getElementName();
+				String description= null;
+				if (members.length == 1)
+					description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_single, JavaElementLabels.getElementLabel(members[0], JavaElementLabels.ALL_FULLY_QUALIFIED));
+				else
+					description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_multi, String.valueOf(members.length));
+				return new RefactoringDescriptor(ID_STATIC_MOVE, project, MessageFormat.format(description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
+			}
+		}; 
 		fTarget= getCuRewrite(fDestinationType.getCompilationUnit());
 		ITypeBinding targetBinding= getDestinationBinding();
 		if (targetBinding == null) {
@@ -862,5 +882,10 @@ public final class MoveStaticMembersProcessor extends MoveProcessor {
 			}
 		});
 		return result;
+	}
+
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		// TODO: implement
+		return new RefactoringStatus();
 	}
 }

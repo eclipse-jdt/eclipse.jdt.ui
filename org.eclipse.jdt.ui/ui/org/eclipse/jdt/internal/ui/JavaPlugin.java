@@ -64,6 +64,9 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.ChangeMethodSignatureRefactoringInstanceCreator;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.MoveMethodRefactoringInstanceCreator;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.MoveStaticMembersRefactoringInstanceCreator;
 import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameCompilationUnitRefactoringInstanceCreator;
 import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameEnumConstRefactoringInstanceCreator;
 import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameFieldRefactoringInstanceCreator;
@@ -373,6 +376,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 		factory.registerCreator("org.eclipse.jdt.ui.rename.source.folder", new RenameSourceFolderRefactoringInstanceCreator()); //$NON-NLS-1$
 		factory.registerCreator("org.eclipse.jdt.ui.rename.type.parameter", new RenameTypeParameterRefactoringInstanceCreator()); //$NON-NLS-1$
 		factory.registerCreator("org.eclipse.jdt.ui.rename.type", new RenameTypeRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.change.method.signature", new ChangeMethodSignatureRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.move.method", new MoveMethodRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.move.static", new MoveStaticMembersRefactoringInstanceCreator()); //$NON-NLS-1$
 	}
 	
 	/* package */ static void initializeAfterLoad(IProgressMonitor monitor) {

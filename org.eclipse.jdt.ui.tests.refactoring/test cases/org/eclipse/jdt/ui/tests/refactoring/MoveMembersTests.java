@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -63,7 +64,7 @@ public class MoveMembersTests extends RefactoringTest {
 		IJavaProject project= null;
 		if (members != null && members.length > 0)
 			project= members[0].getJavaProject();
-		MoveStaticMembersProcessor processor= MoveStaticMembersProcessor.create(members, JavaPreferencesSettings.getCodeGenerationSettings(project));
+		MoveStaticMembersProcessor processor= (RefactoringAvailabilityTester.isMoveStaticMembersAvailable(members) ? new MoveStaticMembersProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project)) : null);
 		if (processor == null)
 			return null;
 		processor.setDestinationTypeFullyQualifiedName(destination);

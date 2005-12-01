@@ -928,10 +928,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 					IJavaProject javaProject= fType.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					int flags= RefactoringDescriptor.NONE;
+					int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
 					try {
 						if (!Flags.isPrivate(fType.getFlags()))
-							flags|= RefactoringDescriptor.STRUCTURAL_CHANGE;
+							flags|= RefactoringDescriptor.CLOSURE_CHANGE;
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
