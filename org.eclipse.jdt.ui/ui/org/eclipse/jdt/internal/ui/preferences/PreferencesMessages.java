@@ -699,6 +699,7 @@ public final class PreferencesMessages extends NLS {
 	public static String UserLibraryPreferencePage_UserLibraryPreferencePage_libraries_down_button;
 	public static String EditTemplateDialog_autoinsert;
 	public static String ComplianceConfigurationBlock_jrecompliance_info;
+	public static String ComplianceConfigurationBlock_jrecompliance_info_project;
 	public static String CodeAssistConfigurationBlockInProgress_no_shortcut;
 	public static String CodeAssistConfigurationBlockInProgress_computer_description;
 	public static String CodeAssistConfigurationBlockInProgress_computer_link;

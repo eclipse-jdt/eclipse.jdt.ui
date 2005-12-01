@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.preferences;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
@@ -280,14 +282,22 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		addCheckBox(group, label, PREF_CODEGEN_INLINE_JSR_BYTECODE, enableDisableValues, 0);	
 		
 		fJRE50InfoText= new Link(composite, SWT.WRAP);
-		fJRE50InfoText.setText(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info);
+		if (fProject == null) {
+			fJRE50InfoText.setText(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info);
+		} else {
+			fJRE50InfoText.setText(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project);
+		}
 		fJRE50InfoText.setFont(composite.getFont());
 		fJRE50InfoText.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
-				openJREInstallPreferencePage();
+				if ("1".equals(e.text)) { //$NON-NLS-1$
+					openJREInstallPreferencePage();
+				} else {
+					openBuildPathPropertyPage();
+				}
 			}
 			public void widgetSelected(SelectionEvent e) {
-				openJREInstallPreferencePage();
+				widgetDefaultSelected(e);
 			}
 		});
 		GridData gd= new GridData(GridData.FILL, GridData.FILL, true, true);
@@ -296,6 +306,15 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		validateJRE50Status();
 		
 		return sc1;
+	}
+	
+	protected final void openBuildPathPropertyPage() {
+		if (getPreferenceContainer() != null) {
+			Map data= new HashMap();
+			data.put(BuildPathsPropertyPage.DATA_REVEAL_ENTRY, JavaRuntime.getDefaultJREContainerEntry());
+			getPreferenceContainer().openPage(BuildPathsPropertyPage.PROP_ID, data);
+		}
+		validateJRE50Status();
 	}
 	
 	protected final void openJREInstallPreferencePage() {
