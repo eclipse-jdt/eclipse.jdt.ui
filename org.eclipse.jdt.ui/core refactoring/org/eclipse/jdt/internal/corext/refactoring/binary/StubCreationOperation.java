@@ -492,15 +492,15 @@ public final class StubCreationOperation implements IWorkspaceRunnable {
 	public final void run(IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
-		monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, fPackages.size());
+		monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, 100 * fPackages.size());
 		try {
 			final StringBuffer buffer= new StringBuffer(128);
 			for (final Iterator iterator= fPackages.iterator(); iterator.hasNext();) {
 				final IPackageFragment fragment= (IPackageFragment) iterator.next();
-				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
+				final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 100);
 				final IClassFile[] files= fragment.getClassFiles();
 				final int size= files.length;
-				subMonitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, size * 2);
+				subMonitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, size * 50);
 				final String name= fragment.getElementName();
 				IFileStore store= EFS.getStore(fOutputURI);
 				if (!"".equals(name)) { //$NON-NLS-1$
@@ -512,19 +512,19 @@ public final class StubCreationOperation implements IWorkspaceRunnable {
 							buffer.setCharAt(index, '/');
 					}
 					store= store.getChild(new Path(buffer.toString()));
-					if (!store.fetchInfo().exists())
-						store.mkdir(0, new SubProgressMonitor(subMonitor, 1));
+					if (!store.fetchInfo(EFS.NONE, new SubProgressMonitor(subMonitor, 10)).exists())
+						store.mkdir(EFS.NONE, new SubProgressMonitor(subMonitor, 10));
 					else
-						subMonitor.worked(1);
+						subMonitor.worked(10);
 				}
-				final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 1);
+				final IProgressMonitor subsubMonitor= new SubProgressMonitor(subMonitor, 30);
 				try {
-					subsubMonitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, size);
+					subsubMonitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, size * 100);
 					for (int index= 0; index < size; index++) {
 						if (subMonitor.isCanceled())
 							throw new OperationCanceledException();
 						fBuffer.setLength(0);
-						run(files[index], store, new SubProgressMonitor(subsubMonitor, 1));
+						run(files[index], store, new SubProgressMonitor(subsubMonitor, 100));
 					}
 				} finally {
 					subsubMonitor.done();
