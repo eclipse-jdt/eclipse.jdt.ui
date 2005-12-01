@@ -109,7 +109,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				treeViewer.expandToLevel(compilationUnit, 0);
 				treeViewer.setChecked(compilationUnit, true);
 			}
-			treeViewer.setSelection(new StructuredSelection(smallestCommonParents(compilationUnits)), true);
+			if (compilationUnits.length > 0)
+				treeViewer.setSelection(new StructuredSelection(smallestCommonParents(compilationUnits)), true);
 		}
 		
 		private IJavaElement[] smallestCommonParents(IJavaElement[] elements) {
