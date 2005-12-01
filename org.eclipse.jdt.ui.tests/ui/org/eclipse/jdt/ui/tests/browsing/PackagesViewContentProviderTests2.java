@@ -26,7 +26,6 @@ import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.viewers.IStructuredContentProvider;
 
@@ -154,7 +153,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		pushDisplay();
+		fMyPart.pushDisplay();
 
 		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 		assertTrue("Correct package removed", fMyPart.getRemovedObject().contains(fPack12)); //$NON-NLS-1$
@@ -176,7 +175,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		pushDisplay();
+		fMyPart.pushDisplay();
 		
 		//assert remove happened (delta worked)
 		assertTrue("Refresh happened", fMyPart.hasRemoveHappened() && fMyPart.hasAddHappened()); //$NON-NLS-1$
@@ -199,7 +198,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		pushDisplay();
+		fMyPart.pushDisplay();
 		
 		//assert remove happened (delta worked)
 		assertTrue("Refresh did not happened", !fMyPart.hasRefreshHappened()); //$NON-NLS-1$
@@ -220,7 +219,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		pushDisplay();
+		fMyPart.pushDisplay();
 		
 		assertPack81RefreshedOnce();
 	}
@@ -247,7 +246,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		pushDisplay();
+		fMyPart.pushDisplay();
 		
 		assertPack81RefreshedOnce();
 	}
@@ -268,7 +267,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		pushDisplay();
+		fMyPart.pushDisplay();
 		
 		//make sure no refresh happened
 		assertTrue("Refresh did not happened", !fMyPart.hasRefreshHappened()); //$NON-NLS-1$
@@ -287,7 +286,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		pushDisplay();
+		fMyPart.pushDisplay();
 		
 		assertTrue("Add happened", fMyPart.hasAddHappened()); //$NON-NLS-1$
 		assertTrue("Correct package added", fMyPart.getAddedObject().contains(test)); //$NON-NLS-1$
@@ -312,7 +311,7 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 		listener.elementChanged(new ElementChangedEvent(delta, ElementChangedEvent.POST_CHANGE));
 
 		//force events from display
-		pushDisplay();
+		fMyPart.pushDisplay();
 		
 		//assert remove and add happened (delta worked)
 		assertTrue("Remove and add happened", fMyPart.hasRemoveHappened() && fMyPart.hasAddHappened()); //$NON-NLS-1$
@@ -528,16 +527,5 @@ public class PackagesViewContentProviderTests2 extends TestCase {
 			}
 		}
 		return false;
-	}
-
-	private void pushDisplay() {
-		boolean moreToDispatch= true;
-		while (moreToDispatch) {
-			Control ctrl= fMyPart.getTreeViewer().getControl();
-			if (ctrl != null && !ctrl.isDisposed()) {
-				moreToDispatch= fMyPart.getTreeViewer().getControl().getDisplay().readAndDispatch();
-			} else
-				moreToDispatch= false;
-		}
 	}
 }

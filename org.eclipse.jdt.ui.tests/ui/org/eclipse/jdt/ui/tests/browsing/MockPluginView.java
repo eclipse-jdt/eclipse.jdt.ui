@@ -16,6 +16,7 @@ import java.util.List;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.StructuredViewer;
@@ -88,6 +89,8 @@ public class MockPluginView extends PackagesView {
 	}
 	
 	public void clear() {
+		pushDisplay();
+		
 		fAddedObject.clear();
 		fRefreshedObject.clear();
 		fAddedParentObject.clear();
@@ -200,6 +203,19 @@ public class MockPluginView extends PackagesView {
 		return fAddHappened;
 	}
 
+	/**
+	 * force events from display 
+	 */
+	public void pushDisplay() {
+		boolean moreToDispatch= true;
+		while (moreToDispatch) {
+			Control ctrl= getTreeViewer().getControl();
+			if (ctrl != null && !ctrl.isDisposed()) {
+				moreToDispatch= getTreeViewer().getControl().getDisplay().readAndDispatch();
+			} else
+				moreToDispatch= false;
+		}
+	}
 
 	private class TestProblemTreeViewer extends ProblemTreeViewer {
 
