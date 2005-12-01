@@ -268,7 +268,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		IJavaSearchScope scope= null;
 		String scopeDescription= ""; //$NON-NLS-1$
 		
-		boolean includeJRE= getSearchJRE() || !mayExcludeJRE();
+		boolean includeJRE= getSearchJRE();
 		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		
 		switch (getContainer().getSelectedScope()) {
