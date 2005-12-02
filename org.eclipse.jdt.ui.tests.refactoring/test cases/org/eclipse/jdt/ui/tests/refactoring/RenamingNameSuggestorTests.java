@@ -12,17 +12,16 @@ public class RenamingNameSuggestorTests extends TestCase {
 		return new TestSuite(RenamingNameSuggestorTests.class);
 	}
 	
-	String[] prefixes;
-	String[] suffixes;
+	String[] fPrefixes;
+	String[] fSuffixes;
+	RenamingNameSuggestor fSuggestor;
 
 	private String fHelper(String oldFieldName, String oldTypeName, String newTypeName) {
-		
-		return new RenamingNameSuggestor().suggestNewVariableName(prefixes, suffixes, oldFieldName, oldTypeName, newTypeName);
+		return fSuggestor.suggestNewVariableName(fPrefixes, fSuffixes, oldFieldName, oldTypeName, newTypeName);
 	}
 	
 	private String mHelper(String oldFieldName, String oldTypeName, String newTypeName) {
-		
-		return new RenamingNameSuggestor().suggestNewMethodName(oldFieldName, oldTypeName, newTypeName);
+		return fSuggestor.suggestNewMethodName(oldFieldName, oldTypeName, newTypeName);
 	}
 	
 	public void mh(String orig, String changed, String oldT, String newT) {
@@ -30,7 +29,7 @@ public class RenamingNameSuggestorTests extends TestCase {
 	}
 	
 	public void mhf(String orig, String oldT, String newT) {
-		assertNull(mHelper(orig, oldT, newT));
+		assertEquals(null, mHelper(orig, oldT, newT));
 	}
 	
 	public void fh(String orig, String changed, String oldT, String newT) {
@@ -38,13 +37,18 @@ public class RenamingNameSuggestorTests extends TestCase {
 	}
 	
 	public void fhf(String orig, String oldT, String newT) {
-		assertNull(fHelper(orig, oldT, newT));
+		assertEquals(null, fHelper(orig, oldT, newT));
+	}
+	
+	public void setStrategy(int strategy) {
+		fSuggestor= new RenamingNameSuggestor(strategy);
 	}
 
 	public void testOnlyPrefix() {
 		
-		prefixes= new String[] { "f", "q" };
-		suffixes= new String[0];
+		fPrefixes= new String[] { "f", "q" };
+		fSuffixes= new String[0];
+		setStrategy(RenamingNameSuggestor.STRATEGY_EXACT);
 		
 		// Prefix can, but need not be specified.
 		assertEquals("fSomeOtherClass", fHelper("fSomeClass", "SomeClass", "SomeOtherClass"));
@@ -52,10 +56,8 @@ public class RenamingNameSuggestorTests extends TestCase {
 		assertEquals("someOtherClass", fHelper("someClass", "SomeClass", "SomeOtherClass"));
 		
 		//Interface names
-		assertEquals("fINewJavaElement", fHelper("fIJavaElement", "IJavaElement", "INewJavaElement"));
 		assertEquals("fNewJavaElement", fHelper("fJavaElement", "IJavaElement", "INewJavaElement"));
 		assertEquals("newJavaElement", fHelper("javaElement", "IJavaElement", "INewJavaElement"));
-		assertEquals("iNewJavaElement", fHelper("iJavaElement", "IJavaElement", "INewJavaElement"));
 		
 		// Unrelated stuff
 		assertNull(fHelper("fSomeClass", "Unrelated", "Unrelated2"));
@@ -64,8 +66,9 @@ public class RenamingNameSuggestorTests extends TestCase {
 
 	public void testPrefixAndSuffix() {
 
-		prefixes= new String[] { "f", "q" };
-		suffixes= new String[] { "Suf1" };
+		fPrefixes= new String[] { "f", "q" };
+		fSuffixes= new String[] { "Suf1" };
+		setStrategy(RenamingNameSuggestor.STRATEGY_EXACT);
 
 		// Suffix and Prefix can, but need not be specified.
 		assertEquals("fSomeOtherSuf1", fHelper("fSomeSuf1", "Some", "SomeOther"));
@@ -74,46 +77,47 @@ public class RenamingNameSuggestorTests extends TestCase {
 		assertEquals("someOther", fHelper("some", "Some", "SomeOther"));
 		
 		//Interface names
-		assertEquals("fINewJavaElementSuf1", fHelper("fIJavaElementSuf1", "IJavaElement", "INewJavaElement"));
 		assertEquals("fNewJavaElementSuf1", fHelper("fJavaElementSuf1", "IJavaElement", "INewJavaElement"));
 		assertEquals("newJavaElement", fHelper("javaElement", "IJavaElement", "INewJavaElement"));
-		assertEquals("iNewJavaElement", fHelper("iJavaElement", "IJavaElement", "INewJavaElement"));
 	}
 	
 	public void testOnlySuffix() {
 		
-		prefixes= new String[0];
-		suffixes= new String[] { "Suf1" };
+		fPrefixes= new String[0];
+		fSuffixes= new String[] { "Suf1" };
+		setStrategy(RenamingNameSuggestor.STRATEGY_EXACT);
 		
 		//Suffix can, but need not be specified
 		assertEquals("someOtherClassSuf1", fHelper("someClassSuf1", "SomeClass", "SomeOtherClass"));
 		assertEquals("someOtherClass", fHelper("someClass", "SomeClass", "SomeOtherClass"));
 		
 		//Interface names
-		assertEquals("iNewJavaElementSuf1", fHelper("iJavaElementSuf1", "IJavaElement", "INewJavaElement"));
 		assertEquals("newJavaElementSuf1", fHelper("javaElementSuf1", "IJavaElement", "INewJavaElement"));
 		assertEquals("newJavaElement", fHelper("javaElement", "IJavaElement", "INewJavaElement"));
-		assertEquals("iNewJavaElement", fHelper("iJavaElement", "IJavaElement", "INewJavaElement"));
 		
 	}
 
 	public void testVeryShortNames() {
 		
-		prefixes= new String[] { "f", "q" };
-		suffixes= new String[] { "_" };
+		fPrefixes= new String[] { "f", "q" };
+		fSuffixes= new String[] { "_" };
+		setStrategy(RenamingNameSuggestor.STRATEGY_SUFFIX);
 		
 		assertEquals("fB", fHelper("fA", "A", "B"));
 		assertEquals("qB", fHelper("qA", "A", "B"));
 		assertEquals("b", fHelper("a", "A", "B"));
 		
 		assertEquals("b_", fHelper("a_", "A", "B"));
+		
+		fh("mAHahAHa", "mBHahAHa", "A", "B"); // match first occurrence
 	
 	}
 	
 	public void testEmbeddedMatching() {
 		
-		prefixes= new String[0];
-		suffixes= new String[0];
+		fPrefixes= new String[0];
+		fSuffixes= new String[0];
+		setStrategy(RenamingNameSuggestor.STRATEGY_EMBEDDED);
 		
 		mh("getJavaElement", "getNewJavaElement", "JavaElement", "NewJavaElement");
 		mh("javaElement", "newJavaElement", "JavaElement", "NewJavaElement");
@@ -126,12 +130,18 @@ public class RenamingNameSuggestorTests extends TestCase {
 		// match with "_" or "$" and other non-letters and non-digits at the next hunk
 		mh("someClass_pm", "someDifferentClass_pm", "SomeClass", "SomeDifferentClass");
 		mh("someClass$$", "someDifferentClass$$", "SomeClass", "SomeDifferentClass");
+		
+		// match a second type name
+		fh("createelementsecondElement", "createelementsecondMember", "Element", "Member");
+		fh("createelementsecondelement", "createelementsecondmember", "Element", "Member");
+		fhf("createelementsecondelementnomore", "Element", "Member");
 	}
 	
 	public void testCamelCaseMatching() {
 		
-		prefixes= new String[0];
-		suffixes= new String[0];
+		fPrefixes= new String[0];
+		fSuffixes= new String[0];
+		setStrategy(RenamingNameSuggestor.STRATEGY_SUFFIX);
 
 		// only the last camel case match
 		mh("getElement", "getMember", "JavaElement", "JavaMember");
@@ -157,6 +167,7 @@ public class RenamingNameSuggestorTests extends TestCase {
 		// some methods
 		mh("getFreakyClass", "getLast", "FreakyClass", "Last");
 		mh("Element", "Member", "SomeFreakyElement", "SomeFreakyMember");
+		mh("createMyASTNode", "createMyNode", "MyASTNode", "MyNode");
 		
 		// freaky stuff
 		
@@ -166,6 +177,12 @@ public class RenamingNameSuggestorTests extends TestCase {
 		
 		fh("java$Element$", "javaElement", "Java$Element$", "JavaElement");
 		
+		// suffixes inside the name
+		fh("theElementToUse", "theThingToUse", "JavaElement", "JavaThing");
+		
+		// only match last hunk
+		mh("getJavaSomeElement", "getJavaSomeMember", "JavaElement", "JavaMember");
+		mhf("getJavaSome", "JavaElement", "JavaMember");
 		
 		// failures
 
@@ -178,6 +195,99 @@ public class RenamingNameSuggestorTests extends TestCase {
 		
 		fhf("fElement", "SomeLongElement", "AnotherDifferentElement"); //-> don't suggest renaming fElement to fElement!
 		
+	}
+	
+	public void testUpperCaseCamelCaseMatching() {
+		
+		fPrefixes= new String[] { "f" };
+		fSuffixes= new String[0];
+		
+		setStrategy(RenamingNameSuggestor.STRATEGY_EXACT);
+
+		// complete uppercase camel case hunks
+		fh("fAST", "fAbstractSyntaxTree", "AST", "AbstractSyntaxTree");
+		fh("AST", "AbstractSyntaxTree", "AST", "AbstractSyntaxTree");
+		
+		// complete uppercase camel case hunks, but lowercased
+		fh("fAst", "fAbstractSyntaxTree", "AST", "AbstractSyntaxTree");
+		fh("ast", "abstractSyntaxTree", "AST", "AbstractSyntaxTree");
+		fh("aST", "abstractSyntaxTree", "AST", "AbstractSyntaxTree");
+		
+	    fh("fASTNode", "fAbstractSTNode", "ASTNode", "AbstractSTNode");
+	    fh("fASTNode", "fASTreeNode", "ASTNode", "ASTreeNode");
+	    
+	    /*
+		 * do not match: 
+		 * fh("fAstNode", "fAbstractSTNode", "ASTNode", "AbstractSTNode"); 
+		 * fh("fAstNode", "fAsTreeNode", "ASTNode", "ASTreeNode");
+		 * 
+		 * When changing all-uppercase hunks in exact or embedded mode, it is unclear 
+		 * which hunk in the new type name corresponds to the custom-lowercased hunk 
+		 * in the old variable name. Rather than guessing the hunk, we only 
+		 * proceed hunk-by-hunk in suffix mode.
+		 */
+	    
+	    setStrategy(RenamingNameSuggestor.STRATEGY_EMBEDDED);
+	    
+	    fh("fAst2", "fAbstractSyntaxTree2", "AST", "AbstractSyntaxTree");
+		fh("aST2", "abstractSyntaxTree2", "AST", "AbstractSyntaxTree");
+	    
+	    setStrategy(RenamingNameSuggestor.STRATEGY_SUFFIX);
+		
+		// partial uppercase camel case hunks
+		fh("fAST", "fMUST", "PersonalAST", "PersonalMUST");
+		
+		// "downgrading" the new hunks
+		fh("fAst", "fMust", "PersonalAST", "PersonalMUST");
+		fh("fHUNKPowered", "fMONKPowered", "ReallyHUNKPowered", "ReallyMONKPowered");
+		
+		fh("fHunkPowered", "fMonkPowered", "ReallyHUNKPowered", "ReallyMONKPowered");
+		fh("fHunkPowered", "fMonkPowered", "ReallyHUNKPowered", "ReallyMonkPowered");
+		
+		fh("fHunkPowered", "fHunk2Powered", "HunkPowered", "Hunk2Powered");
+		fh("powered", "powered2", "HunkPOWERED", "MonkPOWERED2");
+		
+		// adapted middle hunks
+		fh("astNode", "fastNode", "ASTNode", "FASTNode");
+		mh("createMyASTNode", "createMySECONDNode", "MyASTNode", "MySECONDNode");
+		mh("createMyAstNode", "createMySecondNode", "MyASTNode", "MySECONDNode");
+		
+		// some more methods
+		mh("createAST", "createAbstractSyntaxTree", "AST", "AbstractSyntaxTree");
+	
+		// match new hunks
+		
+		fh("fASTNode", "fMyASTNode", "ASTNode", "MyASTNode");
+		fh("fAstNode", "fMyAstNode", "ASTNode", "MyASTNode");
+		fh("fDifferentAstNode", "fDifferentMyAstNode", "ASTNode", "MyASTNode");
+		fh("fDifferentAstNodeToUse", "fDifferentMyAstNodeToUse", "ASTNode", "MyASTNode");
+		
+		// propagating lowercased front
+		fh("astNode", "myAstNode", "ASTNode", "MyASTNode");
+		
+	}
+	
+	public void testPluralS() {
+		
+		System.out.println("Plural s not currently supported");
+		return;
+
+//		 prefixes= new String[0];
+//		 suffixes= new String[0];
+//		 setStrategy(RenamingNameSuggestor.STRATEGY_EXACT);
+//		 fh("items", "things", "Item", "Thing");
+//		 fh("handies", "mobilePhones", "Handy", "MobilePhone");
+//		 fh("handy", "mobilePhone", "Handy", "MobilePhone");
+//		 fh("handies", "mandies", "Handy", "Mandy");
+//		 setStrategy(RenamingNameSuggestor.STRATEGY_EMBEDDED);
+//		 fh("itemsOnLoan", "thingsOnLoan", "Item", "Thing");
+//		 fh("itemStuff", "thingStuff", "Item", "Thing"); //-> no plural s!
+//		 fh("someHandiesOnLoan", "someMobilePhonesOnLoan", "Handy", "MobilePhone");
+//		 fh("someHandiesOnLoan", "someMandiesOnLoan", "Handy", "Mandy");
+//		 setStrategy(RenamingNameSuggestor.STRATEGY_SUFFIX);
+//		 fh("someItemsOnLoan", "someThingsOnLoan", "ASTItem", "NOASTThing");
+//		 fh("someHandiesOnLoan", "someMandiesOnLoan", "Handy", "Mandy");
+//		 fh("someHandiesOnLoan", "someMobilePhonesOnLoan", "Handy", "MobilePhone");
 	}
 	
 }

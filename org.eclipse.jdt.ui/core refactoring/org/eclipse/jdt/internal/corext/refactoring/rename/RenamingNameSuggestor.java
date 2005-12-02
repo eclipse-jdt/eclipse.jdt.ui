@@ -61,7 +61,7 @@ import org.eclipse.jdt.internal.ui.text.JavaWordIterator;
  * b) all other characters must match case-sensitive
  * 
  * c) the stripped element name must end after the type name, or the next
- * character must be a letter, or the next character must be upper cased.
+ * character must be a non-letter, or the next character must be upper cased.
  * 
  * In case of a match, the new type is inserted into the stripped element name,
  * replacing the old type name, first character adapted to the correct case.
@@ -75,41 +75,65 @@ import org.eclipse.jdt.internal.ui.text.JavaWordIterator;
  * 
  * The new and old type names are analyzed for "camel case suffixes", that is,
  * substrings which begin with an uppercased letter. For example,
- * "SimpleJavaElement" is split into the three suffixes "SimpleJavaElement",
- * "JavaElement", and "Element". If one type name has more suffixes than the
+ * "SimpleJavaElement" is split into the three hunks "Simple",
+ * "Java", and "Element". If one type name has more suffixes than the
  * other, both are stripped to the smaller size.
  * 
- * Then, a search is performed in the stripped variable name for the suffixes of
- * the old type from larger to smaller suffixes. Each suffix must match like in
- * the embedded strategy, i.e.
+ * Then, a search is performed in the stripped variable name hunks from back to
+ * front. At least the last hunk must be found, others may then extend the match. 
+ * Each hunk must match like in the exact strategy, i.e.
  * 
  * a) the first character must match case-insensitive
  * 
  * b) all other characters must match case-sensitive
  * 
- * c) the stripped element name must end after the suffix, or the next character
- * must be a letter, or the next character must be upper cased.
- * 
- * In case of a match, the corresponding suffix of the new type is inserted at
- * the position of the old suffix. Suffixes/Prefixes are reapplied.
+ * In case of a match, the matched hunks of the new type replace
+ * the hunks of the old type. Suffixes/Prefixes are reapplied.
  * 
  * Note that numbers and other non-letter characters belong to the previous
- * camel case substring. Note also that this matches names like "cachedelement"
- * for type "IJavaElement" and also "myE" for the type "LetterE". It does not
- * match "myClass" for type "A".
+ * camel case substring. 
  * 
  * 
  * @since 3.2
  * 
  */
 public class RenamingNameSuggestor {
+	
+	/*
+	 * ADDITIONAL OPTIONS
+	 * ----------------------------------------------------------------
+	 * 
+	 * There are two additional flags which may be set in this class to allow
+	 * better matching of special cases:
+	 * 
+	 * a) Special treatment of leading "I"s in type names, i.e. interface names
+	 * 	  like "IJavaElement". If the corresponding flag is set, leading "I"s are
+	 * 	  stripped from type names if the second char is also uppercase to allow
+	 * 	  exact matching of variable names like "javaElement" for type
+	 * 	  "IJavaElement". Note that embedded matching already matches cases like
+	 * 	  this.
+	 * 
+	 * b) Special treatment of all-uppercase type names or all-uppercase type
+	 * 	  name camel-case hunks, i.e. names like "AST" or "PersonalURL". If the
+	 * 	  corresponding flag is set, the type name hunks will be transformed such
+	 * 	  that variables like "fAst", "ast", "personalUrl", or "url" are found as
+	 * 	  well. The target name will be transformed too if it is an
+	 * 	  all-uppercase type name camel-case hunk as well.
+	 * 
+	 * 	  NOTE that in exact or embedded mode, the whole type name must be
+	 * 	  all-uppercase to allow matching custom-lowercased variable names, i.e.
+	 *    there are no attempts to "guess" which hunk of the new name should be lowercased
+	 *    to match a partly lowercased variable name. In suffix mode, hunks of the 
+	 *    new type which are at the same position as in the old type will be 
+	 *    lowercased if necessary.
+	 * 
+	 */
 
 	public static final int STRATEGY_EXACT= 1;
 	public static final int STRATEGY_EMBEDDED= 2;
 	public static final int STRATEGY_SUFFIX= 3;
 
 	private int fStrategy;
-	private boolean fSkipLeadingI;
 	private String[] fFieldPrefixes;
 	private String[] fFieldSuffixes;
 	private String[] fStaticFieldPrefixes;
@@ -118,6 +142,9 @@ public class RenamingNameSuggestor {
 	private String[] fLocalSuffixes;
 	private String[] fArgumentPrefixes;
 	private String[] fArgumentSuffixes;
+	
+	private boolean fExtendedInterfaceNameMatching;
+	private boolean fExtendedAllUpperCaseHunkMatching;
 
 	public RenamingNameSuggestor() {
 		this(STRATEGY_SUFFIX);
@@ -128,7 +155,8 @@ public class RenamingNameSuggestor {
 		Assert.isTrue(strategy >= 1 && strategy <= 3);
 
 		fStrategy= strategy;
-		fSkipLeadingI= true;
+		fExtendedInterfaceNameMatching= true;
+		fExtendedAllUpperCaseHunkMatching= true;
 
 		resetPrefixes();
 	}
@@ -193,7 +221,7 @@ public class RenamingNameSuggestor {
 		String oldType= oldTypeName;
 		String newType= newTypeName;
 
-		if (fSkipLeadingI && isInterfaceName(oldType) && isInterfaceName(newType)) {
+		if (fExtendedInterfaceNameMatching && isInterfaceName(oldType) && isInterfaceName(newType)) {
 			oldType= getInterfaceName(oldType);
 			newType= getInterfaceName(newType);
 		}
@@ -219,6 +247,21 @@ public class RenamingNameSuggestor {
 
 	private String exactMatch(final String oldTypeName, final String newTypeName, final String strippedVariableName) {
 
+		String newName= exactDirectMatch(oldTypeName, newTypeName, strippedVariableName);
+		if (newName != null)
+			return newName;
+
+		if (fExtendedAllUpperCaseHunkMatching && isUpperCaseCamelCaseHunk(oldTypeName)) {
+			String oldTN= getFirstUpperRestLowerCased(oldTypeName);
+			String newTN= isUpperCaseCamelCaseHunk(newTypeName) ? getFirstUpperRestLowerCased(newTypeName) : newTypeName;
+			newName= exactDirectMatch(oldTN, newTN, strippedVariableName);
+		}
+
+		return newName;
+	}
+
+	private String exactDirectMatch(final String oldTypeName, final String newTypeName, final String strippedVariableName) {
+
 		if (strippedVariableName.equals(oldTypeName))
 			return newTypeName;
 
@@ -230,18 +273,39 @@ public class RenamingNameSuggestor {
 
 	private String embeddedMatch(String oldTypeName, String newTypeName, String strippedVariableName) {
 
-		String newName= embeddedDirectMatch(oldTypeName, newTypeName, strippedVariableName);
-		if (newName != null)
-			return newName;
+		// possibility of a match?
+		final String lowerCaseVariable= strippedVariableName.toLowerCase();
+		final String lowerCaseOldTypeName= oldTypeName.toLowerCase();
+		int presumedIndex= lowerCaseVariable.indexOf(lowerCaseOldTypeName);
 
-		return embeddedDirectMatch(getLowerCased(oldTypeName), getLowerCased(newTypeName), strippedVariableName);
+		while (presumedIndex != -1) {
+			// it may be there
+			final String presumedTypeName= strippedVariableName.substring(presumedIndex, presumedIndex + oldTypeName.length());
+			final String prefix= strippedVariableName.substring(0, presumedIndex);
+			final String suffix= strippedVariableName.substring(presumedIndex + oldTypeName.length());
+
+			// can match at all? (depends on suffix)
+			if (startsNewHunk(suffix)) {
+
+				String name= exactMatch(oldTypeName, newTypeName, presumedTypeName);
+				if (name != null)
+					return prefix + name + suffix;
+			}
+
+			// did not match -> find next occurrence
+			presumedIndex= lowerCaseVariable.indexOf(lowerCaseOldTypeName, presumedIndex + 1);
+		}
+
+		return null;
 	}
-
+	
 	private String suffixMatch(final String oldType, final String newType, final String strippedVariableName) {
 
-		// get an array of all camel-cased elements from both types
+		// get an array of all camel-cased elements from both types + the
+		// variable
 		String[] suffixesOld= getSuffixes(oldType);
 		String[] suffixesNew= getSuffixes(newType);
+		String[] suffixesVar= getSuffixes(strippedVariableName);
 
 		// get an equal-sized array of the last n camel-cased elements
 		int min= Math.min(suffixesOld.length, suffixesNew.length);
@@ -250,51 +314,105 @@ public class RenamingNameSuggestor {
 		System.arraycopy(suffixesOld, suffixesOld.length - min, suffixesOldEqual, 0, min);
 		System.arraycopy(suffixesNew, suffixesNew.length - min, suffixesNewEqual, 0, min);
 
-		// match 'em
-		for (int i= 0; i < suffixesOldEqual.length; i++) {
-			String oldCamelCaseMatch= concatToEndOfArray(suffixesOldEqual, i);
-			String newCamelCaseMatch= concatToEndOfArray(suffixesNewEqual, i);
-			
-			if (oldCamelCaseMatch.equals(newCamelCaseMatch))
-				return null; // only silly suggestions from here on.
-			
-			String newName= embeddedDirectMatch(oldCamelCaseMatch, newCamelCaseMatch, strippedVariableName);
-
-			if (newName != null)
-				return newName;
-
-			// try lowercase, for example for field "element"
-			newName= embeddedDirectMatch(getLowerCased(oldCamelCaseMatch), getLowerCased(newCamelCaseMatch), strippedVariableName);
-
-			if (newName != null)
-				return newName;
+		// find endIndex. endIndex is the index of the last hunk of the old type
+		// name in the variable name.
+		int endIndex= -1;
+		for (int j= suffixesVar.length - 1; j >= 0; j--) {
+			String newHunkName= exactMatch(suffixesOldEqual[suffixesOldEqual.length - 1], suffixesNewEqual[suffixesNewEqual.length - 1], suffixesVar[j]);
+			if (newHunkName != null) {
+				endIndex= j;
+				break;
+			}
 		}
 
-		return null;
+		if (endIndex == -1)
+			return null; // last hunk not found -> no match
+
+		int stepBack= 0;
+		int lastSuffixMatched= -1;
+		int hunkInVarName= -1;
+		for (int i= suffixesOldEqual.length - 1; i >= 0; i--) {
+
+			hunkInVarName= endIndex - stepBack;
+			stepBack++;
+
+			if (hunkInVarName < 0) {
+				// we have reached the beginning of the variable name
+				break;
+			}
+
+			// try to match this hunk:
+			String newHunkName= exactMatch(suffixesOldEqual[i], suffixesNewEqual[i], suffixesVar[hunkInVarName]);
+
+			if (newHunkName == null)
+				break; // only match complete suffixes
+
+			suffixesVar[hunkInVarName]= newHunkName;
+			lastSuffixMatched= i;
+		}
+		
+		if (lastSuffixMatched == 0) {
+			// we have matched ALL type hunks in the variable name,
+			// insert any new prefixes of the new type name
+			int newPrefixes= suffixesNew.length - suffixesNewEqual.length;
+			if (newPrefixes > 0) {
+				
+				// Propagate lowercased start to the front
+				if (Character.isLowerCase(suffixesVar[hunkInVarName].charAt(0)) && Character.isUpperCase(suffixesOldEqual[lastSuffixMatched].charAt(0))) {
+					suffixesVar[hunkInVarName]= getUpperCased(suffixesVar[hunkInVarName]);
+					suffixesNew[0]= getLowerCased(suffixesNew[0]);
+				}
+				
+				String[] newVariableName= new String[suffixesVar.length + newPrefixes];
+				System.arraycopy(suffixesVar, 0, newVariableName, 0, hunkInVarName); // hunks before type name in variable name
+				System.arraycopy(suffixesNew, 0, newVariableName, hunkInVarName, newPrefixes); // new hunks in new type name
+				System.arraycopy(suffixesVar, hunkInVarName, newVariableName, hunkInVarName + newPrefixes, suffixesVar.length - hunkInVarName); // matched + rest hunks
+				suffixesVar= newVariableName;
+			}
+		}
+
+		String varName= concat(suffixesVar);
+		if (varName.equals(strippedVariableName))
+			return null; // no "silly suggestions"
+		else
+			return varName;
 	}
 
 
 	// ---------------- Helper methods
 
+	/**
+	 * True if the string is the beginning of a new camel case hunk. False if it
+	 * is not.
+	 */
+	private boolean startsNewHunk(String string) {
 
-	private String embeddedDirectMatch(String oldTypeName, String newTypeName, String strippedVariableName) {
+		if (string.length() == 0)
+			return true;
 
-		final int index= strippedVariableName.indexOf(oldTypeName);
-
-		if (index != -1) {
-			final String prefix= strippedVariableName.substring(0, index);
-			final String suffix= strippedVariableName.substring(index + oldTypeName.length());
-
-			if (suffix.length() == 0)
-				return prefix + newTypeName;
-			else if (isNextCamelCaseHunk(suffix.charAt(0)))
-				return prefix + newTypeName + suffix;
-		}
-
-		return null;
+		return isLegalChar(string.charAt(0));
 	}
 
-	private boolean isNextCamelCaseHunk(char c) {
+	/**
+	 * True if hunk is longer than 1 character and all letters in the hunk are
+	 * uppercase. False if not.
+	 */
+	private boolean isUpperCaseCamelCaseHunk(String hunk) {
+		if (hunk.length() < 2)
+			return false;
+
+		for (int i= 0; i < hunk.length(); i++) {
+			if (!isLegalChar(hunk.charAt(i)))
+				return false;
+		}
+		return true;
+	}
+	
+	/**
+	 * False if the character is a letter and it is lowercase. True in all other
+	 * cases.
+	 */
+	private boolean isLegalChar(char c) {
 		if (Character.isLetter(c))
 			return Character.isUpperCase(c);
 		return true;
@@ -322,9 +440,9 @@ public class RenamingNameSuggestor {
 		return (String[]) suffixes.toArray(new String[0]);
 	}
 
-	private String concatToEndOfArray(String[] suffixesNewEqual, int i) {
+	private String concat(String[] suffixesNewEqual) {
 		StringBuffer returner= new StringBuffer();
-		for (int j= i; j < suffixesNewEqual.length; j++) {
+		for (int j= 0; j < suffixesNewEqual.length; j++) {
 			returner.append(suffixesNewEqual[j]);
 		}
 		return returner.toString();
@@ -333,6 +451,20 @@ public class RenamingNameSuggestor {
 	private String getLowerCased(String name) {
 		if (name.length() > 1)
 			return Character.toLowerCase(name.charAt(0)) + name.substring(1);
+		else
+			return name.toLowerCase();
+	}
+	
+	private String getUpperCased(String name) {
+		if (name.length() > 1)
+			return Character.toUpperCase(name.charAt(0)) + name.substring(1);
+		else
+			return name.toLowerCase();
+	}
+
+	private String getFirstUpperRestLowerCased(String name) {
+		if (name.length() > 1)
+			return Character.toUpperCase(name.charAt(0)) + name.substring(1).toLowerCase();
 		else
 			return name.toLowerCase();
 	}
