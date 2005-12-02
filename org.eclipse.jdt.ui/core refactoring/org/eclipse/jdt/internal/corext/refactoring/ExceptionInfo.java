@@ -24,7 +24,7 @@ public class ExceptionInfo {
 	public static final int ADDED= 1;
 	public static final int DELETED= 2;
 	
-	private ExceptionInfo(IType type, int kind, ITypeBinding binding) {
+	public ExceptionInfo(IType type, int kind, ITypeBinding binding) {
 		Assert.isNotNull(type);
 		fType= type;
 		fKind= kind;

@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
+import java.util.StringTokenizer;
 
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -37,14 +38,18 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -165,15 +170,14 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 
 	public ChangeSignatureRefactoring(IMethod method) throws JavaModelException {
 		fMethod= method;
+		fOldVarargIndex= -1;
 		if (fMethod != null) {
 			fParameterInfos= createParameterInfoList(method);
 			// fExceptionInfos is created in checkInitialConditions
-			String initialReturnTypeName= Signature.toString(Signature.getReturnType(fMethod.getSignature()));
-			fReturnTypeInfo= new ReturnTypeInfo(initialReturnTypeName);
+			fReturnTypeInfo= new ReturnTypeInfo(Signature.toString(Signature.getReturnType(fMethod.getSignature())));
 			fMethodName= fMethod.getElementName();
 			fVisibility= JdtFlags.getVisibilityCode(fMethod);
 		}
-		fOldVarargIndex= -1;
 	}
 
 	private static List createParameterInfoList(IMethod method) {
@@ -663,30 +667,30 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 	}
 	
 	private RefactoringStatus createExceptionInfoList() {
-		fExceptionInfos= new ArrayList(0);
-		try {
-			IJavaProject project= fMethod.getJavaProject();
-			ASTNode nameNode= NodeFinder.perform(fBaseCuRewrite.getRoot(), fMethod.getNameRange());
-			if (nameNode == null || ! (nameNode instanceof Name) || ! (nameNode.getParent() instanceof MethodDeclaration))
-				return null;
-			MethodDeclaration methodDeclaration= (MethodDeclaration) nameNode.getParent();
-			List exceptions= methodDeclaration.thrownExceptions();
-			List result= new ArrayList(exceptions.size());
-			for (int i= 0; i < exceptions.size(); i++){
-				Name name= (Name) exceptions.get(i);
-				ITypeBinding typeBinding= name.resolveTypeBinding();
-				if (typeBinding == null)
-					return RefactoringStatus.createFatalErrorStatus(
-							RefactoringCoreMessages.ChangeSignatureRefactoring_no_exception_binding); 
-				IType type= Bindings.findType(typeBinding, project);
-				result.add(ExceptionInfo.createInfoForOldException(type, typeBinding));
+		if (fExceptionInfos == null || fExceptionInfos.isEmpty()) {
+			fExceptionInfos= new ArrayList(0);
+			try {
+				IJavaProject project= fMethod.getJavaProject();
+				ASTNode nameNode= NodeFinder.perform(fBaseCuRewrite.getRoot(), fMethod.getNameRange());
+				if (nameNode == null || !(nameNode instanceof Name) || !(nameNode.getParent() instanceof MethodDeclaration))
+					return null;
+				MethodDeclaration methodDeclaration= (MethodDeclaration) nameNode.getParent();
+				List exceptions= methodDeclaration.thrownExceptions();
+				List result= new ArrayList(exceptions.size());
+				for (int i= 0; i < exceptions.size(); i++) {
+					Name name= (Name) exceptions.get(i);
+					ITypeBinding typeBinding= name.resolveTypeBinding();
+					if (typeBinding == null)
+						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_no_exception_binding);
+					IType type= Bindings.findType(typeBinding, project);
+					result.add(ExceptionInfo.createInfoForOldException(type, typeBinding));
+				}
+				fExceptionInfos= result;
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
 			}
-			fExceptionInfos= result;
-			return null;
-		} catch(JavaModelException e) {
-			JavaPlugin.log(e);
-			return null;
 		}
+		return null;
 	}
 
 	/*
@@ -1096,12 +1100,14 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 						final String value= info.getDefaultValue();
 						if (value != null && !"".equals(value)) //$NON-NLS-1$
 							arguments.put(ATTRIBUTE_DEFAULT + count, value);
+						count++;
 					}
 					count= 1;
 					for (final Iterator iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
 						final ExceptionInfo info= (ExceptionInfo) iterator.next();
 						arguments.put(ATTRIBUTE_EXCEPTION + count, info.getType().getHandleIdentifier());
 						arguments.put(ATTRIBUTE_KIND + count, new Integer(info.getKind()).toString());
+						count++;
 					}
 					String project= null;
 					IJavaProject javaProject= fMethod.getJavaProject();
@@ -2244,7 +2250,116 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 	}
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		// TODO: implement
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_CHANGE_METHOD_SIGNATURE));
+				else {
+					fMethod= (IMethod) element;
+					fMethodName= fMethod.getElementName();
+					try {
+						fVisibility= JdtFlags.getVisibilityCode(fMethod);
+						fReturnTypeInfo= new ReturnTypeInfo(Signature.toString(Signature.getReturnType(fMethod.getSignature())));
+					} catch (JavaModelException exception) {
+						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_VISIBILITY));
+					}
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
+			if (name != null && !"".equals(name)) { //$NON-NLS-1$
+				fMethodName= name;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
+			final String type= generic.getAttribute(ATTRIBUTE_RETURN);
+			if (type != null && !"".equals(type)) //$NON-NLS-1$
+				fReturnTypeInfo= new ReturnTypeInfo(type);
+			final String visibility= generic.getAttribute(ATTRIBUTE_VISIBILITY);
+			if (visibility != null && !"".equals(visibility)) {//$NON-NLS-1$
+				int flag= 0;
+				try {
+					flag= Integer.parseInt(visibility);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_VISIBILITY));
+				}
+				fVisibility= flag;
+			}
+			int count= 1;
+			String attribute= ATTRIBUTE_PARAMETER + count;
+			String value= null;
+			fParameterInfos= new ArrayList(3);
+			while ((value= generic.getAttribute(attribute)) != null) {
+				ParameterInfo info= null;
+				final StringTokenizer tokenizer= new StringTokenizer(value);
+				if (tokenizer.hasMoreTokens()) {
+					final String oldTypeName= tokenizer.nextToken();
+					if (tokenizer.hasMoreTokens()) {
+						final String oldName= tokenizer.nextToken();
+						if (tokenizer.hasMoreTokens()) {
+							final String oldIndex= tokenizer.nextToken();
+							if (tokenizer.hasMoreTokens()) {
+								final String newTypeName= tokenizer.nextToken();
+								if (tokenizer.hasMoreTokens()) {
+									final String newName= tokenizer.nextToken();
+									if (tokenizer.hasMoreTokens()) {
+										final String deleted= tokenizer.nextToken();
+										try {
+											info= new ParameterInfo(oldTypeName, oldName, Integer.valueOf(oldIndex).intValue());
+											info.setNewTypeName(newTypeName);
+											info.setNewName(newName);
+											if (Boolean.valueOf(deleted).booleanValue())
+												info.markAsDeleted();
+											fParameterInfos.add(info);
+										} catch (NumberFormatException exception) {
+											return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
+										}
+									} else
+										return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
+								} else
+									return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
+							} else
+								return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
+						} else
+							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
+					} else
+						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
+				} else
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
+				final String result= generic.getAttribute(ATTRIBUTE_DEFAULT + count);
+				if (result != null && info != null && !"".equals(result)) //$NON-NLS-1$
+					info.setDefaultValue(result);
+				count++;
+				attribute= ATTRIBUTE_PARAMETER + count;
+			}
+			count= 1;
+			fExceptionInfos= new ArrayList(2);
+			attribute= ATTRIBUTE_EXCEPTION + count;
+			while ((value= generic.getAttribute(attribute)) != null) {
+				ExceptionInfo info= null;
+				final String kind= generic.getAttribute(ATTRIBUTE_KIND + count);
+				if (kind != null) {
+					final IJavaElement element= JavaCore.create(value);
+					if (element == null || !element.exists())
+						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_CHANGE_METHOD_SIGNATURE));
+					else {
+						try {
+							info= new ExceptionInfo((IType) element, Integer.valueOf(kind).intValue(), null);
+						} catch (NumberFormatException exception) {
+							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_KIND));
+						}
+					}
+				} else
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_KIND));
+				if (info != null)
+					fExceptionInfos.add(info);
+				count++;
+				attribute= ATTRIBUTE_EXCEPTION + count;
+			}
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
 	}
 }
