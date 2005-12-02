@@ -195,9 +195,14 @@ public class RefactoringSearchEngine {
 		Iterator iter= set.iterator();
 		IJavaElement first= (IJavaElement)iter.next();
 		SearchPattern pattern= SearchPattern.createPattern(first, limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+		if (pattern == null) // check for bug 90138
+			throw new IllegalArgumentException("Invalid java element: " + first.getHandleIdentifier() + "\n" + first.toString()); //$NON-NLS-1$ //$NON-NLS-2$
 		while(iter.hasNext()){
 			IJavaElement each= (IJavaElement)iter.next();
-			pattern= SearchPattern.createOrPattern(pattern, SearchPattern.createPattern(each, limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE));
+			SearchPattern nextPattern= SearchPattern.createPattern(each, limitTo, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+			if (nextPattern == null) // check for bug 90138
+				throw new IllegalArgumentException("Invalid java element: " + each.getHandleIdentifier() + "\n" + each.toString()); //$NON-NLS-1$ //$NON-NLS-2$
+			pattern= SearchPattern.createOrPattern(pattern, nextPattern);
 		}
 		return pattern;
 	}
