@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui;
  
+import java.io.IOException;
 import java.io.Reader;
 
 import org.eclipse.jdt.core.IBuffer;
@@ -83,7 +84,11 @@ public class JavadocContentAccess {
 					terminal= scanner.getNextToken();
 				}
 				if (docOffset != -1) {
-					return new JavaDocCommentReader(buf, docOffset, docEnd);
+					JavaDocCommentReader reader= new JavaDocCommentReader(buf, docOffset, docEnd);
+					if (!containsOnlyInheritDoc(reader, length)) {
+						reader.reset();
+						return reader;
+					}
 				}
 			} catch (InvalidInputException ex) {
 				// try if there is inherited Javadoc
@@ -95,6 +100,26 @@ public class JavadocContentAccess {
 			return findDocInHierarchy(method.getDeclaringType(), method.getElementName(), method.getParameterTypes(), method.isConstructor());
 		}
 		return null;
+	}
+	
+	/**
+	 * Checks whether the given reader only returns
+	 * the inheritDoc tag.
+	 * 
+	 * @param reader the reader
+	 * @param length the length of the underlying content
+	 * @return <code>true</code> if the reader only returns the inheritDoc tag
+	 * @since 3.2
+	 */
+	private static boolean containsOnlyInheritDoc(Reader reader, int length) {
+		char[] content= new char[length];
+		try {
+			reader.read(content, 0, length);
+		} catch (IOException e) {
+			return false;
+		}
+		return new String(content).trim().equals("{@inheritDoc}"); //$NON-NLS-1$
+		
 	}
 	
 	/**
