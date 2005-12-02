@@ -55,8 +55,6 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.TextSelection;
 import org.eclipse.jface.text.source.SourceViewer;
 
 import org.eclipse.ui.PlatformUI;
@@ -518,6 +516,9 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		fSourceViewer.setEditable(false);
 		fSourceViewer.getControl().setLayoutData(new GridData(GridData.FILL_BOTH));
 		fSourceViewer.getControl().setFont(JFaceResources.getFont(PreferenceConstants.EDITOR_TEXT_FONT));
+		Document document= new Document();
+		getJavaTextTools().setupJavaDocumentPartitioner(document);
+		fSourceViewer.setDocument(document);
 	}
 
 	private static JavaTextTools getJavaTextTools() {
@@ -692,25 +693,28 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 	}
 
 	private void setSourceViewerContents(IJavaElement el) throws JavaModelException {
+		String EMPTY= ""; //$NON-NLS-1$
 		if (el == null) {
-			fSourceViewer.setDocument(null);
+			fSourceViewer.getDocument().set(EMPTY);
 			return;
 		}
 		ICompilationUnit element= (ICompilationUnit) el.getAncestor(IJavaElement.COMPILATION_UNIT);
 		if (element == null) {
-			fSourceViewer.setDocument(null);
+			fSourceViewer.getDocument().set(EMPTY);
 			return;
 		}
+		
 		String contents= element.getSource();
-		IDocument document= (contents == null) ? new Document() : new Document(contents);
-		getJavaTextTools().setupJavaDocumentPartitioner(document);
-		fSourceViewer.setDocument(document);
-
-		ISourceRange sr= getNameRange(el);
-		if (sr != null) {
-			TextSelection textSelect= new TextSelection(getNameRange(el).getOffset(), getNameRange(el).getLength());
-			fSourceViewer.setSelection(textSelect, true);
-		}
+		try {
+			fSourceViewer.setRedraw(false);
+			fSourceViewer.getDocument().set(contents == null ? EMPTY : contents);
+			ISourceRange sr= getNameRange(el);
+			if (sr != null) {
+				fSourceViewer.setSelectedRange(sr.getOffset(), sr.getLength());
+			}
+		} finally {
+			fSourceViewer.setRedraw(true);
+		}		
 	}
 
 	private ISourceRange getNameRange(IJavaElement element) throws JavaModelException {
