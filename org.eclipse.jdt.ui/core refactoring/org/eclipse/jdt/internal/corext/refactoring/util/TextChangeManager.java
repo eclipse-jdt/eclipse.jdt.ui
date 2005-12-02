@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.util;
 
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
@@ -24,7 +27,7 @@ import org.eclipse.ltk.core.refactoring.TextChange;
  */
 public class TextChangeManager {
 	
-	private Map fMap= new HashMap(10); // ICompilationUnit -> TextChange
+	private Map/*<ICompilationUnit, TextChange>*/ fMap= new HashMap(10);
 	
 	private final boolean fKeepExecutedTextEdits;
 	
@@ -81,7 +84,22 @@ public class TextChangeManager {
 	 * @return all text changes managed by this instance
 	 */
 	public TextChange[] getAllChanges(){
-		return (TextChange[])fMap.values().toArray(new TextChange[fMap.values().size()]);
+		Set cuSet= fMap.keySet();
+		ICompilationUnit[] cus= (ICompilationUnit[]) cuSet.toArray(new ICompilationUnit[cuSet.size()]);
+		// sort by cu name:
+		Arrays.sort(cus, new Comparator() {
+			public int compare(Object o1, Object o2) {
+				String name1= ((ICompilationUnit) o1).getElementName();
+				String name2= ((ICompilationUnit) o2).getElementName();
+				return name1.compareTo(name2);
+			}
+		});
+		
+		TextChange[] textChanges= new TextChange[cus.length];
+		for (int i= 0; i < cus.length; i++) {
+			textChanges[i]= (TextChange) fMap.get(cus[i]);
+		}
+		return textChanges;
 	}
 
 	/**
