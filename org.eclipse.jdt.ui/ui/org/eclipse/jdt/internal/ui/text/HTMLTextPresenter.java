@@ -107,7 +107,7 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 		try {
 
 			StringBuffer buffer= new StringBuffer();
-			int maxNumberOfLines= Math.round(maxHeight / gc.getFontMetrics().getHeight());
+			int maxNumberOfLines= Math.round((float)maxHeight / gc.getFontMetrics().getHeight());
 
 			fCounter= 0;
 			LineBreakingReader reader= new LineBreakingReader(createReader(hoverInfo, presentation), gc, maxWidth);
