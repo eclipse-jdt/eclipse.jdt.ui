@@ -355,6 +355,42 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		}
 		
 	}
+	
+	private static class DerivedElementSorter extends JavaElementSorter {
+
+		/*
+		 * (non-Javadoc)
+		 * @see org.eclipse.jdt.ui.JavaElementSorter#category(java.lang.Object)
+		 */
+		public int category(Object element) {
+
+			/*
+			 * We'd like to present the elements in the same order as they
+			 * appear in the source. This can be achieved by assigning a
+			 * distinct category to every element; the category being derived
+			 * from the source position of the element.
+			 */
+
+			ISourceRange sourceRange= null;
+			if (element instanceof IMember) {
+				IMember member= (IMember) element;
+				try {
+					sourceRange= member.getNameRange();
+				} catch (JavaModelException e) {
+					// fall through
+				}
+			}
+			if (element instanceof ILocalVariable) {
+				ILocalVariable var= (ILocalVariable) element;
+				sourceRange= var.getNameRange();
+			}
+
+			if (sourceRange != null)
+				return 100 + sourceRange.getOffset(); // +100: safe distance from all other categories.
+
+			return super.category(element);
+		}
+	}
 
 	public static final String PAGE_NAME= "DerivedElementSelectionPage"; //$NON-NLS-1$
 
@@ -437,7 +473,7 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
 		fTreeViewer= new ContainerCheckedTreeViewer(tree);
 		fTreeViewer.setUseHashlookup(true);
-		fTreeViewer.setSorter(new JavaElementSorter());
+		fTreeViewer.setSorter(new DerivedElementSorter());
 		fTreeViewer.setContentProvider(new DerivedElementTreeContentProvider());
 		fTreeViewerLabelProvider= new DerivedLabelProvider();
 		fTreeViewer.setLabelProvider(fTreeViewerLabelProvider);
