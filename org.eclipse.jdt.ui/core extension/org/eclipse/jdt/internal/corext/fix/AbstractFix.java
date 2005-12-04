@@ -10,23 +10,31 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
-import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
+import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite.ImportRewriteContext;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 
 public abstract class AbstractFix implements IFix {
@@ -36,15 +44,83 @@ public abstract class AbstractFix implements IFix {
 				ASTRewrite rewrite, 
 				NewImportRewrite importRewrite, 
 				CompilationUnit compilationUnit,
-				List/*<TextEditGroup>*/ textEditGroups) throws CoreException;
+				List/*<TextEditGroup>*/ textEditGroups) throws CoreException; //TODO: ma maybe passing in a CompilationUnitRewrite would be easier?
+	}
+	
+	public static abstract class AbstractFixRewriteOperation implements IFixRewriteOperation {
+		
+		private static class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
+			
+			private final CompilationUnit fCompilationUnit;
+			private final ITypeBinding fImport;
+			private final ASTNode fAccessor;
+			
+			public ContextSensitiveImportRewriteContext(CompilationUnit compilationUnit, ITypeBinding impord, ASTNode accessor) {
+				fCompilationUnit= compilationUnit;
+				fImport= impord; 
+				fAccessor= accessor;
+			}
+
+			public int findInContext(String qualifier, final String name, int kind) {
+				
+				ScopeAnalyzer analyzer= new ScopeAnalyzer(fCompilationUnit);
+				IBinding[] declarationsInScope= analyzer.getDeclarationsInScope(fAccessor.getStartPosition(), ScopeAnalyzer.TYPES);
+				for (int i= 0; i < declarationsInScope.length; i++) {
+					if (declarationsInScope[i] == fImport) { // TODO: ma: Bug should use qualifier and name, fImport is unnecessary
+						return RES_NAME_FOUND;
+					}
+				}
+				
+				List imports= new ArrayList();
+				List staticImports= new ArrayList(); // TODO: ma: can set to null if not interested in staticImports
+				ImportReferencesCollector.collect(fCompilationUnit, fCompilationUnit.getJavaElement().getJavaProject(), null, imports, staticImports);
+				for (Iterator iter= imports.iterator(); iter.hasNext();) {
+					Name element= (Name)iter.next();
+					IBinding binding= element.resolveBinding();
+					if (binding instanceof ITypeBinding) {
+						ITypeBinding declBinding= ((ITypeBinding)binding).getDeclaringClass();
+						if (declBinding == null)
+							declBinding= (ITypeBinding)binding;
+						
+						// TODO: ma: be careful with declBinding.getName(): will contain <> for parameterized types
+						if (binding != fImport && declBinding.getName().equals(fImport.getName())) {
+							return RES_NAME_CONFLICT;
+						}
+					}
+				}
+				
+				return RES_NAME_UNKNOWN;
+			}
+		}
+		
+		// TODO: ma: better name importType
+		protected Type importClass(final ITypeBinding toImport, final ASTNode accessor, NewImportRewrite imports, final CompilationUnit compilationUnit) {
+			imports.setFilterImplicitImports(true);
+			ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(compilationUnit, toImport, accessor);
+			return imports.addImport(toImport, compilationUnit.getAST(), importContext);
+		}
 	}
 	
 	private final String fName;
 	private final ICompilationUnit fCompilationUnit;
+	private final IFixRewriteOperation[] fFixRewrites;
+	private final CompilationUnit fUnit;
 	
-	protected AbstractFix(String name, ICompilationUnit compilationUnit) {
+	protected AbstractFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
+		fName= name;
+		fCompilationUnit= (ICompilationUnit)compilationUnit.getJavaElement();
+		fFixRewrites= fixRewriteOperations;
+		fUnit= compilationUnit;
+	}
+
+	/**
+	 * @deprecated
+	 */
+	public AbstractFix(String name, ICompilationUnit compilationUnit) {
 		fName= name;
 		fCompilationUnit= compilationUnit;
+		fFixRewrites= null;
+		fUnit= null;
 	}
 
 	/* (non-Javadoc)
@@ -61,46 +137,31 @@ public abstract class AbstractFix implements IFix {
 		return fCompilationUnit;
 	}
 	
-	/**
-	 * Helper to apply a <code>ASTRewrite</code> and a <code>ImportRewrite</code> to a 
-	 * <code>ICompilationUnit</code> to calculate a <code>TextEdit</code> generated by
-	 * the rewrite.
-	 * 
-	 * @param compilationUnit The compilationUnit to apply to, not null
-	 * @param rewrite The rewrite to apply, not null
-	 * @param imports Import rewrites to apply, may be null
-	 * @return The TextEdit
-	 * @throws CoreException
-	 * @deprecated
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.fix.IFix#createChange()
 	 */
-	protected TextEdit applyEdits(ICompilationUnit compilationUnit, ASTRewrite rewrite, ImportRewrite imports) throws CoreException {
-		Map options= compilationUnit.getJavaProject().getOptions(true);
-		IDocument document1= new Document(compilationUnit.getBuffer().getContents());
-		TextEdit edit= rewrite.rewriteAST(document1, options);
+	public TextChange createChange() throws CoreException {
+		if (fFixRewrites == null || fFixRewrites.length == 0)
+			return null;
 
-		if (imports != null && !imports.isEmpty()) {
-			edit.addChild(imports.createEdit(document1, new NullProgressMonitor()));
-		}
-		return edit;
-	}
+		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(getCompilationUnit(), fUnit);
 	
-	/**
-	 * Helper to apply a <code>ASTRewrite</code> and a <code>ImportRewrite</code> to a 
-	 * <code>ICompilationUnit</code> to calculate a <code>TextEdit</code> generated by
-	 * the rewrite.
-	 * 
-	 * @param compilationUnit The compilationUnit to apply to, not null
-	 * @param rewrite The rewrite to apply, not null
-	 * @param imports Import rewrites to apply, may be null
-	 * @return The TextEdit
-	 * @throws CoreException
-	 */
-	protected TextEdit applyEdits(CompilationUnit compilationUnit, ASTRewrite rewrite, NewImportRewrite imports) throws CoreException {
-		TextEdit edit= rewrite.rewriteAST();
-
-		if (imports != null) {
-			edit.addChild(imports.rewriteImports(new NullProgressMonitor()));
+		ASTRewrite rewrite= cuRewrite.getASTRewrite();
+		NewImportRewrite importRewrite= cuRewrite.getImportRewrite().getNewImportRewrite();
+		
+		List/*<TextEditGroup>*/ groups= new ArrayList();
+		
+		for (int i= 0; i < fFixRewrites.length; i++) {
+			fFixRewrites[i].rewriteAST(rewrite, importRewrite, fUnit, groups);
 		}
-		return edit;
+		
+		CompilationUnitChange result= cuRewrite.createChange();
+		
+		for (Iterator iter= groups.iterator(); iter.hasNext();) {
+			TextEditGroup group= (TextEditGroup)iter.next();
+			result.addTextEditGroup(group);
+		}
+		return result;
 	}
+
 }

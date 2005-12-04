@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
-import org.eclipse.text.edits.MultiTextEdit;
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
@@ -38,10 +40,30 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  * 		Remove unnecessary $NON-NLS$ tag
  *
  */
-public class StringFix extends AbstractFix {
+public class StringFix implements IFix {
 	
-	private final TextEdit fEdit;
-	private TextChange fChange;
+	private final GroupedTextEdit[] fEditGroups;
+	private final String fName;
+	private final ICompilationUnit fCompilationUnit;
+
+	private static class GroupedTextEdit { //TODO: ma: Couldn't TextEditGroup be used?
+
+		private final String fGroupeName;
+		private final TextEdit fAddEdit;
+
+		public GroupedTextEdit(TextEdit addEdit, String groupeName) {
+			fAddEdit= addEdit;
+			fGroupeName= groupeName;
+		}
+
+		public String getGroupName() {
+			return fGroupeName;
+		}
+
+		public TextEdit getEdit() {
+			return fAddEdit;
+		}
+	}
 
 	public static StringFix createFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean removeNLSTag, boolean addNLSTag) throws CoreException {
 		TextEdit addEdit= null;
@@ -56,18 +78,18 @@ public class StringFix extends AbstractFix {
 				removeEdit= getReplace(problem.getOffset(), problem.getLength(), buffer, true);
 			}
 		}
-		if (addEdit == null && removeEdit == null) {
-			return null;
-		} else if (addEdit != null && removeEdit != null) {
-			MultiTextEdit root= new MultiTextEdit();
-			TextChangeCompatibility.insert(root, addEdit);
-			TextChangeCompatibility.insert(root, removeEdit);
-			StringFix stringFix= new StringFix(FixMessages.StringFix_AddRemoveNonNls_description, root, cu);
-			return stringFix;
+
+		if (addEdit != null && removeEdit != null) {
+			String label= FixMessages.StringFix_AddRemoveNonNls_description;
+			return new StringFix(label, compilationUnit, new GroupedTextEdit[] {new GroupedTextEdit(addEdit, label), new GroupedTextEdit(removeEdit, label)});
 		} else if (addEdit != null) {
-			return new StringFix(FixMessages.StringFix_AddNonNls_description, addEdit, cu);
+			String label= FixMessages.StringFix_AddNonNls_description;
+			return new StringFix(label, compilationUnit, new GroupedTextEdit[] {new GroupedTextEdit(addEdit, label)});
+		} else if (removeEdit != null) {
+			String label= FixMessages.StringFix_RemoveNonNls_description;
+			return new StringFix(label, compilationUnit, new GroupedTextEdit[] {new GroupedTextEdit(removeEdit, label)});
 		} else {
-			return new StringFix(FixMessages.StringFix_RemoveNonNls_description, removeEdit, cu);
+			return null;
 		}
 	}
 	
@@ -76,40 +98,27 @@ public class StringFix extends AbstractFix {
 			return null;
 		
 		IProblem[] problems= compilationUnit.getProblems();
-		
-		if (problems.length == 0)
-			return null;
-		
-		CompilationUnitChange result= null;
-		
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
+		List result= new ArrayList();
 		
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];
 			if (addNLSTag && problem.getID() == IProblem.NonExternalizedStringLiteral) {
 				TextEdit edit= NLSUtil.createNLSEdit(cu, problem.getSourceStart());
-				if (edit != null) {
-					if (result == null) 
-						result= new CompilationUnitChange("", cu); //$NON-NLS-1$
-					TextChangeCompatibility.addTextEdit(result, FixMessages.StringFix_AddNonNls_description, edit);
-				}
+				result.add(new GroupedTextEdit(edit, FixMessages.StringFix_AddNonNls_description));
 			}
 			if (removeNLSTag && problem.getID() == IProblem.UnnecessaryNLSTag) {
 				IBuffer buffer= cu.getBuffer();
 				if (buffer != null) {
 					TextEdit edit= StringFix.getReplace(problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart() + 1, buffer, false);
-					if (edit != null) {
-						if (result == null)
-							result= new CompilationUnitChange("", cu); //$NON-NLS-1$
-						TextChangeCompatibility.addTextEdit(result, FixMessages.StringFix_RemoveNonNls_description, edit);
-					}
+					result.add(new GroupedTextEdit(edit, FixMessages.StringFix_RemoveNonNls_description));
 				}
 			}
 		}
-		if (result == null)
+		if (result.isEmpty())
 			return null;
 		
-		return new TextChangeFix("", cu, result); //$NON-NLS-1$
+		return new StringFix("", compilationUnit, (GroupedTextEdit[])result.toArray(new GroupedTextEdit[result.size()])); //$NON-NLS-1$
 	}
 	
 	private static ReplaceEdit getReplace(int offset, int length, IBuffer buffer, boolean removeLeadingIndents) {
@@ -154,18 +163,41 @@ public class StringFix extends AbstractFix {
 			return null;
 		}
 	}
-
-	private StringFix(String name, TextEdit edit, ICompilationUnit compilationUnit) {
-		super(name, compilationUnit);
-		fEdit= edit;
+	
+	private StringFix(String name, CompilationUnit compilationUnit, GroupedTextEdit[] groups) {
+		fName= name;
+		fCompilationUnit= (ICompilationUnit)compilationUnit.getJavaElement();
+		fEditGroups= groups;
 	}
 
-	public TextChange createChange() {
-		if (fChange == null) {
-			fChange= new CompilationUnitChange(getDescription(), getCompilationUnit());
-			fChange.setEdit(fEdit);
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix#createChange()
+	 */
+	public TextChange createChange() throws CoreException {
+		if (fEditGroups == null || fEditGroups.length == 0)
+			return null;
+		
+		CompilationUnitChange result= new CompilationUnitChange(getDescription(), getCompilationUnit());
+		for (int i= 0; i < fEditGroups.length; i++) {
+			TextEdit edit= fEditGroups[i].getEdit();
+			String groupName= fEditGroups[i].getGroupName();
+			TextChangeCompatibility.addTextEdit(result, groupName, edit);
 		}
-		return fChange;
+		return result;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getDescription()
+	 */
+	public String getDescription() {
+		return fName;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.corext.fix.IFix#getCompilationUnit()
+	 */
+	public ICompilationUnit getCompilationUnit() {
+		return fCompilationUnit;
 	}
 
 }

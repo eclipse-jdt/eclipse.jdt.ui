@@ -11,17 +11,12 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.ltk.core.refactoring.TextChange;
-
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -51,11 +46,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -66,8 +61,6 @@ import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
  * Fix which removes unused code.
- * Supported:
- * 		Remove unused import
  */
 public class UnusedCodeFix extends AbstractFix {
 	
@@ -113,6 +106,144 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 	}
 	
+	private static class RemoveImportOperation implements IFixRewriteOperation {
+
+		private final ImportDeclaration fImportDeclaration;
+		
+		public RemoveImportOperation(ImportDeclaration importDeclaration) {
+			fImportDeclaration= importDeclaration;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
+		 */
+		public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
+			ImportDeclaration node= fImportDeclaration;
+			TextEditGroup group= new TextEditGroup(FixMessages.UnusedCodeFix_RemoveImport_description + " " + node.getName()); //$NON-NLS-1$
+			rewrite.remove(node, group);
+			textEditGroups.add(group);
+		}
+		
+	}
+	
+	private static class RemoveUnusedMemberOperation implements IFixRewriteOperation {
+
+		private final SimpleName fUnusedName;
+		
+		public RemoveUnusedMemberOperation(SimpleName unusedName) {
+			fUnusedName= unusedName;
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
+		 */
+		public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
+			SimpleName name= fUnusedName;
+			removeUnusedName(rewrite, name, compilationUnit, textEditGroups);
+		}
+		
+		private void removeUnusedName(ASTRewrite rewrite, SimpleName simpleName, CompilationUnit completeRoot, List groups) {
+			IBinding binding= simpleName.resolveBinding();
+			CompilationUnit root= (CompilationUnit) simpleName.getRoot();
+			String displayString= getDisplayString(simpleName, binding);
+			TextEditGroup group= new TextEditGroup(displayString);
+			groups.add(group);
+			if (binding.getKind() == IBinding.METHOD) {
+				IMethodBinding decl= ((IMethodBinding) binding).getMethodDeclaration();
+				ASTNode declaration= root.findDeclaringNode(decl);
+				rewrite.remove(declaration, group);
+			} else if (binding.getKind() == IBinding.TYPE) {
+				ITypeBinding decl= ((ITypeBinding) binding).getTypeDeclaration();
+				ASTNode declaration= root.findDeclaringNode(decl);
+				rewrite.remove(declaration, group);
+			} else { // variable
+				SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, simpleName.getStartPosition(), simpleName.getLength());
+				SimpleName[] references= LinkedNodeFinder.findByBinding(completeRoot, nameNode.resolveBinding());
+				for (int i= 0; i < references.length; i++) {
+					removeVariableReferences(rewrite, references[i], group);
+				}
+
+				IVariableBinding bindingDecl= Bindings.getVariableDeclaration((IVariableBinding) nameNode.resolveBinding());
+				ASTNode declaringNode= completeRoot.findDeclaringNode(bindingDecl);
+				if (declaringNode instanceof SingleVariableDeclaration) {
+					removeParamTag(rewrite, (SingleVariableDeclaration) declaringNode, group);
+				}
+			}
+		}
+		
+		private void removeParamTag(ASTRewrite rewrite, SingleVariableDeclaration varDecl, TextEditGroup group) {
+			if (varDecl.getParent() instanceof MethodDeclaration) {
+				Javadoc javadoc= ((MethodDeclaration) varDecl.getParent()).getJavadoc();
+				if (javadoc != null) {
+					TagElement tagElement= JavadocTagsSubProcessor.findParamTag(javadoc, varDecl.getName().getIdentifier());
+					if (tagElement != null) {
+						rewrite.remove(tagElement, group);
+					}
+				}
+			}
+		}
+		
+		/**
+		 * Remove the field or variable declaration including the initializer.
+		 */
+		private void removeVariableReferences(ASTRewrite rewrite, SimpleName reference, TextEditGroup group) {
+			ASTNode parent= reference.getParent();
+			while (parent instanceof QualifiedName) {
+				parent= parent.getParent();
+			}
+			if (parent instanceof FieldAccess) {
+				parent= parent.getParent();
+			}
+
+			int nameParentType= parent.getNodeType();
+			if (nameParentType == ASTNode.ASSIGNMENT) {
+				Assignment assignment= (Assignment) parent;
+				Expression rightHand= assignment.getRightHandSide();
+
+				ASTNode assignParent= assignment.getParent();
+				if (assignParent.getNodeType() == ASTNode.EXPRESSION_STATEMENT && rightHand.getNodeType() != ASTNode.ASSIGNMENT) {
+					removeVariableWithInitializer(rewrite, rightHand, assignParent, group);
+				}	else {
+					rewrite.replace(assignment, rewrite.createCopyTarget(rightHand), group);
+				}
+			} else if (nameParentType == ASTNode.SINGLE_VARIABLE_DECLARATION) {
+				rewrite.remove(parent, group);
+			} else if (nameParentType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
+				VariableDeclarationFragment frag= (VariableDeclarationFragment) parent;
+				ASTNode varDecl= frag.getParent();
+				List fragments;
+				if (varDecl instanceof VariableDeclarationExpression) {
+					fragments= ((VariableDeclarationExpression) varDecl).fragments();
+				} else if (varDecl instanceof FieldDeclaration) {
+					fragments= ((FieldDeclaration) varDecl).fragments();
+				} else {
+					fragments= ((VariableDeclarationStatement) varDecl).fragments();
+				}
+				if (fragments.size() == 1) {
+					rewrite.remove(varDecl, group);
+				} else {
+					rewrite.remove(frag, group); // don't try to preserve
+				}
+			}
+		}
+
+		private void removeVariableWithInitializer(ASTRewrite rewrite, ASTNode initializerNode, ASTNode statementNode, TextEditGroup group) {
+			ArrayList sideEffectNodes= new ArrayList();
+			initializerNode.accept(new SideEffectFinder(sideEffectNodes));
+			int nSideEffects= sideEffectNodes.size();
+			if (nSideEffects == 0) {
+				if (ASTNodes.isControlStatementBody(statementNode.getLocationInParent())) {
+					rewrite.replace(statementNode, rewrite.getAST().newBlock(), group);
+				} else {
+					rewrite.remove(statementNode, group);
+				}
+			} else {
+				// do nothing yet
+			}
+		}
+		
+	}
+	
 	public static UnusedCodeFix createRemoveUnusedImportFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		int id= problem.getProblemId();
 		if (id == IProblem.UnusedImport || id == IProblem.DuplicateImport || id == IProblem.ConflictingImport ||
@@ -120,7 +251,9 @@ public class UnusedCodeFix extends AbstractFix {
 			
 			ImportDeclaration node= getImportDeclaration(problem, compilationUnit);
 			if (node != null) {
-				return new UnusedCodeFix(FixMessages.UnusedCodeFix_RemoveImport_description, compilationUnit, new ImportDeclaration[] {node}, null, UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS);
+				String label= FixMessages.UnusedCodeFix_RemoveImport_description;
+				RemoveImportOperation operation= new RemoveImportOperation(node);
+				return new UnusedCodeFix(label, compilationUnit, new IFixRewriteOperation[] {operation}, UnusedCodeCleanUp.REMOVE_UNUSED_IMPORTS);
 			}
 		}
 		return null;
@@ -135,7 +268,9 @@ public class UnusedCodeFix extends AbstractFix {
 			if (name != null) {
 				IBinding binding= name.resolveBinding();
 				if (binding != null) {
-					return new UnusedCodeFix(getDisplayString(name, binding), compilationUnit, null, new SimpleName[] {name}, getCleanUpFlag(binding));
+					String label= getDisplayString(name, binding);
+					RemoveUnusedMemberOperation operation= new RemoveUnusedMemberOperation(name);
+					return new UnusedCodeFix(label, compilationUnit, new IFixRewriteOperation[] {operation}, getCleanUpFlag(binding));
 				}
 			}
 		}
@@ -149,9 +284,8 @@ public class UnusedCodeFix extends AbstractFix {
 			boolean removeUnusedPrivateTypes, 
 			boolean removeUnusedLocalVariables, 
 			boolean removeUnusedImports) {
-		
-		List/*<ImportDeclaration>*/ removeImports= new ArrayList();
-		List/*<SimpleName>*/ removeNames= new ArrayList();
+
+		List/*<IFixRewriteOperation>*/ result= new ArrayList();
 
 		IProblem[] problems= compilationUnit.getProblems();
 
@@ -161,8 +295,9 @@ public class UnusedCodeFix extends AbstractFix {
 			
 			if (removeUnusedImports && id == IProblem.UnusedImport) {
 				ImportDeclaration node= UnusedCodeFix.getImportDeclaration(problem, compilationUnit);
-				if (node != null)
-					removeImports.add(node);
+				if (node != null) {
+					result.add(new RemoveImportOperation(node));
+				}
 			}
 
 			if ((removeUnusedPrivateMethods && id == IProblem.UnusedPrivateMethod) || (removeUnusedPrivateConstructors && id == IProblem.UnusedPrivateConstructor) ||
@@ -172,7 +307,7 @@ public class UnusedCodeFix extends AbstractFix {
 				if (name != null) {
 					IBinding binding= name.resolveBinding();
 					if (binding != null) {
-						removeNames.add(name);
+						result.add(new RemoveUnusedMemberOperation(name));
 					}
 				}
 			}
@@ -182,18 +317,16 @@ public class UnusedCodeFix extends AbstractFix {
 				if (name != null) {
 					IBinding binding= name.resolveBinding();
 					if (binding != null && isSideEffectFree(name, compilationUnit)) {
-						removeNames.add(name);
+						result.add(new RemoveUnusedMemberOperation(name));
 					}
 				}
 			}
 		}
 		
-		if (removeImports.size() == 0 && removeNames.size() == 0)
+		if (result.size() == 0)
 			return null;
 		
-		ImportDeclaration[] imports= (ImportDeclaration[])removeImports.toArray(new ImportDeclaration[removeImports.size()]);
-		SimpleName[] names= (SimpleName[])removeNames.toArray(new SimpleName[removeNames.size()]);
-		return new UnusedCodeFix("", compilationUnit, imports, names); //$NON-NLS-1$
+		return new UnusedCodeFix("", compilationUnit, (IFixRewriteOperation[])result.toArray(new IFixRewriteOperation[result.size()])); //$NON-NLS-1$
 	}
 	
 	private static boolean isSideEffectFree(SimpleName simpleName, CompilationUnit completeRoot) {
@@ -305,156 +438,15 @@ public class UnusedCodeFix extends AbstractFix {
 		return new ProblemLocation(offset, length, problem.getID(), problem.getArguments(), problem.isError());
 	}
 	
-	private final ImportDeclaration[] fImports;
-	private final SimpleName[] fUnused;
-	private final CompilationUnit fCompilationUnit;
 	private final int fCleanUpFlags;
-
-	private UnusedCodeFix(String name, CompilationUnit compilationUnit, ImportDeclaration[] imports, SimpleName[] unused) {
-		this(name, compilationUnit, imports, unused, 0);
+	
+	private UnusedCodeFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations) {
+		this(name, compilationUnit, fixRewriteOperations, 0);
 	}
-
-	private UnusedCodeFix(String name, CompilationUnit compilationUnit, ImportDeclaration[] imports, SimpleName[] unused, int cleanUpFlag) {
-		super(name, (ICompilationUnit)compilationUnit.getJavaElement());
-		fImports= imports;
-		fUnused= unused;
-		fCompilationUnit= compilationUnit;
+	
+	private UnusedCodeFix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewriteOperations, int cleanUpFlag) {
+		super(name, compilationUnit, fixRewriteOperations);
 		fCleanUpFlags= cleanUpFlag;
-	}
-
-	public TextChange createChange() throws CoreException {
-		
-		if (fImports == null && fUnused == null)
-			return null;
-		
-		List/*<TextEditGroup>*/ groups= new ArrayList();
-		ASTRewrite rewrite= ASTRewrite.create(fCompilationUnit.getAST());
-		
-		if (fImports != null)
-			for (int i= 0; i < fImports.length; i++) {
-				ImportDeclaration node= fImports[i];
-				TextEditGroup group= new TextEditGroup(FixMessages.UnusedCodeFix_RemoveImport_description + " " + node.getName()); //$NON-NLS-1$
-				rewrite.remove(node, group);
-				groups.add(group);
-			}
-
-		if (fUnused != null)
-			for (int i= 0; i < fUnused.length; i++) {
-				SimpleName name= fUnused[i];
-				removeUnusedName(rewrite, name, fCompilationUnit, groups);
-			}
-			
-		TextEdit edit= applyEdits(fCompilationUnit, rewrite, null);
-			
-		CompilationUnitChange result= new CompilationUnitChange("", getCompilationUnit()); //$NON-NLS-1$
-		result.setEdit(edit);
-			
-		for (Iterator iter= groups.iterator(); iter.hasNext();) {
-			TextEditGroup group= (TextEditGroup)iter.next();
-			result.addTextEditGroup(group);
-		}
-		
-		return result;
-	}
-	
-	private void removeUnusedName(ASTRewrite rewrite, SimpleName simpleName, CompilationUnit completeRoot, List groups) {
-		IBinding binding= simpleName.resolveBinding();
-		CompilationUnit root= (CompilationUnit) simpleName.getRoot();
-		String displayString= getDisplayString(simpleName, binding);
-		TextEditGroup group= new TextEditGroup(displayString);
-		groups.add(group);
-		if (binding.getKind() == IBinding.METHOD) {
-			IMethodBinding decl= ((IMethodBinding) binding).getMethodDeclaration();
-			ASTNode declaration= root.findDeclaringNode(decl);
-			rewrite.remove(declaration, group);
-		} else if (binding.getKind() == IBinding.TYPE) {
-			ITypeBinding decl= ((ITypeBinding) binding).getTypeDeclaration();
-			ASTNode declaration= root.findDeclaringNode(decl);
-			rewrite.remove(declaration, group);
-		} else { // variable
-			SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, simpleName.getStartPosition(), simpleName.getLength());
-			SimpleName[] references= LinkedNodeFinder.findByBinding(completeRoot, nameNode.resolveBinding());
-			for (int i= 0; i < references.length; i++) {
-				removeVariableReferences(rewrite, references[i], group);
-			}
-
-			IVariableBinding bindingDecl= Bindings.getVariableDeclaration((IVariableBinding) nameNode.resolveBinding());
-			ASTNode declaringNode= completeRoot.findDeclaringNode(bindingDecl);
-			if (declaringNode instanceof SingleVariableDeclaration) {
-				removeParamTag(rewrite, (SingleVariableDeclaration) declaringNode, group);
-			}
-		}
-	}
-	
-	private void removeParamTag(ASTRewrite rewrite, SingleVariableDeclaration varDecl, TextEditGroup group) {
-		if (varDecl.getParent() instanceof MethodDeclaration) {
-			Javadoc javadoc= ((MethodDeclaration) varDecl.getParent()).getJavadoc();
-			if (javadoc != null) {
-				TagElement tagElement= JavadocTagsSubProcessor.findParamTag(javadoc, varDecl.getName().getIdentifier());
-				if (tagElement != null) {
-					rewrite.remove(tagElement, group);
-				}
-			}
-		}
-	}
-	
-	/**
-	 * Remove the field or variable declaration including the initializer.
-	 */
-	private void removeVariableReferences(ASTRewrite rewrite, SimpleName reference, TextEditGroup group) {
-		ASTNode parent= reference.getParent();
-		while (parent instanceof QualifiedName) {
-			parent= parent.getParent();
-		}
-		if (parent instanceof FieldAccess) {
-			parent= parent.getParent();
-		}
-
-		int nameParentType= parent.getNodeType();
-		if (nameParentType == ASTNode.ASSIGNMENT) {
-			Assignment assignment= (Assignment) parent;
-			Expression rightHand= assignment.getRightHandSide();
-
-			ASTNode assignParent= assignment.getParent();
-			if (assignParent.getNodeType() == ASTNode.EXPRESSION_STATEMENT && rightHand.getNodeType() != ASTNode.ASSIGNMENT) {
-				removeVariableWithInitializer(rewrite, rightHand, assignParent, group);
-			}	else {
-				rewrite.replace(assignment, rewrite.createCopyTarget(rightHand), group);
-			}
-		} else if (nameParentType == ASTNode.SINGLE_VARIABLE_DECLARATION) {
-			rewrite.remove(parent, group);
-		} else if (nameParentType == ASTNode.VARIABLE_DECLARATION_FRAGMENT) {
-			VariableDeclarationFragment frag= (VariableDeclarationFragment) parent;
-			ASTNode varDecl= frag.getParent();
-			List fragments;
-			if (varDecl instanceof VariableDeclarationExpression) {
-				fragments= ((VariableDeclarationExpression) varDecl).fragments();
-			} else if (varDecl instanceof FieldDeclaration) {
-				fragments= ((FieldDeclaration) varDecl).fragments();
-			} else {
-				fragments= ((VariableDeclarationStatement) varDecl).fragments();
-			}
-			if (fragments.size() == 1) {
-				rewrite.remove(varDecl, group);
-			} else {
-				rewrite.remove(frag, group); // don't try to preserve
-			}
-		}
-	}
-
-	private void removeVariableWithInitializer(ASTRewrite rewrite, ASTNode initializerNode, ASTNode statementNode, TextEditGroup group) {
-		ArrayList sideEffectNodes= new ArrayList();
-		initializerNode.accept(new SideEffectFinder(sideEffectNodes));
-		int nSideEffects= sideEffectNodes.size();
-		if (nSideEffects == 0) {
-			if (ASTNodes.isControlStatementBody(statementNode.getLocationInParent())) {
-				rewrite.replace(statementNode, rewrite.getAST().newBlock(), group);
-			} else {
-				rewrite.remove(statementNode, group);
-			}
-		} else {
-			// do nothing yet
-		}
 	}
 
 	public UnusedCodeCleanUp getCleanUp() {
