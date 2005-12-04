@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -93,6 +94,6 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 				label= unit.getElementName();
 		} else
 			label= getOldName();
-		return new RefactoringDescriptor(ID_RENAME_COMPILATION_UNIT, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, getNewName()}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
+		return new RefactoringDescriptor(ID_RENAME_COMPILATION_UNIT, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, getNewName()}), null, arguments, JavaRefactorings.IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
 	}
 }

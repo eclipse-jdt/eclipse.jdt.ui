@@ -38,6 +38,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -123,7 +124,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 					IJavaProject javaProject= field.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
+					int flags= JavaRefactorings.IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
 					final IType declaring= field.getDeclaringType();
 					try {
 						if (!Flags.isPrivate(declaring.getFlags()))

@@ -10,21 +10,35 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.base;
 
-import org.eclipse.jdt.core.compiler.IProblem;
-
-import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 
+import org.eclipse.jdt.core.compiler.IProblem;
+
+import org.eclipse.jdt.internal.corext.SourceRange;
+
 /**
- * Helper method to code Java refactorings
+ * Helper methods for Java refactorings.
  */
-public class JavaRefactorings {
+public final class JavaRefactorings {
+
+	/**
+	 * Constant describing the importable flag (value: 4)
+	 * <p>
+	 * Clients should set this flag to indicate that the refactoring can be
+	 * imported from a JAR file.
+	 * </p>
+	 */
+	public static final int IMPORTABLE= 1 << 16;
 
 	public static RefactoringStatusEntry createStatusEntry(IProblem problem, String newWcSource) {
 		RefactoringStatusContext context= new JavaStringStatusContext(newWcSource, new SourceRange(problem));
-		int severity= problem.isError() ? RefactoringStatus.ERROR: RefactoringStatus.WARNING;
+		int severity= problem.isError() ? RefactoringStatus.ERROR : RefactoringStatus.WARNING;
 		return new RefactoringStatusEntry(severity, problem.getMessage(), context);
+	}
+
+	private JavaRefactorings() {
+		// Not for instantiation
 	}
 }

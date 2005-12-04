@@ -67,6 +67,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
@@ -520,7 +521,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 					IJavaProject javaProject= fField.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
+					int flags= JavaRefactorings.IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
 					try {
 						if (!Flags.isPrivate(fField.getFlags()))
 							flags|= RefactoringDescriptor.CLOSURE_CHANGE;

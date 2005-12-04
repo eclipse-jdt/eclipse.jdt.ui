@@ -126,6 +126,7 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IVisibilityAdjustment;
@@ -1552,7 +1553,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					final IJavaProject javaProject= fMethod.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_MOVE_METHOD, project, MessageFormat.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), new BindingLabelProvider(JavaElementLabels.ALL_FULLY_QUALIFIED, 0).getText(fTarget)}), null, arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE));
+					return new RefactoringDescriptor(ID_MOVE_METHOD, project, MessageFormat.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), new BindingLabelProvider(JavaElementLabels.ALL_FULLY_QUALIFIED, 0).getText(fTarget)}), null, arguments, JavaRefactorings.IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
 				}
 			}; 
 		} finally {

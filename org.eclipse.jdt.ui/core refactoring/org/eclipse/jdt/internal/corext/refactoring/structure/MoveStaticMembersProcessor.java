@@ -95,6 +95,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
@@ -638,7 +639,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_single, JavaElementLabels.getElementLabel(members[0], JavaElementLabels.ALL_FULLY_QUALIFIED));
 				else
 					description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_multi, String.valueOf(members.length));
-				return new RefactoringDescriptor(ID_STATIC_MOVE, project, MessageFormat.format(description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
+				return new RefactoringDescriptor(ID_STATIC_MOVE, project, MessageFormat.format(description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, JavaRefactorings.IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
 			}
 		}; 
 		fTarget= getCuRewrite(fDestinationType.getCompilationUnit());

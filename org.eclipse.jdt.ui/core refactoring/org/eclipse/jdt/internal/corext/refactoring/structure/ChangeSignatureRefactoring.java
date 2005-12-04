@@ -1113,7 +1113,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 					IJavaProject javaProject= fMethod.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
+					int flags= JavaRefactorings.IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
 					try {
 						if (!Flags.isPrivate(fMethod.getFlags()))
 							flags|= RefactoringDescriptor.CLOSURE_CHANGE;
