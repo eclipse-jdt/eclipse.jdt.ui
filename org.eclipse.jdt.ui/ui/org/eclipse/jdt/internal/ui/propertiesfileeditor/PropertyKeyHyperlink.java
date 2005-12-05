@@ -15,6 +15,7 @@ import java.text.Collator;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import java.util.regex.Pattern;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -27,9 +28,7 @@ import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceProxy;
 import org.eclipse.core.resources.IStorage;
 
 import org.eclipse.swt.widgets.Shell;
@@ -56,10 +55,10 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 import org.eclipse.ui.texteditor.ITextEditor;
 
-import org.eclipse.search.internal.core.SearchScope;
-import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
-import org.eclipse.search.internal.core.text.MatchLocator;
-import org.eclipse.search.internal.core.text.TextSearchEngine;
+import org.eclipse.search.core.text.TextSearchEngine;
+import org.eclipse.search.core.text.TextSearchMatchAccess;
+import org.eclipse.search.core.text.TextSearchRequestor;
+import org.eclipse.search.core.text.TextSearchScope;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -72,6 +71,7 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.PatternConstructor;
 
 
 /**
@@ -174,37 +174,26 @@ public class PropertyKeyHyperlink implements IHyperlink {
 	}
 
 
-	private static class ResultCollector implements ITextSearchResultCollector {
+	private static class ResultCollector extends TextSearchRequestor {
 
 		private List fResult;
-		private IProgressMonitor fProgressMonitor;
 		private boolean fIsKeyDoubleQuoted;
 
-		public ResultCollector(List result, IProgressMonitor progressMonitor, boolean isKeyDoubleQuoted) {
+		public ResultCollector(List result, boolean isKeyDoubleQuoted) {
 			fResult= result;
-			fProgressMonitor= progressMonitor;
 			fIsKeyDoubleQuoted= isKeyDoubleQuoted;
 		}
 
-		public void aboutToStart() throws CoreException {
-			// do nothing;
-		}
-
-		public void accept(IResourceProxy proxy, int start, int length) throws CoreException {
-			// Can cast to IFile because search only reports matches on IFile
+		public boolean acceptPatternMatch(TextSearchMatchAccess matchAccess) throws CoreException {
+			int start= matchAccess.getMatchOffset();
+			int length= matchAccess.getMatchLength();
+			
 			if (fIsKeyDoubleQuoted) {
 				start= start + 1;
 				length= length - 2;
 			}
-			fResult.add(new KeyReference((IFile)proxy.requestResource(), start, length));
-		}
-
-		public void done() throws CoreException {
-			// do nothing;
-		}
-
-		public IProgressMonitor getProgressMonitor() {
-			return fProgressMonitor;
+			fResult.add(new KeyReference(matchAccess.getFile(), start, length));
+			return true;
 		}
 	}
 
@@ -438,9 +427,10 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			fEditor.getEditorSite().getWorkbenchWindow().getWorkbench().getProgressService().busyCursorWhile(
 				new IRunnableWithProgress() {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						ResultCollector collector= new ResultCollector(result, monitor, useDoubleQuotedKey());
-						TextSearchEngine engine= new TextSearchEngine();
-						engine.search(createScope(scope), false, collector, new MatchLocator(searchString, true, false));
+						ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey());
+						TextSearchEngine engine= TextSearchEngine.create();
+						Pattern searchPattern= PatternConstructor.createPattern(searchString, true, false);
+						engine.search(createScope(scope), collector, searchPattern, monitor);
 					}
 				}
 			);
@@ -454,17 +444,20 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		return (KeyReference[])result.toArray(new KeyReference[result.size()]);
 	}
 
-	private static SearchScope createScope(IResource scope) {
-		SearchScope result= SearchScope.newSearchScope("", new IResource[] { scope }); //$NON-NLS-1$
-
+	private static TextSearchScope createScope(IResource scope) {
+		ArrayList fileNamePatternStrings= new ArrayList();
+		
 		// XXX: Should be configurable via preference, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81117
 		String[] javaExtensions= JavaCore.getJavaLikeExtensions();
 		for (int i= 0; i < javaExtensions.length; i++)
-			result.addFileNamePattern("*." + javaExtensions[i]); //$NON-NLS-1$
-		result.addFileNamePattern("*.xml"); //$NON-NLS-1$
-		result.addFileNamePattern("*.ini"); //$NON-NLS-1$
+			fileNamePatternStrings.add("*." + javaExtensions[i]); //$NON-NLS-1$
+		fileNamePatternStrings.add("*.xml"); //$NON-NLS-1$
+		fileNamePatternStrings.add("*.ini"); //$NON-NLS-1$
 
-		return result;
+		String[] allPatternStrings= (String[]) fileNamePatternStrings.toArray(new String[fileNamePatternStrings.size()]);
+		Pattern fileNamePattern= PatternConstructor.createPattern(allPatternStrings, false, false);
+		
+		return TextSearchScope.newSearchScope(new IResource[] { scope }, fileNamePattern, false);
 	}
 
 	/*

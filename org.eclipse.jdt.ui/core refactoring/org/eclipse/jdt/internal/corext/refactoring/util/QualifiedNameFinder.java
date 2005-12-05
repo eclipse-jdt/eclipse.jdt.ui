@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.corext.refactoring.util;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import org.eclipse.text.edits.ReplaceEdit;
 
@@ -27,10 +28,10 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceProxy;
 
-import org.eclipse.search.internal.core.SearchScope;
-import org.eclipse.search.internal.core.text.ITextSearchResultCollector;
-import org.eclipse.search.internal.core.text.MatchLocator;
-import org.eclipse.search.internal.core.text.TextSearchEngine;
+import org.eclipse.search.core.text.TextSearchEngine;
+import org.eclipse.search.core.text.TextSearchMatchAccess;
+import org.eclipse.search.core.text.TextSearchRequestor;
+import org.eclipse.search.core.text.TextSearchScope;
 
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
@@ -43,6 +44,8 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 
+import org.eclipse.jdt.internal.ui.util.PatternConstructor;
+
 public class QualifiedNameFinder {
 
 	private static final GroupCategorySet QUALIFIED_NAMES= new GroupCategorySet(
@@ -50,49 +53,46 @@ public class QualifiedNameFinder {
 			RefactoringCoreMessages.QualifiedNameFinder_qualifiedNames_name, 
 			RefactoringCoreMessages.QualifiedNameFinder_qualifiedNames_description));
 	
-	private static class ResultCollector implements ITextSearchResultCollector {
+	private static class ResultCollector extends TextSearchRequestor {
 		
 		private String fNewValue;
-		private IProgressMonitor fProgressMonitor;
 		private QualifiedNameSearchResult fResult;
 		
-		public ResultCollector(QualifiedNameSearchResult result, String newValue, IProgressMonitor monitor) {
+		public ResultCollector(QualifiedNameSearchResult result, String newValue) {
 			fResult= result;
 			fNewValue= newValue;
-			fProgressMonitor= monitor;
 		}
 		
-		public void aboutToStart() throws CoreException {
-			// do nothing;
-		}
-
-		public void accept(IResourceProxy proxy, int start, int length) throws CoreException {
-			if (proxy.getType() != IResource.FILE)
-				return;
+		public boolean acceptFile(IResourceProxy fileProxy) throws CoreException {
+			if (fileProxy.getType() == IResource.FOLDER) {
+				return true;
+			}
 			
-			// Make sure we don't change Compilation Units
-			IFile file= (IFile)proxy.requestResource();
+			IFile file= (IFile) fileProxy.requestResource();
+			
 			IJavaElement element= JavaCore.create(file);
 			if ((element != null && element.exists()))
-				return;
+				return false;
 			
 			// Only touch text files (see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=114153 ):
-			if (! FileBuffers.getTextFileBufferManager().isTextFileLocation(proxy.requestFullPath(), false))
-				return;
+			if (! FileBuffers.getTextFileBufferManager().isTextFileLocation(file.getFullPath(), false))
+				return false;
+			
+			return true;
+		}
+		
+		public boolean acceptPatternMatch(TextSearchMatchAccess matchAccess) throws CoreException {
+			IFile file= matchAccess.getFile();
+			int start= matchAccess.getMatchOffset();
+			int length= matchAccess.getMatchLength();
 			
 			TextChange change= fResult.getChange(file);
 			TextChangeCompatibility.addTextEdit(
 				change, 
 				RefactoringCoreMessages.QualifiedNameFinder_update_name,  
 				new ReplaceEdit(start, length, fNewValue), QUALIFIED_NAMES);
-		}
-
-		public void done() throws CoreException {
-			// do nothing;
-		}
-
-		public IProgressMonitor getProgressMonitor() {
-			return fProgressMonitor;
+			
+			return true;
 		}
 	}
 		
@@ -100,39 +100,45 @@ public class QualifiedNameFinder {
 	}
 	
 	public static void process(QualifiedNameSearchResult result, String pattern, String newValue, String filePatterns, IProject root, IProgressMonitor monitor) {
+		Assert.isNotNull(pattern);
+		Assert.isNotNull(newValue);
+		Assert.isNotNull(root);
+		
+		if (monitor == null)
+			monitor= new NullProgressMonitor();
+		
 		if (filePatterns == null || filePatterns.length() == 0) {
 			// Eat progress.
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.worked(1);
 			return;
 		}
-		Assert.isNotNull(pattern);
-		Assert.isNotNull(newValue);
-		Assert.isNotNull(root);
-		if (monitor == null)
-			monitor= new NullProgressMonitor();
-		ResultCollector collector= new ResultCollector(result, newValue, monitor);
-		TextSearchEngine engine= new TextSearchEngine();
-		engine.search(createScope(filePatterns, root), false,
-			collector, new MatchLocator(pattern, true, false));
+
+		ResultCollector collector= new ResultCollector(result, newValue);
+		TextSearchEngine engine= TextSearchEngine.create();
+		Pattern searchPattern= PatternConstructor.createPattern(pattern, true, false);
+		
+		engine.search(createScope(filePatterns, root), collector, searchPattern, monitor);
 	}
 	
-	private static SearchScope createScope(String filePatterns, IProject root) {
+	private static TextSearchScope createScope(String filePatterns, IProject root) {
 		HashSet res= new HashSet();
 		res.add(root);
 		addReferencingProjects(root, res);
 		IResource[] resArr= (IResource[]) res.toArray(new IResource[res.size()]);
+		Pattern filePattern= getFilePattern(filePatterns);
 		
-		SearchScope result= SearchScope.newSearchScope("", resArr); //$NON-NLS-1$
-		addFilePatterns(filePatterns, result);
-		return result;
+		return TextSearchScope.newSearchScope(resArr, filePattern, false);
 	}
 	
-	private static void addFilePatterns(String filePatterns, SearchScope scope) {
+	private static Pattern getFilePattern(String filePatterns) {
 		StringTokenizer tokenizer= new StringTokenizer(filePatterns, ","); //$NON-NLS-1$
+		String[] filePatternArray= new String[tokenizer.countTokens()];
+		int i= 0;
 		while (tokenizer.hasMoreTokens()) {
-			scope.addFileNamePattern(tokenizer.nextToken().trim());
+			filePatternArray[i++]= tokenizer.nextToken().trim();
 		}
+		return PatternConstructor.createPattern(filePatternArray, true, false);
 	}
 	
 	private static void addReferencingProjects(IProject root, Set res) {
