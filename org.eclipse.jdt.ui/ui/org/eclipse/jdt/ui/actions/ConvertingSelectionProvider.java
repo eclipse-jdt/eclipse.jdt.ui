@@ -69,8 +69,10 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 	}
 	
 	/**
-	 * Creates a {@link ConvertingSelectionProvider} to convert from a given selection provider.
-	 * @param provider
+	 * Creates a {@link ConvertingSelectionProvider} to convert from a given selection provider
+	 * using the default mechanism.
+	 * 
+	 * @param provider the provider to covert from and to
 	 */
 	public ConvertingSelectionProvider(ISelectionProvider provider) {
 		Assert.isNotNull(provider);
@@ -80,7 +82,7 @@ public class ConvertingSelectionProvider implements ISelectionProvider {
 	/**
 	 * Converts the given original viewer selection into a new
 	 * selection. The default behavior adapts the elements in the selection
-	 * to {@link IResource} or {@link IJavaElement}.
+	 * first to {@link IJavaElement} then to {@link IResource}.
 	 * Implementors want to override this method. 
 	 * 
 	 * @param viewerSelection the original viewer selection
