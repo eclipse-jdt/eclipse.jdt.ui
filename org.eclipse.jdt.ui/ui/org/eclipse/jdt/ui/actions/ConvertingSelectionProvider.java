@@ -14,9 +14,8 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
-import org.eclipse.core.commands.util.ListenerList;
-
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.core.resources.IResource;
 
@@ -31,59 +30,19 @@ import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
+
 /**
  * A converting selection provider is a special selection provider which converts
  * a selection before notifying any listeners. Additional it converts the selection
- * on <code>getSelection</code> and <code>setSelection</code>. The strategy used to
- * convert the selection is defined by a given {@link ISelectionConverter}.
+ * on <code>getSelection</code> and <code>setSelection</code>. The default strategy
+ * used to adapt the elements of the selection to {@link IJavaElement} or a {@link IResource},
+ * but implementors can override this behavior.
  *   
  * @since 3.2
  */
-public final class ConvertingSelectionProvider implements ISelectionProvider {
+public class ConvertingSelectionProvider implements ISelectionProvider {
 
-	/**
-	 * Creates a new default Java selection converter. The converter converts the 
-	 * selection using the following algorithm:
-	 * <ul>
-	 *   <li><code>convertFrom</code>: resource and Java elements are left as is. For 
-	 *       all other elements the converter first tries to adapt the element to 
-	 *       <code>IJavaElement</code>. Then it tries to adapt to <code>IResource</code>. 
-	 *       If both adaption fail the original element is used.</li>
-	 *   <li><code>convertTo</code>: no conversion is taking place. The original elements 
-	 *       are used.</li>       
-	 * </ul>
-	 * 
-	 * @return a new selection converter
-	 */
-	public static ISelectionConverter createDefaultConverter() {
-		return new DefaultJavaConverter();
-	}
-	
-	/**
-	 * Creates a new converting selection provider using the default converter.
-	 *  
-	 * @param provider the original selection provider to fetch the selection from
-	 * 
-	 * @return a new converting selection provider
-	 */
-	public static ISelectionProvider create(ISelectionProvider provider) {
-		return new ConvertingSelectionProvider(provider, new DefaultJavaConverter());
-	}
-
-	/**
-	 * Creates a new converting selection provider.
-	 *  
-	 * @param provider the original selection provider to fetch the selection from
-	 * @param converter the actual converter strategy to use
-	 * 
-	 * @return a new converting selection provider
-	 */
-	public static ISelectionProvider create(ISelectionProvider provider, ISelectionConverter converter) {
-		return new ConvertingSelectionProvider(provider, converter);
-	}
-	
-	private ISelectionProvider fProvider;
-	private ISelectionConverter fConverter;
+	private final ISelectionProvider fProvider;
 	private SelectionChangedListener fListener;
 	
 	private class SelectionChangedListener implements ISelectionChangedListener {
@@ -91,7 +50,7 @@ public final class ConvertingSelectionProvider implements ISelectionProvider {
 		ListenerList fListeners= new ListenerList();
 		
 		public void selectionChanged(SelectionChangedEvent event) {
-			ISelection selection= fConverter.convertFrom(event.getSelection());
+			ISelection selection= convertFrom(event.getSelection());
 			SelectionChangedEvent newEvent= new SelectionChangedEvent(ConvertingSelectionProvider.this, selection);
 			Object[] listeners= fListeners.getListeners();
 			for (int i= 0; i < listeners.length; i++) {
@@ -109,60 +68,84 @@ public final class ConvertingSelectionProvider implements ISelectionProvider {
 		}
 	}
 	
-	private static class DefaultJavaConverter implements ISelectionConverter {
-		public ISelection convertFrom(ISelection viewerSelection) {
-			if (! (viewerSelection instanceof IStructuredSelection))
-				return viewerSelection;
-			IStructuredSelection selection= (IStructuredSelection)viewerSelection;
-			List result= new ArrayList(selection.size());
-			for (Iterator iter= selection.iterator(); iter.hasNext();) {
-				Object element= iter.next();
-				if (element instanceof IResource || element instanceof IJavaElement) {
-					result.add(element);
-				} else if (element instanceof IAdaptable) {
-					IAdaptable adaptable= (IAdaptable)element;
-					IJavaElement jElement= (IJavaElement)adaptable.getAdapter(IJavaElement.class);
-					if (jElement != null) {
-						result.add(jElement);
-					} else {
-						IResource resource= (IResource)adaptable.getAdapter(IResource.class);
-						if (resource != null) {
-							result.add(resource);
-						} else {
-							result.add(element);
-						}
-					}
-				} else {
-					result.add(element);
-				}
-			}
-			return new StructuredSelection(result);
-		}
-
-		public ISelection convertTo(ISelection selection) {
-			return selection;
-		}
-	}
-	
-	private ConvertingSelectionProvider(ISelectionProvider provider, ISelectionConverter converter) {
+	/**
+	 * Creates a {@link ConvertingSelectionProvider} to convert from a given selection provider.
+	 * @param provider
+	 */
+	public ConvertingSelectionProvider(ISelectionProvider provider) {
 		Assert.isNotNull(provider);
-		Assert.isNotNull(converter);
 		fProvider= provider;
-		fConverter= converter;
 	}
+	
+	/**
+	 * Converts the given original viewer selection into a new
+	 * selection. The default behavior adapts the elements in the selection
+	 * to {@link IResource} or {@link IJavaElement}.
+	 * Implementors want to override this method. 
+	 * 
+	 * @param viewerSelection the original viewer selection
+	 * 
+	 * @return the new selection to be used
+	 */
+	public ISelection convertFrom(ISelection viewerSelection) {
+		return convertFromUsingDefaultMechanism(viewerSelection);
+	}
+
+
+	private ISelection convertFromUsingDefaultMechanism(ISelection viewerSelection) {
+		if (! (viewerSelection instanceof IStructuredSelection))
+			return viewerSelection;
+		IStructuredSelection selection= (IStructuredSelection)viewerSelection;
+		List result= new ArrayList(selection.size());
+		for (Iterator iter= selection.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (element instanceof IResource || element instanceof IJavaElement) {
+				result.add(element);
+			} else if (element instanceof IAdaptable) {
+				IAdaptable adaptable= (IAdaptable)element;
+				IJavaElement jElement= (IJavaElement)adaptable.getAdapter(IJavaElement.class);
+				if (jElement != null) {
+					result.add(jElement);
+				} else {
+					IResource resource= (IResource)adaptable.getAdapter(IResource.class);
+					if (resource != null) {
+						result.add(resource);
+					} else {
+						result.add(element);
+					}
+				}
+			} else {
+				result.add(element);
+			}
+		}
+		return new StructuredSelection(result);
+	}
+
+	/**
+	 * Converts a selection to a viewer selection. The default implementation does not convert
+	 * the selection. Implementors want to override this behaviour. 
+	 * 
+	 * @param selection the selection to convert
+	 * 
+	 * @return a viewer selection
+	 */
+	public ISelection convertTo(ISelection selection) {
+		return selection;
+	}
+	
 	
 	/**
 	 * {@inheritDoc}
 	 */
-	public ISelection getSelection() {
-		return fConverter.convertFrom(fProvider.getSelection());
+	public final ISelection getSelection() {
+		return convertFrom(fProvider.getSelection());
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public void setSelection(ISelection selection) {
-		fProvider.setSelection(fConverter.convertTo(selection));
+	public final void setSelection(ISelection selection) {
+		fProvider.setSelection(convertTo(selection));
 	}
 	
 	/**
