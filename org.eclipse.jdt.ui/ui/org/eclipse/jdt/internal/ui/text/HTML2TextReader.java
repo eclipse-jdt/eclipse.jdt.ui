@@ -44,6 +44,10 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		fgTags= new HashSet();
 		fgTags.add("b"); //$NON-NLS-1$
 		fgTags.add("br"); //$NON-NLS-1$
+		fgTags.add("h1"); //$NON-NLS-1$
+		fgTags.add("h2"); //$NON-NLS-1$
+		fgTags.add("h3"); //$NON-NLS-1$
+		fgTags.add("h4"); //$NON-NLS-1$
 		fgTags.add("h5"); //$NON-NLS-1$
 		fgTags.add("p"); //$NON-NLS-1$
 		fgTags.add("dl"); //$NON-NLS-1$
@@ -71,7 +75,9 @@ public class HTML2TextReader extends SubstitutionTextReader {
 	private boolean fIsPreformattedText= false;
 
 	/**
-	 * Transforms the html text from the reader to formatted text.
+	 * Transforms the HTML text from the reader to formatted text.
+	 *
+	 * @param reader the reader
 	 * @param presentation If not <code>null</code>, formattings will be applied to
 	 * the presentation.
 	*/
@@ -133,6 +139,8 @@ public class HTML2TextReader extends SubstitutionTextReader {
 		if (html == null || html.length() == 0)
 			return EMPTY_STRING;
 
+		html= html.toLowerCase();
+		
 		String tag= html;
 		if ('/' == tag.charAt(0))
 			tag= tag.substring(1);
@@ -159,7 +167,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 			return EMPTY_STRING;
 		}
 
-		if ("h5".equals(html) || "dt".equals(html)) { //$NON-NLS-1$ //$NON-NLS-2$
+		if ((html.length() > 1 && html.charAt(0) == 'h' && Character.isDigit(html.charAt(1))) || "dt".equals(html)) { //$NON-NLS-1$
 			startBold();
 			return EMPTY_STRING;
 		}
@@ -192,7 +200,7 @@ public class HTML2TextReader extends SubstitutionTextReader {
 			return inParagraph ? EMPTY_STRING : LINE_DELIM;
 		}
 
-		if ("/h5".equals(html) || "/dt".equals(html)) { //$NON-NLS-1$ //$NON-NLS-2$
+		if ((html.startsWith("/h") && html.length() > 2 && Character.isDigit(html.charAt(2))) || "/dt".equals(html)) { //$NON-NLS-1$ //$NON-NLS-2$
 			stopBold();
 			return LINE_DELIM;
 		}
