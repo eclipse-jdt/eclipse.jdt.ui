@@ -278,6 +278,8 @@ public class RenamingNameSuggestorTests extends TestCase {
 //		 fh("items", "things", "Item", "Thing");
 //		 fh("handies", "mobilePhones", "Handy", "MobilePhone");
 //		 fh("handy", "mobilePhone", "Handy", "MobilePhone");
+//		 fh("mobilePhones", "handies", "MobilePhone", "Handy");
+//		 fh("mobilePhone", "handy", "MobilePhone", "Handy");
 //		 fh("handies", "mandies", "Handy", "Mandy");
 //		 setStrategy(RenamingNameSuggestor.STRATEGY_EMBEDDED);
 //		 fh("itemsOnLoan", "thingsOnLoan", "Item", "Thing");
