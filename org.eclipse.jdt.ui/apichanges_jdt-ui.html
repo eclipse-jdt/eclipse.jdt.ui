@@ -5,22 +5,23 @@
  content="text/html; charset=iso-8859-1">
   <meta name="Author" content="IBM">
   <title>JDT UI Breaking API changes</title>
-<link rel="stylesheet" href="http://dev.eclipse.org/default_style.css" type="text/css">
+  <link rel="stylesheet" href="http://dev.eclipse.org/default_style.css"
+ type="text/css">
 </head>
-<body text="#000000" bgcolor="#ffffff">
-<font size="-2" color="#8080ff">java development tooling ui</font>
-<p>
-This document lists the breaking API changes that occurred between R3.1 and R3.2 and
+<body style="color: rgb(0, 0, 0); background-color: rgb(255, 255, 255);">
+<font color="#8080ff" size="-2">java development tooling ui</font>
+<p>This document lists the breaking API changes that occurred between
+R3.1 and R3.2 and
 how to migrate from the R3.1 API to the R3.2 API.
 </p>
-<p></p>
-<table border="0" cellspacing="5" cellpadding="2" width="100%">
+<table border="0" cellpadding="2" cellspacing="5" width="100%">
   <tbody>
     <tr>
       <td align="left" width="72%"> <font size="+3"><b>jdt ui -
 Breaking API changes from R3.1 to R3.2</b></font> <br>
+      </td>
     </tr>
-	<tr>
+    <tr>
       <td>
       <ul>
       </ul>
@@ -29,15 +30,86 @@ Breaking API changes from R3.1 to R3.2</b></font> <br>
   </tbody>
 </table>
 <p> </p>
-<table border="0" cellspacing="5" cellpadding="2" width="100%">
+<table border="0" cellpadding="2" cellspacing="5" width="100%">
   <tbody>
     <tr>
       <td align="left" width="72%"> <font size="+3"><b>jdt ui -
 Non-breaking API changes from R3.1 to R3.2</b></font> <br>
+      </td>
     </tr>
-	<tr>
-      <td>
+    <tr>
+      <td> New API added:<br>
       <ul>
+        <li>JavaUI.createPackageDialog(Shell parent, IRunnableContext
+context, IJavaSearchScope scope, boolean
+multipleSelection, boolean removeDuplicates, String filter) </li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td> New API added to extend the all types dialog
+      <ul>
+        <li> JavaUI.createTypeDialog(Shell, IRunnableContext,
+IJavaSearchScope, int, boolean, String, TypeSelectionExtension)
+(org.eclipse.jdt.ui.)</li>
+        <li>TypeSelectionExtension (org.eclipse.jdt.ui.dialogs)</li>
+        <li>ITypeInfoFilterExtension (org.eclipse.jdt.ui.dialogs)</li>
+        <li>ITypeInfoImageProvider (org.eclipse.jdt.ui.dialogs)</li>
+        <li>ITypeInfoRequestor (org.eclipse.jdt.ui.dialogs)</li>
+        <li>ITypeSelectionComponent (org.eclipse.jdt.ui.dialogs)</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>New API added to open wizards programmatically<br>
+      <ul>
+        <li>OpenNewAnnotationWizardAction (org.eclipse.jdt.ui.action)</li>
+        <li>OpenNewClassWizardAction (org.eclipse.jdt.ui.action)</li>
+        <li>OpenNewEnumWizardAction (org.eclipse.jdt.ui.action)</li>
+        <li>OpenNewInterfaceWizardAction (org.eclipse.jdt.ui.action)</li>
+        <li>OpenNewJavaProjectWizardAction (org.eclipse.jdt.ui.action)</li>
+        <li>OpenNewPackageWizardAction (org.eclipse.jdt.ui.action)</li>
+        <li>OpenNewSourceFolderWizardAction (org.eclipse.jdt.ui.action)</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>New API added on ISharedImages<br>
+      <ul>
+        <li>IMG_OBJS_CLASSPATH_VAR_ENTRY</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>New API added on NewTypeWizardPage<br>
+      <ul>
+        <li>getCompilationUnitName(String)</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>New API added on JavaCapabilityConfigurationPage<br>
+      <ul>
+        <li>createProject(IProject, URI locationURI, IProgressMonitor)</li>
+      </ul>
+Deprecated API<br>
+      <ul>
+        <li>createProject(IProject, IPath locationPath,
+IProgressMonitor)<br>
+        </li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>JDT action now support a pluggable selection provider so that
+the actions can also be used on non-Java elements<br>
+      <ul>
+        <li>New constructor SelectionDispatchAction(IWorkbenchSite
+site, ISelectionProvider provider)</li>
+        <li>New class</li>
+        <ul>
+          <li>ConvertingSelectionProvider</li>
+        </ul>
       </ul>
       </td>
     </tr>
