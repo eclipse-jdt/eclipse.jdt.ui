@@ -4151,6 +4151,42 @@
             class="org.eclipse.jdt.internal.ui.wizards.buildpaths.UserLibraryMarkerResolutionGenerator">
       </markerResolutionGenerator>
    </extension>
+   
+   <extension
+         point="org.eclipse.ui.ide.markerSupport">
+      <hierarchy>
+         <markerTypeReference id="org.eclipse.jdt.core.problem"/>
+         <hierarchyReference
+               direction="DESCENDING"
+               type="SEVERITY"/>
+         <hierarchyReference
+               direction="ASCENDING"
+               type="PROJECT"/>
+         <hierarchyReference
+               direction="ASCENDING"
+               type="RESOURCE"/>
+      </hierarchy>
+      <hierarchy>
+         <markerTypeReference id="org.eclipse.jdt.core.buildpath_problem"/>
+         <hierarchyReference
+               direction="DESCENDING"
+               type="SEVERITY"/>
+         <hierarchyReference
+               direction="ASCENDING"
+               type="PROJECT"/>
+         <hierarchyReference
+               direction="ASCENDING"
+               type="RESOURCE"/>
+      </hierarchy>
+      
+      <markerCategory name="%markerCategory.problem">
+         <markerTypeReference id="org.eclipse.jdt.core.problem"/>
+      </markerCategory>
+      <markerCategory name="%markerCategory.buildpath_problem">
+         <markerTypeReference id="org.eclipse.jdt.core.buildpath_problem"/>
+      </markerCategory>
+   </extension>
+   
 <!-- =========================================================================== -->
 <!-- Filter Support                                                              -->
 <!-- =========================================================================== -->
