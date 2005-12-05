@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui;
  
 import java.io.IOException;
 import java.io.Reader;
+import java.io.StringReader;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IJavaElement;
@@ -21,12 +22,7 @@ import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.compiler.IScanner;
-import org.eclipse.jdt.core.compiler.ITerminalSymbols;
-import org.eclipse.jdt.core.compiler.InvalidInputException;
 
-import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocCommentReader;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -60,48 +56,28 @@ public class JavadocContentAccess {
 	 */
 	public static Reader getContentReader(IMember member, boolean allowInherited) throws JavaModelException {
 		IBuffer buf= member.isBinary() ? member.getClassFile().getBuffer() : member.getCompilationUnit().getBuffer();
+		ISourceRange javadocRange= member.getJavadocRange();
 		if (buf == null) {
 			// no source attachment found
 			return null;
 		}
-		ISourceRange range= member.getSourceRange();
-		int start= range.getOffset();
-		int length= range.getLength();
-		if (length > 0 && buf.getChar(start) == '/') {
-			IScanner scanner= ToolFactory.createScanner(true, false, false, false);
-			scanner.setSource(buf.getCharacters());
-			scanner.resetTo(start, start + length - 1);
-			try {
-				int docOffset= -1;
-				int docEnd= -1;
-				
-				int terminal= scanner.getNextToken();
-				while (TokenScanner.isComment(terminal)) {
-					if (terminal == ITerminalSymbols.TokenNameCOMMENT_JAVADOC) {
-						docOffset= scanner.getCurrentTokenStartPosition();
-						docEnd= scanner.getCurrentTokenEndPosition() + 1;
-					}
-					terminal= scanner.getNextToken();
-				}
-				if (docOffset != -1) {
-					JavaDocCommentReader reader= new JavaDocCommentReader(buf, docOffset, docEnd);
-					if (!containsOnlyInheritDoc(reader, length)) {
-						reader.reset();
-						return reader;
-					}
-				}
-			} catch (InvalidInputException ex) {
-				// try if there is inherited Javadoc
-			}
 
+		if (javadocRange != null) {
+			JavaDocCommentReader reader= new JavaDocCommentReader(buf, javadocRange.getOffset(), javadocRange.getOffset() + javadocRange.getLength() - 1);
+			if (!containsOnlyInheritDoc(reader, javadocRange.getLength())) {
+				reader.reset();
+				return reader;
+			}
 		}
+
 		if (allowInherited && (member.getElementType() == IJavaElement.METHOD)) {
 			IMethod method= (IMethod) member;
 			return findDocInHierarchy(method.getDeclaringType(), method.getElementName(), method.getParameterTypes(), method.isConstructor());
 		}
+		
 		return null;
 	}
-	
+
 	/**
 	 * Checks whether the given reader only returns
 	 * the inheritDoc tag.
@@ -121,24 +97,50 @@ public class JavadocContentAccess {
 		return new String(content).trim().equals("{@inheritDoc}"); //$NON-NLS-1$
 		
 	}
-	
+
 	/**
 	 * Gets a reader for an IMember's Javadoc comment content from the source attachment.
 	 * and renders the tags in HTML. 
 	 * Returns <code>null</code> if the member does not contain a Javadoc comment or if no source is available.
+	 * 
+	 * @param member				the member to get the Javadoc of.
+	 * @param allowInherited		for methods with no (Javadoc) comment, the comment of the overridden
+	 * 									class is returned if <code>allowInherited</code> is <code>true</code>
+	 * @param useAttachedJavadoc	if <code>true</code> Javadoc will be extracted from attached Javadoc
+	 * 									if there's no source
+	 * @return a reader for the Javadoc comment content in HTML or <code>null</code> if the member
+	 * 			does not contain a Javadoc comment or if no source is available
+	 * @throws JavaModelException is thrown when the elements Javadoc can not be accessed
+	 * @since 3.2
+	 */
+	public static Reader getHTMLContentReader(IMember member, boolean allowInherited, boolean useAttachedJavadoc) throws JavaModelException {
+		Reader contentReader= getContentReader(member, allowInherited);
+		if (contentReader != null)
+			return new JavaDoc2HTMLTextReader(contentReader);
+		else if (useAttachedJavadoc) {
+			String s= member.getAttachedJavadoc(null, null);
+			if (s != null)
+				return new StringReader(s);
+		}
+
+		return null;
+	}
+
+	/**
+	 * Gets a reader for an IMember's Javadoc comment content from the source attachment.
+	 * and renders the tags in HTML. 
+	 * Returns <code>null</code> if the member does not contain a Javadoc comment or if no source is available.
+	 * 
 	 * @param member The member to get the Javadoc of.
 	 * @param allowInherited For methods with no (Javadoc) comment, the comment of the overridden class
 	 * is returned if <code>allowInherited</code> is <code>true</code>.
 	 * @return Returns a reader for the Javadoc comment content in HTML or <code>null</code> if the member
 	 * does not contain a Javadoc comment or if no source is available
 	 * @throws JavaModelException is thrown when the elements javadoc can not be accessed
+	 * @deprecated As of 3.2, replaced by {@link #getHTMLContentReader(IMember, boolean, boolean)}
 	 */
 	public static Reader getHTMLContentReader(IMember member, boolean allowInherited) throws JavaModelException {
-		Reader contentReader= getContentReader(member, allowInherited);
-		if (contentReader != null) {
-			return new JavaDoc2HTMLTextReader(contentReader);
-		}
-		return null;
+		return getHTMLContentReader(member, allowInherited, false);
 	}
 
 	private static Reader findDocInHierarchy(IType type, String name, String[] paramTypes, boolean isConstructor) throws JavaModelException {

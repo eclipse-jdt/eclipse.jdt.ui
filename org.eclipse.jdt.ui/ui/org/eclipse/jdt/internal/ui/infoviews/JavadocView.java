@@ -464,7 +464,7 @@ public class JavadocView extends AbstractInfoView {
 //				HTMLPrinter.addSmallHeader(buffer, getInfoText(member));
 				Reader reader;
 				try {
-					reader= JavadocContentAccess.getHTMLContentReader(member, true);
+					reader= JavadocContentAccess.getHTMLContentReader(member, true, true);
 				} catch (JavaModelException ex) {
 					return null;
 				}

@@ -189,7 +189,7 @@ public class JavadocHelpContext implements IContext2 {
 	private String retrieveText(IJavaElement elem) throws JavaModelException {
 		if (elem instanceof IMember) {
 			try {
-				Reader reader= new HTML2TextReader(JavadocContentAccess.getHTMLContentReader((IMember)elem, true), null);
+				Reader reader= new HTML2TextReader(JavadocContentAccess.getHTMLContentReader((IMember)elem, true, true), null);
 				if (reader != null) {
 					String str= getString(reader);
 					BreakIterator breakIterator= BreakIterator.getSentenceInstance();
