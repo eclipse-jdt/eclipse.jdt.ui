@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.workingsets;
 
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -51,28 +50,29 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	private static final String TAG_WORKING_SET_NAME= "workingSetName"; //$NON-NLS-1$
 	private static final String LRU_GROUP= "workingSet_lru_group"; //$NON-NLS-1$
 
-	private WorkingSetFilter fWorkingSetFilter;
+	private final WorkingSetFilter fWorkingSetFilter;
 	
 	private IWorkingSet fWorkingSet= null;
 	
-	private ClearWorkingSetAction fClearWorkingSetAction;
-	private SelectWorkingSetAction fSelectWorkingSetAction;
-	private EditWorkingSetAction fEditWorkingSetAction;
+	private final ClearWorkingSetAction fClearWorkingSetAction;
+	private final SelectWorkingSetAction fSelectWorkingSetAction;
+	private final EditWorkingSetAction fEditWorkingSetAction;
 	
 	private IPropertyChangeListener fWorkingSetListener;
-	
 	private IPropertyChangeListener fChangeListener;
 	
 	private int fLRUMenuCount;
 	private IMenuManager fMenuManager;
 	private IMenuListener fMenuListener;
 	private List fContributions= new ArrayList();
+	private final IWorkbenchPartSite fSite;
 
 	public WorkingSetFilterActionGroup(IWorkbenchPartSite site, IPropertyChangeListener changeListener) {
 		Assert.isNotNull(site);
 		Assert.isNotNull(changeListener);
 
 		fChangeListener= changeListener;
+		fSite= site;
 		fClearWorkingSetAction= new ClearWorkingSetAction(this);
 		fSelectWorkingSetAction= new SelectWorkingSetAction(this, site);
 		fEditWorkingSetAction= new EditWorkingSetAction(this, site);
@@ -82,17 +82,19 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 				doPropertyChange(event);
 			}
 		};
-
 		fWorkingSetFilter= new WorkingSetFilter();
 
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 		manager.addPropertyChangeListener(fWorkingSetListener);
+		
+		setWorkingSet(site.getPage().getAggregateWorkingSet(), false);
 	}
 	
 	public WorkingSetFilterActionGroup(Shell shell, IPropertyChangeListener changeListener) {
 		Assert.isNotNull(shell);
 		Assert.isNotNull(changeListener);
 
+		fSite= null;
 		fChangeListener= changeListener;
 		fClearWorkingSetAction= new ClearWorkingSetAction(this);
 		fSelectWorkingSetAction= new SelectWorkingSetAction(this, shell);
@@ -108,13 +110,15 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 		manager.addPropertyChangeListener(fWorkingSetListener);
+		
+		setWorkingSet(null, false);
 	}
 
 	/**
 	 * Returns whether the current working set filters the given element
 	 * 
 	 * @param parent the parent
-	 * @param object the elemnt to test
+	 * @param object the element to test
 	 * @return the working set
 	 */
 	public boolean isFiltered(Object parent, Object object) {
@@ -137,7 +141,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	 * Sets this filter's working set.
 	 * 
 	 * @param workingSet the working set
-	 * @param refreshViewer Indiactes if the viewer should be refreshed.
+	 * @param refreshViewer Indicates if the viewer should be refreshed.
 	 */
 	public void setWorkingSet(IWorkingSet workingSet, boolean refreshViewer) {
 		// Update action
@@ -159,8 +163,9 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	 */
 	public void saveState(IMemento memento) {
 		String workingSetName= ""; //$NON-NLS-1$
-		if (fWorkingSet != null)
+		if (fWorkingSet != null && !fWorkingSet.isAggregateWorkingSet()) { 
 			workingSetName= fWorkingSet.getName();
+		}
 		memento.putString(TAG_WORKING_SET_NAME, workingSetName);
 	}
 
@@ -174,8 +179,11 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	public void restoreState(IMemento memento) {
 		String workingSetName= memento.getString(TAG_WORKING_SET_NAME);
 		IWorkingSet ws= null;
-		if (workingSetName != null && workingSetName.length() > 0)
+		if (workingSetName != null && workingSetName.length() > 0) {
 			ws= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
+		} else if (fSite != null) {
+			ws= fSite.getPage().getAggregateWorkingSet();
+		}
 		setWorkingSet(ws, false);
 	}
 	
@@ -234,7 +242,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	}
 	
 	private void removePreviousLRUWorkingSetActions(IMenuManager mm) {
-		for (int i= 1; i <= fLRUMenuCount; i++) {
+		for (int i= 1; i < fLRUMenuCount; i++) {
 			String id= WorkingSetMenuContributionItem.getId(i);
 			IContributionItem item= mm.remove(id);
 			fContributions.remove(item);
@@ -243,21 +251,27 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 
 	private void addLRUWorkingSetActions(IMenuManager mm) {
 		IWorkingSet[] workingSets= PlatformUI.getWorkbench().getWorkingSetManager().getRecentWorkingSets();
-		List sortedWorkingSets= Arrays.asList(workingSets);
-		Collections.sort(sortedWorkingSets, new WorkingSetComparator());
+		Arrays.sort(workingSets, new WorkingSetComparator());
 		
-		Iterator iter= sortedWorkingSets.iterator();
-		int i= 0;
-		while (iter.hasNext()) {
-			IWorkingSet workingSet= (IWorkingSet)iter.next();
-			if (workingSet != null) {
-				IContributionItem item= new WorkingSetMenuContributionItem(++i, this, workingSet);
-				mm.insertBefore(LRU_GROUP, item);
-				fContributions.add(item);
+		int currId= 1;
+		if (fSite != null) {
+			addLRUWorkingSetAction(mm, currId++, fSite.getPage().getAggregateWorkingSet());
+		}
+		
+		for (int i= 0; i < workingSets.length; i++) {
+			if (!workingSets[i].isAggregateWorkingSet()) {
+				addLRUWorkingSetAction(mm, currId++, workingSets[i]);
 			}
 		}
-		fLRUMenuCount= i;
+		fLRUMenuCount= currId;
 	}
+	
+	private void addLRUWorkingSetAction(IMenuManager mm, int id, IWorkingSet workingSet) {
+		IContributionItem item= new WorkingSetMenuContributionItem(id, this, workingSet);
+		mm.insertBefore(LRU_GROUP, item);
+		fContributions.add(item);
+	}
+	
 	
 	public void cleanViewMenu(IMenuManager menuManager) {
 		for (Iterator iter= fContributions.iterator(); iter.hasNext();) {
@@ -285,7 +299,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	}
 	
 	/**
-	 * @return Returns viewer filter always confugured with the current working set. 
+	 * @return Returns viewer filter always configured with the current working set. 
 	 */
 	public ViewerFilter getWorkingSetFilter() {
 		return fWorkingSetFilter;

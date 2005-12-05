@@ -58,7 +58,10 @@ public class WorkingSetMenuContributionItem extends ContributionItem {
 	 */
 	public void fill(Menu menu, int index) {
 		MenuItem mi= new MenuItem(menu, SWT.RADIO, index);
-		mi.setText("&" + fId + " " + fWorkingSet.getName());  //$NON-NLS-1$  //$NON-NLS-2$
+		
+		String name= fWorkingSet.isAggregateWorkingSet() ? WorkingSetMessages.WorkingSetMenuContributionItem_window_workingset_name : fWorkingSet.getName();
+		
+		mi.setText("&" + fId + " " + name);  //$NON-NLS-1$  //$NON-NLS-2$
 		if (fImage == null) {
 			ImageDescriptor imageDescriptor= fWorkingSet.getImage();
 			if (imageDescriptor != null)

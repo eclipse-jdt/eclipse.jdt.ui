@@ -81,4 +81,6 @@ public final class WorkingSetMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, WorkingSetMessages.class);
 	}
+
+	public static String WorkingSetMenuContributionItem_window_workingset_name;
 }
