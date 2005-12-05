@@ -22,7 +22,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavadocContentAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
 
 public class ProposalInfo {
@@ -57,16 +56,30 @@ public class ProposalInfo {
 		try {
 			IMember member= getMember();
 			if (member != null) {
-				Reader reader= JavadocContentAccess.getContentReader(member, true);
-				if (reader != null) {
-					return new JavaDoc2HTMLTextReader(reader).getString();
-				}
+				Reader reader= JavadocContentAccess.getHTMLContentReader(member, true, true);
+				if (reader != null)
+					return getString(reader);
 			}
 		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		} catch (IOException e) {
 			JavaPlugin.log(e);
 		}
 		return null;
 	}
+	
+	/**
+	 * Gets the reader content as a String
+	 */
+	private static String getString(Reader reader) {
+		StringBuffer buf= new StringBuffer();
+		char[] buffer= new char[1024];
+		int count;
+		try {
+			while ((count= reader.read(buffer)) != -1)
+				buf.append(buffer, 0, count);
+		} catch (IOException e) {
+			return null;
+		}
+		return buf.toString();
+	}
+	
 }

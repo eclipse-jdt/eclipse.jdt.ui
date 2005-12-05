@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavadocContentAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.javadoc.JavaDoc2HTMLTextReader;
 
 /**
  * Proposal info that computes the javadoc lazily when it is queried.
@@ -100,12 +99,27 @@ public abstract class MemberProposalInfo extends ProposalInfo {
 	 */
 	private String extractJavadoc(IMember member) throws JavaModelException, IOException {
 		if (member != null) {
-			Reader reader= JavadocContentAccess.getContentReader(member, true);
-			if (reader != null) {
-				return new JavaDoc2HTMLTextReader(reader).getString();
-			}
+			Reader reader=  JavadocContentAccess.getHTMLContentReader(member, true, true);
+			if (reader != null)
+				return getString(reader);
 		}
 		return null;
+	}
+	
+	/**
+	 * Gets the reader content as a String
+	 */
+	private static String getString(Reader reader) {
+		StringBuffer buf= new StringBuffer();
+		char[] buffer= new char[1024];
+		int count;
+		try {
+			while ((count= reader.read(buffer)) != -1)
+				buf.append(buffer, 0, count);
+		} catch (IOException e) {
+			return null;
+		}
+		return buf.toString();
 	}
 
 	/**

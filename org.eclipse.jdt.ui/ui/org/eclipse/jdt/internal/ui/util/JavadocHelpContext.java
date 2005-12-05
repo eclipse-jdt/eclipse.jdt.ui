@@ -40,7 +40,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.JavadocContentAccess;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.text.HTML2TextReader;
@@ -188,30 +187,34 @@ public class JavadocHelpContext implements IContext2 {
 
 	private String retrieveText(IJavaElement elem) throws JavaModelException {
 		if (elem instanceof IMember) {
-			try {
-				Reader reader= new HTML2TextReader(JavadocContentAccess.getHTMLContentReader((IMember)elem, true, true), null);
-				if (reader != null) {
-					String str= getString(reader);
-					BreakIterator breakIterator= BreakIterator.getSentenceInstance();
-					breakIterator.setText(str);
-					return str.substring(0, breakIterator.next());
-				}
-			} catch (IOException e) {
-				JavaPlugin.log(e); // ignore
+			Reader reader= JavadocContentAccess.getHTMLContentReader((IMember)elem, true, true);
+			if (reader != null)
+				reader= new HTML2TextReader(reader, null);
+			if (reader != null) {
+				String str= getString(reader);
+				BreakIterator breakIterator= BreakIterator.getSentenceInstance();
+				breakIterator.setText(str);
+				return str.substring(0, breakIterator.next());
 			}
 		}
 		return ""; //$NON-NLS-1$
 	}
 	
-	private String getString(Reader reader) throws IOException {
+	/**
+	 * Gets the reader content as a String
+	 */
+	private static String getString(Reader reader) {
 		StringBuffer buf= new StringBuffer();
-		int ch;
-		while ((ch= reader.read()) != -1) {
-			buf.append((char)ch);
+		char[] buffer= new char[1024];
+		int count;
+		try {
+			while ((count= reader.read(buffer)) != -1)
+				buf.append(buffer, 0, count);
+		} catch (IOException e) {
+			return null;
 		}
 		return buf.toString();
 	}
-
 
 	public IHelpResource[] getRelatedTopics() {
 		return fHelpResources;
