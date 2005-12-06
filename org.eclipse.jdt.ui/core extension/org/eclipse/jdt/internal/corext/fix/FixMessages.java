@@ -28,7 +28,6 @@ public class FixMessages extends NLS {
 	public static String UnusedCodeFix_RemoveImport_description;
 	
 	public static String Java50Fix_AddMissingAnnotation_description;
-	public static String Java50Fix_AddMissingAnnotations_description;
 	public static String Java50Fix_AddDeprecated_description;
 	public static String Java50Fix_AddOverride_description;
 	public static String Java50Fix_ConvertToEnhancedForLoop_description;
