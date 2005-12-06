@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -51,6 +52,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -62,9 +64,8 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
-import org.eclipse.jdt.internal.corext.fix.LinkedFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation;
-import org.eclipse.jdt.internal.corext.fix.LinkedFix.IPositionLinkable;
+import org.eclipse.jdt.internal.corext.fix.LinkedFix.PositionGroup;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
@@ -479,10 +480,10 @@ public class ConvertForLoopProposal implements ILinkedFixRewriteOperation {
 		return fIndexBinding;
 	}
 
-	private void doConvert(ASTRewrite rewrite, IPositionLinkable callback, NewImportRewrite importRewrite, TextEditGroup group) throws CoreException {
+	private ITrackedNodePosition doConvert(ASTRewrite rewrite, NewImportRewrite importRewrite, TextEditGroup group) throws CoreException {
 		doInferCollection();
 		doInferElement(importRewrite);
-		doFindAndReplaceInBody(rewrite, callback, group);
+		doFindAndReplaceInBody(rewrite, group);
 
 		AST ast= fOldForStatement.getAST();
 		fEnhancedForStatement= ast.newEnhancedForStatement();
@@ -490,7 +491,8 @@ public class ConvertForLoopProposal implements ILinkedFixRewriteOperation {
 		fEnhancedForStatement.setBody((Statement) theBody);
 		fEnhancedForStatement.setExpression(createExpression(rewrite, ast));
 		fEnhancedForStatement.setParameter(fParameterDeclaration);
-		callback.addLinkedPosition(rewrite.track(fParameterDeclaration.getName()), true, fParameterName);
+		PositionGroup pg= getPositionGroup(fParameterName);
+		pg.addFirstPosition(rewrite.track(fParameterDeclaration.getName()));
 
 		String name= fParameterDeclaration.getName().getIdentifier();
 
@@ -499,9 +501,10 @@ public class ConvertForLoopProposal implements ILinkedFixRewriteOperation {
 			proposals.add(0, name);
 
 		for (Iterator iterator= proposals.iterator(); iterator.hasNext();)
-			callback.addLinkedPositionProposal(fParameterName, (String) iterator.next(), null);
+			pg.addProposal((String) iterator.next(), null);
 
 		rewrite.replace(fOldForStatement, fEnhancedForStatement, group);
+		return null;
 	}
 
 	private Expression createExpression(ASTRewrite rewrite, AST ast) {
@@ -548,7 +551,7 @@ public class ConvertForLoopProposal implements ILinkedFixRewriteOperation {
 		return names;
 	}
 
-	private void doFindAndReplaceInBody(ASTRewrite rewrite, IPositionLinkable callback, TextEditGroup group) {
+	private void doFindAndReplaceInBody(ASTRewrite rewrite, TextEditGroup group) {
 		LocalOccurencesFinder finder= new LocalOccurencesFinder(fCollectionName, fOldCollectionBinding,
 			fOldCollectionTypeBinding, fOldForStatement.getBody());
 		finder.perform();
@@ -562,16 +565,16 @@ public class ConvertForLoopProposal implements ILinkedFixRewriteOperation {
 				: (ArrayAccess)ASTNodes.getParent(soleOccurence, ArrayAccess.class);
 			if (arrayAccess != null) {
 				if (arrayAccess.getParent() instanceof VariableDeclarationFragment) {
-					replaceSingleVariableDeclaration(rewrite, arrayAccess, callback, group);
+					replaceSingleVariableDeclaration(rewrite, arrayAccess, group);
 					return;
 				}
 			}
 		}
 
-		replaceMultipleOccurences(rewrite, occurences, callback, group);
+		replaceMultipleOccurences(rewrite, occurences, group);
 	}
 
-	private void replaceSingleVariableDeclaration(ASTRewrite rewrite, ArrayAccess arrayAccess, IPositionLinkable callback, TextEditGroup group) {
+	private void replaceSingleVariableDeclaration(ASTRewrite rewrite, ArrayAccess arrayAccess, TextEditGroup group) {
 		VariableDeclarationFragment declarationFragment= (VariableDeclarationFragment)arrayAccess.getParent();
 		VariableDeclarationStatement declarationStatement= (VariableDeclarationStatement)declarationFragment.getParent();
 
@@ -596,20 +599,20 @@ public class ConvertForLoopProposal implements ILinkedFixRewriteOperation {
 		finder2.perform();
 		List occurences2= finder2.getOccurences();
 
-		linkAllReferences(rewrite, occurences2, callback);
+		linkAllReferences(rewrite, occurences2);
 
 		rewrite.replace(declarationStatement, null, group);
 		return;
 	}
 
-	private void linkAllReferences(ASTRewrite rewrite, List occurences, IPositionLinkable callback) {
+	private void linkAllReferences(ASTRewrite rewrite, List occurences) {
 		for (Iterator iter= occurences.iterator(); iter.hasNext();) {
 			ASTNode variableRef= (ASTNode)iter.next();
-			callback.addLinkedPosition(rewrite.track(variableRef), false, fParameterName);
+			getPositionGroup(fParameterName).addPosition(rewrite.track(variableRef));
 		}
 	}
 
-	private void replaceMultipleOccurences(ASTRewrite rewrite, List occurences, IPositionLinkable callback, TextEditGroup group) {
+	private void replaceMultipleOccurences(ASTRewrite rewrite, List occurences, TextEditGroup group) {
 		for (Iterator iter= occurences.iterator(); iter.hasNext();) {
 			ASTNode element= (ASTNode)iter.next();
 			ArrayAccess arrayAccess= element instanceof ArrayAccess ? (ArrayAccess)element : (ArrayAccess)ASTNodes.getParent(
@@ -618,7 +621,7 @@ public class ConvertForLoopProposal implements ILinkedFixRewriteOperation {
 				SimpleName elementReference= fAst.newSimpleName(fParameterDeclaration.getName().getIdentifier());
 
 				rewrite.replace(arrayAccess, elementReference, group);
-				callback.addLinkedPosition(rewrite.track(elementReference), false, fParameterName);
+				getPositionGroup(fParameterName).addPosition(rewrite.track(elementReference));
 
 			}
 		}
@@ -792,17 +795,29 @@ public class ConvertForLoopProposal implements ILinkedFixRewriteOperation {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List, org.eclipse.jdt.internal.corext.fix.LinkedFix.IPositionLinkable)
 	 */
-	public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups, IPositionLinkable callback) throws CoreException {
+	public ITrackedNodePosition rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups, List/*<PositionGroup>*/ positionGroups) throws CoreException {
 		TextEditGroup group= new TextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
 		textEditGroups.add(group);
-		doConvert(rewrite, callback, importRewrite, group);
+		fPositionGroups= new Hashtable();
+		ITrackedNodePosition endPosition= doConvert(rewrite, importRewrite, group);
+		positionGroups.addAll(fPositionGroups.values());
+		return endPosition;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.FixRewriteAdapter#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
 	 */
 	public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
-		rewriteAST(rewrite, importRewrite, compilationUnit, textEditGroups, LinkedFix.NULL_LINKABLE);
+		rewriteAST(rewrite, importRewrite, compilationUnit, textEditGroups, new ArrayList());
+	}
+	
+	private Hashtable fPositionGroups;
+	
+	private PositionGroup getPositionGroup(String parameterName) {
+		if (!fPositionGroups.containsKey(parameterName)) {
+			fPositionGroups.put(parameterName, new PositionGroup(parameterName));
+		}
+		return (PositionGroup)fPositionGroups.get(parameterName);
 	}
 
 }

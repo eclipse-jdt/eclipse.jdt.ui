@@ -24,10 +24,12 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.fix.IFix;
-import org.eclipse.jdt.internal.corext.fix.LinkedFix.IPositionLinkable;
+import org.eclipse.jdt.internal.corext.fix.LinkedFix;
+import org.eclipse.jdt.internal.corext.fix.LinkedFix.PositionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
@@ -39,7 +41,7 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
  * fix a problem. A fix correction proposal may have an @see org.eclipse.jdt.internal.corext.fix.IMultiFix
  * attachet which can be executed instead of the provided IFix.
  */
-public class FixCorrectionProposal extends LinkedCorrectionProposal implements IPositionLinkable, ICompletionProposalExtension2 {
+public class FixCorrectionProposal extends LinkedCorrectionProposal implements ICompletionProposalExtension2 {
 	private final IFix fFix;
 	private final ICleanUp fCleanUp;
 
@@ -57,7 +59,45 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createTextChange()
 	 */
 	protected TextChange createTextChange() throws CoreException {
-		return getFix().createChange();
+		IFix fix= getFix();
+		TextChange createChange= fix.createChange();
+
+		if (fix instanceof LinkedFix) {
+			LinkedFix linkedFix= (LinkedFix)fix;
+			
+			PositionGroup[] positionGroups= linkedFix.getPositionGroups();
+			for (int i= 0; i < positionGroups.length; i++) {
+				PositionGroup group= positionGroups[i];
+				String groupId= group.getGroupId();
+
+				ITrackedNodePosition firstPosition= group.getFirstPosition();
+				ITrackedNodePosition[] positions= group.getPositions();
+				for (int j= 0; j < positions.length; j++) {
+					addLinkedPosition(positions[j], positions[j] == firstPosition, groupId);
+				}
+				String[] proposals= group.getProposals();
+				String[] displayStrings= group.getDisplayStrings();
+				for (int j= 0; j < proposals.length; j++) {
+					String proposal= proposals[j];
+					String displayString= displayStrings[j];
+					
+					if (proposal == null)
+						proposal= displayString;
+					
+					if (displayString == null)
+						displayString= proposal;
+					
+					addLinkedPositionProposal(groupId, displayString, proposal, null);
+				}
+			}
+			
+			ITrackedNodePosition endPosition= linkedFix.getEndPosition();
+			if (endPosition != null) {
+				setEndPosition(endPosition);
+			}
+		}
+		
+		return createChange;
 	}
 	
 	/* (non-Javadoc)

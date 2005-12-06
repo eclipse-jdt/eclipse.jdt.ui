@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -43,6 +44,7 @@ import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
@@ -50,9 +52,8 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
-import org.eclipse.jdt.internal.corext.fix.LinkedFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation;
-import org.eclipse.jdt.internal.corext.fix.LinkedFix.IPositionLinkable;
+import org.eclipse.jdt.internal.corext.fix.LinkedFix.PositionGroup;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -187,7 +188,7 @@ public final class ConvertIterableLoopProposal implements ILinkedFixRewriteOpera
 		return fRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 	}
 
-	private void rewriteAST(final AST ast, final ASTRewrite astRewrite, final IPositionLinkable callback, final NewImportRewrite importRewrite, final TextEditGroup group) throws CoreException {
+	private ITrackedNodePosition rewriteAST(final AST ast, final ASTRewrite astRewrite, final NewImportRewrite importRewrite, final TextEditGroup group) throws CoreException {
 		final ImportRemover remover= new ImportRemover(fCompilationUnit.getJavaProject(), (CompilationUnit) fStatement.getRoot());
 		
 		final EnhancedForStatement statement= ast.newEnhancedForStatement();
@@ -202,7 +203,8 @@ public final class ConvertIterableLoopProposal implements ILinkedFixRewriteOpera
 				name= (String) names.get(0);
 		}
 		for (final Iterator iterator= names.iterator(); iterator.hasNext();)
-			callback.addLinkedPositionProposal(fIdentifierName, (String) iterator.next(), null);
+			getPositionGroup(fIdentifierName).addProposal((String) iterator.next(), null);
+		
 		final Statement body= fStatement.getBody();
 		if (body != null) {
 			if (body instanceof Block) {
@@ -221,7 +223,7 @@ public final class ConvertIterableLoopProposal implements ILinkedFixRewriteOpera
 						final SimpleName node= ast.newSimpleName(text);
 						astRewrite.replace(expression, node, group);
 						remover.registerRemovedNode(expression);
-						callback.addLinkedPosition(astRewrite.track(node), false, fIdentifierName);
+						getPositionGroup(fIdentifierName).addPosition(astRewrite.track(node));
 						return false;
 					}
 
@@ -248,7 +250,7 @@ public final class ConvertIterableLoopProposal implements ILinkedFixRewriteOpera
 							if (binding != null && binding.equals(fElement)) {
 								final Statement parent= (Statement) ASTNodes.getParent(node, Statement.class);
 								if (parent != null && list.getRewrittenList().contains(parent))
-									callback.addLinkedPosition(astRewrite.track(node), false, fIdentifierName);
+									getPositionGroup(fIdentifierName).addPosition(astRewrite.track(node));
 							}
 						}
 						return false;
@@ -259,7 +261,7 @@ public final class ConvertIterableLoopProposal implements ILinkedFixRewriteOpera
 		}
 		final SingleVariableDeclaration declaration= ast.newSingleVariableDeclaration();
 		final SimpleName simple= ast.newSimpleName(name);
-		callback.addLinkedPosition(astRewrite.track(simple), true, fIdentifierName);
+		getPositionGroup(fIdentifierName).addFirstPosition(astRewrite.track(simple));
 		declaration.setName(simple);
 		final ITypeBinding iterable= getIterableType(fIterator.getType());
 		final NewImportRewrite imports= importRewrite;
@@ -270,6 +272,7 @@ public final class ConvertIterableLoopProposal implements ILinkedFixRewriteOpera
 		astRewrite.replace(fStatement, statement, group);
 		remover.registerRemovedNode(fStatement);
 		remover.applyRemoves(imports);
+		return null;
 	}
 
 	/**
@@ -427,16 +430,28 @@ public final class ConvertIterableLoopProposal implements ILinkedFixRewriteOpera
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List, org.eclipse.jdt.internal.corext.fix.LinkedFix.IPositionLinkable)
 	 */
-	public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups, IPositionLinkable callback) throws CoreException {
+	public ITrackedNodePosition rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups, List/*<PositionGroup>*/ positionGroups) throws CoreException {
 		TextEditGroup group= new TextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
 		textEditGroups.add(group);
-		rewriteAST(compilationUnit.getAST(), rewrite, callback, importRewrite, group);
+		fPositionGroups= new Hashtable();
+		ITrackedNodePosition endPosition= rewriteAST(compilationUnit.getAST(), rewrite, importRewrite, group);
+		positionGroups.addAll(fPositionGroups.values());
+		return endPosition;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.FixRewriteAdapter#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
 	 */
 	public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
-		rewriteAST(rewrite, importRewrite, compilationUnit, textEditGroups, LinkedFix.NULL_LINKABLE);
+		rewriteAST(rewrite, importRewrite, compilationUnit, textEditGroups, new ArrayList());
+	}
+	
+	private Hashtable fPositionGroups;
+	
+	private PositionGroup getPositionGroup(String parameterName) {
+		if (!fPositionGroups.containsKey(parameterName)) {
+			fPositionGroups.put(parameterName, new PositionGroup(parameterName));
+		}
+		return (PositionGroup)fPositionGroups.get(parameterName);
 	}
 }
