@@ -38,6 +38,13 @@ Non-breaking API changes from R3.1 to R3.2</b></font> <br>
       </td>
     </tr>
     <tr>
+      <td>New and deprecated API in <code>org.eclipse.jdt.ui.JavadocContentAccess</code>:<br>
+     	<code>getHTMLContentReader(IMember, boolean)</code> has been deprecated in favor of
+     	<code>getHTMLContentReader(IMember, boolean, boolean)</code> which allows to specify
+     	whether attached Javadoc should be respected.
+      </td>
+    </tr>
+    <tr>
       <td> New API added:<br>
       <ul>
         <li>JavaUI.createPackageDialog(Shell parent, IRunnableContext
