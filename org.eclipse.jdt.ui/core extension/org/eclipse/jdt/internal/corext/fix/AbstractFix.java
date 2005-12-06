@@ -52,38 +52,40 @@ public abstract class AbstractFix implements IFix {
 		private static class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 			
 			private final CompilationUnit fCompilationUnit;
-			private final ITypeBinding fImport;
 			private final ASTNode fAccessor;
 			
-			public ContextSensitiveImportRewriteContext(CompilationUnit compilationUnit, ITypeBinding impord, ASTNode accessor) {
+			public ContextSensitiveImportRewriteContext(CompilationUnit compilationUnit, ASTNode accessor) {
 				fCompilationUnit= compilationUnit;
-				fImport= impord; 
 				fAccessor= accessor;
 			}
 
 			public int findInContext(String qualifier, final String name, int kind) {
-				
 				ScopeAnalyzer analyzer= new ScopeAnalyzer(fCompilationUnit);
-				IBinding[] declarationsInScope= analyzer.getDeclarationsInScope(fAccessor.getStartPosition(), ScopeAnalyzer.TYPES);
+				IBinding[] declarationsInScope= analyzer.getDeclarationsInScope(fAccessor.getStartPosition(), ScopeAnalyzer.METHODS | ScopeAnalyzer.TYPES | ScopeAnalyzer.VARIABLES);
 				for (int i= 0; i < declarationsInScope.length; i++) {
-					if (declarationsInScope[i] == fImport) { // TODO: ma: Bug should use qualifier and name, fImport is unnecessary
-						return RES_NAME_FOUND;
+					if (declarationsInScope[i] instanceof ITypeBinding) {
+						ITypeBinding typeBinding= (ITypeBinding)declarationsInScope[i];
+						if (isSameType(typeBinding, qualifier, name)) {
+							return RES_NAME_FOUND;
+						} else if (isConflicting(typeBinding, name)) {
+							return RES_NAME_CONFLICT;
+						}
+					} else if (declarationsInScope[i] != null) {
+						if (isConflicting(declarationsInScope[i], name)) {
+							return RES_NAME_CONFLICT;
+						}
 					}
 				}
 				
 				List imports= new ArrayList();
-				List staticImports= new ArrayList(); // TODO: ma: can set to null if not interested in staticImports
-				ImportReferencesCollector.collect(fCompilationUnit, fCompilationUnit.getJavaElement().getJavaProject(), null, imports, staticImports);
+				//TODO: ma: fCompilationUnit.getJavaElement() can be null, better pass it as an argument or check first 
+				ImportReferencesCollector.collect(fCompilationUnit, fCompilationUnit.getJavaElement().getJavaProject(), null, imports, null);
 				for (Iterator iter= imports.iterator(); iter.hasNext();) {
 					Name element= (Name)iter.next();
 					IBinding binding= element.resolveBinding();
 					if (binding instanceof ITypeBinding) {
-						ITypeBinding declBinding= ((ITypeBinding)binding).getDeclaringClass();
-						if (declBinding == null)
-							declBinding= (ITypeBinding)binding;
-						
-						// TODO: ma: be careful with declBinding.getName(): will contain <> for parameterized types
-						if (binding != fImport && declBinding.getName().equals(fImport.getName())) {
+						ITypeBinding typeBinding= (ITypeBinding)binding;
+						if (isConflictingType(typeBinding.getTypeDeclaration(), qualifier, name)) {
 							return RES_NAME_CONFLICT;
 						}
 					}
@@ -91,12 +93,24 @@ public abstract class AbstractFix implements IFix {
 				
 				return RES_NAME_UNKNOWN;
 			}
+			
+			private boolean isConflicting(IBinding binding, String name) {
+				return binding.getName().equals(name);
+			}
+
+			private boolean isSameType(ITypeBinding binding, String qualifier, String name) {
+				//TODO: ma: use JavaModelUtil.concatenate, to handle the default package case
+				return binding.getQualifiedName().equals(qualifier + "." + name); //$NON-NLS-1$
+			}
+			
+			private boolean isConflictingType(ITypeBinding binding, String qualifier, String name) {
+				//TODO: ma: be careful with parameterized types, names contains <>
+				return !isSameType(binding, qualifier, name) && isConflicting(binding, name);
+			}
 		}
-		
-		// TODO: ma: better name importType
-		protected Type importClass(final ITypeBinding toImport, final ASTNode accessor, NewImportRewrite imports, final CompilationUnit compilationUnit) {
-			imports.setFilterImplicitImports(true);
-			ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(compilationUnit, toImport, accessor);
+						
+		protected Type importType(final ITypeBinding toImport, final ASTNode accessor, NewImportRewrite imports, final CompilationUnit compilationUnit) {
+			ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(compilationUnit, accessor);
 			return imports.addImport(toImport, compilationUnit.getAST(), importContext);
 		}
 	}
