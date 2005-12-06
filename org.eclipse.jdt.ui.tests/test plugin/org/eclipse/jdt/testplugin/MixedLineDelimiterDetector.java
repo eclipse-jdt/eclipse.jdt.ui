@@ -27,11 +27,11 @@ import org.eclipse.jdt.core.IJavaProject;
  */
 public class MixedLineDelimiterDetector  {
 	
-	private static final int MAC_LD= 0;
-	private static final int MIXED_LD= 1;
-	private static final int UNIX_LD= 2;
-	private static final int WINDOWS_LD= 3;
-	
+//	private static final int MAC_LD= 0;
+//	private static final int MIXED_LD= 1;
+//	private static final int UNIX_LD= 2;
+//	private static final int WINDOWS_LD= 3;
+//	
 //	private static class ResultCollector implements ITextSearchResultCollector {
 //
 //		private List fResult;
