@@ -19,22 +19,24 @@ To see which bugs have been addressed in one of the builds simply open the <a hr
 <br><br>
 ========== Eclipse Build Input December 6th 2005 ==========<br>
 <pre>
-- new API to open a package selection dialog on any scope<br>
-  o JavaUI.createPackageDialog(<br>
-         Shell parent, IRunnableContext context, IJavaSearchScope scope,<br>
-         boolean multipleSelection, boolean removeDuplicates, String filter)<br>
+- new API to open a package selection dialog on any scope
+  o JavaUI.createPackageDialog(
+         Shell parent, IRunnableContext context, IJavaSearchScope scope,
+         boolean multipleSelection, boolean removeDuplicates, String filter)
+- converted code to support the new  mutli-font in StyledText widget (for more
+  details see Platform Text build notes)
 </pre>
 <br>
 ========== Eclipse Build Input November 29th 2005 ==========<br>
 <pre>
-- new API to extend the all types dialog<br>
+- new API to extend the all types dialog
   o JavaUI.createTypeDialog(Shell, IRunnableContext, IJavaSearchScope, int,
-			    boolean, String, TypeSelectionExtension)<br>
-  o TypeSelectionExtension (org.eclipse.jdt.ui.dialogs)<br>
-  o ITypeInfoFilterExtension (org.eclipse.jdt.ui.dialogs)<br>
-  o ITypeInfoImageProvider (org.eclipse.jdt.ui.dialogs)<br>
-  o ITypeInfoRequestor (org.eclipse.jdt.ui.dialogs)<br>
-  o ITypeSelectionComponent (org.eclipse.jdt.ui.dialogs)<br>
+			    boolean, String, TypeSelectionExtension)
+  o TypeSelectionExtension (org.eclipse.jdt.ui.dialogs)
+  o ITypeInfoFilterExtension (org.eclipse.jdt.ui.dialogs)
+  o ITypeInfoImageProvider (org.eclipse.jdt.ui.dialogs)
+  o ITypeInfoRequestor (org.eclipse.jdt.ui.dialogs)
+  o ITypeSelectionComponent (org.eclipse.jdt.ui.dialogs)
 </pre>
 <br>
 ========== Eclipse Build Input November 22h 2005 ==========<br>
