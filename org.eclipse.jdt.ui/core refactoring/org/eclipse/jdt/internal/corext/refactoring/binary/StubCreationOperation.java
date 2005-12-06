@@ -251,9 +251,12 @@ public final class StubCreationOperation implements IWorkspaceRunnable {
 		if (!method.isConstructor()) {
 			fBuffer.append(Signature.toString(returnType));
 			fBuffer.append(" "); //$NON-NLS-1$
-			appendTypeParameters(method.getTypeParameters());
+			final ITypeParameter[] parameters= method.getTypeParameters();
+			if (parameters.length > 0) {
+				appendTypeParameters(parameters);
+				fBuffer.append(" "); //$NON-NLS-1$
+			}
 		}
-		fBuffer.append(" "); //$NON-NLS-1$
 		fBuffer.append(method.getElementName());
 		fBuffer.append("("); //$NON-NLS-1$
 		final String[] parameterTypes= method.getParameterTypes();
