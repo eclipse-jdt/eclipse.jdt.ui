@@ -929,15 +929,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				fLine= document.getLineOfOffset(offset);
 				fColumn= offset - document.getLineOffset(fLine);
 				fElement= getElementAt(offset, true);
-
-				fElementLine= -1;
-				if (fElement instanceof IMember) {
-					ISourceRange range= ((IMember) fElement).getNameRange();
-					if (range != null)
-						fElementLine= document.getLineOfOffset(range.getOffset());
-				}
-				if (fElementLine == -1)
-					fElementLine= document.getLineOfOffset(getOffset(fElement));
+				fElementLine= getElementLine(document, fElement);
 			} catch (BadLocationException e) {
 				// should not happen
 				JavaPlugin.log(e);
@@ -947,6 +939,28 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 				JavaPlugin.log(e.getStatus());
 				clear();
 			}
+		}
+		
+		/**
+		 * Computes the element line of a java element (the start of the element, or the line with
+		 * the element's name range).
+		 * 
+		 * @param document the displayed document for line information
+		 * @param element the java element
+		 * @return the element's start line, or -1
+		 * @throws BadLocationException
+		 * @throws JavaModelException
+		 */
+		private int getElementLine(IDocument document, IJavaElement element) throws BadLocationException, JavaModelException {
+			if (element instanceof IMember) {
+				ISourceRange range= ((IMember) fElement).getNameRange();
+				if (range != null)
+					return document.getLineOfOffset(range.getOffset());
+			}
+			int elementOffset= getOffset(element);
+			if (elementOffset != -1)
+				return document.getLineOfOffset(elementOffset);
+			return -1;
 		}
 
 		/**
@@ -959,7 +973,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 			int offset= getRememberedOffset(newElement);
 
-			if (offset != -1 && !containsOffset(newElement, offset) && (offset == 0 || !containsOffset(newElement, offset - 1)))
+			if (offset == -1 || newElement != null && !containsOffset(newElement, offset) && (offset == 0 || !containsOffset(newElement, offset - 1)))
 				return -1;
 
 			return offset;
@@ -973,22 +987,12 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 */
 		public int getRememberedOffset(IJavaElement newElement) {
 			try {
-				if (newElement == null)
-					return -1;
-
 				IDocument document= getSourceViewer().getDocument();
-				int newElementLine= -1;
-				if (newElement instanceof IMember) {
-					ISourceRange range= ((IMember) newElement).getNameRange();
-					if (range != null)
-						newElementLine= document.getLineOfOffset(range.getOffset());
-				}
-				if (newElementLine == -1)
-					newElementLine= document.getLineOfOffset(getOffset(newElement));
-				if (newElementLine == -1)
-					return -1;
+				int newElementLine= getElementLine(document, newElement);
+				int newLine= fLine;
+				if (newElementLine != -1 && fElementLine != -1)
+					newLine += newElementLine - fElementLine;
 
-				int newLine= fLine + newElementLine - fElementLine;
 				if (newLine < 0 || newLine >= document.getNumberOfLines())
 					return -1;
 				int maxColumn= document.getLineLength(newLine);
