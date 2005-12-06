@@ -176,6 +176,9 @@ public class MixedLineDelimiterDetector  {
 //		SearchScope scope= SearchScope.newSearchScope("", new IResource[] { resource }); //$NON-NLS-1$
 //		engine.search(scope, false, collector, new LineDelimiterLocator(MIXED_LD));
 //		return (IResource[])result.toArray(new IResource[result.size()]);
+		
+		Assert.fail("support currently disabled");
+		
 		return new IResource[0];
 	}
 
