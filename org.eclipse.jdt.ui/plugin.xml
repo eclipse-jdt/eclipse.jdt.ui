@@ -3785,6 +3785,14 @@
             contextId="org.eclipse.jdt.ui.javaEditorScope"
             commandId="org.eclipse.jdt.ui.edit.text.java.add.block.comment"
             schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+      <!-- free this on MAC, see: https://bugs.eclipse.org/bugs/show_bug.cgi?id=113981 -->
+      <key
+            platform="carbon"
+            sequence="M1+M2+/"
+            contextId="org.eclipse.jdt.ui.javaEditorScope"
+            commandId=""
+            schemeId="org.eclipse.ui.defaultAcceleratorConfiguration"/>
+
       <key
             sequence="M1+M2+\"
             contextId="org.eclipse.jdt.ui.javaEditorScope"
