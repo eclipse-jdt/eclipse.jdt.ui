@@ -24,7 +24,7 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 public final class JavaRefactorings {
 
 	/**
-	 * Constant describing the importable flag (value: 4)
+	 * Constant describing the importable flag (value: 65536)
 	 * <p>
 	 * Clients should set this flag to indicate that the refactoring can be
 	 * imported from a JAR file.
