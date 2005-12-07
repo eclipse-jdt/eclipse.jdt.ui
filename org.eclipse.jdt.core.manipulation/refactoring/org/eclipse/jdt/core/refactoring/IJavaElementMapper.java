@@ -10,11 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.core.refactoring;
 
+import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
+
 import org.eclipse.jdt.core.IJavaElement;
 
 /**
  * An <code>IJavaElementMapper</code> provides methods to map an original
  * elements to its refactored counterparts.
+ * <p>
+ * An <code>IJavaElementMapper</code> can be obtained via 
+ * {@link RefactoringProcessor#getAdapter(Class)}. 
+ * </p>
  * 
  * @since 3.2
  */
