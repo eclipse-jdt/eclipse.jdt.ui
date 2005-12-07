@@ -88,14 +88,15 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 
 
 		/**
-		 *  Executes a document set content call in the ui thread.
+		 *  Executes a document set content call in the UI thread.
 		 */
 		protected class DocumentSetCommand implements Runnable {
 
 			private String fContents;
 
 			public void run() {
-				fDocument.set(fContents);
+				if (!isClosed())
+					fDocument.set(fContents);
 			}
 
 			public void set(String contents) {
@@ -105,7 +106,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 		}
 
 		/**
-		 * Executes a document replace call in the ui thread.
+		 * Executes a document replace call in the UI thread.
 		 */
 		protected class DocumentReplaceCommand implements Runnable {
 
@@ -115,7 +116,8 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 
 			public void run() {
 				try {
-					fDocument.replace(fOffset, fLength, fText);
+					if (!isClosed())
+						fDocument.replace(fOffset, fLength, fText);
 				} catch (BadLocationException x) {
 					// ignore
 				}
