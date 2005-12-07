@@ -120,6 +120,18 @@ public class BindingLabelProvider extends LabelProvider {
 		}
 	}
 
+	private static void getLocalVariableLabel(IVariableBinding binding, long flags, StringBuffer buffer) {
+		if (((flags & JavaElementLabels.F_PRE_TYPE_SIGNATURE) != 0)) {
+			getTypeLabel(binding.getType(), (flags & JavaElementLabels.T_TYPE_PARAMETERS), buffer);
+			buffer.append(' ');
+		}
+		buffer.append(binding.getName());
+		if (((flags & JavaElementLabels.F_APP_TYPE_SIGNATURE) != 0)) {
+			buffer.append(JavaElementLabels.DECL_STRING);
+			getTypeLabel(binding.getType(), (flags & JavaElementLabels.T_TYPE_PARAMETERS), buffer);
+		}
+	}
+
 	private static ImageDescriptor getInnerClassImageDescriptor(int modifiers) {
 		if (Modifier.isPublic(modifiers))
 			return JavaPluginImages.DESC_OBJS_INNER_CLASS_PUBLIC;
@@ -417,7 +429,11 @@ public class BindingLabelProvider extends LabelProvider {
 		} else if (binding instanceof IMethodBinding) {
 			getMethodLabel(((IMethodBinding) binding), flags, buffer);
 		} else if (binding instanceof IVariableBinding) {
-			getFieldLabel(((IVariableBinding) binding), flags, buffer);
+			final IVariableBinding variable= (IVariableBinding) binding;
+			if (variable.isField())
+				getFieldLabel(variable, flags, buffer);
+			else
+				getLocalVariableLabel(variable, flags, buffer);
 		}
 		return buffer.toString();
 	}
