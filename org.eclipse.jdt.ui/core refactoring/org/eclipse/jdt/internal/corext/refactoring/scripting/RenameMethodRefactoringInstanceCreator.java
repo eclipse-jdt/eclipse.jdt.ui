@@ -13,16 +13,10 @@ package org.eclipse.jdt.internal.corext.refactoring.scripting;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringInstanceCreator;
-import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
-import org.eclipse.jdt.internal.corext.refactoring.rename.RenameNonVirtualMethodProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodProcessor;
 
 /**
@@ -36,19 +30,6 @@ public final class RenameMethodRefactoringInstanceCreator extends RefactoringIns
 	 * {@inheritDoc}
 	 */
 	public Refactoring createRefactoring(final RefactoringDescriptor descriptor) throws JavaModelException {
-		RenameProcessor processor= null;
-		final String handle= (String) descriptor.getArguments().get(RefactoringDescriptor.INPUT);
-		if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-			final IJavaElement element= JavaCore.create(handle);
-			if (element instanceof IMethod && element.exists()) {
-				final IMethod method= (IMethod) element;
-				if (MethodChecks.isVirtual(method))
-					processor= new RenameVirtualMethodProcessor(null);
-				else
-					processor= new RenameNonVirtualMethodProcessor(null);
-				return new JavaRenameRefactoring(processor);
-			}
-		}
-		return null;
+		return new JavaRenameRefactoring(new RenameVirtualMethodProcessor(null));
 	}
 }
