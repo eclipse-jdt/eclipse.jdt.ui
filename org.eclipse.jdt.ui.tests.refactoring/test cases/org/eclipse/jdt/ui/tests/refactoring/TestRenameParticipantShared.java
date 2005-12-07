@@ -26,11 +26,10 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating;
+import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
+import org.eclipse.jdt.core.refactoring.RenameTypeArguments;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.IDerivedElementRefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.ISharableParticipant;
@@ -56,14 +55,17 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 		else
 			fHandles.add(((IResource)element).getFullPath().toString());
 		
-		IDerivedElementRefactoringProcessor updating= (IDerivedElementRefactoringProcessor)getProcessor().getAdapter(IDerivedElementUpdating.class);
-		if ((updating != null) && (getArguments().getUpdateDerivedElements())) { 
-			Object[] elements= updating.getDerivedElements();
-			for (int i= 0; i < elements.length; i++) {
-				IJavaElement updated= (IJavaElement)updating.getRefactoredElement(elements[i]);
-				if (updated!=null) {
-					fDerivedToHandle.put(((IJavaElement)elements[i]).getHandleIdentifier(), getKey(updated));
-					fDerivedToNewName.put(((IJavaElement)elements[i]).getHandleIdentifier(), updated.getElementName());
+		IJavaElementMapper updating= (IJavaElementMapper)getProcessor().getAdapter(IJavaElementMapper.class);
+		if ((updating != null) && getArguments() instanceof RenameTypeArguments) {
+			RenameTypeArguments arguments= (RenameTypeArguments)getArguments();
+			if (arguments.getUpdateSimilarDeclarations()) {
+				IJavaElement[] elements= arguments.getSimilarDeclarations();
+				for (int i= 0; i < elements.length; i++) {
+					IJavaElement updated= updating.getRefactoredJavaElement(elements[i]);
+					if (updated!=null) {
+						fDerivedToHandle.put(elements[i].getHandleIdentifier(), getKey(updated));
+						fDerivedToNewName.put(elements[i].getHandleIdentifier(), updated.getElementName());
+					}
 				}
 			}
 		}

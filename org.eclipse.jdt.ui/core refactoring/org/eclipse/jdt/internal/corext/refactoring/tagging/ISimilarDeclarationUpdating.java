@@ -11,35 +11,35 @@
 package org.eclipse.jdt.internal.corext.refactoring.tagging;
 
 /**
- * Interface implemented by processors able to rename derived elements.
+ * Interface implemented by processors able to rename similar declarations.
  * 
  * @since 3.2
  */
-public interface IDerivedElementUpdating {
+public interface ISimilarDeclarationUpdating {
 
 	/**
-	 * Checks if this refactoring object is capable of updating derived elements
+	 * Checks if this refactoring object is capable of updating similar declarations
 	 * of the renamed element.
 	 */
-	public boolean canEnableDerivedElementUpdating();
+	public boolean canEnableSimilarDeclarationUpdating();
 
 	/**
-	 * If <code>canEnableDerivedElementUpdating</code> returns
+	 * If <code>canEnableSimilarElementUpdating</code> returns
 	 * <code>true</code>, then this method is used to inform the refactoring
-	 * object whether derived elements should be updated. This call can be
-	 * ignored if <code>canEnableDerivedElementUpdating</code> returns
+	 * object whether similar declarations should be updated. This call can be
+	 * ignored if <code>canEnableSimilarElementUpdating</code> returns
 	 * <code>false</code>.
 	 */
-	public void setUpdateDerivedElements(boolean update);
+	public void setUpdateSimilarDeclarations(boolean update);
 
 	/**
-	 * If <code>canEnableDerivedElementUpdating</code> returns
+	 * If <code>canEnableSimilarElementUpdating</code> returns
 	 * <code>true</code>, then this method is used to ask the refactoring
-	 * object whether derived elements should be updated. This call can be
-	 * ignored if <code>canEnableDerivedElementUpdating</code> returns
+	 * object whether similar declarations should be updated. This call can be
+	 * ignored if <code>canEnableSimilarElementUpdating</code> returns
 	 * <code>false</code>.
 	 */
-	public boolean getUpdateDerivedElements();
+	public boolean getUpdateSimilarDeclarations();
 
 	/**
 	 * If <code>canEnableDerivedElementUpdating</code> returns
@@ -51,9 +51,9 @@ public interface IDerivedElementUpdating {
 	public void setMatchStrategy(int selectedStrategy);
 
 	/**
-	 * If <code>canEnableDerivedElementUpdating</code> returns
+	 * If <code>canEnableSimilarElementUpdating</code> returns
 	 * <code>true</code>, then this method is used to ask the refactoring
-	 * object which match strategy is used for determining derived elements.
+	 * object which match strategy is used for determining similar elements.
 	 * 
 	 * @return one of the STRATEGY_* constants in {@link org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor}
 	 */

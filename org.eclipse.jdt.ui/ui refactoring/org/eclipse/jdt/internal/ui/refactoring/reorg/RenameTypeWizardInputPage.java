@@ -30,7 +30,7 @@ import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ISimilarDeclarationUpdating;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -57,7 +57,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 
 	protected void addAdditionalOptions(Composite composite, RowLayouter layouter) {
 
-		if (getDerivedElementUpdating() == null || !getDerivedElementUpdating().canEnableDerivedElementUpdating())
+		if (getDerivedElementUpdating() == null || !getDerivedElementUpdating().canEnableSimilarDeclarationUpdating())
 			return;
 
 		try {
@@ -77,14 +77,14 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 		fUpdateDerivedElements= new Button(c, SWT.CHECK);
 		fUpdateDerivedElements.setText(RefactoringMessages.RenameTypeWizardInputPage_update_derived_elements);
 
-		final boolean updateDerivedElements= getBooleanSetting(UPDATE_DERIVED_ELEMENTS, getDerivedElementUpdating().getUpdateDerivedElements());
+		final boolean updateDerivedElements= getBooleanSetting(UPDATE_DERIVED_ELEMENTS, getDerivedElementUpdating().getUpdateSimilarDeclarations());
 		fUpdateDerivedElements.setSelection(updateDerivedElements);
-		getDerivedElementUpdating().setUpdateDerivedElements(updateDerivedElements);
+		getDerivedElementUpdating().setUpdateSimilarDeclarations(updateDerivedElements);
 		fUpdateDerivedElements.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 		fUpdateDerivedElements.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(SelectionEvent e) {
-				getDerivedElementUpdating().setUpdateDerivedElements(fUpdateDerivedElements.getSelection());
+				getDerivedElementUpdating().setUpdateSimilarDeclarations(fUpdateDerivedElements.getSelection());
 				fUpdateDerivedElementsButton.setEnabled(fUpdateDerivedElements.getSelection());
 			}
 		});
@@ -137,8 +137,8 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 		return isPageComplete();
 	}
 
-	private IDerivedElementUpdating getDerivedElementUpdating() {
-		return (IDerivedElementUpdating) getRefactoring().getAdapter(IDerivedElementUpdating.class);
+	private ISimilarDeclarationUpdating getDerivedElementUpdating() {
+		return (ISimilarDeclarationUpdating) getRefactoring().getAdapter(ISimilarDeclarationUpdating.class);
 	}
 	
 	protected boolean performFinish() {

@@ -42,7 +42,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ISimilarDeclarationUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
@@ -192,8 +192,8 @@ public class RenameTypeTests extends RefactoringTest {
 			qnUpdating.setFilePatterns(nonJavaFiles);
 		}
 		
-		IDerivedElementUpdating p= (IDerivedElementUpdating)ref.getAdapter(IDerivedElementUpdating.class);
-		p.setUpdateDerivedElements(updateDerived);
+		ISimilarDeclarationUpdating p= (ISimilarDeclarationUpdating)ref.getAdapter(ISimilarDeclarationUpdating.class);
+		p.setUpdateSimilarDeclarations(updateDerived);
 		p.setMatchStrategy(matchStrategy);
 	}
 	
@@ -1561,20 +1561,20 @@ public class RenameTypeTests extends RefactoringTest {
 		checkResultInClass("SomeNewClass");
 		
 		RenameTypeProcessor rtp= (RenameTypeProcessor)ref.getProcessor();
-		ICompilationUnit newUnit= (ICompilationUnit) rtp.getRefactoredElement(someClass.getCompilationUnit());
+		ICompilationUnit newUnit= (ICompilationUnit)rtp.getRefactoredJavaElement(someClass.getCompilationUnit());
 		
 		assertTrue(newUnit.exists());
 		assertTrue(newUnit.getElementName().equals("SomeNewClass.java"));
 		assertFalse(someClass.getCompilationUnit().exists());
 		
-		IFile newFile= (IFile) rtp.getRefactoredElement(someClass.getResource());
+		IFile newFile= (IFile)rtp.getRefactoredResource(someClass.getResource());
 		
 		assertTrue(newFile.exists());
 		assertTrue(newFile.getName().equals("SomeNewClass.java"));
 		assertFalse(someClass.getResource().exists());
 		
-		IPackageFragment oldPackage= (IPackageFragment) cu.getParent();
-		IPackageFragment newPackage= (IPackageFragment) rtp.getRefactoredElement(oldPackage);
+		IPackageFragment oldPackage= (IPackageFragment)cu.getParent();
+		IPackageFragment newPackage= (IPackageFragment)rtp.getRefactoredJavaElement(oldPackage);
 		assertEquals(oldPackage, newPackage);
 	}
 	
@@ -1624,6 +1624,5 @@ public class RenameTypeTests extends RefactoringTest {
 	public void testDerivedElements33() throws Exception {
 		// Test two local variables inside anonymous types do not generate warnings
 		helper3("Why", "WhyNot", true, false, true);
-	}
-
+	}	
 }

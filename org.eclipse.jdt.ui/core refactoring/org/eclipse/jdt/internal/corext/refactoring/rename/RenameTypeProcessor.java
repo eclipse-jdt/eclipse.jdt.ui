@@ -24,6 +24,7 @@ import java.util.Set;
 import org.eclipse.text.edits.ReplaceEdit;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
@@ -37,13 +38,14 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
-import org.eclipse.ltk.core.refactoring.IDerivedElementRefactoringProcessor;
+import org.eclipse.ltk.core.refactoring.IResourceMapper;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.IParticipantDesciptorFilter;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
@@ -73,6 +75,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
+import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
+import org.eclipse.jdt.core.refactoring.RenameTypeArguments;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -94,7 +98,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ISimilarDeclarationUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
@@ -115,7 +119,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating, IDerivedElementUpdating, IDerivedElementRefactoringProcessor {
+public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 
 	private static final String ID_RENAME_TYPE= "org.eclipse.jdt.ui.rename.type"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
@@ -146,7 +150,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	
 	// --- Derived
 
-	private boolean fUpdateDerivedElements;
+	private boolean fUpdateSimilarElements;
 	private Map/* <IJavaElement, String> */fFinalDerivedElementToName= null;
 	private int fRenamingStrategy;
 
@@ -162,12 +166,23 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	private int fCachedRenamingStrategy= -1;
 	private RefactoringStatus fCachedRefactoringStatus= null;
 
-	private class NoOverrideProgressMonitor extends SubProgressMonitor {
+	public static final class ParticipantDescritorFilter implements IParticipantDesciptorFilter {
+		public boolean select(IConfigurationElement element) {
+			IConfigurationElement[] params= element.getChildren(PARAM);
+			for (int i= 0; i < params.length; i++) {
+				IConfigurationElement param= params[i];
+				if ("handlesSimilarDeclarations".equals(param.getAttribute(NAME)) && //$NON-NLS-1$
+					"true".equals(param.getAttribute(VALUE))) //$NON-NLS-1$
+					return true;
+			}
+			return false;
+		}
+	}
 
+	private class NoOverrideProgressMonitor extends SubProgressMonitor {
 		public NoOverrideProgressMonitor(IProgressMonitor monitor, int ticks) {
 			super(monitor, ticks, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 		}
-
 		public void setTaskName(String name) {
 			// do nothing
 		}
@@ -179,7 +194,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			setNewElementName(type.getElementName());
 		fUpdateReferences= true; //default is yes
 		fUpdateTextualMatches= false;
-		fUpdateDerivedElements= false; // default is no
+		fUpdateSimilarElements= false; // default is no
 		fRenamingStrategy= RenamingNameSuggestor.STRATEGY_EXACT;
 	}
 	
@@ -213,7 +228,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	
 	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
 		String newCUName= getNewCompilationUnit().getElementName();
-		RenameArguments arguments= new RenameArguments(newCUName, getUpdateReferences(), getUpdateDerivedElements());
+		RenameArguments arguments= new RenameArguments(newCUName, getUpdateReferences());
 		loadDerivedParticipants(status, result, 
 			computeDerivedElements(), arguments, 
 			computeResourceModifications(), natures, shared);
@@ -284,6 +299,19 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		}
 	}
 
+	//---- JavaRenameProcessor -------------------------------------------
+	
+	protected RenameArguments createRenameArguments() {
+		return new RenameTypeArguments(getNewElementName(), getUpdateReferences(), 
+			getUpdateSimilarDeclarations(), getSimilarElements());
+	}
+	
+	protected IParticipantDesciptorFilter createParticipantDescriptorFilter() {
+		if (!getUpdateSimilarDeclarations())
+			return null;
+		return new ParticipantDescritorFilter();
+	}
+	
 	//---- ITextUpdating -------------------------------------------------
 
 	public boolean canEnableTextUpdating() {
@@ -334,6 +362,66 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		fFilePatterns= patterns;
 	}
 	
+	// ---- ISimilarElementUpdating
+
+	public boolean canEnableSimilarDeclarationUpdating() {
+		return true;
+	}
+
+	public void setUpdateSimilarDeclarations(boolean update) {
+		fUpdateSimilarElements= update;
+	}
+
+	public boolean getUpdateSimilarDeclarations() {
+		return fUpdateSimilarElements;
+	}
+
+	public int getMatchStrategy() {
+		return fRenamingStrategy;
+
+	}
+
+	public void setMatchStrategy(int selectedStrategy) {
+		fRenamingStrategy= selectedStrategy;
+	}
+
+	/**
+	 * Returns the similar elements of the type, i.e. IFields, IMethods,
+	 * and ILocalVariables.
+	 */
+	public IJavaElement[] getSimilarElements() {
+		if (fFinalDerivedElementToName == null)
+			return null;
+		Set keys= fFinalDerivedElementToName.keySet();
+		return (IJavaElement[])keys.toArray(new IJavaElement[keys.size()]);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public IResource getRefactoredResource(IResource element) {
+		if (element instanceof IFile) {
+			if (Checks.isTopLevel(fType) && element.equals(fType.getResource()))
+				return getNewCompilationUnit().getResource();
+		}
+		return element;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IJavaElement getRefactoredJavaElement(IJavaElement element) {
+		if (element instanceof ICompilationUnit) {
+			if (Checks.isTopLevel(fType) && element.equals(fType.getCompilationUnit()))
+				return getNewCompilationUnit();
+		} else if (element instanceof IMember) {
+			final IType newType= (IType) getNewElement();
+			final RefactoringHandleTransplanter transplanter= new RefactoringHandleTransplanter(fType, newType, fFinalDerivedElementToName);
+			return transplanter.transplantHandle((IMember) element);
+		} 
+		return element;
+	}
+
 	//------------- Conditions -----------------
 	
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
@@ -356,9 +444,9 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		Assert.isNotNull(getNewElementName(), "newName"); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
 		
-		int referenceSearchTicks= fUpdateReferences || fUpdateDerivedElements ? 15 : 0;
-		int affectedCusTicks= fUpdateReferences || fUpdateDerivedElements ? 10 : 1;
-		int derivedTicks= fUpdateDerivedElements ? 85 : 0;
+		int referenceSearchTicks= fUpdateReferences || fUpdateSimilarElements ? 15 : 0;
+		int affectedCusTicks= fUpdateReferences || fUpdateSimilarElements ? 10 : 1;
+		int derivedTicks= fUpdateSimilarElements ? 85 : 0;
 		int createChangeTicks = 5;
 		int qualifiedNamesTicks= fUpdateQualifiedNames ? 50 : 0;
 		
@@ -419,7 +507,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				return result;
 			
 			// Load references, including derived elements
-			if (fUpdateReferences || fUpdateDerivedElements) {
+			if (fUpdateReferences || fUpdateSimilarElements) {
 				pm.setTaskName(RefactoringCoreMessages.RenameTypeRefactoring_searching);
 				result.merge(initializeReferences(new SubProgressMonitor(pm, referenceSearchTicks)));
 			} else {
@@ -430,7 +518,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 			
-			if (fUpdateReferences || fUpdateDerivedElements) {
+			if (fUpdateReferences || fUpdateSimilarElements) {
 				result.merge(analyzeAffectedCompilationUnits(new SubProgressMonitor(pm, affectedCusTicks)));
 			} else {
 				Checks.checkCompileErrorsInAffectedFile(result, fType.getResource());
@@ -440,7 +528,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			if (result.hasFatalError())
 				return result;
 			
-			if (fUpdateDerivedElements) {
+			if (fUpdateSimilarElements) {
 				result.merge(initializeDerivedRenameProcessors(new SubProgressMonitor(pm, derivedTicks), context));
 				if (result.hasFatalError())
 					return result;
@@ -479,11 +567,11 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		// Search depends on the type, the new name, the derived elements, and
 		// the strategy
 
-		if (fReferences != null && (getNewElementName().equals(fCachedNewName)) && (fCachedRenameDerivedElements == getUpdateDerivedElements()) && (fCachedRenamingStrategy == fRenamingStrategy))
+		if (fReferences != null && (getNewElementName().equals(fCachedNewName)) && (fCachedRenameDerivedElements == getUpdateSimilarDeclarations()) && (fCachedRenamingStrategy == fRenamingStrategy))
 			return fCachedRefactoringStatus;
 
 		fCachedNewName= getNewElementName();
-		fCachedRenameDerivedElements= fUpdateDerivedElements;
+		fCachedRenameDerivedElements= fUpdateSimilarElements;
 		fCachedRenamingStrategy= fRenamingStrategy;
 		fCachedRefactoringStatus= new RefactoringStatus();
 
@@ -500,7 +588,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 
 			monitor.beginTask("", fReferences.length); //$NON-NLS-1$
 
-			if (getUpdateDerivedElements()) {
+			if (getUpdateSimilarDeclarations()) {
 
 				RenamingNameSuggestor sugg= new RenamingNameSuggestor(fRenamingStrategy);
 
@@ -929,7 +1017,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 					arguments.put(ATTRIBUTE_QUALIFIED, Boolean.valueOf(fUpdateQualifiedNames).toString());
 					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
-					arguments.put(ATTRIBUTE_DERIVED, Boolean.valueOf(fUpdateDerivedElements).toString());
+					arguments.put(ATTRIBUTE_DERIVED, Boolean.valueOf(fUpdateSimilarElements).toString());
 					arguments.put(ATTRIBUTE_DERIVED_MATCHING_STRATEGY, Integer.toString(fRenamingStrategy));
 					String project= null;
 					IJavaProject javaProject= fType.getJavaProject();
@@ -1019,7 +1107,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			if (fUpdateTextualMatches) {
 				pm.subTask(RefactoringCoreMessages.RenameTypeRefactoring_searching_text); 
 				TextMatchUpdater.perform(new SubProgressMonitor(pm, 1), RefactoringScopeFactory.create(fType), this, fChangeManager, fReferences);
-				if (fUpdateDerivedElements)
+				if (fUpdateSimilarElements)
 					addDerivedTextualUpdates(fChangeManager, new SubProgressMonitor(pm, 3));
 			}
 			
@@ -1125,7 +1213,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_QUALIFIED));
 			final String derived= generic.getAttribute(ATTRIBUTE_DERIVED);
 			if (derived != null)
-				fUpdateDerivedElements= Boolean.valueOf(derived).booleanValue();
+				fUpdateSimilarElements= Boolean.valueOf(derived).booleanValue();
 			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DERIVED));
 			final String derivedMatchingStrategy= generic.getAttribute(ATTRIBUTE_DERIVED_MATCHING_STRATEGY);
@@ -1575,89 +1663,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		}
 	}
 
-	// ---- IDerivedElementUpdating
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating#canEnableDerivedElementUpdating()
-	 */
-	public boolean canEnableDerivedElementUpdating() {
-		return true;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating#setUpdateDerivedElements(boolean)
-	 */
-	public void setUpdateDerivedElements(boolean update) {
-		fUpdateDerivedElements= update;
-	}
-
-	/*
-	 * (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating#getUpdateDerivedElements()
-	 */
-	public boolean getUpdateDerivedElements() {
-		return fUpdateDerivedElements;
-	}
-
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating#getMatchStrategy()
-	 */
-	public int getMatchStrategy() {
-		return fRenamingStrategy;
-
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IDerivedElementUpdating#setMatchStrategy(int)
-	 */
-	public void setMatchStrategy(int selectedStrategy) {
-		fRenamingStrategy= selectedStrategy;
-	}
-
-	// ------------- IDerivedElementRefactoringComponent
-
-	/**
-	 * Returns the derived elements of the type, i.e. IFields, IMethods,
-	 * and ILocalVariables.
-	 * 
-	 */
-	public Object[] getDerivedElements() {
-		if (fFinalDerivedElementToName == null)
-			return null;
-		return fFinalDerivedElementToName.keySet().toArray();
-	}
-
-	/**
-	 * This method is used to ask the refactoring object for an updated element
-	 * handle of java elements and resources in the project. The returned handle
-	 * is either an updated handle of the given handle which reflects all
-	 * changes to the project - or the original handle if it is not affected by
-	 * the changes.
-	 * 
-	 * Note that local variables <strong>cannot</strong> be resolved using this
-	 * method.
-	 * 
-	 */
-	public Object getRefactoredElement(Object element) {
-
-		if (element instanceof IFile) {
-			if (Checks.isTopLevel(fType) && element.equals(fType.getResource()))
-				return getNewCompilationUnit().getResource();
-		} else if (element instanceof ICompilationUnit) {
-			if (Checks.isTopLevel(fType) && element.equals(fType.getCompilationUnit()))
-				return getNewCompilationUnit();
-		} else if (element instanceof IMember) {
-			final IType newType= (IType) getNewElement();
-			final RefactoringHandleTransplanter transplanter= new RefactoringHandleTransplanter(fType, newType, fFinalDerivedElementToName);
-			return transplanter.transplantHandle((IMember) element);
-		} 
-			
-		return element;
-	}
-
 	// ------ UI interaction
 
 	/**
@@ -1700,7 +1705,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	 * 
 	 */
 	public boolean hasDerivedElementsToRename() {
-		if (!fUpdateDerivedElements)
+		if (!fUpdateSimilarElements)
 			return false;
 		if (fPreloadedElementToName == null)
 			return false;

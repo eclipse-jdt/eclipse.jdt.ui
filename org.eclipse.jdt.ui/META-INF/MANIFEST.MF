@@ -123,6 +123,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ltk.core.refactoring,
  org.eclipse.ltk.ui.refactoring,
  org.eclipse.ui.forms,
- org.eclipse.ui.navigator
+ org.eclipse.ui.navigator,
+ org.eclipse.jdt.core.manipulation;bundle-version="[1.0.0,2.0.0)"
 Eclipse-LazyStart: true
 Plugin-Class: org.eclipse.jdt.internal.ui.JavaPlugin
