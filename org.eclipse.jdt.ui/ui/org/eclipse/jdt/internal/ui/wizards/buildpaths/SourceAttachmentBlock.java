@@ -441,7 +441,7 @@ public class SourceAttachmentBlock {
 	
 	private IPath chooseExtension() {
 		IPath currPath= getFilePath();
-		if (currPath.isEmpty()) {
+		if (currPath.segmentCount() == 0) {
 			currPath= fEntry.getPath();
 		}		
 	
@@ -467,7 +467,7 @@ public class SourceAttachmentBlock {
 	 */
 	private IPath chooseExtJarFile() {
 		IPath currPath= getFilePath();
-		if (currPath.isEmpty()) {
+		if (currPath.segmentCount() == 0) {
 			currPath= fEntry.getPath();
 		}		
 			
@@ -488,7 +488,7 @@ public class SourceAttachmentBlock {
 	
 	private IPath chooseExtFolder() {
 		IPath currPath= getFilePath();
-		if (currPath.isEmpty()) {
+		if (currPath.segmentCount() == 0) {
 			currPath= fEntry.getPath();
 		}
 		if (ArchiveFileFilter.isArchivePath(currPath)) {
