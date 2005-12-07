@@ -178,7 +178,7 @@ public class SelectionListenerWithASTManager {
 					return Status.OK_STATUS;
 				}
 			} catch (OperationCanceledException e) {
-				// thrown when cancelling the AST creation
+				// thrown when canceling the AST creation
 			}
 			return Status.CANCEL_STATUS;
 		}
@@ -229,13 +229,20 @@ public class SelectionListenerWithASTManager {
 	 * part. The event is sent from a background thread: this method call can return before the listeners
 	 * are informed.
 	 * @param part The editor part that has a changed selection
-	 * @param selection The new text selection
 	 */
-	public void forceSelectionChange(ITextEditor part, ITextSelection selection) {
+	public void forceSelectionChange(ITextEditor part) {
 		synchronized (this) {
+			if (part == null)
+				return;
+			ISelectionProvider selectionProvider= part.getSelectionProvider();
+			if (selectionProvider == null)
+				return;
+			
 			PartListenerGroup partListener= (PartListenerGroup) fListenerGroups.get(part);
-			if (partListener != null) {
-				partListener.firePostSelectionChanged(selection);
+			ISelection selection= selectionProvider.getSelection();
+			
+			if (partListener != null && selection instanceof ITextSelection) {
+				partListener.firePostSelectionChanged((ITextSelection)selection);
 			}
 		}
 	}}
