@@ -4731,5 +4731,43 @@
          <adapter type="org.eclipse.team.ui.mapping.ICompareAdapter"/>
       </factory>
    </extension>
+   
+   <extension
+         id="jdtContentProvider"
+         point="org.eclipse.team.ui.teamContentProviders">
+      <teamContentProvider
+            contentExtensionId="org.eclipse.jdt.ui.resourceContent"
+            modelProviderId="org.eclipse.jdt.ui.modelProvider"/>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.navigator.viewer">
+      <viewerContentBinding viewerId="org.eclipse.team.ui.navigatorViewer">
+         <includes>
+            <contentExtension
+                  isRoot="true"
+                  pattern="org.eclipse.jdt.ui.resourceContent"/>
+         </includes>
+      </viewerContentBinding>
+   </extension>
+   
+   <extension
+         point="org.eclipse.ui.navigator.navigatorContent">
+      <navigatorContent
+            contentProvider="org.eclipse.jdt.internal.ui.refactoring.model.JavaTeamContentProvider"
+            id="org.eclipse.jdt.ui.resourceContent"
+            labelProvider="org.eclipse.jdt.internal.ui.refactoring.model.JavaTeamLabelProvider"
+            name="%RefactoringModelContent.name">
+         <enablement>
+            <or>
+               <instanceof value="org.eclipse.jdt.internal.ui.refactoring.model.JavaRefactoringModelProvider"/>
+               <instanceof value="org.eclipse.core.resources.IResource"/>
+               <instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+               <instanceof value="org.eclipse.team.core.mapping.IResourceMappingScope"/>
+               <instanceof value="org.eclipse.team.core.mapping.ISynchronizationContext"/>
+            </or>
+         </enablement>
+      </navigatorContent>
+   </extension>
 
 </plugin>
