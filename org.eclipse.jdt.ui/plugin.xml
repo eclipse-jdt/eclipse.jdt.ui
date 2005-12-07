@@ -4727,7 +4727,8 @@
       <factory
             adaptableType="org.eclipse.ltk.core.refactoring.model.AbstractRefactoringModelProvider"
             class="org.eclipse.jdt.internal.ui.refactoring.model.JavaRefactoringAdapterFactory">
-         <adapter type="org.eclipse.team.ui.mapping.IResourceMappingMerger"/>
+         <adapter type="org.eclipse.team.core.mapping.IResourceMappingMerger"/>
+         <adapter type="org.eclipse.team.ui.mapping.ICompareAdapter"/>
       </factory>
    </extension>
 
