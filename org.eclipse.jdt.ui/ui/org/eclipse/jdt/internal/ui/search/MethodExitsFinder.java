@@ -58,8 +58,11 @@ public class MethodExitsFinder extends ASTVisitor {
 	private List fCatchedExceptions;
 
 	public String initialize(CompilationUnit root, int offset, int length) {
+		return initialize(root, NodeFinder.perform(root, offset, length));
+	}
+	
+	public String initialize(CompilationUnit root, ASTNode node) {
 		fAST= root.getAST();
-		ASTNode node= NodeFinder.perform(root, offset, length);
 		
 		if (node instanceof ReturnStatement) {
 			fMethodDeclaration= (MethodDeclaration)ASTNodes.getParent(node, ASTNode.METHOD_DECLARATION);

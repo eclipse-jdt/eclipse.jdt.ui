@@ -76,7 +76,10 @@ public class OccurrencesFinder extends ASTVisitor implements IOccurrencesFinder 
 	}
 	
 	public String initialize(CompilationUnit root, int offset, int length) {
-		ASTNode node= NodeFinder.perform(root, offset, length);
+		return initialize(root, NodeFinder.perform(root, offset, length));
+	}
+	
+	public String initialize(CompilationUnit root, ASTNode node) {
 		if (!(node instanceof Name))
 			return SearchMessages.OccurrencesFinder_no_element; 
 		fRoot= root;

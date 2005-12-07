@@ -2849,9 +2849,12 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		List matches= null;
+		
+		ASTNode selectedNode= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
+		
 		if (fMarkExceptions || fMarkTypeOccurrences) {
 			ExceptionOccurrencesFinder exceptionFinder= new ExceptionOccurrencesFinder();
-			String message= exceptionFinder.initialize(astRoot, selection.getOffset(), selection.getLength());
+			String message= exceptionFinder.initialize(astRoot, selectedNode);
 			if (message == null) {
 				matches= exceptionFinder.perform();
 				if (!fMarkExceptions && !matches.isEmpty())
@@ -2861,7 +2864,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		if ((matches == null || matches.isEmpty()) && (fMarkMethodExitPoints || fMarkTypeOccurrences)) {
 			MethodExitsFinder finder= new MethodExitsFinder();
-			String message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
+			String message= finder.initialize(astRoot, selectedNode);
 			if (message == null) {
 				matches= finder.perform();
 				if (!fMarkMethodExitPoints && !matches.isEmpty())
@@ -2871,7 +2874,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		if ((matches == null || matches.isEmpty()) && (fMarkBreakContinueTargets || fMarkTypeOccurrences)) {
 			BreakContinueTargetFinder finder= new BreakContinueTargetFinder();
-			String message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
+			String message= finder.initialize(astRoot, selectedNode);
 			if (message == null) {
 				matches= finder.perform();
 				if (!fMarkBreakContinueTargets && !matches.isEmpty())
@@ -2881,7 +2884,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 
 		if ((matches == null || matches.isEmpty()) && (fMarkImplementors || fMarkTypeOccurrences)) {
 			ImplementOccurrencesFinder finder= new ImplementOccurrencesFinder();
-			String message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
+			String message= finder.initialize(astRoot, selectedNode);
 			if (message == null) {
 				matches= finder.perform();
 				if (!fMarkImplementors && !matches.isEmpty())
@@ -2890,15 +2893,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		if (matches == null) {
-			ASTNode node= NodeFinder.perform(astRoot, selection.getOffset(), selection.getLength());
 			IBinding binding= null;
-			if (node instanceof Name)
-				binding= ((Name)node).resolveBinding();
+			if (selectedNode instanceof Name)
+				binding= ((Name)selectedNode).resolveBinding();
 
 			if (binding != null && markOccurrencesOfType(binding)) {
 				// Find the matches && extract positions so we can forget the AST
 				OccurrencesFinder finder = new OccurrencesFinder(binding);
-				String message= finder.initialize(astRoot, selection.getOffset(), selection.getLength());
+				String message= finder.initialize(astRoot, selectedNode);
 				if (message == null)
 					matches= finder.perform();
 			}

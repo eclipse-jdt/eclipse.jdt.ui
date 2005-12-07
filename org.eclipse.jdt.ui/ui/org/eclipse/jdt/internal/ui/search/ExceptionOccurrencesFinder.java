@@ -70,8 +70,11 @@ public class ExceptionOccurrencesFinder extends ASTVisitor implements IOccurrenc
 	}
 	
 	public String initialize(CompilationUnit root, int offset, int length) {
+		return initialize(root, NodeFinder.perform(root, offset, length));
+	}
+	
+	public String initialize(CompilationUnit root, ASTNode node) {
 		fAST= root.getAST();
-		ASTNode node= NodeFinder.perform(root, offset, length);
 		if (!(node instanceof Name)) {
 			return SearchMessages.ExceptionOccurrencesFinder_no_exception;  
 		}

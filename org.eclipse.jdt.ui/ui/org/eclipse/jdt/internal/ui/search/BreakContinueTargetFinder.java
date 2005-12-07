@@ -66,7 +66,14 @@ public class BreakContinueTargetFinder extends ASTVisitor {
 	 * Initializes the finder. Returns error message or <code>null</code> if everything is OK.
 	 */
 	public String initialize(CompilationUnit root, int offset, int length) {
-		ASTNode controlNode= getBreakOrContinueNode(NodeFinder.perform(root, offset, length));
+		return initialize(root, NodeFinder.perform(root, offset, length));
+	}
+	
+	/*
+	 * Initializes the finder. Returns error message or <code>null</code> if everything is OK.
+	 */
+	public String initialize(CompilationUnit root, ASTNode node) {
+		ASTNode controlNode= getBreakOrContinueNode(node);
 		if (controlNode != null){
 			fContents= getContents(root);
 			if (fContents == null)
