@@ -28,6 +28,7 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -43,6 +44,7 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
 
 /**
@@ -287,6 +289,9 @@ public final class ASTProvider {
 			fActiveEditor= editor;
 			fActiveJavaElement= javaElement;
 		}
+		
+		if (fActiveEditor instanceof ITextEditor)
+			SelectionListenerWithASTManager.getDefault().forceSelectionChange((ITextEditor)fActiveEditor);
 
 		if (DEBUG)
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "active editor is: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
@@ -472,7 +477,7 @@ public final class ASTProvider {
 
 				// Check whether active element is still valid
 				synchronized (this) {
-					if (activeElement == fActiveJavaElement) {
+					if (activeElement == fActiveJavaElement && fAST != null) {
 						if (DEBUG)
 							System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "...got AST for: " + je.getElementName()); //$NON-NLS-1$ //$NON-NLS-2$
 
