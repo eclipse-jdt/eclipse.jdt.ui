@@ -26,13 +26,12 @@ import org.eclipse.core.commands.ParameterizedCommand;
 import org.eclipse.core.commands.common.NotDefinedException;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.layout.RowData;
-import org.eclipse.swt.layout.RowLayout;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -60,11 +59,13 @@ import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
+import org.eclipse.jdt.core.JavaCore;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
-import org.eclipse.jdt.internal.ui.util.SWTUtil;
+import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
 /**
@@ -80,11 +81,13 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 	
 	private static final Key PREF_EXCLUDED_CATEGORIES= getJDTUIKey(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES);
 	private static final Key PREF_CATEGORY_ORDER= getJDTUIKey(PreferenceConstants.CODEASSIST_CATEGORY_ORDER);
+	private static final Key PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAMES= getJDTCoreKey(JavaCore.CODEASSIST_TIMEOUT_FOR_PARAMETER_NAMES);
 	
 	private static Key[] getAllKeys() {
 		return new Key[] {
 				PREF_EXCLUDED_CATEGORIES,
 				PREF_CATEGORY_ORDER,
+				PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAMES
 		};
 	}
 
@@ -245,12 +248,13 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 	 */
 	protected Control createContents(Composite parent) {
 		
-		ScrolledComposite scrolled= new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+		ScrolledPageContent scrolled= new ScrolledPageContent(parent, SWT.H_SCROLL | SWT.V_SCROLL);
 		
-		final Composite composite= new Composite(scrolled, SWT.NONE);
-		RowLayout layout= createRowLayout(SWT.VERTICAL);
-		layout.spacing= 20;
-		layout.fill= true;
+		scrolled.setExpandHorizontal(true);
+		scrolled.setExpandVertical(true);
+		
+		Composite composite= new Composite(scrolled, SWT.NONE);
+		GridLayout layout= new GridLayout(2, false);
 		composite.setLayout(layout);
 		
 		final ICommandService commandSvc= (ICommandService) PlatformUI.getWorkbench().getAdapter(ICommandService.class);
@@ -260,9 +264,14 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 		if (key == null)
 			key= PreferencesMessages.CodeAssistConfigurationBlockInProgress_no_shortcut;
 
+		PixelConverter pixelConverter= new PixelConverter(parent);
+		int width= pixelConverter.convertWidthInCharsToPixels(40);
+		
 		Label label= new Label(composite, SWT.NONE | SWT.WRAP);
 		label.setText(MessageFormat.format(PreferencesMessages.CodeAssistConfigurationBlockInProgress_computer_description, new Object[] { key }));
-		label.setLayoutData(new RowData(300, SWT.DEFAULT));
+		GridData gd= new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1);
+		gd.widthHint= width;
+		label.setLayoutData(gd);
 		
 		createControls(composite);
 		
@@ -274,25 +283,45 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 			}
 		});
 		// limit the size of the Link as it would take all it can get
-		link.setLayoutData(new RowData(300, SWT.DEFAULT));
+		gd= new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1);
+		gd.widthHint= width;
+		link.setLayoutData(gd);
 		
 		updateControls();
 		if (fModel.size() > 0) {
 			fViewer.getTable().select(0);
 			handleTableSelection();
 		}
+
+		createParameterTimeoutControl(composite);
 		
 		scrolled.setContent(composite);
 		scrolled.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-		scrolled.setExpandHorizontal(true);
-		scrolled.setExpandVertical(true);
 		return scrolled;
+	}
+	
+	private void createParameterTimeoutControl(Composite composite) {
+		Label filler= new Label(composite, SWT.NONE);
+		filler.setVisible(false);
+		filler.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
+		
+		Composite timeoutComposite= new Composite(composite, SWT.NONE);
+		GridLayout layout= new GridLayout(3, false);
+		layout.marginWidth= 0;
+		layout.marginHeight= 0;
+		timeoutComposite.setLayout(layout);
+		GridData gd= new GridData(GridData.FILL, GridData.FILL, false, false, 2, 1);
+		timeoutComposite.setLayoutData(gd);
+		
+		PixelConverter pixelConverter= new PixelConverter(composite);
+		String str= PreferencesMessages.CodeAssistConfigurationBlockInProgress_parameterName_timeout; 
+		addTextField(timeoutComposite, str, PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAMES, 0, pixelConverter.convertWidthInCharsToPixels(7));
 	}
 
 	private void createControls(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
-		RowLayout layout= createRowLayout(SWT.HORIZONTAL);
-		layout.fill= true;
+		GridLayout layout= new GridLayout(2, false);
+
 		composite.setLayout(layout);
 		
 		createViewer(composite);
@@ -346,8 +375,7 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 
 	private void createButtonList(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
-		RowLayout layout= createRowLayout(SWT.VERTICAL);
-		layout.spacing= 20;
+		GridLayout layout= new GridLayout();
 		composite.setLayout(layout);
 		
 		createUpDownControls(composite);
@@ -356,8 +384,7 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 
 	private void createUpDownControls(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
-		RowLayout layout= createRowLayout(SWT.VERTICAL);
-		layout.fill= true;
+		GridLayout layout= new GridLayout();
 		composite.setLayout(layout);
 		
 		fUpButton= new Button(composite, SWT.PUSH | SWT.CENTER);
@@ -374,7 +401,7 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 				}
 			}		
 		});
-		fUpButton.setLayoutData(new RowData(SWTUtil.getButtonWidthHint(fUpButton), SWT.DEFAULT));
+		fUpButton.setLayoutData(new GridData());
 		
 		fDownButton= new Button(composite, SWT.PUSH | SWT.CENTER);
 		fDownButton.setText(PreferencesMessages.CodeAssistConfigurationBlockInProgress_Down);
@@ -390,13 +417,12 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 				}
 			}		
 		});
-		fDownButton.setLayoutData(new RowData(SWTUtil.getButtonWidthHint(fDownButton), SWT.DEFAULT));
+		fDownButton.setLayoutData(new GridData());
 	}
 
 	private void createButtons(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
-		RowLayout layout= createRowLayout(SWT.VERTICAL);
-		layout.spacing= 10;
+		GridLayout layout= new GridLayout();
 		composite.setLayout(layout);
 		
 		fInclusionButton= new Button(composite, SWT.CHECK);
@@ -540,19 +566,6 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 		super.dispose();
 	}
 
-	private RowLayout createRowLayout(int type) {
-		RowLayout layout= new RowLayout(type);
-		layout.wrap= false;
-		layout.marginHeight= 0;
-		layout.marginTop= 0;
-		layout.marginBottom= 0;
-		layout.marginWidth= 0;
-		layout.marginLeft= 0;
-		layout.marginRight= 0;
-		layout.spacing= 5;
-		return layout;
-	}
-
 	private int computeWidth(Control control, String name) {
 		if (name == null)
 			return 0;
@@ -589,5 +602,5 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 		}
 		return img;
 	}
-
+	
 }

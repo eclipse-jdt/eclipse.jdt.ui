@@ -707,6 +707,7 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeAssistConfigurationBlockInProgress_Down;
 	public static String CodeAssistConfigurationBlockInProgress_separator;
 	public static String CodeAssistConfigurationBlockInProgress_include;
+	public static String CodeAssistConfigurationBlockInProgress_parameterName_timeout;
 	public static String ProblemSeveritiesConfigurationBlock_section_generics;
 	public static String JavaBuildConfigurationBlock_treat_optional_as_fatal;
 	public static String JavaBasePreferencePage_dialogs;
