@@ -2270,8 +2270,11 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
 			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
-			if (name != null && !"".equals(name)) { //$NON-NLS-1$
+			if (name != null) {
 				fMethodName= name;
+				final RefactoringStatus status= Checks.checkMethodName(fMethodName);
+				if (status.hasError())
+					return status;
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
 			final String type= generic.getAttribute(ATTRIBUTE_RETURN);
