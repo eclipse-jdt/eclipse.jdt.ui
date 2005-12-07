@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.text.java;
 
-import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 
@@ -22,6 +21,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -67,8 +67,21 @@ public class JavaContentAssistInvocationContext extends TextContentAssistInvocat
 	/**
 	 * Creates a new context.
 	 * 
+	 * @param unit the compilation unit in <code>document</code>
+	 */
+	public JavaContentAssistInvocationContext(ICompilationUnit unit) {
+		super();
+		fCU= unit;
+		fCUComputed= true;
+		fEditor= null;
+	}
+	
+	/**
+	 * Creates a new context.
+	 * 
 	 * @param viewer the viewer used by the editor
 	 * @param offset the invocation offset
+	 * @deprecated don't use any longer - will be removed for 3.2 M4
 	 */
 	public JavaContentAssistInvocationContext(ITextViewer viewer, int offset) {
 		super(viewer, offset);
@@ -86,7 +99,7 @@ public class JavaContentAssistInvocationContext extends TextContentAssistInvocat
 			fCUComputed= true;
 			if (fCollector != null)
 				fCU= fCollector.getCompilationUnit();
-			else if (fEditor != null)
+			else if (fEditor != null) // TODO remove null check when deprecated ctor gets removed
 				fCU= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
 		}
 		return fCU;
@@ -163,7 +176,7 @@ public class JavaContentAssistInvocationContext extends TextContentAssistInvocat
 	 * @return the expected type if any, <code>null</code> otherwise
 	 */
 	public IType getExpectedType() {
-		if (fType == null) {
+		if (fType == null && getCompilationUnit() != null) {
 			CompletionContext context= getCoreContext();
 			if (context != null) {
 				char[][] expectedTypes= context.getExpectedTypesSignatures();
