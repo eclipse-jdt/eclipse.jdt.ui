@@ -49,10 +49,12 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -142,6 +144,7 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
@@ -1005,7 +1008,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	private boolean fInline= false;
 
 	/** The method to move */
-	private final IMethod fMethod;
+	private IMethod fMethod;
 
 	/** The name of the new method to generate */
 	private String fMethodName;
@@ -1017,7 +1020,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	private boolean fRemove= false;
 
 	/** The code generation settings to apply */
-	private final CodeGenerationSettings fSettings;
+	private CodeGenerationSettings fSettings;
 
 	/** The source compilation unit rewrite */
 	private CompilationUnitRewrite fSourceRewrite;
@@ -1043,17 +1046,28 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Creates a new move instance method processor.
 	 * 
-	 * @param method the method to move
-	 * @param settings the code generation settings to apply
+	 * @param method the method to move, or <code>null</code>
+	 * @param settings the code generation settings to apply, or <code>null</code>
 	 */
 	public MoveInstanceMethodProcessor(final IMethod method, final CodeGenerationSettings settings) {
 		fSettings= settings;
 		fMethod= method;
-		if (method != null) {
-			fSourceRewrite= new CompilationUnitRewrite(fMethod.getCompilationUnit());
-			fMethodName= method.getElementName();
-			fTargetName= suggestTargetName();
-		}
+		if (method != null)
+			initialize(method);
+	}
+
+	/**
+	 * Initializes the refactoring with the given input.
+	 * 
+	 * @param method the method to move
+	 */
+	protected void initialize(final IMethod method) {
+		Assert.isNotNull(method);
+		fSourceRewrite= new CompilationUnitRewrite(fMethod.getCompilationUnit());
+		fMethodName= method.getElementName();
+		fTargetName= suggestTargetName();
+		if (fSettings == null)
+			fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fMethod.getJavaProject());
 	}
 
 	/**
@@ -2718,8 +2732,83 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		return "arg"; //$NON-NLS-1$
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		// TODO: implement
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+				else {
+					fMethod= (IMethod) element;
+					initialize(fMethod);
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
+			if (name != null) {
+				final RefactoringStatus status= setMethodName(name);
+				if (status.hasError())
+					return status;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
+			final String deprecate= generic.getAttribute(ATTRIBUTE_DEPRECATE);
+			if (deprecate != null) {
+				fDeprecated= Boolean.valueOf(deprecate).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
+			final String remove= generic.getAttribute(ATTRIBUTE_REMOVE);
+			if (remove != null) {
+				fRemove= Boolean.valueOf(remove).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REMOVE));
+			final String inline= generic.getAttribute(ATTRIBUTE_INLINE);
+			if (inline != null) {
+				fInline= Boolean.valueOf(inline).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INLINE));
+			final String getter= generic.getAttribute(ATTRIBUTE_USE_GETTER);
+			if (getter != null)
+				fUseGetters= Boolean.valueOf(getter).booleanValue();
+			else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_USE_GETTER));
+			final String setter= generic.getAttribute(ATTRIBUTE_USE_SETTER);
+			if (setter != null)
+				fUseSetters= Boolean.valueOf(setter).booleanValue();
+			else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_USE_SETTER));
+			final String target= generic.getAttribute(ATTRIBUTE_TARGET_NAME);
+			if (target != null) {
+				final RefactoringStatus status= setTargetName(target);
+				if (status.hasError())
+					return status;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TARGET_NAME));
+			final String value= generic.getAttribute(ATTRIBUTE_TARGET_INDEX);
+			if (value != null) {
+				try {
+					final int index= Integer.valueOf(value).intValue();
+					if (index >= 0) {
+						final MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(fMethod, fSourceRewrite.getRoot());
+						if (declaration != null) {
+							final IVariableBinding[] bindings= computeTargetCategories(declaration);
+							if (bindings != null && index < bindings.length)
+								setTarget(bindings[index]);
+						}
+					}
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, value, ATTRIBUTE_TARGET_INDEX));
+				} catch (JavaModelException exception) {
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, value, ATTRIBUTE_TARGET_INDEX));
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TARGET_INDEX));
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
 	}
 }
