@@ -44,8 +44,11 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayType;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.IExtendedModifier;
@@ -60,10 +63,8 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
-import org.eclipse.jdt.core.dom.TypeDeclarationStatement;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -72,6 +73,7 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
@@ -506,7 +508,7 @@ public class TypeContextChecker {
 		}
 	}
 
-	private static void fillWithTypeStubs(StringBuffer bufBefore, StringBuffer bufAfter, int focalPosition, List/*<? extends BodyDeclaration>*/ types) {
+	private static void fillWithTypeStubs(final StringBuffer bufBefore, final StringBuffer bufAfter, final int focalPosition, List/*<? extends BodyDeclaration>*/ types) {
 		StringBuffer buf;
 		for (Iterator iter= types.iterator(); iter.hasNext();) {
 			BodyDeclaration bodyDeclaration= (BodyDeclaration) iter.next();
@@ -525,16 +527,28 @@ public class TypeContextChecker {
 				buf.append(" void "); //$NON-NLS-1$
 				buf.append(methodDeclaration.getName().getIdentifier());
 				buf.append("(){\n"); //$NON-NLS-1$
-				List statements= methodDeclaration.getBody().statements();
-				for (Iterator iterator= statements.iterator(); iterator.hasNext();) {
-					Statement statement= (Statement) iterator.next();
-					if (statement instanceof TypeDeclarationStatement) {
-						AbstractTypeDeclaration localType= ((TypeDeclarationStatement) statement).getDeclaration();
-						fillWithTypeStubs(bufBefore, bufAfter, focalPosition, Collections.singletonList(localType));
+				Block body= methodDeclaration.getBody();
+				body.accept(new HierarchicalASTVisitor() {
+					public boolean visit(AbstractTypeDeclaration node) {
+						fillWithTypeStubs(bufBefore, bufAfter, focalPosition, Collections.singletonList(node));
+						return false;
 					}
-					//TODO: does not work for anonymous inner classes and local classes declared inside a block!
-					// Does not propose type parameters of the method
-				}
+					public boolean visit(ClassInstanceCreation node) {
+						AnonymousClassDeclaration anonDecl= node.getAnonymousClassDeclaration();
+						if (anonDecl == null)
+							return false;
+						int anonStart= anonDecl.getStartPosition();
+						int anonEnd= anonDecl.getStartPosition() + anonDecl.getLength();
+						if (! (anonStart < focalPosition && focalPosition < anonEnd))
+							return false;
+						bufBefore.append(" new "); //$NON-NLS-1$
+						bufBefore.append(node.getType().toString());
+						bufBefore.append("(){\n"); //$NON-NLS-1$
+						fillWithTypeStubs(bufBefore, bufAfter, focalPosition, anonDecl.bodyDeclarations());
+						bufAfter.insert(0, "};\n"); //$NON-NLS-1$
+						return false;
+					}
+				});
 				buf= bufAfter;
 				buf.append("}\n"); //$NON-NLS-1$
 				continue;
