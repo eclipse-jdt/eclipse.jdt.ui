@@ -52,7 +52,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
  * This reference is either unqualified if the import could be added, or fully qualified if the import failed due to a conflict with another element of the same name.
  * </p>
  * <p>
- * On {@link #intrenalerewriteImports(CompilationUnit, IProgressMonitor)} or {@link #rewriteImports(IProgressMonitor)} the rewrite translates these descriptions into
+ * On {@link #rewriteImports(IProgressMonitor)} the rewrite translates these descriptions into
  * text edits that can then be applied to the original source. The rewrite infrastructure tries to generate minimal text changes and only
  * works on the import statements. It is possible to combine the result of an import rewrite with the result of a {@link org.eclipse.jdt.core.dom.rewrite.ASTRewrite}
  * as long as no import statements are modified by the AST rewrite.
@@ -382,7 +382,7 @@ public final class NewImportRewrite {
 			case Signature.BASE_TYPE_SIGNATURE:
 				return ast.newPrimitiveType(PrimitiveType.toCode(Signature.toString(typeSig)));
 			case Signature.ARRAY_TYPE_SIGNATURE:
-				Type elementType= addImportFromSignature(Signature.getElementType(typeSig), ast);
+				Type elementType= addImportFromSignature(Signature.getElementType(typeSig), ast, context);
 				return ast.newArrayType(elementType, Signature.getArrayCount(typeSig));
 			case Signature.CLASS_TYPE_SIGNATURE:
 				String erasureSig= Signature.getTypeErasure(typeSig);
@@ -397,7 +397,7 @@ public final class NewImportRewrite {
 					ParameterizedType type= ast.newParameterizedType(baseType);
 					List argNodes= type.typeArguments();
 					for (int i= 0; i < typeArguments.length; i++) {
-						argNodes.add(addImportFromSignature(typeArguments[i], ast));
+						argNodes.add(addImportFromSignature(typeArguments[i], ast, context));
 					}
 					return type;
 				}
@@ -408,12 +408,12 @@ public final class NewImportRewrite {
 				WildcardType wildcardType= ast.newWildcardType();
 				char ch= typeSig.charAt(0);
 				if (ch != Signature.C_STAR) {
-					Type bound= addImportFromSignature(typeSig.substring(1), ast);
+					Type bound= addImportFromSignature(typeSig.substring(1), ast, context);
 					wildcardType.setBound(bound, ch == Signature.C_EXTENDS);
 				}
 				return wildcardType;
 			case Signature.CAPTURE_TYPE_SIGNATURE:
-				return addImportFromSignature(typeSig.substring(1), ast);
+				return addImportFromSignature(typeSig.substring(1), ast, context);
 			default:
 				throw new IllegalArgumentException("Unknown type signature kind: " + typeSig); //$NON-NLS-1$
 		}
@@ -477,13 +477,13 @@ public final class NewImportRewrite {
 				} else {
 					res.append(" super "); //$NON-NLS-1$
 				}
-				res.append(addImport(bound));
+				res.append(addImport(bound, context));
 			}
 			return res.toString();
 		}
 		
 		if (normalizedBinding.isArray()) {
-			StringBuffer res= new StringBuffer(addImport(normalizedBinding.getElementType()));
+			StringBuffer res= new StringBuffer(addImport(normalizedBinding.getElementType(), context));
 			for (int i= normalizedBinding.getDimensions(); i > 0; i--) {
 				res.append("[]"); //$NON-NLS-1$
 			}
@@ -502,7 +502,7 @@ public final class NewImportRewrite {
 					if (i > 0) {
 						res.append(','); 
 					}
-					res.append(addImport(typeArguments[i]));
+					res.append(addImport(typeArguments[i], context));
 				}
 				res.append('>');
 				return res.toString();
@@ -589,14 +589,14 @@ public final class NewImportRewrite {
 			WildcardType wcType= ast.newWildcardType();
 			ITypeBinding bound= normalizedBinding.getBound();
 			if (bound != null && !bound.isWildcardType() && !bound.isCapture()) { // bug 96942
-				Type boundType= addImport(bound, ast);
+				Type boundType= addImport(bound, ast, context);
 				wcType.setBound(boundType, normalizedBinding.isUpperbound());
 			}
 			return wcType;
 		}
 		
 		if (normalizedBinding.isArray()) {
-			Type elementType= addImport(normalizedBinding.getElementType(), ast);
+			Type elementType= addImport(normalizedBinding.getElementType(), ast, context);
 			return ast.newArrayType(elementType, normalizedBinding.getDimensions());
 		}
 		
@@ -610,7 +610,7 @@ public final class NewImportRewrite {
 				ParameterizedType paramType= ast.newParameterizedType(erasureType);
 				List arguments= paramType.typeArguments();
 				for (int i= 0; i < typeArguments.length; i++) {
-					arguments.add(addImport(typeArguments[i], ast));
+					arguments.add(addImport(typeArguments[i], ast, context));
 				}
 				return paramType;
 			}
@@ -684,16 +684,39 @@ public final class NewImportRewrite {
 	 * or method.
 	 */
 	public String addStaticImport(IBinding binding) {
+		return addStaticImport(binding, fDefaultContext);
+	}
+		
+	/**
+	 * Adds a new static import to the rewriter's record and returns a reference that can be used in the code. The reference will
+	 * be fully qualified if an import conflict prevented the import or unqualified if the import succeeded or was already
+	 * existing.
+	 * 	<p>
+ 	 * No imports are added for members that are already known. If a import for a type is recorded to be removed, this record is discarded instead.
+	 * </p>
+	 * <p>
+	 * The content of the compilation unit itself is actually not modified
+	 * in any way by this method; rather, the rewriter just records that a new import has been added.
+	 * </p>
+	 * @param binding The binding of the static field or method to be added.
+	 * @param context an optional context that knows about members visible in the current scope or <code>null</code>
+	 * to use the default context only using the available imports.
+	 * @return returns either the simple member name if the import was successful or else the qualified name if
+	 * an import conflict prevented the import.
+	 * @throws IllegalArgumentException an {@link IllegalArgumentException} is thrown if the binding is not a static field
+	 * or method.
+	 */
+	public String addStaticImport(IBinding binding, ImportRewriteContext context) {		
 		if (Modifier.isStatic(binding.getModifiers())) {
 			if (binding instanceof IVariableBinding) {
 				IVariableBinding variableBinding= (IVariableBinding) binding;
 				if (variableBinding.isField()) {
 					ITypeBinding declaringType= variableBinding.getDeclaringClass();
-					return addStaticImport(getRawQualifiedName(declaringType), binding.getName(), true);
+					return addStaticImport(getRawQualifiedName(declaringType), binding.getName(), true, context);
 				}
 			} else if (binding instanceof IMethodBinding) {
 				ITypeBinding declaringType= ((IMethodBinding) binding).getDeclaringClass();
-				return addStaticImport(getRawQualifiedName(declaringType), binding.getName(), false);
+				return addStaticImport(getRawQualifiedName(declaringType), binding.getName(), false, context);
 			}
 		}
 		throw new IllegalArgumentException("Binding must be a static field or method."); //$NON-NLS-1$
@@ -718,11 +741,38 @@ public final class NewImportRewrite {
 	 * an import conflict prevented the import.
 	 */
 	public String addStaticImport(String declaringTypeName, String simpleName, boolean isField) {
+		return addStaticImport(declaringTypeName, simpleName, isField, fDefaultContext);
+	}
+	
+	/**
+	 * Adds a new static import to the rewriter's record and returns a reference that can be used in the code. The reference will
+	 * be fully qualified if an import conflict prevented the import or unqualified if the import succeeded or was already
+	 * existing.
+	 * 	<p>
+ 	 * No imports are added for members that are already known. If a import for a type is recorded to be removed, this record is discarded instead.
+	 * </p>
+	 * <p>
+	 * The content of the compilation unit itself is actually not modified
+	 * in any way by this method; rather, the rewriter just records that a new import has been added.
+	 * </p>
+	 * @param declaringTypeName The qualified name of the static's member declaring type
+	 * @param simpleName the simple name of the member; either a field or a method name.
+	 * @param isField <code>true</code> specifies that the member is a field, <code>false</code> if it is a
+	 * method.
+	 * @param context an optional context that knows about members visible in the current scope or <code>null</code>
+	 * to use the default context only using the available imports.
+	 * @return returns either the simple member name if the import was successful or else the qualified name if
+	 * an import conflict prevented the import.
+	 */
+	public String addStaticImport(String declaringTypeName, String simpleName, boolean isField, ImportRewriteContext context) {	
 		if (declaringTypeName.indexOf('.') == -1) {
 			return declaringTypeName + '.' + simpleName;
 		}
+		if (context == null) {
+			context= fDefaultContext;
+		}
 		int kind= isField ? ImportRewriteContext.KIND_STATIC_FIELD : ImportRewriteContext.KIND_STATIC_METHOD;
-		int res= fDefaultContext.findInContext(declaringTypeName, simpleName, kind);
+		int res= context.findInContext(declaringTypeName, simpleName, kind);
 		if (res == ImportRewriteContext.RES_NAME_CONFLICT) {
 			return declaringTypeName + '.' + simpleName;
 		}
@@ -746,6 +796,9 @@ public final class NewImportRewrite {
 		if (typeContainerName.length() == 0 && PrimitiveType.toCode(typeName) != null) {
 			return fullTypeName;
 		}
+		
+		if (context == null)
+			context= fDefaultContext;
 		
 		int res= context.findInContext(typeContainerName, typeName, ImportRewriteContext.KIND_TYPE);
 		if (res == ImportRewriteContext.RES_NAME_CONFLICT) {
@@ -892,65 +945,7 @@ public final class NewImportRewrite {
 	}
 	
 	/**
-	 * Converts all modifications recorded by this rewriter into an object representing the corresponding text
-	 * edits to the source code of the rewrite's compilation unit. The compilation unit itself is not modified.
-	 * <p>
-	 * Calling this methods does not discard the modifications on record. Subsequence modifications are added
-	 * to the ones already on record. If this method is called again later, the resulting text edit object will accurately
-	 * reflect the net cumulative affect of all those changes.
-	 * </p>
-	 * <p>
-	 * Note that this method is more efficient than using {@link #rewriteImports(IProgressMonitor)}. The AST has to
-	 * be created from the rewrite's compilation unit ({@link ASTParser#setSource(ICompilationUnit)} has been used to create the AST) and must
-	 * contain at least the package statement, imports and top level type declarations.
-	 * </p>
-	 * @param astRoot The AST created from the rewriter's compilation unit (see {@link #getCompilationUnit()}) containing
-	 * at least the package statement, imports and top level type declarations. 
-	 * @param monitor the progress monitor or <code>null</code>
-	 * @return text edit object describing the changes to the document corresponding to the changes
-	 * recorded by this rewriter
-	 * @throws CoreException the exception is thrown if the rewrite failed.
-	 */
-	public final TextEdit intrenalerewriteImports(CompilationUnit astRoot, IProgressMonitor monitor) throws CoreException {
-		if (!fCompilationUnit.equals(astRoot.getJavaElement())) {
-			throw new IllegalArgumentException("AST is not from the compilation unit that was used when creating the import rewrite."); //$NON-NLS-1$
-		}
-		
-		if (!hasRecordedChanges()) {
-			fCreatedImports= new String[0];
-			fCreatedStaticImports= new String[0];
-			return new MultiTextEdit();
-		}
-		
-		IJavaProject project= fCompilationUnit.getJavaProject();
-		String[] order= getImportOrderPreference(project);
-		int threshold= getImportNumberThreshold(project);
-		
-		ImportRewriteComputer computer= new ImportRewriteComputer(fCompilationUnit, astRoot, order, threshold, fRestoreExistingImports);
-		computer.setFilterImplicitImports(fFilterImplicitImports);
-		
-		if (fAddedImports != null) {
-			for (int i= 0; i < fAddedImports.size(); i++) {
-				String curr= (String) fAddedImports.get(i);
-				computer.addImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0));
-			}
-		}
-		
-		if (fRemovedImports != null) {
-			for (int i= 0; i < fRemovedImports.size(); i++) {
-				String curr= (String) fRemovedImports.get(i);
-				computer.removeImport(curr.substring(1), STATIC_PREFIX == curr.charAt(0));
-			}
-		}
-			
-		TextEdit result= computer.getResultingEdits(monitor);
-		fCreatedImports= computer.getCreatedImports();
-		fCreatedStaticImports= computer.getCreatedStaticImports();
-		return result;
-	}
-	
-	/**
-	 * Returns all new non-static imports created by the last invocation of {@link #intrenalerewriteImports(CompilationUnit, IProgressMonitor)} or {@link #rewriteImports(IProgressMonitor)}
+	 * Returns all new non-static imports created by the last invocation of {@link #rewriteImports(IProgressMonitor)}
 	 * or <code>null</code> if these methods have not been called yet.
 	 * <p>
 	 * 	Note that this list doesn't need to be the same as the added imports (see {@link #getAddedImports()}) as
@@ -963,7 +958,7 @@ public final class NewImportRewrite {
 	}
 	
 	/**
-	 * Returns all new static imports created by the last invocation of {@link #intrenalerewriteImports(CompilationUnit, IProgressMonitor)} or {@link #rewriteImports(IProgressMonitor)}
+	 * Returns all new static imports created by the last invocation of {@link #rewriteImports(IProgressMonitor)}
 	 * or <code>null</code> if these methods have not been called yet.
 	 * <p>
 	 * Note that this list doesn't need to be the same as the added static imports ({@link #getAddedStaticImports()}) as
