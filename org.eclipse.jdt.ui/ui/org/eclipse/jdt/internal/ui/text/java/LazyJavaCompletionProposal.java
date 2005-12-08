@@ -12,185 +12,33 @@
 package org.eclipse.jdt.internal.ui.text.java;
 
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.custom.StyledText;
-import org.eclipse.swt.events.VerifyEvent;
-import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
-
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferenceConverter;
 
 import org.eclipse.jface.text.Assert;
-import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.BadPositionCategoryException;
-import org.eclipse.jface.text.DefaultPositionUpdater;
-import org.eclipse.jface.text.DocumentCommand;
-import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IInformationControlCreator;
-import org.eclipse.jface.text.IPositionUpdater;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.ITextViewerExtension2;
-import org.eclipse.jface.text.ITextViewerExtension5;
-import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
-import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.link.ILinkedModeListener;
-import org.eclipse.jface.text.link.LinkedModeModel;
-import org.eclipse.jface.text.link.LinkedModeUI;
-import org.eclipse.jface.text.link.LinkedPosition;
-import org.eclipse.jface.text.link.LinkedPositionGroup;
-import org.eclipse.jface.text.link.LinkedModeUI.ExitFlags;
-import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
-
-import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.Signature;
 
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.IJavaPartitions;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
-public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICompletionProposalExtension, ICompletionProposalExtension2, ICompletionProposalExtension3 {
-	/**
-	 * A class to simplify tracking a reference position in a document.
-	 */
-	static final class ReferenceTracker {
+public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	
-		/** The reference position category name. */
-		private static final String CATEGORY= "reference_position"; //$NON-NLS-1$
-		/** The position updater of the reference position. */
-		private final IPositionUpdater fPositionUpdater= new DefaultPositionUpdater(CATEGORY);
-		/** The reference position. */
-		private final Position fPosition= new Position(0);
-	
-		/**
-		 * Called before document changes occur. It must be followed by a call to postReplace().
-		 *
-		 * @param document the document on which to track the reference position.
-		 *
-		 */
-		public void preReplace(IDocument document, int offset) throws BadLocationException {
-			fPosition.setOffset(offset);
-			try {
-				document.addPositionCategory(CATEGORY);
-				document.addPositionUpdater(fPositionUpdater);
-				document.addPosition(CATEGORY, fPosition);
-	
-			} catch (BadPositionCategoryException e) {
-				// should not happen
-				JavaPlugin.log(e);
-			}
-		}
-	
-		/**
-		 * Called after the document changed occured. It must be preceded by a call to preReplace().
-		 *
-		 * @param document the document on which to track the reference position.
-		 */
-		public int postReplace(IDocument document) {
-			try {
-				document.removePosition(CATEGORY, fPosition);
-				document.removePositionUpdater(fPositionUpdater);
-				document.removePositionCategory(CATEGORY);
-	
-			} catch (BadPositionCategoryException e) {
-				// should not happen
-				JavaPlugin.log(e);
-			}
-			return fPosition.getOffset();
-		}
-	}
-
-	protected static final class ExitPolicy implements IExitPolicy {
-	
-		final char fExitCharacter;
-		private final IDocument fDocument;
-	
-		public ExitPolicy(char exitCharacter, IDocument document) {
-			fExitCharacter= exitCharacter;
-			fDocument= document;
-		}
-	
-		/*
-		 * @see org.eclipse.jdt.internal.ui.text.link.LinkedPositionUI.ExitPolicy#doExit(org.eclipse.jdt.internal.ui.text.link.LinkedPositionManager, org.eclipse.swt.events.VerifyEvent, int, int)
-		 */
-		public ExitFlags doExit(LinkedModeModel environment, VerifyEvent event, int offset, int length) {
-	
-			if (event.character == fExitCharacter) {
-				if (environment.anyPositionContains(offset))
-					return new ExitFlags(ILinkedModeListener.UPDATE_CARET, false);
-				else
-					return new ExitFlags(ILinkedModeListener.UPDATE_CARET, true);
-			}
-	
-			switch (event.character) {
-				case ';':
-					return new ExitFlags(ILinkedModeListener.NONE, true);
-				case SWT.CR:
-					// when entering an anonymous class as a parameter, we don't want
-					// to jump after the parenthesis when return is pressed
-					if (offset > 0) {
-						try {
-							if (fDocument.getChar(offset - 1) == '{')
-								return new ExitFlags(ILinkedModeListener.EXIT_ALL, true);
-						} catch (BadLocationException e) {
-						}
-					}
-					// fall through
-				default:
-					return null;
-			}
-		}
-	
-	}
-
 	private boolean fDisplayStringComputed;
-	private String fDisplayString;
-	
 	private boolean fReplacementStringComputed;
-	private String fReplacementString;
-	
 	private boolean fReplacementOffsetComputed;
-	private int fReplacementOffset;
-	
 	private boolean fReplacementLengthComputed;
-	private int fReplacementLength;
-	
 	private boolean fCursorPositionComputed;
-	private int fCursorPosition;
-	
 	private boolean fImageComputed;
-	private Image fImage;
-	
 	private boolean fContextInformationComputed;
-	private IContextInformation fContextInformation;
-	
 	private boolean fProposalInfoComputed;
-	private ProposalInfo fProposalInfo;
-	
 	private boolean fTriggerCharactersComputed;
-	private char[] fTriggerCharacters;
-	
 	private boolean fSortStringComputed;
-	private String fSortString;
-
 	private boolean fRelevanceComputed;
-	private int fRelevance;
 	
 	/**
 	 * The core proposal wrapped by this completion proposal.
@@ -201,10 +49,6 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	 */
 	protected final JavaContentAssistInvocationContext fInvocationContext;
 	
-	private StyleRange fRememberedStyleRange;
-	private boolean fToggleEating;
-	private ITextViewer fTextViewer;
-
 	public LazyJavaCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
 		Assert.isNotNull(proposal);
 		Assert.isNotNull(context);
@@ -219,7 +63,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	public final char[] getTriggerCharacters() {
 		if (!fTriggerCharactersComputed)
 			setTriggerCharacters(computeTriggerCharacters());
-		return fTriggerCharacters;
+		return super.getTriggerCharacters();
 	}
 	
 	protected char[] computeTriggerCharacters() {
@@ -232,7 +76,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	 */
 	public final void setTriggerCharacters(char[] triggerCharacters) {
 		fTriggerCharactersComputed= true;
-		fTriggerCharacters= triggerCharacters;
+		super.setTriggerCharacters(triggerCharacters);
 	}
 
 	/**
@@ -241,7 +85,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	 */
 	public final void setProposalInfo(ProposalInfo proposalInfo) {
 		fProposalInfoComputed= true;
-		fProposalInfo= proposalInfo;
+		super.setProposalInfo(proposalInfo);
 	}
 
 	/**
@@ -254,7 +98,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	public final ProposalInfo getProposalInfo() {
 		if (!fProposalInfoComputed)
 			setProposalInfo(computeProposalInfo());
-		return fProposalInfo;
+		return super.getProposalInfo();
 	}
 
 	protected ProposalInfo computeProposalInfo() {
@@ -267,15 +111,14 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	 * @param cursorPosition The cursorPosition to set
 	 */
 	public final void setCursorPosition(int cursorPosition) {
-		Assert.isTrue(cursorPosition >= 0);
 		fCursorPositionComputed= true;
-		fCursorPosition= cursorPosition;
+		super.setCursorPosition(cursorPosition);
 	}
 	
 	protected final int getCursorPosition() {
 		if (!fCursorPositionComputed)
 			setCursorPosition(computeCursorPosition());
-		return fCursorPosition;
+		return super.getCursorPosition();
 	}
 
 	protected int computeCursorPosition() {
@@ -283,133 +126,10 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	}
 
 	/*
-	 * @see ICompletionProposal#apply
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isInJavadoc()
 	 */
-	public final void apply(IDocument document) {
-		// not used any longer
-		apply(document, (char) 0, getReplacementOffset() + getReplacementLength());
-	}
-	
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension#apply(org.eclipse.jface.text.IDocument, char, int)
-	 */
-	public void apply(IDocument document, char trigger, int offset) {
-		try {
-			// patch replacement length
-			int delta= offset - (getReplacementOffset() + getReplacementLength());
-			if (delta > 0)
-				setReplacementLength(getReplacementLength() + delta);
-	
-			boolean isSmartTrigger= isSmartTrigger(trigger);
-	
-			String replacement;
-			if (isSmartTrigger || trigger == (char) 0) {
-				replacement= getReplacementString();
-			} else {
-				StringBuffer buffer= new StringBuffer(getReplacementString());
-	
-				// fix for PR #5533. Assumes that no eating takes place.
-				if ((getCursorPosition() > 0 && getCursorPosition() <= buffer.length() && buffer.charAt(getCursorPosition() - 1) != trigger)) {
-					buffer.insert(getCursorPosition(), trigger);
-					setCursorPosition(getCursorPosition() + 1);
-				}
-	
-				replacement= buffer.toString();
-				setReplacementString(replacement);
-			}
-	
-			// reference position just at the end of the document change.
-			int referenceOffset= getReplacementOffset() + getReplacementLength();
-			final ReferenceTracker referenceTracker= new ReferenceTracker();
-			referenceTracker.preReplace(document, referenceOffset);
-	
-			replace(document, getReplacementOffset(), getReplacementLength(), replacement);
-	
-			referenceOffset= referenceTracker.postReplace(document);
-			setReplacementOffset(referenceOffset - (replacement == null ? 0 : replacement.length()));
-	
-			// PR 47097
-			if (isSmartTrigger)
-				handleSmartTrigger(document, trigger, referenceOffset);
-	
-		} catch (BadLocationException x) {
-			// ignore
-		}
-	}
-
-	private boolean isSmartTrigger(char trigger) {
-		return trigger == ';' && JavaPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_SEMICOLON)
-				|| trigger == '{' && JavaPlugin.getDefault().getCombinedPreferenceStore().getBoolean(PreferenceConstants.EDITOR_SMART_OPENING_BRACE);
-	}
-
-	private void handleSmartTrigger(IDocument document, char trigger, int referenceOffset) throws BadLocationException {
-		DocumentCommand cmd= new DocumentCommand() {
-		};
-		
-		cmd.offset= referenceOffset;
-		cmd.length= 0;
-		cmd.text= Character.toString(trigger);
-		cmd.doit= true;
-		cmd.shiftsCaret= true;
-		cmd.caretOffset= getReplacementOffset() + getCursorPosition();
-		
-		SmartSemicolonAutoEditStrategy strategy= new SmartSemicolonAutoEditStrategy(IJavaPartitions.JAVA_PARTITIONING);
-		strategy.customizeDocumentCommand(document, cmd);
-		
-		replace(document, cmd.offset, cmd.length, cmd.text);
-		setCursorPosition(cmd.caretOffset - getReplacementOffset() + cmd.text.length());
-	}
-	
-	protected final void replace(IDocument document, int offset, int length, String string) throws BadLocationException {
-		if (!document.get(offset, length).equals(string))
-			document.replace(offset, length, string);
-	}
-	
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension1#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
-	 */
-	public void apply(ITextViewer viewer, char trigger, int stateMask, int offset) {
-
-		IDocument document= viewer.getDocument();
-		if (fTextViewer == null)
-			fTextViewer= viewer;
-		
-		// see https://bugs.eclipse.org/bugs/show_bug.cgi?id=96059
-		// don't apply the proposal if for some reason we're not valid any longer
-		if (!fInvocationContext.getCoreContext().isInJavadoc() && !validate(document, offset, null)) {
-			setCursorPosition(offset - getReplacementOffset());
-			if (trigger != '\0') {
-				try {
-					document.replace(offset, 0, String.valueOf(trigger));
-					setCursorPosition(getCursorPosition() + 1);
-					if (trigger == '(' && autocloseBrackets()) {
-						document.replace(getReplacementOffset() + getCursorPosition(), 0, ")"); //$NON-NLS-1$
-						setUpLinkedMode(document, ')');
-					}
-				} catch (BadLocationException x) {
-					// ignore
-				}
-			}
-			return;
-		}
-
-		// don't eat if not in preferences, XOR with modifier key 1 (Ctrl)
-		// but: if there is a selection, replace it!
-		Point selection= viewer.getSelectedRange();
-		fToggleEating= (stateMask & SWT.MOD1) != 0;
-		int newLength= selection.x + selection.y - getReplacementOffset();
-		if ((insertCompletion() ^ fToggleEating) && newLength >= 0)
-			setReplacementLength(newLength);
-
-		apply(document, trigger, offset);
-		fToggleEating= false;
-	}
-
-	/*
-	 * @see ICompletionProposal#getSelection
-	 */
-	public Point getSelection(IDocument document) {
-		return new Point(getReplacementOffset() + getCursorPosition(), 0);
+	protected final boolean isInJavadoc() {
+		return fInvocationContext.getCoreContext().isInJavadoc();
 	}
 
 	/*
@@ -418,7 +138,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	public final IContextInformation getContextInformation() {
 		if (!fContextInformationComputed)
 			setContextInformation(computeContextInformation());
-		return fContextInformation;
+		return super.getContextInformation();
 	}
 
 	protected IContextInformation computeContextInformation() {
@@ -431,18 +151,21 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	 */
 	public final void setContextInformation(IContextInformation contextInformation) {
 		fContextInformationComputed= true;
-		fContextInformation= contextInformation;
+		super.setContextInformation(contextInformation);
 	}
 	
 	/*
 	 * @see ICompletionProposal#getDisplayString()
 	 */
 	public final String getDisplayString() {
-		if (!fDisplayStringComputed) {
-			fDisplayStringComputed= true;
-			fDisplayString= computeDisplayString();
-		}
-		return fDisplayString;
+		if (!fDisplayStringComputed)
+			setDisplayString(computeDisplayString());
+		return super.getDisplayString();
+	}
+
+	protected final void setDisplayString(String string) {
+		fDisplayStringComputed= true;
+		super.setDisplayString(string);
 	}
 
 	protected String computeDisplayString() {
@@ -475,7 +198,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	public final int getReplacementOffset() {
 		if (!fReplacementOffsetComputed)
 			setReplacementOffset(fProposal.getReplaceStart());
-		return fReplacementOffset;
+		return super.getReplacementOffset();
 	}
 
 	/**
@@ -483,9 +206,8 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	 * @param replacementOffset The replacement offset to set
 	 */
 	public final void setReplacementOffset(int replacementOffset) {
-		Assert.isTrue(replacementOffset >= 0);
 		fReplacementOffsetComputed= true;
-		fReplacementOffset= replacementOffset;
+		super.setReplacementOffset(replacementOffset);
 	}
 
 	/*
@@ -502,7 +224,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	public final int getReplacementLength() {
 		if (!fReplacementLengthComputed)
 			setReplacementLength(fProposal.getReplaceEnd() - fProposal.getReplaceStart());
-		return fReplacementLength;
+		return super.getReplacementLength();
 	}
 
 	/**
@@ -510,9 +232,8 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	 * @param replacementLength The replacementLength to set
 	 */
 	public final void setReplacementLength(int replacementLength) {
-		Assert.isTrue(replacementLength >= 0);
 		fReplacementLengthComputed= true;
-		fReplacementLength= replacementLength;
+		super.setReplacementLength(replacementLength);
 	}
 
 	/**
@@ -522,7 +243,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	public final String getReplacementString() {
 		if (!fReplacementStringComputed)
 			setReplacementString(computeReplacementString());
-		return fReplacementString;
+		return super.getReplacementString();
 	}
 
 	protected String computeReplacementString() {
@@ -534,9 +255,8 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	 * @param replacementString The replacement string to set
 	 */
 	public final void setReplacementString(String replacementString) {
-		Assert.isNotNull(replacementString);
 		fReplacementStringComputed= true;
-		fReplacementString= replacementString;
+		super.setReplacementString(replacementString);
 	}
 
 	/*
@@ -552,7 +272,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	public final Image getImage() {
 		if (!fImageComputed)
 			setImage(computeImage());
-		return fImage;
+		return super.getImage();
 	}
 
 	protected Image computeImage() {
@@ -565,7 +285,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	 */
 	public final void setImage(Image image) {
 		fImageComputed= true;
-		fImage= image;
+		super.setImage(image);
 	}
 
 	/*
@@ -576,41 +296,24 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
-	public boolean validate(IDocument document, int offset, DocumentEvent event) {
-
-		if (offset < getReplacementOffset())
-			return false;
+	protected boolean isValidPrefix(String prefix) {
+		if (super.isValidPrefix(prefix))
+			return true;
 		
-		/*
-		 * See http://dev.eclipse.org/bugs/show_bug.cgi?id=17667
-		 * why we do not use the replacement string.
-		 * String word= fReplacementString;
-		 */
-
-		String expected= getDisplayString(); // TODO remove early display string reference
 		if (fProposal.getKind() == CompletionProposal.METHOD_NAME_REFERENCE) {
 			// static imports - includes package & type name
 			StringBuffer buf= new StringBuffer();
 			buf.append(Signature.toCharArray(fProposal.getDeclarationSignature()));
 			buf.append('.');
-			buf.append(expected);
-			expected= buf.toString();
-		} 
-
-		boolean validated= startsWith(document, offset, expected);
-
-		if (validated && event != null) {
-			// adapt replacement range to document change
-			int delta= (event.fText == null ? 0 : event.fText.length()) - event.fLength;
-			final int newLength= Math.max(getReplacementLength() + delta, 0);
-			setReplacementLength(newLength);
+			buf.append(getDisplayString());
+			return isPrefix(prefix, buf.toString());
 		}
-
-		return validated;
+		
+		return false;
 	}
-
+	
 	/**
 	 * Gets the proposal's relevance.
 	 * @return Returns a int
@@ -618,7 +321,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	public final int getRelevance() {
 		if (!fRelevanceComputed)
 			setRelevance(computeRelevance());
-		return fRelevance;
+		return super.getRelevance();
 	}
 
 	/**
@@ -627,143 +330,7 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	 */
 	public final void setRelevance(int relevance) {
 		fRelevanceComputed= true;
-		fRelevance= relevance;
-	}
-
-	/**
-	 * Returns <code>true</code> if a words starts with the code completion prefix in the document,
-	 * <code>false</code> otherwise.
-	 */
-	protected final boolean startsWith(IDocument document, int offset, String word) {
-		int wordLength= word == null ? 0 : word.length();
-		if (offset >  getReplacementOffset() + wordLength)
-			return false;
-
-		try {
-			int length= offset - getReplacementOffset();
-			String start= document.get(getReplacementOffset(), length);
-			return word.substring(0, length).equalsIgnoreCase(start);
-		} catch (BadLocationException x) {
-		}
-
-		return false;
-	}
-
-	private static boolean insertCompletion() {
-		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
-		return preference.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
-	}
-
-	private static Color getForegroundColor(StyledText text) {
-
-		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
-		RGB rgb= PreferenceConverter.getColor(preference, PreferenceConstants.CODEASSIST_REPLACEMENT_FOREGROUND);
-		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		return textTools.getColorManager().getColor(rgb);
-	}
-
-	private static Color getBackgroundColor(StyledText text) {
-
-		IPreferenceStore preference= JavaPlugin.getDefault().getPreferenceStore();
-		RGB rgb= PreferenceConverter.getColor(preference, PreferenceConstants.CODEASSIST_REPLACEMENT_BACKGROUND);
-		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
-		return textTools.getColorManager().getColor(rgb);
-	}
-
-	private void repairPresentation(ITextViewer viewer) {
-		if (fRememberedStyleRange != null) {
-			 if (viewer instanceof ITextViewerExtension2) {
-			 	// attempts to reduce the redraw area
-			 	ITextViewerExtension2 viewer2= (ITextViewerExtension2) viewer;
-
-			 	if (viewer instanceof ITextViewerExtension5) {
-
-			 		ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
-			 		IRegion modelRange= extension.widgetRange2ModelRange(new Region(fRememberedStyleRange.start, fRememberedStyleRange.length));
-			 		if (modelRange != null)
-			 			viewer2.invalidateTextPresentation(modelRange.getOffset(), modelRange.getLength());
-
-			 	} else {
-					viewer2.invalidateTextPresentation(fRememberedStyleRange.start + viewer.getVisibleRegion().getOffset(), fRememberedStyleRange.length);
-			 	}
-
-			} else
-				viewer.invalidateTextPresentation();
-		}
-	}
-
-	private void updateStyle(ITextViewer viewer) {
-
-		StyledText text= viewer.getTextWidget();
-		if (text == null || text.isDisposed())
-			return;
-
-		int widgetCaret= text.getCaretOffset();
-
-		int modelCaret= 0;
-		if (viewer instanceof ITextViewerExtension5) {
-			ITextViewerExtension5 extension= (ITextViewerExtension5) viewer;
-			modelCaret= extension.widgetOffset2ModelOffset(widgetCaret);
-		} else {
-			IRegion visibleRegion= viewer.getVisibleRegion();
-			modelCaret= widgetCaret + visibleRegion.getOffset();
-		}
-
-		if (modelCaret >= getReplacementOffset() + getReplacementLength()) {
-			repairPresentation(viewer);
-			return;
-		}
-
-		int offset= widgetCaret;
-		int length= getReplacementOffset() + getReplacementLength() - modelCaret;
-
-		Color foreground= getForegroundColor(text);
-		Color background= getBackgroundColor(text);
-
-		StyleRange range= text.getStyleRangeAtOffset(offset);
-		int fontStyle= range != null ? range.fontStyle : SWT.NORMAL;
-
-		repairPresentation(viewer);
-		fRememberedStyleRange= new StyleRange(offset, length, foreground, background, fontStyle);
-		if (range != null) {
-			fRememberedStyleRange.strikeout= range.strikeout;
-			fRememberedStyleRange.underline= range.underline;
-		}
-
-		// http://dev.eclipse.org/bugs/show_bug.cgi?id=34754
-		try {
-			text.setStyleRange(fRememberedStyleRange);
-		} catch (IllegalArgumentException x) {
-			// catching exception as offset + length might be outside of the text widget
-			fRememberedStyleRange= null;
-		}
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#selected(ITextViewer, boolean)
-	 */
-	public void selected(ITextViewer viewer, boolean smartToggle) {
-		if (!insertCompletion() ^ smartToggle)
-			updateStyle(viewer);
-		else {
-			repairPresentation(viewer);
-			fRememberedStyleRange= null;
-		}
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#unselected(ITextViewer)
-	 */
-	public void unselected(ITextViewer viewer) {
-		repairPresentation(viewer);
-		fRememberedStyleRange= null;
-	}
-
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getInformationControlCreator()
-	 */
-	public IInformationControlCreator getInformationControlCreator() {
-		return null;
+		super.setRelevance(relevance);
 	}
 
 	protected int computeRelevance() {
@@ -798,60 +365,15 @@ public class LazyJavaCompletionProposal implements IJavaCompletionProposal, ICom
 	public final String getSortString() {
 		if (!fSortStringComputed)
 			setSortString(computeSortString());
-		return fSortString;
+		return super.getSortString();
 	}
 
 	protected final void setSortString(String string) {
 		fSortStringComputed= true;
-		fSortString= string;
+		super.setSortString(string);
 	}
 
 	protected String computeSortString() {
 		return getDisplayString();
-	}
-
-	protected final ITextViewer getTextViewer() {
-		return fTextViewer;
-	}
-
-	protected final boolean isToggleEating() {
-		return fToggleEating;
-	}
-
-	/**
-	 * Sets up a simple linked mode at {@link #getCursorPosition()} and an exit policy that will
-	 * exit the mode when <code>closingCharacter</code> is typed and an exit position at
-	 * <code>getCursorPosition() + 1</code>.
-	 * 
-	 * @param document the document
-	 * @param closingCharacter the exit character
-	 */
-	protected void setUpLinkedMode(IDocument document, char closingCharacter) {
-		if (getTextViewer() != null && autocloseBrackets()) {
-			int offset= getReplacementOffset() + getCursorPosition();
-			int exit= getReplacementOffset() + getReplacementString().length();
-			try {
-				LinkedPositionGroup group= new LinkedPositionGroup();
-				group.addPosition(new LinkedPosition(document, offset, 0, LinkedPositionGroup.NO_STOP));
-				
-				LinkedModeModel model= new LinkedModeModel();
-				model.addGroup(group);
-				model.forceInstall();
-				
-				LinkedModeUI ui= new EditorLinkedModeUI(model, getTextViewer());
-				ui.setSimpleMode(true);
-				ui.setExitPolicy(new ExitPolicy(closingCharacter, document));
-				ui.setExitPosition(getTextViewer(), exit, 0, Integer.MAX_VALUE);
-				ui.setCyclingMode(LinkedModeUI.CYCLE_NEVER);
-				ui.enter();
-			} catch (BadLocationException x) {
-				JavaPlugin.log(x);
-			}
-		}
-	}
-	
-	protected boolean autocloseBrackets() {
-		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
-		return preferenceStore.getBoolean(PreferenceConstants.EDITOR_CLOSE_BRACKETS);
 	}
 }

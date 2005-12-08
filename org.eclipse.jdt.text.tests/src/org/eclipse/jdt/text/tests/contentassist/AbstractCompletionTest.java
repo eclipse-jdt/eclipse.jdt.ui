@@ -150,9 +150,9 @@ public class AbstractCompletionTest extends TestCase {
 	}
 	
 	/**
-	 * Creates a CU with a type javadoc that contains solely <code>javadocLine</code>, then runs
+	 * Creates a CU with a method containing <code>before</code>, then runs
 	 * code assist and applies the first proposal whose display name matches <code>selector</code>
-	 * and asserts that the javadoc line now has the content of <code>expected</code>.
+	 * and asserts that the method's body now has the content of <code>expected</code>.
 	 * 
 	 * @param expected the expected contents of the type javadoc line
 	 * @param javadocLine the contents of the javadoc line before code completion is run
@@ -161,11 +161,46 @@ public class AbstractCompletionTest extends TestCase {
 	 */
 	protected void assertMethodBodyProposal(String before, String selector, String expected) throws CoreException {
 		StringBuffer contents= new StringBuffer();
-		IRegion preSelection= assembleTestCUExtractSelection(contents, before, fBeforeImports);
+		IRegion preSelection= assembleMethodBodyTestCUExtractSelection(contents, before, fBeforeImports);
 		StringBuffer result= new StringBuffer();
-		IRegion expectedSelection= assembleTestCUExtractSelection(result, expected, fAfterImports);
+		IRegion expectedSelection= assembleMethodBodyTestCUExtractSelection(result, expected, fAfterImports);
 
 		assertProposal(selector, contents, preSelection, result, expectedSelection);
+	}
+	
+	/**
+	 * Creates a CU with a method containing <code>before</code>, then runs
+	 * code assist and applies the first proposal whose display name matches <code>selector</code>
+	 * and asserts that the method's body now has the content of <code>expected</code>.
+	 * 
+	 * @param expected the expected contents of the type javadoc line
+	 * @param javadocLine the contents of the javadoc line before code completion is run
+	 * @param selector the prefix to match a proposal with
+	 * @throws CoreException
+	 */
+	protected void assertTypeBodyProposal(String before, String selector, String expected) throws CoreException {
+		StringBuffer contents= new StringBuffer();
+		IRegion preSelection= assembleClassBodyTestCUExtractSelection(contents, before, fBeforeImports);
+		StringBuffer result= new StringBuffer();
+		IRegion expectedSelection= assembleClassBodyTestCUExtractSelection(result, expected, fAfterImports);
+		
+		assertProposal(selector, contents, preSelection, result, expectedSelection);
+	}
+	
+	/**
+	 * Creates a CU with a method containing <code>before</code>, then runs
+	 * code assist and asserts that there is no proposal starting with selector.
+	 * 
+	 * @param expected the expected contents of the type javadoc line
+	 * @param javadocLine the contents of the javadoc line before code completion is run
+	 * @param selector the prefix to match a proposal with
+	 * @throws CoreException
+	 */
+	protected void assertNoMethodBodyProposals(String before, String selector) throws CoreException {
+		StringBuffer contents= new StringBuffer();
+		IRegion preSelection= assembleMethodBodyTestCUExtractSelection(contents, before, fBeforeImports);
+
+		assertNoProposal(selector, contents, preSelection);
 	}
 
 	private void assertProposal(String selector, StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection) throws JavaModelException, PartInitException {
@@ -187,7 +222,17 @@ public class AbstractCompletionTest extends TestCase {
 		assertEquals(expectedSelection.getLength(), postSelection.getLength());
 	}
 	
-	private IRegion assembleTestCUExtractSelection(StringBuffer buffer, String javadocLine, String imports) {
+	private void assertNoProposal(String selector, StringBuffer contents, IRegion preSelection) throws JavaModelException, PartInitException {
+		fCU= createCU(fPackage, contents.toString());
+		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
+		try {
+			assertNull(findNamedProposal(selector, fCU, preSelection));
+		} finally {
+			EditorTestHelper.closeEditor(fEditor);
+		}
+	}
+	
+	private IRegion assembleMethodBodyTestCUExtractSelection(StringBuffer buffer, String javadocLine, String imports) {
 		String prefix= "package test1;\n" +
 				imports +
 				"\n" +
@@ -199,6 +244,35 @@ public class AbstractCompletionTest extends TestCase {
 				"	}\n" +
 				fMembers +
 				"}\n";
+		StringBuffer lineBuffer= new StringBuffer(javadocLine);
+		int firstPipe= lineBuffer.indexOf(CARET);
+		int secondPipe;
+		if (firstPipe == -1) {
+			firstPipe= lineBuffer.length();
+			secondPipe= firstPipe;
+		} else {
+			lineBuffer.replace(firstPipe, firstPipe + CARET.length(), "");
+			secondPipe= lineBuffer.indexOf(CARET, firstPipe);
+			if (secondPipe ==-1)
+				secondPipe= firstPipe;
+			else
+				lineBuffer.replace(secondPipe, secondPipe + CARET.length(), "");
+		}
+		buffer.append(prefix + lineBuffer + postfix);
+		return new Region(firstPipe + prefix.length(), secondPipe - firstPipe);
+	}
+	
+	private IRegion assembleClassBodyTestCUExtractSelection(StringBuffer buffer, String javadocLine, String imports) {
+		String prefix= "package test1;\n" +
+		imports +
+		"\n" +
+		"public class Completion<T> {\n" +
+		fLocals +
+		"    ";
+		String postfix= "\n" +
+		"\n" +
+		fMembers +
+		"}\n";
 		StringBuffer lineBuffer= new StringBuffer(javadocLine);
 		int firstPipe= lineBuffer.indexOf(CARET);
 		int secondPipe;

@@ -87,4 +87,9 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertMethodBodyProposal("Map<String, ? extends Number> list= new H|", "HashMap ", "Map<String, ? extends Number> list= new HashMap<String, |Number|>");
 	}
 	
+	public void testNoCamelCase() throws Exception {
+		assertNoMethodBodyProposals("SB|", "StringBuffer ");
+	}
+	
+	
 }

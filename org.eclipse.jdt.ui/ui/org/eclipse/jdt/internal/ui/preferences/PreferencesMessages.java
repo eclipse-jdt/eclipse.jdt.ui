@@ -719,5 +719,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBasePreferencePage_do_not_hide_button;
 	public static String JavaBasePreferencePage_do_not_hide_dialog_title;
 	public static String JavaBasePreferencePage_do_not_hide_dialog_message;
+	public static String CodeAssistConfigurationBlock_matchCamelCase_label;
 
 }

@@ -20,7 +20,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.preference.IPreferenceStore;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -117,17 +116,10 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#validate(org.eclipse.jface.text.IDocument, int, org.eclipse.jface.text.DocumentEvent)
-	 * see http://dev.eclipse.org/bugs/show_bug.cgi?id=39439
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
-	public boolean validate(IDocument document, int offset, DocumentEvent event) {
-		boolean isValid= super.validate(document, offset, event);
-		if (isValid)
-			return true;
-
-		return
-			(fUnqualifiedTypeName != null && startsWith(document, offset, fUnqualifiedTypeName)) ||
-			(fFullyQualifiedTypeName != null && startsWith(document, offset, fFullyQualifiedTypeName));
+	protected boolean isValidPrefix(String prefix) {
+		return super.isValidPrefix(prefix) || isPrefix(prefix, fUnqualifiedTypeName) || isPrefix(prefix, fFullyQualifiedTypeName);
 	}
 
 	/*
