@@ -397,7 +397,12 @@ public final class NewImportRewrite {
 					ParameterizedType type= ast.newParameterizedType(baseType);
 					List argNodes= type.typeArguments();
 					for (int i= 0; i < typeArguments.length; i++) {
-						argNodes.add(addImportFromSignature(typeArguments[i], ast, context));
+						String curr= typeArguments[i];
+						if (curr.indexOf(Signature.C_CAPTURE) != -1) { // see bug 103044
+							argNodes.add(ast.newWildcardType());
+						} else {
+							argNodes.add(addImportFromSignature(curr, ast, context));
+						}
 					}
 					return type;
 				}
@@ -502,7 +507,12 @@ public final class NewImportRewrite {
 					if (i > 0) {
 						res.append(','); 
 					}
-					res.append(addImport(typeArguments[i], context));
+					ITypeBinding curr= typeArguments[i];
+					if (containsCapture(curr)) { // see bug 103044
+						res.append('?');
+					} else {
+						res.append(addImport(curr, context));
+					}
 				}
 				res.append('>');
 				return res.toString();
@@ -512,6 +522,28 @@ public final class NewImportRewrite {
 		return getRawName(normalizedBinding);
 	}
 	
+	private boolean containsCapture(ITypeBinding binding) {
+		if (binding == null || binding.isPrimitive() || binding.isTypeVariable()) {
+			return false;
+		}
+		if (binding.isCapture()) {
+			return true;
+		}
+		if (binding.isWildcardType()) {
+			return containsCapture(binding.getBound());
+		}
+		if (binding.isArray()) {
+			return containsCapture(binding.getElementType());
+		}
+		ITypeBinding[] typeArguments= binding.getTypeArguments();
+		for (int i= 0; i < typeArguments.length; i++) {
+			if (containsCapture(typeArguments[i])) {
+				return true;
+			}
+		}
+		return false;
+	}
+
 	private static ITypeBinding normalizeTypeBinding(ITypeBinding binding) {
 		if (binding != null && !binding.isNullType() && !"void".equals(binding.getName())) { //$NON-NLS-1$
 			if (binding.isAnonymous()) {
@@ -610,7 +642,12 @@ public final class NewImportRewrite {
 				ParameterizedType paramType= ast.newParameterizedType(erasureType);
 				List arguments= paramType.typeArguments();
 				for (int i= 0; i < typeArguments.length; i++) {
-					arguments.add(addImport(typeArguments[i], ast, context));
+					ITypeBinding curr= typeArguments[i];
+					if (containsCapture(curr)) { // see bug 103044
+						arguments.add(ast.newWildcardType());
+					} else {
+						arguments.add(addImport(curr, ast, context));
+					}
 				}
 				return paramType;
 			}
