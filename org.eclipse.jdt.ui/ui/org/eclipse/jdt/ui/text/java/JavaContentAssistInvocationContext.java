@@ -77,18 +77,6 @@ public class JavaContentAssistInvocationContext extends TextContentAssistInvocat
 	}
 	
 	/**
-	 * Creates a new context.
-	 * 
-	 * @param viewer the viewer used by the editor
-	 * @param offset the invocation offset
-	 * @deprecated don't use any longer - will be removed for 3.2 M4
-	 */
-	public JavaContentAssistInvocationContext(ITextViewer viewer, int offset) {
-		super(viewer, offset);
-		fEditor= null;
-	}
-	
-	/**
 	 * Returns the compilation unit that content assist is invoked in, <code>null</code> if there
 	 * is none.
 	 * 
@@ -99,7 +87,7 @@ public class JavaContentAssistInvocationContext extends TextContentAssistInvocat
 			fCUComputed= true;
 			if (fCollector != null)
 				fCU= fCollector.getCompilationUnit();
-			else if (fEditor != null) // TODO remove null check when deprecated ctor gets removed
+			else
 				fCU= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
 		}
 		return fCU;
