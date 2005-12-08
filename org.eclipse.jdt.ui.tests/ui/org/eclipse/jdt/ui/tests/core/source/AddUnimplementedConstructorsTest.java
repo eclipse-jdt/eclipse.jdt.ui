@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
@@ -38,7 +37,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -83,16 +81,6 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		super(name);
 	}
 
-	private void checkDefaultConstructorNoCommentWithSuper(String con) throws IOException {
-		StringBuffer buf= new StringBuffer();
-		buf.append("public Test1() {\n");
-		buf.append("        super();\n");
-		buf.append("        // TODO\n");
-		buf.append("    }\n");
-		String constructor= buf.toString();
-		compareSource(constructor, con);
-	}
-
 	private void checkDefaultConstructorWithCommentWithSuper(String con) throws IOException {
 		StringBuffer buf= new StringBuffer();
 		buf.append("/** Constructor Comment\n");
@@ -121,21 +109,14 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	}
 
 	private AddUnimplementedConstructorsOperation createOperation(IType type) throws CoreException {
-		return createOperation(type, new CodeGenerationSettings());
-	}
-
-	private AddUnimplementedConstructorsOperation createOperation(IType type, CodeGenerationSettings settings) throws CoreException {
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		CompilationUnit unit= parser.parse(type.getCompilationUnit(), true);
 		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, type.getNameRange()), AbstractTypeDeclaration.class);
 		assertNotNull("Could not find type declararation node", declaration);
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
-		IMethodBinding[] bindings= StubUtility2.getVisibleConstructors(binding, true, true);
-		String[] keys= new String[bindings.length];
-		for (int index= 0; index < bindings.length; index++)
-			keys[index]= bindings[index].getKey();
-		return new AddUnimplementedConstructorsOperation(type, null, unit, keys, settings, true, true, true);
+		
+		return new AddUnimplementedConstructorsOperation(unit, binding, null, -1, true, true, true);
 	}
 
 	private void initCodeTemplates() {
@@ -247,7 +228,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 
 		CodeGenerationSettings settings= new CodeGenerationSettings();
 		settings.createComments= false;
-		AddUnimplementedConstructorsOperation op= createOperation(testClass, settings);
+		AddUnimplementedConstructorsOperation op= createOperation(testClass);
 
 		op.setOmitSuper(false);
 		op.setVisibility(Modifier.PUBLIC);
@@ -257,11 +238,101 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		IMethod[] createdMethods= testClass.getMethods();
 		checkMethods(new String[] { "Test1", "Test1", "Test1", "Test1", "Test1", "Test1", "Test1", "Test1"}, createdMethods); //$NON-NLS-1$ //$NON-NLS-2$
 
-		checkDefaultConstructorNoCommentWithSuper(createdMethods[0].getSource());
+		checkDefaultConstructorWithCommentWithSuper(createdMethods[0].getSource());
 
 		StringBuffer buf= new StringBuffer();
-		buf.append("public class Test1 extends A {\n" + "\n" + "    public Test1() {\n" + "        super();\n" + "        // TODO\n" + "    }\n" + "\n" + "    public Test1(int a) {\n" + "        super(a);\n" + "        // TODO\n" + "    }\n" + "\n" + "    public Test1(int a, boolean boo, String fooString) {\n" + "        super(a, boo, fooString);\n" + "        // TODO\n" + "    }\n" + "\n" + "    public Test1(int a, boolean boo, String fooString, StringBuffer buf) {\n" + "        super(a, boo, fooString, buf);\n" + "        // TODO\n" + "    }\n" + "\n" + "    public Test1(int a, boolean boo, String fooString, StringBuffer buf, char a) {\n" + "        super(a, boo, fooString, buf, a);\n" + "        // TODO\n" + "    }\n" + "\n" + "    public Test1(int a, boolean boo, String fooString, StringBuffer buf, char a, double c) {\n" + "        super(a, boo, fooString, buf, a, c);\n"
-				+ "        // TODO\n" + "    }\n" + "\n" + "    public Test1(int a, boolean boo, String fooString, StringBuffer buf, char a, double c, float d) {\n" + "        super(a, boo, fooString, buf, a, c, d);\n" + "        // TODO\n" + "    }\n" + "\n" + "    public Test1(int a, boolean boo, String fooString, StringBuffer buf, char a, double c, float d, String secondString) {\n" + "        super(a, boo, fooString, buf, a, c, d, secondString);\n" + "        // TODO\n" + "    }\n" + "}");
+		buf.append("public class Test1 extends A {\n");
+		buf.append("\n");
+		buf.append("    /** Constructor Comment\n");
+		buf.append("     * \n");
+		buf.append("     */\n");
+		buf.append("    public Test1() {\n");
+		buf.append("        super();\n");
+		buf.append("        // TODO\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /** Constructor Comment\n");
+		buf.append("     * @param a\n");
+		buf.append("     */\n");
+		buf.append("    public Test1(int a) {\n");
+		buf.append("        super(a);\n");
+		buf.append("        // TODO\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /** Constructor Comment\n");
+		buf.append("     * @param a\n");
+		buf.append("     * @param boo\n");
+		buf.append("     * @param fooString\n");
+		buf.append("     */\n");
+		buf.append("    public Test1(int a, boolean boo, String fooString) {\n");
+		buf.append("        super(a, boo, fooString);\n");
+		buf.append("        // TODO\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /** Constructor Comment\n");
+		buf.append("     * @param a\n");
+		buf.append("     * @param boo\n");
+		buf.append("     * @param fooString\n");
+		buf.append("     * @param buf\n");
+		buf.append("     */\n");
+		buf.append("    public Test1(int a, boolean boo, String fooString, StringBuffer buf) {\n");
+		buf.append("        super(a, boo, fooString, buf);\n");
+		buf.append("        // TODO\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /** Constructor Comment\n");
+		buf.append("     * @param a\n");
+		buf.append("     * @param boo\n");
+		buf.append("     * @param fooString\n");
+		buf.append("     * @param buf\n");
+		buf.append("     * @param a\n");
+		buf.append("     */\n");
+		buf.append("    public Test1(int a, boolean boo, String fooString, StringBuffer buf, char a) {\n");
+		buf.append("        super(a, boo, fooString, buf, a);\n");
+		buf.append("        // TODO\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /** Constructor Comment\n");
+		buf.append("     * @param a\n");
+		buf.append("     * @param boo\n");
+		buf.append("     * @param fooString\n");
+		buf.append("     * @param buf\n");
+		buf.append("     * @param a\n");
+		buf.append("     * @param c\n");
+		buf.append("     */\n");
+		buf.append("    public Test1(int a, boolean boo, String fooString, StringBuffer buf, char a, double c) {\n");
+		buf.append("        super(a, boo, fooString, buf, a, c);\n" + "        // TODO\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /** Constructor Comment\n");
+		buf.append("     * @param a\n");
+		buf.append("     * @param boo\n");
+		buf.append("     * @param fooString\n");
+		buf.append("     * @param buf\n");
+		buf.append("     * @param a\n");
+		buf.append("     * @param c\n");
+		buf.append("     * @param d\n");
+		buf.append("     */\n");
+		buf.append("    public Test1(int a, boolean boo, String fooString, StringBuffer buf, char a, double c, float d) {\n");
+		buf.append("        super(a, boo, fooString, buf, a, c, d);\n");
+		buf.append("        // TODO\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    /** Constructor Comment\n");
+		buf.append("     * @param a\n");
+		buf.append("     * @param boo\n");
+		buf.append("     * @param fooString\n");
+		buf.append("     * @param buf\n");
+		buf.append("     * @param a\n");
+		buf.append("     * @param c\n");
+		buf.append("     * @param d\n");
+		buf.append("     * @param secondString\n");
+		buf.append("     */\n");
+		buf.append("    public Test1(int a, boolean boo, String fooString, StringBuffer buf, char a, double c, float d, String secondString) {\n");
+		buf.append("        super(a, boo, fooString, buf, a, c, d, secondString);\n");
+		buf.append("        // TODO\n");
+		buf.append("    }\n");
+		buf.append("}");
 
 		compareSource(buf.toString(), testClass.getSource());
 	}
@@ -487,7 +558,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	}
 
 	/*
-	 * found 4 with 5 constructors, 1 already overriden
+	 * found 4 with 5 constructors, 1 already overridden
 	 */
 	public void testFourConstructorsToOverrideWithOneExistingConstructor() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
@@ -954,7 +1025,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 	}
 
 	/*
-	 * found 2 with 5 constructors, 3 already overriden
+	 * found 2 with 5 constructors, 3 already overridden
 	 */
 	public void testTwoConstructorsToOverrideWithThreeExistingConstructors() throws Exception {
 		fJavaProject= JavaProjectHelper.createJavaProject("DummyProject", "bin");
@@ -977,9 +1048,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		testClass.createMethod("public Test1(int a) {super();}\n", null, true, null);
 		testClass.createMethod("public Test1(int a, boolean boo, String fooString) {super();}\n", null, true, null);
 
-		CodeGenerationSettings settings= new CodeGenerationSettings();
-		settings.createComments= false;
-		AddUnimplementedConstructorsOperation op= createOperation(testClass, settings);
+		AddUnimplementedConstructorsOperation op= createOperation(testClass);
 
 		op.setOmitSuper(false);
 		op.setVisibility(Modifier.PUBLIC);
@@ -989,7 +1058,7 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		IMethod[] createdMethods= testClass.getMethods();
 		checkMethods(new String[] { "Test1", "Test1", "Test1", "Test1", "Test1"}, createdMethods); //$NON-NLS-1$ //$NON-NLS-2$
 
-		checkDefaultConstructorNoCommentWithSuper(createdMethods[3].getSource());
+		checkDefaultConstructorWithCommentWithSuper(createdMethods[3].getSource());
 
 		StringBuffer buf= new StringBuffer();
 		buf.append("public class Test1 extends A {\n");
@@ -1001,11 +1070,20 @@ public class AddUnimplementedConstructorsTest extends CoreTests {
 		buf.append("\n");
 		buf.append("    public Test1(int a, boolean boo, String fooString) {super();}\n");
 		buf.append("\n");
+		buf.append("    /** Constructor Comment\n");
+		buf.append("     * \n");
+		buf.append("     */\n");
 		buf.append("    public Test1() {\n");
 		buf.append("        super();\n");
 		buf.append("        // TODO\n");
 		buf.append("    }\n");
 		buf.append("\n");
+		buf.append("    /** Constructor Comment\n");
+		buf.append("     * @param a\n");
+		buf.append("     * @param boo\n");
+		buf.append("     * @param fooString\n");
+		buf.append("     * @param bologna\n");
+		buf.append("     */\n");
 		buf.append("    public Test1(int a, boolean boo, String fooString, int bologna) {\n");
 		buf.append("        super(a, boo, fooString, bologna);\n");
 		buf.append("        // TODO\n");

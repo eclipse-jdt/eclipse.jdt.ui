@@ -16,6 +16,8 @@ import java.util.ArrayList;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.core.resources.IWorkspaceRunnable;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -48,13 +50,15 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
+import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
@@ -506,17 +510,20 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		dialog.setMessage(ActionMessages.AddUnimplementedConstructorsAction_dialog_label); 
 		dialog.setValidator(new AddUnimplementedConstructorsValidator(constructors.length));
 
-		String[] selected= null;
 		if (dialog.open() == Window.OK) {
 			Object[] elements= dialog.getResult();
 			if (elements == null)
 				return;
-			ArrayList result= new ArrayList(elements.length);
-			for (int index= 0; index < elements.length; index++) {
-				if (elements[index] instanceof IMethodBinding)
-					result.add(((IBinding) elements[index]).getKey());
+			
+			ArrayList result= new ArrayList();
+			for (int i= 0; i < elements.length; i++) {
+				Object elem= elements[i];
+				if (elem instanceof IMethodBinding) {
+					result.add(elem);
+				}
 			}
-			selected= (String[]) result.toArray(new String[result.size()]);
+			IMethodBinding[] selected= (IMethodBinding[]) result.toArray(new IMethodBinding[result.size()]);
+
 			CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
 			settings.createComments= dialog.getGenerateComment();
 			IEditorPart editor= EditorUtility.openInEditor(type);
@@ -524,9 +531,11 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			if (target != null)
 				target.beginCompoundChange();
 			try {
-				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(type, dialog.getElementPosition(), provider.getCompilationUnit(), selected, settings, true, true, false);
-				operation.setVisibility(dialog.getVisibilityModifier());
-				operation.setOmitSuper(dialog.isOmitSuper());
+				CompilationUnit astRoot= provider.getCompilationUnit();
+				final ITypeBinding typeBinding= ASTNodes.getTypeBinding(astRoot, type);
+				int insertPos= ((ISourceReference) dialog.getElementPosition()).getSourceRange().getOffset();
+				
+				AddUnimplementedConstructorsOperation operation= (AddUnimplementedConstructorsOperation) createRunnable(astRoot, typeBinding, selected, insertPos, dialog.getGenerateComment(), dialog.getVisibilityModifier(), dialog.isOmitSuper());
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 				if (context == null)
 					context= new BusyIndicatorRunnableContext();
@@ -544,6 +553,30 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				}
 			}
 		}
+	}
+	
+	/**
+	 * Returns a runnable that creates the constructor stubs.
+	 * 
+	 * @param astRoot the AST of the compilation unit to work on. The AST must have been created from a {@link ICompilationUnit}, that
+	 * means {@link ASTParser#setSource(ICompilationUnit)} was used.
+	 * @param type the binding of the type to add the new methods to. The type binding must correspond to a type declaration in the AST.
+	 * @param constructorsToOverride the bindings of constructors to override or <code>null</code> to implement all visible constructors from the super class.
+	 * @param insertPos a hint for a location in the source where to insert the new methods or <code>-1</code> to use the default behavior.
+	 * @param createComments if set, comments will be added to the new methods.
+	 * @param visibility the visibility for the new modifiers. (see {@link Flags}) for visibility constants.
+	 * @param omitSuper if set, no <code>super()</code> call without arguments will be created.
+	 * @return returns a runnable that creates the constructor stubs.
+	 * @throws IllegalArgumentException a {@link IllegalArgumentException} is thrown if the AST passed has not been created from a {@link ICompilationUnit}.
+	 * 
+	 * @since 3.2
+	 */
+	public static IWorkspaceRunnable createRunnable(CompilationUnit astRoot, ITypeBinding type, IMethodBinding[] constructorsToOverride, int insertPos, boolean createComments, int visibility, boolean omitSuper) {
+		AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(astRoot, type, constructorsToOverride, insertPos, true, true, false);
+		operation.setCreateComments(createComments);
+		operation.setOmitSuper(omitSuper);
+		operation.setVisibility(visibility);
+		return operation;
 	}
 
 	// ---- Structured Viewer -----------------------------------------------------------

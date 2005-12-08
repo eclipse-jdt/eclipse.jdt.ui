@@ -39,10 +39,10 @@ Non-breaking API changes from R3.1 to R3.2</b></font> <br>
     </tr>
     <tr>
       <td>New and deprecated API in <code>org.eclipse.jdt.ui.JavadocContentAccess</code>:<br>
-     	<code>getHTMLContentReader(IMember, boolean)</code> has been deprecated in favor of
-     	<code>getHTMLContentReader(IMember, boolean, boolean)</code> which allows to specify
-     	whether attached Javadoc should be respected.
-      </td>
+      <code>getHTMLContentReader(IMember, boolean)</code> has been
+deprecated in favor of <code>getHTMLContentReader(IMember, boolean,
+boolean)</code> which allows to specify whether attached Javadoc should
+be respected. </td>
     </tr>
     <tr>
       <td> New API added:<br>
@@ -117,6 +117,20 @@ site, ISelectionProvider provider)</li>
         <ul>
           <li>ConvertingSelectionProvider</li>
         </ul>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td>New API to use the functionality of OverrideMethodsAction and
+AddUnimplementedConstructorsAction without UI.<br>
+      <ul>
+        <li>New method OverrideMethodsAction.create(CompilationUnit
+astRoot, ITypeBinding type, IMethodBinding[] methodToOverride, int
+insertPos, boolean createComments)</li>
+        <li>New method AddUnimplementedConstructorsAction.create(CompilationUnit
+astRoot,
+ITypeBinding type, IMethodBinding[] methodToOverride, int insertPos,
+boolean createComments, int visibility, boolean omitSuper)</li>
       </ul>
       </td>
     </tr>

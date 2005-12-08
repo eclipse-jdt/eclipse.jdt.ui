@@ -13,54 +13,35 @@ package org.eclipse.jdt.internal.corext.codemanipulation;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
-
-import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.core.resources.IWorkspaceRunnable;
 import org.eclipse.core.resources.ResourcesPlugin;
 
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-
-import org.eclipse.ltk.core.refactoring.Change;
-
-import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
+import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
-import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
  * Workspace runnable to add unimplemented methods.
@@ -78,57 +59,66 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 	/** The method binding keys for which a method was generated */
 	private final List fCreatedMethods= new ArrayList();
 
-	/** The resulting text edit */
-	private TextEdit fEdit= null;
-
 	/** Should the import edits be applied? */
 	private final boolean fImports;
 
-	/** The insertion point, or <code>null</code> */
-	private final IJavaElement fInsert;
+	/** The insertion point, or <code>-1</code> */
+	private final int fInsertPos;
 
-	/** The method binding keys to implement */
-	private final String[] fKeys;
+	/** The method bindings to implement */
+	private final IMethodBinding[] fMethodsToImplement;
 
 	/** Should the compilation unit content be saved? */
 	private final boolean fSave;
 
-	/** The code generation settings to use */
-	private final CodeGenerationSettings fSettings;
+	/** Specified if comments should be created */
+	private boolean fDoCreateComments;
 
 	/** The type declaration to add the methods to */
-	private final IType fType;
+	private final ITypeBinding fType;
 
-	/** The compilation unit ast node */
-	private final CompilationUnit fUnit;
+	/** The compilation unit AST node */
+	private final CompilationUnit fASTRoot;
 
 	/**
 	 * Creates a new add unimplemented methods operation.
 	 * 
+	 * @param astRoot the compilation unit AST node
 	 * @param type the type to add the methods to
-	 * @param insert the insertion point, or <code>null</code>
-	 * @param unit the compilation unit ast node
-	 * @param keys the method binding keys to implement
-	 * @param settings the code generation settings to use
+	 * @param methodsToImplement the method bindings to implement or <code>null</code> to implement all unimplemented methods
+	 * 	@param insertPos the insertion point, or <code>-1</code>
 	 * @param imports <code>true</code> if the import edits should be applied, <code>false</code> otherwise
 	 * @param apply <code>true</code> if the resulting edit should be applied, <code>false</code> otherwise
 	 * @param save <code>true</code> if the changed compilation unit should be saved, <code>false</code> otherwise
 	 */
-	public AddUnimplementedMethodsOperation(final IType type, final IJavaElement insert, final CompilationUnit unit, final String[] keys, final CodeGenerationSettings settings, final boolean imports, final boolean apply, final boolean save) {
-		Assert.isNotNull(type);
-		Assert.isNotNull(unit);
-		Assert.isNotNull(keys);
-		Assert.isNotNull(settings);
+	public AddUnimplementedMethodsOperation(CompilationUnit astRoot, ITypeBinding type, IMethodBinding[] methodsToImplement, int insertPos, final boolean imports, final boolean apply, final boolean save) {
+		if (astRoot == null || !(astRoot.getJavaElement() instanceof ICompilationUnit)) {
+			throw new IllegalArgumentException("AST must not be null and has to be created from a ICompilationUnit"); //$NON-NLS-1$
+		}
+		if (type == null) {
+			throw new IllegalArgumentException("The type must not be null"); //$NON-NLS-1$
+		}
+		ASTNode node= astRoot.findDeclaringNode(type);
+		if (!(node instanceof AnonymousClassDeclaration || node instanceof AbstractTypeDeclaration)) {
+			throw new IllegalArgumentException("type has to map to a type declaration in the AST"); //$NON-NLS-1$
+		}
+		
 		fType= type;
-		fInsert= insert;
-		fUnit= unit;
-		fKeys= keys;
-		fSettings= settings;
+		fInsertPos= insertPos;
+		fASTRoot= astRoot;
+		fMethodsToImplement= methodsToImplement;
 		fSave= save;
 		fApply= apply;
 		fImports= imports;
+		
+		fDoCreateComments= StubUtility.doAddComments(astRoot.getJavaElement().getJavaProject());
 	}
-
+	
+	public void setCreateComments(boolean createComments) {
+		fDoCreateComments= createComments;
+	}
+	
+	
 	/**
 	 * Returns the qualified names of the generated imports.
 	 * 
@@ -153,15 +143,6 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 	}
 
 	/**
-	 * Returns the resulting text edit.
-	 * 
-	 * @return the resulting edit
-	 */
-	public final TextEdit getResultingEdit() {
-		return fEdit;
-	}
-
-	/**
 	 * Returns the scheduling rule for this operation.
 	 * 
 	 * @return the scheduling rule
@@ -177,110 +158,79 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
-			monitor.beginTask("", 1); //$NON-NLS-1$
+			monitor.beginTask("", 2); //$NON-NLS-1$
 			monitor.setTaskName(CodeGenerationMessages.AddUnimplementedMethodsOperation_description);
 			fCreatedMethods.clear();
-			final ICompilationUnit unit= fType.getCompilationUnit();
-			final CompilationUnitRewrite rewrite= new CompilationUnitRewrite(unit, fUnit);
-			ITypeBinding binding= null;
-			ListRewrite rewriter= null;
-			if (fType.isAnonymous()) {
-				final IJavaElement parent= fType.getParent();
-				if (parent instanceof IField && Flags.isEnum(((IMember) parent).getFlags())) {
-					final EnumConstantDeclaration constant= (EnumConstantDeclaration) NodeFinder.perform(rewrite.getRoot(), ((ISourceReference) parent).getSourceRange());
-					if (constant != null) {
-						final AnonymousClassDeclaration declaration= constant.getAnonymousClassDeclaration();
-						if (declaration != null) {
-							binding= declaration.resolveBinding();
-							if (binding != null)
-								rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
-						}
-					}
-				} else {
-					final ClassInstanceCreation creation= (ClassInstanceCreation) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), ClassInstanceCreation.class);
-					if (creation != null) {
-						binding= creation.resolveTypeBinding();
-						final AnonymousClassDeclaration declaration= creation.getAnonymousClassDeclaration();
-						if (declaration != null)
-							rewriter= rewrite.getASTRewrite().getListRewrite(declaration, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
-					}
-				}
+			ICompilationUnit cu= (ICompilationUnit) fASTRoot.getJavaElement();
+			
+			AST ast= fASTRoot.getAST();
+			
+			ASTRewrite astRewrite= ASTRewrite.create(ast);
+			NewImportRewrite importRewrite= NewImportRewrite.create(fASTRoot, true);
+			
+			ITypeBinding currTypeBinding= fType;
+			ListRewrite memberRewriter= null;
+			
+			ASTNode node= fASTRoot.findDeclaringNode(currTypeBinding);
+			if (node instanceof AnonymousClassDeclaration) {
+				memberRewriter= astRewrite.getListRewrite(node, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY);
+			} else if (node instanceof AbstractTypeDeclaration) {
+				ChildListPropertyDescriptor property= ((AbstractTypeDeclaration) node).getBodyDeclarationsProperty();
+				memberRewriter= astRewrite.getListRewrite(node, property);
 			} else {
-				final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), fType.getNameRange()), AbstractTypeDeclaration.class);
-				if (declaration != null) {
-					binding= declaration.resolveBinding();
-					rewriter= rewrite.getASTRewrite().getListRewrite(declaration, declaration.getBodyDeclarationsProperty());
+				Assert.isTrue(false);
+				// not possible, we checked this in the constructor
+			}
+			
+			final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
+			settings.createComments= fDoCreateComments;
+
+			ASTNode insertion= getNodeToInsertBefore(memberRewriter);
+			
+			IMethodBinding[] methodsToImplement= fMethodsToImplement;
+			if (methodsToImplement == null) {
+				methodsToImplement= StubUtility2.getUnimplementedMethods(currTypeBinding);
+			}
+			
+			for (int i= 0; i < methodsToImplement.length; i++) {
+				IMethodBinding curr= methodsToImplement[i];
+				MethodDeclaration stub= StubUtility2.createImplementationStub(cu, astRewrite, new ImportRewrite(importRewrite), ast, curr, currTypeBinding.getName(), settings, currTypeBinding.isInterface());
+				if (stub != null) {
+					fCreatedMethods.add(curr.getKey());
+					if (insertion != null)
+						memberRewriter.insertBefore(stub, insertion, null);
+					else
+						memberRewriter.insertLast(stub, null);
 				}
 			}
-			if (binding != null && rewriter != null) {
-				final IMethodBinding[] bindings= StubUtility2.getOverridableMethods(rewrite.getAST(), binding, false);
-				if (bindings != null && bindings.length > 0) {
-					ITextFileBuffer buffer= null;
-					IDocument document= null;
-					try {
-						if (!JavaModelUtil.isPrimary(unit))
-							document= new Document(unit.getBuffer().getContents());
-						else {
-							buffer= RefactoringFileBuffers.acquire(unit);
-							document= buffer.getDocument();
-						}
-						ASTNode insertion= null;
-						if (fInsert instanceof IMethod)
-							insertion= ASTNodes.getParent(NodeFinder.perform(rewrite.getRoot(), ((IMethod) fInsert).getNameRange()), MethodDeclaration.class);
-						ImportRewrite imports= rewrite.getImportRewrite();
-						String key= null;
-						MethodDeclaration stub= null;
-						for (int index= 0; index < fKeys.length; index++) {
-							key= fKeys[index];
-							if (monitor.isCanceled())
-								break;
-							for (int offset= 0; offset < bindings.length; offset++) {
-								if (bindings[offset].getKey().equals(key)) {
-									stub= StubUtility2.createImplementationStub(rewrite.getCu(), rewrite.getASTRewrite(), imports, rewrite.getAST(), bindings[offset], binding.getName(), fSettings, binding.isInterface());
-									if (stub != null) {
-										fCreatedMethods.add(key);
-										if (insertion != null)
-											rewriter.insertBefore(stub, insertion, null);
-										else
-											rewriter.insertLast(stub, null);
-									}
-									break;
-								}
-							}
-						}
-						imports.createEdit(document, new SubProgressMonitor(monitor, 1));
-						if (!fImports)
-							rewrite.clearImportRewrites();
-						fCreatedImports= imports.getCreatedImports();
-
-						final Change result= rewrite.createChange();
-						if (result instanceof CompilationUnitChange) {
-							final CompilationUnitChange change= (CompilationUnitChange) result;
-							final TextEdit edit= change.getEdit();
-							if (edit != null) {
-								try {
-									fEdit= edit;
-									if (fApply)
-										edit.apply(document, TextEdit.UPDATE_REGIONS);
-									if (fSave) {
-										if (buffer != null)
-											buffer.commit(new SubProgressMonitor(monitor, 1), true);
-										else
-											unit.getBuffer().setContents(document.get());
-									}
-								} catch (Exception exception) {
-									throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, exception.getLocalizedMessage(), exception));
-								}
-							}
-						}
-					} finally {
-						if (buffer != null)
-							RefactoringFileBuffers.release(unit);
-					}
-				}
+			MultiTextEdit edit= new MultiTextEdit();
+			
+			TextEdit importEdits= importRewrite.rewriteImports(new SubProgressMonitor(monitor, 1));
+			fCreatedImports= importRewrite.getCreatedImports();
+			if (fImports) {
+				edit.addChild(importEdits);
+			}
+			edit.addChild(astRewrite.rewriteAST());
+			
+			if (fApply) {
+				JavaModelUtil.applyEdit(cu, edit, fSave, new SubProgressMonitor(monitor, 1));
 			}
 		} finally {
 			monitor.done();
 		}
 	}
+		
+	private ASTNode getNodeToInsertBefore(ListRewrite rewriter) {
+		if (fInsertPos != -1) {
+			List members= rewriter.getOriginalList();
+			for (int i= 0; i < members.size(); i++) {
+				ASTNode curr= (ASTNode) members.get(i);
+				if (curr.getStartPosition() >= fInsertPos) {
+					return curr;
+				}
+			}
+		}
+		return null;
+	}
+		
 }

@@ -12,9 +12,10 @@ package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IWorkspaceRunnable;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -31,13 +32,16 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -49,7 +53,6 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.dialogs.OverrideMethodDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -190,47 +193,75 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		}
 	}
 
-	private void run(Shell shell, IType type) throws JavaModelException, CoreException {
+	private void run(Shell shell, IType type) throws CoreException {
 		final OverrideMethodDialog dialog= new OverrideMethodDialog(shell, fEditor, type, false);
-		String[] keys= null;
 		if (!dialog.hasMethodsToOverride()) {
 			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.OverrideMethodsAction_error_nothing_found); 
 			return;
 		}
-		if (dialog.open() == Window.OK) {
-			final Object[] selected= dialog.getResult();
-			if (selected == null)
-				return;
-			final List list= new ArrayList(selected.length);
-			for (int index= 0; index < selected.length; index++) {
-				if (selected[index] instanceof IMethodBinding)
-					list.add(((IBinding) selected[index]).getKey());
-			}
-			keys= (String[]) list.toArray(new String[list.size()]);
-			final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject());
-			settings.createComments= dialog.getGenerateComment();
-			final IEditorPart editor= EditorUtility.openInEditor(type.getCompilationUnit());
-			final IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
-			if (target != null)
-				target.beginCompoundChange();
-			try {
-				final AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(type, dialog.getElementPosition(), dialog.getCompilationUnit(), keys, settings, true, true, false);
-				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
-				if (context == null)
-					context= new BusyIndicatorRunnableContext();
-				PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(operation, operation.getSchedulingRule()), operation.getSchedulingRule());
-				final String[] created= operation.getCreatedMethods();
-				if (created == null || created.length == 0)
-					MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.OverrideMethodsAction_error_nothing_found); 
-			} catch (InvocationTargetException exception) {
-				ExceptionHandler.handle(exception, shell, getDialogTitle(), null);
-			} catch (InterruptedException exception) {
-				// Do nothing. Operation has been canceled by user.
-			} finally {
-				if (target != null)
-					target.endCompoundChange();
+		if (dialog.open() != Window.OK) {
+			return;
+		}
+			
+		final Object[] selected= dialog.getResult();
+		if (selected == null)
+			return;
+		
+		ArrayList methods= new ArrayList();
+		for (int i= 0; i < selected.length; i++) {
+			Object elem= selected[i];
+			if (elem instanceof IMethodBinding) {
+				methods.add(elem);
 			}
 		}
+		IMethodBinding[] methodToOverride= (IMethodBinding[]) methods.toArray(new IMethodBinding[methods.size()]);
+
+		
+		final IEditorPart editor= EditorUtility.openInEditor(type.getCompilationUnit());
+		final IRewriteTarget target= editor != null ? (IRewriteTarget) editor.getAdapter(IRewriteTarget.class) : null;
+		if (target != null)
+			target.beginCompoundChange();
+		try {
+			CompilationUnit astRoot= dialog.getCompilationUnit();
+			final ITypeBinding typeBinding= ASTNodes.getTypeBinding(astRoot, type);
+			int insertPos= ((ISourceReference) dialog.getElementPosition()).getSourceRange().getOffset();
+			
+			AddUnimplementedMethodsOperation operation= (AddUnimplementedMethodsOperation) createRunnable(astRoot, typeBinding, methodToOverride, insertPos, dialog.getGenerateComment());
+			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
+			if (context == null)
+				context= new BusyIndicatorRunnableContext();
+			PlatformUI.getWorkbench().getProgressService().runInUI(context, new WorkbenchRunnableAdapter(operation, operation.getSchedulingRule()), operation.getSchedulingRule());
+			final String[] created= operation.getCreatedMethods();
+			if (created == null || created.length == 0)
+				MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.OverrideMethodsAction_error_nothing_found); 
+		} catch (InvocationTargetException exception) {
+			ExceptionHandler.handle(exception, shell, getDialogTitle(), null);
+		} catch (InterruptedException exception) {
+			// Do nothing. Operation has been canceled by user.
+		} finally {
+			if (target != null)
+				target.endCompoundChange();
+		}
+	}
+
+	/**
+	 * Returns a runnable that creates the method stubs for overridden methods.
+	 * 
+	 * @param astRoot the AST of the compilation unit to work on. The AST must have been created from a {@link ICompilationUnit}, that
+	 * means {@link ASTParser#setSource(ICompilationUnit)} was used.
+	 * @param type the binding of the type to add the new methods to. The type binding must correspond to a type declaration in the AST.
+	 * @param methodToOverride the bindings of methods to override or <code>null</code> to implement all unimplemented, abstract methods from super types.
+	 * @param insertPos a hint for a location in the source where to insert the new methods or <code>-1</code> to use the default behavior.
+	 * @param createComments if set, comments will be added to the new methods.
+	 * @return returns a runnable that creates the methods stubs.
+	 * @throws IllegalArgumentException a {@link IllegalArgumentException} is thrown if the AST passed has not been created from a {@link ICompilationUnit}.
+	 * 
+	 * @since 3.2
+	 */
+	public static IWorkspaceRunnable createRunnable(CompilationUnit astRoot, ITypeBinding type, IMethodBinding[] methodToOverride, int insertPos, boolean createComments) {
+		AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(astRoot, type, methodToOverride, insertPos, true, true, false);
+		operation.setCreateComments(createComments);
+		return operation;
 	}
 
 	/*

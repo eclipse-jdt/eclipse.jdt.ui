@@ -16,6 +16,9 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+
+import org.eclipse.core.resources.ProjectScope;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
@@ -29,16 +32,16 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
@@ -100,7 +103,12 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		cu= fPackage.getCompilationUnit("E.java");
 		fInterfaceE= cu.createType("public interface E {\n}\n", null, true, null);
 		fInterfaceE.createMethod("void c(java.util.Hashtable h);\n", null, true, null);
-		fInterfaceE.createMethod("void e() throws java.util.NoSuchElementException;\n", null, true, null);	
+		fInterfaceE.createMethod("void e() throws java.util.NoSuchElementException;\n", null, true, null);
+		
+		IEclipsePreferences node= new ProjectScope(fJavaProject.getProject()).getNode(JavaUI.ID_PLUGIN);
+		node.putBoolean(PreferenceConstants.CODEGEN_USE_OVERRIDE_ANNOTATION, false);
+		node.putBoolean(PreferenceConstants.CODEGEN_ADD_COMMENTS, false);
+		node.flush();
 	}
 
 
@@ -189,15 +197,8 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		assertNotNull("Could not find type declararation node", declaration);
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
-		IMethodBinding[] bindings= StubUtility2.getOverridableMethods(unit.getAST(), binding, false);
-		String[] keys= new String[bindings.length];
-		for (int index= 0; index < bindings.length; index++)
-			keys[index]= bindings[index].getKey();
 		
-		CodeGenerationSettings settings= new CodeGenerationSettings();
-		settings.overrideAnnotation= false;
-		
-		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(testClass, null, unit, keys, settings, true, true, true);
+		AddUnimplementedMethodsOperation op= new AddUnimplementedMethodsOperation(unit, binding, null, -1, true, true, true);
 		op.run(new NullProgressMonitor());
 		JavaModelUtil.reconcile(testClass.getCompilationUnit());
 	}

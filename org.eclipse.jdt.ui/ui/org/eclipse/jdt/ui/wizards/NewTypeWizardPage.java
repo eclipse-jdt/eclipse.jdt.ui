@@ -93,7 +93,6 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
@@ -109,7 +108,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
@@ -2327,12 +2325,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		final ITypeBinding binding= ASTNodes.getTypeBinding(unit, type);
 		if (binding != null) {
 			if (doUnimplementedMethods) {
-				AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(type, null, unit, createBindingKeys(StubUtility2.getUnimplementedMethods(binding)), settings, false, true, false);
+				AddUnimplementedMethodsOperation operation= new AddUnimplementedMethodsOperation(unit, binding, null, -1, false, true, false);
+				operation.setCreateComments(isAddComments());
 				operation.run(monitor);
 				createImports(imports, operation.getCreatedImports());
 			}
 			if (doConstructors) {
-				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(type, null, unit, createBindingKeys(StubUtility2.getVisibleConstructors(binding, false, true)), settings, false, true, false);
+				AddUnimplementedConstructorsOperation operation= new AddUnimplementedConstructorsOperation(unit, binding, null, -1, false, true, false);
+				operation.setCreateComments(isAddComments());
 				operation.run(monitor);
 				createImports(imports, operation.getCreatedImports());
 			}
@@ -2350,13 +2350,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private void createImports(ImportsManager imports, String[] createdImports) {
 		for (int index= 0; index < createdImports.length; index++)
 			imports.addImport(createdImports[index]);
-	}
-
-	private String[] createBindingKeys(IBinding[] bindings) {
-		String[] keys= new String[bindings.length];
-		for (int index= 0; index < bindings.length; index++)
-			keys[index]= bindings[index].getKey();
-		return keys;
 	}
 
 	/**
