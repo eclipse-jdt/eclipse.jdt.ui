@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -52,8 +51,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
-import org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation;
-import org.eclipse.jdt.internal.corext.fix.LinkedFix.PositionGroup;
+import org.eclipse.jdt.internal.corext.fix.LinkedFix.AbstractLinkedFixRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -62,7 +60,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * 
  * @since 3.1
  */
-public final class ConvertIterableLoopProposal implements ILinkedFixRewriteOperation {
+public final class ConvertIterableLoopProposal extends AbstractLinkedFixRewriteOperation {
 
 	/**
 	 * Returns the supertype of the given type with the qualified name.
@@ -265,7 +263,7 @@ public final class ConvertIterableLoopProposal implements ILinkedFixRewriteOpera
 		declaration.setName(simple);
 		final ITypeBinding iterable= getIterableType(fIterator.getType());
 		final NewImportRewrite imports= importRewrite;
-		declaration.setType(imports.addImport(iterable, ast));
+		declaration.setType(importType(iterable, fStatement, importRewrite, fRoot));
 		remover.registerAddedImport(iterable.getQualifiedName());
 		statement.setParameter(declaration);
 		statement.setExpression(getExpression(astRewrite));
@@ -433,25 +431,9 @@ public final class ConvertIterableLoopProposal implements ILinkedFixRewriteOpera
 	public ITrackedNodePosition rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups, List/*<PositionGroup>*/ positionGroups) throws CoreException {
 		TextEditGroup group= new TextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
 		textEditGroups.add(group);
-		fPositionGroups= new Hashtable();
+		clearPositionGroups();
 		ITrackedNodePosition endPosition= rewriteAST(compilationUnit.getAST(), rewrite, importRewrite, group);
-		positionGroups.addAll(fPositionGroups.values());
+		positionGroups.addAll(getAllPositionGroups());
 		return endPosition;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.FixRewriteAdapter#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
-	 */
-	public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
-		rewriteAST(rewrite, importRewrite, compilationUnit, textEditGroups, new ArrayList());
-	}
-	
-	private Hashtable fPositionGroups;
-	
-	private PositionGroup getPositionGroup(String parameterName) {
-		if (!fPositionGroups.containsKey(parameterName)) {
-			fPositionGroups.put(parameterName, new PositionGroup(parameterName));
-		}
-		return (PositionGroup)fPositionGroups.get(parameterName);
 	}
 }

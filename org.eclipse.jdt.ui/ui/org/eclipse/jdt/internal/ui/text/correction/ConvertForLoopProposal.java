@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -24,7 +23,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -56,20 +54,18 @@ import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
-import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.FixMessages;
-import org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.LinkedFix.AbstractLinkedFixRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix.PositionGroup;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
-public class ConvertForLoopProposal implements ILinkedFixRewriteOperation {
+public class ConvertForLoopProposal extends AbstractLinkedFixRewriteOperation {
 
 	private ForStatement fOldForStatement;
 	private EnhancedForStatement fEnhancedForStatement;
@@ -85,60 +81,6 @@ public class ConvertForLoopProposal implements ILinkedFixRewriteOperation {
 	private final ICompilationUnit fCompilationUnit;
 	private FieldAccess fFieldAccess;
 	private final CompilationUnit fRoot;
-	
-	private class NewImportRewriteContext extends ImportRewriteContext {
-
-		private final ITypeBinding fToImport;
-		private final ITypeBinding fErasure;
-		private final CompilationUnit fUnit;
-		
-		public NewImportRewriteContext(ITypeBinding toImport, CompilationUnit unit) {
-			fToImport= toImport;
-			fErasure= toImport.getErasure();
-			fUnit= unit;
-		}
-
-		public int findInContext(String qualifier, final String name, int kind) {
-			List list= fUnit.types();
-			for (Iterator iter= list.iterator(); iter.hasNext();) {
-				AbstractTypeDeclaration typeDecl= (AbstractTypeDeclaration)iter.next();
-				if (doesDeclare(fToImport, typeDecl.resolveBinding())) {
-					return RES_NAME_FOUND;
-				}
-			}
-			final boolean[] conflict= new boolean[1];
-			fUnit.accept(new GenericVisitor(){
-				
-				protected boolean visitNode(ASTNode node) {
-					if (conflict[0]) 
-						return false;
-					
-					return super.visitNode(node);
-				}
-
-				public boolean visit(SimpleName node) {
-					if (node.getIdentifier().equals(name) && node.resolveTypeBinding().getErasure() != fErasure) {
-						conflict[0]= true;
-						return false;
-					}
-					return super.visit(node);
-				}
-				
-			});
-			if (conflict[0])
-				return RES_NAME_CONFLICT;
-			
-			return RES_NAME_UNKNOWN;
-		}
-		
-		private boolean doesDeclare(ITypeBinding declaredClass, ITypeBinding declaringClass) {
-			ITypeBinding curr= declaredClass.getDeclaringClass();
-			while (curr != null && declaringClass != curr) {
-				curr= curr.getDeclaringClass();
-			}
-			return curr != null;
-		}	
-	}
 
 	/**
 	 * Visitor class for finding all references to a certain Name within the
@@ -636,7 +578,8 @@ public class ConvertForLoopProposal implements ILinkedFixRewriteOperation {
 				fParameterDeclaration= fAst.newSingleVariableDeclaration();
 				SimpleName name= fAst.newSimpleName(fParameterName);
 				fParameterDeclaration.setName(name);
-				Type theType= importRewrite.addImport(elementType, fAst, new NewImportRewriteContext(elementType, fRoot));
+
+				Type theType= importType(elementType, fOldForStatement, importRewrite, fRoot);
 				if (fOldCollectionTypeBinding.getDimensions() != 1) {
 					theType= fAst.newArrayType(theType, fOldCollectionTypeBinding.getDimensions() - 1);
 				}
@@ -798,26 +741,10 @@ public class ConvertForLoopProposal implements ILinkedFixRewriteOperation {
 	public ITrackedNodePosition rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups, List/*<PositionGroup>*/ positionGroups) throws CoreException {
 		TextEditGroup group= new TextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
 		textEditGroups.add(group);
-		fPositionGroups= new Hashtable();
+		clearPositionGroups();
 		ITrackedNodePosition endPosition= doConvert(rewrite, importRewrite, group);
-		positionGroups.addAll(fPositionGroups.values());
+		positionGroups.addAll(getAllPositionGroups());
 		return endPosition;
-	}
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.FixRewriteAdapter#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
-	 */
-	public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
-		rewriteAST(rewrite, importRewrite, compilationUnit, textEditGroups, new ArrayList());
-	}
-	
-	private Hashtable fPositionGroups;
-	
-	private PositionGroup getPositionGroup(String parameterName) {
-		if (!fPositionGroups.containsKey(parameterName)) {
-			fPositionGroups.put(parameterName, new PositionGroup(parameterName));
-		}
-		return (PositionGroup)fPositionGroups.get(parameterName);
 	}
 
 }

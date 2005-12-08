@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -38,6 +40,40 @@ public class LinkedFix extends AbstractFix {//implements IPositionLinkable {
 				CompilationUnit compilationUnit,
 				List/*<TextEditGroup>*/ textEditGroups,
 				List/*<PositionGroup>*/ positionGroups) throws CoreException;
+	}
+	
+	public static abstract class AbstractLinkedFixRewriteOperation extends AbstractFixRewriteOperation implements ILinkedFixRewriteOperation {
+		
+		private Hashtable fPositionGroups;
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.FixRewriteAdapter#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
+		 */
+		public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
+			rewriteAST(rewrite, importRewrite, compilationUnit, textEditGroups, new ArrayList());
+		}
+		
+		protected PositionGroup getPositionGroup(String parameterName) {
+			if (!fPositionGroups.containsKey(parameterName)) {
+				fPositionGroups.put(parameterName, new PositionGroup(parameterName));
+			}
+			return (PositionGroup)fPositionGroups.get(parameterName);
+		}
+		
+		protected void clearPositionGroups() {
+			if (fPositionGroups == null) {
+				fPositionGroups= new Hashtable();
+			} else {
+				fPositionGroups.clear();
+			}
+		}
+		
+		protected Collection getAllPositionGroups() {
+			if (fPositionGroups == null)
+				return null;
+			
+			return fPositionGroups.values();
+		}
 	}
 	
 	public static class PositionGroup {
