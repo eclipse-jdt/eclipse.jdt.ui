@@ -217,4 +217,27 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	public void setContextInformationPosition(int contextInformationPosition) {
 		fContextInformationPosition= contextInformationPosition;
 	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeSortString()
+	 */
+	protected String computeSortString() {
+		/*
+		 * Lexicographical sort order:
+		 * 1) by relevance (done by the proposal sorter)
+		 * 2) by method name
+		 * 3) by parameter count
+		 * 4) by parameter type names
+		 */
+		char[] name= fProposal.getName();
+		char[] parameterList= Signature.toCharArray(fProposal.getSignature(), null, null, false, false);
+		int parameterCount= Signature.getParameterCount(fProposal.getSignature()) % 10; // we don't care about insane methods with >9 parameters
+		StringBuffer buf= new StringBuffer(name.length + 2 + parameterList.length);
+		
+		buf.append(name);
+		buf.append('\0'); // separator
+		buf.append(parameterCount);
+		buf.append(parameterList);
+		return buf.toString();
+	}
 }
