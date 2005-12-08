@@ -11,10 +11,12 @@
 package org.eclipse.jdt.internal.corext.codemanipulation;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -70,9 +72,36 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 			}
 		}
 		
+		List list= fCompilationUnit.types();
+		for (Iterator iter= list.iterator(); iter.hasNext();) {
+			AbstractTypeDeclaration type= (AbstractTypeDeclaration)iter.next();
+			ITypeBinding binding= type.resolveBinding();
+			if (isSameType(binding, qualifier, name)) {
+				return RES_NAME_FOUND;
+			} else {
+				if (containsDeclaration(binding, qualifier, name))
+					return RES_NAME_CONFLICT;
+			}
+		}
+		
 		return RES_NAME_UNKNOWN;
 	}
 	
+	private boolean containsDeclaration(ITypeBinding binding, String qualifier, String name) {
+		ITypeBinding[] declaredTypes= binding.getDeclaredTypes();
+		for (int i= 0; i < declaredTypes.length; i++) {
+			ITypeBinding childBinding= declaredTypes[i];
+			if (isSameType(childBinding, qualifier, name)) {
+				return true;
+			} else {
+				if (containsDeclaration(childBinding, qualifier, name)) {
+					return true;
+				}
+			}
+		}
+		return false;
+	}
+
 	private boolean isConflicting(IBinding binding, String name) {
 		return binding.getName().equals(name);
 	}

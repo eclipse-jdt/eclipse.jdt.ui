@@ -32,12 +32,16 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -62,7 +66,7 @@ public class AddImportTest extends CoreTests {
 		if (true) {
 			return allTests();
 		} else {
-			return setUpTest(new AddImportTest("testRemoveImports1"));
+			return setUpTest(new AddImportTest("testAddImportContextSensitive06"));
 		}	
 	}
 	
@@ -888,6 +892,223 @@ public class AddImportTest extends CoreTests {
 			FileBuffers.getTextFileBufferManager().disconnect(path, null);
 		}
 	}	
+	
+	public void testAddImportContextSensitive01() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo() {//<-insert\n}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		String[] addedImports= assertImportQualifierAsExpected(cu, "java.lang.Math.PI", "PI");
+		assertEqualStringsIgnoreOrder(addedImports, new String[] {"java.lang.Math.PI"});
+	}
+	
+	public void testAddImportContextSensitive02() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public static final double PI= 3.0;\n");
+		buf.append("    void foo() {//<-insert\n}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		String[] addedImports= assertImportQualifierAsExpected(cu, "java.lang.Math.PI", "java.lang.Math.PI");
+		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
+	}
+
+	public void testAddImportContextSensitive03() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void foo() {//<-insert\n}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		String[] addedImports= assertStaticImportAsExpected(cu, "java.lang.Math", "PI", "PI");
+		assertEqualStringsIgnoreOrder(addedImports, new String[] {"java.lang.Math.PI"});
+	}
+	
+	public void testAddImportContextSensitive04() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public static final double PI= 3.0;\n");
+		buf.append("    void foo() {//<-insert\n}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		String[] addedImports= assertStaticImportAsExpected(cu, "java.lang.Math", "PI", "java.lang.Math.PI");
+		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
+	}
+	
+	public void testAddImportContextSensitive05() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private class E11 {\n");
+		buf.append("        class E12 {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("//<-insert\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		String[] addedImports= assertImportQualifierAsExpected(cu, "pack2.E1.E11.E12", "E12");
+		assertEqualStringsIgnoreOrder(addedImports, new String[] {"pack2.E1.E11.E12"});
+	}
+	
+	public void testAddImportContextSensitive06() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private class E11 {\n");
+		buf.append("        class E12 {        \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("//<-insert\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E11.E12", "pack1.E1.E11.E12");
+		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
+	}
+		
+	public void testAddImportContextSensitive07() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private class E11 {\n");
+		buf.append("        class E12 {        \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private class E21 {\n");
+		buf.append("        //<-insert\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E11.E12", "pack1.E1.E11.E12");
+		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
+	}
+	
+	public void testAddImportContextSensitive08() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public static class E2 {}\n");
+		buf.append("    interface I1 {void bar();}\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        I1 i1= new I1() {\n");
+		buf.append("            public void bar() {\n");
+		buf.append("                //<-insert\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E2", "E2");
+		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
+	}
+	
+	public void testAddImportContextSensitive09() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public static class E2 {\n");
+		buf.append("        public static class E22 {}\n");
+		buf.append("    }\n");
+		buf.append("    interface I1 {void bar();}\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        I1 i1= new I1() {\n");
+		buf.append("            public void bar() {\n");
+		buf.append("                //<-insert\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E2.E22", "pack1.E1.E2.E22");
+		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
+	}
+	
+	public void testAddImportContextSensitive10() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public abstract class E1 {\n");
+		buf.append("    protected class C {}\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("public class E2 extends E1 {\n");
+		buf.append("    //<-insert\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.C", "C");
+		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
+	}
+
+	private String[] assertImportQualifierAsExpected(ICompilationUnit cu, String toImport, String expectedQualifier) throws JavaModelException {
+		String buf= cu.getSource();
+		String selection= "//<-insert";
+		int offset= buf.indexOf(selection);
+		int length= 0;
+		AssistContext context= new AssistContext(cu, offset, length);
+		
+		NewImportRewrite importRewrite= NewImportRewrite.create(context.getASTRoot(), true);
+		String qualifier= importRewrite.addImport(toImport, new ContextSensitiveImportRewriteContext(context.getASTRoot(), offset));
+		assertEquals("Type conflict not detected", expectedQualifier, qualifier);
+		return importRewrite.getAddedImports();
+	}
+	
+	private String[] assertStaticImportAsExpected(ICompilationUnit cu, String declaringClassName, String fieldName, String expectedQualifier) throws JavaModelException {
+		String code= cu.getSource();
+		String selection= "//<-insert";
+		int offset= code.indexOf(selection);
+		int length= 0;
+		AssistContext context= new AssistContext(cu, offset, length);
+		
+		NewImportRewrite importRewrite= NewImportRewrite.create(context.getASTRoot(), true);
+		String qualifier= importRewrite.addStaticImport(declaringClassName, fieldName, true, new ContextSensitiveImportRewriteContext(context.getASTRoot(), offset));
+		assertEquals("Type conflict not detected", expectedQualifier, qualifier);
+		return importRewrite.getAddedStaticImports();
+	}
 
 	private NewImportRewrite newImportsRewrite(ICompilationUnit cu, String[] order, int threshold, boolean restoreExistingImports) throws CoreException, BackingStoreException {
 		setOrganizeImportSettings(order, threshold, cu.getJavaProject());
