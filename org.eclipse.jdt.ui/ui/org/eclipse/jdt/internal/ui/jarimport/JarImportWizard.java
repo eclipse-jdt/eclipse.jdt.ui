@@ -28,6 +28,7 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
@@ -52,7 +53,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -499,22 +499,6 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 	/**
 	 * {@inheritDoc}
 	 */
-	protected boolean selectPreviewChange(final Change change) {
-		if (fSourceFolder != null) {
-			final IPath source= fSourceFolder.getFullPath();
-			if (change instanceof TextFileChange) {
-				final TextFileChange extended= (TextFileChange) change;
-				final IPath path= extended.getFile().getFullPath();
-				if (source.isPrefixOf(path))
-					return false;
-			}
-		}
-		return super.selectPreviewChange(change);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	protected void addUserDefinedPages() {
 		addPage(new JarImportWizardPage(fJarImportData));
 	}
@@ -729,5 +713,22 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 		} finally {
 			monitor.done();
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected boolean selectPreviewChange(final Change change) {
+		if (fSourceFolder != null) {
+			final IPath source= fSourceFolder.getFullPath();
+			final Object element= change.getModifiedElement();
+			if (element instanceof IAdaptable) {
+				final IAdaptable adaptable= (IAdaptable) element;
+				final IResource resource= (IResource) adaptable.getAdapter(IResource.class);
+				if (resource != null && source.isPrefixOf(resource.getFullPath()))
+					return false;
+			}
+		}
+		return super.selectPreviewChange(change);
 	}
 }
