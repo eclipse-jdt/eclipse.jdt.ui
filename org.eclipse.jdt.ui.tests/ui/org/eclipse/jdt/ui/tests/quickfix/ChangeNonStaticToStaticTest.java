@@ -582,4 +582,52 @@ public class ChangeNonStaticToStaticTest extends QuickFixTest {
 		
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
+	
+	public void testNonStaticAccessTest12() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1<G> {\n");
+		buf.append("    public static int I;\n");
+		buf.append("}\n");
+		pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.E1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        test1.E1<E1<test1.E1<E2>>> e1= new test1.E1<E1<test1.E1<E2>>>();\n");
+		buf.append("        e1.I= 10;\n");
+		buf.append("        E1<E1<E2>> f=null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class E1<G>  {}\n");
+		pack2.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu);
+		
+		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import test2.E1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        test1.E1<E1<test1.E1<E2>>> e1= new test1.E1<E1<test1.E1<E2>>>();\n");
+		buf.append("        test1.E1.I= 10;\n");
+		buf.append("        E1<E1<E2>> f=null;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
 }
