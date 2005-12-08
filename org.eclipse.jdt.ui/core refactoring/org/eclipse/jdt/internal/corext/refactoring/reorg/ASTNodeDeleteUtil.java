@@ -20,9 +20,11 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -45,6 +47,14 @@ public class ASTNodeDeleteUtil {
 		if (element.getElementType() == IJavaElement.TYPE && ((IType) element).isLocal()) {
 			IType type= (IType) element;
 			if (type.isAnonymous()) {
+				if (type.getParent().getElementType() == IJavaElement.FIELD) {
+					final ISourceRange range= type.getSourceRange();
+					if (range != null) {
+						final ASTNode node= ASTNodeSearchUtil.getAstNode(cuNode, range.getOffset(), range.getLength());
+						if (node instanceof AnonymousClassDeclaration)
+							return new ASTNode[] { node};
+					}
+				}
 				return new ASTNode[] { ASTNodeSearchUtil.getClassInstanceCreationNode(type, cuNode)};
 			} else {
 				ASTNode[] nodes= ASTNodeSearchUtil.getDeclarationNodes(element, cuNode);

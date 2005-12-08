@@ -81,7 +81,7 @@ public class ASTNodeSearchUtil {
 	}
 
 	/** misses javadoc nodes */
-	private static ASTNode getAstNode(CompilationUnit cuNode, int start, int length){
+	public static ASTNode getAstNode(CompilationUnit cuNode, int start, int length){
 		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(start, length), true);
 		cuNode.accept(analyzer);
 		//XXX workaround for jdt core feature 23527
