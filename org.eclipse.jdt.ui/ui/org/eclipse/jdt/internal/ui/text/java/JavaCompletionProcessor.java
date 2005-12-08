@@ -36,8 +36,6 @@ import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
-
 /**
  * Java completion processor.
  */
@@ -50,8 +48,6 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	
 	private IContextInformationValidator fValidator;
 
-	private int fNumberOfComputedResults= 0;
-	
 	private final CompletionProposalComparator fAlphaComparator;
 	private final CompletionProposalComparator fComparator;
 	protected final IEditorPart fEditor;
@@ -103,15 +99,6 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	}
 
 	/*
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
-	 */
-	public String getErrorMessage() {
-		if (fNumberOfComputedResults == 0)
-			return JavaUIMessages.JavaEditor_codeassist_noCompletions;
-		return null;
-	}
-
-	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getContextInformationValidator()
 	 */
 	public IContextInformationValidator getContextInformationValidator() {
@@ -126,7 +113,6 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	protected List filterAndSortProposals(List proposals, IProgressMonitor monitor, TextContentAssistInvocationContext context) {
 		filter(proposals, context);
 		Collections.sort(proposals, fComparator);
-		fNumberOfComputedResults= proposals.size();
 		return proposals;
 	}
 
@@ -238,15 +224,6 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	
 	private boolean isKeyword(String name) {
 		return KEYWORDS.contains(name);
-	}
-
-	
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor#filterAndSortContextInformation(java.util.List, org.eclipse.core.runtime.IProgressMonitor)
-	 */
-	protected List filterAndSortContextInformation(List contexts, IProgressMonitor monitor) {
-		fNumberOfComputedResults= contexts.size();
-		return super.filterAndSortContextInformation(contexts, monitor);
 	}
 	
 	/*

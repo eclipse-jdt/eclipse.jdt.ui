@@ -102,6 +102,8 @@ final class CompletionProposalComputerDescriptor {
 	private ICompletionProposalComputer fComputer;
 	/** The ui category. */
 	private final CompletionProposalCategory fCategory;
+	/** The first error message in the most recent operation, or <code>null</code>. */
+	private String fLastError;
 
 	/**
 	 * Creates a new descriptor.
@@ -278,8 +280,10 @@ final class CompletionProposalComputerDescriptor {
 			List proposals= computer.computeCompletionProposals(context, monitor);
 			stopMeter(stats, COMPUTE_COMPLETION_PROPOSALS);
 			
-			if (proposals != null)
+			if (proposals != null) {
+				fLastError= computer.getErrorMessage();
 				return proposals;
+			}
 			
 			status= createAPIViolationStatus(COMPUTE_COMPLETION_PROPOSALS);
 		} catch (InvalidRegistryObjectException x) {
@@ -319,8 +323,10 @@ final class CompletionProposalComputerDescriptor {
 			List proposals= computer.computeContextInformation(context, monitor);
 			stopMeter(stats, COMPUTE_CONTEXT_INFORMATION);
 			
-			if (proposals != null)
+			if (proposals != null) {
+				fLastError= computer.getErrorMessage();
 				return proposals;
+			}
 			
 			status= createAPIViolationStatus(COMPUTE_CONTEXT_INFORMATION);
 		} catch (InvalidRegistryObjectException x) {
@@ -410,8 +416,17 @@ final class CompletionProposalComputerDescriptor {
 		return fCategory.isEnabled();
 	}
 	
-	public CompletionProposalCategory getCategory() {
+	CompletionProposalCategory getCategory() {
 		return fCategory;
+	}
+
+	/**
+	 * Returns the error message from the described extension.
+	 * 
+	 * @return the error message from the described extension
+	 */
+	public String getErrorMessage() {
+		return fLastError;
 	}
 	
 }

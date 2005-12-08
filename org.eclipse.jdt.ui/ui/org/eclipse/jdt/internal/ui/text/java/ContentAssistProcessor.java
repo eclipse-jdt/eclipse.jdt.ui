@@ -43,6 +43,8 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
+
 /**
  * A content assist processor that aggregates the proposals of the
  * {@link org.eclipse.jface.text.contentassist.ICompletionProposalComputer}s contributed via the
@@ -84,6 +86,8 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	private int fRepetition= -1;
 	private List/*<List<CompletionProposalCategory>>*/ fCategoryIteration= null;
 	private String fIterationGesture= null;
+	private int fNumberOfComputedResults= 0;
+	private String fErrorMessage;
 	
 	public ContentAssistProcessor(ContentAssistant assistant, String partition) {
 		Assert.isNotNull(partition);
@@ -134,6 +138,8 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeCompletionProposals(org.eclipse.jface.text.ITextViewer, int)
 	 */
 	public final ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
+		clearState();
+		
 		IProgressMonitor monitor= createProgressMonitor();
 		monitor.beginTask(JavaTextMessages.ContentAssistProcessor_computing_proposals, fCategories.size() + 1);
 
@@ -144,10 +150,16 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 		monitor.subTask(JavaTextMessages.ContentAssistProcessor_sorting_proposals);
 		List filtered= filterAndSortProposals(proposals, monitor, context);
+		fNumberOfComputedResults= filtered.size();
 		
 		ICompletionProposal[] result= (ICompletionProposal[]) filtered.toArray(new ICompletionProposal[filtered.size()]);
 		monitor.done();
 		return result;
+	}
+
+	private void clearState() {
+		fErrorMessage=null;
+		fNumberOfComputedResults= 0;
 	}
 
 	private List collectProposals(ITextViewer viewer, int offset, IProgressMonitor monitor, TextContentAssistInvocationContext context) {
@@ -157,6 +169,8 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
 			List computed= cat.computeCompletionProposals(context, fPartition, new SubProgressMonitor(monitor, 1));
 			proposals.addAll(computed);
+			if (fErrorMessage == null)
+				fErrorMessage= cat.getErrorMessage();
 		}
 		
 		return proposals;
@@ -181,6 +195,8 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeContextInformation(org.eclipse.jface.text.ITextViewer, int)
 	 */
 	public IContextInformation[] computeContextInformation(ITextViewer viewer, int offset) {
+		clearState();
+
 		IProgressMonitor monitor= createProgressMonitor();
 		monitor.beginTask(JavaTextMessages.ContentAssistProcessor_computing_contexts, fCategories.size() + 1);
 		
@@ -189,6 +205,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 		monitor.subTask(JavaTextMessages.ContentAssistProcessor_sorting_contexts);
 		List filtered= filterAndSortContextInformation(proposals, monitor);
+		fNumberOfComputedResults= filtered.size();
 		
 		IContextInformation[] result= (IContextInformation[]) filtered.toArray(new IContextInformation[filtered.size()]);
 		monitor.done();
@@ -204,6 +221,8 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
 			List computed= cat.computeContextInformation(context, fPartition, new SubProgressMonitor(monitor, 1));
 			proposals.addAll(computed);
+			if (fErrorMessage == null)
+				fErrorMessage= cat.getErrorMessage();
 		}
 		
 		return proposals;
@@ -253,7 +272,11 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
 	 */
 	public String getErrorMessage() {
-		return null;
+		if (fNumberOfComputedResults > 0)
+			return null;
+		if (fErrorMessage != null)
+			return fErrorMessage;
+		return JavaUIMessages.JavaEditor_codeassist_noCompletions;
 	}
 
 	/*

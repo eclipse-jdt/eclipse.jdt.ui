@@ -46,6 +46,8 @@ public class LegacyJavadocCompletionProposalComputer implements ICompletionPropo
 
 	private IJavadocCompletionProcessor[] fSubProcessors;
 
+	private String fErrorMessage;
+
 	public LegacyJavadocCompletionProposalComputer() {
 		fSubProcessors= null;
 	}
@@ -73,6 +75,7 @@ public class LegacyJavadocCompletionProposalComputer implements ICompletionPropo
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public List computeContextInformation(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+		fErrorMessage= null;
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
 			
@@ -82,6 +85,7 @@ public class LegacyJavadocCompletionProposalComputer implements ICompletionPropo
 			ArrayList result= new ArrayList();
 			
 			IJavadocCompletionProcessor[] processors= getContributedProcessors();
+			String error= null;
 			for (int i= 0; i < processors.length; i++) {
 				IJavadocCompletionProcessor curr= processors[i];
 				IContextInformation[] contextInfos= curr.computeContextInformation(cu, offset);
@@ -89,8 +93,11 @@ public class LegacyJavadocCompletionProposalComputer implements ICompletionPropo
 					for (int k= 0; k < contextInfos.length; k++) {
 						result.add(contextInfos[k]);
 					}
+				} else if (error == null) {
+					error= curr.getErrorMessage();
 				}
 			}
+			fErrorMessage= error;
 			return result;
 		}
 		return Collections.EMPTY_LIST;
@@ -100,6 +107,7 @@ public class LegacyJavadocCompletionProposalComputer implements ICompletionPropo
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public List computeCompletionProposals(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+		fErrorMessage= null;
 		if (context instanceof JavadocContentAssistInvocationContext) {
 			JavadocContentAssistInvocationContext javaContext= (JavadocContentAssistInvocationContext) context;
 			
@@ -127,5 +135,13 @@ public class LegacyJavadocCompletionProposalComputer implements ICompletionPropo
 			return result;
 		}
 		return Collections.EMPTY_LIST;
+	}
+
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#getErrorMessage()
+	 */
+	public String getErrorMessage() {
+		return fErrorMessage;
 	}
 }

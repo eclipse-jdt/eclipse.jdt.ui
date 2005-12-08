@@ -101,7 +101,9 @@ public class JavaCompletionProposalComputer implements ICompletionProposalComput
 				return fContextInformation.equals(object);
 		}
 	}
-
+	
+	private String fErrorMessage;
+	
 	public JavaCompletionProposalComputer() {
 	}
 
@@ -172,6 +174,7 @@ public class JavaCompletionProposalComputer implements ICompletionProposalComput
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public List computeContextInformation(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+		fErrorMessage= null;
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
 			
@@ -186,6 +189,7 @@ public class JavaCompletionProposalComputer implements ICompletionProposalComput
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public List computeCompletionProposals(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+		fErrorMessage= null;
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
 			return internalComputeCompletionProposals(context.getInvocationOffset(), javaContext, monitor);
@@ -229,6 +233,11 @@ public class JavaCompletionProposalComputer implements ICompletionProposalComput
 		}
 		
 		List proposals= new ArrayList(Arrays.asList(javaProposals));
+		if (proposals.size() == 0) {
+			String error= collector.getErrorMessage();
+			if (error.length() > 0)
+				fErrorMessage= error;
+		}
 		return proposals;
 	}
 
@@ -240,5 +249,12 @@ public class JavaCompletionProposalComputer implements ICompletionProposalComput
 			return new ExperimentalResultCollector(context);
 		else
 			return new CompletionProposalCollector(context.getCompilationUnit());
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#getErrorMessage()
+	 */
+	public String getErrorMessage() {
+		return fErrorMessage;
 	}
 }

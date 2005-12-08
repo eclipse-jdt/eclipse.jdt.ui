@@ -55,6 +55,7 @@ public final class CompletionProposalCategory {
 	private final CompletionProposalComputerRegistry fRegistry;
 	
 	private int fSortOrder= 0x10000;
+	private String fLastError= null;
 
 	CompletionProposalCategory(IConfigurationElement element, CompletionProposalComputerRegistry registry) {
 		fElement= element;
@@ -240,12 +241,15 @@ public final class CompletionProposalCategory {
 	 *         {@link org.eclipse.jface.text.contentassist.ICompletionProposal})
 	 */
 	public List computeCompletionProposals(TextContentAssistInvocationContext context, String partition, SubProgressMonitor monitor) {
+		fLastError= null;
 		List result= new ArrayList();
 		List descriptors= new ArrayList(fRegistry.getProposalComputerDescriptors(partition));
 		for (Iterator it= descriptors.iterator(); it.hasNext();) {
 			CompletionProposalComputerDescriptor desc= (CompletionProposalComputerDescriptor) it.next();
 			if (desc.getCategory() == this)
 				result.addAll(desc.computeCompletionProposals(context, monitor));
+			if (fLastError == null)
+				fLastError= desc.getErrorMessage();
 		}
 		return result;
 	}
@@ -262,14 +266,26 @@ public final class CompletionProposalCategory {
 	 *         {@link org.eclipse.jface.text.contentassist.IContextInformation})
 	 */
 	public List computeContextInformation(TextContentAssistInvocationContext context, String partition, SubProgressMonitor monitor) {
+		fLastError= null;
 		List result= new ArrayList();
 		List descriptors= new ArrayList(fRegistry.getProposalComputerDescriptors(partition));
 		for (Iterator it= descriptors.iterator(); it.hasNext();) {
 			CompletionProposalComputerDescriptor desc= (CompletionProposalComputerDescriptor) it.next();
 			if (desc.getCategory() == this)
 				result.addAll(desc.computeContextInformation(context, monitor));
+			if (fLastError == null)
+				fLastError= desc.getErrorMessage();
 		}
 		return result;
+	}
+
+	/**
+	 * Returns the error message from the computers in this category.
+	 * 
+	 * @return the error message from the computers in this category
+	 */
+	public String getErrorMessage() {
+		return fLastError;
 	}
 	
 }

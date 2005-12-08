@@ -110,4 +110,11 @@ public final class WordCompletionProposalComputer implements ICompletionProposal
 	public List computeContextInformation(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
 		return Collections.EMPTY_LIST;
 	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#getErrorMessage()
+	 */
+	public String getErrorMessage() {
+		return null; // no error message available
+	}
 }

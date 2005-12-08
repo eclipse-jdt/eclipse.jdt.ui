@@ -189,4 +189,11 @@ public final class TemplateCompletionProposalComputer implements ICompletionProp
 	private boolean isKeyword(String name) {
 		return KEYWORDS.contains(name);
 	}
+
+	/*
+	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#getErrorMessage()
+	 */
+	public String getErrorMessage() {
+		return null;
+	}
 }
