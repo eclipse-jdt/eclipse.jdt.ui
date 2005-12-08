@@ -1,4 +1,4 @@
-<project name="org.eclipse.jdt.ui" default="export" basedir="..">
+<project name="org.eclipse.jdt.core.manipulation" default="export" basedir="..">
 <!-- build script to create a plugin from org.eclipse.jdt.core.manipulation -->
 
 	<target name="init">
