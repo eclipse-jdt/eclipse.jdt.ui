@@ -59,10 +59,13 @@ import org.eclipse.ui.keys.IBindingService;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
+import org.eclipse.osgi.util.NLS;
+
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -81,13 +84,13 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 	
 	private static final Key PREF_EXCLUDED_CATEGORIES= getJDTUIKey(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES);
 	private static final Key PREF_CATEGORY_ORDER= getJDTUIKey(PreferenceConstants.CODEASSIST_CATEGORY_ORDER);
-	private static final Key PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAMES= getJDTCoreKey(JavaCore.CODEASSIST_TIMEOUT_FOR_PARAMETER_NAMES);
+	private static final Key PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC= getJDTCoreKey(JavaCore.CODEASSIST_TIMEOUT_FOR_PARAMETER_NAMES);
 	
 	private static Key[] getAllKeys() {
 		return new Key[] {
 				PREF_EXCLUDED_CATEGORIES,
 				PREF_CATEGORY_ORDER,
-				PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAMES
+				PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC
 		};
 	}
 
@@ -314,8 +317,8 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 		timeoutComposite.setLayoutData(gd);
 		
 		PixelConverter pixelConverter= new PixelConverter(composite);
-		String str= PreferencesMessages.CodeAssistConfigurationBlockInProgress_parameterName_timeout; 
-		addTextField(timeoutComposite, str, PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAMES, 0, pixelConverter.convertWidthInCharsToPixels(7));
+		String str= PreferencesMessages.CodeAssistConfigurationBlockInProgress_parameterNameFromAttachedJavadoc_timeout; 
+		addTextField(timeoutComposite, str, PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC, 0, pixelConverter.convertWidthInCharsToPixels(7));
 	}
 
 	private void createControls(Composite parent) {
@@ -544,6 +547,28 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#validateSettings(org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock.Key, java.lang.String, java.lang.String)
 	 */
 	protected void validateSettings(Key changedKey, String oldValue, String newValue) {
+		if (changedKey == PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC) {
+			final StatusInfo status= new StatusInfo();
+			if (newValue.length() == 0)
+				status.setError(PreferencesMessages.CodeAssistConfigurationBlockInProgress_parameterNameFromAttachedJavadoc_timeout_emptyInput); 
+			else {
+				try {
+					int number= Integer.parseInt(newValue);
+					int min= 0;
+					int max= 5000;
+					if (number < min || number > max) {
+						String msgFormat= PreferencesMessages.CodeAssistConfigurationBlockInProgress_parameterNameFromAttachedJavadoc_timeout_invalidRange;
+						String msg= NLS.bind(msgFormat, new Integer(min), new Integer(max));
+						status.setError(msg);
+					}
+				} catch (NumberFormatException ex) {
+					String msgFormat= PreferencesMessages.CodeAssistConfigurationBlockInProgress_parameterNameFromAttachedJavadoc_timeout_invalidInput;
+					String msg= NLS.bind(msgFormat, newValue);
+					status.setError(msg); 
+				}
+			}
+			fContext.statusChanged(status);			
+		}
 	}
 
 	/*
