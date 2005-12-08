@@ -159,7 +159,7 @@ public interface IClasspathInformationProvider {
      * <code>null</code>
      * @throws JavaModelException
      * 
-     * @see ClasspathModifierQueries#getDefaultCreateFolderQuery(Shell, Object)
+     * @see ClasspathModifierQueries#getDefaultCreateFolderQuery(Shell, IJavaProject)
      */
     public ILinkToQuery getLinkFolderQuery() throws JavaModelException;
     
@@ -207,7 +207,7 @@ public interface IClasspathInformationProvider {
      * <code>null</code>
      * @throws JavaModelException
      * 
-     * @see {@link ClasspathModifierQueries#getDefaultCreateFolderQuery(Shell, IJavaProject) }
+     * @see ClasspathModifierQueries#getDefaultCreateFolderQuery(Shell, IJavaProject)
      */
 	public ICreateFolderQuery getCreateFolderQuery() throws JavaModelException;
     
