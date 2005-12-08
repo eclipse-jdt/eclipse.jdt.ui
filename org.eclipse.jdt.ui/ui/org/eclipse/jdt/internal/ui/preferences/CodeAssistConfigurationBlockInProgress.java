@@ -309,7 +309,7 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 		filler.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, false, 1, 1));
 		
 		Composite timeoutComposite= new Composite(composite, SWT.NONE);
-		GridLayout layout= new GridLayout(3, false);
+		GridLayout layout= new GridLayout(4, false);
 		layout.marginWidth= 0;
 		layout.marginHeight= 0;
 		timeoutComposite.setLayout(layout);
@@ -319,6 +319,12 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 		PixelConverter pixelConverter= new PixelConverter(composite);
 		String str= PreferencesMessages.CodeAssistConfigurationBlockInProgress_parameterNameFromAttachedJavadoc_timeout; 
 		addTextField(timeoutComposite, str, PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC, 0, pixelConverter.convertWidthInCharsToPixels(7));
+		
+		Label ms= new Label(timeoutComposite, SWT.NONE);
+		gd= new GridData();
+		ms.setLayoutData(gd);
+		ms.setText(PreferencesMessages.CodeAssistConfigurationBlockInProgress_parameterNameFromAttachedJavadoc_timeout_ms);
+		
 	}
 
 	private void createControls(Composite parent) {
