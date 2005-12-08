@@ -91,7 +91,9 @@ public class MethodExitsFinder extends ASTVisitor {
 		fResult= new ArrayList();
 		markReferences();
 		if (fResult.size() > 0) {
-			fResult.add(fMethodDeclaration.getReturnType2());
+			Type returnType= fMethodDeclaration.getReturnType2();
+			if (returnType != null)
+				fResult.add(fMethodDeclaration.getReturnType2());
 		}
 		return fResult;
 	}
