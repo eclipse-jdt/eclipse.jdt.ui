@@ -93,6 +93,8 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		document.appendChild(xmlJarDesc);
 		xmlWriteJarLocation(jarPackage, document, xmlJarDesc);
 		xmlWriteOptions(jarPackage, document, xmlJarDesc);
+		xmlWriteRefactoring(jarPackage, document, xmlJarDesc);
+		xmlWriteSelectedProjects(jarPackage, document, xmlJarDesc);
 		if (jarPackage.areGeneratedFilesExported())
 			xmlWriteManifest(jarPackage, document, xmlJarDesc);
 		xmlWriteSelectedElements(jarPackage, document, xmlJarDesc);
@@ -130,6 +132,15 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		options.setAttribute("useSourceFolders", "" + jarPackage.useSourceFolderHierarchy()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("buildIfNeeded", "" + jarPackage.isBuildingIfNeeded()); //$NON-NLS-2$ //$NON-NLS-1$
 		options.setAttribute("includeDirectoryEntries", "" + jarPackage.areDirectoryEntriesIncluded());  //$NON-NLS-1$//$NON-NLS-2$
+		options.setAttribute("storeRefactorings", "" + jarPackage.isRefactoringAware());  //$NON-NLS-1$//$NON-NLS-2$
+	}
+
+	private void xmlWriteRefactoring(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
+		Element refactoring= document.createElement("refactoring"); //$NON-NLS-1$
+		xmlJarDesc.appendChild(refactoring);
+		refactoring.setAttribute("startStamp", new Long(jarPackage.getHistoryStart()).toString()); //$NON-NLS-1$
+		refactoring.setAttribute("endStamp", new Long(jarPackage.getHistoryEnd()).toString()); //$NON-NLS-1$
+		refactoring.setAttribute("structuralOnly", "" + jarPackage.isExportStructuralOnly()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private void xmlWriteManifest(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
@@ -175,6 +186,17 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		}
 	}
 
+	private void xmlWriteSelectedProjects(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {
+		Element selectedElements= document.createElement("selectedProjects"); //$NON-NLS-1$
+		xmlJarDesc.appendChild(selectedElements);
+		Object[] elements= jarPackage.getRefactoringProjects();
+		for (int index= 0; index < elements.length; index++) {
+			Object element= elements[index];
+			if (element instanceof IResource)
+				add((IResource)element, selectedElements, document);
+		}
+	}
+	
 	/**
      * Closes this stream.
      * It is the client's responsibility to close the stream.

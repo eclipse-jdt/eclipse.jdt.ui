@@ -289,7 +289,6 @@ public interface IJavaHelpContextIds {
 	public static final String NEW_CLASS_WIZARD_PAGE= PREFIX + "new_class_wizard_page_context"; //$NON-NLS-1$
 	public static final String NEW_INTERFACE_WIZARD_PAGE= PREFIX + "new_interface_wizard_page_context"; //$NON-NLS-1$
 	
-	
 	// since 3.1
 	public static final String NEW_ENUM_WIZARD_PAGE= PREFIX + "new_enum_wizard_page_context"; //$NON-NLS-1$
 	// since 3.1
@@ -297,6 +296,12 @@ public interface IJavaHelpContextIds {
 
 	public static final String NEW_PACKAGEROOT_WIZARD_PAGE= PREFIX + "new_packageroot_wizard_page_context"; //$NON-NLS-1$
 	public static final String JARPACKAGER_WIZARD_PAGE= PREFIX + "jar_packager_wizard_page_context"; //$NON-NLS-1$
+	// since 3.2
+	public static final String JARIMPORT_WIZARD_PAGE= PREFIX + "jar_import_wizard_page_context"; //$NON-NLS-1$
+	// since 3.2
+	public static final String JARREFACTORING_WIZARD_PAGE= PREFIX + "jar_refactoring_wizard_page_context"; //$NON-NLS-1$
+	// since 3.2
+	public static final String JARPREVIEW_WIZARD_PAGE= PREFIX + "jar_preview_wizard_page_context"; //$NON-NLS-1$
 	public static final String JARMANIFEST_WIZARD_PAGE= PREFIX + "jar_manifest_wizard_page_context"; //$NON-NLS-1$
 	public static final String JAROPTIONS_WIZARD_PAGE= PREFIX + "jar_options_wizard_page_context"; //$NON-NLS-1$
 	public static final String JAVA_WORKING_SET_PAGE= PREFIX + "java_working_set_page_context"; //$NON-NLS-1$
@@ -368,6 +373,4 @@ public interface IJavaHelpContextIds {
 	public static final String CALL_HIERARCHY_TOGGLE_IMPLEMENTORS_ACTION= PREFIX + "call_hierarchy_toggle_implementors_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_OPEN_ACTION= PREFIX + "call_hierarchy_open_action_context"; //$NON-NLS-1$
     public static final String CALL_HIERARCHY_CANCEL_SEARCH_ACTION= PREFIX + "call_hierarchy_cancel_search_action_context"; //$NON-NLS-1$
-
-
 }

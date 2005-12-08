@@ -14,6 +14,8 @@ import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferencePage;
@@ -36,8 +38,6 @@ import org.eclipse.ui.PlatformUI;
  */
 public class WorkInProgressPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
-//	public static final String PREF_AUGMENT_RAW= "org.eclipse.jdt.ui.enable.augment.raw.container.clients"; //$NON-NLS-1$
-	
 	private List fCheckBoxes;
 	private List fRadioButtons;
 	private List fTextControls;
@@ -52,19 +52,19 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		fTextControls= new ArrayList();
 	}
 
-//	private Button addCheckBox(Composite parent, String label, String key) { 
-//		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-//		
-//		Button button= new Button(parent, SWT.CHECK);
-//		button.setText(label);
-//		button.setData(key);
-//		button.setLayoutData(gd);
-//
-//		button.setSelection(getPreferenceStore().getBoolean(key));
-//		
-//		fCheckBoxes.add(button);
-//		return button;
-//	}
+	private Button addCheckBox(Composite parent, String label, String key) { 
+		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
+		
+		Button button= new Button(parent, SWT.CHECK);
+		button.setText(label);
+		button.setData(key);
+		button.setLayoutData(gd);
+
+		button.setSelection(getPreferenceStore().getBoolean(key));
+		
+		fCheckBoxes.add(button);
+		return button;
+	}
 	
 	/*
 	 * @see PreferencePage#createControl(Composite)
@@ -81,11 +81,11 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		GridLayout layout= new GridLayout();
 		layout.marginHeight= convertVerticalDLUsToPixels(IDialogConstants.VERTICAL_MARGIN);
 		layout.marginWidth= 0;
-		//layout.verticalSpacing= convertVerticalDLUsToPixels(10);
-		//layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+		layout.verticalSpacing= convertVerticalDLUsToPixels(10);
+		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
 		result.setLayout(layout);
 
-//		addCheckBox(result, PreferencesMessages.getString("WorkInProgressPreferencePage.enable.augment.raw"), PREF_AUGMENT_RAW); //$NON-NLS-1$
+		addCheckBox(result, "&Enable refactoring support in JAR Export wizard", JarPackageWizard.PREFERENCE_ENABLE_REFACTORING_SUPPORT); //$NON-NLS-1$
 		
 		applyDialogFont(result);
 		return result;
@@ -164,6 +164,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
-//		store.setDefault(PREF_AUGMENT_RAW, false);
+		store.setDefault(JarPackageWizard.PREFERENCE_ENABLE_REFACTORING_SUPPORT, false);
 	}
 }

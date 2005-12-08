@@ -10,19 +10,25 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.jarpackager;
 
+import java.io.BufferedInputStream;
+import java.io.BufferedOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarOutputStream;
 import java.util.jar.Manifest;
-import java.util.zip.CRC32;
 import java.util.zip.ZipEntry;
 
 import org.eclipse.core.filesystem.EFS;
@@ -30,7 +36,10 @@ import org.eclipse.core.filesystem.IFileInfo;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -42,9 +51,16 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
+
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerMessages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 
@@ -58,12 +74,13 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
  * @since 3.1
  */
 public class JarWriter3 {
-	
-	private JarOutputStream fJarOutputStream;
-	private JarPackageData fJarPackage;
 
 	private Set fDirectories= new HashSet();
-	
+
+	private JarOutputStream fJarOutputStream;
+
+	private JarPackageData fJarPackage;
+
 	/**
 	 * Creates an instance which is used to create a JAR based
 	 * on the given JarPackage.
@@ -85,63 +102,103 @@ public class JarWriter3 {
 
 		try {
 			if (fJarPackage.usesManifest() && fJarPackage.areGeneratedFilesExported()) {
-				Manifest manifest=  fJarPackage.getManifestProvider().create(fJarPackage);
+				Manifest manifest= fJarPackage.getManifestProvider().create(fJarPackage);
 				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toOSString()), manifest);
 			} else
 				fJarOutputStream= new JarOutputStream(new FileOutputStream(fJarPackage.getAbsoluteJarLocation().toOSString()));
 			String comment= jarPackage.getComment();
 			if (comment != null)
 				fJarOutputStream.setComment(comment);
+			final Object[] projects= fJarPackage.getRefactoringProjects();
+			if (fJarPackage.isRefactoringAware() && JavaPlugin.getDefault().getPreferenceStore().getBoolean(JarPackageWizard.PREFERENCE_ENABLE_REFACTORING_SUPPORT) && projects != null && projects.length > 0) {
+				Assert.isTrue(fJarPackage.areDirectoryEntriesIncluded());
+				final IPath path= new Path(JarPackagerUtil.getRefactoringsEntryName());
+				addDirectories(path.removeLastSegments(1));
+				addHistory(fJarPackage, path, new NullProgressMonitor());
+			}
 		} catch (IOException ex) {
 			throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
 		}
 	}
 	
 	/**
-	 * Closes the archive and does all required cleanup.
-	 *
-	 * @throws	CoreException	to signal any other unusual termination.
-	 * 								This can also be used to return information
-	 * 								in the status object.
+	 * Creates the directory entries for the given path and writes it to the
+	 * current archive.
+	 * 
+	 * @param destinationPath
+	 *            the path to add
+	 * 
+	 * @throws IOException
+	 *             if an I/O error has occurred
 	 */
-	public void close() throws CoreException {
-		if (fJarOutputStream != null)
-			try {
-				fJarOutputStream.close();
-				registerInWorkspaceIfNeeded();
-			} catch (IOException ex) {
-				throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
-			}
+	protected void addDirectories(IPath destinationPath) throws IOException {
+		String path= destinationPath.toString().replace(File.separatorChar, '/');
+		int lastSlash= path.lastIndexOf('/');
+		List directories= new ArrayList(2);
+		while (lastSlash != -1) {
+			path= path.substring(0, lastSlash + 1);
+			if (!fDirectories.add(path))
+				break;
+
+			JarEntry newEntry= new JarEntry(path);
+			newEntry.setMethod(ZipEntry.STORED);
+			newEntry.setSize(0);
+			newEntry.setCrc(0);
+			newEntry.setTime(System.currentTimeMillis());
+			directories.add(newEntry);
+
+			lastSlash= path.lastIndexOf('/', lastSlash - 1);
+		}
+
+		for (int i= directories.size() - 1; i >= 0; --i) {
+			fJarOutputStream.putNextEntry((JarEntry) directories.get(i));
+		}
 	}
 	
 	/**
-	 * Writes the passed resource to the current archive.
-	 *
-	 * @param resource			the file to be written
-	 * @param destinationPath	the path for the file inside the archive
-	 * @throws	CoreException	to signal any other unusual termination.
-	 * 								This can also be used to return information
-	 * 								in the status object.
+	 * Creates the directory entries for the given path and writes it to the
+	 * current archive.
+	 * 
+	 * @param resource
+	 *            the resource for which the parent directories are to be added
+	 * @param destinationPath
+	 *            the path to add
+	 * 
+	 * @throws IOException
+	 *             if an I/O error has occurred
 	 */
-	public void write(IFile resource, IPath destinationPath) throws CoreException {
-		if (!resource.isLocal(IResource.DEPTH_ZERO)) {
-			String message= Messages.format(JarPackagerMessages.JarWriter_error_fileNotAccessible, resource.getFullPath()); 
-			throw JarPackagerUtil.createCoreException(message, null);
+	protected void addDirectories(IResource resource, IPath destinationPath) throws IOException, CoreException {
+		IContainer parent= null;
+		String path= destinationPath.toString().replace(File.separatorChar, '/');
+		int lastSlash= path.lastIndexOf('/');
+		List directories= new ArrayList(2);
+		while (lastSlash != -1) {
+			path= path.substring(0, lastSlash + 1);
+			if (!fDirectories.add(path))
+				break;
+
+			parent= resource.getParent();
+			long timeStamp= System.currentTimeMillis();
+			URI location= parent.getLocationURI();
+			if (location != null) {
+				IFileInfo info= EFS.getStore(location).fetchInfo();
+				if (info.exists())
+					timeStamp= info.getLastModified();
+			}
+
+			JarEntry newEntry= new JarEntry(path);
+			newEntry.setMethod(ZipEntry.STORED);
+			newEntry.setSize(0);
+			newEntry.setCrc(0);
+			newEntry.setTime(timeStamp);
+			directories.add(newEntry);
+
+			lastSlash= path.lastIndexOf('/', lastSlash - 1);
 		}
 
-		try {
-			if (fJarPackage.areDirectoryEntriesIncluded())
-				addDirectories(resource, destinationPath);
-			addFile(resource, destinationPath);
-		} catch (IOException ex) {
-			// Ensure full path is visible
-			String message= null;
-			if (ex.getLocalizedMessage() != null)
-				message= Messages.format(JarPackagerMessages.JarWriter_writeProblemWithMessage, new Object[] {resource.getFullPath(), ex.getLocalizedMessage()}); 
-			else
-				message= Messages.format(JarPackagerMessages.JarWriter_writeProblem, resource.getFullPath()); 
-			throw JarPackagerUtil.createCoreException(message, ex);
-		}					
+		for (int i= directories.size() - 1; i >= 0; --i) {
+			fJarOutputStream.putNextEntry((JarEntry) directories.get(i));
+		}
 	}
 	
 	/**
@@ -163,7 +220,7 @@ public class JarWriter3 {
 			// Entry is filled automatically.
 		else {
 			newEntry.setMethod(ZipEntry.STORED);
-			calculateCrcAndSize(newEntry, resource, readBuffer);
+			JarPackagerUtil.calculateCrcAndSize(newEntry, resource.getContents(false), readBuffer);
 		}
 
 		long lastModified= System.currentTimeMillis();
@@ -199,74 +256,68 @@ public class JarWriter3 {
 	}
 
 	/**
-	 * Calculates the crc and size of the resource and updates the jarEntry.
+	 * Creates a new JAR file entry containing the refactoring history.
 	 * 
-	 * @param jarEntry			the JarEntry to update
-	 * @param resource			the file to calculate 
-	 * @param readBuffer 		a shared read buffer to store temporary data
-	 * 
-     * @throws	IOException		if an I/O error has occurred
-	 * @throws	CoreException 	if the resource can-t be accessed
+	 * @param data
+	 *            the jar package data
+	 * @param path
+	 *            the path of the refactoring history file within the archive
+	 * @param monitor
+	 *            the progress monitor to use
+	 * @throws IOException
+	 *             if no temp file could be written
+	 * @throws CoreException
+	 *             if an error occurs while transforming the refactorings
 	 */
-	private void calculateCrcAndSize(JarEntry jarEntry, IFile resource, byte[] readBuffer) throws IOException, CoreException {
-		InputStream contentStream = resource.getContents(false);
-		int size = 0;
-		CRC32 checksumCalculator= new CRC32();
-		int count;
-		try {
-			while ((count= contentStream.read(readBuffer, 0, readBuffer.length)) != -1) {
-				checksumCalculator.update(readBuffer, 0, count);
-				size += count;
-			}
-		} finally {
-			if (contentStream != null)
-				contentStream.close();
-		}
-		jarEntry.setSize(size);
-		jarEntry.setCrc(checksumCalculator.getValue());
-	}
-	
-	/**
-	 * Creates the directory entries for the given path and writes it to the 
-	 * current archive.
-	 * 
-	 * @param resource 			the resource for which the parent directories
-	 * 							are to be added
-	 * @param destinationPath 	the path to add
-	 * 
-	 * @throws IOException if an I/O error has occurred  
-	 */
-	protected void addDirectories(IResource resource, IPath destinationPath) throws IOException, CoreException {
-		IContainer parent= null;
-		String path= destinationPath.toString().replace(File.separatorChar, '/');
-		int lastSlash= path.lastIndexOf('/');
-		List directories= new ArrayList(2);
-		while(lastSlash != -1) {
-			path= path.substring(0, lastSlash + 1);
-			if (!fDirectories.add(path))
-				break;
+	private void addHistory(final JarPackageData data, final IPath path, final IProgressMonitor monitor) throws IOException, CoreException {
+		Assert.isNotNull(data);
+		Assert.isNotNull(data.getRefactoringProjects());
+		Assert.isNotNull(path);
+		Assert.isNotNull(monitor);
+		final IProject[] projects= data.getRefactoringProjects();
+		final RefactoringHistory history= JarPackagerUtil.retrieveHistory(projects, data.getHistoryStart(), data.getHistoryEnd(), monitor);
+		if (history != null && !history.isEmpty()) {
+			final RefactoringDescriptorProxy[] proxies= history.getDescriptors();
+			Arrays.sort(proxies, new Comparator() {
 
-			parent= resource.getParent();
-			long timeStamp= System.currentTimeMillis();
-			URI location= parent.getLocationURI();
-			if (location != null) {
-				IFileInfo info= EFS.getStore(location).fetchInfo();
-				if (info.exists())
-					timeStamp= info.getLastModified();
+				public final int compare(final Object first, final Object second) {
+					final RefactoringDescriptorProxy predecessor= (RefactoringDescriptorProxy) first;
+					final RefactoringDescriptorProxy successor= (RefactoringDescriptorProxy) second;
+					return (int) (predecessor.getTimeStamp() - successor.getTimeStamp());
+				}
+			});
+			File file= null;
+			OutputStream output= null;
+			try {
+				file= File.createTempFile("history", null); //$NON-NLS-1$
+				output= new BufferedOutputStream(new FileOutputStream(file));
+				try {
+					int filter= JavaRefactorings.IMPORTABLE;
+					if (fJarPackage.isExportStructuralOnly())
+						filter|= RefactoringDescriptor.STRUCTURAL_CHANGE;
+					RefactoringCore.getRefactoringHistoryService().writeRefactoringDescriptors(proxies, output, filter);
+					if (output != null) {
+						try {
+							output.close();
+							output= null;
+						} catch (IOException exception) {
+							// Do nothing
+						}
+					}
+					writeHistory(data, file, path);
+				} finally {
+					if (output != null) {
+						try {
+							output.close();
+						} catch (IOException exception) {
+							// Do nothing
+						}
+					}
+				}
+			} finally {
+				if (file != null)
+					file.delete();
 			}
-				
-			JarEntry newEntry= new JarEntry(path);
-			newEntry.setMethod(ZipEntry.STORED);
-			newEntry.setSize(0);
-			newEntry.setCrc(0);
-			newEntry.setTime(timeStamp);
-			directories.add(newEntry);
-			
-			lastSlash= path.lastIndexOf('/', lastSlash - 1);
-		}
-			
-		for(int i= directories.size() - 1; i >= 0; --i) {
-			fJarOutputStream.putNextEntry((JarEntry)directories.get(i));
 		}
 	}
 
@@ -304,6 +355,23 @@ public class JarWriter3 {
 		return true;
 	}
 
+	/**
+	 * Closes the archive and does all required cleanup.
+	 * 
+	 * @throws CoreException
+	 *             to signal any other unusual termination. This can also be
+	 *             used to return information in the status object.
+	 */
+	public void close() throws CoreException {
+		if (fJarOutputStream != null)
+			try {
+				fJarOutputStream.close();
+				registerInWorkspaceIfNeeded();
+			} catch (IOException ex) {
+				throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
+			}
+	}
+
 	private void registerInWorkspaceIfNeeded() {
 		IPath jarPath= fJarPackage.getAbsoluteJarLocation();
 		IProject[] projects= ResourcesPlugin.getWorkspace().getRoot().getProjects();
@@ -326,6 +394,77 @@ public class JarWriter3 {
 					JavaPlugin.log(ex);
 				}
 			}
+		}
+	}
+
+	/**
+	 * Writes the passed resource to the current archive.
+	 * 
+	 * @param resource
+	 *            the file to be written
+	 * @param destinationPath
+	 *            the path for the file inside the archive
+	 * @throws CoreException
+	 *             to signal any other unusual termination. This can also be
+	 *             used to return information in the status object.
+	 */
+	public void write(IFile resource, IPath destinationPath) throws CoreException {
+		if (!resource.isLocal(IResource.DEPTH_ZERO)) {
+			String message= Messages.format(JarPackagerMessages.JarWriter_error_fileNotAccessible, resource.getFullPath());
+			throw JarPackagerUtil.createCoreException(message, null);
+		}
+
+		try {
+			if (fJarPackage.areDirectoryEntriesIncluded())
+				addDirectories(resource, destinationPath);
+			addFile(resource, destinationPath);
+		} catch (IOException ex) {
+			// Ensure full path is visible
+			String message= null;
+			if (ex.getLocalizedMessage() != null)
+				message= Messages.format(JarPackagerMessages.JarWriter_writeProblemWithMessage, new Object[] {resource.getFullPath(), ex.getLocalizedMessage()}); 
+			else
+				message= Messages.format(JarPackagerMessages.JarWriter_writeProblem, resource.getFullPath()); 
+			throw JarPackagerUtil.createCoreException(message, ex);
+		}					
+	}
+
+	/**
+	 * Writes the refactoring history file to the JAR file.
+	 * 
+	 * @param data
+	 *            the jar package data
+	 * @param file
+	 *            the file containing the refactoring history
+	 * @param path
+	 *            the path of the refactoring history file within the archive
+	 * @throws FileNotFoundException
+	 *             if the history file could not be found
+	 * @throws IOException
+	 *             if an input/output error occurs
+	 */
+	private void writeHistory(final JarPackageData data, final File file, final IPath path) throws FileNotFoundException, IOException, CoreException {
+		Assert.isNotNull(data);
+		Assert.isNotNull(file);
+		Assert.isNotNull(path);
+		final JarEntry entry= new JarEntry(path.toString().replace(File.separatorChar, '/'));
+		byte[] buffer= new byte[4096];
+		if (data.isCompressed())
+			entry.setMethod(ZipEntry.DEFLATED);
+		else {
+			entry.setMethod(ZipEntry.STORED);
+			JarPackagerUtil.calculateCrcAndSize(entry, new BufferedInputStream(new FileInputStream(file)), buffer);
+		}
+		entry.setTime(System.currentTimeMillis());
+		final InputStream stream= new BufferedInputStream(new FileInputStream(file));
+		try {
+			fJarOutputStream.putNextEntry(entry);
+			int count;
+			while ((count= stream.read(buffer, 0, buffer.length)) != -1)
+				fJarOutputStream.write(buffer, 0, count);
+		} finally {
+			if (stream != null)
+				stream.close();
 		}
 	}
 }

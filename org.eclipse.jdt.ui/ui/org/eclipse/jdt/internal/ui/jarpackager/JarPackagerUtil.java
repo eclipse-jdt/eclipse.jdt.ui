@@ -11,15 +11,21 @@
 package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.io.File;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
+import java.util.jar.JarEntry;
+import java.util.zip.CRC32;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
@@ -28,6 +34,11 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+import org.eclipse.jface.util.Assert;
+
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.history.IRefactoringHistoryService;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
@@ -43,18 +54,30 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 
 /**
- * Utility for the Jar packager
+ * Utility methods for JAR Import/Export.
  */
 public class JarPackagerUtil {
 
-	// Constants
 	static final String JAR_EXTENSION= "jar"; //$NON-NLS-1$
 	static final String DESCRIPTION_EXTENSION= "jardesc"; //$NON-NLS-1$
+
+	private static final String REFACTORINGS_ENTRY= "META-INF/REFACTORINGS.XML"; //$NON-NLS-1$
 
 	public static boolean askToCreateDirectory(final Shell parent, File directory) {
 		if (parent == null)
 			return false;
 		return queryDialog(parent, JarPackagerMessages.JarPackage_confirmCreate_title, Messages.format(JarPackagerMessages.JarPackage_confirmCreate_message, directory.toString())); 
+	}
+
+	/**
+	 * Returns the name of the refactorings zip entry.
+	 * 
+	 * @return the name of the refactorings zip entry
+	 * 
+	 * @since 3.2
+	 */
+	public static String getRefactoringsEntryName() {
+		return REFACTORINGS_ENTRY;
 	}
 
 	/**
@@ -190,5 +213,67 @@ public class JarPackagerUtil {
 			}
 		}
 		return false;
+	}
+
+	/**
+	 * Calculates the crc and size of the resource and updates the entry.
+	 * 
+	 * @param entry
+	 *            the jar entry to update
+	 * @param stream
+	 *            the input stream
+	 * @param buffer
+	 *            a shared buffer to store temporary data
+	 * 
+	 * @throws IOException
+	 *             if an input/output error occurs
+	 */
+	public static void calculateCrcAndSize(final JarEntry entry, final InputStream stream, final byte[] buffer) throws IOException {
+		int size= 0;
+		final CRC32 crc= new CRC32();
+		int count;
+		try {
+			while ((count= stream.read(buffer, 0, buffer.length)) != -1) {
+				crc.update(buffer, 0, count);
+				size+= count;
+			}
+		} finally {
+			if (stream != null) {
+				try {
+					stream.close();
+				} catch (IOException exception) {
+					// Do nothing
+				}
+			}
+		}
+		entry.setSize(size);
+		entry.setCrc(crc.getValue());
+	}
+
+	/**
+	 * Returns the refactoring history for the specified projects.
+	 * 
+	 * @param projects
+	 *            the projects whose history to retrieve
+	 * @param start
+	 *            the start time stamp, inclusive
+	 * @param end
+	 *            the end time stamp, inclusive
+	 * @param monitor
+	 *            the progress monitor to use, or <code>null</code>
+	 * @return the refactoring history, or <code>null</code>
+	 */
+	public static RefactoringHistory retrieveHistory(final IProject[] projects, final long start, final long end, final IProgressMonitor monitor) {
+		Assert.isNotNull(projects);
+		if (start >= 0 && end >= start) {
+			final IRefactoringHistoryService service= RefactoringCore.getRefactoringHistoryService();
+			try {
+				service.connect();
+				return service.getRefactoringHistory(projects, start, end, monitor);
+			} finally {
+				service.disconnect();
+			}
+		}
+		return null;
 	}
 }

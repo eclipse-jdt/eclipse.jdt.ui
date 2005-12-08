@@ -14,6 +14,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -26,6 +27,8 @@ import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
+import org.eclipse.jdt.internal.corext.Assert;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarpackager.JarFileExportOperation;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackageReader;
@@ -35,10 +38,15 @@ import org.eclipse.jdt.internal.ui.jarpackager.ManifestProvider;
 import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 /**
- * Model for a JAR package. Describes a JAR package including a bunch of
- * useful options to generate a JAR file with a JAR writer.
- * 
+ * Model for a JAR package which stores information used during JAR export and
+ * import.
+ * <p>
+ * All time stamps are measured in UTC milliseconds from the epoch (see
+ * {@link java.util#Calendar}).
+ * </p>
+ * <p>
  * Clients may subclass.
+ * </p>
  * 
  * @see org.eclipse.jdt.ui.jarpackager.JarWriter3
  * @since 2.0
@@ -121,7 +129,22 @@ public class JarPackageData {
 	
 	// Add directory entries to the jar
 	private boolean fIncludeDirectoryEntries;
-	
+
+	// The end time stamp of the refactoring history
+	private long fRefactoringEnd= Long.MAX_VALUE - 1;
+
+	// Projects for which to store refactoring information
+	private IProject[] fRefactoringProjects= {};
+
+	// The start time stamp of the refactoring history
+	private long fRefactoringStart= 0;
+
+	// Should the package be refactoring aware?
+	private boolean fRefactoringAware= false;
+
+	// Should the exporter only export refactorings causing structural changes?
+	private boolean fRefactoringStructural= true;
+
 	/**
 	 * Creates a new Jar Package Data structure
 	 */
@@ -965,5 +988,160 @@ public class JarPackageData {
 	 */
 	public void setIncludeDirectoryEntries(boolean includeDirectoryEntries) {
 		fIncludeDirectoryEntries = includeDirectoryEntries;
+	}
+
+	/**
+	 * Returns the time stamp where to stop considering refactorings.
+	 * <p>
+	 * This information is used for JAR export.
+	 * </p>
+	 * 
+	 * @return the time stamp where to stop considering refactorings.
+	 * 
+	 * @since 3.2
+	 */
+	public long getHistoryEnd() {
+		return fRefactoringEnd;
+	}
+
+	/**
+	 * Returns the projects for which refactoring information should be stored.
+	 * <p>
+	 * This information is used for JAR export.
+	 * </p>
+	 * 
+	 * @return the projects for which refactoring information should be stored,
+	 *         or an empty array
+	 * 
+	 * @since 3.2
+	 */
+	public IProject[] getRefactoringProjects() {
+		return fRefactoringProjects;
+	}
+
+	/**
+	 * Returns the time stamp where to start considering refactorings.
+	 * <p>
+	 * This information is used for JAR export.
+	 * </p>
+	 * 
+	 * @return the time stamp where to start considering refactorings.
+	 * 
+	 * @since 3.2
+	 */
+	public long getHistoryStart() {
+		return fRefactoringStart;
+	}
+
+	/**
+	 * Is the JAR export wizard only exporting refactorings causing structural
+	 * changes?
+	 * <p>
+	 * This information is used for JAR export.
+	 * </p>
+	 * 
+	 * @return <code>true</code> if exporting structural changes only,
+	 *         <code>false</code> otherwise
+	 * @since 3.2
+	 */
+	public boolean isExportStructuralOnly() {
+		return fRefactoringStructural;
+	}
+
+	/**
+	 * Is the JAR package refactoring aware?
+	 * <p>
+	 * This information is used both in JAR export and import
+	 * </p>
+	 * 
+	 * @return <code>true</code> if it is refactoring aware,
+	 *         <code>false</code> otherwise
+	 * 
+	 * @since 3.2
+	 */
+	public boolean isRefactoringAware() {
+		return fRefactoringAware;
+	}
+
+	/**
+	 * Sets the time stamp where to stop considering refactorings.
+	 * <p>
+	 * This information is used for JAR export.
+	 * </p>
+	 * 
+	 * @param stamp
+	 *            the time stamp to set
+	 * 
+	 * @since 3.2
+	 */
+	public void setHistoryEnd(long stamp) {
+		Assert.isTrue(stamp >= 0);
+		fRefactoringEnd= stamp;
+	}
+
+	/**
+	 * Sets the projects for which refactoring information should be stored.
+	 * <p>
+	 * This information is used for JAR export.
+	 * </p>
+	 * 
+	 * @param projects
+	 *            the projects for which refactoring information should be
+	 *            stored
+	 * 
+	 * @since 3.2
+	 */
+	public void setRefactoringProjects(IProject[] projects) {
+		Assert.isNotNull(projects);
+		fRefactoringProjects= projects;
+	}
+
+	/**
+	 * Sets the time stamp where to start considering refactorings.
+	 * <p>
+	 * This information is used for JAR export.
+	 * </p>
+	 * 
+	 * @param stamp
+	 *            the time stamp to set
+	 * 
+	 * @since 3.2
+	 */
+	public void setHistoryStart(long stamp) {
+		Assert.isTrue(stamp >= 0);
+		fRefactoringStart= stamp;
+	}
+
+	/**
+	 * Determines wether the jar package is refactoring aware.
+	 * <p>
+	 * This information is used both in JAR export and import.
+	 * </p>
+	 * 
+	 * @param aware
+	 *            <code>true</code> if it is refactoring aware,
+	 *            <code>false</code> otherwise
+	 * 
+	 * @since 3.2
+	 */
+	public void setRefactoringAware(boolean aware) {
+		fRefactoringAware= aware;
+	}
+
+	/**
+	 * Determines wether the jar packager exports only refactorings causing
+	 * structural changes.
+	 * <p>
+	 * This information is used for JAR export.
+	 * </p>
+	 * 
+	 * @param structural
+	 *            <code>true</code> if it exports only refactorings causing
+	 *            structural changes, <code>false</code> otherwise
+	 * 
+	 * @since 3.2
+	 */
+	public void setExportStructuralOnly(boolean structural) {
+		fRefactoringStructural= structural;
 	}
 }

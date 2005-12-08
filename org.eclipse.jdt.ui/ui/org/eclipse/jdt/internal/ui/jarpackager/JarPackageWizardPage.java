@@ -43,6 +43,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.window.Window;
@@ -64,10 +65,12 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
@@ -89,10 +92,12 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	private Combo	fDestinationNamesCombo;
 	private Button	fDestinationBrowseButton;
 	
+	private Button		fRefactoringsCheckbox;
 	private Button		fCompressCheckbox;
 	private Button		fOverwriteCheckbox;
 	private Button		fIncludeDirectoryEntriesCheckbox;
 	private Text		fDescriptionFileText;
+	private boolean	fInitiallySelecting= true;
 
 	// dialog store id constants
 	private static final String PAGE_NAME= "JarPackageWizardPage"; //$NON-NLS-1$
@@ -103,6 +108,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	
 	private static final String STORE_DESTINATION_NAMES= PAGE_NAME + ".DESTINATION_NAMES_ID"; //$NON-NLS-1$
 	
+	private static final String STORE_REFACTORINGS= PAGE_NAME + ".REFACTORINGS"; //$NON-NLS-1$
 	private static final String STORE_COMPRESS= PAGE_NAME + ".COMPRESS"; //$NON-NLS-1$
 	private final static String STORE_OVERWRITE= PAGE_NAME + ".OVERWRITE"; //$NON-NLS-1$
 	private final static String STORE_INCLUDE_DIRECTORY_ENTRIES= PAGE_NAME + ".INCLUDE_DIRECTORY_ENTRIES"; //$NON-NLS-1$
@@ -176,6 +182,12 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		layout.marginHeight= 0;
 		optionsGroup.setLayout(layout);
 
+		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(JarPackageWizard.PREFERENCE_ENABLE_REFACTORING_SUPPORT)) {
+			fRefactoringsCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
+			fRefactoringsCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_refactorings_text);
+			fRefactoringsCheckbox.addListener(SWT.Selection, this);
+		}
+		
 		fCompressCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
 		fCompressCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_compress_text); 
 		fCompressCheckbox.addListener(SWT.Selection, this);
@@ -254,6 +266,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			settings.put(STORE_EXPORT_JAVA_FILES, fJarPackage.areJavaFilesExported());
 
 			// options
+			settings.put(STORE_REFACTORINGS, fJarPackage.isRefactoringAware());
 			settings.put(STORE_COMPRESS, fJarPackage.isCompressed());
 			settings.put(STORE_INCLUDE_DIRECTORY_ENTRIES, fJarPackage.areDirectoryEntriesIncluded());
 			settings.put(STORE_OVERWRITE, fJarPackage.allowOverwrite());
@@ -297,6 +310,8 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		}
 		
 		// options
+		if (fRefactoringsCheckbox != null)
+			fRefactoringsCheckbox.setSelection(fJarPackage.isRefactoringAware());
 		fCompressCheckbox.setSelection(fJarPackage.isCompressed());
 		fIncludeDirectoryEntriesCheckbox.setSelection(fJarPackage.areDirectoryEntriesIncluded());
 		fOverwriteCheckbox.setSelection(fJarPackage.allowOverwrite());
@@ -315,6 +330,7 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 			fJarPackage.setExportJavaFiles(settings.getBoolean(STORE_EXPORT_JAVA_FILES));
 
 			// options
+			fJarPackage.setRefactoringAware(settings.getBoolean(STORE_REFACTORINGS));
 			fJarPackage.setCompress(settings.getBoolean(STORE_COMPRESS));
 			fJarPackage.setIncludeDirectoryEntries(settings.getBoolean(STORE_INCLUDE_DIRECTORY_ENTRIES));
 			fJarPackage.setOverwrite(settings.getBoolean(STORE_OVERWRITE));
@@ -355,6 +371,8 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		fJarPackage.setJarLocation(path);
 
 		// options
+		if (fRefactoringsCheckbox != null)
+			fJarPackage.setRefactoringAware(fRefactoringsCheckbox.getSelection());
 		fJarPackage.setCompress(fCompressCheckbox.getSelection());
 		fJarPackage.setIncludeDirectoryEntries(fIncludeDirectoryEntriesCheckbox.getSelection());
 		fJarPackage.setOverwrite(fOverwriteCheckbox.getSelection());
@@ -488,16 +506,27 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 					return !(element instanceof IPackageFragment) && super.hasChildren(element);
 				}
 			};
+		final DecoratingLabelProvider provider= new DecoratingLabelProvider(new JavaElementLabelProvider(labelFlags), new ProblemsLabelDecorator());
 		fInputGroup= new CheckboxTreeAndListGroup(
 					parent,
 					JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()),
 					treeContentProvider,
-					new JavaElementLabelProvider(labelFlags),
+					provider,
 					new StandardJavaElementContentProvider(),
-					new JavaElementLabelProvider(labelFlags),
+					provider,
 					SWT.NONE,
 					SIZING_SELECTION_WIDGET_WIDTH,
-					SIZING_SELECTION_WIDGET_HEIGHT);
+					SIZING_SELECTION_WIDGET_HEIGHT) {
+
+						protected void setTreeChecked(final Object element, final boolean state) {
+							if (fInitiallySelecting && element instanceof IResource) {
+								final IResource resource= (IResource) element;
+								if (resource.getName().charAt(0) == '.')
+									return;
+							}
+							super.setTreeChecked(element, state);
+						}
+		};
 		fInputGroup.addTreeFilter(new EmptyInnerPackageFilter());
 		fInputGroup.setTreeSorter(new JavaElementSorter());
 		fInputGroup.setListSorter(new JavaElementSorter());
@@ -536,6 +565,14 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	 * Updates the enablements of this page's controls. Subclasses may extend.
 	 */
 	protected void updateWidgetEnablements() {
+		if (fRefactoringsCheckbox != null) {
+			final boolean selection= fRefactoringsCheckbox.getSelection();
+			fIncludeDirectoryEntriesCheckbox.setEnabled(!selection);
+			if (selection) {
+				fIncludeDirectoryEntriesCheckbox.setSelection(true);
+				fJarPackage.setIncludeDirectoryEntries(true);
+			}
+		}
 	}
 
 	/*
@@ -712,8 +749,12 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 					IJavaElement je= JavaCore.create((IResource)selectedElement);
 					if (je != null && je.exists() &&  je.getJavaProject().isOnClasspath((IResource)selectedElement))
 						selectedElement= je;
-				}					
-				fInputGroup.initialCheckTreeItem(selectedElement);
+				}	
+				try {
+					fInputGroup.initialCheckTreeItem(selectedElement);
+				} finally {
+					fInitiallySelecting= false;
+				}
 			}
 		}
 		

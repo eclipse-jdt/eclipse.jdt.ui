@@ -31,6 +31,17 @@ public final class JarPackagerMessages extends NLS {
 	public static String JarPackageWizard_jarExport_title;
 	public static String JarPackageWizard_jarExportError_title;
 	public static String JarPackageWizard_jarExportError_message;
+	public static String JarPackageWizard_workspace_caption;
+	public static String JarPackageWizard_project_pattern;
+	public static String RefactoringSelectionPage_title;
+	public static String RefactoringSelectionPage_description;
+	public static String RefactoringSelectionPage_viewer_caption;
+	public static String RefactoringSelectionPage_date_label;
+	public static String RefactoringSelectionPage_time_label;
+	public static String RefactoringPreviewPage_title;
+	public static String RefactoringPreviewPage_description;
+	public static String JarPackageRefactoringPage_export_label;
+	public static String JarPackageRefactoringPage_export_caption;
 	public static String OpenJarPackageWizardDelegate_badXmlFormat;
 	public static String OpenJarPackageWizardDelegate_error_openJarPackager_title;
 	public static String OpenJarPackageWizardDelegate_error_openJarPackager_message;
@@ -99,6 +110,7 @@ public final class JarPackagerMessages extends NLS {
 	public static String JarPackageWizardPage_whereToExport_label;
 	public static String JarPackageWizardPage_options_label;
 	public static String JarPackageWizardPage_compress_text;
+	public static String JarPackageWizardPage_refactorings_text;
 	public static String JarPackageWizardPage_overwrite_text;
 	public static String JarPackageWizardPage_includeDirectoryEntries_text;
 	public static String JarPackageWizardPage_destination_label;

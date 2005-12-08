@@ -125,6 +125,8 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			Element element= (Element)node;
 			xmlReadJarLocation(jarPackage, element);
 			xmlReadOptions(jarPackage, element);
+			xmlReadRefactoring(jarPackage, element);
+			xmlReadSelectedProjects(jarPackage, element);
 			if (jarPackage.areGeneratedFilesExported())
 				xmlReadManifest(jarPackage, element);
 			xmlReadSelectedElements(jarPackage, element);
@@ -148,6 +150,15 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 			jarPackage.setDescriptionLocation(Path.fromPortableString(element.getAttribute("descriptionLocation"))); //$NON-NLS-1$
 			jarPackage.setBuildIfNeeded(getBooleanAttribute(element, "buildIfNeeded", jarPackage.isBuildingIfNeeded())); //$NON-NLS-1$
 			jarPackage.setIncludeDirectoryEntries(getBooleanAttribute(element, "includeDirectoryEntries", false)); //$NON-NLS-1$
+			jarPackage.setRefactoringAware(getBooleanAttribute(element, "storeRefactorings", false)); //$NON-NLS-1$
+		}
+	}
+
+	private void xmlReadRefactoring(JarPackageData jarPackage, Element element) throws java.io.IOException {
+		if (element.getNodeName().equals("refactoring")) { //$NON-NLS-1$
+			jarPackage.setHistoryStart(Long.valueOf(element.getAttribute("startStamp")).longValue()); //$NON-NLS-1$
+			jarPackage.setHistoryEnd(Long.valueOf(element.getAttribute("endStamp")).longValue()); //$NON-NLS-1$
+			jarPackage.setExportStructuralOnly(getBooleanAttribute(element, "structuralOnly", jarPackage.isExportStructuralOnly())); //$NON-NLS-1$
 		}
 	}
 
@@ -210,6 +221,22 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 		}
 	}
 
+	private void xmlReadSelectedProjects(JarPackageData jarPackage, Element element) throws java.io.IOException {
+		if (element.getNodeName().equals("selectedProjects")) { //$NON-NLS-1$
+			NodeList selectedElements= element.getChildNodes();
+			Set selectedProjects= new HashSet(selectedElements.getLength());
+			for (int index= 0; index < selectedElements.getLength(); index++) {
+				Node node= selectedElements.item(index);
+				if (node.getNodeType() != Node.ELEMENT_NODE)
+					continue;
+				Element selectedElement= (Element)node;
+				if (selectedElement.getNodeName().equals("project")) //$NON-NLS-1$
+					addProject(selectedProjects ,selectedElement);
+			}
+			jarPackage.setRefactoringProjects((IProject[]) selectedProjects.toArray(new IProject[selectedProjects.size()]));
+		}
+	}
+	
 	protected boolean getBooleanAttribute(Element element, String name, boolean defaultValue) throws IOException {
 		if (element.hasAttribute(name))
 			return getBooleanAttribute(element, name);
