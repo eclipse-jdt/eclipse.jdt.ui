@@ -439,7 +439,10 @@ public final class ASTProvider {
 	 * @return					the AST or <code>null</code> if the AST is not available
 	 */
 	public CompilationUnit getAST(IJavaElement je, WAIT_FLAG waitFlag, IProgressMonitor progressMonitor) {
-		Assert.isTrue(je != null && (je.getElementType() == IJavaElement.CLASS_FILE || je.getElementType() == IJavaElement.COMPILATION_UNIT));
+		if (je == null)
+			return null;
+		
+		Assert.isTrue(je.getElementType() == IJavaElement.CLASS_FILE || je.getElementType() == IJavaElement.COMPILATION_UNIT);
 
 		if (progressMonitor != null && progressMonitor.isCanceled())
 			return null;
