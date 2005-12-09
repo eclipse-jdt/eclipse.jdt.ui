@@ -70,7 +70,6 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.viewsupport.LibraryFilter;
@@ -182,30 +181,28 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		layout.marginHeight= 0;
 		optionsGroup.setLayout(layout);
 
-		if (JavaPlugin.getDefault().getPreferenceStore().getBoolean(JarPackageWizard.PREFERENCE_ENABLE_REFACTORING_SUPPORT)) {
-			fRefactoringsCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-			fRefactoringsCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_refactorings_text);
-			fRefactoringsCheckbox.addListener(SWT.Selection, this);
-		}
-		
+		fRefactoringsCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
+		fRefactoringsCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_refactorings_text);
+		fRefactoringsCheckbox.addListener(SWT.Selection, this);
+
 		fCompressCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fCompressCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_compress_text); 
+		fCompressCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_compress_text);
 		fCompressCheckbox.addListener(SWT.Selection, this);
-		
+
 		fIncludeDirectoryEntriesCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fIncludeDirectoryEntriesCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_includeDirectoryEntries_text); 
+		fIncludeDirectoryEntriesCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_includeDirectoryEntries_text);
 		fIncludeDirectoryEntriesCheckbox.addListener(SWT.Selection, this);
 
 		fOverwriteCheckbox= new Button(optionsGroup, SWT.CHECK | SWT.LEFT);
-		fOverwriteCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_overwrite_text); 
+		fOverwriteCheckbox.setText(JarPackagerMessages.JarPackageWizardPage_overwrite_text);
 		fOverwriteCheckbox.addListener(SWT.Selection, this);
 	}
 
 	/**
-	 *	Answer the contents of the destination specification widget. If this
-	 *	value does not have the required suffix then add it first.
-	 *
-	 *	@return java.lang.String
+	 * Answer the contents of the destination specification widget. If this
+	 * value does not have the required suffix then add it first.
+	 * 
+	 * @return java.lang.String
 	 */
 	protected String getDestinationValue() {
 		String destinationText= fDestinationNamesCombo.getText().trim();

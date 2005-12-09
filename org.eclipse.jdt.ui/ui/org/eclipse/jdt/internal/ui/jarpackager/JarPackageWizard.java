@@ -75,9 +75,6 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 
 	private static String DIALOG_SETTINGS_KEY= "JarPackageWizard"; //$NON-NLS-1$
 
-	/** The refactoring support preference */
-	public static final String PREFERENCE_ENABLE_REFACTORING_SUPPORT= "org.eclipse.jdt.ui.jar.package.refactoring.support"; //$NON-NLS-1$
-
 	private boolean fHasNewDialogSettings;
 
 	private boolean fInitializeFromJarPackage;
@@ -191,13 +188,13 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	}
 
 	public IWizardPage getNextPage(IWizardPage page) {
-		if (page == fJarPackageWizardPage && (!fJarPackage.isRefactoringAware() || !JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREFERENCE_ENABLE_REFACTORING_SUPPORT)))
+		if (page == fJarPackageWizardPage && !fJarPackage.isRefactoringAware())
 			return fJarOptionsWizardPage;
 		return super.getNextPage(page);
 	}
 
 	public IWizardPage getPreviousPage(IWizardPage page) {
-		if (page == fJarOptionsWizardPage && (!fJarPackage.isRefactoringAware() || !JavaPlugin.getDefault().getPreferenceStore().getBoolean(PREFERENCE_ENABLE_REFACTORING_SUPPORT)))
+		if (page == fJarOptionsWizardPage && !fJarPackage.isRefactoringAware())
 			return fJarPackageWizardPage;
 		return super.getPreviousPage(page);
 	}

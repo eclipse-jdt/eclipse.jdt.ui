@@ -13,12 +13,6 @@ package org.eclipse.jdt.internal.ui.preferences;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
-import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.preference.PreferencePage;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -27,14 +21,19 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
+
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.preference.IPreferenceStore;
+import org.eclipse.jface.preference.PreferencePage;
+
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 /**
  * Preference page for work in progress.
- * 
- * Currently not used. Left here to allow easy reactivation (in plugin.xml).
  */
 public class WorkInProgressPreferencePage extends PreferencePage implements IWorkbenchPreferencePage {
 
@@ -52,7 +51,7 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		fTextControls= new ArrayList();
 	}
 
-	private Button addCheckBox(Composite parent, String label, String key) { 
+	Button addCheckBox(Composite parent, String label, String key) { 
 		GridData gd= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
 		
 		Button button= new Button(parent, SWT.CHECK);
@@ -85,8 +84,8 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 		layout.horizontalSpacing= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
 		result.setLayout(layout);
 
-		addCheckBox(result, "&Enable refactoring support in JAR Export wizard", JarPackageWizard.PREFERENCE_ENABLE_REFACTORING_SUPPORT); //$NON-NLS-1$
-		
+		// Add your controls here
+
 		applyDialogFont(result);
 		return result;
 	}
@@ -164,6 +163,6 @@ public class WorkInProgressPreferencePage extends PreferencePage implements IWor
 	}
 
 	public static void initDefaults(IPreferenceStore store) {
-		store.setDefault(JarPackageWizard.PREFERENCE_ENABLE_REFACTORING_SUPPORT, false);
+		// Initialize your defaults here
 	}
 }

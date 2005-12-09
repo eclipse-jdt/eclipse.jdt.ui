@@ -60,7 +60,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.jarpackager.JarPackageWizard;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerMessages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 
@@ -110,7 +109,7 @@ public class JarWriter3 {
 			if (comment != null)
 				fJarOutputStream.setComment(comment);
 			final Object[] projects= fJarPackage.getRefactoringProjects();
-			if (fJarPackage.isRefactoringAware() && JavaPlugin.getDefault().getPreferenceStore().getBoolean(JarPackageWizard.PREFERENCE_ENABLE_REFACTORING_SUPPORT) && projects != null && projects.length > 0) {
+			if (fJarPackage.isRefactoringAware() && projects != null && projects.length > 0) {
 				Assert.isTrue(fJarPackage.areDirectoryEntriesIncluded());
 				final IPath path= new Path(JarPackagerUtil.getRefactoringsEntryName());
 				addDirectories(path.removeLastSegments(1));
