@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
+import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -42,28 +43,9 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
  */
 public class StringFix implements IFix {
 	
-	private final GroupedTextEdit[] fEditGroups;
+	private final TextEditGroup[] fEditGroups;
 	private final String fName;
 	private final ICompilationUnit fCompilationUnit;
-
-	private static class GroupedTextEdit { //TODO: ma: Couldn't TextEditGroup be used?
-
-		private final String fGroupeName;
-		private final TextEdit fAddEdit;
-
-		public GroupedTextEdit(TextEdit addEdit, String groupeName) {
-			fAddEdit= addEdit;
-			fGroupeName= groupeName;
-		}
-
-		public String getGroupName() {
-			return fGroupeName;
-		}
-
-		public TextEdit getEdit() {
-			return fAddEdit;
-		}
-	}
 
 	public static StringFix createFix(CompilationUnit compilationUnit, IProblemLocation problem, boolean removeNLSTag, boolean addNLSTag) throws CoreException {
 		TextEdit addEdit= null;
@@ -81,13 +63,13 @@ public class StringFix implements IFix {
 
 		if (addEdit != null && removeEdit != null) {
 			String label= FixMessages.StringFix_AddRemoveNonNls_description;
-			return new StringFix(label, compilationUnit, new GroupedTextEdit[] {new GroupedTextEdit(addEdit, label), new GroupedTextEdit(removeEdit, label)});
+			return new StringFix(label, compilationUnit, new TextEditGroup[] {new TextEditGroup(label, addEdit), new TextEditGroup(label, removeEdit)});
 		} else if (addEdit != null) {
 			String label= FixMessages.StringFix_AddNonNls_description;
-			return new StringFix(label, compilationUnit, new GroupedTextEdit[] {new GroupedTextEdit(addEdit, label)});
+			return new StringFix(label, compilationUnit, new TextEditGroup[] {new TextEditGroup(label, addEdit)});
 		} else if (removeEdit != null) {
 			String label= FixMessages.StringFix_RemoveNonNls_description;
-			return new StringFix(label, compilationUnit, new GroupedTextEdit[] {new GroupedTextEdit(removeEdit, label)});
+			return new StringFix(label, compilationUnit, new TextEditGroup[] {new TextEditGroup(label, removeEdit)});
 		} else {
 			return null;
 		}
@@ -105,20 +87,24 @@ public class StringFix implements IFix {
 			IProblem problem= problems[i];
 			if (addNLSTag && problem.getID() == IProblem.NonExternalizedStringLiteral) {
 				TextEdit edit= NLSUtil.createNLSEdit(cu, problem.getSourceStart());
-				result.add(new GroupedTextEdit(edit, FixMessages.StringFix_AddNonNls_description));
+				if (edit != null) {
+					result.add(new TextEditGroup(FixMessages.StringFix_AddNonNls_description, edit));
+				}
 			}
 			if (removeNLSTag && problem.getID() == IProblem.UnnecessaryNLSTag) {
 				IBuffer buffer= cu.getBuffer();
 				if (buffer != null) {
 					TextEdit edit= StringFix.getReplace(problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart() + 1, buffer, false);
-					result.add(new GroupedTextEdit(edit, FixMessages.StringFix_RemoveNonNls_description));
+					if (edit != null) {
+						result.add(new TextEditGroup(FixMessages.StringFix_RemoveNonNls_description, edit));
+					}
 				}
 			}
 		}
 		if (result.isEmpty())
 			return null;
 		
-		return new StringFix("", compilationUnit, (GroupedTextEdit[])result.toArray(new GroupedTextEdit[result.size()])); //$NON-NLS-1$
+		return new StringFix("", compilationUnit, (TextEditGroup[])result.toArray(new TextEditGroup[result.size()])); //$NON-NLS-1$
 	}
 	
 	private static ReplaceEdit getReplace(int offset, int length, IBuffer buffer, boolean removeLeadingIndents) {
@@ -164,7 +150,7 @@ public class StringFix implements IFix {
 		}
 	}
 	
-	private StringFix(String name, CompilationUnit compilationUnit, GroupedTextEdit[] groups) {
+	private StringFix(String name, CompilationUnit compilationUnit, TextEditGroup[] groups) {
 		fName= name;
 		fCompilationUnit= (ICompilationUnit)compilationUnit.getJavaElement();
 		fEditGroups= groups;
@@ -179,9 +165,11 @@ public class StringFix implements IFix {
 		
 		CompilationUnitChange result= new CompilationUnitChange(getDescription(), getCompilationUnit());
 		for (int i= 0; i < fEditGroups.length; i++) {
-			TextEdit edit= fEditGroups[i].getEdit();
-			String groupName= fEditGroups[i].getGroupName();
-			TextChangeCompatibility.addTextEdit(result, groupName, edit);
+			TextEdit[] edits= fEditGroups[i].getTextEdits();
+			String groupName= fEditGroups[i].getName();
+			for (int j= 0; j < edits.length; j++) {
+				TextChangeCompatibility.addTextEdit(result, groupName, edits[j]);	
+			}
 		}
 		return result;
 	}
