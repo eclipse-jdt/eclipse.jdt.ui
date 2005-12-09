@@ -59,7 +59,9 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 
+import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IKeyBindingService;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
@@ -72,13 +74,18 @@ import org.eclipse.ui.commands.Priority;
 import org.eclipse.ui.contexts.IWorkbenchContextSupport;
 import org.eclipse.ui.keys.KeySequence;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IParent;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.util.StringMatcher;
 
 /**
@@ -442,7 +449,27 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		Object selectedElement= getSelectedElement();
 		if (selectedElement != null) {
 			try {
+				Shell shell= getParentShell();
 				dispose();
+				if (selectedElement instanceof IJavaElement) {
+					ICompilationUnit cu= (ICompilationUnit)((IJavaElement)selectedElement).getAncestor(IJavaElement.COMPILATION_UNIT);
+					if (JavaModelUtil.isPrimary(cu)) {
+						// Try to reveal it in the active editor
+						IWorkbenchPage page= JavaPlugin.getActivePage();
+						if (page != null) {
+							IEditorPart editor= page.getActiveEditor();
+							if (editor != null) {
+								ICompilationUnit editorCU= JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editor.getEditorInput());
+								if (editorCU == cu) {
+									EditorUtility.revealInEditor(editor, (IJavaElement)selectedElement);
+									return;
+								}
+							}
+						}
+						if (!ActionUtil.isProcessable(shell, selectedElement))
+							return;
+					}
+				}
 				OpenActionUtil.open(selectedElement, true);
 			} catch (CoreException ex) {
 				JavaPlugin.log(ex);

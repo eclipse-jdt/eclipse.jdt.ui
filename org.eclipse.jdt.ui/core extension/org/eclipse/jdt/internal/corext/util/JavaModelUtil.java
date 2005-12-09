@@ -603,7 +603,7 @@ public final class JavaModelUtil {
 	 * Returns true if a cu is a primary cu (original or shared working copy)
 	 */
 	public static boolean isPrimary(ICompilationUnit cu) {
-		return cu.getOwner() == null;
+		return cu != null && cu.getOwner() == null;
 	}
 	
 	
