@@ -4730,7 +4730,7 @@
          </with>
       </enablement>
    </extension>
-
+<!--
    <extension
          point="org.eclipse.compare.streamMergers">
       <streamMerger
@@ -4740,7 +4740,7 @@
             contentTypeId="org.eclipse.jdt.core.javaSource"
             streamMergerId="org.eclipse.jdt.ui.refactoring.model.JavaStreamMerger"/>
    </extension>
-
+-->
    <extension
          point="org.eclipse.core.runtime.adapters">
       <factory
