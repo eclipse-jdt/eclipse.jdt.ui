@@ -20,7 +20,7 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IOpenable;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.ui.JavaUI;
 
 /**
  *
@@ -45,7 +45,7 @@ public class EditorUtility {
 	public static IOpenable getJavaInput(IEditorPart part) {
 		IEditorInput editorInput= part.getEditorInput();
 		if (editorInput != null) {
-			IJavaElement input= JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput);
+			IJavaElement input= JavaUI.getWorkingCopyManager().getWorkingCopy(editorInput);
 			if (input instanceof IOpenable) {
 				return (IOpenable) input;
 			}
