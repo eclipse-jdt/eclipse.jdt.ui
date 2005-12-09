@@ -35,7 +35,6 @@
             class="org.eclipse.jdt.ui.tests.refactoring.TestRenameParticipantShared"
             name="org.eclipse.jdt.ui.tests.refactoring.TestRenameParticipantShared"
             id="org.eclipse.jdt.ui.tests.refactoring.TestRenameParticipantShared">
-         <param name="handlesSimilarDeclarations" value="true"/>   
          <enablement>
            <with variable="affectedNatures">
              <iterate operator="or">
@@ -54,7 +53,6 @@
             class="org.eclipse.jdt.ui.tests.refactoring.TestRenameParticipantSingle"
             name="org.eclipse.jdt.ui.tests.refactoring.TestRenameParticipantSingle"
             id="org.eclipse.jdt.ui.tests.refactoring.TestRenameParticipantSingle">
-         <param name="handlesSimilarDeclarations" value="true"/>   
          <enablement>
            <with variable="affectedNatures">
              <iterate operator="or">

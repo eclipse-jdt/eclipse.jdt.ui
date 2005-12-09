@@ -169,19 +169,17 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	private RefactoringStatus fCachedRefactoringStatus= null;
 
 	public static final class ParticipantDescriptorFilter implements IParticipantDescriptorFilter {
-		private static final boolean BUG_120084= true;
 
 		public boolean select(IConfigurationElement element, RefactoringStatus status) {
 			IConfigurationElement[] params= element.getChildren(PARAM);
 			for (int i= 0; i < params.length; i++) {
 				IConfigurationElement param= params[i];
 				if ("handlesSimilarDeclarations".equals(param.getAttribute(NAME)) && //$NON-NLS-1$
-						"true".equals(param.getAttribute(VALUE))) //$NON-NLS-1$
-					return true;
+						"false".equals(param.getAttribute(VALUE))) { //$NON-NLS-1$
+					return false;
+				}
 			}
-			if (! BUG_120084)
-				status.addWarning(Messages.format(RefactoringCoreMessages.RenameTypeProcessor_participant_does_not_support_similar_names, element.getAttribute(NAME)));
-			return false;
+			return true;
 		}
 	}
 

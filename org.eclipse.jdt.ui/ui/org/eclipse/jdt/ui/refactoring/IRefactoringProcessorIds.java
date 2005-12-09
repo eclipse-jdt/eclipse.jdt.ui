@@ -105,10 +105,9 @@ public interface IRefactoringProcessorIds {
 	 * 
 	 * <p>Since 3.2:</p>
 	 * 
-	 * <p>If the "update similar declarations" feature is selected by the user, participants
-	 * <strong>must</strong> must declare
-	 * <pre> &lt;param name="handlesSimilarDeclarations" value="true"/&gt; </pre>
-	 * in their extension contribution in order to be loaded.</p> 
+	 * <p>Participants that declare <pre> &lt;param name="handlesSimilarDeclarations" value="false"/&gt; </pre>
+	 * in their extension contribution will not be loaded if the user selects the 
+	 * "update similar declarations" feature.</p> 
 	 * 
 	 * <p>Rename type participans can retrieve information about similar declarations by casting the
 	 * RenameArguments to RenameTypeArguments. The new signatures of similar declarations are available 
