@@ -50,6 +50,7 @@ import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
@@ -852,6 +853,23 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			}
 
 		}
+		
+		/**
+		 * Empty selection provider.
+		 * 
+		 * @since 3.2
+		 */
+		private static final class EmptySelectionProvider implements ISelectionProvider {
+			public void addSelectionChangedListener(ISelectionChangedListener listener) {
+			}
+			public ISelection getSelection() {
+				return StructuredSelection.EMPTY;
+			}
+			public void removeSelectionChangedListener(ISelectionChangedListener listener) {
+			}
+			public void setSelection(ISelection selection) {
+			}
+		}			
 
 
 	/** A flag to show contents of top level type only */
@@ -1071,8 +1089,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 		IPageSite site= getSite();
 		site.registerContextMenu(JavaPlugin.getPluginId() + ".outline", manager, fOutlineViewer); //$NON-NLS-1$
-		site.setSelectionProvider(fOutlineViewer);
-
+		
+		updateSelectionProvider(site);
+		
 		// we must create the groups after we have set the selection provider to the site
 		fActionGroups= new CompositeActionGroup(new ActionGroup[] {
 				new OpenViewActionGroup(this),
@@ -1109,6 +1128,16 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		registerToolbarActions(actionBars);
 
 		fOutlineViewer.setInput(fInput);
+	}
+	
+	private void updateSelectionProvider(IPageSite site) {
+		ISelectionProvider provider= fOutlineViewer;
+		if (fInput != null) {
+			ICompilationUnit cu= (ICompilationUnit)fInput.getAncestor(IJavaElement.COMPILATION_UNIT);
+			if (!JavaModelUtil.isPrimary(cu))
+				provider= new EmptySelectionProvider();
+		}
+		site.setSelectionProvider(provider);
 	}
 
 	public void dispose() {
@@ -1164,8 +1193,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 	public void setInput(IJavaElement inputElement) {
 		fInput= inputElement;
-		if (fOutlineViewer != null)
+		if (fOutlineViewer != null) {
 			fOutlineViewer.setInput(fInput);
+			updateSelectionProvider(getSite());
+		}
 	}
 
 	public void select(ISourceReference reference) {

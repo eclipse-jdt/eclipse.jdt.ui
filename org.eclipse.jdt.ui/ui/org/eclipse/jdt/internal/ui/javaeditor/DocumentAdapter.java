@@ -18,19 +18,21 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.swt.widgets.Display;
-
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.ResourceAttributes;
+
+import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
@@ -146,7 +148,20 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	private List fBufferListeners= new ArrayList(3);
 	private IStatus fStatus;
 
+	private IPath fPath;
 
+
+	/**
+	 * This method is <code>public</code> for test purposes only.
+	 */
+	public DocumentAdapter(IOpenable owner, IPath path) {
+		
+		fOwner= owner;
+		fPath= path;
+		
+		initialize();
+	}
+	
 	/**
 	 * This method is <code>public</code> for test purposes only.
 	 */
@@ -154,20 +169,20 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 
 		fOwner= owner;
 		fFile= file;
+		fPath= fFile.getFullPath();
 
 		initialize();
 	}
 
 	private void initialize() {
 		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
-		IPath location= fFile.getFullPath();
 		try {
-			manager.connect(location, new NullProgressMonitor());
-			fTextFileBuffer= manager.getTextFileBuffer(location);
+			manager.connect(fPath, new NullProgressMonitor());
+			fTextFileBuffer= manager.getTextFileBuffer(fPath);
 			fDocument= fTextFileBuffer.getDocument();
 		} catch (CoreException x) {
 			fStatus= x.getStatus();
-			fDocument= manager.createEmptyDocument(location);
+			fDocument= manager.createEmptyDocument(fPath);
 		}
 		fDocument.addPrenotifiedDocumentListener(this);
 	}
@@ -328,8 +343,15 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	 * @see IBuffer#isReadOnly()
 	 */
 	public boolean isReadOnly() {
+		if (fTextFileBuffer != null)
+			return !fTextFileBuffer.isCommitable();
+		
 		IResource resource= getUnderlyingResource();
-		return resource == null ? true : resource.isReadOnly();
+		if (resource == null)
+			return true;
+			
+		final ResourceAttributes attributes= resource.getResourceAttributes();
+		return attributes == null ? false : attributes.isReadOnly();
 	}
 
 	/*
