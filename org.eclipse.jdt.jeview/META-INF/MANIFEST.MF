@@ -2,7 +2,7 @@ Manifest-Version: 1.0
 Bundle-ManifestVersion: 2
 Bundle-Name: %pluginName
 Bundle-SymbolicName: org.eclipse.jdt.jeview; singleton:=true
-Bundle-Version: 1.0.0
+Bundle-Version: 1.0.1
 Bundle-Activator: org.eclipse.jdt.jeview.JEViewPlugin
 Bundle-Vendor: %providerName
 Bundle-Localization: plugin
@@ -17,6 +17,7 @@ Require-Bundle: org.eclipse.ui,
  org.eclipse.ui.views,
  org.eclipse.ui.workbench.texteditor
 Eclipse-LazyStart: true
+Eclipse-AutoStart: true
 Export-Package: org.eclipse.jdt.jeview;x-internal:=true,
  org.eclipse.jdt.jeview.properties;x-internal:=true,
  org.eclipse.jdt.jeview.views;x-internal:=true

@@ -2,7 +2,7 @@
 <feature
       id="org.eclipse.jdt.jeview.feature"
       label="org.eclipse.jdt.jeview.feature"
-      version="1.0.0"
+      version="1.0.1"
       provider-name="Eclipse.org">
 
    <description>
@@ -14,7 +14,8 @@
    </license>
 
    <url>
-      <update label="AST View update site" url="http://dev.eclipse.org/viewcvs/index.cgi/%7Echeckout%7E/jdt-ui-home/plugins/org.eclipse.jdt.astview/AST-View-Site"/>
+      <update label="JDT UI update site" url="http://www.eclipse.org/jdt/ui/update-site"/>
+      <discovery label="JDT UI Site" url="http://www.eclipse.org/jdt/ui/update-site"/>
    </url>
 
    <requires>
