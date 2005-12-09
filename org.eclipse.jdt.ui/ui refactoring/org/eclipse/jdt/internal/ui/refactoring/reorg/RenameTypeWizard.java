@@ -47,7 +47,7 @@ public class RenameTypeWizard extends RenameRefactoringWizard {
 	protected void addUserInputPages() {
 		super.addUserInputPages();
 		if (isRenameType())
-			addPage(new RenameTypeWizardDerivedElementPage());
+			addPage(new RenameTypeWizardSimilarElementsPage());
 
 	}
 

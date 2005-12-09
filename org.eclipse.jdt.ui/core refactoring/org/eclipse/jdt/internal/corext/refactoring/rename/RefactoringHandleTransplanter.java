@@ -39,12 +39,12 @@ public class RefactoringHandleTransplanter {
 
 	private IType fOldType;
 	private IType fNewType;
-	private Map fRefactoredDerivedElements;
+	private Map fRefactoredSimilarElements;
 
-	public RefactoringHandleTransplanter(IType oldType, IType newType, Map refactoredDerivedElements) {
+	public RefactoringHandleTransplanter(IType oldType, IType newType, Map refactoredSimilarElements) {
 		fOldType= oldType;
 		fNewType= newType;
-		fRefactoredDerivedElements= refactoredDerivedElements;
+		fRefactoredSimilarElements= refactoredSimilarElements;
 	}
 
 	/**
@@ -187,7 +187,7 @@ public class RefactoringHandleTransplanter {
 	}
 
 	private String resolveElementName(IJavaElement method) {
-		final String newName= (String) fRefactoredDerivedElements.get(method);
+		final String newName= (String) fRefactoredSimilarElements.get(method);
 		if (newName != null)
 			return newName;
 		else

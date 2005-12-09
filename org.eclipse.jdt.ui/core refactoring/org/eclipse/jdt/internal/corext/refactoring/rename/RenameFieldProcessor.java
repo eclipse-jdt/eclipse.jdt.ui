@@ -102,21 +102,21 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	protected boolean fUpdateTextualMatches;
 	private boolean fRenameGetter;
 	private boolean fRenameSetter;
-	private boolean fIsDerived;
+	private boolean fIsComposite;
 	private GroupCategorySet fCategorySet;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
 
 	public RenameFieldProcessor(IField field) {
 		this(field, new TextChangeManager(true), null);
-		fIsDerived= false;
+		fIsComposite= false;
 	}
 	
 	protected RenameFieldProcessor(IField field, TextChangeManager manager, GroupCategorySet categorySet) {
 		initialize(field);
 		fChangeManager= manager;
 		fCategorySet= categorySet;
-		fIsDerived= true;
+		fIsComposite= true;
 	}
 
 	private void initialize(IField field) {
@@ -194,18 +194,18 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		RefactoringStatus result= Checks.checkFieldName(newName);
 
 		if (isInstanceField(fField) && (!Checks.startsWithLowerCase(newName)))
-			result.addWarning(fIsDerived
+			result.addWarning(fIsComposite
 					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_should_start_lowercase2, new String[] { newName, fField.getDeclaringType().getElementName() })
 					: RefactoringCoreMessages.RenameFieldRefactoring_should_start_lowercase);
 
 		if (Checks.isAlreadyNamed(fField, newName))
-			result.addFatalError(fIsDerived
+			result.addFatalError(fIsComposite
 					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_another_name2, new String[] { newName, fField.getDeclaringType().getElementName() })
 					: RefactoringCoreMessages.RenameFieldRefactoring_another_name,
 					JavaStatusContext.create(fField));
 		
 		if (fField.getDeclaringType().getField(newName).exists())
-			result.addFatalError(fIsDerived 
+			result.addFatalError(fIsComposite 
 					? Messages.format(RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined2, new String[] { newName, fField.getDeclaringType().getElementName() }) 
 					: RefactoringCoreMessages.RenameFieldRefactoring_field_already_defined,
 					JavaStatusContext.create(fField.getDeclaringType().getField(newName)));
@@ -541,7 +541,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private RefactoringStatus createChanges(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.RenameFieldRefactoring_checking, 10); 
 		RefactoringStatus result= new RefactoringStatus();
-		if (!fIsDerived)
+		if (!fIsComposite)
 			fChangeManager.clear();
 
 		addDeclarationUpdate();
@@ -584,7 +584,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 	
 	private void addTextEdit(TextChange change, String groupName, TextEdit textEdit) {
-		if (fIsDerived)
+		if (fIsComposite)
 			TextChangeCompatibility.addTextEdit(change, groupName, textEdit, fCategorySet);
 		else
 			TextChangeCompatibility.addTextEdit(change, groupName, textEdit);
@@ -655,7 +655,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			SearchResultGroup[] oldReferences= fReferences;
 
 			List compilationUnitsToModify= new ArrayList();
-			if (fIsDerived) {
+			if (fIsComposite) {
 				// limited change set, no accessors.
 				for (int i= 0; i < oldReferences.length; i++) 
 					compilationUnitsToModify.add(oldReferences[i].getCompilationUnit());

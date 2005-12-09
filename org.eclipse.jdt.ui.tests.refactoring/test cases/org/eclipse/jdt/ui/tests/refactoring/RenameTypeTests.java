@@ -136,7 +136,7 @@ public class RenameTypeTests extends RefactoringTest {
 		return helper2_0(oldName, newName, newName, true);
 	}
 	
-	// <--------------------- Derived Member ---------------------------->
+	// <--------------------- Similarly named elements ---------------------------->
 	
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -146,42 +146,42 @@ public class RenameTypeTests extends RefactoringTest {
 		setSomeArgumentOptions(getPackageP().getJavaProject(), "pm", "_pm");
 	}
 	
-	private void helper3(String oldName, String newName, boolean updateRef, boolean updateTextual, boolean updateDerived, String nonJavaFiles) throws JavaModelException, CoreException, IOException, Exception {
-		RenameRefactoring ref= initWithAllOptions(oldName, oldName, newName, newName, updateRef, updateTextual, updateDerived, nonJavaFiles, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+	private void helper3(String oldName, String newName, boolean updateRef, boolean updateTextual, boolean updateSimilar, String nonJavaFiles) throws JavaModelException, CoreException, IOException, Exception {
+		RenameRefactoring ref= initWithAllOptions(oldName, oldName, newName, newName, updateRef, updateTextual, updateSimilar, nonJavaFiles, RenamingNameSuggestor.STRATEGY_EMBEDDED);
 		RefactoringStatus status= performRefactoring(ref);
 		assertNull("was supposed to pass", status);
 		checkResultInClass(newName);
 	}
 	
-	private void helper3_inner(String oldName, String oldInnerName, String newName, String innerNewName, boolean updateRef, boolean updateTextual, boolean updateDerived, String nonJavaFiles) throws JavaModelException, CoreException, IOException, Exception {
-		RenameRefactoring ref= initWithAllOptions(oldName, oldInnerName, newName, innerNewName, updateRef, updateTextual, updateDerived, nonJavaFiles, RenamingNameSuggestor.STRATEGY_EMBEDDED);
+	private void helper3_inner(String oldName, String oldInnerName, String newName, String innerNewName, boolean updateRef, boolean updateTextual, boolean updateSimilar, String nonJavaFiles) throws JavaModelException, CoreException, IOException, Exception {
+		RenameRefactoring ref= initWithAllOptions(oldName, oldInnerName, newName, innerNewName, updateRef, updateTextual, updateSimilar, nonJavaFiles, RenamingNameSuggestor.STRATEGY_EMBEDDED);
 		assertNull("was supposed to pass", performRefactoring(ref));
 		checkResultInClass(newName);
 	}
 	
-	private void helper3(String oldName, String newName, boolean updateDerived, boolean updateTextual, boolean updateRef) throws JavaModelException, CoreException, IOException, Exception {
-		helper3(oldName, newName, updateDerived, updateTextual, updateRef, null);
+	private void helper3(String oldName, String newName, boolean updateSimilar, boolean updateTextual, boolean updateRef) throws JavaModelException, CoreException, IOException, Exception {
+		helper3(oldName, newName, updateSimilar, updateTextual, updateRef, null);
 	}
 	
-	private void helper3_fail(String oldName, String newName, boolean updateDerived, boolean updateTextual, boolean updateRef, int matchStrategy) throws JavaModelException, CoreException, IOException, Exception {
+	private void helper3_fail(String oldName, String newName, boolean updateSimilar, boolean updateTextual, boolean updateRef, int matchStrategy) throws JavaModelException, CoreException, IOException, Exception {
 		RenameRefactoring ref= initWithAllOptions(oldName, oldName, newName, newName, updateRef, updateTextual, updateRef, null, matchStrategy);
 		assertNotNull("was supposed to fail", performRefactoring(ref));
 	}
 	
-	private void helper3_fail(String oldName, String newName, boolean updateDerived, boolean updateTextual, boolean updateRef) throws JavaModelException, CoreException, IOException, Exception {
-		RenameRefactoring ref= initWithAllOptions(oldName, oldName, newName, newName, updateRef, updateTextual, updateDerived, null, RenamingNameSuggestor.STRATEGY_SUFFIX);
+	private void helper3_fail(String oldName, String newName, boolean updateSimilar, boolean updateTextual, boolean updateRef) throws JavaModelException, CoreException, IOException, Exception {
+		RenameRefactoring ref= initWithAllOptions(oldName, oldName, newName, newName, updateRef, updateTextual, updateSimilar, null, RenamingNameSuggestor.STRATEGY_SUFFIX);
 		assertNotNull("was supposed to fail", performRefactoring(ref));
 	}
 
-	private RenameRefactoring initWithAllOptions(String oldName, String innerOldName, String newName, String innerNewName, boolean updateReferences, boolean updateTextualMatches, boolean updateDerived, String nonJavaFiles, int matchStrategy) throws Exception, JavaModelException, CoreException {
+	private RenameRefactoring initWithAllOptions(String oldName, String innerOldName, String newName, String innerNewName, boolean updateReferences, boolean updateTextualMatches, boolean updateSimilar, String nonJavaFiles, int matchStrategy) throws Exception, JavaModelException, CoreException {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), oldName);
 		IType classA= getType(cu, innerOldName);
 		RenameRefactoring ref= createRefactoring(classA, innerNewName);
-		setTheOptions(ref, updateReferences, updateTextualMatches, updateDerived, nonJavaFiles, matchStrategy);
+		setTheOptions(ref, updateReferences, updateTextualMatches, updateSimilar, nonJavaFiles, matchStrategy);
 		return ref;
 	}
 
-	private void setTheOptions(RenameRefactoring ref, boolean updateReferences, boolean updateTextualMatches, boolean updateDerived, String nonJavaFiles, int matchStrategy) {
+	private void setTheOptions(RenameRefactoring ref, boolean updateReferences, boolean updateTextualMatches, boolean updateSimilar, String nonJavaFiles, int matchStrategy) {
 		IReferenceUpdating refUpdating= (IReferenceUpdating)ref.getAdapter(IReferenceUpdating.class);
 		refUpdating.setUpdateReferences(updateReferences);
 		ITextUpdating textUpdating= (ITextUpdating)ref.getAdapter(ITextUpdating.class);
@@ -193,7 +193,7 @@ public class RenameTypeTests extends RefactoringTest {
 		}
 		
 		ISimilarDeclarationUpdating p= (ISimilarDeclarationUpdating)ref.getAdapter(ISimilarDeclarationUpdating.class);
-		p.setUpdateSimilarDeclarations(updateDerived);
+		p.setUpdateSimilarDeclarations(updateSimilar);
 		p.setMatchStrategy(matchStrategy);
 	}
 	
@@ -224,7 +224,7 @@ public class RenameTypeTests extends RefactoringTest {
 		project.setOption(JavaCore.CODEASSIST_ARGUMENT_SUFFIXES, suffixes);
 	}
 	
-	// </------------------------------------ Derived Member --------------------------------->
+	// </------------------------------------ Similarly named elements --------------------------------->
 	
 	public void testIllegalInnerClass() throws Exception {
 		helper1();
@@ -1233,38 +1233,38 @@ public class RenameTypeTests extends RefactoringTest {
 		helperWithTextual("A" , "A", "B", "A", true, true);
 	}
 	
-	// --------------- Derived  tests -----------------
+	// --------------- Similarly named elements -----------------
 	
-	public void testDerivedElements00() throws Exception {
+	public void testSimilarElements00() throws Exception {
 		// Very basic test, one field, two methods
 		helper3("SomeClass", "SomeClass2", true, false, true);
 	}
 	
-	public void testDerivedElements01() throws Exception {
+	public void testSimilarElements01() throws Exception {
 		// Already existing field with new name, shadow-error from field refac
 		helper3_fail("SomeClass", "SomeClass2", true, false, true);
 	}
 	
-	public void testDerivedElements02() throws Exception {
+	public void testSimilarElements02() throws Exception {
 		// Already existing method 
 		helper3_fail("SomeClass", "SomeDifferentClass", true, false, true);
 	}
 	
-	public void testDerivedElements03() throws Exception {
+	public void testSimilarElements03() throws Exception {
 		// more methods
 		helper3("SomeClass", "SomeClass2", true, false, true);
 	}
-	public void testDerivedElements04() throws Exception {
+	public void testSimilarElements04() throws Exception {
 		//Additional field with exactly the same name and getters and setters in another class
 		getClassFromTestFile(getPackageP(), "SomeOtherClass");
 		helper3("SomeClass", "SomeClass2", true, false, true);
 		checkResultInClass("SomeOtherClass");
 	}
 	
-	public void testDerivedElements05() throws Exception {
+	public void testSimilarElements05() throws Exception {
 		//qualified name updating
 		//includes textual updating
-		String content= getFileContents(getTestPath() + "testDerivedElements05/in/test.html");
+		String content= getFileContents(getTestPath() + "testSimilarElements05/in/test.html");
 		IProject project= getPackageP().getJavaProject().getProject();
 		IFile file= project.getFile("test.html");
 		file.create(new ByteArrayInputStream(content.getBytes()), true, null);
@@ -1281,12 +1281,12 @@ public class RenameTypeTests extends RefactoringTest {
 			if (reader != null)
 				reader.close();
 		}
-		String definedContent= getFileContents(getTestPath() + "testDerivedElements05/out/test.html");
+		String definedContent= getFileContents(getTestPath() + "testSimilarElements05/out/test.html");
 		assertEqualLines("invalid updating test.html", newContent.toString(), definedContent);
 		
 	}
 	
-	public void testDerivedElements06() throws Exception {
+	public void testSimilarElements06() throws Exception {
 		//Additional field with exactly the same name and getters and setters in another class
 		//includes textual updating
 		// printTestDisabledMessage("potential matches in comments issue (bug 111891)");
@@ -1295,18 +1295,18 @@ public class RenameTypeTests extends RefactoringTest {
 		checkResultInClass("SomeNearlyIdenticalClass");
 	}
 	
-	public void testDerivedElements07() throws Exception {
+	public void testSimilarElements07() throws Exception {
 		//Test 4 fields in one file, different suffixes/prefixes, incl. 2x setters/getters
 		//includes textual updating
 		helper3("SomeClass", "SomeDiffClass", true, true, true);
 	}
 	
-	public void testDerivedElements08() throws Exception {
+	public void testSimilarElements08() throws Exception {
 		//Interface renaming fun, this time without textual
 		helper3("ISomeIf", "ISomeIf2", true, false, true);
 	}
 
-	public void testDerivedElements09() throws Exception {
+	public void testSimilarElements09() throws Exception {
 		//Some inner types
 		//includes textual updating
 		getClassFromTestFile(getPackageP(), "SomeOtherClass");
@@ -1314,16 +1314,16 @@ public class RenameTypeTests extends RefactoringTest {
 		checkResultInClass("SomeOtherClass");
 	}
 	
-	public void testDerivedElements10() throws Exception {
+	public void testSimilarElements10() throws Exception {
 		//Two static fields
 		getClassFromTestFile(getPackageP(), "SomeOtherClass");
 		helper3("SomeClass", "SomeClass2", true, false, true, null);
 		checkResultInClass("SomeOtherClass");
 	}
 	
-	public void testDerivedElements11() throws Exception {
+	public void testSimilarElements11() throws Exception {
 		//Assure participants get notified of normal stuff (type rename
-		//and resource changes) AND derived elements. 
+		//and resource changes) AND similarly named elements. 
 		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "SomeClass");
 		IType someClass= getType(cu, "SomeClass");
@@ -1332,46 +1332,46 @@ public class RenameTypeTests extends RefactoringTest {
 		List handleList= new ArrayList();
 		List argumentList= new ArrayList();
 		
-		List derivedOldHandleList= new ArrayList();
-		List derivedNewNameList= new ArrayList();
-		List derivedNewHandleList= new ArrayList();
+		List similarOldHandleList= new ArrayList();
+		List similarNewNameList= new ArrayList();
+		List similarNewHandleList= new ArrayList();
 		
 		final String newName= "SomeNewClass";
 		
 		// f-Field + getters/setters
 		IField f3= other.getField("fSomeClass");
-		derivedOldHandleList.add(f3.getHandleIdentifier());
-		derivedNewHandleList.add("Lp/SomeOtherClass;.fSomeNewClass");
-		derivedNewNameList.add("fSomeNewClass");
+		similarOldHandleList.add(f3.getHandleIdentifier());
+		similarNewHandleList.add("Lp/SomeOtherClass;.fSomeNewClass");
+		similarNewNameList.add("fSomeNewClass");
 		
 		IMethod m3= other.getMethod("getSomeClass", new String[0]);
-		derivedOldHandleList.add(m3.getHandleIdentifier());
-		derivedNewNameList.add("getSomeNewClass");
-		derivedNewHandleList.add("Lp/SomeOtherClass;.getSomeNewClass()V");
+		similarOldHandleList.add(m3.getHandleIdentifier());
+		similarNewNameList.add("getSomeNewClass");
+		similarNewHandleList.add("Lp/SomeOtherClass;.getSomeNewClass()V");
 		IMethod m4= other.getMethod("setSomeClass", new String[] {"QSomeClass;"});
-		derivedOldHandleList.add(m4.getHandleIdentifier());
-		derivedNewNameList.add("setSomeNewClass");
-		derivedNewHandleList.add("Lp/SomeOtherClass;.setSomeNewClass(QSomeNewClass;)V");
+		similarOldHandleList.add(m4.getHandleIdentifier());
+		similarNewNameList.add("setSomeNewClass");
+		similarNewHandleList.add("Lp/SomeOtherClass;.setSomeNewClass(QSomeNewClass;)V");
 		
 		// non-f-field + getter/setters
 		IField f1= someClass.getField("someClass");
-		derivedOldHandleList.add(f1.getHandleIdentifier());
-		derivedNewNameList.add("someNewClass");
-		derivedNewHandleList.add("Lp/SomeNewClass;.someNewClass");
+		similarOldHandleList.add(f1.getHandleIdentifier());
+		similarNewNameList.add("someNewClass");
+		similarNewHandleList.add("Lp/SomeNewClass;.someNewClass");
 		IMethod m1= someClass.getMethod("getSomeClass", new String[0]);
-		derivedOldHandleList.add(m1.getHandleIdentifier());
-		derivedNewNameList.add("getSomeNewClass");
-		derivedNewHandleList.add("Lp/SomeNewClass;.getSomeNewClass()V");
+		similarOldHandleList.add(m1.getHandleIdentifier());
+		similarNewNameList.add("getSomeNewClass");
+		similarNewHandleList.add("Lp/SomeNewClass;.getSomeNewClass()V");
 		IMethod m2= someClass.getMethod("setSomeClass", new String[] {"QSomeClass;"});
-		derivedOldHandleList.add(m2.getHandleIdentifier());
-		derivedNewNameList.add("setSomeNewClass");
-		derivedNewHandleList.add("Lp/SomeNewClass;.setSomeNewClass(QSomeNewClass;)V");
+		similarOldHandleList.add(m2.getHandleIdentifier());
+		similarNewNameList.add("setSomeNewClass");
+		similarNewHandleList.add("Lp/SomeNewClass;.setSomeNewClass(QSomeNewClass;)V");
 
 		// fs-field
 		IField f2= someClass.getField("fsSomeClass");
-		derivedOldHandleList.add(f2.getHandleIdentifier());
-		derivedNewNameList.add("fsSomeNewClass");
-		derivedNewHandleList.add("Lp/SomeNewClass;.fsSomeNewClass");
+		similarOldHandleList.add(f2.getHandleIdentifier());
+		similarNewNameList.add("fsSomeNewClass");
+		similarNewHandleList.add("Lp/SomeNewClass;.fsSomeNewClass");
 		
 		// Type Stuff
 		handleList.add(someClass);
@@ -1393,65 +1393,65 @@ public class RenameTypeTests extends RefactoringTest {
 		checkResultInClass("SomeOtherClass");
 		
 		ParticipantTesting.testRename(handles, arguments);
-		ParticipantTesting.testDerivedElements(derivedOldHandleList, derivedNewNameList, derivedNewHandleList);
+		ParticipantTesting.testSimilarElements(similarOldHandleList, similarNewNameList, similarNewHandleList);
 	}
 	
-	public void testDerivedElements12() throws Exception {
+	public void testSimilarElements12() throws Exception {
 		// Test updating of references
 		helper3("SomeFieldClass", "SomeOtherFieldClass", true, false, true);
 	}
 	
-	public void testDerivedElements13() throws Exception {
+	public void testSimilarElements13() throws Exception {
 		// Test various locals and parameters with and without prefixes.
 		// tests not renaming parameters with local prefixes and locals with parameter prefixes
 		helper3("SomeClass", "SomeOtherClass", true, false, true);
 	}
 	
-	public void testDerivedElements14() throws Exception {
+	public void testSimilarElements14() throws Exception {
 		// Test for loop variables
 		helper3("SomeClass2", "SomeOtherClass2", true, false, true);
 	}
 	
-	public void testDerivedElements15() throws Exception {
+	public void testSimilarElements15() throws Exception {
 		// Test catch block variables (exceptions)
 		helper3("SomeClass3", "SomeOtherClass3", true, false, true);
 	}
 	
-	public void testDerivedElements16() throws Exception {
+	public void testSimilarElements16() throws Exception {
 		// Test updating of references
 		helper3("SomeClass4", "SomeOtherClass4", true, false,  true);
 	}
 	
-	public void testDerivedElements17() throws Exception {
+	public void testSimilarElements17() throws Exception {
 		// Local with this name already exists - do not pass.
 		helper3_fail("SomeClass6", "SomeOtherClass6", true, false, true);
 	}
 	
-	public void testDerivedElements18() throws Exception {
+	public void testSimilarElements18() throws Exception {
 		// factory method
 		helper3("SomeClass", "SomeOtherClass", true, false, true);
 	}
 	
-	public void testDerivedElements19() throws Exception {
+	public void testSimilarElements19() throws Exception {
 		// Test detection of same target
 		helper3_fail("ThreeHunkClass", "TwoHunk", true, false, true, RenamingNameSuggestor.STRATEGY_SUFFIX);
 	}
 	
-	public void testDerivedElements20() throws Exception {
+	public void testSimilarElements20() throws Exception {
 		// Overridden method, check both are renamed
 		getClassFromTestFile(getPackageP(), "OtherClass");
 		helper3("OverriddenMethodClass", "ThirdClass", true, false, true);
 		checkResultInClass("OtherClass");
 	}
 	
-	public void testDerivedElements21() throws Exception {
+	public void testSimilarElements21() throws Exception {
 		// Constructors may not be renamed
 		getClassFromTestFile(getPackageP(), "SomeClassSecond");
 		helper3("SomeClass", "SomeNewClass", true, false, true);
 		checkResultInClass("SomeClassSecond");
 	}
 	
-	public void testDerivedElements22() throws Exception {
+	public void testSimilarElements22() throws Exception {
 		// Test transplanter for fields in types inside of initializers
 
 		ParticipantTesting.reset();
@@ -1461,17 +1461,17 @@ public class RenameTypeTests extends RefactoringTest {
 		List handleList= new ArrayList();
 		List argumentList= new ArrayList();
 		
-		List derivedOldHandleList= new ArrayList();
-		List derivedNewNameList= new ArrayList();
-		List derivedNewHandleList= new ArrayList();
+		List similarOldHandleList= new ArrayList();
+		List similarNewNameList= new ArrayList();
+		List similarNewHandleList= new ArrayList();
 		
 		final String newName= "SomeNewClass";
 		
 		// field in class in initializer
 		IField inInitializer= someClass.getInitializer(1).getType("InInitializer", 1).getField("someClassInInitializer");
-		derivedOldHandleList.add(inInitializer.getHandleIdentifier());
-		derivedNewNameList.add("someNewClassInInitializer");
-		derivedNewHandleList.add("Lp/SomeNewClass$InInitializer;.someNewClassInInitializer");
+		similarOldHandleList.add(inInitializer.getHandleIdentifier());
+		similarNewNameList.add("someNewClassInInitializer");
+		similarNewHandleList.add("Lp/SomeNewClass$InInitializer;.someNewClassInInitializer");
 		
 		// Type Stuff
 		handleList.add(someClass);
@@ -1492,11 +1492,11 @@ public class RenameTypeTests extends RefactoringTest {
 		checkResultInClass(newName);
 		
 		ParticipantTesting.testRename(handles, arguments);
-		ParticipantTesting.testDerivedElements(derivedOldHandleList, derivedNewNameList, derivedNewHandleList);
+		ParticipantTesting.testSimilarElements(similarOldHandleList, similarNewNameList, similarNewHandleList);
 		
 	}
 	
-	public void testDerivedElements23() throws Exception {
+	public void testSimilarElements23() throws Exception {
 		// Test transplanter for elements inside types inside fields
 
 		ParticipantTesting.reset();
@@ -1506,23 +1506,23 @@ public class RenameTypeTests extends RefactoringTest {
 		List handleList= new ArrayList();
 		List argumentList= new ArrayList();
 		
-		List derivedOldHandleList= new ArrayList();
-		List derivedNewNameList= new ArrayList();
-		List derivedNewHandleList= new ArrayList();
+		List similarOldHandleList= new ArrayList();
+		List similarNewNameList= new ArrayList();
+		List similarNewHandleList= new ArrayList();
 		
 		final String newName= "SomeNewClass";
 		
 		// some field 
 		IField anotherSomeClass= someClass.getField("anotherSomeClass");
-		derivedOldHandleList.add(anotherSomeClass.getHandleIdentifier());
-		derivedNewNameList.add("anotherSomeNewClass");
-		derivedNewHandleList.add("Lp/SomeNewClass;.anotherSomeNewClass");
+		similarOldHandleList.add(anotherSomeClass.getHandleIdentifier());
+		similarNewNameList.add("anotherSomeNewClass");
+		similarNewHandleList.add("Lp/SomeNewClass;.anotherSomeNewClass");
 		
 		// field in class in method in field declaration ;)
 		IField inInner= anotherSomeClass.getType("", 1).getMethod("foo", new String[0]).getType("X", 1).getField("someClassInInner");
-		derivedOldHandleList.add(inInner.getHandleIdentifier());
-		derivedNewNameList.add("someNewClassInInner");
-		derivedNewHandleList.add("Lp/SomeNewClass$1$X;.someNewClassInInner");
+		similarOldHandleList.add(inInner.getHandleIdentifier());
+		similarNewNameList.add("someNewClassInInner");
+		similarNewHandleList.add("Lp/SomeNewClass$1$X;.someNewClassInInner");
 		
 		// Type Stuff
 		handleList.add(someClass);
@@ -1543,10 +1543,10 @@ public class RenameTypeTests extends RefactoringTest {
 		checkResultInClass(newName);
 		
 		ParticipantTesting.testRename(handles, arguments);
-		ParticipantTesting.testDerivedElements(derivedOldHandleList, derivedNewNameList, derivedNewHandleList);
+		ParticipantTesting.testSimilarElements(similarOldHandleList, similarNewNameList, similarNewHandleList);
 	}
 	
-	public void testDerivedElements24() throws Exception {
+	public void testSimilarElements24() throws Exception {
 		// Test transplanter for ICompilationUnit and IFile
 		
 		ParticipantTesting.reset();
@@ -1578,50 +1578,50 @@ public class RenameTypeTests extends RefactoringTest {
 		assertEquals(oldPackage, newPackage);
 	}
 	
-	public void testDerivedElements25() throws Exception {
+	public void testSimilarElements25() throws Exception {
 		// Test renaming of several-in-one field declarations
 		helper3("ScrewUp", "ScrewDown", true, false, true);
 	}
 	
-	public void testDerivedElements26() throws Exception {
+	public void testSimilarElements26() throws Exception {
 		// Test renaming of several-in-one local variable declarations
 		helper3("ScrewUp", "ScrewDown", true, false, true);
 	}
 	
-	public void testDerivedElements27() throws Exception {
+	public void testSimilarElements27() throws Exception {
 		// Test methods are not renamed if the match is
 		// not either a parameter or a return type
 		helper3("ScrewUp", "ScrewDown", true, false, true);
 	}
 	
-	public void testDerivedElements28() throws Exception {
+	public void testSimilarElements28() throws Exception {
 		// Test local variables are not renamed if the match is
 		// not the type of the local variable itself
 		helper3("ScrewUp", "ScrewDown", true, false, true);
 	}
 	
-	public void testDerivedElements29() throws Exception {
+	public void testSimilarElements29() throws Exception {
 		// Test fields are not renamed if the match is
 		// not the type of the field itself
 		helper3("ScrewUp", "ScrewDown", true, false, true);
 	}
 	
-	public void testDerivedElements30() throws Exception {
+	public void testSimilarElements30() throws Exception {
 		// Test local variables in initializers
 		helper3("SomeClass", "SomeNewClass", true, false, true);
 	}
 	
-	public void testDerivedElements31() throws Exception {
+	public void testSimilarElements31() throws Exception {
 		// Test references and textual references to local elements
 		helper3("SomeClass", "SomeDiffClass", true, true, true);
 	}
 	
-	public void testDerivedElements32() throws Exception {
+	public void testSimilarElements32() throws Exception {
 		// Test whether local variable problem reporting still works
 		helper3_fail("SomeClass", "SomeDifferentClass", true, false, true);
 	}
 	
-	public void testDerivedElements33() throws Exception {
+	public void testSimilarElements33() throws Exception {
 		// Test two local variables inside anonymous types do not generate warnings
 		helper3("Why", "WhyNot", true, false, true);
 	}	

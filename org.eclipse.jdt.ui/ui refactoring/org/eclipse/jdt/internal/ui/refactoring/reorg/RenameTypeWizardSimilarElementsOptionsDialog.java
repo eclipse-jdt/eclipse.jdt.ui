@@ -32,12 +32,12 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.LayoutUtil;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.SelectionButtonDialogField;
 
 /**
- * Option dialog for selecting a derived element renaming strategy
+ * Option dialog for selecting a similarly named element renaming strategy
  * 
  * @since 3.2
  * 
  */
-public class RenameTypeWizardDerivedOptionsDialog extends MessageDialog {
+public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog {
 
 	private SelectionButtonDialogField fExactStrategyRadio;
 	private SelectionButtonDialogField fEmbeddedStrategyRadio;
@@ -47,7 +47,7 @@ public class RenameTypeWizardDerivedOptionsDialog extends MessageDialog {
 	private Label fWarningImageLabel;
 	private int fSelectedStrategy;
 
-	public RenameTypeWizardDerivedOptionsDialog(Shell parentShell, int defaultStrategy) {
+	public RenameTypeWizardSimilarElementsOptionsDialog(Shell parentShell, int defaultStrategy) {
 		super(parentShell, RefactoringMessages.RenameTypeWizard_defaultPageTitle, null, new String(), INFORMATION, new String[] { IDialogConstants.OK_LABEL, IDialogConstants.CANCEL_LABEL }, 0);
 		setShellStyle(getShellStyle() | SWT.RESIZE);
 		fSelectedStrategy= defaultStrategy;
@@ -73,7 +73,7 @@ public class RenameTypeWizardDerivedOptionsDialog extends MessageDialog {
 		messageComposite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 
 		Label infoLabel= new Label(messageComposite, SWT.WRAP);
-		infoLabel.setText(RefactoringMessages.RenameTypeWizardDerivedOptionsDialog_select_strategy);
+		infoLabel.setText(RefactoringMessages.RenameTypeWizardSimilarElementsOptionsDialog_select_strategy);
 		GridData gd= new GridData(GridData.FILL, GridData.CENTER, true, false);
 		gd.widthHint= convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH);
 		infoLabel.setLayoutData(gd);
@@ -82,19 +82,19 @@ public class RenameTypeWizardDerivedOptionsDialog extends MessageDialog {
 		int indent= convertWidthInCharsToPixels(3);
 
 		fExactStrategyRadio= new SelectionButtonDialogField(SWT.RADIO);
-		fExactStrategyRadio.setLabelText(RefactoringMessages.RenameTypeWizardDerivedOptionsDialog_strategy_1);
+		fExactStrategyRadio.setLabelText(RefactoringMessages.RenameTypeWizardSimilarElementsOptionsDialog_strategy_1);
 		fExactStrategyRadio.doFillIntoGrid(messageComposite, 1);
 		fExactStrategyRadio.setSelection(fSelectedStrategy == RenamingNameSuggestor.STRATEGY_EXACT);
 		LayoutUtil.setHorizontalIndent(fExactStrategyRadio.getSelectionButton(null), indent);
 
 		fEmbeddedStrategyRadio= new SelectionButtonDialogField(SWT.RADIO);
-		fEmbeddedStrategyRadio.setLabelText(RefactoringMessages.RenameTypeWizardDerivedOptionsDialog_strategy_2);
+		fEmbeddedStrategyRadio.setLabelText(RefactoringMessages.RenameTypeWizardSimilarElementsOptionsDialog_strategy_2);
 		fEmbeddedStrategyRadio.doFillIntoGrid(messageComposite, 1);
 		fEmbeddedStrategyRadio.setSelection(fSelectedStrategy == RenamingNameSuggestor.STRATEGY_EMBEDDED);
 		LayoutUtil.setHorizontalIndent(fEmbeddedStrategyRadio.getSelectionButton(null), indent);
 
 		fSuffixStrategyRadio= new SelectionButtonDialogField(SWT.RADIO);
-		fSuffixStrategyRadio.setLabelText(RefactoringMessages.RenameTypeWizardDerivedOptionsDialog_strategy_3);
+		fSuffixStrategyRadio.setLabelText(RefactoringMessages.RenameTypeWizardSimilarElementsOptionsDialog_strategy_3);
 		fSuffixStrategyRadio.doFillIntoGrid(messageComposite, 1);
 		fSuffixStrategyRadio.setSelection(fSelectedStrategy == RenamingNameSuggestor.STRATEGY_SUFFIX);
 		LayoutUtil.setHorizontalIndent(fSuffixStrategyRadio.getSelectionButton(null), indent);
@@ -114,7 +114,7 @@ public class RenameTypeWizardDerivedOptionsDialog extends MessageDialog {
 		fWarningImageLabel.setLayoutData(new GridData(GridData.BEGINNING, GridData.CENTER, false, false, 1, 1));
 
 		fWarningLabel= new Label(warningComposite, SWT.WRAP);
-		fWarningLabel.setText(RefactoringMessages.RenameTypeWizardDerivedOptionsDialog_warning_short_names);
+		fWarningLabel.setText(RefactoringMessages.RenameTypeWizardSimilarElementsOptionsDialog_warning_short_names);
 		GridData gridData= new GridData(GridData.FILL, GridData.CENTER, true, false, 1, 1);
 		gridData.widthHint= convertHorizontalDLUsToPixels(IDialogConstants.MINIMUM_MESSAGE_AREA_WIDTH);
 		fWarningLabel.setLayoutData(gridData);

@@ -97,21 +97,21 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private Set/*<IMethod>*/ fMethodsToRename;
 	private TextChangeManager fChangeManager;
 	private WorkingCopyOwner fWorkingCopyOwner;
-	private boolean fIsDerived;
+	private boolean fIsComposite;
 	private GroupCategorySet fCategorySet;
 	
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
 	
 	protected RenameMethodProcessor(IMethod method) {
 		this(method, new TextChangeManager(true), null);
-		fIsDerived= false;
+		fIsComposite= false;
 	}
 	
 	protected RenameMethodProcessor(IMethod method, TextChangeManager manager, GroupCategorySet categorySet) {
 		initialize(method);
 		fChangeManager= manager;
 		fCategorySet= categorySet;
-		fIsDerived= true;
+		fIsComposite= true;
 	}
 	
 	protected void initialize(IMethod method) {
@@ -175,12 +175,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				
 		RefactoringStatus status= Checks.checkName(newName, JavaConventions.validateMethodName(newName));
 		if (status.isOK() && Checks.startsWithUpperCase(newName))
-			status= RefactoringStatus.createWarningStatus(fIsDerived 
+			status= RefactoringStatus.createWarningStatus(fIsComposite 
 					? Messages.format(RefactoringCoreMessages.Checks_method_names_lowercase2, new String[] { newName, fMethod.getDeclaringType().getElementName()})
 					: RefactoringCoreMessages.Checks_method_names_lowercase);
 		
 		if (Checks.isAlreadyNamed(fMethod, newName))
-			status.addFatalError(fIsDerived 
+			status.addFatalError(fIsComposite 
 					? Messages.format(RefactoringCoreMessages.RenameMethodRefactoring_same_name2, new String[] { newName, fMethod.getDeclaringType().getElementName() } ) 
 					: RefactoringCoreMessages.RenameMethodRefactoring_same_name,
 					JavaStatusContext.create(fMethod)); 
@@ -642,7 +642,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 
 	private TextChangeManager createChanges(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
-		if (!fIsDerived)
+		if (!fIsComposite)
 			fChangeManager.clear();
 		
 		/* don't really want to add declaration and references separetely in this refactoring 
@@ -739,7 +739,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	}
 
 	protected void addTextEdit(TextChange change, String editName, ReplaceEdit replaceEdit) {
-		if (fIsDerived)
+		if (fIsComposite)
 			TextChangeCompatibility.addTextEdit(change, editName, replaceEdit, fCategorySet);
 		else
 			TextChangeCompatibility.addTextEdit(change, editName, replaceEdit);

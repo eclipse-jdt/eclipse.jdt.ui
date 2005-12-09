@@ -332,7 +332,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameTypeProcessor_changeCategory_local_variables;
 	public static String RenameTypeProcessor_changeCategory_local_variables_description;
 	public static String RenameTypeProcessor_creating_changes;
-	public static String RenameTypeProcessor_checking_derived_refactoring_conditions;
+	public static String RenameTypeProcessor_checking_similarly_named_declarations_refactoring_conditions;
 	public static String RenameTypeProcessor_cannot_rename_methods_same_new_name;
 	public static String RenameTypeProcessor_cannot_rename_fields_same_new_name;
 	public static String RenameTypeProcessor_cannot_rename_locals_same_new_name;

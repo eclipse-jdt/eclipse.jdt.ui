@@ -105,13 +105,13 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 
 /**
  * 
- * Wizard page for displaying a tree of derived elements renamed along with a
+ * Wizard page for displaying a tree of similarly named elements renamed along with a
  * type.
  * 
  * @since 3.2
  * 
  */
-class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
+class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 
 	public static class EditElementDialog extends StatusDialog implements IDialogFieldListener {
 
@@ -120,14 +120,14 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 
 		public EditElementDialog(Shell parent, IJavaElement elementToEdit, String newName) {
 			super(parent);
-			setTitle(RefactoringMessages.RenameTypeWizardDerivedElementPage_change_element_name);
+			setTitle(RefactoringMessages.RenameTypeWizardSimilarElementsPage_change_element_name);
 			setShellStyle(getShellStyle() | SWT.RESIZE);
 
 			fElementToEdit= elementToEdit;
 
 			fNameField= new StringDialogField();
 			fNameField.setDialogFieldListener(this);
-			fNameField.setLabelText(RefactoringMessages.RenameTypeWizardDerivedElementPage_enter_new_name);
+			fNameField.setLabelText(RefactoringMessages.RenameTypeWizardSimilarElementsPage_enter_new_name);
 
 			fNameField.setText(newName);
 		}
@@ -164,25 +164,25 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		private IStatus validateSettings() {
 			final String name= fNameField.getText();
 			if (name.length() == 0) {
-				return new StatusInfo(IStatus.ERROR, RefactoringMessages.RenameTypeWizardDerivedElementPage_name_empty);
+				return new StatusInfo(IStatus.ERROR, RefactoringMessages.RenameTypeWizardSimilarElementsPage_name_empty);
 			}
 			IStatus status= JavaConventions.validateIdentifier(name);
 			if (status.matches(IStatus.ERROR))
 				return status;
 			if (!Checks.startsWithLowerCase(name))
-				return new StatusInfo(IStatus.WARNING, RefactoringMessages.RenameTypeWizardDerivedElementPage_name_should_start_lowercase);
+				return new StatusInfo(IStatus.WARNING, RefactoringMessages.RenameTypeWizardSimilarElementsPage_name_should_start_lowercase);
 
 			if (fElementToEdit instanceof IMember && ((IMember) fElementToEdit).getDeclaringType() != null) {
 				IType type= ((IMember) fElementToEdit).getDeclaringType();
 				if (fElementToEdit instanceof IField) {
 					final IField f= type.getField(name);
 					if (f.exists())
-						return new StatusInfo(IStatus.ERROR, RefactoringMessages.RenameTypeWizardDerivedElementPage_field_exists);
+						return new StatusInfo(IStatus.ERROR, RefactoringMessages.RenameTypeWizardSimilarElementsPage_field_exists);
 				}
 				if (fElementToEdit instanceof IMethod) {
 					final IMethod m= type.getMethod(name, ((IMethod) fElementToEdit).getParameterTypes());
 					if (m.exists())
-						return new StatusInfo(IStatus.ERROR, RefactoringMessages.RenameTypeWizardDerivedElementPage_method_exists);
+						return new StatusInfo(IStatus.ERROR, RefactoringMessages.RenameTypeWizardSimilarElementsPage_method_exists);
 				}
 			}
 			
@@ -196,7 +196,7 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		}
 	}
 
-	private static class DerivedElementTreeContentProvider implements ITreeContentProvider {
+	private static class SimilarElementTreeContentProvider implements ITreeContentProvider {
 
 		private Map/* <IJavaElement,Set<IJavaElement>> */fTreeElementMap;
 		private Set/* <ICompilationUnit> */fTopLevelElements;
@@ -256,21 +256,21 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 			Assert.isTrue(newInput == null || newInput instanceof Map);
 			if (newInput == null)
 				return;
-			final Map derivedElementsMap= (Map) newInput;
-			final IJavaElement[] derivedElements= (IJavaElement[]) derivedElementsMap.keySet().toArray(new IJavaElement[0]);
+			final Map similarElementsMap= (Map) newInput;
+			final IJavaElement[] similarElements= (IJavaElement[]) similarElementsMap.keySet().toArray(new IJavaElement[0]);
 			fTreeElementMap= new HashMap();
 			fTopLevelElements= new HashSet();
-			for (int i= 0; i < derivedElements.length; i++) {
-				final IType declaring= (IType) derivedElements[i].getAncestor(IJavaElement.TYPE);
-				if (derivedElements[i] instanceof IMember) {
+			for (int i= 0; i < similarElements.length; i++) {
+				final IType declaring= (IType) similarElements[i].getAncestor(IJavaElement.TYPE);
+				if (similarElements[i] instanceof IMember) {
 					// methods, fields, initializers, inner types
-					addToMap(declaring, derivedElements[i]);
+					addToMap(declaring, similarElements[i]);
 				} else {
 					// local variables
-					final IJavaElement parent= derivedElements[i].getParent();
+					final IJavaElement parent= similarElements[i].getParent();
 					if (parent instanceof IMember) {
 						// parent is a method or an initializer
-						addToMap(parent, derivedElements[i]);
+						addToMap(parent, similarElements[i]);
 						addToMap(declaring, parent);
 					}
 				}
@@ -301,12 +301,12 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 
 	}
 
-	private static class DerivedLabelProvider extends JavaElementLabelProvider {
+	private static class SimilarLabelProvider extends JavaElementLabelProvider {
 
 		private Map fDescriptorImageMap= new HashMap();
 		private Map fElementToNewName;
 
-		public DerivedLabelProvider() {
+		public SimilarLabelProvider() {
 			super(JavaElementLabelProvider.SHOW_DEFAULT);
 		}
 
@@ -332,7 +332,7 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		}
 
 		public Image getImage(Object element) {
-			if (isDerivedElement(element))
+			if (isSimilarElement(element))
 				return manageImageDescriptor(JavaPluginImages.DESC_OBJS_DEFAULT_CHANGE);
 			return super.getImage(element);
 		}
@@ -342,19 +342,19 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		}
 
 		public String getText(Object element) {
-			if (isDerivedElement(element)) {
-				return Messages.format(RefactoringMessages.RenameTypeWizardDerivedElementPage_rename_to, new String[] { super.getText(element), (String)fElementToNewName.get(element) } ); 
+			if (isSimilarElement(element)) {
+				return Messages.format(RefactoringMessages.RenameTypeWizardSimilarElementsPage_rename_to, new String[] { super.getText(element), (String)fElementToNewName.get(element) } ); 
 			}
 			return super.getText(element);
 		}
 		
-		private boolean isDerivedElement(Object element) {
+		private boolean isSimilarElement(Object element) {
 			return fElementToNewName.containsKey(element);
 		}
 		
 	}
 	
-	private static class DerivedElementSorter extends JavaElementSorter {
+	private static class SimilarElementSorter extends JavaElementSorter {
 
 		/*
 		 * (non-Javadoc)
@@ -390,21 +390,21 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		}
 	}
 
-	public static final String PAGE_NAME= "DerivedElementSelectionPage"; //$NON-NLS-1$
+	public static final String PAGE_NAME= "SimilarElementSelectionPage"; //$NON-NLS-1$
 
 	private final long LABEL_FLAGS= JavaElementLabels.DEFAULT_QUALIFIED | JavaElementLabels.ROOT_POST_QUALIFIED | JavaElementLabels.APPEND_ROOT_PATH | JavaElementLabels.M_PARAMETER_TYPES
 			| JavaElementLabels.M_PARAMETER_NAMES | JavaElementLabels.M_APP_RETURNTYPE | JavaElementLabels.M_EXCEPTIONS | JavaElementLabels.F_APP_TYPE_SIGNATURE | JavaElementLabels.T_TYPE_PARAMETERS;
 
-	private Label fDerivedLabel;
+	private Label fSimilarElementsLabel;
 	private SourceViewer fSourceViewer;
 	private ContainerCheckedTreeViewer fTreeViewer;
-	private DerivedLabelProvider fTreeViewerLabelProvider;
-	private Map fDerivedElementsToNewName;
+	private SimilarLabelProvider fTreeViewerLabelProvider;
+	private Map fSimilarElementsToNewName;
 	private Button fEditElementButton;
 	private boolean fWasInitialized;
 	private CLabel fCurrentElementLabel;
 
-	public RenameTypeWizardDerivedElementPage() {
+	public RenameTypeWizardSimilarElementsPage() {
 		super(PAGE_NAME);
 	}
 
@@ -441,12 +441,12 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		layout.marginHeight= 0;
 		composite.setLayout(layout);
 
-		createDerivedElementTreeComposite(composite);
+		createSimilarElementTreeComposite(composite);
 		createSourceViewerComposite(composite);
 		composite.setWeights(new int[] { 50, 50 });
 	}
 
-	private void createDerivedElementTreeComposite(Composite parent) {
+	private void createSimilarElementTreeComposite(Composite parent) {
 		Composite composite= new Composite(parent, SWT.NONE);
 		composite.setLayoutData(new GridData(GridData.FILL_BOTH));
 		GridLayout layout= new GridLayout();
@@ -459,11 +459,11 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 	}
 
 	private void createTypeHierarchyLabel(Composite composite) {
-		fDerivedLabel= new Label(composite, SWT.WRAP);
+		fSimilarElementsLabel= new Label(composite, SWT.WRAP);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.heightHint= JavaElementImageProvider.SMALL_SIZE.x;
-		fDerivedLabel.setLayoutData(gd);
-		fDerivedLabel.setText(RefactoringMessages.RenameTypeWizardDerivedElementPage_review_derived_elements);
+		fSimilarElementsLabel.setLayoutData(gd);
+		fSimilarElementsLabel.setText(RefactoringMessages.RenameTypeWizardSimilarElementsPage_review_similar_elements);
 	}
 
 	private void createTreeViewer(Composite composite) {
@@ -471,20 +471,20 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		tree.setLayoutData(new GridData(GridData.FILL_BOTH));
 		fTreeViewer= new ContainerCheckedTreeViewer(tree);
 		fTreeViewer.setUseHashlookup(true);
-		fTreeViewer.setSorter(new DerivedElementSorter());
-		fTreeViewer.setContentProvider(new DerivedElementTreeContentProvider());
-		fTreeViewerLabelProvider= new DerivedLabelProvider();
+		fTreeViewer.setSorter(new SimilarElementSorter());
+		fTreeViewer.setContentProvider(new SimilarElementTreeContentProvider());
+		fTreeViewerLabelProvider= new SimilarLabelProvider();
 		fTreeViewer.setLabelProvider(fTreeViewerLabelProvider);
 		fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
 			public void selectionChanged(SelectionChangedEvent event) {
-				RenameTypeWizardDerivedElementPage.this.treeViewerSelectionChanged(event);
+				RenameTypeWizardSimilarElementsPage.this.treeViewerSelectionChanged(event);
 			}
 		});
 		fTreeViewer.addDoubleClickListener(new IDoubleClickListener() {
 
 			public void doubleClick(DoubleClickEvent event) {
-				RenameTypeWizardDerivedElementPage.this.editCurrentElement();
+				RenameTypeWizardSimilarElementsPage.this.editCurrentElement();
 			}
 		});
 	}
@@ -505,7 +505,7 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		fCurrentElementLabel= new CLabel(c, SWT.NONE);
 		GridData gd= new GridData(GridData.FILL_HORIZONTAL);
 		gd.heightHint= JavaElementImageProvider.SMALL_SIZE.x;
-		fCurrentElementLabel.setText(RefactoringMessages.RenameTypeWizardDerivedElementPage_select_element_to_view_source);
+		fCurrentElementLabel.setText(RefactoringMessages.RenameTypeWizardSimilarElementsPage_select_element_to_view_source);
 		fCurrentElementLabel.setLayoutData(gd);
 	}
 
@@ -533,24 +533,24 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 		buttonComposite.setLayout(bcl);
 
 		Button returnToDefaults= new Button(buttonComposite, SWT.PUSH);
-		returnToDefaults.setText(RefactoringMessages.RenameTypeWizardDerivedElementPage_restore_defaults);
+		returnToDefaults.setText(RefactoringMessages.RenameTypeWizardSimilarElementsPage_restore_defaults);
 		returnToDefaults.setLayoutData(new GridData());
 		SWTUtil.setButtonDimensionHint(returnToDefaults);
 		returnToDefaults.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(SelectionEvent e) {
-				RenameTypeWizardDerivedElementPage.this.resetDataInRefAndUI();
+				RenameTypeWizardSimilarElementsPage.this.resetDataInRefAndUI();
 			}
 		});
 		fEditElementButton= new Button(buttonComposite, SWT.PUSH);
-		fEditElementButton.setText(RefactoringMessages.RenameTypeWizardDerivedElementPage_change_name);
+		fEditElementButton.setText(RefactoringMessages.RenameTypeWizardSimilarElementsPage_change_name);
 		fEditElementButton.setLayoutData(new GridData());
 		fEditElementButton.setEnabled(false);
 		SWTUtil.setButtonDimensionHint(fEditElementButton);
 		fEditElementButton.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(SelectionEvent e) {
-				RenameTypeWizardDerivedElementPage.this.editCurrentElement();
+				RenameTypeWizardSimilarElementsPage.this.editCurrentElement();
 			}
 		});
 	}
@@ -567,21 +567,21 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 
 	private void initializeUIFromRef() {
 		// Get data from the refactoring
-		final Map elementsToNewNames= getRenameTypeProcessor().getDerivedElementsToNewNames();
+		final Map elementsToNewNames= getRenameTypeProcessor().getSimilarElementsToNewNames();
 		// To prevent flickering, only change the input if the list is brand-new
-		if (fDerivedElementsToNewName == null || elementsToNewNames != fDerivedElementsToNewName) {
-			fDerivedElementsToNewName= elementsToNewNames;
-			fTreeViewerLabelProvider.initialize(fDerivedElementsToNewName);
-			fTreeViewer.setInput(fDerivedElementsToNewName);
+		if (fSimilarElementsToNewName == null || elementsToNewNames != fSimilarElementsToNewName) {
+			fSimilarElementsToNewName= elementsToNewNames;
+			fTreeViewerLabelProvider.initialize(fSimilarElementsToNewName);
+			fTreeViewer.setInput(fSimilarElementsToNewName);
 		}
-		restoreSelectionAndNames(getRenameTypeProcessor().getDerivedElementsToSelection());
+		restoreSelectionAndNames(getRenameTypeProcessor().getSimilarElementsToSelection());
 		fTreeViewer.expandAll();
 		fWasInitialized= true;
 	}
 
 	private void initializeRefFromUI() {
-		IJavaElement[] selected= getCheckedDerivedElements();
-		Map selection= getRenameTypeProcessor().getDerivedElementsToSelection();
+		IJavaElement[] selected= getCheckedSimilarElements();
+		Map selection= getRenameTypeProcessor().getSimilarElementsToSelection();
 		for (Iterator iter= selection.keySet().iterator(); iter.hasNext();) {
 			IJavaElement element= (IJavaElement) iter.next();
 			selection.put(element, Boolean.FALSE);
@@ -592,22 +592,22 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 	}
 
 	private void resetDataInRefAndUI() {
-		getRenameTypeProcessor().resetSelectedDerivedElements();
-		restoreSelectionAndNames(getRenameTypeProcessor().getDerivedElementsToSelection());
+		getRenameTypeProcessor().resetSelectedSimilarElements();
+		restoreSelectionAndNames(getRenameTypeProcessor().getSimilarElementsToSelection());
 	}
 
 	protected void editCurrentElement() {
 		IStructuredSelection selection= (IStructuredSelection) fTreeViewer.getSelection();
-		if ( (selection != null) && isDerivedElement(selection.getFirstElement())) {
+		if ( (selection != null) && isSimilarElement(selection.getFirstElement())) {
 			IJavaElement element= (IJavaElement) selection.getFirstElement();
-			String newName= (String) fDerivedElementsToNewName.get(element);
+			String newName= (String) fSimilarElementsToNewName.get(element);
 			if (newName == null)
 				return;
 			EditElementDialog dialog= new EditElementDialog(getShell(), element, newName);
 			if (dialog.open() == Window.OK) {
 				String changedName= dialog.getNewName();
 				if (!changedName.equals(newName)) {
-					fDerivedElementsToNewName.put(element, changedName);
+					fSimilarElementsToNewName.put(element, changedName);
 					fTreeViewer.update(element, null);
 				}
 			}
@@ -660,19 +660,19 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 
 	// ------------ Helper
 
-	private boolean isDerivedElement(Object element) {
+	private boolean isSimilarElement(Object element) {
 		if (!fWasInitialized)
 			return false;
 		
-		return fDerivedElementsToNewName.containsKey(element);
+		return fSimilarElementsToNewName.containsKey(element);
 	}
 
 	private void treeViewerSelectionChanged(SelectionChangedEvent event) {
 		try {
 			final IJavaElement selection= getFirstSelectedSourceReference(event);
 			setSourceViewerContents(selection);
-			fEditElementButton.setEnabled(selection != null && (isDerivedElement(selection)));
-			fCurrentElementLabel.setText(selection != null ? JavaElementLabels.getElementLabel(selection, LABEL_FLAGS) : RefactoringMessages.RenameTypeWizardDerivedElementPage_select_element_to_view_source);
+			fEditElementButton.setEnabled(selection != null && (isSimilarElement(selection)));
+			fCurrentElementLabel.setText(selection != null ? JavaElementLabels.getElementLabel(selection, LABEL_FLAGS) : RefactoringMessages.RenameTypeWizardSimilarElementsPage_select_element_to_view_source);
 			fCurrentElementLabel.setImage(selection != null ? fTreeViewerLabelProvider.getJavaImage(selection) : null);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.RenameTypeWizard_defaultPageTitle, RefactoringMessages.RenameTypeWizard_unexpected_exception);
@@ -726,11 +726,11 @@ class RenameTypeWizardDerivedElementPage extends UserInputWizardPage {
 			return null;
 	}
 
-	private IJavaElement[] getCheckedDerivedElements() {
+	private IJavaElement[] getCheckedSimilarElements() {
 		Object[] checked= fTreeViewer.getCheckedElements();
 		List elements= new ArrayList(checked.length);
 		for (int i= 0; i < checked.length; i++) {
-			if (isDerivedElement(checked[i]))
+			if (isSimilarElement(checked[i]))
 				elements.add(checked[i]);
 		}
 		return (IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]);

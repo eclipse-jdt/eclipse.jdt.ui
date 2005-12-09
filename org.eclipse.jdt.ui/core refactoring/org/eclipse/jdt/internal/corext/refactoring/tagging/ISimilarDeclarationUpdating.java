@@ -45,9 +45,9 @@ public interface ISimilarDeclarationUpdating {
 	public boolean getUpdateSimilarDeclarations();
 
 	/**
-	 * If <code>canEnableDerivedElementUpdating</code> returns
+	 * If <code>canEnableSimilarElementUpdating</code> returns
 	 * <code>true</code>, then this method is used to set the match strategy
-	 * for determining derived elements.
+	 * for determining similarly named elements.
 	 * 
 	 * @param selectedStrategy one of the STRATEGY_* constants in {@link org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor}
 	 */

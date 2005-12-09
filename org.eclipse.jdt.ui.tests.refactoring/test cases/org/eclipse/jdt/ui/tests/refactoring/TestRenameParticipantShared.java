@@ -43,8 +43,8 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 	List fElements= new ArrayList(3);
 	List fHandles= new ArrayList(3);
 	List fArguments= new ArrayList(3);
-	Map fDerivedToHandle= new HashMap();
-	Map fDerivedToNewName= new HashMap();
+	Map fSimilarToHandle= new HashMap();
+	Map fSimilarToNewName= new HashMap();
 
 	public boolean initialize(Object element) {
 		fgInstance= this;
@@ -63,8 +63,8 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 				for (int i= 0; i < elements.length; i++) {
 					IJavaElement updated= updating.getRefactoredJavaElement(elements[i]);
 					if (updated!=null) {
-						fDerivedToHandle.put(elements[i].getHandleIdentifier(), getKey(updated));
-						fDerivedToNewName.put(elements[i].getHandleIdentifier(), updated.getElementName());
+						fSimilarToHandle.put(elements[i].getHandleIdentifier(), getKey(updated));
+						fSimilarToNewName.put(elements[i].getHandleIdentifier(), updated.getElementName());
 					}
 				}
 			}
@@ -127,23 +127,23 @@ public class TestRenameParticipantShared extends RenameParticipant implements IS
 		fgInstance= null;
 	}
 
-	public static void testNumberOfDerivedElements(int expected) {
+	public static void testNumberOfSimilarElements(int expected) {
 		if (expected == 0)
 			Assert.assertTrue(fgInstance == null);
 		else
-			Assert.assertEquals(expected, fgInstance.fDerivedToHandle.size());
+			Assert.assertEquals(expected, fgInstance.fSimilarToHandle.size());
 	}
 
-	public static void testDerivedElements(List derivedList, List derivedNewNameList, List derivedNewHandleList) {
-		for (int i=0; i< derivedList.size(); i++) {
-			String handle= (String) derivedList.get(i);
-			String newHandle= (String)derivedNewHandleList.get(i);
-			String newName= (String)derivedNewNameList.get(i);
-			String actualNewHandle= (String)fgInstance.fDerivedToHandle.get(handle);
-			String actualNewName= (String)fgInstance.fDerivedToNewName.get(handle);
+	public static void testSimilarElements(List similarList, List similarNewNameList, List similarNewHandleList) {
+		for (int i=0; i< similarList.size(); i++) {
+			String handle= (String) similarList.get(i);
+			String newHandle= (String)similarNewHandleList.get(i);
+			String newName= (String)similarNewNameList.get(i);
+			String actualNewHandle= (String)fgInstance.fSimilarToHandle.get(handle);
+			String actualNewName= (String)fgInstance.fSimilarToNewName.get(handle);
 			Assert.assertEquals("New element handle not as expected", newHandle, actualNewHandle);
 			Assert.assertEquals("New element name not as expected", newName, actualNewName);
 		}
-		Assert.assertEquals(derivedList.size(), fgInstance.fDerivedToHandle.size());
+		Assert.assertEquals(similarList.size(), fgInstance.fSimilarToHandle.size());
 	}
 }

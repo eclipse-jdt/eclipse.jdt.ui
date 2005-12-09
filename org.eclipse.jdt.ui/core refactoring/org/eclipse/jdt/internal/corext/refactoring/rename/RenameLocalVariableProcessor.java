@@ -89,7 +89,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	private VariableDeclaration fTempDeclarationNode;
 	private TextChange fChange;
 	
-	private boolean fIsDerived;
+	private boolean fIsComposite;
 	private GroupCategorySet fCategorySet;
 	private TextChangeManager fChangeManager;
 	private RenameAnalyzeUtil.LocalAnalyzePackage fLocalAnalyzePackage;
@@ -102,7 +102,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		if (localVariable != null)
 			fCu= (ICompilationUnit) localVariable.getAncestor(IJavaElement.COMPILATION_UNIT);
 		fNewName= ""; //$NON-NLS-1$
-		fIsDerived= false;
+		fIsComposite= false;
 	}
 	
 	protected RenameLocalVariableProcessor(ILocalVariable localVariable, TextChangeManager manager, CompilationUnit compilUnit, GroupCategorySet categorySet) {
@@ -110,7 +110,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		fChangeManager= manager;
 		fCategorySet= categorySet;
 		fCompilationUnitNode= compilUnit;
-		fIsDerived= true;
+		fIsComposite= true;
 	}
 
 	/*
@@ -229,7 +229,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	}
 
 	private void initAST() throws JavaModelException {
-		if (!fIsDerived)
+		if (!fIsComposite)
 			fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true);
 		ISourceRange sourceRange= fLocalVariable.getNameRange();
 		ASTNode name= NodeFinder.perform(fCompilationUnitNode, sourceRange);
@@ -259,12 +259,12 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			if (result.hasFatalError())
 				return result;
 			createEdits();
-			if (!fIsDerived)
+			if (!fIsComposite)
 				result.merge(RenameAnalyzeUtil.analyzeLocalRenames(new RenameAnalyzeUtil.LocalAnalyzePackage[] { fLocalAnalyzePackage }, fChange, fCompilationUnitNode));
 			return result;
 		} finally {
 			pm.done();
-			if (fIsDerived) {
+			if (fIsComposite) {
 				// end of life cycle for this processor
 				fChange= null;
 				fCompilationUnitNode= null;
@@ -279,7 +279,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	public RefactoringStatus checkNewElementName(String newName) throws JavaModelException {
 		RefactoringStatus result= Checks.checkFieldName(newName);
 		if (! Checks.startsWithLowerCase(newName))
-			if (fIsDerived) {
+			if (fIsComposite) {
 				final String nameOfParent= (fLocalVariable.getParent() instanceof IMethod) ? fLocalVariable.getParent().getElementName() : RefactoringCoreMessages.JavaElementUtil_initializer;
 				final String nameOfType= fLocalVariable.getAncestor(IJavaElement.TYPE).getElementName();
 				result.addWarning(Messages.format(RefactoringCoreMessages.RenameTempRefactoring_lowercase2, new String[] { newName, nameOfParent, nameOfType }));
@@ -303,7 +303,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 
 		String changeName= Messages.format(RefactoringCoreMessages.RenameTempRefactoring_changeName, new String[]{fCurrentName, fNewName}); 
 		for (int i= 0; i < allRenameEdits.length; i++) {
-			if (fIsDerived) {
+			if (fIsComposite) {
 				// Add a copy of the text edit (text edit may only have one
 				// parent) to keep problem reporting code clean
 				TextChangeCompatibility.addTextEdit(fChangeManager.get(fCu), changeName, allRenameEdits[i].copy(), fCategorySet);
@@ -318,7 +318,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		}
 
 		// store information for analysis
-		if (fIsDerived) {
+		if (fIsComposite) {
 			fLocalAnalyzePackage= new RenameAnalyzeUtil.LocalAnalyzePackage(unparentedDeclarationEdit, allUnparentedRenameEdits);
 		} else 
 			fLocalAnalyzePackage= new RenameAnalyzeUtil.LocalAnalyzePackage(declarationEdit, allRenameEdits);

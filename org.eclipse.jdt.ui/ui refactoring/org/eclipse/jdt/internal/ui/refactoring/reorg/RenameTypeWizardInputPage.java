@@ -37,19 +37,19 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 /**
- * Wizard page for renaming a type (with derived elements)
+ * Wizard page for renaming a type (with similarly named elements)
  * 
  * @since 3.2
  * 
  */
 class RenameTypeWizardInputPage extends RenameInputWizardPage {
 
-	private Button fUpdateDerivedElements;
+	private Button fUpdateSimilarElements;
 	private int fSelectedStrategy;
 
-	private static final String UPDATE_DERIVED_ELEMENTS= "updateDerivedElements"; //$NON-NLS-1$
-	private final static String DIALOG_SETTINGS_DERIVED_MATCH_STRATEGY= "updateDerivedElementsMatchStrategy"; //$NON-NLS-1$
-	private Button fUpdateDerivedElementsButton;
+	private static final String UPDATE_SIMILAR_ELEMENTS= "updateSimilarElements"; //$NON-NLS-1$
+	private final static String DIALOG_SETTINGS_SIMILAR_MATCH_STRATEGY= "updateSimilarElementsMatchStrategy"; //$NON-NLS-1$
+	private Button fUpdateSimilarElementsButton;
 
 	public RenameTypeWizardInputPage(String description, String contextHelpId, boolean isLastUserPage, String initialValue) {
 		super(description, contextHelpId, isLastUserPage, initialValue);
@@ -57,16 +57,16 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 
 	protected void addAdditionalOptions(Composite composite, RowLayouter layouter) {
 
-		if (getDerivedElementUpdating() == null || !getDerivedElementUpdating().canEnableSimilarDeclarationUpdating())
+		if (getSimilarElementUpdating() == null || !getSimilarElementUpdating().canEnableSimilarDeclarationUpdating())
 			return;
 
 		try {
-			fSelectedStrategy= getRefactoringSettings().getInt(DIALOG_SETTINGS_DERIVED_MATCH_STRATEGY);
+			fSelectedStrategy= getRefactoringSettings().getInt(DIALOG_SETTINGS_SIMILAR_MATCH_STRATEGY);
 		} catch (NumberFormatException e) {
-			fSelectedStrategy= getDerivedElementUpdating().getMatchStrategy();
+			fSelectedStrategy= getSimilarElementUpdating().getMatchStrategy();
 		}
 
-		getDerivedElementUpdating().setMatchStrategy(fSelectedStrategy);
+		getSimilarElementUpdating().setMatchStrategy(fSelectedStrategy);
 
 		Composite c= new Composite(composite, SWT.NULL);
 		GridLayout layout= new GridLayout(2, false);
@@ -74,38 +74,38 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 		layout.marginHeight= 0;
 		c.setLayout(layout);
 
-		fUpdateDerivedElements= new Button(c, SWT.CHECK);
-		fUpdateDerivedElements.setText(RefactoringMessages.RenameTypeWizardInputPage_update_derived_elements);
+		fUpdateSimilarElements= new Button(c, SWT.CHECK);
+		fUpdateSimilarElements.setText(RefactoringMessages.RenameTypeWizardInputPage_update_similar_elements);
 
-		final boolean updateDerivedElements= getBooleanSetting(UPDATE_DERIVED_ELEMENTS, getDerivedElementUpdating().getUpdateSimilarDeclarations());
-		fUpdateDerivedElements.setSelection(updateDerivedElements);
-		getDerivedElementUpdating().setUpdateSimilarDeclarations(updateDerivedElements);
-		fUpdateDerivedElements.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		fUpdateDerivedElements.addSelectionListener(new SelectionAdapter() {
+		final boolean updateSimilarElements= getBooleanSetting(UPDATE_SIMILAR_ELEMENTS, getSimilarElementUpdating().getUpdateSimilarDeclarations());
+		fUpdateSimilarElements.setSelection(updateSimilarElements);
+		getSimilarElementUpdating().setUpdateSimilarDeclarations(updateSimilarElements);
+		fUpdateSimilarElements.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		fUpdateSimilarElements.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(SelectionEvent e) {
-				getDerivedElementUpdating().setUpdateSimilarDeclarations(fUpdateDerivedElements.getSelection());
-				fUpdateDerivedElementsButton.setEnabled(fUpdateDerivedElements.getSelection());
+				getSimilarElementUpdating().setUpdateSimilarDeclarations(fUpdateSimilarElements.getSelection());
+				fUpdateSimilarElementsButton.setEnabled(fUpdateSimilarElements.getSelection());
 			}
 		});
 
-		fUpdateDerivedElementsButton= new Button(c, SWT.PUSH);
+		fUpdateSimilarElementsButton= new Button(c, SWT.PUSH);
 		GridData d= new GridData();
 		d.grabExcessHorizontalSpace= true;
 		d.horizontalAlignment= SWT.RIGHT;
-		fUpdateDerivedElementsButton.setText(RefactoringMessages.RenameTypeWizardInputPage_update_derived_elements_configure);
-		fUpdateDerivedElementsButton.setEnabled(updateDerivedElements);
-		fUpdateDerivedElementsButton.addSelectionListener(new SelectionAdapter() {
+		fUpdateSimilarElementsButton.setText(RefactoringMessages.RenameTypeWizardInputPage_update_similar_elements_configure);
+		fUpdateSimilarElementsButton.setEnabled(updateSimilarElements);
+		fUpdateSimilarElementsButton.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(SelectionEvent e) {
-				RenameTypeWizardDerivedOptionsDialog dialog= new RenameTypeWizardDerivedOptionsDialog(getShell(), fSelectedStrategy);
+				RenameTypeWizardSimilarElementsOptionsDialog dialog= new RenameTypeWizardSimilarElementsOptionsDialog(getShell(), fSelectedStrategy);
 				if (dialog.open() == Window.OK) {
 					fSelectedStrategy= dialog.getSelectedStrategy();
-					getDerivedElementUpdating().setMatchStrategy(fSelectedStrategy);
+					getSimilarElementUpdating().setMatchStrategy(fSelectedStrategy);
 				}
 			}
 		});
-		fUpdateDerivedElementsButton.setLayoutData(d);
+		fUpdateSimilarElementsButton.setLayoutData(d);
 
 		GridData forC= new GridData();
 		forC.grabExcessHorizontalSpace= true;
@@ -120,9 +120,9 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 
 	public void dispose() {
 		if (saveSettings())
-			if (fUpdateDerivedElements != null && !fUpdateDerivedElements.isDisposed() && fUpdateDerivedElements.isEnabled()) {
-				saveBooleanSetting(UPDATE_DERIVED_ELEMENTS, fUpdateDerivedElements);
-				getRefactoringSettings().put(DIALOG_SETTINGS_DERIVED_MATCH_STRATEGY, fSelectedStrategy);
+			if (fUpdateSimilarElements != null && !fUpdateSimilarElements.isDisposed() && fUpdateSimilarElements.isEnabled()) {
+				saveBooleanSetting(UPDATE_SIMILAR_ELEMENTS, fUpdateSimilarElements);
+				getRefactoringSettings().put(DIALOG_SETTINGS_SIMILAR_MATCH_STRATEGY, fSelectedStrategy);
 			}
 
 		super.dispose();
@@ -130,14 +130,14 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 
 	/*
 	 * Override - we don't want to initialize the next page (may needlessly
-	 * trigger change creation if derived page is skipped, which is not
+	 * trigger change creation if similar elements page is skipped, which is not
 	 * indicated by fIsLastUserInputPage in parent).
 	 */
 	public boolean canFlipToNextPage() {
 		return isPageComplete();
 	}
 
-	private ISimilarDeclarationUpdating getDerivedElementUpdating() {
+	private ISimilarDeclarationUpdating getSimilarElementUpdating() {
 		return (ISimilarDeclarationUpdating) getRefactoring().getAdapter(ISimilarDeclarationUpdating.class);
 	}
 	
@@ -182,7 +182,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 				return this;
 			}
 
-			if (renameTypeProcessor.hasDerivedElementsToRename()) {
+			if (renameTypeProcessor.hasSimilarElementsToRename()) {
 				nextPage= super.getNextPage();
 			} else {
 				nextPage= computeSuccessorPage();
