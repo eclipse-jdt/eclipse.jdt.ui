@@ -164,7 +164,10 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 		 * {@inheritDoc}
 		 */
 		public boolean isEmpty() {
-			return false;
+			final RefactoringDescriptorProxy[] proxies= getDescriptors();
+			if (proxies != null)
+				return proxies.length == 0;
+			return true;
 		}
 
 		/**
@@ -571,7 +574,7 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 					if (!list.isEmpty()) {
 						final URI uri= fSourceFolder.getRawLocationURI();
 						if (uri != null) {
-							final StubCreationOperation operation= new StubCreationOperation(uri, list);
+							final StubCreationOperation operation= new StubCreationOperation(uri, list, true);
 							try {
 								operation.run(new SubProgressMonitor(monitor, 150, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 							} finally {
