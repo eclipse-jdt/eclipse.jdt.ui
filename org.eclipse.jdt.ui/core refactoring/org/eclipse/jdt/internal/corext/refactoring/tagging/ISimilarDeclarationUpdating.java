@@ -20,6 +20,9 @@ public interface ISimilarDeclarationUpdating {
 	/**
 	 * Checks if this refactoring object is capable of updating similar declarations
 	 * of the renamed element.
+	 * 
+	 * This can be disabled globally by setting the product configuration property
+	 * "org.eclipse.jdt.ui.refactoring.handlesSimilarDeclarations" to "false".
 	 */
 	public boolean canEnableSimilarDeclarationUpdating();
 

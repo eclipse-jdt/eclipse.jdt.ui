@@ -22,7 +22,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.IParticipantDesciptorFilter;
+import org.eclipse.ltk.core.refactoring.participants.IParticipantDescriptorFilter;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
@@ -62,7 +62,7 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements IIn
 	}
 	
 	protected void loadDerivedParticipants(RefactoringStatus status, List result, 
-			Object[] derivedElements, RenameArguments arguments, IParticipantDesciptorFilter filter,
+			Object[] derivedElements, RenameArguments arguments, IParticipantDescriptorFilter filter,
 			ResourceModifications resourceModifications, 
 			String[] natures, SharableParticipants shared) throws CoreException {
 		if (derivedElements != null) {
@@ -96,7 +96,7 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements IIn
 		return new RenameArguments(getNewElementName(), getUpdateReferences());
 	}
 	
-	protected IParticipantDesciptorFilter createParticipantDescriptorFilter() {
+	protected IParticipantDescriptorFilter createParticipantDescriptorFilter() {
 		return null;
 	}
 	

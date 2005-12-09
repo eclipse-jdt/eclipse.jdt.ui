@@ -25,10 +25,12 @@ import org.eclipse.text.edits.ReplaceEdit;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
+import org.eclipse.core.runtime.IProduct;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
@@ -45,7 +47,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
-import org.eclipse.ltk.core.refactoring.participants.IParticipantDesciptorFilter;
+import org.eclipse.ltk.core.refactoring.participants.IParticipantDescriptorFilter;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
@@ -98,9 +100,9 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ISimilarDeclarationUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ISimilarDeclarationUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.Changes;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -166,15 +168,19 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	private int fCachedRenamingStrategy= -1;
 	private RefactoringStatus fCachedRefactoringStatus= null;
 
-	public static final class ParticipantDescritorFilter implements IParticipantDesciptorFilter {
-		public boolean select(IConfigurationElement element) {
+	public static final class ParticipantDescriptorFilter implements IParticipantDescriptorFilter {
+		private static final boolean BUG_120084= true;
+
+		public boolean select(IConfigurationElement element, RefactoringStatus status) {
 			IConfigurationElement[] params= element.getChildren(PARAM);
 			for (int i= 0; i < params.length; i++) {
 				IConfigurationElement param= params[i];
 				if ("handlesSimilarDeclarations".equals(param.getAttribute(NAME)) && //$NON-NLS-1$
-					"true".equals(param.getAttribute(VALUE))) //$NON-NLS-1$
+						"true".equals(param.getAttribute(VALUE))) //$NON-NLS-1$
 					return true;
 			}
+			if (! BUG_120084)
+				status.addWarning(Messages.format(RefactoringCoreMessages.RenameTypeProcessor_participant_does_not_support_similar_names, element.getAttribute(NAME)));
 			return false;
 		}
 	}
@@ -306,10 +312,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			getUpdateSimilarDeclarations(), getSimilarElements());
 	}
 	
-	protected IParticipantDesciptorFilter createParticipantDescriptorFilter() {
+	protected IParticipantDescriptorFilter createParticipantDescriptorFilter() {
 		if (!getUpdateSimilarDeclarations())
 			return null;
-		return new ParticipantDescritorFilter();
+		return new ParticipantDescriptorFilter();
 	}
 	
 	//---- ITextUpdating -------------------------------------------------
@@ -362,9 +368,17 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		fFilePatterns= patterns;
 	}
 	
-	// ---- ISimilarElementUpdating
+	// ---- ISimilarDeclarationUpdating
 
 	public boolean canEnableSimilarDeclarationUpdating() {
+		
+		IProduct product= Platform.getProduct();
+		if (product != null) {
+			String property= product.getProperty("org.eclipse.jdt.ui.refactoring.handlesSimilarDeclarations"); //$NON-NLS-1$
+			if ("false".equalsIgnoreCase(property)) //$NON-NLS-1$
+				return false;
+		}
+
 		return true;
 	}
 

@@ -107,7 +107,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		RenameArguments arguments= new RenameTypeArguments(newTypeName, getUpdateReferences(), getUpdateSimilarDeclarations(), getSimilarElements());
 		loadDerivedParticipants(status, result, 
 			computeDerivedElements(), arguments, getUpdateSimilarDeclarations() 
-				? new RenameTypeProcessor.ParticipantDescritorFilter()
+				? new RenameTypeProcessor.ParticipantDescriptorFilter()
 				: null, 
 			computeResourceModifications(), natures, shared);
 	}
@@ -235,7 +235,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		fRenameTypeProcessor.setFilePatterns(patterns);
 	}
 	
-	// ---- ISimilarElementUpdating ------------------------------
+	// ---- ISimilarDeclarationUpdating ------------------------------
 
 	public boolean canEnableSimilarDeclarationUpdating() {
 		if (fRenameTypeProcessor == null)

@@ -102,6 +102,19 @@ public interface IRefactoringProcessorIds {
 	 *   <li>participants registered for renaming <code>IFile</code> if the compilation 
 	 *       unit gets rename as well.</li>
 	 * </ul>
+	 * 
+	 * <p>Since 3.2:</p>
+	 * 
+	 * <p>If the "update similar declarations" feature is selected by the user, participants
+	 * <strong>must</strong> must declare
+	 * <pre> &lt;param name="handlesSimilarDeclarations" value="true"/&gt; </pre>
+	 * in their extension contribution in order to be loaded.</p> 
+	 * 
+	 * <p>Rename type participans can retrieve information about similar declarations by casting the
+	 * RenameArguments to RenameTypeArguments. The new signatures of similar declarations are available 
+	 * through the interfaces IJavaElementMapper and IResourceMapper, which can be retrieved from the 
+	 * processor using the getAdapter() method.</p>
+	 * 
 	 */
 	public static String RENAME_TYPE_PROCESSOR= RenameTypeProcessor.IDENTIFIER;
 	
