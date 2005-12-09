@@ -61,6 +61,7 @@ import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix.AbstractLinkedFixRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix.PositionGroup;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
@@ -735,13 +736,13 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List, org.eclipse.jdt.internal.corext.fix.LinkedFix.IPositionLinkable)
+	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List, java.util.List)
 	 */
-	public ITrackedNodePosition rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups, List/*<PositionGroup>*/ positionGroups) throws CoreException {
+	public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, List positionGroups) throws CoreException {
 		TextEditGroup group= new TextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
 		textEditGroups.add(group);
 		clearPositionGroups();
-		ITrackedNodePosition endPosition= doConvert(rewrite, importRewrite, group);
+		ITrackedNodePosition endPosition= doConvert(cuRewrite.getASTRewrite(), cuRewrite.getImportRewrite().getNewImportRewrite(), group);
 		positionGroups.addAll(getAllPositionGroups());
 		return endPosition;
 	}

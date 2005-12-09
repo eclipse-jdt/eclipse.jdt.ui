@@ -33,12 +33,11 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -136,17 +135,14 @@ public class Java50Fix extends LinkedFix {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
+		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List)
 		 */
-		public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
-			addAnnotation(fBodyDeclaration, fAnnotation, compilationUnit.getAST(), rewrite, textEditGroups);
-		}
-		
-		private void addAnnotation(BodyDeclaration declaration, String annotation, AST ast, ASTRewrite rewrite, List textEditGroups) {
-			ListRewrite listRewrite= rewrite.getListRewrite(declaration, declaration.getModifiersProperty());
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+			AST ast= cuRewrite.getRoot().getAST();
+			ListRewrite listRewrite= cuRewrite.getASTRewrite().getListRewrite(fBodyDeclaration, fBodyDeclaration.getModifiersProperty());
 			Annotation newAnnotation= ast.newMarkerAnnotation();
-			newAnnotation.setTypeName(ast.newSimpleName(annotation));
-			TextEditGroup group= new TextEditGroup(MessageFormat.format(FixMessages.Java50Fix_AddMissingAnnotation_description, new Object[] {annotation}));
+			newAnnotation.setTypeName(ast.newSimpleName(fAnnotation));
+			TextEditGroup group= new TextEditGroup(MessageFormat.format(FixMessages.Java50Fix_AddMissingAnnotation_description, new Object[] {fAnnotation}));
 			textEditGroups.add(group);
 			listRewrite.insertFirst(newAnnotation, group);
 		}

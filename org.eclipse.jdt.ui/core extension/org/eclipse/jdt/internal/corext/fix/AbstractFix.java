@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Type;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
@@ -37,11 +36,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 public abstract class AbstractFix implements IFix {
 	
 	public interface IFixRewriteOperation {
-		public void rewriteAST(
-				ASTRewrite rewrite, 
-				NewImportRewrite importRewrite, 
-				CompilationUnit compilationUnit,
-				List/*<TextEditGroup>*/ textEditGroups) throws CoreException; //TODO: ma maybe passing in a CompilationUnitRewrite would be easier?
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, List/*<TextEditGroup>*/ textEditGroups) throws CoreException;
 	}
 	
 	public static abstract class AbstractFixRewriteOperation implements IFixRewriteOperation {
@@ -62,16 +57,6 @@ public abstract class AbstractFix implements IFix {
 		fCompilationUnit= (ICompilationUnit)compilationUnit.getJavaElement();
 		fFixRewrites= fixRewriteOperations;
 		fUnit= compilationUnit;
-	}
-
-	/**
-	 * @deprecated
-	 */
-	public AbstractFix(String name, ICompilationUnit compilationUnit) {
-		fName= name;
-		fCompilationUnit= compilationUnit;
-		fFixRewrites= null;
-		fUnit= null;
 	}
 
 	/* (non-Javadoc)
@@ -96,14 +81,11 @@ public abstract class AbstractFix implements IFix {
 			return null;
 
 		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite(getCompilationUnit(), fUnit);
-	
-		ASTRewrite rewrite= cuRewrite.getASTRewrite();
-		NewImportRewrite importRewrite= cuRewrite.getImportRewrite().getNewImportRewrite();
-		
+
 		List/*<TextEditGroup>*/ groups= new ArrayList();
 		
 		for (int i= 0; i < fFixRewrites.length; i++) {
-			fFixRewrites[i].rewriteAST(rewrite, importRewrite, fUnit, groups);
+			fFixRewrites[i].rewriteAST(cuRewrite, groups);
 		}
 		
 		CompilationUnitChange result= cuRewrite.createChange();

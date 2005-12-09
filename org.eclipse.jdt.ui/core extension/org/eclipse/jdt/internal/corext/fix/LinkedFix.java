@@ -24,22 +24,15 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
-public class LinkedFix extends AbstractFix {//implements IPositionLinkable {
+public class LinkedFix extends AbstractFix {
 	
 	public interface ILinkedFixRewriteOperation extends IFixRewriteOperation {
-		public ITrackedNodePosition rewriteAST(
-				ASTRewrite rewrite, 
-				NewImportRewrite importRewrite, 
-				CompilationUnit compilationUnit,
-				List/*<TextEditGroup>*/ textEditGroups,
-				List/*<PositionGroup>*/ positionGroups) throws CoreException;
+		public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List/*<TextEditGroup>*/ textEditGroups, List/*<PositionGroup>*/ positionGroups) throws CoreException;
 	}
 	
 	public static abstract class AbstractLinkedFixRewriteOperation extends AbstractFixRewriteOperation implements ILinkedFixRewriteOperation {
@@ -47,12 +40,12 @@ public class LinkedFix extends AbstractFix {//implements IPositionLinkable {
 		private Hashtable fPositionGroups;
 		
 		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.FixRewriteAdapter#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
+		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List)
 		 */
-		public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
-			rewriteAST(rewrite, importRewrite, compilationUnit, textEditGroups, new ArrayList());
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+			rewriteAST(cuRewrite, textEditGroups, new ArrayList());
 		}
-		
+
 		protected PositionGroup getPositionGroup(String parameterName) {
 			if (!fPositionGroups.containsKey(parameterName)) {
 				fPositionGroups.put(parameterName, new PositionGroup(parameterName));
@@ -155,21 +148,18 @@ public class LinkedFix extends AbstractFix {//implements IPositionLinkable {
 
 		CompilationUnitRewrite cuRewrite= new CompilationUnitRewrite((ICompilationUnit)fCompilationUnit.getJavaElement(), fCompilationUnit);
 	
-		ASTRewrite rewrite= cuRewrite.getASTRewrite();
-		NewImportRewrite importRewrite= cuRewrite.getImportRewrite().getNewImportRewrite();
-		
 		List/*<TextEditGroup>*/ groups= new ArrayList();
 
 		fEndPosition= null;
 		fPositionGroups.clear();
 		
 		for (int i= 0; i < fFixRewrites.length; i++) {
-			IFixRewriteOperation adapter= fFixRewrites[i];
-			if (adapter instanceof ILinkedFixRewriteOperation) {
-				ILinkedFixRewriteOperation linkedAdapter= (ILinkedFixRewriteOperation)adapter;
-				fEndPosition= linkedAdapter.rewriteAST(rewrite, importRewrite, fCompilationUnit, groups, fPositionGroups);
+			IFixRewriteOperation operation= fFixRewrites[i];
+			if (operation instanceof ILinkedFixRewriteOperation) {
+				ILinkedFixRewriteOperation linkedOperation= (ILinkedFixRewriteOperation)operation;
+				fEndPosition= linkedOperation.rewriteAST(cuRewrite, groups, fPositionGroups);
 			} else {
-				adapter.rewriteAST(rewrite, importRewrite, fCompilationUnit, groups);
+				operation.rewriteAST(cuRewrite, groups);
 			}
 		}
 		

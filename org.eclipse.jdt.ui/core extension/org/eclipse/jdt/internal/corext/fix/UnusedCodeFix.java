@@ -46,11 +46,11 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -115,12 +115,12 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
+		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List)
 		 */
-		public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			ImportDeclaration node= fImportDeclaration;
 			TextEditGroup group= new TextEditGroup(FixMessages.UnusedCodeFix_RemoveImport_description + " " + node.getName()); //$NON-NLS-1$
-			rewrite.remove(node, group);
+			cuRewrite.getASTRewrite().remove(node, group);
 			textEditGroups.add(group);
 		}
 		
@@ -135,11 +135,11 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
+		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List)
 		 */
-		public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			SimpleName name= fUnusedName;
-			removeUnusedName(rewrite, name, compilationUnit, textEditGroups);
+			removeUnusedName(cuRewrite.getASTRewrite(), name, cuRewrite.getRoot(), textEditGroups);
 		}
 		
 		private void removeUnusedName(ASTRewrite rewrite, SimpleName simpleName, CompilationUnit completeRoot, List groups) {

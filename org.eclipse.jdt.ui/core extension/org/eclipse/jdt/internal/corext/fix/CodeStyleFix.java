@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -223,9 +224,10 @@ public class CodeStyleFix extends AbstractFix {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
+		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List)
 		 */
-		public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			String groupName= MessageFormat.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {fName.getIdentifier(), fQualifier});
 			TextEditGroup group= new TextEditGroup(groupName);
 			textEditGroups.add(group);
@@ -245,11 +247,13 @@ public class CodeStyleFix extends AbstractFix {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
+		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List)
 		 */
-		public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			CompilationUnit compilationUnit= cuRewrite.getRoot();
 			ITypeBinding declaringClass= fBinding.getDeclaringClass();
-			Type qualifier= importType(declaringClass, fName, importRewrite, compilationUnit);
+			Type qualifier= importType(declaringClass, fName, cuRewrite.getImportRewrite().getNewImportRewrite(), compilationUnit);
 			TextEditGroup group= new TextEditGroup(Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {fName.getIdentifier(), ASTNodes.asString(qualifier)}));
 			textEditGroups.add(group);
 			rewrite.replace(fName, compilationUnit.getAST().newQualifiedType(qualifier, (SimpleName)rewrite.createMoveTarget(fName)), group);
@@ -272,14 +276,14 @@ public class CodeStyleFix extends AbstractFix {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
+		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List)
 		 */
-		public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
-			Type type= importType(fDeclaringTypeBinding, fQualifier, importRewrite, compilationUnit);
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+			Type type= importType(fDeclaringTypeBinding, fQualifier, cuRewrite.getImportRewrite().getNewImportRewrite(), cuRewrite.getRoot());
 			TextEditGroup group= new TextEditGroup(Messages.format(FixMessages.CodeStyleFix_ChangeAccessToStatic_description, fDeclaringTypeBinding.getName()));
 			textEditGroups.add(group);
-			rewrite.replace(fQualifier, type, group);
-		}		
+			cuRewrite.getASTRewrite().replace(fQualifier, type, group);
+		}
 	}
 	
 	private static final class AddBlockOperation implements IFixRewriteOperation {
@@ -295,9 +299,10 @@ public class CodeStyleFix extends AbstractFix {
 		}
 
 		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite, org.eclipse.jdt.core.dom.CompilationUnit, java.util.List)
+		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List)
 		 */
-		public void rewriteAST(ASTRewrite rewrite, NewImportRewrite importRewrite, CompilationUnit compilationUnit, List textEditGroups) throws CoreException {
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			String label;
 			if (fBodyProperty == IfStatement.THEN_STATEMENT_PROPERTY) {
 				label = FixMessages.CodeStyleFix_ChangeIfToBlock_desription;
@@ -311,7 +316,7 @@ public class CodeStyleFix extends AbstractFix {
 			textEditGroups.add(group);
 			
 			ASTNode childPlaceholder= rewrite.createMoveTarget(fBody);
-			Block replacingBody= compilationUnit.getAST().newBlock();
+			Block replacingBody= cuRewrite.getRoot().getAST().newBlock();
 			replacingBody.statements().add(childPlaceholder);
 			rewrite.set(fStatement, fBodyProperty, replacingBody, group);
 		}
