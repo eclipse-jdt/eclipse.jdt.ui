@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -623,5 +624,13 @@ public class SourceActionDialog extends CheckedTreeSelectionDialog {
 	 */
 	public IJavaElement getElementPosition() {
 		return (IJavaElement) fInsertPositions.get(fCurrentPositionIndex);	
+	}
+	
+	public int getInsertOffset() throws JavaModelException {
+		IJavaElement elementPosition= getElementPosition();
+		if (elementPosition instanceof ISourceReference) {
+			return ((ISourceReference) elementPosition).getSourceRange().getOffset();
+		}
+		return -1;
 	}
 }

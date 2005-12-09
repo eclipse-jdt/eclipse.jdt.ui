@@ -32,7 +32,6 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -224,7 +223,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		try {
 			CompilationUnit astRoot= dialog.getCompilationUnit();
 			final ITypeBinding typeBinding= ASTNodes.getTypeBinding(astRoot, type);
-			int insertPos= ((ISourceReference) dialog.getElementPosition()).getSourceRange().getOffset();
+			int insertPos= dialog.getInsertOffset();
 			
 			AddUnimplementedMethodsOperation operation= (AddUnimplementedMethodsOperation) createRunnable(astRoot, typeBinding, methodToOverride, insertPos, dialog.getGenerateComment());
 			IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();

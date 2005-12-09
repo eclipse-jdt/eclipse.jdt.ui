@@ -52,7 +52,6 @@ import org.eclipse.ui.dialogs.ISelectionStatusValidator;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -533,7 +532,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 			try {
 				CompilationUnit astRoot= provider.getCompilationUnit();
 				final ITypeBinding typeBinding= ASTNodes.getTypeBinding(astRoot, type);
-				int insertPos= ((ISourceReference) dialog.getElementPosition()).getSourceRange().getOffset();
+				int insertPos= dialog.getInsertOffset();
 				
 				AddUnimplementedConstructorsOperation operation= (AddUnimplementedConstructorsOperation) createRunnable(astRoot, typeBinding, selected, insertPos, dialog.getGenerateComment(), dialog.getVisibilityModifier(), dialog.isOmitSuper());
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
