@@ -358,7 +358,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			fFoldersList.addElement(entry);
 			fFoldersList.postSetSelection(new StructuredSelection(entry));
 		} else {
-			res= openNewSourceContainerDialog(elem, true);
+			res= editSourceContainerDialog(elem);
 			
 			if (res != null) {
 				fFoldersList.replaceElement(elem, res);
@@ -460,10 +460,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 		Object elem= selElements.get(0);
 		if (elem instanceof CPListElement) {
-			if (((CPListElement)elem).getLinkTarget() != null)
-				return true;
-			
-			return false;
+			return true;
 		}
 		if (elem instanceof CPListElementAttribute) {
 			return true;
@@ -540,6 +537,41 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
         }
 		return null;
 	}
+    
+    private CPListElement editSourceContainerDialog(CPListElement existing) {
+    		
+		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
+		List existingContainers= getExistingContainers(null);
+		IProject[] allProjects= fWorkspaceRoot.getProjects();
+		ArrayList rejectedElements= new ArrayList(allProjects.length);
+		IProject currProject= fCurrJProject.getProject();
+		for (int i= 0; i < allProjects.length; i++) {
+			if (!allProjects[i].equals(currProject)) {
+				rejectedElements.add(allProjects[i]);
+			}
+		}
+		rejectedElements.addAll(existingContainers);
+		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, rejectedElements.toArray());
+		
+		ILabelProvider lp= new WorkbenchLabelProvider();
+		ITreeContentProvider cp= new BaseWorkbenchContentProvider();
+
+		String title= NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_edit_title; 
+		String message= NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_edit_description; 
+		
+		FolderSelectionDialog dialog= new FolderSelectionDialog(getShell(), lp, cp);
+
+		dialog.setTitle(title);
+		dialog.setMessage(message);
+		dialog.addFilter(filter);
+		dialog.setInput(fCurrJProject.getProject().getParent());
+		if (dialog.open() == Window.OK) {
+			Object[] elements= dialog.getResult();	
+			if (elements.length == 1)
+				return newCPSourceElement((IResource)elements[0]);
+		}
+		return null;
+    }
 		
 	private CPListElement openNewSourceContainerDialog(CPListElement existing, boolean includeLinked) {	
 		if (includeLinked) {
