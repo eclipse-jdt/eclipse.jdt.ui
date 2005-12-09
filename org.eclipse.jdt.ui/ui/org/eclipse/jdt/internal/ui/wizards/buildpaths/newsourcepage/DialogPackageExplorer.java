@@ -148,7 +148,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
             try {
                 if (element instanceof IPackageFragmentRoot) {
                     IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-                    if (ClasspathModifier.filtersSet(root)) {
+                    if (root.exists() && ClasspathModifier.filtersSet(root)) {
                         IClasspathEntry entry= root.getRawClasspathEntry();
                         int excluded= entry.getExclusionPatterns().length;
                         if (excluded == 1)
@@ -159,7 +159,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
                 }
                 if (element instanceof IJavaProject) {
                     IJavaProject project= (IJavaProject)element;
-                    if (project.isOnClasspath(project)) {
+                    if (project.exists() && project.isOnClasspath(project)) {
                         IPackageFragmentRoot root= project.findPackageFragmentRoot(project.getPath());
                         if (ClasspathModifier.filtersSet(root)) {
                             IClasspathEntry entry= root.getRawClasspathEntry();
@@ -173,7 +173,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
                 }
                 if (element instanceof IFile || element instanceof IFolder) {
                     IResource resource= (IResource)element;
-                        if (ClasspathModifier.isExcluded(resource, fCurrJProject))
+                        if (resource.exists() && ClasspathModifier.isExcluded(resource, fCurrJProject))
                             return Messages.format(NewWizardMessages.DialogPackageExplorer_LabelProvider_Excluded, text); 
                 }
             } catch (JavaModelException e) {
@@ -189,12 +189,12 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
             try {
                 if (element instanceof IPackageFragmentRoot) {
                     IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-                    if (ClasspathModifier.filtersSet(root))
+                    if (root.exists() && ClasspathModifier.filtersSet(root))
                         return getBlueColor();
                 }
                 if (element instanceof IJavaProject) {
                     IJavaProject project= (IJavaProject)element;
-                    if (project.isOnClasspath(project)) {
+                    if (project.exists() && project.isOnClasspath(project)) {
                         IPackageFragmentRoot root= project.findPackageFragmentRoot(project.getPath());
                         if (root != null && ClasspathModifier.filtersSet(root))
                             return getBlueColor();
@@ -202,7 +202,7 @@ public class DialogPackageExplorer implements IMenuListener, ISelectionChangedLi
                 }
                 if (element instanceof IFile || element instanceof IFolder) {
                     IResource resource= (IResource)element;
-                    if (ClasspathModifier.isExcluded(resource, fCurrJProject))
+                    if (resource.exists() && ClasspathModifier.isExcluded(resource, fCurrJProject))
                         return getBlueColor();
                 } 
             } catch (JavaModelException e) {
