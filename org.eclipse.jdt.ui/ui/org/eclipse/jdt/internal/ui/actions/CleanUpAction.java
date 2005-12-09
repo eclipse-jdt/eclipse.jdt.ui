@@ -15,6 +15,11 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
+import org.eclipse.core.runtime.Status;
+
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -36,12 +41,15 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -151,15 +159,31 @@ public class CleanUpAction extends SelectionDispatchAction {
 	 * @param cu The compilation unit to process
 	 */
 	public void run(ICompilationUnit cu) {
-		if (!ElementValidator.check(cu, getShell(), ActionMessages.OrganizeImportsAction_error_title, fEditor != null)) 
+		if (!ElementValidator.check(cu, getShell(), ActionMessages.CleanUpAction_ErrorDialogTitle, fEditor != null)) 
 			return;
 		if (!ActionUtil.isProcessable(getShell(), cu))
 			return;
 		
-		runOnMultiple(new ICompilationUnit[] {cu});
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu);
+		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, true, true);
+		
+		RefactoringStarter starter= new RefactoringStarter();
+		try {
+			starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", true); //$NON-NLS-1$
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+			showUnexpectedError(e);
+		}
+		return;
 	}
 
 	private void runLight(ICompilationUnit cu) {
+		if (!ElementValidator.check(cu, getShell(), ActionMessages.CleanUpAction_ErrorDialogTitle, fEditor != null)) 
+			return;
+		if (!ActionUtil.isProcessable(getShell(), cu))
+			return;
+		
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
 		
@@ -185,6 +209,18 @@ public class CleanUpAction extends SelectionDispatchAction {
 	 * @param cus The compilation units to run on
 	 */
 	public void runOnMultiple(final ICompilationUnit[] cus) {
+		String message= ActionMessages.CleanUpAction_MultiStateErrorTitle; 
+		final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, message, null);
+		for (int i= 0; i < cus.length; i++) {
+			testOnBuildPath(cus[i], status);
+		}
+		
+		if (!status.isOK()) {
+			String title= ActionMessages.CleanUpAction_ErrorDialogTitle; 
+			ProblemDialog.open(getShell(), title, null, status);
+			return;
+		}
+			
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		for (int i= 0; i < cus.length; i++) {
 			refactoring.addCompilationUnit(cus[i]);
@@ -197,8 +233,27 @@ public class CleanUpAction extends SelectionDispatchAction {
 			starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), "Clean ups", true); //$NON-NLS-1$
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
+			showUnexpectedError(e);
 		}
 		return;
+	}
+
+	private void showUnexpectedError(CoreException e) {
+		String message2= Messages.format(ActionMessages.CleanUpAction_UnexpectedErrorMessage, e.getStatus().getMessage()); 
+		IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message2, null);
+		String title= ActionMessages.CleanUpAction_ErrorDialogTitle; 
+		ProblemDialog.open(getShell(), title, null, status);
+	}
+	
+	private boolean testOnBuildPath(ICompilationUnit cu, MultiStatus status) {
+		IJavaProject project= cu.getJavaProject();
+		if (!project.isOnClasspath(cu)) {
+			String cuLocation= cu.getPath().makeRelative().toString();
+			String message= Messages.format(ActionMessages.CleanUpAction_CUNotOnBuildpathMessage, cuLocation); 
+			status.add(new Status(IStatus.INFO, JavaUI.ID_PLUGIN, IStatus.ERROR, message, null));
+			return false;
+		}
+		return true;
 	}
 	
 	private ICompilationUnit[] getCompilationUnits(IStructuredSelection selection) {
