@@ -354,6 +354,7 @@ public final class RefactoringMessages extends NLS {
 	public static String RenameTypeWizardSimilarElementsPage_restore_defaults;
 	public static String RenameTypeWizardSimilarElementsPage_change_name;
 
+	public static String RenameTypeWizardSimilarElementsOptionsDialog_title;
 	public static String RenameTypeWizardSimilarElementsOptionsDialog_select_strategy;
 	public static String RenameTypeWizardSimilarElementsOptionsDialog_strategy_1;
 	public static String RenameTypeWizardSimilarElementsOptionsDialog_strategy_2;
