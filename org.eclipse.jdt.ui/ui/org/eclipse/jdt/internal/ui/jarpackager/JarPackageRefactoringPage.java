@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
@@ -108,6 +109,9 @@ public final class JarPackageRefactoringPage extends WizardPage implements IJarP
 	/** The page name */
 	private final static String PAGE_NAME= "jarRefactoringsWizardPage"; //$NON-NLS-1$
 
+	/** The export structual only dialog settings store */
+	private static final String STORE_EXPORT_STRUCTURAL_ONLY= PAGE_NAME + ".EXPORT_STRUCTURAL_ONLY"; //$NON-NLS-1$
+
 	/** The date label */
 	private Label fDateLabel;
 
@@ -154,6 +158,9 @@ public final class JarPackageRefactoringPage extends WizardPage implements IJarP
 	 */
 	public void createControl(final Composite parent) {
 		initializeDialogUnits(parent);
+		final IDialogSettings settings= getDialogSettings();
+		if (settings != null)
+			fJarPackageData.setExportStructuralOnly(settings.getBoolean(STORE_EXPORT_STRUCTURAL_ONLY));
 		final Composite composite= new Composite(parent, SWT.NULL);
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
@@ -371,7 +378,9 @@ public final class JarPackageRefactoringPage extends WizardPage implements IJarP
 	 * @see org.eclipse.jdt.internal.ui.jarpackager.IJarPackageWizardPage#finish()
 	 */
 	public void finish() {
-		// Nothing to do
+		final IDialogSettings settings= getDialogSettings();
+		if (settings != null)
+			settings.put(STORE_EXPORT_STRUCTURAL_ONLY, fJarPackageData.isExportStructuralOnly());
 	}
 
 	/**
