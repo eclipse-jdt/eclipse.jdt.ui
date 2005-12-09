@@ -398,7 +398,7 @@ public final class NewImportRewrite {
 					List argNodes= type.typeArguments();
 					for (int i= 0; i < typeArguments.length; i++) {
 						String curr= typeArguments[i];
-						if (curr.indexOf(Signature.C_CAPTURE) != -1) { // see bug 103044
+						if (containsNestedCapture(curr)) { // see bug 103044
 							argNodes.add(ast.newWildcardType());
 						} else {
 							argNodes.add(addImportFromSignature(curr, ast, context));
@@ -424,6 +424,8 @@ public final class NewImportRewrite {
 		}
 	}
 	
+
+
 	/**
 	 * Adds a new import to the rewriter's record and returns a type reference that can be used
 	 * in the code. The type binding can be an array binding, type variable or wildcard.
@@ -508,7 +510,7 @@ public final class NewImportRewrite {
 						res.append(','); 
 					}
 					ITypeBinding curr= typeArguments[i];
-					if (containsCapture(curr)) { // see bug 103044
+					if (containsNestedCapture(curr, false)) { // see bug 103044
 						res.append('?');
 					} else {
 						res.append(addImport(curr, context));
@@ -522,26 +524,33 @@ public final class NewImportRewrite {
 		return getRawName(normalizedBinding);
 	}
 	
-	private boolean containsCapture(ITypeBinding binding) {
+	private boolean containsNestedCapture(ITypeBinding binding, boolean isNested) {
 		if (binding == null || binding.isPrimitive() || binding.isTypeVariable()) {
 			return false;
 		}
 		if (binding.isCapture()) {
-			return true;
+			if (isNested) {
+				return true;
+			}
+			return containsNestedCapture(binding.getWildcard(), true); 
 		}
 		if (binding.isWildcardType()) {
-			return containsCapture(binding.getBound());
+			return containsNestedCapture(binding.getBound(), true);
 		}
 		if (binding.isArray()) {
-			return containsCapture(binding.getElementType());
+			return containsNestedCapture(binding.getElementType(), true);
 		}
 		ITypeBinding[] typeArguments= binding.getTypeArguments();
 		for (int i= 0; i < typeArguments.length; i++) {
-			if (containsCapture(typeArguments[i])) {
+			if (containsNestedCapture(typeArguments[i], true)) {
 				return true;
 			}
 		}
 		return false;
+	}
+	
+	private boolean containsNestedCapture(String signature) {
+		return signature.length() > 1 && signature.indexOf(Signature.C_CAPTURE, 1) != -1;
 	}
 
 	private static ITypeBinding normalizeTypeBinding(ITypeBinding binding) {
@@ -643,7 +652,7 @@ public final class NewImportRewrite {
 				List arguments= paramType.typeArguments();
 				for (int i= 0; i < typeArguments.length; i++) {
 					ITypeBinding curr= typeArguments[i];
-					if (containsCapture(curr)) { // see bug 103044
+					if (containsNestedCapture(curr, false)) { // see bug 103044
 						arguments.add(ast.newWildcardType());
 					} else {
 						arguments.add(addImport(curr, ast, context));

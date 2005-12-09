@@ -34,11 +34,18 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
+import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
@@ -517,13 +524,128 @@ public class AddImportTest extends CoreTests {
 		assertEqualStringIgnoreDelim(cu2.getSource(), buf.toString());
 		
 	}
+	
+	public void testAddTypesWithCaptures1() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
-	private static final boolean BUG_87929= false;
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");		
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        getClass();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setSource(cu);
+		parser.setResolveBindings(true);
+		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
+		
+		String str= "getClass()";
+		MethodInvocation inv= (MethodInvocation) NodeFinder.perform(astRoot, buf.indexOf(str), str.length());
+		ITypeBinding binding= inv.resolveTypeBinding();
+		
+		NewImportRewrite rewrite= NewImportRewrite.create(astRoot, true);
+		
+		String string= rewrite.addImport(binding);
+		assertEquals("Class<? extends E>", string);
+		
+		Type resNode= rewrite.addImport(binding, astRoot.getAST());
+		assertEquals("Class<? extends E>", ASTNodes.asString(resNode));
+		
+		String signature= new BindingKey(binding.getKey()).internalToSignature();
+		
+		Type resNode2= rewrite.addImportFromSignature(signature, astRoot.getAST());
+		assertEquals("Class<? extends E>", ASTNodes.asString(resNode2));
+	}
+	
+	private static final boolean BUG_120082= true;
+	
+	public void testAddTypesWithCaptures2() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");		
+		buf.append("public class E<X> {\n");
+		buf.append("    public static <T> E<T> bar(T t) { return null; }\n");
+		buf.append("    public void foo(E<?> e) {\n");
+		buf.append("        bar(e);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setSource(cu);
+		parser.setResolveBindings(true);
+		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
+		
+		String str= "bar(e)";
+		MethodInvocation inv= (MethodInvocation) NodeFinder.perform(astRoot, buf.indexOf(str), str.length());
+		ITypeBinding binding= inv.resolveTypeBinding();
+		
+		NewImportRewrite rewrite= NewImportRewrite.create(astRoot, true);
+		
+		String string= rewrite.addImport(binding);
+		assertEquals("E<?>", string);
+		
+		Type resNode= rewrite.addImport(binding, astRoot.getAST());
+		assertEquals("E<?>", ASTNodes.asString(resNode));
+		
+		if (!BUG_120082) {
+			String signature= new BindingKey(binding.getKey()).internalToSignature();
+			
+			Type resNode2= rewrite.addImportFromSignature(signature, astRoot.getAST());
+			assertEquals("E<?>", ASTNodes.asString(resNode2));
+		}
+	}
+	
+	public void testAddTypesWithCaptures3() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack1= sourceFolder.createPackageFragment("pack1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack1;\n");
+		buf.append("\n");		
+		buf.append("public class E<X> {\n");
+		buf.append("    public static <T> E<? extends T> bar(T t) { return null; }\n");
+		buf.append("    public void foo(E<?> e) {\n");
+		buf.append("        bar(e);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setSource(cu);
+		parser.setResolveBindings(true);
+		CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
+		
+		String str= "bar(e)";
+		MethodInvocation inv= (MethodInvocation) NodeFinder.perform(astRoot, buf.indexOf(str), str.length());
+		ITypeBinding binding= inv.resolveTypeBinding();
+		
+		NewImportRewrite rewrite= NewImportRewrite.create(astRoot, true);
+		
+		String string= rewrite.addImport(binding);
+		assertEquals("E<?>", string);
+		
+		Type resNode= rewrite.addImport(binding, astRoot.getAST());
+		assertEquals("E<?>", ASTNodes.asString(resNode));
+		
+		if (!BUG_120082) {
+			String signature= new BindingKey(binding.getKey()).internalToSignature();
+			
+			Type resNode2= rewrite.addImportFromSignature(signature, astRoot.getAST());
+			assertEquals("E<?>", ASTNodes.asString(resNode2));
+		}
+	}
+
 	
 	public void testImportStructureWithSignatures2() throws Exception {
-		if (BUG_87929) {
-			return;
-		}
 		
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 		
