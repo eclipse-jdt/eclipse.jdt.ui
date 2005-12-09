@@ -43,8 +43,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.ui.text.correction.ConvertForLoopProposal;
-import org.eclipse.jdt.internal.ui.text.correction.ConvertIterableLoopProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 
 /**
@@ -88,14 +86,14 @@ public class Java50Fix extends LinkedFix {
 				}
 			}
 			
-			ConvertForLoopProposal forAdapter= new ConvertForLoopProposal(fCompilationUnit, node, identifierName);
-			if (forAdapter.satisfiesPreconditions()) {
-				fForConverters.add(forAdapter);
+			ConvertForLoopOperation forConverter= new ConvertForLoopOperation(fCompilationUnit, node, identifierName);
+			if (forConverter.satisfiesPreconditions()) {
+				fForConverters.add(forConverter);
 				fUsedNames.put(node, identifierName);
 			} else {
-				ConvertIterableLoopProposal iterableAdapter= new ConvertIterableLoopProposal(fCompilationUnit, node, identifierName);
-				if (iterableAdapter.isApplicable()) {
-					fForConverters.add(iterableAdapter);
+				ConvertIterableLoopOperation iterableConverter= new ConvertIterableLoopOperation(fCompilationUnit, node, identifierName);
+				if (iterableConverter.isApplicable()) {
+					fForConverters.add(iterableConverter);
 					fUsedNames.put(node, identifierName);
 				}
 			}
@@ -193,7 +191,7 @@ public class Java50Fix extends LinkedFix {
 	}
 	
 	public static Java50Fix createConvertForLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
-		ConvertForLoopProposal loopConverter= new ConvertForLoopProposal(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER);
+		ConvertForLoopOperation loopConverter= new ConvertForLoopOperation(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER);
 		if (!loopConverter.satisfiesPreconditions())
 			return null;
 		
@@ -201,7 +199,7 @@ public class Java50Fix extends LinkedFix {
 	}
 	
 	public static Java50Fix createConvertIterableLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
-		ConvertIterableLoopProposal loopConverter= new ConvertIterableLoopProposal(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER);
+		ConvertIterableLoopOperation loopConverter= new ConvertIterableLoopOperation(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER);
 		if (!loopConverter.isApplicable())
 			return null;
 

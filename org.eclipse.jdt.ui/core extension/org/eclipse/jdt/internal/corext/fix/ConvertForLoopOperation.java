@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.correction;
+package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -59,13 +59,12 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix.AbstractLinkedFixRewriteOperation;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix.PositionGroup;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 
-public class ConvertForLoopProposal extends AbstractLinkedFixRewriteOperation {
+public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 
 	private ForStatement fOldForStatement;
 	private EnhancedForStatement fEnhancedForStatement;
@@ -157,7 +156,7 @@ public class ConvertForLoopProposal extends AbstractLinkedFixRewriteOperation {
 	 * @param forStatement The For statement to be converted
 	 * @param root 
 	 */
-	public ConvertForLoopProposal(CompilationUnit root, ForStatement forStatement, String parameterName) {
+	public ConvertForLoopOperation(CompilationUnit root, ForStatement forStatement, String parameterName) {
 		fRoot= root;
 		fCompilationUnit= (ICompilationUnit)root.getJavaElement();
 		this.fOldForStatement= forStatement;

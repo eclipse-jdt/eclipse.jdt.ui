@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.correction;
+package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -50,7 +50,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-import org.eclipse.jdt.internal.corext.fix.FixMessages;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix.AbstractLinkedFixRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -60,7 +59,7 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * 
  * @since 3.1
  */
-public final class ConvertIterableLoopProposal extends AbstractLinkedFixRewriteOperation {
+public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewriteOperation {
 
 	/**
 	 * Returns the supertype of the given type with the qualified name.
@@ -126,7 +125,7 @@ public final class ConvertIterableLoopProposal extends AbstractLinkedFixRewriteO
 	 * @param unit the compilation unit containing the for statement
 	 * @param statement the for statement to be converted
 	 */
-	public ConvertIterableLoopProposal(final CompilationUnit unit, final ForStatement statement, String identifierName) {
+	public ConvertIterableLoopOperation(final CompilationUnit unit, final ForStatement statement, String identifierName) {
 		fIdentifierName= identifierName;
 		fCompilationUnit= (ICompilationUnit)unit.getJavaElement();
 		fStatement= statement;
