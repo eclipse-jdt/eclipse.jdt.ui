@@ -92,9 +92,11 @@ public class WorkingCopyManager implements IWorkingCopyManager, IWorkingCopyMana
 	 * @see org.eclipse.jdt.internal.ui.javaeditor.IWorkingCopyManagerExtension#setWorkingCopy(org.eclipse.ui.IEditorInput, org.eclipse.jdt.core.ICompilationUnit)
 	 */
 	public void setWorkingCopy(IEditorInput input, ICompilationUnit workingCopy) {
-		if (fMap == null)
-			fMap= new HashMap();
-		fMap.put(input, workingCopy);
+		if (fDocumentProvider.getDocument(input) != null) {
+			if (fMap == null)
+				fMap= new HashMap();
+			fMap.put(input, workingCopy);
+		}
 	}
 
 	/*
