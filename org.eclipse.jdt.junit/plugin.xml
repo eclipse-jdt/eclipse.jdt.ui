@@ -322,6 +322,7 @@
             name="%RenameTypeParticipant.name"
             class="org.eclipse.jdt.internal.junit.refactoring.TypeRenameParticipant"
             id="org.eclipse.jdt.junit.renameTypeParticipant">
+         <param name="handlesSimilarDeclarations" value="true"/>
          <enablement>
             <with
                   variable="affectedNatures">
