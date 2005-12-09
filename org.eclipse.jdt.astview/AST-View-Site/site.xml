@@ -6,8 +6,8 @@
    <feature url="features/org.eclipse.jdt.astview.feature_1.0.1.jar" id="org.eclipse.jdt.astview.feature" version="1.0.1">
       <category name="ast-view-1.0.1"/>
    </feature>
-   <feature url="features/org.eclipse.jdt.jeview.feature_1.0.0.jar" id="org.eclipse.jdt.jeview.feature" version="1.0.0">
-      <category name="java-element-view-1.0.0"/>
+   <feature url="features/org.eclipse.jdt.jeview.feature_1.0.1.jar" id="org.eclipse.jdt.jeview.feature" version="1.0.1">
+      <category name="java-element-view-1.0.1"/>
    </feature>
    <feature url="features/org.eclipse.jdt.astview.feature_1.0.9.jar" id="org.eclipse.jdt.astview.feature" version="1.0.9">
       <category name="ast-view-1.0.9"/>
@@ -20,7 +20,7 @@ View to visualize the Java compilers abstract syntax tree generated for a Java f
 Use this version Eclipse 3.1 and higher
       </description>
    </category-def>
-   <category-def name="java-element-view-1.0.0" label="JavaElement View (requires Java 5.0)">
+   <category-def name="java-element-view-1.0.1" label="JavaElement View (requires Java 5.0)">
       <description>
          DEPRECATED SITE, USE http://www.eclipse.org/jdt/ui/update-site FOR NEW UPDATES.
 View to visualize IJavaElement and IResource handles in the Eclpse SDK. This feature requires Java 5.0.
