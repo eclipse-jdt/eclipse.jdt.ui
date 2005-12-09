@@ -32,6 +32,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
 import org.eclipse.ui.IWorkbenchPartSite;
+import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.IWorkingSetManager;
 import org.eclipse.ui.PlatformUI;
@@ -87,7 +88,9 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		IWorkingSetManager manager= PlatformUI.getWorkbench().getWorkingSetManager();
 		manager.addPropertyChangeListener(fWorkingSetListener);
 		
-		setWorkingSet(site.getPage().getAggregateWorkingSet(), false);
+		if (useWindowWorkingSetByDefault()) {
+			setWorkingSet(site.getPage().getAggregateWorkingSet(), false);
+		}
 	}
 	
 	public WorkingSetFilterActionGroup(Shell shell, IPropertyChangeListener changeListener) {
@@ -181,10 +184,14 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		IWorkingSet ws= null;
 		if (workingSetName != null && workingSetName.length() > 0) {
 			ws= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
-		} else if (fSite != null) {
+		} else if (fSite != null && (useWindowWorkingSetByDefault())) {
 			ws= fSite.getPage().getAggregateWorkingSet();
 		}
 		setWorkingSet(ws, false);
+	}
+
+	private boolean useWindowWorkingSetByDefault() {
+		return PlatformUI.getPreferenceStore().getBoolean(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT);
 	}
 	
 
