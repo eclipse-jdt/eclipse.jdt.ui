@@ -20,6 +20,8 @@ import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
@@ -161,8 +163,35 @@ public final class JarImportWizardPage extends WizardPage {
 				final Set set= new HashSet();
 				final IJavaProject[] projects= model.getJavaProjects();
 				for (int index= 0; index < projects.length; index++) {
-					if (getPackageFragmentRoots(projects[index]).length > 0)
-						set.add(projects[index]);
+					final IProject project= projects[index].getProject();
+					if (project.isAccessible()) {
+						boolean add= true;
+						try {
+							final IProjectDescription description= project.getDescription();
+							final String[] ids= description.getNatureIds();
+							for (int offset= 0; offset < ids.length; offset++) {
+								if ("org.eclipse.pde.PluginNature".equals(ids[offset])) { //$NON-NLS-1$
+									boolean found= false;
+									final IClasspathEntry[] entry= projects[index].getRawClasspath();
+									for (int position= 0; position < entry.length; position++) {
+										if (entry[position].getContentKind() == IPackageFragmentRoot.K_SOURCE && entry[position].getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+											found= true;
+											break;
+										}
+									}
+									if (!found)
+										add= false;
+								}
+							}
+						} catch (CoreException exception) {
+							throw new JavaModelException(exception);
+						}
+						if (add) {
+							final Object[] roots= getPackageFragmentRoots(projects[index]);
+							if (roots.length > 0)
+								set.add(projects[index]);
+						}
+					}
 				}
 				return set.toArray();
 			}
