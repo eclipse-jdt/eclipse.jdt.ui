@@ -453,7 +453,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 				dispose();
 				if (selectedElement instanceof IJavaElement) {
 					ICompilationUnit cu= (ICompilationUnit)((IJavaElement)selectedElement).getAncestor(IJavaElement.COMPILATION_UNIT);
-					if (!JavaModelUtil.isPrimary(cu)) {
+					if (cu == null || !JavaModelUtil.isPrimary(cu)) {
 						// Try to reveal it in the active editor
 						IWorkbenchPage page= JavaPlugin.getActivePage();
 						if (page != null) {
