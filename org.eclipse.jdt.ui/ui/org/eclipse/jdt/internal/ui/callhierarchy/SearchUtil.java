@@ -126,7 +126,7 @@ public class SearchUtil {
 		if (workingSets != null && workingSets.length > 0) {
 			boolean firstFound= false;
 			for (int i= 0; i < workingSets.length; i++) {
-				String workingSetName= workingSets[i].getName();
+				String workingSetName= workingSets[i].getLabel();
 				if (firstFound)
 					result= Messages.format(CallHierarchyMessages.SearchUtil_workingSetConcatenation, new String[] {result, workingSetName}); 
 				else {

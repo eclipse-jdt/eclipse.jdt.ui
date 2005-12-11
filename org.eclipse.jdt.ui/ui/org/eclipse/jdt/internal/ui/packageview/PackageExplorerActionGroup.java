@@ -335,10 +335,10 @@ class PackageExplorerActionGroup extends CompositeActionGroup {
 		} else {
 			IWorkingSet workingSet= (IWorkingSet) event.getNewValue();
 			
-			String workingSetName= null;
+			String workingSetLabel= null;
 			if (workingSet != null)
-				workingSetName= workingSet.getName();
-			fPart.setWorkingSetName(workingSetName);
+				workingSetLabel= workingSet.getLabel();
+			fPart.setWorkingSetLabel(workingSetLabel);
 			fPart.updateTitle();
 	
 			String property= event.getProperty();

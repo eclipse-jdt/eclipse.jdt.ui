@@ -210,7 +210,7 @@ public class PackageExplorerPart extends ViewPart
 	private ISelection fLastOpenSelection;
 	private ISelectionChangedListener fPostSelectionListener;
 	
-	private String fWorkingSetName;
+	private String fWorkingSetLabel;
 	
 	private IPartListener fPartListener= new IPartListener() {
 		public void partActivated(IWorkbenchPart part) {
@@ -1044,7 +1044,7 @@ public class PackageExplorerPart extends ViewPart
 			} else if (element instanceof IJavaElement){
 				result= JavaElementLabels.getTextLabel(element, AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS);
 			} else if (element instanceof IWorkingSet) {
-				result= ((IWorkingSet)element).getName();
+				result= ((IWorkingSet)element).getLabel();
 			} else if (element instanceof WorkingSetModel) {
 				result= PackagesMessages.PackageExplorerPart_workingSetModel; 
 			} else {
@@ -1059,13 +1059,13 @@ public class PackageExplorerPart extends ViewPart
 			}
 		}
 		
-		if (fWorkingSetName == null)
+		if (fWorkingSetLabel == null)
 			return result;
 
-		String wsstr= Messages.format(PackagesMessages.PackageExplorer_toolTip, new String[] { fWorkingSetName }); 
+		String wsstr= Messages.format(PackagesMessages.PackageExplorer_toolTip, new String[] { fWorkingSetLabel }); 
 		if (result.length() == 0)
 			return wsstr;
-		return Messages.format(PackagesMessages.PackageExplorer_toolTip2, new String[] { result, fWorkingSetName }); 
+		return Messages.format(PackagesMessages.PackageExplorer_toolTip2, new String[] { result, fWorkingSetLabel }); 
 	}
 	
 	public String getTitleToolTip() {
@@ -1627,8 +1627,8 @@ public class PackageExplorerPart extends ViewPart
 		return fViewer.isExpandable(element);
 	}
 
-	void setWorkingSetName(String workingSetName) {
-		fWorkingSetName= workingSetName;
+	void setWorkingSetLabel(String workingSetName) {
+		fWorkingSetLabel= workingSetName;
 	}
 	
 	/**
@@ -1789,7 +1789,7 @@ public class PackageExplorerPart extends ViewPart
         if (workingSetGroup != null) {
 		    IWorkingSet workingSet= workingSetGroup.getWorkingSet();  	    
 		    if (workingSetGroup.isFiltered(getVisibleParent(element), element)) {
-		        String message= Messages.format(PackagesMessages.PackageExplorer_notFound, workingSet.getName());  
+		        String message= Messages.format(PackagesMessages.PackageExplorer_notFound, workingSet.getLabel());  
 		        if (MessageDialog.openQuestion(getSite().getShell(), PackagesMessages.PackageExplorer_filteredDialog_title, message)) { 
 		            workingSetGroup.setWorkingSet(null, true);		
 		            if (revealElementOrParent(element))

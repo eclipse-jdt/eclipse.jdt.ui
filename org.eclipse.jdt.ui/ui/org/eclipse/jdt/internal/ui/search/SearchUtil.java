@@ -104,11 +104,11 @@ public class SearchUtil {
 		if (workingSets != null && workingSets.length > 0) {
 			boolean firstFound= false;
 			for (int i= 0; i < workingSets.length; i++) {
-				String workingSetName= workingSets[i].getName();
+				String workingSetLabel= workingSets[i].getLabel();
 				if (firstFound)
-					result= Messages.format(SearchMessages.SearchUtil_workingSetConcatenation, new String[] {result, workingSetName}); 
+					result= Messages.format(SearchMessages.SearchUtil_workingSetConcatenation, new String[] {result, workingSetLabel}); 
 				else {
-					result= workingSetName;
+					result= workingSetLabel;
 					firstFound= true;
 				}
 			}

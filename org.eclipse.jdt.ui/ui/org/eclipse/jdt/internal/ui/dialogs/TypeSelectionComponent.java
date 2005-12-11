@@ -380,7 +380,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 							fTitleLabel.setText(null);
 						} else {
 							fScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true);
-							fTitleLabel.setText(ws.getName());
+							fTitleLabel.setText(ws.getLabel());
 						}
 						fViewer.setSearchScope(fScope, true);
 					}
@@ -396,7 +396,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 			IWorkingSet ws= fFilterActionGroup.getWorkingSet();
 			if (ws != null) {
 				fScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true);
-				fTitleLabel.setText(ws.getName());
+				fTitleLabel.setText(ws.getLabel());
 			} else {
 				fScope= SearchEngine.createWorkspaceScope();
 				fTitleLabel.setText(null);

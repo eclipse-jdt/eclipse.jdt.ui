@@ -28,13 +28,13 @@ class WorkingSetsComparator implements Comparator {
 		if (o1 instanceof IWorkingSet[]) {
 			IWorkingSet[] workingSets= (IWorkingSet[])o1;
 			if (workingSets.length > 0)
-				name1= workingSets[0].getName();
+				name1= workingSets[0].getLabel();
 		}
 
 		if (o2 instanceof IWorkingSet[]) {
 			IWorkingSet[] workingSets= (IWorkingSet[])o1;
 			if (workingSets.length > 0)
-				name2= workingSets[0].getName();
+				name2= workingSets[0].getLabel();
 		}
 
 		return fCollator.compare(name1, name2);

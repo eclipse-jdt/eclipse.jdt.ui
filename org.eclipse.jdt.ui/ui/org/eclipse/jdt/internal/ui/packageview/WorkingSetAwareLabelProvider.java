@@ -33,7 +33,7 @@ public class WorkingSetAwareLabelProvider extends PackageExplorerLabelProvider {
 	 */
 	public String getText(Object element) {
 		if (element instanceof IWorkingSet) {
-			return decorateText(((IWorkingSet)element).getName(), element);
+			return decorateText(((IWorkingSet)element).getLabel(), element);
 		} 
 		return super.getText(element);
 	}

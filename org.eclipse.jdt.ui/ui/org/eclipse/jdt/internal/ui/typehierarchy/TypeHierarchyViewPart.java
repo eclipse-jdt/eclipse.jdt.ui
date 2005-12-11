@@ -1232,7 +1232,7 @@ public class TypeHierarchyViewPart extends ViewPart implements ITypeHierarchyVie
 				title= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_title, args); 
 				tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_tooltip, args); 
 			} else {
-				String[] args= new String[] { viewerTitle, JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT), workingSet.getName() };
+				String[] args= new String[] { viewerTitle, JavaElementLabels.getElementLabel(fInputElement, JavaElementLabels.ALL_DEFAULT), workingSet.getLabel() };
 				title= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_title, args); 
 				tooltip= Messages.format(TypeHierarchyMessages.TypeHierarchyViewPart_ws_tooltip, args); 
 			}

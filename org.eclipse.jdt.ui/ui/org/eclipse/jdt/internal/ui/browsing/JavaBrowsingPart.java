@@ -818,10 +818,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 			return result;
 
 		IWorkingSet ws= fWorkingSetFilterActionGroup.getWorkingSet();
-		String wsstr= Messages.format(JavaBrowsingMessages.JavaBrowsingPart_toolTip, new String[] { ws.getName() });
+		String wsstr= Messages.format(JavaBrowsingMessages.JavaBrowsingPart_toolTip, new String[] { ws.getLabel() });
 		if (result.length() == 0)
 			return wsstr;
-		return Messages.format(JavaBrowsingMessages.JavaBrowsingPart_toolTip2, new String[] { result, ws.getName() });
+		return Messages.format(JavaBrowsingMessages.JavaBrowsingPart_toolTip2, new String[] { result, ws.getLabel() });
 	}
 
 	public String getTitleToolTip() {
