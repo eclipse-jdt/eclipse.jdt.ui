@@ -106,10 +106,4 @@ public class ParticipantDescriptor {
 			return false;
 		return true;
 	}
-	
-	public String toString() {
-		return "name= " + getName() + (isEnabled() ? " (enabled)" : " (disabled)") + //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				"\nid= " + getId() + //$NON-NLS-1$
-				"\nclass= " + fConfigurationElement.getAttribute(CLASS); //$NON-NLS-1$
-	}
 }
