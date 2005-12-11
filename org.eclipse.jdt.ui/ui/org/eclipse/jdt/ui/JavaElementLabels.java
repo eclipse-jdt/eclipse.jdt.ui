@@ -1002,17 +1002,29 @@ public class JavaElementLabels {
 	private static boolean getVariableLabel(IPackageFragmentRoot root, long flags, StringBuffer buf) {
 		try {
 			IClasspathEntry rawEntry= root.getRawClasspathEntry();
-			if (rawEntry != null) {
-				if (rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
-					buf.append(rawEntry.getPath().makeRelative());
-					buf.append(CONCAT_STRING);
-					if (root.isExternal())
-						buf.append(root.getPath().toOSString());
-					else
-						buf.append(root.getPath().makeRelative().toString());
-					return true;
+			if (rawEntry != null && rawEntry.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+				IPath path= rawEntry.getPath().makeRelative();
+				if (getFlag(flags, REFERENCED_ROOT_POST_QUALIFIED)) {
+					int segements= path.segmentCount();
+					if (segements > 0) {
+						buf.append(path.segment(segements - 1));
+						if (segements > 1) {
+							buf.append(CONCAT_STRING);
+							buf.append(path.removeLastSegments(1).toOSString());
+						}
+					} else {
+						buf.append(path.toString());
+					}
+				} else {
+					buf.append(path.toString());
 				}
+				buf.append(CONCAT_STRING);
 			}
+			if (root.isExternal())
+				buf.append(root.getPath().toOSString());
+			else
+				buf.append(root.getPath().makeRelative().toString());
+			return true;
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e); // problems with class path
 		}
