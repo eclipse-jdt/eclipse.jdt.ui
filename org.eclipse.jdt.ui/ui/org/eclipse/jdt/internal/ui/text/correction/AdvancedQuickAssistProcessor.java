@@ -1731,15 +1731,11 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			ITypeBinding thenBinding= thenExpression.resolveTypeBinding();
 			ITypeBinding elseBinding= elseExpression.resolveTypeBinding();
 			if (thenBinding != null && elseBinding != null && exprBinding != null && !elseBinding.isAssignmentCompatible(thenBinding)) {
-				try {
-					CastExpression castException= ast.newCastExpression();
-					proposal.createImportRewrite(context.getASTRoot());
-					castException.setType(proposal.getImportRewrite().addImport(exprBinding, ast));
-					castException.setExpression(elseCopy);
-					elseCopy= castException;
-				} catch (CoreException e) {
-					//ignore
-				}
+				CastExpression castException= ast.newCastExpression();
+				proposal.createImportRewrite(context.getASTRoot());
+				castException.setType(proposal.getImportRewrite().addImport(exprBinding, ast));
+				castException.setExpression(elseCopy);
+				elseCopy= castException;
 			}
 		}
 		conditionalExpression.setThenExpression(thenCopy);

@@ -21,6 +21,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ArrayInitializer;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
@@ -31,9 +32,11 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
@@ -100,18 +103,25 @@ public class TypeMismatchSubProcessor {
 				castTypeBinding= ASTNodes.getType(frag).resolveBinding();
 				receiverNode= frag.getName();
 			}
+		} else if (parentNodeType == ASTNode.MEMBER_VALUE_PAIR) {
+			receiverNode= ((MemberValuePair) selectedNode.getParent()).getName();
+			castTypeBinding= ASTResolving.guessBindingForReference(nodeToCast);
+		} else if (parentNodeType == ASTNode.SINGLE_MEMBER_ANNOTATION) {
+			receiverNode= ((SingleMemberAnnotation) selectedNode.getParent()).getTypeName(); // use the type name
+			castTypeBinding= ASTResolving.guessBindingForReference(nodeToCast);
 		} else {
 			// try to find the binding corresponding to 'castTypeName'
-			ITypeBinding guessedCastTypeBinding= ASTResolving.guessBindingForReference(nodeToCast);
-			castTypeBinding= guessedCastTypeBinding;
+			castTypeBinding= ASTResolving.guessBindingForReference(nodeToCast);
 		}
 		if (castTypeBinding == null) {
 			return;
 		}
 
-		ITypeBinding binding= nodeToCast.resolveTypeBinding();
-		if (binding == null || binding.isCastCompatible(castTypeBinding) || nodeToCast instanceof CastExpression) {
-			proposals.add(createCastProposal(context, castTypeBinding, nodeToCast, 7));
+		if (!(nodeToCast instanceof ArrayInitializer)) {
+			ITypeBinding binding= nodeToCast.resolveTypeBinding();
+			if (binding == null || binding.isCastCompatible(castTypeBinding) || nodeToCast instanceof CastExpression) {
+				proposals.add(createCastProposal(context, castTypeBinding, nodeToCast, 7));
+			}
 		}
 
 		ITypeBinding currBinding= nodeToCast.resolveTypeBinding();
@@ -210,6 +220,12 @@ public class TypeMismatchSubProcessor {
 			if (!methodBinding.isConstructor()) {
 				declaringType= methodBinding.getDeclaringClass().getTypeDeclaration();
 				callerBindingDecl= methodBinding.getMethodDeclaration();
+			}
+		} else if (callerBinding instanceof ITypeBinding && nodeToCast.getLocationInParent() == SingleMemberAnnotation.TYPE_NAME_PROPERTY) {
+			declaringType= (ITypeBinding) callerBinding;
+			callerBindingDecl= Bindings.findMethodInType(declaringType, "value", (String[]) null); //$NON-NLS-1$
+			if (callerBindingDecl == null) {
+				return;
 			}
 		}
 

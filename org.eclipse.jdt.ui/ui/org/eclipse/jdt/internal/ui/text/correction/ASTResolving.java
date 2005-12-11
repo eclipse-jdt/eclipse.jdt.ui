@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.ArrayCreation;
@@ -47,6 +48,7 @@ import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.InfixExpression;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.InstanceofExpression;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -208,6 +210,12 @@ public class ASTResolving {
 				VariableDeclaration varDecl= (VariableDeclaration) initializerParent;
 				creationType= ASTNodes.getType(varDecl);
 				dim-= ASTNodes.getExtraDimensions(varDecl);
+			} else if (initializerParent instanceof MemberValuePair) {
+				String name= ((MemberValuePair) initializerParent).getName().getIdentifier();
+				IMethodBinding annotMember= findAnnotationMember((Annotation) initializerParent.getParent(), name);
+				if (annotMember != null) {
+					return getReducedDimensionBinding(annotMember.getReturnType(), dim, annotMember.getReturnType().getElementType());
+				}
 			}
 			if (creationType != null) {
 				while ((creationType instanceof ArrayType) && dim > 0) {
@@ -273,11 +281,33 @@ public class ASTResolving {
 				return ((SwitchStatement) parent.getParent()).getExpression().resolveTypeBinding();
 			}
 			break;
-
+		case ASTNode.SINGLE_MEMBER_ANNOTATION: {
+			IMethodBinding annotMember= findAnnotationMember((Annotation) parent, "value"); //$NON-NLS-1$
+			if (annotMember != null) {
+				return annotMember.getReturnType();
+			}
+			break;
+		}
+		case ASTNode.MEMBER_VALUE_PAIR: {
+			String name= ((MemberValuePair) parent).getName().getIdentifier();
+			IMethodBinding annotMember= findAnnotationMember((Annotation) parent.getParent(), name);
+			if (annotMember != null) {
+				return annotMember.getReturnType();
+			}
+			break;
+		}
 		default:
 			// do nothing
 		}
 
+		return null;
+	}
+	
+	private static IMethodBinding findAnnotationMember(Annotation annotation, String name) {
+		ITypeBinding annotBinding= annotation.resolveTypeBinding();
+		if (annotBinding != null) {
+			return Bindings.findMethodInType(annotBinding, name, (String[]) null);
+		}
 		return null;
 	}
 
@@ -331,6 +361,15 @@ public class ASTResolving {
 		return null;
 	}
 
+	private static ITypeBinding getReducedDimensionBinding(ITypeBinding arrayBinding, int dimsToReduce, ITypeBinding def) {
+		if (dimsToReduce == 0) {
+			return arrayBinding;
+		}
+		if (arrayBinding.getDimensions() == dimsToReduce) {
+			return arrayBinding.getElementType();
+		}
+		return def; //TODO bug 120264 
+	}
 
 	private static ITypeBinding getParameterTypeBinding(ASTNode node, List args, IMethodBinding binding) {
 		ITypeBinding[] paramTypes= binding.getParameterTypes();
@@ -565,6 +604,23 @@ public class ASTResolving {
 		return (BodyDeclaration) node;
 	}
 	
+	public static BodyDeclaration findParentBodyDeclaration(ASTNode node, boolean treatModifiersOutside) {
+		StructuralPropertyDescriptor lastLocation= null;
+		
+		while (node != null) {
+			if (node instanceof BodyDeclaration) {
+				BodyDeclaration decl= (BodyDeclaration) node;
+				if (!treatModifiersOutside || lastLocation != decl.getModifiersProperty()) {
+					return decl;
+				}
+				treatModifiersOutside= false;
+			}
+			lastLocation= node.getLocationInParent();
+			node= node.getParent();
+		}
+		return (BodyDeclaration) node;
+	}
+	
 
 	public static CompilationUnit findParentCompilationUnit(ASTNode node) {
 		return (CompilationUnit) findAncestor(node, ASTNode.COMPILATION_UNIT);
@@ -575,11 +631,26 @@ public class ASTResolving {
 	 * @param node
 	 * @return CompilationUnit
 	 */
-	public static ASTNode findParentType(ASTNode node) {
-		while ((node != null) && !(node instanceof AbstractTypeDeclaration) && !(node instanceof AnonymousClassDeclaration)) {
+	public static ASTNode findParentType(ASTNode node, boolean treatModifiersOutside) {
+		StructuralPropertyDescriptor lastLocation= null;
+
+		while (node != null) {
+			if (node instanceof AbstractTypeDeclaration) {
+				AbstractTypeDeclaration decl= (AbstractTypeDeclaration) node;
+				if (!treatModifiersOutside || lastLocation != decl.getModifiersProperty()) {
+					return decl;
+				}
+			} else if (node instanceof AnonymousClassDeclaration) {
+				return node;
+			}
+			lastLocation= node.getLocationInParent();
 			node= node.getParent();
 		}
-		return node;
+		return null;
+	}
+	
+	public static ASTNode findParentType(ASTNode node) {
+		return findParentType(node, false);
 	}
 
 	/**
@@ -634,6 +705,35 @@ public class ASTResolving {
 			if (statement instanceof ConstructorInvocation || statement instanceof SuperConstructorInvocation) {
 				return true; // argument in a this or super call
 			}
+		}
+		return false;
+	}
+	
+	public static ITypeBinding getBindingOfParentType(ASTNode node, boolean treatModifiersOutside) {
+		StructuralPropertyDescriptor lastLocation= null;
+
+		while (node != null) {
+			if (node instanceof AbstractTypeDeclaration) {
+				AbstractTypeDeclaration decl= (AbstractTypeDeclaration) node;
+				if (!treatModifiersOutside || lastLocation != decl.getModifiersProperty()) {
+					return decl.resolveBinding();
+				}
+			} else if (node instanceof AnonymousClassDeclaration) {
+				return ((AnonymousClassDeclaration) node).resolveBinding();
+			}
+			lastLocation= node.getLocationInParent();
+			node= node.getParent();
+		}
+		return null;
+	}
+	
+	
+	public static boolean isInsideModifiers(ASTNode node) {
+		while (node != null && !(node instanceof BodyDeclaration)) {
+			if (node instanceof Annotation) {
+				return true;
+			}
+			node= node.getParent();
 		}
 		return false;
 	}

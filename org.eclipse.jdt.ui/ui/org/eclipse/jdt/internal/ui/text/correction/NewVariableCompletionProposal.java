@@ -353,7 +353,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			ListRewrite listRewriter= rewrite.getListRewrite(newTypeDecl, property);
 			listRewriter.insertAt(newDecl, insertIndex, null);
 
-			ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(this, rewrite, newDecl.modifiers());
+			ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(this, rewrite, newDecl.modifiers(), fSenderBinding.isInterface());
 			
 			addLinkedPosition(rewrite.track(newDecl.getType()), false, KEY_TYPE);
 			if (!isInDifferentCU) {
@@ -415,7 +415,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			}
 			return imports.addImport(binding, ast);
 		}
-		// no binding, find type ast node instead -> ABC a= x-> use 'ABC' as is
+		// no binding, find type AST node instead -> ABC a= x-> use 'ABC' as is
 		Type type= ASTResolving.guessTypeForReference(ast, fOriginalNode);
 		if (type != null) {
 			return type;
@@ -459,7 +459,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 				modifiers |= Modifier.STATIC;
 			}
 		}
-		ASTNode node= ASTResolving.findParentType(fOriginalNode);
+		ASTNode node= ASTResolving.findParentType(fOriginalNode, true);
 		if (newTypeDecl.equals(node)) {
 			modifiers |= Modifier.PRIVATE;
 		} else if (node instanceof AnonymousClassDeclaration) {

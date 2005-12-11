@@ -235,7 +235,7 @@ public class AssignToVariableAssistProposal extends LinkedCorrectionProposal {
 		newDecl.setType(type);
 		newDecl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers));
 		
-		ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(this, rewrite, newDecl.modifiers());
+		ModifierCorrectionSubProcessor.installLinkedVisibilityProposals(this, rewrite, newDecl.modifiers(), false);
 
 		int insertIndex= findFieldInsertIndex(decls, fNodeToAssign.getStartPosition());
 		rewrite.getListRewrite(newTypeDecl, property).insertAt(newDecl, insertIndex, null);

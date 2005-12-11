@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -47,14 +48,17 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.NormalAnnotation;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
+import org.eclipse.jdt.core.dom.SingleMemberAnnotation;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
@@ -110,11 +114,10 @@ public class UnresolvedElementsSubProcessor {
 
 		// type that defines the variable
 		ITypeBinding binding= null;
-		ITypeBinding declaringTypeBinding= Bindings.getBindingOfParentType(selectedNode);
+		ITypeBinding declaringTypeBinding= ASTResolving.getBindingOfParentType(selectedNode, true);
 		if (declaringTypeBinding == null) {
 			return;
 		}
-
 
 		// possible type kind of the node
 		boolean suggestVariableProposals= true;
@@ -238,7 +241,7 @@ public class UnresolvedElementsSubProcessor {
 
 	private static void addNewVariableProposals(ICompilationUnit cu, Name node, SimpleName simpleName, Collection proposals) {
 		String name= simpleName.getIdentifier();
-		BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(node);
+		BodyDeclaration bodyDeclaration= ASTResolving.findParentBodyDeclaration(node, true);
 		int type= bodyDeclaration.getNodeType();
 		if (type == ASTNode.METHOD_DECLARATION) {
 			int relevance= StubUtility.hasParameterName(cu.getJavaProject(), name) ? 8 : 5;
@@ -286,21 +289,23 @@ public class UnresolvedElementsSubProcessor {
 		if (!senderDeclBinding.isFromSource() || targetCU == null) {
 			return;
 		}
+		
+		boolean mustBeConst= ASTResolving.isInsideModifiers(simpleName);
 
-		addNewFieldForType(targetCU, binding, senderDeclBinding, simpleName, isWriteAccess, proposals);
+		addNewFieldForType(targetCU, binding, senderDeclBinding, simpleName, isWriteAccess, mustBeConst, proposals);
 
 		if (binding == null && senderDeclBinding.isNested()) {
 			ASTNode anonymDecl= astRoot.findDeclaringNode(senderDeclBinding);
 			if (anonymDecl != null) {
 				ITypeBinding bind= Bindings.getBindingOfParentType(anonymDecl.getParent());
 				if (!bind.isAnonymous()) {
-					addNewFieldForType(targetCU, bind, bind, simpleName, isWriteAccess, proposals);
+					addNewFieldForType(targetCU, bind, bind, simpleName, isWriteAccess, mustBeConst, proposals);
 				}
 			}
 		}
 	}
 
-	private static void addNewFieldForType(ICompilationUnit targetCU, ITypeBinding binding, ITypeBinding senderDeclBinding, SimpleName simpleName, boolean isWriteAccess, Collection proposals) {
+	private static void addNewFieldForType(ICompilationUnit targetCU, ITypeBinding binding, ITypeBinding senderDeclBinding, SimpleName simpleName, boolean isWriteAccess, boolean mustBeConst, Collection proposals) {
 		String name= simpleName.getIdentifier();
 		String label;
 		Image image;
@@ -309,15 +314,17 @@ public class UnresolvedElementsSubProcessor {
 			image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
 			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.ENUM_CONST, simpleName, senderDeclBinding, 10, image));
 		} else {
-			if (binding == null) {
-				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createfield_description, name);
-				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
-			} else {
-				label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createfield_other_description, new Object[] { name, ASTResolving.getTypeSignature(senderDeclBinding) } );
-				image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
+			if (!mustBeConst) {
+				if (binding == null) {
+					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createfield_description, name);
+					image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PRIVATE);
+				} else {
+					label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_createfield_other_description, new Object[] { name, ASTResolving.getTypeSignature(senderDeclBinding) } );
+					image= JavaPluginImages.get(JavaPluginImages.IMG_FIELD_PUBLIC);
+				}
+				int fieldRelevance= StubUtility.hasFieldName(targetCU.getJavaProject(), name) ? 9 : 6;
+				proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderDeclBinding, fieldRelevance, image));
 			}
-			int fieldRelevance= StubUtility.hasFieldName(targetCU.getJavaProject(), name) ? 9 : 6;
-			proposals.add(new NewVariableCompletionProposal(label, targetCU, NewVariableCompletionProposal.FIELD, simpleName, senderDeclBinding, fieldRelevance, image));
 
 			if (!isWriteAccess && !senderDeclBinding.isAnonymous()) {
 				if (binding == null) {
@@ -1534,6 +1541,53 @@ public class UnresolvedElementsSubProcessor {
 		proposals.add(new RenameNodeCompletionProposal(label, context.getCompilationUnit(), offset, length, lengthId, 7));
 	}
 
+	public static void getAnnotationMemberProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+		CompilationUnit astRoot= context.getASTRoot();
+		ICompilationUnit cu= context.getCompilationUnit();
+		ASTNode selectedNode= problem.getCoveringNode(astRoot);
+
+		Annotation annotation;
+		String memberName;
+		if (selectedNode.getLocationInParent() == MemberValuePair.NAME_PROPERTY) {
+			if (selectedNode.getParent().getLocationInParent() != NormalAnnotation.VALUES_PROPERTY) {
+				return;
+			}
+			annotation= (Annotation) selectedNode.getParent().getParent();
+			memberName= ((SimpleName) selectedNode).getIdentifier();
+		} else if (selectedNode.getLocationInParent() == SingleMemberAnnotation.VALUE_PROPERTY) {
+			annotation= (Annotation) selectedNode.getParent();
+			memberName= "value"; //$NON-NLS-1$
+		} else {
+			return;
+		}
+		
+		ITypeBinding annotBinding= annotation.resolveTypeBinding();
+		if (annotBinding == null) {
+			return;
+		}
+
+		
+		if (annotation instanceof NormalAnnotation) {
+			// similar names
+			IMethodBinding[] otherMembers= annotBinding.getDeclaredMethods();
+			for (int i= 0; i < otherMembers.length; i++) {
+				IMethodBinding binding= otherMembers[i];
+				String curr= binding.getName();
+				int relevance= NameMatcher.isSimilarName(memberName, curr) ? 6 : 3;
+				String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_UnresolvedElementsSubProcessor_changetoattribute_description, curr);
+				proposals.add(new RenameNodeCompletionProposal(label, cu, problem.getOffset(), problem.getLength(), curr, relevance));
+			}
+		}
+		
+		if (annotBinding.isFromSource()) {
+			ICompilationUnit targetCU= ASTResolving.findCompilationUnitForBinding(cu, astRoot, annotBinding);
+			if (targetCU != null) {
+				String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_UnresolvedElementsSubProcessor_createattribute_description, memberName);
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_MISC_PUBLIC);
+				proposals.add(new NewAnnotationMemberProposal(label, targetCU, selectedNode, annotBinding, 5, image));
+			}
+		}
+	}
 
 
 }

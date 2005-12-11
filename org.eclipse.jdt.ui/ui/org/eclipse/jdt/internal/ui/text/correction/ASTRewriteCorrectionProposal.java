@@ -58,7 +58,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	/**
 	 * Returns the import rewriter used for this compilation unit.
 	 */
-	public NewImportRewrite getImportRewrite() throws CoreException {
+	public NewImportRewrite getImportRewrite() {
 		return fImportRewrite;
 	}
 

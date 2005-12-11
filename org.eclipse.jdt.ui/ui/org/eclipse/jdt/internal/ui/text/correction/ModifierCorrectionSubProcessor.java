@@ -718,7 +718,7 @@ public class ModifierCorrectionSubProcessor {
 		public boolean validate(IDocument document, int offset, DocumentEvent event) { return false; }
 	}
 	
-	public static void installLinkedVisibilityProposals(LinkedCorrectionProposal proposal, ASTRewrite rewrite, List modifiers) {
+	public static void installLinkedVisibilityProposals(LinkedCorrectionProposal proposal, ASTRewrite rewrite, List modifiers, boolean inInterface) {
 		ASTNode modifier= findVisibilityModifier(modifiers);
 		if (modifier != null) {
 			int selected= ((Modifier) modifier).getKeyword().toFlagValue();
@@ -726,7 +726,7 @@ public class ModifierCorrectionSubProcessor {
 			proposal.addLinkedPositionProposal(KEY_MODIFIER, new ModifierLinkedModeProposal(selected));
 			
 			// add all others
-			int[] flagValues= { Modifier.PUBLIC, 0, Modifier.PROTECTED, Modifier.PRIVATE };
+			int[] flagValues= inInterface ? new int[] { Modifier.PUBLIC, 0 } : new int[] { Modifier.PUBLIC, 0, Modifier.PROTECTED, Modifier.PRIVATE };
 			for (int i= 0; i < flagValues.length; i++) {
 				if (flagValues[i] != selected) {
 					proposal.addLinkedPositionProposal(KEY_MODIFIER,  new ModifierLinkedModeProposal(flagValues[i]));

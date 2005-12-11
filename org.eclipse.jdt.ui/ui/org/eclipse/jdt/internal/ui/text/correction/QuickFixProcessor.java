@@ -174,6 +174,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnnecessaryNLSTag:
 			case IProblem.AssignmentHasNoEffect:
 			case IProblem.UnsafeTypeConversion:
+			case IProblem.UndefinedAnnotationMember:
 			//case IProblem.NonGenericType:
 				return true;
 			default:
@@ -245,6 +246,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.UndefinedConstructor:
 				UnresolvedElementsSubProcessor.getConstructorProposals(context, problem, proposals);
+				break;
+			case IProblem.UndefinedAnnotationMember:
+				UnresolvedElementsSubProcessor.getAnnotationMemberProposals(context, problem, proposals);
 				break;
 			case IProblem.ParameterMismatch:
 				UnresolvedElementsSubProcessor.getMethodProposals(context, problem, true, proposals);
