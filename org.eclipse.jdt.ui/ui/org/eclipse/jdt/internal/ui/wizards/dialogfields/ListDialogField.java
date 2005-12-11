@@ -488,7 +488,7 @@ public class ListDialogField extends DialogField {
 	 * Updates the enable state of the all buttons
 	 */ 
 	protected void updateButtonState() {
-		if (fButtonControls != null && isOkToUse(fTableControl)) {
+		if (fButtonControls != null && isOkToUse(fTableControl) && fTableControl.isEnabled()) {
 			ISelection sel= fTable.getSelection();
 			for (int i= 0; i < fButtonControls.length; i++) {
 				Button button= fButtonControls[i];

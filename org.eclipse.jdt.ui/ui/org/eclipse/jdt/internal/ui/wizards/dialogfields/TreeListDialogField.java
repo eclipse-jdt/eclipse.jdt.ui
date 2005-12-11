@@ -417,7 +417,7 @@ public class TreeListDialogField extends DialogField {
 	* Updates the enable state of the all buttons
 	*/
 	protected void updateButtonState() {
-		if (fButtonControls != null) {
+		if (fButtonControls != null && isOkToUse(fTreeControl) && fTreeControl.isEnabled()) {
 			ISelection sel= fTree.getSelection();
 			for (int i= 0; i < fButtonControls.length; i++) {
 				Button button= fButtonControls[i];
