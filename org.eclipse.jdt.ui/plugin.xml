@@ -4716,36 +4716,22 @@
 
    <extension
          id="modelProvider"
-         name="%RefactoringModelProvider.name"
+         name="%JavaModelProvider.name"
          point="org.eclipse.core.resources.modelProviders">
       <modelProvider
-            class="org.eclipse.jdt.internal.ui.refactoring.model.JavaRefactoringModelProvider"
-            name="%RefactoringModelProvider.name"/>
+            class="org.eclipse.jdt.internal.ui.model.JavaModelProvider"
+            name="%JavaModelProvider.name"/>
       <extends-model id="org.eclipse.core.resources.modelProvider"/>
       <enablement>
-         <with variable="affectedNatures">
-            <iterate operator="or">
-               <equals value="org.eclipse.jdt.core.javanature"/>
-            </iterate>
-         </with>
+          <test property="org.eclipse.core.resources.projectNature" value="org.eclipse.jdt.core.javanature" />
       </enablement>
    </extension>
-<!--
-   <extension
-         point="org.eclipse.compare.streamMergers">
-      <streamMerger
-            class="org.eclipse.jdt.internal.ui.refactoring.merge.JavaStreamMerger"
-            id="org.eclipse.jdt.ui.refactoring.model.JavaStreamMerger"/>
-      <contentTypeBinding
-            contentTypeId="org.eclipse.jdt.core.javaSource"
-            streamMergerId="org.eclipse.jdt.ui.refactoring.model.JavaStreamMerger"/>
-   </extension>
--->
+
    <extension
          point="org.eclipse.core.runtime.adapters">
       <factory
             adaptableType="org.eclipse.ltk.core.refactoring.model.AbstractRefactoringModelProvider"
-            class="org.eclipse.jdt.internal.ui.refactoring.model.JavaRefactoringAdapterFactory">
+            class="org.eclipse.jdt.internal.ui.model.JavaModelAdapterFactory">
          <adapter type="org.eclipse.team.core.mapping.IResourceMappingMerger"/>
          <adapter type="org.eclipse.team.ui.mapping.ICompareAdapter"/>
       </factory>
@@ -4773,14 +4759,13 @@
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
       <navigatorContent
-            contentProvider="org.eclipse.jdt.internal.ui.refactoring.model.JavaTeamContentProvider"
+            contentProvider="org.eclipse.jdt.internal.ui.model.JavaSynchronizationContentProvider"
             id="org.eclipse.jdt.ui.resourceContent"
-            labelProvider="org.eclipse.jdt.internal.ui.refactoring.model.JavaTeamLabelProvider"
-            name="%RefactoringModelContent.name">
+            labelProvider="org.eclipse.jdt.internal.ui.model.JavaSynchronizationLabelProvider"
+            name="%JavaModelContent.name">
          <enablement>
             <or>
-               <instanceof value="org.eclipse.jdt.internal.ui.refactoring.model.JavaRefactoringModelProvider"/>
-               <instanceof value="org.eclipse.core.resources.IResource"/>
+               <instanceof value="org.eclipse.jdt.internal.ui.model.JavaModelProvider"/>
                <instanceof value="org.eclipse.jdt.core.IJavaElement"/>
                <instanceof value="org.eclipse.team.core.mapping.IResourceMappingScope"/>
                <instanceof value="org.eclipse.team.core.mapping.ISynchronizationContext"/>

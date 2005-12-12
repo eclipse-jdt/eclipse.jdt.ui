@@ -8,22 +8,30 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.ltk.ui.refactoring.model;
+package org.eclipse.jdt.internal.ui.model;
+
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.compare.structuremergeviewer.ICompareInput;
+
+import org.eclipse.team.core.mapping.ISynchronizationContext;
 
 import org.eclipse.team.ui.mapping.AbstractCompareAdapter;
 
 /**
- * Partial implementation of a refactoring-aware compare adapter.
- * <p>
- * Note: this class is intended to be extended outside the refactoring
- * framework.
- * </p>
- * <p>
- * Note: This API is considered experimental and may change in the near future.
- * </p>
+ * Java-aware compare adapter.
  * 
  * @since 3.2
  */
-public abstract class AbstractRefactoringCompareAdapter extends AbstractCompareAdapter {
-	// No implementation so far
+public final class JavaCompareAdapter extends AbstractCompareAdapter {
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public ICompareInput asCompareInput(final ISynchronizationContext context, final Object element) {
+		final IResource resource= JavaModelProvider.getResource(element);
+		if (resource != null)
+			return super.asCompareInput(context, resource);
+		return null;
+	}
 }

@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.refactoring.model;
+package org.eclipse.jdt.internal.ui.model;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 
@@ -20,11 +20,11 @@ import org.eclipse.team.ui.mapping.ICompareAdapter;
 import org.eclipse.ltk.core.refactoring.model.AbstractRefactoringModelProvider;
 
 /**
- * Adaptor factory for model integration support.
+ * Adaptor factory for model support.
  * 
  * @since 3.2
  */
-public final class JavaRefactoringAdapterFactory implements IAdapterFactory {
+public final class JavaModelAdapterFactory implements IAdapterFactory {
 
 	/**
 	 * {@inheritDoc}
@@ -32,9 +32,9 @@ public final class JavaRefactoringAdapterFactory implements IAdapterFactory {
 	public Object getAdapter(final Object adaptable, final Class adapter) {
 		if (adaptable instanceof AbstractRefactoringModelProvider) {
 			if (adapter == IResourceMappingMerger.class)
-				return new JavaRefactoringModelMerger((ModelProvider) adaptable);
+				return new JavaModelMerger((ModelProvider) adaptable);
 			else if (adapter == ICompareAdapter.class)
-				return new JavaRefactoringCompareAdapter();
+				return new JavaCompareAdapter();
 		}
 		return null;
 	}

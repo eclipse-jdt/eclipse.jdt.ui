@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.refactoring.model;
+package org.eclipse.jdt.internal.ui.model;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -29,19 +29,19 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Java-specific implementation of a refactoring-aware model merger.
+ * Java-aware resource mapping merger.
  * 
  * @since 3.2
  */
-public final class JavaRefactoringModelMerger extends AbstractRefactoringModelMerger {
+public final class JavaModelMerger extends AbstractRefactoringModelMerger {
 
 	/**
-	 * Creates a new java refactoring model merger.
+	 * Creates a new java model merger.
 	 * 
 	 * @param provider
 	 *            the model provider
 	 */
-	public JavaRefactoringModelMerger(final ModelProvider provider) {
+	public JavaModelMerger(final ModelProvider provider) {
 		super(provider);
 	}
 

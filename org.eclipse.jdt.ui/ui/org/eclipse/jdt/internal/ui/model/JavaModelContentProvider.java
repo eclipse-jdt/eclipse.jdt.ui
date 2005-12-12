@@ -8,21 +8,21 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.refactoring.model;
+package org.eclipse.jdt.internal.ui.model;
 
-import org.eclipse.team.internal.ui.mapping.ResourceTeamAwareContentProvider;
+import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 /**
- * Content provider for model-based team operations.
+ * Content provider for Java models.
  * 
  * @since 3.2
  */
-public final class JavaTeamContentProvider extends ResourceTeamAwareContentProvider {
+public final class JavaModelContentProvider extends StandardJavaElementContentProvider {
 
 	/**
-	 * {@inheritDoc}
+	 * Creates a new java model content provider.
 	 */
-	protected String getModelProviderId() {
-		return JavaRefactoringModelProvider.JAVA_REFACTORING_MODEL_PROVIDER_ID;
+	public JavaModelContentProvider() {
+		super(true);
 	}
 }
