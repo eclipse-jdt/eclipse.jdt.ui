@@ -692,7 +692,7 @@ public final class JavaUI {
 	 * Returns the Java element wrapped by the given editor input.
 	 *
 	 * @param editorInput the editor input
-	 * @return the Java element wrapped by <code>editorInput</code>.
+	 * @return the Java element wrapped by <code>editorInput</code> or <code>null</code> if none
 	 * @since 3.2
 	 */
 	public static IJavaElement getEditorInputJavaElement(IEditorInput editorInput) {
