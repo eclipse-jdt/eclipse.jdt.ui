@@ -116,7 +116,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.GenerateActionGroup;
 import org.eclipse.jdt.ui.actions.IJavaEditorActionDefinitionIds;
@@ -1363,13 +1362,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		// Note that the previous code could result in a reconcile as side effect. Should check if that
 		// is still required.
 		return element;
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#getInputElement()
-	 */
-	protected IJavaElement getInputJavaElement() {
-		return JavaUI.getEditorInputJavaElement(getEditorInput());
 	}
 
 	/*

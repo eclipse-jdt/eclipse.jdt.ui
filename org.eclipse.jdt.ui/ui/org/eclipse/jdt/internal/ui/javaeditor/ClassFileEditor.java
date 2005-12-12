@@ -23,19 +23,6 @@ import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.resources.IFile;
 
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.IClasspathContainer;
-import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModelStatusConstants;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.ToolFactory;
-import org.eclipse.jdt.core.util.IClassFileDisassembler;
-import org.eclipse.jdt.core.util.IClassFileReader;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.custom.StackLayout;
@@ -63,11 +50,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+
 import org.eclipse.jface.text.IWidgetTokenKeeper;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRuler;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IFileEditorInput;
@@ -76,15 +64,28 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IDocumentProvider;
 import org.eclipse.ui.texteditor.ITextEditorActionConstants;
 
+import org.eclipse.jdt.core.IClassFile;
+import org.eclipse.jdt.core.IClasspathContainer;
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModelStatusConstants;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.ToolFactory;
+import org.eclipse.jdt.core.util.IClassFileDisassembler;
+import org.eclipse.jdt.core.util.IClassFileReader;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.SourceAttachmentBlock;
-
-import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
 /**
  * Java specific text editor.
@@ -539,16 +540,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 				return element;
 		}
 		return null;
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.ui.javaeditor.JavaEditor#getInputElement()
-	 */
-	protected IJavaElement getInputJavaElement() {
-		if (getEditorInput() == null)
-			return null;
-
-		return ((IClassFileEditorInput)getEditorInput()).getClassFile();
 	}
 
 	/*
