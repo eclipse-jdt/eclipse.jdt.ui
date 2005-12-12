@@ -71,6 +71,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -356,7 +357,7 @@ public class EditorUtility {
 			if (part != null) {
 				IEditorInput editorInput= part.getEditorInput();
 				if (editorInput != null) {
-					return (IJavaElement)editorInput.getAdapter(IJavaElement.class);
+					return JavaUI.getEditorInputJavaElement(editorInput);
 				}
 			}
 		}

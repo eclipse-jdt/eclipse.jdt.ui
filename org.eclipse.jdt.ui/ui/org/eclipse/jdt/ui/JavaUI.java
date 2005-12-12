@@ -25,6 +25,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.operation.IRunnableContext;
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.dialogs.SelectionDialog;
@@ -686,7 +687,26 @@ public final class JavaUI {
 	public static IWorkingCopyManager getWorkingCopyManager() {
 		return JavaPlugin.getDefault().getWorkingCopyManager();
 	}
-	
+
+	/**
+	 * Returns the Java element wrapped by the given editor input.
+	 *
+	 * @param editorInput the editor input
+	 * @return the Java element wrapped by <code>editorInput</code>.
+	 * @since 3.2
+	 */
+	public static IJavaElement getEditorInputJavaElement(IEditorInput editorInput) {
+		Assert.isNotNull(editorInput);
+		IJavaElement je= getWorkingCopyManager().getWorkingCopy(editorInput); 
+		if (je != null)
+			return je;
+
+		/*
+		 * This needs works, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=120340
+		 */
+		return (IJavaElement)editorInput.getAdapter(IJavaElement.class);
+	}
+
 	/**
 	 * Answers the shared working copies currently registered for the Java plug-in.
 	 * Note that the returned array can include working copies that are

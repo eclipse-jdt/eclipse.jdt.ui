@@ -45,7 +45,7 @@ public class EditorUtility {
 	public static IOpenable getJavaInput(IEditorPart part) {
 		IEditorInput editorInput= part.getEditorInput();
 		if (editorInput != null) {
-			IJavaElement input= JavaUI.getWorkingCopyManager().getWorkingCopy(editorInput);
+			IJavaElement input= JavaUI.getEditorInputJavaElement(editorInput);
 			if (input instanceof IOpenable) {
 				return (IOpenable) input;
 			}
