@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -50,6 +51,7 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -563,19 +565,54 @@ class RenameTypeWizardSimilarElementsPage extends UserInputWizardPage {
 			initializeUIFromRef();
 		}
 		super.setVisible(visible);
+		selectFirstElement();
+	}
+
+	private void selectFirstElement() {
+		if (fTreeViewer.getTree().getItemCount() > 0) {
+			TreeItem item= fTreeViewer.getTree().getItem(0);
+			if (item.getData() != null) {
+				fTreeViewer.reveal(item.getData());
+				Object data= getFirstSimilarElement(item);
+				if (data != null) {
+					fTreeViewer.setSelection(new StructuredSelection(data));
+				}
+			}
+		}
+		fTreeViewer.getTree().setFocus();
+	}
+	
+	private Object getFirstSimilarElement(TreeItem item) {
+		Object data= item.getData();
+		if (isSimilarElement(data)) {
+			return data;
+		} else {
+			TreeItem[] children= item.getItems();
+			for (int i= 0; i < children.length; i++) {
+				Object childData= getFirstSimilarElement(children[i]);
+				if (childData != null)
+					return childData;
+			}
+		}
+		return null;
 	}
 
 	private void initializeUIFromRef() {
 		// Get data from the refactoring
 		final Map elementsToNewNames= getRenameTypeProcessor().getSimilarElementsToNewNames();
-		// To prevent flickering, only change the input if the list is brand-new
-		if (fSimilarElementsToNewName == null || elementsToNewNames != fSimilarElementsToNewName) {
-			fSimilarElementsToNewName= elementsToNewNames;
-			fTreeViewerLabelProvider.initialize(fSimilarElementsToNewName);
-			fTreeViewer.setInput(fSimilarElementsToNewName);
-		}
-		restoreSelectionAndNames(getRenameTypeProcessor().getSimilarElementsToSelection());
-		fTreeViewer.expandAll();
+		try {
+			// To prevent flickering, stop redrawing
+			getShell().setRedraw(false);
+			if (fSimilarElementsToNewName == null || elementsToNewNames != fSimilarElementsToNewName) {
+				fSimilarElementsToNewName= elementsToNewNames;
+				fTreeViewerLabelProvider.initialize(fSimilarElementsToNewName);
+				fTreeViewer.setInput(fSimilarElementsToNewName);
+			}
+			fTreeViewer.expandAll();
+			restoreSelectionAndNames(getRenameTypeProcessor().getSimilarElementsToSelection());
+		} finally {
+			getShell().setRedraw(true);
+		}		
 		fWasInitialized= true;
 	}
 

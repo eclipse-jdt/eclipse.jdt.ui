@@ -148,6 +148,11 @@ public class RenameTypeWizardSimilarElementsOptionsDialog extends MessageDialog 
 
 		return messageComposite;
 	}
+	
+	
+	protected boolean customShouldTakeFocus() {
+		return true;
+	}
 
 	private void updateLabel() {
 		fWarningImageLabel.setEnabled(!fExactStrategyRadio.isSelected());
