@@ -307,4 +307,5 @@ final class CorrectionMessages extends NLS {
 	public static String CorrectionMessages_add_type_parameters_to_instantiation;
 	public static String UnresolvedElementsSubProcessor_UnresolvedElementsSubProcessor_changetoattribute_description;
 	public static String UnresolvedElementsSubProcessor_UnresolvedElementsSubProcessor_createattribute_description;
+	public static String MissingAnnotationAttributesProposal_add_missing_attributes_label;
 }

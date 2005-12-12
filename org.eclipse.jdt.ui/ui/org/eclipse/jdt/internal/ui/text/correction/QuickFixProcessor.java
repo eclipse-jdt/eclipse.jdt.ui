@@ -175,6 +175,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.AssignmentHasNoEffect:
 			case IProblem.UnsafeTypeConversion:
 			case IProblem.UndefinedAnnotationMember:
+			case IProblem.MissingValueForAnnotationMember:
 			//case IProblem.NonGenericType:
 				return true;
 			default:
@@ -369,6 +370,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.AbstractMethodMustBeImplemented:
 				LocalCorrectionsSubProcessor.addUnimplementedMethodsProposals(context, problem, proposals);
 				break;
+			case IProblem.MissingValueForAnnotationMember:
+				LocalCorrectionsSubProcessor.addValueForAnnotationProposals(context, problem, proposals);
+				break;				
 			case IProblem.BodyForNativeMethod:
 				ModifierCorrectionSubProcessor.addNativeMethodProposals(context, problem, proposals);
 				break;

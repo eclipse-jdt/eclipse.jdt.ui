@@ -4871,4 +4871,84 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 
 		assertExpectedExistInProposals(proposals, expected);
 	}
+	
+	public void testMissingAnnotationAttributes1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public @interface Annot {\n");
+		buf.append("        public int foo();\n");
+		buf.append("    }\n");
+		buf.append("    @Annot()\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public @interface Annot {\n");
+		buf.append("        public int foo();\n");
+		buf.append("    }\n");
+		buf.append("    @Annot(foo = 0)\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testMissingAnnotationAttributes2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public @interface Other {\n");
+		buf.append("    }\n");
+		buf.append("    public @interface Annot {\n");
+		buf.append("        public Other[] foo();\n");
+		buf.append("        public String hoo();\n");
+		buf.append("    }\n");
+		buf.append("    @Annot()\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public @interface Other {\n");
+		buf.append("    }\n");
+		buf.append("    public @interface Annot {\n");
+		buf.append("        public Other[] foo();\n");
+		buf.append("        public String hoo();\n");
+		buf.append("    }\n");
+		buf.append("    @Annot(foo = {@Other}, hoo = \"\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+
 }

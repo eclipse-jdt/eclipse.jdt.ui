@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
@@ -904,6 +905,19 @@ public class LocalCorrectionsSubProcessor {
 					proposals.add(proposal);			
 				}
 			}
+		}
+	}
+
+	public static void addValueForAnnotationProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ICompilationUnit cu= context.getCompilationUnit();
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode instanceof Annotation) {
+			Annotation annotation= (Annotation) selectedNode;
+			if (annotation.resolveTypeBinding() == null) {
+				return;
+			}
+			MissingAnnotationAttributesProposal proposal= new MissingAnnotationAttributesProposal(cu, annotation, 10);
+			proposals.add(proposal);		
 		}
 	}
 
