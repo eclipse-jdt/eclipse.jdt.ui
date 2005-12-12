@@ -6,6 +6,7 @@ ipl-*.html
 license.html
 about.html
 notice.html
+customBuildCallbacks.xml
 buildnotes*.htm
 buildnotes*.html
 */bin/*
