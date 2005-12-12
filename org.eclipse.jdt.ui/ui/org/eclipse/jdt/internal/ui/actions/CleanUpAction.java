@@ -166,7 +166,7 @@ public class CleanUpAction extends SelectionDispatchAction {
 		
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu);
-		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, true, true);
+		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, false, true);
 		
 		RefactoringStarter starter= new RefactoringStarter();
 		try {
@@ -226,7 +226,7 @@ public class CleanUpAction extends SelectionDispatchAction {
 			refactoring.addCompilationUnit(cus[i]);
 		}
 		
-		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, true, true);
+		CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, false, true);
 		
 		RefactoringStarter starter= new RefactoringStarter();
 		try {
