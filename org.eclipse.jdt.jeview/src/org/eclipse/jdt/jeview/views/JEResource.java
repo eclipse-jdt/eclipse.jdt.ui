@@ -75,15 +75,22 @@ public class JEResource extends JEAttribute {
 
 	@Override
 	public JEAttribute[] getChildren() {
+		ArrayList<JEAttribute> result= new ArrayList<JEAttribute>();
+		
+		IContainer parent= fResource.getParent();
+		if (parent != null )
+			result.add(new JEResource(this, "PARENT", parent));
+		else
+			result.add(new JavaElementProperty(this, "PARENT", parent));
+		
 		if (fResource instanceof IContainer) {
-			ArrayList<JEAttribute> result= new ArrayList<JEAttribute>();
 			final IContainer container= (IContainer) fResource;
 //			result.add(new JavaElementProperty(this, "ModificationStamp") {
 //				@Override protected Object computeValue() throws CoreException {
 //					return container.getDefaultCharset();
 //				}
 //			});
-			result.add(new JavaElementChildrenProperty(this, "members") {
+			result.add(new JavaElementChildrenProperty(this, "MEMBERS") {
 				@Override protected JEAttribute[] computeChildren() throws CoreException {
 					IResource[] resources= container.members();
 					JEAttribute[] children= new JEAttribute[resources.length];
@@ -93,9 +100,8 @@ public class JEResource extends JEAttribute {
 					return children;
 				}
 			});
-			return result.toArray(new JEAttribute[result.size()]);
 		}
-		return EMPTY;
+		return result.toArray(new JEAttribute[result.size()]);
 	}
 
 	@Override
