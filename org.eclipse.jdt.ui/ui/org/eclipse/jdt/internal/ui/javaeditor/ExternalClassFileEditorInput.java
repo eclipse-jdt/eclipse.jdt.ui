@@ -40,7 +40,7 @@ public class ExternalClassFileEditorInput extends FileEditorInput implements ICl
 	}
 
 	/**
-	 * Refreshs this input element. Workaround for non-updating class file elements.
+	 * Refreshes this input element. Workaround for non-updating class file elements.
 	 */
 	public void refresh() {
 		Object element= JavaCore.create(getFile());
