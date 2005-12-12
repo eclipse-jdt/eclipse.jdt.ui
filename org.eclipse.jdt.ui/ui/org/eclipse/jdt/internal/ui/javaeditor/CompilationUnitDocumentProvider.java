@@ -12,9 +12,15 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import java.io.BufferedReader;
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.io.Reader;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -30,6 +36,8 @@ import org.eclipse.core.runtime.jobs.ISchedulingRule;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
@@ -60,6 +68,7 @@ import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ImageUtilities;
 
 import org.eclipse.ui.IFileEditorInput;
+import org.eclipse.ui.IStorageEditorInput;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
@@ -72,11 +81,20 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.ForwardingDocumentProvider;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
+import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.AST;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -782,6 +800,11 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	private IPropertyChangeListener fPropertyListener;
 	/** Annotation model listener added to all created CU annotation models */
 	private GlobalAnnotationModelListener fGlobalAnnotationModelListener;
+	/**
+	 * Element information of all connected elements with a fake CU.
+	 * @since 3.2
+	 */
+	private final Map fFakeCUInfoMap= new HashMap();
 
 
 	/**
@@ -833,16 +856,21 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#createFileInfo(java.lang.Object)
 	 */
 	protected FileInfo createFileInfo(Object element) throws CoreException {
-		if (!(element instanceof IFileEditorInput))
-			return null;
-
-		IFileEditorInput input= (IFileEditorInput) element;
-		ICompilationUnit original= createCompilationUnit(input.getFile());
-		if (original == null)
-			return null;
-
+		ICompilationUnit original= null;
+		if (element instanceof IFileEditorInput) {
+			IFileEditorInput input= (IFileEditorInput) element;
+			original= createCompilationUnit(input.getFile());
+			if (original == null)
+				return null;
+		}
+		
 		FileInfo info= super.createFileInfo(element);
 		if (!(info instanceof CompilationUnitInfo))
+			return null;
+		
+		if (original == null)
+			original= createFakeCompiltationUnit(element, false);
+		if (original == null)
 			return null;
 
 		CompilationUnitInfo cuInfo= (CompilationUnitInfo) info;
@@ -855,7 +883,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			extension.setIsHandlingTemporaryProblems(isHandlingTemporaryProblems());
 		}
 
-		original.becomeWorkingCopy(requestor, getProgressMonitor());
+		if (JavaModelUtil.isPrimary(original))
+			original.becomeWorkingCopy(requestor, getProgressMonitor());
 		cuInfo.fCopy= original;
 
 		if (cuInfo.fModel instanceof CompilationUnitAnnotationModel)   {
@@ -867,6 +896,65 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			cuInfo.fModel.addAnnotationModelListener(fGlobalAnnotationModelListener);
 
 		return cuInfo;
+	}
+	
+	/**
+	 * Creates a fake compilation unit.
+	 *
+	 * @param element the element
+	 * @param setContents tells whether to read and set the contents to the new CU
+	 * @since 3.2
+	 */
+	private ICompilationUnit createFakeCompiltationUnit(Object element, boolean setContents) {
+		if (!(element instanceof IStorageEditorInput))
+			return null;
+		
+		final IStorageEditorInput sei= (IStorageEditorInput)element;
+		
+		try {
+			final IStorage storage= sei.getStorage();
+			IJavaModel jm= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+			IJavaProject jp;
+			
+			jp= jm.getJavaProject("__projectWorkingcopy__"); //$NON-NLS-1$
+			IPackageFragmentRoot root= jp.getPackageFragmentRoot(jp.getProject());
+			IPackageFragment pkg= root.getPackageFragment(""); //$NON-NLS-1$
+			ICompilationUnit cu= pkg.getCompilationUnit(storage.getName());
+			
+			WorkingCopyOwner woc= new WorkingCopyOwner() {
+				/*
+				 * @see org.eclipse.jdt.core.WorkingCopyOwner#createBuffer(org.eclipse.jdt.core.ICompilationUnit)
+				 * @since 3.2
+				 */
+				public IBuffer createBuffer(ICompilationUnit workingCopy) {
+					return new DocumentAdapter(workingCopy, storage.getFullPath());
+				}
+			};
+			cu= cu.getWorkingCopy(woc, null, getProgressMonitor());
+			
+			if (setContents) {
+				int READER_CHUNK_SIZE= 2048;
+				int BUFFER_SIZE= 8 * READER_CHUNK_SIZE;
+				Reader in= new BufferedReader(new InputStreamReader(storage.getContents()));
+				StringBuffer buffer= new StringBuffer(BUFFER_SIZE);
+				char[] readBuffer= new char[READER_CHUNK_SIZE];
+				int n;
+				try {
+					n= in.read(readBuffer);
+					while (n > 0) {
+						buffer.append(readBuffer, 0, n);
+						n= in.read(readBuffer);
+					}
+				} catch (IOException e) {
+					JavaPlugin.log(e);
+				}
+				cu.getBuffer().setContents(buffer.toString());
+				cu.reconcile(AST.JLS3, false, null, getProgressMonitor());
+			}
+			return cu;
+		} catch (CoreException ex) {
+			return null;
+		}
 	}
 
     private void setUpSynchronization(CompilationUnitInfo cuInfo) {
@@ -897,6 +985,49 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		}
 		super.disposeFileInfo(element, info);
 	}
+	
+	/*
+	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#connect(java.lang.Object)
+	 * @since 3.2
+	 */
+	public void connect(Object element) throws CoreException {
+		super.connect(element);
+		if (getFileInfo(element) != null)
+			return;
+
+		CompilationUnitInfo info= (CompilationUnitInfo)fFakeCUInfoMap.get(element);
+		if (info == null) {
+			ICompilationUnit cu= createFakeCompiltationUnit(element, true);
+			if (cu == null)
+				return;
+			info= new CompilationUnitInfo();
+			info.fCopy= cu;
+			info.fElement= element;
+			fFakeCUInfoMap.put(element, info);
+		}
+		info.fCount++;
+	}
+	
+	/*
+	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#disconnect(java.lang.Object)
+	 * @since 3.2
+	 */
+	public void disconnect(Object element) {
+		CompilationUnitInfo info= (CompilationUnitInfo)fFakeCUInfoMap.get(element);
+		if (info != null)  {
+			if (info.fCount == 1) {
+				fFakeCUInfoMap.remove(element);
+				// Destroy and unregister fake working copy
+				try {
+					info.fCopy.discardWorkingCopy();
+				} catch (JavaModelException ex) {
+					handleCoreException(ex, ex.getMessage());				}
+			} else
+				info.fCount--;
+		}
+		super.disconnect(element);
+	}
+	
 
 	/**
 	 * Creates and returns a new sub-progress monitor for the
@@ -1014,6 +1145,11 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	protected DocumentProviderOperation createSaveOperation(final Object element, final IDocument document, final boolean overwrite) throws CoreException {
 		final FileInfo info= getFileInfo(element);
 		if (info instanceof CompilationUnitInfo) {
+			
+			// Delegate handling of non-primary CUs
+			ICompilationUnit cu= ((CompilationUnitInfo)info).fCopy;
+			if (cu != null && !JavaModelUtil.isPrimary(cu))
+				return super.createSaveOperation(element, document, overwrite);
 
 			if (info.fTextFileBuffer.getDocument() != document) {
 				// the info exists, but not for the given document
@@ -1095,9 +1231,13 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	public ICompilationUnit getWorkingCopy(Object element) {
 		FileInfo fileInfo= getFileInfo(element);
 		if (fileInfo instanceof CompilationUnitInfo) {
-			CompilationUnitInfo info= (CompilationUnitInfo) fileInfo;
+			CompilationUnitInfo info= (CompilationUnitInfo)fileInfo;
 			return info.fCopy;
 		}
+		CompilationUnitInfo cuInfo= (CompilationUnitInfo)fFakeCUInfoMap.get(element);
+		if (cuInfo != null)
+			return cuInfo.fCopy;
+		
 		return null;
 	}
 
@@ -1109,6 +1249,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		Iterator e= getConnectedElementsIterator();
 		while (e.hasNext())
 			disconnect(e.next());
+		fFakeCUInfoMap.clear();
 	}
 
 	/*
