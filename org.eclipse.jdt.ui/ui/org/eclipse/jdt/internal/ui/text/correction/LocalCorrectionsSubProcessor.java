@@ -141,7 +141,7 @@ public class LocalCorrectionsSubProcessor {
 		if (refactoring.checkActivationBasics(astRoot).isOK()) {
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_surroundwith_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, (CompilationUnitChange) refactoring.createChange(null), 4, image);
+			CUCorrectionProposal proposal= new CUCorrectionProposal(label, cu, (CompilationUnitChange) refactoring.createChange(null), 6, image);
 			proposals.add(proposal);
 		}
 
@@ -162,7 +162,7 @@ public class LocalCorrectionsSubProcessor {
 
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_addadditionalcatch_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
-			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 5, image);
+			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 7, image);
 			
 			proposal.setImportRewrite(imports);
 
@@ -222,7 +222,7 @@ public class LocalCorrectionsSubProcessor {
 				String label= CorrectionMessages.LocalCorrectionsSubProcessor_addthrows_description;
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 
-				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, cu, astRoot, binding, null, desc, 6, image);
+				ChangeMethodSignatureProposal proposal= new ChangeMethodSignatureProposal(label, cu, astRoot, binding, null, desc, 8, image);
 				for (int i= 0; i < uncaughtExceptions.length; i++) {
 					addExceptionTypeLinkProposals(proposal, uncaughtExceptions[i], proposal.getExceptionTypeGroupId(i + nExistingExceptions));
 				}
@@ -269,7 +269,7 @@ public class LocalCorrectionsSubProcessor {
 		}
 		String name= CorrectionMessages.LocalCorrectionsSubProcessor_externalizestrings_description;
 
-		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(name, null, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 			public void apply(IDocument document) {
 				try {
 					NLSRefactoring refactoring= NLSRefactoring.create(cu);
@@ -292,7 +292,7 @@ public class LocalCorrectionsSubProcessor {
 		IFix fix= StringFix.createFix(context.getASTRoot(), problem, false, true);
 		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_NLS_NEVER_TRANSLATE);
-			FixCorrectionProposal addNLS= new FixCorrectionProposal(fix, new StringCleanUp(StringCleanUp.ADD_MISSING_NLS_TAG), 6, image);
+			FixCorrectionProposal addNLS= new FixCorrectionProposal(fix, new StringCleanUp(StringCleanUp.ADD_MISSING_NLS_TAG), 3, image);
 			addNLS.setCommandId(ADD_NON_NLS_ID);
 			proposals.add(addNLS);
 		}
