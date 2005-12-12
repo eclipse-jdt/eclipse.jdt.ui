@@ -80,6 +80,7 @@ import org.eclipse.jdt.core.IParent;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -459,7 +460,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 						if (page != null) {
 							IEditorPart editor= page.getActiveEditor();
 							if (editor != null) {
-								ICompilationUnit editorCU= JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editor.getEditorInput());
+								IJavaElement editorCU= JavaUI.getEditorInputJavaElement(editor.getEditorInput());
 								if (editorCU == cu) {
 									EditorUtility.revealInEditor(editor, (IJavaElement)selectedElement);
 									return;
