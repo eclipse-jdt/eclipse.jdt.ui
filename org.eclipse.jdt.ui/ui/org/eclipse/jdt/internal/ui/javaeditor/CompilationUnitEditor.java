@@ -932,14 +932,15 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 		 * the element's name range).
 		 * 
 		 * @param document the displayed document for line information
-		 * @param element the java element
+		 * @param element the java element, may be <code>null</code>
 		 * @return the element's start line, or -1
 		 * @throws BadLocationException
 		 * @throws JavaModelException
+		 * @since 3.2
 		 */
 		private int getElementLine(IDocument document, IJavaElement element) throws BadLocationException, JavaModelException {
 			if (element instanceof IMember) {
-				ISourceRange range= ((IMember) fElement).getNameRange();
+				ISourceRange range= ((IMember) element).getNameRange();
 				if (range != null)
 					return document.getLineOfOffset(range.getOffset());
 			}
