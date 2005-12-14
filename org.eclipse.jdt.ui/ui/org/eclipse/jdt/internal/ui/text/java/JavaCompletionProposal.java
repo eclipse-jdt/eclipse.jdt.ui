@@ -46,13 +46,12 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 		setTriggerCharacters(null);
 		setProposalInfo(null);
 	}
-
-
-	/**
-	 * Returns <code>true</code> if a words starts with the code completion prefix in the document,
-	 * <code>false</code> otherwise.
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
-	protected boolean startsWith(IDocument document, int offset, String word) {
+	protected boolean isValidPrefix(String prefix) {
+		String word= getDisplayString();
 		// TODO move the javadoc specific code to a subclass
 		int idx = word.indexOf("{@link "); //$NON-NLS-1$
 		if (idx==0) {
@@ -63,7 +62,7 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 				word = word.substring(8);
 			}
 		}
-		return super.startsWith(document, offset, word);
+		return isPrefix(prefix, word);
 	}
 	
 	/*

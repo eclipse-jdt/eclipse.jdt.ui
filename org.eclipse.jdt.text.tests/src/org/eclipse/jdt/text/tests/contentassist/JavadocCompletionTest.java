@@ -370,6 +370,18 @@ public class JavadocCompletionTest extends TestCase {
 		assertTypeJavadocProposal(" * Prefix {@link java.util.Collections#EMPTY_LIST|", " * Prefix {@link java.util.Collections#|", "EMPTY_LI");
 	}
 	
+	public void testFieldReference() throws Exception {
+		assertTypeJavadocProposal(" * Prefix {@link java.util.Collections#EMPTY_LIST }|", " * Prefix java.util.Collections#|", "{@link java.util.Collections#EMPTY_LI");
+	}
+	
+	public void testFieldValueReference() throws Exception {
+		assertTypeJavadocProposal(" * Prefix {@value java.util.Collections#EMPTY_LIST }|", " * Prefix java.util.Collections#|", "{@value java.util.Collections#EMPTY_LI");
+	}
+	
+	public void testMethodReference() throws Exception {
+		assertTypeJavadocProposal(" * Prefix {@link java.util.Collections#toString() }|", " * Prefix java.util.Collections#|", "{@link java.util.Collections#toSt");
+	}
+	
 	public void testTypeBlockTags() throws Exception {
 		tearDown();
 		for (int i= 0; i < TYPE_BLOCK_TAGS.length; i++) {

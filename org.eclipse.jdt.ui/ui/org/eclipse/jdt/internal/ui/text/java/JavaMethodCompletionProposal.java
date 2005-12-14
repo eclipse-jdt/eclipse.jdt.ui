@@ -240,4 +240,26 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		buf.append(parameterList);
 		return buf.toString();
 	}
+	
+	/*
+	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
+	 */
+	protected boolean isValidPrefix(String prefix) {
+		if (super.isValidPrefix(prefix))
+			return true;
+		
+		String word= getDisplayString();
+		if (isInJavadoc()) {
+			int idx = word.indexOf("{@link "); //$NON-NLS-1$
+			if (idx==0) {
+				word = word.substring(7);
+			} else {
+				idx = word.indexOf("{@value "); //$NON-NLS-1$
+				if (idx==0) {
+					word = word.substring(8);
+				}
+			}
+		}
+		return isPrefix(prefix, word);
+	}
 }
