@@ -67,7 +67,7 @@ public final class StubCreationOperation implements IWorkspaceRunnable {
 	private final List fPackages;
 
 	/** Should stubs for private member be generated as well? */
-	private final boolean fStubPrivate;
+	private final boolean fStubInvisible;
 
 	/**
 	 * Creates a new stub creation operation.
@@ -88,16 +88,16 @@ public final class StubCreationOperation implements IWorkspaceRunnable {
 	 *            the URI where to output the stubs
 	 * @param packages
 	 *            the list of packages to create stubs for
-	 * @param stubPrivate
-	 *            <code>true</code> to generate stubs for private members as
-	 *            well, <code>false</code> otherwise
+	 * @param stub
+	 *            <code>true</code> to generate stubs for private and package
+	 *            visible members as well, <code>false</code> otherwise
 	 */
-	public StubCreationOperation(final URI uri, final List packages, final boolean stubPrivate) {
+	public StubCreationOperation(final URI uri, final List packages, final boolean stub) {
 		Assert.isNotNull(uri);
 		Assert.isNotNull(packages);
 		fOutputURI= uri;
 		fPackages= packages;
-		fStubPrivate= stubPrivate;
+		fStubInvisible= stub;
 	}
 
 	/**
@@ -221,15 +221,12 @@ public final class StubCreationOperation implements IWorkspaceRunnable {
 				final int flags= child.getFlags();
 				final boolean isPrivate= Flags.isPrivate(flags);
 				final boolean isDefault= !Flags.isPublic(flags) && !Flags.isProtected(flags) && !isPrivate;
+				final boolean stub= fStubInvisible || (!isPrivate && !isDefault);
 				if (child instanceof IType) {
-					if ((isPrivate && !fStubPrivate) || isDefault) {
-						// skip
-					} else
+					if (stub)
 						appendTypeDeclaration((IType) child, new SubProgressMonitor(monitor, 1));
 				} else if (child instanceof IField) {
-					if ((isPrivate && !fStubPrivate) || isDefault || Flags.isEnum(flags) || Flags.isSynthetic(flags)) {
-						// skip
-					} else
+					if (stub && !Flags.isEnum(flags) && !Flags.isSynthetic(flags))
 						appendFieldDeclaration((IField) child);
 				} else if (child instanceof IMethod) {
 					final IMethod method= (IMethod) child;
@@ -243,7 +240,7 @@ public final class StubCreationOperation implements IWorkspaceRunnable {
 						if (method.isConstructor())
 							continue;
 					}
-					boolean skip= (isPrivate && !fStubPrivate) || isDefault || name.equals("<clinit>"); //$NON-NLS-1$
+					boolean skip= !stub || name.equals("<clinit>"); //$NON-NLS-1$
 					if (method.isConstructor())
 						skip= false;
 					skip= skip || Flags.isSynthetic(flags) || Flags.isBridge(flags);
