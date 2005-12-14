@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -268,6 +269,9 @@ public class UnusedCodeFix extends AbstractFix {
 			if (name != null) {
 				IBinding binding= name.resolveBinding();
 				if (binding != null) {
+					if (isFormalParameterInEnhancedForStatement(name))
+						return null;
+						
 					String label= getDisplayString(name, binding);
 					RemoveUnusedMemberOperation operation= new RemoveUnusedMemberOperation(name);
 					return new UnusedCodeFix(label, compilationUnit, new IFixRewriteOperation[] {operation}, getCleanUpFlag(binding));
@@ -316,7 +320,7 @@ public class UnusedCodeFix extends AbstractFix {
 				SimpleName name= getUnusedName(compilationUnit, problem);
 				if (name != null) {
 					IBinding binding= name.resolveBinding();
-					if (binding != null && isSideEffectFree(name, compilationUnit)) {
+					if (binding != null && !isFormalParameterInEnhancedForStatement(name) && isSideEffectFree(name, compilationUnit)) {
 						result.add(new RemoveUnusedMemberOperation(name));
 					}
 				}
@@ -327,6 +331,10 @@ public class UnusedCodeFix extends AbstractFix {
 			return null;
 		
 		return new UnusedCodeFix("", compilationUnit, (IFixRewriteOperation[])result.toArray(new IFixRewriteOperation[result.size()])); //$NON-NLS-1$
+	}
+	
+	private static boolean isFormalParameterInEnhancedForStatement(SimpleName name) {
+		return name.getParent() instanceof SingleVariableDeclaration && name.getParent().getLocationInParent() == EnhancedForStatement.PARAMETER_PROPERTY;
 	}
 	
 	private static boolean isSideEffectFree(SimpleName simpleName, CompilationUnit completeRoot) {

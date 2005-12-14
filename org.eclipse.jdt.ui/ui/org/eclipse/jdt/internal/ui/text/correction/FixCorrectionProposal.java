@@ -30,6 +30,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix.PositionGroup;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
@@ -96,6 +97,9 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 				setEndPosition(endPosition);
 			}
 		}
+		
+		if (createChange == null)
+			return new CompilationUnitChange("", getCompilationUnit()); //$NON-NLS-1$
 		
 		return createChange;
 	}

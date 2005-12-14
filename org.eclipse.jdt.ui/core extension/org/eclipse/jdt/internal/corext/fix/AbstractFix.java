@@ -89,6 +89,8 @@ public abstract class AbstractFix implements IFix {
 		}
 		
 		CompilationUnitChange result= cuRewrite.createChange();
+		if (result == null)
+			return null;
 		
 		for (Iterator iter= groups.iterator(); iter.hasNext();) {
 			TextEditGroup group= (TextEditGroup)iter.next();
