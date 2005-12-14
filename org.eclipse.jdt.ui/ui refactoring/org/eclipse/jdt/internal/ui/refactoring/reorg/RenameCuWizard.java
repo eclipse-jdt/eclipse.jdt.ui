@@ -11,6 +11,11 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameCompilationUnitProcessor;
@@ -20,10 +25,6 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameCuWizard extends RenameTypeWizard {
 	
@@ -36,10 +37,14 @@ public class RenameCuWizard extends RenameTypeWizard {
 	}
 	
 	protected RefactoringStatus validateNewName(String newName) {
-		String fullName= JavaModelUtil.getRenamedCUName(getRenameTypeProcessor().getType().getCompilationUnit(), newName);
+		String fullName= JavaModelUtil.getRenamedCUName(getCompilationUnit(), newName);
 		return super.validateNewName(fullName);
 	}
-	
+
+	private ICompilationUnit getCompilationUnit() {
+		return (ICompilationUnit) getCompilationUnitProcessor().getElements()[0];
+	}
+
 	protected RenameInputWizardPage createInputPage(String message, String initialSetting) {
 		return new RenameTypeWizardInputPage(message, IJavaHelpContextIds.RENAME_CU_WIZARD_PAGE, true, initialSetting) {
 			protected RefactoringStatus validateTextField(String text) {
@@ -54,9 +59,12 @@ public class RenameCuWizard extends RenameTypeWizard {
 	}
 
 	protected boolean isRenameType() {
-		RenameCompilationUnitProcessor proc= ((RenameCompilationUnitProcessor) ((RenameRefactoring) getRefactoring()).getProcessor());
 		// the flag 'willRenameType' may change in checkInitialConditions(), but
 		// only from true to false.
-		return proc.isWillRenameType(); 
+		return getCompilationUnitProcessor().isWillRenameType(); 
+	}
+
+	private RenameCompilationUnitProcessor getCompilationUnitProcessor() {
+		return ((RenameCompilationUnitProcessor) ((RenameRefactoring) getRefactoring()).getProcessor());
 	}
 }

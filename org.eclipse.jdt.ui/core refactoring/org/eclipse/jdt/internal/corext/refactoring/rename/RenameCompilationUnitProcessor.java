@@ -444,6 +444,9 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		return new RefactoringStatus();
 	}
 
+	/**
+	 * @return the RenameTypeProcessor or <code>null</code> if no type will be renamed
+	 */
 	public RenameTypeProcessor getRenameTypeProcessor() {
 		return fRenameTypeProcessor;
 	}
