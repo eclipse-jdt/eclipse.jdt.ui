@@ -84,7 +84,7 @@ final class CodeAssistConfigurationBlockInProgress extends OptionsConfigurationB
 	
 	private static final Key PREF_EXCLUDED_CATEGORIES= getJDTUIKey(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES);
 	private static final Key PREF_CATEGORY_ORDER= getJDTUIKey(PreferenceConstants.CODEASSIST_CATEGORY_ORDER);
-	private static final Key PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC= getJDTCoreKey(JavaCore.CODEASSIST_TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC);
+	private static final Key PREF_CODEASSIST_TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC= getJDTCoreKey(JavaCore.TIMEOUT_FOR_PARAMETER_NAME_FROM_ATTACHED_JAVADOC);
 	
 	private static Key[] getAllKeys() {
 		return new Key[] {
