@@ -709,14 +709,22 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
-				if (element == null || !element.exists())
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
-				else {
-					fMethod= (IMethod) element;
-					initializeWorkingCopyOwner();
-				}
+				if (element instanceof IMethod) {
+					final IMethod method= (IMethod) element;
+					final IType declaring= method.getDeclaringType();
+					if (declaring != null && declaring.exists()) {
+						final IMethod[] methods= declaring.findMethods(method);
+						if (methods != null && methods.length == 1 && methods[0] != null) {
+							fMethod= methods[0];
+							initializeWorkingCopyOwner();
+						} else
+							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+					} else
+						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+				} else
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, RefactoringDescriptor.INPUT));
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
 			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
 			if (name != null) {
 				if (fMethod != null) {
