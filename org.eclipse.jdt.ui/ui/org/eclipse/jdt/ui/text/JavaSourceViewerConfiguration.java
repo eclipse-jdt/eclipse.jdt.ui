@@ -869,8 +869,8 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 		int inheritedDetectorsLength= inheritedDetectors != null ? inheritedDetectors.length : 0;
 		IHyperlinkDetector[] detectors= new IHyperlinkDetector[inheritedDetectorsLength + 2];
-		detectors[0]= new JavaElementHyperlinkDetector(fTextEditor);
-		detectors[1]= new NLSKeyHyperlinkDetector(fTextEditor);
+		detectors[0]= new NLSKeyHyperlinkDetector(fTextEditor);
+		detectors[1]= new JavaElementHyperlinkDetector(fTextEditor);
 		for (int i= 0; i < inheritedDetectorsLength; i++)
 			detectors[i+2]= inheritedDetectors[i];
 
