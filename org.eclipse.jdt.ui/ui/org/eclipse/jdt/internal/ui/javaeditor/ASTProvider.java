@@ -28,7 +28,6 @@ import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchPartReference;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -44,7 +43,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.viewsupport.SelectionListenerWithASTManager;
 
 
 /**
@@ -288,10 +286,8 @@ public final class ASTProvider {
 		synchronized (this) {
 			fActiveEditor= editor;
 			fActiveJavaElement= javaElement;
+			cache(null, javaElement);
 		}
-		
-		if (fActiveEditor instanceof ITextEditor)
-			SelectionListenerWithASTManager.getDefault().forceSelectionChange((ITextEditor)fActiveEditor);
 
 		if (DEBUG)
 			System.out.println(getThreadName() + " - " + DEBUG_PREFIX + "active editor is: " + toString(javaElement)); //$NON-NLS-1$ //$NON-NLS-2$
@@ -300,10 +296,10 @@ public final class ASTProvider {
 			if (fIsReconciling && !fReconcilingJavaElement.equals(javaElement)) {
 				fIsReconciling= false;
 				fReconcilingJavaElement= null;
-			}
+			} else if (javaElement == null)
+				fIsReconciling= false;
+				fReconcilingJavaElement= null;
 		}
-
-		cache(null, javaElement);
 	}
 
 	/**
