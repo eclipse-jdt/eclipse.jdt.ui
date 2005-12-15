@@ -2430,7 +2430,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					if (!fMarkOccurrenceAnnotations)
 						uninstallOccurrencesFinder();
 					else
-						installOccurrencesFinder();
+						installOccurrencesFinder(true);
 				}
 				return;
 			}
@@ -2656,7 +2656,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fEditorSelectionChangedListener.install(getSelectionProvider());
 
 		if (fMarkOccurrenceAnnotations)
-			installOccurrencesFinder();
+			installOccurrencesFinder(false);
 
 		if (isSemanticHighlightingEnabled())
 			installSemanticHighlighting();
@@ -2926,7 +2926,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fOccurrencesFinderJob.run(new NullProgressMonitor());
 	}
 
-	protected void installOccurrencesFinder() {
+	protected void installOccurrencesFinder(boolean forceUpdate) {
 		fMarkOccurrenceAnnotations= true;
 
 		fPostSelectionListenerWithAST= new ISelectionListenerWithAST() {
@@ -2935,7 +2935,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 			}
 		};
 		SelectionListenerWithASTManager.getDefault().addListener(this, fPostSelectionListenerWithAST);
-		if (getSelectionProvider() != null) {
+		if (forceUpdate && getSelectionProvider() != null) {
 			fForcedMarkOccurrencesSelection= getSelectionProvider().getSelection();
 			updateOccurrenceAnnotations((ITextSelection)fForcedMarkOccurrencesSelection, JavaPlugin.getDefault().getASTProvider().getAST(getInputJavaElement(), ASTProvider.WAIT_NO, getProgressMonitor()));
 		}

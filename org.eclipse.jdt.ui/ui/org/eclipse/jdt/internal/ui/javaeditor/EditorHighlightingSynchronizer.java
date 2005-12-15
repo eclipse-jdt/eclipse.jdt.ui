@@ -47,7 +47,7 @@ public class EditorHighlightingSynchronizer implements ILinkedModeListener {
 	 */
 	public void left(LinkedModeModel environment, int flags) {
 		if (fWasOccurrencesOn)
-			fEditor.installOccurrencesFinder();
+			fEditor.installOccurrencesFinder(true);
 	}
 
 	/*

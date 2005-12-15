@@ -20,19 +20,20 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
 
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.ListenerList;
-import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 
+import org.eclipse.jface.text.ITextSelection;
+
 import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.ISelectionListener;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.IJavaElement;
-
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -59,7 +60,8 @@ public class SelectionListenerWithASTManager {
 	
 	private final static class PartListenerGroup {
 		private ITextEditor fPart;
-		private ISelectionChangedListener fSelectionListener, fPostSelectionListener;
+		private ISelectionListener fPostSelectionListener;
+		private ISelectionChangedListener fSelectionListener;
 		private Job fCurrentJob;
 		private ListenerList fAstListeners;
 		/**
@@ -68,8 +70,8 @@ public class SelectionListenerWithASTManager {
 		 */
 		private final Object fJobLock= new Object();
 		
-		public PartListenerGroup(ITextEditor part) {
-			fPart= part;
+		public PartListenerGroup(ITextEditor editorPart) {
+			fPart= editorPart;
 			fCurrentJob= null;
 			fAstListeners= new ListenerList();
 			
@@ -82,12 +84,10 @@ public class SelectionListenerWithASTManager {
 				}
 			};
 			
-			fPostSelectionListener= new ISelectionChangedListener() {
-				public void selectionChanged(SelectionChangedEvent event) {
-					ISelection selection= event.getSelection();
-					if (selection instanceof ITextSelection) {
+			fPostSelectionListener= new ISelectionListener() {
+				public void selectionChanged(IWorkbenchPart part, ISelection selection) {
+					if (part == fPart && selection instanceof ITextSelection)
 						firePostSelectionChanged((ITextSelection) selection);
-					}
 				}
 			};
 		}
@@ -98,11 +98,9 @@ public class SelectionListenerWithASTManager {
 
 		public void install(ISelectionListenerWithAST listener) {
 			if (isEmpty()) {
+				fPart.getEditorSite().getPage().addPostSelectionListener(fPostSelectionListener);
 				ISelectionProvider selectionProvider= fPart.getSelectionProvider();
-				if (selectionProvider instanceof IPostSelectionProvider) {
-					((IPostSelectionProvider) selectionProvider).addPostSelectionChangedListener(fPostSelectionListener);
-					selectionProvider.addSelectionChangedListener(fSelectionListener);
-				}
+				selectionProvider.addSelectionChangedListener(fSelectionListener);
 			}
 			fAstListeners.add(listener);
 		}
@@ -110,11 +108,9 @@ public class SelectionListenerWithASTManager {
 		public void uninstall(ISelectionListenerWithAST listener) {
 			fAstListeners.remove(listener);
 			if (isEmpty()) {
+				fPart.getEditorSite().getPage().removePostSelectionListener(fPostSelectionListener);
 				ISelectionProvider selectionProvider= fPart.getSelectionProvider();
-				if (selectionProvider instanceof IPostSelectionProvider) {
-					((IPostSelectionProvider) selectionProvider).removePostSelectionChangedListener(fPostSelectionListener);
-					selectionProvider.removeSelectionChangedListener(fSelectionListener);
-				}
+				selectionProvider.removeSelectionChangedListener(fSelectionListener);
 			}
 		}
 		
@@ -223,26 +219,4 @@ public class SelectionListenerWithASTManager {
 			}
 		}
 	}
-	
-	/**
-	 * Forces a selection changed event that is sent to all listeners registered to the given editor
-	 * part. The event is sent from a background thread: this method call can return before the listeners
-	 * are informed.
-	 * @param part The editor part that has a changed selection
-	 */
-	public void forceSelectionChange(ITextEditor part) {
-		synchronized (this) {
-			if (part == null)
-				return;
-			ISelectionProvider selectionProvider= part.getSelectionProvider();
-			if (selectionProvider == null)
-				return;
-			
-			PartListenerGroup partListener= (PartListenerGroup) fListenerGroups.get(part);
-			ISelection selection= selectionProvider.getSelection();
-			
-			if (partListener != null && selection instanceof ITextSelection) {
-				partListener.firePostSelectionChanged((ITextSelection)selection);
-			}
-		}
-	}}
+}
