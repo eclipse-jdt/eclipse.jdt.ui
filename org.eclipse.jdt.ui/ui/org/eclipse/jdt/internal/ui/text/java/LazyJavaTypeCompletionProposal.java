@@ -193,7 +193,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 * @return <code>true</code> if imports may be added, <code>false</code> if not
 	 */
 	protected boolean allowAddingImports() {
-		if (fInvocationContext.getCoreContext().isInJavadoc()) {
+		if (isInJavadoc()) {
 			// TODO fix
 //			if (!fContext.isInJavadocFormalReference())
 //				return false;
@@ -236,7 +236,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeTriggerCharacters()
 	 */
 	protected char[] computeTriggerCharacters() {
-		return fInvocationContext.getCoreContext().isInJavadoc() ? JDOC_TYPE_TRIGGERS : TYPE_TRIGGERS;
+		return isInJavadoc() ? JDOC_TYPE_TRIGGERS : TYPE_TRIGGERS;
 	}
 	
 	/*

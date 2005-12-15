@@ -200,14 +200,7 @@ public class JavaDocCompletionEvaluator implements IJavadocCompletionProcessor, 
 		if (fCurrentLength == 0)
 			length= findReplaceEndPos(fDocument, newText, oldText, fCurrentPos) - offset;
 
-		JavaCompletionProposal proposal= new JavaCompletionProposal(newText, offset, length, image, labelText, severity) {
-			/*
-			 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isInJavadoc()
-			 */
-			protected boolean isInJavadoc() {
-				return true;
-			}
-		};
+		JavaCompletionProposal proposal= new JavaCompletionProposal(newText, offset, length, image, labelText, severity, true);
 		proposal.setTriggerCharacters( new char[] { '>' });
 		return proposal;
 	}

@@ -29,7 +29,7 @@ public final class JavadocLinkTypeCompletionProposal extends LazyJavaTypeComplet
 
 	public JavadocLinkTypeCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
 		super(proposal, context);
-		Assert.isTrue(fInvocationContext.getCoreContext().isInJavadoc());
+		Assert.isTrue(isInJavadoc());
 	}
 	
 	/*

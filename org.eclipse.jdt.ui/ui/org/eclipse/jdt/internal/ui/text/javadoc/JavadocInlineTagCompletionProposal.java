@@ -31,7 +31,7 @@ public final class JavadocInlineTagCompletionProposal extends LazyJavaCompletion
 
 	public JavadocInlineTagCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
 		super(proposal, context);
-		Assert.isTrue(fInvocationContext.getCoreContext().isInJavadoc());
+		Assert.isTrue(isInJavadoc());
 	}
 	
 	/*

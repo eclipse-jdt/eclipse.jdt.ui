@@ -289,13 +289,6 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	}
 
 	/*
-	 * @see ICompletionProposalExtension#isValidFor(IDocument, int)
-	 */
-	public final boolean isValidFor(IDocument document, int offset) {
-		return validate(document, offset, null);
-	}
-
-	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.AbstractJavaCompletionProposal#isValidPrefix(java.lang.String)
 	 */
 	protected boolean isValidPrefix(String prefix) {

@@ -171,6 +171,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	private char[] fTriggerCharacters;
 	private String fSortString;
 	private int fRelevance;
+	private boolean fIsInJavadoc;
 	
 	private StyleRange fRememberedStyleRange;
 	private boolean fToggleEating;
@@ -353,8 +354,23 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		fToggleEating= false;
 	}
 
+	/**
+	 * Returns <code>true</code> if the proposal is within javadoc, <code>false</code>
+	 * otherwise.
+	 * 
+	 * @return <code>true</code> if the proposal is within javadoc, <code>false</code> otherwise
+	 */
 	protected boolean isInJavadoc(){
-		return false;
+		return fIsInJavadoc;
+	}
+	
+	/**
+	 * Sets the javadoc attribute.
+	 * 
+	 * @param isInJavadoc <code>true</code> if the proposal is within javadoc
+	 */
+	protected void setInJavadoc(boolean isInJavadoc) {
+		fIsInJavadoc= isInJavadoc;
 	}
 
 	/*
@@ -512,6 +528,21 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		return validated;
 	}
 
+	/**
+	 * Checks whether <code>prefix</code> is a valid prefix for this proposal. Usually, while code
+	 * completion is in progress, the user types and edits the prefix in the document in order to
+	 * filter the proposal list. From {@link #validate(IDocument, int, DocumentEvent) }, the
+	 * current prefix in the document is extracted and this method is called to find out whether the
+	 * proposal is still valid.
+	 * <p>
+	 * The default implementation checks if <code>prefix</code> is a prefix of the proposal's
+	 * {@link #getDisplayString() display string} using the {@link #isPrefix(String, String) }
+	 * method.
+	 * </p>
+	 * 
+	 * @param prefix the current prefix in the document
+	 * @return <code>true</code> if <code>prefix</code> is a valid prefix of this proposal
+	 */
 	protected boolean isValidPrefix(String prefix) {
 		/*
 		 * See http://dev.eclipse.org/bugs/show_bug.cgi?id=17667
@@ -537,17 +568,6 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		fRelevance= relevance;
 	}
 
-	/**
-	 * Returns <code>true</code> if a words starts with the code completion prefix in the document,
-	 * <code>false</code> otherwise.
-	 */
-	protected boolean startsWith(IDocument document, int offset, String word) {
-		int wordLength= word == null ? 0 : word.length();
-		if (offset > getReplacementOffset() + wordLength)
-			return false;
-		return isPrefix(getPrefix(document, offset), word);
-	}
-	
 	/**
 	 * Returns the text in <code>document</code> from {@link #getReplacementOffset() } to
 	 * <code>offset</code>. Returns the empty string if <code>offset</code> is before the

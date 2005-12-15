@@ -151,7 +151,7 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 		IPreferenceStore preferenceStore= JavaPlugin.getDefault().getPreferenceStore();
 		boolean noOverwrite= preferenceStore.getBoolean(PreferenceConstants.CODEASSIST_INSERT_COMPLETION) ^ isToggleEating();
 		char[] completion= fProposal.getCompletion();
-		return !fInvocationContext.getCoreContext().isInJavadoc() && completion.length > 0 && (noOverwrite  || completion[completion.length - 1] == ')');
+		return !isInJavadoc() && completion.length > 0 && (noOverwrite  || completion[completion.length - 1] == ')');
 	}
 
 	/**
