@@ -1134,7 +1134,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		ISelectionProvider provider= fOutlineViewer;
 		if (fInput != null) {
 			ICompilationUnit cu= (ICompilationUnit)fInput.getAncestor(IJavaElement.COMPILATION_UNIT);
-			if (cu == null || !JavaModelUtil.isPrimary(cu))
+			if (cu != null && !JavaModelUtil.isPrimary(cu))
 				provider= new EmptySelectionProvider();
 		}
 		site.setSelectionProvider(provider);
