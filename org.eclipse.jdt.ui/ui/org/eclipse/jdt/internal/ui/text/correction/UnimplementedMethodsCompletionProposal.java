@@ -26,8 +26,10 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -76,8 +78,9 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 			settings.createComments= false;
 		}
 		ImportRewrite imports= new ImportRewrite(createImportRewrite((CompilationUnit) fTypeNode.getRoot()));
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext((CompilationUnit) fTypeNode.getRoot(), fTypeNode.getStartPosition());
 		for (int i= 0; i < methods.length; i++) {
-			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(getCompilationUnit(), rewrite, imports, ast, methods[i], binding.getName(), settings, binding.isInterface());
+			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(getCompilationUnit(), rewrite, imports, ast, methods[i], binding.getName(), settings, binding.isInterface(), context);
 			listRewrite.insertLast(newMethodDecl, null);
 		}
 		return rewrite;

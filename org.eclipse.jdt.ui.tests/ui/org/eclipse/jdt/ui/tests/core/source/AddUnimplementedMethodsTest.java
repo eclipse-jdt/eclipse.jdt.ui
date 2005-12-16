@@ -191,6 +191,41 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		IImportDeclaration[] imports= cu.getImports();
 		checkImports(new String[] { "java.util.Hashtable", "java.util.NoSuchElementException" }, imports);
 	}
+	
+	public void testBug119171() throws Exception {
+		StringBuffer buf= new StringBuffer();
+		buf.append("package ibm.util;\n");
+		buf.append("import java.util.Properties;\n");
+		buf.append("public interface F {\n");
+		buf.append("    public void b(Properties p);\n");
+		buf.append("}\n");
+		fPackage.createCompilationUnit("F.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package ibm.util;\n");
+		buf.append("public class Properties {\n");
+		buf.append("    public int get() {return 0;}\n");
+		buf.append("}\n");
+		fPackage.createCompilationUnit("Properties.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("public class Test5 implements F {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Properties p= new Properties();\n");
+		buf.append("        p.get();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= fPackage.getCompilationUnit("Test5.java");
+		IType testClass= cu.createType(buf.toString(), null, true, null);
+		
+		testHelper(testClass);
+		
+		IMethod[] methods= testClass.getMethods();
+		checkMethods(new String[] { "b", "foo", "equals", "clone", "toString", "finalize", "hashCode" }, methods);
+		
+		IImportDeclaration[] imports= cu.getImports();
+		checkImports(new String[0], imports);
+	}
 
 	private void testHelper(IType testClass) throws JavaModelException, CoreException {
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
@@ -220,7 +255,19 @@ public class AddUnimplementedMethodsTest extends TestCase {
 	private void checkImports(String[] expected, IImportDeclaration[] imports) {
 		int nImports= imports.length;
 		int nExpected= expected.length;
-		assertTrue("" + nExpected + " imports expected, is " + nImports, nImports == nExpected);
+		if (nExpected != nImports) {
+			StringBuffer buf= new StringBuffer();
+			buf.append(nExpected).append(" imports expected, is ").append(nImports).append("\n");
+			buf.append("expected:\n");
+			for (int i= 0; i < expected.length; i++) {
+				buf.append(expected[i]).append("\n");
+			}
+			buf.append("actual:\n");
+			for (int i= 0; i < imports.length; i++) {
+				buf.append(imports[i]).append("\n");
+			}
+			assertTrue(buf.toString(), false);
+		}
 		for (int i= 0; i < nExpected; i++) {
 			String impName= expected[i];
 			assertTrue("import " + impName + " expected", nameContained(impName, imports));

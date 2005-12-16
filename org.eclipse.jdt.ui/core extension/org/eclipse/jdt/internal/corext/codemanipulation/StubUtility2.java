@@ -53,6 +53,7 @@ import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -100,7 +101,7 @@ public final class StubUtility2 {
 			typeParameters.add(newTypeParam);
 		}
 
-		List parameters= createParameters(unit, imports, ast, binding, decl);
+		List parameters= createParameters(unit, imports, ast, binding, decl, null);
 
 		List thrownExceptions= decl.thrownExceptions();
 		ITypeBinding[] excTypes= binding.getExceptionTypes();
@@ -165,7 +166,7 @@ public final class StubUtility2 {
 				typeParameters.add(newTypeParam);
 			}
 
-			createParameters(unit, imports, ast, superConstructor, decl);
+			createParameters(unit, imports, ast, superConstructor, decl, null);
 
 			List thrownExceptions= decl.thrownExceptions();
 			ITypeBinding[] excTypes= superConstructor.getExceptionTypes();
@@ -348,8 +349,9 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean deferred) throws CoreException {
+	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean deferred, ImportRewriteContext context) throws CoreException {
 
+		NewImportRewrite newImports= imports.getNewImportRewrite();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(getImplementationModifiers(ast, binding, deferred));
 
@@ -366,20 +368,20 @@ public final class StubUtility2 {
 			if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
 				List newTypeBounds= newTypeParam.typeBounds();
 				for (int k= 0; k < typeBounds.length; k++) {
-					newTypeBounds.add(imports.addImport(typeBounds[k], ast));
+					newTypeBounds.add(newImports.addImport(typeBounds[k], ast, context));
 				}
 			}
 			typeParameters.add(newTypeParam);
 		}
 
-		decl.setReturnType2(imports.addImport(binding.getReturnType(), ast));
+		decl.setReturnType2(newImports.addImport(binding.getReturnType(), ast, context));
 
-		List parameters= createParameters(unit, imports, ast, binding, decl);
+		List parameters= createParameters(unit, imports, ast, binding, decl, context);
 
 		List thrownExceptions= decl.thrownExceptions();
 		ITypeBinding[] excTypes= binding.getExceptionTypes();
 		for (int i= 0; i < excTypes.length; i++) {
-			String excTypeName= imports.addImport(excTypes[i]);
+			String excTypeName= newImports.addImport(excTypes[i], context);
 			thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
 		}
 
@@ -525,20 +527,21 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	private static List createParameters(ICompilationUnit unit, ImportRewrite imports, AST ast, IMethodBinding binding, MethodDeclaration decl) {
+	private static List createParameters(ICompilationUnit unit, ImportRewrite imports, AST ast, IMethodBinding binding, MethodDeclaration decl, ImportRewriteContext context) {
+		NewImportRewrite newImports= imports.getNewImportRewrite();
 		List parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
 		String[] paramNames= suggestArgumentNames(unit.getJavaProject(), binding);
 		for (int i= 0; i < params.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			if (binding.isVarargs() && params[i].isArray() && i == params.length - 1) {
-				StringBuffer buffer= new StringBuffer(imports.addImport(params[i].getElementType()));
+				StringBuffer buffer= new StringBuffer(newImports.addImport(params[i].getElementType(), context));
 				for (int dim= 1; dim < params[i].getDimensions(); dim++)
 					buffer.append("[]"); //$NON-NLS-1$
 				var.setType(ASTNodeFactory.newType(ast, buffer.toString()));
 				var.setVarargs(true);
 			} else
-				var.setType(imports.addImport(params[i], ast));
+				var.setType(newImports.addImport(params[i], ast, context));
 			var.setName(ast.newSimpleName(paramNames[i]));
 			parameters.add(var);
 		}
