@@ -27,7 +27,7 @@ public class NewLinesTabPage extends ModifyDialogTabPage {
 	"  static int [] fArray= {1, 2, 3, 4, 5 };" + //$NON-NLS-1$
 	"  Listener fListener= new Listener() {" + //$NON-NLS-1$
 	"  };\n" + //$NON-NLS-1$
-	"  @deprecated @overrides " + //$NON-NLS-1$
+	"  @Deprecated @Override " + //$NON-NLS-1$
 	"  public void\nbar\n()\n {}" + //$NON-NLS-1$
 	"  void foo() {" + //$NON-NLS-1$
 	"    ;;" + //$NON-NLS-1$
