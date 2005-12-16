@@ -991,7 +991,7 @@
             verticalRulerPreferenceKey="occurrenceIndicationInVerticalRuler"
             verticalRulerPreferenceValue="false"
             colorPreferenceKey="occurrenceIndicationColor"
-            colorPreferenceValue="255,248,147"
+            colorPreferenceValue="212,212,212"
             presentationLayer="4"
             showInNextPrevDropdownToolbarActionKey="showOccurrenceInNextPrevDropdownToolbarAction"
             showInNextPrevDropdownToolbarAction="true"
