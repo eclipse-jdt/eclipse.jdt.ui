@@ -378,6 +378,7 @@ public class BindingLabelProvider extends LabelProvider {
 				buffer.append(JavaElementLabels.CONCAT_STRING);
 				getMethodLabel(declaringMethod, JavaElementLabels.T_FULLY_QUALIFIED | (flags & JavaElementLabels.P_COMPRESSED), buffer);
 			} else if (declaringType != null) {
+				buffer.append(JavaElementLabels.CONCAT_STRING);
 				getTypeLabel(declaringType, JavaElementLabels.T_FULLY_QUALIFIED | (flags & JavaElementLabels.P_COMPRESSED), buffer);
 			} else {
 				final IPackageBinding pack= binding.getPackage();
