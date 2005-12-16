@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.util.Iterator;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuListener;
@@ -20,16 +22,23 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+import org.eclipse.jface.wizard.Wizard;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IUpdate;
+
+import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.buildpath.AddExternalArchivesOperation;
 import org.eclipse.jdt.internal.corext.buildpath.AddLibraryOperation;
@@ -45,9 +54,12 @@ import org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation;
 import org.eclipse.jdt.internal.corext.buildpath.UnexcludeOperation;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.actions.AbstractOpenWizardAction;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
 /**
@@ -99,6 +111,51 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		}
 	}
 	private Action fNoActionAvailable= new NoActionAvailable(); 
+	
+	private static class OpenNewSourceFolderWizardActionWithListener extends AbstractOpenWizardAction implements ISelectionChangedListener {
+		
+		public OpenNewSourceFolderWizardActionWithListener() {
+			setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
+			setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
+			setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip); 
+			setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKROOT);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#createWizard()
+		 */
+		protected Wizard createWizard() throws CoreException {
+			return new NewSourceFolderCreationWizard();
+		}
+
+		/* (non-Javadoc)
+		 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
+		 */
+		public void selectionChanged(SelectionChangedEvent event) {
+	        ISelection selection = event.getSelection();
+	        if (selection instanceof IStructuredSelection)
+	            selectionChanged((IStructuredSelection) selection);
+	        else
+	            selectionChanged(StructuredSelection.EMPTY);
+		}
+
+		private void selectionChanged(IStructuredSelection selection) {
+			if (selection.size() != 1) {
+				setEnabled(false);
+				return;
+			}
+			
+			Object firstElement= selection.getFirstElement();
+			if (!(firstElement instanceof IJavaProject)) {
+				setEnabled(false);
+				return;
+			}
+			
+			setEnabled(true);
+		}
+	}
+
     
     private IWorkbenchSite fSite;
     private Action[] fActions;
@@ -133,9 +190,14 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 
 	private Action[] getActions() {
 		if (fActions == null) {
+			
+			OpenNewSourceFolderWizardActionWithListener newSourceFolderWizardActionWithListener= new OpenNewSourceFolderWizardActionWithListener();
+			fSite.getSelectionProvider().addSelectionChangedListener(newSourceFolderWizardActionWithListener);
+			
 			final BuildActionSelectionContext context= new BuildActionSelectionContext();
 			final Action[] actions= new Action[] {
 					createBuildPathAction(fSite, IClasspathInformationProvider.CREATE_LINK, context),
+					newSourceFolderWizardActionWithListener,
 					createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_SF_TO_BP, context),
 					createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_LIB_TO_BP, context),
 					createBuildPathAction(fSite, IClasspathInformationProvider.REMOVE_FROM_BP, context),
@@ -152,7 +214,8 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		final Action[] actions= fActions;
 		
 		for (int i= 0; i < actions.length; i++) {
-			((IUpdate) actions[i]).update();
+			if (actions[i] instanceof IUpdate)
+				((IUpdate) actions[i]).update();
         }
 		return actions;
 	}
@@ -301,11 +364,11 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         
         Action[] actions= getActions();
         for (int i= 0; i < actions.length; i++) {
-            if (i == 1)
+            if (i == 2)
                 source.add(new Separator(GROUP_BUILDPATH));
-            else if (i == 6)
+            else if (i == 7)
                 source.add(new Separator(GROUP_FILTER));
-            else if (i == 8)
+            else if (i == 9)
                 source.add(new Separator(GROUP_CUSTOMIZE));
             added+= addAction(source, actions[i]);
         }
