@@ -4802,7 +4802,7 @@
             </separator>
          </menu>
          <action
-               class="org.eclipse.jdt.internal.ui.actions.JarImportActionDelegate"
+               class="org.eclipse.jdt.internal.ui.actions.JarImportWizardAction"
                definitionId="org.eclipse.jdt.ui.import.jar"
                enablesFor="1"
                icon="icons/full/obj16/jar_obj.gif"

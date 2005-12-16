@@ -330,4 +330,7 @@ public final class ActionMessages extends NLS {
 	public static String OpenNewSourceFolderWizardAction_text2;
 	public static String OpenNewSourceFolderWizardAction_description;
 	public static String OpenNewSourceFolderWizardAction_tooltip;
+	public static String GenerateBuildPathActionGroup_update_jar_text;
+	public static String GenerateBuildPathActionGroup_update_jar_description;
+	public static String GenerateBuildPathActionGroup_update_jar_tooltip;
 }

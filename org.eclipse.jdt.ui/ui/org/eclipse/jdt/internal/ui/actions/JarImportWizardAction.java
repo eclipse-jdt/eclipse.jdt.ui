@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.wizard.WizardDialog;
 
 import org.eclipse.ui.IImportWizard;
@@ -29,11 +32,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarimport.JarImportWizard;
 
 /**
- * Action delegate for the jar import action.
+ * Combined action and action delegate for the jar import action.
  * 
  * @since 3.2
  */
-public final class JarImportActionDelegate implements IObjectActionDelegate {
+public class JarImportWizardAction extends Action implements IObjectActionDelegate, ISelectionChangedListener {
 
 	/** The wizard height */
 	private static final int SIZING_WIZARD_HEIGHT= 520;
@@ -46,6 +49,13 @@ public final class JarImportActionDelegate implements IObjectActionDelegate {
 
 	/** The active workbench part, or <code>null</code> */
 	private IWorkbenchPart fWorkbenchPart= null;
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void run() {
+		run(this);
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -67,6 +77,7 @@ public final class JarImportActionDelegate implements IObjectActionDelegate {
 	 * {@inheritDoc}
 	 */
 	public void selectionChanged(final IAction action, final ISelection selection) {
+		fSelection= null;
 		if (selection instanceof IStructuredSelection) {
 			final IStructuredSelection structured= (IStructuredSelection) selection;
 			if (structured.size() == 1) {
@@ -81,9 +92,15 @@ public final class JarImportActionDelegate implements IObjectActionDelegate {
 					}
 				}
 			}
-		} else
-			fSelection= null;
+		}
 		action.setEnabled(fSelection != null);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void selectionChanged(final SelectionChangedEvent event) {
+		selectionChanged(this, event.getSelection());
 	}
 
 	/**

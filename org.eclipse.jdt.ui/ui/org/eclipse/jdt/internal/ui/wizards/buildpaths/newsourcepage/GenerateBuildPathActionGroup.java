@@ -23,6 +23,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
@@ -31,6 +32,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IViewPart;
+import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
@@ -59,6 +61,7 @@ import org.eclipse.jdt.ui.actions.AbstractOpenWizardAction;
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
+import org.eclipse.jdt.internal.ui.actions.JarImportWizardAction;
 import org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
@@ -112,9 +115,9 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 	}
 	private Action fNoActionAvailable= new NoActionAvailable(); 
 	
-	private static class OpenNewSourceFolderWizardActionWithListener extends AbstractOpenWizardAction implements ISelectionChangedListener {
+	private static class OpenNewSourceFolderWizardAction extends AbstractOpenWizardAction implements ISelectionChangedListener {
 		
-		public OpenNewSourceFolderWizardActionWithListener() {
+		public OpenNewSourceFolderWizardAction() {
 			setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
 			setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
 			setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip); 
@@ -122,15 +125,15 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#createWizard()
+		/**
+		 * {@inheritDoc}
 		 */
 		protected Wizard createWizard() throws CoreException {
 			return new NewSourceFolderCreationWizard();
 		}
 
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.viewers.ISelectionChangedListener#selectionChanged(org.eclipse.jface.viewers.SelectionChangedEvent)
+		/**
+		 * {@inheritDoc}
 		 */
 		public void selectionChanged(SelectionChangedEvent event) {
 	        ISelection selection = event.getSelection();
@@ -156,7 +159,27 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		}
 	}
 
-    
+    private class UpdateJarFileAction extends JarImportWizardAction implements IUpdate {
+
+		public UpdateJarFileAction() {
+			setText(ActionMessages.GenerateBuildPathActionGroup_update_jar_text);
+			setDescription(ActionMessages.GenerateBuildPathActionGroup_update_jar_description);
+			setToolTipText(ActionMessages.GenerateBuildPathActionGroup_update_jar_tooltip);
+			setImageDescriptor(JavaPluginImages.DESC_OBJS_JAR);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.JARIMPORT_WIZARD_PAGE);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void update() {
+			final IWorkbenchPart part= fSite.getPage().getActivePart();
+			if (part != null)
+				setActivePart(this, part);
+			selectionChanged(this, fSite.getSelectionProvider().getSelection());
+		}
+	}
+
     private IWorkbenchSite fSite;
     private Action[] fActions;
 
@@ -191,18 +214,22 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 	private Action[] getActions() {
 		if (fActions == null) {
 			
-			OpenNewSourceFolderWizardActionWithListener newSourceFolderWizardActionWithListener= new OpenNewSourceFolderWizardActionWithListener();
-			fSite.getSelectionProvider().addSelectionChangedListener(newSourceFolderWizardActionWithListener);
+			final OpenNewSourceFolderWizardAction openAction= new OpenNewSourceFolderWizardAction();
+			final UpdateJarFileAction updateAction= new UpdateJarFileAction();
+			final ISelectionProvider provider= fSite.getSelectionProvider();
+			provider.addSelectionChangedListener(openAction);
+			provider.addSelectionChangedListener(updateAction);
 			
 			final BuildActionSelectionContext context= new BuildActionSelectionContext();
 			final Action[] actions= new Action[] {
 					createBuildPathAction(fSite, IClasspathInformationProvider.CREATE_LINK, context),
-					newSourceFolderWizardActionWithListener,
+					openAction,
 					createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_SF_TO_BP, context),
 					createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_LIB_TO_BP, context),
 					createBuildPathAction(fSite, IClasspathInformationProvider.REMOVE_FROM_BP, context),
 					createBuildPathAction(fSite, IClasspathInformationProvider.ADD_JAR_TO_BP, context),
 					createBuildPathAction(fSite, IClasspathInformationProvider.ADD_LIB_TO_BP, context),
+					updateAction,
 					createBuildPathAction(fSite, IClasspathInformationProvider.EXCLUDE, context),
 					createBuildPathAction(fSite, IClasspathInformationProvider.UNEXCLUDE, context),
 					createBuildPathAction(fSite, IClasspathInformationProvider.EDIT_FILTERS, context),
@@ -366,9 +393,9 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
         for (int i= 0; i < actions.length; i++) {
             if (i == 2)
                 source.add(new Separator(GROUP_BUILDPATH));
-            else if (i == 7)
+            else if (i == 8)
                 source.add(new Separator(GROUP_FILTER));
-            else if (i == 9)
+            else if (i == 10)
                 source.add(new Separator(GROUP_CUSTOMIZE));
             added+= addAction(source, actions[i]);
         }
@@ -403,4 +430,20 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		}
     	return true;
     }
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void dispose() {
+		if (fActions != null) {
+			final ISelectionProvider provider= fSite.getSelectionProvider();
+			for (int index= 0; index < fActions.length; index++) {
+				final IAction action= fActions[index];
+				if (action instanceof ISelectionChangedListener)
+					provider.removeSelectionChangedListener((ISelectionChangedListener) action);
+			}
+		}
+		fActions= null;
+		super.dispose();
+	}
 }
