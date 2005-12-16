@@ -21,15 +21,10 @@ import org.eclipse.core.resources.mapping.ResourceMappingContext;
 
 import org.eclipse.ltk.core.refactoring.model.AbstractRefactoringModelProvider;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Java-aware resource mapping model provider.
@@ -51,19 +46,7 @@ public final class JavaModelProvider extends AbstractRefactoringModelProvider {
 	public static IResource getResource(final Object element) {
 		IResource resource= null;
 		if (element instanceof IJavaElement) {
-			final IJavaElement java= (IJavaElement) element;
-			try {
-				resource= java.getCorrespondingResource();
-			} catch (JavaModelException exception) {
-				JavaPlugin.log(exception);
-				if (java instanceof ICompilationUnit) {
-					final ICompilationUnit unit= (ICompilationUnit) java;
-					return unit.getResource();
-				} else if (java instanceof IPackageFragment) {
-					final IPackageFragment fragment= (IPackageFragment) java;
-					return fragment.getResource();
-				}
-			}
+			resource= ((IJavaElement) element).getResource();
 		} else if (element instanceof IResource) {
 			resource= (IResource) element;
 		} else if (element instanceof IAdaptable) {

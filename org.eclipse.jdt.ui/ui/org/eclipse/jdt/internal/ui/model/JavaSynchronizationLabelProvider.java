@@ -25,11 +25,7 @@ import org.eclipse.team.ui.mapping.SynchronizationLabelProvider;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.ui.JavaElementLabels;
-
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 
 /**
  * Java-aware synchronization label provider.
@@ -77,7 +73,7 @@ public final class JavaSynchronizationLabelProvider extends SynchronizationLabel
 	 */
 	protected ILabelProvider getDelegateLabelProvider() {
 		if (fLabelProvider == null)
-			fLabelProvider= new AppearanceAwareLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED, AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS);
+			fLabelProvider= new JavaModelLabelProvider();
 		return fLabelProvider;
 	}
 

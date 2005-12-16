@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.model;
 
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
+
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 /**
@@ -24,5 +26,29 @@ public final class JavaModelContentProvider extends StandardJavaElementContentPr
 	 */
 	public JavaModelContentProvider() {
 		super(true);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object[] getChildren(final Object element) {
+		if (element instanceof JavaProjectSettings)
+			return NO_CHILDREN;
+		else if (element instanceof RefactoringHistory)
+			return ((RefactoringHistory) element).getDescriptors();
+		else
+			return super.getChildren(element);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean hasChildren(final Object element) {
+		if (element instanceof JavaProjectSettings)
+			return false;
+		else if (element instanceof RefactoringHistory)
+			return true;
+		else
+			return super.hasChildren(element);
 	}
 }

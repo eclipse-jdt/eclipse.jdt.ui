@@ -13,10 +13,13 @@ package org.eclipse.jdt.internal.ui.model;
 import org.eclipse.core.runtime.IAdapterFactory;
 
 import org.eclipse.core.resources.mapping.ModelProvider;
+import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.team.core.mapping.IResourceMappingMerger;
 
 import org.eclipse.team.ui.mapping.ICompareAdapter;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 import org.eclipse.ltk.core.refactoring.model.AbstractRefactoringModelProvider;
 
 /**
@@ -35,6 +38,15 @@ public final class JavaModelAdapterFactory implements IAdapterFactory {
 				return new JavaModelMerger((ModelProvider) adaptable);
 			else if (adapter == ICompareAdapter.class)
 				return new JavaCompareAdapter();
+		} else if (adaptable instanceof RefactoringHistory) {
+			if (adapter == ResourceMapping.class)
+				return new JavaRefactoringHistoryResourceMapping((RefactoringHistory) adaptable);
+		} else if (adaptable instanceof RefactoringDescriptorProxy) {
+			if (adapter == ResourceMapping.class)
+				return new JavaRefactoringDescriptorResourceMapping((RefactoringDescriptorProxy) adaptable);
+		} else if (adaptable instanceof JavaProjectSettings) {
+			if (adapter == ResourceMapping.class)
+				return new JavaProjectSettingsResourceMapping((JavaProjectSettings) adaptable);
 		}
 		return null;
 	}
@@ -43,6 +55,6 @@ public final class JavaModelAdapterFactory implements IAdapterFactory {
 	 * {@inheritDoc}
 	 */
 	public Class[] getAdapterList() {
-		return new Class[] { IResourceMappingMerger.class, ICompareAdapter.class};
+		return new Class[] { IResourceMappingMerger.class, ResourceMapping.class, ICompareAdapter.class};
 	}
 }
