@@ -279,6 +279,7 @@ public final class JarImportWizardPage extends WizardPage {
 		handleJarFileChanged();
 		if (isPageComplete())
 			handlePackageFragmentRootChanged();
+		getContainer().updateButtons();
 	}
 
 	/**
