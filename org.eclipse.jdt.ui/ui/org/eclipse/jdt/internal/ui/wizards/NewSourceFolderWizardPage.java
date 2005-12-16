@@ -374,13 +374,15 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 				Set modified= new HashSet();				
 				if (fExcludeInOthersFields.isSelected()) {
 					addExclusionPatterns(newEntry, newEntries, modified);
-					newEntries.add(JavaCore.newSourceEntry(path));
+					IClasspathEntry entry= JavaCore.newSourceEntry(path);
+					insertAtEndOfCategory(entry, newEntries);
 				} else {
 					if (projectEntryIndex != -1) {
 						fIsProjectAsSourceFolder= true;
 						newEntries.set(projectEntryIndex, newEntry);
 					} else {
-						newEntries.add(JavaCore.newSourceEntry(path));
+						IClasspathEntry entry= JavaCore.newSourceEntry(path);
+						insertAtEndOfCategory(entry, newEntries);
 					}
 				}
 					
@@ -412,6 +414,36 @@ public class NewSourceFolderWizardPage extends NewElementWizardPage {
 					return;
 				}
 			}
+		}
+	}
+	
+	private void insertAtEndOfCategory(IClasspathEntry entry, List entries) {
+		int length= entries.size();
+		IClasspathEntry[] elements= (IClasspathEntry[])entries.toArray(new IClasspathEntry[length]);
+		int i= 0;
+		while (i < length && elements[i].getEntryKind() != entry.getEntryKind()) {
+			i++;
+		}
+		if (i < length) {
+			i++;
+			while (i < length && elements[i].getEntryKind() == entry.getEntryKind()) {
+				i++;
+			}
+			entries.add(i, entry);
+			return;
+		}
+		
+		switch (entry.getEntryKind()) {
+		case IClasspathEntry.CPE_SOURCE:
+			entries.add(0, entry);
+			break;
+		case IClasspathEntry.CPE_CONTAINER:
+		case IClasspathEntry.CPE_LIBRARY:
+		case IClasspathEntry.CPE_PROJECT:
+		case IClasspathEntry.CPE_VARIABLE:
+		default:
+			entries.add(entry);
+			break;
 		}
 	}
 	
