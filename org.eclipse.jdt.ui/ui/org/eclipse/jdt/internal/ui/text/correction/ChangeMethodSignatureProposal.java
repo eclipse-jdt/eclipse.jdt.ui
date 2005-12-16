@@ -47,6 +47,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
@@ -70,7 +71,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 		public final String name;
 		public final ITypeBinding type;
 		Type resultingParamType;
-		SimpleName resultingParamName;
+		SimpleName[] resultingParamName;
 		SimpleName resultingTagArg;
 
 		private ModifyDescription(ITypeBinding type, String name) {
@@ -80,6 +81,8 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 	}
 
 	public static class EditDescription extends ModifyDescription {
+		String orginalName;
+
 		public EditDescription(ITypeBinding type, String name) {
 			super(type, name);
 		}
@@ -171,7 +174,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				newNode.setName(ast.newSimpleName("x")); //$NON-NLS-1$
 
 				// remember to set name later
-				desc.resultingParamName= newNode.getName();
+				desc.resultingParamName= new SimpleName[] {newNode.getName()};
 				desc.resultingParamType= newNode.getType();
 				hasCreatedVariables= true;
 
@@ -203,15 +206,29 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 				EditDescription desc= (EditDescription) curr;
 
 				Type newType= imports.addImport(desc.type, ast);
-				SimpleName newName= ast.newSimpleName("x"); //$NON-NLS-1$  // name will be set later
 				
 				SingleVariableDeclaration decl= (SingleVariableDeclaration) parameters.get(k);
 				rewrite.replace(decl.getType(), newType, null);
-				rewrite.replace(decl.getName(), newName, null); 
+				
+				IBinding binding= decl.getName().resolveBinding();
+				if (binding != null) {
+					SimpleName[] names= LinkedNodeFinder.findByBinding(decl.getRoot(), binding);
+					SimpleName[] newNames= new SimpleName[names.length];
+					for (int j= 0; j < names.length; j++) {
+						SimpleName newName= ast.newSimpleName("x"); //$NON-NLS-1$  // name will be set later
+						newNames[j]= newName;
+						rewrite.replace(names[j], newName, null); 
+					}
+					desc.resultingParamName= newNames;
+				} else {
+					SimpleName newName= ast.newSimpleName("x"); //$NON-NLS-1$  // name will be set later
+					rewrite.replace(decl.getName(), newName, null); 
+					// remember to set name later
+					desc.resultingParamName= new SimpleName[] {newName};
+				}
 
-				// remember to set name later
-				desc.resultingParamName= newName;
 				desc.resultingParamType= newType;
+				desc.orginalName= decl.getName().getIdentifier();
 				hasCreatedVariables= true;
 
 				k++;
@@ -286,25 +303,32 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 					dim= ((ArrayType) type).getDimensions();
 					type= ((ArrayType) type).getElementType();
 				}
+				
+				if (desc instanceof EditDescription) {
+					addLinkedPositionProposal(nameKey, ((EditDescription)desc).orginalName, null);
+				}
 				String[] suggestedNames=  NamingConventions.suggestArgumentNames(getCompilationUnit().getJavaProject(), "", ASTNodes.asString(type), dim, excludedNames); //$NON-NLS-1$
 				for (int k= 0; k < suggestedNames.length; k++) {
 					addLinkedPositionProposal(nameKey, suggestedNames[k], null);
 				}
 				if (favourite == null) {
 					favourite= suggestedNames[0];
-				}
-
-				desc.resultingParamName.setIdentifier(favourite);
+				}		
 				usedNames.add(favourite);
+				
+				SimpleName[] names= desc.resultingParamName;
+				for (int j= 0; j < names.length; j++) {
+					names[j].setIdentifier(favourite);
+					addLinkedPosition(rewrite.track(names[j]), false, nameKey);
+				}
+				
+				addLinkedPosition(rewrite.track(desc.resultingParamType), true, typeKey);
 
 				// collect type suggestions
 				ITypeBinding[] bindings= ASTResolving.getRelaxingTypes(ast, desc.type);
 				for (int k= 0; k < bindings.length; k++) {
 					addLinkedPositionProposal(typeKey, bindings[k]);
 				}
-
-				addLinkedPosition(rewrite.track(desc.resultingParamType), false, typeKey);
-				addLinkedPosition(rewrite.track(desc.resultingParamName), false, nameKey);
 
 				SimpleName tagArg= desc.resultingTagArg;
 				if (tagArg != null) {
