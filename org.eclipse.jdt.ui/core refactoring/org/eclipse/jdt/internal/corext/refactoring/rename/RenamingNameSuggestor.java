@@ -126,12 +126,22 @@ public class RenamingNameSuggestor {
 	 *    to match a partly lowercased variable name. In suffix mode, hunks of the 
 	 *    new type which are at the same position as in the old type will be 
 	 *    lowercased if necessary.
+	 *    
+	 * c) Support for (english) plural forms. If the corresponding flag is set, the
+	 *    suggestor will try to match variables which have plural forms of the
+	 *    type name, for example "handies" for "Handy" or "phones" for "MobilePhone".
+	 *    The target name will be transformed as well, i.e. conversion like
+	 *    "fHandies" -> "fPhones" are supported.   
 	 * 
 	 */
 
 	public static final int STRATEGY_EXACT= 1;
 	public static final int STRATEGY_EMBEDDED= 2;
 	public static final int STRATEGY_SUFFIX= 3;
+	
+	private static final String PLURAL_S= "s"; //$NON-NLS-1$
+	private static final String PLURAL_IES= "ies"; //$NON-NLS-1$
+	private static final String SINGULAR_Y= "y"; //$NON-NLS-1$
 
 	private int fStrategy;
 	private String[] fFieldPrefixes;
@@ -145,6 +155,7 @@ public class RenamingNameSuggestor {
 	
 	private boolean fExtendedInterfaceNameMatching;
 	private boolean fExtendedAllUpperCaseHunkMatching;
+	private boolean fExtendedPluralMatching;
 
 	public RenamingNameSuggestor() {
 		this(STRATEGY_SUFFIX);
@@ -157,6 +168,7 @@ public class RenamingNameSuggestor {
 		fStrategy= strategy;
 		fExtendedInterfaceNameMatching= true;
 		fExtendedAllUpperCaseHunkMatching= true;
+		fExtendedPluralMatching= true;
 
 		resetPrefixes();
 	}
@@ -226,8 +238,15 @@ public class RenamingNameSuggestor {
 			newType= getInterfaceName(newType);
 		}
 
-		String newVariableName= null;
+		String newVariableName= matchDirect(oldType, newType, strippedVariableName);
 
+		if (fExtendedPluralMatching && newVariableName == null && canPluralize(oldType))
+			newVariableName= matchDirect(pluralize(oldType), pluralize(newType), strippedVariableName);
+
+		return newVariableName;
+	}
+
+	private String matchDirect(String oldType, String newType, final String strippedVariableName) {
 		/*
 		 * Use all strategies applied by the user. Always start with exact
 		 * matching.
@@ -236,7 +255,7 @@ public class RenamingNameSuggestor {
 		 * new type name has a smaller camel case chunk count.
 		 */
 
-		newVariableName= exactMatch(oldType, newType, strippedVariableName);
+		String newVariableName= exactMatch(oldType, newType, strippedVariableName);
 		if (newVariableName == null && fStrategy >= STRATEGY_EMBEDDED)
 			newVariableName= embeddedMatch(oldType, newType, strippedVariableName);
 		if (newVariableName == null && fStrategy >= STRATEGY_SUFFIX)
@@ -503,6 +522,22 @@ public class RenamingNameSuggestor {
 			}
 		}
 		return usedPrefix;
+	}
+	
+	/**
+	 * Returns true if the type name can be pluralized by a string operation.
+	 * This is always the case if it does not already end with an "s".
+	 */
+	private boolean canPluralize(String typeName) {
+		return !typeName.endsWith(PLURAL_S);
+	}
+
+	private String pluralize(String typeName) {
+		if (typeName.endsWith(SINGULAR_Y))
+			typeName= typeName.substring(0, typeName.length() - 1).concat(PLURAL_IES);
+		else if (!typeName.endsWith(PLURAL_S))
+			typeName= typeName.concat(PLURAL_S);
+		return typeName;
 	}
 
 	private void resetPrefixes() {

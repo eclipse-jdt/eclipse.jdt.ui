@@ -268,28 +268,26 @@ public class RenamingNameSuggestorTests extends TestCase {
 	}
 	
 	public void testPluralS() {
-		
-		System.out.println("Plural s not currently supported");
-		return;
 
-//		 prefixes= new String[0];
-//		 suffixes= new String[0];
-//		 setStrategy(RenamingNameSuggestor.STRATEGY_EXACT);
-//		 fh("items", "things", "Item", "Thing");
-//		 fh("handies", "mobilePhones", "Handy", "MobilePhone");
-//		 fh("handy", "mobilePhone", "Handy", "MobilePhone");
-//		 fh("mobilePhones", "handies", "MobilePhone", "Handy");
-//		 fh("mobilePhone", "handy", "MobilePhone", "Handy");
-//		 fh("handies", "mandies", "Handy", "Mandy");
-//		 setStrategy(RenamingNameSuggestor.STRATEGY_EMBEDDED);
-//		 fh("itemsOnLoan", "thingsOnLoan", "Item", "Thing");
-//		 fh("itemStuff", "thingStuff", "Item", "Thing"); //-> no plural s!
-//		 fh("someHandiesOnLoan", "someMobilePhonesOnLoan", "Handy", "MobilePhone");
-//		 fh("someHandiesOnLoan", "someMandiesOnLoan", "Handy", "Mandy");
-//		 setStrategy(RenamingNameSuggestor.STRATEGY_SUFFIX);
-//		 fh("someItemsOnLoan", "someThingsOnLoan", "ASTItem", "NOASTThing");
-//		 fh("someHandiesOnLoan", "someMandiesOnLoan", "Handy", "Mandy");
-//		 fh("someHandiesOnLoan", "someMobilePhonesOnLoan", "Handy", "MobilePhone");
+		 fPrefixes= new String[0];
+		 fSuffixes= new String[0];
+		 setStrategy(RenamingNameSuggestor.STRATEGY_EXACT);
+		 fh("items", "things", "Item", "Thing");
+		 fh("handies", "mobilePhones", "Handy", "MobilePhone");
+		 fh("handy", "mobilePhone", "Handy", "MobilePhone");
+		 fh("mobilePhones", "handies", "MobilePhone", "Handy");
+		 fh("mobilePhone", "handy", "MobilePhone", "Handy");
+		 fh("handies", "mandies", "Handy", "Mandy");
+		 setStrategy(RenamingNameSuggestor.STRATEGY_EMBEDDED);
+		 fh("itemsOnLoan", "thingsOnLoan", "Item", "Thing");
+		 fh("itemStuff", "thingStuff", "Item", "Thing"); //-> no plural s!
+		 fh("someHandiesOnLoan", "someMobilePhonesOnLoan", "Handy", "MobilePhone");
+		 fh("someHandiesOnLoan", "someMandiesOnLoan", "Handy", "Mandy");
+		 setStrategy(RenamingNameSuggestor.STRATEGY_SUFFIX);
+		 fh("someItemsOnLoan", "someThingsOnLoan", "ASTItem", "NOASTThing");
+		 fh("someHandiesOnLoan", "someMandiesOnLoan", "Handy", "Mandy");
+		 fh("someHandiesOnLoan", "someMobilePhonesOnLoan", "Handy", "MobilePhone");
+		 fh("somePhonesOnLoan", "someHandiesOnLoan", "MobilePhone", "Handy");
 	}
 	
 }

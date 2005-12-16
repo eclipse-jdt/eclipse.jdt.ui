@@ -22,6 +22,8 @@ public class RenameTests {
 		TestSuite suite= new TestSuite(clazz.getName());
 
 		suite.addTest(RefactoringScannerTests.suite());
+		suite.addTest(RenamingNameSuggestorTests.suite());
+		
 		suite.addTest(RenameVirtualMethodInClassTests.suite());
 		suite.addTest(RenameMethodInInterfaceTests.suite());
 		suite.addTest(RenamePrivateMethodTests.suite());	
