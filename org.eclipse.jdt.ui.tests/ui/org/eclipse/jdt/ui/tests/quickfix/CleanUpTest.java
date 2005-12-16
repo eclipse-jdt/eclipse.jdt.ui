@@ -3386,4 +3386,44 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 	
+	public void testCombinationBug120585() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private int i= 0;\n");
+		buf.append("    void method() {\n");
+		buf.append("        int[] array= null;\n");
+		buf.append("        for (int i= 0; i < array.length; i++)\n");
+		buf.append("            System.out.println(array[i]);\n");
+		buf.append("        i= 12;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp1= new CodeStyleCleanUp(CodeStyleCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		ICleanUp cleanUp2= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS);
+		ICleanUp cleanUp3= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp1);
+		refactoring.addCleanUp(cleanUp2);
+		refactoring.addCleanUp(cleanUp3);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    void method() {\n");
+		buf.append("        int[] array= null;\n");
+		buf.append("        for (int element : array) {\n");
+		buf.append("            System.out.println(element);\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
 }

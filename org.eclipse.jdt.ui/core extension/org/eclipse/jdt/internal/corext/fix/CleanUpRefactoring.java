@@ -41,7 +41,6 @@ import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
 
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -54,6 +53,8 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibili
 import org.eclipse.jdt.internal.corext.refactoring.composite.MultiStateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
@@ -343,22 +344,7 @@ public class CleanUpRefactoring extends Refactoring {
 	}
 
 	private String getChangeName(ICompilationUnit compilationUnit) {
-		// TODO: Use JavaElementLabels for labels
-		StringBuffer buf= new StringBuffer();
-		IJavaElement p= compilationUnit.getParent();
-		if (p != null) {
-			buf.insert(0, p.getElementName());
-			p= p.getParent();
-			while (p != null) {
-				if (p.getElementName().length() > 0) {
-					buf.insert(0, p.getElementName() + "/"); //$NON-NLS-1$
-				}
-				p= p.getParent();
-			}
-		}
-		buf.insert(0, " - "); //$NON-NLS-1$
-		buf.insert(0, compilationUnit.getElementName());
-		return buf.toString();
+		return JavaElementLabels.getElementLabel(compilationUnit, JavaElementLabels.CU_POST_QUALIFIED | JavaElementLabels.P_QUALIFIED);
 	}
 
 	private ASTParser createParser(Map cleanUpOptions, IJavaProject javaProject) {
@@ -388,7 +374,7 @@ public class CleanUpRefactoring extends Refactoring {
 					if (solution != null) {
 						if (intersects(current.getEdit(),solution.getEdit())) {
 							if (result == null) {
-								result= new ParseListElement((ICompilationUnit)ast.getJavaElement());
+								result= new ParseListElement((ICompilationUnit)ast.getJavaElement().getPrimaryElement());
 							}
 							result.addCleanUp(cleanUp);
 						} else {

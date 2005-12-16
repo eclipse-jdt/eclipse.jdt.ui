@@ -932,7 +932,7 @@ public class JavaElementLabels {
 		
 		if (getFlag(flags, CU_POST_QUALIFIED)) {
 			buf.append(CONCAT_STRING);
-			getPackageFragmentLabel((IPackageFragment) cu.getParent(), flags & QUALIFIER_FLAGS, buf);
+			getPackageFragmentLabel((IPackageFragment) cu.getParent(), flags | QUALIFIER_FLAGS, buf);
 		}		
 	}
 
