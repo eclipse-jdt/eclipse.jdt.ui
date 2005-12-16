@@ -19,7 +19,7 @@ import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
-final class MethodOccurenceCollector extends CollectingSearchRequestor {
+class MethodOccurenceCollector extends CollectingSearchRequestor {
 
 		private final int fNameLength;
 

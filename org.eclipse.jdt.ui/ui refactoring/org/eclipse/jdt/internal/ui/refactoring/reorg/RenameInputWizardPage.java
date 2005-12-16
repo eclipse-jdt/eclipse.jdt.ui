@@ -27,11 +27,13 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 
+import org.eclipse.jdt.internal.ui.refactoring.DelegateUIHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
@@ -42,6 +44,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	private Button fUpdateReferences;
 	private Button fUpdateTextualMatches;
 	private Button fUpdateQualifiedNames;
+	private Button fLeaveDelegateCheckBox;
 	private QualifiedNameComponent fQualifiedNameComponent;
 	
 	private static final String UPDATE_TEXTUAL_MATCHES= "updateTextualMatches"; //$NON-NLS-1$
@@ -92,6 +95,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		addAdditionalOptions(composite, layouter);
 		addOptionalUpdateTextualMatches(composite, layouter);
 		addOptionalUpdateQualifiedNameComponent(composite, layouter, layout.marginWidth);
+		addOptionalLeaveDelegateCheckbox(composite, layouter);
 		updateForcePreview();
 		
 		Dialog.applyDialogFont(superComposite);
@@ -145,6 +149,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 			saveBooleanSetting(UPDATE_QUALIFIED_NAMES, fUpdateQualifiedNames);
 			if (fQualifiedNameComponent != null)
 				fQualifiedNameComponent.savePatterns(getRefactoringSettings());
+			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
 		}
 		super.dispose();
 	}
@@ -211,6 +216,31 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		fQualifiedNameComponent.setEnabled(enabled);
 		ref.setUpdateQualifiedNames(enabled);
 		updateForcePreview();
+	}
+	
+	private void addOptionalLeaveDelegateCheckbox(Composite result, RowLayouter layouter) {
+		final IDelegatingUpdating refactoring= (IDelegatingUpdating) getRefactoring().getAdapter(IDelegatingUpdating.class);
+		if (refactoring == null || !refactoring.canEnableDelegatingUpdating())
+			return;
+		fLeaveDelegateCheckBox= createCheckbox(result, DelegateUIHelper.getLeaveDelegateCheckBoxTitle(false), DelegateUIHelper.loadLeaveDelegateSetting(refactoring), layouter);
+		refactoring.setDelegatingUpdating(fLeaveDelegateCheckBox.getSelection());
+		fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				refactoring.setDelegatingUpdating(fLeaveDelegateCheckBox.getSelection());
+			}
+		});
+	}
+
+	protected void updateLeaveDelegateCheckbox(int delegateCount) {
+		if (fLeaveDelegateCheckBox == null)
+			return;
+		fLeaveDelegateCheckBox.setEnabled(delegateCount > 0);
+		fLeaveDelegateCheckBox.setText(DelegateUIHelper.getLeaveDelegateCheckBoxTitle(delegateCount > 1));
+		if (delegateCount == 0) {
+			fLeaveDelegateCheckBox.setSelection(false);
+			final IDelegatingUpdating refactoring= (IDelegatingUpdating) getRefactoring().getAdapter(IDelegatingUpdating.class);
+			refactoring.setDelegatingUpdating(false);
+		}
 	}
 	
 	protected String getLabelText() {

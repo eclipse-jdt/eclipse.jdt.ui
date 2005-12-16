@@ -70,13 +70,14 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		helper1_0("m", "k", new String[0]);
 	}
 	
-	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass, boolean updateReferences) throws Exception{
+	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass, boolean updateReferences, boolean createDelegate) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
 		RenameMethodProcessor processor= new RenameVirtualMethodProcessor(classA.getMethod(methodName, signatures));
 		RenameRefactoring ref= new RenameRefactoring(processor);
 		processor.setUpdateReferences(updateReferences);
 		processor.setNewElementName(newMethodName);
+		processor.setDelegatingUpdating(createDelegate);
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		if (!shouldPass){
@@ -103,7 +104,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass) throws Exception{
-		helper2_0(methodName, newMethodName, signatures, shouldPass, true);
+		helper2_0(methodName, newMethodName, signatures, shouldPass, true, false);
 	}
 	
 	private void helper2_0(String methodName, String newMethodName, String[] signatures) throws Exception{
@@ -111,11 +112,15 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 	}
 	
 	private void helper2(boolean updateReferences) throws Exception{
-		helper2_0("m", "k", new String[0], true, updateReferences);
+		helper2_0("m", "k", new String[0], true, updateReferences, false);
 	}
 
 	private void helper2() throws Exception{
 		helper2(true);
+	}
+	
+	private void helperDelegate() throws Exception{
+		helper2_0("m", "k", new String[0], true, true, true);
 	}
 	
 	private void helper2_fail() throws Exception{
@@ -500,4 +505,18 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		helper2();
 	}
 	
+	public void testDelegate01() throws Exception {
+		// simple delegate
+		helperDelegate();
+	}
+	
+	public void testDelegate02() throws Exception {
+		// overridden delegates with abstract mix-in
+		helperDelegate();
+	}
+	
+	public void testDelegate03() throws Exception {
+		// overridden delegates in local type
+		helperDelegate();
+	}
 }

@@ -96,6 +96,7 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			fRenameGetter.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
 					getRenameFieldProcessor().setRenameGetter(fRenameGetter.getSelection());
+					updateLeaveDelegateCheckbox(getRenameFieldProcessor().getDelegateCount());
 				}
 			});
 		
@@ -109,10 +110,12 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			fRenameSetter.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
 					getRenameFieldProcessor().setRenameSetter(fRenameSetter.getSelection());
+					updateLeaveDelegateCheckbox(getRenameFieldProcessor().getDelegateCount());
 				}
 			});
 		
 			updateGetterSetterLabels();
+			updateLeaveDelegateCheckbox(getRenameFieldProcessor().getDelegateCount());
 			Dialog.applyDialogFont(composite);
 		}
 		

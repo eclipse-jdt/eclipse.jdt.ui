@@ -57,7 +57,6 @@ public class AllRefactoringTests {
 		
 		//--types
 		suite.addTest(RenameTypeTests.suite());	
-		suite.addTest(RenamingNameSuggestorTests.suite());
 		suite.addTest(RenameTypeParameterTests.suite());
 		suite.addTest(ChangeTypeRefactoringTests.suite());
 		
@@ -70,6 +69,10 @@ public class AllRefactoringTests {
 		
 		//--projects
 		suite.addTest(RenameJavaProjectTests.suite());		
+		
+		//--helpers
+		suite.addTest(RenamingNameSuggestorTests.suite());
+		suite.addTest(DelegateCreatorTests.suite());
 		return suite;
 	}
 }

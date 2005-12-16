@@ -116,10 +116,12 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -135,7 +137,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class ChangeSignatureRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class ChangeSignatureRefactoring extends Refactoring implements IDelegatingUpdating, IInitializableRefactoringComponent {
 	
 	private static final String ID_CHANGE_METHOD_SIGNATURE= "org.eclipse.jdt.ui.change.method.signature"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RETURN= "return"; //$NON-NLS-1$
@@ -144,6 +146,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 	private static final String ATTRIBUTE_DEFAULT= "default"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_EXCEPTION= "exception"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_KIND= "kind"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_DELEGATING_UPDATING= "delegatingUpdating"; //$NON-NLS-1$
 	
 	private List fParameterInfos;
 
@@ -167,10 +170,12 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 	private BodyUpdater fBodyUpdater;
 
 	private ITypeHierarchy fCachedTypeHierarchy= null;
+	private boolean fDelegatingUpdating;
 
 	public ChangeSignatureRefactoring(IMethod method) throws JavaModelException {
 		fMethod= method;
 		fOldVarargIndex= -1;
+		fDelegatingUpdating= false;
 		if (fMethod != null) {
 			fParameterInfos= createParameterInfoList(method);
 			// fExceptionInfos is created in checkInitialConditions
@@ -305,6 +310,22 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 		return fBaseCuRewrite;
 	}
 	
+	//------------------- IDelegatingUpdating ----------------------
+	
+	public boolean canEnableDelegatingUpdating() {
+		return true;
+	}
+
+	public boolean getDelegatingUpdating() {
+		return fDelegatingUpdating;
+	}
+
+	public void setDelegatingUpdating(boolean delegatingUpdating) {
+		fDelegatingUpdating= delegatingUpdating;
+	}
+	
+	//------------------- /IDelegatingUpdating ---------------------
+	
 	public RefactoringStatus checkSignature() {
 		return checkSignature(false);
 	}
@@ -359,6 +380,36 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 			return true;
 		
 		return false;
+	}
+	
+	/**
+	 * Returns true if the new method cannot coexist with the old method since
+	 * the signatures are too much alike.
+	 * 
+	 */
+	public boolean isSignatureClashWithInitial() throws JavaModelException {
+
+		if (!isMethodNameSameAsInitial())
+			return false; // name has changed.
+
+		if (fMethod.getNumberOfParameters() == 0 && fParameterInfos.isEmpty())
+			return true; // name is equal and both parameter lists are empty
+
+		// name is equal and there are some parameters.
+		// check if there are more or less parameters than before
+
+		int no= getNotDeletedInfos().size();
+
+		if (fMethod.getNumberOfParameters() != no)
+			return false;
+
+		// name is equal and parameter count is equal.
+		// check whether types remained the same
+		
+		if (isOrderSameAsInitial())
+			return areParameterTypesSameAsInitial();
+		else
+			return false; // could be more specific here
 	}
 
 	private boolean areParameterTypesSameAsInitial() {
@@ -709,6 +760,9 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 			result.merge(checkSignature(true));
 			if (result.hasFatalError())
 				return result;
+			
+			if (fDelegatingUpdating && isSignatureClashWithInitial()) 
+				result.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_old_and_new_signatures_not_sufficiently_different ));
 
 			fRippleMethods= RippleMethodFinder2.getRelatedMethods(fMethod, new SubProgressMonitor(pm, 1), null);
 			result.merge(checkVarargs());
@@ -1073,6 +1127,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 					final Map arguments= new HashMap();
 					arguments.put(RefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
 					arguments.put(RefactoringDescriptor.NAME, fMethodName);
+					arguments.put(ATTRIBUTE_DELEGATING_UPDATING, Boolean.valueOf(fDelegatingUpdating).toString());
 					if (fReturnTypeInfo.isTypeNameChanged())
 						arguments.put(ATTRIBUTE_RETURN, fReturnTypeInfo.getNewTypeName());
 					try {
@@ -1383,6 +1438,10 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 		
 		public abstract void updateNode() throws JavaModelException;
 		
+		protected void registerImportRemoveNode(ASTNode node) {
+			getImportRemover().registerRemovedNode(node);
+		}
+
 		protected final void reshuffleElements() {
 			if (isOrderSameAsInitial())
 				return;
@@ -1421,11 +1480,11 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 				
 				if (info.isDeleted()) {
 					if (oldIndex != fOldVarargIndex) {
-						getImportRemover().registerRemovedNode((ASTNode) nodes.get(oldIndex));
+						registerImportRemoveNode((ASTNode) nodes.get(oldIndex));
 					} else {
 						//vararg deleted -> remove all remaining nodes:
 						for (int n= oldIndex; n < nodes.size(); n++) {
-							getImportRemover().registerRemovedNode((ASTNode) nodes.get(n));
+							registerImportRemoveNode((ASTNode) nodes.get(n));
 						}
 					}
 					
@@ -1437,13 +1496,13 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 				} else /* parameter stays */ {
 					if (oldIndex != fOldVarargIndex) {
 						ASTNode oldNode= (ASTNode) nodes.get(oldIndex);
-						ASTNode movedNode= getASTRewrite().createMoveTarget(oldNode); //node must be one of ast
+						ASTNode movedNode= moveNode(oldNode);
 						newNodes.add(movedNode);
 					} else {
 						//vararg stays and is last parameter -> copy all remaining nodes:
 						for (int n= oldIndex; n < nodes.size(); n++) {
 							ASTNode oldNode= (ASTNode) nodes.get(n);
-							ASTNode movedNode= getASTRewrite().createMoveTarget(oldNode);
+							ASTNode movedNode= moveNode(oldNode);
 							newNodes.add(movedNode);
 						}
 					}
@@ -1469,7 +1528,26 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 				listRewrite.insertLast(node, fDescription);
 			}
 		}
-		
+
+		/**
+		 * If this occurrence update is called from within a declaration update
+		 * (i.e., to update the call inside the newly created delegate), the old
+		 * node does not yet exist and therefore cannot be a move target.
+		 * 
+		 * Normally, always use createMoveTarget as this has the advantage of
+		 * being able to add changes inside changed nodes (for example, a method
+		 * call within a method call, see test case #4) and preserving comments
+		 * inside calls.
+		 */
+		private ASTNode moveNode(ASTNode oldNode) {
+			ASTNode movedNode;
+			if (ASTNodes.isExistingNode(oldNode))
+				movedNode= getASTRewrite().createMoveTarget(oldNode); //node must be one of ast
+			else
+				movedNode= ASTNode.copySubtree(getASTRewrite().getAST(), oldNode);
+			return movedNode;
+		}
+
 		/**
 		 * @return ListRewrite of parameters or arguments
 		 */
@@ -1500,7 +1578,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 		protected final void replaceTypeNode(Type typeNode, String newTypeName, ITypeBinding newTypeBinding){
 			Type newTypeNode= createNewTypeNode(newTypeName, newTypeBinding);
 			getASTRewrite().replace(typeNode, newTypeNode, fDescription);
-			getImportRemover().registerRemovedNode(typeNode);
+			registerImportRemoveNode(typeNode);
 			getTightSourceRangeComputer().addTightSourceNode(typeNode);
 		}
 	
@@ -1517,7 +1595,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 				SimpleName nameNode= getMethodNameNode();
 				SimpleName newNameNode= nameNode.getAST().newSimpleName(fMethodName);
 				getASTRewrite().replace(nameNode, newNameNode, fDescription);
-				getImportRemover().registerRemovedNode(nameNode);
+				registerImportRemoveNode(nameNode);
 				getTightSourceRangeComputer().addTightSourceNode(nameNode);
 			}
 		}
@@ -1666,6 +1744,12 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 			super(cuRewrite, cuRewrite.createGroupDescription(RefactoringCoreMessages.ChangeSignatureRefactoring_change_signature), result); 
 			fMethDecl= decl;
 		}
+		
+		// Prevent import removing if delegate is created.
+		protected void registerImportRemoveNode(ASTNode node) {
+			if (!fDelegatingUpdating)
+				super.registerImportRemoveNode(node);
+		}
 
 		public void updateNode() throws JavaModelException {
 			changeParamguments();
@@ -1686,6 +1770,29 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 			
 			if (fBodyUpdater != null)
 				fBodyUpdater.updateBody(fMethDecl, fCuRewrite, fResult);
+			
+			if (fDelegatingUpdating)
+				addDelegate();
+		}
+
+		private void addDelegate() throws JavaModelException {
+
+			DelegateMethodCreator d= new DelegateMethodCreator();
+			d.setDeclaration(fMethDecl);
+			d.setSourceRewrite(fCuRewrite);
+			d.prepareDelegate();
+			
+			/*
+			 * The delegate now contains a call and a javadoc reference to the
+			 * old method (i.e., to itself).
+			 * 
+			 * Use ReferenceUpdate() / DocReferenceUpdate() to update these
+			 * references like any other reference.
+			 */
+			new ReferenceUpdate(d.getDelegateInvocation(), d.getDelegateRewrite(), fResult).updateNode();
+			new DocReferenceUpdate(d.getJavadocReference(), d.getDelegateRewrite(), fResult).updateNode();
+			
+			d.createEdit();
 		}
 		
 		/** @return {@inheritDoc} (element type: SingleVariableDeclaration) */
@@ -1782,7 +1889,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 					continue; // newly added or unresolvable type
 				if (Bindings.equals(typeToRemove, currentType)) {
 					getASTRewrite().remove(currentName, fDescription);
-					getImportRemover().registerRemovedNode(currentName);
+					registerImportRemoveNode(currentName);
 				}
 			}
 		}
@@ -1830,7 +1937,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 						TagElement tag= (TagElement) tags.get(i);
 						if (TagElement.TAG_RETURN.equals(tag.getTagName())) {
 							getASTRewrite().remove(tag, fDescription);
-							getImportRemover().registerRemovedNode(tag);
+							registerImportRemoveNode(tag);
 						}
 					}
 				} else if (isTopOfRipple && Signature.SIG_VOID.equals(fMethod.getReturnType())){
@@ -1858,12 +1965,12 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 						if (identifier.equals(info.getOldName())) {
 							if (info.isDeleted()) {
 								getASTRewrite().remove(tag, fDescription);
-								getImportRemover().registerRemovedNode(tag);
+								registerImportRemoveNode(tag);
 								removed= true;
 							} else if (info.isRenamed()) {
 								SimpleName newName= simpleName.getAST().newSimpleName(info.getNewName());
 								getASTRewrite().replace(simpleName, newName, fDescription);
-								getImportRemover().registerRemovedNode(simpleName);
+								registerImportRemoveNode(tag);
 							}
 							break;
 						}
@@ -1935,7 +2042,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 						ExceptionInfo info= (ExceptionInfo) fExceptionInfos.get(j);
 						if (info.isDeleted() && Bindings.equals(info.getTypeBinding(), name.resolveTypeBinding())) {
 							getASTRewrite().remove(tag, fDescription);
-							getImportRemover().registerRemovedNode(tag);
+							registerImportRemoveNode(tag);
 							tagDeleted= true;
 							break;
 						}
@@ -2191,7 +2298,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 			}
 			
 			getASTRewrite().replace(oldTypeNode, newTypeNode, fDescription);
-			getImportRemover().registerRemovedNode(oldTypeNode);
+			registerImportRemoveNode(oldTypeNode);
 		}
 	}
 	
@@ -2361,6 +2468,11 @@ public class ChangeSignatureRefactoring extends Refactoring implements IInitiali
 				count++;
 				attribute= ATTRIBUTE_EXCEPTION + count;
 			}
+			final String delegatingUpdating= generic.getAttribute(ATTRIBUTE_DELEGATING_UPDATING);
+			if (delegatingUpdating != null) {
+				fDelegatingUpdating= Boolean.valueOf(delegatingUpdating).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATING_UPDATING));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();

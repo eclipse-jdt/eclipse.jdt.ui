@@ -111,11 +111,16 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 		
 	private void helperAdd(String[] signature, ParameterInfo[] newParamInfos, int[] newIndices) throws Exception {
+		helperAdd(signature, newParamInfos, newIndices, false);
+	}
+	
+	private void helperAdd(String[] signature, ParameterInfo[] newParamInfos, int[] newIndices, boolean createDelegate) throws Exception {
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
 		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
+		ref.setDelegatingUpdating(createDelegate);
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -159,7 +164,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 							  	String[] newParameterTypeNames, 
 							  	int[] permutation,
 							  	int newVisibility,
-							  	int[] deleted, String returnTypeName)  throws Exception{
+							  	int[] deleted, String returnTypeName, boolean createDelegate)  throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, typeName);
 		IMethod method = classA.getMethod(methodName, signature);
@@ -167,6 +172,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		if (returnTypeName != null)
 			ref.setNewReturnTypeName(returnTypeName);
+		ref.setDelegatingUpdating(createDelegate);
 		markAsDeleted(ref.getParameterInfos(), deleted);	
 		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation);
 		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
@@ -182,6 +188,13 @@ public class ChangeSignatureTests extends RefactoringTest {
 		assertEqualLines(expectedFileContents, newcu.getSource());
 	}
 	
+	private void helperDoAll(String typeName, String methodName, String[] signature, ParameterInfo[] newParamInfos, int[] newIndices,
+			String[] oldParamNames, String[] newParamNames, String[] newParameterTypeNames, int[] permutation, int newVisibility, int[] deleted,
+			String returnTypeName) throws Exception {
+		helperDoAll(typeName, methodName, signature, newParamInfos, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation,
+				newVisibility, deleted, returnTypeName, false);
+	}
+	
 	private void markAsDeleted(List list, int[] deleted) {
 		if (deleted == null)
 			return;
@@ -195,11 +208,16 @@ public class ChangeSignatureTests extends RefactoringTest {
 	}
 	
 	private void helper1(String[] newOrder, String[] signature, String[] oldNames, String[] newNames) throws Exception{
+		helper1(newOrder, signature, oldNames, newNames, false);
+	}
+	
+	private void helper1(String[] newOrder, String[] signature, String[] oldNames, String[] newNames, boolean createDelegate) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		IType classA= getType(cu, "A");
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
 		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
+		ref.setDelegatingUpdating(createDelegate);
 		modifyInfos(ref.getParameterInfos(), newOrder, oldNames, newNames);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -2041,6 +2059,45 @@ public class ChangeSignatureTests extends RefactoringTest {
 			String newReturnTypeName= null;
 			helperDoAll("I", "test", signature, newParamInfo, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation, newVisibility, deletedIndices, newReturnTypeName);
 		}
+		
+	public void testDelegate01() throws Exception {
+		// simple reordering with delegate
+		helper1(new String[]{"j", "i"}, new String[]{"I", "QString;"}, null, null, true);
+	}
+	
+	public void testDelegate02() throws Exception {
+		// add a parameter -> import it
+		String[] signature= {};
+		String[] newTypes= {"java.util.List" };
+		String[] newNames= {"list" };
+		String[] newDefaultValues= {"null"};
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= { 0 };
+		helperAdd(signature, newParamInfo, newIndices, true);
+	}
+	
+	public void testDelegate03() throws Exception {
+		// reordering with imported type in body => don't remove import
+		helper1(new String[]{"j", "i"}, new String[]{"I", "QString;"}, null, null, true);
+	}
+	
+	public void testDelegate04() throws Exception {
+		// delete a parameter => import stays
+		String[] signature= {"QList;"};
+		String[] newNames= null;
+		String[] newTypes= null;
+		String[] newDefaultValues= null;
+		ParameterInfo[] newParamInfo= createNewParamInfos(newTypes, newNames, newDefaultValues);
+		int[] newIndices= null;
+		
+		String[] oldParamNames= {"l"};
+		String[] newParamNames= {"l"};
+		int[] permutation= {};
+		int[] deletedIndices= {0};
+		int newVisibility= Modifier.PRIVATE;
+		String newReturnTypeName= null;
+		helperDoAll("A", "m", signature, newParamInfo, newIndices, oldParamNames, newParamNames, null, permutation, newVisibility, deletedIndices, newReturnTypeName, true);	
+	}
 	
 }
 

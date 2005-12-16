@@ -52,6 +52,9 @@ import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -69,9 +72,16 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -87,13 +97,14 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating {
+public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IDelegatingUpdating {
 
 	private static final String ID_RENAME_FIELD= "org.eclipse.jdt.ui.rename.field"; //$NON-NLS-1$
 	protected static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RENAME_GETTER= "getter"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RENAME_SETTER= "setter"; //$NON-NLS-1$
 	protected static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_DELEGATING_UPDATING= "delegatingUpdating"; //$NON-NLS-1$
 
 	protected IField fField;
 	private SearchResultGroup[] fReferences;
@@ -104,6 +115,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private boolean fRenameSetter;
 	private boolean fIsComposite;
 	private GroupCategorySet fCategorySet;
+	private boolean fDelegatingUpdating;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
 
@@ -116,6 +128,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		initialize(field);
 		fChangeManager= manager;
 		fCategorySet= categorySet;
+		fDelegatingUpdating= false;
 		fIsComposite= true;
 	}
 
@@ -319,6 +332,41 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	public String getNewSetterName() throws CoreException {
 		return GetterSetterUtil.getSetterName(fField.getJavaProject(), getNewElementName(), fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
 	}
+	
+	// ------------------- IDelegatingUpdating ----------------------
+
+	public boolean canEnableDelegatingUpdating() {
+		return (getDelegateCount() > 0);
+	}
+
+	public boolean getDelegatingUpdating() {
+		return fDelegatingUpdating;
+	}
+
+	public void setDelegatingUpdating(boolean delegatingUpdating) {
+		fDelegatingUpdating= delegatingUpdating;
+	}
+
+	/**
+	 * Returns the maximum number of delegates which can
+	 * be created for the input elements of this refactoring.
+	 * 
+	 * @return maximum number of delegates
+	 */
+	public int getDelegateCount() {
+		int count= 0;
+		try {
+			if (RefactoringAvailabilityTester.isDelegateCreationAvailable(getField()))
+				count++;
+			if (fRenameGetter && getGetter() != null)
+				count++;
+			if (fRenameSetter && getSetter() != null)
+				count++;
+		} catch (CoreException e) {
+			// no-op
+		}
+		return count;
+	}
 
 	// -------------- Preconditions -----------------------
 	
@@ -517,6 +565,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
 					arguments.put(ATTRIBUTE_RENAME_GETTER, Boolean.valueOf(fRenameGetter).toString());
 					arguments.put(ATTRIBUTE_RENAME_SETTER, Boolean.valueOf(fRenameSetter).toString());
+					arguments.put(ATTRIBUTE_DELEGATING_UPDATING, Boolean.valueOf(fDelegatingUpdating).toString());
 					String project= null;
 					IJavaProject javaProject= fField.getJavaProject();
 					if (javaProject != null)
@@ -544,6 +593,11 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		if (!fIsComposite)
 			fChangeManager.clear();
 
+		// Delegate creation requires ASTRewrite which
+		// creates a new change -> do this first.
+		if (fDelegatingUpdating)
+			result.merge(addDelegates());
+		
 		addDeclarationUpdate();
 		
 		if (fUpdateReferences) {
@@ -582,7 +636,58 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		String groupName= RefactoringCoreMessages.RenameFieldRefactoring_Update_field_declaration; 
 		addTextEdit(fChangeManager.get(cu), groupName, textEdit);
 	}
-	
+
+	private RefactoringStatus addDelegates() throws JavaModelException, CoreException {
+
+		RefactoringStatus status= new RefactoringStatus();
+		CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fField.getCompilationUnit());
+		rewrite.setResolveBindings(false);
+
+		// add delegate for the field
+		if (RefactoringAvailabilityTester.isDelegateCreationAvailable(fField)) {
+			FieldDeclaration fieldDeclaration= ASTNodeSearchUtil.getFieldDeclarationNode(fField, rewrite.getRoot());
+			if (fieldDeclaration.fragments().size() > 1) {
+				status.addWarning(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_more_than_one_fragment, fField
+						.getElementName()), JavaStatusContext.create(fField));
+			} else if (((VariableDeclarationFragment) fieldDeclaration.fragments().get(0)).getInitializer() == null) {
+				status.addWarning(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_no_initializer, fField
+						.getElementName()), JavaStatusContext.create(fField));
+			} else {
+				DelegateFieldCreator d= new DelegateFieldCreator();
+				d.setDeclaration(fieldDeclaration);
+				d.setNewElementName(getNewElementName());
+				d.setSourceRewrite(rewrite);
+				d.prepareDelegate();
+				d.createEdit();
+			}
+		}
+
+		// add delegates for getter and setter methods
+		// there may be getters even if the field is static final
+		if (getGetter() != null && fRenameGetter)
+			addMethodDelegate(getGetter(), getNewGetterName(), rewrite);
+		if (getSetter() != null && fRenameSetter)
+			addMethodDelegate(getSetter(), getNewSetterName(), rewrite);
+
+		final CompilationUnitChange change= rewrite.createChange();
+		if (change != null) {
+			change.setKeepPreviewEdits(true);
+			fChangeManager.manage(fField.getCompilationUnit(), change);
+		}
+
+		return status;
+	}
+
+	private void addMethodDelegate(IMethod getter, String newName, CompilationUnitRewrite rewrite) throws JavaModelException {
+		MethodDeclaration m= ASTNodeSearchUtil.getMethodDeclarationNode(getter, rewrite.getRoot());
+		DelegateCreator d= new DelegateMethodCreator();
+		d.setDeclaration(m);
+		d.setNewElementName(newName);
+		d.setSourceRewrite(rewrite);
+		d.prepareDelegate();
+		d.createEdit();
+	}
+
 	private void addTextEdit(TextChange change, String groupName, TextEdit textEdit) {
 		if (fIsComposite)
 			TextChangeCompatibility.addTextEdit(change, groupName, textEdit, fCategorySet);
@@ -687,21 +792,35 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		if (declaringCuWorkingCopy == null)
 			return new SearchResultGroup[0];
 		
-		IField field= getNewField(declaringCuWorkingCopy);
+		IField field= getFieldInWorkingCopy(declaringCuWorkingCopy, getNewElementName());
 		if (field == null || ! field.exists())
 			return new SearchResultGroup[0];
 		
+		CollectingSearchRequestor requestor= null;
+		if (fDelegatingUpdating && RefactoringAvailabilityTester.isDelegateCreationAvailable(getField())) {
+			// There will be two new matches inside the delegate (the invocation
+			// and the javadoc) which are OK and must not be reported.
+			final IField oldField= getFieldInWorkingCopy(declaringCuWorkingCopy, getCurrentElementName());
+			requestor= new CollectingSearchRequestor() {
+				public void acceptSearchMatch(SearchMatch match) throws CoreException {
+					if (!oldField.equals(match.getElement()))
+						super.acceptSearchMatch(match);
+				}
+			};
+		} else
+			requestor= new CollectingSearchRequestor();
+		
 		SearchPattern newPattern= SearchPattern.createPattern(field, IJavaSearchConstants.REFERENCES);			
-		return RefactoringSearchEngine.search(newPattern, createRefactoringScope(), new CollectingSearchRequestor(), new SubProgressMonitor(pm, 1), owner, status);
+		return RefactoringSearchEngine.search(newPattern, createRefactoringScope(), requestor, new SubProgressMonitor(pm, 1), owner, status);
 	}
-
-	private IField getNewField(ICompilationUnit newWorkingCopyOfDeclaringCu) throws CoreException{
+	
+	private IField getFieldInWorkingCopy(ICompilationUnit newWorkingCopyOfDeclaringCu, String elementName) throws CoreException{
 		IType type= fField.getDeclaringType();
 		IType typeWc= (IType) JavaModelUtil.findInCompilationUnit(newWorkingCopyOfDeclaringCu, type);
 		if (typeWc == null)
 			return null;
 		
-		return typeWc.getField(getNewElementName());
+		return typeWc.getField(elementName);
 	}
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
@@ -752,6 +871,11 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				fRenameSetter= Boolean.valueOf(setters).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_RENAME_SETTER));
+			final String delegatingUpdating= generic.getAttribute(ATTRIBUTE_DELEGATING_UPDATING);
+			if (delegatingUpdating != null) {
+				fDelegatingUpdating= Boolean.valueOf(delegatingUpdating).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATING_UPDATING));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();

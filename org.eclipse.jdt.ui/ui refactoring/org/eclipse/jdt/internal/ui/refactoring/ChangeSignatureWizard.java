@@ -20,6 +20,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -72,6 +73,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		public static final String PAGE_NAME= "ChangeSignatureInputPage"; //$NON-NLS-1$
 		private JavaSourceViewer fSignaturePreview;
 		private Document fSignaturePreviewDocument;
+		private Button fLeaveDelegateCheckBox;
 		
 		public ChangeSignatureInputPage() {
 			super(PAGE_NAME);
@@ -91,6 +93,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 				createHeadControls(composite);
 
 				createParameterExceptionsFolder(composite);
+				fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(composite, getRefactoring(), false);
 				Label sep= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 				sep.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
 				createSignaturePreview(composite);
@@ -279,6 +282,11 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 			cp.setLayoutData(new GridData(GridData.FILL_BOTH));
 			cp.setInput(getChangeMethodSignatureRefactoring().getExceptionInfos());
 			return cp;
+		}
+
+		public void dispose() {
+			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
+			super.dispose();
 		}
 		
 		private void createSignaturePreview(Composite composite) {

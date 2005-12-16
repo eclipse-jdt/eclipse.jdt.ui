@@ -105,6 +105,10 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 	 * @throws Exception
 	 */
 	private void helper2(String fieldName, String newFieldName) throws Exception{
+		helper2(fieldName, newFieldName, false);
+	}
+	
+	private void helper2(String fieldName, String newFieldName, boolean createDelegates) throws Exception{
 		ParticipantTesting.reset();
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType classA= getType(cu, "A");
@@ -117,6 +121,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		processor.setUpdateTextualMatches(fUpdateTextualMatches);
 		processor.setRenameGetter(fRenameGetter);
 		processor.setRenameSetter(fRenameSetter);
+		processor.setDelegatingUpdating(createDelegates);
 		
 		int numbers= 1;
 		List elements= new ArrayList();
@@ -430,4 +435,21 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		helper2("ZERO", "ZORRO");
 	}
 	
+	public void testDelegate01() throws Exception {
+		// a simple delegate
+		helper2("f", "g", true);
+	}
+	
+	public void testDelegate02() throws Exception {
+		// nonstatic field, getter and setter
+		fRenameSetter= true;
+		fRenameGetter= true;
+		helper2("f", "g", true);
+	}
+	
+	public void testDelegate03() throws Exception {
+		// create delegates for the field and a getter
+		fRenameGetter= true;
+		helper2("f", "g", true);
+	}
 }

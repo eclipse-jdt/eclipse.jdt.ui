@@ -897,6 +897,10 @@ public final class RefactoringAvailabilityTester {
 			return ReorgUtils.getCompilationUnit(element).isWorkingCopy();
 		return false;
 	}
+	
+	public static boolean isDelegateCreationAvailable(final IField field) throws JavaModelException {
+		return (Flags.isStatic(field.getFlags()) && Flags.isFinal(field.getFlags()) /* && hasInitializer(field) */);
+	}
 
 	private RefactoringAvailabilityTester() {
 		// Not for instantiation

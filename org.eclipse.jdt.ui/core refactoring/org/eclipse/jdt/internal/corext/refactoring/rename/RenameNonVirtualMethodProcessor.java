@@ -26,7 +26,9 @@ import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.MethodDeclarationMatch;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -39,6 +41,10 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -131,8 +137,10 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	 */
 	void addOccurrences(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
-		addReferenceUpdates(manager, pm, status);
-		addDeclarationUpdate(manager.get(getDeclaringCU()));
+		// declaration update must be registered first
+		addDeclarationUpdate(manager);
+		if (getUpdateReferences())
+			addReferenceUpdates(manager, pm, status);
 		pm.worked(1);
 	}
 	
@@ -152,6 +160,31 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 
 	private SearchPattern createReferenceSearchPattern() {
 		return SearchPattern.createPattern(getMethod(), IJavaSearchConstants.REFERENCES, SearchUtils.GENERICS_AGNOSTIC_MATCH_RULE);
+	}
+	
+	final void addDeclarationUpdate(TextChangeManager manager) throws CoreException {
+
+		if (getDelegatingUpdating()) {
+			// create the delegate
+			CompilationUnitRewrite rewrite= new CompilationUnitRewrite(getDeclaringCU());
+			rewrite.setResolveBindings(false);
+			MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(getMethod(), rewrite.getRoot());
+			DelegateMethodCreator creator= new DelegateMethodCreator();
+			creator.setDeclaration(methodDeclaration);
+			creator.setSourceRewrite(rewrite);
+			creator.setCopy(true);
+			creator.setNewElementName(getNewElementName());
+			creator.prepareDelegate();
+			creator.createEdit();
+			final CompilationUnitChange change= rewrite.createChange();
+			change.setKeepPreviewEdits(true);
+			manager.manage(getDeclaringCU(), change);
+		}
+
+		String editName= RefactoringCoreMessages.RenameMethodRefactoring_update_declaration;
+		ISourceRange nameRange= getMethod().getNameRange();
+		ReplaceEdit replaceEdit= new ReplaceEdit(nameRange.getOffset(), nameRange.getLength(), getNewElementName());
+		addTextEdit(manager.get(getDeclaringCU()), editName, replaceEdit);
 	}
 	
 	private void addReferenceUpdates(TextChangeManager manager, IProgressMonitor pm, RefactoringStatus status) throws CoreException {

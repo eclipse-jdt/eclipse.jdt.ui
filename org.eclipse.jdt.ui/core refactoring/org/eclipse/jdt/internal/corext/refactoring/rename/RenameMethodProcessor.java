@@ -46,16 +46,17 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaConventions;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.MethodDeclarationMatch;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchParticipant;
@@ -73,7 +74,12 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -86,10 +92,11 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating {
+public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating, IDelegatingUpdating {
 
 	private static final String ID_RENAME_METHOD= "org.eclipse.jdt.ui.rename.method"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_DELEGATING_UPDATING= "delegatingUpdating"; //$NON-NLS-1$
 
 	private SearchResultGroup[] fOccurrences;
 	private boolean fUpdateReferences;
@@ -99,6 +106,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private WorkingCopyOwner fWorkingCopyOwner;
 	private boolean fIsComposite;
 	private GroupCategorySet fCategorySet;
+	private boolean fDelegatingUpdating;
 	
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
 	
@@ -111,6 +119,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		initialize(method);
 		fChangeManager= manager;
 		fCategorySet= categorySet;
+		fDelegatingUpdating= false;
 		fIsComposite= true;
 	}
 	
@@ -221,6 +230,20 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	public boolean getUpdateReferences() {
 		return fUpdateReferences;
 	}	
+	
+	//------------------- IDelegatingUpdating ----------------------
+		
+	public boolean canEnableDelegatingUpdating() {
+		return true;
+	}
+
+	public boolean getDelegatingUpdating() {
+		return fDelegatingUpdating;
+	}
+
+	public void setDelegatingUpdating(boolean delegatingUpdating) {
+		fDelegatingUpdating= delegatingUpdating;
+	}
 	
 	//----------- preconditions ------------------
 
@@ -456,16 +479,21 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			newDeclarationWCs= RenameAnalyzeUtil.createNewWorkingCopies(declarationCUs,
 					fChangeManager, fWorkingCopyOwner, new SubProgressMonitor(pm, 1));
 			
-			IMethod[] newMethods= new IMethod[fMethodsToRename.size()];
+			IMethod[] wcOldMethods= new IMethod[fMethodsToRename.size()];
+			IMethod[] wcNewMethods= new IMethod[fMethodsToRename.size()];
 			int i= 0;
 			for (Iterator iter= fMethodsToRename.iterator(); iter.hasNext(); i++) {
 				IMethod method= (IMethod) iter.next();
 				ICompilationUnit newCu= RenameAnalyzeUtil.findWorkingCopyForCu(newDeclarationWCs, method.getCompilationUnit());
-				newMethods[i]= getNewMethod(method, newCu);
+				IType typeWc= (IType) JavaModelUtil.findInCompilationUnit(newCu, method.getDeclaringType());
+				if (typeWc == null)
+					continue;
+				wcOldMethods[i]= getMethodInWorkingCopy(method, getCurrentElementName(), typeWc);
+				wcNewMethods[i]= getMethodInWorkingCopy(method, getNewElementName(), typeWc);
 			}
 			
 //			SearchResultGroup[] newOccurrences= findNewOccurrences(newMethods, newDeclarationWCs, new SubProgressMonitor(pm, 3));
-			SearchResultGroup[] newOccurrences= batchFindNewOccurrences(newMethods, newDeclarationWCs, new SubProgressMonitor(pm, 3), result);
+			SearchResultGroup[] newOccurrences= batchFindNewOccurrences(wcNewMethods, wcOldMethods, newDeclarationWCs, new SubProgressMonitor(pm, 3), result);
 			
 			result.merge(RenameAnalyzeUtil.analyzeRenameChanges2(fChangeManager, fOccurrences, newOccurrences, getNewElementName()));
 			return result;
@@ -512,13 +540,30 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 //		return newResults;
 //	}
 
-	private SearchResultGroup[] batchFindNewOccurrences(IMethod[] newMethods, ICompilationUnit[] newDeclarationWCs, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
+	private SearchResultGroup[] batchFindNewOccurrences(IMethod[] wcNewMethods, final IMethod[] wcOldMethods, ICompilationUnit[] newDeclarationWCs, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		
-		SearchPattern refsPattern= RefactoringSearchEngine.createOrPattern(newMethods, IJavaSearchConstants.REFERENCES);
+		SearchPattern refsPattern= RefactoringSearchEngine.createOrPattern(wcNewMethods, IJavaSearchConstants.REFERENCES);
 		SearchParticipant[] searchParticipants= SearchUtils.getDefaultSearchParticipants();
-		IJavaSearchScope scope= RefactoringScopeFactory.create(newMethods);
-		MethodOccurenceCollector requestor= new MethodOccurenceCollector(getNewElementName());
+		IJavaSearchScope scope= RefactoringScopeFactory.create(wcNewMethods);
+		
+		MethodOccurenceCollector requestor;
+		if (getDelegatingUpdating()) {
+			// There will be two new matches inside the delegate(s) (the invocation
+			// and the javadoc) which are OK and must not be reported.
+			// Note that except these ocurrences, the delegate bodies are empty 
+			// (as they were created this way).
+			requestor= new MethodOccurenceCollector(getNewElementName()) {
+				public void acceptSearchMatch(SearchMatch match) throws CoreException {
+					for (int i= 0; i < wcOldMethods.length; i++) 
+						if (wcOldMethods[i].equals(match.getElement()))
+							return;
+					super.acceptSearchMatch(match);
+				}
+			};
+		} else
+			requestor= new MethodOccurenceCollector(getNewElementName());
+		
 		SearchEngine searchEngine= new SearchEngine(fWorkingCopyOwner);
 		
 		ArrayList needWCs= new ArrayList();
@@ -557,14 +602,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return (ICompilationUnit[]) cus.toArray(new ICompilationUnit[cus.size()]);
 	}
 	
-	private IMethod getNewMethod(IMethod method, ICompilationUnit newWorkingCopyOfDeclaringCu) throws CoreException{
-		IType type= method.getDeclaringType();
-		IType typeWc= (IType) JavaModelUtil.findInCompilationUnit(newWorkingCopyOfDeclaringCu, type);
-		if (typeWc == null)
-			return null;
-		
+	private IMethod getMethodInWorkingCopy(IMethod method, String elementName, IType typeWc) throws CoreException{
 		String[] paramTypeSignatures= method.getParameterTypes();
-		return typeWc.getMethod(getNewElementName(), paramTypeSignatures);
+		return typeWc.getMethod(elementName, paramTypeSignatures);
 	}
 
 	//-------
@@ -622,6 +662,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 					arguments.put(RefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
 					arguments.put(RefactoringDescriptor.NAME, getNewElementName());
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+					arguments.put(ATTRIBUTE_DELEGATING_UPDATING, Boolean.valueOf(fDelegatingUpdating).toString());
 					String project= null;
 					IJavaProject javaProject= fMethod.getJavaProject();
 					if (javaProject != null)
@@ -644,14 +685,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private TextChangeManager createChanges(IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		if (!fIsComposite)
 			fChangeManager.clear();
-		
-		/* don't really want to add declaration and references separetely in this refactoring 
-		* (declarations of methods are different than declarations of anything else)
-		*/
-		if (! fUpdateReferences)
-			addDeclarationUpdate(fChangeManager); // TODO: only one declaration updated, not all of them
-		else
-			addOccurrences(fChangeManager, pm, status);	
+		addOccurrences(fChangeManager, pm, status);
 		return fChangeManager;
 	}
 	
@@ -662,18 +696,71 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			if (cu == null)	
 				continue;
 			
-			TextChange textChange= manager.get(cu);
 			SearchMatch[] results= fOccurrences[i].getSearchResults();
-			for (int j= 0; j < results.length; j++){
-				String editName= RefactoringCoreMessages.RenameMethodRefactoring_update_occurrence; 
-				ReplaceEdit replaceEdit= createReplaceEdit(results[j], cu);
-				addTextEdit(textChange, editName, replaceEdit);
+
+			// Split matches into declaration and non-declaration matches
+			
+			List declarationsInThisCu= new ArrayList();
+			List referencesInThisCu= new ArrayList();
+			 
+			for (int j= 0; j < results.length; j++) {
+				if (results[j] instanceof MethodDeclarationMatch)
+					declarationsInThisCu.add(results[j]);
+				else
+					referencesInThisCu.add(results[j]);
 			}
+
+			// First, handle the declarations
+			if (declarationsInThisCu.size() > 0) {
+
+				if (fDelegatingUpdating) {
+					// Update with delegates
+					CompilationUnitRewrite rewrite= new CompilationUnitRewrite(cu);
+					rewrite.setResolveBindings(false);
+
+					for (Iterator iter= declarationsInThisCu.iterator(); iter.hasNext();) {
+						SearchMatch element= (SearchMatch) iter.next();
+						MethodDeclaration method= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) element.getElement(), rewrite.getRoot());
+						DelegateCreator creator= new DelegateMethodCreator();
+						creator.setDeclaration(method);
+						creator.setSourceRewrite(rewrite);
+						creator.setNewElementName(getNewElementName());
+						creator.prepareDelegate();
+						creator.createEdit();
+					}
+					// Need to handle all delegates first as this
+					// creates a completely new change object.
+					TextChange changeForThisCu= rewrite.createChange();
+					changeForThisCu.setKeepPreviewEdits(true);
+					manager.manage(cu, changeForThisCu);
+				}
+
+				// Update the normal methods
+				for (Iterator iter= declarationsInThisCu.iterator(); iter.hasNext();) {
+					SearchMatch element= (SearchMatch) iter.next();
+					simpleUpdate(element, cu, manager.get(cu));
+				}
+			}
+
+			// Second, handle references
+			if (fUpdateReferences) {
+				for (Iterator iter= referencesInThisCu.iterator(); iter.hasNext();) {
+					SearchMatch element= (SearchMatch) iter.next();
+					simpleUpdate(element, cu, manager.get(cu));
+				}
+			}
+			
 			pm.worked(1);
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 		}
 		pm.done();
+	}
+
+	private void simpleUpdate(SearchMatch element, ICompilationUnit cu, TextChange textChange) {
+		String editName= RefactoringCoreMessages.RenameMethodRefactoring_update_occurrence;
+		ReplaceEdit replaceEdit= createReplaceEdit(element, cu);
+		addTextEdit(textChange, editName, replaceEdit);
 	}
 
 	protected final ReplaceEdit createReplaceEdit(SearchMatch searchResult, ICompilationUnit cu) {
@@ -688,19 +775,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		} else {
 			return new ReplaceEdit(searchResult.getOffset(), searchResult.getLength(), getNewElementName());
 		}
-	}
-
-	private void addDeclarationUpdate(TextChangeManager manager) throws CoreException {
-		ICompilationUnit cu= fMethod.getCompilationUnit();
-		TextChange change= manager.get(cu);
-		addDeclarationUpdate(change);
-	}
-	
-	final void addDeclarationUpdate(TextChange change) throws CoreException {
-		String editName= RefactoringCoreMessages.RenameMethodRefactoring_update_declaration; 
-		ISourceRange nameRange= fMethod.getNameRange();
-		ReplaceEdit replaceEdit= new ReplaceEdit(nameRange.getOffset(), nameRange.getLength(), getNewElementName());
-		addTextEdit(change, editName, replaceEdit);
 	}
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
@@ -741,6 +815,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				fUpdateReferences= Boolean.valueOf(references).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REFERENCES));
+			final String delegatingUpdating= generic.getAttribute(ATTRIBUTE_DELEGATING_UPDATING);
+			if (delegatingUpdating != null) {
+				fDelegatingUpdating= Boolean.valueOf(delegatingUpdating).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATING_UPDATING));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();

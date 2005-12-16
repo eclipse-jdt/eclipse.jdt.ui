@@ -5,7 +5,7 @@ interface I {
 void k();
 }
 class C1 implements I{
-	public void m(){};
+	public void k(){};
 }
 class D{
 	void h(){

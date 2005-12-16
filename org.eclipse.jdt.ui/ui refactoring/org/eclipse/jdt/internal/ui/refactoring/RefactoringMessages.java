@@ -365,6 +365,9 @@ public final class RefactoringMessages extends NLS {
 	public static String RenameTypeWizardInputPage_update_similar_elements_configure;
 	public static String RenameTypeWizardInputPage_description;
 	
+	public static String DelegateCreator_leave_several_delegates;
+	public static String DelegateCreator_leave_one_delegate;
+	
 	public static String RenameTypeParameterWizard_defaultPageTitle;
 	public static String RenameTypeParameterWizard_inputPage_description;
 	public static String RenameMethodWizard_defaultPageTitle;

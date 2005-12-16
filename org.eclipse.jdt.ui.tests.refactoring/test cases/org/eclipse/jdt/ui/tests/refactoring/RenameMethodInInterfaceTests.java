@@ -70,13 +70,14 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		helper1_0("m", "k", NO_ARGUMENTS);
 	}
 	
-	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass, boolean updateReferences) throws Exception{
+	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean shouldPass, boolean updateReferences, boolean createDelegate) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		IType interfaceI= getType(cu, "I");
 		RenameMethodProcessor processor= new RenameVirtualMethodProcessor(interfaceI.getMethod(methodName, signatures));
 		RenameRefactoring ref= new RenameRefactoring(processor);
 		processor.setUpdateReferences(updateReferences);
 		processor.setNewElementName(newMethodName);
+		processor.setDelegatingUpdating(createDelegate);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		if (!shouldPass){
 			assertTrue("incorrect renaming because of a java model bug", ! getFileContents(getOutputTestFileName("A")).equals(cu.getSource()));
@@ -100,38 +101,42 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}
 	
 	private void helper2(boolean updateReferences) throws Exception{
-		helper2_0("m", "k", NO_ARGUMENTS, true, updateReferences);
+		helper2_0("m", "k", NO_ARGUMENTS, true, updateReferences, false);
 	}
 	
 	private void helper2() throws Exception{
 		helper2(true);
 	}
 	
+	private void helperDelegate() throws Exception{
+		helper2_0("m", "k", NO_ARGUMENTS, true, true, true);
+	}
+	
 // --------------------------------------------------------------------------
 	
 	public void testAnnotation0() throws Exception{
-		helper2_0("name", "ident", NO_ARGUMENTS, true, true);
+		helper2_0("name", "ident", NO_ARGUMENTS, true, true, false);
 	}
 	
 	public void testAnnotation1() throws Exception{
-		helper2_0("value", "number", NO_ARGUMENTS, true, true);
+		helper2_0("value", "number", NO_ARGUMENTS, true, true, false);
 	}
 	
 	public void testAnnotation2() throws Exception{
-		helper2_0("thing", "value", NO_ARGUMENTS, true, true);
+		helper2_0("thing", "value", NO_ARGUMENTS, true, true, false);
 	}
 	
 	public void testAnnotation3() throws Exception{
-		helper2_0("value", "num", NO_ARGUMENTS, true, true);
+		helper2_0("value", "num", NO_ARGUMENTS, true, true, false);
 	}
 	
 	public void testAnnotation4() throws Exception{
 		// see also bug 83064
-		helper2_0("value", "num", NO_ARGUMENTS, true, true);
+		helper2_0("value", "num", NO_ARGUMENTS, true, true, false);
 	}
 	
 	public void testGenerics01() throws Exception {
-		helper2_0("getXYZ", "zYXteg", new String[] {"QList<QSet<QRunnable;>;>;"}, true, true);
+		helper2_0("getXYZ", "zYXteg", new String[] {"QList<QSet<QRunnable;>;>;"}, true, true, false);
 	}
 	
 	public void testFail0() throws Exception{
@@ -425,5 +430,14 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 	}
 	public void test47() throws Exception{
 		helper2();
+	}
+	
+	public void testDelegate01() throws Exception {
+		// simple delegate
+		helperDelegate();
+	}
+	public void testDelegate02() throws Exception {
+		// "overridden" delegate
+		helperDelegate();
 	}
 }

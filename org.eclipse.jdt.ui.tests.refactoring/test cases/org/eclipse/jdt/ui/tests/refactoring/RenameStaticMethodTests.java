@@ -66,7 +66,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		helper1_0("m", "k", new String[0]);
 	}
 	
-	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean updateReferences) throws Exception{
+	private void helper2_0(String methodName, String newMethodName, String[] signatures, boolean updateReferences, boolean createDelegate) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), "A");
 		try{
 			IType classA= getType(cu, "A");
@@ -74,6 +74,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 			RenameRefactoring refactoring= new RenameRefactoring(processor);
 			processor.setUpdateReferences(updateReferences);
 			processor.setNewElementName(newMethodName);
+			processor.setDelegatingUpdating(createDelegate);
 			assertEquals("was supposed to pass", null, performRefactoring(refactoring));
 			assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 			
@@ -96,15 +97,19 @@ public class RenameStaticMethodTests extends RefactoringTest {
 		}
 	}
 	private void helper2_0(String methodName, String newMethodName, String[] signatures) throws Exception{
-		helper2_0(methodName, newMethodName, signatures, true);
+		helper2_0(methodName, newMethodName, signatures, true, false);
 	}
 	
 	private void helper2(boolean updateReferences) throws Exception{
-		helper2_0("m", "k", new String[0], updateReferences);
+		helper2_0("m", "k", new String[0], updateReferences, false);
 	}
 	
 	private void helper2() throws Exception{
 		helper2(true);
+	}
+	
+	private void helperDelegate() throws Exception{
+		helper2_0("m", "k", new String[0], true, true);
 	}
 
 	public void testFail0() throws Exception {
@@ -178,7 +183,7 @@ public class RenameStaticMethodTests extends RefactoringTest {
 	}
 	
 	public void test9() throws Exception{
-		helper2_0("m", "k", new String[]{Signature.SIG_INT}, false);
+		helper2_0("m", "k", new String[]{Signature.SIG_INT}, false, false);
 	}
 	
 	public void test10() throws Exception{
@@ -254,6 +259,11 @@ public class RenameStaticMethodTests extends RefactoringTest {
 			return;
 		}
 		helper2();
+	}
+	
+	public void testDelegate01() throws Exception  {
+		// simple static delegate
+		helperDelegate();
 	}
 
 }

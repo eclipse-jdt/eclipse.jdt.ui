@@ -157,6 +157,18 @@ public class ASTNodes {
 	}
 	
 	/**
+	 * Returns true if this is an existing node, i.e. it was created as part of
+	 * a parsing process of a source code file. Returns false if this is a newly
+	 * created node which has not yet been given a source position.
+	 * 
+	 * @param node the node to be tested.
+	 * @return true if this is an existing node, false if not.
+	 */
+	public static boolean isExistingNode(ASTNode node) {
+		return node.getStartPosition() != -1;
+	}
+	
+	/**
 	 * Returns the element type. This is a convenience method that returns its 
 	 * argument if it is a simple type and the element type if the parameter is an array type.
 	 * @param type The type to get the element type from.

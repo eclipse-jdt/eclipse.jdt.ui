@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
@@ -70,6 +71,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 		
 		private JavaSourceViewer fSignaturePreview;
 		private Document fSignaturePreviewDocument;
+		private Button fLeaveDelegateCheckBox;
     
 		public IntroduceParameterInputPage(String[] tempNameProposals) {
 			super(PAGE_NAME);
@@ -90,6 +92,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			result.setLayout(layout);
 			
 			createParameterTableControl(result);
+			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(result, getRefactoring(), false);
 			createSignaturePreview(result);
 			
 			update(false);
@@ -114,6 +117,11 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			cp.setInput(getIntroduceParameterRefactoring().getParameterInfos());
 			cp.editParameter(getIntroduceParameterRefactoring().getAddedParameterInfo());
 			return cp;
+		}
+
+		public void dispose() {
+			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
+			super.dispose();
 		}
 	
 		private void createSignaturePreview(Composite composite) {

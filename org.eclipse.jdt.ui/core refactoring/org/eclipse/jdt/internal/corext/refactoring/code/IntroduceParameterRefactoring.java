@@ -68,11 +68,12 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.BodyUpdater;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
-public class IntroduceParameterRefactoring extends Refactoring {
+public class IntroduceParameterRefactoring extends Refactoring implements IDelegatingUpdating {
 	
 	private static final String[] KNOWN_METHOD_NAME_PREFIXES= {"get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
 	
@@ -95,6 +96,23 @@ public class IntroduceParameterRefactoring extends Refactoring {
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 	}
+	
+	// ------------------- IDelegatingUpdating ----------------------
+
+	public boolean canEnableDelegatingUpdating() {
+		return true;
+	}
+
+	public boolean getDelegatingUpdating() {
+		return (fChangeSignatureRefactoring != null) ? fChangeSignatureRefactoring.getDelegatingUpdating() : false;
+	}
+
+	public void setDelegatingUpdating(boolean delegatingUpdating) {
+		if (fChangeSignatureRefactoring != null)
+			fChangeSignatureRefactoring.setDelegatingUpdating(delegatingUpdating);
+	}
+	
+	// ------------------- /IDelegatingUpdating ---------------------
 	
 	public static IntroduceParameterRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		return new IntroduceParameterRefactoring(cu, selectionStart, selectionLength);

@@ -349,6 +349,15 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String MemberVisibilityAdjustor_adjustments_name;
 	public static String MemberVisibilityAdjustor_adjustments_description;
 	
+	public static String DelegateCreator_create_delegate;
+	public static String DelegateCreator_use_member_instead;
+	public static String DelegateCreator_change_category_title;
+	public static String DelegateCreator_change_category_description;
+	public static String DelegateCreator_cannot_create_field_delegate_not_final;
+	public static String DelegateCreator_cannot_create_field_delegate_no_initializer;
+	public static String DelegateCreator_cannot_create_field_delegate_more_than_one_fragment;
+	public static String DelegateCreator_cannot_create_delegate_for_type;
+	
 	public static String RippleMethodFinder_analizing_hierarchy;
 	public static String RefactoringAnalyzeUtil_name_collision;
 	public static String RefactoringSearchEngine_binary_match_ungrouped;
@@ -544,6 +553,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ChangeSignatureRefactoring_cannot_convert_vararg;
 	public static String ChangeSignatureRefactoring_vararg_must_be_last;
 	public static String ChangeSignatureRefactoring_ripple_cannot_convert_vararg;
+	public static String ChangeSignatureRefactoring_old_and_new_signatures_not_sufficiently_different;
 	public static String TypeContextChecker_couldNotResolveType;
 	public static String TypeContextChecker_ambiguous;
 	public static String TypeContextChecker_not_unique;
