@@ -20,8 +20,6 @@ import java.util.zip.ZipFile;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.core.resources.IProject;
-import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
@@ -50,7 +48,6 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
-import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
@@ -84,6 +81,9 @@ public final class JarImportWizardPage extends WizardPage {
 	/** The jar import wizard page name */
 	private static final String PAGE_NAME= "JarImportWizardPage"; //$NON-NLS-1$
 
+	/** Is the wizard part of an import wizard? */
+	private final boolean fImportWizard;
+
 	/** The jar package data */
 	private final JarImportData fJarImportData;
 
@@ -98,13 +98,22 @@ public final class JarImportWizardPage extends WizardPage {
 	 * 
 	 * @param data
 	 *            the jar import data
+	 * @param wizard
+	 *            <code>true</code> if the wizard is part of an import wizard,
+	 *            <code>false</code> otherwise
 	 */
-	public JarImportWizardPage(final JarImportData data) {
+	public JarImportWizardPage(final JarImportData data, final boolean wizard) {
 		super(PAGE_NAME);
 		Assert.isNotNull(data);
 		fJarImportData= data;
-		setTitle(JarImportMessages.JarImportWizardPage_page_title);
-		setDescription(JarImportMessages.JarImportWizardPage_page_description);
+		fImportWizard= wizard;
+		if (fImportWizard) {
+			setTitle(JarImportMessages.JarImportWizardPage_page_title);
+			setDescription(JarImportMessages.JarImportWizardPage_page_description);
+		} else {
+			setTitle(JarImportMessages.JarImportWizardPage_page_replace_title);
+			setDescription(JarImportMessages.JarImportWizardPage_page_replace_description);
+		}
 		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
 	}
 
@@ -117,7 +126,8 @@ public final class JarImportWizardPage extends WizardPage {
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 		createLocationGroup(composite);
-		createInputGroup(composite);
+		if (fImportWizard)
+			createInputGroup(composite);
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.JARIMPORT_WIZARD_PAGE);
@@ -163,34 +173,10 @@ public final class JarImportWizardPage extends WizardPage {
 				final Set set= new HashSet();
 				final IJavaProject[] projects= model.getJavaProjects();
 				for (int index= 0; index < projects.length; index++) {
-					final IProject project= projects[index].getProject();
-					if (project.isAccessible()) {
-						boolean add= true;
-						try {
-							final IProjectDescription description= project.getDescription();
-							final String[] ids= description.getNatureIds();
-							for (int offset= 0; offset < ids.length; offset++) {
-								if ("org.eclipse.pde.PluginNature".equals(ids[offset])) { //$NON-NLS-1$
-									boolean found= false;
-									final IClasspathEntry[] entry= projects[index].getRawClasspath();
-									for (int position= 0; position < entry.length; position++) {
-										if (entry[position].getContentKind() == IPackageFragmentRoot.K_SOURCE && entry[position].getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-											found= true;
-											break;
-										}
-									}
-									if (!found)
-										add= false;
-								}
-							}
-						} catch (CoreException exception) {
-							throw new JavaModelException(exception);
-						}
-						if (add) {
-							final Object[] roots= getPackageFragmentRoots(projects[index]);
-							if (roots.length > 0)
-								set.add(projects[index]);
-						}
+					if (JarImportWizard.isValidJavaProject(projects[index])) {
+						final Object[] roots= getPackageFragmentRoots(projects[index]);
+						if (roots.length > 0)
+							set.add(projects[index]);
 					}
 				}
 				return set.toArray();
@@ -200,8 +186,7 @@ public final class JarImportWizardPage extends WizardPage {
 				final Set set= new HashSet();
 				final IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 				for (int offset= 0; offset < roots.length; offset++) {
-					final IClasspathEntry entry= roots[offset].getRawClasspathEntry();
-					if (entry.getContentKind() == IPackageFragmentRoot.K_BINARY && entry.getEntryKind() != IClasspathEntry.CPE_CONTAINER)
+					if (JarImportWizard.isValidPackageFragmentRoot(roots[offset]))
 						set.add(roots[offset]);
 				}
 				return set.toArray();
@@ -211,6 +196,7 @@ public final class JarImportWizardPage extends WizardPage {
 				return (element instanceof IJavaProject) || (element instanceof IJavaModel);
 			}
 		};
+
 		final DecoratingLabelProvider labelProvider= new DecoratingLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_BASICS | JavaElementLabelProvider.SHOW_OVERLAY_ICONS | JavaElementLabelProvider.SHOW_SMALL_ICONS), new ProblemsLabelDecorator());
 		fTreeViewer= new TreeViewer(parent, SWT.SINGLE | SWT.BORDER);
 		fTreeViewer.getTree().setLayoutData(createGridData(GridData.FILL_BOTH, 6, 0));
@@ -288,7 +274,6 @@ public final class JarImportWizardPage extends WizardPage {
 	 */
 	protected void handleInputChanged() {
 		fJarImportData.setRefactoringHistory(null);
-		fJarImportData.setPackageFragmentRoot(null);
 		setErrorMessage(null);
 		setPageComplete(true);
 		handleJarFileChanged();

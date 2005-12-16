@@ -36,6 +36,8 @@ import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -115,10 +117,10 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 		public RefactoringDescriptorProxy[] getDescriptors() {
 			if (fHistoryDelta != null)
 				return fHistoryDelta;
-			final RefactoringHistory incoming= fJarImportData.getRefactoringHistory();
+			final RefactoringHistory incoming= fImportData.getRefactoringHistory();
 			if (incoming != null) {
 				fHistoryDelta= incoming.getDescriptors();
-				final IPackageFragmentRoot root= fJarImportData.getPackageFragmentRoot();
+				final IPackageFragmentRoot root= fImportData.getPackageFragmentRoot();
 				if (root != null) {
 					try {
 						final URI uri= getLocationURI(root.getRawClasspathEntry());
@@ -293,6 +295,58 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 	}
 
 	/**
+	 * Is the specified java project a valid project for import?
+	 * 
+	 * @param project
+	 *            the java project
+	 * @throws JavaModelException
+	 *             if an error occurs
+	 */
+	public static boolean isValidJavaProject(final IJavaProject project) throws JavaModelException {
+		Assert.isNotNull(project);
+		boolean result= false;
+		final IProject resource= project.getProject();
+		if (resource.isAccessible()) {
+			try {
+				result= true;
+				final IProjectDescription description= resource.getDescription();
+				final String[] ids= description.getNatureIds();
+				for (int offset= 0; offset < ids.length && result; offset++) {
+					if ("org.eclipse.pde.PluginNature".equals(ids[offset])) { //$NON-NLS-1$
+						boolean found= false;
+						final IClasspathEntry[] entries= project.getRawClasspath();
+						for (int position= 0; position < entries.length && !found; position++) {
+							if (entries[position].getContentKind() == IPackageFragmentRoot.K_SOURCE && entries[position].getEntryKind() == IClasspathEntry.CPE_SOURCE)
+								found= true;
+						}
+						if (!found)
+							result= false;
+					}
+				}
+			} catch (CoreException exception) {
+				throw new JavaModelException(exception);
+			}
+		}
+		return result;
+	}
+
+	/**
+	 * Is the specified package fragment root a valid root for import?
+	 * 
+	 * @param root
+	 *            the package fragment root
+	 * @return <code>true</code> if it is a valid package fragment root,
+	 *         <code>false</code> otherwise
+	 * @throws JavaModelException
+	 *             if an error occurs
+	 */
+	public static boolean isValidPackageFragmentRoot(final IPackageFragmentRoot root) throws JavaModelException {
+		Assert.isNotNull(root);
+		final IClasspathEntry entry= root.getRawClasspathEntry();
+		return entry.getContentKind() == IPackageFragmentRoot.K_BINARY && entry.getEntryKind() != IClasspathEntry.CPE_CONTAINER;
+	}
+
+	/**
 	 * Tries to set up the class path for the java project
 	 * 
 	 * @param project
@@ -338,7 +392,10 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 	private boolean fCancelled= false;
 
 	/** The jar import data */
-	private final JarImportData fJarImportData= new JarImportData();
+	private final JarImportData fImportData= new JarImportData();
+
+	/** Is the wizard part of an import wizard? */
+	private boolean fImportWizard= true;
 
 	/** The java project or <code>null</code> */
 	private IJavaProject fJavaProject= null;
@@ -360,8 +417,8 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 	 */
 	public JarImportWizard() {
 		super(JarImportMessages.JarImportWizard_window_title, JarImportMessages.RefactoringImportPreviewPage_title, JarImportMessages.RefactoringImportPreviewPage_description);
-		fJarImportData.setRefactoringAware(true);
-		fJarImportData.setIncludeDirectoryEntries(true);
+		fImportData.setRefactoringAware(true);
+		fImportData.setIncludeDirectoryEntries(true);
 		setInput(new RefactoringHistoryProxy());
 		IDialogSettings workbenchSettings= JavaPlugin.getDefault().getDialogSettings();
 		IDialogSettings section= workbenchSettings.getSection(DIALOG_SETTINGS_KEY);
@@ -384,6 +441,19 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 	}
 
 	/**
+	 * Creates a new jar import wizard.
+	 * 
+	 * @param wizard
+	 *            <code>true</code> if the wizard is part of an import wizard,
+	 *            <code>false</code> otherwise
+	 */
+	public JarImportWizard(final boolean wizard) {
+		this();
+		fImportWizard= wizard;
+		setWindowTitle(JarImportMessages.JarImportWizard_replace_title);
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	protected RefactoringStatus aboutToPerformHistory(final IProgressMonitor monitor) {
@@ -392,7 +462,7 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 		try {
 			fProcessedFragments.clear();
 			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 500);
-			final IPackageFragmentRoot root= fJarImportData.getPackageFragmentRoot();
+			final IPackageFragmentRoot root= fImportData.getPackageFragmentRoot();
 			if (root != null) {
 				status.merge(checkPackageFragmentRoots(root, new SubProgressMonitor(monitor, 90, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
 				if (!status.hasFatalError()) {
@@ -503,14 +573,14 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 	 * {@inheritDoc}
 	 */
 	protected void addUserDefinedPages() {
-		addPage(new JarImportWizardPage(fJarImportData));
+		addPage(new JarImportWizardPage(fImportData, fImportWizard));
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public boolean canFinish() {
-		return super.canFinish() && fJarImportData.getPackageFragmentRoot() != null && fJarImportData.getRefactoringHistory() != null;
+		return super.canFinish() && fImportData.getPackageFragmentRoot() != null && fImportData.getRefactoringHistory() != null;
 	}
 
 	/**
@@ -524,9 +594,9 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 	private void copyJarFile(final IProgressMonitor monitor) throws CoreException {
 		try {
 			monitor.beginTask(JarImportMessages.JarImportWizard_cleanup_import, 150);
-			final URI source= fJarImportData.getRefactoringFileLocation();
+			final URI source= fImportData.getRefactoringFileLocation();
 			if (source != null) {
-				final IPackageFragmentRoot root= fJarImportData.getPackageFragmentRoot();
+				final IPackageFragmentRoot root= fImportData.getPackageFragmentRoot();
 				if (root != null) {
 					final URI target= getLocationURI(root.getRawClasspathEntry());
 					if (target != null) {
@@ -555,7 +625,7 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
 			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 240);
-			final IPackageFragmentRoot root= fJarImportData.getPackageFragmentRoot();
+			final IPackageFragmentRoot root= fImportData.getPackageFragmentRoot();
 			if (root != null && fSourceFolder != null) {
 				try {
 					final SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 40, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
@@ -660,7 +730,7 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 				final IPackageFragmentRoot root= (IPackageFragmentRoot) element;
 				try {
 					if (root.isArchive() && root.getRawClasspathEntry().getEntryKind() != IClasspathEntry.CPE_CONTAINER)
-						fJarImportData.setPackageFragmentRoot(root);
+						fImportData.setPackageFragmentRoot(root);
 				} catch (JavaModelException exception) {
 					JavaPlugin.log(exception);
 				}

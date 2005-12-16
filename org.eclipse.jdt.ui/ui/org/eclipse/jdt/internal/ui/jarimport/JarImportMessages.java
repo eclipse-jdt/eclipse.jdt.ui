@@ -26,6 +26,8 @@ public final class JarImportMessages extends NLS {
 
 	public static String JarImportWizard_project_pattern;
 
+	public static String JarImportWizard_replace_title;
+
 	public static String JarImportWizard_window_title;
 
 	public static String JarImportWizard_workspace_caption;
@@ -47,6 +49,10 @@ public final class JarImportMessages extends NLS {
 	public static String JarImportWizardPage_no_refactorings;
 
 	public static String JarImportWizardPage_page_description;
+
+	public static String JarImportWizardPage_page_replace_description;
+
+	public static String JarImportWizardPage_page_replace_title;
 
 	public static String JarImportWizardPage_page_title;
 

@@ -2144,7 +2144,6 @@
             <separator name="reorgGroup"/>
             <separator name="typeGroup"/>
             <separator name="codingGroup"/>
-            <separator name="historyGroup"/>
          </menu>
 <!-- undo/redo group  -->
 		 <!--
@@ -4735,6 +4734,21 @@
          <adapter type="org.eclipse.team.core.mapping.IResourceMappingMerger"/>
          <adapter type="org.eclipse.team.ui.mapping.ICompareAdapter"/>
       </factory>
+      <factory
+            adaptableType="org.eclipse.ltk.core.refactoring.history.RefactoringHistory"
+            class="org.eclipse.jdt.internal.ui.model.JavaModelAdapterFactory">
+         <adapter type="org.eclipse.core.resources.mapping.ResourceMapping"/>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy"
+            class="org.eclipse.jdt.internal.ui.model.JavaModelAdapterFactory">
+         <adapter type="org.eclipse.core.resources.mapping.ResourceMapping"/>
+      </factory>
+      <factory
+            adaptableType="org.eclipse.jdt.internal.ui.model.JavaProjectSettings"
+            class="org.eclipse.jdt.internal.ui.model.JavaModelAdapterFactory">
+         <adapter type="org.eclipse.core.resources.mapping.ResourceMapping"/>
+      </factory>
    </extension>
    
    <extension
@@ -4772,6 +4786,31 @@
             </or>
          </enablement>
       </navigatorContent>
+   </extension>
+   <extension
+         point="org.eclipse.ui.popupMenus">
+      <objectContribution
+            adaptable="false"
+            id="org.eclipse.jdt.ui.jar.import"
+            objectClass="org.eclipse.jdt.core.IPackageFragmentRoot">
+         <menu
+               label="%ReplaceWithMenu.label"
+               path="additions"
+               id="replaceWithMenu">
+            <separator
+                  name="replaceWithGroup">
+            </separator>
+         </menu>
+         <action
+               class="org.eclipse.jdt.internal.ui.actions.JarImportActionDelegate"
+               definitionId="org.eclipse.jdt.ui.import.jar"
+               enablesFor="1"
+               icon="icons/full/obj16/jar_obj.gif"
+               id="org.eclipse.jdt.ui.import.jar"
+               label="%JarImportAction.label"
+               menubarPath="replaceWithMenu/replaceWithGroup"
+               tooltip="%JarImportAction.description"/>
+      </objectContribution>
    </extension>
 
 </plugin>
