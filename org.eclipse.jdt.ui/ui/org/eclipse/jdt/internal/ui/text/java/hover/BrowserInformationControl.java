@@ -11,9 +11,13 @@
 
 package org.eclipse.jdt.internal.ui.text.java.hover;
 
+import org.eclipse.core.runtime.ListenerList;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.SWTError;
 import org.eclipse.swt.browser.Browser;
+import org.eclipse.swt.browser.LocationAdapter;
+import org.eclipse.swt.browser.LocationEvent;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.events.FocusEvent;
@@ -36,8 +40,6 @@ import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.util.ListenerList;
 
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
@@ -249,6 +251,23 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 			}
 
 			public void keyReleased(KeyEvent e) {}
+		});
+		/*
+		 * XXX revisit when the Browser support is better 
+		 * See https://bugs.eclipse.org/bugs/show_bug.cgi?id=107629. Choosing a link to a
+		 * non-available target will show an error dialog behind the ON_TOP shell that seemingly
+		 * blocks the workbench. Disable links completely for now.
+		 */
+		fBrowser.addLocationListener(new LocationAdapter() {
+			/*
+			 * @see org.eclipse.swt.browser.LocationAdapter#changing(org.eclipse.swt.browser.LocationEvent)
+			 */
+			public void changing(LocationEvent event) {
+				String location= event.location;
+				// using the Browser.setText API triggers a location change to "about:blank"
+				if (!"about:blank".equals(location)) //$NON-NLS-1$
+					event.doit= false;
+			}
 		});
 
 		// Replace browser's built-in context menu with none
