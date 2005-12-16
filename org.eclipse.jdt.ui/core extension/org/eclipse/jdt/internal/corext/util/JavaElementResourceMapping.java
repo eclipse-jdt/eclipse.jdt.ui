@@ -151,7 +151,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			return new ResourceTraversal[] {
-				new ResourceTraversal(new IResource[] {fRoot.getCorrespondingResource()}, IResource.DEPTH_INFINITE, 0)
+				new ResourceTraversal(new IResource[] {fRoot.getResource()}, IResource.DEPTH_INFINITE, 0)
 			};
 		}
 	}
@@ -159,12 +159,14 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 	private static final class LocalPackageFragementTraversal extends ResourceTraversal {
 		private final IPackageFragment fPack;
 		public LocalPackageFragementTraversal(IPackageFragment pack) throws CoreException {
-			super(new IResource[] {pack.getCorrespondingResource()}, IResource.DEPTH_ONE, 0);
+			super(new IResource[] {pack.getResource()}, IResource.DEPTH_ONE, 0);
 			fPack= pack;
 		}
 		public void accept(IResourceVisitor visitor) throws CoreException {
 			IFile[] files= getPackageContent(fPack);
-			visitor.visit(fPack.getCorrespondingResource());
+			final IResource resource= fPack.getResource();
+			if (resource != null)
+				visitor.visit(resource);
 			for (int i= 0; i < files.length; i++) {
 				visitor.visit(files[i]);
 			}
@@ -186,7 +188,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			if (context instanceof RemoteResourceMappingContext) {
 				return new ResourceTraversal[] {
-					new ResourceTraversal(new IResource[] {fPack.getCorrespondingResource()}, IResource.DEPTH_ONE, 0)
+					new ResourceTraversal(new IResource[] {fPack.getResource()}, IResource.DEPTH_ONE, 0)
 				};
 			} else {
 				return new ResourceTraversal[] { new LocalPackageFragementTraversal(fPack) };
@@ -201,7 +203,9 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 				if (monitor == null)
 					monitor= new NullProgressMonitor();
 				monitor.beginTask("", files.length + 1); //$NON-NLS-1$
-				visitor.visit(fPack.getCorrespondingResource());
+				final IResource resource= fPack.getResource();
+				if (resource != null)
+					visitor.visit(resource);
 				monitor.worked(1);
 				for (int i= 0; i < files.length; i++) {
 					visitor.visit(files[i]);
@@ -213,7 +217,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 	
 	private static IFile[] getPackageContent(IPackageFragment pack) throws CoreException {
 		List result= new ArrayList();
-		IContainer container= (IContainer)pack.getCorrespondingResource();
+		IContainer container= (IContainer)pack.getResource();
 		if (container != null) {
 			IResource[] members= container.members();
 			for (int m= 0; m < members.length; m++) {
@@ -244,7 +248,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			return new ResourceTraversal[] {
-				new ResourceTraversal(new IResource[] {fUnit.getCorrespondingResource()}, IResource.DEPTH_ONE, 0)
+				new ResourceTraversal(new IResource[] {fUnit.getResource()}, IResource.DEPTH_ONE, 0)
 			};
 		}
 	}
@@ -262,7 +266,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 		}
 		public ResourceTraversal[] getTraversals(ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
 			return new ResourceTraversal[] {
-				new ResourceTraversal(new IResource[] {fClassFile.getCorrespondingResource()}, IResource.DEPTH_ONE, 0)
+				new ResourceTraversal(new IResource[] {fClassFile.getResource()}, IResource.DEPTH_ONE, 0)
 			};
 		}
 	}
@@ -287,7 +291,7 @@ public abstract class JavaElementResourceMapping extends ResourceMapping {
 			if (context instanceof RemoteResourceMappingContext) {
 				for (int i= 0; i < fFragments.length; i++) {
 					result.add(new ResourceTraversal(
-						new IResource[] {fFragments[i].getCorrespondingResource()}, IResource.DEPTH_ONE, 0));
+						new IResource[] {fFragments[i].getResource()}, IResource.DEPTH_ONE, 0));
 				}
 			} else {
 				for (int i= 0; i < fFragments.length; i++) {
