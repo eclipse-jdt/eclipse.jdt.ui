@@ -177,6 +177,8 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 				// fall through
 			case IJavaElement.METHOD:
 				// fall through
+			case IJavaElement.INITIALIZER:
+				// fall through
 			case IJavaElement.FIELD:
 				// fall through
 			case IJavaElement.PACKAGE_DECLARATION:
