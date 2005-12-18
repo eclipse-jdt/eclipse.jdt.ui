@@ -197,7 +197,7 @@ public class NLSRefactoring extends Refactoring {
 
 			pm.beginTask("", 3); //$NON-NLS-1$
 
-			final DynamicValidationStateChange result= new DynamicValidationStateChange("NLS Refactoring"); //$NON-NLS-1$
+			final DynamicValidationStateChange result= new DynamicValidationStateChange(NLSMessages.NLSRefactoring_change_name);
 
 			boolean createAccessorClass= willCreateAccessorClass();
 			if (createAccessorClass) {

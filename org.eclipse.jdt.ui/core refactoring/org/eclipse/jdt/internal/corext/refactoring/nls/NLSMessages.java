@@ -40,6 +40,7 @@ public final class NLSMessages extends NLS {
 	public static String NLSRefactoring_will_be_created;
 	public static String NLSRefactoring_no_strings;
 	public static String NLSRefactoring_warning;
+	public static String NLSRefactoring_change_name;
 	public static String AccessorClassModifier_add_entry;
 	public static String AccessorClassModifier_remove_entry;
 	public static String AccessorClassModifier_replace_entry;
