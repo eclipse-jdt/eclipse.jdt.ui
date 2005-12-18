@@ -42,13 +42,16 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.WizardDialog;
 
+import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.IAccessRule;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -56,8 +59,11 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.wizards.BuildPathDialogAccess;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.actions.JarImportWizardAction;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
+import org.eclipse.jdt.internal.ui.jarimport.JarImportWizard;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
@@ -88,7 +94,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	private final int IDX_EDIT= 6;
 	private final int IDX_REMOVE= 7;
 
-	
+	private final int IDX_REPLACE= 9;
 		
 	public LibrariesWorkbookPage(CheckedListDialogField classPathList, IWorkbenchPreferenceContainer pageContainer) {
 		fClassPathList= classPathList;
@@ -103,7 +109,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			NewWizardMessages.LibrariesWorkbookPage_libraries_addclassfolder_button, 
 			/* */ null,  
 			NewWizardMessages.LibrariesWorkbookPage_libraries_edit_button, 
-			NewWizardMessages.LibrariesWorkbookPage_libraries_remove_button
+			NewWizardMessages.LibrariesWorkbookPage_libraries_remove_button,
+			/* */ null,  
+			NewWizardMessages.LibrariesWorkbookPage_libraries_replace_button
 		};		
 				
 		LibrariesAdapter adapter= new LibrariesAdapter();
@@ -114,7 +122,8 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 		fLibrariesList.enableButton(IDX_REMOVE, false);
 		fLibrariesList.enableButton(IDX_EDIT, false);
-		
+		fLibrariesList.enableButton(IDX_REPLACE, false);
+
 		fLibrariesList.setViewerSorter(new CPListElementSorter());
 
 	}
@@ -241,7 +250,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			return;
 		case IDX_REMOVE: /* remove */
 			removeEntry();
-			return;			
+			return;
+		case IDX_REPLACE: /* replace */
+			replaceJarFile();
+			return;
 		}
 		if (libentries != null) {
 			int nElementsChosen= libentries.length;					
@@ -296,6 +308,45 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			}
 		}	
 	}	
+
+	private void replaceJarFile() {
+		final IPackageFragmentRoot root= getSelectedPackageFragmentRoot();
+		if (root != null) {
+			final IImportWizard wizard= new JarImportWizard(false);
+			wizard.init(PlatformUI.getWorkbench(), new StructuredSelection(root));
+			final WizardDialog dialog= new WizardDialog(getShell(), wizard);
+			dialog.create();
+			dialog.getShell().setSize(Math.max(JarImportWizardAction.SIZING_WIZARD_WIDTH, dialog.getShell().getSize().x), JarImportWizardAction.SIZING_WIZARD_HEIGHT);
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(dialog.getShell(), IJavaHelpContextIds.JARIMPORT_WIZARD_PAGE);
+			dialog.open();
+		}
+	}
+
+	private IPackageFragmentRoot getSelectedPackageFragmentRoot() {
+		final List elements= fLibrariesList.getSelectedElements();
+		if (elements.size() == 1) {
+			final Object object= elements.get(0);
+			if (object instanceof CPListElement) {
+				final CPListElement element= (CPListElement) object;
+				final IClasspathEntry entry= element.getClasspathEntry();
+				if (JarImportWizard.isValidClassPathEntry(entry)) {
+					final IJavaProject project= element.getJavaProject();
+					if (project != null) {
+						try {
+							final IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
+							for (int index= 0; index < roots.length; index++) {
+								if (entry.equals(roots[index].getRawClasspathEntry()))
+									return roots[index];
+							}
+						} catch (JavaModelException exception) {
+							JavaPlugin.log(exception);
+						}
+					}
+				}
+			}
+		}
+		return null;
+	}
 
 	private void removeEntry() {
 		List selElements= fLibrariesList.getSelectedElements();
@@ -508,6 +559,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 		List selElements= fLibrariesList.getSelectedElements();
 		fLibrariesList.enableButton(IDX_EDIT, canEdit(selElements));
 		fLibrariesList.enableButton(IDX_REMOVE, canRemove(selElements));
+		fLibrariesList.enableButton(IDX_REPLACE, getSelectedPackageFragmentRoot() != null);
 		
 		boolean noAttributes= containsOnlyTopLevelEntries(selElements);
 		fLibrariesList.enableButton(IDX_ADDEXT, noAttributes);

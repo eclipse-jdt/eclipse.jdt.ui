@@ -131,7 +131,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		fJarPackageWizardPage= new JarPackageWizardPage(fJarPackage, fSelection);
 		addPage(fJarPackageWizardPage);
 		addPage(new JarPackageRefactoringPage(fJarPackage));
-		addPage(new JarPackagePreviewPage(fJarPackage, new RefactoringHistoryControlConfiguration(null, true) {
+		addPage(new JarPackagePreviewPage(fJarPackage, new RefactoringHistoryControlConfiguration(null, true, false) {
 
 			public String getProjectPattern() {
 				return JarPackagerMessages.JarPackageWizard_project_pattern;

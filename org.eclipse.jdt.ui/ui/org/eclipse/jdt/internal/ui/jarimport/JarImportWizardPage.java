@@ -186,7 +186,7 @@ public final class JarImportWizardPage extends WizardPage {
 				final Set set= new HashSet();
 				final IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
 				for (int offset= 0; offset < roots.length; offset++) {
-					if (JarImportWizard.isValidPackageFragmentRoot(roots[offset]))
+					if (JarImportWizard.isValidClassPathEntry(roots[offset].getRawClasspathEntry()))
 						set.add(roots[offset]);
 				}
 				return set.toArray();
@@ -274,6 +274,7 @@ public final class JarImportWizardPage extends WizardPage {
 	 */
 	protected void handleInputChanged() {
 		fJarImportData.setRefactoringHistory(null);
+		fJarImportData.setRefactoringFileLocation(null);
 		setErrorMessage(null);
 		setPageComplete(true);
 		handleJarFileChanged();
@@ -307,16 +308,16 @@ public final class JarImportWizardPage extends WizardPage {
 					setPageComplete(false);
 					return;
 				}
+				fJarImportData.setRefactoringFileLocation(file.toURI());
 				ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntryName());
 				if (entry == null) {
-					setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
-					setPageComplete(false);
+					setMessage(JarImportMessages.JarImportWizardPage_no_refactorings, INFORMATION);
+					setPageComplete(true);
 					return;
 				}
 				InputStream stream= null;
 				try {
 					stream= zip.getInputStream(entry);
-					fJarImportData.setRefactoringFileLocation(file.toURI());
 					fJarImportData.setRefactoringHistory(RefactoringCore.getRefactoringHistoryService().readRefactoringHistory(stream, JavaRefactorings.IMPORTABLE));
 				} catch (IOException exception) {
 					setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);

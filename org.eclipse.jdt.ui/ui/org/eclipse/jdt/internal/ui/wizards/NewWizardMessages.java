@@ -244,6 +244,7 @@ public final class NewWizardMessages extends NLS {
 	public static String LibrariesWorkbookPage_libraries_addvariable_button;
 	public static String LibrariesWorkbookPage_libraries_addlibrary_button;
 	public static String LibrariesWorkbookPage_libraries_addclassfolder_button;
+	public static String LibrariesWorkbookPage_libraries_replace_button;
 	public static String LibrariesWorkbookPage_configurecontainer_error_title;
 	public static String LibrariesWorkbookPage_configurecontainer_error_message;
 	public static String LibrariesWorkbookPage_libraries_edit_button;

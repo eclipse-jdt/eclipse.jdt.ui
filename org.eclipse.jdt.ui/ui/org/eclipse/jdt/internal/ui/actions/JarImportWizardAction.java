@@ -39,10 +39,10 @@ import org.eclipse.jdt.internal.ui.jarimport.JarImportWizard;
 public class JarImportWizardAction extends Action implements IObjectActionDelegate, ISelectionChangedListener {
 
 	/** The wizard height */
-	private static final int SIZING_WIZARD_HEIGHT= 520;
+	public static final int SIZING_WIZARD_HEIGHT= 520;
 
 	/** The wizard width */
-	private static final int SIZING_WIZARD_WIDTH= 470;
+	public static final int SIZING_WIZARD_WIDTH= 470;
 
 	/** The structured selection, or <code>null</code> */
 	private IStructuredSelection fSelection= null;
@@ -85,7 +85,7 @@ public class JarImportWizardAction extends Action implements IObjectActionDelega
 				if (element instanceof IPackageFragmentRoot) {
 					final IPackageFragmentRoot root= (IPackageFragmentRoot) element;
 					try {
-						if (JarImportWizard.isValidPackageFragmentRoot(root) && JarImportWizard.isValidJavaProject(root.getJavaProject()))
+						if (JarImportWizard.isValidClassPathEntry(root.getRawClasspathEntry()) && JarImportWizard.isValidJavaProject(root.getJavaProject()))
 							fSelection= structured;
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
