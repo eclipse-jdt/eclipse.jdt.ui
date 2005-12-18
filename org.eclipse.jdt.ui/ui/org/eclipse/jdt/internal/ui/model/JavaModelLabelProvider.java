@@ -31,7 +31,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 
 	/** The refactoring history label provider */
-	private final RefactoringHistoryLabelProvider fHistoryLabelProvider= new RefactoringHistoryLabelProvider(new RefactoringHistoryControlConfiguration(null, true));
+	private final RefactoringHistoryLabelProvider fHistoryLabelProvider= new RefactoringHistoryLabelProvider(new RefactoringHistoryControlConfiguration(null, true, false));
 
 	/** The project settings image, or <code>null</code> */
 	private Image fSettingsImage= null;
