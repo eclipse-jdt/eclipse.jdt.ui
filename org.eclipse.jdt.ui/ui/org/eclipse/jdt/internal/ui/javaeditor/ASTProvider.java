@@ -296,9 +296,10 @@ public final class ASTProvider {
 			if (fIsReconciling && !fReconcilingJavaElement.equals(javaElement)) {
 				fIsReconciling= false;
 				fReconcilingJavaElement= null;
-			} else if (javaElement == null)
+			} else if (javaElement == null) {
 				fIsReconciling= false;
 				fReconcilingJavaElement= null;
+			}
 		}
 	}
 
