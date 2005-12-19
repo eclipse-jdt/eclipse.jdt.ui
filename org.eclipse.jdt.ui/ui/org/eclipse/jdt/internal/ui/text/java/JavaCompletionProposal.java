@@ -20,6 +20,9 @@ import org.eclipse.jface.text.IDocument;
 
 public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 
+	// FIXME: https://bugs.eclipse.org/bugs/show_bug.cgi?id=121414
+	private static final boolean BUG_121414= true;
+	
 	/**
 	 * Creates a new completion proposal. All fields are initialized based on the provided information.
 	 *
@@ -71,7 +74,7 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 */
 	protected boolean isValidPrefix(String prefix) {
 		String word= getDisplayString();
-		if (isInJavadoc()) {
+		if (isInJavadoc() || BUG_121414) {
 			int idx = word.indexOf("{@link "); //$NON-NLS-1$
 			if (idx==0) {
 				word = word.substring(7);
