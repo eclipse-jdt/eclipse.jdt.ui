@@ -56,6 +56,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -63,6 +65,7 @@ import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryControlConfigura
 import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryWizard;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
@@ -72,6 +75,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.binary.StubCreationOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -767,12 +771,8 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 	 */
 	public boolean performFinish() {
 		final boolean result= super.performFinish();
-		if (fNewSettings) {
-			final IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
-			IDialogSettings section= settings.getSection(DIALOG_SETTINGS_KEY);
-			section= settings.addNewSection(DIALOG_SETTINGS_KEY);
-			setDialogSettings(section);
-		}
+		if (fNewSettings)
+			setDialogSettings(JavaPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY).addNewSection(DIALOG_SETTINGS_KEY));
 		return result;
 	}
 
@@ -819,5 +819,25 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 			}
 		}
 		return super.selectPreviewChange(change);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected boolean selectStatusEntry(final RefactoringStatusEntry entry) {
+		if (fSourceFolder != null) {
+			final IPath source= fSourceFolder.getFullPath();
+			final RefactoringStatusContext context= entry.getContext();
+			if (context instanceof JavaStatusContext) {
+				final JavaStatusContext extended= (JavaStatusContext) context;
+				final ICompilationUnit unit= extended.getCompilationUnit();
+				if (unit != null) {
+					final IResource resource= unit.getResource();
+					if (resource != null && source.isPrefixOf(resource.getFullPath()))
+						return false;
+				}
+			}
+		}
+		return super.selectStatusEntry(entry);
 	}
 }
