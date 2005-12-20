@@ -277,7 +277,7 @@ public class JavadocConfigurationBlock {
 
 			try {
 				String protocol = location.getProtocol();
-				if (protocol.equals("http") || protocol.equals("jar")) { //$NON-NLS-1$ //$NON-NLS-2$
+				if (protocol.startsWith("http") || protocol.equals("jar")) { //$NON-NLS-1$ //$NON-NLS-2$
 					validateURL(location);
 				} else if (protocol.equals("file")) { //$NON-NLS-1$
 					validateFile(location);
