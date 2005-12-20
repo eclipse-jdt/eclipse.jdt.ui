@@ -24,6 +24,7 @@ public class PerformanceTestSuite extends TestSuite {
 	}
 	
 	public PerformanceTestSuite() {
+		addTest(ActivateJavaEditorTest.suite());
 		addTest(RevertTextEditorTest.suite());
 		addTest(RevertJavaEditorTest.suite());
 		addTest(ToggleCommentTest.suite());
@@ -33,7 +34,6 @@ public class PerformanceTestSuite extends TestSuite {
 		addTest(OpenJavaContentAssistTest.suite());
 		addTest(JavaSmartPasteTest.suite());
 		addTest(ActivateTextEditorTest.suite());
-		addTest(ActivateJavaEditorTest.suite());
 		addTest(SaveTextEditorTest.suite());
 		addTest(SaveJavaEditorTest.suite());
 		addTest(JavaFormatterTest.suite());
