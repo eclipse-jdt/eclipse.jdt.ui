@@ -30,7 +30,7 @@ public class EditorHighlightingSynchronizer implements ILinkedModeListener {
 	 * Creates a new synchronizer.
 	 *
 	 * @param editor the java editor the occurrences markers of which will be
-	 *        synchonized with the linked mode
+	 *        synchronized with the linked mode
 	 *
 	 */
 	public EditorHighlightingSynchronizer(JavaEditor editor) {
@@ -38,7 +38,7 @@ public class EditorHighlightingSynchronizer implements ILinkedModeListener {
 		fEditor= editor;
 		fWasOccurrencesOn= fEditor.isMarkingOccurrences();
 
-		if (fWasOccurrencesOn)
+		if (fWasOccurrencesOn && !isEditorDisposed())
 			fEditor.uninstallOccurrencesFinder();
 	}
 
@@ -46,8 +46,12 @@ public class EditorHighlightingSynchronizer implements ILinkedModeListener {
 	 * @see org.eclipse.jface.text.link.ILinkedModeListener#left(org.eclipse.jface.text.link.LinkedModeModel, int)
 	 */
 	public void left(LinkedModeModel environment, int flags) {
-		if (fWasOccurrencesOn)
+		if (fWasOccurrencesOn && !isEditorDisposed())
 			fEditor.installOccurrencesFinder(true);
+	}
+
+	private boolean isEditorDisposed() {
+		return fEditor == null || fEditor.getSelectionProvider() == null;
 	}
 
 	/*
