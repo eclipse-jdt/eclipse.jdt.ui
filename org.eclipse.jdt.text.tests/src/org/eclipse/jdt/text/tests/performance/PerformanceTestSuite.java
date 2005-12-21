@@ -44,7 +44,10 @@ public class PerformanceTestSuite extends TestSuite {
 		addTest(CodeCompletionPerformanceTest.suite());
 		addTest(DocumentLineDifferInitializationTest.suite());
 		addTest(SynchronizedLineDifferInitializationTest.suite());
-		addTest(DocumentLineDifferModificationTest.suite());
+
+		// FIXME: Disabled, no longer works since at least M3, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=121710
+//		addTest(DocumentLineDifferModificationTest.suite());
+
 		addTest(LineTrackerPerformanceTest.suite());
 		addTest(new OpenJavaEditorTest.Setup(EmptyTestCase.suite(), false)); // the actual test runs in its own workbench (see test.xml)
 	}
