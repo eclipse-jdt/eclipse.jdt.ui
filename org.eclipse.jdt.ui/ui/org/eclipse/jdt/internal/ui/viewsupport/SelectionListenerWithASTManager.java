@@ -100,7 +100,8 @@ public class SelectionListenerWithASTManager {
 			if (isEmpty()) {
 				fPart.getEditorSite().getPage().addPostSelectionListener(fPostSelectionListener);
 				ISelectionProvider selectionProvider= fPart.getSelectionProvider();
-				selectionProvider.addSelectionChangedListener(fSelectionListener);
+				if (selectionProvider != null)
+						selectionProvider.addSelectionChangedListener(fSelectionListener);
 			}
 			fAstListeners.add(listener);
 		}
@@ -110,7 +111,8 @@ public class SelectionListenerWithASTManager {
 			if (isEmpty()) {
 				fPart.getEditorSite().getPage().removePostSelectionListener(fPostSelectionListener);
 				ISelectionProvider selectionProvider= fPart.getSelectionProvider();
-				selectionProvider.removeSelectionChangedListener(fSelectionListener);
+				if (selectionProvider != null)
+					selectionProvider.removeSelectionChangedListener(fSelectionListener);
 			}
 		}
 		
