@@ -79,6 +79,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
+import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
@@ -98,7 +99,11 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -111,7 +116,7 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public final class MoveStaticMembersProcessor extends MoveProcessor implements IInitializableRefactoringComponent {
+public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegatingUpdating, IInitializableRefactoringComponent {
 
 	private static final String ID_STATIC_MOVE= "org.eclipse.jdt.ui.move.static"; //$NON-NLS-1$
 
@@ -128,6 +133,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	private CompilationUnitRewrite fTarget;
 	private IBinding[] fMemberBindings;
 	private BodyDeclaration[] fMemberDeclarations;
+	private boolean fDelegatingUpdating;
 
 	private static class TypeReferenceFinder extends ASTVisitor {
 		List fResult= new ArrayList();
@@ -164,6 +170,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	public MoveStaticMembersProcessor(IMember[] elements, CodeGenerationSettings preferenceSettings) {
 		fMembersToMove= elements;
 		fPreferences= preferenceSettings;
+		fDelegatingUpdating= false; 
 	}
 	
 	/**
@@ -202,6 +209,36 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				status, this, member, args, natures, sharedParticipants)));
 		}
 		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
+	}
+	
+	//------------------- IDelegatingUpdating ----------------------
+	
+	public boolean canEnableDelegatingUpdating() {
+		try {
+			for (int i= 0; i < fMembersToMove.length; i++) {
+				if (isDelegateCreationAvailable(fMembersToMove[i]))
+					return true;
+			}
+		} catch (JavaModelException e) {
+			return false;
+		}
+		return false;
+	}
+
+	private boolean isDelegateCreationAvailable(IMember member) throws JavaModelException {
+		if (member instanceof IMethod)
+			return true; 
+		if (member instanceof IField && RefactoringAvailabilityTester.isDelegateCreationAvailable(((IField)member)))
+			return true; 
+		return false;
+	}
+	
+	public boolean getDelegatingUpdating() {
+		return fDelegatingUpdating;
+	}
+
+	public void setDelegatingUpdating(boolean delegatingUpdating) {
+		fDelegatingUpdating= delegatingUpdating;
 	}
 	
 	/*
@@ -479,6 +516,13 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			}
 		}
 		
+		if (fDelegatingUpdating && isDelegateCreationAvailable(member)) {
+			// ensure moved member is visible from the delegate
+			IType type= member.getDeclaringType();
+			if (!blindAccessorTypes.contains(type) && !isVisibleFrom(member, getDestinationType(), type))
+				blindAccessorTypes.add(type);
+		}
+		
 		return (IType[]) blindAccessorTypes.toArray(new IType[blindAccessorTypes.size()]);
 	}
 
@@ -669,6 +713,18 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				adjustor.setRewrite(fSource.getASTRewrite(), fSource.getRoot());
 				adjustor.adjustVisibility(new NullProgressMonitor());
 
+				if (fDelegatingUpdating && isDelegateCreationAvailable(member)) {
+					// Add a visibility adjustment so the moved member
+					// will be visible from within the delegate
+					ModifierKeyword threshold= adjustor.getVisibilityThreshold(member, fDestinationType, new NullProgressMonitor());
+					IncomingMemberVisibilityAdjustment adjustment= (IncomingMemberVisibilityAdjustment) adjustments.get(member);
+					ModifierKeyword kw= (adjustment != null) ? adjustment.getKeyword() : ModifierKeyword.fromFlagValue(JdtFlags.getVisibilityCode(member));
+					if (MemberVisibilityAdjustor.hasLowerVisibility(kw, threshold)) {
+						adjustments.put(member, new MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment(member, threshold, 
+								RefactoringStatus.createWarningStatus(Messages.format(MemberVisibilityAdjustor.getMessage(member), new String[] { MemberVisibilityAdjustor.getLabel(member), MemberVisibilityAdjustor.getLabel(threshold) }), JavaStatusContext.create(member))));
+					}
+				}
+				
 				// Check if destination type is visible from references ->
 				// error message if not (for example, when moving into a private type)
 				status.merge(checkMovedMemberAvailability(member, new SubProgressMonitor(sub, 1)));
@@ -847,9 +903,61 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		TextEditGroup add= fTarget.createGroupDescription(RefactoringCoreMessages.MoveMembersRefactoring_addMembers); 
 		for (int i= 0; i < members.length; i++) {
 			BodyDeclaration declaration= members[i];
-			fSource.getASTRewrite().remove(declaration, delete);
-			if (fSource != fTarget)
-				fSource.getImportRemover().registerRemovedNode(declaration);
+			ASTNode removeImportsOf= null;
+			boolean addedDelegate= false;
+			
+			if (fDelegatingUpdating) {
+				if (declaration instanceof MethodDeclaration) {
+
+					DelegateMethodCreator d= new DelegateMethodCreator();
+					d.setDeclaration(declaration);
+					d.setSourceRewrite(fSource);
+					d.setCopy(false);
+					d.setNewLocation(getDestinationBinding());
+					d.prepareDelegate();
+					d.createEdit();
+
+					removeImportsOf= ((MethodDeclaration) declaration).getBody();
+					addedDelegate= true;
+				}
+				if (declaration instanceof FieldDeclaration) {
+
+					// Note: this FieldDeclaration only has one fragment (@see #getASTMembers(RefactoringStatus))
+					final VariableDeclarationFragment frag= (VariableDeclarationFragment) ((FieldDeclaration) declaration).fragments().get(0);
+					
+					if (!Modifier.isFinal(declaration.getModifiers())) {
+						// Don't create a delegate for non-final fields
+						result.addInfo(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_not_final, frag.getName()), null);
+					} else if (frag.getInitializer() == null) {
+						// Don't create a delegate without an initializer.
+						result.addInfo(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_no_initializer, frag.getName()), null);
+					} else {
+						DelegateFieldCreator d= new DelegateFieldCreator();
+						d.setDeclaration(declaration);
+						d.setSourceRewrite(fSource);
+						d.setCopy(false);
+						d.setNewLocation(getDestinationBinding());
+						d.prepareDelegate();
+						d.createEdit();
+
+						removeImportsOf= frag.getInitializer();
+						addedDelegate= true;
+					}
+				}
+				if (declaration instanceof AbstractTypeDeclaration) {
+					result.addInfo(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_delegate_for_type, ((AbstractTypeDeclaration) declaration).getName().getIdentifier()),
+							null);
+				}
+			} 
+			
+			if (!addedDelegate) {
+				fSource.getASTRewrite().remove(declaration, delete);
+				removeImportsOf= declaration;
+			}
+
+			if (removeImportsOf != null && fSource != fTarget)
+				fSource.getImportRemover().registerRemovedNode(removeImportsOf);
+			
 			ASTNode node= fTarget.getASTRewrite().createStringPlaceholder(sources[i], declaration.getNodeType());
 			List container= containerRewrite.getRewrittenList();
 			int insertionIndex= ASTNodes.getInsertionIndex((BodyDeclaration) node, container);

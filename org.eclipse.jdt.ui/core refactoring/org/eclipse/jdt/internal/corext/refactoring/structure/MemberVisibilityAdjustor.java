@@ -402,7 +402,7 @@ public final class MemberVisibilityAdjustor {
 	 * @param threshold the visibility threshold keyword to compare with, or <code>null</code> to compare with default visibility
 	 * @return <code>true</code> if the visibility is lower than required, <code>false</code> otherwise
 	 */
-	private static boolean hasLowerVisibility(final ModifierKeyword keyword, final ModifierKeyword threshold) {
+	public static boolean hasLowerVisibility(final ModifierKeyword keyword, final ModifierKeyword threshold) {
 		Assert.isTrue(isVisibilityKeyword(keyword));
 		Assert.isTrue(isVisibilityKeyword(threshold));
 		return hasLowerVisibility(keyword != null ? keyword.toFlagValue() : Modifier.NONE, threshold != null ? threshold.toFlagValue() : Modifier.NONE);
@@ -557,7 +557,7 @@ public final class MemberVisibilityAdjustor {
 	 * @throws JavaModelException if the visibility adjustment could not be computed
 	 */
 	private void adjustIncomingVisibility(final IJavaElement element, IMember referencedMovedElement, final IProgressMonitor monitor) throws JavaModelException {
-		final ModifierKeyword threshold= computeIncomingVisibilityThreshold(element, referencedMovedElement, monitor);
+		final ModifierKeyword threshold= getVisibilityThreshold(element, referencedMovedElement, monitor);
 		if (hasLowerVisibility(referencedMovedElement.getFlags(), threshold == null ? Modifier.NONE : threshold.toFlagValue()) && needsVisibilityAdjustment(referencedMovedElement, threshold))
 			fAdjustments.put(referencedMovedElement, new IncomingMemberVisibilityAdjustment(referencedMovedElement, threshold, RefactoringStatus.createStatus(fVisibilitySeverity, Messages.format(getMessage(referencedMovedElement), new String[] { getLabel(referencedMovedElement), getLabel(threshold)}), JavaStatusContext.create(referencedMovedElement), null, RefactoringStatusEntry.NO_CODE, null)));
 	}
@@ -831,7 +831,7 @@ public final class MemberVisibilityAdjustor {
 	 * @return the visibility keyword corresponding to the threshold, or <code>null</code> for default visibility
 	 * @throws JavaModelException if the java elements could not be accessed
 	 */
-	private ModifierKeyword computeIncomingVisibilityThreshold(final IJavaElement referencing, final IMember referenced, final IProgressMonitor monitor) throws JavaModelException {
+	public ModifierKeyword getVisibilityThreshold(final IJavaElement referencing, final IMember referenced, final IProgressMonitor monitor) throws JavaModelException {
 		Assert.isTrue(!(referencing instanceof IInitializer));
 		Assert.isTrue(!(referenced instanceof IInitializer));
 		ModifierKeyword keyword= ModifierKeyword.PUBLIC_KEYWORD;

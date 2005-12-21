@@ -13,8 +13,6 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -26,7 +24,6 @@ import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ColumnWeightData;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -71,12 +68,9 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 
 		/** The page name */
 		protected static final String PAGE_NAME= "MoveInstanceMethodPage"; //$NON-NLS-1$
-
-		/** The create delegator button */
-		protected Button fCreateDelegator= null;
-
-		/** The deprecate delegator button */
-		protected Button fDeprecateDelegator= null;
+		
+		/** The "leave delegate" checkbox */
+		protected Button fLeaveDelegateCheckBox= null;
 
 		/** The method name text field */
 		protected Text fMethodNameField= null;
@@ -221,56 +215,29 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			data= new GridData();
 			data.horizontalSpan= 2;
 			label.setLayoutData(data);
-
-			fCreateDelegator= new Button(control, SWT.CHECK);
-			fCreateDelegator.setSelection(DEFAULT_CREATE_DELEGATOR_SETTING);
-			fCreateDelegator.setText(RefactoringMessages.MoveInstanceMethodPage_Create_button_name); 
-			fCreateDelegator.addSelectionListener(new SelectionAdapter() {
-
-				public final void widgetDefaultSelected(final SelectionEvent event) {
-					widgetSelected(event);
-				}
-
-				public final void widgetSelected(final SelectionEvent event) {
-					final boolean selection= fCreateDelegator.getSelection();
-					fProcessor.setInlineDelegator(!selection);
-					fProcessor.setRemoveDelegator(!selection);
-					fDeprecateDelegator.setEnabled(selection);
-				}
-			});
-
-			data= new GridData();
-			data.horizontalSpan= 2;
-			fCreateDelegator.setLayoutData(data);
-
-			fDeprecateDelegator= new Button(control, SWT.CHECK);
-			fDeprecateDelegator.setSelection(DEFAULT_DEPRECATE_DELEGATOR_SETTING);
-			fDeprecateDelegator.setEnabled(DEFAULT_CREATE_DELEGATOR_SETTING);
-			fDeprecateDelegator.setText(RefactoringMessages.MoveInstanceMethodPage_Deprecate_button_name); 
-			fDeprecateDelegator.addSelectionListener(new SelectionAdapter() {
-
-				public final void widgetDefaultSelected(final SelectionEvent event) {
-					widgetSelected(event);
-				}
-
-				public final void widgetSelected(final SelectionEvent event) {
-					fProcessor.setDeprecated(fDeprecateDelegator.getSelection());
-				}
-			});
-
-			data= new GridData();
-			data.horizontalSpan= 2;
-			data.horizontalIndent= IDialogConstants.INDENT;
-			fDeprecateDelegator.setLayoutData(data);
-
-			fProcessor.setInlineDelegator(!DEFAULT_CREATE_DELEGATOR_SETTING);
-			fProcessor.setRemoveDelegator(!DEFAULT_CREATE_DELEGATOR_SETTING);
-			fProcessor.setDeprecated(DEFAULT_DEPRECATE_DELEGATOR_SETTING);
+			
+			/*
+			 * Changed the implementation to use the refactoring-independent
+			 * DelegateCreator and removed user option to choose whether to 
+			 * deprecated the delegate (default is now true). When re-enabling this 
+			 * option, consider adding it for all other
+			 * affected refactorings as well.
+			 * 
+			 */
+			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(control, getRefactoring(), false);
+			fProcessor.setDeprecated(true); 
+			fProcessor.setInlineDelegator(!fLeaveDelegateCheckBox.getSelection());
+			fProcessor.setRemoveDelegator(!fLeaveDelegateCheckBox.getSelection());
 
 			handleTargetChanged(possibleTargets[0]);
 
 			Dialog.applyDialogFont(control);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.MOVE_MEMBERS_WIZARD_PAGE);
+		}
+		
+		public void dispose() {
+			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
+			super.dispose();
 		}
 
 		/**

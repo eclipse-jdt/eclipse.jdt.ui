@@ -75,10 +75,10 @@ import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -96,16 +96,12 @@ import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.TagElement;
-import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.ThisExpression;
-import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
@@ -131,7 +127,9 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IVisibilityAdjustment;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -151,7 +149,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 /**
  * Refactoring processor to move instance methods.
  */
-public final class MoveInstanceMethodProcessor extends MoveProcessor implements IInitializableRefactoringComponent {
+public final class MoveInstanceMethodProcessor extends MoveProcessor implements IInitializableRefactoringComponent, IDelegatingUpdating {
 
 	/**
 	 * AST visitor to find references to parameters occurring in anonymous classes of a method body.
@@ -1043,6 +1041,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/** Should setter methods be used to resolve visibility issues? */
 	private boolean fUseSetters= true;
 
+	private boolean fDelegatingUpdating;
+
 	/**
 	 * Creates a new move instance method processor.
 	 * 
@@ -1070,6 +1070,24 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fMethod.getJavaProject());
 	}
 
+	//------------------- IDelegatingUpdating ----------------------
+	
+	public boolean canEnableDelegatingUpdating() {
+		return true;
+	}
+
+	public boolean getDelegatingUpdating() {
+		return fDelegatingUpdating;
+	}
+
+	public void setDelegatingUpdating(boolean delegatingUpdating) {
+		fDelegatingUpdating= delegatingUpdating;
+		setInlineDelegator(!delegatingUpdating);
+		setRemoveDelegator(!delegatingUpdating);
+	}
+	
+	//------------------- /IDelegatingUpdating ---------------------
+	
 	/**
 	 * Checks whether a method with the proposed name already exists in the target type.
 	 * 
@@ -1652,17 +1670,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	}
 
 	/**
-	 * Creates a new expression statement for the method invocation.
-	 * 
-	 * @param invocation the method invocation
-	 * @return the corresponding statement
-	 */
-	protected ExpressionStatement createExpressionStatement(final MethodInvocation invocation) {
-		Assert.isNotNull(invocation);
-		return invocation.getAST().newExpressionStatement(invocation);
-	}
-
-	/**
 	 * Creates the necessary change to inline a method invocation represented by a search match.
 	 * 
 	 * @param rewriter the current compilation unit rewrite
@@ -2039,21 +2046,51 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	protected boolean createMethodDelegation(final MethodDeclaration declaration, final Map rewrites, final Map adjustments, final RefactoringStatus status, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(declaration);
 		Assert.isNotNull(monitor);
-		final AST ast= fSourceRewrite.getRoot().getAST();
-		final ASTRewrite rewrite= fSourceRewrite.getASTRewrite();
-		final ImportRemover remover= fSourceRewrite.getImportRemover();
-		final MethodInvocation invocation= ast.newMethodInvocation();
-		invocation.setName(ast.newSimpleName(fMethodName));
-		invocation.setExpression(createSimpleTargetAccessExpression(declaration));
-		final boolean target= createArgumentList(declaration, invocation.arguments(), new VisibilityAdjustingArgumentFactory(ast, rewrites, adjustments));
-		final Block block= ast.newBlock();
-		block.statements().add(createMethodInvocation(declaration, invocation));
-		if (!fSourceRewrite.getCu().equals(fTargetType.getCompilationUnit()))
-			remover.registerRemovedNode(declaration.getBody());
-		rewrite.set(declaration, MethodDeclaration.BODY_PROPERTY, block, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.MoveInstanceMethodProcessor_replace_body_with_delegation)); 
-		if (fDeprecated)
-			createMethodDeprecation(declaration);
-		return target;
+
+		final DelegateInstanceMethodCreator creator= new DelegateInstanceMethodCreator(adjustments, rewrites);
+		creator.setSourceRewrite(fSourceRewrite);
+		creator.setCopy(false);
+		creator.setDeclareDeprecated(fDeprecated);
+		creator.setDeclaration(declaration);
+		creator.setNewElementName(fMethodName);
+		creator.prepareDelegate();
+		creator.createEdit();
+		
+		return creator.getNeededInsertion();
+	}
+	
+	class DelegateInstanceMethodCreator extends DelegateMethodCreator {
+		
+		private Map fAdjustments;
+		private Map fRewrites;
+		private boolean fNeededInsertion;
+		
+		protected boolean getNeededInsertion() {
+			return fNeededInsertion;
+		}
+		
+		public DelegateInstanceMethodCreator(Map adjustments, Map rewrites) {
+			super();
+			fAdjustments= adjustments;
+			fRewrites= rewrites;
+		}
+		
+		protected ASTNode createBody(BodyDeclaration bd) throws JavaModelException {
+			MethodDeclaration methodDeclaration= (MethodDeclaration)bd;
+			final MethodInvocation invocation= getAst().newMethodInvocation();
+			invocation.setName(getAst().newSimpleName(getNewElementName()));
+			invocation.setExpression(createSimpleTargetAccessExpression(methodDeclaration));
+			fNeededInsertion= createArgumentList(methodDeclaration, invocation.arguments(), new VisibilityAdjustingArgumentFactory(getAst(), fRewrites, fAdjustments));
+			final Block block= getAst().newBlock();
+			block.statements().add(createMethodInvocation(methodDeclaration, invocation));
+			if (!fSourceRewrite.getCu().equals(fTargetType.getCompilationUnit()))
+				fSourceRewrite.getImportRemover().registerRemovedNode(methodDeclaration.getBody());
+			return block;
+		}
+		
+		protected ASTNode createDocReference(final BodyDeclaration declaration) throws JavaModelException {
+			return MoveInstanceMethodProcessor.this.createMethodReference((MethodDeclaration)declaration, getAst());
+		}
 	}
 
 	/**
@@ -2144,42 +2181,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		}
 	}
 
-	/**
-	 * Creates the method deprecation message for the original method.
-	 * 
-	 * @param declaration the method declaration to create the message for
-	 * @throws JavaModelException if an error occurs
-	 */
-	protected void createMethodDeprecation(final MethodDeclaration declaration) throws JavaModelException {
-		Assert.isNotNull(declaration);
-		final AST ast= fSourceRewrite.getRoot().getAST();
-		final ASTRewrite rewrite= fSourceRewrite.getASTRewrite();
-		final String[] tokens= Strings.splitByToken(RefactoringCoreMessages.MoveInstanceMethodProcessor_deprecate_delegator_message, " ");  //$NON-NLS-1$
-		final List fragments= new ArrayList(tokens.length);
-		String element= null;
-		for (int index= 0; index < tokens.length; index++) {
-			element= tokens[index];
-			if (element != null && element.length() > 0) {
-				if (element.equals("{0}")) //$NON-NLS-1$
-					fragments.add(createMethodReference(declaration, ast));
-				else {
-					final TextElement text= ast.newTextElement();
-					text.setText(element);
-					fragments.add(text);
-				}
-			}
-		}
-		final TagElement tag= ast.newTagElement();
-		tag.setTagName(TagElement.TAG_DEPRECATED);
-		tag.fragments().addAll(fragments);
-		Javadoc comment= declaration.getJavadoc();
-		if (comment == null) {
-			comment= ast.newJavadoc();
-			comment.tags().add(tag);
-			rewrite.set(declaration, MethodDeclaration.JAVADOC_PROPERTY, comment, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.MoveInstanceMethodProcessor_deprecate_delegator_method)); 
-		} else
-			rewrite.getListRewrite(comment, Javadoc.TAGS_PROPERTY).insertLast(tag, fSourceRewrite.createGroupDescription(RefactoringCoreMessages.MoveInstanceMethodProcessor_deprecate_delegator_method)); 
-	}
 
 	/**
 	 * Creates the necessary imports for the copied method in the target compilation unit.
@@ -2202,33 +2203,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		} finally {
 			monitor.done();
 		}
-	}
-
-	/**
-	 * Creates the corresponding statement for the method invocation, based on the return type.
-	 * 
-	 * @param declaration the method declaration where the invocation statement is inserted
-	 * @param invocation the method invocation being encapsulated by the resulting statement
-	 * @return the corresponding statement
-	 */
-	protected Statement createMethodInvocation(final MethodDeclaration declaration, final MethodInvocation invocation) {
-		Assert.isNotNull(declaration);
-		Assert.isNotNull(invocation);
-		Statement statement= null;
-		final Type type= declaration.getReturnType2();
-		if (type == null)
-			statement= createExpressionStatement(invocation);
-		else {
-			if (type instanceof PrimitiveType) {
-				final PrimitiveType primitive= (PrimitiveType) type;
-				if (primitive.getPrimitiveTypeCode().equals(PrimitiveType.VOID))
-					statement= createExpressionStatement(invocation);
-				else
-					statement= createReturnStatement(invocation);
-			} else
-				statement= createReturnStatement(invocation);
-		}
-		return statement;
 	}
 
 	/**
@@ -2317,7 +2291,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * @return the created link tag to reference the method
 	 * @throws JavaModelException if an error occurs
 	 */
-	protected TagElement createMethodReference(final MethodDeclaration declaration, final AST ast) throws JavaModelException {
+	protected ASTNode createMethodReference(final MethodDeclaration declaration, final AST ast) throws JavaModelException {
 		Assert.isNotNull(ast);
 		Assert.isNotNull(declaration);
 		final MethodRef reference= ast.newMethodRef();
@@ -2343,10 +2317,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				return parameter;
 			}
 		});
-		final TagElement element= ast.newTagElement();
-		element.setTagName(TagElement.TAG_LINK);
-		element.fragments().add(reference);
-		return element;
+		return reference;
 	}
 
 	/**
@@ -2369,19 +2340,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		} catch (BadLocationException exception) {
 			JavaPlugin.log(exception);
 		}
-	}
-
-	/**
-	 * Creates a new return statement for the method invocation.
-	 * 
-	 * @param invocation the method invocation to create a return statement for
-	 * @return the corresponding statement
-	 */
-	protected ReturnStatement createReturnStatement(final MethodInvocation invocation) {
-		Assert.isNotNull(invocation);
-		final ReturnStatement statement= invocation.getAST().newReturnStatement();
-		statement.setExpression(invocation);
-		return statement;
 	}
 
 	/**

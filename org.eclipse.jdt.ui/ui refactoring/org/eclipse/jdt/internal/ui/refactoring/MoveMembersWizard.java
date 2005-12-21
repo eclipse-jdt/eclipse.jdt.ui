@@ -85,6 +85,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 		private static final long LABEL_FLAGS= JavaElementLabels.ALL_DEFAULT;
 
 		private Combo fDestinationField;
+		private Button fLeaveDelegateCheckBox;
 		private static final int MRU_COUNT= 10;
 		private static List fgMruDestinations= new ArrayList(MRU_COUNT);
 
@@ -110,12 +111,19 @@ public class MoveMembersWizard extends RefactoringWizard {
 		
 			addLabel(composite);
 			addDestinationControls(composite);
+			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(composite, getRefactoring(),
+					getMoveProcessor().getMembersToMove().length > 1);
 		
 			setControl(composite);
 			Dialog.applyDialogFont(composite);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.MOVE_MEMBERS_WIZARD_PAGE);
 		}
 
+		public void dispose() {
+			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
+			super.dispose();
+		}
+		
 		private void addLabel(Composite parent) {
 			Label label= new Label(parent, SWT.NONE);
 			IMember[] members= getMoveProcessor().getMembersToMove();
