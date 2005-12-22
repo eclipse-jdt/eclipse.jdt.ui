@@ -42,6 +42,7 @@ import org.eclipse.ltk.core.refactoring.TextEditBasedChangeGroup;
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
@@ -344,7 +345,15 @@ public class CleanUpRefactoring extends Refactoring {
 	}
 
 	private String getChangeName(ICompilationUnit compilationUnit) {
-		return JavaElementLabels.getElementLabel(compilationUnit, JavaElementLabels.CU_POST_QUALIFIED | JavaElementLabels.P_QUALIFIED);
+		StringBuffer buf= new StringBuffer();
+		JavaElementLabels.getCompilationUnitLabel(compilationUnit, JavaElementLabels.ALL_DEFAULT, buf);
+		buf.append(JavaElementLabels.CONCAT_STRING);
+		
+		StringBuffer buf2= new StringBuffer();
+		JavaElementLabels.getPackageFragmentLabel((IPackageFragment) compilationUnit.getParent(), JavaElementLabels.P_QUALIFIED, buf2);
+		buf.append(buf2.toString().replace('.', '/'));
+		
+		return buf.toString();
 	}
 
 	private ASTParser createParser(Map cleanUpOptions, IJavaProject javaProject) {
