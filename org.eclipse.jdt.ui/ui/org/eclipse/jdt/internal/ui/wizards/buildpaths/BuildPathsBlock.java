@@ -767,7 +767,18 @@ public class BuildPathsBlock {
 					}
 					IFolder folder= project.getFolder(path);
 					if (!folder.exists()) {
-						CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));			
+						IPath orginalPath= entry.getOrginalPath();
+						if (orginalPath != null && projPath.isPrefixOf(orginalPath)) {
+							orginalPath= orginalPath.removeFirstSegments(projPath.segmentCount());
+						}
+						if (orginalPath == null) {
+							//New source folder needs to be created
+							CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
+						} else {
+							//Source folder was edited, move to new location
+							IFolder orginalFolder= project.getFolder(orginalPath);
+							orginalFolder.move(path, true, true, new SubProgressMonitor(monitor, 1));
+						}
 					}
 					if (monitor.isCanceled()) {
 						throw new OperationCanceledException();

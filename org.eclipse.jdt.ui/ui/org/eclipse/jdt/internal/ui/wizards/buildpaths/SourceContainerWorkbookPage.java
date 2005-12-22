@@ -21,12 +21,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
-import org.eclipse.core.resources.IContainer;
-import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyEvent;
@@ -36,18 +32,11 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
-import org.eclipse.jface.viewers.ILabelProvider;
-import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.Wizard;
-
-import org.eclipse.ui.model.BaseWorkbenchContentProvider;
-import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -60,7 +49,6 @@ import org.eclipse.jdt.ui.actions.AbstractOpenWizardAction;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.TypedViewerFilter;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.LinkFolderDialog;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -75,9 +63,15 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	
 	private class OpenAddSourceFolderWizardAction extends AbstractOpenWizardAction implements IPropertyChangeListener {
 		
-		AddSourceFolderWizard fAddSourceFolderWizard;
+		private AddSourceFolderWizard fAddSourceFolderWizard;
+		private final CPListElement fElementToEdit;
 
 		public OpenAddSourceFolderWizardAction() {
+			this(null);
+		}
+		
+		public OpenAddSourceFolderWizardAction(CPListElement elementToEdit) {
+			fElementToEdit= elementToEdit;
 			addPropertyChangeListener(this);
 		}
 
@@ -87,8 +81,13 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		protected Wizard createWizard() throws CoreException {
 			List elements= fFoldersList.getElements();
 			CPListElement[] existing= (CPListElement[])elements.toArray(new CPListElement[elements.size()]);
-			CPListElement newElement= new CPListElement(fCurrJProject, IClasspathEntry.CPE_SOURCE);
-			fAddSourceFolderWizard= new AddSourceFolderWizard(fCurrJProject, existing, newElement);
+			CPListElement element;
+			if (fElementToEdit == null) {
+				element= new CPListElement(fCurrJProject, IClasspathEntry.CPE_SOURCE);
+			} else {
+				element= fElementToEdit;
+			}
+			fAddSourceFolderWizard= new AddSourceFolderWizard(fCurrJProject, existing, element, new Path(fOutputLocationField.getText()).makeAbsolute());
 			fAddSourceFolderWizard.setDoFlushChange(false);
 			return fAddSourceFolderWizard;
 		}
@@ -109,7 +108,11 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			for (int i= 0; i < createdElements.length; i++) {
 				fFoldersList.expandElement(createdElements[i], 3);	
 			}
-			fFoldersList.postSetSelection(new StructuredSelection(elementsToAdd));
+			if (fElementToEdit == null) {
+				fFoldersList.postSetSelection(new StructuredSelection(elementsToAdd));
+			} else {
+				fFoldersList.postSetSelection(new StructuredSelection(fElementToEdit));
+			}
 			
 			fFoldersList.removeElements(Arrays.asList(fAddSourceFolderWizard.getRemovedElements()));
 			CPListElement[] modifiedElements= fAddSourceFolderWizard.getModifiedElements();
@@ -125,9 +128,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private IJavaProject fCurrJProject;
 	
 	private Control fSWTControl;
-	
-	private IWorkspaceRoot fWorkspaceRoot;
-	
 	private TreeListDialogField fFoldersList;
 	
 	private StringDialogField fOutputLocationField;
@@ -140,7 +140,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	private final int IDX_REMOVE= 4;	
 
 	public SourceContainerWorkbookPage(ListDialogField classPathList, StringDialogField outputLocationField) {
-		fWorkspaceRoot= ResourcesPlugin.getWorkspace().getRoot();
 		fClassPathList= classPathList;
 	
 		fOutputLocationField= outputLocationField;
@@ -362,8 +361,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	}
 
 	private void editElementEntry(CPListElement elem) {
-		CPListElement res= null;
-		
 		if (elem.getLinkTarget() != null) {
 			removeEntry();
 			CPListElement entry= openNewLinkedSourceContainerDialog(elem);
@@ -374,11 +371,8 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			fFoldersList.addElement(entry);
 			fFoldersList.postSetSelection(new StructuredSelection(entry));
 		} else {
-			res= editSourceContainerDialog(elem);
-			
-			if (res != null) {
-				fFoldersList.replaceElement(elem, res);
-			}
+			OpenAddSourceFolderWizardAction action= new OpenAddSourceFolderWizardAction(elem);
+			action.run();
 		}
 	}
 
@@ -553,41 +547,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
         }
 		return null;
 	}
-    
-    private CPListElement editSourceContainerDialog(CPListElement existing) {
-    		
-		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
-		List existingContainers= getExistingContainers(null);
-		IProject[] allProjects= fWorkspaceRoot.getProjects();
-		ArrayList rejectedElements= new ArrayList(allProjects.length);
-		IProject currProject= fCurrJProject.getProject();
-		for (int i= 0; i < allProjects.length; i++) {
-			if (!allProjects[i].equals(currProject)) {
-				rejectedElements.add(allProjects[i]);
-			}
-		}
-		rejectedElements.addAll(existingContainers);
-		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, rejectedElements.toArray());
-		
-		ILabelProvider lp= new WorkbenchLabelProvider();
-		ITreeContentProvider cp= new BaseWorkbenchContentProvider();
-
-		String title= NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_edit_title; 
-		String message= NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_edit_description; 
-		
-		FolderSelectionDialog dialog= new FolderSelectionDialog(getShell(), lp, cp);
-
-		dialog.setTitle(title);
-		dialog.setMessage(message);
-		dialog.addFilter(filter);
-		dialog.setInput(fCurrJProject.getProject().getParent());
-		if (dialog.open() == Window.OK) {
-			Object[] elements= dialog.getResult();	
-			if (elements.length == 1)
-				return newCPSourceElement((IResource)elements[0]);
-		}
-		return null;
-    }
 	
 	/**
 	 * Asks to change the output folder to 'proj/bin' when no source folders were existing
@@ -620,26 +579,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			String message= NewWizardMessages.SourceContainerWorkbookPage_exclusion_added_message; 
 			MessageDialog.openInformation(getShell(), title, message);
 		}
-	}
-	
-	private List getExistingContainers(CPListElement existing) {
-		List res= new ArrayList();
-		List cplist= fFoldersList.getElements();
-		for (int i= 0; i < cplist.size(); i++) {
-			CPListElement elem= (CPListElement)cplist.get(i);
-			if (elem != existing) {
-				IResource resource= elem.getResource();
-				if (resource instanceof IContainer) { // defensive code
-					res.add(resource);	
-				}
-			}
-		}
-		return res;
-	}
-	
-	private CPListElement newCPSourceElement(IResource res) {
-		Assert.isNotNull(res);
-		return new CPListElement(fCurrJProject, IClasspathEntry.CPE_SOURCE, res.getFullPath(), res);
 	}
 	
 	/*

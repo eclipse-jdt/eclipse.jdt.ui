@@ -54,7 +54,7 @@ public class CPListElement {
 	private IJavaProject fProject;
 	
 	private int fEntryKind;
-	private IPath fPath;
+	private IPath fPath, fOrginalPath;
 	private IResource fResource;
 	private boolean fIsExported;
 	private boolean fIsMissing;
@@ -78,6 +78,7 @@ public class CPListElement {
 
 		fEntryKind= entryKind;
 		fPath= path;
+		fOrginalPath= path;
 		fChildren= new ArrayList();
 		fResource= res;
 		fIsExported= false;
@@ -658,6 +659,10 @@ public class CPListElement {
 			result[i]= CPListElement.createFromExisting(rawClasspath[i], project);
 		}
 		return result;
+	}
+
+	public IPath getOrginalPath() {
+		return fOrginalPath;
 	}
 
 }

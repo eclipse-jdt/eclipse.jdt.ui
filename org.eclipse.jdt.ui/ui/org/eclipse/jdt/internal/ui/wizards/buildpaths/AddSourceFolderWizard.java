@@ -38,12 +38,18 @@ public class AddSourceFolderWizard extends NewElementWizard {
 	private final List/*<CPListElement>*/ fExistingEntries;
 	private IPackageFragmentRoot fPackageFragmentRoot;
 	private boolean fDoFlushChange;
+	private final IPath fOutputLocation;
 
-	public AddSourceFolderWizard(IJavaProject project, CPListElement[] existingEntries, CPListElement newEntry) {
+	public AddSourceFolderWizard(IJavaProject project, CPListElement[] existingEntries, CPListElement newEntry, IPath outputLocation) {
 		super();
+		fOutputLocation= outputLocation;
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR);
 		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
-		setWindowTitle(NewWizardMessages.NewSourceFolderCreationWizard_title); 
+		if (newEntry.getPath() == null) {
+			setWindowTitle(NewWizardMessages.NewSourceFolderCreationWizard_title);
+		} else {
+			setWindowTitle(NewWizardMessages.NewSourceFolderCreationWizard_edit_title);
+		}
 
 		fNewEntry= newEntry;
 		fExistingEntries= new ArrayList(Arrays.asList(existingEntries));
@@ -60,7 +66,7 @@ public class AddSourceFolderWizard extends NewElementWizard {
 	public void addPages() {
 		super.addPages();
 	
-		fAddFolderPage= new AddSourceFolderWizardPage(fNewEntry, fExistingEntries);
+		fAddFolderPage= new AddSourceFolderWizardPage(fNewEntry, fExistingEntries, fOutputLocation);
 		addPage(fAddFolderPage);
 		
 		fFilterPage= new SetFilterWizardPage();
@@ -90,7 +96,11 @@ public class AddSourceFolderWizard extends NewElementWizard {
 	}
 	
 	public CPListElement[] getCreatedElements() {
-		return new CPListElement[] {fNewEntry};
+		if (fNewEntry.getOrginalPath() != null) {
+			return new CPListElement[] {};
+		} else {
+			return new CPListElement[] {fNewEntry};
+		}
 	}
 	
 	public CPListElement[] getRemovedElements() {

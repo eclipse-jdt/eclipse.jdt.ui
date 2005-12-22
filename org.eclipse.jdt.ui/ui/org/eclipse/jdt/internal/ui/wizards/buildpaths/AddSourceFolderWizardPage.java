@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -82,38 +84,50 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	
 	private final CPListElement fNewElement;
 	private final List/*<CPListElement>*/ fExistingEntries;
+	private final Hashtable/*<CPListElement, IPath[]>*/ fOrginalExlusionFilters, fOrginalInclusionFilters;
+	private final IPath fOrginalPath;
 	
 	private IPath fOutputLocation;
-	private IPath fNewOutputLocation;	
+	private IPath fNewOutputLocation;
 	private CPListElement fOldProjectSourceFolder;
 
 	private List fModifiedElements;
 	private List fRemovedElements;
 	
-	public AddSourceFolderWizardPage(CPListElement newElement, List/*<CPListElement>*/ existingEntries) {
+	public AddSourceFolderWizardPage(CPListElement newElement, List/*<CPListElement>*/ existingEntries, IPath outputLocation) {
 		super(PAGE_NAME);
 		
-		setTitle(NewWizardMessages.NewSourceFolderWizardPage_title); 
-		setDescription(NewWizardMessages.NewSourceFolderWizardPage_description);		 
+		fOrginalExlusionFilters= new Hashtable();
+		fOrginalInclusionFilters= new Hashtable();
+		for (Iterator iter= existingEntries.iterator(); iter.hasNext();) {
+			CPListElement element= (CPListElement)iter.next();
+			IPath[] exlusions= (IPath[])element.getAttribute(CPListElement.EXCLUSION);
+			if (exlusions != null) {
+				fOrginalExlusionFilters.put(element, exlusions);
+			}
+			IPath[] inclusions= (IPath[])element.getAttribute(CPListElement.INCLUSION);
+			if (inclusions != null) {
+				fOrginalInclusionFilters.put(element, inclusions);
+			}
+		}
+		
+		setTitle(NewWizardMessages.NewSourceFolderWizardPage_title);
+		fOrginalPath= newElement.getPath();
+		if (fOrginalPath == null) {
+			setDescription(NewWizardMessages.NewSourceFolderWizardPage_description);
+		} else {
+			setDescription(NewWizardMessages.NewSourceFolderWizardPage_edit_description);
+		}
 		
 		fNewElement= newElement;
 		fExistingEntries= existingEntries;
 		fModifiedElements= new ArrayList();
 		fRemovedElements= new ArrayList();
-		
-		try {
-			fOutputLocation= fNewElement.getJavaProject().getOutputLocation();		
-		} catch (CoreException e) {
-			IJavaProject javaProject= fNewElement.getJavaProject();
-			IProject project= javaProject.getProject();
-			IPath projPath= project.getFullPath();
-			fOutputLocation= projPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
-		}
+		fOutputLocation= outputLocation;
 		
 		RootFieldAdapter adapter= new RootFieldAdapter();
 		
 		fRootDialogField= new StringButtonDialogField(adapter);
-		fRootDialogField.setDialogFieldListener(adapter);
 		fRootDialogField.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_root_label); 
 		fRootDialogField.setButtonLabel(NewWizardMessages.NewSourceFolderWizardPage_root_button); 
 		if (fNewElement.getPath() == null) {
@@ -124,14 +138,18 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		fRootDialogField.setEnabled(fNewElement.getJavaProject() != null);
 		
 		fExcludeInOthersFields= new SelectionButtonDialogField(SWT.CHECK);
-		fExcludeInOthersFields.setDialogFieldListener(adapter);
 		fExcludeInOthersFields.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_exclude_label); 
-		fExcludeInOthersFields.setEnabled(JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS)));
+		fExcludeInOthersFields.setEnabled(JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS)) && fOrginalPath == null);
+		if (!fExcludeInOthersFields.isEnabled()) 
+			fExcludeInOthersFields.setSelection(true);
 		
 		fReplaceExistingField= new SelectionButtonDialogField(SWT.CHECK);
-		fReplaceExistingField.setDialogFieldListener(adapter);
 		fReplaceExistingField.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_ReplaceExistingSourceFolder_label); 
-		fReplaceExistingField.setEnabled(true);
+		fReplaceExistingField.setEnabled(fOrginalPath == null);
+
+		fReplaceExistingField.setDialogFieldListener(adapter);
+		fExcludeInOthersFields.setDialogFieldListener(adapter);
+		fRootDialogField.setDialogFieldListener(adapter);
 	}
 
 	// -------- UI Creation ---------
@@ -241,11 +259,13 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		
 		boolean isProjectAsSourceFolder= false;
 		
-		fNewElement.setPath(path);
 		fModifiedElements.clear();
+		updateFilters(fNewElement.getPath(), path);
+		
+		fNewElement.setPath(path);
 		fRemovedElements.clear();
 		Set modified= new HashSet();				
-		if (fExcludeInOthersFields.isSelected()) {
+		if (fExcludeInOthersFields.isEnabled() && fExcludeInOthersFields.isSelected()) {
 			addExclusionPatterns(fNewElement, fExistingEntries, modified);
 			fModifiedElements.addAll(modified);
 			CPListElement.insert(fNewElement, fExistingEntries);
@@ -282,9 +302,6 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			fNewOutputLocation= null;
 			result.setError(status.getMessage());
 			return result;
-		} else if (isProjectAsSourceFolder) {
-			result.setInfo(NewWizardMessages.NewSourceFolderWizardPage_warning_ReplaceSF); 
-			return result;
 		}
 		if (!modified.isEmpty()) {
 			result.setInfo(Messages.format(NewWizardMessages.NewSourceFolderWizardPage_warning_AddedExclusions, String.valueOf(modified.size()))); 
@@ -296,13 +313,57 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 	private void restoreCPElements() {
 		if (fNewElement.getPath() != null) {
-			removeExclusionPatterns(fNewElement, fExistingEntries);
+			for (Iterator iter= fExistingEntries.iterator(); iter.hasNext();) {
+				CPListElement element= (CPListElement)iter.next();
+				if (fOrginalExlusionFilters.containsKey(element)) {
+					element.setAttribute(CPListElement.EXCLUSION, fOrginalExlusionFilters.get(element));
+				}
+				if (fOrginalInclusionFilters.containsKey(element)) {
+					element.setAttribute(CPListElement.INCLUSION, fOrginalInclusionFilters.get(element));
+				}
+			}
 			
 			if (fOldProjectSourceFolder != null) {
 				fExistingEntries.set(fExistingEntries.indexOf(fNewElement), fOldProjectSourceFolder);
 				fOldProjectSourceFolder= null;
 			} else if (fExistingEntries.contains(fNewElement)) {
 				fExistingEntries.remove(fNewElement);
+			}
+		}
+	}
+	
+	private void updateFilters(IPath oldPath, IPath newPath) {
+		if (oldPath == null)
+			return;
+		
+		IPath projPath= fNewElement.getJavaProject().getProject().getFullPath();
+		if (projPath.isPrefixOf(oldPath)) {
+			oldPath= oldPath.removeFirstSegments(projPath.segmentCount()).addTrailingSeparator();
+			newPath= newPath.removeFirstSegments(projPath.segmentCount()).addTrailingSeparator();
+		}
+		
+		for (Iterator iter= fExistingEntries.iterator(); iter.hasNext();) {
+			CPListElement element= (CPListElement)iter.next();
+			IPath[] exlusions= (IPath[])element.getAttribute(CPListElement.EXCLUSION);
+			if (exlusions != null) {
+				for (int i= 0; i < exlusions.length; i++) {
+					if (exlusions[i].equals(oldPath)) {
+						fModifiedElements.add(element);
+						exlusions[i]= newPath;
+					}
+				}
+				element.setAttribute(CPListElement.EXCLUSION, exlusions);
+			}
+			
+			IPath[] inclusion= (IPath[])element.getAttribute(CPListElement.INCLUSION);
+			if (inclusion != null) {
+				for (int i= 0; i < inclusion.length; i++) {
+					if (inclusion[i].equals(oldPath)) {
+						fModifiedElements.add(element);
+						inclusion[i]= newPath;
+					}
+				}
+				element.setAttribute(CPListElement.INCLUSION, inclusion);
 			}
 		}
 	}
@@ -368,17 +429,6 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		}
 	}
 	
-	private void removeExclusionPatterns(CPListElement newEntry, List existing) {
-		IPath entryPath= newEntry.getPath();
-		for (int i= 0; i < existing.size(); i++) {
-			CPListElement curr= (CPListElement) existing.get(i);
-			IPath currPath= curr.getPath();
-			if (curr != newEntry && curr.getEntryKind() == IClasspathEntry.CPE_SOURCE && currPath.isPrefixOf(entryPath)) {
-				curr.removeFromExclusions(entryPath);
-			}
-		}
-	}
-	
 	public IResource getCorrespondingResource() {
 		return fNewElement.getJavaProject().getProject().getFolder(fRootDialogField.getText());
 	}
@@ -422,7 +472,13 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	}
 
 	public CPListElement[] getModifiedElements() {
-		return (CPListElement[])fModifiedElements.toArray(new CPListElement[fModifiedElements.size()]);
+		if (fOrginalPath == null) {
+			return (CPListElement[])fModifiedElements.toArray(new CPListElement[fModifiedElements.size()]);
+		} else {
+			List l= new ArrayList(fModifiedElements);
+			l.add(fNewElement);
+			return (CPListElement[])l.toArray(new CPListElement[l.size()]);
+		}
 	}
 	
 	public CPListElement[] getRemovedElements() {

@@ -14,6 +14,9 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
@@ -58,6 +61,7 @@ import org.eclipse.jdt.internal.corext.buildpath.RemoveFromClasspathOperation;
 import org.eclipse.jdt.internal.corext.buildpath.UnexcludeOperation;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.actions.AbstractOpenWizardAction;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -137,7 +141,17 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     		IJavaProject selectedProject= (IJavaProject)getSelection().getFirstElement();
     		CPListElement newEntry= new CPListElement(selectedProject, IClasspathEntry.CPE_SOURCE);
     		CPListElement[] existingEntries= CPListElement.createFromExisting(selectedProject);
-    		fAddSourceFolderWizard= new AddSourceFolderWizard(selectedProject, existingEntries, newEntry);
+    		
+    		IPath outputLocation;
+    		try {
+    			outputLocation= selectedProject.getOutputLocation();		
+    		} catch (CoreException e) {
+    			IProject project= selectedProject.getProject();
+    			IPath projPath= project.getFullPath();
+    			outputLocation= projPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
+    		}
+    		
+    		fAddSourceFolderWizard= new AddSourceFolderWizard(selectedProject, existingEntries, newEntry, outputLocation);
 			return fAddSourceFolderWizard;
     	}
     	

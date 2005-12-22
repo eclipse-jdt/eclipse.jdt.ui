@@ -154,6 +154,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewJavaProjectWizardPage_op_desc;
 	
 	public static String NewSourceFolderCreationWizard_title;
+	public static String NewSourceFolderCreationWizard_edit_title;
 	public static String NewSourceFolderWizardPage_title;
 	public static String NewSourceFolderWizardPage_description;
 	public static String NewSourceFolderWizardPage_root_label;
@@ -180,6 +181,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewSourceFolderWizardPage_warning_ReplaceSF;
 	public static String NewSourceFolderWizardPage_warning_AddedExclusions;
 	public static String NewSourceFolderWizardPage_ReplaceExistingSourceFolder_label;
+	public static String NewSourceFolderWizardPage_edit_description;
 	
 	public static String BuildPathsBlock_tab_source;
 	public static String BuildPathsBlock_tab_projects;
