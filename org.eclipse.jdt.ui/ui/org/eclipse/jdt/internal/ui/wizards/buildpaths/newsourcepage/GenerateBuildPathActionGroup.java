@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage;
 
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 
@@ -40,6 +41,7 @@ import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IUpdate;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.buildpath.AddExternalArchivesOperation;
@@ -62,8 +64,9 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.JarImportWizardAction;
-import org.eclipse.jdt.internal.ui.wizards.NewSourceFolderCreationWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.AddSourceFolderWizard;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 /**
  * Action group that adds the source and generate actions to a part's context
@@ -113,51 +116,52 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 			setText(NewWizardMessages.GenerateBuildPathActionGroup_no_action_available); 
 		}
 	}
-	private Action fNoActionAvailable= new NoActionAvailable(); 
-	
-	private static class OpenNewSourceFolderWizardAction extends AbstractOpenWizardAction implements ISelectionChangedListener {
+	private Action fNoActionAvailable= new NoActionAvailable();
 		
-		public OpenNewSourceFolderWizardAction() {
-			setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
-			setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
-			setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip); 
-			setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKROOT);
-			PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
-		}
+    public static class AddSourceFolderAction extends AbstractOpenWizardAction implements ISelectionChangedListener {
+    	
+    	private AddSourceFolderWizard fAddSourceFolderWizard;
 
-		/**
-		 * {@inheritDoc}
-		 */
-		protected Wizard createWizard() throws CoreException {
-			return new NewSourceFolderCreationWizard();
-		}
+		public AddSourceFolderAction() {
+    		setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
+    		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
+    		setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip); 
+    		setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKROOT);
+    		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
+    	}
 
+    	/**
+    	 * {@inheritDoc}
+    	 */
+    	protected Wizard createWizard() throws CoreException {
+    		IJavaProject selectedProject= (IJavaProject)getSelection().getFirstElement();
+    		CPListElement newEntry= new CPListElement(selectedProject, IClasspathEntry.CPE_SOURCE);
+    		CPListElement[] existingEntries= CPListElement.createFromExisting(selectedProject);
+    		fAddSourceFolderWizard= new AddSourceFolderWizard(selectedProject, existingEntries, newEntry);
+			return fAddSourceFolderWizard;
+    	}
+    	
 		/**
 		 * {@inheritDoc}
 		 */
 		public void selectionChanged(SelectionChangedEvent event) {
-	        ISelection selection = event.getSelection();
-	        if (selection instanceof IStructuredSelection)
-	            selectionChanged((IStructuredSelection) selection);
-	        else
-	            selectionChanged(StructuredSelection.EMPTY);
+            ISelection selection = event.getSelection();
+            if (selection instanceof IStructuredSelection) {
+    			setEnabled(isValid((IStructuredSelection) selection));
+            } else {
+    			setEnabled(isValid(StructuredSelection.EMPTY));
+            }
 		}
 
-		private void selectionChanged(IStructuredSelection selection) {
-			if (selection.size() != 1) {
-				setEnabled(false);
-				return;
-			}
-			
-			Object firstElement= selection.getFirstElement();
-			if (!(firstElement instanceof IJavaProject)) {
-				setEnabled(false);
-				return;
-			}
-			
-			setEnabled(true);
+		protected boolean isValid(IStructuredSelection selection) {
+			return selection.size() == 1 && selection.getFirstElement() instanceof IJavaProject;
 		}
-	}
+		
+		public List getCPListElements() {
+			return fAddSourceFolderWizard.getCPListElements();
+		}
+
+    }
 
     private class UpdateJarFileAction extends JarImportWizardAction implements IUpdate {
 
@@ -209,43 +213,30 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     
     private GenerateBuildPathActionGroup(IWorkbenchSite site, IKeyBindingService keyBindingService) {
         fSite= site;
-    }
-
-	private Action[] getActions() {
-		if (fActions == null) {
-			
-			final OpenNewSourceFolderWizardAction openAction= new OpenNewSourceFolderWizardAction();
-			final UpdateJarFileAction updateAction= new UpdateJarFileAction();
-			final ISelectionProvider provider= fSite.getSelectionProvider();
-			provider.addSelectionChangedListener(openAction);
-			provider.addSelectionChangedListener(updateAction);
-			
-			final BuildActionSelectionContext context= new BuildActionSelectionContext();
-			final Action[] actions= new Action[] {
-					createBuildPathAction(fSite, IClasspathInformationProvider.CREATE_LINK, context),
-					openAction,
-					createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_SF_TO_BP, context),
-					createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_LIB_TO_BP, context),
-					createBuildPathAction(fSite, IClasspathInformationProvider.REMOVE_FROM_BP, context),
-					createBuildPathAction(fSite, IClasspathInformationProvider.ADD_JAR_TO_BP, context),
-					createBuildPathAction(fSite, IClasspathInformationProvider.ADD_LIB_TO_BP, context),
-					updateAction,
-					createBuildPathAction(fSite, IClasspathInformationProvider.EXCLUDE, context),
-					createBuildPathAction(fSite, IClasspathInformationProvider.UNEXCLUDE, context),
-					createBuildPathAction(fSite, IClasspathInformationProvider.EDIT_FILTERS, context),
-					createBuildPathAction(fSite, IClasspathInformationProvider.EDIT_OUTPUT, context),
-					createConfigureAction(fSite)
-			};
-			fActions= actions;
-		}
-		final Action[] actions= fActions;
+        
+        final AddSourceFolderAction addSourceFolderAction= new AddSourceFolderAction();
+		final UpdateJarFileAction updateAction= new UpdateJarFileAction();
+		final ISelectionProvider provider= fSite.getSelectionProvider();
+		provider.addSelectionChangedListener(addSourceFolderAction);
+		provider.addSelectionChangedListener(updateAction);
 		
-		for (int i= 0; i < actions.length; i++) {
-			if (actions[i] instanceof IUpdate)
-				((IUpdate) actions[i]).update();
-        }
-		return actions;
-	}
+		final BuildActionSelectionContext context= new BuildActionSelectionContext();
+		fActions= new Action[] {
+				createBuildPathAction(fSite, IClasspathInformationProvider.CREATE_LINK, context),
+				addSourceFolderAction,
+				createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_SF_TO_BP, context),
+				createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_LIB_TO_BP, context),
+				createBuildPathAction(fSite, IClasspathInformationProvider.REMOVE_FROM_BP, context),
+				createBuildPathAction(fSite, IClasspathInformationProvider.ADD_JAR_TO_BP, context),
+				createBuildPathAction(fSite, IClasspathInformationProvider.ADD_LIB_TO_BP, context),
+				updateAction,
+				createBuildPathAction(fSite, IClasspathInformationProvider.EXCLUDE, context),
+				createBuildPathAction(fSite, IClasspathInformationProvider.UNEXCLUDE, context),
+				createBuildPathAction(fSite, IClasspathInformationProvider.EDIT_FILTERS, context),
+				createBuildPathAction(fSite, IClasspathInformationProvider.EDIT_OUTPUT, context),
+				createConfigureAction(fSite)
+		};
+    }
     
 	private Action createConfigureAction(IWorkbenchSite site) {
 		ConfigureBuildPathAction action= new ConfigureBuildPathAction(site);
@@ -389,7 +380,12 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 	private void fillViewSubMenu(IMenuManager source) {
         int added= 0;
         
-        Action[] actions= getActions();
+        Action[] actions= fActions;
+		for (int i= 0; i < actions.length; i++) {
+			if (actions[i] instanceof IUpdate)
+				((IUpdate) actions[i]).update();
+        }
+        
         for (int i= 0; i < actions.length; i++) {
             if (i == 2)
                 source.add(new Separator(GROUP_BUILDPATH));

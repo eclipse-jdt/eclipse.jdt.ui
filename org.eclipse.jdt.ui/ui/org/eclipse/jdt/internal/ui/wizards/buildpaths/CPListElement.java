@@ -11,6 +11,9 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
@@ -29,6 +32,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.launching.JavaRuntime;
 
@@ -65,6 +69,9 @@ public class CPListElement {
 		this(null, project, entryKind, path, res);
 	}
 	
+	public CPListElement(IJavaProject project, int entryKind) {
+		this(null, project, entryKind, null, null);
+	}
 	
 	public CPListElement(Object parent, IJavaProject project, int entryKind, IPath path, IResource res) {
 		fProject= project;
@@ -219,6 +226,53 @@ public class CPListElement {
 		attribute.setValue(value);
 		attributeChanged(key);
 		return attribute;
+	}
+	
+	public boolean addToExclusions(IPath path) {
+		String key= CPListElement.EXCLUSION;
+		return addFilter(path, key);
+	}
+	
+	public boolean addToInclusion(IPath path) {
+		String key= CPListElement.INCLUSION;
+		return addFilter(path, key);
+	}
+	
+	public boolean removeFromExclusions(IPath path) {
+		String key= CPListElement.EXCLUSION;
+		return removeFilter(path, key);
+	}
+	
+	public boolean removeFromInclusion(IPath path) {
+		String key= CPListElement.INCLUSION;
+		return removeFilter(path, key);
+	}
+	
+	private boolean addFilter(IPath path, String key) {
+		IPath[] exclusionFilters= (IPath[]) getAttribute(key);
+		if (!JavaModelUtil.isExcludedPath(path, exclusionFilters)) {
+			IPath pathToExclude= path.removeFirstSegments(getPath().segmentCount()).addTrailingSeparator();
+			IPath[] newExclusionFilters= new IPath[exclusionFilters.length + 1];
+			System.arraycopy(exclusionFilters, 0, newExclusionFilters, 0, exclusionFilters.length);
+			newExclusionFilters[exclusionFilters.length]= pathToExclude;
+			setAttribute(key, newExclusionFilters);
+			return true;
+		}
+		return false;
+	}
+	
+	private boolean removeFilter(IPath path, String key) {
+		IPath[] exclusionFilters= (IPath[]) getAttribute(key);
+		IPath pathToExclude= path.removeFirstSegments(getPath().segmentCount()).addTrailingSeparator();
+		if (JavaModelUtil.isExcludedPath(pathToExclude, exclusionFilters)) {
+			
+			List l= new ArrayList(Arrays.asList(exclusionFilters));
+			l.remove(pathToExclude);
+			IPath[] newExclusionFilters= (IPath[])l.toArray(new IPath[l.size()]);
+			setAttribute(key, newExclusionFilters);
+			return true;
+		}
+		return false;
 	}
 	
 	public CPListElementAttribute findAttributeElement(String key) {
@@ -549,6 +603,61 @@ public class CPListElement {
 
 	public void setLinkTarget(IPath linkTarget) {
 		fLinkTarget= linkTarget;
+	}
+
+	public void setPath(IPath path) {
+		fCachedEntry= null;
+		fPath= path;
+	}
+
+	public static void insert(CPListElement element, List cpList) {
+		int length= cpList.size();
+		CPListElement[] elements= (CPListElement[])cpList.toArray(new CPListElement[length]);
+		int i= 0;
+		while (i < length && elements[i].getEntryKind() != element.getEntryKind()) {
+			i++;
+		}
+		if (i < length) {
+			i++;
+			while (i < length && elements[i].getEntryKind() == element.getEntryKind()) {
+				i++;
+			}
+			cpList.add(i, element);
+			return;
+		}
+		
+		switch (element.getEntryKind()) {
+		case IClasspathEntry.CPE_SOURCE:
+			cpList.add(0, element);
+			break;
+		case IClasspathEntry.CPE_CONTAINER:
+		case IClasspathEntry.CPE_LIBRARY:
+		case IClasspathEntry.CPE_PROJECT:
+		case IClasspathEntry.CPE_VARIABLE:
+		default:
+			cpList.add(element);
+			break;
+		}
+	}
+
+	public static IClasspathEntry[] convertToClasspathEntries(List/*<CPListElement>*/ cpList) {
+		IClasspathEntry[] result= new IClasspathEntry[cpList.size()];
+		int i= 0;
+		for (Iterator iter= cpList.iterator(); iter.hasNext();) {
+			CPListElement cur= (CPListElement)iter.next();
+			result[i]= cur.getClasspathEntry();
+			i++;
+		}
+		return result;
+	}
+	
+	public static CPListElement[] createFromExisting(IJavaProject project) throws JavaModelException {
+		IClasspathEntry[] rawClasspath= project.getRawClasspath();
+		CPListElement[] result= new CPListElement[rawClasspath.length];
+		for (int i= 0; i < rawClasspath.length; i++) {
+			result[i]= CPListElement.createFromExisting(rawClasspath[i], project);
+		}
+		return result;
 	}
 
 }

@@ -179,6 +179,7 @@ public final class NewWizardMessages extends NLS {
 	public static String NewSourceFolderWizardPage_warning_ReplaceOL;
 	public static String NewSourceFolderWizardPage_warning_ReplaceSF;
 	public static String NewSourceFolderWizardPage_warning_AddedExclusions;
+	public static String NewSourceFolderWizardPage_ReplaceExistingSourceFolder_label;
 	
 	public static String BuildPathsBlock_tab_source;
 	public static String BuildPathsBlock_tab_projects;

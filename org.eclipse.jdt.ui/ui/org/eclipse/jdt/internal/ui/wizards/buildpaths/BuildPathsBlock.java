@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
@@ -670,30 +671,10 @@ public class BuildPathsBlock {
 	}
 	
 	public void configureJavaProject(IProgressMonitor monitor) throws CoreException, OperationCanceledException {
-		if (monitor == null) {
-			monitor= new NullProgressMonitor();
-		}
-		monitor.setTaskName(NewWizardMessages.BuildPathsBlock_operationdesc_java); 
-		monitor.beginTask("", 10); //$NON-NLS-1$
-		try {
-			IRemoveOldBinariesQuery reorgQuery= getRemoveOldBinariesQuery(null);
-			// remove old .class files
-			if (reorgQuery != null) {
-				IPath oldOutputLocation= fCurrJProject.getOutputLocation();
-				if (!getOutputLocation().equals(oldOutputLocation)) {
-					IResource res= fWorkspaceRoot.findMember(oldOutputLocation);
-					if (res instanceof IContainer && hasClassfiles(res)) {
-						if (reorgQuery.doQuery(oldOutputLocation)) {
-							removeOldClassfiles(res);
-						}
-					}
-				}		
-			}
-			
-			internalConfigureJavaProject(fClassPathList.getElements(), getOutputLocation(), reorgQuery, monitor);
-		} finally {
-			monitor.done();
-		}
+		
+		flush(fClassPathList.getElements(), getOutputLocation(), monitor);
+		initializeTimeStamps();
+		
 		updateUI();
 	}
     	
@@ -701,59 +682,105 @@ public class BuildPathsBlock {
 	 * Creates the Java project and sets the configured build path and output location.
 	 * If the project already exists only build paths are updated.
 	 */
-	private void internalConfigureJavaProject(List classPathEntries, IPath outputLocation, IRemoveOldBinariesQuery reorgQuery, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
-		// 10 monitor steps to go
+	public static void flush(List classPathEntries, IPath outputLocation, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+		if (classPathEntries.isEmpty())
+			return;
 		
-		// create and set the output path first
-		if (!fWorkspaceRoot.exists(outputLocation)) {
-			IFolder folder= fWorkspaceRoot.getFolder(outputLocation);
-			CoreUtility.createFolder(folder, true, true, null);
-			folder.setDerived(true);		
+		if (monitor == null) {
+			monitor= new NullProgressMonitor();
 		}
-		
-
-		if (monitor.isCanceled()) {
-			throw new OperationCanceledException();
-		}
-		monitor.worked(2);
-				
-		int nEntries= classPathEntries.size();
-		IClasspathEntry[] classpath= new IClasspathEntry[nEntries];
-		
-		// create and set the class path
-		for (int i= 0; i < nEntries; i++) {
-			CPListElement entry= ((CPListElement)classPathEntries.get(i));
-			IResource res= entry.getResource();
-			if (res instanceof IFolder) {
-				if (entry.getLinkTarget() != null) {
-					if (!res.exists()) {
-						((IFolder)res).createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, monitor);
-					} else if (!entry.getLinkTarget().equals(res.getLocation())) {
-						((IFolder)res).delete(true, monitor);
-						((IFolder)res).createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, monitor);
-					}
-				} else if (!res.exists()) {
-					CoreUtility.createFolder((IFolder)res, true, true, null);
-				}
+		monitor.setTaskName(NewWizardMessages.BuildPathsBlock_operationdesc_java); 
+		monitor.beginTask("", classPathEntries.size() + 4); //$NON-NLS-1$
+		try {
+			
+			IJavaProject javaProject= ((CPListElement)classPathEntries.get(0)).getJavaProject();
+			IProject project= javaProject.getProject();
+			IPath projPath= project.getFullPath();
+			
+			IPath oldOutputLocation;
+			try {
+				oldOutputLocation= javaProject.getOutputLocation();		
+			} catch (CoreException e) {
+				oldOutputLocation= projPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
 			}
-			if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-				IPath folderOutput= (IPath) entry.getAttribute(CPListElement.OUTPUT);
-				if (folderOutput != null && folderOutput.segmentCount() > 1) {
-					IFolder folder= fWorkspaceRoot.getFolder(folderOutput);
-					CoreUtility.createFolder(folder, true, true, null);
+			
+			if (oldOutputLocation.equals(projPath) && !outputLocation.equals(projPath)) {
+				if (BuildPathsBlock.hasClassfiles(project)) {
+					if (BuildPathsBlock.getRemoveOldBinariesQuery(JavaPlugin.getActiveWorkbenchShell()).doQuery(projPath)) {
+						BuildPathsBlock.removeOldClassfiles(project);
+					}
 				}
 			}
 			
-			classpath[i]= entry.getClasspathEntry();
-		}	
-		
-		if (monitor.isCanceled()) {
-			throw new OperationCanceledException();
-		}
-		monitor.worked(1);
+			IWorkspaceRoot fWorkspaceRoot= JavaPlugin.getWorkspace().getRoot();
+			
+			//create and set the output path first
+			if (!fWorkspaceRoot.exists(outputLocation)) {
+				IFolder folder= fWorkspaceRoot.getFolder(outputLocation);
+				CoreUtility.createFolder(folder, true, true, null);
+				folder.setDerived(true);		
+			}
+			
+			if (monitor.isCanceled()) {
+				throw new OperationCanceledException();
+			}
+			monitor.worked(2);
+			
+			int nEntries= classPathEntries.size();
+			IClasspathEntry[] classpath= new IClasspathEntry[nEntries];
+			int i= 0;
+			
+			for (Iterator iter= classPathEntries.iterator(); iter.hasNext();) {
+				CPListElement entry= (CPListElement)iter.next();
+				classpath[i]= entry.getClasspathEntry();
+				i++;
 				
-		fCurrJProject.setRawClasspath(classpath, outputLocation, new SubProgressMonitor(monitor, 7));
-		initializeTimeStamps();
+				IResource res= entry.getResource();
+				if (res instanceof IFolder) {
+					if (entry.getLinkTarget() != null) {
+						IFolder folder= ((IFolder)res);
+						if (!res.exists()) {
+							folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, monitor);
+						} else if (!entry.getLinkTarget().equals(res.getLocation())) {
+							folder.delete(true, monitor);
+							folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, monitor);
+						}
+					} else if (!res.exists()) {
+						CoreUtility.createFolder((IFolder)res, true, true, null);
+					}
+				}
+				if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+					IPath folderOutput= (IPath) entry.getAttribute(CPListElement.OUTPUT);
+					if (folderOutput != null && folderOutput.segmentCount() > 1) {
+						IFolder folder= fWorkspaceRoot.getFolder(folderOutput);
+						CoreUtility.createFolder(folder, true, true, null);
+					}
+					
+					IPath path= entry.getPath();
+					if (projPath.equals(path)) {
+						monitor.worked(1);
+						continue;	
+					}
+					
+					if (projPath.isPrefixOf(path)) {
+						path= path.removeFirstSegments(projPath.segmentCount());
+					}
+					IFolder folder= project.getFolder(path);
+					if (!folder.exists()) {
+						CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));			
+					}
+					if (monitor.isCanceled()) {
+						throw new OperationCanceledException();
+					}
+				} else {
+					monitor.worked(1);
+				}
+			}
+
+			javaProject.setRawClasspath(classpath, outputLocation, new SubProgressMonitor(monitor, 2));
+		} finally {
+			monitor.done();
+		}
 	}
 	
 	public static boolean hasClassfiles(IResource resource) throws CoreException {

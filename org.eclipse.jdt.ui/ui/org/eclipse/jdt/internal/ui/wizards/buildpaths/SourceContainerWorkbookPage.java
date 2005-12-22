@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -33,15 +34,18 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
+import org.eclipse.jface.wizard.Wizard;
 
-import org.eclipse.ui.dialogs.NewFolderDialog;
 import org.eclipse.ui.model.BaseWorkbenchContentProvider;
 import org.eclipse.ui.model.WorkbenchLabelProvider;
 
@@ -51,6 +55,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.actions.AbstractOpenWizardAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
@@ -67,10 +72,57 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.TreeListDialogField;
 
 public class SourceContainerWorkbookPage extends BuildPathBasePage {
+	
+	private class OpenAddSourceFolderWizardAction extends AbstractOpenWizardAction implements IPropertyChangeListener {
+		
+		AddSourceFolderWizard fAddSourceFolderWizard;
+
+		public OpenAddSourceFolderWizardAction() {
+			addPropertyChangeListener(this);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		protected Wizard createWizard() throws CoreException {
+			List elements= fFoldersList.getElements();
+			CPListElement[] existing= (CPListElement[])elements.toArray(new CPListElement[elements.size()]);
+			CPListElement newElement= new CPListElement(fCurrJProject, IClasspathEntry.CPE_SOURCE);
+			fAddSourceFolderWizard= new AddSourceFolderWizard(fCurrJProject, existing, newElement);
+			fAddSourceFolderWizard.setDoFlushChange(false);
+			return fAddSourceFolderWizard;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public void propertyChange(PropertyChangeEvent event) {
+			if (event.getProperty().equals(IAction.RESULT) && event.getNewValue().equals(Boolean.TRUE)) {
+				finishWizard();
+			}
+		}
+		
+		protected void finishWizard() {
+			CPListElement[] createdElements= fAddSourceFolderWizard.getCreatedElements();
+			List elementsToAdd= Arrays.asList(createdElements);
+			fFoldersList.addElements(elementsToAdd);
+			for (int i= 0; i < createdElements.length; i++) {
+				fFoldersList.expandElement(createdElements[i], 3);	
+			}
+			fFoldersList.postSetSelection(new StructuredSelection(elementsToAdd));
+			
+			fFoldersList.removeElements(Arrays.asList(fAddSourceFolderWizard.getRemovedElements()));
+			CPListElement[] modifiedElements= fAddSourceFolderWizard.getModifiedElements();
+			for (int i= 0; i < modifiedElements.length; i++) {
+				fFoldersList.refresh(modifiedElements[i]);	
+				fFoldersList.expandElement(modifiedElements[i], 3);
+			}
+			fOutputLocationField.setText(fAddSourceFolderWizard.getOutputLocation().makeRelative().toOSString());
+		}
+	}
 
 	private ListDialogField fClassPathList;
 	private IJavaProject fCurrJProject;
-	private IPath fProjPath;
 	
 	private Control fSWTControl;
 	
@@ -121,8 +173,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 	}
 	
 	public void init(IJavaProject jproject) {
-		fCurrJProject= jproject;
-		fProjPath= fCurrJProject.getProject().getFullPath();	
+		fCurrJProject= jproject;	
 		updateFoldersList();
 	}
 	
@@ -147,9 +198,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		
 		for (int i= 0; i < folders.size(); i++) {
 			CPListElement cpe= (CPListElement) folders.get(i);
-			IPath[] patterns= (IPath[]) cpe.getAttribute(CPListElement.EXCLUSION);
+			IPath[] ePatterns= (IPath[]) cpe.getAttribute(CPListElement.EXCLUSION);
+			IPath[] iPatterns= (IPath[])cpe.getAttribute(CPListElement.INCLUSION);
 			boolean hasOutputFolder= (cpe.getAttribute(CPListElement.OUTPUT) != null);
-			if (patterns.length > 0 || hasOutputFolder) {
+			if (ePatterns.length > 0 || iPatterns.length > 0 || hasOutputFolder) {
 				fFoldersList.expandElement(cpe, 3);
 			}				
 		}
@@ -254,53 +306,17 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			}
 		}
 	}
-	
-	private boolean hasFolders(IContainer container) {
-		try {
-			IResource[] members= container.members();
-			for (int i= 0; i < members.length; i++) {
-				if (members[i] instanceof IContainer) {
-					return true;
-				}
-			}
-		} catch (CoreException e) {
-			// ignore
-		}
-		return false;
-	}
-	
-	
+		
 	protected void sourcePageCustomButtonPressed(DialogField field, int index) {
 		if (field == fFoldersList) {
-			if (index == IDX_ADD || index == IDX_ADD_LINK) {
+			if (index == IDX_ADD) {
+				OpenAddSourceFolderWizardAction action= new OpenAddSourceFolderWizardAction();
+				action.run();
+			} else if (index == IDX_ADD_LINK) {
 				List elementsToAdd= new ArrayList(10);
-				if (index == IDX_ADD) {
-					IProject project= fCurrJProject.getProject();
-					if (project.exists()) {
-						if (hasFolders(project)) {
-							CPListElement[] srcentries= openSourceContainerDialog(null);
-							if (srcentries != null) {
-								for (int i= 0; i < srcentries.length; i++) {
-									elementsToAdd.add(srcentries[i]);
-								}
-							}
-						} else {
-							CPListElement entry= openNewSourceContainerDialog(null, true);
-							if (entry != null) {
-								elementsToAdd.add(entry);
-							}	
-						}
-					} else {
-						CPListElement entry= openNewSourceContainerDialog(null, false);
-						if (entry != null) {
-							elementsToAdd.add(entry);
-						}
-					}
-				} else {
-					CPListElement entry= openNewLinkedSourceContainerDialog(null);
-					if (entry != null) {
-						elementsToAdd.add(entry);
-					}
+				CPListElement entry= openNewLinkedSourceContainerDialog(null);
+				if (entry != null) {
+					elementsToAdd.add(entry);
 				}
 				if (!elementsToAdd.isEmpty()) {
 					if (fFoldersList.getSize() == 1) {
@@ -572,31 +588,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 		return null;
     }
-		
-	private CPListElement openNewSourceContainerDialog(CPListElement existing, boolean includeLinked) {	
-		if (includeLinked) {
-			NewFolderDialog dialog= new NewFolderDialog(getShell(), fCurrJProject.getProject());
-			dialog.setTitle(NewWizardMessages.SourceContainerWorkbookPage_NewSourceFolderDialog_new_title); 
-			if (dialog.open() == Window.OK) {
-				IResource createdFolder= (IResource) dialog.getResult()[0];
-				return newCPSourceElement(createdFolder);
-			}
-			return null;
-		} else {
-			String title= (existing == null) ? NewWizardMessages.SourceContainerWorkbookPage_NewSourceFolderDialog_new_title : NewWizardMessages.SourceContainerWorkbookPage_NewSourceFolderDialog_edit_title; 
-	
-			IProject proj= fCurrJProject.getProject();
-			NewSourceFolderDialog dialog= new NewSourceFolderDialog(getShell(), title, proj, getExistingContainers(existing), existing);
-			dialog.setMessage(Messages.format(NewWizardMessages.SourceContainerWorkbookPage_NewSourceFolderDialog_description, fProjPath.toString())); 
-			if (dialog.open() == Window.OK) {
-				IResource folder= dialog.getSourceFolder();
-				return newCPSourceElement(folder);
-			}
-			return null;
-		}
-	}
-	
-	
 	
 	/**
 	 * Asks to change the output folder to 'proj/bin' when no source folders were existing
@@ -629,50 +620,6 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			String message= NewWizardMessages.SourceContainerWorkbookPage_exclusion_added_message; 
 			MessageDialog.openInformation(getShell(), title, message);
 		}
-	}
-	
-	private CPListElement[] openSourceContainerDialog(CPListElement existing) {
-		
-		Class[] acceptedClasses= new Class[] { IProject.class, IFolder.class };
-		List existingContainers= getExistingContainers(null);
-		
-		IProject[] allProjects= fWorkspaceRoot.getProjects();
-		ArrayList rejectedElements= new ArrayList(allProjects.length);
-		IProject currProject= fCurrJProject.getProject();
-		for (int i= 0; i < allProjects.length; i++) {
-			if (!allProjects[i].equals(currProject)) {
-				rejectedElements.add(allProjects[i]);
-			}
-		}
-		ViewerFilter filter= new TypedViewerFilter(acceptedClasses, rejectedElements.toArray());
-		
-		ILabelProvider lp= new WorkbenchLabelProvider();
-		ITreeContentProvider cp= new BaseWorkbenchContentProvider();
-
-		String title= (existing == null) ? NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_new_title : NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_edit_title; 
-		String message= (existing == null) ? NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_new_description : NewWizardMessages.SourceContainerWorkbookPage_ExistingSourceFolderDialog_edit_description; 
-
-		MultipleFolderSelectionDialog dialog= new MultipleFolderSelectionDialog(getShell(), lp, cp);
-		dialog.setExisting(existingContainers.toArray());
-		dialog.setTitle(title);
-		dialog.setMessage(message);
-		dialog.addFilter(filter);
-		dialog.setInput(fCurrJProject.getProject().getParent());
-		if (existing == null) {
-			dialog.setInitialFocus(fCurrJProject.getProject());
-		} else {
-			dialog.setInitialFocus(existing.getResource());
-		}		
-		if (dialog.open() == Window.OK) {
-			Object[] elements= dialog.getResult();	
-			CPListElement[] res= new CPListElement[elements.length];
-			for (int i= 0; i < res.length; i++) {
-				IResource elem= (IResource)elements[i];
-				res[i]= newCPSourceElement(elem);
-			}
-			return res;
-		}
-		return null;
 	}
 	
 	private List getExistingContainers(CPListElement existing) {
