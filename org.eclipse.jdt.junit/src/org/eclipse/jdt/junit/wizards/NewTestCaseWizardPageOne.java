@@ -7,7 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Sebastian Davids - bug 38507 & 113998
+ *     Sebastian Davids, sdavids@gmx.de - bug 38507
+ *     Sebastian Davids, sdavids@gmx.de - 113998 [JUnit] New Test Case Wizard: Class Under Test Dialog -- allow Enums
  *******************************************************************************/
 package org.eclipse.jdt.junit.wizards;
 

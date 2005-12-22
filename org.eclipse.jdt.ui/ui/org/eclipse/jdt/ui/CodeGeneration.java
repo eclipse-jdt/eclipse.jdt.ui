@@ -7,6 +7,7 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
+ *     John Kaplan, johnkaplantech@gmail.com - 108071 [code templates] template for body of newly created class
  *******************************************************************************/
 package org.eclipse.jdt.ui;
 
