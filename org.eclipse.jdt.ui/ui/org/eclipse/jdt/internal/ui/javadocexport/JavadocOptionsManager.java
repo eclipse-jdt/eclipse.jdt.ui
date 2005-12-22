@@ -7,7 +7,8 @@
  *
  * Contributors:
  *     IBM Corporation - initial API and implementation
- *     Sebastian Davids <sdavids@gmx.de> bug 38692
+ *     Sebastian Davids, sdavids@gmx.de, - bug 38692
+ *     Matt Chapman, mpchapman@gmail.com - 89977 Make JDT .java agnostic
  *******************************************************************************/
 
 package org.eclipse.jdt.internal.ui.javadocexport;
