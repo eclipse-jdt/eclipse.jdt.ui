@@ -37,8 +37,6 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
 
-import org.eclipse.jdt.internal.corext.util.Messages;
-
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
@@ -121,13 +119,6 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 		layout.numColumns= 2;
 		inner.setLayout(layout);
 		inner.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
-		if (fCurrElement.getPath() != null) {
-			DialogField labelField= new DialogField();
-			String name= fCurrElement.getPath().makeRelative().toString();
-			labelField.setLabelText(Messages.format(NewWizardMessages.ExclusionInclusionDialog_description, name)); 
-			labelField.doFillIntoGrid(inner, 2);
-		}
 		
 		fInclusionPatternList.doFillIntoGrid(inner, 3);
 		LayoutUtil.setHorizontalSpan(fInclusionPatternList.getLabelControl(null), 2);
