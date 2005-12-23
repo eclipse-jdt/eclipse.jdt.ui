@@ -276,6 +276,9 @@ public class CPListLabelProvider extends LabelProvider {
 					} else {
 						buf.append(fNewLabel);
 					}
+				} else if (cpentry.getOrginalPath() == null) {
+					buf.append(' ');
+					buf.append(fNewLabel);
 				}
 				return buf.toString();
 			}
