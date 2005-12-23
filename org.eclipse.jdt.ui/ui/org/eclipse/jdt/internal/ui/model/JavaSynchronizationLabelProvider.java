@@ -20,7 +20,7 @@ import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.team.core.diff.IDiffNode;
 import org.eclipse.team.core.mapping.ISynchronizationContext;
 
-import org.eclipse.team.ui.mapping.SynchronizationLabelProvider;
+import org.eclipse.ltk.ui.refactoring.model.AbstractRefactoringSynchronizationLabelProvider;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
@@ -32,7 +32,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  * 
  * @since 3.2
  */
-public final class JavaSynchronizationLabelProvider extends SynchronizationLabelProvider {
+public final class JavaSynchronizationLabelProvider extends AbstractRefactoringSynchronizationLabelProvider {
 
 	/** The delegate label provider, or <code>null</code> */
 	private ILabelProvider fLabelProvider= null;
@@ -73,7 +73,7 @@ public final class JavaSynchronizationLabelProvider extends SynchronizationLabel
 	 */
 	protected ILabelProvider getDelegateLabelProvider() {
 		if (fLabelProvider == null)
-			fLabelProvider= new JavaModelLabelProvider();
+			fLabelProvider= new JavaModelLabelProvider(ModelMessages.JavaModelLabelProvider_project_preferences_label, ModelMessages.JavaModelLabelProvider_refactorings_label);
 		return fLabelProvider;
 	}
 

@@ -4738,6 +4738,7 @@
             adaptableType="org.eclipse.ltk.core.refactoring.history.RefactoringHistory"
             class="org.eclipse.jdt.internal.ui.model.JavaModelAdapterFactory">
          <adapter type="org.eclipse.core.resources.mapping.ResourceMapping"/>
+         <adapter type="org.eclipse.core.resources.IResource"/>
       </factory>
       <factory
             adaptableType="org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy"
@@ -4748,6 +4749,7 @@
             adaptableType="org.eclipse.jdt.internal.ui.model.JavaProjectSettings"
             class="org.eclipse.jdt.internal.ui.model.JavaModelAdapterFactory">
          <adapter type="org.eclipse.core.resources.mapping.ResourceMapping"/>
+         <adapter type="org.eclipse.core.resources.IResource"/>
       </factory>
    </extension>
    

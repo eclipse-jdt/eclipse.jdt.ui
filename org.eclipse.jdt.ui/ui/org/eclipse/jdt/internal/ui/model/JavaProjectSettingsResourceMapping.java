@@ -28,9 +28,6 @@ import org.eclipse.jdt.internal.corext.Assert;
  */
 public final class JavaProjectSettingsResourceMapping extends ResourceMapping {
 
-	/** The name of the settings folder */
-	private static final String NAME_SETTINGS_FOLDER= ".settings"; //$NON-NLS-1$
-
 	/** The project settings */
 	private final JavaProjectSettings fProjectSettings;
 
@@ -86,7 +83,7 @@ public final class JavaProjectSettingsResourceMapping extends ResourceMapping {
 	public ResourceTraversal[] getTraversals(final ResourceMappingContext context, final IProgressMonitor monitor) throws CoreException {
 		if (fResourceTraversals == null) {
 			final IProject[] projects= getProjects();
-			fResourceTraversals= new ResourceTraversal[] { new ResourceTraversal(new IResource[] { projects[0].getFolder(NAME_SETTINGS_FOLDER)}, IResource.DEPTH_INFINITE, IResource.NONE)};
+			fResourceTraversals= new ResourceTraversal[] { new ResourceTraversal(new IResource[] { projects[0].getFolder(JavaProjectSettings.NAME_SETTINGS_FOLDER)}, IResource.DEPTH_INFINITE, IResource.NONE)};
 		}
 		return fResourceTraversals;
 	}

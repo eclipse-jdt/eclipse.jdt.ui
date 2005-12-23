@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.ResourceMapping;
@@ -27,17 +28,16 @@ import org.eclipse.core.resources.mapping.ResourceTraversal;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
-import org.eclipse.ui.IMemento;
-import org.eclipse.ui.navigator.IExtensionStateModel;
-
 import org.eclipse.team.core.diff.IDiffNode;
 import org.eclipse.team.core.diff.IDiffVisitor;
+import org.eclipse.team.core.mapping.IResourceDiffTree;
 import org.eclipse.team.core.mapping.ISynchronizationContext;
 
-import org.eclipse.team.ui.mapping.SynchronizationContentProvider;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
+import org.eclipse.ltk.ui.refactoring.model.AbstractRefactoringSynchronizationContentProvider;
 
-import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
@@ -51,7 +51,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.2
  */
-public final class JavaSynchronizationContentProvider extends SynchronizationContentProvider {
+public final class JavaSynchronizationContentProvider extends AbstractRefactoringSynchronizationContentProvider {
+
+	/** The refactorings folder */
+	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
 
 	/**
 	 * Returns the deltas associated with the element.
@@ -99,13 +102,6 @@ public final class JavaSynchronizationContentProvider extends SynchronizationCon
 				return mapping.getTraversals(ResourceMappingContext.LOCAL_CONTEXT, new NullProgressMonitor());
 			} catch (CoreException exception) {
 				JavaPlugin.log(exception);
-				if (element instanceof ICompilationUnit) {
-					final ICompilationUnit unit= (ICompilationUnit) element;
-					return new ResourceTraversal[] { new ResourceTraversal(new IResource[] { unit.getResource() }, IResource.DEPTH_ZERO, IResource.NONE) };
-				} else if (element instanceof IPackageFragment) {
-					final IPackageFragment fragment= (IPackageFragment) element;
-					return new ResourceTraversal[] { new ResourceTraversal(new IResource[] { fragment.getResource() }, IResource.DEPTH_ONE, IResource.NONE) };
-				}
 			}
 		}
 		return new ResourceTraversal[0];
@@ -120,69 +116,21 @@ public final class JavaSynchronizationContentProvider extends SynchronizationCon
 	/**
 	 * {@inheritDoc}
 	 */
-	public void dispose() {
-		super.dispose();
-		final ISynchronizationContext context= getContext();
-		if (context != null)
-			context.getDiffTree().removeDiffChangeListener(this);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	protected Object[] getChildrenInScope(final Object parent, final Object[] children) {
 		final Object[] elements= super.getChildrenInScope(parent, children);
 		final ISynchronizationContext context= getContext();
 		if (context != null) {
+			final IResourceDiffTree tree= context.getDiffTree();
 			if (parent instanceof IPackageFragment) {
-				final Set set= new HashSet();
-				for (int index= 0; index < elements.length; index++)
-					set.add(elements[index]);
-				final IResource resource= ((IPackageFragment) parent).getResource();
-				if (resource != null) {
-					final IResource[] members= context.getDiffTree().members(resource);
-					for (int index= 0; index < members.length; index++) {
-						final IDiffNode node= context.getDiffTree().getDiff(members[index]);
-						if (node != null) {
-							if (members[index].getType() == IResource.FILE && isInScope(parent, members[index]))
-								set.add(JavaCore.create(members[index]));
-						}
-					}
-				}
-				return set.toArray(new Object[set.size()]);
+				return getPackageFragmentChildren(tree, parent, elements);
 			} else if (parent instanceof IPackageFragmentRoot) {
-				final Set set= new HashSet();
-				for (int index= 0; index < elements.length; index++)
-					set.add(elements[index]);
-				final IResource resource= JavaModelProvider.getResource(parent);
-				if (resource != null) {
-					final IResource[] members= context.getDiffTree().members(resource);
-					for (int index= 0; index < members.length; index++) {
-						if (members[index].getType() == IResource.FILE && isInScope(parent, members[index]))
-							set.add(JavaCore.create((IFile) members[index]));
-						else if (members[index].getType() == IResource.FOLDER && isInScope(parent, members[index]))
-							set.add(JavaCore.create(members[index]));
-						if (members[index] instanceof IFolder) {
-							try {
-								context.getDiffTree().accept(((IFolder) members[index]).getFullPath(), new IDiffVisitor() {
-
-									public final boolean visit(final IDiffNode node) throws CoreException {
-										final IResource current= context.getDiffTree().getResource(node);
-										if (current.getType() == IResource.FILE)
-											set.add(JavaCore.create(current.getParent()));
-										else
-											set.add(JavaCore.create(current));
-										return true;
-									}
-								}, IResource.DEPTH_INFINITE);
-							} catch (CoreException exception) {
-								JavaPlugin.log(exception);
-							}
-						}
-					}
-					return set.toArray(new Object[set.size()]);
-				}
-			}
+				return getPackageFragmentRootChildren(tree, parent, elements);
+			} else if (parent instanceof IJavaProject) {
+				return getJavaProjectChildren(tree, parent, elements);
+			} else if (parent instanceof JavaProjectSettings) {
+				return getProjectSettingsChildren(tree, parent, elements);
+			} else if (parent instanceof RefactoringHistory)
+				return ((RefactoringHistory) parent).getDescriptors();
 		}
 		return elements;
 	}
@@ -194,6 +142,40 @@ public final class JavaSynchronizationContentProvider extends SynchronizationCon
 		if (fContentProvider == null)
 			fContentProvider= new JavaModelContentProvider();
 		return fContentProvider;
+	}
+
+	/**
+	 * Returns the java project children in the current scope.
+	 * 
+	 * @param tree
+	 *            the resource diff tree
+	 * @param parent
+	 *            the parent element
+	 * @param children
+	 *            the child elements
+	 * @return the java project children
+	 */
+	private Object[] getJavaProjectChildren(final IResourceDiffTree tree, final Object parent, final Object[] children) {
+		final Set set= new HashSet();
+		for (int index= 0; index < children.length; index++)
+			set.add(children[index]);
+		final IResource resource= JavaModelProvider.getResource(parent);
+		if (resource != null) {
+			final IResource[] members= tree.members(resource);
+			for (int index= 0; index < members.length; index++) {
+				if (members[index].getType() == IResource.FOLDER && isInScope(parent, members[index])) {
+					final String name= members[index].getName();
+					if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
+						set.remove(members[index]);
+						set.add(new JavaProjectSettings((IJavaProject) parent));
+					} else if (name.equals(NAME_REFACTORING_FOLDER)) {
+						set.remove(members[index]);
+						set.add(getIncomingRefactorings(tree, (IProject) resource, null));
+					}
+				}
+			}
+		}
+		return set.toArray(new Object[set.size()]);
 	}
 
 	/**
@@ -210,6 +192,112 @@ public final class JavaSynchronizationContentProvider extends SynchronizationCon
 		if (fModelRoot == null)
 			fModelRoot= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 		return fModelRoot;
+	}
+
+	/**
+	 * Returns the package fragment children in the current scope.
+	 * 
+	 * @param tree
+	 *            the resource diff tree
+	 * @param parent
+	 *            the parent element
+	 * @param children
+	 *            the child elements
+	 * @return the package fragment children
+	 */
+	private Object[] getPackageFragmentChildren(final IResourceDiffTree tree, final Object parent, final Object[] children) {
+		final Set set= new HashSet();
+		for (int index= 0; index < children.length; index++)
+			set.add(children[index]);
+		final IResource resource= ((IPackageFragment) parent).getResource();
+		if (resource != null) {
+			final IResource[] members= tree.members(resource);
+			for (int index= 0; index < members.length; index++) {
+				final IDiffNode node= tree.getDiff(members[index]);
+				if (node != null) {
+					if (members[index].getType() == IResource.FILE && isInScope(parent, members[index]))
+						set.add(JavaCore.create(members[index]));
+				}
+			}
+		}
+		return set.toArray(new Object[set.size()]);
+	}
+
+	/**
+	 * Returns the package fragment root children in the current scope.
+	 * 
+	 * @param tree
+	 *            the resource diff tree
+	 * @param parent
+	 *            the parent element
+	 * @param children
+	 *            the child elements
+	 * @return the package fragment root children
+	 */
+	private Object[] getPackageFragmentRootChildren(final IResourceDiffTree tree, final Object parent, final Object[] children) {
+		final Set set= new HashSet();
+		for (int index= 0; index < children.length; index++)
+			set.add(children[index]);
+		final IResource resource= JavaModelProvider.getResource(parent);
+		if (resource != null) {
+			final IResource[] members= tree.members(resource);
+			for (int index= 0; index < members.length; index++) {
+				final int type= members[index].getType();
+				final boolean contained= isInScope(parent, members[index]);
+				if (type == IResource.FILE && contained)
+					set.add(JavaCore.create((IFile) members[index]));
+				else if (type == IResource.FOLDER && contained)
+					set.add(JavaCore.create(members[index]));
+				if (members[index] instanceof IFolder) {
+					try {
+						tree.accept(((IFolder) members[index]).getFullPath(), new IDiffVisitor() {
+
+							public final boolean visit(final IDiffNode node) throws CoreException {
+								final IResource current= tree.getResource(node);
+								if (current.getType() == IResource.FILE)
+									set.add(JavaCore.create(current.getParent()));
+								else
+									set.add(JavaCore.create(current));
+								return true;
+							}
+						}, IResource.DEPTH_INFINITE);
+					} catch (CoreException exception) {
+						JavaPlugin.log(exception);
+					}
+				}
+			}
+			return set.toArray(new Object[set.size()]);
+		}
+		return children;
+	}
+
+	/**
+	 * Returns the project settings children in the current scope.
+	 * 
+	 * @param tree
+	 *            the resource diff tree
+	 * @param parent
+	 *            the parent element
+	 * @param children
+	 *            the child elements
+	 * @return the project settings children
+	 */
+	private Object[] getProjectSettingsChildren(final IResourceDiffTree tree, final Object parent, final Object[] children) {
+		final Set set= new HashSet();
+		for (int index= 0; index < children.length; index++)
+			set.add(children[index]);
+		final IResource resource= JavaModelProvider.getResource(parent);
+		if (resource != null) {
+			final IResource[] members= tree.members(resource);
+			for (int index= 0; index < members.length; index++) {
+				final IDiffNode node= tree.getDiff(members[index]);
+				if (node != null) {
+					if (members[index].getType() == IResource.FILE && isInScope(parent, members[index]))
+						set.add(members[index]);
+				}
+			}
+		}
+		return set.toArray(new Object[set.size()]);
 	}
 
 	/**
@@ -242,16 +330,6 @@ public final class JavaSynchronizationContentProvider extends SynchronizationCon
 				return true;
 		}
 		return false;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void init(final IExtensionStateModel model, final IMemento memento) {
-		super.init(model, memento);
-		final ISynchronizationContext context= getContext();
-		if (context != null)
-			context.getDiffTree().addDiffChangeListener(this);
 	}
 
 	/**

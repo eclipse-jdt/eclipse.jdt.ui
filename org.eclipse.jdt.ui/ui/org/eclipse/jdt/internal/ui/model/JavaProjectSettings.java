@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.model;
 
 import org.eclipse.core.runtime.PlatformObject;
 
+import org.eclipse.core.resources.IFolder;
+
 import org.eclipse.jdt.core.IJavaProject;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -22,6 +24,9 @@ import org.eclipse.jdt.internal.corext.Assert;
  * @since 3.2
  */
 public final class JavaProjectSettings extends PlatformObject {
+
+	/** The settings folder */
+	static final String NAME_SETTINGS_FOLDER= ".settings"; //$NON-NLS-1$
 
 	/** The associated Java project */
 	private final IJavaProject fProject;
@@ -55,6 +60,15 @@ public final class JavaProjectSettings extends PlatformObject {
 	 */
 	public IJavaProject getProject() {
 		return fProject;
+	}
+
+	/**
+	 * Returns the associated resource.
+	 * 
+	 * @return the associated resource, or <code>null</code>
+	 */
+	public IFolder getResource() {
+		return fProject.getProject().getFolder(NAME_SETTINGS_FOLDER);
 	}
 
 	/**

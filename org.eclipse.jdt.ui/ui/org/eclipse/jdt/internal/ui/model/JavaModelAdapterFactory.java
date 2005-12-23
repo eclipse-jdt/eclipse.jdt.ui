@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.model;
 
 import org.eclipse.core.runtime.IAdapterFactory;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.mapping.ModelProvider;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 
@@ -41,12 +42,16 @@ public final class JavaModelAdapterFactory implements IAdapterFactory {
 		} else if (adaptable instanceof RefactoringHistory) {
 			if (adapter == ResourceMapping.class)
 				return new JavaRefactoringHistoryResourceMapping((RefactoringHistory) adaptable);
+			else if (adapter == IResource.class)
+				return new JavaRefactoringHistoryResourceMapping((RefactoringHistory) adaptable).getResource();
 		} else if (adaptable instanceof RefactoringDescriptorProxy) {
 			if (adapter == ResourceMapping.class)
 				return new JavaRefactoringDescriptorResourceMapping((RefactoringDescriptorProxy) adaptable);
 		} else if (adaptable instanceof JavaProjectSettings) {
 			if (adapter == ResourceMapping.class)
 				return new JavaProjectSettingsResourceMapping((JavaProjectSettings) adaptable);
+			else if (adapter == IResource.class)
+				return ((JavaProjectSettings) adaptable).getResource();
 		}
 		return null;
 	}
@@ -55,6 +60,6 @@ public final class JavaModelAdapterFactory implements IAdapterFactory {
 	 * {@inheritDoc}
 	 */
 	public Class[] getAdapterList() {
-		return new Class[] { IResourceMappingMerger.class, ResourceMapping.class, ICompareAdapter.class};
+		return new Class[] { IResourceMappingMerger.class, ResourceMapping.class, ICompareAdapter.class, IResource.class};
 	}
 }

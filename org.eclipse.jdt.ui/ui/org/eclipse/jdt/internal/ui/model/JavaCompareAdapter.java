@@ -16,19 +16,22 @@ import org.eclipse.compare.structuremergeviewer.ICompareInput;
 
 import org.eclipse.team.core.mapping.ISynchronizationContext;
 
-import org.eclipse.team.ui.mapping.AbstractCompareAdapter;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+import org.eclipse.ltk.ui.refactoring.model.AbstractRefactoringCompareAdapter;
 
 /**
  * Java-aware compare adapter.
  * 
  * @since 3.2
  */
-public final class JavaCompareAdapter extends AbstractCompareAdapter {
+public final class JavaCompareAdapter extends AbstractRefactoringCompareAdapter {
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public ICompareInput asCompareInput(final ISynchronizationContext context, final Object element) {
+		if (element instanceof RefactoringDescriptorProxy)
+			return super.asCompareInput(context, element);
 		final IResource resource= JavaModelProvider.getResource(element);
 		if (resource != null)
 			return super.asCompareInput(context, resource);

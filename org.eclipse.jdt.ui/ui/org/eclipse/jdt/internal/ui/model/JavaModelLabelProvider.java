@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.model;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
@@ -31,7 +33,13 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 
 	/** The refactoring history label provider */
-	private final RefactoringHistoryLabelProvider fHistoryLabelProvider= new RefactoringHistoryLabelProvider(new RefactoringHistoryControlConfiguration(null, true, false));
+	private final RefactoringHistoryLabelProvider fHistoryLabelProvider= new RefactoringHistoryLabelProvider(new RefactoringHistoryControlConfiguration(null, false, false));
+
+	/** The project preferences label */
+	private final String fPreferencesLabel;
+
+	/** The pending refactorings label */
+	private final String fRefactoringsLabel;
 
 	/** The project settings image, or <code>null</code> */
 	private Image fSettingsImage= null;
@@ -40,7 +48,23 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 	 * Creates a new java model label provider.
 	 */
 	public JavaModelLabelProvider() {
+		this(ModelMessages.JavaModelLabelProvider_project_preferences_label, ModelMessages.JavaModelLabelProvider_refactorings_label);
+	}
+
+	/**
+	 * Creates a new java model label provider.
+	 * 
+	 * @param preferences
+	 *            the preferences label
+	 * @param refactorings
+	 *            the refactorings label
+	 */
+	public JavaModelLabelProvider(final String preferences, final String refactorings) {
 		super(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED, AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS);
+		Assert.isNotNull(preferences);
+		Assert.isNotNull(refactorings);
+		fPreferencesLabel= preferences;
+		fRefactoringsLabel= refactorings;
 	}
 
 	/**
@@ -48,6 +72,7 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 	 */
 	public void dispose() {
 		super.dispose();
+		fHistoryLabelProvider.dispose();
 		if (fSettingsImage != null && !fSettingsImage.isDisposed()) {
 			fSettingsImage.dispose();
 			fSettingsImage= null;
@@ -66,7 +91,7 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 				image= fHistoryLabelProvider.getImage(element);
 			else if (element instanceof JavaProjectSettings) {
 				if (fSettingsImage == null || fSettingsImage.isDisposed())
-					fSettingsImage= JavaPluginImages.DESC_OBJS_LIBRARY.createImage();
+					fSettingsImage= JavaPluginImages.DESC_OBJS_PROJECT_SETTINGS.createImage();
 				image= fSettingsImage;
 			}
 			return decorateImage(image, element);
@@ -81,11 +106,11 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 		String text= super.getText(element);
 		if (text == null || "".equals(text)) { //$NON-NLS-1$
 			if (element instanceof RefactoringHistory)
-				text= fHistoryLabelProvider.getText(element);
+				text= fRefactoringsLabel;
 			else if (element instanceof RefactoringDescriptorProxy)
 				text= fHistoryLabelProvider.getText(element);
 			else if (element instanceof JavaProjectSettings) {
-				text= ModelMessages.JavaModelLabelProvider_project_preferences_label;
+				text= fPreferencesLabel;
 			}
 			return decorateText(text, element);
 		}

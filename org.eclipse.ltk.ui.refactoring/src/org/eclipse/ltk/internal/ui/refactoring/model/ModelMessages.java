@@ -8,17 +8,23 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.model;
+package org.eclipse.ltk.internal.ui.refactoring.model;
 
 import org.eclipse.osgi.util.NLS;
 
-public class ModelMessages extends NLS {
+public final class ModelMessages extends NLS {
 
-	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.model.ModelMessages"; //$NON-NLS-1$
+	private static final String BUNDLE_NAME= "org.eclipse.ltk.internal.ui.refactoring.model.Modelmessages"; //$NON-NLS-1$
 
-	public static String JavaModelLabelProvider_project_preferences_label;
+	public static String RefactoringDescriptorCompareInput_pending_refactoring;
 
-	public static String JavaModelLabelProvider_refactorings_label;
+	public static String RefactoringDescriptorDiffNode_diff_string;
+
+	public static String RefactoringDescriptorViewer_breaking_change_message;
+
+	public static String RefactoringDescriptorViewer_closure_change_message;
+
+	public static String RefactoringDescriptorViewer_structural_change_message;
 
 	static {
 		// initialize resource bundle
