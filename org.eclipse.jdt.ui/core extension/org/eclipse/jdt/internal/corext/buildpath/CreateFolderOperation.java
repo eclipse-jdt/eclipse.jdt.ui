@@ -55,7 +55,7 @@ public class CreateFolderOperation extends ClasspathModifierOperation {
 	 */
 	public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
 		AddSourceFolderAction action= new AddSourceFolderAction();
-		action.setSelection(new StructuredSelection(fCPInformationProvider.getJavaProject()));
+		action.selectionChanged(new StructuredSelection(fCPInformationProvider.getJavaProject()));
 		action.run();
 		IPackageFragmentRoot createdElement= (IPackageFragmentRoot)action.getCreatedElement();
 		if (createdElement == null) {

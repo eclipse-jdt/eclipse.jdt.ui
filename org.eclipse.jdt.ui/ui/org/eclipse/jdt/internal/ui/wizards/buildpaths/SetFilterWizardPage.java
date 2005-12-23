@@ -37,11 +37,15 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IJavaModelStatus;
+import org.eclipse.jdt.core.JavaConventions;
+
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.viewsupport.ImageDescriptorRegistry;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
@@ -66,13 +70,18 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 	private static final int IDX_EDIT= 2;
 	private static final int IDX_REMOVE= 4;
 
-	public SetFilterWizardPage() {
+	private final ArrayList fExistingEntries;
+
+	private final IPath fOutputLocation;
+
+	public SetFilterWizardPage(CPListElement entryToEdit, ArrayList existingEntries, IPath outputLocation) {
 		super(PAGE_NAME);
+		fExistingEntries= existingEntries;
+		fOutputLocation= outputLocation;
 		
 		setTitle(NewWizardMessages.ExclusionInclusionDialog_title); 
-	}
-	
-	public void init(CPListElement entryToEdit) {
+		setDescription(NewWizardMessages.ExclusionInclusionDialog_description2);
+		
 		fCurrElement= entryToEdit;
 		fCurrProject= entryToEdit.getJavaProject().getProject();
 		IWorkspaceRoot root= fCurrProject.getWorkspace().getRoot();
@@ -159,7 +168,6 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 		ListDialogField patternList= new ListDialogField(adapter, buttonLabels, new ExclusionInclusionLabelProvider(descriptor));
 		patternList.setDialogFieldListener(adapter);
 		patternList.setLabelText(label);
-		patternList.setRemoveButtonIndex(IDX_REMOVE);
 		patternList.enableButton(IDX_EDIT, false);
 	
 		IPath[] pattern= (IPath[]) entryToEdit.getAttribute(key);
@@ -182,11 +190,30 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 			editEntry(field);
 		} else if (index == IDX_ADD_MULTIPLE) {
 			addMultipleEntries(field);
+		} else if (index == IDX_REMOVE) {
+			field.removeElements(field.getSelectedElements());
 		}
+		updateStatus();
 	}
 	
+	private void updateStatus() {
+		fCurrElement.setAttribute(CPListElement.INCLUSION, getInclusionPattern());
+		fCurrElement.setAttribute(CPListElement.EXCLUSION, getExclusionPattern());
+		IJavaModelStatus status= JavaConventions.validateClasspath(fCurrElement.getJavaProject(), CPListElement.convertToClasspathEntries(fExistingEntries), fOutputLocation);
+		if (!status.isOK()) {
+			StatusInfo statusInfo= new StatusInfo();
+			statusInfo.setError(status.getMessage());
+			updateStatus(statusInfo);
+		} else {
+			StatusInfo statusInfo= new StatusInfo();
+			statusInfo.setOK();
+			updateStatus(statusInfo);
+		}
+	}
+
 	protected void doDoubleClicked(ListDialogField field) {
 		editEntry(field);
+		updateStatus();
 	}
 	
 	protected void doSelectionChanged(ListDialogField field) {

@@ -45,12 +45,16 @@ import org.eclipse.ui.part.Page;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.buildpath.AddExternalArchivesOperation;
 import org.eclipse.jdt.internal.corext.buildpath.AddLibraryOperation;
 import org.eclipse.jdt.internal.corext.buildpath.AddSelectedLibraryOperation;
 import org.eclipse.jdt.internal.corext.buildpath.AddSelectedSourceFolderOperation;
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifierOperation;
 import org.eclipse.jdt.internal.corext.buildpath.EditFiltersOperation;
 import org.eclipse.jdt.internal.corext.buildpath.EditOutputFolderOperation;
@@ -71,6 +75,7 @@ import org.eclipse.jdt.internal.ui.actions.JarImportWizardAction;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.AddSourceFolderWizard;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.EditFilterWizard;
 
 /**
  * Action group that adds the source and generate actions to a part's context
@@ -121,38 +126,17 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		}
 	}
 	private Action fNoActionAvailable= new NoActionAvailable();
-		
-    public static class AddSourceFolderAction extends AbstractOpenWizardAction implements ISelectionChangedListener {
+	   
+    private static abstract class OpenBuildPathWizardAction extends AbstractOpenWizardAction implements ISelectionChangedListener {
     	
-    	private AddSourceFolderWizard fAddSourceFolderWizard;
-
-		public AddSourceFolderAction() {
-    		setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
-    		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
-    		setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip); 
-    		setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKROOT);
-    		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
-    	}
-
-    	/**
-    	 * {@inheritDoc}
-    	 */
-    	protected Wizard createWizard() throws CoreException {
-    		IJavaProject selectedProject= (IJavaProject)getSelection().getFirstElement();
-    		CPListElement newEntry= new CPListElement(selectedProject, IClasspathEntry.CPE_SOURCE);
-    		CPListElement[] existingEntries= CPListElement.createFromExisting(selectedProject);
-    		
-    		IPath outputLocation;
+    	protected IPath getOutputLocation(IJavaProject javaProject) {
     		try {
-    			outputLocation= selectedProject.getOutputLocation();		
+    			return javaProject.getOutputLocation();		
     		} catch (CoreException e) {
-    			IProject project= selectedProject.getProject();
+    			IProject project= javaProject.getProject();
     			IPath projPath= project.getFullPath();
-    			outputLocation= projPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
+    			return projPath.append(PreferenceConstants.getPreferenceStore().getString(PreferenceConstants.SRCBIN_BINNAME));
     		}
-    		
-    		fAddSourceFolderWizard= new AddSourceFolderWizard(selectedProject, existingEntries, newEntry, outputLocation);
-			return fAddSourceFolderWizard;
     	}
     	
 		/**
@@ -161,20 +145,127 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		public void selectionChanged(SelectionChangedEvent event) {
             ISelection selection = event.getSelection();
             if (selection instanceof IStructuredSelection) {
-    			setEnabled(isValid((IStructuredSelection) selection));
+    			setEnabled(selectionChanged((IStructuredSelection) selection));
             } else {
-    			setEnabled(isValid(StructuredSelection.EMPTY));
+    			setEnabled(selectionChanged(StructuredSelection.EMPTY));
             }
 		}
 
-		protected boolean isValid(IStructuredSelection selection) {
-			return selection.size() == 1 && selection.getFirstElement() instanceof IJavaProject;
+		//Needs to be public for the operation, will be protected later.
+		public abstract boolean selectionChanged(IStructuredSelection selection);
+    }
+		
+    public static class AddSourceFolderAction extends OpenBuildPathWizardAction {
+    	
+    	private AddSourceFolderWizard fAddSourceFolderWizard;
+    	private IJavaProject fSelectedProject;
+
+		public AddSourceFolderAction() {
+    		setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
+    		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
+    		setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip); 
+    		setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKROOT);
+    		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
+    	}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected Wizard createWizard() throws CoreException {
+			CPListElement newEntrie= new CPListElement(fSelectedProject, IClasspathEntry.CPE_SOURCE);
+			fAddSourceFolderWizard= new AddSourceFolderWizard(CPListElement.createFromExisting(fSelectedProject), newEntrie, getOutputLocation(fSelectedProject));
+			return fAddSourceFolderWizard;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean selectionChanged(IStructuredSelection selection) {
+			if (selection.size() == 1 && selection.getFirstElement() instanceof IJavaProject) {
+				fSelectedProject= (IJavaProject)selection.getFirstElement();
+				return true;
+			}
+			return false;
 		}
 		
 		public List getCPListElements() {
-			return fAddSourceFolderWizard.getCPListElements();
+			return fAddSourceFolderWizard.getExistingEntries();
+		}
+    }
+    
+    public static class EditFilterAction extends OpenBuildPathWizardAction {
+    	
+    	private IJavaProject fSelectedProject;
+    	private IJavaElement fSelectedElement;
+		private EditFilterWizard fEditFilterWizard;
+    	
+		public EditFilterAction() {
+    		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_label); 
+    		
+    		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
+    		
+    		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip); 
+    		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH_FILTERS);
+    		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH_FILTERS);
+    		
+//    		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
+    	}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		protected Wizard createWizard() throws CoreException {
+			CPListElement[] existingEntries= CPListElement.createFromExisting(fSelectedProject);
+			CPListElement elementToEdit= findElement(fSelectedElement, existingEntries);
+			fEditFilterWizard= new EditFilterWizard(existingEntries, elementToEdit, getOutputLocation(fSelectedProject));
+			return fEditFilterWizard;
 		}
 
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean selectionChanged(IStructuredSelection selection) {
+			if (selection.size() != 1)
+				return false;
+			
+			try {
+				Object element= selection.getFirstElement();
+				if (element instanceof IJavaProject) {
+					IJavaProject project= (IJavaProject)element;	
+					if (ClasspathModifier.isSourceFolder(project)) {
+						fSelectedProject= project;
+						fSelectedElement= (IJavaElement)element;
+						return true;
+					}
+				} else if (element instanceof IPackageFragmentRoot) {
+					IPackageFragmentRoot packageFragmentRoot= ((IPackageFragmentRoot) element);
+					IJavaProject project= packageFragmentRoot.getJavaProject();
+					if (packageFragmentRoot.getKind() == IPackageFragmentRoot.K_SOURCE && project != null) {
+						fSelectedProject= project;
+						fSelectedElement= (IJavaElement)element;
+						return true;
+					}
+				}
+			} catch (JavaModelException e) {
+				return false;
+			}
+			return false;
+		}
+
+		private static CPListElement findElement(IJavaElement element, CPListElement[] elements) {
+			IPath path= element.getPath();
+    		for (int i= 0; i < elements.length; i++) {
+				CPListElement cur= elements[i];
+				if (cur.getEntryKind() == IClasspathEntry.CPE_SOURCE && cur.getPath().equals(path)) {
+					return cur;
+				}
+			}
+    		return null;
+		}
+
+		public List getCPListElements() {
+			return fEditFilterWizard.getExistingEntries();
+		}
     }
 
     private class UpdateJarFileAction extends JarImportWizardAction implements IUpdate {
@@ -233,6 +324,9 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		final ISelectionProvider provider= fSite.getSelectionProvider();
 		provider.addSelectionChangedListener(addSourceFolderAction);
 		provider.addSelectionChangedListener(updateAction);
+
+		final EditFilterAction editFilterAction= new EditFilterAction();
+		provider.addSelectionChangedListener(editFilterAction);
 		
 		final BuildActionSelectionContext context= new BuildActionSelectionContext();
 		fActions= new Action[] {
@@ -246,7 +340,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 				updateAction,
 				createBuildPathAction(fSite, IClasspathInformationProvider.EXCLUDE, context),
 				createBuildPathAction(fSite, IClasspathInformationProvider.UNEXCLUDE, context),
-				createBuildPathAction(fSite, IClasspathInformationProvider.EDIT_FILTERS, context),
+				editFilterAction,
 				createBuildPathAction(fSite, IClasspathInformationProvider.EDIT_OUTPUT, context),
 				createConfigureAction(fSite)
 		};

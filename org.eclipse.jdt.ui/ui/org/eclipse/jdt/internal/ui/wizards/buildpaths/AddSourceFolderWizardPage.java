@@ -473,18 +473,15 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		return null;		
 	}
 
-	public CPListElement[] getModifiedElements() {
-		if (fOrginalPath == null) {
-			return (CPListElement[])fModifiedElements.toArray(new CPListElement[fModifiedElements.size()]);
-		} else {
-			List l= new ArrayList(fModifiedElements);
-			l.add(fNewElement);
-			return (CPListElement[])l.toArray(new CPListElement[l.size()]);
-		}
+	public List getModifiedElements() {
+		if (fOrginalPath != null && !fModifiedElements.contains(fNewElement))
+			fModifiedElements.add(fNewElement);
+		
+		return fModifiedElements;
 	}
 	
-	public CPListElement[] getRemovedElements() {
-		return (CPListElement[])fRemovedElements.toArray(new CPListElement[fRemovedElements.size()]);
+	public List getRemovedElements() {
+		return fRemovedElements;
 	}
 		
 }

@@ -10,121 +10,75 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.wizards.NewElementWizard;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 
-public class AddSourceFolderWizard extends NewElementWizard {
+public class AddSourceFolderWizard extends BuildPathWizard {
 	
 	private AddSourceFolderWizardPage fAddFolderPage;
 	private SetFilterWizardPage fFilterPage;
-	private CPListElement fNewEntry;
-	private final List/*<CPListElement>*/ fExistingEntries;
-	private IPackageFragmentRoot fPackageFragmentRoot;
-	private boolean fDoFlushChange;
-	private final IPath fOutputLocation;
 
-	public AddSourceFolderWizard(IJavaProject project, CPListElement[] existingEntries, CPListElement newEntry, IPath outputLocation) {
-		super();
-		fOutputLocation= outputLocation;
-		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR);
-		setDialogSettings(JavaPlugin.getDefault().getDialogSettings());
+	public AddSourceFolderWizard(CPListElement[] existingEntries, CPListElement newEntry, IPath outputLocation) {
+		super(existingEntries, newEntry, outputLocation, getTitel(newEntry), JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR);
+	}
+
+	private static String getTitel(CPListElement newEntry) {
 		if (newEntry.getPath() == null) {
-			setWindowTitle(NewWizardMessages.NewSourceFolderCreationWizard_title);
+			return NewWizardMessages.NewSourceFolderCreationWizard_title;
 		} else {
-			setWindowTitle(NewWizardMessages.NewSourceFolderCreationWizard_edit_title);
+			return NewWizardMessages.NewSourceFolderCreationWizard_edit_title;
 		}
-
-		fNewEntry= newEntry;
-		fExistingEntries= new ArrayList(Arrays.asList(existingEntries));
-		fDoFlushChange= true;
-	}
-	
-	public void setDoFlushChange(boolean b) {
-		fDoFlushChange= b;
 	}
 
-	/*
-	 * @see Wizard#addPages
-	 */	
+	/**
+	 * {@inheritDoc}
+	 */
 	public void addPages() {
 		super.addPages();
 	
-		fAddFolderPage= new AddSourceFolderWizardPage(fNewEntry, fExistingEntries, fOutputLocation);
+		fAddFolderPage= new AddSourceFolderWizardPage(getEntryToEdit(), getExistingEntries(), getOutputLocation());
 		addPage(fAddFolderPage);
 		
-		fFilterPage= new SetFilterWizardPage();
+		fFilterPage= new SetFilterWizardPage(getEntryToEdit(), getExistingEntries(), getOutputLocation());
 		addPage(fFilterPage);
-		fFilterPage.init(fNewEntry);
-	}			
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#finishPage(org.eclipse.core.runtime.IProgressMonitor)
+	}
+	
+	/**
+	 * {@inheritDoc}
 	 */
-	protected void finishPage(IProgressMonitor monitor) throws InterruptedException, CoreException {	
-		if (fDoFlushChange) {
-			BuildPathsBlock.flush(fExistingEntries, fAddFolderPage.getOutputLocation(), monitor);
-			
-			IJavaProject javaProject= fNewEntry.getJavaProject();
-			IProject project= javaProject.getProject();
-			IPath projPath= project.getFullPath();
-			IPath path= fNewEntry.getPath();
-			
-			if (!projPath.equals(path) && projPath.isPrefixOf(path)) {
-				path= path.removeFirstSegments(projPath.segmentCount());
-			}
-			
-			IFolder folder= project.getFolder(path);
-			fPackageFragmentRoot= javaProject.getPackageFragmentRoot(folder);
-		}
+	public List getInsertedElements() {
+		List result= super.getInsertedElements();
+		if (getEntryToEdit().getOrginalPath() == null)
+			result.add(getEntryToEdit());
+		
+		return result;
 	}
-	
-	public CPListElement[] getCreatedElements() {
-		if (fNewEntry.getOrginalPath() != null) {
-			return new CPListElement[] {};
-		} else {
-			return new CPListElement[] {fNewEntry};
-		}
-	}
-	
-	public CPListElement[] getRemovedElements() {
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public List getRemovedElements() {
 		return fAddFolderPage.getRemovedElements();
 	}
 	
-	public CPListElement[] getModifiedElements() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public List getModifiedElements() {
 		return fAddFolderPage.getModifiedElements();
 	}
 	
-	public IPath getOutputLocation() {
-		return fAddFolderPage.getOutputLocation();
-	}
-	
-	public List getCPListElements() {
-		return fExistingEntries;
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jface.wizard.IWizard#performFinish()
+	/**
+	 * {@inheritDoc}
 	 */
 	public boolean performFinish() {
-		fNewEntry.setAttribute(CPListElement.INCLUSION, fFilterPage.getInclusionPattern());
-		fNewEntry.setAttribute(CPListElement.EXCLUSION, fFilterPage.getExclusionPattern());
+		getEntryToEdit().setAttribute(CPListElement.INCLUSION, fFilterPage.getInclusionPattern());
+		getEntryToEdit().setAttribute(CPListElement.EXCLUSION, fFilterPage.getExclusionPattern());
+		setOutputLocation(fAddFolderPage.getOutputLocation());
 		
 		boolean res= super.performFinish();
 		if (res) {
@@ -132,12 +86,4 @@ public class AddSourceFolderWizard extends NewElementWizard {
 		}
 		return res;
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.wizards.NewElementWizard#getCreatedElement()
-	 */
-	public IJavaElement getCreatedElement() {
-		return fPackageFragmentRoot;
-	}		
-
 }

@@ -15,8 +15,9 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+
+import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -26,6 +27,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.IInclusionExclusionQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup.EditFilterAction;
 
 /**
  * Operation to edit the inclusion / exclusion filters of an
@@ -35,6 +37,9 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
  */
 public class EditFiltersOperation extends ClasspathModifierOperation {
 	
+	private final IClasspathInformationProvider fCPInformationProvider;
+	private final IClasspathModifierListener fListener;
+
 	/**
 	 * Constructor
 	 * 
@@ -47,7 +52,10 @@ public class EditFiltersOperation extends ClasspathModifierOperation {
 	 * @see ClasspathModifier
 	 */
 	public EditFiltersOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
-		super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip, IClasspathInformationProvider.EDIT_FILTERS); 
+		super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip, IClasspathInformationProvider.EDIT_FILTERS);
+		fListener= listener;
+		fCPInformationProvider= informationProvider; 
+		
 	}
 	
 	/**
@@ -59,22 +67,18 @@ public class EditFiltersOperation extends ClasspathModifierOperation {
 	 * @param monitor a progress monitor, can be <code>null</code>
 	 */
 	public void run(IProgressMonitor monitor) throws InvocationTargetException {
-		Object result= null;
-        fException= null;
-		try {
-			Object selection= getSelectedElements().get(0);
-			IJavaProject project= fInformationProvider.getJavaProject();
-			IJavaElement javaElement= (IJavaElement)selection;
-			IInclusionExclusionQuery query= fInformationProvider.getInclusionExclusionQuery();
-			result= editFilters(javaElement, project, query, monitor);
-		} catch (CoreException e) {
-			fException= e;
-			result= null;
+		EditFilterAction action= new EditFilterAction();
+		IStructuredSelection selection= fCPInformationProvider.getSelection();
+		Object firstElement= selection.getFirstElement();
+		action.selectionChanged(selection);
+		action.run();
+		List l= new ArrayList();
+		l.add(firstElement);
+		if (fListener != null) {
+			List entries= action.getCPListElements();
+			fListener.classpathEntryChanged(entries);
 		}
-		List resultList= new ArrayList();
-		if (result != null)
-			resultList.add(result);
-		super.handleResult(resultList, monitor);
+		fCPInformationProvider.handleResult(l, null, IClasspathInformationProvider.EDIT_FILTERS);
 	}
 	
 	/**
@@ -98,8 +102,8 @@ public class EditFiltersOperation extends ClasspathModifierOperation {
 		Object element= elements.get(0);
 		
 		if (element instanceof IJavaProject) {
-			if (!isSourceFolder(project))
-				return false;
+			if (isSourceFolder(project))
+				return true;
 		} else if (element instanceof IPackageFragmentRoot) {
 			return ((IPackageFragmentRoot) element).getKind() == IPackageFragmentRoot.K_SOURCE;
 		}
