@@ -150,6 +150,8 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		fReplaceExistingField.setDialogFieldListener(adapter);
 		fExcludeInOthersFields.setDialogFieldListener(adapter);
 		fRootDialogField.setDialogFieldListener(adapter);
+		
+		packRootDialogFieldChanged();
 	}
 
 	// -------- UI Creation ---------
@@ -199,7 +201,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		
 		// -------- IDialogFieldListener
 		public void dialogFieldChanged(DialogField field) {
-			packRootDialogFieldChanged(field);
+			packRootDialogFieldChanged();
 		}
 	}
 	
@@ -220,7 +222,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		fRootDialogField.setText(shortPath.toString());
 	}	
 	
-	protected void packRootDialogFieldChanged(DialogField field) {
+	protected void packRootDialogFieldChanged() {
 		StatusInfo status= updateRootStatus();
 		updateStatus(new IStatus[] {status});
 	}
