@@ -470,6 +470,10 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		}
 		Object elem= selElements.get(0);
 		if (elem instanceof CPListElement) {
+			CPListElement cp= ((CPListElement)elem);
+			if (cp.getPath().equals(cp.getJavaProject().getPath()))
+				return false;
+			
 			return true;
 		}
 		if (elem instanceof CPListElementAttribute) {
