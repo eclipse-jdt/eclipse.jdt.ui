@@ -208,7 +208,10 @@ public class TypeInfoFilter {
 	private boolean matchesPackage(TypeInfo type) {
 		if (fPackageMatcher == null)
 			return true;
-		return fPackageMatcher.matches(type.getTypeContainerName());
+		// We should use the type container name here. However this
+		// require support from JDT/Core. See
+		// https://bugs.eclipse.org/bugs/show_bug.cgi?id=120534
+		return fPackageMatcher.matches(type.getPackageName());
 	}
 
 	private boolean matchesScope(TypeInfo type) {
