@@ -106,7 +106,7 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 
 /**
  * Special flow analyzer to determine the return value of the extracted method
- * and  the variables which have to be passed to the method.
+ * and the variables which have to be passed to the method.
  * 
  * Note: This analyzer doesn't do a full flow analysis. For example it doesn't
  * do dead code analysis or variable initialization analysis. It analyses the

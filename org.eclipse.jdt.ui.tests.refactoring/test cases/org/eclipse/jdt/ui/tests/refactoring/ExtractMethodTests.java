@@ -625,6 +625,14 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		invalidSelectionTest();
 	}
 	
+	//---- more than one value to return
+	
+	public void test196() throws Exception {
+		invalidSelectionTest();
+	}
+	
+	
+	
 	//====================================================================================
 	// Testing valid selections
 	//=====================================================================================

@@ -53,9 +53,12 @@ public class InputFlowAnalyzer extends FlowAnalyzer {
 			return fLoopNode;
 		}
 		public void process(ASTNode node) {
-			fFlowContext.setLoopReentranceMode(true);	
-			node.accept(this);
-			fFlowContext.setLoopReentranceMode(false);
+			try {
+				fFlowContext.setLoopReentranceMode(true);	
+				node.accept(this);
+			} finally {
+				fFlowContext.setLoopReentranceMode(false);
+			}
 		}
 		public void endVisit(DoStatement node) {
 			if (skipNode(node))

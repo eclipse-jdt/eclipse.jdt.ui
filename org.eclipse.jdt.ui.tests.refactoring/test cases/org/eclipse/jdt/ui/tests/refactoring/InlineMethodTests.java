@@ -322,6 +322,26 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performArgumentTest();
 	}	
 	
+	public void testLocalReferenceLoop1() throws Exception {
+		performArgumentTest();
+	}	
+	
+	public void testLocalReferenceLoop2() throws Exception {
+		performArgumentTest();
+	}	
+	
+	public void testLocalReferenceLoop3() throws Exception {
+		performArgumentTest();
+	}	
+	
+	public void testLocalReferenceLoop4() throws Exception {
+		performArgumentTest();
+	}	
+	
+	public void testLocalReferenceLoop5() throws Exception {
+		performArgumentTest();
+	}	
+	
 	public void testLocalReferencePrefix() throws Exception {
 		performArgumentTest();
 	}	
