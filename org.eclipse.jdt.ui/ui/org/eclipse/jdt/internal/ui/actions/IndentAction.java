@@ -239,6 +239,8 @@ public class IndentAction extends TextEditorAction {
 				wsStart= offset + slashes;
 				
 				StringBuffer computed= indenter.computeIndentation(offset);
+				if (computed == null)
+					computed= new StringBuffer(0);
 				int tabSize= getTabSize();
 				while (slashes > 0 && computed.length() > 0) {
 					char c= computed.charAt(0);
