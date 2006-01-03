@@ -82,7 +82,7 @@ public class CallLocation implements IAdaptable {
     		return;
     	
         IBuffer buffer= getBufferForMember();
-        if (buffer == null) { //binary, without source attachment
+        if (buffer == null || buffer.getLength() < fEnd) { //binary, without source attachment || buffer contents out of sync (bug 121900)
         	fCallText= ""; //$NON-NLS-1$
         	fLineNumber= UNKNOWN_LINE_NUMBER;
         	return;
