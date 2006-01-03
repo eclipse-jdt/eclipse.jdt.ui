@@ -46,6 +46,7 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.wizard.WizardPage;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 
 import org.eclipse.jdt.core.JavaCore;
@@ -62,6 +63,7 @@ import org.eclipse.jdt.launching.VMStandin;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.CompliancePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
@@ -763,6 +765,8 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
+
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.OPEN_PROJECT_WIZARD_ACTION);
 	}	
 
 	/**
