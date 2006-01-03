@@ -94,6 +94,8 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	}
 	
 	public CharSequence getPrefixCompletionText(IDocument document, int completionOffset) {
+		if (isEmptyConstructorProposal())
+			return ""; //$NON-NLS-1$
 		if (hasArgumentList())
 			return String.valueOf(fProposal.getName());
 		return super.getPrefixCompletionText(document, completionOffset);
