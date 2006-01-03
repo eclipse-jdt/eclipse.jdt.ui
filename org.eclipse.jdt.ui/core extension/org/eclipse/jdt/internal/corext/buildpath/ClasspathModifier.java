@@ -13,7 +13,9 @@ package org.eclipse.jdt.internal.corext.buildpath;
 
 import java.net.URI;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Set;
 
@@ -1275,10 +1277,65 @@ public class ClasspathModifier {
 			IClasspathEntry entry= root.getRawClasspathEntry();
 			CPListElement elem= CPListElement.createFromExisting(entry, project);
 			existingEntries.remove(elem);
+			removeFilters(elem.getPath(), project, existingEntries);
 			return elem.getResource();
 		} finally {
 			monitor.done();
 		}
+	}
+	
+	/**
+	 * Remove <code>path</code> from inclusion/exlusion filters in all <code>existingEntries</code>
+	 * 
+	 * @param path the path to remove
+	 * @param project the Java project
+	 * @param existingEntries a list of <code>CPListElement</code> representing the build path
+	 * entries of the project.
+	 * @return returns a <code>List</code> of <code>CPListElement</code> of modified elements, not null.
+	 */
+	public static List removeFilters(IPath path, IJavaProject project, List existingEntries) {
+		if (path == null)
+			return Collections.EMPTY_LIST;
+		
+		IPath projPath= project.getPath();
+		if (projPath.isPrefixOf(path)) {
+			path= path.removeFirstSegments(projPath.segmentCount()).addTrailingSeparator();
+		}
+		
+		List result= new ArrayList();
+		for (Iterator iter= existingEntries.iterator(); iter.hasNext();) {
+			CPListElement element= (CPListElement)iter.next();
+			boolean hasChange= false;
+			IPath[] exlusions= (IPath[])element.getAttribute(CPListElement.EXCLUSION);
+			if (exlusions != null) {
+				List exlusionList= new ArrayList(exlusions.length);
+				for (int i= 0; i < exlusions.length; i++) {
+					if (!exlusions[i].equals(path)) {
+						exlusionList.add(exlusions[i]);
+					} else {
+						hasChange= true;
+					}
+				}
+				element.setAttribute(CPListElement.EXCLUSION, exlusionList.toArray(new IPath[exlusionList.size()]));
+			}
+			
+			IPath[] inclusion= (IPath[])element.getAttribute(CPListElement.INCLUSION);
+			if (inclusion != null) {
+				List inclusionList= new ArrayList(inclusion.length);
+				for (int i= 0; i < inclusion.length; i++) {
+					if (!inclusion[i].equals(path)) {
+						inclusionList.add(inclusion[i]);
+					} else {
+						hasChange= true;
+					}
+				}
+				element.setAttribute(CPListElement.INCLUSION, inclusionList.toArray(new IPath[inclusionList.size()]));
+			}
+			if (hasChange) {
+				result.add(element);
+			}
+		}
+		return result;
 	}
 
 	/**

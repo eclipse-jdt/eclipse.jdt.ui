@@ -40,6 +40,7 @@ import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
 
+import org.eclipse.jdt.internal.corext.buildpath.ClasspathModifier;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -429,6 +430,17 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			fFoldersList.refresh();
 			fClassPathList.dialogFieldChanged(); // validate
 		} else {
+			for (Iterator iter= selElements.iterator(); iter.hasNext();) {
+				CPListElement element= (CPListElement)iter.next();
+				if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+					List list= ClasspathModifier.removeFilters(element.getPath(), fCurrJProject, fFoldersList.getElements());
+					for (Iterator iterator= list.iterator(); iterator.hasNext();) {
+						CPListElement modified= (CPListElement)iterator.next();
+						fFoldersList.refresh(modified);
+						fFoldersList.expandElement(modified, 3);
+					}
+				}
+			}
 			fFoldersList.removeElements(selElements);
 		}
 	}
