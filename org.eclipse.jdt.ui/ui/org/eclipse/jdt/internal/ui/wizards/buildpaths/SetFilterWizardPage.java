@@ -139,7 +139,7 @@ public class SetFilterWizardPage extends NewElementWizardPage {
 		
 		setControl(inner);
 		Dialog.applyDialogFont(inner);
-//		PlatformUI.getWorkbench().getHelpSystem().setHelp(inner, IJavaHelpContextIds.NEW_PACKAGEROOT_WIZARD_PAGE);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(inner, IJavaHelpContextIds.INCLUSION_EXCLUSION_WIZARD_PAGE);
 	}
 	
 	

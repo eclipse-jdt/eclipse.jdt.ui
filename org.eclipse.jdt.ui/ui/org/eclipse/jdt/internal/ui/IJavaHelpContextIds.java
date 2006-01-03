@@ -299,6 +299,8 @@ public interface IJavaHelpContextIds {
 	// since 3.2
 	public static final String JARIMPORT_WIZARD_PAGE= PREFIX + "jar_import_wizard_page_context"; //$NON-NLS-1$
 	// since 3.2
+	public static final String INCLUSION_EXCLUSION_WIZARD_PAGE= PREFIX + "edit_inclusion_exlusion_filter_wizard_page_context"; //$NON-NLS-1$
+	// since 3.2
 	public static final String JARREFACTORING_WIZARD_PAGE= PREFIX + "jar_refactoring_wizard_page_context"; //$NON-NLS-1$
 	// since 3.2
 	public static final String JARPREVIEW_WIZARD_PAGE= PREFIX + "jar_preview_wizard_page_context"; //$NON-NLS-1$
