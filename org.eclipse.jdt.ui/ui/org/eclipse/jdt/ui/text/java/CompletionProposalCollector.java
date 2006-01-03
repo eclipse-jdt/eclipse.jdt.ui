@@ -640,7 +640,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 		Image image= getImage(fLabelProvider.createFieldImageDescriptor(proposal));
 		int relevance= computeRelevance(proposal);
 
-		JavaCompletionProposal javaProposal= new JavaCompletionProposal(completion, start, length, image, label, relevance);
+		JavaCompletionProposal javaProposal= new JavaCompletionProposal(completion, start, length, image, label, relevance, getContext().isInJavadoc());
 		if (fJavaProject != null)
 			javaProposal.setProposalInfo(new FieldProposalInfo(fJavaProject, proposal));
 
