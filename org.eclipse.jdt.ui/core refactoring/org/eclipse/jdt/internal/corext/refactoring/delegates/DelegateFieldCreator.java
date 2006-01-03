@@ -44,6 +44,8 @@ public class DelegateFieldCreator extends DelegateCreator {
 		fOldFieldFragment= (VariableDeclarationFragment) ((FieldDeclaration) getDeclaration()).fragments().get(0);
 		if (getNewElementName() == null)
 			setNewElementName(fOldFieldFragment.getName().getIdentifier());
+		
+		setInsertBefore(false); // delegate must be inserted after the original field that is referenced in the initializer
 	}
 
 	protected ASTNode createBody(BodyDeclaration fd) throws JavaModelException {

@@ -120,11 +120,10 @@ public abstract class DelegateCreator {
 	private CompilationUnitRewrite fOriginalRewrite;
 	private CompilationUnitRewrite fDelegateRewrite;
 	
-	private AST fAst;
-
 	private boolean fIsMoveToAnotherFile;
 	private boolean fCopy;
 	private boolean fDeclareDeprecated;
+	private boolean fInsertBefore;
 
 	private BodyDeclaration fDeclaration;
 	private String fNewElementName;
@@ -137,6 +136,7 @@ public abstract class DelegateCreator {
 	public DelegateCreator() {
 		fCopy= true;
 		fDeclareDeprecated= true;
+		fInsertBefore= false;
 	}
 
 	/**
@@ -151,7 +151,6 @@ public abstract class DelegateCreator {
 		fPreferences= JavaPreferencesSettings.getCodeGenerationSettings(rewrite.getCu().getJavaProject());
 
 		fDelegateRewrite= new CompilationUnitRewrite(rewrite.getCu(), rewrite.getRoot());
-		fAst= fDelegateRewrite.getAST();
 	}
 
 	/**
@@ -211,6 +210,19 @@ public abstract class DelegateCreator {
 		fDeclareDeprecated= declareDeprecated;
 	}
 	
+	/**
+	 * When in copy mode, use this method to control the insertion point of the
+	 * delegate. If the parameter is true, the delegate gets inserted before the
+	 * original declaration. If false, the delegate gets inserted after the
+	 * original declaration.
+	 * 
+	 * The default is false (do not insert before).
+	 * 
+	 * @param insertBefore insertion point
+	 */
+	public void setInsertBefore(boolean insertBefore) {
+		fInsertBefore= insertBefore;
+	}
 
 	// Methods to be overridden by subclasses
 
@@ -275,7 +287,7 @@ public abstract class DelegateCreator {
 	}
 
 	protected AST getAst() {
-		return fAst;
+		return fDelegateRewrite.getAST();
 	}
 
 	protected BodyDeclaration getDeclaration() {
@@ -304,7 +316,7 @@ public abstract class DelegateCreator {
 
 		// Moving to a new type?
 		if (fDestinationTypeBinding != null) {
-			fDestinationType= fOriginalRewrite.getImportRewrite().addImport(fDestinationTypeBinding, fAst);
+			fDestinationType= fOriginalRewrite.getImportRewrite().addImport(fDestinationTypeBinding, getAst());
 			fIsMoveToAnotherFile= true;
 		} else
 			fIsMoveToAnotherFile= false;
@@ -350,7 +362,10 @@ public abstract class DelegateCreator {
 			CategorizedTextEditGroup groupDescription= fOriginalRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.DelegateCreator_create_delegate, CATEGORY_DELEGATE);
 			ListRewrite bodyDeclarationsListRewrite= fOriginalRewrite.getASTRewrite().getListRewrite(fDeclaration.getParent(), getTypeBodyDeclarationsProperty());
 			if (fCopy)
-				bodyDeclarationsListRewrite.insertAfter(placeholder, fDeclaration, groupDescription);
+				if (fInsertBefore)
+					bodyDeclarationsListRewrite.insertBefore(placeholder, fDeclaration, groupDescription);
+				else
+					bodyDeclarationsListRewrite.insertAfter(placeholder, fDeclaration, groupDescription);
 			else
 				bodyDeclarationsListRewrite.replace(fDeclaration, placeholder, groupDescription);
 			
@@ -374,23 +389,23 @@ public abstract class DelegateCreator {
 
 	private TagElement getDelegateJavadocTag(BodyDeclaration declaration) throws JavaModelException {
 		Assert.isNotNull(declaration);
-		final String[] tokens= Strings.splitByToken(RefactoringCoreMessages.DelegateCreator_use_member_instead, " "); //$NON-NLS-1$
-		final List fragments= new ArrayList(tokens.length);
-		String element= null;
-		for (int index= 0; index < tokens.length; index++) {
-			element= tokens[index];
-			if (element != null && element.length() > 0) {
-				if (element.equals("{0}")) {//$NON-NLS-1$
-					fragments.add(createJavadocMemberReferenceTag(declaration, fAst));
-				} else {
-					final TextElement text= fAst.newTextElement();
-					text.setText(element);
-					fragments.add(text);
-				}
-			}
-		}
-
-		final TagElement tag= fAst.newTagElement();
+		
+		String msg= RefactoringCoreMessages.DelegateCreator_use_member_instead;
+		int firstParam= msg.indexOf("{0}"); //$NON-NLS-1$
+		Assert.isTrue(firstParam != -1);
+		
+		List fragments= new ArrayList();
+		TextElement text= getAst().newTextElement();
+		text.setText(msg.substring(0, firstParam).trim()); 
+		fragments.add(text);
+		
+		fragments.add(createJavadocMemberReferenceTag(declaration, getAst()));
+		
+		text= getAst().newTextElement();
+		text.setText(msg.substring(firstParam + 3).trim()); 
+		fragments.add(text);
+		
+		final TagElement tag= getAst().newTagElement();
 		tag.setTagName(TagElement.TAG_DEPRECATED);
 		tag.fragments().addAll(fragments);
 		return tag;

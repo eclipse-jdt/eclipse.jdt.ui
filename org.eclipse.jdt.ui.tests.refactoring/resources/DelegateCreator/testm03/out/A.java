@@ -2,13 +2,6 @@ package p;
 
 public class A {
 
-	@Some
-	@Thing
-	@Else
-	void foo() {
-		
-	}
-
 	/**
 	 * @deprecated Use {@link #foo()} instead
 	 */
@@ -17,5 +10,12 @@ public class A {
 	@Else
 	void foo() {
 		foo();
+	}
+
+	@Some
+	@Thing
+	@Else
+	void foo() {
+		
 	}
 }

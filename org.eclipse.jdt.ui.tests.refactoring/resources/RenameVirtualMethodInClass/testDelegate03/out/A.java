@@ -1,48 +1,48 @@
 package p;
 
 public abstract class A {
-	abstract void k();
-
 	/**
 	 * @deprecated Use {@link #k()} instead
 	 */
 	abstract void m();
+
+	abstract void k();
 }
 
 class B extends A {
-	void k() {
-		//Foo
-	}
-
 	/**
 	 * @deprecated Use {@link #k()} instead
 	 */
 	void m() {
 		k();
 	}
+
+	void k() {
+		//Foo
+	}
 }
 
 class C extends B {
+	/**
+	 * @deprecated Use {@link #k()} instead
+	 */
+	void m() {
+		k();
+	}
+
 	void k() {
 		//Bar
 		C c= new C() {
-			void k() {
-				// X
-			}
-
 			/**
 			 * @deprecated Use {@link #k()} instead
 			 */
 			void m() {
 				k();
 			}
-		};
-	}
 
-	/**
-	 * @deprecated Use {@link #k()} instead
-	 */
-	void m() {
-		k();
+			void k() {
+				// X
+			}
+		};
 	}
 }

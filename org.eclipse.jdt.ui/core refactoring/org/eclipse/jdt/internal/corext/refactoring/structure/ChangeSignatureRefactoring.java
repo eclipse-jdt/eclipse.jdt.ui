@@ -1789,7 +1789,11 @@ public class ChangeSignatureRefactoring extends Refactoring implements IDelegati
 			 * Use ReferenceUpdate() / DocReferenceUpdate() to update these
 			 * references like any other reference.
 			 */
-			new ReferenceUpdate(d.getDelegateInvocation(), d.getDelegateRewrite(), fResult).updateNode();
+			final ASTNode delegateInvocation= d.getDelegateInvocation();
+			if (delegateInvocation != null)
+				// may be null if the delegate is an interface method or
+				// abstract -> no body
+				new ReferenceUpdate(delegateInvocation, d.getDelegateRewrite(), fResult).updateNode();
 			new DocReferenceUpdate(d.getJavadocReference(), d.getDelegateRewrite(), fResult).updateNode();
 			
 			d.createEdit();

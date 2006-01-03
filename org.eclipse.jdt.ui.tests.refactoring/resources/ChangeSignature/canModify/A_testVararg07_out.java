@@ -1,11 +1,25 @@
 package p;
 
 class A {
+	/**
+	 * @deprecated Use {@link #m(int,String,Integer)} instead
+	 */
+	public void m(int i, String[] names) {
+		m(i, "none", 17);
+	}
+
 	public void m(int i, String j, Integer k) {
 	}
 }
 
 class B extends A {
+	/**
+	 * @deprecated Use {@link #m(int,String,Integer)} instead
+	 */
+	public void m(int i, String... names) {
+		m(i, "none", 17);
+	}
+
 	public void m(int i, String j, Integer k) {
 	}	
 }

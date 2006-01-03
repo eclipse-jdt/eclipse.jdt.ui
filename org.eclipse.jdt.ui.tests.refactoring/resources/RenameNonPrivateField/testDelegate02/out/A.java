@@ -4,10 +4,6 @@ class A {
    
 	public String g;
 
-	public String getG() {
-		return g;
-	}
-
 	/**
 	 * @deprecated Use {@link #getG()} instead
 	 */
@@ -15,8 +11,8 @@ class A {
 		return getG();
 	}
 
-	public void setG(String f) {
-		this.g = f;
+	public String getG() {
+		return g;
 	}
 
 	/**
@@ -24,5 +20,9 @@ class A {
 	 */
 	public void setF(String f) {
 		setG(f);
+	}
+
+	public void setG(String f) {
+		this.g = f;
 	}
 }

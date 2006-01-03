@@ -10,6 +10,13 @@ class Query {
 	}
 	
 	class PoolMessageEvent {
+		/**
+		 * @deprecated Use {@link #PoolMessageEvent(String,Object,int,Object)} instead
+		 */
+		PoolMessageEvent( String msg, Object xml, int id ) {
+			this(msg, xml, id, null);
+		}
+
 		PoolMessageEvent( String msg, Object xml, int id, Object newParam ) {
 			//empty
 		}
