@@ -54,6 +54,7 @@ public class JdtTextTestSuite {
 		suite.addTest(JavaDoubleClickSelectorTest.suite());
 		suite.addTest(BreakContinueTargetFinderTest.suite());
 		suite.addTest(ContentAssistTestSuite.suite());
+		suite.addTest(IndentActionTest.suite());
 		//$JUnit-END$
 		
 		return suite;
