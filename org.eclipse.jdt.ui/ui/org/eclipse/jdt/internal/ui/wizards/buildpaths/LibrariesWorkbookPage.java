@@ -448,6 +448,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				fLibrariesList.refresh(elem);
 				fLibrariesList.update(selElement); // image
 				fClassPathList.refresh(); // images
+				updateEnabledState();
 			}
 		} else if (key.equals(CPListElement.JAVADOC)) {
 			String initialLocation= (String) selElement.getAttribute(CPListElement.JAVADOC);
@@ -464,6 +465,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 
 					fLibrariesList.refresh(elem);
 					fClassPathList.dialogFieldChanged(); // validate
+					updateEnabledState();
 				}
 			} catch (MalformedURLException e) {
 				// ignore
@@ -478,6 +480,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				
 				fLibrariesList.refresh(elem);
 				fClassPathList.dialogFieldChanged(); // validate
+				updateEnabledState();
 				
 				if (res == AccessRulesDialog.SWITCH_PAGE) { // switch after updates and validation
 					dialog.performPageSwitch(fPageContainer);
@@ -492,6 +495,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 				
 				fLibrariesList.refresh(elem);
 				fClassPathList.dialogFieldChanged(); // validate
+				updateEnabledState();
 			}
 		}
 	}
@@ -556,6 +560,10 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 	}
 
 	private void libaryPageSelectionChanged(DialogField field) {
+		updateEnabledState();
+	}
+
+	private void updateEnabledState() {
 		List selElements= fLibrariesList.getSelectedElements();
 		fLibrariesList.enableButton(IDX_EDIT, canEdit(selElements));
 		fLibrariesList.enableButton(IDX_REMOVE, canRemove(selElements));
