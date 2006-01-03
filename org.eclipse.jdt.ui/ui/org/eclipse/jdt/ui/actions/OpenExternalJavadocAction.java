@@ -70,7 +70,11 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	 * @param site the site providing additional context information for this action
 	 */ 
 	public OpenExternalJavadocAction(IWorkbenchSite site) {
-		this(site, site.getSelectionProvider());
+		super(site);
+		setText(ActionMessages.OpenExternalJavadocAction_label); 
+		setDescription(ActionMessages.OpenExternalJavadocAction_description); 
+		setToolTipText(ActionMessages.OpenExternalJavadocAction_tooltip); 
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_EXTERNAL_JAVADOC_ACTION);
 	}
 	
 	/**
@@ -80,17 +84,18 @@ public class OpenExternalJavadocAction extends SelectionDispatchAction {
 	 * 
 	 * @param site the site providing additional context information for this action
 	 * @param provider a special selection provider which is used instead 
-	 *  of the site's selection provider
+	 *  of the site's selection provider or <code>null</code> to use the site's
+	 *  selection provider
 	 * 
 	 * @since 3.2
-	 */ 
-	public OpenExternalJavadocAction(IWorkbenchSite site, ISelectionProvider provider) {
-		super(site, provider);
-		setText(ActionMessages.OpenExternalJavadocAction_label); 
-		setDescription(ActionMessages.OpenExternalJavadocAction_description); 
-		setToolTipText(ActionMessages.OpenExternalJavadocAction_tooltip); 
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_EXTERNAL_JAVADOC_ACTION);
-	}
+	 * @deprecated Use {@link #setSpecialSelectionProvider(ISelectionProvider)} instead. This API will be
+	 * removed after 3.2 M5.
+     */
+    public OpenExternalJavadocAction(IWorkbenchSite site, ISelectionProvider provider) {
+        this(site);
+        setSpecialSelectionProvider(provider);
+    }
+
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.

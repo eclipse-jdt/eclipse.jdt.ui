@@ -13,7 +13,6 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IStatusLineManager;
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -112,10 +111,6 @@ public class FindOccurrencesInFileAction extends SelectionDispatchAction {
 		else if (site instanceof IPageSite)
 			fActionBars= ((IPageSite)site).getActionBars();
 		
-		ISelection selection= getSelection();
-		if (selection instanceof IStructuredSelection) {
-			setEnabled(getMember((IStructuredSelection)selection) != null);		
-		}
 		setText(SearchMessages.Search_FindOccurrencesInFile_label); 
 		setToolTipText(SearchMessages.Search_FindOccurrencesInFile_tooltip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_OCCURRENCES_IN_FILE_ACTION);

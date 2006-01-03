@@ -12,7 +12,6 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -72,11 +71,6 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 		setText(ActionMessages.FindExceptionOccurrences_text); 
 		setToolTipText(ActionMessages.FindExceptionOccurrences_toolTip); 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_EXCEPTION_OCCURRENCES);
-		
-		ISelection selection= getSelection();
-		if (selection instanceof IStructuredSelection) {
-			setEnabled(getMember((IStructuredSelection)selection) != null);		
-		}
 	}
 	
 	//---- Text Selection ----------------------------------------------------------------------
@@ -85,6 +79,13 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 	 * Method declared in SelectionDispatchAction.
 	 */
 	public void selectionChanged(ITextSelection selection) {
+	}
+	
+	/* (non-JavaDoc)
+	 * Method declared in SelectionDispatchAction.
+	 */
+	public void selectionChanged(IStructuredSelection selection) {
+		setEnabled(getMember(selection) != null);
 	}
 
 	/* (non-JavaDoc)

@@ -71,7 +71,11 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	 * @param site the site providing context information for this action
 	 */
 	public OpenTypeHierarchyAction(IWorkbenchSite site) {
-		this(site, site.getSelectionProvider());
+		super(site);
+		setText(ActionMessages.OpenTypeHierarchyAction_label); 
+		setToolTipText(ActionMessages.OpenTypeHierarchyAction_tooltip); 
+		setDescription(ActionMessages.OpenTypeHierarchyAction_description); 
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_TYPE_HIERARCHY_ACTION);
 	}
 	
 	/**
@@ -81,17 +85,18 @@ public class OpenTypeHierarchyAction extends SelectionDispatchAction {
 	 * 
 	 * @param site the site providing context information for this action
 	 * @param provider a special selection provider which is used instead 
-	 *  of the site's selection provider
+	 *  of the site's selection provider or <code>null</code> to use the site's
+	 *  selection provider
 	 * 
 	 * @since 3.2
-	 */
-	public OpenTypeHierarchyAction(IWorkbenchSite site, ISelectionProvider provider) {
-		super(site, provider);
-		setText(ActionMessages.OpenTypeHierarchyAction_label); 
-		setToolTipText(ActionMessages.OpenTypeHierarchyAction_tooltip); 
-		setDescription(ActionMessages.OpenTypeHierarchyAction_description); 
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_TYPE_HIERARCHY_ACTION);
-	}
+	 * @deprecated Use {@link #setSpecialSelectionProvider(ISelectionProvider)} instead. This API will be
+	 * removed after 3.2 M5.
+     */
+    public OpenTypeHierarchyAction(IWorkbenchSite site, ISelectionProvider provider) {
+        this(site);
+        setSpecialSelectionProvider(provider);
+    }
+
 	
 	/**
 	 * Note: This constructor is for internal use only. Clients should not call this constructor.

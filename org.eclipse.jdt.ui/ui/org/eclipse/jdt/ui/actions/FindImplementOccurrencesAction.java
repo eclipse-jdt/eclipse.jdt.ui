@@ -12,7 +12,6 @@ package org.eclipse.jdt.ui.actions;
 
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -70,10 +69,6 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 		super(site);
 		setText(ActionMessages.FindImplementOccurrencesAction_text); 
 		setToolTipText(ActionMessages.FindImplementOccurrencesAction_toolTip); 
-		ISelection selection= getSelection();
-		if (selection instanceof IStructuredSelection) {
-			setEnabled(getMember((IStructuredSelection)selection) != null);		
-		}
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_IMPLEMENT_OCCURRENCES);
 	}
 	
@@ -83,6 +78,13 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.text.ITextSelection)
 	 */
 	public void selectionChanged(ITextSelection selection) {
+	}
+	
+	/* (non-JavaDoc)
+	 * Method declared in SelectionDispatchAction.
+	 */
+	public void selectionChanged(IStructuredSelection selection) {
+		setEnabled(getMember(selection) != null);
 	}
 
 	/*

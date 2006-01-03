@@ -14,6 +14,7 @@ import org.eclipse.swt.dnd.Clipboard;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionProvider;
 
 import org.eclipse.ui.IActionBars;
@@ -97,8 +98,11 @@ public class CCPActionGroup extends ActionGroup {
 
 	private void registerActionsAsSelectionChangeListeners() {
 		ISelectionProvider provider = fSite.getSelectionProvider();
+		ISelection selection= provider.getSelection();
 		for (int i= 0; i < fActions.length; i++) {
-			provider.addSelectionChangedListener(fActions[i]);
+			SelectionDispatchAction action= fActions[i];
+			action.update(selection);
+			provider.addSelectionChangedListener(action);
 		}
 	}
 	

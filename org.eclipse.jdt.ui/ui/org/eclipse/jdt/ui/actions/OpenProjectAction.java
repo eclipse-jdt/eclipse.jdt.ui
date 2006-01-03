@@ -75,7 +75,6 @@ public class OpenProjectAction extends SelectionDispatchAction implements IResou
 		fWorkbenchAction= new OpenResourceAction(site.getShell());
 		setText(fWorkbenchAction.getText());
 		setToolTipText(fWorkbenchAction.getToolTipText());
-		setEnabled(hasCloseProjects());
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_PROJECT_ACTION);
 	}
 	

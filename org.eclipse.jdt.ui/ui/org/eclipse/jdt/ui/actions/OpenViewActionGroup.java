@@ -62,7 +62,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	 * @param page the page that owns this action group
 	 */
 	public OpenViewActionGroup(Page page) {
-		createSiteActions(page.getSite());
+		createSiteActions(page.getSite(), null);
 	}
 	
 	/**
@@ -88,7 +88,7 @@ public class OpenViewActionGroup extends ActionGroup {
 	 * @param part the view part that owns this action group
 	 */
 	public OpenViewActionGroup(IViewPart part) {
-		this(part, part.getSite().getSelectionProvider());
+		this(part, null);
 	}
 	
 	/**
@@ -150,24 +150,26 @@ public class OpenViewActionGroup extends ActionGroup {
 
 		initialize(part.getEditorSite().getSelectionProvider());
 	}
-
-	private void createSiteActions(IWorkbenchSite site) {
-		createSiteActions(site, site.getSelectionProvider());
-	}
 	
-	private void createSiteActions(IWorkbenchSite site, ISelectionProvider provider) {
-		fOpenSuperImplementation= new OpenSuperImplementationAction(site, provider);
+	private void createSiteActions(IWorkbenchSite site, ISelectionProvider specialProvider) {
+		fOpenSuperImplementation= new OpenSuperImplementationAction(site);
 		fOpenSuperImplementation.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_SUPER_IMPLEMENTATION);
-
-		fOpenExternalJavadoc= new OpenExternalJavadocAction(site, provider);
+		fOpenSuperImplementation.setSpecialSelectionProvider(specialProvider);
+		
+		fOpenExternalJavadoc= new OpenExternalJavadocAction(site);
 		fOpenExternalJavadoc.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EXTERNAL_JAVADOC);
+		fOpenExternalJavadoc.setSpecialSelectionProvider(specialProvider);
 
-		fOpenTypeHierarchy= new OpenTypeHierarchyAction(site, provider);
+		fOpenTypeHierarchy= new OpenTypeHierarchyAction(site);
 		fOpenTypeHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_TYPE_HIERARCHY);
+		fOpenTypeHierarchy.setSpecialSelectionProvider(specialProvider);
 
-		fOpenCallHierarchy= new OpenCallHierarchyAction(site, provider);
+		fOpenCallHierarchy= new OpenCallHierarchyAction(site);
         fOpenCallHierarchy.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_CALL_HIERARCHY);
+        fOpenCallHierarchy.setSpecialSelectionProvider(specialProvider);
 
+        ISelectionProvider provider= specialProvider != null ? specialProvider : site.getSelectionProvider();
+        
         fOpenPropertiesDialog= new PropertyDialogAction(site, provider);
         fOpenPropertiesDialog.setActionDefinitionId(IWorkbenchActionDefinitionIds.PROPERTIES);
 		
