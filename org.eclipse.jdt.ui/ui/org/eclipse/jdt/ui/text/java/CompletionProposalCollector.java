@@ -188,7 +188,7 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	 * @return invocationContext the invocation context
 	 * @since 3.2
 	 */
-	public JavaContentAssistInvocationContext getInvocationContext() {
+	protected final JavaContentAssistInvocationContext getInvocationContext() {
 		if (fInvocationContext == null)
 			setInvocationContext(new JavaContentAssistInvocationContext(getCompilationUnit()));
 		return fInvocationContext;
@@ -450,13 +450,11 @@ public class CompletionProposalCollector extends CompletionRequestor {
 
 	/**
 	 * Returns the <code>CompletionContext</code> for this completion operation.
-	 * <p>
-	 * Public since 3.2. XXX this API is provisional and may change anytime during the course of 3.2
-	 * </p>
+
 	 * @return the <code>CompletionContext</code> for this completion operation
 	 * @see CompletionRequestor#acceptContext(CompletionContext)
 	 */
-	public final CompletionContext getContext() {
+	protected final CompletionContext getContext() {
 		return fContext;
 	}
 
