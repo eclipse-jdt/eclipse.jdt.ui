@@ -184,6 +184,10 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 		performInvalidTestInlineMethod();
 	}
 	
+	public void testSuperInThis() throws Exception {
+		performInvalidTestInlineMethod();
+	}
+	
 	/* *********************** Simple Tests ******************************* */
 		
 	private void performSimpleTest() throws Exception {

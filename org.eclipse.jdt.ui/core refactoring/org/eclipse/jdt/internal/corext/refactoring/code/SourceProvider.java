@@ -172,6 +172,10 @@ public class SourceProvider {
 		return fAnalyzer.hasArrayAccess();
 	}
 	
+	public boolean hasSuperMethodInvocation() {
+		return fAnalyzer.hasSuperMethodInvocation();
+	}
+	
 	public boolean mustEvaluateReturnedExpression() {
 		return fMustEvalReturnedExpression;
 	}

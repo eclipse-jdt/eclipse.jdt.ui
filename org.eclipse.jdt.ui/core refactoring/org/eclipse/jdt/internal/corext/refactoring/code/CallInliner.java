@@ -287,8 +287,7 @@ public class CallInliner {
 			JavaPlugin.log(exception);
 		}
 		checkInvocationContext(result, severity);
-		if (result.getSeverity() >= severity)
-			return result;		
+		
 		return result;
 	}
 
@@ -320,6 +319,15 @@ public class CallInliner {
 				severity,  
 				RefactoringCoreMessages.CallInliner_constructors, 
 				JavaStatusContext.create(fCUnit, fInvocation)));
+		}
+		if (fSourceProvider.hasSuperMethodInvocation() && fInvocation.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			Expression receiver= ((MethodInvocation)fInvocation).getExpression();
+			if (receiver instanceof ThisExpression) {
+				result.addEntry(new RefactoringStatusEntry(
+					severity,
+					RefactoringCoreMessages.CallInliner_super_into_this_expression,
+					JavaStatusContext.create(fCUnit, fInvocation)));
+			}
 		}
 	}
 

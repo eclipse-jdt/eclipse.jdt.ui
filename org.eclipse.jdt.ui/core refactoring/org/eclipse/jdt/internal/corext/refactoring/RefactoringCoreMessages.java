@@ -151,6 +151,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String CallInliner_field_initialize_self_reference;
 	public static String CallInliner_constructors;
 	public static String CallInliner_cast_analysis_error;
+	public static String CallInliner_super_into_this_expression;
 	
 	public static String TargetProvider_inaccurate_match;
 	public static String TargetProvider_method_declaration_not_unique;

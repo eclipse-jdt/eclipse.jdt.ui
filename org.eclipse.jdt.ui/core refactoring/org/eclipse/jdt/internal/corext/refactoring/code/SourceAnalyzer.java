@@ -50,6 +50,8 @@ import org.eclipse.jdt.core.dom.ReturnStatement;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
+import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -204,8 +206,21 @@ class SourceAnalyzer  {
 		public boolean visit(MethodInvocation node) {
 			if (fTypeCounter == 0) {
 				Expression receiver= node.getExpression();
-				if (receiver == null && !isStaticallyImported(node.getName()))
+				if (receiver == null && !isStaticallyImported(node.getName())) {
 					fImplicitReceivers.add(node);
+				}
+			}
+			return true;
+		}
+		public boolean visit(SuperMethodInvocation node) {
+			if (fTypeCounter == 0) {
+				fHasSuperMethodInvocation= true;
+			}
+			return true;
+		}
+		public boolean visist(SuperConstructorInvocation node) {
+			if (fTypeCounter == 0) {
+				fHasSuperMethodInvocation= true;
 			}
 			return true;
 		}
@@ -304,6 +319,7 @@ class SourceAnalyzer  {
 	private List fImplicitReceivers;
 	
 	private boolean fArrayAccess;
+	private boolean fHasSuperMethodInvocation;
 	
 	private List/*<Name>*/ fTypesToImport;
 	private List/*<Name>*/ fStaticsToImport;
@@ -457,6 +473,10 @@ class SourceAnalyzer  {
 	
 	public boolean hasArrayAccess() {
 		return fArrayAccess;
+	}
+	
+	public boolean hasSuperMethodInvocation() {
+		return fHasSuperMethodInvocation;
 	}
 	
 	private ASTNode[] getStatements() {
