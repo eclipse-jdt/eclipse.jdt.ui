@@ -54,7 +54,6 @@ import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModelStatus;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -139,7 +138,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		
 		fExcludeInOthersFields= new SelectionButtonDialogField(SWT.CHECK);
 		fExcludeInOthersFields.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_exclude_label); 
-		fExcludeInOthersFields.setEnabled(JavaCore.ENABLED.equals(JavaCore.getOption(JavaCore.CORE_ENABLE_CLASSPATH_EXCLUSION_PATTERNS)) && fOrginalPath == null);
+		fExcludeInOthersFields.setEnabled(fOrginalPath == null);
 		if (!fExcludeInOthersFields.isEnabled()) 
 			fExcludeInOthersFields.setSelection(true);
 		
