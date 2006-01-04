@@ -119,10 +119,12 @@ public class IndentAction extends TextEditorAction {
 			
 			Runnable runnable= new Runnable() {
 				public void run() {
+					final boolean multiLine= nLines > 1;
 					IRewriteTarget target= (IRewriteTarget)getTextEditor().getAdapter(IRewriteTarget.class);
 					if (target != null) {
 						target.beginCompoundChange();
-						target.setRedraw(false);
+						if (multiLine)
+							target.setRedraw(false);
 					}
 					
 					try {
@@ -136,10 +138,7 @@ public class IndentAction extends TextEditorAction {
 						// update caret position: move to new position when indenting just one line
 						// keep selection when indenting multiple
 						int newOffset, newLength;
-						if (fIsTabAction) {
-							newOffset= fCaretOffset;
-							newLength= 0;
-						} else if (nLines > 1) {
+						if (!fIsTabAction && multiLine) {
 							newOffset= offset;
 							newLength= end.getOffset() - offset;
 						} else {
@@ -161,7 +160,8 @@ public class IndentAction extends TextEditorAction {
 						
 						if (target != null) {
 							target.endCompoundChange();
-							target.setRedraw(true);
+							if (multiLine)
+								target.setRedraw(true);
 						}
 					}
 				}
