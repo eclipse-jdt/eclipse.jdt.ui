@@ -38,9 +38,9 @@ import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 
 /**
- * A correction proposal which uses an @see org.eclipse.jdt.internal.corext.fix.IFix to
- * fix a problem. A fix correction proposal may have an @see org.eclipse.jdt.internal.corext.fix.IMultiFix
- * attachet which can be executed instead of the provided IFix.
+ * A correction proposal which uses an {@link IFix} to
+ * fix a problem. A fix correction proposal may have an {@link ICleanUp}
+ * attached which can be executed instead of the provided IFix.
  */
 public class FixCorrectionProposal extends LinkedCorrectionProposal implements ICompletionProposalExtension2 {
 	private final IFix fFix;
