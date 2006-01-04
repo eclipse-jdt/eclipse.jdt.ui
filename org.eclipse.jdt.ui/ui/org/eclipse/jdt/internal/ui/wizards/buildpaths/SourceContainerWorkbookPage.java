@@ -548,16 +548,19 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
     private CPListElement openNewLinkedSourceContainerDialog(CPListElement element) {
     	
     	LinkFolderDialog dialog= new LinkFolderDialog(getShell(), fCurrJProject.getProject(), false);
+
+    	IPath oldPath= null;
     	if (element != null) {
+    		oldPath= element.getPath();
 	    	dialog.setName(element.getResource().getName());
-	    	dialog.setLinkTarget(element.getLinkTarget().toOSString());
+			dialog.setLinkTarget(element.getLinkTarget().toOSString());
     	}
     	
         if (dialog.open() == Window.OK) {
             IResource createdLink= dialog.getCreatedFolder();
             IPath linkTarget= dialog.getLinkTarget();
-            CPListElement result= new CPListElement(fCurrJProject, IClasspathEntry.CPE_SOURCE, createdLink.getFullPath(), createdLink);
-            result.setLinkTarget(linkTarget);
+            CPListElement result= new CPListElement(null, fCurrJProject, IClasspathEntry.CPE_SOURCE, oldPath, createdLink, linkTarget);
+            result.setPath(createdLink.getFullPath());
 			return result;
         }
 		return null;

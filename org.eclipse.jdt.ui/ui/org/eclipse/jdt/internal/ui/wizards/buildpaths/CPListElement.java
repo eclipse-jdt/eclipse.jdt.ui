@@ -69,16 +69,21 @@ public class CPListElement {
 		this(null, project, entryKind, path, res);
 	}
 	
+	public CPListElement(Object parent, IJavaProject project, int entryKind, IPath path, IResource res) {
+		this(parent, project, entryKind, path, res, null);
+	}
+	
 	public CPListElement(IJavaProject project, int entryKind) {
 		this(null, project, entryKind, null, null);
 	}
 	
-	public CPListElement(Object parent, IJavaProject project, int entryKind, IPath path, IResource res) {
+	public CPListElement(Object parent, IJavaProject project, int entryKind, IPath path, IResource res, IPath linkTarget) {
 		fProject= project;
 
 		fEntryKind= entryKind;
 		fPath= path;
 		fOrginalPath= path;
+		fLinkTarget= linkTarget;
 		fChildren= new ArrayList();
 		fResource= res;
 		fIsExported= false;
@@ -493,7 +498,7 @@ public class CPListElement {
 				isMissing= (res == null);
 				break;
 		}
-		CPListElement elem= new CPListElement(parent, project, curr.getEntryKind(), path, res);
+		CPListElement elem= new CPListElement(parent, project, curr.getEntryKind(), path, res, linkTarget);
 		elem.setExported(curr.isExported());
 		elem.setAttribute(SOURCEATTACHMENT, curr.getSourceAttachmentPath());
 		elem.setAttribute(OUTPUT, curr.getOutputLocation());
@@ -507,8 +512,6 @@ public class CPListElement {
 			IClasspathAttribute attrib= extraAttributes[i];
 			elem.setAttribute(attrib.getName(), attrib.getValue());
 		}
-
-		elem.setLinkTarget(linkTarget);
 		
 		if (project != null && project.exists()) {
 			elem.setIsMissing(isMissing);
@@ -566,12 +569,8 @@ public class CPListElement {
 		if (getLinkTarget() == null) {
 			appendEncodePath(fPath, buf).append(';');
 		} else {
-			if (fPath != null) {
-				String str= getLinkTarget().toString();
-				buf.append('[').append(str.length()).append(']').append(str);
-			} else {
-				buf.append('[').append(']');
-			}
+			appendEncodePath(getLinkTarget(), buf);
+			buf.append(':').append(getResource().getName());
 			buf.append(';');
 		}
 		buf.append(Boolean.valueOf(fIsExported)).append(';');
@@ -600,10 +599,6 @@ public class CPListElement {
 
 	public IPath getLinkTarget() {
 		return fLinkTarget;
-	}
-
-	public void setLinkTarget(IPath linkTarget) {
-		fLinkTarget= linkTarget;
 	}
 
 	public void setPath(IPath path) {

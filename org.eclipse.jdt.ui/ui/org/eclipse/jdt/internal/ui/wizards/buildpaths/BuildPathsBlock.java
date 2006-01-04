@@ -690,7 +690,7 @@ public class BuildPathsBlock {
 			monitor= new NullProgressMonitor();
 		}
 		monitor.setTaskName(NewWizardMessages.BuildPathsBlock_operationdesc_java); 
-		monitor.beginTask("", classPathEntries.size() + 4); //$NON-NLS-1$
+		monitor.beginTask("", classPathEntries.size() * 4 + 4); //$NON-NLS-1$
 		try {
 			
 			IJavaProject javaProject= ((CPListElement)classPathEntries.get(0)).getJavaProject();
@@ -712,19 +712,21 @@ public class BuildPathsBlock {
 				}
 			}
 			
+			monitor.worked(1);
+			
 			IWorkspaceRoot fWorkspaceRoot= JavaPlugin.getWorkspace().getRoot();
 			
 			//create and set the output path first
 			if (!fWorkspaceRoot.exists(outputLocation)) {
 				IFolder folder= fWorkspaceRoot.getFolder(outputLocation);
-				CoreUtility.createFolder(folder, true, true, null);
+				CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
 				folder.setDerived(true);		
+			} else {
+				monitor.worked(1);
 			}
-			
 			if (monitor.isCanceled()) {
 				throw new OperationCanceledException();
 			}
-			monitor.worked(2);
 			
 			int nEntries= classPathEntries.size();
 			IClasspathEntry[] classpath= new IClasspathEntry[nEntries];
@@ -736,24 +738,45 @@ public class BuildPathsBlock {
 				i++;
 				
 				IResource res= entry.getResource();
+				//2 ticks
 				if (res instanceof IFolder) {
 					if (entry.getLinkTarget() != null) {
 						IFolder folder= ((IFolder)res);
 						if (!res.exists()) {
-							folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, monitor);
+							if (entry.getOrginalPath() == null) {//it's a new one
+								folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, new SubProgressMonitor(monitor, 2));
+							} else {//it's a rename
+								IPath orginalPath= entry.getOrginalPath();
+								if (orginalPath != null && projPath.isPrefixOf(orginalPath)) {
+									orginalPath= orginalPath.removeFirstSegments(projPath.segmentCount());
+								}
+								IFolder orginalFolder= project.getFolder(orginalPath);
+								orginalFolder.delete(true, new SubProgressMonitor(monitor, 1));
+								folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, new SubProgressMonitor(monitor, 1));
+							}
 						} else if (!entry.getLinkTarget().equals(res.getLocation())) {
-							folder.delete(true, monitor);
-							folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, monitor);
+							folder.delete(true, new SubProgressMonitor(monitor, 1));
+							folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, new SubProgressMonitor(monitor, 1));
+						} else {
+							monitor.worked(2);
 						}
 					} else if (!res.exists()) {
-						CoreUtility.createFolder((IFolder)res, true, true, null);
+						CoreUtility.createFolder((IFolder)res, true, true, new SubProgressMonitor(monitor, 2));
 					}
+				} else {
+					monitor.worked(2);
 				}
+				if (monitor.isCanceled()) {
+					throw new OperationCanceledException();
+				}
+				//2 ticks
 				if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 					IPath folderOutput= (IPath) entry.getAttribute(CPListElement.OUTPUT);
 					if (folderOutput != null && folderOutput.segmentCount() > 1) {
 						IFolder folder= fWorkspaceRoot.getFolder(folderOutput);
-						CoreUtility.createFolder(folder, true, true, null);
+						CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
+					} else {
+						monitor.worked(1);
 					}
 					
 					IPath path= entry.getPath();
@@ -779,12 +802,14 @@ public class BuildPathsBlock {
 							IFolder orginalFolder= project.getFolder(orginalPath);
 							orginalFolder.move(path, true, true, new SubProgressMonitor(monitor, 1));
 						}
-					}
-					if (monitor.isCanceled()) {
-						throw new OperationCanceledException();
+					} else {
+						monitor.worked(1);
 					}
 				} else {
-					monitor.worked(1);
+					monitor.worked(2);
+				}
+				if (monitor.isCanceled()) {
+					throw new OperationCanceledException();
 				}
 			}
 
