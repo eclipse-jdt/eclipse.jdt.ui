@@ -82,7 +82,7 @@ public class MembersView extends JavaBrowsingPart implements IPropertyChangeList
 	 */
 	protected JavaUILabelProvider createLabelProvider() {
 		return new AppearanceAwareLabelProvider(
-						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_APP_TYPE_SIGNATURE,
+						AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.F_APP_TYPE_SIGNATURE | JavaElementLabels.ALL_CATEGORY,
 						AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS
 						);
 	}

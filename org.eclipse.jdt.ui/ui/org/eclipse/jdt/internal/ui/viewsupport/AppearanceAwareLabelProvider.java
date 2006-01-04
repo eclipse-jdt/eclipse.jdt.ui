@@ -59,6 +59,9 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 		if (!store.getBoolean(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)) {
 			fTextFlagMask ^= JavaElementLabels.P_COMPRESSED;
 		}
+		if (!store.getBoolean(PreferenceConstants.APPEARANCE_CATEGORY)) {
+			fTextFlagMask ^= JavaElementLabels.ALL_CATEGORY;
+		}
 		
 		fImageFlagMask= -1;
 	}
@@ -70,6 +73,7 @@ public class AppearanceAwareLabelProvider extends JavaUILabelProvider implements
 		String property= event.getProperty();
 		if (property.equals(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE)
 				|| property.equals(PreferenceConstants.APPEARANCE_METHOD_TYPEPARAMETERS)
+				|| property.equals(PreferenceConstants.APPEARANCE_CATEGORY)
 				|| property.equals(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW)
 				|| property.equals(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES)) {
 			initMasks();

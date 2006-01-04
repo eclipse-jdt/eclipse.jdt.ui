@@ -263,6 +263,7 @@ public final class PreferencesMessages extends NLS {
 	public static String SourceAttachmentPropertyPage_containerentry_message;
 	public static String AppearancePreferencePage_description;
 	public static String AppearancePreferencePage_methodreturntype_label;
+	public static String AppearancePreferencePage_showCategory_label;
 	public static String AppearancePreferencePage_methodtypeparams_label;
 	public static String AppearancePreferencePage_pkgNamePatternEnable_label;
 	public static String AppearancePreferencePage_pkgNamePattern_label;

@@ -50,8 +50,10 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 	private static final String PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW= PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW;
 	private static final String STACK_BROWSING_VIEWS_VERTICALLY= PreferenceConstants.BROWSING_STACK_VERTICALLY;
 	private static final String PREF_FOLD_PACKAGES_IN_PACKAGE_EXPLORER= PreferenceConstants.APPEARANCE_FOLD_PACKAGES_IN_PACKAGE_EXPLORER;
-	
+	private static final String PREF_CATEGORY= PreferenceConstants.APPEARANCE_CATEGORY;
+
 	private SelectionButtonDialogField fShowMethodReturnType;
+	private SelectionButtonDialogField fShowCategory;
 	private SelectionButtonDialogField fCompressPackageNames;
 	private SelectionButtonDialogField fStackBrowsingViewsVertically;
 	private SelectionButtonDialogField fShowMembersInPackageView;
@@ -78,6 +80,9 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fShowMethodTypeParameters.setDialogFieldListener(listener);
 		fShowMethodTypeParameters.setLabelText(PreferencesMessages.AppearancePreferencePage_methodtypeparams_label); 
 
+		fShowCategory= new SelectionButtonDialogField(SWT.CHECK);
+		fShowCategory.setDialogFieldListener(listener);
+		fShowCategory.setLabelText(PreferencesMessages.AppearancePreferencePage_showCategory_label); 
 		
 		fShowMembersInPackageView= new SelectionButtonDialogField(SWT.CHECK);
 		fShowMembersInPackageView.setDialogFieldListener(listener);
@@ -105,6 +110,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		fShowMethodReturnType.setSelection(prefs.getBoolean(PREF_METHOD_RETURNTYPE));
 		fShowMethodTypeParameters.setSelection(prefs.getBoolean(PREF_METHOD_TYPEPARAMETERS));
 		fShowMembersInPackageView.setSelection(prefs.getBoolean(SHOW_CU_CHILDREN));
+		fShowCategory.setSelection(prefs.getBoolean(PREF_CATEGORY));
 		fStackBrowsingViewsVertically.setSelection(prefs.getBoolean(STACK_BROWSING_VIEWS_VERTICALLY));
 		fPackageNamePattern.setText(prefs.getString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW));
 		fCompressPackageNames.setSelection(prefs.getBoolean(PREF_COMPRESS_PACKAGE_NAMES));
@@ -138,6 +144,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 				
 		fShowMethodReturnType.doFillIntoGrid(result, nColumns);
 		fShowMethodTypeParameters.doFillIntoGrid(result, nColumns);
+		fShowCategory.doFillIntoGrid(result, nColumns);
 		fShowMembersInPackageView.doFillIntoGrid(result, nColumns);				
 		fFoldPackagesInPackageExplorer.doFillIntoGrid(result, nColumns);
 
@@ -196,6 +203,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		IPreferenceStore prefs= getPreferenceStore();
 		prefs.setValue(PREF_METHOD_RETURNTYPE, fShowMethodReturnType.isSelected());
 		prefs.setValue(PREF_METHOD_TYPEPARAMETERS, fShowMethodTypeParameters.isSelected());
+		prefs.setValue(PREF_CATEGORY, fShowCategory.isSelected());
 		prefs.setValue(SHOW_CU_CHILDREN, fShowMembersInPackageView.isSelected());
 		prefs.setValue(STACK_BROWSING_VIEWS_VERTICALLY, fStackBrowsingViewsVertically.isSelected());
 		prefs.setValue(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW, fPackageNamePattern.getText());
@@ -212,6 +220,7 @@ public class AppearancePreferencePage extends PreferencePage implements IWorkben
 		IPreferenceStore prefs= getPreferenceStore();
 		fShowMethodReturnType.setSelection(prefs.getDefaultBoolean(PREF_METHOD_RETURNTYPE));
 		fShowMethodTypeParameters.setSelection(prefs.getDefaultBoolean(PREF_METHOD_TYPEPARAMETERS));
+		fShowCategory.setSelection(prefs.getDefaultBoolean(PREF_CATEGORY));
 		fShowMembersInPackageView.setSelection(prefs.getDefaultBoolean(SHOW_CU_CHILDREN));
 		fStackBrowsingViewsVertically.setSelection(prefs.getDefaultBoolean(STACK_BROWSING_VIEWS_VERTICALLY));
 		fPackageNamePattern.setText(prefs.getDefaultString(PREF_PKG_NAME_PATTERN_FOR_PKG_VIEW));

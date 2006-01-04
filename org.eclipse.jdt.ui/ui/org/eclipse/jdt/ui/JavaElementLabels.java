@@ -270,10 +270,33 @@ public class JavaElementLabels {
 	public final static long USE_RESOLVED= 1L << 48;
 	
 	/**
+	 * Prepend first category (if any) to field.
+	 * @since 3.2 
+	 */
+	public final static long F_CATEGORY= 1L << 49;
+	/**
+	 * Prepend first category (if any) to method.
+	 * @since 3.2
+	 */
+	public final static long M_CATEGORY= 1L << 50;
+	/**
+	 * Prepend first category (if any) to type.
+	 * @since 3.2 
+	 */
+	public final static long T_CATEGORY= 1L << 51;
+	
+	/**
+	 * Show category for all elements.
+	 * @since 3.2
+	 */
+	public final static long ALL_CATEGORY= new Long(JavaElementLabels.F_CATEGORY | JavaElementLabels.M_CATEGORY | JavaElementLabels.T_CATEGORY).longValue();
+	
+	/**
 	 * Qualify all elements
 	 */
 	public final static long ALL_FULLY_QUALIFIED= new Long(F_FULLY_QUALIFIED | M_FULLY_QUALIFIED | I_FULLY_QUALIFIED | T_FULLY_QUALIFIED | D_QUALIFIED | CF_QUALIFIED | CU_QUALIFIED | P_QUALIFIED | ROOT_QUALIFIED).longValue();
 
+	
 	/**
 	 * Post qualify all elements
 	 */
@@ -439,6 +462,15 @@ public class JavaElementLabels {
 		try {
 			BindingKey resolvedKey= getFlag(flags, USE_RESOLVED) && method.isResolved() ? new BindingKey(method.getKey()) : null;
 			String resolvedSig= (resolvedKey != null) ? resolvedKey.internalToSignature() : null;
+			
+			// category
+			if (getFlag(flags, M_CATEGORY) && method.exists()) {
+				String[] categories= method.getCategories();
+				if (categories.length > 0) {
+					buf.append(categories[0]);
+					buf.append(CONCAT_STRING);
+				}
+			}
 			
 			// type parameters
 			if (getFlag(flags, M_PRE_TYPE_PARAMETERS)) {
@@ -621,6 +653,16 @@ public class JavaElementLabels {
 	 */	
 	public static void getFieldLabel(IField field, long flags, StringBuffer buf) {
 		try {
+			
+			// category
+			if (getFlag(flags, F_CATEGORY) && field.exists()) {
+				String[] categories= field.getCategories();
+				if (categories.length > 0) {
+					buf.append(categories[0]);
+					buf.append(CONCAT_STRING);
+				}
+			}
+			
 			if (getFlag(flags, F_PRE_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
 				if (getFlag(flags, USE_RESOLVED) && field.isResolved()) {
 					getTypeSignatureLabel(new BindingKey(field.getKey()).internalToSignature(), flags, buf);
@@ -787,6 +829,20 @@ public class JavaElementLabels {
 	 * @param buf The buffer to append the resulting label to.
 	 */		
 	public static void getTypeLabel(IType type, long flags, StringBuffer buf) {
+		
+		// category
+		if (getFlag(flags, T_CATEGORY) && type.exists()) {
+			try {
+				String[] categories= type.getCategories();
+				if (categories.length > 0) {
+					buf.append(categories[0]);
+					buf.append(CONCAT_STRING);
+				}
+			} catch (JavaModelException e) {
+				// ignore
+			}
+		}
+		
 		if (getFlag(flags, T_FULLY_QUALIFIED)) {
 			IPackageFragment pack= type.getPackageFragment();
 			if (!pack.isDefaultPackage()) {

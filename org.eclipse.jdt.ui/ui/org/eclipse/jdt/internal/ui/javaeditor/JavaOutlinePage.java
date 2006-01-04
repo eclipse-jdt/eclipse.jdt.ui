@@ -575,6 +575,9 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 							if ((change & IJavaElementDelta.F_CONTENT) != 0)
 								updateItem(item, affectedElement);
 
+							if ((change & IJavaElementDelta.F_CATEGORIES) != 0)
+								updateItem(item, affectedElement);
+
 							if ((change & IJavaElementDelta.F_CHILDREN) != 0)
 								update(item, affectedDelta);
 
@@ -1056,7 +1059,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		Tree tree= new Tree(parent, SWT.MULTI);
 
 		AppearanceAwareLabelProvider lprovider= new AppearanceAwareLabelProvider(
-			AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE,
+			AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS |  JavaElementLabels.F_APP_TYPE_SIGNATURE | JavaElementLabels.ALL_CATEGORY,
 			AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS
 		);
 

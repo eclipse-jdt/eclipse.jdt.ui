@@ -172,7 +172,16 @@ public class PreferenceConstants {
 	 * @since 3.0
 	 */
 	public static final String APPEARANCE_ENABLE_VISIBILITY_SORT_ORDER= "org.eclipse.jdt.ui.enable.visibility.order"; //$NON-NLS-1$
-	
+
+	/**
+	 * A named preference that controls category rendering of Java elements in the UI.
+	 * <p>
+	 * Value is of type <code>Boolean</code>: if <code>true</code> category is rendered
+	 * </p>
+	 * @since 3.2
+	 */
+	public static final String APPEARANCE_CATEGORY= "org.eclipse.jdt.ui.category";//$NON-NLS-1$
+
 	/**
 	 * A named preference that controls if prefix removal during setter/getter generation is turned on or off. 
 	 * <p>
@@ -3333,10 +3342,12 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.LINK_BROWSING_MEMBERS_TO_EDITOR, true);
 
 		store.setDefault(PreferenceConstants.SEARCH_USE_REDUCED_MENU, true);
+		
 		// AppearancePreferencePage
 		store.setDefault(PreferenceConstants.APPEARANCE_COMPRESS_PACKAGE_NAMES, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_METHOD_RETURNTYPE, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_METHOD_TYPEPARAMETERS, true);
+		store.setDefault(PreferenceConstants.APPEARANCE_CATEGORY, true);
 		store.setDefault(PreferenceConstants.SHOW_CU_CHILDREN, true);
 		store.setDefault(PreferenceConstants.BROWSING_STACK_VERTICALLY, false);
 		store.setDefault(PreferenceConstants.APPEARANCE_PKG_NAME_PATTERN_FOR_PKG_VIEW, ""); //$NON-NLS-1$

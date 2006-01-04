@@ -969,7 +969,7 @@ public class PackageExplorerPart extends ViewPart
 	
 	private PackageExplorerLabelProvider createLabelProvider() {
 		if (showProjects()) 
-			return new PackageExplorerLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED,
+			return new PackageExplorerLabelProvider(AppearanceAwareLabelProvider.DEFAULT_TEXTFLAGS | JavaElementLabels.P_COMPRESSED | JavaElementLabels.ALL_CATEGORY,
 				AppearanceAwareLabelProvider.DEFAULT_IMAGEFLAGS | JavaElementImageProvider.SMALL_ICONS,
 				fContentProvider);
 		else
