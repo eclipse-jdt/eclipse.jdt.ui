@@ -89,7 +89,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider {
 	
 	/**
 	 * Gets the image flags.
-	 * Can be overwriten by super classes.
+	 * Can be overwritten by super classes.
 	 * @return Returns a int
 	 */
 	public final int getImageFlags() {
@@ -106,7 +106,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider {
 	
 	/**
 	 * Evaluates the image flags for a element.
-	 * Can be overwriten by super classes.
+	 * Can be overwritten by super classes.
 	 * @return Returns a int
 	 */
 	protected int evaluateImageFlags(Object element) {
@@ -114,7 +114,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider {
 	}
 
 	/**
-	 * Evaluates the text flags for a element. Can be overwriten by super classes.
+	 * Evaluates the text flags for a element. Can be overwritten by super classes.
 	 * @return Returns a int
 	 */
 	protected long evaluateTextFlags(Object element) {
