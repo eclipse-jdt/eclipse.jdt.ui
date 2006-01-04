@@ -45,7 +45,6 @@ public class ReorgMoveAction extends SelectionDispatchAction {
 		super(site);
 		setText(ReorgMessages.ReorgMoveAction_3); 
 		setDescription(ReorgMessages.ReorgMoveAction_4); 
-		update(getSelection());
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.MOVE_ACTION);
 	}
 

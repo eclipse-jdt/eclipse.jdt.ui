@@ -47,7 +47,6 @@ public class ReorgCopyAction extends SelectionDispatchAction {
 		setText(ReorgMessages.ReorgCopyAction_3); 
 		setDescription(ReorgMessages.ReorgCopyAction_4); 
 
-		update(getSelection());
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.COPY_ACTION);
 	}
 
