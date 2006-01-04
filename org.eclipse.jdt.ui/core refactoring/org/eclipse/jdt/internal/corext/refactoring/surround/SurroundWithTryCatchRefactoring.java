@@ -50,7 +50,10 @@ import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.TryStatement;
@@ -248,12 +251,26 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			if (node instanceof VariableDeclarationStatement && variableDeclarations.contains(node)) {
 				AST ast= getAST();
 				VariableDeclarationStatement statement= (VariableDeclarationStatement)node;
-				// Create a copy and remove the initalizers
+				// Create a copy and remove the initializer
 				VariableDeclarationStatement copy= (VariableDeclarationStatement)ASTNode.copySubtree(ast, statement);
+				List modifiers= copy.modifiers();
+				for (Iterator iter= modifiers.iterator(); iter.hasNext();) {
+					IExtendedModifier modifier= (IExtendedModifier) iter.next();
+					if (modifier.isModifier() && Modifier.isFinal(((Modifier)modifier).getKeyword().toFlagValue())) {
+						iter.remove();
+					}
+				}
 				List fragments= copy.fragments();
-				for (Iterator iter= fragments.iterator(); iter.hasNext();) {
+				for (Iterator iter= fragments.iterator(), original= statement.fragments().iterator(); iter.hasNext();) {
 					VariableDeclarationFragment fragment= (VariableDeclarationFragment)iter.next();
-					fragment.setInitializer(null);
+					IVariableBinding binding= ((VariableDeclarationFragment)original.next()).resolveBinding();
+					// If we want to initialize the new local then we should do a flow analysis upfront
+					// to decide if the first access is a read or write.
+					if (true /* binding == null */) {
+						fragment.setInitializer(null);
+					} else {
+						fragment.setInitializer(ASTNodeFactory.newDefaultExpression(ast, binding.getType()));
+					}
 				}
 				CompilationUnit root= (CompilationUnit)statement.getRoot();
 				int extendedStart= root.getExtendedStartPosition(statement);

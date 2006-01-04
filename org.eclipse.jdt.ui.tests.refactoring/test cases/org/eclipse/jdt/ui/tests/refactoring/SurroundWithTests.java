@@ -135,6 +135,10 @@ public class SurroundWithTests extends AbstractSelectionTestCase {
 		tryCatchTest();
 	}
 	
+	public void testWrappedLocal8() throws Exception {
+		tryCatchTest();
+	}
+	
 	public void testInitializerThrowsException() throws Exception {
 		tryCatchTest();
 	}
