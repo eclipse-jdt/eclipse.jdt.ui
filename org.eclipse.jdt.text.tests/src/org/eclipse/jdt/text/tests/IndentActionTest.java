@@ -24,6 +24,8 @@ import org.eclipse.jdt.internal.ui.actions.IndentAction;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 import org.eclipse.jdt.text.tests.performance.ResourceTestHelper;
@@ -53,6 +55,7 @@ public class IndentActionTest extends TestCase {
 			super.setUp();
 			
 			fJavaProject= EditorTestHelper.createJavaProject(PROJECT, "testResources/indentation");
+			fJavaProject.setOption(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, JavaCore.TAB);
 		}
 
 		protected void tearDown () throws Exception {
