@@ -150,12 +150,6 @@ public class UserLibraryWizardPage extends NewElementWizardPage implements IClas
 					}
 				} else if (list.size() == 1) {
 					fEditResult= (CPUserLibraryElement) list.get(0);
-				} else {
-					if (fEditResult != null) {
-						fLibrarySelector.setCheckedWithoutUpdate(fEditResult, true);
-					} else {
-						fEditResult= null;
-					}
 				}
 			}
 			updateStatus(validateSetting(list));
