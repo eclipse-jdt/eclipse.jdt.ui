@@ -1192,7 +1192,7 @@ public class PackageExplorerPart extends ViewPart
 		if (!(s instanceof IStructuredSelection))
 			return s;
 			
-		Object[] elements= ((StructuredSelection)s).toArray();
+		Object[] elements= ((IStructuredSelection)s).toArray();
 				
 		for (int i= 0; i < elements.length; i++) 
 			elements[i]= convertElement(elements[i]);

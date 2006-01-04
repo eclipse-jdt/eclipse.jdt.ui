@@ -31,7 +31,6 @@ import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
@@ -219,7 +218,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		}
 
 		private void initializeRefactoring() {
-			StructuredSelection ss= (StructuredSelection)fTableViewer.getSelection();
+			IStructuredSelection ss= (IStructuredSelection)fTableViewer.getSelection();
 			((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().setSuperType((IType)ss.getFirstElement());
 		}
 	

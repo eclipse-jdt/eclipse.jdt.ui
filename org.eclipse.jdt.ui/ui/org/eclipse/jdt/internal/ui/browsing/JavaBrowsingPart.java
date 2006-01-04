@@ -1064,10 +1064,10 @@ abstract class JavaBrowsingPart extends ViewPart implements IMenuListener, ISele
 
 
 	protected final Object getSingleElementFromSelection(ISelection selection) {
-		if (!(selection instanceof StructuredSelection) || selection.isEmpty())
+		if (!(selection instanceof IStructuredSelection) || selection.isEmpty())
 			return null;
 
-		Iterator iter= ((StructuredSelection)selection).iterator();
+		Iterator iter= ((IStructuredSelection)selection).iterator();
 		Object firstElement= iter.next();
 		if (!(firstElement instanceof IJavaElement)) {
 			if (firstElement instanceof IMarker)
