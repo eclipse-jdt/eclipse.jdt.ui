@@ -19,10 +19,9 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.TextUtilities;
-import org.eclipse.jface.text.contentassist.ICompletionProposalComputer;
-import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 import org.eclipse.jface.text.templates.TemplateContextType;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -31,8 +30,10 @@ import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateEngine;
@@ -42,7 +43,7 @@ import org.eclipse.jdt.internal.ui.text.template.contentassist.TemplateProposal;
  * 
  * @since 3.2
  */
-public final class TemplateCompletionProposalComputer implements ICompletionProposalComputer {
+public final class TemplateCompletionProposalComputer implements IJavaCompletionProposalComputer {
 	
 	private final TemplateEngine fJavaTemplateEngine;
 	private final TemplateEngine fJavadocTemplateEngine;
@@ -71,7 +72,7 @@ public final class TemplateCompletionProposalComputer implements ICompletionProp
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeCompletionProposals(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		TemplateEngine engine;
 		try {
 			String partition= TextUtilities.getContentType(context.getDocument(), IJavaPartitions.JAVA_PARTITIONING, context.getInvocationOffset(), true);
@@ -134,7 +135,7 @@ public final class TemplateCompletionProposalComputer implements ICompletionProp
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeContextInformation(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		return Collections.EMPTY_LIST;
 	}
 

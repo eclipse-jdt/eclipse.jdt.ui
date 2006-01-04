@@ -27,12 +27,13 @@ import org.eclipse.core.runtime.PerformanceStats;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
+
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.contentassist.ICompletionProposalComputer;
-import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -88,7 +89,7 @@ final class CompletionProposalComputerDescriptor {
 	private final String fId;
 	/** The name of the extension. */
 	private final String fName;
-	/** The class name of the provided <code>ICompletionProposalComputer</code>. */
+	/** The class name of the provided <code>IJavaCompletionProposalComputer</code>. */
 	private final String fClass;
 	/** The activate attribute value. */
 	private final boolean fActivate;
@@ -99,7 +100,7 @@ final class CompletionProposalComputerDescriptor {
 	/** The registry we are registered with. */
 	private final CompletionProposalComputerRegistry fRegistry;
 	/** The computer, if instantiated, <code>null</code> otherwise. */
-	private ICompletionProposalComputer fComputer;
+	private IJavaCompletionProposalComputer fComputer;
 	/** The ui category. */
 	private final CompletionProposalCategory fCategory;
 	/** The first error message in the most recent operation, or <code>null</code>. */
@@ -221,7 +222,7 @@ final class CompletionProposalComputerDescriptor {
 	 * @throws InvalidRegistryObjectException if the extension is not
 	 *         valid any longer (e.g. due to plug-in unloading)
 	 */
-	private synchronized ICompletionProposalComputer getComputer() throws CoreException, InvalidRegistryObjectException {
+	private synchronized IJavaCompletionProposalComputer getComputer() throws CoreException, InvalidRegistryObjectException {
 		if (fComputer == null && (fActivate || isPluginLoaded()))
 			fComputer= createComputer();
 		return fComputer;
@@ -242,9 +243,9 @@ final class CompletionProposalComputerDescriptor {
 	 * Returns a new instance of the computer as described in the
 	 * extension's xml. Note that the safest way to access the computer
 	 * is by using the
-	 * {@linkplain #computeCompletionProposals(TextContentAssistInvocationContext, IProgressMonitor) computeCompletionProposals}
+	 * {@linkplain #computeCompletionProposals(ContentAssistInvocationContext, IProgressMonitor) computeCompletionProposals}
 	 * and
-	 * {@linkplain #computeContextInformation(TextContentAssistInvocationContext, IProgressMonitor) computeContextInformation}
+	 * {@linkplain #computeContextInformation(ContentAssistInvocationContext, IProgressMonitor) computeContextInformation}
 	 * methods. These delegate the functionality to the contributed
 	 * computer, but handle instance creation and any exceptions thrown.
 	 * 
@@ -254,27 +255,27 @@ final class CompletionProposalComputerDescriptor {
 	 * @throws InvalidRegistryObjectException if the extension is not
 	 *         valid any longer (e.g. due to plug-in unloading)
 	 */
-	public ICompletionProposalComputer createComputer() throws CoreException, InvalidRegistryObjectException {
-		return (ICompletionProposalComputer) fElement.createExecutableExtension(CLASS);
+	public IJavaCompletionProposalComputer createComputer() throws CoreException, InvalidRegistryObjectException {
+		return (IJavaCompletionProposalComputer) fElement.createExecutableExtension(CLASS);
 	}
 	
 	/**
 	 * Safely computes completion proposals through the described extension. If the extension
 	 * is disabled, throws an exception or otherwise does not adhere to the contract described in
-	 * {@link ICompletionProposalComputer}, an empty list is returned.
+	 * {@link IJavaCompletionProposalComputer}, an empty list is returned.
 	 * 
 	 * @param context the invocation context passed on to the extension
 	 * @param monitor the progress monitor passed on to the extension
 	 * @return the list of computed completion proposals (element type:
 	 *         {@link org.eclipse.jface.text.contentassist.ICompletionProposal})
 	 */
-	public List computeCompletionProposals(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (!isEnabled())
 			return Collections.EMPTY_LIST;
 		
 		IStatus status;
 		try {
-			ICompletionProposalComputer computer= getComputer();
+			IJavaCompletionProposalComputer computer= getComputer();
 			
 			PerformanceStats stats= startMeter(context, computer);
 			List proposals= computer.computeCompletionProposals(context, monitor);
@@ -304,20 +305,20 @@ final class CompletionProposalComputerDescriptor {
 	/**
 	 * Safely computes context information objects through the described extension. If the extension
 	 * is disabled, throws an exception or otherwise does not adhere to the contract described in
-	 * {@link ICompletionProposalComputer}, an empty list is returned.
+	 * {@link IJavaCompletionProposalComputer}, an empty list is returned.
 	 * 
 	 * @param context the invocation context passed on to the extension
 	 * @param monitor the progress monitor passed on to the extension
 	 * @return the list of computed context information objects (element type:
 	 *         {@link org.eclipse.jface.text.contentassist.IContextInformation})
 	 */
-	public List computeContextInformation(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (!isEnabled())
 			return Collections.EMPTY_LIST;
 		
 		IStatus status;
 		try {
-			ICompletionProposalComputer computer= getComputer();
+			IJavaCompletionProposalComputer computer= getComputer();
 			
 			PerformanceStats stats= startMeter(context, computer);
 			List proposals= computer.computeContextInformation(context, monitor);
@@ -355,7 +356,7 @@ final class CompletionProposalComputerDescriptor {
 		}
 	}
 
-	private PerformanceStats startMeter(TextContentAssistInvocationContext context, ICompletionProposalComputer computer) {
+	private PerformanceStats startMeter(ContentAssistInvocationContext context, IJavaCompletionProposalComputer computer) {
 		final PerformanceStats stats;
 		if (MEASURE_PERFORMANCE) {
 			stats= PerformanceStats.getStats(PERFORMANCE_EVENT, computer);

@@ -23,16 +23,17 @@ import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.graphics.Point;
 
-import org.eclipse.jface.text.contentassist.ICompletionProposalComputer;
+
 import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -40,7 +41,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Java doc completion processor using contributed IJavaDocCompletionProcessor's
  * to evaluate proposals.
  */
-public class LegacyJavadocCompletionProposalComputer implements ICompletionProposalComputer {
+public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionProposalComputer {
 
 	private static final String PROCESSOR_CONTRIBUTION_ID= "javadocCompletionProcessor"; //$NON-NLS-1$
 
@@ -74,7 +75,7 @@ public class LegacyJavadocCompletionProposalComputer implements ICompletionPropo
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeContextInformation(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		fErrorMessage= null;
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
@@ -106,7 +107,7 @@ public class LegacyJavadocCompletionProposalComputer implements ICompletionPropo
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeCompletionProposals(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		fErrorMessage= null;
 		if (context instanceof JavadocContentAssistInvocationContext) {
 			JavadocContentAssistInvocationContext javaContext= (JavadocContentAssistInvocationContext) context;

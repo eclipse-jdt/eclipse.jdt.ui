@@ -26,7 +26,6 @@ import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension3;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 
 import org.eclipse.ui.IEditorPart;
 
@@ -35,6 +34,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
 /**
  * Java completion processor.
@@ -110,13 +110,13 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor#filterAndSort(java.util.List, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	protected List filterAndSortProposals(List proposals, IProgressMonitor monitor, TextContentAssistInvocationContext context) {
+	protected List filterAndSortProposals(List proposals, IProgressMonitor monitor, ContentAssistInvocationContext context) {
 		filter(proposals, context);
 		Collections.sort(proposals, fComparator);
 		return proposals;
 	}
 
-	private void filter(List proposals, TextContentAssistInvocationContext context) {
+	private void filter(List proposals, ContentAssistInvocationContext context) {
 
 		/*
 		 * TODO filtering is hard if the subjects come from multiple,
@@ -229,7 +229,7 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor#createContext(org.eclipse.jface.text.ITextViewer, int)
 	 */
-	protected TextContentAssistInvocationContext createContext(ITextViewer viewer, int offset) {
+	protected ContentAssistInvocationContext createContext(ITextViewer viewer, int offset) {
 		return new JavaContentAssistInvocationContext(viewer, offset, fEditor);
 	}
 }

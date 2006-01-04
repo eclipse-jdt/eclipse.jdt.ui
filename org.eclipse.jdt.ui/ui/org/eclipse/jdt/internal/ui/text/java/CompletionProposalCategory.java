@@ -27,8 +27,10 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
-import org.eclipse.jface.text.contentassist.ICompletionProposalComputer;
-import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
+
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -232,7 +234,7 @@ public final class CompletionProposalCategory {
 	/**
 	 * Safely computes completion proposals of all computers of this category through their
 	 * extension. If an extension is disabled, throws an exception or otherwise does not adhere to
-	 * the contract described in {@link ICompletionProposalComputer}, it is disabled.
+	 * the contract described in {@link IJavaCompletionProposalComputer}, it is disabled.
 	 * 
 	 * @param context the invocation context passed on to the extension
 	 * @param partition the partition type where to invocation occurred
@@ -240,7 +242,7 @@ public final class CompletionProposalCategory {
 	 * @return the list of computed completion proposals (element type:
 	 *         {@link org.eclipse.jface.text.contentassist.ICompletionProposal})
 	 */
-	public List computeCompletionProposals(TextContentAssistInvocationContext context, String partition, SubProgressMonitor monitor) {
+	public List computeCompletionProposals(ContentAssistInvocationContext context, String partition, SubProgressMonitor monitor) {
 		fLastError= null;
 		List result= new ArrayList();
 		List descriptors= new ArrayList(fRegistry.getProposalComputerDescriptors(partition));
@@ -257,7 +259,7 @@ public final class CompletionProposalCategory {
 	/**
 	 * Safely computes context information objects of all computers of this category through their
 	 * extension. If an extension is disabled, throws an exception or otherwise does not adhere to
-	 * the contract described in {@link ICompletionProposalComputer}, it is disabled.
+	 * the contract described in {@link IJavaCompletionProposalComputer}, it is disabled.
 	 * 
 	 * @param context the invocation context passed on to the extension
 	 * @param partition the partition type where to invocation occurred
@@ -265,7 +267,7 @@ public final class CompletionProposalCategory {
 	 * @return the list of computed context information objects (element type:
 	 *         {@link org.eclipse.jface.text.contentassist.IContextInformation})
 	 */
-	public List computeContextInformation(TextContentAssistInvocationContext context, String partition, SubProgressMonitor monitor) {
+	public List computeContextInformation(ContentAssistInvocationContext context, String partition, SubProgressMonitor monitor) {
 		fLastError= null;
 		List result= new ArrayList();
 		List descriptors= new ArrayList(fRegistry.getProposalComputerDescriptors(partition));

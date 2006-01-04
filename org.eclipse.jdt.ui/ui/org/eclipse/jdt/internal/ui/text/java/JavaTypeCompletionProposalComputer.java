@@ -16,7 +16,6 @@ import java.util.List;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jface.text.BadLocationException;
-import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IType;
@@ -26,6 +25,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -67,7 +67,7 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeCompletionProposals(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		List types= super.computeCompletionProposals(context, monitor);
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;

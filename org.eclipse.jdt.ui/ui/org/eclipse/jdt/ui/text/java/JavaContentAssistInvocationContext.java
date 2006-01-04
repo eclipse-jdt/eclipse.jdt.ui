@@ -11,7 +11,6 @@
 package org.eclipse.jdt.ui.text.java;
 
 import org.eclipse.jface.text.ITextViewer;
-import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 
 import org.eclipse.ui.IEditorPart;
 
@@ -40,7 +39,7 @@ import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory.RHSHistory;
  * 
  * @since 3.2
  */
-public class JavaContentAssistInvocationContext extends TextContentAssistInvocationContext {
+public class JavaContentAssistInvocationContext extends ContentAssistInvocationContext {
 	private final IEditorPart fEditor;
 	
 	private ICompilationUnit fCU= null;

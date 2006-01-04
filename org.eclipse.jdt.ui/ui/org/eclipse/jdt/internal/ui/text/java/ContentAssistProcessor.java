@@ -34,7 +34,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ICommandService;
@@ -43,11 +42,13 @@ import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
 
 import org.eclipse.jdt.internal.corext.Assert;
 
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
+
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /**
  * A content assist processor that aggregates the proposals of the
- * {@link org.eclipse.jface.text.contentassist.ICompletionProposalComputer}s contributed via the
+ * {@link org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer}s contributed via the
  * <code>org.eclipse.jdt.ui.javaCompletionProposalComputer</code> extension point.
  * <p>
  * Subclasses may extend:
@@ -143,7 +144,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		IProgressMonitor monitor= createProgressMonitor();
 		monitor.beginTask(JavaTextMessages.ContentAssistProcessor_computing_proposals, fCategories.size() + 1);
 
-		TextContentAssistInvocationContext context= createContext(viewer, offset);
+		ContentAssistInvocationContext context= createContext(viewer, offset);
 		
 		monitor.subTask(JavaTextMessages.ContentAssistProcessor_collecting_proposals);
 		List proposals= collectProposals(viewer, offset, monitor, context);
@@ -162,7 +163,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 		fNumberOfComputedResults= 0;
 	}
 
-	private List collectProposals(ITextViewer viewer, int offset, IProgressMonitor monitor, TextContentAssistInvocationContext context) {
+	private List collectProposals(ITextViewer viewer, int offset, IProgressMonitor monitor, ContentAssistInvocationContext context) {
 		List proposals= new ArrayList();
 		List providers= getCategories();
 		for (Iterator it= providers.iterator(); it.hasNext();) {
@@ -187,7 +188,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * @return the list of filtered and sorted proposals, ready for
 	 *         display (element type: {@link ICompletionProposal})
 	 */
-	protected List filterAndSortProposals(List proposals, IProgressMonitor monitor, TextContentAssistInvocationContext context) {
+	protected List filterAndSortProposals(List proposals, IProgressMonitor monitor, ContentAssistInvocationContext context) {
 		return proposals;
 	}
 
@@ -214,7 +215,7 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 
 	private List collectContextInformation(ITextViewer viewer, int offset, IProgressMonitor monitor) {
 		List proposals= new ArrayList();
-		TextContentAssistInvocationContext context= createContext(viewer, offset);
+		ContentAssistInvocationContext context= createContext(viewer, offset);
 		
 		List providers= getCategories();
 		for (Iterator it= providers.iterator(); it.hasNext();) {
@@ -307,8 +308,8 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * @param offset the content assist offset
 	 * @return the context to be passed to the computers
 	 */
-	protected TextContentAssistInvocationContext createContext(ITextViewer viewer, int offset) {
-		return new TextContentAssistInvocationContext(viewer, offset);
+	protected ContentAssistInvocationContext createContext(ITextViewer viewer, int offset) {
+		return new ContentAssistInvocationContext(viewer, offset);
 	}
 
 	private List getCategories() {

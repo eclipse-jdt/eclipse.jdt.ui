@@ -15,12 +15,12 @@ import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
-import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.ui.text.java.IJavadocCompletionProcessor;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 
@@ -56,7 +56,7 @@ public class JavadocCompletionProcessor extends JavaCompletionProcessor {
 	/*
 	 * @see org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor#createContext(org.eclipse.jface.text.ITextViewer, int)
 	 */
-	protected TextContentAssistInvocationContext createContext(ITextViewer viewer, int offset) {
+	protected ContentAssistInvocationContext createContext(ITextViewer viewer, int offset) {
 		return new JavadocContentAssistInvocationContext(viewer, offset, fEditor, fSubProcessorFlags);
 	}
 

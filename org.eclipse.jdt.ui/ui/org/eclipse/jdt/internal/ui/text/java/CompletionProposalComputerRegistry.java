@@ -116,7 +116,7 @@ public final class CompletionProposalComputerRegistry {
 	 * The returned list is read-only and is sorted in the order that the extensions were read in.
 	 * There are no duplicate elements in the returned list. The returned list may change if plug-ins
 	 * are loaded or unloaded while the application is running or if an extension violates the API
-	 * contract of {@link org.eclipse.jface.text.contentassist.ICompletionProposalComputer}. When
+	 * contract of {@link org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer}. When
 	 * computing proposals, it is therefore imperative to copy the returned list before iterating
 	 * over it.
 	 * </p>
@@ -139,7 +139,7 @@ public final class CompletionProposalComputerRegistry {
 	 * The returned list is read-only and is sorted in the order that the extensions were read in.
 	 * There are no duplicate elements in the returned list. The returned list may change if plug-ins
 	 * are loaded or unloaded while the application is running or if an extension violates the API
-	 * contract of {@link org.eclipse.jface.text.contentassist.ICompletionProposalComputer}. When
+	 * contract of {@link org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer}. When
 	 * computing proposals, it is therefore imperative to copy the returned list before iterating
 	 * over it.
 	 * </p>

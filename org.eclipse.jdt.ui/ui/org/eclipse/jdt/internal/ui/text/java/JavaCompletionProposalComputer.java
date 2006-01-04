@@ -29,17 +29,17 @@ import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.ICompletionProposalComputer;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationExtension;
-import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
 
@@ -48,7 +48,7 @@ import org.eclipse.jdt.internal.ui.text.JavaCodeReader;
  * 
  * @since 3.2
  */
-public class JavaCompletionProposalComputer implements ICompletionProposalComputer {
+public class JavaCompletionProposalComputer implements IJavaCompletionProposalComputer {
 
 	private static final class ContextInformationWrapper implements IContextInformation, IContextInformationExtension {
 
@@ -118,7 +118,7 @@ public class JavaCompletionProposalComputer implements ICompletionProposalComput
 		return Character.isJavaIdentifierPart((char) curr) || Character.isJavaIdentifierStart((char) curr);
 	}
 
-	private int guessContextInformationPosition(TextContentAssistInvocationContext context) {
+	private int guessContextInformationPosition(ContentAssistInvocationContext context) {
 		int contextPosition= context.getInvocationOffset();
 
 		IDocument document= context.getDocument();
@@ -173,7 +173,7 @@ public class JavaCompletionProposalComputer implements ICompletionProposalComput
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeContextInformation(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		fErrorMessage= null;
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
@@ -188,7 +188,7 @@ public class JavaCompletionProposalComputer implements ICompletionProposalComput
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeCompletionProposals(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		fErrorMessage= null;
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;

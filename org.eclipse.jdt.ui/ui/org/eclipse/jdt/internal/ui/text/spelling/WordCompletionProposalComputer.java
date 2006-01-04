@@ -18,14 +18,15 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.contentassist.ICompletionProposalComputer;
-import org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -39,7 +40,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.engine.RankedWordProposal;
  *
  * @since 3.0
  */
-public final class WordCompletionProposalComputer implements ICompletionProposalComputer {
+public final class WordCompletionProposalComputer implements IJavaCompletionProposalComputer {
 
 	/** The prefix rank shift */
 	private static final int PREFIX_RANK_SHIFT= 4096;
@@ -47,7 +48,7 @@ public final class WordCompletionProposalComputer implements ICompletionProposal
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeCompletionProposals(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		if (contributes()) {
 			try {
 				IDocument document= context.getDocument();
@@ -107,7 +108,7 @@ public final class WordCompletionProposalComputer implements ICompletionProposal
 	/*
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public List computeContextInformation(TextContentAssistInvocationContext context, IProgressMonitor monitor) {
+	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
 		return Collections.EMPTY_LIST;
 	}
 
