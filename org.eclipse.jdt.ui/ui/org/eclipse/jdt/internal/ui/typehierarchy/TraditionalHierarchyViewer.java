@@ -115,6 +115,8 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 				} else {
 					if (Flags.isInterface(hierarchy.getCachedFlags(input))) {
 						res.add(input);
+					} else if (isAnonymousFromInterface(input)) {
+						res.add(hierarchy.getSuperInterfaces(input)[0]);
 					} else {
 						IType[] roots= hierarchy.getRootClasses();
 						for (int i= 0; i < roots.length; i++) {
@@ -139,7 +141,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 				if (isObject(type)) {
 					for (int i= 0; i < types.length; i++) {
 						IType curr= types[i];
-						if (!isAnonymous(curr)) { // no anonyous classes on 'Object' -> will be children of interface
+						if (!isAnonymousFromInterface(curr)) { // no anonymous classes on 'Object' -> will be children of interface
 							res.add(curr);
 						}
 					}
@@ -167,7 +169,7 @@ public class TraditionalHierarchyViewer extends TypeHierarchyViewer {
 			ITypeHierarchy hierarchy= getHierarchy();
 			if (hierarchy != null) {
 				return hierarchy.getSuperclass(type);
-				// dont handle interfaces
+				// don't handle interfaces
 			}
 			return null;
 		}	

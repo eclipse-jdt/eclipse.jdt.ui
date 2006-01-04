@@ -345,6 +345,10 @@ public abstract class TypeHierarchyContentProvider implements ITreeContentProvid
 		return type.getElementName().length() == 0;
 	}
 	
+	protected final boolean isAnonymousFromInterface(IType type) {
+		return isAnonymous(type) && fTypeHierarchy.getHierarchy().getSuperInterfaces(type).length != 0;
+	}
+	
 	protected final boolean isObject(IType type) {
 		return "Object".equals(type.getElementName()) && type.getDeclaringType() == null && "java.lang".equals(type.getPackageFragment().getElementName());  //$NON-NLS-1$//$NON-NLS-2$
 	}
