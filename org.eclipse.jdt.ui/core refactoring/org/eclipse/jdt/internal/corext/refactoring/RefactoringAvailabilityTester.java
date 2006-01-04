@@ -25,6 +25,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -376,11 +377,13 @@ public final class RefactoringAvailabilityTester {
 	}
 	
 	public static boolean isInferTypeArgumentsAvailable(final IJavaElement element) throws JavaModelException {
-		if (element instanceof IJavaProject) {
+		if (! Checks.isAvailable(element)) {
+			return false;
+		} else if (element instanceof IJavaProject) {
 			IJavaProject project= (IJavaProject) element;
-			IPackageFragmentRoot[] roots= project.getPackageFragmentRoots();
-			for (int i= 0; i < roots.length; i++) {
-				if (roots[i].getKind() == IPackageFragmentRoot.K_SOURCE)
+			IClasspathEntry[] classpathEntries= project.getRawClasspath();
+			for (int i= 0; i < classpathEntries.length; i++) {
+				if (classpathEntries[i].getEntryKind() == IClasspathEntry.CPE_SOURCE)
 					return true;
 			}
 			return false;

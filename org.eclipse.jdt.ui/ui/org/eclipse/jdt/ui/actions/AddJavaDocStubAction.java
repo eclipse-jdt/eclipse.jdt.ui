@@ -194,7 +194,9 @@ public class AddJavaDocStubAction extends SelectionDispatchAction {
 				Object curr= elements.get(i);
 				if (curr instanceof IMethod || curr instanceof IType || curr instanceof IField) {
 					IMember member= (IMember)curr; // limit to methods, types & fields
-
+					if (! member.exists()) {
+						return null;
+					}
 					if (i == 0) {
 						cu= member.getCompilationUnit();
 						if (cu == null) {
