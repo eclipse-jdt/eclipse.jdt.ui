@@ -682,7 +682,7 @@ public class BuildPathsBlock {
 	 * Creates the Java project and sets the configured build path and output location.
 	 * If the project already exists only build paths are updated.
 	 */
-	public static void flush(List classPathEntries, IPath outputLocation, IProgressMonitor monitor) throws CoreException, OperationCanceledException {
+	public static void flush(List classPathEntries, IPath outputLocation, IProgressMonitor monitor) throws CoreException, OperationCanceledException {		
 		if (classPathEntries.isEmpty())
 			return;
 		
@@ -738,38 +738,14 @@ public class BuildPathsBlock {
 				i++;
 				
 				IResource res= entry.getResource();
-				//2 ticks
-				if (res instanceof IFolder) {
-					if (entry.getLinkTarget() != null) {
-						IFolder folder= ((IFolder)res);
-						if (!res.exists()) {
-							if (entry.getOrginalPath() == null) {//it's a new one
-								folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, new SubProgressMonitor(monitor, 2));
-							} else {//it's a rename
-								IPath orginalPath= entry.getOrginalPath();
-								if (orginalPath != null && projPath.isPrefixOf(orginalPath)) {
-									orginalPath= orginalPath.removeFirstSegments(projPath.segmentCount());
-								}
-								IFolder orginalFolder= project.getFolder(orginalPath);
-								orginalFolder.delete(true, new SubProgressMonitor(monitor, 1));
-								folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, new SubProgressMonitor(monitor, 1));
-							}
-						} else if (!entry.getLinkTarget().equals(res.getLocation())) {
-							folder.delete(true, new SubProgressMonitor(monitor, 1));
-							folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, new SubProgressMonitor(monitor, 1));
-						} else {
-							monitor.worked(2);
-						}
-					} else if (!res.exists()) {
-						CoreUtility.createFolder((IFolder)res, true, true, new SubProgressMonitor(monitor, 2));
-					}
+				//1 tick
+				if (res instanceof IFolder && entry.getLinkTarget() == null && !res.exists()) {
+					CoreUtility.createFolder((IFolder)res, true, true, new SubProgressMonitor(monitor, 1));
 				} else {
-					monitor.worked(2);
+					monitor.worked(1);
 				}
-				if (monitor.isCanceled()) {
-					throw new OperationCanceledException();
-				}
-				//2 ticks
+				
+				//3 ticks
 				if (entry.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
 					IPath folderOutput= (IPath) entry.getAttribute(CPListElement.OUTPUT);
 					if (folderOutput != null && folderOutput.segmentCount() > 1) {
@@ -781,7 +757,7 @@ public class BuildPathsBlock {
 					
 					IPath path= entry.getPath();
 					if (projPath.equals(path)) {
-						monitor.worked(1);
+						monitor.worked(2);
 						continue;	
 					}
 					
@@ -789,24 +765,35 @@ public class BuildPathsBlock {
 						path= path.removeFirstSegments(projPath.segmentCount());
 					}
 					IFolder folder= project.getFolder(path);
-					if (!folder.exists()) {
-						IPath orginalPath= entry.getOrginalPath();
-						if (orginalPath != null && projPath.isPrefixOf(orginalPath)) {
-							orginalPath= orginalPath.removeFirstSegments(projPath.segmentCount());
-						}
-						if (orginalPath == null) {
+					IPath orginalPath= entry.getOrginalPath();
+					if (orginalPath == null) {
+						if (!folder.exists()) {
 							//New source folder needs to be created
-							CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 1));
-						} else {
-							//Source folder was edited, move to new location
-							IFolder orginalFolder= project.getFolder(orginalPath);
-							orginalFolder.move(path, true, true, new SubProgressMonitor(monitor, 1));
+							if (entry.getLinkTarget() == null) {
+								CoreUtility.createFolder(folder, true, true, new SubProgressMonitor(monitor, 2));
+							} else {
+								folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, new SubProgressMonitor(monitor, 2));
+							}
 						}
 					} else {
-						monitor.worked(1);
+						if (projPath.isPrefixOf(orginalPath)) {
+							orginalPath= orginalPath.removeFirstSegments(projPath.segmentCount());
+						}
+						IFolder orginalFolder= project.getFolder(orginalPath);
+						if (entry.getLinkTarget() == null) {
+							if (!folder.exists()) {
+								//Source folder was edited, move to new location
+								orginalFolder.move(path, true, true, new SubProgressMonitor(monitor, 2));
+							}
+						} else {
+							if (!folder.exists() || !entry.getLinkTarget().equals(entry.getOrginalLinkTarget())) {
+								orginalFolder.delete(true, new SubProgressMonitor(monitor, 1));
+								folder.createLink(entry.getLinkTarget(), IResource.ALLOW_MISSING_LOCAL, new SubProgressMonitor(monitor, 1));
+							}
+						}
 					}
 				} else {
-					monitor.worked(2);
+					monitor.worked(3);
 				}
 				if (monitor.isCanceled()) {
 					throw new OperationCanceledException();

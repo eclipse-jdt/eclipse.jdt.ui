@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.wizards.buildpaths;
 
+import java.io.File;
 import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
@@ -35,8 +36,10 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.DirectoryDialog;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.ILabelProvider;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.ViewerFilter;
@@ -50,6 +53,8 @@ import org.eclipse.ui.model.WorkbenchLabelProvider;
 
 import org.eclipse.ui.views.navigator.ResourceSorter;
 
+import org.eclipse.ui.ide.dialogs.PathVariableSelectionDialog;
+
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaModelStatus;
 import org.eclipse.jdt.core.IJavaProject;
@@ -57,10 +62,12 @@ import org.eclipse.jdt.core.JavaConventions;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.wizards.NewElementWizardPage;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.TypedElementSelectionValidator;
@@ -74,17 +81,120 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringButtonDialogField;
 
 
 public class AddSourceFolderWizardPage extends NewElementWizardPage {
+	
+	private final class LinkFields implements IStringButtonAdapter, IDialogFieldListener{
+		private StringButtonDialogField fLinkLocation;
+		
+		private static final String DIALOGSTORE_LAST_EXTERNAL_LOC= JavaUI.ID_PLUGIN + ".last.external.project"; //$NON-NLS-1$
+
+		private RootFieldAdapter fAdapter;
+
+		private SelectionButtonDialogField fVariables;
+		
+		public LinkFields() {
+			fLinkLocation= new StringButtonDialogField(this);
+			
+			fLinkLocation.setLabelText(NewWizardMessages.LinkFolderDialog_dependenciesGroup_locationLabel_desc); 
+			fLinkLocation.setButtonLabel(NewWizardMessages.LinkFolderDialog_dependenciesGroup_browseButton_desc); 
+			fLinkLocation.setDialogFieldListener(this);
+			
+			fVariables= new SelectionButtonDialogField(SWT.PUSH);
+			fVariables.setLabelText(NewWizardMessages.LinkFolderDialog_dependenciesGroup_variables_desc); 
+			fVariables.setDialogFieldListener(new IDialogFieldListener() {
+				public void dialogFieldChanged(DialogField field) {
+					handleVariablesButtonPressed();
+				}
+			});
+		}
+		
+		public void setDialogFieldListener(RootFieldAdapter adapter) {
+			fAdapter= adapter;
+		}
+		
+		private void doFillIntoGrid(Composite parent, int numColumns) {
+			fLinkLocation.doFillIntoGrid(parent, numColumns);
+			
+			LayoutUtil.setHorizontalSpan(fLinkLocation.getLabelControl(null), numColumns);
+			LayoutUtil.setHorizontalGrabbing(fLinkLocation.getTextControl(null));
+			
+			fVariables.doFillIntoGrid(parent, 1);
+		}
+		
+		public IPath getLinkTarget() {
+			return Path.fromOSString(fLinkLocation.getText());
+		}
+		
+		public void setLinkTarget(IPath path) {
+			fLinkLocation.setText(path.toOSString());
+		}
+		
+		/*(non-Javadoc)
+		 * @see org.eclipse.jdt.internal.ui.wizards.dialogfields.IStringButtonAdapter#changeControlPressed(org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField)
+		 */
+		public void changeControlPressed(DialogField field) {
+			final DirectoryDialog dialog= new DirectoryDialog(getShell());
+			dialog.setMessage(NewWizardMessages.JavaProjectWizardFirstPage_directory_message); 
+			String directoryName = fLinkLocation.getText().trim();
+			if (directoryName.length() == 0) {
+				String prevLocation= JavaPlugin.getDefault().getDialogSettings().get(DIALOGSTORE_LAST_EXTERNAL_LOC);
+				if (prevLocation != null) {
+					directoryName= prevLocation;
+				}
+			}
+			
+			if (directoryName.length() > 0) {
+				final File path = new File(directoryName);
+				if (path.exists())
+					dialog.setFilterPath(directoryName);
+			}
+			final String selectedDirectory = dialog.open();
+			if (selectedDirectory != null) {
+				fLinkLocation.setText(selectedDirectory);
+				fRootDialogField.setText(selectedDirectory.substring(selectedDirectory.lastIndexOf(File.separatorChar) + 1));
+				JavaPlugin.getDefault().getDialogSettings().put(DIALOGSTORE_LAST_EXTERNAL_LOC, selectedDirectory);
+				if (fAdapter != null) {
+					fAdapter.dialogFieldChanged(fRootDialogField);
+				}
+			}
+		}
+		
+		/**
+		 * Opens a path variable selection dialog
+		 */
+		private void handleVariablesButtonPressed() {
+			int variableTypes = IResource.FOLDER;
+			PathVariableSelectionDialog dialog = new PathVariableSelectionDialog(getShell(), variableTypes);
+			if (dialog.open() == IDialogConstants.OK_ID) {
+				String[] variableNames = (String[]) dialog.getResult();
+				if (variableNames != null && variableNames.length == 1) {
+					fLinkLocation.setText(variableNames[0]);
+					fRootDialogField.setText(variableNames[0]);	
+					if (fAdapter != null) {
+						fAdapter.dialogFieldChanged(fRootDialogField);
+					}
+				}
+			}
+		}
+		
+		public void dialogFieldChanged(DialogField field) {
+			if (fAdapter != null) {
+				fAdapter.dialogFieldChanged(fLinkLocation);
+			}
+		}
+	}
 		
 	private static final String PAGE_NAME= "NewSourceFolderWizardPage"; //$NON-NLS-1$
 
 	private final StringButtonDialogField fRootDialogField;
 	private final SelectionButtonDialogField fExcludeInOthersFields;
 	private final SelectionButtonDialogField fReplaceExistingField;
+	private final LinkFields fLinkFields;
 	
 	private final CPListElement fNewElement;
 	private final List/*<CPListElement>*/ fExistingEntries;
 	private final Hashtable/*<CPListElement, IPath[]>*/ fOrginalExlusionFilters, fOrginalInclusionFilters;
 	private final IPath fOrginalPath;
+	private final boolean fLinkedMode;
 	
 	private IPath fOutputLocation;
 	private IPath fNewOutputLocation;
@@ -93,9 +203,11 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 	private List fModifiedElements;
 	private List fRemovedElements;
 	
-	public AddSourceFolderWizardPage(CPListElement newElement, List/*<CPListElement>*/ existingEntries, IPath outputLocation) {
+	public AddSourceFolderWizardPage(CPListElement newElement, List/*<CPListElement>*/ existingEntries, IPath outputLocation, boolean linkedMode) {
 		super(PAGE_NAME);
 		
+		fLinkedMode= linkedMode;
+				
 		fOrginalExlusionFilters= new Hashtable();
 		fOrginalInclusionFilters= new Hashtable();
 		for (Iterator iter= existingEntries.iterator(); iter.hasNext();) {
@@ -145,10 +257,16 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		fReplaceExistingField= new SelectionButtonDialogField(SWT.CHECK);
 		fReplaceExistingField.setLabelText(NewWizardMessages.NewSourceFolderWizardPage_ReplaceExistingSourceFolder_label); 
 		fReplaceExistingField.setEnabled(fOrginalPath == null);
-
+		
+		fLinkFields= new LinkFields();
+		if (fNewElement.getLinkTarget() != null) {
+			fLinkFields.setLinkTarget(fNewElement.getLinkTarget());
+		}
+		
 		fReplaceExistingField.setDialogFieldListener(adapter);
 		fExcludeInOthersFields.setDialogFieldListener(adapter);
 		fRootDialogField.setDialogFieldListener(adapter);
+		fLinkFields.setDialogFieldListener(adapter);
 		
 		packRootDialogFieldChanged();
 	}
@@ -164,15 +282,18 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		Composite composite= new Composite(parent, SWT.NONE);
 			
 		GridLayout layout= new GridLayout();
-		layout.numColumns= 3;
+		layout.numColumns= 4;
 		composite.setLayout(layout);
-				
-		fRootDialogField.doFillIntoGrid(composite, 3);
-		fExcludeInOthersFields.doFillIntoGrid(composite, 3);
-		fReplaceExistingField.doFillIntoGrid(composite, 3);
 		
-		int maxFieldWidth= convertWidthInCharsToPixels(40);
-		LayoutUtil.setWidthHint(fRootDialogField.getTextControl(null), maxFieldWidth);	
+		if (fLinkedMode)
+			fLinkFields.doFillIntoGrid(composite, layout.numColumns);
+		
+		fRootDialogField.doFillIntoGrid(composite, layout.numColumns);
+		fExcludeInOthersFields.doFillIntoGrid(composite, layout.numColumns);
+		fReplaceExistingField.doFillIntoGrid(composite, layout.numColumns);
+		
+		LayoutUtil.setHorizontalSpan(fRootDialogField.getLabelControl(null), layout.numColumns);
+		LayoutUtil.setHorizontalGrabbing(fRootDialogField.getTextControl(null));
 			
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
@@ -213,7 +334,7 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 			if (folder != null) {
 				setFolderDialogText(folder.getFullPath());
 			}
-		} 
+		}
 	}
 
 	private void setFolderDialogText(IPath path) {
@@ -264,6 +385,9 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		updateFilters(fNewElement.getPath(), path);
 		
 		fNewElement.setPath(path);
+		if (fLinkedMode) {
+			fNewElement.setLinkTarget(fLinkFields.getLinkTarget());
+		}
 		fRemovedElements.clear();
 		Set modified= new HashSet();				
 		if (fExcludeInOthersFields.isEnabled() && fExcludeInOthersFields.isSelected()) {

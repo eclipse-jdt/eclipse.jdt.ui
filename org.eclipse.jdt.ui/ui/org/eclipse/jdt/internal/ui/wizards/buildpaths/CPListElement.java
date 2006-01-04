@@ -63,7 +63,7 @@ public class CPListElement {
 		
 	private IClasspathEntry fCachedEntry;
 	private ArrayList fChildren;
-	private IPath fLinkTarget;
+	private IPath fLinkTarget, fOrginalLinkTarget;
 	
 	public CPListElement(IJavaProject project, int entryKind, IPath path, IResource res) {
 		this(null, project, entryKind, path, res);
@@ -84,6 +84,7 @@ public class CPListElement {
 		fPath= path;
 		fOrginalPath= path;
 		fLinkTarget= linkTarget;
+		fOrginalLinkTarget= linkTarget;
 		fChildren= new ArrayList();
 		fResource= res;
 		fIsExported= false;
@@ -569,9 +570,8 @@ public class CPListElement {
 		if (getLinkTarget() == null) {
 			appendEncodePath(fPath, buf).append(';');
 		} else {
-			appendEncodePath(getLinkTarget(), buf);
-			buf.append(':').append(getResource().getName());
-			buf.append(';');
+			appendEncodePath(fPath, buf).append('-').append('>');
+			appendEncodePath(getLinkTarget(), buf).append(';');
 		}
 		buf.append(Boolean.valueOf(fIsExported)).append(';');
 		for (int i= 0; i < fChildren.size(); i++) {
@@ -604,6 +604,11 @@ public class CPListElement {
 	public void setPath(IPath path) {
 		fCachedEntry= null;
 		fPath= path;
+	}
+	
+	public void setLinkTarget(IPath linkTarget) {
+		fCachedEntry= null;
+		fLinkTarget= linkTarget;
 	}
 
 	public static void insert(CPListElement element, List cpList) {
@@ -658,6 +663,10 @@ public class CPListElement {
 
 	public IPath getOrginalPath() {
 		return fOrginalPath;
+	}
+
+	public IPath getOrginalLinkTarget() {
+		return fOrginalLinkTarget;
 	}
 
 }

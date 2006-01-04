@@ -11,17 +11,24 @@
 package org.eclipse.jdt.internal.corext.buildpath;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.resources.IResource;
+
+import org.eclipse.jface.viewers.StructuredSelection;
+
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathModifierQueries.ILinkToQuery;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.GenerateBuildPathActionGroup.AddLinkedSourceFolderAction;
 
 /**
  * Operation create a link to a source folder.
@@ -30,7 +37,10 @@ import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.ClasspathMod
  */
 public class LinkedSourceFolderOperation extends ClasspathModifierOperation {
 
-    /**
+    private IClasspathModifierListener fListener;
+	private IClasspathInformationProvider fCPInformationProvider;
+
+	/**
      * Constructor
      * 
      * @param listener a <code>IClasspathModifierListener</code> that is notified about 
@@ -43,6 +53,8 @@ public class LinkedSourceFolderOperation extends ClasspathModifierOperation {
      */
     public LinkedSourceFolderOperation(IClasspathModifierListener listener, IClasspathInformationProvider informationProvider) {
         super(listener, informationProvider, NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip, IClasspathInformationProvider.CREATE_LINK); 
+		fListener= listener;
+		fCPInformationProvider= informationProvider;
     }
     
     /**
@@ -54,18 +66,30 @@ public class LinkedSourceFolderOperation extends ClasspathModifierOperation {
      * @param monitor a progress monitor, can be <code>null</code>
      */
     public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-        List result= null;
-        fException= null;
-        try {
-            IJavaProject project= fInformationProvider.getJavaProject();
-            ILinkToQuery query= fInformationProvider.getLinkFolderQuery();
-            result= createLinkedSourceFolder(query, project, monitor);
-        } catch (CoreException e) {
-            fException= e;
-            result= null;
-        }
-        
-        super.handleResult(result, monitor);
+    	AddLinkedSourceFolderAction action= new AddLinkedSourceFolderAction();
+		action.selectionChanged(new StructuredSelection(fCPInformationProvider.getJavaProject()));
+		action.run();
+		IPackageFragmentRoot createdElement= (IPackageFragmentRoot)action.getCreatedElement();
+		if (createdElement == null) {
+			//Wizard was cancled.
+			return;
+		}
+		try {
+			IResource correspondingResource= createdElement.getCorrespondingResource();
+			List result= new ArrayList();
+			result.add(correspondingResource);
+			if (fListener != null) {
+				List entries= action.getCPListElements();
+				fListener.classpathEntryChanged(entries);
+			}
+	        fCPInformationProvider.handleResult(result, null, IClasspathInformationProvider.CREATE_LINK);   
+		} catch (JavaModelException e) {
+			if (monitor == null) {
+				fCPInformationProvider.handleResult(Collections.EMPTY_LIST, e, IClasspathInformationProvider.CREATE_LINK);
+			} else {
+				throw new InvocationTargetException(e);
+			}
+		}
     }
 
     /**

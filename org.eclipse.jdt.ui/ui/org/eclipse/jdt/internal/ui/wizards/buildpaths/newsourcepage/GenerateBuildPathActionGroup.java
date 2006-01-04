@@ -161,7 +161,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     	private IJavaProject fSelectedProject;
 
 		public AddSourceFolderAction() {
-    		setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
+			setText(ActionMessages.OpenNewSourceFolderWizardAction_text2); 
     		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
     		setToolTipText(ActionMessages.OpenNewSourceFolderWizardAction_tooltip); 
     		setImageDescriptor(JavaPluginImages.DESC_TOOL_NEWPACKROOT);
@@ -173,7 +173,44 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		 */
 		protected Wizard createWizard() throws CoreException {
 			CPListElement newEntrie= new CPListElement(fSelectedProject, IClasspathEntry.CPE_SOURCE);
-			fAddSourceFolderWizard= new AddSourceFolderWizard(CPListElement.createFromExisting(fSelectedProject), newEntrie, getOutputLocation(fSelectedProject));
+			fAddSourceFolderWizard= new AddSourceFolderWizard(CPListElement.createFromExisting(fSelectedProject), newEntrie, getOutputLocation(fSelectedProject), false);
+			return fAddSourceFolderWizard;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean selectionChanged(IStructuredSelection selection) {
+			if (selection.size() == 1 && selection.getFirstElement() instanceof IJavaProject) {
+				fSelectedProject= (IJavaProject)selection.getFirstElement();
+				return true;
+			}
+			return false;
+		}
+		
+		public List getCPListElements() {
+			return fAddSourceFolderWizard.getExistingEntries();
+		}
+    }
+    
+    public static class AddLinkedSourceFolderAction extends OpenBuildPathWizardAction {
+    	
+    	private AddSourceFolderWizard fAddSourceFolderWizard;
+    	private IJavaProject fSelectedProject;
+
+		public AddLinkedSourceFolderAction() {
+			setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_label); 
+    		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Link_tooltip);
+    		setImageDescriptor(JavaPluginImages.DESC_ELCL_ADD_LINKED_SOURCE_TO_BUILDPATH);
+    		setDescription(NewWizardMessages.PackageExplorerActionGroup_FormText_createLinkedFolder);
+    	}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		protected Wizard createWizard() throws CoreException {
+			CPListElement newEntrie= new CPListElement(fSelectedProject, IClasspathEntry.CPE_SOURCE);
+			fAddSourceFolderWizard= new AddSourceFolderWizard(CPListElement.createFromExisting(fSelectedProject), newEntrie, getOutputLocation(fSelectedProject), true);
 			return fAddSourceFolderWizard;
 		}
 		
@@ -201,14 +238,10 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     	
 		public EditFilterAction() {
     		setText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_label); 
-    		
-    		setDescription(ActionMessages.OpenNewSourceFolderWizardAction_description); 
-    		
+    		setDescription(NewWizardMessages.PackageExplorerActionGroup_FormText_Edit);
     		setToolTipText(NewWizardMessages.NewSourceContainerWorkbookPage_ToolBar_Edit_tooltip); 
     		setImageDescriptor(JavaPluginImages.DESC_ELCL_CONFIGURE_BUILDPATH_FILTERS);
     		setDisabledImageDescriptor(JavaPluginImages.DESC_DLCL_CONFIGURE_BUILDPATH_FILTERS);
-    		
-//    		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.OPEN_SOURCEFOLDER_WIZARD_ACTION);
     	}
 
 		/**
@@ -328,9 +361,12 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		final EditFilterAction editFilterAction= new EditFilterAction();
 		provider.addSelectionChangedListener(editFilterAction);
 		
+		final AddLinkedSourceFolderAction addLinkedSourceFolderAction= new AddLinkedSourceFolderAction();
+		provider.addSelectionChangedListener(addLinkedSourceFolderAction);
+		
 		final BuildActionSelectionContext context= new BuildActionSelectionContext();
 		fActions= new Action[] {
-				createBuildPathAction(fSite, IClasspathInformationProvider.CREATE_LINK, context),
+				addLinkedSourceFolderAction,
 				addSourceFolderAction,
 				createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_SF_TO_BP, context),
 				createBuildPathAction(fSite, IClasspathInformationProvider.ADD_SEL_LIB_TO_BP, context),
