@@ -1673,6 +1673,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		Expression assigned= null;
 		Expression thenExpression= null;
 		Expression elseExpression= null;
+		
 		ITypeBinding exprBinding= null;
 		if (thenStatement instanceof ReturnStatement && elseStatement instanceof ReturnStatement) {
 			thenExpression= ((ReturnStatement) thenStatement).getExpression();
@@ -1690,7 +1691,7 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 				Assignment assign2= (Assignment) inner2;
 				Expression left1= assign1.getLeftHandSide();
 				Expression left2= assign2.getLeftHandSide();
-				if (left1 instanceof Name && left2 instanceof Name) {
+				if (left1 instanceof Name && left2 instanceof Name && assign1.getOperator() == assign2.getOperator()) {
 					IBinding bind1= ((Name) left1).resolveBinding();
 					IBinding bind2= ((Name) left2).resolveBinding();
 					if (bind1 == bind2 && bind1 instanceof IVariableBinding) {
@@ -1750,6 +1751,8 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			Assignment assignment= ast.newAssignment();
 			assignment.setLeftHandSide((Expression) rewrite.createCopyTarget(assigned));
 			assignment.setRightHandSide(conditionalExpression);
+			assignment.setOperator(((Assignment) assigned.getParent()).getOperator());
+			
 			ExpressionStatement expressionStatement = ast.newExpressionStatement(assignment);
 			rewrite.replace(ifStatement, expressionStatement, null);
 		}
@@ -1766,9 +1769,10 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		return thenReturn;
 	}
 
-	private static Statement createAssignmentStatement(ASTRewrite rewrite, Expression origAssignee, Expression origAssigned) {
+	private static Statement createAssignmentStatement(ASTRewrite rewrite, Assignment.Operator assignmentOperator, Expression origAssignee, Expression origAssigned) {
 		AST ast= rewrite.getAST();
 		Assignment elseAssignment= ast.newAssignment();
+		elseAssignment.setOperator(assignmentOperator);
 		elseAssignment.setLeftHandSide((Expression) rewrite.createCopyTarget(origAssignee));
 		elseAssignment.setRightHandSide((Expression) rewrite.createCopyTarget(origAssigned));
 		ExpressionStatement statement = ast.newExpressionStatement(elseAssignment);
@@ -1814,9 +1818,12 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		IfStatement ifStatement= ast.newIfStatement();
 		ifStatement.setExpression((Expression) rewrite.createCopyTarget(expression));
 		if (locationInParent == Assignment.RIGHT_HAND_SIDE_PROPERTY) {
-			Expression assignee= ((Assignment) covering.getParent()).getLeftHandSide();
-			ifStatement.setThenStatement(createAssignmentStatement(rewrite, assignee, conditional.getThenExpression()));
-			ifStatement.setElseStatement(createAssignmentStatement(rewrite, assignee, conditional.getElseExpression()));
+			Assignment assignment= (Assignment) covering.getParent();
+			Expression assignee= assignment.getLeftHandSide();
+			Assignment.Operator op= assignment.getOperator();
+			
+			ifStatement.setThenStatement(createAssignmentStatement(rewrite, op, assignee, conditional.getThenExpression()));
+			ifStatement.setElseStatement(createAssignmentStatement(rewrite, op, assignee, conditional.getElseExpression()));
 
 			// replace return conditional expression with if/then/else/return
 			rewrite.replace(covering.getParent().getParent(), ifStatement, null);
@@ -1829,9 +1836,11 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 			rewrite.replace(conditional.getParent(), ifStatement, null);
 		} else if (locationInParent == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
 			VariableDeclarationFragment frag= (VariableDeclarationFragment) covering.getParent();
+			Assignment.Operator op= Assignment.Operator.ASSIGN;
+			
 			Expression assignee= frag.getName();
-			ifStatement.setThenStatement(createAssignmentStatement(rewrite, assignee, conditional.getThenExpression()));
-			ifStatement.setElseStatement(createAssignmentStatement(rewrite, assignee, conditional.getElseExpression()));
+			ifStatement.setThenStatement(createAssignmentStatement(rewrite, op, assignee, conditional.getThenExpression()));
+			ifStatement.setElseStatement(createAssignmentStatement(rewrite, op, assignee, conditional.getElseExpression()));
 
 			rewrite.set(frag, VariableDeclarationFragment.INITIALIZER_PROPERTY, null, null); // clear initializer
 

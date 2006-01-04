@@ -1092,7 +1092,46 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 
 	}
+	
+	public void testReplaceAssignConditionWithIf3() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean b) {\n");
+		buf.append("        int i = 42;\n");
+		buf.append("        i += ( b ) ? 1 : 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
+		int offset= buf.toString().indexOf("?");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean b) {\n");
+		buf.append("        int i = 42;\n");
+		buf.append("        if (b)\n");
+		buf.append("            i += 1;\n");
+		buf.append("        else\n");
+		buf.append("            i += 2;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+
+	}
+
+	
+
+	
 
 	public void testReplaceReturnIfWithCondition() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
@@ -1172,7 +1211,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 	
 	
 	
-	public void testReplaceAssignIfWithCondition() throws Exception {
+	public void testReplaceAssignIfWithCondition1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -1209,6 +1248,45 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1});
 
 	}
+	
+	public void testReplaceAssignIfWithCondition2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean b) {\n");
+		buf.append("        int res= 0;\n");
+		buf.append("        if (b) {\n");
+		buf.append("            res -= 2;\n");
+		buf.append("        } else {\n");
+		buf.append("            res -= 3;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		int offset= buf.toString().indexOf("if");
+		AssistContext context= getCorrectionContext(cu, offset, 0);
+		assertNoErrors(context);
+		List proposals= collectAssists(context, false);
+
+		assertCorrectLabels(proposals);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(boolean b) {\n");
+		buf.append("        int res= 0;\n");
+		buf.append("        res -= b ? 2 : 3;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+
+		String expected1= buf.toString();
+
+		assertExpectedExistInProposals(proposals, new String[] {expected1});
+
+	}
+
 	
 	
 	public void testInverseVariable1() throws Exception {
