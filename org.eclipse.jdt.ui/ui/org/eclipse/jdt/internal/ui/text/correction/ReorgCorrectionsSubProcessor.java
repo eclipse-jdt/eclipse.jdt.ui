@@ -112,19 +112,24 @@ public class ReorgCorrectionsSubProcessor {
 		boolean isLinked= cu.getResource().isLinked();
 
 		IBuffer buffer= cu.getBuffer();
-		if (buffer != null) {
-			String currTypeName= buffer.getText(problem.getOffset(), problem.getLength());
+		if (buffer == null) {
+			return;
+		}
 			
-			proposals.add(new CorrectMainTypeNameProposal(cu, context, currTypeName, 5));
-			String newCUName= JavaModelUtil.getRenamedCUName(cu, currTypeName);
-			ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
-			if (!newCU.exists() && !isLinked && !JavaConventions.validateCompilationUnitName(newCUName).matches(IStatus.ERROR)) {
-				RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
-	
-				// rename cu
-				String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renamecu_description, newCUName);
-				proposals.add(new ChangeCorrectionProposal(label, change, 6, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME)));
-			}
+		String currTypeName= buffer.getText(problem.getOffset(), problem.getLength());
+		String newTypeName= JavaCore.removeJavaLikeExtension(cu.getElementName());
+		if (!JavaConventions.validateJavaTypeName(newTypeName).matches(IStatus.ERROR)) {
+			proposals.add(new CorrectMainTypeNameProposal(cu, context, currTypeName, newTypeName, 5));
+		}			
+
+		String newCUName= JavaModelUtil.getRenamedCUName(cu, currTypeName);
+		ICompilationUnit newCU= ((IPackageFragment) (cu.getParent())).getCompilationUnit(newCUName);
+		if (!newCU.exists() && !isLinked && !JavaConventions.validateCompilationUnitName(newCUName).matches(IStatus.ERROR)) {
+			RenameCompilationUnitChange change= new RenameCompilationUnitChange(cu, newCUName);
+
+			// rename CU
+			String label= Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renamecu_description, newCUName);
+			proposals.add(new ChangeCorrectionProposal(label, change, 6, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_RENAME)));
 		}
 	}
 
@@ -132,11 +137,11 @@ public class ReorgCorrectionsSubProcessor {
 		ICompilationUnit cu= context.getCompilationUnit();
 		boolean isLinked= cu.getResource().isLinked();
 
-		// correct pack decl
+		// correct package declaration
 		int relevance= cu.getPackageDeclarations().length == 0 ? 7 : 5; // bug 38357
 		proposals.add(new CorrectPackageDeclarationProposal(cu, problem, relevance));
 
-		// move to pack
+		// move to package
 		IPackageDeclaration[] packDecls= cu.getPackageDeclarations();
 		String newPackName= packDecls.length > 0 ? packDecls[0].getElementName() : ""; //$NON-NLS-1$
 

@@ -16,7 +16,6 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
@@ -32,7 +31,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 /**
  * Renames the primary type to be compatible with the name of the compilation unit.
- * All constructurs and local references to the type are renamed as well.
+ * All constructors and local references to the type are renamed as well.
   */
 public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 
@@ -43,15 +42,15 @@ public class CorrectMainTypeNameProposal extends ASTRewriteCorrectionProposal {
 	/**
 	 * Constructor for CorrectTypeNameProposal.
 	 */
-	public CorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContext context, String oldTypeName, int relevance) {
+	public CorrectMainTypeNameProposal(ICompilationUnit cu, IInvocationContext context, String oldTypeName, String newTypeName, int relevance) {
 		super("", cu, null, relevance, null); //$NON-NLS-1$
 		fContext= context;
-		fNewName= JavaCore.removeJavaLikeExtension(cu.getElementName());
 
-		setDisplayName(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renametype_description, fNewName));
+		setDisplayName(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_renametype_description, newTypeName));
 		setImage(JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
 
 		fOldName= oldTypeName;
+		fNewName= newTypeName;
 	}
 
 	/* (non-Javadoc)
