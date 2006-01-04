@@ -12,6 +12,8 @@ package org.eclipse.jdt.ui.wizards;
 
 import java.lang.reflect.InvocationTargetException;
 
+import org.eclipse.core.filesystem.URIUtil;
+
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.runtime.CoreException;
@@ -300,7 +302,7 @@ public class NewJavaProjectWizardPage extends NewElementWizardPage {
 				try {
 					IPath locationPath= getLocationPath();
 					BuildPathsBlock.createProject(getProjectHandle(), 
-						locationPath != null ? locationPath.toFile().toURI() : null, 
+						locationPath != null ? URIUtil.toURI(locationPath) : null, 
 						new SubProgressMonitor(monitor, 2));
 					BuildPathsBlock.addJavaNature(getProjectHandle(), new SubProgressMonitor(monitor, 2));
 					fBuildPathsBlock.configureJavaProject(new SubProgressMonitor(monitor, 6));

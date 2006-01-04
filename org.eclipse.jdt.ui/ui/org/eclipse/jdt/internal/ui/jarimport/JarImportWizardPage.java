@@ -18,6 +18,8 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.filesystem.URIUtil;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -308,7 +310,7 @@ public final class JarImportWizardPage extends WizardPage {
 					setPageComplete(false);
 					return;
 				}
-				fJarImportData.setRefactoringFileLocation(file.toURI());
+				fJarImportData.setRefactoringFileLocation(URIUtil.toURI(path));
 				ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntryName());
 				if (entry == null) {
 					setMessage(JarImportMessages.JarImportWizardPage_no_refactorings, INFORMATION);

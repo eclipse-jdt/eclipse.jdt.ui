@@ -13,6 +13,8 @@ package org.eclipse.jdt.ui.wizards;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URI;
 
+import org.eclipse.core.filesystem.URIUtil;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -68,7 +70,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * It contains UI to configure a the classpath and the output folder.
 	 * 
 	 * <p>
-	 * After constructing, a call to <code>init</code> is required.
+	 * After constructing, a call to {@link #init(IJavaProject, IPath, IClasspathEntry[], boolean)} is required.
 	 * </p>
 	 */	
 	public JavaCapabilityConfigurationPage() {
@@ -165,7 +167,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	}
 	
 	/**
-	 * Returns the Java project that was passed in <code>init</code> or <code>null</code> if the 
+	 * Returns the Java project that was passed in {@link #init(IJavaProject, IPath, IClasspathEntry[], boolean)} or <code>null</code> if the 
 	 * page has not been initialized yet.
 	 * 
 	 * @return the managed Java project or <code>null</code>
@@ -211,7 +213,7 @@ public class JavaCapabilityConfigurationPage extends NewElementWizardPage {
 	 * @deprecated use {@link #createProject(IProject, URI, IProgressMonitor)} instead.
 	 */
 	public static void createProject(IProject project, IPath locationPath, IProgressMonitor monitor) throws CoreException {
-		createProject(project, locationPath != null ? locationPath.toFile().toURI() : null, monitor);
+		createProject(project, locationPath != null ? URIUtil.toURI(locationPath) : null, monitor);
 	}
 	
 	/**

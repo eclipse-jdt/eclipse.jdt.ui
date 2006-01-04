@@ -26,6 +26,7 @@ import java.util.zip.ZipFile;
 
 import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
+import org.eclipse.core.filesystem.URIUtil;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -295,7 +296,7 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 		if (root.exists(path)) {
 			location= root.getFile(path).getRawLocationURI();
 		} else
-			location= new File(path.toOSString()).toURI();
+			location= URIUtil.toURI(path);
 		return location;
 	}
 
