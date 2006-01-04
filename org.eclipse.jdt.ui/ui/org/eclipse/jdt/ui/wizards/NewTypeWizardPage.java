@@ -93,6 +93,7 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -1795,11 +1796,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				parentCU.becomeWorkingCopy(null, new SubProgressMonitor(monitor, 1)); // cu is now a (primary) working copy
 				connectedCU= parentCU;
 				
-				// use the compiler template with an empty type content to get the imports right
-				String content= CodeGeneration.getCompilationUnitContent(parentCU, getFileComment(parentCU, lineDelimiter), getTypeComment(parentCU, lineDelimiter), "", lineDelimiter); //$NON-NLS-1$
-				if (content != null) {
-					parentCU.getBuffer().setContents(content);
-				}
+				IBuffer buffer= parentCU.getBuffer();
+				
+				String cuContent= constructCUContent(parentCU, constructSimpleTypeStub(), lineDelimiter);
+				buffer.setContents(cuContent);
+				
 				CompilationUnit astRoot= createASTForImports(parentCU);
 				existingImports= getExistingImports(astRoot);
 							
@@ -1809,9 +1810,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				
 				String typeContent= constructTypeStub(parentCU, imports, lineDelimiter);
 				
-				String cuContent= constructCUContent(parentCU, typeContent, lineDelimiter);
+				AbstractTypeDeclaration typeNode= (AbstractTypeDeclaration) astRoot.types().get(0);
+				int start= ((ASTNode) typeNode.modifiers().get(0)).getStartPosition();
+				int end= typeNode.getStartPosition() + typeNode.getLength();
 				
-				parentCU.getBuffer().setContents(cuContent);
+				buffer.replace(start, end - start, typeContent);
 				
 				createdType= parentCU.getType(typeName);
 			} else {
@@ -2077,6 +2080,14 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				}
 			}
 		}
+	}
+	
+	
+	private String constructSimpleTypeStub() {
+		StringBuffer buf= new StringBuffer("public class "); //$NON-NLS-1$
+		buf.append(getTypeName());
+		buf.append("{ }"); //$NON-NLS-1$
+		return buf.toString();
 	}
 	
 	/*
