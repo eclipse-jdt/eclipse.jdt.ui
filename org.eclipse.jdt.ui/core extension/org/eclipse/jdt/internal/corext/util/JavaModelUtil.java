@@ -236,6 +236,16 @@ public final class JavaModelUtil {
 	 * this is ambiguous. JavaCore PR: 1GCFUNT
 	 */
 	public static String getTypeQualifiedName(IType type) {
+		try {
+			if (type.isBinary() && !type.isAnonymous()) {
+				IType declaringType= type.getDeclaringType();
+				if (declaringType != null) {
+					return getTypeQualifiedName(declaringType) + '.' + type.getElementName();
+				}
+			}
+		} catch (JavaModelException e) {
+			// ignore
+		}	
 		return type.getTypeQualifiedName('.');
 	}
 	
@@ -246,6 +256,16 @@ public final class JavaModelUtil {
 	 * this is ambiguous. JavaCore PR: 1GCFUNT
 	 */
 	public static String getFullyQualifiedName(IType type) {
+		try {
+			if (type.isBinary() && !type.isAnonymous()) {
+				IType declaringType= type.getDeclaringType();
+				if (declaringType != null) {
+					return getFullyQualifiedName(declaringType) + '.' + type.getElementName();
+				}
+			}
+		} catch (JavaModelException e) {
+			// ignore
+		}		
 		return type.getFullyQualifiedName('.');
 	}
 	
@@ -255,7 +275,7 @@ public final class JavaModelUtil {
 	public static String getTypeContainerName(IType type) {
 		IType outerType= type.getDeclaringType();
 		if (outerType != null) {
-			return outerType.getFullyQualifiedName('.');
+			return getFullyQualifiedName(outerType);
 		} else {
 			return type.getPackageFragment().getElementName();
 		}
