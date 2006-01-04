@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	/** Triggers for method proposals without parameters. Do not modify. */
-	protected final static char[] METHOD_TRIGGERS= new char[] { ';', ',', '.', '\t', '[', ' ' };
+	protected final static char[] METHOD_TRIGGERS= new char[] { ';', ',', '.', '\t', '[' };
 	/** Triggers for method proposals. Do not modify. */
 	protected final static char[] METHOD_WITH_ARGUMENTS_TRIGGERS= new char[] { '(', '-', ' ' };
 	/** Triggers for method name proposals (static imports). Do not modify. */
