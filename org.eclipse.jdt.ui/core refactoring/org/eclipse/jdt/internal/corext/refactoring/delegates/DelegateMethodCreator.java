@@ -49,6 +49,8 @@ public class DelegateMethodCreator extends DelegateCreator {
 
 		if (getNewElementName() == null)
 			setNewElementName(((MethodDeclaration) getDeclaration()).getName().getIdentifier());
+		
+		setInsertBefore(true); 
 	}
 
 	protected ASTNode createBody(BodyDeclaration bd) throws JavaModelException {
@@ -85,12 +87,17 @@ public class DelegateMethodCreator extends DelegateCreator {
 
 	/**
 	 * @return the delegate incovation, either a {@link ConstructorInvocation}
-	 *         or a {@link MethodInvocation}
+	 *         or a {@link MethodInvocation}. May be null if the delegate
+	 *         method is abstract (and therefore has no body at all)
 	 */
 	public ASTNode getDelegateInvocation() {
 		return fDelegateInvocation;
 	}
 
+	/**
+	 * @return the javadoc reference to the old method in the javadoc comment.
+	 * 		   May be null if no comment was created. 
+	 */
 	public MethodRef getJavadocReference() {
 		return fDocMethodReference;
 	}
@@ -113,6 +120,8 @@ public class DelegateMethodCreator extends DelegateCreator {
 				// we are creating type info for the javadoc
 				final MethodRefParameter parameter= getAst().newMethodRefParameter();
 				parameter.setType(ASTNodeFactory.newType(getAst(), variable));
+				if ((index == size - 1) && declaration.isVarargs())
+					parameter.setVarargs(true);
 				arguments.add(parameter);
 			}
 		}
