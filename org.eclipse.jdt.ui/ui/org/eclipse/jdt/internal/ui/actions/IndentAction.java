@@ -132,7 +132,7 @@ public class IndentAction extends TextEditorAction {
 						JavaIndenter indenter= new JavaIndenter(document, scanner, getJavaProject());
 						boolean hasChanged= false;
 						for (int i= 0; i < nLines; i++) {
-							hasChanged |= indentLine(document, firstLine + i, offset, indenter, scanner);
+							hasChanged |= indentLine(document, firstLine + i, offset, indenter, scanner, multiLine);
 						}
 						
 						// update caret position: move to new position when indenting just one line
@@ -205,10 +205,11 @@ public class IndentAction extends TextEditorAction {
 	 * @param caret the caret position
 	 * @param indenter the java indenter
 	 * @param scanner the heuristic scanner
+	 * @param multiLine <code>true</code> if more than one line is being indented 
 	 * @return <code>true</code> if <code>document</code> was modified, <code>false</code> otherwise
 	 * @throws BadLocationException if the document got changed concurrently 
 	 */
-	private boolean indentLine(IDocument document, int line, int caret, JavaIndenter indenter, JavaHeuristicScanner scanner) throws BadLocationException {
+	private boolean indentLine(IDocument document, int line, int caret, JavaIndenter indenter, JavaHeuristicScanner scanner, boolean multiLine) throws BadLocationException {
 		IRegion currentLine= document.getLineInformation(line);
 		int offset= currentLine.getOffset();
 		int wsStart= offset; // where we start searching for non-WS; after the "//" in single line comments
@@ -266,8 +267,12 @@ public class IndentAction extends TextEditorAction {
 		// get current white space
 		int lineLength= currentLine.getLength();
 		int end= scanner.findNonWhitespaceForwardInAnyPartition(wsStart, offset + lineLength);
-		if (end == JavaHeuristicScanner.NOT_FOUND)
+		if (end == JavaHeuristicScanner.NOT_FOUND) {
+			// an empty line
 			end= offset + lineLength;
+			if (multiLine && !indentEmptyLines())
+				indent= ""; //$NON-NLS-1$
+		}
 		int length= end - offset;
 		String currentIndent= document.get(offset, length);
 		
@@ -400,6 +405,16 @@ public class IndentAction extends TextEditorAction {
 	 */
 	private int getTabSize() {
 		return getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_TAB_SIZE, 4);
+	}
+
+	/**
+	 * Returns <code>true</code> if empty lines should be indented, false otherwise.
+	 * 
+	 * @return <code>true</code> if empty lines should be indented, false otherwise
+	 * @since 3.2
+	 */
+	private boolean indentEmptyLines() {
+		return DefaultCodeFormatterConstants.TRUE.equals(getCoreFormatterOption(DefaultCodeFormatterConstants.FORMATTER_INDENT_EMPTY_LINES));
 	}
 	
 	/**

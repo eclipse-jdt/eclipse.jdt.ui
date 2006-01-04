@@ -28,16 +28,16 @@ import java.lang.reflect.Constructor;
  * @see Test
  */
 public class TestSuite implements Test {
-	
+
 	private Vector fTests= new Vector(10);
 	private String fName;
-	
+
 	/**
 	 * Constructs an empty TestSuite.
 	 */
 	public TestSuite() {
 	}
-	
+
 	/**
 	 * Constructs a TestSuite from the given class with the given name.
 	 * @see TestSuite#TestSuite(Class)
@@ -46,7 +46,7 @@ public class TestSuite implements Test {
 		this(theClass);
 		setName(name);
 	}
-	
+
 	/**
 	 * Constructs a TestSuite from the given class. Adds all the methods
 	 * starting with "test" as test cases to the suite.
@@ -61,12 +61,12 @@ public class TestSuite implements Test {
 			addTest(warning("Class "+theClass.getName()+" has no public constructor TestCase(String name) or TestCase()"));
 			return;
 		}
-		
+
 		if (!Modifier.isPublic(theClass.getModifiers())) {
 			addTest(warning("Class "+theClass.getName()+" is not public"));
 			return;
 		}
-		
+
 		Class superClass= theClass;
 		Vector names= new Vector();
 		while (Test.class.isAssignableFrom(superClass)) {
@@ -79,28 +79,28 @@ public class TestSuite implements Test {
 		if (fTests.size() == 0)
 			addTest(warning("No tests found in "+theClass.getName()));
 	}
-	
+
 	/**
 	 * Constructs an empty TestSuite.
 	 */
 	public TestSuite(String name) {
 		setName(name);
 	}
-	
+
 	/**
 	 * Adds a test to the suite.
 	 */
 	public void addTest(Test test) {
 		fTests.addElement(test);
 	}
-	
+
 	/**
 	 * Adds the tests from the given class to the suite
 	 */
 	public void addTestSuite(Class testClass) {
 		addTest(new TestSuite(testClass));
 	}
-	
+
 	private void addTestMethod(Method m, Vector names, Class theClass) {
 		String name= m.getName();
 		if (names.contains(name))
@@ -113,7 +113,7 @@ public class TestSuite implements Test {
 		names.addElement(name);
 		addTest(createTest(theClass, name));
 	}
-	
+
 	/**
 	 * ...as the moon sets over the early morning Merlin, Oregon
 	 * mountains, our intrepid adventurers type...
@@ -143,7 +143,7 @@ public class TestSuite implements Test {
 		}
 		return (Test) test;
 	}
-	
+
 	/**
 	 * Converts the stack trace into a string
 	 */
@@ -152,9 +152,9 @@ public class TestSuite implements Test {
 		PrintWriter writer= new PrintWriter(stringWriter);
 		t.printStackTrace(writer);
 		return stringWriter.toString();
-		
+
 	}
-	
+
 	/**
 	 * Counts the number of test cases that will be run by this test.
 	 */
@@ -166,7 +166,7 @@ public class TestSuite implements Test {
 		}
 		return count;
 	}
-	
+
 	/**
 	 * Gets a constructor which takes a single String as
 	 * its argument or a no arg constructor.
@@ -180,18 +180,18 @@ public class TestSuite implements Test {
 		}
 		return theClass.getConstructor(new Class[0]);
 	}
-	
+
 	private boolean isPublicTestMethod(Method m) {
 		return isTestMethod(m) && Modifier.isPublic(m.getModifiers());
 	}
-	
+
 	private boolean isTestMethod(Method m) {
 		String name= m.getName();
 		Class[] parameters= m.getParameterTypes();
 		Class returnType= m.getReturnType();
 		return parameters.length == 0 && name.startsWith("test") && returnType.equals(Void.TYPE);
 	}
-	
+
 	/**
 	 * Runs the tests and collects their result in a TestResult.
 	 */
@@ -203,32 +203,32 @@ public class TestSuite implements Test {
 			runTest(test, result);
 		}
 	}
-	
+
 	public void runTest(Test test, TestResult result) {
 		test.run(result);
 	}
-	
+
 	/**
 	 * Returns the test at the given index
 	 */
 	public Test testAt(int index) {
 		return (Test)fTests.elementAt(index);
 	}
-	
+
 	/**
 	 * Returns the number of tests in this suite
 	 */
 	public int testCount() {
 		return fTests.size();
 	}
-	
+
 	/**
 	 * Returns the tests as an enumeration
 	 */
 	public Enumeration tests() {
 		return fTests.elements();
 	}
-	
+
 	/**
 	 */
 	public String toString() {
@@ -236,7 +236,7 @@ public class TestSuite implements Test {
 			return getName();
 		return super.toString();
 	}
-	
+
 	/**
 	 * Sets the name of the suite.
 	 * @param name The name to set
@@ -244,7 +244,7 @@ public class TestSuite implements Test {
 	public void setName(String name) {
 		fName= name;
 	}
-	
+
 	/**
 	 * Returns the name of the suite. Not all
 	 * test suites have a name and this method
@@ -253,7 +253,7 @@ public class TestSuite implements Test {
 	public String getName() {
 		return fName;
 	}
-	
+
 	/**
 	 * Returns a test which will fail and log a warning message.
 	 */
