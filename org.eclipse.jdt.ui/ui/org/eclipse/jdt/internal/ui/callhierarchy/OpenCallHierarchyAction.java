@@ -59,7 +59,12 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
      * @param site the site providing context information for this action
      */
     public OpenCallHierarchyAction(IWorkbenchSite site) {
-        this(site, site.getSelectionProvider());
+        super(site);
+        setText(CallHierarchyMessages.OpenCallHierarchyAction_label); 
+        setToolTipText(CallHierarchyMessages.OpenCallHierarchyAction_tooltip); 
+        setDescription(CallHierarchyMessages.OpenCallHierarchyAction_description); 
+        PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_OPEN_ACTION);
+
     }
     
     /**
@@ -69,16 +74,16 @@ public class OpenCallHierarchyAction extends SelectionDispatchAction {
      * 
      * @param site the site providing context information for this action
 	 * @param provider a special selection provider which is used instead 
-	 *  of the site's selection provider
+	 *  of the site's selection provider or <code>null</code> to use the site's
+	 *  selection provider
      * 
      * @since 3.2
+	 * @deprecated Use {@link #setSpecialSelectionProvider(ISelectionProvider)} instead. This API will be
+	 * removed after 3.2 M5.
      */
     public OpenCallHierarchyAction(IWorkbenchSite site, ISelectionProvider provider) {
-        super(site, provider);
-        setText(CallHierarchyMessages.OpenCallHierarchyAction_label); 
-        setToolTipText(CallHierarchyMessages.OpenCallHierarchyAction_tooltip); 
-        setDescription(CallHierarchyMessages.OpenCallHierarchyAction_description); 
-        PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.CALL_HIERARCHY_OPEN_ACTION);
+        this(site);
+        setSpecialSelectionProvider(provider);
     }
     
     /**
