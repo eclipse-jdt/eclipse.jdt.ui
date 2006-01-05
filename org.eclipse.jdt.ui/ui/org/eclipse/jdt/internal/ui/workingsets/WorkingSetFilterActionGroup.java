@@ -31,6 +31,7 @@ import org.eclipse.jface.viewers.ViewerFilter;
 
 import org.eclipse.ui.IActionBars;
 import org.eclipse.ui.IMemento;
+import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.IWorkbenchPreferenceConstants;
 import org.eclipse.ui.IWorkingSet;
@@ -66,14 +67,14 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	private IMenuManager fMenuManager;
 	private IMenuListener fMenuListener;
 	private List fContributions= new ArrayList();
-	private final IWorkbenchPartSite fSite;
+	private final IWorkbenchPage fWorkbenchPage;
 
 	public WorkingSetFilterActionGroup(IWorkbenchPartSite site, IPropertyChangeListener changeListener) {
 		Assert.isNotNull(site);
 		Assert.isNotNull(changeListener);
 
 		fChangeListener= changeListener;
-		fSite= site;
+		fWorkbenchPage= site.getPage();
 		fClearWorkingSetAction= new ClearWorkingSetAction(this);
 		fSelectWorkingSetAction= new SelectWorkingSetAction(this, site);
 		fEditWorkingSetAction= new EditWorkingSetAction(this, site);
@@ -93,11 +94,11 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		}
 	}
 	
-	public WorkingSetFilterActionGroup(Shell shell, IPropertyChangeListener changeListener) {
+	public WorkingSetFilterActionGroup(Shell shell, IWorkbenchPage page, IPropertyChangeListener changeListener) {
 		Assert.isNotNull(shell);
 		Assert.isNotNull(changeListener);
 
-		fSite= null;
+		fWorkbenchPage= page;
 		fChangeListener= changeListener;
 		fClearWorkingSetAction= new ClearWorkingSetAction(this);
 		fSelectWorkingSetAction= new SelectWorkingSetAction(this, shell);
@@ -184,8 +185,8 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		IWorkingSet ws= null;
 		if (workingSetName != null && workingSetName.length() > 0) {
 			ws= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
-		} else if (fSite != null && (useWindowWorkingSetByDefault())) {
-			ws= fSite.getPage().getAggregateWorkingSet();
+		} else if (fWorkbenchPage != null && useWindowWorkingSetByDefault()) {
+			ws= fWorkbenchPage.getAggregateWorkingSet();
 		}
 		setWorkingSet(ws, false);
 	}
@@ -261,8 +262,8 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		Arrays.sort(workingSets, new WorkingSetComparator());
 		
 		int currId= 1;
-		if (fSite != null) {
-			addLRUWorkingSetAction(mm, currId++, fSite.getPage().getAggregateWorkingSet());
+		if (fWorkbenchPage != null) {
+			addLRUWorkingSetAction(mm, currId++, fWorkbenchPage.getAggregateWorkingSet());
 		}
 		
 		for (int i= 0; i < workingSets.length; i++) {

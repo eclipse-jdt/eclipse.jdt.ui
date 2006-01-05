@@ -372,6 +372,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		viewMenu.add(fullyQualifyDuplicatesAction);
 		if (fScope == null) {
 			fFilterActionGroup= new WorkingSetFilterActionGroup(getShell(),
+				JavaPlugin.getActivePage(),
 				new IPropertyChangeListener() {
 					public void propertyChange(PropertyChangeEvent event) {
 						IWorkingSet ws= (IWorkingSet)event.getNewValue();
@@ -415,7 +416,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 				memento.save(writer);
 				fSettings.put(WORKINGS_SET_SETTINGS, writer.getBuffer().toString());
 			} catch (IOException e) {
-				// don't do anythiung. Simply don't store the settings
+				// don't do anything. Simply don't store the settings
 			}
 		}
 	}
