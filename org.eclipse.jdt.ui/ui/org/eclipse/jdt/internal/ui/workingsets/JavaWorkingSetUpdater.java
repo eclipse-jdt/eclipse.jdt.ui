@@ -212,12 +212,26 @@ public class JavaWorkingSetUpdater implements IWorkingSetUpdater, IElementChange
 			boolean remove= false;
 			if (element instanceof IJavaElement) {
 				IJavaElement jElement= (IJavaElement)element;
-				IProject project= jElement.getJavaProject().getProject();
-				remove= (project != null ? project.isOpen() : true) && !jElement.exists();
+				// If we have directly a project then remove it when it
+				// doesn't exist anymore. However if we have a sub element
+				// under a project only remove the element if the parent
+				// project is open. Otherwise we would remove all elements
+				// in closed projects.
+				if (jElement instanceof IJavaProject) {
+					remove= !jElement.exists();
+				} else {
+					IProject project= jElement.getJavaProject().getProject();
+					remove= project.isOpen() && !jElement.exists();
+				}
 			} else if (element instanceof IResource) {
 				IResource resource= (IResource)element;
-				IProject project= resource.getProject();
-				remove= (project != null ? project.isOpen() : true) && !resource.exists();
+				// See comments above
+				if (resource instanceof IProject) {
+					remove= !resource.exists();
+				} else {
+					IProject project= resource.getProject();
+					remove= (project != null ? project.isOpen() : true) && !resource.exists();
+				}
 			}
 			if (remove) {
 				iter.remove();
