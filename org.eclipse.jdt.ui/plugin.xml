@@ -1160,15 +1160,6 @@
             class="org.eclipse.jdt.internal.ui.javaeditor.JavaDocumentSetupParticipant">
       </participant>
    </extension>
-   <extension
-         id="JavaDocumentFactory"
-         name="%javaDocumentFactory"
-         point="org.eclipse.core.filebuffers.documentCreation">
-      <factory
-            contentTypeId="org.eclipse.jdt.core.javaSource"
-            class="org.eclipse.jdt.internal.ui.javaeditor.JavaDocumentFactory">
-      </factory>
-   </extension>
    
    <extension
          id="PropertiesFileDocumentSetupParticipant"

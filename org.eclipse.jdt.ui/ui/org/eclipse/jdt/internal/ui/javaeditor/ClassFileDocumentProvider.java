@@ -18,9 +18,12 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.core.filebuffers.FileBuffers;
+
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
 import org.eclipse.ui.IEditorInput;
@@ -231,7 +234,10 @@ public class ClassFileDocumentProvider extends FileDocumentProvider {
 	 * @since 3.1
 	 */
 	protected IDocument createEmptyDocument() {
-		return new PartiallySynchronizedDocument();
+		IDocument document= FileBuffers.getTextFileBufferManager().createEmptyDocument(null);
+		if (document instanceof ISynchronizable)
+			((ISynchronizable)document).setLockObject(new Object());		
+		return document;
 	}
 
 	/*

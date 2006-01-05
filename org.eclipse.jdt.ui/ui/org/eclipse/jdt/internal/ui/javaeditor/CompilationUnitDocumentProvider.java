@@ -962,9 +962,14 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
         IDocument document= cuInfo.fTextFileBuffer.getDocument();
         IAnnotationModel model= cuInfo.fModel;
 
-        if (document instanceof ISynchronizable && model instanceof ISynchronizable) {
-            Object lock= ((ISynchronizable) document).getLockObject();
-            ((ISynchronizable) model).setLockObject(lock);
+        if (document instanceof ISynchronizable) {
+            Object lock= ((ISynchronizable)document).getLockObject();
+            if (lock == null) {
+            	lock= new Object();
+            	((ISynchronizable)document).setLockObject(lock);
+            }
+            if (model instanceof ISynchronizable)
+            	((ISynchronizable) model).setLockObject(lock);
         }
     }
 

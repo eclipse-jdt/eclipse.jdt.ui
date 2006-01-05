@@ -40,6 +40,7 @@ import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentListener;
+import org.eclipse.jface.text.ISynchronizable;
 
 import org.eclipse.jdt.core.BufferChangedEvent;
 import org.eclipse.jdt.core.IBuffer;
@@ -183,6 +184,8 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 		} catch (CoreException x) {
 			fStatus= x.getStatus();
 			fDocument= manager.createEmptyDocument(fPath);
+			if (fDocument instanceof ISynchronizable)
+				((ISynchronizable)fDocument).setLockObject(new Object());
 		}
 		fDocument.addPrenotifiedDocumentListener(this);
 	}

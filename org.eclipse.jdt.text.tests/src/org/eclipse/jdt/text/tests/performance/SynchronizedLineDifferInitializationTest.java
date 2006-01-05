@@ -13,9 +13,10 @@ package org.eclipse.jdt.text.tests.performance;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jface.text.IDocument;
+import org.eclipse.core.filebuffers.FileBuffers;
 
-import org.eclipse.jdt.internal.ui.javaeditor.PartiallySynchronizedDocument;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.ISynchronizable;
 
 /**
  * 
@@ -31,7 +32,9 @@ public class SynchronizedLineDifferInitializationTest extends DocumentLineDiffer
 	 * @see org.eclipse.jdt.text.tests.performance.DocumentLineDifferInitializationText#createDocument(java.lang.String)
 	 */
 	protected IDocument createDocument(String contents) {
-		PartiallySynchronizedDocument document= new PartiallySynchronizedDocument();
+		IDocument document= FileBuffers.getTextFileBufferManager().createEmptyDocument(null);
+		if (document instanceof ISynchronizable)
+			((ISynchronizable)document).setLockObject(new Object());		
 		document.set(contents);
 		return document;
 	}
