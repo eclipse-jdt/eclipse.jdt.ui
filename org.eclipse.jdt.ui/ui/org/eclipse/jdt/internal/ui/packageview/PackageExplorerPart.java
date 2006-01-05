@@ -1176,7 +1176,7 @@ public class PackageExplorerPart extends ViewPart
 		PackageExplorerContentProvider provider= (PackageExplorerContentProvider)getViewer().getContentProvider();
 		ISelection cs= fViewer.getSelection();
 		// If we have Pending changes and the element could not be selected then
-		// we try it again on more time by posting the select and reveal asynchronuoulsy
+		// we try it again on more time by posting the select and reveal asynchronously
 		// to the event queue. See PR http://bugs.eclipse.org/bugs/show_bug.cgi?id=30700
 		// for a discussion of the underlying problem.
 		if (count == 0 && provider.hasPendingChanges() && !javaSelection.equals(cs)) {
