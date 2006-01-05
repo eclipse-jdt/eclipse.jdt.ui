@@ -59,6 +59,7 @@ import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
+import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.AnnotationModelEvent;
 import org.eclipse.jface.text.source.IAnnotationAccessExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
@@ -1003,9 +1004,30 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			info= new CompilationUnitInfo();
 			info.fCopy= cu;
 			info.fElement= element;
+			info.fModel= new AnnotationModel();
 			fFakeCUInfoMap.put(element, info);
 		}
 		info.fCount++;
+	}
+	
+	/*
+	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#getAnnotationModel(java.lang.Object)
+	 * @since 3.2
+	 */
+	public IAnnotationModel getAnnotationModel(Object element) {
+		IAnnotationModel model= super.getAnnotationModel(element);
+		if (model != null)
+			return model;
+		
+		FileInfo info= (FileInfo)fFakeCUInfoMap.get(element);
+		if (info != null) {
+			if (info.fModel != null)
+				return info.fModel;
+			if (info.fTextFileBuffer != null)
+				return info.fTextFileBuffer.getAnnotationModel();
+		}
+		
+		return null;
 	}
 	
 	/*
@@ -1017,11 +1039,13 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		if (info != null)  {
 			if (info.fCount == 1) {
 				fFakeCUInfoMap.remove(element);
+				info.fModel= null;
 				// Destroy and unregister fake working copy
 				try {
 					info.fCopy.discardWorkingCopy();
 				} catch (JavaModelException ex) {
-					handleCoreException(ex, ex.getMessage());				}
+					handleCoreException(ex, ex.getMessage());
+				}
 			} else
 				info.fCount--;
 		}
