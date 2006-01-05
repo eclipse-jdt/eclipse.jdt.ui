@@ -851,7 +851,7 @@
             id="org.eclipse.jdt.internal.ui.preferences.JavadocConfigurationPropertyPage3">
       </page>
       <page
-            objectClass="org.eclipse.jdt.internal.core.JarPackageFragmentRoot"
+            objectClass="org.eclipse.jdt.core.IPackageFragmentRoot"
             name="%nativeLibraryPageName"
             class="org.eclipse.jdt.internal.ui.preferences.NativeLibrariesPropertyPage"
             id="org.eclipse.jdt.internal.ui.preferences.NativeLibrariesPropertyPage">

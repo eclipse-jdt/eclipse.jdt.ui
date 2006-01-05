@@ -98,6 +98,7 @@ public class CPListElement {
 				createAttributeElement(OUTPUT, null, true);
 				createAttributeElement(INCLUSION, new Path[0], true);
 				createAttributeElement(EXCLUSION, new Path[0], true);
+				createAttributeElement(NATIVE_LIB_PATH, null, false);
 				break;
 			case IClasspathEntry.CPE_LIBRARY:
 			case IClasspathEntry.CPE_VARIABLE:
@@ -109,6 +110,7 @@ public class CPListElement {
 			case IClasspathEntry.CPE_PROJECT:
 				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
 				createAttributeElement(COMBINE_ACCESSRULES, Boolean.FALSE, true); // not rendered
+				createAttributeElement(NATIVE_LIB_PATH, null, false);
 				break;
 			case IClasspathEntry.CPE_CONTAINER:
 				createAttributeElement(ACCESSRULES, new IAccessRule[0], true);
@@ -128,6 +130,7 @@ public class CPListElement {
 					}
 				} catch (JavaModelException e) {
 				}			
+				createAttributeElement(NATIVE_LIB_PATH, null, false);
 				break;
 			default:
 		}

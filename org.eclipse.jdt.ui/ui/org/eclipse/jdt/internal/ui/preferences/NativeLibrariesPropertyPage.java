@@ -40,6 +40,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusUtil;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
@@ -53,6 +55,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 	private NativeLibrariesConfigurationBlock fConfigurationBlock;
 	private boolean fIsValidElement;
 	private IClasspathEntry fEntry;
+	private IPath fContainerPath;
 	
 	/**
 	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
@@ -64,11 +67,18 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 				IPackageFragmentRoot root= (IPackageFragmentRoot) elem;
 				
 				IClasspathEntry entry= root.getRawClasspathEntry();
-				if (entry == null || entry.getEntryKind() != IClasspathEntry.CPE_LIBRARY) {
+				if (entry == null) {
 					fIsValidElement= false;
 				} else {
-					fEntry= entry;
-					fIsValidElement= true;
+					if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+						fContainerPath= entry.getPath();
+						fEntry= JavaModelUtil.getClasspathEntryToEdit(elem.getJavaProject(), fContainerPath, root.getPath());
+						fIsValidElement= fEntry != null;
+					} else {
+						fContainerPath= null;
+						fEntry= entry;
+						fIsValidElement= true;
+					}
 				}
 			} else {
 				fIsValidElement= false;
@@ -132,7 +142,7 @@ public class NativeLibrariesPropertyPage extends PropertyPage implements IStatus
 			
 			IJavaElement elem= getJavaElement();
 			try {
-				IRunnableWithProgress runnable= getRunnable(getShell(), elem, nativeLibraryPath, fEntry, null);
+				IRunnableWithProgress runnable= getRunnable(getShell(), elem, nativeLibraryPath, fEntry, fContainerPath);
 				PlatformUI.getWorkbench().getProgressService().run(true, true, runnable);
 			} catch (InvocationTargetException e) {
 				String title= PreferencesMessages.NativeLibrariesPropertyPage_errorAttaching_title; 

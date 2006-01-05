@@ -370,6 +370,14 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 			EditFilterWizard wizard= newEditFilterWizard(elem.getParent(), fFoldersList.getElements(), fOutputLocationField.getText());
 			OpenBuildPathWizardAction action= new OpenBuildPathWizardAction(wizard);
 			action.run();
+		} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
+			CPListElement selElement=  elem.getParent();
+			NativeLibrariesDialog dialog= new NativeLibrariesDialog(getShell(), selElement);
+			if (dialog.open() == Window.OK) {
+				selElement.setAttribute(CPListElement.NATIVE_LIB_PATH, dialog.getNativeLibraryPath());
+				fFoldersList.refresh();
+				fClassPathList.dialogFieldChanged(); // validate
+			}
 		}
 	}
 
