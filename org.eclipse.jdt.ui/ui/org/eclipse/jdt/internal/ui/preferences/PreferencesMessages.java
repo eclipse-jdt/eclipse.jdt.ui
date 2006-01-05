@@ -261,6 +261,9 @@ public final class PreferencesMessages extends NLS {
 	public static String SourceAttachmentPropertyPage_error_message;
 	public static String SourceAttachmentPropertyPage_noarchive_message;
 	public static String SourceAttachmentPropertyPage_containerentry_message;
+	public static String NativeLibrariesPropertyPage_invalidElementSelection_desription;
+	public static String NativeLibrariesPropertyPage_errorAttaching_title;
+	public static String NativeLibrariesPropertyPage_errorAttaching_message;
 	public static String AppearancePreferencePage_description;
 	public static String AppearancePreferencePage_methodreturntype_label;
 	public static String AppearancePreferencePage_showCategory_label;
