@@ -12,7 +12,8 @@ package org.eclipse.jdt.internal.ui.text;
 
 import java.util.Arrays;
 
-import org.eclipse.jface.text.Assert;
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -231,11 +232,11 @@ public final class JavaHeuristicScanner implements Symbols {
 	}
 
 	/** The document being scanned. */
-	private IDocument fDocument;
+	private final IDocument fDocument;
 	/** The partitioning being used for scanning. */
-	private String fPartitioning;
+	private final String fPartitioning;
 	/** The partition to scan in. */
-	private String fPartition;
+	private final String fPartition;
 
 	/* internal scan state */
 
@@ -243,6 +244,8 @@ public final class JavaHeuristicScanner implements Symbols {
 	private char fChar;
 	/** the most recently read position. */
 	private int fPos;
+	/** the most recently used partition. */
+	private ITypedRegion fCachedPartition= new TypedRegion(-1, 0, "__no_partition_at_all"); //$NON-NLS-1$
 
 	/* preset stop conditions */
 	private final StopCondition fNonWSDefaultPart= new NonWhitespaceDefaultPartition();
@@ -257,9 +260,9 @@ public final class JavaHeuristicScanner implements Symbols {
 	 * @param partition the partition to scan in
 	 */
 	public JavaHeuristicScanner(IDocument document, String partitioning, String partition) {
-		Assert.isNotNull(document);
-		Assert.isNotNull(partitioning);
-		Assert.isNotNull(partition);
+		Assert.isLegal(document != null);
+		Assert.isLegal(partitioning != null);
+		Assert.isLegal(partition != null);
 		fDocument= document;
 		fPartitioning= partitioning;
 		fPartition= partition;
@@ -329,7 +332,7 @@ public final class JavaHeuristicScanner implements Symbols {
 
 		// else
 		if (Character.isJavaIdentifierPart(fChar)) {
-			// assume an ident or keyword
+			// assume an identifier or keyword
 			int from= pos, to;
 			pos= scanForward(pos + 1, bound, fNonIdent);
 			if (pos == NOT_FOUND)
@@ -509,8 +512,7 @@ public final class JavaHeuristicScanner implements Symbols {
 	 * @return the matching peer character position, or <code>NOT_FOUND</code>
 	 */
 	public int findClosingPeer(int start, final char openingPeer, final char closingPeer) {
-		Assert.isNotNull(fDocument);
-		Assert.isTrue(start >= 0);
+		Assert.isLegal(start >= 0);
 
 		try {
 			int depth= 1;
@@ -547,7 +549,7 @@ public final class JavaHeuristicScanner implements Symbols {
 	 * @return the matching peer character position, or <code>NOT_FOUND</code>
 	 */
 	public int findOpeningPeer(int start, char openingPeer, char closingPeer) {
-		Assert.isTrue(start < fDocument.getLength());
+		Assert.isLegal(start < fDocument.getLength());
 
 		try {
 			int depth= 1;
@@ -638,12 +640,12 @@ public final class JavaHeuristicScanner implements Symbols {
 	 * @return the lowest position in [<code>start</code>, <code>bound</code>) for which <code>condition</code> holds, or <code>NOT_FOUND</code> if none can be found
 	 */
 	public int scanForward(int start, int bound, StopCondition condition) {
-		Assert.isTrue(start >= 0);
+		Assert.isLegal(start >= 0);
 
 		if (bound == UNBOUND)
 			bound= fDocument.getLength();
 
-		Assert.isTrue(bound <= fDocument.getLength());
+		Assert.isLegal(bound <= fDocument.getLength());
 
 		try {
 			fPos= start;
@@ -702,8 +704,8 @@ public final class JavaHeuristicScanner implements Symbols {
 		if (bound == UNBOUND)
 			bound= -1;
 
-		Assert.isTrue(bound >= -1);
-		Assert.isTrue(start < fDocument.getLength() );
+		Assert.isLegal(bound >= -1);
+		Assert.isLegal(start < fDocument.getLength() );
 
 		try {
 			fPos= start;
@@ -755,14 +757,7 @@ public final class JavaHeuristicScanner implements Symbols {
 	 * @return <code>true</code> if <code>position</code> is in the default partition of <code>fDocument</code>, <code>false</code> otherwise
 	 */
 	public boolean isDefaultPartition(int position) {
-		Assert.isTrue(position >= 0);
-		Assert.isTrue(position <= fDocument.getLength());
-
-		try {
-			return fPartition.equals(TextUtilities.getContentType(fDocument, fPartitioning, position, false));
-		} catch (BadLocationException e) {
-			return false;
-		}
+		return fPartition.equals(getPartition(position).getType());
 	}
 
 	/**
@@ -773,15 +768,30 @@ public final class JavaHeuristicScanner implements Symbols {
 	 *         partition if accessing the document fails
 	 */
 	private ITypedRegion getPartition(int position) {
-		Assert.isTrue(position >= 0);
-		Assert.isTrue(position <= fDocument.getLength());
-
-		try {
-			return TextUtilities.getPartition(fDocument, fPartitioning, position, false);
-		} catch (BadLocationException e) {
-			return new TypedRegion(position, 0, "__no_partition_at_all"); //$NON-NLS-1$
+		if (!contains(fCachedPartition, position)) {
+			Assert.isTrue(position >= 0);
+			Assert.isTrue(position <= fDocument.getLength());
+			
+			try {
+				fCachedPartition= TextUtilities.getPartition(fDocument, fPartitioning, position, false);
+			} catch (BadLocationException e) {
+				fCachedPartition= new TypedRegion(position, 0, "__no_partition_at_all"); //$NON-NLS-1$
+			}
 		}
 
+		return fCachedPartition;
+	}
+
+	/**
+	 * Returns <code>true</code> if <code>region</code> contains <code>position</code>.
+	 * 
+	 * @param region a region
+	 * @param position an offset
+	 * @return <code>true</code> if <code>region</code> contains <code>position</code>
+	 */
+	private boolean contains(IRegion region, int position) {
+		int offset= region.getOffset();
+		return offset <= position && position < offset + region.getLength();
 	}
 
 	/**
