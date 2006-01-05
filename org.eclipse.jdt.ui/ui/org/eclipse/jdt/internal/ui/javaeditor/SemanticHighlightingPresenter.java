@@ -630,8 +630,11 @@ public class SemanticHighlightingPresenter implements ITextPresentationListener,
 	 * @return the document's lock object
 	 */
 	private Object getLockObject(IDocument document) {
-		if (document instanceof ISynchronizable)
-			return ((ISynchronizable)document).getLockObject();
+		if (document instanceof ISynchronizable) {
+			Object lock= ((ISynchronizable)document).getLockObject();
+			if (lock != null)
+				return lock;
+		}
 		return document;
 	}
 

@@ -154,10 +154,12 @@ class OverrideIndicatorManager implements IJavaReconcilingListener {
 	 * @since 3.0
 	 */
 	private Object getLockObject(IAnnotationModel annotationModel) {
-		if (annotationModel instanceof ISynchronizable)
-			return ((ISynchronizable)annotationModel).getLockObject();
-		else
-			return annotationModel;
+		if (annotationModel instanceof ISynchronizable) {
+			Object lock= ((ISynchronizable)annotationModel).getLockObject();
+			if (lock != null)
+				return lock;
+		}
+		return annotationModel;
 	}
 
 	/**
