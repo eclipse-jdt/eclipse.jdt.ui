@@ -8,12 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-/*
- * Created on Jun 10, 2004
- *
- * To change the template for this generated file go to
- * Window - Preferences - Java - Code Generation - Code and Comments
- */
+
 package org.eclipse.jdt.internal.ui.search;
 
 import java.util.Arrays;
@@ -42,14 +37,9 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.ui.dialogs.SelectionStatusDialog;
 
-/**
- * @author tma
- * 
- * To change the template for this generated type comment go to Window - Preferences - Java - Code Generation - Code and Comments
- */
 public class FiltersDialog extends SelectionStatusDialog {
 
-	private CheckboxTableViewer listViewer;
+	private CheckboxTableViewer fListViewer;
 	private JavaSearchResultPage fPage;
 	private Button fLimitElementsCheckbox;
 	private Text fLimitElementsField;
@@ -98,14 +88,14 @@ public class FiltersDialog extends SelectionStatusDialog {
 		
 		Table table = new Table(parent, SWT.CHECK | SWT.BORDER);
 		table.setFont(parent.getFont());
-		listViewer = new CheckboxTableViewer(table);
+		fListViewer = new CheckboxTableViewer(table);
 		
 
 		GridData data = new GridData(GridData.FILL_BOTH);
 		data.minimumHeight= convertHeightInCharsToPixels(8);
 		table.setLayoutData(data);
 
-		listViewer.setLabelProvider(new LabelProvider() {
+		fListViewer.setLabelProvider(new LabelProvider() {
 			public String getText(Object element) {
 				// Return the features's label.
 				return ((MatchFilter) element).getName();
@@ -114,9 +104,9 @@ public class FiltersDialog extends SelectionStatusDialog {
 
 		// Set the content provider
 		ArrayContentProvider cp = new ArrayContentProvider();
-		listViewer.setContentProvider(cp);
-		listViewer.setInput(MatchFilter.allFilters());
-		listViewer.setCheckedElements(fPage.getMatchFilters());
+		fListViewer.setContentProvider(cp);
+		fListViewer.setInput(MatchFilter.allFilters());
+		fListViewer.setCheckedElements(fPage.getMatchFilters());
 
 		l= new Label(parent, SWT.NONE);
 		l.setFont(parent.getFont());
@@ -126,7 +116,7 @@ public class FiltersDialog extends SelectionStatusDialog {
 		data = new GridData(GridData.FILL_HORIZONTAL);
 		data.heightHint = convertHeightInCharsToPixels(3);
 		description.setLayoutData(data);
-		listViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+		fListViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				Object selectedElement = ((IStructuredSelection) event.getSelection()).getFirstElement();
 				if (selectedElement != null)
@@ -207,6 +197,6 @@ public class FiltersDialog extends SelectionStatusDialog {
 		fLimitElementCount= Integer.valueOf(fLimitElementsField.getText()).intValue();
 		fLimitElements= fLimitElementsCheckbox.getSelection();
 
-		setResult(Arrays.asList(listViewer.getCheckedElements()));
+		setResult(Arrays.asList(fListViewer.getCheckedElements()));
 	}
 }
