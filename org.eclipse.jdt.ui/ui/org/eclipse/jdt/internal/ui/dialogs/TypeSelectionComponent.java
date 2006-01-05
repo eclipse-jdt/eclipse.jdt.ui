@@ -376,7 +376,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 				new IPropertyChangeListener() {
 					public void propertyChange(PropertyChangeEvent event) {
 						IWorkingSet ws= (IWorkingSet)event.getNewValue();
-						if (ws == null) {
+						if (ws == null || (ws.isAggregateWorkingSet() && ws.isEmpty())) {
 							fScope= SearchEngine.createWorkspaceScope();
 							fTitleLabel.setText(null);
 						} else {
@@ -395,12 +395,12 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 				}
 			}
 			IWorkingSet ws= fFilterActionGroup.getWorkingSet();
-			if (ws != null) {
-				fScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true);
-				fTitleLabel.setText(ws.getLabel());
-			} else {
+			if (ws == null || (ws.isAggregateWorkingSet() && ws.isEmpty())) {
 				fScope= SearchEngine.createWorkspaceScope();
 				fTitleLabel.setText(null);
+			} else {
+				fScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope(ws, true);
+				fTitleLabel.setText(ws.getLabel());
 			}
 			fFilterActionGroup.fillViewMenu(viewMenu);
 		}

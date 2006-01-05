@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.ui.search.WorkingSetComparator;
 public class WorkingSetFilterActionGroup extends ActionGroup implements IWorkingSetActionGroup {
 
 	private static final String TAG_WORKING_SET_NAME= "workingSetName"; //$NON-NLS-1$
+	private static final String TAG_IS_WINDOW_WORKING_SET= "isWindowWorkingSet";  //$NON-NLS-1$
 	private static final String LRU_GROUP= "workingSet_lru_group"; //$NON-NLS-1$
 
 	private final WorkingSetFilter fWorkingSetFilter;
@@ -68,6 +69,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	private IMenuListener fMenuListener;
 	private List fContributions= new ArrayList();
 	private final IWorkbenchPage fWorkbenchPage;
+	private boolean fAllowWindowWorkingSetByDefault;
 
 	public WorkingSetFilterActionGroup(IWorkbenchPartSite site, IPropertyChangeListener changeListener) {
 		Assert.isNotNull(site);
@@ -75,6 +77,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 
 		fChangeListener= changeListener;
 		fWorkbenchPage= site.getPage();
+		fAllowWindowWorkingSetByDefault= true;
 		fClearWorkingSetAction= new ClearWorkingSetAction(this);
 		fSelectWorkingSetAction= new SelectWorkingSetAction(this, site);
 		fEditWorkingSetAction= new EditWorkingSetAction(this, site);
@@ -99,6 +102,7 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 		Assert.isNotNull(changeListener);
 
 		fWorkbenchPage= page;
+		fAllowWindowWorkingSetByDefault= false;
 		fChangeListener= changeListener;
 		fClearWorkingSetAction= new ClearWorkingSetAction(this);
 		fSelectWorkingSetAction= new SelectWorkingSetAction(this, shell);
@@ -167,9 +171,15 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	 */
 	public void saveState(IMemento memento) {
 		String workingSetName= ""; //$NON-NLS-1$
-		if (fWorkingSet != null && !fWorkingSet.isAggregateWorkingSet()) { 
-			workingSetName= fWorkingSet.getName();
+		boolean isWindowWorkingSet= false;
+		if (fWorkingSet != null) {
+			if (fWorkingSet.isAggregateWorkingSet()) { 
+				isWindowWorkingSet= true;
+			} else {
+				workingSetName= fWorkingSet.getName();
+			}
 		}
+		memento.putString(TAG_IS_WINDOW_WORKING_SET, Boolean.toString(isWindowWorkingSet));
 		memento.putString(TAG_WORKING_SET_NAME, workingSetName);
 	}
 
@@ -181,18 +191,27 @@ public class WorkingSetFilterActionGroup extends ActionGroup implements IWorking
 	 * @param memento
 	 */	
 	public void restoreState(IMemento memento) {
+		boolean isWindowWorkingSet;
+		if (memento.getString(TAG_IS_WINDOW_WORKING_SET) != null) {
+			isWindowWorkingSet= Boolean.valueOf(memento.getString(TAG_IS_WINDOW_WORKING_SET)).booleanValue();
+		} else {
+			isWindowWorkingSet= useWindowWorkingSetByDefault();
+		}
 		String workingSetName= memento.getString(TAG_WORKING_SET_NAME);
+		boolean hasWorkingSetName= workingSetName != null && workingSetName.length() > 0;
+		
 		IWorkingSet ws= null;
-		if (workingSetName != null && workingSetName.length() > 0) {
+		// First handle name if present.
+		if (hasWorkingSetName) {
 			ws= PlatformUI.getWorkbench().getWorkingSetManager().getWorkingSet(workingSetName);
-		} else if (fWorkbenchPage != null && useWindowWorkingSetByDefault()) {
+		} else if (isWindowWorkingSet && fWorkbenchPage != null) {
 			ws= fWorkbenchPage.getAggregateWorkingSet();
 		}
 		setWorkingSet(ws, false);
 	}
 
 	private boolean useWindowWorkingSetByDefault() {
-		return PlatformUI.getPreferenceStore().getBoolean(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT);
+		return fAllowWindowWorkingSetByDefault && PlatformUI.getPreferenceStore().getBoolean(IWorkbenchPreferenceConstants.USE_WINDOW_WORKING_SET_BY_DEFAULT);
 	}
 	
 
