@@ -323,6 +323,8 @@ public final class NewWizardMessages extends NLS {
 	public static String VariableBlock_job_description;
 	public static String VariableBlock_needsbuild_title;
 	public static String VariableBlock_needsbuild_message;
+	public static String VariableBlock_variableSettingError_titel;
+	public static String VariableBlock_variableSettingError_message;
 	public static String VariablePathDialogField_variabledialog_title;
 	
 	public static String CPVariableElementLabelProvider_reserved;

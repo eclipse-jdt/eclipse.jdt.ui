@@ -16,19 +16,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
 
-import org.eclipse.jdt.launching.JavaRuntime;
-
-import org.eclipse.core.resources.IncrementalProjectBuilder;
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
-import org.eclipse.core.runtime.jobs.Job;
+
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Composite;
@@ -37,6 +32,7 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -52,7 +48,11 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.launching.JavaRuntime;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.CoreUtility;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -298,37 +298,21 @@ public class VariableBlock {
 				needsBuild= (res == 0);
 			}
 			
-			final VariableBlockRunnable runnable= new VariableBlockRunnable(removedVariables, changedElements, needsBuild);
-			Job buildJob = new Job(NewWizardMessages.VariableBlock_job_description) {  
-				protected IStatus run(IProgressMonitor monitor) {
-					try {
-						runnable.setVariables(monitor);
-					} catch (CoreException e) {
-						return e.getStatus();
-					} catch (OperationCanceledException e) {
-						return Status.CANCEL_STATUS;
-					} finally {
-						monitor.done();
-					}
-					return Status.OK_STATUS;
-				}
-			};
+			final VariableBlockRunnable runnable= new VariableBlockRunnable(removedVariables, changedElements);			
+			final ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
+			try {
+				dialog.run(true, true, runnable);
+			} catch (InvocationTargetException e) {
+				ExceptionHandler.handle(new InvocationTargetException(new NullPointerException()), getShell(), NewWizardMessages.VariableBlock_variableSettingError_titel, NewWizardMessages.VariableBlock_variableSettingError_message);
+				return false;
+			} catch (InterruptedException e) {
+				return false;
+			}
 			
-			buildJob.setRule(ResourcesPlugin.getWorkspace().getRuleFactory().buildRule());
-			buildJob.setUser(true); 
-			buildJob.schedule();
-			return true;
-		}				
-//			ProgressMonitorDialog dialog= new ProgressMonitorDialog(getShell());
-//			try {
-//				dialog.run(true, true, runnable);
-//			} catch (InvocationTargetException e) {
-//				ExceptionHandler.handle(e, getShell(), NewWizardMessages.getString("VariableBlock.operation_errror.title"), NewWizardMessages.getString("VariableBlock.operation_errror.message")); //$NON-NLS-1$ //$NON-NLS-2$
-//				return false;
-//			} catch (InterruptedException e) {
-//				return false;
-//			}
-//		}
+			if (needsBuild) {
+				CoreUtility.getBuildJob(null).schedule();
+			}
+		}
 		return true;
 	}
 	
@@ -357,19 +341,17 @@ public class VariableBlock {
 	private class VariableBlockRunnable implements IRunnableWithProgress {
 		private List fToRemove;
 		private List fToChange;
-		private boolean fDoBuild;
 		
-		public VariableBlockRunnable(List toRemove, List toChange, boolean doBuild) {
+		public VariableBlockRunnable(List toRemove, List toChange) {
 			fToRemove= toRemove;
 			fToChange= toChange;
-			fDoBuild= doBuild;
 		}
 		
 		/*
 	 	 * @see IRunnableWithProgress#run(IProgressMonitor)
 		 */
 		public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-			monitor.beginTask(NewWizardMessages.VariableBlock_operation_desc, fDoBuild ? 2 : 1); 
+			monitor.beginTask(NewWizardMessages.VariableBlock_operation_desc, 1); 
 			try {
 				setVariables(monitor);
 				
@@ -401,10 +383,6 @@ public class VariableBlock {
 				k++;					
 			}
 			JavaCore.setClasspathVariables(names, paths, new SubProgressMonitor(monitor, 1));
-			
-			if (fDoBuild) {
-				JavaPlugin.getWorkspace().build(IncrementalProjectBuilder.FULL_BUILD, new SubProgressMonitor(monitor, 1));
-			}
 		}
 	}
 	
