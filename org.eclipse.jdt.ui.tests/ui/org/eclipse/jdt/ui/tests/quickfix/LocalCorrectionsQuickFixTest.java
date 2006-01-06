@@ -2101,7 +2101,62 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 	
-	
+	public void testUnimplementedMethods_bug122906() throws Exception {
+		IPackageFragment pack2= fSourceFolder.createPackageFragment("test2", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("import java.util.Properties;\n");
+		buf.append("public interface F {\n");
+		buf.append("    public void b(Properties p);\n");
+		buf.append("    public void g(test2.Properties p);\n");
+		buf.append("}\n");
+		pack2.createCompilationUnit("F.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class Properties {}\n");
+		pack2.createCompilationUnit("Properties.java", buf.toString(), false, null);	
+		
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public class A implements F {\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack2.createCompilationUnit("A.java", buf.toString(), false, null);	
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 2);
+		assertNumberOfProposals(proposals, 2);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview1= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("\n");
+		buf.append("import java.util.Properties;\n");
+		buf.append("\n");
+		buf.append("public class A implements F {\n");
+		buf.append("\n");
+		buf.append("    public void b(Properties p) {\n");
+		buf.append("    }\n");
+		buf.append("\n");
+		buf.append("    public void g(test2.Properties p) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		proposal= (CUCorrectionProposal) proposals.get(1);
+		String preview2= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test2;\n");
+		buf.append("public abstract class A implements F {\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
+	}
 	
 	public void testUnimplementedMethodsExtendingGenericType1() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);

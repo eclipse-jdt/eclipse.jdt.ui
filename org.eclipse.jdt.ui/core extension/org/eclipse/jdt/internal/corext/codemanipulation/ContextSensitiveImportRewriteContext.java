@@ -36,10 +36,12 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 	private final int fPosition;
 	private IBinding[] fDeclarationsInScope;
 	private Name[] fImportedNames;
+	private final NewImportRewrite fImportRewrite;
 	
-	public ContextSensitiveImportRewriteContext(CompilationUnit compilationUnit, int position) {
+	public ContextSensitiveImportRewriteContext(CompilationUnit compilationUnit, int position, NewImportRewrite importRewrite) {
 		fCompilationUnit= compilationUnit;
 		fPosition= position;
+		fImportRewrite= importRewrite;
 		fDeclarationsInScope= null;
 		fImportedNames= null;
 	}
@@ -81,6 +83,26 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 			} else {
 				if (containsDeclaration(binding, qualifier, name))
 					return RES_NAME_CONFLICT;
+			}
+		}
+		
+		String[] addedImports= fImportRewrite.getAddedImports();
+		String qualifiedName= JavaModelUtil.concatenateName(qualifier, name);
+		for (int i= 0; i < addedImports.length; i++) {
+			String addedImport= addedImports[i];
+			if (qualifiedName.equals(addedImport)) {
+				return RES_NAME_FOUND;
+			} else {
+				int index= addedImport.lastIndexOf('.');
+				String importedName;
+				if (index == -1) {
+					importedName= addedImport;
+				} else {
+					importedName= addedImport.substring(index + 1, addedImport.length());
+				}
+				if (importedName.equals(name)) {
+					return RES_NAME_CONFLICT;
+				}
 			}
 		}
 		

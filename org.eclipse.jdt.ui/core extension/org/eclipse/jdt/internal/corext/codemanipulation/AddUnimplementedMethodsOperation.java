@@ -199,7 +199,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 				AbstractTypeDeclaration firstTypeDecl= (AbstractTypeDeclaration)fASTRoot.types().get(0);
 				insertionPosition= firstTypeDecl.getStartPosition();
 				if (insertionPosition != -1) {
-					 context= new ContextSensitiveImportRewriteContext(fASTRoot, insertionPosition);
+					 context= new ContextSensitiveImportRewriteContext(fASTRoot, insertionPosition, importRewrite);
 				}
 			}
 

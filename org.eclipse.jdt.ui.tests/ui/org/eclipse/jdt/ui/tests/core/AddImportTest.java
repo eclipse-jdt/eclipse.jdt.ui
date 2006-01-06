@@ -1214,7 +1214,7 @@ public class AddImportTest extends CoreTests {
 		AssistContext context= new AssistContext(cu, offset, length);
 		
 		NewImportRewrite importRewrite= NewImportRewrite.create(context.getASTRoot(), true);
-		String qualifier= importRewrite.addImport(toImport, new ContextSensitiveImportRewriteContext(context.getASTRoot(), offset));
+		String qualifier= importRewrite.addImport(toImport, new ContextSensitiveImportRewriteContext(context.getASTRoot(), offset, importRewrite));
 		assertEquals("Type conflict not detected", expectedQualifier, qualifier);
 		return importRewrite.getAddedImports();
 	}
@@ -1227,7 +1227,7 @@ public class AddImportTest extends CoreTests {
 		AssistContext context= new AssistContext(cu, offset, length);
 		
 		NewImportRewrite importRewrite= NewImportRewrite.create(context.getASTRoot(), true);
-		String qualifier= importRewrite.addStaticImport(declaringClassName, fieldName, true, new ContextSensitiveImportRewriteContext(context.getASTRoot(), offset));
+		String qualifier= importRewrite.addStaticImport(declaringClassName, fieldName, true, new ContextSensitiveImportRewriteContext(context.getASTRoot(), offset, importRewrite));
 		assertEquals("Type conflict not detected", expectedQualifier, qualifier);
 		return importRewrite.getAddedStaticImports();
 	}

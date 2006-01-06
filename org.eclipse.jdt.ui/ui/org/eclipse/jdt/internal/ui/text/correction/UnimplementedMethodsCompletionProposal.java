@@ -78,7 +78,7 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 			settings.createComments= false;
 		}
 		ImportRewrite imports= new ImportRewrite(createImportRewrite((CompilationUnit) fTypeNode.getRoot()));
-		ImportRewriteContext context= new ContextSensitiveImportRewriteContext((CompilationUnit) fTypeNode.getRoot(), fTypeNode.getStartPosition());
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext((CompilationUnit) fTypeNode.getRoot(), fTypeNode.getStartPosition(), imports.getNewImportRewrite());
 		for (int i= 0; i < methods.length; i++) {
 			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(getCompilationUnit(), rewrite, imports, ast, methods[i], binding.getName(), settings, binding.isInterface(), context);
 			listRewrite.insertLast(newMethodDecl, null);

@@ -42,7 +42,7 @@ public abstract class AbstractFix implements IFix {
 	public static abstract class AbstractFixRewriteOperation implements IFixRewriteOperation {
 		
 		protected Type importType(final ITypeBinding toImport, final ASTNode accessor, NewImportRewrite imports, final CompilationUnit compilationUnit) {
-			ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(compilationUnit, accessor.getStartPosition());
+			ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(compilationUnit, accessor.getStartPosition(), imports);
 			return imports.addImport(toImport, compilationUnit.getAST(), importContext);
 		}
 	}
