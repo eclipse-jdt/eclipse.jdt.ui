@@ -104,6 +104,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			public Map getRequiredOptions() {return null;}
 			public Control createConfigurationControl(Composite parent) {return null;}
 			public void saveSettings(IDialogSettings settings) {}
+			public String[] getDescriptions() {return null;}
 		});
 		tagAsSummary("Code clean up - no fix", Dimension.ELAPSED_PROCESS);
 		

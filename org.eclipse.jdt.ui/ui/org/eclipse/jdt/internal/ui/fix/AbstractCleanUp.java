@@ -77,4 +77,13 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		return button;
 	}
 	
+	protected String removeMemonic(String s) {
+		StringBuffer buf= new StringBuffer(s);
+		for (int i=buf.length()-1;i>=0;i--) {
+			if (buf.charAt(i) == '&')
+				buf.deleteCharAt(i);
+		}
+		return buf.toString();
+	}
+	
 }

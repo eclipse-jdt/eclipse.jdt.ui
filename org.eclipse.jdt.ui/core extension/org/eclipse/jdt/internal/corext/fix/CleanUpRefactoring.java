@@ -155,6 +155,10 @@ public class CleanUpRefactoring extends Refactoring {
 	public boolean hasCleanUps() {
 		return !fCleanUps.isEmpty();
 	}
+	
+	public ICleanUp[] getCleanUps() {
+		return (ICleanUp[])fCleanUps.toArray(new ICleanUp[fCleanUps.size()]);
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.ltk.core.refactoring.Refactoring#getName()

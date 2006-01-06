@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
@@ -310,7 +311,22 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 	protected void addUserInputPages() {
 		if (fShowCUPage) {
 			SelectCUPage selectCUPage= new SelectCUPage(MultiFixMessages.CleanUpRefactoringWizard_SelectCompilationUnitsPage_name);
-			selectCUPage.setMessage(MultiFixMessages.CleanUpRefactoringWizard_SelectCompilationUnitsPage_message);
+			if (fShowCleanUpPage) {
+				selectCUPage.setMessage(MultiFixMessages.CleanUpRefactoringWizard_SelectCompilationUnitsPage_message);
+			} else {
+				ICleanUp[] cleanUps= ((CleanUpRefactoring)getRefactoring()).getCleanUps();
+				if (cleanUps.length == 1) {
+					ICleanUp cleanUp= cleanUps[0];
+					String[] descriptions= cleanUp.getDescriptions();
+					if (descriptions.length == 1) {
+						selectCUPage.setMessage(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_SelectCompilationUnitsPage_preSingleSelect_message, descriptions[0]));
+					} else {
+						selectCUPage.setMessage(MultiFixMessages.CleanUpRefactoringWizard_SelectCompilationUnitsPage_preSelect_message);
+					}
+				} else {
+					selectCUPage.setMessage(MultiFixMessages.CleanUpRefactoringWizard_SelectCompilationUnitsPage_preSelect_message);
+				}
+			}
 			addPage(selectCUPage);
 		}
 		

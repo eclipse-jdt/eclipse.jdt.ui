@@ -11,7 +11,9 @@
 package org.eclipse.jdt.internal.ui.fix;
 
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -123,6 +125,26 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 
 	public void saveSettings(IDialogSettings settings) {
 		super.saveSettings(getSection(settings, SECTION_NAME));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String[] getDescriptions() {
+		List result= new ArrayList();
+		if (isFlag(REMOVE_UNUSED_IMPORTS))
+			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedImport_description));
+		if (isFlag(REMOVE_UNUSED_PRIVATE_METHODS))
+			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedMethod_description));
+		if (isFlag(REMOVE_UNUSED_PRIVATE_CONSTRUCTORS))
+			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedConstructor_description));
+		if (isFlag(REMOVE_UNUSED_PRIVATE_TYPES))
+			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedType_description));
+		if (isFlag(REMOVE_UNUSED_PRIVATE_FIELDS))
+			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description));
+		if (isFlag(REMOVE_UNUSED_LOCAL_VARIABLES))
+			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description));
+		return (String[])result.toArray(new String[result.size()]);
 	}
 
 }

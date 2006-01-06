@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -92,6 +94,18 @@ public class StringCleanUp extends AbstractCleanUp {
 	
 	public void saveSettings(IDialogSettings settings) {
 		super.saveSettings(getSection(settings, SECTION_NAME));
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String[] getDescriptions() {
+		List result= new ArrayList();
+		if (isFlag(ADD_MISSING_NLS_TAG))
+			result.add(removeMemonic(MultiFixMessages.StringMultiFix_AddMissingNonNls_description));
+		if (isFlag(REMOVE_UNNECESSARY_NLS_TAG))
+			result.add(removeMemonic(MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description));
+		return (String[])result.toArray(new String[result.size()]);
 	}
 
 }

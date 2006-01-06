@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -110,6 +112,20 @@ public class Java50CleanUp extends AbstractCleanUp {
 	
 	public void saveSettings(IDialogSettings settings) {
 		super.saveSettings(getSection(settings, SECTION_NAME));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String[] getDescriptions() {
+		List result= new ArrayList();
+		if (isFlag(ADD_OVERRIDE_ANNOATION))
+			result.add(removeMemonic(MultiFixMessages.Java50MultiFix_AddMissingOverride_description));
+		if (isFlag(ADD_DEPRECATED_ANNOTATION))
+			result.add(removeMemonic(MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description));
+		if (isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP))
+			result.add(removeMemonic(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description));
+		return (String[])result.toArray(new String[result.size()]);
 	}
 
 }

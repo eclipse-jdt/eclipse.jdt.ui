@@ -10,7 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import java.util.ArrayList;
 import java.util.Hashtable;
+import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -128,6 +130,24 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 
 	public void saveSettings(IDialogSettings settings) {
 		super.saveSettings(getSection(settings, SECTION_NAME));
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String[] getDescriptions() {
+		List result= new ArrayList();
+		if (isFlag(QUALIFY_FIELD_ACCESS))
+			result.add(removeMemonic(MultiFixMessages.CodeStyleMultiFix_AddThisQualifier_description));
+		if (isFlag(QUALIFY_STATIC_FIELD_ACCESS))
+			result.add(removeMemonic(MultiFixMessages.CodeStyleMultiFix_QualifyAccessToStaticField));
+		if (isFlag(CHANGE_NON_STATIC_ACCESS_TO_STATIC))
+			result.add(removeMemonic(MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description));
+		if (isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT))
+			result.add(removeMemonic(MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect));
+		if (isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS))
+			result.add(removeMemonic(MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description));
+		return (String[])result.toArray(new String[result.size()]);
 	}
 	
 }

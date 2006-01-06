@@ -68,4 +68,11 @@ public interface ICleanUp {
 	 * @param settings The settings to store to, not null
 	 */
 	public abstract void saveSettings(IDialogSettings settings);
+	
+	/**
+	 * Description for each operation this clean up will execute
+	 * 
+	 * @return descriptions or null
+	 */
+	public String[] getDescriptions();
 }
