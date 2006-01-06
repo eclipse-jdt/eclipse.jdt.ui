@@ -226,6 +226,7 @@
 			class="org.eclipse.jdt.internal.ui.text.java.JavaTypeCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaTypeProposalCategory">
 			<partition type="__dftl_partition_content_type"/>
+			<partition type="__java_string"/>
 		</javaCompletionProposalComputer>
 	</extension>
 	<extension
@@ -235,6 +236,7 @@
 			class="org.eclipse.jdt.internal.ui.text.java.JavaNoTypeCompletionProposalComputer"
 			categoryId="org.eclipse.jdt.ui.javaNoTypeProposalCategory">
 			<partition type="__dftl_partition_content_type"/>
+			<partition type="__java_string"/>
 		</javaCompletionProposalComputer>
 	</extension>
 	<!-- javadoc completions -->   
