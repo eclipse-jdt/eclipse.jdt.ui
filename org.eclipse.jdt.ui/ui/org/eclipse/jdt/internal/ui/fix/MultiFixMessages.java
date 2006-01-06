@@ -39,6 +39,7 @@ public class MultiFixMessages extends NLS {
 	public static String Java50CleanUp_ConvertToEnhancedForLoop_description;
 	
 	public static String CleanUpRefactoringWizard_SelectCleanUpsPage_message;
+	public static String CleanUpRefactoringWizard_SelectCleanUpsPage_preSingleSelect_message;
 	public static String CleanUpRefactoringWizard_SelectCompilationUnitsPage_message;
 	public static String CleanUpRefactoringWizard_SelectCompilationUnitsPage_preSingleSelect_message;
 	public static String CleanUpRefactoringWizard_SelectCompilationUnitsPage_preSelect_message;

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.actions;
 
-import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.HashSet;
@@ -20,15 +19,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
-
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
@@ -51,11 +46,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
-import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 import org.eclipse.jdt.internal.ui.util.ElementValidator;
 
 public class CleanUpAction extends SelectionDispatchAction {
@@ -87,7 +79,7 @@ public class CleanUpAction extends SelectionDispatchAction {
 	public void run(ITextSelection selection) {
 		ICompilationUnit cu= getCompilationUnit(fEditor);
 		if (cu != null) {
-			runLight(cu);
+			run(cu);
 		}
 	}
 	
@@ -177,32 +169,33 @@ public class CleanUpAction extends SelectionDispatchAction {
 		}
 		return;
 	}
-
-	private void runLight(ICompilationUnit cu) {
-		if (!ElementValidator.check(cu, getShell(), ActionMessages.CleanUpAction_ErrorDialogTitle, fEditor != null)) 
-			return;
-		if (!ActionUtil.isProcessable(getShell(), cu))
-			return;
-		
-		CleanUpRefactoring refactoring= new CleanUpRefactoring();
-		refactoring.addCompilationUnit(cu);
-		
-		ICleanUp[] cleanUps= CleanUpRefactoringWizard.createAllCleanUps();
-		for (int i= 0; i < cleanUps.length; i++) {
-			refactoring.addCleanUp(cleanUps[i]);
-		}
-		
-		int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
-		Shell shell= JavaPlugin.getActiveWorkbenchShell();
-		BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
-		RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, true, shell, context);
-		try {
-			executer.perform();
-		} catch (InterruptedException e) {
-		} catch (InvocationTargetException e) {
-			JavaPlugin.log(e);
-		}
-	}
+	
+//Bug 120528 [clean up] inside editor behaves unexpected
+//	private void runLight(ICompilationUnit cu) {
+//		if (!ElementValidator.check(cu, getShell(), ActionMessages.CleanUpAction_ErrorDialogTitle, fEditor != null)) 
+//			return;
+//		if (!ActionUtil.isProcessable(getShell(), cu))
+//			return;
+//		
+//		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+//		refactoring.addCompilationUnit(cu);
+//		
+//		ICleanUp[] cleanUps= CleanUpRefactoringWizard.createAllCleanUps();
+//		for (int i= 0; i < cleanUps.length; i++) {
+//			refactoring.addCleanUp(cleanUps[i]);
+//		}
+//		
+//		int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
+//		Shell shell= JavaPlugin.getActiveWorkbenchShell();
+//		BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
+//		RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, true, shell, context);
+//		try {
+//			executer.perform();
+//		} catch (InterruptedException e) {
+//		} catch (InvocationTargetException e) {
+//			JavaPlugin.log(e);
+//		}
+//	}
 
 	/**
 	 * Perform on multiple compilation units. No editors are opened.

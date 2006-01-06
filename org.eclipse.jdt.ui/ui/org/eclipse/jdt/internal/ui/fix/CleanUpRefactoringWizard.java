@@ -48,6 +48,7 @@ import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
@@ -380,7 +381,17 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		
 		if (fShowCleanUpPage){
 			SelectCleanUpPage selectSolverPage= new SelectCleanUpPage(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_name);
-			selectSolverPage.setMessage(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_message);
+			if (fShowCUPage) {
+				selectSolverPage.setMessage(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_message);
+			} else {
+				ICompilationUnit[] compilationUnits= ((CleanUpRefactoring)getRefactoring()).getCompilationUnits();
+				if (compilationUnits.length == 1) {
+					String label= JavaElementLabels.getElementLabel(compilationUnits[0], JavaElementLabels.ALL_DEFAULT);
+					selectSolverPage.setMessage(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_preSingleSelect_message, label));
+				} else {
+					selectSolverPage.setMessage(MultiFixMessages.CleanUpRefactoringWizard_SelectCleanUpsPage_message);
+				}
+			}
 			addPage(selectSolverPage);
 		}
 	}
