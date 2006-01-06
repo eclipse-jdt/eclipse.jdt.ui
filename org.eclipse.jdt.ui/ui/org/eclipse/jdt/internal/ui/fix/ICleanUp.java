@@ -19,6 +19,7 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
@@ -75,4 +76,13 @@ public interface ICleanUp {
 	 * @return descriptions or null
 	 */
 	public String[] getDescriptions();
+
+	/**
+	 * Can the clean up operate on compilation units which are part of
+	 * <code>project</code>?
+	 * 
+	 * @param project The project, not null
+	 * @return true if clean up can fix problems in project
+	 */
+	public abstract boolean canCleanUp(IJavaProject project);
 }

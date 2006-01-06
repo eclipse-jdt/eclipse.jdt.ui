@@ -19,6 +19,8 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.jdt.core.IJavaProject;
+
 public abstract class AbstractCleanUp implements ICleanUp {
 	
 	protected static IDialogSettings getSection(IDialogSettings settings, String sectionName) {
@@ -84,6 +86,13 @@ public abstract class AbstractCleanUp implements ICleanUp {
 				buf.deleteCharAt(i);
 		}
 		return buf.toString();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean canCleanUp(IJavaProject project) {
+		return true;
 	}
 	
 }

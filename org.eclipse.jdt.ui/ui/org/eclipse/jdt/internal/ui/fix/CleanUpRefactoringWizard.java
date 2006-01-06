@@ -20,6 +20,7 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -39,6 +40,7 @@ import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -238,6 +240,14 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 		
 		private void createGroups(Composite parent) {
+			CleanUpRefactoring refactoring= (CleanUpRefactoring)getRefactoring();
+			ICompilationUnit[] compilationUnits= refactoring.getCompilationUnits();
+			final IJavaProject project;
+			if (areInSameProject(compilationUnits)) {
+				project= compilationUnits[0].getJavaProject();
+			} else {
+				project= null;
+			}
 			NameCleanUpTuple[] cleanUps= getNamedCleanUps();
 			for (int i= 0; i < cleanUps.length; i++) {
 				NameCleanUpTuple tuple= cleanUps[i];
@@ -247,10 +257,48 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				group.setLayout(new GridLayout(1, true));
 				group.setText(tuple.getName());
 				
-				tuple.getCleanUp().createConfigurationControl(group);
+				ICleanUp cleanUp= tuple.getCleanUp();
+				cleanUp.createConfigurationControl(group);
+				if (project != null && !cleanUp.canCleanUp(project)) {
+					disableGroup(group);
+				}
 			}
 		}
 		
+		private void disableGroup(Composite composite) {
+			composite.setEnabled(false);
+			Control[] children= composite.getChildren();
+			for (int i= 0; i < children.length; i++) {
+				Control child= children[i];
+				if (child instanceof Composite) {
+					disableGroup((Composite)child);
+				} else {
+					child.setEnabled(false);
+				}
+			}
+		}
+
+		private boolean areInSameProject(ICompilationUnit[] compilationUnits) {
+			if (compilationUnits.length == 0)
+				return false;
+			
+			IJavaProject p= compilationUnits[0].getJavaProject();
+			if (p == null)
+				return false;
+			
+			for (int i= 1; i < compilationUnits.length; i++) {
+				IJavaProject q= compilationUnits[i].getJavaProject();
+				if (q == null)
+					return false;
+				
+				if (!p.equals(q))
+					return false;
+				
+				p= q;
+			}
+			return true;
+		}
+
 		protected boolean performFinish() {
 			initializeRefactoring();
 			storeSettings();

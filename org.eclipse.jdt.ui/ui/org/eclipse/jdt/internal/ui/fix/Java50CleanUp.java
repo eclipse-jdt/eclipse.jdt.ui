@@ -25,11 +25,13 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 /**
  * Create fixes which can transform pre Java50 code to Java50 code
@@ -126,6 +128,13 @@ public class Java50CleanUp extends AbstractCleanUp {
 		if (isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP))
 			result.add(removeMemonic(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description));
 		return (String[])result.toArray(new String[result.size()]);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean canCleanUp(IJavaProject project) {
+		return JavaModelUtil.is50OrHigher(project);
 	}
 
 }
