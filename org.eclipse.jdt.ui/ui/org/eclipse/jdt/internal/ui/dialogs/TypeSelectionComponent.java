@@ -15,6 +15,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.accessibility.AccessibleAdapter;
+import org.eclipse.swt.accessibility.AccessibleEvent;
 import org.eclipse.swt.custom.CLabel;
 import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.events.DisposeEvent;
@@ -174,7 +176,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		return fScope;
 	}
 	
-	private void createContent(String message, int elementKind) {
+	private void createContent(final String message, int elementKind) {
 		GridLayout layout= new GridLayout();
 		layout.numColumns= 2;
 		layout.marginWidth= 0; layout.marginHeight= 0;
@@ -208,6 +210,11 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 				}
 			}
 		});
+		fFilter.getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			public void getName(AccessibleEvent e) {
+				e.result= message;
+			}
+		});
 		TextFieldNavigationHandler.install(fFilter);
 		
 		Label label= new Label(this, SWT.NONE);
@@ -235,6 +242,11 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		gd.heightHint= SWTUtil.getTableHeightHint(fViewer.getTable(), 10);
 		gd.horizontalSpan= 2;
 		fViewer.getTable().setLayoutData(gd);
+		fViewer.getTable().getAccessible().addAccessibleListener(new AccessibleAdapter() {
+			public void getName(AccessibleEvent e) {
+				e.result= JavaUIMessages.TypeSelectionComponent_label;
+			}
+		});
 		fViewer.setFullyQualifyDuplicates(fSettings.getBoolean(FULLY_QUALIFY_DUPLICATES), false);
 		if (fTypeSelectionExtension != null) {
 			Control addition= fTypeSelectionExtension.createContentArea(this);
