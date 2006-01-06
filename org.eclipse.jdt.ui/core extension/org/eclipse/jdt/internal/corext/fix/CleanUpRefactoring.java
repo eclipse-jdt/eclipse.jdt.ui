@@ -229,7 +229,7 @@ public class CleanUpRefactoring extends Refactoring {
 					break;
 				} else {
 					ICompilationUnit endUnit = ((ParseListElement)toGo.get(end)).getCompilationUnit();
-					if (endUnit.getJavaProject() != beforeEndUnit.getJavaProject()) {
+					if (!endUnit.getJavaProject().equals(beforeEndUnit.getJavaProject())) {
 						beforeEndUnit= endUnit;
 						break;
 					} else {
