@@ -274,7 +274,7 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			}
 			
 			fLibrariesList.addElements(elementsToAdd);
-			if (index == IDX_ADDLIB) {
+			if (index == IDX_ADDLIB || index == IDX_ADDVAR) {
 				fLibrariesList.refresh();
 			}
 			fLibrariesList.postSetSelection(new StructuredSelection(libentries));
@@ -555,6 +555,9 @@ public class LibrariesWorkbookPage extends BuildPathBasePage {
 			CPListElement curr= res[0];
 			curr.setExported(elem.isExported());
 			fLibrariesList.replaceElement(elem, curr);
+			if (elem.getEntryKind() == IClasspathEntry.CPE_VARIABLE) {
+				fLibrariesList.refresh();
+			}
 		}		
 			
 	}
