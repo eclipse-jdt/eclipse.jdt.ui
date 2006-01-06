@@ -56,7 +56,6 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ILineTracker;
-import org.eclipse.jface.text.ISynchronizable;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModel;
@@ -957,21 +956,6 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			return null;
 		}
 	}
-
-    private void setUpSynchronization(CompilationUnitInfo cuInfo) {
-        IDocument document= cuInfo.fTextFileBuffer.getDocument();
-        IAnnotationModel model= cuInfo.fModel;
-
-        if (document instanceof ISynchronizable) {
-            Object lock= ((ISynchronizable)document).getLockObject();
-            if (lock == null) {
-            	lock= new Object();
-            	((ISynchronizable)document).setLockObject(lock);
-            }
-            if (model instanceof ISynchronizable)
-            	((ISynchronizable) model).setLockObject(lock);
-        }
-    }
 
     /*
 	 * @see org.eclipse.ui.editors.text.TextFileDocumentProvider#disposeFileInfo(java.lang.Object, org.eclipse.ui.editors.text.TextFileDocumentProvider.FileInfo)
