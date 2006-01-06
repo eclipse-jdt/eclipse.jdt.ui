@@ -51,7 +51,6 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.ListenerList;
@@ -1774,7 +1773,6 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	public void editorContextMenuAboutToShow(IMenuManager menu) {
 
 		super.editorContextMenuAboutToShow(menu);
-		menu.appendToGroup(ITextEditorActionConstants.GROUP_SAVE, new Separator(IContextMenuConstants.GROUP_OPEN));
 		menu.insertAfter(IContextMenuConstants.GROUP_OPEN, new GroupMarker(IContextMenuConstants.GROUP_SHOW));
 
 		ActionContext context= new ActionContext(getSelectionProvider().getSelection());
