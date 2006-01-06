@@ -649,4 +649,18 @@ public class Strings {
 		else
 			return text.substring(0, end);
 	}
+	
+	public static String removeMnemonicIndicator(String string) {
+		int length= string.length();
+		StringBuffer result= new StringBuffer(length);
+		char lastChar= ' '; // everything except & is OK as an initializer
+		for(int i= 0; i < length; i++) {
+			char ch= string.charAt(i);
+			if (ch != '&' || lastChar == '&') {
+				result.append(ch);				
+			}
+			lastChar= ch;
+		}
+		return result.toString();
+	}
 }

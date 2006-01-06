@@ -39,6 +39,7 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.ToolBar;
 import org.eclipse.swt.widgets.ToolItem;
@@ -60,6 +61,7 @@ import org.eclipse.ui.XMLMemento;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
+import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
 import org.eclipse.jdt.ui.dialogs.ITypeSelectionComponent;
@@ -212,7 +214,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 		});
 		fFilter.getAccessible().addAccessibleListener(new AccessibleAdapter() {
 			public void getName(AccessibleEvent e) {
-				e.result= message;
+				e.result= Strings.removeMnemonicIndicator(message);
 			}
 		});
 		TextFieldNavigationHandler.install(fFilter);
@@ -237,14 +239,17 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 			fTypeSelectionExtension != null ? fTypeSelectionExtension.getFilterExtension() : null,
 			fTypeSelectionExtension != null ? fTypeSelectionExtension.getImageProvider() : null);
 		gd= new GridData(GridData.FILL_BOTH);
-		PixelConverter converter= new PixelConverter(fViewer.getTable());
+		final Table table= fViewer.getTable();
+		PixelConverter converter= new PixelConverter(table);
 		gd.widthHint= converter.convertWidthInCharsToPixels(70);
-		gd.heightHint= SWTUtil.getTableHeightHint(fViewer.getTable(), 10);
+		gd.heightHint= SWTUtil.getTableHeightHint(table, 10);
 		gd.horizontalSpan= 2;
-		fViewer.getTable().setLayoutData(gd);
-		fViewer.getTable().getAccessible().addAccessibleListener(new AccessibleAdapter() {
+		table.setLayoutData(gd);
+		table.getAccessible().addAccessibleListener(new AccessibleAdapter() {
 			public void getName(AccessibleEvent e) {
-				e.result= JavaUIMessages.TypeSelectionComponent_label;
+				if (table.getSelectionCount() == 0) {
+					e.result= Strings.removeMnemonicIndicator(JavaUIMessages.TypeSelectionComponent_label);
+				}
 			}
 		});
 		fViewer.setFullyQualifyDuplicates(fSettings.getBoolean(FULLY_QUALIFY_DUPLICATES), false);
@@ -266,7 +271,7 @@ public class TypeSelectionComponent extends Composite implements ITypeSelectionC
 			fLabel= new CLabel(fForm, SWT.FLAT);
 			fLabel.setFont(fForm.getFont());
 			fForm.setContent(fLabel);
-			fViewer.getTable().addSelectionListener(new SelectionAdapter() {
+			table.addSelectionListener(new SelectionAdapter() {
 				private TypeInfoLabelProvider fLabelProvider= new TypeInfoLabelProvider(
 					TypeInfoLabelProvider.SHOW_TYPE_CONTAINER_ONLY + TypeInfoLabelProvider.SHOW_ROOT_POSTFIX);
 				public void widgetSelected(SelectionEvent event) {
