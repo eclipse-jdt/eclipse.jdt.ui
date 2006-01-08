@@ -16,8 +16,6 @@ import java.util.List;
 
 import org.eclipse.core.runtime.IAdaptable;
 
-import org.eclipse.core.resources.IProject;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
@@ -281,13 +279,13 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				scope= factory.createJavaSearchScope(getContainer().getSelection(), includeJRE);
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
-				scope= factory.createJavaProjectSearchScope(getContainer().getSelection(), includeJRE);
-				IProject[] projects= JavaSearchScopeFactory.getInstance().getProjects(scope);
-				if (projects.length >= 1) {
-					if (projects.length == 1)
-						scopeDescription= Messages.format(SearchMessages.EnclosingProjectScope, projects[0].getName()); 
+				String[] projectNames= getContainer().getEnclosingProjectNames();
+				scope= factory.createJavaProjectSearchScope(projectNames, includeJRE);
+				if (projectNames.length >= 1) {
+					if (projectNames.length == 1)
+						scopeDescription= Messages.format(SearchMessages.EnclosingProjectScope, projectNames[0]); 
 					else
-						scopeDescription= Messages.format(SearchMessages.EnclosingProjectsScope, projects[0].getName()); 
+						scopeDescription= Messages.format(SearchMessages.EnclosingProjectsScope, projectNames[0]); 
 				} else 
 					scopeDescription= Messages.format(SearchMessages.EnclosingProjectScope, "");  //$NON-NLS-1$
 				break;
@@ -297,8 +295,8 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				if (workingSets == null || workingSets.length < 1)
 					return false;
 				scopeDescription= Messages.format(SearchMessages.WorkingSetScope, SearchUtil.toString(workingSets)); 
-				scope= factory.createJavaSearchScope(getContainer().getSelectedWorkingSets(), includeJRE);
-				SearchUtil.updateLRUWorkingSets(getContainer().getSelectedWorkingSets());
+				scope= factory.createJavaSearchScope(workingSets, includeJRE);
+				SearchUtil.updateLRUWorkingSets(workingSets);
 		
 		}
 		

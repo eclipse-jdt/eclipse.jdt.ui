@@ -10,8 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -21,19 +23,16 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IFileEditorInput;
-import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
@@ -48,15 +47,16 @@ import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 
 public class JavaSearchScopeFactory {
 
 	private static JavaSearchScopeFactory fgInstance;
-	private static final IJavaSearchScope EMPTY_SCOPE= SearchEngine.createJavaSearchScope(new IJavaElement[] {});
-	private static final Set EMPTY_SET= new HashSet(0);
+	private final IJavaSearchScope EMPTY_SCOPE= SearchEngine.createJavaSearchScope(new IJavaElement[] {});
+	private final Set EMPTY_SET= new HashSet(0);
 	
 	private JavaSearchScopeFactory() {
 	}
@@ -85,13 +85,21 @@ public class JavaSearchScopeFactory {
 			return EMPTY_SCOPE;
 
 		Set javaElements= new HashSet(workingSets.length * 10);
-		for (int i= 0; i < workingSets.length; i++)
-			addJavaElements(javaElements, workingSets[i]);
+		for (int i= 0; i < workingSets.length; i++) {
+			IWorkingSet workingSet= workingSets[i];
+			if (workingSet.isEmpty() && workingSet.isAggregateWorkingSet()) {
+				return createWorkspaceScope(includeJRE);
+			}
+			addJavaElements(javaElements, workingSet);
+		}
 		return createJavaSearchScope(javaElements, includeJRE);
 	}
 	
 	public IJavaSearchScope createJavaSearchScope(IWorkingSet workingSet, boolean includeJRE) {
 		Set javaElements= new HashSet(10);
+		if (workingSet.isEmpty() && workingSet.isAggregateWorkingSet()) {
+			return createWorkspaceScope(includeJRE);
+		}
 		addJavaElements(javaElements, workingSet);
 		return createJavaSearchScope(javaElements, includeJRE);
 	}
@@ -107,120 +115,49 @@ public class JavaSearchScopeFactory {
 	public IJavaSearchScope createJavaSearchScope(ISelection selection, boolean includeJRE) {
 		return createJavaSearchScope(getJavaElements(selection), includeJRE);
 	}
-	
-	private IJavaSearchScope internalCreateProjectScope(ISelection selection, boolean includeJRE) {
-		Set javaProjects= getJavaProjects(selection);
-		return createJavaSearchScope(javaProjects, includeJRE);
-	}
-	
-	public IJavaSearchScope createJavaProjectSearchScope(IJavaElement selection, boolean includeJRE) {
-		return createJavaProjectSearchScope(new StructuredSelection(selection), includeJRE);
-	}
-	
-	
-	public IJavaSearchScope createJavaProjectSearchScope(ISelection selection, boolean includeJRE) {
-		IEditorInput input= getActiveEditorInput();
-		if (input != null)
-			return JavaSearchScopeFactory.getInstance().internalCreateProjectScope(input, includeJRE);
-		return internalCreateProjectScope(selection, includeJRE);
 		
-	}
-	public String getProjectScopeDescription(IJavaElement element) {
-		IJavaProject project= element.getJavaProject();
-		IEditorInput input= getActiveEditorInput();
-		if (input != null) {
-			IAdaptable inputElement = getEditorInputElement(input);
-			if (inputElement != null) {
-				IJavaProject project2= getJavaProject(inputElement);
-				if (project2 != null)
-					project= project2;
+	public IJavaSearchScope createJavaProjectSearchScope(String[] projectNames, boolean includeJRE) {
+		ArrayList res= new ArrayList();
+		IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		for (int i= 0; i < projectNames.length; i++) {
+			IJavaProject project= JavaCore.create(root.getProject(projectNames[i]));
+			if (project.exists()) {
+				res.add(project);
 			}
 		}
-
-		if (project != null)
-			return Messages.format(SearchMessages.ProjectScope, project.getElementName()); 
-		else 
-			return Messages.format(SearchMessages.ProjectScope, "");  //$NON-NLS-1$
-	}
-
-	private IEditorInput getActiveEditorInput() {
-		IWorkbenchPage page= JavaPlugin.getActivePage();
-		if (page != null) {
-			IEditorPart editor= page.getActiveEditor();
-			if (editor != null && editor.equals(page.getActivePart())) {
-				return editor.getEditorInput();
-			}
-		}
-		return null;
-	}
-
-	private IJavaSearchScope internalCreateProjectScope(IEditorInput editorInput, boolean includeJRE) {
-		IAdaptable inputElement = getEditorInputElement(editorInput);
-		StructuredSelection selection;
-		if (inputElement != null) {
-			selection= new StructuredSelection(inputElement);
-		} else {
-			selection= StructuredSelection.EMPTY;
-		}
-		return internalCreateProjectScope(selection, includeJRE);
+		return createJavaSearchScope(res, includeJRE);
 	}
 	
-	private IAdaptable getEditorInputElement(IEditorInput editorInput) {
-		IAdaptable inputElement= null;
-		if (editorInput instanceof IClassFileEditorInput) {
-			inputElement= ((IClassFileEditorInput)editorInput).getClassFile();
-		} else if (editorInput instanceof IFileEditorInput) {
-			inputElement= ((IFileEditorInput)editorInput).getFile();
-		}
-		return inputElement;
+	public IJavaSearchScope createJavaProjectSearchScope(IJavaProject project, boolean includeJRE) {
+		return SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, getSearchFlags(includeJRE));
 	}
-
-	private Set getJavaProjects(ISelection selection) {
-		Set javaProjects;
-		if (selection instanceof IStructuredSelection && !selection.isEmpty()) {
-			Iterator iter= ((IStructuredSelection) selection).iterator();
-			javaProjects= new HashSet(((IStructuredSelection) selection).size());
-			while (iter.hasNext()) {
-				Object selectedElement= iter.next();
-				if (selectedElement instanceof LogicalPackage)
-					// must check this first, since it's adaptable, but doesn't adapt to anything useful
-					javaProjects.add(((LogicalPackage) selectedElement).getJavaProject());
-				else if (selectedElement instanceof IAdaptable) {
-					IJavaProject javaProject= getJavaProject((IAdaptable) selectedElement);
-					if (javaProject != null)
-						javaProjects.add(javaProject);
-				}
-			}
-		} else {
-			javaProjects= EMPTY_SET;
-		}
-		return javaProjects;
-	}
-
-	private IJavaProject getJavaProject(IAdaptable selectedElement) {
-		IJavaProject javaProject= (IJavaProject) selectedElement.getAdapter(IJavaProject.class);
-		if (javaProject != null)
-			return javaProject;
-		IJavaElement javaElement= (IJavaElement) selectedElement.getAdapter(IJavaElement.class);
-		if (javaElement != null) {
-			javaProject= javaElement.getJavaProject();
-			if (javaProject != null)
-				return javaProject;
-		}
-		IResource resource= (IResource) selectedElement.getAdapter(IResource.class);
-		if (resource != null) {
-			IProject project= resource.getProject();
-			try {
-				if (project != null && project.isAccessible() && project.hasNature(JavaCore.NATURE_ID)) {
-					return JavaCore.create(project);
-				}
-			} catch (CoreException e) {
-				// Since the java project is accessible, this should not happen, anyway, don't search this project
+	
+	public IJavaSearchScope createJavaProjectSearchScope(IEditorInput editorInput, boolean includeJRE) {
+		IJavaElement elem= JavaUI.getEditorInputJavaElement(editorInput);
+		if (elem != null) {
+			IJavaProject project= elem.getJavaProject();
+			if (project != null) {
+				return createJavaProjectSearchScope(project, includeJRE);
 			}
 		}
-		return null;
+		return EMPTY_SCOPE;
 	}
-
+	
+	public String getProjectScopeDescription(IJavaProject project) {
+		return Messages.format(SearchMessages.ProjectScope, project.getElementName()); 
+	}
+	
+	public String getProjectScopeDescription(IEditorInput editorInput) {
+		IJavaElement elem= JavaUI.getEditorInputJavaElement(editorInput);
+		if (elem != null) {
+			IJavaProject project= elem.getJavaProject();
+			if (project != null) {
+				return getProjectScopeDescription(project);
+			}
+		}
+		return Messages.format(SearchMessages.ProjectScope, "");  //$NON-NLS-1$
+	}
+	
 	
 	public IProject[] getProjects(IJavaSearchScope scope) {
 		IPath[] paths= scope.enclosingProjectsAndJars();
@@ -256,7 +193,7 @@ public class JavaSearchScopeFactory {
 				addJavaElements(result, (LogicalPackage) selectedElement);
 			} else if (selectedElement instanceof IWorkingSet) {
 				IWorkingSet ws= (IWorkingSet)selectedElement;
-				result.addAll(getJavaElements(ws.getElements()));
+				addJavaElements(result, ws);
 			} else if (selectedElement instanceof IAdaptable) {
 				IResource resource= (IResource) ((IAdaptable) selectedElement).getAdapter(IResource.class);
 				if (resource != null)
@@ -267,10 +204,10 @@ public class JavaSearchScopeFactory {
 		return result;
 	}
 
-	private IJavaSearchScope createJavaSearchScope(Set javaElements, boolean includeJRE) {
+	private IJavaSearchScope createJavaSearchScope(Collection javaElements, boolean includeJRE) {
 		if (javaElements.isEmpty())
 			return EMPTY_SCOPE;
-		IJavaElement[] elementArray= (IJavaElement[])javaElements.toArray(new IJavaElement[javaElements.size()]);
+		IJavaElement[] elementArray= (IJavaElement[]) javaElements.toArray(new IJavaElement[javaElements.size()]);
 		return SearchEngine.createJavaSearchScope(elementArray, getSearchFlags(includeJRE));
 	}
 	
@@ -312,6 +249,16 @@ public class JavaSearchScopeFactory {
 		if (workingSet == null)
 			return;
 		
+		if (workingSet.isAggregateWorkingSet() && workingSet.isEmpty()) {
+			try {
+				IJavaProject[] projects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
+				javaElements.addAll(Arrays.asList(projects));
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+			return;
+		}
+		
 		IAdaptable[] elements= workingSet.getElements();
 		for (int i= 0; i < elements.length; i++) {
 			IJavaElement javaElement=(IJavaElement) elements[i].getAdapter(IJavaElement.class);
@@ -340,7 +287,7 @@ public class JavaSearchScopeFactory {
 				IJavaProject[] projects= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getJavaProjects();
 				return SearchEngine.createJavaSearchScope(projects, getSearchFlags(includeJRE));
 			} catch (JavaModelException e) {
-				// ignore, use workspacescope instead
+				// ignore, use workspace scope instead
 			}
 		}
 		return SearchEngine.createWorkspaceScope();

@@ -10,17 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.actions;
 
+import org.eclipse.ui.IWorkbenchSite;
+import org.eclipse.ui.PlatformUI;
+
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchPage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
-import org.eclipse.ui.IWorkbenchSite;
-import org.eclipse.ui.PlatformUI;
 
 /**
  * Finds field read accesses of the selected element in the enclosing project.
@@ -60,13 +61,24 @@ public class FindReadReferencesInProjectAction extends FindReadReferencesAction 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_PROJECT_ACTION);
 	}
 	
-	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
-		return JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(element, JavaSearchPage.getSearchJRE());
+	IJavaSearchScope getScope(IJavaElement element) {
+		JavaSearchScopeFactory instance= JavaSearchScopeFactory.getInstance();
+		JavaEditor editor= getEditor();
+		if (editor != null) {
+			return instance.createJavaProjectSearchScope(editor.getEditorInput(), JavaSearchPage.getSearchJRE());
+		} else {
+			return instance.createJavaProjectSearchScope(element.getJavaProject(), JavaSearchPage.getSearchJRE());
+		}
 	}
 
 	String getScopeDescription(IJavaElement element) {
-		return JavaSearchScopeFactory.getInstance().getProjectScopeDescription(element);
+		JavaSearchScopeFactory instance= JavaSearchScopeFactory.getInstance();
+		JavaEditor editor= getEditor();
+		if (editor != null) {
+			return instance.getProjectScopeDescription(editor.getEditorInput());
+		} else {
+			return instance.getProjectScopeDescription(element.getJavaProject());
+		}
 	}
-
 
 }

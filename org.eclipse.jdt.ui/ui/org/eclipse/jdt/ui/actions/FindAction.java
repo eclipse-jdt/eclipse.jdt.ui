@@ -342,5 +342,9 @@ public abstract class FindAction extends SelectionDispatchAction {
 		}
 		return type;
 	}
+	
+	JavaEditor getEditor() {
+		return fEditor;
+	}
 		
 }

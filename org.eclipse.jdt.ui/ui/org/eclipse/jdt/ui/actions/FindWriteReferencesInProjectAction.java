@@ -65,11 +65,23 @@ public class FindWriteReferencesInProjectAction extends FindWriteReferencesActio
 	}
 	
 	IJavaSearchScope getScope(IJavaElement element) {
-		return JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(element, JavaSearchPage.getSearchJRE());
+		JavaSearchScopeFactory instance= JavaSearchScopeFactory.getInstance();
+		JavaEditor editor= getEditor();
+		if (editor != null) {
+			return instance.createJavaProjectSearchScope(editor.getEditorInput(), JavaSearchPage.getSearchJRE());
+		} else {
+			return instance.createJavaProjectSearchScope(element.getJavaProject(), JavaSearchPage.getSearchJRE());
+		}
 	}
 
 	String getScopeDescription(IJavaElement element) {
-		return JavaSearchScopeFactory.getInstance().getProjectScopeDescription(element);
+		JavaSearchScopeFactory instance= JavaSearchScopeFactory.getInstance();
+		JavaEditor editor= getEditor();
+		if (editor != null) {
+			return instance.getProjectScopeDescription(editor.getEditorInput());
+		} else {
+			return instance.getProjectScopeDescription(element.getJavaProject());
+		}
 	}
 
 	protected JavaSearchQuery createJob(IJavaElement element) {

@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.ui.search.SearchMessages;
  * @since 3.0
  */
 public class FindDeclarationsInProjectAction extends FindDeclarationsAction {
-
+	
 	/**
 	 * Creates a new <code>FindDeclarationsInProjectAction</code>. The action 
 	 * requires that the selection provided by the site's selection provider is of type 
@@ -60,13 +60,25 @@ public class FindDeclarationsInProjectAction extends FindDeclarationsAction {
 		setImageDescriptor(JavaPluginImages.DESC_OBJS_SEARCH_DECL);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_PROJECT_ACTION);
 	}
-
+	
 	IJavaSearchScope getScope(IJavaElement element) {
-		return JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(element, true);
+		JavaSearchScopeFactory instance= JavaSearchScopeFactory.getInstance();
+		JavaEditor editor= getEditor();
+		if (editor != null) {
+			return instance.createJavaProjectSearchScope(editor.getEditorInput(), true);
+		} else {
+			return instance.createJavaProjectSearchScope(element.getJavaProject(), true);
+		}
 	}
 
 	String getScopeDescription(IJavaElement element) {
-		return JavaSearchScopeFactory.getInstance().getProjectScopeDescription(element);
+		JavaSearchScopeFactory instance= JavaSearchScopeFactory.getInstance();
+		JavaEditor editor= getEditor();
+		if (editor != null) {
+			return instance.getProjectScopeDescription(editor.getEditorInput());
+		} else {
+			return instance.getProjectScopeDescription(element.getJavaProject());
+		}
 	}
 
 }

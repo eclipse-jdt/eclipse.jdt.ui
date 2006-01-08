@@ -64,11 +64,23 @@ public class FindImplementorsInProjectAction extends FindImplementorsAction {
 	}
 	
 	IJavaSearchScope getScope(IJavaElement element) {
-		return JavaSearchScopeFactory.getInstance().createJavaProjectSearchScope(element, true);
+		JavaSearchScopeFactory instance= JavaSearchScopeFactory.getInstance();
+		JavaEditor editor= getEditor();
+		if (editor != null) {
+			return instance.createJavaProjectSearchScope(editor.getEditorInput(), true);
+		} else {
+			return instance.createJavaProjectSearchScope(element.getJavaProject(), true);
+		}
 	}
 
 	String getScopeDescription(IJavaElement element) {
-		return JavaSearchScopeFactory.getInstance().getProjectScopeDescription(element);
+		JavaSearchScopeFactory instance= JavaSearchScopeFactory.getInstance();
+		JavaEditor editor= getEditor();
+		if (editor != null) {
+			return instance.getProjectScopeDescription(editor.getEditorInput());
+		} else {
+			return instance.getProjectScopeDescription(element.getJavaProject());
+		}
 	}
 
 	protected JavaSearchQuery createJob(IJavaElement element) {
