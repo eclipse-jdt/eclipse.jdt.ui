@@ -18,8 +18,6 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
-import org.eclipse.core.filesystem.URIUtil;
-
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -38,6 +36,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
@@ -116,7 +115,7 @@ public final class JarImportWizardPage extends WizardPage {
 			setTitle(JarImportMessages.JarImportWizardPage_page_replace_title);
 			setDescription(JarImportMessages.JarImportWizardPage_page_replace_description);
 		}
-		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_PACKAGER);
+		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_IMPORTER);
 	}
 
 	/**
@@ -130,6 +129,7 @@ public final class JarImportWizardPage extends WizardPage {
 		createLocationGroup(composite);
 		if (fImportWizard)
 			createInputGroup(composite);
+		createRenameGroup(composite);
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.JARIMPORT_WIZARD_PAGE);
@@ -259,6 +259,30 @@ public final class JarImportWizardPage extends WizardPage {
 	}
 
 	/**
+	 * Creates the rename group.
+	 * 
+	 * @param parent
+	 *            the parent control
+	 */
+	protected void createRenameGroup(final Composite parent) {
+		Assert.isNotNull(parent);
+		final Button button= new Button(parent, SWT.CHECK);
+		button.setText(JarImportMessages.JarImportWizardPage_replace_jar_file);
+		button.setSelection(!fJarImportData.isRenameJarFile());
+		button.addSelectionListener(new SelectionAdapter() {
+
+			public void widgetSelected(final SelectionEvent event) {
+				fJarImportData.setRenameJarFile(!button.getSelection());
+			}
+		});
+		if (!fImportWizard) {
+			final GridData data= new GridData();
+			data.horizontalIndent= IDialogConstants.HORIZONTAL_MARGIN;
+			button.setLayoutData(data);
+		}
+	}
+
+	/**
 	 * Handles the browse button selected event.
 	 */
 	protected void handleBrowseButtonSelected() {
@@ -310,7 +334,7 @@ public final class JarImportWizardPage extends WizardPage {
 					setPageComplete(false);
 					return;
 				}
-				fJarImportData.setRefactoringFileLocation(URIUtil.toURI(path));
+				fJarImportData.setRefactoringFileLocation(file.toURI());
 				ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntryName());
 				if (entry == null) {
 					setMessage(JarImportMessages.JarImportWizardPage_no_refactorings, INFORMATION);

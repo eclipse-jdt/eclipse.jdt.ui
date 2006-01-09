@@ -56,6 +56,8 @@ public final class JarImportMessages extends NLS {
 
 	public static String JarImportWizardPage_page_title;
 
+	public static String JarImportWizardPage_replace_jar_file;
+
 	public static String JarImportWizardPage_select_single_jar;
 
 	public static String PerformRefactoringsOperation_init_error;

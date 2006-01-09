@@ -34,6 +34,9 @@ public final class JarImportData extends JarPackageData {
 	/** The refactoring history to import, or <code>null</code> */
 	private RefactoringHistory fRefactoringHistory= null;
 
+	/** Should the jar file be renamed to the new file name? */
+	private boolean fRenameJarFile= true;
+
 	/**
 	 * Returns the package fragment root to update.
 	 * 
@@ -59,6 +62,16 @@ public final class JarImportData extends JarPackageData {
 	 */
 	public RefactoringHistory getRefactoringHistory() {
 		return fRefactoringHistory;
+	}
+
+	/**
+	 * Should the jar file be renamed to the new file name?
+	 * 
+	 * @return <code>true</code> if it should be renamed, <code>false</code>
+	 *         otherwise
+	 */
+	public boolean isRenameJarFile() {
+		return fRenameJarFile;
 	}
 
 	/**
@@ -89,5 +102,16 @@ public final class JarImportData extends JarPackageData {
 	 */
 	public void setRefactoringHistory(final RefactoringHistory history) {
 		fRefactoringHistory= history;
+	}
+
+	/**
+	 * Determines whether the jar file should be renamed.
+	 * 
+	 * @param rename
+	 *            <code>true</code> to rename the jar file, <code>false</code>
+	 *            otherwise
+	 */
+	public void setRenameJarFile(final boolean rename) {
+		fRenameJarFile= rename;
 	}
 }

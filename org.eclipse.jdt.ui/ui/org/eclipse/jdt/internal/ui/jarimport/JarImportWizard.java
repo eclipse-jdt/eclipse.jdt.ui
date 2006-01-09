@@ -28,6 +28,7 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.filesystem.URIUtil;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
@@ -74,7 +75,6 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.binary.StubCreationOperation;
@@ -296,7 +296,7 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 		if (root.exists(path)) {
 			location= root.getFile(path).getRawLocationURI();
 		} else
-			location= URIUtil.toURI(path);
+			location= new File(path.toOSString()).toURI();
 		return location;
 	}
 
@@ -427,8 +427,7 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 		fImportData.setRefactoringAware(true);
 		fImportData.setIncludeDirectoryEntries(true);
 		setInput(new RefactoringHistoryProxy());
-		IDialogSettings workbenchSettings= JavaPlugin.getDefault().getDialogSettings();
-		IDialogSettings section= workbenchSettings.getSection(DIALOG_SETTINGS_KEY);
+		final IDialogSettings section= JavaPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY);
 		if (section == null)
 			fNewSettings= true;
 		else {
@@ -467,6 +466,8 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 		Assert.isNotNull(monitor);
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
+			fJavaProject= null;
+			fSourceFolder= null;
 			fProcessedFragments.clear();
 			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 500);
 			final IPackageFragmentRoot root= fImportData.getPackageFragmentRoot();
@@ -593,36 +594,6 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 	}
 
 	/**
-	 * Copies the new JAR file over the old one.
-	 * 
-	 * @param monitor
-	 *            the progress monitor to use
-	 * @throws CoreException
-	 *             if an error occurs
-	 */
-	private void copyJarFile(final IProgressMonitor monitor) throws CoreException {
-		try {
-			monitor.beginTask(JarImportMessages.JarImportWizard_cleanup_import, 150);
-			final URI source= fImportData.getRefactoringFileLocation();
-			if (source != null) {
-				final IPackageFragmentRoot root= fImportData.getPackageFragmentRoot();
-				if (root != null) {
-					final URI target= getLocationURI(root.getRawClasspathEntry());
-					if (target != null) {
-						EFS.getStore(source).copy(EFS.getStore(target), EFS.OVERWRITE, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-						if (fJavaProject != null)
-							fJavaProject.getResource().refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 50, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-						return;
-					}
-				}
-			}
-			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, JarImportMessages.JarImportWizard_error_copying_jar, null));
-		} finally {
-			monitor.done();
-		}
-	}
-
-	/**
 	 * Creates the necessary type stubs for the refactoring.
 	 * 
 	 * @param refactoring
@@ -681,6 +652,55 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 	}
 
 	/**
+	 * Returns the target path to be used for the updated classpath entry.
+	 * 
+	 * @param entry
+	 *            the classpath entry
+	 * @return the target path, or <code>null</code>
+	 * @throws CoreException
+	 *             if an error occurs
+	 */
+	private IPath getTargetPath(final IClasspathEntry entry) throws CoreException {
+		final URI location= getLocationURI(entry);
+		if (location != null) {
+			final URI target= getTargetURI(location);
+			if (target != null) {
+				IPath path= URIUtil.toPath(target);
+				if (path != null) {
+					final IPath workspace= ResourcesPlugin.getWorkspace().getRoot().getLocation();
+					if (workspace.isPrefixOf(path)) {
+						path= path.removeFirstSegments(workspace.segmentCount());
+						path= path.setDevice(null);
+						path= path.makeAbsolute();
+					}
+				}
+				return path;
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the target uri taking any renaming of the jar file into account.
+	 * 
+	 * @param uri
+	 *            the location uri
+	 * @return the target uri
+	 * @throws CoreException
+	 *             if an error occurs
+	 */
+	private URI getTargetURI(final URI uri) throws CoreException {
+		Assert.isNotNull(uri);
+		final IFileStore parent= EFS.getStore(uri).getParent();
+		if (parent != null) {
+			final URI location= fImportData.getRefactoringFileLocation();
+			if (location != null)
+				return parent.getChild(EFS.getStore(location).getName()).toURI();
+		}
+		return uri;
+	}
+
+	/**
 	 * Returns the transformed input value of the specified value.
 	 * 
 	 * @param value
@@ -722,17 +742,15 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 			final RefactoringStatus status= super.historyPerformed(new SubProgressMonitor(monitor, 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 			if (!status.hasFatalError()) {
 				try {
-					final RefactoringHistory history= fImportData.getRefactoringHistory();
-					if (!fCancelled) {
-						copyJarFile(new SubProgressMonitor(monitor, 60, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-						if (history != null)
-							RefactoringCore.getUndoManager().flush();
-					}
-					if (history != null)
-						resetClassPath(new SubProgressMonitor(monitor, 40, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-					CoreUtility.enableAutoBuild(fAutoBuild);
+					resetClassPath(new SubProgressMonitor(monitor, 90, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 				} catch (CoreException exception) {
 					status.addError(exception.getLocalizedMessage());
+				} finally {
+					try {
+						CoreUtility.enableAutoBuild(fAutoBuild);
+					} catch (CoreException exception) {
+						JavaPlugin.log(exception);
+					}
 				}
 			}
 			return status;
@@ -750,7 +768,8 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 			if (element instanceof IPackageFragmentRoot) {
 				final IPackageFragmentRoot root= (IPackageFragmentRoot) element;
 				try {
-					if (root.isArchive() && root.getRawClasspathEntry().getEntryKind() != IClasspathEntry.CPE_CONTAINER)
+					final IClasspathEntry entry= root.getRawClasspathEntry();
+					if (isValidClassPathEntry(entry))
 						fImportData.setPackageFragmentRoot(root);
 				} catch (JavaModelException exception) {
 					JavaPlugin.log(exception);
@@ -772,9 +791,50 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 	 */
 	public boolean performFinish() {
 		final boolean result= super.performFinish();
-		if (fNewSettings)
-			setDialogSettings(JavaPlugin.getDefault().getDialogSettings().getSection(DIALOG_SETTINGS_KEY).addNewSection(DIALOG_SETTINGS_KEY));
+		if (fNewSettings) {
+			final IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
+			IDialogSettings section= settings.getSection(DIALOG_SETTINGS_KEY);
+			section= settings.addNewSection(DIALOG_SETTINGS_KEY);
+			setDialogSettings(section);
+		}
 		return result;
+	}
+
+	/**
+	 * Replaces the old jar file with the new one.
+	 * 
+	 * @param monitor
+	 *            the progress monitor to use
+	 * @throws CoreException
+	 *             if an error occurs
+	 */
+	private void replaceJarFile(final IProgressMonitor monitor) throws CoreException {
+		try {
+			monitor.beginTask(JarImportMessages.JarImportWizard_cleanup_import, 250);
+			final URI location= fImportData.getRefactoringFileLocation();
+			if (location != null) {
+				final IPackageFragmentRoot root= fImportData.getPackageFragmentRoot();
+				if (root != null) {
+					final URI uri= getLocationURI(root.getRawClasspathEntry());
+					if (uri != null) {
+						final IFileStore store= EFS.getStore(location);
+						if (fImportData.isRenameJarFile()) {
+							final URI target= getTargetURI(uri);
+							store.copy(EFS.getStore(target), EFS.OVERWRITE, new SubProgressMonitor(monitor, 50, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+							if (!uri.equals(target))
+								EFS.getStore(uri).delete(EFS.NONE, new SubProgressMonitor(monitor, 50, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+						} else
+							store.copy(EFS.getStore(uri), EFS.OVERWRITE, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+						if (fJavaProject != null)
+							fJavaProject.getResource().refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 50, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+						return;
+					}
+				}
+			}
+			throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, JarImportMessages.JarImportWizard_error_copying_jar, null));
+		} finally {
+			monitor.done();
+		}
 	}
 
 	/**
@@ -787,9 +847,31 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 	 */
 	private void resetClassPath(final IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor.beginTask(JarImportMessages.JarImportWizard_cleanup_import, 100);
+			monitor.beginTask(JarImportMessages.JarImportWizard_cleanup_import, 200);
 			if (fJavaProject != null) {
-				fJavaProject.setRawClasspath(fJavaProject.readRawClasspath(), false, new SubProgressMonitor(monitor, 60, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				final IClasspathEntry[] entries= fJavaProject.readRawClasspath();
+				final boolean rename= fImportData.isRenameJarFile();
+				if (rename && !fCancelled) {
+					final IPackageFragmentRoot root= fImportData.getPackageFragmentRoot();
+					if (root != null) {
+						final IClasspathEntry entry= root.getRawClasspathEntry();
+						for (int index= 0; index < entries.length; index++) {
+							if (entries[index].equals(entry)) {
+								final IPath path= getTargetPath(entries[index]);
+								if (path != null)
+									entries[index]= JavaCore.newLibraryEntry(path, entries[index].getSourceAttachmentPath(), entries[index].getSourceAttachmentRootPath(), entries[index].getAccessRules(), entries[index].getExtraAttributes(), entries[index].isExported());
+							}
+						}
+					}
+				}
+				final RefactoringHistory history= fImportData.getRefactoringHistory();
+				if (!fCancelled) {
+					replaceJarFile(new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+					if (history != null)
+						RefactoringCore.getUndoManager().flush();
+				}
+				if (history != null || rename)
+					fJavaProject.setRawClasspath(entries, rename, new SubProgressMonitor(monitor, 60, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 				fJavaProject= null;
 			}
 			if (fSourceFolder != null) {
