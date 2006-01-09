@@ -702,7 +702,7 @@ public final class JavaUI {
 			return je;
 
 		/*
-		 * This needs works, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=120340
+		 * This needs work, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=120340
 		 */
 		return (IJavaElement)editorInput.getAdapter(IJavaElement.class);
 	}
