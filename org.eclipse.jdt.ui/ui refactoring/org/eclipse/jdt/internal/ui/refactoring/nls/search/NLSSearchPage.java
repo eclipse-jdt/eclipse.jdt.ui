@@ -176,7 +176,7 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 				scope= factory.createJavaSearchScope(getSelection(), includeJRE);
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE :
-				String[] projectNames= getContainer().getEnclosingProjectNames();
+				String[] projectNames= getContainer().getSelectedProjectNames();
 				scope= factory.createJavaProjectSearchScope(projectNames, includeJRE);
 				if (projectNames.length > 1)
 					scopeDescription= Messages.format(NLSSearchMessages.EnclosingProjectsScope, projectNames[0]); 

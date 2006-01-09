@@ -279,7 +279,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 				scope= factory.createJavaSearchScope(getContainer().getSelection(), includeJRE);
 				break;
 			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
-				String[] projectNames= getContainer().getEnclosingProjectNames();
+				String[] projectNames= getContainer().getSelectedProjectNames();
 				scope= factory.createJavaProjectSearchScope(projectNames, includeJRE);
 				if (projectNames.length >= 1) {
 					if (projectNames.length == 1)
