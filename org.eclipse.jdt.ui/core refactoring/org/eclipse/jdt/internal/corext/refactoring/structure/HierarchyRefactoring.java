@@ -28,6 +28,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextUtilities;
 
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -96,7 +97,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Partial implementation of a refactoring executed on type hierarchies.
  */
-public abstract class HierarchyRefactoring extends Refactoring {
+public abstract class HierarchyRefactoring extends Refactoring implements IInitializableRefactoringComponent {
 
 	/**
 	 * AST node visitor which performs the actual mapping.
@@ -463,8 +464,8 @@ public abstract class HierarchyRefactoring extends Refactoring {
 	protected IMember[] fMembersToMove;
 
 	protected HierarchyRefactoring(final IMember[] members) {
-		Assert.isNotNull(members);
-		fMembersToMove= (IMember[]) SourceReferenceUtil.sortByOffset(members);
+		if (members != null)
+			fMembersToMove= (IMember[]) SourceReferenceUtil.sortByOffset(members);
 	}
 
 	protected boolean canBeAccessedFrom(final IMember member, final IType target, final ITypeHierarchy hierarchy) throws JavaModelException {

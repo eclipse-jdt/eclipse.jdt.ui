@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -29,18 +30,26 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.IRefactoringStatusEntryComparator;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
@@ -99,7 +108,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
@@ -124,9 +132,19 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public class MoveInnerToTopRefactoring extends Refactoring {
+public class MoveInnerToTopRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+
+	private static final String ID_MOVE_INNER= "org.eclipse.jdt.ui.move.inner"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_FIELD= "field"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_MANDATORY= "mandatory"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_POSSIBLE= "possible"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_FIELD_NAME= "fieldName"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_PARAMETER_NAME= "parameterName"; //$NON-NLS-1$
 
 	private static class MemberAccessNodeCollector extends ASTVisitor {
 
@@ -337,12 +355,6 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		}, other).length > 0;
 	}
 
-	public static MoveInnerToTopRefactoring create(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isMoveInnerAvailable(type))
-			return null;
-		return new MoveInnerToTopRefactoring(type, codeGenerationSettings);
-	}
-
 	private static AbstractTypeDeclaration findTypeDeclaration(IType enclosing, AbstractTypeDeclaration[] declarations) {
 		String typeName= enclosing.getElementName();
 		for (int i= 0; i < declarations.length; i++) {
@@ -478,7 +490,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 
 	private TextChangeManager fChangeManager;
 
-	private final CodeGenerationSettings fCodeGenerationSettings;
+	private CodeGenerationSettings fCodeGenerationSettings;
 
 	private boolean fCreateInstanceField;
 
@@ -500,17 +512,25 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 
 	private IType fType;
 
-	private final String[] fTypeComponents;
+	private String[] fTypeComponents;
 
 	private Collection fTypeImports;
 
-	private MoveInnerToTopRefactoring(IType type, CodeGenerationSettings codeGenerationSettings) throws JavaModelException {
-		Assert.isNotNull(type);
-		Assert.isNotNull(codeGenerationSettings);
+	public MoveInnerToTopRefactoring(IType type, CodeGenerationSettings settings) throws JavaModelException {
 		fType= type;
-		fCodeGenerationSettings= codeGenerationSettings;
+		fCodeGenerationSettings= settings;
 		fMarkInstanceFieldAsFinal= true; // default
+		if (fType != null)
+			initialize();
+	}
+
+	private void initialize() throws JavaModelException {
 		fTypeComponents= Strings.splitByToken((fType.getPackageFragment().getElementName() + '.' + fType.getElementName()), "."); //$NON-NLS-1$
+		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
+		fSourceRewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
+		fIsInstanceFieldCreationPossible= !(JdtFlags.isStatic(fType) || fType.isAnnotation() || fType.isEnum());
+		fIsInstanceFieldCreationMandatory= fIsInstanceFieldCreationPossible && isInstanceFieldCreationMandatory();
+		fCreateInstanceField= fIsInstanceFieldCreationMandatory;
 	}
 
 	private void addEnclosingInstanceDeclaration(final AbstractTypeDeclaration declaration, final ASTRewrite rewrite) throws CoreException {
@@ -679,9 +699,6 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		return result;
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkInput(IProgressMonitor)
-	 */
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
 		pm.beginTask("", 2);//$NON-NLS-1$
 		try {
@@ -706,17 +723,7 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 		}
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.Refactoring#checkActivation(IProgressMonitor)
-	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
-
-		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
-		fSourceRewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
-		fIsInstanceFieldCreationPossible= !(JdtFlags.isStatic(fType) || fType.isAnnotation() || fType.isEnum());
-		fIsInstanceFieldCreationMandatory= fIsInstanceFieldCreationPossible && isInstanceFieldCreationMandatory();
-		fCreateInstanceField= fIsInstanceFieldCreationMandatory;
-
 		IType orig= (IType) WorkingCopyUtil.getOriginal(fType);
 		if (orig == null || !orig.exists()) {
 
@@ -745,12 +752,28 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 			return createReadAccessExpressionForEnclosingInstance(node.getAST());
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#createChange(IProgressMonitor)
-	 */
 	public Change createChange(final IProgressMonitor monitor) throws CoreException {
-		monitor.beginTask(RefactoringCoreMessages.MoveInnerToTopRefactoring_creating_change, 1); 
-		final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.MoveInnerToTopRefactoring_move_to_Top); 
+		monitor.beginTask(RefactoringCoreMessages.MoveInnerToTopRefactoring_creating_change, 1);
+		final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.MoveInnerToTopRefactoring_move_to_Top) {
+
+			public final RefactoringDescriptor getRefactoringDescriptor() {
+				final Map arguments= new HashMap();
+				arguments.put(RefactoringDescriptor.INPUT, fType.getHandleIdentifier());
+				if (fEnclosingInstanceFieldName != null)
+					arguments.put(ATTRIBUTE_FIELD_NAME, fEnclosingInstanceFieldName);
+				if (fNameForEnclosingInstanceConstructorParameter != null)
+					arguments.put(ATTRIBUTE_PARAMETER_NAME, fNameForEnclosingInstanceConstructorParameter);
+				arguments.put(ATTRIBUTE_FIELD, Boolean.valueOf(fCreateInstanceField).toString());
+				arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fMarkInstanceFieldAsFinal).toString());
+				arguments.put(ATTRIBUTE_POSSIBLE, Boolean.valueOf(fIsInstanceFieldCreationPossible).toString());
+				arguments.put(ATTRIBUTE_MANDATORY, Boolean.valueOf(fIsInstanceFieldCreationMandatory).toString());
+				String project= null;
+				IJavaProject javaProject= fType.getJavaProject();
+				if (javaProject != null)
+					project= javaProject.getElementName();
+				return new RefactoringDescriptor(ID_MOVE_INNER, project, MessageFormat.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fType.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) }), null, arguments, RefactoringDescriptor.CLOSURE_CHANGE | RefactoringDescriptor.STRUCTURAL_CHANGE);
+			}
+		};
 		result.addAll(fChangeManager.getAllChanges());
 		result.add(createCompilationUnitForMovedType(new SubProgressMonitor(monitor, 1)));
 		return result;
@@ -1549,5 +1572,55 @@ public class MoveInnerToTopRefactoring extends Refactoring {
 				rewrite.getImportRewrite().addImport(name);
 			}
 		}
+	}
+
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_MOVE_INNER));
+				else {
+					fType= (IType) element;
+					fCodeGenerationSettings= JavaPreferencesSettings.getCodeGenerationSettings(fType.getJavaProject());
+					try {
+						initialize();
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			final String fieldName= generic.getAttribute(ATTRIBUTE_FIELD_NAME);
+			if (fieldName != null && !"".equals(fieldName)) //$NON-NLS-1$
+				fEnclosingInstanceFieldName= fieldName;
+			final String parameterName= generic.getAttribute(ATTRIBUTE_PARAMETER_NAME);
+			if (parameterName != null && !"".equals(parameterName)) //$NON-NLS-1$
+				fNameForEnclosingInstanceConstructorParameter= parameterName;
+			final String createField= generic.getAttribute(ATTRIBUTE_FIELD);
+			if (createField != null) {
+				fCreateInstanceField= Boolean.valueOf(createField).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FIELD));
+			final String markFinal= generic.getAttribute(ATTRIBUTE_FINAL);
+			if (markFinal != null) {
+				fMarkInstanceFieldAsFinal= Boolean.valueOf(markFinal).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FINAL));
+			final String possible= generic.getAttribute(ATTRIBUTE_POSSIBLE);
+			if (possible != null) {
+				fIsInstanceFieldCreationPossible= Boolean.valueOf(possible).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_POSSIBLE));
+			final String mandatory= generic.getAttribute(ATTRIBUTE_MANDATORY);
+			if (mandatory != null)
+				fIsInstanceFieldCreationMandatory= Boolean.valueOf(mandatory).booleanValue();
+			else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_MANDATORY));
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		return new RefactoringStatus();
 	}
 }

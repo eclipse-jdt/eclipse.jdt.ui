@@ -96,7 +96,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 	private void validatePassingTest(String className, String[] cuNames, String newInterfaceName, boolean replaceOccurrences, String[] extractedMethodNames, String[][] extractedSignatures, String[] extractedFieldNames) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 				
-		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
+		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject())));
 		ExtractInterfaceProcessor processor= ref.getExtractInterfaceProcessor();
 		processor.setTypeName(newInterfaceName);
 		assertEquals("interface name should be accepted", RefactoringStatus.OK, processor.checkTypeName(newInterfaceName).getSeverity());
@@ -126,7 +126,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 		ICompilationUnit cu= clas.getCompilationUnit();
 		IPackageFragment pack= (IPackageFragment)cu.getParent();
 				
-		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject()));
+		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(clas, JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject())));
 		ExtractInterfaceProcessor processor= ref.getExtractInterfaceProcessor();
 		processor.setTypeName(newInterfaceName);
 		assertEquals("interface name should be accepted", RefactoringStatus.OK, processor.checkTypeName(newInterfaceName).getSeverity());
@@ -147,7 +147,7 @@ public class ExtractInterfaceTests extends RefactoringTest {
 
 	private void validateFailingTest(String className, String newInterfaceName, boolean extractAll, int expectedSeverity) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
-		ExtractInterfaceRefactoring ref= ExtractInterfaceRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
+		ExtractInterfaceRefactoring ref= new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject())));
 		ExtractInterfaceProcessor processor= ref.getExtractInterfaceProcessor();
 		processor.setTypeName(newInterfaceName);
 		if (extractAll)

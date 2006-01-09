@@ -78,7 +78,7 @@ public class ExtractMethodAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		try{
-			ExtractMethodRefactoring refactoring= ExtractMethodRefactoring.create(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
+			final ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
 			if (refactoring == null)
 				return;
 			new RefactoringStarter().activate(refactoring, new ExtractMethodWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);

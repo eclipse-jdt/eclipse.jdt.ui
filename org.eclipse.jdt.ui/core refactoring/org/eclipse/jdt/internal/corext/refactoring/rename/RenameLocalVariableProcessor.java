@@ -74,8 +74,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RenameLocalVariableProcessor extends JavaRenameProcessor implements INameUpdating, IReferenceUpdating {
 
-	private static final String ID_RENAME_LOCAL_VARIABLE= "org.eclipse.jdt.ui.rename.local.variable"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_RANGE= "variable"; //$NON-NLS-1$
+	public static final String ID_RENAME_LOCAL_VARIABLE= "org.eclipse.jdt.ui.rename.local.variable"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 
 	private ILocalVariable fLocalVariable;
@@ -354,7 +354,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 						arguments.put(RefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
 						arguments.put(RefactoringDescriptor.NAME, getNewElementName());
 						final ISourceRange range= fLocalVariable.getNameRange();
-						arguments.put(ATTRIBUTE_RANGE, new Integer(range.getOffset()).toString() + " " + new Integer(range.getLength()).toString()); //$NON-NLS-1$
+						arguments.put(ATTRIBUTE_SELECTION, new Integer(range.getOffset()).toString() + " " + new Integer(range.getLength()).toString()); //$NON-NLS-1$
 						arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 						String project= null;
 						IJavaProject javaProject= fCu.getJavaProject();
@@ -379,31 +379,22 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_LOCAL_VARIABLE));
 				else
 					fCu= (ICompilationUnit) element;
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
 			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
-			if (name != null) {
-				RefactoringStatus status= new RefactoringStatus();
-				try {
-					status= checkNewElementName(name);
-				} catch (CoreException exception) {
-					JavaPlugin.log(exception);
-				}
-				if (!status.hasError())
-					setNewElementName(name);
-				else
-					return status;
-			} else
+			if (name != null && !"".equals(name)) //$NON-NLS-1$
+				setNewElementName(name);
+			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
 			if (fCu != null) {
-				final String range= generic.getAttribute(ATTRIBUTE_RANGE);
-				if (range != null) {
-					int offset= 0;
-					int length= 0;
-					final StringTokenizer tokenizer= new StringTokenizer(range);
+				final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
+				if (selection != null) {
+					int offset= -1;
+					int length= -1;
+					final StringTokenizer tokenizer= new StringTokenizer(selection);
 					if (tokenizer.hasMoreTokens())
 						offset= Integer.valueOf(tokenizer.nextToken()).intValue();
 					if (tokenizer.hasMoreTokens())
@@ -419,14 +410,14 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 								}
 							}
 							if (fLocalVariable == null)
-								return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+								return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_LOCAL_VARIABLE));
 						} catch (JavaModelException exception) {
 							JavaPlugin.log(exception);
 						}
 					} else
-						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { range, ATTRIBUTE_RANGE}));
+						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
 				} else
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_RANGE));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
 			}
 			final String references= generic.getAttribute(ATTRIBUTE_REFERENCES);
 			if (references != null) {

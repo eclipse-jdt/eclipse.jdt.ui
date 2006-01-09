@@ -10,9 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import java.text.MessageFormat;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -21,16 +24,21 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -45,6 +53,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsModel;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver;
@@ -58,6 +67,8 @@ import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
@@ -65,8 +76,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 
-	/** The identifier of this processor */
-	public static final String IDENTIFIER= "org.eclipse.jdt.ui.useSuperTypeProcessor"; //$NON-NLS-1$
+	private static final String IDENTIFIER= "org.eclipse.jdt.ui.useSuperTypeProcessor"; //$NON-NLS-1$
+
+	public static final String ID_USE_SUPERTYPE= "org.eclipse.jdt.ui.use.supertype"; //$NON-NLS-1$
 
 	/**
 	 * Finds the type with the given fully qualified name (generic type parameters included) in the hierarchy.
@@ -102,7 +114,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	private int fChanges= 0;
 
 	/** The subtype to replace */
-	private final IType fSubType;
+	private IType fSubType;
 
 	/** The supertype as replacement */
 	private IType fSuperType= null;
@@ -116,7 +128,6 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @param subType the subtype to replace its occurrences
 	 */
 	public UseSuperTypeProcessor(final IType subType) {
-		Assert.isNotNull(subType);
 		fSubType= subType;
 	}
 
@@ -127,8 +138,6 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 * @param superType the supertype as replacement
 	 */
 	public UseSuperTypeProcessor(final IType subType, final IType superType) {
-		Assert.isNotNull(subType);
-		Assert.isNotNull(superType);
 		fSubType= subType;
 		fSuperType= superType;
 	}
@@ -184,7 +193,19 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 			final TextChange[] changes= fChangeManager.getAllChanges();
 			if (changes != null && changes.length != 0) {
 				fChanges= changes.length;
-				return new DynamicValidationStateChange(RefactoringCoreMessages.UseSupertypeWherePossibleRefactoring_name, fChangeManager.getAllChanges());
+				return new DynamicValidationStateChange(RefactoringCoreMessages.UseSupertypeWherePossibleRefactoring_name, fChangeManager.getAllChanges()) {
+
+					public final RefactoringDescriptor getRefactoringDescriptor() {
+						final Map arguments= new HashMap();
+						arguments.put(RefactoringDescriptor.INPUT, fSubType.getHandleIdentifier());
+						arguments.put(RefactoringDescriptor.ELEMENT + 1, fSuperType.getHandleIdentifier());
+						arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
+						IJavaProject project= null;
+						if (!fSubType.isBinary())
+							project= fSubType.getJavaProject();
+						return new RefactoringDescriptor(ID_USE_SUPERTYPE, project.getElementName(), MessageFormat.format(RefactoringCoreMessages.UseSuperTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fSuperType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED) }), null, arguments, JavaRefactorings.IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
+					}
+				};
 			}
 		} finally {
 			monitor.done();
@@ -378,5 +399,39 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		Assert.isNotNull(type);
 
 		fSuperType= type;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_USE_SUPERTYPE));
+				else
+					fSubType= (IType) element;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			handle= generic.getAttribute(RefactoringDescriptor.ELEMENT + 1);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_USE_SUPERTYPE));
+				else
+					fSuperType= (IType) element;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.ELEMENT + 1));
+			final String instance= generic.getAttribute(ATTRIBUTE_INSTANCEOF);
+			if (instance != null) {
+				fInstanceOf= Boolean.valueOf(instance).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		return new RefactoringStatus();
 	}
 }

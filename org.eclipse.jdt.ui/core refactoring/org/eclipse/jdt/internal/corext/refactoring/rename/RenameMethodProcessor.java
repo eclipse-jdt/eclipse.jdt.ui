@@ -94,7 +94,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating, IDelegatingUpdating {
 
-	private static final String ID_RENAME_METHOD= "org.eclipse.jdt.ui.rename.method"; //$NON-NLS-1$
+	public static final String ID_RENAME_METHOD= "org.eclipse.jdt.ui.rename.method"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELEGATING_UPDATING= "delegatingUpdating"; //$NON-NLS-1$
 
@@ -792,23 +792,17 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 							fMethod= methods[0];
 							initializeWorkingCopyOwner();
 						} else
-							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_METHOD));
 					} else
-						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_METHOD));
 				} else
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, RefactoringDescriptor.INPUT));
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_METHOD));
 			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
-			if (name != null) {
-				if (fMethod != null) {
-					final RefactoringStatus status= checkNewElementName(name);
-					if (!status.hasError())
-						setNewElementName(name);
-					else
-						return status;
-				}
-			} else
+			if (name != null && !"".equals(name)) //$NON-NLS-1$
+				setNewElementName(name);
+			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
 			final String references= generic.getAttribute(ATTRIBUTE_REFERENCES);
 			if (references != null) {

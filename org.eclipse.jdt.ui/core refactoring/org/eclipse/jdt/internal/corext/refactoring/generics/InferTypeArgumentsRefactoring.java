@@ -34,14 +34,19 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -61,7 +66,6 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
-import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -86,26 +90,23 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class InferTypeArgumentsRefactoring extends Refactoring {
-	
+public class InferTypeArgumentsRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+
+	private static final String ID_INFER_TYPE_ARGUMENTS= "org.eclipse.jdt.ui.infer.typearguments"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_CLONE= "clone"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_LEAVE= "leave"; //$NON-NLS-1$
+
 	private static final String REWRITTEN= "InferTypeArgumentsRefactoring.rewritten"; //$NON-NLS-1$
 	
 	private TextChangeManager fChangeManager;
-	private final IJavaElement[] fElements;
+	private IJavaElement[] fElements;
 	private InferTypeArgumentsTCModel fTCModel;
 
 	private boolean fAssumeCloneReturnsSameType;
 	private boolean fLeaveUnconstrainedRaw;
 	
-	private InferTypeArgumentsRefactoring(IJavaElement[] elements) {
+	public InferTypeArgumentsRefactoring(IJavaElement[] elements) {
 		fElements= elements;
-	}
-	
-	public static InferTypeArgumentsRefactoring create(IJavaElement[] elements) throws JavaModelException {
-		if (RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements)) {
-			return new InferTypeArgumentsRefactoring(elements);
-		}
-		return null;
 	}
 	
 	/*
@@ -483,11 +484,72 @@ public class InferTypeArgumentsRefactoring extends Refactoring {
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
-			DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.InferTypeArgumentsRefactoring_name, fChangeManager.getAllChanges()); 
+			DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.InferTypeArgumentsRefactoring_name, fChangeManager.getAllChanges()) {
+			
+				public final RefactoringDescriptor getRefactoringDescriptor() {
+					final Map arguments= new HashMap();
+					for (int index= 0; index < fElements.length; index++)
+						arguments.put(RefactoringDescriptor.ELEMENT + (index + 1), fElements[index].getHandleIdentifier());
+					arguments.put(ATTRIBUTE_CLONE, Boolean.valueOf(fAssumeCloneReturnsSameType).toString());
+					arguments.put(ATTRIBUTE_LEAVE, Boolean.valueOf(fLeaveUnconstrainedRaw).toString());
+					final IJavaProject project= getSingleProject();
+					return new RefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, project != null ? project.getElementName() : null, project != null ? NLS.bind(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description, null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
+				}
+			}; 
 			return result;
 		} finally {
 			pm.done();
 		}	
 	}
 
+	private IJavaProject getSingleProject() {
+		IJavaProject first= null;
+		for (int index= 0; index < fElements.length; index++) {
+			final IJavaProject project= fElements[index].getJavaProject();
+			if (project != null) {
+				if (first == null)
+					first= project;
+				else if (!project.equals(first))
+					return null;
+			}
+		}
+		return first;
+	}
+
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			final String clone= generic.getAttribute(ATTRIBUTE_CLONE);
+			if (clone != null) {
+				fAssumeCloneReturnsSameType= Boolean.valueOf(clone).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_CLONE));
+			final String leave= generic.getAttribute(ATTRIBUTE_LEAVE);
+			if (leave != null) {
+				fLeaveUnconstrainedRaw= Boolean.valueOf(leave).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_LEAVE));
+			int count= 1;
+			final List elements= new ArrayList();
+			String value= null;
+			String attribute= RefactoringDescriptor.ELEMENT + count;
+			final RefactoringStatus status= new RefactoringStatus();
+			while ((value= generic.getAttribute(attribute)) != null) {
+				final IJavaElement element= JavaCore.create(value);
+				if (element == null || !element.exists())
+					status.merge(RefactoringStatus.createWarningStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INFER_TYPE_ARGUMENTS)));
+				else
+					elements.add(element);
+				count++;
+				attribute= RefactoringDescriptor.ELEMENT + count;
+			}
+			fElements= (IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]);
+			if (elements.isEmpty())
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INFER_TYPE_ARGUMENTS));
+			if (!status.isOK())
+				return status;
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		return new RefactoringStatus();
+	}
 }

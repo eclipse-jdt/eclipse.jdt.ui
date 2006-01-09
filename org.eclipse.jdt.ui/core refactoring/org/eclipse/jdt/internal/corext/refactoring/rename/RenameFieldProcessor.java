@@ -99,7 +99,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IDelegatingUpdating {
 
-	private static final String ID_RENAME_FIELD= "org.eclipse.jdt.ui.rename.field"; //$NON-NLS-1$
+	public static final String ID_RENAME_FIELD= "org.eclipse.jdt.ui.rename.field"; //$NON-NLS-1$
 	protected static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RENAME_GETTER= "getter"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RENAME_SETTER= "setter"; //$NON-NLS-1$
@@ -830,26 +830,15 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_FIELD));
 				else
 					fField= (IField) element;
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
 			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
-			if (name != null) {
-				if (fField != null) {
-					RefactoringStatus status= new RefactoringStatus();
-					try {
-						status= checkNewElementName(name);
-					} catch (CoreException exception) {
-						JavaPlugin.log(exception);
-					}
-					if (!status.hasError())
-						setNewElementName(name);
-					else
-						return status;
-				}
-			} else
+			if (name != null && !"".equals(name)) //$NON-NLS-1$
+				setNewElementName(name);
+			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
 			final String references= generic.getAttribute(ATTRIBUTE_REFERENCES);
 			if (references != null) {

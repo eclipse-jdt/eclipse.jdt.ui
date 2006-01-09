@@ -86,8 +86,7 @@ public class IntroduceParameterTests extends LineColumnSelectionTestCase {
 		ICompilationUnit cu= createCU(packageFragment, getName());
 
 		ISourceRange selection= getSelection(cu);
-		IntroduceParameterRefactoring refactoring= IntroduceParameterRefactoring.create(
-			cu, selection.getOffset(), selection.getLength());		
+		IntroduceParameterRefactoring refactoring= new IntroduceParameterRefactoring(cu, selection.getOffset(), selection.getLength());		
 
 		NullProgressMonitor pm= new NullProgressMonitor();
 		RefactoringStatus status= refactoring.checkInitialConditions(pm);

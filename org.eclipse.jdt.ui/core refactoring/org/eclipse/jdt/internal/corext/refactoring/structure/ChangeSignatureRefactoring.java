@@ -144,7 +144,6 @@ public class ChangeSignatureRefactoring extends Refactoring implements IDelegati
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_PARAMETER= "parameter"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DEFAULT= "default"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_EXCEPTION= "exception"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_KIND= "kind"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELEGATING_UPDATING= "delegatingUpdating"; //$NON-NLS-1$
 	
@@ -1160,7 +1159,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IDelegati
 					count= 1;
 					for (final Iterator iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
 						final ExceptionInfo info= (ExceptionInfo) iterator.next();
-						arguments.put(ATTRIBUTE_EXCEPTION + count, info.getType().getHandleIdentifier());
+						arguments.put(RefactoringDescriptor.ELEMENT + count, info.getType().getHandleIdentifier());
 						arguments.put(ATTRIBUTE_KIND + count, new Integer(info.getKind()).toString());
 						count++;
 					}
@@ -2450,7 +2449,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IDelegati
 			}
 			count= 1;
 			fExceptionInfos= new ArrayList(2);
-			attribute= ATTRIBUTE_EXCEPTION + count;
+			attribute= RefactoringDescriptor.ELEMENT + count;
 			while ((value= generic.getAttribute(attribute)) != null) {
 				ExceptionInfo info= null;
 				final String kind= generic.getAttribute(ATTRIBUTE_KIND + count);
@@ -2470,7 +2469,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IDelegati
 				if (info != null)
 					fExceptionInfos.add(info);
 				count++;
-				attribute= ATTRIBUTE_EXCEPTION + count;
+				attribute= RefactoringDescriptor.ELEMENT + count;
 			}
 			final String delegatingUpdating= generic.getAttribute(ATTRIBUTE_DELEGATING_UPDATING);
 			if (delegatingUpdating != null) {

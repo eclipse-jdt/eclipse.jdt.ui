@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveRefactoring;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -31,7 +32,6 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 
@@ -69,7 +69,7 @@ public class ReorgMoveStarter {
 	
 	public void run(Shell parent) throws InterruptedException, InvocationTargetException {
 		try {
-			MoveRefactoring ref= new MoveRefactoring(fMoveProcessor);
+			JavaMoveRefactoring ref= new JavaMoveRefactoring(fMoveProcessor);
 			if (fMoveProcessor.hasAllInputSet()) {
 				IRunnableContext context= new ProgressMonitorDialog(parent);
 				fMoveProcessor.setCreateTargetQueries(new CreateTargetQueries(parent));

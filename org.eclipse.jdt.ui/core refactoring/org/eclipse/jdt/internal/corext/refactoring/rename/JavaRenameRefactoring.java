@@ -47,6 +47,6 @@ public class JavaRenameRefactoring extends RenameRefactoring implements IInitial
 		if (processor instanceof IInitializableRefactoringComponent) {
 			return ((IInitializableRefactoringComponent) processor).initialize(arguments);
 		}
-		return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.JavaRenameRefactoring_error_unsupported_initialization, getProcessor().getIdentifier()));
+		return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.ProcessorBasedRefactoring_error_unsupported_initialization, getProcessor().getIdentifier()));
 	}
 }

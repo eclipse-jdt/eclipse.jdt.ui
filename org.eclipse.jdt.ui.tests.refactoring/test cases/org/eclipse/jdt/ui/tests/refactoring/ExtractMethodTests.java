@@ -76,7 +76,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	protected void performTest(IPackageFragment packageFragment, String id, int mode, String outputFolder, String[] newNames, int[] newOrder, int destination) throws Exception {
 		ICompilationUnit unit= createCU(packageFragment, id);
 		int[] selection= getSelection();
-		ExtractMethodRefactoring refactoring= ExtractMethodRefactoring.create(unit, selection[0], selection[1]);
+		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(unit, selection[0], selection[1]);
 		refactoring.setMethodName("extracted");
 		refactoring.setVisibility(Modifier.PROTECTED);
 		RefactoringStatus status= refactoring.checkInitialConditions(new NullProgressMonitor());

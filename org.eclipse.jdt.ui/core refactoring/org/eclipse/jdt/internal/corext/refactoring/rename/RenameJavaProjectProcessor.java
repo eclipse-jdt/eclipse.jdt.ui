@@ -45,8 +45,6 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 public class RenameJavaProjectProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 	
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
@@ -188,26 +186,15 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 			if (path != null) {
 				final IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(path));
 				if (resource == null || !resource.exists())
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, RenameJavaProjectChange.ID_RENAME_JAVA_PROJECT));
 				else
 					fProject= (IJavaProject) JavaCore.create(resource);
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PATH));
 			final String name= generic.getAttribute(ATTRIBUTE_NAME);
-			if (name != null) {
-				if (fProject != null) {
-					RefactoringStatus status= new RefactoringStatus();
-					try {
-						status= checkNewElementName(name);
-					} catch (CoreException exception) {
-						JavaPlugin.log(exception);
-					}
-					if (!status.hasError())
-						setNewElementName(name);
-					else
-						return status;
-				}
-			} else
+			if (name != null && !"".equals(name)) //$NON-NLS-1$
+				setNewElementName(name);
+			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_NAME));
 			final String references= generic.getAttribute(ATTRIBUTE_REFERENCES);
 			if (references != null) {

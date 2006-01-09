@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
@@ -87,7 +88,7 @@ public class InferTypeArgumentsTests extends RefactoringTest {
 	 * @throws CoreException 
 	 */
 	private boolean perform(IJavaElement[] elements, int expectedInitialStatus, int expectedFinalStatus) throws CoreException {
-		InferTypeArgumentsRefactoring refactoring= InferTypeArgumentsRefactoring.create(elements);
+		InferTypeArgumentsRefactoring refactoring= ((RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements)) ? new InferTypeArgumentsRefactoring(elements) : null);
 		
 		NullProgressMonitor pm= new NullProgressMonitor();
 		RefactoringStatus initialStatus= refactoring.checkInitialConditions(pm);

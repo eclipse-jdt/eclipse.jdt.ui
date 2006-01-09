@@ -106,7 +106,7 @@ public class ExtractConstantTests extends RefactoringTest {
 	private void guessHelper(int startLine, int startColumn, int endLine, int endColumn, String expectedGuessedName) throws Exception {
 		ICompilationUnit cu= createCU(getPackageP(), getName()+".java", getFileContents(TEST_PATH_PREFIX + getRefactoringPath() + "nameGuessing/" + getName()+".java"));
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ExtractConstantRefactoring ref= ExtractConstantRefactoring.create(cu, selection.getOffset(), selection.getLength());		
+		ExtractConstantRefactoring ref= new ExtractConstantRefactoring(cu, selection.getOffset(), selection.getLength());		
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());
 		assertEquals("constant name not guessed", expectedGuessedName, ref.guessConstantName());
@@ -115,7 +115,7 @@ public class ExtractConstantTests extends RefactoringTest {
 	private void helper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, boolean qualifyReferencesWithConstantName, String constantName, String guessedConstantName) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ExtractConstantRefactoring ref= ExtractConstantRefactoring.create(cu, selection.getOffset(), selection.getLength());
+		ExtractConstantRefactoring ref= new ExtractConstantRefactoring(cu, selection.getOffset(), selection.getLength());
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());
 
@@ -158,7 +158,7 @@ public class ExtractConstantTests extends RefactoringTest {
 	private void failHelper1(int startLine, int startColumn, int endLine, int endColumn, boolean replaceAll, boolean allowLoadtime, String constantName, int errorCode, boolean checkCode) throws Exception{
 		ICompilationUnit cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ExtractConstantRefactoring ref= ExtractConstantRefactoring.create(cu, selection.getOffset(), selection.getLength());
+		ExtractConstantRefactoring ref= new ExtractConstantRefactoring(cu, selection.getOffset(), selection.getLength());
 		ref.setReplaceAllOccurrences(replaceAll);
 		ref.setConstantName(constantName);
 		RefactoringStatus result= performRefactoring(ref);

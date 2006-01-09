@@ -16,8 +16,11 @@ package org.eclipse.jdt.internal.corext.refactoring.code;
 
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -26,13 +29,20 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ArrayInitializer;
@@ -71,12 +81,17 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
-public class IntroduceParameterRefactoring extends Refactoring implements IDelegatingUpdating {
-	
+public class IntroduceParameterRefactoring extends Refactoring implements IInitializableRefactoringComponent, IDelegatingUpdating {
+
+	public static final String ID_INTRODUCE_PARAMETER= "org.eclipse.jdt.ui.introduce.parameter"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_ARGUMENT= "argument"; //$NON-NLS-1$
+
 	private static final String[] KNOWN_METHOD_NAME_PREFIXES= {"get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
-	
+
 	private ICompilationUnit fSourceCU;
 	private int fSelectionStart;
 	private int fSelectionLength;
@@ -84,12 +99,13 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 	private IMethod fMethod;
 	private ChangeSignatureRefactoring fChangeSignatureRefactoring;
 	private ParameterInfo fParameter;
+	private String fParameterName;
+	private RefactoringArguments fArguments;
 
 	private Expression fSelectedExpression;
 	private String[] fExcludedParameterNames;
 	
-	private IntroduceParameterRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
-		Assert.isTrue(cu != null && cu.exists());
+	public IntroduceParameterRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		fSourceCU= cu;
@@ -113,14 +129,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 	}
 	
 	// ------------------- /IDelegatingUpdating ---------------------
-	
-	public static IntroduceParameterRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
-		return new IntroduceParameterRefactoring(cu, selectionStart, selectionLength);
-	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
-	 */
+
 	public String getName() {
 		return RefactoringCoreMessages.IntroduceParameterRefactoring_name; 
 	}
@@ -140,34 +149,49 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 			
 			fMethod= (IMethod) enclosingElement;
 			pm.worked(1);
-			
-			// first try:
-			fChangeSignatureRefactoring= RefactoringAvailabilityTester.isChangeSignatureAvailable(fMethod) ? new ChangeSignatureRefactoring(fMethod) : null;
-			if (fChangeSignatureRefactoring == null)
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method); 
-			fChangeSignatureRefactoring.setValidationContext(getValidationContext());
-			RefactoringStatus result= fChangeSignatureRefactoring.checkInitialConditions(new SubProgressMonitor(pm, 1));
-			
-			if (result.hasFatalError()) {
-				RefactoringStatusEntry entry= result.getEntryMatchingSeverity(RefactoringStatus.FATAL);
-				if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
-					// second try:
-					IMethod method= (IMethod) entry.getData();
-					fChangeSignatureRefactoring= RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null;
-					if (fChangeSignatureRefactoring == null) {
-						String msg= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_cannot_introduce, entry.getMessage());
-						return RefactoringStatus.createFatalErrorStatus(msg);
-					} 
-					result= fChangeSignatureRefactoring.checkInitialConditions(new SubProgressMonitor(pm, 1));
+
+			RefactoringStatus result= new RefactoringStatus();
+			if (fArguments != null) {
+				// invoked by script
+				fChangeSignatureRefactoring= new ChangeSignatureRefactoring(null);
+				result= fChangeSignatureRefactoring.initialize(fArguments);
+				if (!result.hasFatalError()) {
+					fChangeSignatureRefactoring.setValidationContext(getValidationContext());
+					result.merge(fChangeSignatureRefactoring.checkInitialConditions(new SubProgressMonitor(pm, 2)));
 					if (result.hasFatalError())
 						return result;
 				} else {
+					pm.worked(2);
 					return result;
 				}
 			} else {
-				pm.worked(1);
+				// first try:
+				fChangeSignatureRefactoring= RefactoringAvailabilityTester.isChangeSignatureAvailable(fMethod) ? new ChangeSignatureRefactoring(fMethod) : null;
+				if (fChangeSignatureRefactoring == null)
+					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceParameterRefactoring_expression_in_method);
+				fChangeSignatureRefactoring.setValidationContext(getValidationContext());
+				result.merge(fChangeSignatureRefactoring.checkInitialConditions(new SubProgressMonitor(pm, 1)));
+				if (result.hasFatalError()) {
+					RefactoringStatusEntry entry= result.getEntryMatchingSeverity(RefactoringStatus.FATAL);
+					if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
+						// second try:
+						IMethod method= (IMethod) entry.getData();
+						fChangeSignatureRefactoring= RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null;
+						if (fChangeSignatureRefactoring == null) {
+							String msg= Messages.format(RefactoringCoreMessages.IntroduceParameterRefactoring_cannot_introduce, entry.getMessage());
+							return RefactoringStatus.createFatalErrorStatus(msg);
+						}
+						result= fChangeSignatureRefactoring.checkInitialConditions(new SubProgressMonitor(pm, 1));
+						if (result.hasFatalError())
+							return result;
+					} else {
+						return result;
+					}
+				} else {
+					pm.worked(1);
+				}
 			}
-			
+
 			CompilationUnitRewrite cuRewrite= fChangeSignatureRefactoring.getBaseCuRewrite();
 			if (! cuRewrite.getCu().equals(fSourceCU))
 				cuRewrite= new CompilationUnitRewrite(fSourceCU); // TODO: should try to avoid throwing away this AST
@@ -198,22 +222,20 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 	}
 
 	private void addParameterInfo(CompilationUnitRewrite cuRewrite) throws JavaModelException {
-		ITypeBinding typeBinding= Bindings.normalizeForDeclarationUse( 
-			fSelectedExpression.resolveTypeBinding(),
-			fSelectedExpression.getAST());
+		ITypeBinding typeBinding= Bindings.normalizeForDeclarationUse(fSelectedExpression.resolveTypeBinding(), fSelectedExpression.getAST());
 		String typeName= cuRewrite.getImportRewrite().addImport(typeBinding);
-		String name= guessedParameterName();
+		String name= fParameterName != null ? fParameterName : guessedParameterName();
 		fParameter= ParameterInfo.createInfoForAddedParameter(typeBinding, typeName, name);
 		String defaultValue= fSourceCU.getBuffer().getText(fSelectedExpression.getStartPosition(), fSelectedExpression.getLength());
 		fParameter.setDefaultValue(defaultValue);
-		
-		List parameterInfos= fChangeSignatureRefactoring.getParameterInfos();
-		int parametersCount= parameterInfos.size();
-		if (parametersCount > 0 &&
-				((ParameterInfo) parameterInfos.get(parametersCount - 1)).isOldVarargs())
-			parameterInfos.add(parametersCount - 1, fParameter);
-		else
-			parameterInfos.add(fParameter);
+		if (fArguments == null) {
+			List parameterInfos= fChangeSignatureRefactoring.getParameterInfos();
+			int parametersCount= parameterInfos.size();
+			if (parametersCount > 0 && ((ParameterInfo) parameterInfos.get(parametersCount - 1)).isOldVarargs())
+				parameterInfos.add(parametersCount - 1, fParameter);
+			else
+				parameterInfos.add(fParameter);
+		}
 	}
 
 	private void replaceSelectedExpression(CompilationUnitRewrite cuRewrite) {
@@ -459,6 +481,64 @@ public class IntroduceParameterRefactoring extends Refactoring implements IDeleg
 		} finally {
 			fChangeSignatureRefactoring.setValidationContext(null);
 		}
-		return result;
+		return new CompositeChange(RefactoringCoreMessages.IntroduceParameterRefactoring_name, new Change[] {result}) {
+		
+			public final RefactoringDescriptor getRefactoringDescriptor() {
+				final RefactoringDescriptor descriptor= getChildren()[0].getRefactoringDescriptor();
+				if (descriptor != null) {
+					final Map arguments= new HashMap();
+					arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
+					arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+					arguments.putAll(descriptor.getArguments());
+					String signature= fChangeSignatureRefactoring.getMethodName();
+					try {
+						signature= fChangeSignatureRefactoring.getOldMethodSignature();
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
+					return new RefactoringDescriptor(ID_INTRODUCE_PARAMETER, descriptor.getProject(), NLS.bind(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)}), null, arguments, descriptor.getFlags());
+				}
+				return null;
+			}
+		};
+	}
+
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		fArguments= arguments;
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
+			if (selection != null) {
+				int offset= -1;
+				int length= -1;
+				final StringTokenizer tokenizer= new StringTokenizer(selection);
+				if (tokenizer.hasMoreTokens())
+					offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (tokenizer.hasMoreTokens())
+					length= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (offset >= 0 && length >= 0) {
+					fSelectionStart= offset;
+					fSelectionLength= length;
+				} else
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
+			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INTRODUCE_PARAMETER));
+				else
+					fSourceCU= ((IMethod) element).getCompilationUnit();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			final String name= generic.getAttribute(ATTRIBUTE_ARGUMENT);
+			if (name != null && !"".equals(name)) //$NON-NLS-1$
+				fParameterName= name;
+			else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ARGUMENT));
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		return new RefactoringStatus();
 	}
 }

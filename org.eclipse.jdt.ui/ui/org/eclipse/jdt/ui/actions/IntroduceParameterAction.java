@@ -76,9 +76,7 @@ public class IntroduceParameterAction extends SelectionDispatchAction {
 		if (!ActionUtil.isProcessable(getShell(), fEditor))
 			return;
 		try{
-			IntroduceParameterRefactoring refactoring= IntroduceParameterRefactoring.create(
-			SelectionConverter.getInputAsCompilationUnit(fEditor), 
-			selection.getOffset(), selection.getLength());
+			final IntroduceParameterRefactoring refactoring= new IntroduceParameterRefactoring(SelectionConverter.getInputAsCompilationUnit(fEditor), selection.getOffset(), selection.getLength());
 			if (refactoring == null)
 				return;
 			new RefactoringStarter().activate(refactoring, new IntroduceParameterWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, true);

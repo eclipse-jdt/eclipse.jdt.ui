@@ -37,7 +37,15 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.TextRangeUtil;
 public class ChangeTypeRefactoringTests extends RefactoringTest {
 	private static final Class clazz= ChangeTypeRefactoringTests.class;
 	private static final String REFACTORING_PATH= "ChangeTypeRefactoring/";
+
+	public static ChangeTypeRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength){
+		return new ChangeTypeRefactoring(cu, selectionStart, selectionLength);
+	}
 	
+	public static ChangeTypeRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, String selectedType){
+		return new ChangeTypeRefactoring(cu, selectionStart, selectionLength, selectedType);
+	}
+
 	public ChangeTypeRefactoringTests(String name) {
 		super(name);
 	} 
@@ -81,8 +89,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 		throws Exception {
 		ICompilationUnit	cu= createCUfromTestFile(getPackageP(), true, true);
 		ISourceRange		selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ChangeTypeRefactoring		ref= ChangeTypeRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
-												   selectedTypeName);
+		ChangeTypeRefactoring		ref= new ChangeTypeRefactoring(cu, selection.getOffset(), selection.getLength(), selectedTypeName);
 	
 		// TODO Set parameters on your refactoring instance from arguments...
 	
@@ -108,8 +115,7 @@ public class ChangeTypeRefactoringTests extends RefactoringTest {
 							 int expectedStatus, String selectedTypeName) throws Exception {
 		ICompilationUnit	cu= createCUfromTestFile(getPackageP(), false, true);
 		ISourceRange		selection= TextRangeUtil.getSelection(cu, startLine, startColumn, endLine, endColumn);
-		ChangeTypeRefactoring	ref= ChangeTypeRefactoring.create(cu, selection.getOffset(), selection.getLength(), 
-												   selectedTypeName);
+		ChangeTypeRefactoring	ref= new ChangeTypeRefactoring(cu, selection.getOffset(), selection.getLength(), selectedTypeName);
 		RefactoringStatus	result= performRefactoring(ref);
 
 		assertNotNull("precondition was supposed to fail", result);

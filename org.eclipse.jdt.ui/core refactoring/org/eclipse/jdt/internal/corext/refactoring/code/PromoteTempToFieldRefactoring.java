@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.eclipse.text.edits.TextEdit;
 
@@ -23,12 +27,20 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
@@ -82,14 +94,23 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
-public class PromoteTempToFieldRefactoring extends Refactoring {
+public class PromoteTempToFieldRefactoring extends Refactoring implements IInitializableRefactoringComponent {
 
-	private final int fSelectionStart;
-    private final int fSelectionLength;
-    private final ICompilationUnit fCu;
+	public static final String ID_PROMOTE_TEMP= "org.eclipse.jdt.ui.promote.temp"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_STATIC= "static"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_INITIALIZE= "initialize"; //$NON-NLS-1$
+
+	private int fSelectionStart;
+    private int fSelectionLength;
+    private ICompilationUnit fCu;
 	
 	public static final int INITIALIZE_IN_FIELD= 0;
 	public static final int INITIALIZE_IN_METHOD= 1;
@@ -110,11 +131,9 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	private boolean fInitializerUsesLocalTypes;
 	private boolean fTempTypeUsesClassTypeVariables;
 	
-	private PromoteTempToFieldRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings){
+	public PromoteTempToFieldRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings){
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
-		Assert.isTrue(cu.exists());
-		Assert.isNotNull(codeGenerationSettings);
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= cu;
@@ -126,14 +145,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
         fInitializeIn= INITIALIZE_IN_METHOD;
         fCodeGenerationSettings= codeGenerationSettings;
 	}
-	
-	public static PromoteTempToFieldRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings){
-		return new PromoteTempToFieldRefactoring(cu, selectionStart, selectionLength, codeGenerationSettings);
-	}
-	
-    /*
-     * @see org.eclipse.jdt.internal.corext.refactoring.base.IRefactoring#getName()
-     */
+
     public String getName() {
         return RefactoringCoreMessages.PromoteTempToFieldRefactoring_name; 
     }
@@ -602,7 +614,25 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 	}
     
     private Change createChange(ASTRewrite rewrite) throws CoreException{
-        final TextChange result= new CompilationUnitChange("", fCu); //$NON-NLS-1$
+        final TextChange result= new CompilationUnitChange(RefactoringCoreMessages.PromoteTempToFieldRefactoring_name, fCu) {
+		
+			public final RefactoringDescriptor getRefactoringDescriptor() {
+				final Map arguments= new HashMap();
+				arguments.put(RefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
+				arguments.put(RefactoringDescriptor.NAME, fFieldName);
+				arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+				arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
+				arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
+				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
+				arguments.put(ATTRIBUTE_INITIALIZE, new Integer(fInitializeIn).toString());
+				String project= null;
+				IJavaProject javaProject= fCu.getJavaProject();
+				if (javaProject != null)
+					project= javaProject.getElementName();
+				final IVariableBinding binding= fTempDeclarationNode.resolveBinding();
+				return new RefactoringDescriptor(ID_PROMOTE_TEMP, project, MessageFormat.format("Convert local variable ''{0}'' in ''{1}'' to field", new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
+			}
+		};
         ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fCu);
         try {
 	        TextEdit resultingEdits= rewrite.rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true));
@@ -772,5 +802,73 @@ public class PromoteTempToFieldRefactoring extends Refactoring {
 			}
 			return super.visit(node);
 		}
-    }    
+    }
+
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
+			if (selection != null) {
+				int offset= -1;
+				int length= -1;
+				final StringTokenizer tokenizer= new StringTokenizer(selection);
+				if (tokenizer.hasMoreTokens())
+					offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (tokenizer.hasMoreTokens())
+					length= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (offset >= 0 && length >= 0) {
+					fSelectionStart= offset;
+					fSelectionLength= length;
+				} else
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
+			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_PROMOTE_TEMP));
+				else
+					fCu= (ICompilationUnit) element;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			final String visibility= generic.getAttribute(ATTRIBUTE_VISIBILITY);
+			if (visibility != null && !"".equals(visibility)) {//$NON-NLS-1$
+				int flag= 0;
+				try {
+					flag= Integer.parseInt(visibility);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_VISIBILITY));
+				}
+				fVisibility= flag;
+			}
+			final String initialize= generic.getAttribute(ATTRIBUTE_INITIALIZE);
+			if (initialize != null && !"".equals(initialize)) {//$NON-NLS-1$
+				int value= 0;
+				try {
+					value= Integer.parseInt(initialize);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INITIALIZE));
+				}
+				fInitializeIn= value;
+			}
+			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
+			if (name != null && !"".equals(name)) //$NON-NLS-1$
+				fFieldName= name;
+			else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
+			final String declareStatic= generic.getAttribute(ATTRIBUTE_STATIC);
+			if (declareStatic != null) {
+				fDeclareStatic= Boolean.valueOf(declareStatic).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_STATIC));
+			final String declareFinal= generic.getAttribute(ATTRIBUTE_FINAL);
+			if (declareFinal != null) {
+				fDeclareFinal= Boolean.valueOf(declareFinal).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FINAL));
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		return new RefactoringStatus();
+	}    
 }

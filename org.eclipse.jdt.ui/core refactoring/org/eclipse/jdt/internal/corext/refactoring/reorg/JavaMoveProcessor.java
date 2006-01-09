@@ -35,14 +35,15 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatin
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
-public final class JavaMoveProcessor extends MoveProcessor implements IQualifiedNameUpdating, IReorgDestinationValidator {
+public final class JavaMoveProcessor extends MoveProcessor implements IInitializableRefactoringComponent, IQualifiedNameUpdating, IReorgDestinationValidator {
 	//TODO: offer IMovePolicy getMovePolicy(); IReorgPolicy getReorgPolicy();
 	// and remove delegate methods (also for CopyRefactoring)?
 	
@@ -60,7 +61,8 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 		return new JavaMoveProcessor(movePolicy);
 	}
 
-	private JavaMoveProcessor(IMovePolicy movePolicy) {
+	public JavaMoveProcessor(IMovePolicy movePolicy) {
+		Assert.isNotNull(movePolicy);
 		fMovePolicy= movePolicy;
 	}
 	
@@ -174,10 +176,6 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 					super.perform(pm2);
 					return null;
 				}
-
-				public RefactoringDescriptor getRefactoringDescriptor() {
-					return super.getRefactoringDescriptor();
-				}
 			};
 			Change change= fMovePolicy.createChange(pm);
 			if (change instanceof CompositeChange){
@@ -257,5 +255,10 @@ public final class JavaMoveProcessor extends MoveProcessor implements IQualified
 	}
 	public boolean isTextualMove() {
 		return fMovePolicy.isTextualMove();
+	}
+
+	public RefactoringStatus initialize(RefactoringArguments arguments) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

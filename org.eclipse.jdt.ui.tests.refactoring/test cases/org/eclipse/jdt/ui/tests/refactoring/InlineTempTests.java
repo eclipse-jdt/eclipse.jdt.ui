@@ -68,8 +68,9 @@ public class InlineTempTests extends RefactoringTest {
 	}
 	
 	private void helper1(ICompilationUnit cu, ISourceRange selection) throws Exception{
-		InlineTempRefactoring ref= InlineTempRefactoring.create(cu, new RefactoringASTParser(AST.JLS3).parse(cu, true), selection.getOffset(), selection.getLength());
-		
+		InlineTempRefactoring ref= new InlineTempRefactoring(cu, selection.getOffset(), selection.getLength());
+		if (ref.checkIfTempSelected(new RefactoringASTParser(AST.JLS3).parse(cu, true)).hasFatalError())
+			ref= null;
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
 		
@@ -92,8 +93,9 @@ public class InlineTempTests extends RefactoringTest {
 	}
 	
 	private void helper2(ICompilationUnit cu, ISourceRange selection) throws Exception{
-		InlineTempRefactoring ref= InlineTempRefactoring.create(cu, new RefactoringASTParser(AST.JLS3).parse(cu, true), selection.getOffset(), selection.getLength());
-		
+		InlineTempRefactoring ref= new InlineTempRefactoring(cu, selection.getOffset(), selection.getLength());
+		if (ref.checkIfTempSelected(new RefactoringASTParser(AST.JLS3).parse(cu, true)).hasFatalError())
+			ref= null;
 		if (ref != null){
 			RefactoringStatus result= performRefactoring(ref);
 			assertNotNull("precondition was supposed to fail", result);		

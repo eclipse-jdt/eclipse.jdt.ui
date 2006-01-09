@@ -68,7 +68,7 @@ public class PullUpTests extends RefactoringTest {
 		IJavaProject project= null;
 		if (methods != null && methods.length > 0)
 			project= methods[0].getJavaProject();
-		return PullUpRefactoring.create(methods, JavaPreferencesSettings.getCodeGenerationSettings(project));
+		return (RefactoringAvailabilityTester.isPullUpAvailable(methods) ? new PullUpRefactoring(methods, JavaPreferencesSettings.getCodeGenerationSettings(project)) : null);
 	}
 	
 	private void fieldMethodHelper1(String[] fieldNames, String[] methodNames, String[][] signatures, boolean deleteAllInSourceType, boolean deleteAllMatchingMethods) throws Exception{

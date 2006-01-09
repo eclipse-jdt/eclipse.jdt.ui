@@ -10,34 +10,20 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
-
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 /**
  * Refactoring to extract an interface from a type.
  */
-public final class ExtractInterfaceRefactoring extends ProcessorBasedRefactoring {
-
-	/**
-	 * Creates a new extract interface refactoring.
-	 * 
-	 * @param type the type to extract an interface from
-	 * @param settings the code generation settings to apply
-	 * @return the created refactoring
-	 * @throws JavaModelException if the the refactoring could not be tested for availability
-	 */
-	public static ExtractInterfaceRefactoring create(final IType type, final CodeGenerationSettings settings) throws JavaModelException {
-		Assert.isNotNull(type);
-		Assert.isNotNull(settings);
-		Assert.isTrue(type.exists() && !type.isAnnotation() && !type.isAnonymous() && !type.isBinary() && !type.isReadOnly());
-		return new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(type, settings));
-	}
+public final class ExtractInterfaceRefactoring extends ProcessorBasedRefactoring implements IInitializableRefactoringComponent {
 
 	/** The processor to use */
 	private final ExtractInterfaceProcessor fProcessor;
@@ -45,9 +31,10 @@ public final class ExtractInterfaceRefactoring extends ProcessorBasedRefactoring
 	/**
 	 * Creates a new extract interface refactoring.
 	 * 
-	 * @param processor the processor to use
+	 * @param processor
+	 *            the processor to use
 	 */
-	private ExtractInterfaceRefactoring(final ExtractInterfaceProcessor processor) {
+	public ExtractInterfaceRefactoring(final ExtractInterfaceProcessor processor) {
 		super(processor);
 
 		fProcessor= processor;
@@ -67,5 +54,17 @@ public final class ExtractInterfaceRefactoring extends ProcessorBasedRefactoring
 	 */
 	public final RefactoringProcessor getProcessor() {
 		return fProcessor;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
+		Assert.isNotNull(arguments);
+		final RefactoringProcessor processor= getProcessor();
+		if (processor instanceof IInitializableRefactoringComponent) {
+			return ((IInitializableRefactoringComponent) processor).initialize(arguments);
+		}
+		return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.ProcessorBasedRefactoring_error_unsupported_initialization, ExtractInterfaceProcessor.ID_EXTRACT_INTERFACE));
 	}
 }

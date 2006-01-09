@@ -57,7 +57,7 @@ public class PushDownTests extends RefactoringTest {
 	}
 
 	private static PushDownRefactoring createRefactoring(IMember[] members) throws JavaModelException{
-		return PushDownRefactoring.create(members);
+		return (RefactoringAvailabilityTester.isPushDownAvailable(members) ? new PushDownRefactoring(members) : null);
 	}
 
 	private PushDownRefactoring createRefactoringPrepareForInputCheck(String[] selectedMethodNames, String[][] selectedMethodSignatures, 

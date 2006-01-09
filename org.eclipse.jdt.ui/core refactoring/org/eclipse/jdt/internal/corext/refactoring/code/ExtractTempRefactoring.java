@@ -10,14 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.ReplaceEdit;
@@ -33,11 +37,19 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 import org.eclipse.jface.text.BadLocationException;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -112,7 +124,12 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Extract Local Variable (from selected expression inside method or initializer).
  */
-public class ExtractTempRefactoring extends Refactoring {
+public class ExtractTempRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+
+	public static final String ID_EXTRACT_TEMP= "org.eclipse.jdt.ui.extract.temp"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
 
 	private static final class ForStatementChecker extends ASTVisitor {
 
@@ -173,10 +190,6 @@ public class ExtractTempRefactoring extends Refactoring {
 		if (parent instanceof SwitchCase)
 			return false;
 		return true;
-	}
-
-	public static ExtractTempRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
-		return new ExtractTempRefactoring(cu, selectionStart, selectionLength);
 	}
 
 	private static Object[] getArrayPrefix(Object[] array, int prefixLength) {
@@ -318,7 +331,7 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private CompilationUnit fCompilationUnitNode;
 
-	private final ICompilationUnit fCu;
+	private ICompilationUnit fCu;
 
 	private boolean fDeclareFinal;
 
@@ -331,19 +344,18 @@ public class ExtractTempRefactoring extends Refactoring {
 
 	private String fTempTypeName;
 	
-	private final int fSelectionLength;
+	private int fSelectionLength;
 
-	private final int fSelectionStart;
+	private int fSelectionStart;
 
 	private String fTempName;
 
 	private TextEdit fImportEdit;
 	private TextChange fChange;
 
-	private ExtractTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
+	public ExtractTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
-		Assert.isTrue(cu.exists());
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= cu;
@@ -426,7 +438,22 @@ public class ExtractTempRefactoring extends Refactoring {
 	}
 	
 	private TextChange doCreateChange(ITextFileBuffer buffer, IProgressMonitor pm) throws CoreException, JavaModelException {
-		TextChange change= new CompilationUnitChange(RefactoringCoreMessages.ExtractTempRefactoring_extract_temp, fCu);
+		TextChange change= new CompilationUnitChange(RefactoringCoreMessages.ExtractTempRefactoring_extract_temp, fCu) {
+		
+			public final RefactoringDescriptor getRefactoringDescriptor() {
+				final Map arguments= new HashMap();
+				arguments.put(RefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
+				arguments.put(RefactoringDescriptor.NAME, fTempName);
+				arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+				arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllOccurrences).toString());
+				arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
+				String project= null;
+				IJavaProject javaProject= fCu.getJavaProject();
+				if (javaProject != null)
+					project= javaProject.getElementName();
+				return new RefactoringDescriptor(ID_EXTRACT_TEMP, project, MessageFormat.format(RefactoringCoreMessages.ExtractTempRefactoring_descriptor_description, new String[] { fTempName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression()) }), null, arguments, RefactoringDescriptor.NONE);
+			}
+		};
 		try {
 			String lineDelimiter= buffer.getDocument().getLineDelimiter(buffer.getDocument().getLineOfOffset(fSelectionStart));
 			TextEdit tempDeclarationEdit= createTempDeclarationEdit(lineDelimiter);
@@ -929,5 +956,53 @@ public class ExtractTempRefactoring extends Refactoring {
 	private boolean shouldReplaceSelectedExpressionWithTempDeclaration() throws JavaModelException {
 		IExpressionFragment selectedFragment= getSelectedExpression();
 		return selectedFragment.getAssociatedNode().getParent() instanceof ExpressionStatement && selectedFragment.matches(ASTFragmentFactory.createFragmentForFullSubtree(selectedFragment.getAssociatedNode()));
+	}
+
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
+			if (selection != null) {
+				int offset= -1;
+				int length= -1;
+				final StringTokenizer tokenizer= new StringTokenizer(selection);
+				if (tokenizer.hasMoreTokens())
+					offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (tokenizer.hasMoreTokens())
+					length= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (offset >= 0 && length >= 0) {
+					fSelectionStart= offset;
+					fSelectionLength= length;
+				} else
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
+			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_TEMP));
+				else
+					fCu= (ICompilationUnit) element;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
+			if (name != null && !"".equals(name)) //$NON-NLS-1$
+				fTempName= name;
+			else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
+			final String replace= generic.getAttribute(ATTRIBUTE_REPLACE);
+			if (replace != null) {
+				fReplaceAllOccurrences= Boolean.valueOf(replace).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
+			final String declareFinal= generic.getAttribute(ATTRIBUTE_FINAL);
+			if (declareFinal != null) {
+				fDeclareFinal= Boolean.valueOf(declareFinal).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_FINAL));
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		return new RefactoringStatus();
 	}
 }

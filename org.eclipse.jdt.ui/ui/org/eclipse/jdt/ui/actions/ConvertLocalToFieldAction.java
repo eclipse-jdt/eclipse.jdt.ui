@@ -83,7 +83,7 @@ public class ConvertLocalToFieldAction extends SelectionDispatchAction {
 			return;
 		try{
 			ICompilationUnit cunit= SelectionConverter.getInputAsCompilationUnit(fEditor);
-			PromoteTempToFieldRefactoring refactoring= PromoteTempToFieldRefactoring.create(cunit, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject()));
+			final PromoteTempToFieldRefactoring refactoring= new PromoteTempToFieldRefactoring(cunit, selection.getOffset(), selection.getLength(), JavaPreferencesSettings.getCodeGenerationSettings(cunit.getJavaProject()));
 			if (refactoring == null)
 				return;
 			new RefactoringStarter().activate(refactoring, new PromoteTempWizard(refactoring), getShell(), DIALOG_MESSAGE_TITLE, false);

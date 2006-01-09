@@ -105,7 +105,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 
 	private void validatePassingTest(String className, IType clas, String[] cuNames, String[] packageNames, String enclosingInstanceName, boolean makeFinal, boolean possible, boolean mandatory, boolean createFieldIfPossible) throws JavaModelException, CoreException, Exception, IOException {
 		assertTrue("should be enabled", RefactoringAvailabilityTester.isMoveInnerAvailable(clas));
-		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
+		MoveInnerToTopRefactoring ref= ((RefactoringAvailabilityTester.isMoveInnerAvailable(clas)) ? new MoveInnerToTopRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject())) : null);
 		RefactoringStatus preconditionResult= ref.checkInitialConditions(new NullProgressMonitor());
 		assertTrue("activation was supposed to be successful" + preconditionResult.toString(), preconditionResult.isOK());
 		
@@ -147,7 +147,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		IType parentClas= getClassFromTestFile(getPackageP(), parentClassName);
 		IType clas= parentClas.getType(className);
 
-		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject()));
+		MoveInnerToTopRefactoring ref= ((RefactoringAvailabilityTester.isMoveInnerAvailable(clas)) ? new MoveInnerToTopRefactoring(clas, JavaPreferencesSettings.getCodeGenerationSettings(clas.getJavaProject())) : null);
 		if (expectedSeverity == NOT_AVAILABLE && ref == null)
 			return;
 		assertEquals("refactoring availability not as expected", expectedSeverity == NOT_AVAILABLE, ref == null);
@@ -520,7 +520,7 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		int offset= TextRangeUtil.getOffset(parentClas.getCompilationUnit(), 5, 25);
 		IType nestedLocal= (IType) parentClas.getCompilationUnit().codeSelect(offset, 0)[0];
 	
-		MoveInnerToTopRefactoring ref= MoveInnerToTopRefactoring.create(nestedLocal, JavaPreferencesSettings.getCodeGenerationSettings(parentClas.getJavaProject()));
+		MoveInnerToTopRefactoring ref= ((RefactoringAvailabilityTester.isMoveInnerAvailable(nestedLocal)) ? new MoveInnerToTopRefactoring(nestedLocal, JavaPreferencesSettings.getCodeGenerationSettings(parentClas.getJavaProject())) : null);
 		assertNull("refactoring was not supposed to be available", ref);
 	}
 }

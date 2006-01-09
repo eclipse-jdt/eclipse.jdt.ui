@@ -43,9 +43,6 @@ import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
-
 public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
@@ -179,26 +176,15 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 			if (path != null) {
 				final IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(path));
 				if (resource == null || !resource.exists())
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, RenameSourceFolderChange.ID_RENAME_SOURCE_FOLDER));
 				else
 					fSourceFolder= (IPackageFragmentRoot) JavaCore.create(resource);
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PATH));
 			final String name= generic.getAttribute(ATTRIBUTE_NAME);
-			if (name != null) {
-				if (fSourceFolder != null) {
-					RefactoringStatus status= new RefactoringStatus();
-					try {
-						status= checkNewElementName(name);
-					} catch (CoreException exception) {
-						JavaPlugin.log(exception);
-					}
-					if (!status.hasError())
-						setNewElementName(name);
-					else
-						return status;
-				}
-			} else
+			if (name != null && !"".equals(name)) //$NON-NLS-1$
+				setNewElementName(name);
+			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_NAME));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);

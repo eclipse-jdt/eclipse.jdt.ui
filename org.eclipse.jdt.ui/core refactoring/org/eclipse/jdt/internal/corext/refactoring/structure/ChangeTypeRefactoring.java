@@ -223,25 +223,16 @@ public class ChangeTypeRefactoring extends Refactoring {
 	private ITypeBinding fSelectionTypeBinding;
 	private ConstraintCollector fCollector;
 
-	public static ChangeTypeRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength){
-		return new ChangeTypeRefactoring(cu, selectionStart, selectionLength);
-	}
-	
-	public static ChangeTypeRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength, String selectedType){
-		return new ChangeTypeRefactoring(cu, selectionStart, selectionLength, selectedType);
-	}
-
-	private ChangeTypeRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
+	public ChangeTypeRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		this(cu, selectionStart, selectionLength, null);
 	}
 
 	/**
 	 * Constructor for ChangeTypeRefactoring (invoked from tests only)
 	 */
-	private ChangeTypeRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, String selectedType) {
+	public ChangeTypeRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, String selectedType) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
-		Assert.isTrue(cu.exists());
 
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
@@ -987,7 +978,6 @@ public class ChangeTypeRefactoring extends Refactoring {
 		
 		return result;
 	}
-
 	private static ConstraintVariable match(ConstraintVariable matchee, ConstraintVariable left, ConstraintVariable right) {
 		if (matchee.equals(left))
 			return right;
@@ -1242,7 +1232,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			return typeName + fFieldBinding.getName();
 		} else if (fMethodBinding != null) {
 			if (fParamIndex == -1) {
-				return typeName + fMethodBinding.getName() + "(..)"; //$NON-NLS-1$
+				return typeName + fMethodBinding.getName() + "(...)"; //$NON-NLS-1$
 			} else {
 				return typeName + fParamName;
 			}

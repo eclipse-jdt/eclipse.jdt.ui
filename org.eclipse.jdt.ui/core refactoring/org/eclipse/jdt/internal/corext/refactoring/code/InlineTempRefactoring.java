@@ -10,7 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.text.MessageFormat;
+import java.util.HashMap;
 import java.util.Iterator;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.ReplaceEdit;
@@ -20,21 +24,33 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -59,35 +75,33 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceRangeComputer;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
 
-public class InlineTempRefactoring extends Refactoring {
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-	private final int fSelectionStart;
-	private final int fSelectionLength;
-	private final ICompilationUnit fCu;
+public class InlineTempRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+
+	private static final String ID_INLINE_TEMP= "org.eclipse.jdt.ui.inline.temp"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
+
+	private int fSelectionStart;
+	private int fSelectionLength;
+	private ICompilationUnit fCu;
 	
 	//the following fields are set after the construction
 	private VariableDeclaration fTempDeclaration;
 	private CompilationUnit fCompilationUnitNode;
 	private int[] fReferenceOffsets;
 
-	private InlineTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
+	public InlineTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
-		Assert.isTrue(cu.exists());
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= cu;
 	}
-	
-	public static InlineTempRefactoring create(ICompilationUnit unit, CompilationUnit node, int selectionStart, int selectionLength) {
-		InlineTempRefactoring ref= new InlineTempRefactoring(unit, selectionStart, selectionLength);
-		if (ref.checkIfTempSelected(node).hasFatalError())
-			return null;
-		return ref;
-	}
-	
-	private RefactoringStatus checkIfTempSelected(CompilationUnit node){
+	public RefactoringStatus checkIfTempSelected(CompilationUnit node) {
+		Assert.isNotNull(node);
 		fCompilationUnitNode= node;
 
 		fTempDeclaration= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
@@ -192,14 +206,30 @@ public class InlineTempRefactoring extends Refactoring {
 	}
 	
 	//----- changes
-	
-	/*
-	 * @see IRefactoring#createChange(IProgressMonitor)
-	 */
+
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
 			pm.beginTask(RefactoringCoreMessages.InlineTempRefactoring_preview, 2); 
-			final CompilationUnitChange result= new CompilationUnitChange(RefactoringCoreMessages.InlineTempRefactoring_inline, fCu); 
+			final CompilationUnitChange result= new CompilationUnitChange(RefactoringCoreMessages.InlineTempRefactoring_inline, fCu) {
+			
+				public final RefactoringDescriptor getRefactoringDescriptor() {
+					final Map arguments= new HashMap();
+					arguments.put(RefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
+					arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+					String project= null;
+					IJavaProject javaProject= fCu.getJavaProject();
+					if (javaProject != null)
+						project= javaProject.getElementName();
+					final IVariableBinding binding= fTempDeclaration.resolveBinding();
+					String text= null;
+					final IMethodBinding method= binding.getDeclaringMethod();
+					if (method != null)
+						text= BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED);
+					else
+						text= '{' + JavaElementLabels.ELLIPSIS_STRING + '}';
+					return new RefactoringDescriptor(ID_INLINE_TEMP, project, MessageFormat.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), text}), null, arguments, RefactoringDescriptor.NONE);
+				}
+			}; 
 			inlineTemp(result, new SubProgressMonitor(pm, 1));
 			removeTemp(result);
 			return result;
@@ -329,5 +359,44 @@ public class InlineTempRefactoring extends Refactoring {
 
 	public VariableDeclaration getTempDeclaration() {
 		return fTempDeclaration;
+	}
+
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
+			if (selection != null) {
+				int offset= -1;
+				int length= -1;
+				final StringTokenizer tokenizer= new StringTokenizer(selection);
+				if (tokenizer.hasMoreTokens())
+					offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (tokenizer.hasMoreTokens())
+					length= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (offset >= 0 && length >= 0) {
+					fSelectionStart= offset;
+					fSelectionLength= length;
+				} else
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
+			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INLINE_TEMP));
+				else {
+					fCu= (ICompilationUnit) element;
+		        	final ASTParser parser= ASTParser.newParser(AST.JLS3);
+		        	parser.setResolveBindings(true);
+		        	parser.setSource(fCu);
+		        	if (checkIfTempSelected((CompilationUnit) parser.createAST(null)).hasFatalError())
+						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INLINE_TEMP));
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		return new RefactoringStatus();
 	}
 }

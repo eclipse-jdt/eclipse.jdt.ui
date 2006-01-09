@@ -63,7 +63,7 @@ public class UseSupertypeWherePossibleTests extends RefactoringTest {
 	private void validatePassingTest(String className, String[] cuNames, String superTypeFullName, boolean updateInstanceOf) throws Exception {
 		IType clas= getClassFromTestFile(getPackageP(), className);
 				
-		UseSuperTypeRefactoring ref= UseSuperTypeRefactoring.create(clas);
+		UseSuperTypeRefactoring ref= new UseSuperTypeRefactoring(new UseSuperTypeProcessor(clas));
 		UseSuperTypeProcessor processor= ref.getUseSuperTypeProcessor();
 		processor.setInstanceOf(updateInstanceOf);
 			

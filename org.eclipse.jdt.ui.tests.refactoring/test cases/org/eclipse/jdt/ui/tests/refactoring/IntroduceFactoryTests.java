@@ -184,7 +184,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 	private void doSingleUnitTest(boolean protectConstructor, ICompilationUnit cu, String outputFileName) throws Exception, JavaModelException, IOException {
 		ISourceRange		selection= findSelectionInSource(cu.getSource());
-		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(cu, selection.getOffset(), selection.getLength());
+		IntroduceFactoryRefactoring	ref= new IntroduceFactoryRefactoring(cu, selection.getOffset(), selection.getLength());
 
 		ref.setProtectConstructor(protectConstructor);
 
@@ -260,7 +260,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	{
 		ICompilationUnit	cu= createCUForSimpleTest(getPackageP(), true, true);
 		ISourceRange		selection= findSelectionInSource(cu.getSource());
-		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(cu, selection.getOffset(), selection.getLength());
+		IntroduceFactoryRefactoring	ref= new IntroduceFactoryRefactoring(cu, selection.getOffset(), selection.getLength());
 
 		RefactoringStatus	activationResult= ref.checkInitialConditions(new NullProgressMonitor());	
 
@@ -300,7 +300,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 
 	private void doMultiUnitTest(ICompilationUnit[] CUs, String testPath, String[] outputFileBaseNames, String factoryClassName) throws Exception, JavaModelException, IOException {
 		ISourceRange selection= findSelectionInSource(CUs[0].getSource());
-		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(CUs[0], selection.getOffset(), selection.getLength());
+		IntroduceFactoryRefactoring	ref= new IntroduceFactoryRefactoring(CUs[0], selection.getOffset(), selection.getLength());
 
 		RefactoringStatus activationResult= ref.checkInitialConditions(new NullProgressMonitor());
 
@@ -497,7 +497,7 @@ public class IntroduceFactoryTests extends RefactoringTest {
 	private void failHelper(boolean staticFactory, int expectedStatus) throws Exception {
 		ICompilationUnit	cu= createCUForSimpleTest(getPackageP(), false, true);
 		ISourceRange		selection= findSelectionInSource(cu.getSource());
-		IntroduceFactoryRefactoring	ref= IntroduceFactoryRefactoring.create(cu, selection.getOffset(), selection.getLength());
+		IntroduceFactoryRefactoring	ref= new IntroduceFactoryRefactoring(cu, selection.getOffset(), selection.getLength());
 		RefactoringStatus	result= performRefactoring(ref);
 
 		assertNotNull("precondition was supposed to fail", result);

@@ -44,6 +44,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
@@ -51,6 +52,7 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -62,6 +64,7 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -115,11 +118,12 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegatingUpdating, IInitializableRefactoringComponent {
 
-	private static final String ID_STATIC_MOVE= "org.eclipse.jdt.ui.move.static"; //$NON-NLS-1$
-
+	public static final String ID_STATIC_MOVE= "org.eclipse.jdt.ui.move.static"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_DELEGATE="delegate"; //$NON-NLS-1$
 	private static final String TRACKED_POSITION_PROPERTY= "MoveStaticMembersProcessor.trackedPosition"; //$NON-NLS-1$
 
 	private IMember[] fMembersToMove;
@@ -671,6 +675,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			public final RefactoringDescriptor getRefactoringDescriptor() {
 				final Map arguments= new HashMap();
 				arguments.put(RefactoringDescriptor.INPUT, fDestinationType.getHandleIdentifier());
+				arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegatingUpdating).toString());
 				final IMember[] members= getMembersToMove();
 				for (int index= 0; index < members.length; index++)
 					arguments.put(RefactoringDescriptor.ELEMENT + (index + 1), members[index].getHandleIdentifier());
@@ -994,7 +999,48 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	}
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		// TODO: implement
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_STATIC_MOVE));
+				else {
+					fDestinationType= (IType) element;
+					fDestinationTypeName= fDestinationType.getFullyQualifiedName();
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			final String delegate= generic.getAttribute(ATTRIBUTE_DELEGATE);
+			if (delegate != null) {
+				fDelegatingUpdating= Boolean.valueOf(delegate).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
+			int count= 1;
+			final List elements= new ArrayList();
+			String attribute= RefactoringDescriptor.ELEMENT + count;
+			final RefactoringStatus status= new RefactoringStatus();
+			while ((handle= generic.getAttribute(attribute)) != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					status.merge(RefactoringStatus.createWarningStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_STATIC_MOVE)));
+				else
+					elements.add(element);
+				count++;
+				attribute= RefactoringDescriptor.ELEMENT + count;
+			}
+			fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
+			if (elements.isEmpty())
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_STATIC_MOVE));
+			IJavaProject project= null;
+			if (fMembersToMove.length > 0)
+				project= fMembersToMove[0].getJavaProject();
+			fPreferences= JavaPreferencesSettings.getCodeGenerationSettings(project);
+			if (!status.isOK())
+				return status;
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
 	}
 }

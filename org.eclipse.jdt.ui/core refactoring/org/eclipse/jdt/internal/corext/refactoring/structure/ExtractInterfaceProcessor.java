@@ -10,13 +10,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import org.eclipse.text.edits.MalformedTreeException;
@@ -36,11 +39,15 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -89,6 +96,7 @@ import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
@@ -112,8 +120,10 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
  * Refactoring processor to extract interfaces.
@@ -122,6 +132,12 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 	/** The identifier of this processor */
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.extractInterfaceProcessor"; //$NON-NLS-1$
+
+	public static final String ID_EXTRACT_INTERFACE= "org.eclipse.jdt.ui.extract.interface"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_COMMENTS= "comments"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_ABSTRACT= "abstract"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_PUBLIC= "public"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
 
 	/**
 	 * Is the specified member extractable from the type?
@@ -161,13 +177,13 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	private boolean fReplace= false;
 
 	/** The code generation settings */
-	private final CodeGenerationSettings fSettings;
+	private CodeGenerationSettings fSettings;
 
 	/** The static bindings to import */
 	private final Set fStaticBindings= new HashSet();
 
 	/** The subtype where to extract the supertype */
-	private final IType fSubType;
+	private IType fSubType;
 
 	/** The subtype name */
 	private String fSuperName;
@@ -185,11 +201,10 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * @param settings The code generation settings
 	 */
 	public ExtractInterfaceProcessor(final IType type, final CodeGenerationSettings settings) {
-		Assert.isNotNull(type);
-		Assert.isNotNull(settings);
 		fSubType= type;
 		fSettings= settings;
-		fSuperName= fSubType.getElementName();
+		if (fSubType != null)
+			fSuperName= fSubType.getElementName();
 	}
 
 	/*
@@ -302,7 +317,26 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		try {
 			monitor.beginTask("", 6); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
-			final DynamicValidationStateChange change= new DynamicValidationStateChange(RefactoringCoreMessages.ExtractInterfaceRefactoring_name, fChangeManager.getAllChanges());
+			final DynamicValidationStateChange change= new DynamicValidationStateChange(RefactoringCoreMessages.ExtractInterfaceRefactoring_name, fChangeManager.getAllChanges()) {
+
+				public final RefactoringDescriptor getRefactoringDescriptor() {
+					final Map arguments= new HashMap();
+					arguments.put(RefactoringDescriptor.INPUT, fSubType.getHandleIdentifier());
+					arguments.put(RefactoringDescriptor.NAME, fSuperName);
+					for (int index= 0; index < fMembers.length; index++)
+						arguments.put(RefactoringDescriptor.ELEMENT + (index + 1), fMembers[index].getHandleIdentifier());
+					arguments.put(ATTRIBUTE_ABSTRACT, Boolean.valueOf(fAbstract).toString());
+					arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fComments).toString());
+					arguments.put(ATTRIBUTE_PUBLIC, Boolean.valueOf(fPublic).toString());
+					arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplace).toString());
+					arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
+					String project= null;
+					final IJavaProject javaProject= fSubType.getJavaProject();
+					if (javaProject != null)
+						project= javaProject.getElementName();
+					return new RefactoringDescriptor(ID_EXTRACT_INTERFACE, project, MessageFormat.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { fSuperName, JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, JavaRefactorings.IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
+				}
+			};
 			final IFile file= ResourceUtil.getFile(fSubType.getCompilationUnit());
 			if (fSuperSource != null && fSuperSource.length() > 0)
 				change.add(new CreateTextFileChange(file.getFullPath().removeLastSegments(1).append(JavaModelUtil.getRenamedCUName(fSubType.getCompilationUnit(), fSuperName)), fSuperSource, file.getCharset(false), "java")); //$NON-NLS-1$
@@ -1184,5 +1218,77 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	public final void setTypeName(final String name) {
 		Assert.isNotNull(name);
 		fSuperName= name;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_INTERFACE));
+				else
+					fSubType= (IType) element;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
+			if (name != null) {
+				fSuperName= name;
+				final RefactoringStatus status= checkTypeName(name);
+				if (status.hasError())
+					return status;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
+			final String deferred= generic.getAttribute(ATTRIBUTE_ABSTRACT);
+			if (deferred != null) {
+				fAbstract= Boolean.valueOf(deferred).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ABSTRACT));
+			final String comment= generic.getAttribute(ATTRIBUTE_COMMENTS);
+			if (comment != null) {
+				fComments= Boolean.valueOf(comment).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_COMMENTS));
+			final String instance= generic.getAttribute(ATTRIBUTE_INSTANCEOF);
+			if (instance != null) {
+				fInstanceOf= Boolean.valueOf(instance).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INSTANCEOF));
+			final String visibility= generic.getAttribute(ATTRIBUTE_PUBLIC);
+			if (visibility != null) {
+				fPublic= Boolean.valueOf(visibility).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PUBLIC));
+			final String replace= generic.getAttribute(ATTRIBUTE_REPLACE);
+			if (replace != null) {
+				fReplace= Boolean.valueOf(replace).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
+			int count= 1;
+			final List elements= new ArrayList();
+			String attribute= RefactoringDescriptor.ELEMENT + count;
+			final RefactoringStatus status= new RefactoringStatus();
+			while ((handle= generic.getAttribute(attribute)) != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					status.merge(RefactoringStatus.createWarningStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_INTERFACE)));
+				else
+					elements.add(element);
+				count++;
+				attribute= RefactoringDescriptor.ELEMENT + count;
+			}
+			fMembers= (IMember[]) elements.toArray(new IMember[elements.size()]);
+			if (elements.isEmpty())
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_INTERFACE));
+			fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fSubType.getJavaProject());
+			if (!status.isOK())
+				return status;
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		return new RefactoringStatus();
 	}
 }

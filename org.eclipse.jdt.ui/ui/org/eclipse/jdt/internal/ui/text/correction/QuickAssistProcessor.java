@@ -202,7 +202,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 
 		final ICompilationUnit cu= context.getCompilationUnit();
-		final ExtractTempRefactoring refactoring= ExtractTempRefactoring.create(cu, expression.getStartPosition(), expression.getLength());
+		final ExtractTempRefactoring refactoring= new ExtractTempRefactoring(cu, expression.getStartPosition(), expression.getLength());
 		if (refactoring.checkActivationBasics(context.getASTRoot(), new NullProgressMonitor()).isOK()) {
 			String label= CorrectionMessages.QuickAssistProcessor_extract_to_local_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_LOCAL);

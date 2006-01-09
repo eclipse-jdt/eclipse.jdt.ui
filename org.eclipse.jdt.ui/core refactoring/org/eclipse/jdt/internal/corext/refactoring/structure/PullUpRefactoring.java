@@ -33,18 +33,24 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -85,6 +91,7 @@ import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
@@ -99,10 +106,18 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 
 import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public final class PullUpRefactoring extends HierarchyRefactoring {
+
+	private static final String ID_PULL_UP= "org.eclipse.jdt.ui.pull.up"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_STUBS= "stubs"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_PULL= "pull"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_ABSTRACT= "abstract"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_DELETE= "delete"; //$NON-NLS-1$
 
 	/**
 	 * AST node visitor which performs the actual mapping.
@@ -219,18 +234,6 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		matchingSet.add(matchingMember);
 	}
 
-	public static PullUpRefactoring create(IMember[] members, CodeGenerationSettings preferenceSettings) throws JavaModelException {
-		if (!RefactoringAvailabilityTester.isPullUpAvailable(members))
-			return null;
-		final IType type= RefactoringAvailabilityTester.getTopLevelType(members);
-		if (type != null && RefactoringAvailabilityTester.getPullUpMembers(type).length != 0) {
-			PullUpRefactoring result= new PullUpRefactoring(new IMember[0], preferenceSettings);
-			result.fDeclaringType= RefactoringAvailabilityTester.getTopLevelType(members);
-			return result;
-		}
-		return new PullUpRefactoring(members, preferenceSettings);
-	}
-
 	private static CompilationUnitRewrite getCompilationUnitRewrite(final Map rewrites, final ICompilationUnit unit) {
 		Assert.isNotNull(rewrites);
 		Assert.isNotNull(unit);
@@ -305,7 +308,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 
 	private ITypeHierarchy fCachedTargetClassHierarchy;
 
-	private final CodeGenerationSettings fCodeGenerationSettings;
+	private CodeGenerationSettings fCodeGenerationSettings;
 
 	private boolean fCreateMethodStubs;
 
@@ -315,8 +318,19 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 
 	private IType fTargetType;
 
-	private PullUpRefactoring(IMember[] elements, CodeGenerationSettings settings) {
-		super(elements);
+	public PullUpRefactoring(IMember[] members, CodeGenerationSettings settings) {
+		super(members);
+		if (members != null) {
+			final IType type= RefactoringAvailabilityTester.getTopLevelType(members);
+			try {
+				if (type != null && RefactoringAvailabilityTester.getPullUpMembers(type).length != 0) {
+					fMembersToMove= new IMember[0];
+					fDeclaringType= RefactoringAvailabilityTester.getTopLevelType(members);
+				}
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+		}
 		fCodeGenerationSettings= settings;
 		fMethodsToDelete= new IMethod[0];
 		fMethodsToDeclareAbstract= new IMethod[0];
@@ -881,12 +895,33 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		targetRewrite.getASTRewrite().getListRewrite(targetClass, targetClass.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, targetClass.bodyDeclarations()), targetRewrite.createGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_abstract_method)); 
 	}
 
-	/*
-	 * @see IRefactoring#createChange(IProgressMonitor)
-	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
-			return new DynamicValidationStateChange(RefactoringCoreMessages.PullUpRefactoring_Pull_Up, fChangeManager.getAllChanges()); 
+			return new DynamicValidationStateChange(RefactoringCoreMessages.PullUpRefactoring_Pull_Up, fChangeManager.getAllChanges()) {
+
+				public final RefactoringDescriptor getRefactoringDescriptor() {
+					final Map arguments= new HashMap();
+					arguments.put(RefactoringDescriptor.INPUT, fTargetType.getHandleIdentifier());
+					if (fDeclaringType != null)
+						arguments.put(RefactoringDescriptor.ELEMENT + 1, fDeclaringType.getHandleIdentifier());
+					arguments.put(ATTRIBUTE_PULL, new Integer(fMembersToMove.length).toString());
+					for (int offset= 0; offset < fMembersToMove.length; offset++)
+						arguments.put(RefactoringDescriptor.ELEMENT + (offset + 2), fMembersToMove[offset].getHandleIdentifier());
+					arguments.put(ATTRIBUTE_DELETE, new Integer(fMethodsToDelete.length).toString());
+					for (int offset= 0; offset < fMethodsToDelete.length; offset++)
+						arguments.put(RefactoringDescriptor.ELEMENT + (offset + fMembersToMove.length + 2), fMethodsToDelete[offset].getHandleIdentifier());
+					arguments.put(ATTRIBUTE_ABSTRACT, new Integer(fMethodsToDeclareAbstract.length).toString());
+					for (int offset= 0; offset < fMethodsToDeclareAbstract.length; offset++)
+						arguments.put(RefactoringDescriptor.ELEMENT + (offset + fMembersToMove.length + fMethodsToDelete.length + 2), fMethodsToDeclareAbstract[offset].getHandleIdentifier());
+					arguments.put(ATTRIBUTE_STUBS, Boolean.valueOf(fCreateMethodStubs).toString());
+					String project= null;
+					final IType declaring= getDeclaringType();
+					final IJavaProject javaProject= declaring.getJavaProject();
+					if (javaProject != null)
+						project= javaProject.getElementName();
+					return new RefactoringDescriptor(ID_PULL_UP, project, fMembersToMove.length == 1 ? NLS.bind(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fTargetType, JavaElementLabels.ALL_FULLY_QUALIFIED) }) : NLS.bind(RefactoringCoreMessages.PullUpRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fTargetType, JavaElementLabels.ALL_FULLY_QUALIFIED) }), null, arguments, JavaRefactorings.IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
+				}
+			};
 		} finally {
 			pm.done();
 			clearCaches();
@@ -1402,5 +1437,114 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		if (!targetType.equals(fTargetType))
 			fCachedTargetClassHierarchy= null;
 		fTargetType= targetType;
+	}
+
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_PULL_UP));
+				else
+					fTargetType= (IType) element;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			handle= generic.getAttribute(RefactoringDescriptor.ELEMENT + 1);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_PULL_UP));
+				else
+					fDeclaringType= (IType) element;
+			}
+			final String instance= generic.getAttribute(ATTRIBUTE_STUBS);
+			if (instance != null) {
+				fCreateMethodStubs= Boolean.valueOf(instance).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_STUBS));
+			int pullCount= 0;
+			int abstractCount= 0;
+			int deleteCount= 0;
+			String value= generic.getAttribute(ATTRIBUTE_ABSTRACT);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					abstractCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ABSTRACT));
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_ABSTRACT));
+			value= generic.getAttribute(ATTRIBUTE_DELETE);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					deleteCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELETE));
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELETE));
+			value= generic.getAttribute(ATTRIBUTE_PULL);
+			if (value != null && !"".equals(value)) {//$NON-NLS-1$
+				try {
+					pullCount= Integer.parseInt(value);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PULL));
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PULL));
+			final RefactoringStatus status= new RefactoringStatus();
+			List elements= new ArrayList();
+			for (int index= 0; index < pullCount; index++) {
+				final String attribute= RefactoringDescriptor.ELEMENT + (index + 2);
+				handle= generic.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IJavaElement element= JavaCore.create(handle);
+					if (element == null || !element.exists())
+						status.merge(RefactoringStatus.createWarningStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_PULL_UP)));
+					else
+						elements.add(element);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
+			elements= new ArrayList();
+			for (int index= 0; index < deleteCount; index++) {
+				final String attribute= RefactoringDescriptor.ELEMENT + (pullCount + index + 2);
+				handle= generic.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IJavaElement element= JavaCore.create(handle);
+					if (element == null || !element.exists())
+						status.merge(RefactoringStatus.createWarningStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_PULL_UP)));
+					else
+						elements.add(element);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fMethodsToDelete= (IMethod[]) elements.toArray(new IMethod[elements.size()]);
+			elements= new ArrayList();
+			for (int index= 0; index < abstractCount; index++) {
+				final String attribute= RefactoringDescriptor.ELEMENT + (pullCount + abstractCount + index + 2);
+				handle= generic.getAttribute(attribute);
+				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
+					final IJavaElement element= JavaCore.create(handle);
+					if (element == null || !element.exists())
+						status.merge(RefactoringStatus.createWarningStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_PULL_UP)));
+					else
+						elements.add(element);
+				} else
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, attribute));
+			}
+			fMethodsToDeclareAbstract= (IMethod[]) elements.toArray(new IMethod[elements.size()]);
+			IJavaProject project= null;
+			if (fMembersToMove.length > 0)
+				project= fMembersToMove[0].getJavaProject();
+			fCodeGenerationSettings= JavaPreferencesSettings.getCodeGenerationSettings(project);
+			if (!status.isOK())
+				return status;
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		return new RefactoringStatus();
 	}
 }

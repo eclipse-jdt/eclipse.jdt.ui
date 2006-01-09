@@ -10,13 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashSet;
 import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -28,11 +32,20 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
@@ -85,12 +98,20 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
-public class ExtractConstantRefactoring extends Refactoring {
+public class ExtractConstantRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+
+	public static final String ID_EXTRACT_CONSTANT= "org.eclipse.jdt.ui.extract.constant"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_QUALIFY= "qualify"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 
 	public static final String PUBLIC= 	JdtFlags.VISIBILITY_STRING_PUBLIC;
 	public static final String PROTECTED= JdtFlags.VISIBILITY_STRING_PROTECTED;
@@ -102,9 +123,9 @@ public class ExtractConstantRefactoring extends Refactoring {
 	
 	
 	private CompilationUnitRewrite fCuRewrite;
-	private final int fSelectionStart;
-	private final int fSelectionLength;
-	private final ICompilationUnit fCu;
+	private int fSelectionStart;
+	private int fSelectionLength;
+	private ICompilationUnit fCu;
 
 	private IExpressionFragment fSelectedExpression;
 	private Type fConstantTypeCache;
@@ -127,17 +148,12 @@ public class ExtractConstantRefactoring extends Refactoring {
 	
 	private CompilationUnitChange fChange;
 
-	private ExtractConstantRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
+	public ExtractConstantRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
-		Assert.isTrue(cu.exists());
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fCu= cu;
-	}
-	
-	public static ExtractConstantRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
-		return new ExtractConstantRefactoring(cu, selectionStart, selectionLength);
 	}
 	
 	public String getName() {
@@ -572,7 +588,32 @@ public class ExtractConstantRefactoring extends Refactoring {
 	}
 
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
-		return fChange;
+		return new CompositeChange(RefactoringCoreMessages.ExtractConstantRefactoring_name, new Change[] {fChange}) {
+		
+			public final RefactoringDescriptor getRefactoringDescriptor() {
+				final Map arguments= new HashMap();
+				arguments.put(RefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
+				arguments.put(RefactoringDescriptor.NAME, fConstantName);
+				arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+				arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllOccurrences).toString());
+				arguments.put(ATTRIBUTE_QUALIFY, Boolean.valueOf(fQualifyReferencesWithDeclaringClassName).toString());
+				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(JdtFlags.getVisibilityCode(fAccessModifier)).toString());
+				String project= null;
+				IJavaProject javaProject= fCu.getJavaProject();
+				if (javaProject != null)
+					project= javaProject.getElementName();
+				int flags= RefactoringDescriptor.NONE;
+				if (JdtFlags.getVisibilityCode(fAccessModifier) != Modifier.PRIVATE)
+					flags |= RefactoringDescriptor.STRUCTURAL_CHANGE;
+				String description= ""; //$NON-NLS-1$
+				try {
+					description= BindingLabelProvider.getBindingLabel(getContainingTypeBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "."; //$NON-NLS-1$
+				} catch (JavaModelException exception) {
+					JavaPlugin.log(exception);
+				}
+				return new RefactoringDescriptor(ID_EXTRACT_CONSTANT, project, MessageFormat.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description, new String[] { description + fConstantName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression()) }), null, arguments, flags);
+			}
+		};
 	}
 
 	private TextEdit[] createReplaceExpressionWithConstantEdits() throws JavaModelException {
@@ -799,4 +840,61 @@ public class ExtractConstantRefactoring extends Refactoring {
 		return result;
 	}
 
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
+			if (selection != null) {
+				int offset= -1;
+				int length= -1;
+				final StringTokenizer tokenizer= new StringTokenizer(selection);
+				if (tokenizer.hasMoreTokens())
+					offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (tokenizer.hasMoreTokens())
+					length= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (offset >= 0 && length >= 0) {
+					fSelectionStart= offset;
+					fSelectionLength= length;
+				} else
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
+			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_EXTRACT_CONSTANT));
+				else
+					fCu= (ICompilationUnit) element;
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			final String visibility= generic.getAttribute(ATTRIBUTE_VISIBILITY);
+			if (visibility != null && !"".equals(visibility)) {//$NON-NLS-1$
+				int flag= 0;
+				try {
+					flag= Integer.parseInt(visibility);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_VISIBILITY));
+				}
+				fAccessModifier= JdtFlags.getVisibilityString(flag);
+			}
+			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
+			if (name != null && !"".equals(name)) //$NON-NLS-1$
+				fConstantName= name;
+			else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
+			final String replace= generic.getAttribute(ATTRIBUTE_REPLACE);
+			if (replace != null) {
+				fReplaceAllOccurrences= Boolean.valueOf(replace).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
+			final String declareFinal= generic.getAttribute(ATTRIBUTE_QUALIFY);
+			if (declareFinal != null) {
+				fQualifyReferencesWithDeclaringClassName= Boolean.valueOf(declareFinal).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_QUALIFY));
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		return new RefactoringStatus();
+	}
 }

@@ -34,8 +34,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -66,6 +64,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInnerToTopRefactoring;
@@ -74,6 +73,7 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodR
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
@@ -191,13 +191,13 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startChangeTypeRefactoring(final ICompilationUnit unit, final Shell shell, final int offset, final int length) throws JavaModelException {
-		final ChangeTypeRefactoring refactoring= ChangeTypeRefactoring.create(unit, offset, length);
+		final ChangeTypeRefactoring refactoring= new ChangeTypeRefactoring(unit, offset, length);
 		if (refactoring != null)
 			new RefactoringStarter().activate(refactoring, new ChangeTypeWizard(refactoring), shell, RefactoringMessages.ChangeTypeAction_dialog_title, false);
 	}
 
 	public static void startConvertAnonymousRefactoring(final ICompilationUnit unit, final int offset, final int length, final Shell shell) throws JavaModelException {
-		final ConvertAnonymousToNestedRefactoring refactoring= ConvertAnonymousToNestedRefactoring.create(unit, offset, length);
+		final ConvertAnonymousToNestedRefactoring refactoring= new ConvertAnonymousToNestedRefactoring(unit, offset, length);
 		if (refactoring == null)
 			return;
 		new RefactoringStarter().activate(refactoring, new ConvertAnonymousToNestedWizard(refactoring), shell, RefactoringMessages.ConvertAnonymousToNestedAction_dialog_title, false);
@@ -216,7 +216,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startExtractInterfaceRefactoring(final IType type, final Shell shell) throws JavaModelException {
-		final ExtractInterfaceRefactoring refactoring= ExtractInterfaceRefactoring.create(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
+		final ExtractInterfaceRefactoring refactoring= new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject())));
 		if (!ActionUtil.isProcessable(shell, refactoring.getExtractInterfaceProcessor().getType()))
 			return;
 		new RefactoringStarter().activate(refactoring, new ExtractInterfaceWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true); 
@@ -226,7 +226,7 @@ public final class RefactoringExecutionStarter {
 		if (! ActionUtil.areProcessable(shell, elements))
 			return;
 		try {
-			final InferTypeArgumentsRefactoring refactoring= InferTypeArgumentsRefactoring.create(elements);
+			final InferTypeArgumentsRefactoring refactoring= ((RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements)) ? new InferTypeArgumentsRefactoring(elements) : null);
 			if (refactoring == null)
 				return;
 			new RefactoringStarter().activate(refactoring, new InferTypeArgumentsWizard(refactoring), shell, RefactoringMessages.InferTypeArgumentsAction_dialog_title, true);
@@ -236,8 +236,8 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static boolean startInlineConstantRefactoring(final ICompilationUnit unit, final CompilationUnit node, final int offset, final int length, final Shell shell, final boolean activate) throws JavaModelException {
-		final InlineConstantRefactoring refactoring= InlineConstantRefactoring.create(unit, node, offset, length);
-		if (refactoring == null) {
+		final InlineConstantRefactoring refactoring= new InlineConstantRefactoring(unit, node, offset, length);
+		if (refactoring.checkStaticFinalConstantNameSelected().hasFatalError()) {
 			if (activate)
 				MessageDialog.openInformation(shell, RefactoringMessages.InlineConstantAction_dialog_title, RefactoringMessages.InlineConstantAction_no_constant_reference_or_declaration);
 			return false;
@@ -260,23 +260,24 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static boolean startInlineTempRefactoring(final ICompilationUnit unit, final CompilationUnit node, final ITextSelection selection, final Shell shell, final boolean activate) throws JavaModelException {
-		final Refactoring refactoring= InlineTempRefactoring.create(unit, node, selection.getOffset(), selection.getLength());
-		if (refactoring != null) {
+		final InlineTempRefactoring refactoring= new InlineTempRefactoring(unit, selection.getOffset(), selection.getLength());
+		if (!refactoring.checkIfTempSelected(node).hasFatalError()) {
 			if (activate)
-				new RefactoringStarter().activate(refactoring, new InlineTempWizard((InlineTempRefactoring) refactoring), shell, RefactoringMessages.InlineTempAction_inline_temp, false);
+				new RefactoringStarter().activate(refactoring, new InlineTempWizard(refactoring), shell, RefactoringMessages.InlineTempAction_inline_temp, false);
 			return true;
 		}
 		return false;
 	}
 
 	public static void startIntroduceFactoryRefactoring(final ICompilationUnit unit, final ITextSelection selection, final Shell shell) throws JavaModelException {
-		final IntroduceFactoryRefactoring refactoring= IntroduceFactoryRefactoring.create(unit, selection.getOffset(), selection.getLength());
-		if (refactoring != null)
-			new RefactoringStarter().activate(refactoring, new IntroduceFactoryWizard(refactoring, RefactoringMessages.IntroduceFactoryAction_use_factory), shell, RefactoringMessages.IntroduceFactoryAction_dialog_title, false);
+		final IntroduceFactoryRefactoring refactoring= new IntroduceFactoryRefactoring(unit, selection.getOffset(), selection.getLength());
+		new RefactoringStarter().activate(refactoring, new IntroduceFactoryWizard(refactoring, RefactoringMessages.IntroduceFactoryAction_use_factory), shell, RefactoringMessages.IntroduceFactoryAction_dialog_title, false);
 	}
 
 	public static void startMoveInnerRefactoring(final IType type, final Shell shell) throws JavaModelException {
-		final MoveInnerToTopRefactoring refactoring= MoveInnerToTopRefactoring.create(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
+		final MoveInnerToTopRefactoring refactoring= (RefactoringAvailabilityTester.isMoveInnerAvailable(type) ? new MoveInnerToTopRefactoring(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject())) : null);
+		if (refactoring == null)
+			return;
 		if (!ActionUtil.isProcessable(shell, refactoring.getInputType()))
 			return;
 		new RefactoringStarter().activate(refactoring, new MoveInnerToTopWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
@@ -306,14 +307,18 @@ public final class RefactoringExecutionStarter {
 		IJavaProject project= null;
 		if (members != null && members.length > 0)
 			project= members[0].getJavaProject();
-		final PullUpRefactoring refactoring= PullUpRefactoring.create(members, JavaPreferencesSettings.getCodeGenerationSettings(project));
+		final PullUpRefactoring refactoring= (RefactoringAvailabilityTester.isPullUpAvailable(members) ? new PullUpRefactoring(members, JavaPreferencesSettings.getCodeGenerationSettings(project)) : null);
+		if (refactoring == null)
+			return;
 		if (!ActionUtil.isProcessable(shell, refactoring.getDeclaringType()))
 			return;
 		new RefactoringStarter().activate(refactoring, new PullUpWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
 
 	public static void startPushDownRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
-		final PushDownRefactoring refactoring= PushDownRefactoring.create(members);
+		final PushDownRefactoring refactoring= (RefactoringAvailabilityTester.isPushDownAvailable(members) ? new PushDownRefactoring(members) : null);
+		if (refactoring == null)
+			return;
 		if (!ActionUtil.isProcessable(shell, refactoring.getDeclaringType()))
 			return;
 		new RefactoringStarter().activate(refactoring, new PushDownWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
@@ -321,7 +326,7 @@ public final class RefactoringExecutionStarter {
 
 	public static void startRefactoring(final IResource[] resources, final IJavaElement[] elements, final Shell shell) throws JavaModelException {
 		final JavaMoveProcessor processor= JavaMoveProcessor.create(resources, elements);
-		final MoveRefactoring refactoring= new MoveRefactoring(processor);
+		final JavaMoveRefactoring refactoring= new JavaMoveRefactoring(processor);
 		final RefactoringWizard wizard= new ReorgMoveWizard(refactoring);
 		processor.setCreateTargetQueries(new CreateTargetQueries(wizard));
 		processor.setReorgQueries(new ReorgQueries(wizard));
@@ -335,7 +340,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startRenameResourceRefactoring(final IResource resource, final Shell shell) throws CoreException {
-		final RenameRefactoring refactoring= new JavaRenameRefactoring(new RenameResourceProcessor(resource));
+		final JavaRenameRefactoring refactoring= new JavaRenameRefactoring(new RenameResourceProcessor(resource));
 		RenameUserInterfaceManager.getDefault().getStarter(refactoring).activate(refactoring, shell, true);
 	}
 
@@ -353,7 +358,7 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startUseSupertypeRefactoring(final IType type, final Shell shell) throws JavaModelException {
-		final UseSuperTypeRefactoring refactoring= UseSuperTypeRefactoring.create(type);
+		final UseSuperTypeRefactoring refactoring= new UseSuperTypeRefactoring(new UseSuperTypeProcessor(type));
 		if (!ActionUtil.isProcessable(shell, refactoring.getUseSuperTypeProcessor().getSubType()))
 			return;
 		new RefactoringStarter().activate(refactoring, new UseSupertypeWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);

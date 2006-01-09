@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 
@@ -88,7 +89,9 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.1
  */
-public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor {
+public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor implements IInitializableRefactoringComponent {
+
+	protected static final String ATTRIBUTE_INSTANCEOF= "instanceof"; //$NON-NLS-1$
 
 	/** Number of compilation units to parse at once */
 	private static final int SIZE_BATCH= 500;
@@ -509,7 +512,8 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 							public final void acceptAST(final ICompilationUnit unit, final CompilationUnit node) {
 								try {
-									rewriteTypeOccurrences(manager, this, sourceRewrite, unit, node, replacements);
+									if (sourceRewrite != null)
+										rewriteTypeOccurrences(manager, this, sourceRewrite, unit, node, replacements);
 								} catch (CoreException exception) {
 									status.merge(RefactoringStatus.createFatalErrorStatus(exception.getLocalizedMessage()));
 								} finally {

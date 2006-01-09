@@ -787,7 +787,6 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String IntroduceFactory_unsupportedNestedTypes;
 	public static String IntroduceFactory_duplicateMethodName;
 	public static String IntroduceFactory_createChanges;
-	public static String IntroduceFactory_topLevelChangeLabel;
 	public static String IntroduceFactory_constructorInBinaryClass;
 	public static String IntroduceFactory_unableToResolveConstructorBinding;
 	public static String IntroduceFactory_callSitesInBinaryClass;
@@ -859,7 +858,25 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RenameTypeParameterProcessor_descriptor_description;
 	public static String RenameTypeProcessor_descriptor_description;
 	public static String ChangeSignatureRefactoring_descriptor_description;
-	public static String JavaRenameRefactoring_error_unsupported_initialization;
+	public static String ExtractInterfaceProcessor_descriptor_description;
+	public static String UseSuperTypeProcessor_descriptor_description;
+	public static String InferTypeArgumentsRefactoring_descriptor_description_project;
+	public static String InferTypeArgumentsRefactoring_descriptor_description;
+	public static String PullUpRefactoring_descriptor_description_full;
+	public static String PullUpRefactoring_descriptor_description;
+	public static String PushDownRefactoring_descriptor_description_full;
+	public static String PushDownRefactoring_descriptor_description;
+	public static String ConvertAnonymousToNestedRefactoring_descriptor_description;
+	public static String MoveInnerToTopRefactoring_descriptor_description;
+	public static String InlineTempRefactoring_descriptor_description;
+	public static String InlineConstantRefactoring_descriptor_description;
+	public static String InlineMethodRefactoring_descriptor_description;
+	public static String ExtractMethodRefactoring_descriptor_description;
+	public static String ExtractTempRefactoring_descriptor_description;
+	public static String ExtractConstantRefactoring_descriptor_description;
+	public static String IntroduceParameterRefactoring_descriptor_description;
+	public static String IntroduceFactory_descriptor_description;
+	public static String ProcessorBasedRefactoring_error_unsupported_initialization;
 
 	public static String InitializableRefactoring_argument_not_exist;
 	public static String InitializableRefactoring_inacceptable_arguments;

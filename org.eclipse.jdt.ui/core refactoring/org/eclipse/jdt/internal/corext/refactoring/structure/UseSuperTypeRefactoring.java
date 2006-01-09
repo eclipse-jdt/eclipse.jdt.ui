@@ -10,62 +10,37 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
-
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 
 /**
  * Refactoring to replace type occurrences by a super type where possible.
  * 
  * @since 3.1
  */
-public final class UseSuperTypeRefactoring extends ProcessorBasedRefactoring {
-
-	/**
-	 * Creates a new use super type refactoring.
-	 * 
-	 * @param subType the type to replace its occurrences
-	 * @return the created refactoring
-	 * @throws JavaModelException if the the refactoring could not be tested for availability
-	 */
-	public static UseSuperTypeRefactoring create(final IType subType) throws JavaModelException {
-		Assert.isNotNull(subType);
-		Assert.isTrue(subType.exists() && !subType.isAnonymous() && !subType.isAnnotation());
-		return new UseSuperTypeRefactoring(new UseSuperTypeProcessor(subType));
-	}
-
-	/**
-	 * Creates a new use super type refactoring.
-	 * 
-	 * @param subType the type to replace its occurrences
-	 * @param superType the type as replacement
-	 * @return the created refactoring
-	 * @throws JavaModelException if the the refactoring could not be tested for availability
-	 */
-	public static UseSuperTypeRefactoring create(final IType subType, final IType superType) throws JavaModelException {
-		Assert.isNotNull(subType);
-		Assert.isNotNull(superType);
-		Assert.isTrue(subType.exists() && !subType.isAnonymous() && !subType.isAnnotation());
-		Assert.isTrue(superType.exists() && !superType.isAnonymous() && !superType.isAnnotation() && !superType.isEnum());
-		return new UseSuperTypeRefactoring(new UseSuperTypeProcessor(subType, superType));
-	}
+public final class UseSuperTypeRefactoring extends ProcessorBasedRefactoring implements IInitializableRefactoringComponent {
 
 	/** The processor to use */
 	private final UseSuperTypeProcessor fProcessor;
 
 	/**
+	 * Creates a new use super type refactoring.
+	 * 
 	 * @param processor
+	 *            the processor to use
 	 */
 	public UseSuperTypeRefactoring(final UseSuperTypeProcessor processor) {
 		super(processor);
 
 		fProcessor= processor;
 	}
-
 	/*
 	 * @see org.eclipse.ltk.core.refactoring.participants.ProcessorBasedRefactoring#getProcessor()
 	 */
@@ -80,5 +55,17 @@ public final class UseSuperTypeRefactoring extends ProcessorBasedRefactoring {
 	 */
 	public final UseSuperTypeProcessor getUseSuperTypeProcessor() {
 		return (UseSuperTypeProcessor) getProcessor();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
+		Assert.isNotNull(arguments);
+		final RefactoringProcessor processor= getProcessor();
+		if (processor instanceof IInitializableRefactoringComponent) {
+			return ((IInitializableRefactoringComponent) processor).initialize(arguments);
+		}
+		return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.ProcessorBasedRefactoring_error_unsupported_initialization, UseSuperTypeProcessor.ID_USE_SUPERTYPE));
 	}
 }

@@ -916,7 +916,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 	private static final String ATTRIBUTE_USE_SETTER= "setter"; //$NON-NLS-1$
 
-	private static final String ID_MOVE_METHOD= "org.eclipse.jdt.ui.move.method"; //$NON-NLS-1$
+	public static final String ID_MOVE_METHOD= "org.eclipse.jdt.ui.move.method"; //$NON-NLS-1$
 
 	/** The identifier of this processor */
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.moveInstanceMethodProcessor"; //$NON-NLS-1$
@@ -1585,7 +1585,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					final IJavaProject javaProject= fMethod.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_MOVE_METHOD, project, MessageFormat.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), new BindingLabelProvider(JavaElementLabels.ALL_FULLY_QUALIFIED, 0).getText(fTarget)}), null, arguments, JavaRefactorings.IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
+					return new RefactoringDescriptor(ID_MOVE_METHOD, project, MessageFormat.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fTarget, JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, JavaRefactorings.IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
 				}
 			}; 
 		} finally {
@@ -2700,7 +2700,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, getIdentifier()));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_MOVE_METHOD));
 				else {
 					fMethod= (IMethod) element;
 					initialize(fMethod);

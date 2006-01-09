@@ -10,10 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.StringTokenizer;
 
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEditGroup;
@@ -28,14 +32,20 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -88,15 +98,22 @@ import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * Refactoring class that permits the substitution of a factory method
  * for direct calls to a given constructor.
  * @author rfuhrer
  */
-public class IntroduceFactoryRefactoring extends Refactoring {
-	
+public class IntroduceFactoryRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+
+	public static final String ID_INTRODUCE_FACTORY= "org.eclipse.jdt.ui.introduce.factory"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_PROTECT= "protect"; //$NON-NLS-1$
+
 	/**
 	 * The handle for the compilation unit holding the selection that was
 	 * passed into this refactoring.
@@ -209,11 +226,13 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	private CompilationUnit fFactoryCU;
 
+	/**
+	 * The fully qualified name of the factory class. This is only used
+	 * if invoked from a refactoring script.
+	 */
+	private String fFactoryClassName;
+	
 	private int fConstructorVisibility= Modifier.PRIVATE;
-
-	public static IntroduceFactoryRefactoring create(ICompilationUnit cu, int selectionStart, int selectionLength) {
-		return new IntroduceFactoryRefactoring(cu, selectionStart, selectionLength);
-	}
 
 	/**
 	 * Creates a new <code>IntroduceFactoryRefactoring</code> with the given selection
@@ -222,15 +241,17 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 * @param selectionStart the start of the textual selection in <code>cu</code>
 	 * @param selectionLength the length of the textual selection in <code>cu</code>
 	 */
-	private IntroduceFactoryRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
-		super();
+	public IntroduceFactoryRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart  >= 0);
 		Assert.isTrue(selectionLength >= 0);
-		Assert.isTrue(cu.exists());
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
-
 		fCUHandle= cu;
+		if (cu != null)
+			initialize();
+	}
+
+	private void initialize() {
 		fCU= ASTCreator.createAST(fCUHandle, null);
 	}
 
@@ -495,6 +516,10 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 			pm.beginTask(RefactoringCoreMessages.IntroduceFactory_checking_preconditions, 1); 
 			RefactoringStatus result= new RefactoringStatus();
 			
+			if (fFactoryClassName != null)
+				result.merge(setFactoryClass(fFactoryClassName));
+			if (result.hasFatalError())
+				return result;
 			fArgTypes= fCtorBinding.getParameterTypes();
 			fCtorIsVarArgs= fCtorBinding.isVarargs();
 			fAllCallsTo= findAllCallsTo(fCtorBinding, pm, result);
@@ -1041,7 +1066,23 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.IntroduceFactory_createChanges, fAllCallsTo.length); 
-		final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.IntroduceFactory_topLevelChangeLabel + fCtorBinding.getName()); 
+		final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.IntroduceFactory_name) {
+		
+			public final RefactoringDescriptor getRefactoringDescriptor() {
+				final Map arguments= new HashMap();
+				arguments.put(RefactoringDescriptor.INPUT, fCUHandle.getHandleIdentifier());
+				arguments.put(RefactoringDescriptor.NAME, fNewMethodName);
+				final ITypeBinding binding= fFactoryOwningClass.resolveBinding();
+				arguments.put(RefactoringDescriptor.ELEMENT + 1, binding.getJavaElement().getHandleIdentifier());
+				arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+				arguments.put(ATTRIBUTE_PROTECT, Boolean.valueOf(fProtectConstructor).toString());
+				String project= null;
+				IJavaProject javaProject= fCUHandle.getJavaProject();
+				if (javaProject != null)
+					project= javaProject.getElementName();
+				return new RefactoringDescriptor(ID_INTRODUCE_FACTORY, project, MessageFormat.format(RefactoringCoreMessages.IntroduceFactory_descriptor_description, new String[] { fNewMethodName, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
+			}
+		}; 
 
 		try {
 			boolean hitInFactoryClass= false;
@@ -1174,11 +1215,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 		IType factoryType;
 
 		try {
-			factoryType= getProject().findType(fullyQualifiedTypeName);
-
-			if (factoryType == null) // presumably a non-primary type; try the search engine
-				factoryType= findNonPrimaryType(fullyQualifiedTypeName, new NullProgressMonitor(), new RefactoringStatus());
-
+			factoryType= findFactoryClass(fullyQualifiedTypeName);
 			if (factoryType == null)
 				return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.IntroduceFactory_noSuchClass, fullyQualifiedTypeName)); 
 
@@ -1186,7 +1223,7 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceFactory_cantPutFactoryMethodOnAnnotation); 
 			if (factoryType.isInterface())
 				return RefactoringStatus.createErrorStatus(RefactoringCoreMessages.IntroduceFactory_cantPutFactoryMethodOnInterface); 
-		} catch (JavaModelException e1) {
+		} catch (JavaModelException e) {
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceFactory_cantCheckForInterface); 
 		}
 
@@ -1215,10 +1252,23 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 					fConstructorVisibility= 0; // No such thing as Modifier.PACKAGE...
 
 			} catch (JavaModelException e) {
-				return RefactoringStatus.createErrorStatus(e.getMessage());
+				return RefactoringStatus.createFatalErrorStatus(e.getMessage());
 			}
 			return new RefactoringStatus();
 		}
+	}
+
+	/**
+	 * Finds the factory class associated with the fully qualified name.
+	 * @param fullyQualifiedTypeName the fully qualified type name
+	 * @return the factory class, or <code>null</code> if not found
+	 * @throws JavaModelException if an error occurs while finding the factory class
+	 */
+	private IType findFactoryClass(String fullyQualifiedTypeName) throws JavaModelException {
+		IType factoryType= getProject().findType(fullyQualifiedTypeName);
+		if (factoryType == null) // presumably a non-primary type; try the search engine
+			factoryType= findNonPrimaryType(fullyQualifiedTypeName, new NullProgressMonitor(), new RefactoringStatus());
+		return factoryType;
 	}
 
 	/**
@@ -1227,5 +1277,61 @@ public class IntroduceFactoryRefactoring extends Refactoring {
 	 */
 	public String getFactoryClassName() {
 		return fFactoryOwningClass.resolveBinding().getQualifiedName();
+	}
+
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		if (arguments instanceof GenericRefactoringArguments) {
+			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+			final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
+			if (selection != null) {
+				int offset= -1;
+				int length= -1;
+				final StringTokenizer tokenizer= new StringTokenizer(selection);
+				if (tokenizer.hasMoreTokens())
+					offset= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (tokenizer.hasMoreTokens())
+					length= Integer.valueOf(tokenizer.nextToken()).intValue();
+				if (offset >= 0 && length >= 0) {
+					fSelectionStart= offset;
+					fSelectionLength= length;
+				} else
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
+			String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INTRODUCE_FACTORY));
+				else {
+					fCUHandle= (ICompilationUnit) element;
+		        	initialize();
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			handle= generic.getAttribute(RefactoringDescriptor.ELEMENT + 1);
+			if (handle != null) {
+				final IJavaElement element= JavaCore.create(handle);
+				if (element == null || !element.exists())
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INTRODUCE_FACTORY));
+				else {
+					final IType type= (IType) element;
+					fFactoryClassName= type.getFullyQualifiedName();
+				}
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
+			if (name != null && !"".equals(name)) //$NON-NLS-1$
+				fNewMethodName= name;
+			else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
+			final String protect= generic.getAttribute(ATTRIBUTE_PROTECT);
+			if (protect != null) {
+				fProtectConstructor= Boolean.valueOf(protect).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PROTECT));
+		} else
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
+		return new RefactoringStatus();
 	}
 }
