@@ -288,13 +288,6 @@ public final class ParameterGuessingProposal extends JavaMethodCompletionProposa
 		MessageDialog.openError(shell, JavaTextMessages.ParameterGuessingProposal_error_msg, e.getMessage());
 	}
 
-	/*
-	 * @see java.lang.Object#toString()
-	 */
-	public String toString() {
-		return getDisplayString() + super.toString();
-	}
-
 	private void ensurePositionCategoryInstalled(final IDocument document, LinkedModeModel model) {
 		if (!document.containsPositionCategory(getCategory())) {
 			document.addPositionCategory(getCategory());

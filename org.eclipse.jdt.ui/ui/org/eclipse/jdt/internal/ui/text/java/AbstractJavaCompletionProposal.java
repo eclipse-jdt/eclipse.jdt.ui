@@ -793,4 +793,11 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	protected void setDisplayString(String string) {
 		fDisplayString= string;
 	}
+	
+	/*
+	 * @see java.lang.Object#toString()
+	 */
+	public String toString() {
+		return getDisplayString();
+	}
 }

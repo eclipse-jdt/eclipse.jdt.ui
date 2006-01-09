@@ -18,14 +18,16 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.BadLocationException;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.ui.text.java.CompletionProposalCollector;
+import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
-import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -116,7 +118,30 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 		proposal.setRelevance(relevance);
 		proposal.setReplaceRange(context.getInvocationOffset(), context.getInvocationOffset());
 		proposal.setSignature(Signature.createTypeSignature(fullyQualifiedType, true).toCharArray());
-		
-		return new GenericJavaTypeProposal(proposal, context);
+
+		if (shouldProposeGenerics(context.getProject()))
+			return new GenericJavaTypeProposal(proposal, context);
+		else
+			return new LazyJavaTypeCompletionProposal(proposal, context);
 	}
+	
+	/**
+	 * Returns <code>true</code> if generic proposals should be allowed,
+	 * <code>false</code> if not. Note that even though code (in a library)
+	 * may be referenced that uses generics, it is still possible that the
+	 * current source does not allow generics.
+	 *
+	 * @return <code>true</code> if the generic proposals should be allowed,
+	 *         <code>false</code> if not
+	 */
+	private final boolean shouldProposeGenerics(IJavaProject project) {
+		String sourceVersion;
+		if (project != null)
+			sourceVersion= project.getOption(JavaCore.COMPILER_SOURCE, true);
+		else
+			sourceVersion= JavaCore.getOption(JavaCore.COMPILER_SOURCE);
+
+		return sourceVersion != null && JavaCore.VERSION_1_5.compareTo(sourceVersion) <= 0;
+	}
+
 }
