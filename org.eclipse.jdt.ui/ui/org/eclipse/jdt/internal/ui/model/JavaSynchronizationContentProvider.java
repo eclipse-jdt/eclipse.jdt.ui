@@ -126,7 +126,7 @@ public final class JavaSynchronizationContentProvider extends AbstractRefactorin
 			} else if (parent instanceof IPackageFragmentRoot) {
 				return getPackageFragmentRootChildren(tree, parent, elements);
 			} else if (parent instanceof IJavaProject) {
-				return getJavaProjectChildren(tree, parent, elements);
+				return getJavaProjectChildren(context, parent, elements);
 			} else if (parent instanceof JavaProjectSettings) {
 				return getProjectSettingsChildren(tree, parent, elements);
 			} else if (parent instanceof RefactoringHistory)
@@ -147,21 +147,21 @@ public final class JavaSynchronizationContentProvider extends AbstractRefactorin
 	/**
 	 * Returns the java project children in the current scope.
 	 * 
-	 * @param tree
-	 *            the resource diff tree
+	 * @param context
+	 *            the synchronization context
 	 * @param parent
 	 *            the parent element
 	 * @param children
 	 *            the child elements
 	 * @return the java project children
 	 */
-	private Object[] getJavaProjectChildren(final IResourceDiffTree tree, final Object parent, final Object[] children) {
+	private Object[] getJavaProjectChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
 		final Set set= new HashSet();
 		for (int index= 0; index < children.length; index++)
 			set.add(children[index]);
 		final IResource resource= JavaModelProvider.getResource(parent);
 		if (resource != null) {
-			final IResource[] members= tree.members(resource);
+			final IResource[] members= context.getDiffTree().members(resource);
 			for (int index= 0; index < members.length; index++) {
 				if (members[index].getType() == IResource.FOLDER && isInScope(parent, members[index])) {
 					final String name= members[index].getName();
@@ -170,7 +170,7 @@ public final class JavaSynchronizationContentProvider extends AbstractRefactorin
 						set.add(new JavaProjectSettings((IJavaProject) parent));
 					} else if (name.equals(NAME_REFACTORING_FOLDER)) {
 						set.remove(members[index]);
-						set.add(getIncomingRefactorings(tree, (IProject) resource, null));
+						set.add(getIncomingRefactorings(context, (IProject) resource, null));
 					}
 				}
 			}

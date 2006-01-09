@@ -18,8 +18,10 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.team.core.diff.IDiffNode;
+import org.eclipse.team.core.diff.IThreeWayDiff;
 import org.eclipse.team.core.mapping.ISynchronizationContext;
 
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.ui.refactoring.model.AbstractRefactoringSynchronizationLabelProvider;
 
 import org.eclipse.jdt.core.IPackageFragment;
@@ -80,6 +82,20 @@ public final class JavaSynchronizationLabelProvider extends AbstractRefactoringS
 	/**
 	 * {@inheritDoc}
 	 */
+	protected int getDirection(final RefactoringDescriptorProxy proxy) {
+		return IThreeWayDiff.INCOMING;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected int getKind(final RefactoringDescriptorProxy proxy) {
+		return IDiffNode.CHANGE;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
 	protected Object getModelRoot() {
 		if (fModelRoot == null)
 			fModelRoot= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
@@ -89,14 +105,14 @@ public final class JavaSynchronizationLabelProvider extends AbstractRefactoringS
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IDiffNode getSyncDelta(final Object element) {
+	protected IDiffNode getDiff(final Object element) {
 		final ISynchronizationContext context= getContext();
 		final IResource resource= JavaModelProvider.getResource(element);
 		if (context != null && resource != null) {
-			final IDiffNode[] deltas= JavaSynchronizationContentProvider.getDeltas(context, element);
-			for (int index= 0; index < deltas.length; index++) {
-				if (context.getDiffTree().getResource(deltas[index]).equals(resource))
-					return deltas[index];
+			final IDiffNode[] nodes= JavaSynchronizationContentProvider.getDeltas(context, element);
+			for (int index= 0; index < nodes.length; index++) {
+				if (context.getDiffTree().getResource(nodes[index]).equals(resource))
+					return nodes[index];
 			}
 		}
 		return null;

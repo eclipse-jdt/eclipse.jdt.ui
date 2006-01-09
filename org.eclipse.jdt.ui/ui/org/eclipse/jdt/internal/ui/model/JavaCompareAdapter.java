@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.model;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.compare.structuremergeviewer.Differencer;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
 
 import org.eclipse.team.core.mapping.ISynchronizationContext;
@@ -36,5 +37,12 @@ public final class JavaCompareAdapter extends AbstractRefactoringCompareAdapter 
 		if (resource != null)
 			return super.asCompareInput(context, resource);
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected int getKind(final ISynchronizationContext context, final RefactoringDescriptorProxy proxy) {
+		return Differencer.ADDITION | Differencer.LEFT;
 	}
 }
