@@ -14,8 +14,12 @@ import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -93,20 +97,48 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 			if (qualifiedName.equals(addedImport)) {
 				return RES_NAME_FOUND;
 			} else {
-				int index= addedImport.lastIndexOf('.');
-				String importedName;
-				if (index == -1) {
-					importedName= addedImport;
-				} else {
-					importedName= addedImport.substring(index + 1, addedImport.length());
-				}
-				if (importedName.equals(name)) {
+				if (isConflicting(name, addedImport))
 					return RES_NAME_CONFLICT;
+			}
+		}
+		
+		if (qualifier.equals("java.lang")) { //$NON-NLS-1$
+			//No explicit import statement required
+			IJavaElement parent= fCompilationUnit.getJavaElement().getParent();
+			if (parent instanceof IPackageFragment) {
+				IPackageFragment packageFragment= (IPackageFragment)parent;
+				try {
+					ICompilationUnit[] compilationUnits= packageFragment.getCompilationUnits();
+					for (int i= 0; i < compilationUnits.length; i++) {
+						ICompilationUnit cu= compilationUnits[i];
+						IType[] allTypes= cu.getAllTypes();
+						for (int j= 0; j < allTypes.length; j++) {
+							IType type= allTypes[j];
+							String packageTypeName= type.getFullyQualifiedName();
+							if (isConflicting(name, packageTypeName))
+								return RES_NAME_CONFLICT;
+						}
+					}
+				} catch (JavaModelException e) {
 				}
 			}
 		}
 		
 		return RES_NAME_UNKNOWN;
+	}
+
+	private boolean isConflicting(String name, String importt) {
+		int index= importt.lastIndexOf('.');
+		String importedName;
+		if (index == -1) {
+			importedName= importt;
+		} else {
+			importedName= importt.substring(index + 1, importt.length());
+		}
+		if (importedName.equals(name)) {
+			return true;
+		}
+		return false;
 	}
 	
 	private boolean containsDeclaration(ITypeBinding binding, String qualifier, String name) {
