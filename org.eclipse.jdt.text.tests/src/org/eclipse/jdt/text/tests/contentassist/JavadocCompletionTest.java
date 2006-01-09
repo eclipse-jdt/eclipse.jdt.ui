@@ -63,7 +63,6 @@ public class JavadocCompletionTest extends TestCase {
 	 */
 
 	private static final Class THIS= JavadocCompletionTest.class;
-	private static final boolean OLD= false;
 	private static final String CARET= "|";
 	private static final String TYPE_JDOC_START= "/**\n";
 	private static final String TYPE_JDOC_END= " */\n";
@@ -74,7 +73,7 @@ public class JavadocCompletionTest extends TestCase {
 			"	public int method(int param) {\n" +
 			"		return 0;\n" +
 			"	}\n";
-	private static final String MEMBER_JDOC_START= "	/**\n";
+	private static final String MEMBER_JDOC_START= "	/**\n	";
 	private static final String MEMBER_JDOC_END= "	 */\n";
 	private static final String FIELD= "	public int fField\n";
 	
@@ -213,7 +212,7 @@ public class JavadocCompletionTest extends TestCase {
 	}
 	
 	public void testSeeMethodWithoutImport() throws Exception {
-		if (!OLD) {
+		if (true) {
 			System.out.println("JavadocCompletionTest.testSeeMethodWithoutImport() - no best-effort imports with Core completion");
 			return;
 		}
@@ -225,10 +224,7 @@ public class JavadocCompletionTest extends TestCase {
 	}
 	
 	public void testSeeMethodWithTypeVariableParameter() throws Exception {
-		if (OLD) // bug in OLD: have to use erased types 
-			assertTypeJavadocProposal(" * @see java.util.List#add(E)|", " * @see java.util.List#ad|", "add(E");
-		else
-			assertTypeJavadocProposal(" * @see java.util.List#add(Object)|", " * @see java.util.List#ad|", "add(O");
+		assertTypeJavadocProposal(" * @see java.util.List#add(Object)|", " * @see java.util.List#ad|", "add(O");
 	}
 	
 	public void testSeeMethodLocal() throws Exception {
@@ -289,7 +285,7 @@ public class JavadocCompletionTest extends TestCase {
 	}
 	
 	public void testLinkMethodWithoutImport() throws Exception {
-		if (!OLD) {
+		if (true) {
 			System.out.println("JavadocCompletionTest.testLinkMethodWithoutImport() - no best-effort imports with Core completion");
 			return;
 		}
@@ -325,10 +321,7 @@ public class JavadocCompletionTest extends TestCase {
 	
 	public void testLinkMethodWithParamOverwriteNoPrefix() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);
-		if (OLD) // this is really a bug in OLD
-			assertTypeJavadocProposal(" * Prefix {@link java.util.List#clear()|add} postfix", " * Prefix {@link java.util.List#|add} postfix", "clear");
-		else
-			assertTypeJavadocProposal(" * Prefix {@link java.util.List#clear()|} postfix", " * Prefix {@link java.util.List#|add} postfix", "clear");
+		assertTypeJavadocProposal(" * Prefix {@link java.util.List#clear()|} postfix", " * Prefix {@link java.util.List#|add} postfix", "clear");
 	}
 	
 	public void testLinkMethodWithParamOverwrite() throws Exception {
@@ -338,10 +331,7 @@ public class JavadocCompletionTest extends TestCase {
 	
 	public void testLinkMethodWithParamOverwriteWithParamsNoPrefix() throws Exception {
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, false);
-		if (OLD) // this is really a bug in OLD
-			assertTypeJavadocProposal(" * Prefix {@link java.util.List#clear()|add(int, Object)} postfix", " * Prefix {@link java.util.List#|add(int, Object)} postfix", "clear");
-		else
-			assertTypeJavadocProposal(" * Prefix {@link java.util.List#clear()|} postfix", " * Prefix {@link java.util.List#|add(int, Object)} postfix", "clear");
+		assertTypeJavadocProposal(" * Prefix {@link java.util.List#clear()|} postfix", " * Prefix {@link java.util.List#|add(int, Object)} postfix", "clear");
 	}
 	
 	public void testLinkMethodWithParamOverwriteWithParams() throws Exception {
@@ -354,16 +344,10 @@ public class JavadocCompletionTest extends TestCase {
 	}
 	
 	public void testLinkMethodWithTypeVariableParameter() throws Exception {
-		if (OLD) // bug in OLD: have to use erased types
-			assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(E)|", " * Prefix {@link java.util.List#ad|", "add(E");
-		else
-			assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(Object)|", " * Prefix {@link java.util.List#ad|", "add(O");
+		assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(Object)|", " * Prefix {@link java.util.List#ad|", "add(O");
 	}
 	public void testLinkMethodWithTypeVariableParameterClosed() throws Exception {
-		if (OLD) // bug in OLD: have to use erased types 
-			assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(E)|}", " * Prefix {@link java.util.List#ad|}", "add(E");
-		else
-			assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(Object)|}", " * Prefix {@link java.util.List#ad|}", "add(O");
+		assertTypeJavadocProposal(" * Prefix {@link java.util.List#add(Object)|}", " * Prefix {@link java.util.List#ad|}", "add(O");
 	}
 	
 	public void testLinkConstant() throws Exception {
@@ -416,10 +400,6 @@ public class JavadocCompletionTest extends TestCase {
 	}
 	
  	public void testNoInlineAsBlockTags() throws Exception {
- 		if (OLD) {
- 			System.out.println("JavadocCompletionTest.testNoInlineAsRootTags() - disabled in legacy mode");
- 			return;
- 		}
  		tearDown();
  		for (int i= 0; i < TYPE_INLINE_TAGS.length; i++) {
  			setUp();
@@ -464,10 +444,6 @@ public class JavadocCompletionTest extends TestCase {
 	}
 	
 	public void testNoBlockAsInlineTags() throws Exception {
- 		if (OLD) {
- 			System.out.println("JavadocCompletionTest.testNoRootAsInlineTags() - disabled in legacy mode");
- 			return;
- 		}
 		tearDown();
 		for (int i= 0; i < TYPE_BLOCK_TAGS.length; i++) {
 			String tag= TYPE_BLOCK_TAGS[i];
@@ -481,7 +457,7 @@ public class JavadocCompletionTest extends TestCase {
 	}
 	
 	public void testHTMLTags() throws Exception {
- 		if (!OLD) {
+ 		if (true) {
  			System.out.println("no HTML tag proposals in core jdoc assist");
  			return;
  		}
@@ -599,7 +575,8 @@ public class JavadocCompletionTest extends TestCase {
 				"\n" +
 				TYPE_START +
 				MEMBER_JDOC_START;
-				String postfix= MEMBER_JDOC_END +
+		String postfix= "\n" +
+				MEMBER_JDOC_END +
 				member +
 				TYPE_END;
 		StringBuffer lineBuffer= new StringBuffer(javadocLine);
