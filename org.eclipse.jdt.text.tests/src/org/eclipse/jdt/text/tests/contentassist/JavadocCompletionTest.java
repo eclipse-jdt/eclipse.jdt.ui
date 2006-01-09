@@ -371,15 +371,15 @@ public class JavadocCompletionTest extends TestCase {
 	}
 	
 	public void testFieldReference() throws Exception {
-		assertTypeJavadocProposal(" * Prefix {@link java.util.Collections#EMPTY_LIST }|", " * Prefix java.util.Collections#|", "{@link java.util.Collections#EMPTY_LI");
+		assertTypeJavadocProposal(" * Prefix {@link java.util.Collections#EMPTY_LIST}|", " * Prefix java.util.Collections#|", "{@link java.util.Collections#EMPTY_LI");
 	}
 	
 	public void testFieldValueReference() throws Exception {
-		assertTypeJavadocProposal(" * Prefix {@value java.util.Collections#EMPTY_LIST }|", " * Prefix java.util.Collections#|", "{@value java.util.Collections#EMPTY_LI");
+		assertTypeJavadocProposal(" * Prefix {@value java.util.Collections#EMPTY_LIST}|", " * Prefix java.util.Collections#|", "{@value java.util.Collections#EMPTY_LI");
 	}
 	
 	public void testMethodReference() throws Exception {
-		assertTypeJavadocProposal(" * Prefix {@link java.util.Collections#toString() }|", " * Prefix java.util.Collections#|", "{@link java.util.Collections#toSt");
+		assertTypeJavadocProposal(" * Prefix {@link java.util.Collections#toString()}|", " * Prefix java.util.Collections#|", "{@link java.util.Collections#toSt");
 	}
 	
 	public void testTypeBlockTags() throws Exception {
@@ -435,7 +435,7 @@ public class JavadocCompletionTest extends TestCase {
 		for (int i= 0; i < TYPE_INLINE_TAGS.length; i++) {
 			setUp();
 			String tag= TYPE_INLINE_TAGS[i];
-			assertTypeJavadocProposal(" * {" + tag + " |}", " * {@|", "{" + tag);
+			assertTypeJavadocProposal(" * {" + tag + "|}", " * {@|", "{" + tag + "}");
 			tearDown();
 		}
 		setUp();
@@ -446,7 +446,7 @@ public class JavadocCompletionTest extends TestCase {
 		for (int i= 0; i < METHOD_INLINE_TAGS.length; i++) {
 			setUp();
 			String tag= METHOD_INLINE_TAGS[i];
-			assertMethodJavadocProposal(" * {" + tag + " |}", " * {@|", "{" + tag);
+			assertMethodJavadocProposal(" * {" + tag + "|}", " * {@|", "{" + tag);
 			tearDown();
 		}
 		setUp();
@@ -457,7 +457,7 @@ public class JavadocCompletionTest extends TestCase {
 		for (int i= 0; i < FIELD_INLINE_TAGS.length; i++) {
 			setUp();
 			String tag= FIELD_INLINE_TAGS[i];
-			assertFieldJavadocProposal(" * {" + tag + " |}", " * {@|", "{" + tag);
+			assertFieldJavadocProposal(" * {" + tag + "|}", " * {@|", "{" + tag);
 			tearDown();
 		}
 		setUp();
