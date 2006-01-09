@@ -163,14 +163,15 @@ public class Bindings {
 	 * <p>
 	 * If the binding resolves to a generic type, the fully qualified name of the raw type is returned.
 	 * 
-	 * @param binding the type binding to get its fully qualified name
+	 * @param type the type binding to get its fully qualified name
 	 * @return the fully qualified name
 	 */
-	public static String getFullyQualifiedName(ITypeBinding binding) {
-		final IType type= (IType) binding.getJavaElement();
-		if (type != null) // Array type bindings return null
-			return (type).getFullyQualifiedName();
-		return binding.getQualifiedName();
+	public static String getFullyQualifiedName(ITypeBinding type) {
+		String name= type.getQualifiedName();
+		final int index= name.indexOf('<');
+		if (index > 0)
+			name= name.substring(0, index);
+		return name;
 	}
 
 	public static String getImportName(IBinding binding) {
