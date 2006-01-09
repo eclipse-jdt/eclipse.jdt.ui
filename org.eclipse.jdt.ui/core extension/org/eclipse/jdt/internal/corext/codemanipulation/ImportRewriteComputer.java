@@ -457,7 +457,7 @@ public final class ImportRewriteComputer {
 			ImportDeclaration first= (ImportDeclaration) imports.get(0);
 			ImportDeclaration last= (ImportDeclaration) imports.get(imports.size() - 1);
 			
-			int startPos= root.getExtendedStartPosition(first);
+			int startPos= first.getStartPosition(); // don't use extended range
 			int endPos= root.getExtendedStartPosition(last) + root.getExtendedLength(last);
 			int endLine= root.getLineNumber(endPos);
 			if (endLine > 0) {
