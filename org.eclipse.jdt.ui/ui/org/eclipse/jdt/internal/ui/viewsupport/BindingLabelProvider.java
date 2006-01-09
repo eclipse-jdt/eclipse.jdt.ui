@@ -349,7 +349,7 @@ public class BindingLabelProvider extends LabelProvider {
 					}
 					if (baseType != null) {
 						StringBuffer anonymBaseType= new StringBuffer();
-						getTypeLabel(baseType, flags & JavaElementLabels.T_TYPE_PARAMETERS, buffer);
+						getTypeLabel(baseType, flags & JavaElementLabels.T_TYPE_PARAMETERS, anonymBaseType);
 						buffer.append(Messages.format(JavaUIMessages.JavaElementLabels_anonym_type, anonymBaseType.toString()));
 					} else {
 						buffer.append(JavaUIMessages.JavaElementLabels_anonym);
