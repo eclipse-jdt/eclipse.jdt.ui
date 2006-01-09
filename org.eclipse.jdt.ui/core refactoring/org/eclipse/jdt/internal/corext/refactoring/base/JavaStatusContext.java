@@ -13,7 +13,6 @@ package org.eclipse.jdt.internal.corext.refactoring.base;
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IImportDeclaration;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
@@ -22,7 +21,6 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
@@ -136,19 +134,11 @@ public abstract class JavaStatusContext extends RefactoringStatusContext {
 	 * Creates an status entry context for the given method binding
 	 * 
 	 * @param method the method binding for which the context is supposed to be created
-	 * @param scope the Java project that is used to convert the method binding into a
-	 * 	<code>IMethod</code>
 	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
 	 * 	context cannot be created
 	 */
-	public static RefactoringStatusContext create(IMethodBinding method, IJavaProject scope) {
-		IMethod mr= null;
-		try {
-			mr= Bindings.findMethod(method, scope);
-		} catch (JavaModelException e) {
-			// Do nothing. Create NULL_CONTEXT
-		}
-		return create(mr);
+	public static RefactoringStatusContext create(IMethodBinding method) {
+		return create((IMethod) method.getJavaElement());
 	}
 
 	/**

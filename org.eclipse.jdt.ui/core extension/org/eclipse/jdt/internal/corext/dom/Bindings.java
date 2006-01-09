@@ -20,7 +20,6 @@ import java.util.List;
 import java.util.Set;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
@@ -847,47 +846,6 @@ public class Bindings {
 	}
 
 	/**
-	 * Finds a field for the given <code>IVariableBinding</code>
-	 * using the class path defined by the given Java project. Returns <code>null</code>
-	 * if the field could not be found.
-	 * @param field the field to search for
-	 * @param in the project defining the scope
-	 * @return the corresponding IField
-	 * @throws JavaModelException if an error occurs in the Java model
-	 * @deprecated Inline as (IField) field.getJavaElement();
-	 */
-	public static IField findField(IVariableBinding field, IJavaProject in) throws JavaModelException {
-		return (IField) field.getJavaElement();
-	}
-
-	/**
-	 * Finds a type for the given <code>ITypeBinding</code>
-	 * using the class path defined by the given Java project. Returns <code>null</code>
-	 * if the type could not be found.
-	 * @param type the type to find
-	 * @param scope the project scope
-	 * @return the corresponding IType or <code>null</code>
-	 * @throws JavaModelException if an error occurs in the Java model
-	 * @deprecated Inline as (IType) type.getJavaElement();
-	 */
-	public static IType findType(ITypeBinding type, IJavaProject scope) throws JavaModelException {
-		return (IType) type.getJavaElement();
-	}
-
-	/**
-	 * Finds a method for the given <code>IMethodBinding</code>. Returns
-	 * <code>null</code> if the method can not be found in the declaring type of the method binding.
-	 * @param method the method to find
-	 * @param scope the project scope 
-	 * @return the corresponding IMethod or <code>null</code> 
-	 * @throws JavaModelException if an error occurs in the Java model
-	 * 	@deprecated Inline as (IMethod) method.getJavaElement();
-	 */
-	public static IMethod findMethod(IMethodBinding method, IJavaProject scope) throws JavaModelException {
-		return (IMethod) method.getJavaElement();	
-	}
-
-	/**
 	 * Finds a method for the given <code>IMethodBinding</code>. Returns
 	 * <code>null</code> if the type doesn't contain a corresponding method.
 	 * @param method the method to find
@@ -1090,14 +1048,6 @@ public class Bindings {
 		return EMPTY;
 	}
 	
-
-	/**
-	 * Get field declaration. See bug 83100
-	 * @deprecated inline
-	 */
-	public static IVariableBinding getVariableDeclaration(IVariableBinding var) {
-		return var.getVariableDeclaration();
-	}
 
 	/**
 	 * Tests if the given node is a declaration, not a instance of a generic type, method or field.

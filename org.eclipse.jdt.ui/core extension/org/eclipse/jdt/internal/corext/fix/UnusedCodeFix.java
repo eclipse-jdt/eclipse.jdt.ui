@@ -48,7 +48,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
@@ -164,7 +163,7 @@ public class UnusedCodeFix extends AbstractFix {
 					removeVariableReferences(rewrite, references[i], group);
 				}
 
-				IVariableBinding bindingDecl= Bindings.getVariableDeclaration((IVariableBinding) nameNode.resolveBinding());
+				IVariableBinding bindingDecl= ((IVariableBinding) nameNode.resolveBinding()).getVariableDeclaration();
 				ASTNode declaringNode= completeRoot.findDeclaringNode(bindingDecl);
 				if (declaringNode instanceof SingleVariableDeclaration) {
 					removeParamTag(rewrite, (SingleVariableDeclaration) declaringNode, group);

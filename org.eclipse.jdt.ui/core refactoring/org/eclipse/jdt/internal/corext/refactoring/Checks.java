@@ -292,10 +292,9 @@ public class Checks {
 	 * @param type
 	 * @param methodName
 	 * @param parameters
-	 * @param scope
 	 * @return the status
 	 */
-	public static RefactoringStatus checkMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters, IJavaProject scope) {
+	public static RefactoringStatus checkMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
 		RefactoringStatus result= new RefactoringStatus();
 		if (methodName.equals(type.getName()))
 			result.addWarning(RefactoringCoreMessages.Checks_methodName_constructor); 
@@ -303,7 +302,7 @@ public class Checks {
 		if (method != null) 
 			result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_exists,  
 				new Object[] {methodName, type.getName()}),
-				JavaStatusContext.create(method, scope));
+				JavaStatusContext.create(method));
 		return result;
 	}
 	
@@ -318,10 +317,9 @@ public class Checks {
 	 * @param methodName
 	 * @param returnType
 	 * @param parameters
-	 * @param scope
 	 * @return the status
 	 */
-	public static RefactoringStatus checkMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding returnType, ITypeBinding[] parameters, IJavaProject scope) {
+	public static RefactoringStatus checkMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding returnType, ITypeBinding[] parameters) {
 		RefactoringStatus result= new RefactoringStatus();
 		IMethodBinding method= Bindings.findMethodInHierarchy(type, methodName, parameters);
 		if (method != null) {
@@ -340,11 +338,11 @@ public class Checks {
 			if (returnTypeClash) {
 				result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_returnTypeClash, 
 					new Object[] {methodName, dc.getName()}),
-					JavaStatusContext.create(method, scope));
+					JavaStatusContext.create(method));
 			} else {
 				result.addError(Messages.format(RefactoringCoreMessages.Checks_methodName_overrides, 
 					new Object[] {methodName, dc.getName()}),
-					JavaStatusContext.create(method, scope));
+					JavaStatusContext.create(method));
 			}
 		}
 		return result;

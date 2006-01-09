@@ -215,7 +215,7 @@ public class TypeMismatchSubProcessor {
 			if (!variableBinding.isField()) {
 				targetCu= cu;
 			} else {
-				callerBindingDecl= Bindings.getVariableDeclaration(variableBinding);
+				callerBindingDecl= variableBinding.getVariableDeclaration();
 				declaringType= variableBinding.getDeclaringClass().getTypeDeclaration();
 			}
 		} else if (callerBinding instanceof IMethodBinding) {

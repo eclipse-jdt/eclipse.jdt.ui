@@ -92,7 +92,6 @@ import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.HierarchicalASTVisitor;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.dom.fragments.ASTFragmentFactory;
@@ -643,7 +642,7 @@ public class InlineConstantRefactoring extends Refactoring implements IInitializ
 	}
 
 	private RefactoringStatus findField() throws JavaModelException {
-		fField= Bindings.findField((IVariableBinding) fSelectedConstantName.resolveBinding(), fSelectionCu.getJavaProject());
+		fField= (IField) ((IVariableBinding) fSelectedConstantName.resolveBinding()).getJavaElement();
 		if (fField != null && ! fField.exists())
 			return RefactoringStatus.createStatus(RefactoringStatus.FATAL, RefactoringCoreMessages.InlineConstantRefactoring_local_anonymous_unsupported, null, Corext.getPluginId(), RefactoringStatusCodes.LOCAL_AND_ANONYMOUS_NOT_SUPPORTED, null); 
 		

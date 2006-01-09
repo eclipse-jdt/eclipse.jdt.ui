@@ -63,7 +63,6 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -422,7 +421,7 @@ public class InlineMethodRefactoring extends Refactoring implements IInitializab
 		pm.beginTask("", 9); //$NON-NLS-1$
 		pm.setTaskName(RefactoringCoreMessages.InlineMethodRefactoring_checking_overridden); 
 		MethodDeclaration decl= fSourceProvider.getDeclaration();
-		IMethod method= Bindings.findMethod(decl.resolveBinding(), fSourceProvider.getCompilationUnit().getJavaProject());
+		IMethod method= (IMethod) decl.resolveBinding().getJavaElement();
 		if (method == null || Flags.isPrivate(method.getFlags())) {
 			pm.worked(8);
 			return;

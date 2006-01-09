@@ -324,7 +324,7 @@ public class IntroduceFactoryRefactoring extends Refactoring implements IInitial
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceFactory_unsupportedNestedTypes); 
 	
 			ITypeBinding	ctorType= fCtorBinding.getDeclaringClass();
-			IType			ctorOwningType= Bindings.findType(ctorType, fCUHandle.getJavaProject());
+			IType			ctorOwningType= (IType) ctorType.getJavaElement();
 	
 			if (ctorOwningType.isBinary())
 				// Can't modify binary CU; don't know what CU to put factory method
@@ -417,12 +417,12 @@ public class IntroduceFactoryRefactoring extends Refactoring implements IInitial
 		}
 	}
 	
-	private IJavaSearchScope createSearchScope(IMethod ctor, IMethodBinding binding, IJavaProject resolvingScope) throws JavaModelException {
+	private IJavaSearchScope createSearchScope(IMethod ctor, IMethodBinding binding) throws JavaModelException {
 		if (ctor != null) {
 			return RefactoringScopeFactory.create(ctor);
 		} else {
 			ITypeBinding type= Bindings.getTopLevelType(binding.getDeclaringClass());
-			return RefactoringScopeFactory.create(Bindings.findType(type, resolvingScope));
+			return RefactoringScopeFactory.create(type.getJavaElement());
 		}
 	}
 
@@ -456,12 +456,10 @@ public class IntroduceFactoryRefactoring extends Refactoring implements IInitial
 	 * @throws JavaModelException
 	 */
 	private SearchResultGroup[] searchForCallsTo(IMethodBinding methodBinding, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
-		ICompilationUnit unit= ASTCreator.getCu(fSelectedNode);
-		IJavaProject javaProject= (IJavaProject) unit.getAncestor(IJavaElement.JAVA_PROJECT);
-		IMethod method= Bindings.findMethod(methodBinding, javaProject);
+		IMethod method= (IMethod) methodBinding.getJavaElement();
 		final RefactoringSearchEngine2 engine= new RefactoringSearchEngine2(createSearchPattern(method, methodBinding));
 		engine.setFiltering(true, true);
-		engine.setScope(createSearchScope(method, methodBinding, javaProject));
+		engine.setScope(createSearchScope(method, methodBinding));
 		engine.setStatus(status);
 		engine.searchPattern(new SubProgressMonitor(pm, 1));
 		return (SearchResultGroup[]) engine.getResults();

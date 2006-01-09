@@ -161,7 +161,7 @@ public class ModifierCorrectionSubProcessor {
 			typeBinding= varDecl.getDeclaringClass();
 			name= binding.getName();
 			isLocalVar= !varDecl.isField();
-			bindingDecl= Bindings.getVariableDeclaration(varDecl);
+			bindingDecl= varDecl.getVariableDeclaration();
 		} else if (binding instanceof ITypeBinding) {
 			typeBinding= (ITypeBinding) binding;
 			bindingDecl= typeBinding.getTypeDeclaration();
@@ -284,7 +284,7 @@ public class ModifierCorrectionSubProcessor {
 
 		IBinding binding= ((SimpleName) selectedNode).resolveBinding();
 		if (binding instanceof IVariableBinding) {
-			binding= Bindings.getVariableDeclaration((IVariableBinding) binding);
+			binding= ((IVariableBinding) binding).getVariableDeclaration();
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertofinal_description, binding.getName());
 			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));
@@ -605,7 +605,7 @@ public class ModifierCorrectionSubProcessor {
 
 		IBinding binding= ((SimpleName) selectedNode).resolveBinding();
 		if (binding instanceof IVariableBinding) {
-			binding= Bindings.getVariableDeclaration((IVariableBinding) binding);
+			binding= ((IVariableBinding) binding).getVariableDeclaration();
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 			String label= Messages.format(CorrectionMessages.ModifierCorrectionSubProcessor_changemodifiertofinal_description, binding.getName());
 			proposals.add(new ModifierChangeCompletionProposal(label, cu, binding, selectedNode, Modifier.FINAL, 0, 5, image));

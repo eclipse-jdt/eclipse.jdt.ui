@@ -720,7 +720,6 @@ public class ChangeSignatureRefactoring extends Refactoring implements IDelegati
 		if (fExceptionInfos == null || fExceptionInfos.isEmpty()) {
 			fExceptionInfos= new ArrayList(0);
 			try {
-				IJavaProject project= fMethod.getJavaProject();
 				ASTNode nameNode= NodeFinder.perform(fBaseCuRewrite.getRoot(), fMethod.getNameRange());
 				if (nameNode == null || !(nameNode instanceof Name) || !(nameNode.getParent() instanceof MethodDeclaration))
 					return null;
@@ -732,7 +731,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IDelegati
 					ITypeBinding typeBinding= name.resolveTypeBinding();
 					if (typeBinding == null)
 						return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_no_exception_binding);
-					IType type= Bindings.findType(typeBinding, project);
+					IType type= (IType) typeBinding.getJavaElement();
 					result.add(ExceptionInfo.createInfoForOldException(type, typeBinding));
 				}
 				fExceptionInfos= result;

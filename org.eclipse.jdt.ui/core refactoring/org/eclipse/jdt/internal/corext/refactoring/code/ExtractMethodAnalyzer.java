@@ -20,7 +20,6 @@ import org.eclipse.jface.text.IRegion;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.AST;
@@ -269,11 +268,11 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 	//---- Input checking -----------------------------------------------------------------------------------
 		
-	public void checkInput(RefactoringStatus status, String methodName, IJavaProject scope, AST ast) {
+	public void checkInput(RefactoringStatus status, String methodName, AST ast) {
 		ITypeBinding[] arguments= getArgumentTypes();
 		ITypeBinding type= ASTNodes.getEnclosingType(fEnclosingBodyDeclaration);
-		status.merge(Checks.checkMethodInType(type, methodName, arguments, scope));
-		status.merge(Checks.checkMethodInHierarchy(type.getSuperclass(), methodName, null, arguments, scope));
+		status.merge(Checks.checkMethodInType(type, methodName, arguments));
+		status.merge(Checks.checkMethodInHierarchy(type.getSuperclass(), methodName, null, arguments));
 	}
 	
 	private ITypeBinding[] getArgumentTypes() {

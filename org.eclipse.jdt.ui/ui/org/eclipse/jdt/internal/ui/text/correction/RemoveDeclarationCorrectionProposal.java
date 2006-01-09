@@ -21,7 +21,6 @@ import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -133,7 +132,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 				removeVariableReferences(rewrite, references[i]);
 			}
 
-			IVariableBinding bindingDecl= Bindings.getVariableDeclaration((IVariableBinding) nameNode.resolveBinding());
+			IVariableBinding bindingDecl= ((IVariableBinding) nameNode.resolveBinding()).getVariableDeclaration();
 			ASTNode declaringNode= completeRoot.findDeclaringNode(bindingDecl);
 			if (declaringNode instanceof SingleVariableDeclaration) {
 				removeParamTag(rewrite, (SingleVariableDeclaration) declaringNode);

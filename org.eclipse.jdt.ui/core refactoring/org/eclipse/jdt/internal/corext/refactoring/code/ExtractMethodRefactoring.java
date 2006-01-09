@@ -411,7 +411,7 @@ public class ExtractMethodRefactoring extends Refactoring implements IInitializa
 
 		BodyDeclaration node= fAnalyzer.getEnclosingBodyDeclaration();
 		if (node != null) {
-			fAnalyzer.checkInput(result, fMethodName, fCUnit.getJavaProject(), fAST);
+			fAnalyzer.checkInput(result, fMethodName, fAST);
 			pm.worked(1);
 		}
 		pm.done();

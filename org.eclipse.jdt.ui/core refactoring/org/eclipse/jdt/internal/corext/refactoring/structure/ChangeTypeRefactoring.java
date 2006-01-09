@@ -311,7 +311,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			}
 			
 			if (fMethodBinding != null) {
-				IMethod selectedMethod= Bindings.findMethod(fMethodBinding, fCu.getJavaProject());
+				IMethod selectedMethod= (IMethod) fMethodBinding.getJavaElement();
 				if (selectedMethod == null){
 					return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ChangeTypeRefactoring_insideLocalTypesNotSupported); 
 				}
@@ -369,7 +369,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 				ITypeBinding superType= (ITypeBinding) iter.next();
 				IMethodBinding overriddenMethod= findMethod(fMethodBinding, superType);
 				Assert.isNotNull(overriddenMethod);//because we asked for declaring types
-				IMethod iMethod= Bindings.findMethod(overriddenMethod, fCu.getJavaProject());
+				IMethod iMethod= (IMethod) overriddenMethod.getJavaElement();
 				if (iMethod.isBinary()){
 					return true;
 				}
@@ -593,7 +593,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 			} else if (cv instanceof ReturnTypeVariable){
 				ReturnTypeVariable rtv = (ReturnTypeVariable)cv;
 				IMethodBinding mb= rtv.getMethodBinding();
-				icu= Bindings.findMethod(mb, fCu.getJavaProject()).getCompilationUnit();
+				icu= ((IMethod) mb.getJavaElement()).getCompilationUnit();
 			}
 			if (!relevantVarsByUnit.containsKey(icu)){
 				relevantVarsByUnit.put(icu, new HashSet/*<ConstraintVariable>*/());
@@ -605,7 +605,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 	private ASTNode findDeclaration(CompilationUnit root, ConstraintVariable cv) throws JavaModelException {
 
 		if (fFieldBinding != null){
-			IField f= Bindings.findField(fFieldBinding, fCu.getJavaProject());
+			IField f= (IField) fFieldBinding.getJavaElement();
 			return ASTNodeSearchUtil.getFieldDeclarationNode(f, root);
 		}
 		
@@ -626,7 +626,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 		} else if (cv instanceof ReturnTypeVariable) {
 			ReturnTypeVariable rtv= (ReturnTypeVariable) cv;
 			IMethodBinding mb= rtv.getMethodBinding();
-			IMethod im= Bindings.findMethod(mb, fCu.getJavaProject());
+			IMethod im= (IMethod) mb.getJavaElement();
 			return ASTNodeSearchUtil.getMethodDeclarationNode(im, root);
 		}
 		return null;
@@ -1289,11 +1289,10 @@ public class ChangeTypeRefactoring extends Refactoring {
 			return fAffectedUnits;
 		}
 		if (fMethodBinding != null) {
-			IJavaProject project= fCu.getJavaProject();
 			if (fMethodBinding != null) {
 				
 				
-				IMethod selectedMethod= Bindings.findMethod(fMethodBinding, project);
+				IMethod selectedMethod= (IMethod) fMethodBinding.getJavaElement();
 				if (selectedMethod == null) {
 					// can't happen since we checked it up front in check initial conditions
 					Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_no_method); 
@@ -1333,7 +1332,7 @@ public class ChangeTypeRefactoring extends Refactoring {
 				fAffectedUnits= getCus(groups);
 			}
 		} else if (fFieldBinding != null) {
-			IField iField= Bindings.findField(fFieldBinding, fCu.getJavaProject());
+			IField iField= (IField) fFieldBinding.getJavaElement();
 			if (iField == null) {
 				// can't happen since we checked it up front in check initial conditions
 				Assert.isTrue(false, RefactoringCoreMessages.ChangeTypeRefactoring_no_filed); 

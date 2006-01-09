@@ -896,7 +896,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring implements 
         if (constructorBinding == null)
             return;
         ITypeBinding[] paramTypes= constructorBinding.getParameterTypes();
-        IMethod method= Bindings.findMethod(constructorBinding, fCu.getJavaProject());
+        IMethod method= (IMethod) constructorBinding.getJavaElement();
         if (method == null)
             return;
         String[] parameterNames= method.getParameterNames();

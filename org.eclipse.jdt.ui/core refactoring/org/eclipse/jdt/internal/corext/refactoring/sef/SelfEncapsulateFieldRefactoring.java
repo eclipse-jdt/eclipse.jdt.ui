@@ -417,10 +417,9 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 		ITypeBinding type= declaration.resolveBinding();
 		if (type != null) {
 			ITypeBinding fieldType= fFieldDeclaration.resolveBinding().getType();
-			status.merge(Checks.checkMethodInHierarchy(type, fGetterName, fieldType, new ITypeBinding[0], fField.getJavaProject()));
+			status.merge(Checks.checkMethodInHierarchy(type, fGetterName, fieldType, new ITypeBinding[0]));
 			status.merge(Checks.checkMethodInHierarchy(type, fSetterName, fFieldDeclaration.getAST().resolveWellKnownType("void"), //$NON-NLS-1$
-				new ITypeBinding[] {fieldType}, 
-				fField.getJavaProject()));
+				new ITypeBinding[] {fieldType}));
 		}
 	}
 	

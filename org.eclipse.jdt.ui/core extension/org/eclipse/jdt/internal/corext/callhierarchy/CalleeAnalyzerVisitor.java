@@ -204,15 +204,12 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
                 IType calledType = null;
 
                 if (!calledTypeBinding.isAnonymous()) {
-                    calledType = Bindings.findType(calledTypeBinding,
-                            fMethod.getJavaProject());
+                    calledType = (IType) calledTypeBinding.getJavaElement();
                 } else {
                     if (!"java.lang.Object".equals(calledTypeBinding.getSuperclass().getQualifiedName())) { //$NON-NLS-1$
-                        calledType= Bindings.findType(calledTypeBinding.getSuperclass(),
-                        fMethod.getJavaProject());
+                        calledType= (IType) calledTypeBinding.getSuperclass().getJavaElement();
                     } else {
-                        calledType = Bindings.findType(calledTypeBinding.getInterfaces()[0],
-                                fMethod.getJavaProject());
+                        calledType = (IType) calledTypeBinding.getInterfaces()[0].getJavaElement();
                     }
                 }
 
@@ -233,17 +230,16 @@ class CalleeAnalyzerVisitor extends ASTVisitor {
                         referencedMember= calledMethod;
                     }
                 }
-                
-                fSearchResults.addMember(fMethod, referencedMember,
-                    node.getStartPosition(),
-                    node.getStartPosition() + node.getLength(), fCompilationUnit.lineNumber(node.getStartPosition()));
+                final int position= node.getStartPosition();
+				final int number= fCompilationUnit.getLineNumber(position);
+				fSearchResults.addMember(fMethod, referencedMember, position, position + node.getLength(), number < 1 ? 1 : number);
             }
         } catch (JavaModelException jme) {
             JavaPlugin.log(jme);
         }
     }
     
-	private static IMethod findIncludingSupertypes(IMethodBinding method, IType type, IProgressMonitor pm) throws JavaModelException {
+    private static IMethod findIncludingSupertypes(IMethodBinding method, IType type, IProgressMonitor pm) throws JavaModelException {
 		IMethod inThisType= Bindings.findMethod(method, type);
 		if (inThisType != null)
 			return inThisType;
