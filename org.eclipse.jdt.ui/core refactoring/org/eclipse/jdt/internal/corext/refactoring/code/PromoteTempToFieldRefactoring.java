@@ -129,7 +129,9 @@ public class PromoteTempToFieldRefactoring extends Refactoring implements IIniti
 	//------ analysis ---------//
 	private boolean fInitializerUsesLocalTypes;
 	private boolean fTempTypeUsesClassTypeVariables;
-	
+	//------ scripting --------//
+	private boolean fSelfInitializing= false;
+
 	public PromoteTempToFieldRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings){
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
@@ -289,7 +291,8 @@ public class PromoteTempToFieldRefactoring extends Refactoring implements IIniti
 		
 		checkTempInitializerForLocalTypeUsage();
 		
-		initializeDefaults();
+		if (!fSelfInitializing)
+			initializeDefaults();
 		return result;
 	}
     
@@ -804,6 +807,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring implements IIniti
     }
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		fSelfInitializing= true;
 		if (arguments instanceof GenericRefactoringArguments) {
 			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
 			final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
