@@ -27,14 +27,19 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.AST;
+import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
  * If passed compilation unit is not null, the replacement string will be seen as a qualified type name.
@@ -51,12 +56,15 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	private String fQualifiedName;
 	private String fSimpleName;
 	private IType fType;
-	private ImportsStructure fImportStructure;
+	private NewImportRewrite fImportRewrite;
+	private int fInvocationOffset;
+	private ContextSensitiveImportRewriteContext fImportContext;
 
 	public LazyJavaTypeCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
 		super(proposal, context);
 		fCompilationUnit= context.getCompilationUnit();
 		fQualifiedName= null;
+		fInvocationOffset= context.getInvocationOffset();
 	}
 	
 	/**
@@ -95,9 +103,9 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		 if (fProposal.getKind() == CompletionProposal.TYPE_REF &&  fInvocationContext.getCoreContext().isInJavadocText())
 			 return getSimpleTypeName();
 		
-		fImportStructure= createImportStructure();
-		if (fImportStructure != null) {
-			return fImportStructure.addImport(getQualifiedTypeName());
+		fImportRewrite= createImportRewrite();
+		if (fImportRewrite != null) {
+			return fImportRewrite.addImport(getQualifiedTypeName(), fImportContext);
 		}
 		
 		if (fCompilationUnit != null) {
@@ -115,16 +123,34 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		return completion.length > 0 && completion[completion.length - 1] == ';';
 	}
 
-	private ImportsStructure createImportStructure() {
+	private NewImportRewrite createImportRewrite() {
 		if (fCompilationUnit != null && allowAddingImports()) {
-			IJavaProject project= fCompilationUnit.getJavaProject();
-			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(project);
-			int threshold= JavaPreferencesSettings.getImportNumberThreshold(project);
 			try {
-				return new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
+				CompilationUnit cu= createASTRoot(fCompilationUnit);
+				if (cu == null) {
+					NewImportRewrite rewrite= NewImportRewrite.create(fCompilationUnit, true);
+					fImportContext= null;
+					return rewrite;
+				} else {
+					NewImportRewrite rewrite= NewImportRewrite.create(cu, true);
+					fImportContext= new ContextSensitiveImportRewriteContext(cu, fInvocationOffset, rewrite);
+					return rewrite;
+				}
 			} catch (CoreException x) {
 				JavaPlugin.log(x);
 			}
+		}
+		return null;
+	}
+
+	private CompilationUnit createASTRoot(ICompilationUnit compilationUnit) {
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
+		parser.setKind(ASTParser.K_COMPILATION_UNIT);
+		parser.setResolveBindings(true);
+		parser.setSource(compilationUnit);
+		ASTNode node= parser.createAST(new NullProgressMonitor());
+		if (node instanceof CompilationUnit) {
+			return (CompilationUnit)node;
 		}
 		return null;
 	}
@@ -136,9 +162,9 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		try {
 			super.apply(document, trigger, offset);
 
-			if (fImportStructure != null && fImportStructure.hasChanges()) {
+			if (fImportRewrite != null && fImportRewrite.hasRecordedChanges()) {
 				int oldLen= document.getLength();
-				fImportStructure.getResultingEdits(document, new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
+				fImportRewrite.rewriteImports(new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
 			}
 			
