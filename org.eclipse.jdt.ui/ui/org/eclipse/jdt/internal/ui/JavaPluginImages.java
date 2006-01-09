@@ -377,6 +377,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_CU= createUnManaged(T_WIZBAN, "compunitrefact_wiz.gif");	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_REFACTOR_PULL_UP= createUnManaged(T_WIZBAN, "pullup_wiz.gif");	//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_JAR_PACKAGER= createUnManaged(T_WIZBAN, "jar_pack_wiz.gif"); 		//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_JAR_IMPORTER= createUnManaged(T_WIZBAN, "jar_import_wiz.gif"); 		//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_JAVA_WORKINGSET= createUnManaged(T_WIZBAN, "java_workingset_wiz.gif");//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_EXPORT_JAVADOC= createUnManaged(T_WIZBAN, "export_javadoc_wiz.gif");//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_EXTERNALIZE_STRINGS= createUnManaged(T_WIZBAN, "extstr_wiz.gif");//$NON-NLS-1$
