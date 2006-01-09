@@ -144,7 +144,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
 /**
  * Refactoring processor to move instance methods.
@@ -885,7 +884,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 						final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
 						final String modifier= same ? RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_default : RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_public; 
 						if (MemberVisibilityAdjustor.hasLowerVisibility(binding.getModifiers(), same ? Modifier.NONE : (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(type, keyword, fAdjustments))
-							fAdjustments.put(type, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(type, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_type_warning, new String[] { BindingLabels.getFullyQualified(declaration.resolveBinding()), modifier}), JavaStatusContext.create(type.getCompilationUnit(), declaration)))); 
+							fAdjustments.put(type, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(type, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_type_warning, new String[] { BindingLabelProvider.getBindingLabel(declaration.resolveBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED), modifier}), JavaStatusContext.create(type.getCompilationUnit(), declaration)))); 
 					}
 				}
 			}
@@ -1503,7 +1502,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 						if (method != null) {
 							binding= method.resolveBinding();
 							if (binding != null && MemberVisibilityAdjustor.hasLowerVisibility(getter.getFlags(), same ? Modifier.NONE : (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(getter, keyword, adjustments))
-								adjustments.put(getter, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(getter, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { BindingLabels.getFullyQualified(binding), modifier}), JavaStatusContext.create(getter)))); 
+								adjustments.put(getter, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(getter, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), modifier}), JavaStatusContext.create(getter)))); 
 							final MethodInvocation invocation= rewrite.getAST().newMethodInvocation();
 							invocation.setExpression(expression);
 							invocation.setName(rewrite.getAST().newSimpleName(getter.getElementName()));
@@ -1512,7 +1511,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					}
 				}
 				if (MemberVisibilityAdjustor.hasLowerVisibility(field.getFlags(), (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(field, keyword, adjustments))
-					adjustments.put(field, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(field, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_field_warning, new String[] { BindingLabels.getFullyQualified(fTarget), modifier}), JavaStatusContext.create(field)))); 
+					adjustments.put(field, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(field, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_field_warning, new String[] { BindingLabelProvider.getBindingLabel(fTarget, JavaElementLabels.ALL_FULLY_QUALIFIED), modifier}), JavaStatusContext.create(field)))); 
 			}
 		}
 		return null;
@@ -1715,7 +1714,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					if (index < bindings.length && invocation.arguments().size() > index) {
 						final Expression argument= (Expression) invocation.arguments().get(index);
 						if (argument instanceof NullLiteral) {
-							status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_null_argument, BindingLabels.getFullyQualified(declaration.resolveBinding())), JavaStatusContext.create(rewriter.getCu(), invocation))); 
+							status.merge(RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_null_argument, BindingLabelProvider.getBindingLabel(declaration.resolveBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED)), JavaStatusContext.create(rewriter.getCu(), invocation))); 
 							result= false;
 						} else {
 							if (argument instanceof ThisExpression)
@@ -2134,7 +2133,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 						found= true;
 				}
 				if (found) {
-					status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_overridden, BindingLabels.getFullyQualified(declaration.resolveBinding())), JavaStatusContext.create(fMethod))); 
+					status.merge(RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_inline_overridden, BindingLabelProvider.getBindingLabel(declaration.resolveBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED)), JavaStatusContext.create(fMethod))); 
 					result= false;
 				} else {
 					monitor.worked(1);

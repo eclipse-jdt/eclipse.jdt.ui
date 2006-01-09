@@ -99,8 +99,9 @@ import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.ui.JavaElementLabels;
 
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * Encapsulates a field into getter and setter calls.
@@ -272,7 +273,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring {
 			if (selector.equals(name))
 				status.addFatalError(Messages.format(
 					RefactoringCoreMessages.SelfEncapsulateField_method_exists, 
-					new String[] {BindingLabels.getFullyQualified(method), type.getElementName()}));
+					new String[] {BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED), type.getElementName()}));
 		}
 	}	
 	
