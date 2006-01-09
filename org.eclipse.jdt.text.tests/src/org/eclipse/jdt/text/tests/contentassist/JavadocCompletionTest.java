@@ -446,7 +446,7 @@ public class JavadocCompletionTest extends TestCase {
 		for (int i= 0; i < METHOD_INLINE_TAGS.length; i++) {
 			setUp();
 			String tag= METHOD_INLINE_TAGS[i];
-			assertMethodJavadocProposal(" * {" + tag + "|}", " * {@|", "{" + tag);
+			assertMethodJavadocProposal(" * {" + tag + "|}", " * {@|", "{" + tag + "}");
 			tearDown();
 		}
 		setUp();
@@ -457,7 +457,7 @@ public class JavadocCompletionTest extends TestCase {
 		for (int i= 0; i < FIELD_INLINE_TAGS.length; i++) {
 			setUp();
 			String tag= FIELD_INLINE_TAGS[i];
-			assertFieldJavadocProposal(" * {" + tag + "|}", " * {@|", "{" + tag);
+			assertFieldJavadocProposal(" * {" + tag + "|}", " * {@|", "{" + tag + "}");
 			tearDown();
 		}
 		setUp();
