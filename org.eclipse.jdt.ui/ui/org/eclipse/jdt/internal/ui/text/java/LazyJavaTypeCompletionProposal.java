@@ -27,9 +27,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
@@ -40,6 +37,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * If passed compilation unit is not null, the replacement string will be seen as a qualified type name.
@@ -142,15 +140,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	}
 
 	private CompilationUnit createASTRoot(ICompilationUnit compilationUnit) {
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
-		parser.setKind(ASTParser.K_COMPILATION_UNIT);
-		parser.setResolveBindings(true);
-		parser.setSource(compilationUnit);
-		ASTNode node= parser.createAST(new NullProgressMonitor());
-		if (node instanceof CompilationUnit) {
-			return (CompilationUnit)node;
-		}
-		return null;
+		return JavaPlugin.getDefault().getASTProvider().getAST(compilationUnit, ASTProvider.WAIT_NO, new NullProgressMonitor());
 	}
 
 	/*
