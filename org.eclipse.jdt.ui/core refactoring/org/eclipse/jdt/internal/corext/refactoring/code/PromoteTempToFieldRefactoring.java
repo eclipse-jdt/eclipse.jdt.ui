@@ -97,7 +97,6 @@ import org.eclipse.jdt.ui.CodeGeneration;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
-import org.eclipse.jdt.internal.ui.viewsupport.BindingLabels;
 
 public class PromoteTempToFieldRefactoring extends Refactoring implements IInitializableRefactoringComponent {
 
@@ -438,7 +437,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring implements IIniti
 				method.accept(nameCollector);
 				List names= nameCollector.getNames();
 				if (names.contains(fFieldName)) {
-					String[] keys= { fFieldName, BindingLabels.getFullyQualified(method.resolveBinding())};
+					String[] keys= { fFieldName, BindingLabelProvider.getBindingLabel(method.resolveBinding(), JavaElementLabels.ALL_FULLY_QUALIFIED)};
 					String msg= Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_Name_conflict, keys); 
 					return RefactoringStatus.createFatalErrorStatus(msg);
 				}
@@ -630,7 +629,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring implements IIniti
 				if (javaProject != null)
 					project= javaProject.getElementName();
 				final IVariableBinding binding= fTempDeclarationNode.resolveBinding();
-				return new RefactoringDescriptor(ID_PROMOTE_TEMP, project, MessageFormat.format("Convert local variable ''{0}'' in ''{1}'' to field", new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
+				return new RefactoringDescriptor(ID_PROMOTE_TEMP, project, MessageFormat.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
 			}
 		};
         ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fCu);

@@ -876,6 +876,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String ExtractConstantRefactoring_descriptor_description;
 	public static String IntroduceParameterRefactoring_descriptor_description;
 	public static String IntroduceFactory_descriptor_description;
+	public static String PromoteTempToFieldRefactoring_descriptor_description;
 	public static String ProcessorBasedRefactoring_error_unsupported_initialization;
 
 	public static String InitializableRefactoring_argument_not_exist;
