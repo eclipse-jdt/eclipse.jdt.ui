@@ -127,8 +127,8 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		/** Are we in an anonymous class declaration? */
 		protected boolean fAnonymousClassDeclaration= false;
 
-		/** The qualified type name where the super references are referring to */
-		protected final String fQualifiedName;
+		/** The super reference type */
+		protected final IType fSuperReferenceType;
 
 		/** The source compilation unit rewrite to use */
 		protected final CompilationUnitRewrite fSourceRewriter;
@@ -154,7 +154,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 			Assert.isNotNull(type);
 			fSourceRewriter= sourceRewriter;
 			fTargetRewriter= targetRewriter;
-			fQualifiedName= JavaModelUtil.getFullyQualifiedName(type);
+			fSuperReferenceType= type;
 		}
 
 		public final void endVisit(final AnonymousClassDeclaration node) {
@@ -190,12 +190,12 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 			if (!fAnonymousClassDeclaration && !fTypeDeclarationStatement) {
 				final IBinding name= node.getName().resolveBinding();
 				if (name != null && name.getKind() == IBinding.METHOD) {
-					final ITypeBinding type= ((IMethodBinding) name).getDeclaringClass();
-
-					// TW replace by comparison type.getJavaElement().equals(super_reference_type) (see 78087)
-
-					if (type != null && !fQualifiedName.equals(Bindings.getFullyQualifiedName(type)))
-						return true;
+					final ITypeBinding binding= ((IMethodBinding) name).getDeclaringClass();
+					if (binding != null) {
+						final IType type= (IType) binding.getJavaElement();
+						if (!fSuperReferenceType.equals(type))
+							return true;
+					}
 				}
 				final AST ast= node.getAST();
 				final ThisExpression expression= ast.newThisExpression();
