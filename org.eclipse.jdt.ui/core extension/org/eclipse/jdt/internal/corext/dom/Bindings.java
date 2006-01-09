@@ -19,11 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.Path;
-import org.eclipse.core.runtime.Platform;
-
-import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -52,31 +47,13 @@ import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 public class Bindings {
 	
 	public static final String ARRAY_LENGTH_FIELD_BINDING_STRING= "(array type):length";//$NON-NLS-1$
 	private Bindings() {
 		// No instance
 	}
-	
-	private static final boolean CHECK_CORE_BINDING_IS_EQUAL_TO;
-	static {
-		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/checkCoreBindingIsEqualTo"); //$NON-NLS-1$
-		CHECK_CORE_BINDING_IS_EQUAL_TO= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
-	}
-	private static final boolean CHECK_CORE_BINDING_GET_JAVA_ELEMENT;
-	static {
-		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/checkCoreBindingGetJavaElement"); //$NON-NLS-1$
-		CHECK_CORE_BINDING_GET_JAVA_ELEMENT= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
-	}
-	private static final boolean USE_UI_BINDING_GET_JAVA_ELEMENT;
-	static {
-		String value= Platform.getDebugOption("org.eclipse.jdt.ui/debug/useUIBindingGetJavaElement"); //$NON-NLS-1$
-		USE_UI_BINDING_GET_JAVA_ELEMENT= value != null && value.equalsIgnoreCase("true"); //$NON-NLS-1$
-	}
-	
+
 	/**
 	 * Checks if the two bindings are equals. First an identity check is
 	 * made an then the key of the bindings are compared. 
@@ -86,36 +63,9 @@ public class Bindings {
 	 * @return boolean
 	 */
 	public static boolean equals(IBinding b1, IBinding b2) {
-		boolean isEqualTo= b1.isEqualTo(b2);
-		if (CHECK_CORE_BINDING_IS_EQUAL_TO) {
-			boolean originalEquals= originalEquals(b1, b2);
-			if (originalEquals != isEqualTo) {
-				String message= "Unexpected difference between Bindings.equals(..) and IBinding#isEqualTo(..)"; //$NON-NLS-1$
-				String detail= "\nb1 == " + b1.getKey() + ",\nb2 == " + (b2 == null ? "null binding" : b2.getKey()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				try {
-					detail+= "\nb1.getJavaElement() == " + b1.getJavaElement() + ",\nb2.getJavaElement() == " + (b2 == null ? "null binding" : b2.getJavaElement().toString()); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-				} catch (Exception e) {
-					detail += "\nException in getJavaElement():\n" + e; //$NON-NLS-1$
-				}
-				JavaPlugin.logRepeatedMessage(message, detail);
-			}
-		}
-		return isEqualTo;
+		return b1.isEqualTo(b2);
 	}
-	
-	private static boolean originalEquals(IBinding b1, IBinding b2) {
-		Assert.isNotNull(b1);
-		if (b1 == b2)
-			return true;
-		if (b2 == null)
-			return false;		
-		String k1= b1.getKey();
-		String k2= b2.getKey();
-		if (k1 == null || k2 == null)
-			return false;
-		return k1.equals(k2);
-	}
-	
+
 	/**
 	 * Checks if the two arrays of bindings have the same length and
 	 * their elements are equal. Uses
@@ -150,13 +100,13 @@ public class Bindings {
 	/*
 	 * Note: this method is for debugging and testing purposes only.
 	 * There are tests whose precomputed test results rely on the returned String's format.
-	 * @see org.eclipse.jdt.internal.ui.viewsupport.BindingLabels
+	 * @see org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider
 	 */
 	public static String asString(IBinding binding) {
 		if (binding instanceof IMethodBinding)
 			return asString((IMethodBinding)binding);
 		else if (binding instanceof ITypeBinding)
-			return asString((ITypeBinding)binding);
+			return ((ITypeBinding)binding).getQualifiedName();
 		else if (binding instanceof IVariableBinding)
 			return asString((IVariableBinding)binding);
 		return binding.toString();
@@ -176,10 +126,6 @@ public class Bindings {
 		return result.toString();		
 	}
 
-	private static String asString(ITypeBinding type) {
-		return type.getQualifiedName();
-	}
-		
 	private static String asString(IMethodBinding method) {
 		StringBuffer result= new StringBuffer();
 		result.append(method.getDeclaringClass().getName());
@@ -217,19 +163,15 @@ public class Bindings {
 	 * <p>
 	 * If the binding resolves to a generic type, the fully qualified name of the raw type is returned.
 	 * 
-	 * @param type the type binding to get its fully qualified name
+	 * @param binding the type binding to get its fully qualified name
 	 * @return the fully qualified name
 	 */
-	public static String getFullyQualifiedName(ITypeBinding type) {
-
-		// TW: replace by call to type.getJavaElement().getFullyQualifiedName (see 78087)
-
-		String name= type.getQualifiedName();
-		final int index= name.indexOf('<');
-		if (index > 0)
-			name= name.substring(0, index);
-		return name;
-	}	
+	public static String getFullyQualifiedName(ITypeBinding binding) {
+		final IType type= (IType) binding.getJavaElement();
+		if (type != null) // Array type bindings return null
+			return (type).getFullyQualifiedName();
+		return binding.getQualifiedName();
+	}
 
 	public static String getImportName(IBinding binding) {
 		ITypeBinding declaring= null;
@@ -885,9 +827,6 @@ public class Bindings {
 		}
 		return false;
 	}
-	
-
-	// find IJavaElements for bindings
 
 	/**
 	 * Finds the compilation unit where the type of the given <code>ITypeBinding</code> is defined,
@@ -899,51 +838,11 @@ public class Bindings {
 	 * @throws JavaModelException if an errors occurs in the Java model
 	 */
 	public static ICompilationUnit findCompilationUnit(ITypeBinding typeBinding, IJavaProject project) throws JavaModelException {
-		ICompilationUnit coreFindCompilationUnit= coreFindCompilationUnit(typeBinding);
-		if (CHECK_CORE_BINDING_GET_JAVA_ELEMENT) {
-			ICompilationUnit originalFindCompilationUnit= originalFindCompilationUnit(typeBinding, project);
-			if (coreFindCompilationUnit == null) {
-				if (originalFindCompilationUnit != null) {
-					JavaPlugin.logRepeatedMessage("ITypeBinding#getJavaElement() is not supposed to be null: ", //$NON-NLS-1$
-							"typeBinding == " + typeBinding.getKey() + ", project == " + project.getElementName()  //$NON-NLS-1$//$NON-NLS-2$
-							+ ", coreFindCompilationUnit == " + coreFindCompilationUnit + ", originalFindCompilationUnit == " + originalFindCompilationUnit);  //$NON-NLS-1$//$NON-NLS-2$
-				}
-			} else {
-				if (! coreFindCompilationUnit.equals(originalFindCompilationUnit)) {
-					JavaPlugin.logRepeatedMessage("ITypeBinding#getJavaElement() is not correct element: ", //$NON-NLS-1$
-							"typeBinding == " + typeBinding.getKey() + ", project == " + project.getElementName()  //$NON-NLS-1$//$NON-NLS-2$
-							+ ", coreFindCompilationUnit == " + coreFindCompilationUnit + ", originalFindCompilationUnit == " + originalFindCompilationUnit);  //$NON-NLS-1$//$NON-NLS-2$
-				}
-			}
-		}
-		return coreFindCompilationUnit;
-	}
-
-	private static ICompilationUnit coreFindCompilationUnit(ITypeBinding typeBinding) {
 		IJavaElement type= typeBinding.getJavaElement();
 		if (type instanceof IType)
 			return ((IType) type).getCompilationUnit();
 		else
 			return null;
-	}
-
-	private static ICompilationUnit originalFindCompilationUnit(ITypeBinding typeBinding, IJavaProject project) throws JavaModelException {
-		if (!typeBinding.isFromSource()) {
-			return null;
-		}
-		while (typeBinding != null && !typeBinding.isTopLevel()) {
-			typeBinding= typeBinding.getDeclaringClass();
-		}
-		if (typeBinding != null) {
-			typeBinding= typeBinding.getTypeDeclaration();
-			IPackageBinding pack= typeBinding.getPackage();
-			String packageName= pack.isUnnamed() ? "" : pack.getName(); //$NON-NLS-1$
-			IType type= project.findType(packageName, typeBinding.getName());
-			if (type != null) {
-				return type.getCompilationUnit();
-			}
-		}
-		return null;
 	}
 
 	/**
@@ -957,31 +856,7 @@ public class Bindings {
 	 * @deprecated Inline as (IField) field.getJavaElement();
 	 */
 	public static IField findField(IVariableBinding field, IJavaProject in) throws JavaModelException {
-		Assert.isTrue(field.isField());
-		IField iField= (IField) field.getJavaElement();
-		if (CHECK_CORE_BINDING_GET_JAVA_ELEMENT) {
-			IField originalFindField= originalFindField(field, in);
-			if (iField != null && ! iField.equals(originalFindField)
-					|| iField == null && originalFindField != null) {
-				JavaPlugin.logRepeatedMessage("IVariableBinding#getJavaElement() is not correct element: ", //$NON-NLS-1$
-						"field == " + field.getKey() + ", project == " + in.getElementName()  //$NON-NLS-1$//$NON-NLS-2$
-						+ ", iField == " + iField + ", originalFindField == " + originalFindField);  //$NON-NLS-1$//$NON-NLS-2$
-			}
-		}
-		return iField;
-	}
-
-	private static IField originalFindField(IVariableBinding field, IJavaProject in) throws JavaModelException {
-		ITypeBinding declaringClassBinding = field.getDeclaringClass();
-		if (declaringClassBinding == null)
-			return null;
-		IType declaringClass = findType(declaringClassBinding, in);
-		if (declaringClass == null)
-			return null;
-		IField foundField= declaringClass.getField(field.getName());
-		if (! foundField.exists())
-	    	return null;
-		return foundField;
+		return (IField) field.getJavaElement();
 	}
 
 	/**
@@ -995,45 +870,7 @@ public class Bindings {
 	 * @deprecated Inline as (IType) type.getJavaElement();
 	 */
 	public static IType findType(ITypeBinding type, IJavaProject scope) throws JavaModelException {
-		IType iType= (IType) type.getJavaElement();
-		if (CHECK_CORE_BINDING_GET_JAVA_ELEMENT) {
-			IType originalFindType= originalFindType(type, scope);
-			if (iType != null && ! iType.equals(originalFindType)
-					|| iType == null && originalFindType != null) {
-				JavaPlugin.logRepeatedMessage("ITypeBinding#getJavaElement() is not correct element: ", //$NON-NLS-1$
-						"type == " + type.getKey() + ", project == " + scope.getElementName()  //$NON-NLS-1$//$NON-NLS-2$
-						+ ", iType == " + iType + ", originalFindType == " + originalFindType);  //$NON-NLS-1$//$NON-NLS-2$
-			}
-		}
-		return iType;
-	}
-
-	private static IType originalFindType(ITypeBinding type, IJavaProject scope) throws JavaModelException {
-		if (type.isPrimitive() || type.isAnonymous() || type.isNullType())
-			return null;
-		if (type.isArray())
-			return findType(type.getElementType(), scope);
-			
-		// TODO: Bug 36032: JavaCore should allow to find secondary top level types.
-		
-		String[] typeElements= Bindings.getNameComponents(type);
-		IJavaElement element= scope.findElement(getPathToCompilationUnit(type.getPackage(), typeElements[0]));
-		IType candidate= null;
-		if (element instanceof ICompilationUnit) {
-			candidate= ((ICompilationUnit)element).getType(typeElements[0]);
-		} else if (element instanceof IClassFile) {
-			candidate= ((IClassFile)element).getType();
-		} else if (element == null) {
-			if (type.isMember())
-				candidate= JavaModelUtil.findType(scope, Bindings.getFullyQualifiedName(type.getDeclaringClass()));
-			else
-				candidate= JavaModelUtil.findType(scope, Bindings.getFullyQualifiedName(type));
-		}
-		
-		if (candidate == null || typeElements.length == 1)
-			return candidate;
-			
-		return findTypeInType(typeElements, candidate);
+		return (IType) type.getJavaElement();
 	}
 
 	/**
@@ -1046,40 +883,9 @@ public class Bindings {
 	 * 	@deprecated Inline as (IMethod) method.getJavaElement();
 	 */
 	public static IMethod findMethod(IMethodBinding method, IJavaProject scope) throws JavaModelException {
-		if (! USE_UI_BINDING_GET_JAVA_ELEMENT) {
-			IMethod iMethod= (IMethod) method.getJavaElement();
-			if (CHECK_CORE_BINDING_GET_JAVA_ELEMENT) {
-				IMethod originalFindMethod= originalFindMethod(method, scope);
-				if (iMethod != null && ! iMethod.equals(originalFindMethod)
-						|| iMethod == null && originalFindMethod != null) {
-					JavaPlugin.logRepeatedMessage("IMethodBinding#getJavaElement() is not correct element: ", //$NON-NLS-1$
-							"method == " + method.getKey() + ", project == " + scope.getElementName()  //$NON-NLS-1$//$NON-NLS-2$
-							+ ", iMethod == " + iMethod + ", originalFindMethod == " + originalFindMethod);  //$NON-NLS-1$//$NON-NLS-2$
-				}
-			}
-			return iMethod;
-		}
-		
-		IMethod originalFindMethod= originalFindMethod(method, scope);
-		if (CHECK_CORE_BINDING_GET_JAVA_ELEMENT) {
-			IMethod iMethod= (IMethod) method.getJavaElement();
-			if (iMethod != null && ! iMethod.equals(originalFindMethod)
-					|| iMethod == null && originalFindMethod != null) {
-				JavaPlugin.logRepeatedMessage("IMethodBinding#getJavaElement() is not correct element: ", //$NON-NLS-1$
-						"method == " + method.getKey() + ", project == " + scope.getElementName()  //$NON-NLS-1$//$NON-NLS-2$
-						+ ", iMethod == " + iMethod + ", originalFindMethod == " + originalFindMethod);  //$NON-NLS-1$//$NON-NLS-2$
-			}
-		}
-		return originalFindMethod;	
+		return (IMethod) method.getJavaElement();	
 	}
 
-	private static IMethod originalFindMethod(IMethodBinding method, IJavaProject scope) throws JavaModelException {
-		IType type= findType(method.getDeclaringClass(), scope);
-		if (type == null)
-			return null;
-		return findMethod(method, type);
-	}
-	
 	/**
 	 * Finds a method for the given <code>IMethodBinding</code>. Returns
 	 * <code>null</code> if the type doesn't contain a corresponding method.
@@ -1101,27 +907,6 @@ public class Bindings {
 		}
 		return null;
 	}			
-
-	//---- Helper methods to convert a type --------------------------------------------
-	
-	private static IPath getPathToCompilationUnit(IPackageBinding packageBinding, String topLevelTypeName) {
-		IPath result= Path.EMPTY;
-		String[] packageNames= packageBinding.getNameComponents();
-		for (int i= 0; i < packageNames.length; i++) {
-			result= result.append(packageNames[i]);
-		}
-		return result.append(topLevelTypeName + ".java"); //$NON-NLS-1$
-	}
-
-	private static IType findTypeInType(String[] typeElements, IType jmType) {
-		IType result= jmType;
-		for (int i= 1; i < typeElements.length; i++) {
-			result= result.getType(typeElements[i]);
-			if (!result.exists())
-				return null;
-		}
-		return result == jmType ? null : result;
-	}
 
 	//---- Helper methods to convert a method ---------------------------------------------
 	
@@ -1149,7 +934,7 @@ public class Bindings {
 			type= type.getElementType();
 		candidate= Signature.getElementType(candidate);
 		
-		if (isPrimitiveType(candidate) != type.isPrimitive()) {
+		if ((Signature.getTypeSignatureKind(candidate) == Signature.BASE_TYPE_SIGNATURE) != type.isPrimitive()) {
 			return false;
 		}
 			
@@ -1160,7 +945,7 @@ public class Bindings {
 			candidate= Signature.getTypeErasure(candidate);
 			type= type.getErasure();
 			
-			if (isResolvedType(candidate)) {
+			if (candidate.charAt(Signature.getArrayCount(candidate)) == Signature.C_RESOLVED) {
 				return Signature.toString(candidate).equals(Bindings.getFullyQualifiedName(type));
 			} else {
 				String[][] qualifiedCandidates= scope.resolveType(Signature.toString(candidate));
@@ -1177,15 +962,6 @@ public class Bindings {
 			}
 		}
 		return false;
-	}
-
-	private static boolean isPrimitiveType(String s) {
-		return Signature.getTypeSignatureKind(s) == Signature.BASE_TYPE_SIGNATURE;
-	}
-	
-	private static boolean isResolvedType(String s) {
-		int arrayCount= Signature.getArrayCount(s);
-		return s.charAt(arrayCount) == Signature.C_RESOLVED;
 	}
 
 	/**
@@ -1215,8 +991,7 @@ public class Bindings {
 	public static boolean isVoidType(ITypeBinding binding) {
 		return "void".equals(binding.getName()); //$NON-NLS-1$
 	}
-	
-	
+
 	/**
 	 * Normalizes the binding so that it can be used as a type inside a declaration
 	 * (e.g. variable declaration, method return type, parameter type, ...). For
@@ -1317,24 +1092,10 @@ public class Bindings {
 
 	/**
 	 * Get field declaration. See bug 83100
+	 * @deprecated inline
 	 */
 	public static IVariableBinding getVariableDeclaration(IVariableBinding var) {
-		ITypeBinding declaringClass= var.getDeclaringClass();
-		if (declaringClass == null) {
-			return var;
-		}
-		if (declaringClass.getTypeDeclaration() == declaringClass) { // test if type is already declaration
-			return var;
-		}
-		IVariableBinding[] genericFields= declaringClass.getTypeDeclaration().getDeclaredFields();
-		String name= var.getName();
-		for (int i= 0; i < genericFields.length; i++) {
-			if (name.equals(genericFields[i].getName())) {
-				return genericFields[i];
-			}
-		}
-		Assert.isTrue(false, "field does not exist in generic type"); //$NON-NLS-1$
-		return var;
+		return var.getVariableDeclaration();
 	}
 
 	/**
