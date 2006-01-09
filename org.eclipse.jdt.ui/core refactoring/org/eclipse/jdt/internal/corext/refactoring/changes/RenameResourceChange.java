@@ -34,7 +34,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
  */
 public class RenameResourceChange extends JDTChange {
 
-	private static final String ID_RENAME_RESOURCE= "org.eclipse.jdt.ui.rename.resource"; //$NON-NLS-1$
+	public static final String ID_RENAME_RESOURCE= "org.eclipse.jdt.ui.rename.resource"; //$NON-NLS-1$
 
 	/*
 	 * we cannot use handles because they became invalid when you rename the resource.

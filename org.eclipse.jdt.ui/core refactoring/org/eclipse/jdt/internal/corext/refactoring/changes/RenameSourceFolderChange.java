@@ -35,7 +35,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 
-	private static final String ID_RENAME_SOURCE_FOLDER= "org.eclipse.jdt.ui.rename.source.folder"; //$NON-NLS-1$
+	public static final String ID_RENAME_SOURCE_FOLDER= "org.eclipse.jdt.ui.rename.source.folder"; //$NON-NLS-1$
 
 	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) {
 		this(sourceFolder.getPath(), sourceFolder.getElementName(), newName, IResource.NULL_STAMP);

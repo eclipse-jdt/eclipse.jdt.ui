@@ -38,7 +38,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange {
 
-	private static final String ID_RENAME_COMPILATION_UNIT= "org.eclipse.jdt.ui.rename.compilationunit"; //$NON-NLS-1$
+	public static final String ID_RENAME_COMPILATION_UNIT= "org.eclipse.jdt.ui.rename.compilationunit"; //$NON-NLS-1$
 
 	public RenameCompilationUnitChange(ICompilationUnit cu, String newName) {
 		this(ResourceUtil.getResource(cu).getFullPath(), cu.getElementName(), newName, IResource.NULL_STAMP);
