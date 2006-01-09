@@ -711,8 +711,6 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fDestinationType, member);
 				adjustor.setAdjustments(adjustments);
 				adjustor.setStatus(status);
-				adjustor.setGetters(true);
-				adjustor.setSetters(true);
 				adjustor.setVisibilitySeverity(RefactoringStatus.WARNING);
 				adjustor.setFailureSeverity(RefactoringStatus.WARNING);
 				adjustor.setRewrite(fSource.getASTRewrite(), fSource.getRoot());

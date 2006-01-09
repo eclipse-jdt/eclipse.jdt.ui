@@ -1620,8 +1620,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			final ASTRewrite sourceRewrite= ASTRewrite.create(fSourceRewrite.getRoot().getAST());
 			final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fTargetType, fMethod);
 			adjustor.setStatus(status);
-			adjustor.setGetters(fUseGetters);
-			adjustor.setSetters(fUseSetters);
 			adjustor.setVisibilitySeverity(RefactoringStatus.WARNING);
 			adjustor.setFailureSeverity(RefactoringStatus.WARNING);
 			adjustor.setRewrites(rewrites);

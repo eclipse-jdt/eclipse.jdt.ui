@@ -54,7 +54,6 @@ import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -66,8 +65,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Helper class to adjust the visibilities of members with respect to a reference element.
@@ -252,50 +249,6 @@ public final class MemberVisibilityAdjustor {
 		 * @throws JavaModelException if an error occurs
 		 */
 		public void rewriteVisibility(MemberVisibilityAdjustor adjustor, IProgressMonitor monitor) throws JavaModelException;
-	}
-
-	/** Description of an outgoing accessor visibility adjustment */
-	public static class OutgoingAccessorVisibilityAdjustment extends OutgoingMemberVisibilityAdjustment {
-
-		/** The accessor method, or <code>null</code> */
-		protected final IMethod fAccessor;
-
-		/** Is the accessor method a getter method? */
-		protected final boolean fGetter;
-
-		/**
-		 * Creates a new outgoing accessor visibility adjustment.
-		 * 
-		 * @param field the field which is adjusted
-		 * @param accessor the used accessor method
-		 * @param getter <code>true</code> if the accessor method is a getter, <code>false</code> otherwise
-		 * @param keyword the keyword representing the adjusted visibility
-		 * @param status the associated status
-		 */
-		public OutgoingAccessorVisibilityAdjustment(final IField field, final IMethod accessor, final boolean getter, final ModifierKeyword keyword, final RefactoringStatus status) {
-			super(field, keyword, status);
-			Assert.isNotNull(accessor);
-			fAccessor= accessor;
-			fGetter= getter;
-		}
-
-		/**
-		 * Returns the accessor method.
-		 * 
-		 * @return the accessor method
-		 */
-		public final IMethod getAccessor() {
-			return fAccessor;
-		}
-
-		/**
-		 * Is the accessor method a getter method?
-		 * 
-		 * @return <code>true</code> if the accessor method is a getter, <code>false</code> if not or if no accessor is used
-		 */
-		public final boolean isGetter() {
-			return fGetter;
-		}
 	}
 
 	/** Description of an outgoing member visibility adjustment */
@@ -495,9 +448,6 @@ public final class MemberVisibilityAdjustor {
 	/** The map of members to visibility adjustments */
 	private Map fAdjustments= new HashMap();
 
-	/** Should getters be used to resolve visibility issues? */
-	private boolean fGetters= true;
-
 	/** Should incoming references be adjusted? */
 	private boolean fIncoming= true;
 
@@ -521,9 +471,6 @@ public final class MemberVisibilityAdjustor {
 
 	/** The incoming search scope */
 	private IJavaSearchScope fScope;
-
-	/** Should setters be used to resolve visibility issues? */
-	private boolean fSetters= true;
 
 	/** The status of the visibility adjustment */
 	private RefactoringStatus fStatus= new RefactoringStatus();
@@ -665,30 +612,8 @@ public final class MemberVisibilityAdjustor {
 		//bug 100555 (moving inner class to top level class; taking private fields with you)
 		final IType declaring= field.getDeclaringType();
 		if (declaring != null && declaring.equals(fReferenced)) return;
-		if (hasLowerVisibility(field.getFlags(), keywordToVisibility(threshold)) && needsVisibilityAdjustment(field, threshold)) {
-			if (fGetters) {
-				try {
-					final IMethod getter= GetterSetterUtil.getGetter(field);
-					if (getter != null && getter.exists()) {
-						adjustOutgoingVisibility(getter, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning);
-						fAdjustments.put(field, new OutgoingAccessorVisibilityAdjustment(field, getter, true, threshold, new RefactoringStatus()));
-					}
-				} catch (JavaModelException exception) {
-					JavaPlugin.log(exception);
-				}
-			} else if (fSetters) {
-				try {
-					final IMethod setter= GetterSetterUtil.getSetter(field);
-					if (setter != null && setter.exists()) {
-						adjustOutgoingVisibility(setter, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning);
-						fAdjustments.put(field, new OutgoingAccessorVisibilityAdjustment(field, setter, false, threshold, new RefactoringStatus()));
-					}
-				} catch (JavaModelException exception) {
-					JavaPlugin.log(exception);
-				}
-			}
+		if (hasLowerVisibility(field.getFlags(), keywordToVisibility(threshold)) && needsVisibilityAdjustment(field, threshold)) 
 			adjustOutgoingVisibility(field, threshold, RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_field_warning);
-		}
 	}
 
 	/**
@@ -1184,17 +1109,6 @@ public final class MemberVisibilityAdjustor {
 	}
 
 	/**
-	 * Determines whether getters should be preferred to resolve visibility issues.
-	 * <p>
-	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to use getters where possible.
-	 * 
-	 * @param use <code>true</code> if getters should be used, <code>false</code> otherwise
-	 */
-	public final void setGetters(final boolean use) {
-		fGetters= use;
-	}
-
-	/**
 	 * Determines whether incoming references should be adjusted.
 	 * <p>
 	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to adjust incoming references.
@@ -1252,17 +1166,6 @@ public final class MemberVisibilityAdjustor {
 	public final void setScope(final IJavaSearchScope scope) {
 		Assert.isNotNull(scope);
 		fScope= scope;
-	}
-
-	/**
-	 * Determines whether getters should be preferred to resolve visibility issues.
-	 * <p>
-	 * This method must be called before calling {@link MemberVisibilityAdjustor#adjustVisibility(IProgressMonitor)}. The default is to use setters where possible.
-	 * 
-	 * @param use <code>true</code> if setters should be used, <code>false</code> otherwise
-	 */
-	public final void setSetters(final boolean use) {
-		fSetters= use;
 	}
 
 	/**

@@ -520,6 +520,34 @@ public class MoveMembersTests extends RefactoringTest {
 		typeHelper_passing(new String[] { "SomeInner.Inner" });
 	}
 	
+	public void test60() throws Exception{
+		// Move a static private "getter" of a static field into another class
+		// only the field should be changed to public (bug 122490)
+		IPackageFragment packageForB= null;
+		try{
+			packageForB= getRoot().createPackageFragment("e", false, null);
+			fieldMethodTypePackageHelper_passing(new String[0], new String[] { "getNAME" }, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
+		} finally{
+			performDummySearch();
+			if (packageForB != null)
+				packageForB.delete(true, null);
+		}	
+	}
+	
+	public void test61() throws Exception{
+		// Move some method which references a field with a getter and a setter
+		// only the field should be changed to public (bug 122490)
+		IPackageFragment packageForB= null;
+		try{
+			packageForB= getRoot().createPackageFragment("e", false, null);
+			fieldMethodTypePackageHelper_passing(new String[0], new String[] { "foo" }, new String[][]{new String[0]}, new String[0], getPackageP(), packageForB, false);
+		} finally{
+			performDummySearch();
+			if (packageForB != null)
+				packageForB.delete(true, null);
+		}	
+	}
+	
 	//---
 	public void testFail0() throws Exception{
 		fieldMethodTypeHelper_failing(new String[0],

@@ -788,8 +788,6 @@ public class MoveInnerToTopRefactoring extends Refactoring implements IInitializ
 			final Map rewrites= new HashMap(2);
 			rewrites.put(fSourceRewrite.getCu(), fSourceRewrite);
 			final MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fType.getPackageFragment(), fType);
-			adjustor.setGetters(true);
-			adjustor.setSetters(true);
 			adjustor.setRewrites(rewrites);
 			adjustor.setVisibilitySeverity(RefactoringStatus.WARNING);
 			adjustor.setFailureSeverity(RefactoringStatus.WARNING);
