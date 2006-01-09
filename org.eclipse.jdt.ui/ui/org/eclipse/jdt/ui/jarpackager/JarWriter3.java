@@ -40,6 +40,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Path;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -273,50 +274,55 @@ public class JarWriter3 {
 		Assert.isNotNull(data.getRefactoringProjects());
 		Assert.isNotNull(path);
 		Assert.isNotNull(monitor);
-		final IProject[] projects= data.getRefactoringProjects();
-		final RefactoringHistory history= JarPackagerUtil.retrieveHistory(projects, data.getHistoryStart(), data.getHistoryEnd(), monitor);
-		if (history != null && !history.isEmpty()) {
-			final RefactoringDescriptorProxy[] proxies= history.getDescriptors();
-			Arrays.sort(proxies, new Comparator() {
+		try {
+			monitor.beginTask("", 200); //$NON-NLS-1$
+			final IProject[] projects= data.getRefactoringProjects();
+			final RefactoringHistory history= JarPackagerUtil.retrieveHistory(projects, data.getHistoryStart(), data.getHistoryEnd(), new SubProgressMonitor(monitor, 150));
+			if (history != null && !history.isEmpty()) {
+				final RefactoringDescriptorProxy[] proxies= history.getDescriptors();
+				Arrays.sort(proxies, new Comparator() {
 
-				public final int compare(final Object first, final Object second) {
-					final RefactoringDescriptorProxy predecessor= (RefactoringDescriptorProxy) first;
-					final RefactoringDescriptorProxy successor= (RefactoringDescriptorProxy) second;
-					return (int) (predecessor.getTimeStamp() - successor.getTimeStamp());
-				}
-			});
-			File file= null;
-			OutputStream output= null;
-			try {
-				file= File.createTempFile("history", null); //$NON-NLS-1$
-				output= new BufferedOutputStream(new FileOutputStream(file));
+					public final int compare(final Object first, final Object second) {
+						final RefactoringDescriptorProxy predecessor= (RefactoringDescriptorProxy) first;
+						final RefactoringDescriptorProxy successor= (RefactoringDescriptorProxy) second;
+						return (int) (predecessor.getTimeStamp() - successor.getTimeStamp());
+					}
+				});
+				File file= null;
+				OutputStream output= null;
 				try {
-					int filter= JavaRefactorings.IMPORTABLE;
-					if (fJarPackage.isExportStructuralOnly())
-						filter|= RefactoringDescriptor.STRUCTURAL_CHANGE;
-					RefactoringCore.getRefactoringHistoryService().writeRefactoringDescriptors(proxies, output, filter);
-					if (output != null) {
-						try {
-							output.close();
-							output= null;
-						} catch (IOException exception) {
-							// Do nothing
+					file= File.createTempFile("history", null); //$NON-NLS-1$
+					output= new BufferedOutputStream(new FileOutputStream(file));
+					try {
+						int filter= JavaRefactorings.IMPORTABLE;
+						if (fJarPackage.isExportStructuralOnly())
+							filter|= RefactoringDescriptor.STRUCTURAL_CHANGE;
+						RefactoringCore.getRefactoringHistoryService().writeRefactoringDescriptors(proxies, output, filter, new SubProgressMonitor(monitor, 50));
+						if (output != null) {
+							try {
+								output.close();
+								output= null;
+							} catch (IOException exception) {
+								// Do nothing
+							}
+						}
+						writeHistory(data, file, path);
+					} finally {
+						if (output != null) {
+							try {
+								output.close();
+							} catch (IOException exception) {
+								// Do nothing
+							}
 						}
 					}
-					writeHistory(data, file, path);
 				} finally {
-					if (output != null) {
-						try {
-							output.close();
-						} catch (IOException exception) {
-							// Do nothing
-						}
-					}
+					if (file != null)
+						file.delete();
 				}
-			} finally {
-				if (file != null)
-					file.delete();
 			}
+		} finally {
+			monitor.done();
 		}
 	}
 
