@@ -135,13 +135,26 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 			return fCollector.getContext();
 		return null;
 	}
+
+	/**
+	 * Returns an integer in [0,&nbsp;10] based on whether the type has been recently used as a
+	 * right hand side for the type expected in the current context. 0 signals that the
+	 * <code>qualifiedTypeName</code> does not match the expected type, while 10 signals that
+	 * <code>qualifiedTypeName</code> has most recently been used in a similar context.
+	 * 
+	 * @param qualifiedTypeName the type name of the type of interest
+	 * @return a relevance in [0,&nbsp;10] based on previous content assist invocations
+	 */
+	public int getHistoryRelevance(String qualifiedTypeName) {
+		return getRHSHistory().getRank(qualifiedTypeName);
+	}
 	
 	/**
 	 * Returns the content assist type history for the expected type.
 	 * 
 	 * @return the content assist type history for the expected type
 	 */
-	public RHSHistory getRHSHistory() {
+	private RHSHistory getRHSHistory() {
 		if (fRHSHistory == null) {
 			CompletionContext context= getCoreContext();
 			if (context != null) {

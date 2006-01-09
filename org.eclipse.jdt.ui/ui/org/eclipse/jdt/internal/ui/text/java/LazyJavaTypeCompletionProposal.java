@@ -57,14 +57,12 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	private String fSimpleName;
 	private IType fType;
 	private NewImportRewrite fImportRewrite;
-	private int fInvocationOffset;
 	private ContextSensitiveImportRewriteContext fImportContext;
 
 	public LazyJavaTypeCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
 		super(proposal, context);
 		fCompilationUnit= context.getCompilationUnit();
 		fQualifiedName= null;
-		fInvocationOffset= context.getInvocationOffset();
 	}
 	
 	/**
@@ -133,7 +131,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 					return rewrite;
 				} else {
 					NewImportRewrite rewrite= NewImportRewrite.create(cu, true);
-					fImportContext= new ContextSensitiveImportRewriteContext(cu, fInvocationOffset, rewrite);
+					fImportContext= new ContextSensitiveImportRewriteContext(cu, fInvocationContext.getInvocationOffset(), rewrite);
 					return rewrite;
 				}
 			} catch (CoreException x) {
@@ -289,6 +287,6 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeRelevance()
 	 */
 	protected int computeRelevance() {
-		return super.computeRelevance() + fInvocationContext.getRHSHistory().getRank(getQualifiedTypeName());
+		return super.computeRelevance() + fInvocationContext.getHistoryRelevance(getQualifiedTypeName());
 	}
 }
