@@ -27,10 +27,12 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 
+import org.eclipse.jdt.ui.search.ElementQuerySpecification;
+import org.eclipse.jdt.ui.search.QuerySpecification;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.JavaSearchPage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
@@ -81,8 +83,13 @@ public class FindReferencesAction extends FindAction {
 		return IJavaSearchConstants.REFERENCES;
 	}	
 	
-	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
-		return JavaSearchScopeFactory.getInstance().createWorkspaceScope(JavaSearchPage.getSearchJRE());
+	QuerySpecification createQuery(IJavaElement element) throws JavaModelException {
+		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
+		boolean isInsideJRE= factory.isInsideJRE(element);
+		
+		IJavaSearchScope scope= factory.createWorkspaceScope(isInsideJRE);
+		String description= isInsideJRE ? SearchMessages.WorkspaceScope : SearchMessages.WorkspaceScopeNoJRE;
+		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
 
 	public void run(IJavaElement element) {

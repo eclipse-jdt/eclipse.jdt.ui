@@ -14,7 +14,11 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+
+import org.eclipse.jdt.ui.search.ElementQuerySpecification;
+import org.eclipse.jdt.ui.search.QuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -61,24 +65,20 @@ public class FindDeclarationsInProjectAction extends FindDeclarationsAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_PROJECT_ACTION);
 	}
 	
-	IJavaSearchScope getScope(IJavaElement element) {
-		JavaSearchScopeFactory instance= JavaSearchScopeFactory.getInstance();
+	QuerySpecification createQuery(IJavaElement element) throws JavaModelException {
+		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		JavaEditor editor= getEditor();
+		
+		IJavaSearchScope scope;
+		String description;
+		boolean isInsideJRE= true;
 		if (editor != null) {
-			return instance.createJavaProjectSearchScope(editor.getEditorInput(), true);
+			scope= factory.createJavaProjectSearchScope(editor.getEditorInput(), isInsideJRE);
+			description= factory.getProjectScopeDescription(editor.getEditorInput(), isInsideJRE);
 		} else {
-			return instance.createJavaProjectSearchScope(element.getJavaProject(), true);
+			scope= factory.createJavaProjectSearchScope(element.getJavaProject(), isInsideJRE);
+			description=  factory.getProjectScopeDescription(element.getJavaProject(), isInsideJRE);
 		}
+		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
-
-	String getScopeDescription(IJavaElement element) {
-		JavaSearchScopeFactory instance= JavaSearchScopeFactory.getInstance();
-		JavaEditor editor= getEditor();
-		if (editor != null) {
-			return instance.getProjectScopeDescription(editor.getEditorInput());
-		} else {
-			return instance.getProjectScopeDescription(element.getJavaProject());
-		}
-	}
-
 }

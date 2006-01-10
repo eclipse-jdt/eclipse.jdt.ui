@@ -271,33 +271,42 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		
 		switch (getContainer().getSelectedScope()) {
 			case ISearchPageContainer.WORKSPACE_SCOPE:
-				scopeDescription= SearchMessages.WorkspaceScope; 
+				scopeDescription= includeJRE ? SearchMessages.WorkspaceScope : SearchMessages.WorkspaceScopeNoJRE; 
 				scope= factory.createWorkspaceScope(includeJRE);
 				break;
 			case ISearchPageContainer.SELECTION_SCOPE:
-				scopeDescription= SearchMessages.SelectionScope; 
+				scopeDescription= includeJRE ? SearchMessages.SelectionScope : SearchMessages.SelectionScopeNoJRE;
 				scope= factory.createJavaSearchScope(getContainer().getSelection(), includeJRE);
 				break;
-			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE:
+			case ISearchPageContainer.SELECTED_PROJECTS_SCOPE: {
 				String[] projectNames= getContainer().getSelectedProjectNames();
 				scope= factory.createJavaProjectSearchScope(projectNames, includeJRE);
+				String label;
+				String projectName;
 				if (projectNames.length >= 1) {
-					if (projectNames.length == 1)
-						scopeDescription= Messages.format(SearchMessages.EnclosingProjectScope, projectNames[0]); 
-					else
-						scopeDescription= Messages.format(SearchMessages.EnclosingProjectsScope, projectNames[0]); 
-				} else 
-					scopeDescription= Messages.format(SearchMessages.EnclosingProjectScope, "");  //$NON-NLS-1$
+					projectName= projectNames[0];
+					if (projectNames.length == 1) {
+						label= includeJRE ? SearchMessages.EnclosingProjectScope : SearchMessages.EnclosingProjectScopeNoJRE;
+					} else {
+						label= includeJRE ? SearchMessages.EnclosingProjectsScope : SearchMessages.EnclosingProjectsScopeNoJRE;
+					}
+				} else {
+					projectName= ""; //$NON-NLS-1$
+					label= SearchMessages.EnclosingProjectScope;
+				}
+				scopeDescription= Messages.format(label, projectName);
 				break;
-			case ISearchPageContainer.WORKING_SET_SCOPE:
+			}
+			case ISearchPageContainer.WORKING_SET_SCOPE: {
 				IWorkingSet[] workingSets= getContainer().getSelectedWorkingSets();
 				// should not happen - just to be sure
 				if (workingSets == null || workingSets.length < 1)
 					return false;
-				scopeDescription= Messages.format(SearchMessages.WorkingSetScope, SearchUtil.toString(workingSets)); 
+				String label= includeJRE ? SearchMessages.WorkingSetScope : SearchMessages.WorkingSetScopeNoJRE;
+				scopeDescription= Messages.format(label, SearchUtil.toString(workingSets)); 
 				scope= factory.createJavaSearchScope(workingSets, includeJRE);
 				SearchUtil.updateLRUWorkingSets(workingSets);
-		
+			}
 		}
 		
 		QuerySpecification querySpec= null;

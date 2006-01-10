@@ -229,7 +229,8 @@ public class JavaSearchQuery implements ISearchQuery {
 	private String getSearchPatternDescription() {
 		if (fPatternData instanceof ElementQuerySpecification) {
 			IJavaElement element= ((ElementQuerySpecification) fPatternData).getElement();
-			return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT | JavaElementLabels.USE_RESOLVED);
+			return JavaElementLabels.getElementLabel(element, JavaElementLabels.ALL_DEFAULT
+					| JavaElementLabels.ALL_FULLY_QUALIFIED | JavaElementLabels.USE_RESOLVED);
 		} 
 		return ((PatternQuerySpecification) fPatternData).getPattern();
 	}

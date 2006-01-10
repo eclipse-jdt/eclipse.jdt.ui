@@ -21,11 +21,11 @@ import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
+import org.eclipse.jdt.ui.search.QuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
@@ -95,26 +95,19 @@ public class FindDeclarationsInWorkingSetAction extends FindDeclarationsAction {
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_DECLARATIONS_IN_WORKING_SET_ACTION);
 	}
 
-
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.ui.actions.FindDeclarationsAction#createJob(org.eclipse.jdt.core.IJavaElement, org.eclipse.jdt.internal.ui.search.JavaSearchResult)
-	 */
-	protected JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {
+	QuerySpecification createQuery(IJavaElement element) throws JavaModelException {
+		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
+		
 		IWorkingSet[] workingSets= fWorkingSet;
 		if (fWorkingSet == null) {
-			workingSets= JavaSearchScopeFactory.getInstance().queryWorkingSets();
+			workingSets= factory.queryWorkingSets();
 			if (workingSets == null)
 				return null;
 		}
 		SearchUtil.updateLRUWorkingSets(workingSets);
-		return new JavaSearchQuery(new ElementQuerySpecification(element, getLimitTo(), getScope(workingSets), getScopeDescription(workingSets)));
+		IJavaSearchScope scope= factory.createJavaSearchScope(workingSets, true);
+		String description= Messages.format(SearchMessages.WorkingSetScope, new String[] {SearchUtil.toString(workingSets)});
+		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
 
-	private IJavaSearchScope getScope(IWorkingSet[] workingSets) {
-		return JavaSearchScopeFactory.getInstance().createJavaSearchScope(workingSets, true);
-	}
-
-	private String getScopeDescription(IWorkingSet[] workingSets) {
-		return Messages.format(SearchMessages.WorkingSetScope, new String[] {SearchUtil.toString(workingSets)}); 
-	}
 }

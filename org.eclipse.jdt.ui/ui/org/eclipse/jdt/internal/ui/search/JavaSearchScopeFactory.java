@@ -37,9 +37,12 @@ import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.IWorkingSetSelectionDialog;
 
+import org.eclipse.jdt.core.IClasspathContainer;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -127,7 +130,7 @@ public class JavaSearchScopeFactory {
 		}
 		return createJavaSearchScope(res, includeJRE);
 	}
-	
+
 	public IJavaSearchScope createJavaProjectSearchScope(IJavaProject project, boolean includeJRE) {
 		return SearchEngine.createJavaSearchScope(new IJavaElement[] { project }, getSearchFlags(includeJRE));
 	}
@@ -143,16 +146,20 @@ public class JavaSearchScopeFactory {
 		return EMPTY_SCOPE;
 	}
 	
-	public String getProjectScopeDescription(IJavaProject project) {
-		return Messages.format(SearchMessages.ProjectScope, project.getElementName()); 
+	public String getProjectScopeDescription(IJavaProject project, boolean includeJRE) {
+		if (includeJRE) {
+			return Messages.format(SearchMessages.ProjectScope, project.getElementName());
+		} else {
+			return Messages.format(SearchMessages.ProjectScopeNoJRE, project.getElementName());
+		}
 	}
 	
-	public String getProjectScopeDescription(IEditorInput editorInput) {
+	public String getProjectScopeDescription(IEditorInput editorInput, boolean includeJRE) {
 		IJavaElement elem= JavaUI.getEditorInputJavaElement(editorInput);
 		if (elem != null) {
 			IJavaProject project= elem.getJavaProject();
 			if (project != null) {
-				return getProjectScopeDescription(project);
+				return getProjectScopeDescription(project, includeJRE);
 			}
 		}
 		return Messages.format(SearchMessages.ProjectScope, "");  //$NON-NLS-1$
@@ -291,5 +298,22 @@ public class JavaSearchScopeFactory {
 			}
 		}
 		return SearchEngine.createWorkspaceScope();
+	}
+
+	public boolean isInsideJRE(IJavaElement element) {
+		IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+		if (root != null) {
+			try {
+				IClasspathEntry entry= root.getRawClasspathEntry();
+				if (entry.getEntryKind() == IClasspathEntry.CPE_CONTAINER) {
+					IClasspathContainer container= JavaCore.getClasspathContainer(entry.getPath(), root.getJavaProject());
+					return container != null && container.getKind() == IClasspathContainer.K_DEFAULT_SYSTEM;
+				}
+				return false;
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+			}
+		}
+		return true; // include JRE in doubt
 	}
 }

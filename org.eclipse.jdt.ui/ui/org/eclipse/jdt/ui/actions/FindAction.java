@@ -43,13 +43,13 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
+import org.eclipse.jdt.ui.search.QuerySpecification;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.JavaSearchDescription;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
@@ -281,7 +281,7 @@ public abstract class FindAction extends SelectionDispatchAction {
 	}
 
 	private void performNewSearch(IJavaElement element) throws JavaModelException {
-		JavaSearchQuery query= createJob(element);
+		JavaSearchQuery query= new JavaSearchQuery(createQuery(element));
 		if (query != null) {
 			NewSearchUI.activateSearchResultView();
 			if (query.canRunInBackground()) {
@@ -307,26 +307,14 @@ public abstract class FindAction extends SelectionDispatchAction {
 			}
 		}
 	}
-
-	JavaSearchQuery createJob(IJavaElement element) throws JavaModelException {
-		return new JavaSearchQuery(new ElementQuerySpecification(element, getLimitTo(), getScope(element), getScopeDescription(element)));
-	}
-
-	Object createSearchDescription(IJavaElement element) {
-		IType type= getType(element);
-		return new JavaSearchDescription(getLimitTo(), element, null, getScopeDescription(type));
+	
+	QuerySpecification createQuery(IJavaElement element) throws JavaModelException {
+		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
+		String description= SearchMessages.WorkspaceScope;
+		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
 
 	abstract int getLimitTo();
-
-	
-	String getScopeDescription(IJavaElement element) {
-		return SearchMessages.WorkspaceScope; 
-	}
-
-	IJavaSearchScope getScope(IJavaElement element) throws JavaModelException {
-		return SearchEngine.createWorkspaceScope();
-	}
 
 	IType getType(IJavaElement element) {
 		if (element == null)

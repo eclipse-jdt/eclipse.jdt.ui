@@ -141,11 +141,17 @@ public final class SearchMessages extends NLS {
 	public static String JavaElementAction_operationUnavailable_field;
 	public static String JavaElementAction_operationUnavailable_interface;
 	public static String WorkspaceScope;
+	public static String WorkspaceScopeNoJRE;
 	public static String WorkingSetScope;
+	public static String WorkingSetScopeNoJRE;
 	public static String SelectionScope;
+	public static String SelectionScopeNoJRE;
 	public static String EnclosingProjectsScope;
+	public static String EnclosingProjectsScopeNoJRE;
 	public static String EnclosingProjectScope;
+	public static String EnclosingProjectScopeNoJRE;
 	public static String ProjectScope;
+	public static String ProjectScopeNoJRE;
 	public static String HierarchyScope;
 	public static String JavaSearchResultPage_sortByName;
 	public static String JavaSearchResultPage_sortByPath;

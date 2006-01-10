@@ -14,12 +14,15 @@ import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
+
+import org.eclipse.jdt.ui.search.ElementQuerySpecification;
+import org.eclipse.jdt.ui.search.QuerySpecification;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.search.JavaSearchPage;
 import org.eclipse.jdt.internal.ui.search.JavaSearchScopeFactory;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
 
@@ -61,24 +64,21 @@ public class FindReadReferencesInProjectAction extends FindReadReferencesAction 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJavaHelpContextIds.FIND_READ_REFERENCES_IN_PROJECT_ACTION);
 	}
 	
-	IJavaSearchScope getScope(IJavaElement element) {
-		JavaSearchScopeFactory instance= JavaSearchScopeFactory.getInstance();
+	QuerySpecification createQuery(IJavaElement element) throws JavaModelException {
+		JavaSearchScopeFactory factory= JavaSearchScopeFactory.getInstance();
 		JavaEditor editor= getEditor();
+		
+		IJavaSearchScope scope;
+		String description;
+		boolean isInsideJRE= factory.isInsideJRE(element);
 		if (editor != null) {
-			return instance.createJavaProjectSearchScope(editor.getEditorInput(), JavaSearchPage.getSearchJRE());
+			scope= factory.createJavaProjectSearchScope(editor.getEditorInput(), isInsideJRE);
+			description= factory.getProjectScopeDescription(editor.getEditorInput(), isInsideJRE);
 		} else {
-			return instance.createJavaProjectSearchScope(element.getJavaProject(), JavaSearchPage.getSearchJRE());
+			scope= factory.createJavaProjectSearchScope(element.getJavaProject(), isInsideJRE);
+			description=  factory.getProjectScopeDescription(element.getJavaProject(), isInsideJRE);
 		}
-	}
-
-	String getScopeDescription(IJavaElement element) {
-		JavaSearchScopeFactory instance= JavaSearchScopeFactory.getInstance();
-		JavaEditor editor= getEditor();
-		if (editor != null) {
-			return instance.getProjectScopeDescription(editor.getEditorInput());
-		} else {
-			return instance.getProjectScopeDescription(element.getJavaProject());
-		}
+		return new ElementQuerySpecification(element, getLimitTo(), scope, description);
 	}
 
 }
