@@ -22,12 +22,13 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.Preferences;
 
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory;
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory.RHSHistory;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 /**
  * @since 3.2
@@ -44,12 +45,37 @@ public class ContentAssistHistoryTest extends TestCase {
 	private static final String CHAR_SEQUENCE= "java.lang.CharSequence";
 	private static final String STRING= "java.lang.String";
 	
+	private static IType fgStringT;
+	private static IType fgCharSequenceT;
+	private static IType fgStringBufferT;
+	private static IType fgCollectionT;
+	private static IType fgListT;
+	private static IType fgArrayListT;
+	private static IType fgLinkedListT;
+
+
 	public ContentAssistHistoryTest(String name) {
 		super(name);
 	}
 	
 	public static Test allTests() {
-		return new TestSuite(THIS);
+		return new ProjectTestSetup(new TestSuite(THIS, "ContentAssistHistoryTest")) {
+			/*
+			 * @see org.eclipse.jdt.ui.tests.core.ProjectTestSetup#setUp()
+			 */
+			protected void setUp() throws Exception {
+				super.setUp();
+
+				IJavaProject project= ProjectTestSetup.getProject();
+				fgStringT= project.findType(STRING);
+				fgCharSequenceT= project.findType(CHAR_SEQUENCE);
+				fgStringBufferT= project.findType(STRING_BUFFER);
+				fgCollectionT= project.findType(COLLECTION);
+				fgListT= project.findType(LIST);
+				fgArrayListT= project.findType(ARRAY_LIST);
+				fgLinkedListT= project.findType(LINKED_LIST);
+			}
+		};
 	}
 	
 	public static Test suite() {
@@ -58,31 +84,6 @@ public class ContentAssistHistoryTest extends TestCase {
 
 	public static Test setUpTest(Test test) {
 		return test;
-	}
-
-	private IJavaProject fProject;
-	private IType fStringT;
-	private IType fCharSequenceT;
-	private IType fStringBufferT;
-	private IType fCollectionT;
-	private IType fListT;
-	private IType fArrayListT;
-	private IType fLinkedListT;
-
-	protected void setUp() throws Exception {
-		fProject= JavaProjectHelper.createJavaProject("ContentAssistHistoryTest", "bin");
-		JavaProjectHelper.addRTJar(fProject);
-		fStringT= fProject.findType(STRING);
-		fCharSequenceT= fProject.findType(CHAR_SEQUENCE);
-		fStringBufferT= fProject.findType(STRING_BUFFER);
-		fCollectionT= fProject.findType(COLLECTION);
-		fListT= fProject.findType(LIST);
-		fArrayListT= fProject.findType(ARRAY_LIST);
-		fLinkedListT= fProject.findType(LINKED_LIST);
-	}
-	
-	protected void tearDown() throws Exception {
-		JavaProjectHelper.delete(fProject);
 	}
 
 	public void testContentAssistHistoryIntInt() {
@@ -119,17 +120,17 @@ public class ContentAssistHistoryTest extends TestCase {
 		} catch (IllegalArgumentException e) {
 		}
 		try {
-			history.remember(null, fStringT);
+			history.remember(null, fgStringT);
 			fail();
 		} catch (IllegalArgumentException e) {
 		}
 		try {
-			history.remember(fStringT, null);
+			history.remember(fgStringT, null);
 			fail();
 		} catch (IllegalArgumentException e) {
 		}
 		try {
-			history.remember(fStringT, fStringT);
+			history.remember(fgStringT, fgStringT);
 		} catch (IllegalArgumentException e) {
 			fail();
 		}
@@ -139,18 +140,18 @@ public class ContentAssistHistoryTest extends TestCase {
 		ContentAssistHistory history= new ContentAssistHistory();
 		assertTrue(history.getHistory(STRING).getTypes().isEmpty());
 		
-		history.remember(fCharSequenceT, fStringT);
+		history.remember(fgCharSequenceT, fgStringT);
 		assertTrue(history.getHistory(STRING).getTypes().isEmpty());
 		assertEquals(list(STRING), history.getHistory(CHAR_SEQUENCE).getTypes());
 		
-		history.remember(fStringT, fStringT);
+		history.remember(fgStringT, fgStringT);
 		assertTrue("history must not remember final left hand sides", history.getHistory(STRING).getTypes().isEmpty());
 		
-		history.remember(fCharSequenceT, fStringBufferT);
+		history.remember(fgCharSequenceT, fgStringBufferT);
 		assertTrue(history.getHistory(STRING).getTypes().isEmpty());
 		assertEquals(list(STRING, STRING_BUFFER), history.getHistory(CHAR_SEQUENCE).getTypes());
 		
-		history.remember(fStringT, fStringT);
+		history.remember(fgStringT, fgStringT);
 		assertTrue(history.getHistory(STRING).getTypes().isEmpty());
 		assertEquals("order not correct", list(STRING_BUFFER, STRING), history.getHistory(CHAR_SEQUENCE).getTypes());
 	}
@@ -158,37 +159,37 @@ public class ContentAssistHistoryTest extends TestCase {
 	public void testHistoryCapSize() {
 		ContentAssistHistory history= new ContentAssistHistory(1, 1);
 		
-		history.remember(fCharSequenceT, fStringT);
+		history.remember(fgCharSequenceT, fgStringT);
 		assertEqualMap(map(CHAR_SEQUENCE, list(STRING)), history.getEntireHistory());
 		
-		history.remember(fStringT, fStringT);
+		history.remember(fgStringT, fgStringT);
 		assertEqualMap("adding final types must not modify the history", map(CHAR_SEQUENCE, list(STRING)), history.getEntireHistory());
 		
-		history.remember(fCharSequenceT, fStringBufferT);
+		history.remember(fgCharSequenceT, fgStringBufferT);
 		assertEqualMap(map(CHAR_SEQUENCE, list(STRING_BUFFER)), history.getEntireHistory());
 		
-		history.remember(fCharSequenceT, fArrayListT);
+		history.remember(fgCharSequenceT, fgArrayListT);
 		assertEqualMap("adding types that are not related must not modify the history", map(CHAR_SEQUENCE, list(STRING_BUFFER)), history.getEntireHistory());
 		
-		history.remember(fListT, fStringT);
+		history.remember(fgListT, fgStringT);
 		assertEqualMap("adding types that are not related must not modify the history", map(CHAR_SEQUENCE, list(STRING_BUFFER)), history.getEntireHistory());
 		
-		history.remember(fCollectionT, fArrayListT);
+		history.remember(fgCollectionT, fgArrayListT);
 		assertEqualMap(map(COLLECTION, list(ARRAY_LIST)), history.getEntireHistory());
 	}
 	
 	public void testGetHistoryForHierarchy() {
 		ContentAssistHistory history= new ContentAssistHistory();
 
-		history.remember(fListT, fArrayListT);
+		history.remember(fgListT, fgArrayListT);
 		assertEqualMap(map(LIST, list(ARRAY_LIST), COLLECTION, list(ARRAY_LIST), ITERABLE, list(ARRAY_LIST)), history.getEntireHistory());
 	}
 	
 	public void testGetEntireHistory() {
 		ContentAssistHistory history= new ContentAssistHistory();
 		
-		history.remember(fListT, fArrayListT);
-		history.remember(fCollectionT, fLinkedListT);
+		history.remember(fgListT, fgArrayListT);
+		history.remember(fgCollectionT, fgLinkedListT);
 		
 		assertEqualMap(map(LIST, list(ARRAY_LIST), COLLECTION, list(ARRAY_LIST, LINKED_LIST), ITERABLE, list(ARRAY_LIST, LINKED_LIST)), history.getEntireHistory());
 	}
@@ -196,8 +197,8 @@ public class ContentAssistHistoryTest extends TestCase {
 	public void testReadOnlyEntireHistory() {
 		ContentAssistHistory history= new ContentAssistHistory();
 		
-		history.remember(fListT, fArrayListT);
-		history.remember(fCollectionT, fLinkedListT);
+		history.remember(fgListT, fgArrayListT);
+		history.remember(fgCollectionT, fgLinkedListT);
 		
 		Map map= history.getEntireHistory();
 		try {
@@ -216,8 +217,8 @@ public class ContentAssistHistoryTest extends TestCase {
 	public void testReadOnlyHistory() {
 		ContentAssistHistory history= new ContentAssistHistory();
 		
-		history.remember(fListT, fArrayListT);
-		history.remember(fCollectionT, fLinkedListT);
+		history.remember(fgListT, fgArrayListT);
+		history.remember(fgCollectionT, fgLinkedListT);
 		
 		List set= history.getHistory(LIST).getTypes();
 		try {
@@ -230,8 +231,8 @@ public class ContentAssistHistoryTest extends TestCase {
 	public void testLoadStore() throws Exception {
 		ContentAssistHistory history= new ContentAssistHistory();
 		
-		history.remember(fListT, fArrayListT);
-		history.remember(fCharSequenceT, fStringT);
+		history.remember(fgListT, fgArrayListT);
+		history.remember(fgCharSequenceT, fgStringT);
 		
 		
 		Preferences prefs= new Preferences();

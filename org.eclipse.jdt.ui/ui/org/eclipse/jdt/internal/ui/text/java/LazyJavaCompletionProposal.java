@@ -19,7 +19,11 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
@@ -28,6 +32,58 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	
+	protected static final String LPAREN= "("; //$NON-NLS-1$
+	protected static final String RPAREN= ")"; //$NON-NLS-1$
+	protected static final String COMMA= ","; //$NON-NLS-1$
+	protected static final String SPACE= " "; //$NON-NLS-1$
+	
+	protected static final class FormatterPrefs {
+		/* Methods & constructors */
+		public final boolean beforeOpeningParen;
+		public final boolean afterOpeningParen;
+		public final boolean beforeComma;
+		public final boolean afterComma;
+		public final boolean beforeClosingParen;
+		public final boolean inEmptyList;
+		
+		/* type parameters */
+		public final boolean beforeOpeningBracket;
+		public final boolean afterOpeningBracket;
+		public final boolean beforeTypeArgumentComma;
+		public final boolean afterTypeArgumentComma;
+		public final boolean beforeClosingBracket;
+	
+		FormatterPrefs(IJavaProject project) {
+			beforeOpeningParen= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_INVOCATION, false);
+			afterOpeningParen= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_METHOD_INVOCATION, false);
+			beforeComma= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, false);
+			afterComma= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, true);
+			beforeClosingParen= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_METHOD_INVOCATION, false);
+			inEmptyList= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_INVOCATION, false);
+			
+			beforeOpeningBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
+			afterOpeningBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
+			beforeTypeArgumentComma= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, false);
+			afterTypeArgumentComma= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, true);
+			beforeClosingBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
+		}
+	
+		protected final boolean getCoreOption(IJavaProject project, String key, boolean def) {
+			String option= getCoreOption(project, key);
+			if (JavaCore.INSERT.equals(option))
+				return true;
+			if (JavaCore.DO_NOT_INSERT.equals(option))
+				return false;
+			return def;
+		}
+	
+		protected final String getCoreOption(IJavaProject project, String key) {
+			if (project == null)
+				return JavaCore.getOption(key);
+			return project.getOption(key, true);
+		}
+	}
+
 	private boolean fDisplayStringComputed;
 	private boolean fReplacementStringComputed;
 	private boolean fReplacementOffsetComputed;
@@ -39,7 +95,8 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	private boolean fTriggerCharactersComputed;
 	private boolean fSortStringComputed;
 	private boolean fRelevanceComputed;
-	
+	private FormatterPrefs fFormatterPrefs;
+
 	/**
 	 * The core proposal wrapped by this completion proposal.
 	 */
@@ -368,5 +425,13 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 
 	protected String computeSortString() {
 		return getDisplayString();
+	}
+
+	protected FormatterPrefs getFormatterPrefs() {
+		if (fFormatterPrefs == null) {
+			ICompilationUnit cu= fInvocationContext.getCompilationUnit();
+			fFormatterPrefs= new FormatterPrefs(cu == null ? null : cu.getJavaProject());
+		}
+		return fFormatterPrefs;
 	}
 }

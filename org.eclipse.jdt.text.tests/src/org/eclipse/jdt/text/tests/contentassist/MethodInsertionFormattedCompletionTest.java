@@ -16,7 +16,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
@@ -29,15 +28,15 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 	private static final Class THIS= MethodInsertionFormattedCompletionTest.class;
 
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		return new TestSuite(THIS, suiteName(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
+		return new CompletionTestSetup(test);
 	}
 
 	public static Test suite() {
-		return allTests();
+		return new CompletionTestSetup(allTests());
 	}
 	
 	/*

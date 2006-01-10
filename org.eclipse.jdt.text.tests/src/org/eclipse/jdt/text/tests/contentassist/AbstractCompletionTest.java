@@ -31,7 +31,6 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 import org.eclipse.jdt.ui.text.IJavaPartitions;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -40,15 +39,12 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
 import org.eclipse.jdt.text.tests.performance.EditorTestHelper;
 import org.eclipse.jface.preference.IPreferenceStore;
@@ -56,11 +52,14 @@ import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 public class AbstractCompletionTest extends TestCase {
+	protected static String suiteName(Class fqn) {
+		String name= fqn.toString();
+		name= name.substring(name.lastIndexOf('.') + 1);
+		return name;
+	}
+
 	protected static final String CARET= "|";
 
-	private IJavaProject fJProject1;
-	private IPackageFragmentRoot fSourceFolder;
-	private IPackageFragment fPackage;
 	private ICompilationUnit fCU;
 	private JavaEditor fEditor;
 
@@ -70,13 +69,9 @@ public class AbstractCompletionTest extends TestCase {
 
 	private String fLocals;
 
+	private char fTrigger;
+	
 	protected void setUp() throws Exception {
-		fJProject1= JavaProjectHelper.createJavaProject("TestProject1", "bin");
-		JavaProjectHelper.addRTJar(fJProject1);
-		JavaProjectHelper.addRequiredProject(fJProject1, ProjectTestSetup.getProject());
-		fSourceFolder= setUpSourceFolder();
-		fPackage= fSourceFolder.createPackageFragment("test1", false, null);
-
 		Hashtable options= TestOptions.getDefaultOptions();
 		configureCoreOptions(options);
 		JavaCore.setOptions(options);
@@ -98,6 +93,7 @@ public class AbstractCompletionTest extends TestCase {
 		fAfterImports= "";
 		fMembers= "";
 		fLocals= "";
+		fTrigger= '\0';
 	}
 
 	protected void configureCoreOptions(Hashtable options) {
@@ -113,13 +109,8 @@ public class AbstractCompletionTest extends TestCase {
 		return store;
 	}
 
-	private IPackageFragmentRoot setUpSourceFolder() throws CoreException {
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
-		return sourceFolder;
-	}
-	
 	private ICompilationUnit createCU(IPackageFragment pack1, String contents) throws JavaModelException {
-		ICompilationUnit cu= pack1.createCompilationUnit("Completion.java", contents, false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("Completion_" + getName() + ".java", contents, false, null);
 		return cu;
 	}
 
@@ -132,8 +123,6 @@ public class AbstractCompletionTest extends TestCase {
 		store.setToDefault(PreferenceConstants.CODEASSIST_ADDIMPORT);
 		store.setToDefault(PreferenceConstants.EDITOR_CLOSE_BRACKETS);
 		store.setToDefault(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
-
-		JavaProjectHelper.delete(fJProject1);
 		fCU= null;
 	}
 
@@ -148,6 +137,10 @@ public class AbstractCompletionTest extends TestCase {
 	
 	protected void addLocalVariables(String variable) {
 		fLocals += "\n		" + variable + "\n";
+	}
+	
+	protected void setTrigger(char trigger) {
+		fTrigger= trigger;
 	}
 	
 	/**
@@ -204,8 +197,8 @@ public class AbstractCompletionTest extends TestCase {
 		assertNoProposal(selector, contents, preSelection);
 	}
 
-	private void assertProposal(String selector, StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection) throws JavaModelException, PartInitException {
-		fCU= createCU(fPackage, contents.toString());
+	private void assertProposal(String selector, StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection) throws CoreException {
+		fCU= createCU(CompletionTestSetup.getTestPackage(), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
 		IDocument doc;
 		ITextSelection postSelection;
@@ -223,8 +216,8 @@ public class AbstractCompletionTest extends TestCase {
 		assertEquals(expectedSelection.getLength(), postSelection.getLength());
 	}
 	
-	private void assertNoProposal(String selector, StringBuffer contents, IRegion preSelection) throws JavaModelException, PartInitException {
-		fCU= createCU(fPackage, contents.toString());
+	private void assertNoProposal(String selector, StringBuffer contents, IRegion preSelection) throws CoreException {
+		fCU= createCU(CompletionTestSetup.getTestPackage(), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
 		try {
 			assertNull(findNamedProposal(selector, fCU, preSelection));
@@ -237,7 +230,7 @@ public class AbstractCompletionTest extends TestCase {
 		String prefix= "package test1;\n" +
 				imports +
 				"\n" +
-				"public class Completion<T> {\n" +
+				"public class Completion_" + getName() + "<T> {\n" +
 				"	public void testMethod(int param) {\n" +
 				fLocals +
 				"		";
@@ -267,7 +260,7 @@ public class AbstractCompletionTest extends TestCase {
 		String prefix= "package test1;\n" +
 		imports +
 		"\n" +
-		"public class Completion<T> {\n" +
+		"public class Completion_" + getName() + "<T> {\n" +
 		fLocals +
 		"    ";
 		String postfix= "\n" +
@@ -325,13 +318,13 @@ public class AbstractCompletionTest extends TestCase {
 			ITextViewer viewer= (ITextViewer) editor.getAdapter(ITextOperationTarget.class);
 			ext.selected(viewer, false);
 			viewer.setSelectedRange(selection.getOffset(), selection.getLength());
-			ext.apply(viewer, (char) 0, 0, selection.getOffset());
+			ext.apply(viewer, fTrigger, 0, selection.getOffset());
 			Point range= proposal.getSelection(doc);
 			if (range != null)
 				viewer.setSelectedRange(range.x, range.y);
 		} else if (proposal instanceof ICompletionProposalExtension) {
 			ICompletionProposalExtension ext= (ICompletionProposalExtension) proposal;
-			ext.apply(doc, (char) 0, selection.getOffset() + selection.getLength());
+			ext.apply(doc, fTrigger, selection.getOffset() + selection.getLength());
 		} else {
 			proposal.apply(doc);
 		}

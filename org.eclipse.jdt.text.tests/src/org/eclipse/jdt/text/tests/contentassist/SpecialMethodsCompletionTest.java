@@ -15,8 +15,6 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-
 /**
  * 
  * @since 3.2
@@ -25,15 +23,15 @@ public class SpecialMethodsCompletionTest extends AbstractCompletionTest {
 	private static final Class THIS= SpecialMethodsCompletionTest.class;
 
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		return new TestSuite(THIS, suiteName(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
+		return new CompletionTestSetup(test);
 	}
 
 	public static Test suite() {
-		return allTests();
+		return new CompletionTestSetup(allTests());
 	}
 	
 	/*

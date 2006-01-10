@@ -17,9 +17,7 @@ import org.eclipse.jface.text.contentassist.IContextInformation;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.Signature;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -35,44 +33,6 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	/** Triggers for method name proposals (static imports). Do not modify. */
 	protected final static char[] METHOD_NAME_TRIGGERS= new char[] { ';' };
 	
-	protected static final class FormatterPrefs {
-		public final boolean beforeOpeningParen;
-		public final boolean afterOpeningParen;
-		public final boolean beforeComma;
-		public final boolean afterComma;
-		public final boolean beforeClosingParen;
-		public final boolean inEmptyList;
-
-		FormatterPrefs(IJavaProject project) {
-			beforeOpeningParen= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_PAREN_IN_METHOD_INVOCATION, false);
-			afterOpeningParen= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_PAREN_IN_METHOD_INVOCATION, false);
-			beforeComma= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, false);
-			afterComma= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_METHOD_INVOCATION_ARGUMENTS, true);
-			beforeClosingParen= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_PAREN_IN_METHOD_INVOCATION, false);
-			inEmptyList= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BETWEEN_EMPTY_PARENS_IN_METHOD_INVOCATION, false);
-		}
-
-		private boolean getCoreOption(IJavaProject project, String key, boolean def) {
-			String option= getCoreOption(project, key);
-			if (JavaCore.INSERT.equals(option))
-				return true;
-			if (JavaCore.DO_NOT_INSERT.equals(option))
-				return false;
-			return def;
-		}
-
-		private String getCoreOption(IJavaProject project, String key) {
-			if (project == null)
-				return JavaCore.getOption(key);
-			return project.getOption(key, true);
-		}
-	}
-	
-	protected static final String LPAREN= "("; //$NON-NLS-1$
-	protected static final String RPAREN= ")"; //$NON-NLS-1$
-	protected static final String COMMA= ","; //$NON-NLS-1$
-	protected static final String SPACE= " "; //$NON-NLS-1$
-
 	private boolean fHasParameters;
 	private boolean fHasParametersComputed= false;
 	private int fContextInformationPosition;
@@ -83,6 +43,8 @@ public class JavaMethodCompletionProposal extends LazyJavaCompletionProposal {
 	}
 
 	public void apply(IDocument document, char trigger, int offset) {
+		if (trigger == ' ' || trigger == '(')
+			trigger= '\0';
 		super.apply(document, trigger, offset);
 		if (needsLinkedMode()) {
 			setUpLinkedMode(document, ')');

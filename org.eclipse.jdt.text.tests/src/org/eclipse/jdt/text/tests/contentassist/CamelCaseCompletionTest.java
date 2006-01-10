@@ -15,8 +15,6 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
-
 import org.eclipse.jdt.core.JavaCore;
 
 /**
@@ -27,22 +25,15 @@ public class CamelCaseCompletionTest extends AbstractCompletionTest {
 	private static final Class THIS= CamelCaseCompletionTest.class;
 
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		return new TestSuite(THIS, suiteName(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
+		return new CompletionTestSetup(test);
 	}
 
 	public static Test suite() {
-		return allTests();
-	}
-	
-	/*
-	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
-	 */
-	protected void setUp() throws Exception {
-		super.setUp();
+		return new CompletionTestSetup(allTests());
 	}
 	
 	/*

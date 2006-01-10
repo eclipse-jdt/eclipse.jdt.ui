@@ -148,6 +148,12 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
+			boolean insertClosingParenthesis= trigger == '(' && autocloseBrackets();
+			if (insertClosingParenthesis) {
+				updateReplacementWithParentheses();
+				trigger= '\0';
+			}
+			
 			super.apply(document, trigger, offset);
 
 			if (fImportRewrite != null && fImportRewrite.hasRecordedChanges()) {
@@ -156,10 +162,8 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
 			}
 			
-			if (trigger == '(' && autocloseBrackets()) {
-				document.replace(getReplacementOffset() + getCursorPosition(), 0, ")"); //$NON-NLS-1$
+			if (insertClosingParenthesis)
 				setUpLinkedMode(document, ')');
-			}
 			
 			rememberSelection();
 			
@@ -168,6 +172,28 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e);
 		}
+	}
+
+	private void updateReplacementWithParentheses() {
+		StringBuffer replacement= new StringBuffer(getReplacementString());
+		FormatterPrefs prefs= getFormatterPrefs();
+
+		if (prefs.beforeOpeningParen)
+			replacement.append(SPACE);
+		replacement.append(LPAREN);
+
+
+		if (prefs.afterOpeningParen)
+			replacement.append(SPACE);
+
+		setCursorPosition(replacement.length());
+		
+		if (prefs.afterOpeningParen)
+			replacement.append(SPACE);
+		
+		replacement.append(RPAREN);
+		
+		setReplacementString(replacement.toString());
 	}
 
 	/**

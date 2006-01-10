@@ -42,11 +42,9 @@ import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.CompletionProposal;
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeParameter;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
@@ -54,7 +52,6 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
@@ -175,37 +172,6 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 
 		public String toString() {
 			return fProposal;
-		}
-	}
-
-	private static final class FormatterPrefs {
-		final boolean beforeOpeningBracket;
-		final boolean afterOpeningBracket;
-		final boolean beforeComma;
-		final boolean afterComma;
-		final boolean beforeClosingBracket;
-
-		FormatterPrefs(IJavaProject project) {
-			beforeOpeningBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
-			afterOpeningBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_OPENING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
-			beforeComma= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, false);
-			afterComma= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_AFTER_COMMA_IN_PARAMETERIZED_TYPE_REFERENCE, true);
-			beforeClosingBracket= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_INSERT_SPACE_BEFORE_CLOSING_ANGLE_BRACKET_IN_PARAMETERIZED_TYPE_REFERENCE, false);
-		}
-
-		private boolean getCoreOption(IJavaProject project, String key, boolean def) {
-			String option= getCoreOption(project, key);
-			if (JavaCore.INSERT.equals(option))
-				return true;
-			if (JavaCore.DO_NOT_INSERT.equals(option))
-				return false;
-			return def;
-		}
-
-		private String getCoreOption(IJavaProject project, String key) {
-			if (project == null)
-				return JavaCore.getOption(key);
-			return project.getOption(key, true);
 		}
 	}
 
@@ -668,10 +634,8 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 		StringBuffer buffer= new StringBuffer();
 		buffer.append(getReplacementString());
 
-		FormatterPrefs prefs= new FormatterPrefs(fCompilationUnit == null ? null : fCompilationUnit.getJavaProject());
-		final char SPACE= ' ';
+		FormatterPrefs prefs= getFormatterPrefs();
 		final char LESS= '<';
-		final char COMMA= ',';
 		final char GREATER= '>';
 		if (prefs.beforeOpeningBracket)
 			buffer.append(SPACE);
@@ -679,10 +643,10 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 		if (prefs.afterOpeningBracket)
 			buffer.append(SPACE);
 		StringBuffer separator= new StringBuffer(3);
-		if (prefs.beforeComma)
+		if (prefs.beforeTypeArgumentComma)
 			separator.append(SPACE);
 		separator.append(COMMA);
-		if (prefs.afterComma)
+		if (prefs.afterTypeArgumentComma)
 			separator.append(SPACE);
 
 		for (int i= 0; i != typeArguments.length; i++) {

@@ -86,11 +86,13 @@ public class JavadocCompletionTest extends TestCase {
 	private static final String[] HTML_TAGS= {"b", "blockquote", "br", "code", "dd", "dl", "dt", "em", "hr", "h1", "h2", "h3", "h4", "h5", "h6", "i", "li", "nl", "ol", "p", "pre", "q", "td", "th", "tr", "tt", "ul",};
 
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		String name= THIS.toString();
+		name= name.substring(name.lastIndexOf('.') + 1);
+		return new TestSuite(THIS, name);
 	}
 
 	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
+		return test;
 	}
 
 	public static Test suite() {

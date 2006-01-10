@@ -14,7 +14,6 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 /**
  * 
@@ -24,15 +23,15 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 	private static final Class THIS= TypeCompletionTest.class;
 
 	public static Test allTests() {
-		return new ProjectTestSetup(new TestSuite(THIS));
+		return new TestSuite(THIS, suiteName(THIS));
 	}
 
 	public static Test setUpTest(Test test) {
-		return new ProjectTestSetup(test);
+		return new CompletionTestSetup(test);
 	}
 
 	public static Test suite() {
-		return allTests();
+		return new CompletionTestSetup(allTests());
 	}
 	
 	/*
@@ -41,6 +40,7 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 	protected void setUp() throws Exception {
 		super.setUp();
 		getJDTUIPrefs().setValue(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);
+		getJDTUIPrefs().setValue(PreferenceConstants.EDITOR_CLOSE_BRACKETS, true);
 	}
 
 	public void testJavaLangType() throws Exception {
@@ -91,5 +91,8 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 		assertNoMethodBodyProposals("SB|", "StringBuffer ");
 	}
 	
-	
+	public void testConstructorParentheses() throws Exception {
+		setTrigger('(');
+		assertMethodBodyProposal("StringBuf|", "StringBuffer ", "StringBuffer(|)");
+	}
 }
