@@ -392,6 +392,18 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 	public void test33() throws Exception {
 		helper1(new String[] { "p.Foo", "p.Bar" }, "p.Foo", 6, 18, 6, 21, FIELD, "_bar", false, false);
 	}
+	
+	// Test visibility of target field is changed to public
+	// in case a caller is in another package (bug 117465).
+	public void test34() throws Exception {
+		helper1(new String[] { "test1.TestTarget", "test1.Test1", "test2.Test2"}, "test1.Test1", 3, 21, 3, 33, FIELD, "target", true, true);
+	}
+	
+	// Test visibility of target field is changed to default
+	// in case a caller is in the same package (bug 117465).
+	public void test35() throws Exception {
+		helper1(new String[] { "test1.TestTarget", "test1.Test1", "test1.Test2"}, "test1.Test1", 3, 21, 3, 33, FIELD, "target", true, true);
+	}
 
 	// Move mA1 to field fB, do not inline delegator
 	public void test3() throws Exception {

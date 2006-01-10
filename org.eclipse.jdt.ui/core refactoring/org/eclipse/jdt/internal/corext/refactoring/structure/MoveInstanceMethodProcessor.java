@@ -1471,28 +1471,22 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Creates a visibility-adjusted target expression taking advantage of existing accessor methods.
 	 * 
-	 * @param declaration the source method declaration
+	 * @param enclosingElement the java element which encloses the current method access. 
 	 * @param expression the expression to access the target, or <code>null</code>
 	 * @param adjustments the map of elements to visibility adjustments
 	 * @param rewrite the ast rewrite to use
 	 * @return an adjusted target expression, or <code>null</code> if the access did not have to be changed
 	 * @throws JavaModelException if an error occurs while accessing the target expression
 	 */
-	protected Expression createAdjustedTargetExpression(final MethodDeclaration declaration, final Expression expression, final Map adjustments, final ASTRewrite rewrite) throws JavaModelException {
-		Assert.isNotNull(declaration);
+	protected Expression createAdjustedTargetExpression(final IJavaElement enclosingElement, final Expression expression, final Map adjustments, final ASTRewrite rewrite) throws JavaModelException {
+		Assert.isNotNull(enclosingElement);
 		Assert.isNotNull(adjustments);
 		Assert.isNotNull(rewrite);
 		final IJavaElement element= fTarget.getJavaElement();
 		if (element != null && !Modifier.isPublic(fTarget.getModifiers())) {
 			final IField field= (IField) fTarget.getJavaElement();
 			if (field != null) {
-				boolean same= false;
-				IMethodBinding binding= declaration.resolveBinding();
-				if (binding != null) {
-					final ITypeBinding declaring= binding.getDeclaringClass();
-					if (declaring != null && Bindings.equals(declaring.getPackage(), fTarget.getType().getPackage()))
-						same= true;
-				}
+				boolean same= field.getAncestor(IJavaElement.PACKAGE_FRAGMENT).equals(enclosingElement.getAncestor(IJavaElement.PACKAGE_FRAGMENT));
 				final Modifier.ModifierKeyword keyword= same ? null : Modifier.ModifierKeyword.PUBLIC_KEYWORD;
 				final String modifier= same ? RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_default : RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_public; 
 				if (fUseGetters) {
@@ -1500,7 +1494,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					if (getter != null) {
 						final MethodDeclaration method= ASTNodeSearchUtil.getMethodDeclarationNode(getter, fSourceRewrite.getRoot());
 						if (method != null) {
-							binding= method.resolveBinding();
+							final IMethodBinding binding= method.resolveBinding();
 							if (binding != null && MemberVisibilityAdjustor.hasLowerVisibility(getter.getFlags(), same ? Modifier.NONE : (keyword == null ? Modifier.NONE : keyword.toFlagValue())) && MemberVisibilityAdjustor.needsVisibilityAdjustments(getter, keyword, adjustments))
 								adjustments.put(getter, new MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment(getter, keyword, RefactoringStatus.createWarningStatus(Messages.format(RefactoringCoreMessages.MemberVisibilityAdjustor_change_visibility_method_warning, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), modifier}), JavaStatusContext.create(getter)))); 
 							final MethodInvocation invocation= rewrite.getAST().newMethodInvocation();
@@ -1694,7 +1688,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			if (fTarget.isField()) {
 				Expression access= null;
 				if (invocation.getExpression() != null) {
-					access= createInlinedTargetExpression(rewriter, declaration, invocation.getExpression(), adjustments, status);
+					access= createInlinedTargetExpression(rewriter, (IJavaElement) match.getElement(), invocation.getExpression(), adjustments, status);
 					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, access, group);
 				} else
 					rewrite.set(invocation, MethodInvocation.EXPRESSION_PROPERTY, rewrite.getAST().newSimpleName(fTarget.getName()), group);
@@ -1756,21 +1750,21 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 * Creates the target field expression for the inline method invocation.
 	 * 
 	 * @param rewriter the current compilation unit rewrite
-	 * @param declaration the source method declaration
+	 * @param enclosingElement the enclosing java element of the method invocation.
 	 * @param original the original method invocation expression
 	 * @param adjustments the map of elements to visibility adjustments
 	 * @param status the refactoring status
 	 * @throws JavaModelException if a problem occurred while retrieving potential getter methods of the target
 	 */
-	protected Expression createInlinedTargetExpression(final CompilationUnitRewrite rewriter, final MethodDeclaration declaration, final Expression original, final Map adjustments, final RefactoringStatus status) throws JavaModelException {
+	protected Expression createInlinedTargetExpression(final CompilationUnitRewrite rewriter, final IJavaElement enclosingElement, final Expression original, final Map adjustments, final RefactoringStatus status) throws JavaModelException {
 		Assert.isNotNull(rewriter);
-		Assert.isNotNull(declaration);
+		Assert.isNotNull(enclosingElement);
 		Assert.isNotNull(original);
 		Assert.isNotNull(adjustments);
 		Assert.isNotNull(status);
 		Assert.isTrue(fTarget.isField());
 		final Expression expression= (Expression) ASTNode.copySubtree(fSourceRewrite.getASTRewrite().getAST(), original);
-		final Expression result= createAdjustedTargetExpression(declaration, expression, adjustments, fSourceRewrite.getASTRewrite());
+		final Expression result= createAdjustedTargetExpression(enclosingElement, expression, adjustments, fSourceRewrite.getASTRewrite());
 		if (result == null) {
 			final FieldAccess access= fSourceRewrite.getASTRewrite().getAST().newFieldAccess();
 			access.setExpression(expression);
