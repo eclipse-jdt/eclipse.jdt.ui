@@ -43,7 +43,9 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.DecoratingLabelProvider;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.window.Window;
@@ -532,6 +534,14 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		fInputGroup.addListFilter(new ContainerFilter(ContainerFilter.FILTER_CONTAINERS));
 		fInputGroup.getTree().addListener(SWT.MouseUp, this);
 		fInputGroup.getTable().addListener(SWT.MouseUp, this);
+		
+		ICheckStateListener listener = new ICheckStateListener() {
+            public void checkStateChanged(CheckStateChangedEvent event) {
+                update();
+            }
+        };
+        
+        fInputGroup.addCheckStateListener(listener);
 	}
 
 	/**
