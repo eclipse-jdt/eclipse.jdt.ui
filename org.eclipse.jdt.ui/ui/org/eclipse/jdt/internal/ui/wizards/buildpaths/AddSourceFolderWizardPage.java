@@ -28,8 +28,10 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IPathVariableManager;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceRoot;
 import org.eclipse.core.resources.ResourcesPlugin;
 
@@ -349,12 +351,21 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 
 	private StatusInfo updateRootStatus() {		
 		IJavaProject javaProject= fNewElement.getJavaProject();		
-		IProject project= javaProject.getProject();
+		IProject project= javaProject.getProject();		
 		
 		StatusInfo pathNameStatus= validatePathName(fRootDialogField.getText(), project);
 		
 		if (!pathNameStatus.isOK())
 			return pathNameStatus;
+		
+		if (fLinkedMode) {
+			IStatus linkNameStatus= validateLinkLocation(fRootDialogField.getText());
+			if (linkNameStatus.matches(IStatus.ERROR)) {
+				StatusInfo result= new StatusInfo();
+				result.setError(linkNameStatus.getMessage());
+				return result;
+			}
+		}
 		
 		StatusInfo result= new StatusInfo();
 		result.setOK();
@@ -493,6 +504,40 @@ public class AddSourceFolderWizardPage extends NewElementWizardPage {
 		}
 	}
 	
+    /**
+	 * Validates this page's controls.
+	 *
+	 * @return IStatus indicating the validation result. IStatus.OK if the 
+	 *  specified link target is valid given the linkHandle.
+	 */
+	private IStatus validateLinkLocation(String folderName) {
+		IWorkspace workspace= JavaPlugin.getWorkspace();
+		IPath path= Path.fromOSString(fLinkFields.fLinkLocation.getText());
+
+		IStatus locationStatus= workspace.validateLinkLocation(fNewElement.getJavaProject().getProject().getFolder(new Path(folderName)), path);
+		if (locationStatus.matches(IStatus.ERROR))
+			return locationStatus;
+		
+		IPathVariableManager pathVariableManager = ResourcesPlugin.getWorkspace().getPathVariableManager();
+		IPath path1= Path.fromOSString(fLinkFields.fLinkLocation.getText());
+		IPath resolvedPath= pathVariableManager.resolvePath(path1);
+		// use the resolved link target name
+		String resolvedLinkTarget= resolvedPath.toOSString();
+		
+		path= new Path(resolvedLinkTarget);
+		File linkTargetFile= new Path(resolvedLinkTarget).toFile();
+		if (linkTargetFile.exists()) {
+			if (!linkTargetFile.isDirectory())
+	            return new StatusInfo(IStatus.ERROR, NewWizardMessages.NewFolderDialog_linkTargetNotFolder); 
+		} else {
+			return new StatusInfo(IStatus.ERROR, NewWizardMessages.NewFolderDialog_linkTargetNonExistent);
+		}
+		if (locationStatus.isOK()) {
+			return new StatusInfo();
+		}
+		return new StatusInfo(locationStatus.getSeverity(), locationStatus.getMessage());
+	}
+
 	private static StatusInfo validatePathName(String str, IProject project) {
 		StatusInfo result= new StatusInfo();
 		result.setOK();
