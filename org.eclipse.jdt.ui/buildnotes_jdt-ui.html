@@ -19,7 +19,7 @@ To see which bugs have been addressed in one of the builds simply open the <a hr
 <br><br>
 ========== Eclipse Build Input January 10th 2006 ==========<br>
 <pre>
-Move of the content assist API additions from the various text plug-ins to jdt.ui:
+- move of the content assist API additions from the various text plug-ins to jdt.ui:
    - reason: 
       - the collection-based API of ICompletionProposalComputer has no future in the RCP part of eclipse.
       - it is only currently used in jdt to allow contributions to the Java editor's content assistant
@@ -27,6 +27,12 @@ Move of the content assist API additions from the various text plug-ins to jdt.u
      into TextContentAssistInvocationContext, which has been moved to jdt.ui.
    - moved ICompletionProposalComputer to IJavaCompletionProposalComputer in the jdt.ui plug-in.
    - restored 'protected' visibility of CompletionProposalCollector.getContext() (as in 3.1)
+   
+- adopted changes in document setup and creation:
+  - removed 'org.eclipse.core.filebuffers.documentCreation' extension
+  - removed  'org.eclipse.core.filebuffers.IDocumentFactory' implementation
+  - removed PartiallySynchronizedDocument
+  - reworked setup of synchronization on document and annotation model
    
 - bug fixing
 </pre>
