@@ -180,7 +180,7 @@ public class TypeInfoHistory {
 				}
 				history.internalCheckConsistency(monitor);
 			} finally {
-				history.clearUpdateJob();
+				history.clearUpdateJob(this);
 			}
 			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
 		}
@@ -255,16 +255,18 @@ public class TypeInfoHistory {
 		return fHistory.get(type) != null;
 	}
 
-	public synchronized void checkConsistency(IProgressMonitor monitor) throws OperationCanceledException {
-		if (!fNeedsConsistencyCheck)
-			return;
-		// if we have an update job, join it instead of doing our
-		// own checking.
-		if (fUpdateJob != null) {
-			boolean success= false;
+	public void checkConsistency(IProgressMonitor monitor) throws OperationCanceledException {
+		synchronized (this) {
+			if (!fNeedsConsistencyCheck)
+				return;
+		}
+		// When joining the update job make sure that we don't hold looks
+		// Otherwise the update Job can't continue normally. As a result
+		// the update job could have already finished before we join it.
+		// However this isn't a problem since the join will then be a NOP.
+		if (hasUpdateJob()) {
 			try {
 				Platform.getJobManager().join(UpdateJob.FAMILY, monitor);
-				success= true;
 			} catch (OperationCanceledException e) {
 				// Ignore and do the consistency check without
 				// waiting for the update job.
@@ -272,10 +274,14 @@ public class TypeInfoHistory {
 				// Ignore and do the consistency check without
 				// waiting for the update job.
 			}
-			if (success && !fNeedsConsistencyCheck)
-				return;
 		}
-		internalCheckConsistency(monitor);
+		// Since we gave up the lock when joining the update job
+		// we have to re check the fNeedsConsistencyCheck flag
+		synchronized(this) {
+			if (!fNeedsConsistencyCheck)
+				return;
+			internalCheckConsistency(monitor);
+		}
 	}
 
 	private synchronized void internalCheckConsistency(IProgressMonitor monitor) throws OperationCanceledException {
@@ -304,8 +310,13 @@ public class TypeInfoHistory {
 		fNeedsConsistencyCheck= false;
 	}
 	
-	private synchronized void clearUpdateJob() {
-		fUpdateJob= null;
+	private synchronized void clearUpdateJob(UpdateJob toClear) {
+		if (fUpdateJob == toClear)
+			fUpdateJob= null;
+	}
+	
+	private synchronized boolean hasUpdateJob() {
+		return fUpdateJob != null;
 	}
 	
 	public synchronized void accessed(TypeInfo info) {
