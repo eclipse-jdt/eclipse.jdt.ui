@@ -331,6 +331,13 @@ public class MoveInnerToTopLevelTests extends RefactoringTest {
 		validatePassingTest("A", "SomeInner", "Inner", "p", new String[] { "A"}, new String[] { "p"}, null, false, false, false, false);
 	}
 	
+	// Move inner class with some private used and some private non-used members.
+	// used members go default, non-used stay private
+	// bug 97411 + 117465 (comment #1)
+	public void test37() throws Exception {
+		validatePassingTest("A", "SomeInner", "p", new String[] { "A"}, new String[] { "p"}, null, false, false, false, false);
+	}
+	
 	// --- Non static
 	
 	public void test_nonstatic_0() throws Exception{
