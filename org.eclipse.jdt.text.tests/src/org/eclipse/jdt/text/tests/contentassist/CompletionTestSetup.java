@@ -24,20 +24,19 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 class CompletionTestSetup extends ProjectTestSetup {
 
 	public static IPackageFragment getTestPackage() throws CoreException {
-		IJavaProject project= ProjectTestSetup.getProject();
-		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(project, "src");
-		return sourceFolder.createPackageFragment("test1", false, null);
+		IJavaProject project= getProject();
+		IPackageFragmentRoot root= project.getPackageFragmentRoot("src");
+		if (!root.exists())
+			root= JavaProjectHelper.addSourceContainer(project, "src");
+		
+		IPackageFragment fragment= root.getPackageFragment("test1");
+		if (!fragment.exists())
+			fragment= root.createPackageFragment("test1", false, null);
+		
+		return fragment;
 	}
 	
 	public CompletionTestSetup(Test test) {
 		super(test);
 	}
-	
-	/*
-	 * @see org.eclipse.jdt.ui.tests.core.ProjectTestSetup#setUp()
-	 */
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-	
 }
