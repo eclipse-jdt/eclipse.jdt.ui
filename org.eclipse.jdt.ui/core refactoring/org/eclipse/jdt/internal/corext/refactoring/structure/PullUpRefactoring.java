@@ -67,6 +67,7 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
+import org.eclipse.jdt.core.dom.MarkerAnnotation;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
@@ -875,10 +876,14 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		}
 	}
 
-	private void createAbstractMethods(IMethod sourceMethod, CompilationUnit declaringCuNode, AbstractTypeDeclaration targetClass, TypeVariableMaplet[] mapping, CompilationUnitRewrite targetRewrite, Map adjustments, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
+	private void createAbstractMethod(IMethod sourceMethod, CompilationUnitRewrite sourceRewriter, CompilationUnit declaringCuNode, AbstractTypeDeclaration targetClass, TypeVariableMaplet[] mapping, CompilationUnitRewrite targetRewrite, Map adjustments, IProgressMonitor pm, RefactoringStatus status) throws JavaModelException {
 		MethodDeclaration oldMethod= ASTNodeSearchUtil.getMethodDeclarationNode(sourceMethod, declaringCuNode);
-		AST ast= targetRewrite.getASTRewrite().getAST();
-		MethodDeclaration newMethod= ast.newMethodDeclaration();
+		if (JavaModelUtil.is50OrHigher(sourceMethod.getJavaProject()) && (fCodeGenerationSettings.overrideAnnotation || JavaCore.ERROR.equals(sourceMethod.getJavaProject().getOption(JavaCore.COMPILER_PB_MISSING_OVERRIDE_ANNOTATION, true)))) {
+			final MarkerAnnotation annotation= sourceRewriter.getAST().newMarkerAnnotation();
+			annotation.setTypeName(sourceRewriter.getAST().newSimpleName("Override")); //$NON-NLS-1$
+			sourceRewriter.getASTRewrite().getListRewrite(oldMethod, MethodDeclaration.MODIFIERS2_PROPERTY).insertFirst(annotation, sourceRewriter.createGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_override_annotation));
+		}
+		MethodDeclaration newMethod= targetRewrite.getAST().newMethodDeclaration();
 		newMethod.setBody(null);
 		newMethod.setConstructor(false);
 		newMethod.setExtraDimensions(oldMethod.getExtraDimensions());
@@ -886,13 +891,13 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		int modifiers= getModifiersWithUpdatedVisibility(sourceMethod, Modifier.ABSTRACT | JdtFlags.clearFlag(Modifier.NATIVE | Modifier.FINAL, sourceMethod.getFlags()), adjustments, pm, false, status);
 		if (oldMethod.isVarargs())
 			modifiers&= ~Flags.AccVarargs;
-		newMethod.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers));
-		newMethod.setName(((SimpleName) ASTNode.copySubtree(ast, oldMethod.getName())));
+		newMethod.modifiers().addAll(ASTNodeFactory.newModifiers(targetRewrite.getAST(), modifiers));
+		newMethod.setName(((SimpleName) ASTNode.copySubtree(targetRewrite.getAST(), oldMethod.getName())));
 		copyReturnType(targetRewrite.getASTRewrite(), getDeclaringType().getCompilationUnit(), oldMethod, newMethod, mapping);
 		copyParameters(targetRewrite.getASTRewrite(), getDeclaringType().getCompilationUnit(), oldMethod, newMethod, mapping);
 		copyThrownExceptions(oldMethod, newMethod);
 		ImportRewriteUtil.addImports(targetRewrite, newMethod, new HashMap(), new HashMap(), false);
-		targetRewrite.getASTRewrite().getListRewrite(targetClass, targetClass.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, targetClass.bodyDeclarations()), targetRewrite.createGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_abstract_method)); 
+		targetRewrite.getASTRewrite().getListRewrite(targetClass, targetClass.getBodyDeclarationsProperty()).insertAt(newMethod, ASTNodes.getInsertionIndex(newMethod, targetClass.bodyDeclarations()), targetRewrite.createGroupDescription(RefactoringCoreMessages.PullUpRefactoring_add_abstract_method));
 	}
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
@@ -1013,7 +1018,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 						}
 						subsub.done();
 						for (int offset= 0; offset < fMethodsToDeclareAbstract.length; offset++)
-							createAbstractMethods(fMethodsToDeclareAbstract[offset], root, declaration, mapping, rewrite, adjustments, new SubProgressMonitor(sub, 1), status);
+							createAbstractMethod(fMethodsToDeclareAbstract[offset], sourceRewriter, root, declaration, mapping, rewrite, adjustments, new SubProgressMonitor(sub, 1), status);
 					} else
 						sub.worked(2);
 					if (unit.equals(sourceRewriter.getCu())) {

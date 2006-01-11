@@ -433,6 +433,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String PullUpRefactoring_Type_variable2_not_available;
 	public static String PullUpRefactoring_Type_variable3_not_available;
 	public static String PullUpRefactoring_Type_variables_not_available;
+	public static String PullUpRefactoring_add_override_annotation;
 	public static String MemberCheckUtil_signature_exists;
 	public static String MemberCheckUtil_same_param_count;
 	public static String MemberCheckUtil_field_exists;
@@ -892,4 +893,5 @@ public final class RefactoringCoreMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
 	}
+
 }
