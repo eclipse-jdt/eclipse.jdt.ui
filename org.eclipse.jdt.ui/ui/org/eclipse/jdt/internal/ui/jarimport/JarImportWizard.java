@@ -141,7 +141,7 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 										InputStream stream= null;
 										try {
 											stream= zip.getInputStream(entry);
-											final RefactoringHistory existing= RefactoringCore.getRefactoringHistoryService().readRefactoringHistory(stream, JavaRefactorings.IMPORTABLE);
+											final RefactoringHistory existing= RefactoringCore.getRefactoringHistoryService().readRefactoringHistory(stream, JavaRefactorings.JAR_IMPORTABLE);
 											if (existing != null)
 												fHistoryDelta= incoming.removeAll(existing).getDescriptors();
 										} finally {
@@ -296,7 +296,7 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 		if (root.exists(path)) {
 			location= root.getFile(path).getRawLocationURI();
 		} else
-			location= new File(path.toOSString()).toURI();
+			location= URIUtil.toURI(path);
 		return location;
 	}
 

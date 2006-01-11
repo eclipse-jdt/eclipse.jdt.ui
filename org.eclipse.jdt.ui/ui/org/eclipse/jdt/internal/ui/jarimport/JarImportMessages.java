@@ -46,6 +46,8 @@ public final class JarImportMessages extends NLS {
 
 	public static String JarImportWizardPage_location_label;
 
+	public static String JarImportWizardPage_no_jar_files;
+
 	public static String JarImportWizardPage_no_refactorings;
 
 	public static String JarImportWizardPage_page_description;

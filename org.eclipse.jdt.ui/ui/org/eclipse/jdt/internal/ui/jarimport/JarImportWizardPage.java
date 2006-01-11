@@ -18,6 +18,8 @@ import java.util.Set;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
+import org.eclipse.core.filesystem.URIUtil;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -130,6 +132,9 @@ public final class JarImportWizardPage extends WizardPage {
 		if (fImportWizard)
 			createInputGroup(composite);
 		createRenameGroup(composite);
+		setPageComplete(false);
+		if (fImportWizard && !fTreeViewer.getControl().isEnabled())
+			setErrorMessage(JarImportMessages.JarImportWizardPage_no_jar_files);
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.JARIMPORT_WIZARD_PAGE);
@@ -162,7 +167,8 @@ public final class JarImportWizardPage extends WizardPage {
 	protected void createInputGroup(final Composite parent) {
 		Assert.isNotNull(parent);
 		new Label(parent, SWT.NONE);
-		new Label(parent, SWT.NONE).setText(JarImportMessages.JarImportWizardPage_import_message);
+		final Label label= new Label(parent, SWT.NONE);
+		label.setText(JarImportMessages.JarImportWizardPage_import_message);
 		final StandardJavaElementContentProvider contentProvider= new StandardJavaElementContentProvider() {
 
 			public Object[] getChildren(Object element) {
@@ -208,16 +214,20 @@ public final class JarImportWizardPage extends WizardPage {
 		fTreeViewer.setSorter(new JavaElementSorter());
 		fTreeViewer.setAutoExpandLevel(2);
 		fTreeViewer.setInput(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()));
+		final IPackageFragmentRoot root= fJarImportData.getPackageFragmentRoot();
+		if (root != null) {
+			fTreeViewer.setSelection(new StructuredSelection(new Object[] { root}), true);
+			fTreeViewer.expandToLevel(root, 1);
+		}
 		fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener() {
 
 			public void selectionChanged(final SelectionChangedEvent event) {
 				handleInputChanged();
 			}
 		});
-		final IPackageFragmentRoot root= fJarImportData.getPackageFragmentRoot();
-		if (root != null) {
-			fTreeViewer.setSelection(new StructuredSelection(new Object[] { root}), true);
-			fTreeViewer.expandToLevel(root, 1);
+		if (contentProvider.getChildren(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot())).length == 0) {
+			fTreeViewer.getControl().setEnabled(false);
+			label.setEnabled(false);
 		}
 	}
 
@@ -255,7 +265,6 @@ public final class JarImportWizardPage extends WizardPage {
 				handleBrowseButtonSelected();
 			}
 		});
-		setPageComplete(false);
 	}
 
 	/**
@@ -275,6 +284,8 @@ public final class JarImportWizardPage extends WizardPage {
 				fJarImportData.setRenameJarFile(!button.getSelection());
 			}
 		});
+		if (fImportWizard && !fTreeViewer.getControl().isEnabled())
+			button.setEnabled(false);
 		if (!fImportWizard) {
 			final GridData data= new GridData();
 			data.horizontalIndent= IDialogConstants.HORIZONTAL_MARGIN;
@@ -306,6 +317,8 @@ public final class JarImportWizardPage extends WizardPage {
 		handleJarFileChanged();
 		if (isPageComplete())
 			handlePackageFragmentRootChanged();
+		if (!fTreeViewer.getControl().isEnabled())
+			setErrorMessage(JarImportMessages.JarImportWizardPage_no_jar_files);
 		getContainer().updateButtons();
 	}
 
@@ -334,7 +347,7 @@ public final class JarImportWizardPage extends WizardPage {
 					setPageComplete(false);
 					return;
 				}
-				fJarImportData.setRefactoringFileLocation(file.toURI());
+				fJarImportData.setRefactoringFileLocation(URIUtil.toURI(path));
 				ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntryName());
 				if (entry == null) {
 					setMessage(JarImportMessages.JarImportWizardPage_no_refactorings, INFORMATION);
@@ -344,7 +357,7 @@ public final class JarImportWizardPage extends WizardPage {
 				InputStream stream= null;
 				try {
 					stream= zip.getInputStream(entry);
-					fJarImportData.setRefactoringHistory(RefactoringCore.getRefactoringHistoryService().readRefactoringHistory(stream, JavaRefactorings.IMPORTABLE));
+					fJarImportData.setRefactoringHistory(RefactoringCore.getRefactoringHistoryService().readRefactoringHistory(stream, JavaRefactorings.JAR_IMPORTABLE));
 				} catch (IOException exception) {
 					setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
 					setPageComplete(false);
