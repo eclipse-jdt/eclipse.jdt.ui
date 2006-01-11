@@ -109,12 +109,12 @@ public final class JavaSynchronizationLabelProvider extends AbstractRefactoringS
 		final ISynchronizationContext context= getContext();
 		final IResource resource= JavaModelProvider.getResource(element);
 		if (context != null && resource != null) {
-			final IDiffNode[] nodes= JavaSynchronizationContentProvider.getDeltas(context, element);
+			final IDiffNode[] nodes= JavaSynchronizationContentProvider.getDiffs(context, element);
 			for (int index= 0; index < nodes.length; index++) {
 				if (context.getDiffTree().getResource(nodes[index]).equals(resource))
 					return nodes[index];
 			}
 		}
-		return null;
+		return super.getDiff(element);
 	}
 }

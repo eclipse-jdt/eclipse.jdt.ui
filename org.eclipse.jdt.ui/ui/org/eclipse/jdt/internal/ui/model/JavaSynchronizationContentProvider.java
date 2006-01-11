@@ -57,7 +57,7 @@ public final class JavaSynchronizationContentProvider extends AbstractRefactorin
 	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
 
 	/**
-	 * Returns the deltas associated with the element.
+	 * Returns the diff nodes associated with the element.
 	 * 
 	 * @param context
 	 *            the synchronization context
@@ -65,7 +65,7 @@ public final class JavaSynchronizationContentProvider extends AbstractRefactorin
 	 *            the element
 	 * @return an array of diff nodes
 	 */
-	public static IDiffNode[] getDeltas(final ISynchronizationContext context, final Object element) {
+	public static IDiffNode[] getDiffs(final ISynchronizationContext context, final Object element) {
 		return context.getDiffTree().getDiffs(getResourceTraversals(element));
 	}
 
