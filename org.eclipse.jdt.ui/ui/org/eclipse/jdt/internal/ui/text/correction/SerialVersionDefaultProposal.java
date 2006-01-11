@@ -23,7 +23,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 
 /**
  * Proposal for a default serial version id.
- *
+ * 
  * @since 3.1
  */
 public final class SerialVersionDefaultProposal extends AbstractSerialVersionProposal {
@@ -33,20 +33,20 @@ public final class SerialVersionDefaultProposal extends AbstractSerialVersionPro
 
 	/**
 	 * Creates a new serial version default proposal.
-	 *
+	 * 
 	 * @param unit
-	 *        the compilation unit
+	 *            the compilation unit
 	 * @param node
-	 *        the originally selected node
+	 *            the originally selected node
 	 */
 	public SerialVersionDefaultProposal(final ICompilationUnit unit, final ASTNode node) {
 		super(CorrectionMessages.SerialVersionSubProcessor_createdefault_description, unit, node);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractSerialVersionProposal#addInitializer(org.eclipse.jdt.core.dom.VariableDeclarationFragment)
+	/**
+	 * {@inheritDoc}
 	 */
-	protected final void addInitializer(final VariableDeclarationFragment fragment) {
+	protected void addInitializer(final VariableDeclarationFragment fragment) {
 		Assert.isNotNull(fragment);
 
 		final Expression expression= computeDefaultExpression(new NullProgressMonitor());
@@ -54,10 +54,10 @@ public final class SerialVersionDefaultProposal extends AbstractSerialVersionPro
 			fragment.setInitializer(expression);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractSerialVersionProposal#addLinkedPositions(org.eclipse.jdt.core.dom.rewrite.ASTRewrite, org.eclipse.jdt.core.dom.VariableDeclarationFragment)
+	/**
+	 * {@inheritDoc}
 	 */
-	protected final void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment) {
+	protected void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment) {
 
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(fragment);
@@ -67,17 +67,17 @@ public final class SerialVersionDefaultProposal extends AbstractSerialVersionPro
 			addLinkedPosition(rewrite.track(initializer), true, GROUP_INITIALIZER);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.correction.AbstractSerialVersionProposal#computeDefaultExpression(org.eclipse.core.runtime.IProgressMonitor)
+	/**
+	 * {@inheritDoc}
 	 */
-	protected final Expression computeDefaultExpression(final IProgressMonitor monitor) {
+	protected Expression computeDefaultExpression(final IProgressMonitor monitor) {
 		return getAST().newNumberLiteral(DEFAULT_EXPRESSION);
 	}
 
-	/*
-	 * @see org.eclipse.jface.text.contentassist.ICompletionProposal#getAdditionalProposalInfo()
+	/**
+	 * {@inheritDoc}
 	 */
-	public final String getAdditionalProposalInfo() {
+	public String getAdditionalProposalInfo() {
 		return CorrectionMessages.SerialVersionDefaultProposal_message_default_info;
 	}
 }

@@ -10,61 +10,131 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.io.ObjectStreamClass;
+import java.io.OutputStreamWriter;
+import java.io.PrintWriter;
+import java.io.Writer;
+import java.text.DateFormat;
+import java.util.Date;
 
 /**
  * Support class to compute the serial version ID in a separate VM.
  * <p>
- * To use this class for the computation of a serial version ID, the following steps have to be performed:
+ * To use this class for the computation of a serial version ID, the following
+ * steps have to be performed:
  * <ul>
- * <li>Create a new VM configuration corresponding to the one that created the class whose serial version ID has to be computed</li>
+ * <li>Create a new VM configuration corresponding to the one that created the
+ * class whose serial version ID has to be computed</li>
  * <li>Set up the class path for the new VM</li>
- * <li>Set up the command line. The only argument to pass is the fully qualified name of the class to compute the ID for.</li>
+ * <li>Set up the command line. The only arguments to pass are the fully
+ * qualified names of the classes to compute the IDs for.</li>
  * <li>Launch the configured VM</li>
- * <li>Listen on the standard output stream for the result of the computation</li>
- * <li>Listen on the standard error stream for eventual errors</li>
+ * <li>Read the results from the serial IDs temp file</li>
  * </ul>
  * 
  * @since 3.1
  */
 public final class SerialVersionComputer {
 
-	/** The serial version computation error postfix */
-	public static final String ERROR_POSTFIX= "__SerialVersionComputationErrorPostfix__"; //$NON-NLS-1$
+	/**
+	 * Should the process be debugged? (adapt the path of the log file
+	 * accordingly)
+	 */
+	private static final boolean DEBUG= false;
 
-	/** The serial version computation error prefix */
-	public static final String ERROR_PREFIX= "__SerialVersionComputationErrorPrefix__"; //$NON-NLS-1$
+	/** The temp file encoding */
+	private static final String TEMP_FILE_ENCODING= "utf-8"; //$NON-NLS-1$
 
-	/** The serial version computation result postfix */
-	public static final String RESULT_POSTFIX= "__SerialVersionComputationResultPostfix__"; //$NON-NLS-1$
-
-	/** The serial version computation result prefix */
-	public static final String RESULT_PREFIX= "__SerialVersionComputationResultPrefix__"; //$NON-NLS-1$
+	/** The temp file name */
+	private static final String TEMP_FILE_NAME= "serials.tmp"; //$NON-NLS-1$
 
 	/**
 	 * The entry point of this process.
 	 * 
-	 * @param arguments The arguments to pass
+	 * @param arguments
+	 *            The arguments to pass
 	 */
 	public static void main(final String[] arguments) {
-		boolean success= false;
-		try {
-			if (arguments.length > 0) {
-				try {
-					final ObjectStreamClass stream= ObjectStreamClass.lookup(Class.forName(arguments[0]));
-					if (stream != null) {
-						System.out.println(RESULT_PREFIX + String.valueOf(stream.getSerialVersionUID()) + RESULT_POSTFIX);
-						success= true;
-					} else
-						System.err.println(ERROR_PREFIX + SerialVersionMessages.getFormattedString("SerialVersionComputer.not.serializable", arguments[0]) + ERROR_POSTFIX); //$NON-NLS-1$
-				} catch (ClassNotFoundException exception) {
-					System.err.println(ERROR_PREFIX + SerialVersionMessages.getFormattedString("SerialVersionComputer.not.resolvable", arguments[0]) + ERROR_POSTFIX); //$NON-NLS-1$
+		BufferedWriter logger= null;
+		if (DEBUG) {
+			try {
+				logger= new BufferedWriter(new OutputStreamWriter(new FileOutputStream("C:\\serial.log"))); //$NON-NLS-1$
+				final Date date= new Date(System.currentTimeMillis());
+				logger.write("Begin Session: " + DateFormat.getDateInstance().format(date) + " at " + DateFormat.getTimeInstance().format(date) + "\r\n"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				logger.write("Argument Count: " + arguments.length + "\r\n"); //$NON-NLS-1$ //$NON-NLS-2$
+			} catch (IOException exception) {
+				// Do nothing
+			}
+		}
+		if (arguments.length > 0) {
+			final String directory= System.getProperty("java.io.tmpdir"); //$NON-NLS-1$
+			if (directory != null && !"".equals(directory)) { //$NON-NLS-1$
+				final String separator= System.getProperty("file.separator"); //$NON-NLS-1$
+				if (separator != null && !"".equals(separator)) { //$NON-NLS-1$
+					final File file= new File(directory + separator + TEMP_FILE_NAME);
+					if (DEBUG) {
+						try {
+							logger.write("Created file: " + file.getCanonicalPath() + "\r\n"); //$NON-NLS-1$ //$NON-NLS-2$
+						} catch (IOException exception) {
+							// Do nothing
+						}
+					}
+					Writer writer= null;
+					try {
+						file.delete();
+						file.createNewFile();
+						writer= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), TEMP_FILE_ENCODING));
+						try {
+							final ObjectStreamClass clazz= ObjectStreamClass.lookup(Class.forName(arguments[0]));
+							if (clazz != null) {
+								writer.write(new Long(clazz.getSerialVersionUID()).toString());
+								writer.write('\n');
+							} else {
+								writer.write(SerialVersionMessages.getString("SerialVersionComputer.not.serializable")); //$NON-NLS-1$
+								writer.write('\n');
+							}
+						} catch (ClassNotFoundException exception) {
+							writer.write(SerialVersionMessages.getString("SerialVersionComputer.not.resolvable")); //$NON-NLS-1$
+							writer.write('\n');
+						}
+					} catch (Throwable throwable) {
+						if (DEBUG) {
+							PrintWriter printer= null;
+							try {
+								logger.write("Exception occurred: " + throwable.getLocalizedMessage() + "\r\n"); //$NON-NLS-1$ //$NON-NLS-2$
+								printer= new PrintWriter(logger);
+								throwable.printStackTrace(printer);
+							} catch (IOException exc) {
+								// Do nothing
+							} finally {
+								if (printer != null) {
+									printer.close();
+								}
+							}
+						}
+					} finally {
+						if (writer != null) {
+							try {
+								writer.close();
+							} catch (IOException exception) {
+								// Do nothing
+							}
+						}
+					}
 				}
-			} else
-				System.err.println(ERROR_PREFIX + SerialVersionMessages.getString("SerialVersionComputer.no.argument") + ERROR_POSTFIX); //$NON-NLS-1$
-		} finally {
-			if (!success)
-				System.out.println(RESULT_PREFIX + String.valueOf(1) + RESULT_POSTFIX);
+			}
+		}
+		if (DEBUG) {
+			try {
+				logger.write("End Session\r\n"); //$NON-NLS-1$
+				logger.close();
+			} catch (IOException exception) {
+				// Do nothing
+			}
 		}
 	}
 }

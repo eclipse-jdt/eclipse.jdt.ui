@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.MessageFormat;
@@ -44,7 +45,8 @@ import org.eclipse.jdt.launching.VMRunnerConfiguration;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Launch configuration delegate to launch the computation of the serial version ID.
+ * Launch configuration delegate to launch the computation of the serial version
+ * ID.
  * 
  * @since 3.1
  */
@@ -53,7 +55,13 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 	/**
 	 * VM runner for the serial version ID computation.
 	 */
-	public final class SerialVersionRunner extends AbstractVMRunner {
+	final class SerialVersionRunner extends AbstractVMRunner {
+
+		/** The temp file encoding */
+		private static final String TEMP_FILE_ENCODING= "utf-8"; //$NON-NLS-1$
+
+		/** The temp file name */
+		private static final String TEMP_FILE_NAME= "serials.tmp"; //$NON-NLS-1$
 
 		/** The vm install */
 		private final IVMInstall fInstall;
@@ -61,9 +69,10 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 		/**
 		 * Creates a new serial version runner.
 		 * 
-		 * @param install The vm install to base on
+		 * @param install
+		 *            The vm install to base on
 		 */
-		public SerialVersionRunner(final IVMInstall install) {
+		SerialVersionRunner(final IVMInstall install) {
 			Assert.isNotNull(install);
 
 			fInstall= install;
@@ -72,7 +81,8 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 		/**
 		 * Flattens the indicated class path to a string.
 		 * 
-		 * @param path the class path to flatten
+		 * @param path
+		 *            the class path to flatten
 		 * @return the flattened class path
 		 */
 		private String flattenClassPath(final String[] path) {
@@ -91,10 +101,13 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 		}
 
 		/**
-		 * Construct and return a String containing the full path of a java executable command such as 'java' or 'javaw.exe'. If the configuration specifies an explicit executable, that is used.
+		 * Construct and return a String containing the full path of a java
+		 * executable command such as 'java' or 'javaw.exe'. If the
+		 * configuration specifies an explicit executable, that is used.
 		 * 
 		 * @return full path to java executable
-		 * @exception CoreException if unable to locate an executable
+		 * @exception CoreException
+		 *                if unable to locate an executable
 		 */
 		private String getJavaExecutable(final VMRunnerConfiguration configuration) throws CoreException {
 			Assert.isNotNull(configuration);
@@ -125,24 +138,24 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 			return null;
 		}
 
-		/*
-		 * @see AbstractVMRunner#getPluginIdentifier()
+		/**
+		 * {@inheritDoc}
 		 */
-		protected final String getPluginIdentifier() {
+		protected String getPluginIdentifier() {
 			return JavaPlugin.getPluginId();
 		}
 
-		/*
-		 * @see org.eclipse.jdt.launching.IVMRunner#run(org.eclipse.jdt.launching.VMRunnerConfiguration, org.eclipse.debug.core.ILaunch, org.eclipse.core.runtime.IProgressMonitor)
+		/**
+		 * {@inheritDoc}
 		 */
-		public final void run(final VMRunnerConfiguration configuration, final ILaunch launch, final IProgressMonitor monitor) throws CoreException {
+		public void run(final VMRunnerConfiguration configuration, final ILaunch launch, final IProgressMonitor monitor) throws CoreException {
 			Assert.isNotNull(configuration);
 			Assert.isNotNull(launch);
 			Assert.isNotNull(monitor);
-			final IProgressMonitor subMonitor= new SubProgressMonitor(monitor, 1);
-			subMonitor.beginTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_launching_vm, 2);
+			monitor.beginTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_launching_vm, 40);
 			try {
-				subMonitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_constructing_command_line);
+				monitor.worked(10);
+				monitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_constructing_command_line);
 				final List arguments= new ArrayList();
 				arguments.add(getJavaExecutable(configuration));
 				final String[] vmArguments= combineVmArgs(configuration, fInstall);
@@ -158,6 +171,8 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 					for (int index= 0; index < locations.length; index++)
 						bootClassPath[index]= locations[index].getSystemLibraryPath().toOSString();
 				}
+				if (monitor.isCanceled())
+					return;
 				combinedClassPath= new String[bootClassPath.length + classPath.length];
 				int offset= 0;
 				for (int index= 0; index < bootClassPath.length; index++) {
@@ -180,8 +195,8 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 				arguments.toArray(commandLine);
 				if (monitor.isCanceled())
 					return;
-				subMonitor.worked(1);
-				subMonitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_starting_vm);
+				monitor.worked(10);
+				monitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_starting_vm);
 				final Process process= exec(commandLine, null);
 				if (process != null) {
 					try {
@@ -189,77 +204,71 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 					} catch (InterruptedException exception) {
 						// Do nothing
 					}
-					StringBuffer buffer= new StringBuffer();
-					BufferedReader reader= new BufferedReader(new InputStreamReader(process.getInputStream()));
-					try {
-						int result= 0;
-						while (reader.ready()) {
-							result= reader.read();
-							if (result >= 0)
-								buffer.append((char) result);
-						}
-						String string= buffer.toString();
-						int start= string.indexOf(RESULT_PREFIX);
-						if (start >= 0) {
-							int end= string.indexOf(RESULT_POSTFIX, start);
-							if (end >= 0)
-								fSerialVersionID= Long.valueOf(string.substring(start + RESULT_PREFIX.length(), end)).longValue();
-						}
-					} catch (IOException exception) {
-						JavaPlugin.log(exception);
-						fErrorMessage= exception.getLocalizedMessage();
-					}
-					buffer= new StringBuffer();
-					reader= new BufferedReader(new InputStreamReader(process.getErrorStream()));
-					try {
-						int result= 0;
-						while (reader.ready()) {
-							result= reader.read();
-							if (result >= 0)
-								buffer.append((char) result);
-						}
-						String string= buffer.toString();
-						int start= string.indexOf(ERROR_PREFIX);
-						if (start >= 0) {
-							int end= string.indexOf(ERROR_POSTFIX, start);
-							if (end >= 0)
-								fErrorMessage= string.substring(start + ERROR_PREFIX.length(), end);
-						}
-					} catch (IOException exception) {
-						JavaPlugin.log(exception);
-						fErrorMessage= exception.getLocalizedMessage();
-					}
+					monitor.worked(10);
+					final String directory= System.getProperty("java.io.tmpdir"); //$NON-NLS-1$
+					if (directory != null && !"".equals(directory)) { //$NON-NLS-1$
+						final String separator= System.getProperty("file.separator"); //$NON-NLS-1$
+						if (separator != null && !"".equals(separator)) { //$NON-NLS-1$
+							final File file= new File(directory + separator + TEMP_FILE_NAME);
+							if (file.exists()) {
+								monitor.worked(40);
+								file.deleteOnExit();
+								BufferedReader reader= null;
+								final List lines= new ArrayList();
+								try {
+									reader= new BufferedReader(new InputStreamReader(new FileInputStream(file), TEMP_FILE_ENCODING));
+									while (reader.ready()) {
+										final String line= reader.readLine();
+										if (line != null && !"".equals(line)) //$NON-NLS-1$
+											lines.add(line);
+									}
+								} catch (IOException exception) {
+									fErrorMessage= exception.getLocalizedMessage();
+								} finally {
+									if (reader != null) {
+										try {
+											reader.close();
+										} catch (IOException exception) {
+											// Do nothing
+										}
+									}
+								}
+								fSerialVersionID= new long[lines.size()];
+								for (int index= 0; index < fSerialVersionID.length; index++) {
+									final String line= (String) lines.get(index);
+									try {
+										fSerialVersionID[index]= Long.parseLong(line);
+									} catch (NumberFormatException exception) {
+										fSerialVersionID[index]= AbstractSerialVersionProposal.SERIAL_VALUE;
+										fErrorMessage= line;
+									}
+								}
+							} else
+								fErrorMessage= CorrectionMessages.SerialVersionLaunchConfigurationDelegate_temp_file_not_exists;
+						} else
+							fErrorMessage= CorrectionMessages.SerialVersionLaunchConfigurationDelegate_error_getting_separator_property;
+					} else
+						fErrorMessage= CorrectionMessages.SerialVersionLaunchConfigurationDelegate_error_getting_temp_dir_property;
 					if (monitor.isCanceled())
 						process.destroy();
 				}
 			} finally {
-				subMonitor.done();
+				monitor.done();
 			}
 		}
 	}
 
-	/** The serial version computation error postfix */
-	public static final String ERROR_POSTFIX= "__SerialVersionComputationErrorPostfix__"; //$NON-NLS-1$
-
-	/** The serial version computation error prefix */
-	public static final String ERROR_PREFIX= "__SerialVersionComputationErrorPrefix__"; //$NON-NLS-1$
-
 	/** The list of java executable locations */
 	private static final String[] fgExecutableLocations= { "bin" + File.separatorChar + "javaw", "bin" + File.separatorChar + "javaw.exe", "jre" + File.separatorChar + "bin" + File.separatorChar + "javaw", "jre" + File.separatorChar + "bin" + File.separatorChar + "javaw.exe", "bin" + File.separatorChar + "java", "bin" + File.separatorChar + "java.exe", "jre" + File.separatorChar + "bin" + File.separatorChar + "java", "jre" + File.separatorChar + "bin" + File.separatorChar + "java.exe"}; //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$ //$NON-NLS-4$ //$NON-NLS-5$ //$NON-NLS-6$ //$NON-NLS-7$ //$NON-NLS-8$ //$NON-NLS-9$ //$NON-NLS-10$ //$NON-NLS-11$ //$NON-NLS-12$ //$NON-NLS-13$ //$NON-NLS-14$ //$NON-NLS-15$ //$NON-NLS-16$ //$NON-NLS-17$ //$NON-NLS-18$ //$NON-NLS-19$ //$NON-NLS-20$
-
-	/** The serial version computation result postfix */
-	public static final String RESULT_POSTFIX= "__SerialVersionComputationResultPostfix__"; //$NON-NLS-1$
-
-	/** The serial version computation result prefix */
-	public static final String RESULT_PREFIX= "__SerialVersionComputationResultPrefix__"; //$NON-NLS-1$
 
 	/**
 	 * Attempts to find the java executable in the specified location.
 	 * 
-	 * @param location the location of the vm installation
+	 * @param location
+	 *            the location of the vm installation
 	 * @return the corresponding java executable, or <code>null</code>
 	 */
-	public static File findJavaExecutable(final File location) {
+	private static File findJavaExecutable(final File location) {
 		Assert.isNotNull(location);
 
 		File file= null;
@@ -273,37 +282,37 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 	}
 
 	/** The error message */
-	protected String fErrorMessage= null;
+	private String fErrorMessage= null;
 
-	/** The computed serial version id */
-	protected long fSerialVersionID= AbstractSerialVersionProposal.SERIAL_VALUE;
+	/** The computed serial version ids */
+	private long[] fSerialVersionID= {};
 
 	/**
 	 * Returns any error message that occurred during the computation.
 	 * 
-	 * @return The error message, or <code>null</code>
+	 * @return the error message, or <code>null</code>
 	 */
-	public final String getErrorMessage() {
+	public String getErrorMessage() {
 		return fErrorMessage;
 	}
 
 	/**
-	 * Returns the computed serial version ID.
+	 * Returns the computed serial version IDs.
 	 * 
-	 * @return The computed serial version ID
+	 * @return the computed serial version IDs
 	 */
-	public final long getSerialVersionID() {
+	public long[] getSerialVersionIDs() {
 		return fSerialVersionID;
 	}
 
-	/*
-	 * @see org.eclipse.debug.core.model.ILaunchConfigurationDelegate#launch(org.eclipse.debug.core.ILaunchConfiguration,java.lang.String, org.eclipse.debug.core.ILaunch,org.eclipse.core.runtime.IProgressMonitor)
+	/**
+	 * {@inheritDoc}
 	 */
-	public final void launch(final ILaunchConfiguration configuration, final String mode, final ILaunch launch, IProgressMonitor monitor) throws CoreException {
+	public void launch(final ILaunchConfiguration configuration, final String mode, final ILaunch launch, IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(configuration);
 		Assert.isNotNull(monitor);
 		try {
-			monitor.beginTask(MessageFormat.format("{0}...", new String[] { configuration.getName()}), 4); //$NON-NLS-1$
+			monitor.beginTask(MessageFormat.format("{0}...", new String[] { configuration.getName()}), 100); //$NON-NLS-1$
 			if (monitor.isCanceled())
 				return;
 
@@ -312,7 +321,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 			final String type= verifyMainTypeName(configuration);
 			final IVMInstall install= verifyVMInstall(configuration);
 			final IVMRunner runner= new SerialVersionRunner(install);
-			monitor.worked(1);
+			monitor.worked(10);
 
 			monitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_setting_up);
 
@@ -323,7 +332,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 			final Map attributes= getVMSpecificAttributesMap(configuration);
 			final String[] classpath= getClasspath(configuration);
 
-			monitor.worked(1);
+			monitor.worked(5);
 
 			final VMRunnerConfiguration vmConfiguration= new VMRunnerConfiguration(type, classpath);
 			vmConfiguration.setProgramArguments(execArguments.getProgramArgumentsArray());
@@ -336,9 +345,9 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 				return;
 
 			monitor.subTask(CorrectionMessages.SerialVersionLaunchConfigurationDelegate_launching_computation);
-			monitor.worked(1);
+			monitor.worked(5);
 
-			runner.run(vmConfiguration, launch, monitor);
+			runner.run(vmConfiguration, launch, new SubProgressMonitor(monitor, 80));
 
 			if (monitor.isCanceled())
 				return;
