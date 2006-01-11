@@ -44,6 +44,7 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
@@ -252,6 +253,9 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 			final AnonymousClassDeclaration declaration= (AnonymousClassDeclaration) parent;
 			final ClassInstanceCreation creation= (ClassInstanceCreation) declaration.getParent();
 			binding= creation.resolveTypeBinding();
+		} else if (parent instanceof ParameterizedType) {
+			final ParameterizedType type= (ParameterizedType) parent;
+			binding= type.resolveBinding();
 		}
 		if (binding != null)
 			return binding.getBinaryName();

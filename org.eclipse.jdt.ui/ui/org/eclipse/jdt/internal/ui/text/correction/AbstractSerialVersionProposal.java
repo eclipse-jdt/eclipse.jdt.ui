@@ -158,7 +158,16 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 				rewrite.getListRewrite(node, ((AbstractTypeDeclaration) node).getBodyDeclarationsProperty()).insertAt(declaration, 0, null);
 			else if (node instanceof AnonymousClassDeclaration)
 				rewrite.getListRewrite(node, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(declaration, 0, null);
-			else
+			else if (node instanceof ParameterizedType) {
+				final ParameterizedType type= (ParameterizedType) node;
+				final ASTNode parent= type.getParent();
+				if (parent instanceof ClassInstanceCreation) {
+					final ClassInstanceCreation creation= (ClassInstanceCreation) parent;
+					final AnonymousClassDeclaration anonymous= creation.getAnonymousClassDeclaration();
+					if (anonymous != null)
+						rewrite.getListRewrite(anonymous, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(declaration, 0, null);
+				}
+			} else
 				Assert.isTrue(false);
 
 			addLinkedPositions(rewrite, fragment);
