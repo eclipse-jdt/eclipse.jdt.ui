@@ -334,7 +334,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					final IJavaProject javaProject= fSubType.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_EXTRACT_INTERFACE, project, MessageFormat.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { fSuperName, JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, JavaRefactorings.IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
+					return new RefactoringDescriptor(ID_EXTRACT_INTERFACE, project, MessageFormat.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { fSuperName, JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 				}
 			};
 			final IFile file= ResourceUtil.getFile(fSubType.getCompilationUnit());

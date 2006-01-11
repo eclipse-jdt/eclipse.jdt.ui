@@ -331,7 +331,7 @@ public class InlineMethodRefactoring extends Refactoring implements IInitializab
 				final IMethodBinding binding= fSourceProvider.getDeclaration().resolveBinding();
 				int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
 				if (!Modifier.isPrivate(binding.getModifiers()))
-					flags|= RefactoringDescriptor.CLOSURE_CHANGE;
+					flags|= RefactoringDescriptor.MULTI_CHANGE;
 				return new RefactoringDescriptor(ID_INLINE_METHOD, project, MessageFormat.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringClass(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, flags);
 			}
 		}; 

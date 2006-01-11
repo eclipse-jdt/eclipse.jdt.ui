@@ -30,7 +30,7 @@ public final class JavaRefactorings {
 	 * imported from a JAR file.
 	 * </p>
 	 */
-	public static final int IMPORTABLE= 1 << 16;
+	public static final int JAR_IMPORTABLE= 1 << 16;
 
 	public static RefactoringStatusEntry createStatusEntry(IProblem problem, String newWcSource) {
 		RefactoringStatusContext context= new JavaStringStatusContext(newWcSource, new SourceRange(problem));

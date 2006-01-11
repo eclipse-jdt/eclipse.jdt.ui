@@ -824,7 +824,7 @@ public class InlineConstantRefactoring extends Refactoring implements IInitializ
 					int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
 					try {
 						if (!Flags.isPrivate(fField.getFlags()))
-							flags|= RefactoringDescriptor.CLOSURE_CHANGE;
+							flags|= RefactoringDescriptor.MULTI_CHANGE;
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}

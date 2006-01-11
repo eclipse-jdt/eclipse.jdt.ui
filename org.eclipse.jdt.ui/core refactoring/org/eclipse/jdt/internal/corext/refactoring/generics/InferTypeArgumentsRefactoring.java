@@ -493,7 +493,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring implements IIniti
 					arguments.put(ATTRIBUTE_CLONE, Boolean.valueOf(fAssumeCloneReturnsSameType).toString());
 					arguments.put(ATTRIBUTE_LEAVE, Boolean.valueOf(fLeaveUnconstrainedRaw).toString());
 					final IJavaProject project= getSingleProject();
-					return new RefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, project != null ? project.getElementName() : null, project != null ? NLS.bind(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description, null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE);
+					return new RefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, project != null ? project.getElementName() : null, project != null ? NLS.bind(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description, null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 				}
 			}; 
 			return result;

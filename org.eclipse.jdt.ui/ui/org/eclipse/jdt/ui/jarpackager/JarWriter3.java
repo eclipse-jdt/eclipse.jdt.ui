@@ -294,7 +294,7 @@ public class JarWriter3 {
 					file= File.createTempFile("history", null); //$NON-NLS-1$
 					output= new BufferedOutputStream(new FileOutputStream(file));
 					try {
-						int filter= JavaRefactorings.IMPORTABLE;
+						int filter= JavaRefactorings.JAR_IMPORTABLE;
 						if (fJarPackage.isExportStructuralOnly())
 							filter|= RefactoringDescriptor.STRUCTURAL_CHANGE;
 						RefactoringCore.getRefactoringHistoryService().writeRefactoringDescriptors(proxies, output, filter, new SubProgressMonitor(monitor, 50));

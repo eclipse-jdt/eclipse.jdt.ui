@@ -122,14 +122,14 @@ public class RenameResourceChange extends JDTChange {
 		return getResource();
 	}
 
-	/*
-	 * @see org.eclipse.ltk.core.refactoring.Change#getRefactoringDescriptor()
-	 */
 	public RefactoringDescriptor getRefactoringDescriptor() {
 		final Map arguments= new HashMap();
 		arguments.put(RefactoringDescriptor.INPUT, fResourcePath.toPortableString());
 		arguments.put(RefactoringDescriptor.NAME, fNewName);
-		return new RefactoringDescriptor(ID_RENAME_RESOURCE, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { getResource().getFullPath().toString(), fNewName}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.CLOSURE_CHANGE | RefactoringDescriptor.BREAKING_CHANGE);
+		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE;
+		if (getResource().getType() == IResource.PROJECT)
+			flags|= RefactoringDescriptor.PROJECT_CHANGE;
+		return new RefactoringDescriptor(ID_RENAME_RESOURCE, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { getResource().getFullPath().toString(), fNewName}), null, arguments, flags);
 	}
 
 	public String getNewName() {
