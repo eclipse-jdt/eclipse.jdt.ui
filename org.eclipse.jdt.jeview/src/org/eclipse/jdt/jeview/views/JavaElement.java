@@ -326,6 +326,12 @@ public class JavaElement extends JEAttribute {
 		result.add(new JavaElement(this, "CLASS FILE", member.getClassFile()));
 		result.add(new JavaElement(this, "COMPILATION UNIT", member.getCompilationUnit()));
 		result.add(new JavaElement(this, "DECLARING TYPE", member.getDeclaringType()));
+		result.add(new JavaElementChildrenProperty(this, "CATEGORIES") {
+			@Override
+			protected JEAttribute[] computeChildren() throws JavaModelException {
+				return createStrings(this, member.getCategories());
+			}
+		});
 	}
 	
 	private void addTypeChildren(ArrayList<JEAttribute> result, final IType type) {
