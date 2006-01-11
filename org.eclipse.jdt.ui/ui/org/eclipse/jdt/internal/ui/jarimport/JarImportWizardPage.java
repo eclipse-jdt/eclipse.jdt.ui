@@ -317,7 +317,7 @@ public final class JarImportWizardPage extends WizardPage {
 		handleJarFileChanged();
 		if (isPageComplete())
 			handlePackageFragmentRootChanged();
-		if (!fTreeViewer.getControl().isEnabled())
+		if (fImportWizard && !fTreeViewer.getControl().isEnabled())
 			setErrorMessage(JarImportMessages.JarImportWizardPage_no_jar_files);
 		getContainer().updateButtons();
 	}
