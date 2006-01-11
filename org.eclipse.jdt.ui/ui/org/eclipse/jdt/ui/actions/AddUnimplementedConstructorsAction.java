@@ -485,16 +485,19 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 
 	private void run(Shell shell, IType type, boolean activatedFromEditor) throws CoreException {
 		if (!ElementValidator.check(type, getShell(), getDialogTitle(), activatedFromEditor)) {
+			notifyResult(false);
 			return;
 		}
 		if (!ActionUtil.isProcessable(getShell(), type)) {
+			notifyResult(false);
 			return;
 		}
 
 		AddUnimplementedConstructorsContentProvider provider= new AddUnimplementedConstructorsContentProvider(type);
 		Object[] constructors= provider.getElements(null);
 		if (constructors.length == 0) {
-			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_error_nothing_found); 
+			MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.AddUnimplementedConstructorsAction_error_nothing_found);
+			notifyResult(false);
 			return;
 		}
 
@@ -509,10 +512,13 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 		dialog.setMessage(ActionMessages.AddUnimplementedConstructorsAction_dialog_label); 
 		dialog.setValidator(new AddUnimplementedConstructorsValidator(constructors.length));
 
-		if (dialog.open() == Window.OK) {
+		final int dialogResult= dialog.open();
+		if (dialogResult == Window.OK) {
 			Object[] elements= dialog.getResult();
-			if (elements == null)
+			if (elements == null) {
+				notifyResult(false);
 				return;
+			}
 			
 			ArrayList result= new ArrayList();
 			for (int i= 0; i < elements.length; i++) {
@@ -552,6 +558,7 @@ public class AddUnimplementedConstructorsAction extends SelectionDispatchAction 
 				}
 			}
 		}
+		notifyResult(dialogResult == Window.OK);
 	}
 	
 	/**

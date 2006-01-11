@@ -214,7 +214,8 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		try {
 			IType selectionType= getSelectedType(selection);
 			if (selectionType == null) {
-				MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_not_applicable); 
+				MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_not_applicable);
+				notifyResult(false);
 				return;
 			}
 
@@ -231,10 +232,12 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			} else if (firstElement instanceof ICompilationUnit) {
 				IType type= ((ICompilationUnit) firstElement).findPrimaryType();
 				if (type.isAnnotation()) {
-					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_annotation_not_applicable); 
+					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_annotation_not_applicable);
+					notifyResult(false);
 					return;
 				} else if (type.isInterface()) {
-					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_interface_not_applicable); 
+					MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_interface_not_applicable);
+					notifyResult(false);
 					return;
 				} else
 					run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
@@ -248,8 +251,10 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	 * (non-Javadoc) Method declared on SelectionDispatchAction
 	 */
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
+		if (!ActionUtil.isProcessable(getShell(), fEditor)) {
+			notifyResult(false);
 			return;
+		}
 		try {
 			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 			if (elements.length == 1 && (elements[0] instanceof IField)) {
@@ -276,11 +281,14 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 	// ---- Helpers -------------------------------------------------------------------
 
 	void run(IType type, IField[] selected, boolean activated) throws CoreException {
-		if (!ElementValidator.check(type, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, activated))
+		if (!ElementValidator.check(type, getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, activated)) {
+			notifyResult(false);
 			return;
-		if (!ActionUtil.isProcessable(getShell(), type))
+		}
+		if (!ActionUtil.isProcessable(getShell(), type)) {
+			notifyResult(false);
 			return;
-
+		}
 		IField[] candidates= type.getFields();
 		ArrayList fields= new ArrayList();
 		for (int index= 0; index < candidates.length; index++) {
@@ -303,7 +311,8 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			}
 		}
 		if (fields.isEmpty()) {
-			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_typeContainsNoFields_message); 
+			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_typeContainsNoFields_message);
+			notifyResult(false);
 			return;
 		}
 		final GenerateConstructorUsingFieldsContentProvider provider= new GenerateConstructorUsingFieldsContentProvider(type, fields, Arrays.asList(selected));
@@ -311,6 +320,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		final ITypeBinding provided= provider.getType();
 		if (provided.isAnonymous()) {
 			MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_anonymous_class);
+			notifyResult(false);
 			return;
 		}
 		if (provided.isEnum()) {
@@ -319,6 +329,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 			bindings= StubUtility2.getVisibleConstructors(provided, false, true);
 			if (bindings.length == 0) {
 				MessageDialog.openInformation(getShell(), ActionMessages.GenerateConstructorUsingFieldsAction_error_title, ActionMessages.GenerateConstructorUsingFieldsAction_error_nothing_found);
+				notifyResult(false);
 				return;
 			}
 		}
@@ -333,10 +344,13 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 		dialog.setMessage(ActionMessages.GenerateConstructorUsingFieldsAction_dialog_label); 
 		dialog.setValidator(new GenerateConstructorUsingFieldsValidator(dialog, provided, fields.size()));
 
-		if (dialog.open() == Window.OK) {
+		final int dialogResult= dialog.open();
+		if (dialogResult == Window.OK) {
 			Object[] elements= dialog.getResult();
-			if (elements == null)
+			if (elements == null) {
+				notifyResult(false);
 				return;
+			}
 			ArrayList result= new ArrayList(elements.length);
 			for (int index= 0; index < elements.length; index++) {
 				if (elements[index] instanceof IVariableBinding)
@@ -370,6 +384,7 @@ public class GenerateNewConstructorUsingFieldsAction extends SelectionDispatchAc
 				}
 			}
 		}
+		notifyResult(dialogResult == Window.OK);
 	}
 
 	private IMethodBinding getObjectConstructor(CompilationUnit compilationUnit) {

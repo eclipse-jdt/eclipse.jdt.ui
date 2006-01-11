@@ -147,14 +147,17 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 		try {
 			final IType type= getSelectedType(selection);
 			if (type == null) {
-				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_not_applicable); 
+				MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_not_applicable);
+				notifyResult(false);
 				return;
 			}
 			if (!ElementValidator.check(type, getShell(), getDialogTitle(), false) || !ActionUtil.isProcessable(getShell(), type)) {
+				notifyResult(false);
 				return;
 			}
 			if (type == null) {
-				MessageDialog.openError(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_error_type_removed_in_editor); 
+				MessageDialog.openError(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_error_type_removed_in_editor);
+				notifyResult(false);
 				return;
 			}
 			run(getShell(), type);
@@ -171,14 +174,17 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			final IType type= SelectionConverter.getTypeAtOffset(fEditor);
 			if (type != null) {
 				if (!ElementValidator.check(type, getShell(), getDialogTitle(), false) || !ActionUtil.isProcessable(getShell(), type)) {
+					notifyResult(false);
 					return;
 				}
 				if (type.isAnnotation()) {
-					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_annotation_not_applicable); 
+					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_annotation_not_applicable);
+					notifyResult(false);
 					return;
 				}
 				if (type.isInterface()) {
-					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_interface_not_applicable); 
+					MessageDialog.openInformation(getShell(), getDialogTitle(), ActionMessages.OverrideMethodsAction_interface_not_applicable);
+					notifyResult(false);
 					return;
 				}
 				run(getShell(), type);
@@ -195,16 +201,20 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 	private void run(Shell shell, IType type) throws CoreException {
 		final OverrideMethodDialog dialog= new OverrideMethodDialog(shell, fEditor, type, false);
 		if (!dialog.hasMethodsToOverride()) {
-			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.OverrideMethodsAction_error_nothing_found); 
+			MessageDialog.openInformation(shell, getDialogTitle(), ActionMessages.OverrideMethodsAction_error_nothing_found);
+			notifyResult(false);
 			return;
 		}
 		if (dialog.open() != Window.OK) {
+			notifyResult(false);
 			return;
 		}
 			
 		final Object[] selected= dialog.getResult();
-		if (selected == null)
+		if (selected == null) {
+			notifyResult(false);
 			return;
+		}
 		
 		ArrayList methods= new ArrayList();
 		for (int i= 0; i < selected.length; i++) {
@@ -241,6 +251,7 @@ public class OverrideMethodsAction extends SelectionDispatchAction {
 			if (target != null)
 				target.endCompoundChange();
 		}
+		notifyResult(true);
 	}
 
 	/**

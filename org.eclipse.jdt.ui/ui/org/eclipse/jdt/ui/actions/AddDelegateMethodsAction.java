@@ -559,9 +559,10 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			int result= dialog.open();
 			if (result == Window.OK) {
 				Object[] object= dialog.getResult();
-				if (object == null)
+				if (object == null) {
+					notifyResult(false);
 					return;
-
+				}
 				List tuples= new ArrayList(object.length);
 				for (int index= 0; index < object.length; index++) {
 					if (object[index] instanceof IBinding[])
@@ -596,6 +597,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 						target.endCompoundChange();
 				}
 			}
+			notifyResult(result == Window.OK);
 		} catch (CoreException exception) {
 			ExceptionHandler.handle(exception, DIALOG_TITLE, ActionMessages.AddDelegateMethodsAction_error_actionfailed); 
 		} catch (InvocationTargetException e) {

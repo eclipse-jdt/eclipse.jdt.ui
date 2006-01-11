@@ -200,13 +200,16 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 					MessageDialog.openError(getShell(), 
 						ActionMessages.AddGetterSetterAction_no_primary_type_title, 
 						ActionMessages.AddGetterSetterAction_no_primary_type_message);
+					notifyResult(false);
 					return;
 				}
 				if (type.isAnnotation()) {
-					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_annotation_not_applicable); 
+					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_annotation_not_applicable);
+					notifyResult(false);
 					return;
 				} else if (type.isInterface()) {
-					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_interface_not_applicable); 
+					MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_interface_not_applicable);
+					notifyResult(false);
 					return;
 				} else
 					run(((ICompilationUnit) firstElement).findPrimaryType(), new IField[0], false);
@@ -255,22 +258,29 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 
 	private void run(IType type, IField[] preselected, boolean editor) throws CoreException {
 		if (type.isAnnotation()) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_annotation_not_applicable); 
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_annotation_not_applicable);
+			notifyResult(false);
 			return;
 		} else if (type.isInterface()) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_interface_not_applicable); 
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGetterSetterAction_interface_not_applicable);
+			notifyResult(false);
 			return;
 		}
-		if (!ElementValidator.check(type, getShell(), DIALOG_TITLE, editor))
+		if (!ElementValidator.check(type, getShell(), DIALOG_TITLE, editor)) {
+			notifyResult(false);
 			return;
-		if (!ActionUtil.isProcessable(getShell(), type))
+		}
+		if (!ActionUtil.isProcessable(getShell(), type)) {
+			notifyResult(false);
 			return;
+		}
 
 		ILabelProvider lp= new AddGetterSetterLabelProvider();
 		resetNumEntries();
 		Map entries= createGetterSetterMapping(type);
 		if (entries.isEmpty()) {
-			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGettSetterAction_typeContainsNoFields_message); 
+			MessageDialog.openInformation(getShell(), DIALOG_TITLE, ActionMessages.AddGettSetterAction_typeContainsNoFields_message);
+			notifyResult(false);
 			return;
 		}
 		AddGetterSetterContentProvider cp= new AddGetterSetterContentProvider(entries);
@@ -291,8 +301,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 		int dialogResult= dialog.open();
 		if (dialogResult == Window.OK) {
 			Object[] result= dialog.getResult();
-			if (result == null)
+			if (result == null) {
+				notifyResult(false);
 				return;
+			}
 			fSort= dialog.getSortOrder();
 			fSynchronized= dialog.getSynchronized();
 			fFinal= dialog.getFinal();
@@ -310,6 +322,7 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 			}
 			generate(type, getterFields, setterFields, getterSetterFields, new RefactoringASTParser(AST.JLS3).parse(type.getCompilationUnit(), true), dialog.getElementPosition());
 		}
+		notifyResult(dialogResult == Window.OK);
 	}
 
 	private static class AddGetterSetterSelectionStatusValidator implements ISelectionStatusValidator {
@@ -507,8 +520,10 @@ public class AddGetterSetterAction extends SelectionDispatchAction {
 	 */
 	public void run(ITextSelection selection) {
 		try {
-			if (!ActionUtil.isProcessable(getShell(), fEditor))
+			if (!ActionUtil.isProcessable(getShell(), fEditor)) {
+				notifyResult(false);
 				return;
+			}
 
 			IJavaElement[] elements= SelectionConverter.codeResolve(fEditor);
 			if (elements.length == 1 && (elements[0] instanceof IField)) {
