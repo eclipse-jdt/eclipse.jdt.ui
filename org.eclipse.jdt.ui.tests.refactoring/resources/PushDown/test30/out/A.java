@@ -14,6 +14,7 @@ abstract class A {
 }
 class B extends A {
 
+	@Annotation(name = "bar")
 	@Override
 	public int foo() {
 		return 2;

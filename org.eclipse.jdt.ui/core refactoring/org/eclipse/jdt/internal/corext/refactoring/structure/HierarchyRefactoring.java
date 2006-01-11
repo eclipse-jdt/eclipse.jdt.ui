@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -53,6 +54,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IExtendedModifier;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
@@ -203,6 +205,26 @@ public abstract class HierarchyRefactoring extends Refactoring implements IIniti
 			newMethod.thrownExceptions().add(index, ASTNode.copySubtree(ast, (Name) oldMethod.thrownExceptions().get(index)));
 	}
 
+	protected static void copyAnnotations(MethodDeclaration oldMethod, MethodDeclaration newMethod) {
+		final AST ast= newMethod.getAST();
+		for (int index= 0, n= oldMethod.modifiers().size(); index < n; index++) {
+			final IExtendedModifier modifier= (IExtendedModifier) oldMethod.modifiers().get(index);
+			final List modifiers= newMethod.modifiers();
+			if (modifier.isAnnotation() && !modifiers.contains(modifier))
+				modifiers.add(index, ASTNode.copySubtree(ast, (Annotation) modifier));
+		}
+	}
+
+	protected static void copyAnnotations(FieldDeclaration oldField, FieldDeclaration newField) {
+		final AST ast= newField.getAST();
+		for (int index= 0, n= oldField.modifiers().size(); index < n; index++) {
+			final IExtendedModifier modifier= (IExtendedModifier) oldField.modifiers().get(index);
+			final List modifiers= newField.modifiers();
+			if (modifier.isAnnotation() && !modifiers.contains(modifier))
+				modifiers.add(index, ASTNode.copySubtree(ast, (Annotation) modifier));
+		}
+	}
+
 	protected static void copyTypeParameters(MethodDeclaration oldMethod, MethodDeclaration newMethod) {
 		final AST ast= newMethod.getAST();
 		for (int index= 0, n= oldMethod.typeParameters().size(); index < n; index++)
@@ -245,6 +267,7 @@ public abstract class HierarchyRefactoring extends Refactoring implements IIniti
 		final FieldDeclaration newField= rewrite.getAST().newFieldDeclaration(newFragment);
 		final FieldDeclaration oldField= ASTNodeSearchUtil.getFieldDeclarationNode(field, unit);
 		copyJavadocNode(rewrite, field, oldField, newField);
+		copyAnnotations(oldField, newField);
 		newField.modifiers().addAll(ASTNodeFactory.newModifiers(rewrite.getAST(), modifiers));
 		Type oldType= oldField.getType();
 		Type newType= null;

@@ -95,6 +95,7 @@ import org.eclipse.jdt.internal.corext.util.WorkingCopyUtil;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 public final class PushDownRefactoring extends HierarchyRefactoring {
 
@@ -731,8 +732,8 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		FieldDeclaration oldField= ASTNodeSearchUtil.getFieldDeclarationNode(field, declaringCuNode);
 		if (info.copyJavadocToCopiesInSubclasses())
 			copyJavadocNode(rewrite, field, oldField, newField);
+		copyAnnotations(oldField, newField);
 		newField.modifiers().addAll(ASTNodeFactory.newModifiers(ast, info.getNewModifiersForCopyInSubclass(oldField.getModifiers())));
-
 		Type oldType= oldField.getType();
 		ICompilationUnit cu= field.getCompilationUnit();
 		Type newType= null;
@@ -755,11 +756,13 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 		newMethod.setExtraDimensions(oldMethod.getExtraDimensions());
 		if (info.copyJavadocToCopiesInSubclasses())
 			copyJavadocNode(rewrite, method, oldMethod, newMethod);
-		if (info.isNewMethodToBeDeclaredAbstract() && JavaModelUtil.is50OrHigher(rewriter.getCu().getJavaProject())) {
+		final IJavaProject project= rewriter.getCu().getJavaProject();
+		if (info.isNewMethodToBeDeclaredAbstract() && JavaModelUtil.is50OrHigher(project) && JavaPreferencesSettings.getCodeGenerationSettings(project).overrideAnnotation) {
 			final MarkerAnnotation annotation= ast.newMarkerAnnotation();
 			annotation.setTypeName(ast.newSimpleName("Override")); //$NON-NLS-1$
 			newMethod.modifiers().add(annotation);
 		}
+		copyAnnotations(oldMethod, newMethod);
 		newMethod.modifiers().addAll(ASTNodeFactory.newModifiers(ast, info.getNewModifiersForCopyInSubclass(oldMethod.getModifiers())));
 		newMethod.setName(ast.newSimpleName(oldMethod.getName().getIdentifier()));
 		copyReturnType(rewrite, method.getCompilationUnit(), oldMethod, newMethod, mapping);

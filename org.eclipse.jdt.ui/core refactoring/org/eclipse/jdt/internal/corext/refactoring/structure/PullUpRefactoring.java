@@ -1101,6 +1101,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 		int modifiers= getModifiersWithUpdatedVisibility(sourceMethod, sourceMethod.getFlags(), adjustments, pm, true, status);
 		if (oldMethod.isVarargs())
 			modifiers&= ~Flags.AccVarargs;
+		copyAnnotations(oldMethod, newMethod);
 		newMethod.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers));
 		newMethod.setName(((SimpleName) ASTNode.copySubtree(ast, oldMethod.getName())));
 		copyReturnType(rewrite, getDeclaringType().getCompilationUnit(), oldMethod, newMethod, mapping);
