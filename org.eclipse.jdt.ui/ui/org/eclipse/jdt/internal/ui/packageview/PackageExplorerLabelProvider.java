@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
-import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.core.resources.IFolder;
 
 import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.core.IPackageFragment;
 
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 
@@ -51,9 +53,26 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 			return super.getText(fragment);
 		} else {
 			Object parent= fContentProvider.getPackageFragmentProvider().getParent(fragment);
-			if(parent instanceof IPackageFragment)
+			if (parent instanceof IPackageFragment) {
 				return getNameDelta((IPackageFragment) parent, fragment);
+			} else if (parent instanceof IFolder) {
+				int prefixLength= getPrefixLength((IFolder) parent);
+				return fragment.getElementName().substring(prefixLength);
+			}
 			else return super.getText(fragment);
+		}
+	}
+	
+	private int getPrefixLength(IFolder folder) {
+		Object parent= fContentProvider.getParent(folder);
+		int folderNameLenght= folder.getName().length() + 1;
+		if(parent instanceof IPackageFragment) {
+			String fragmentName= ((IPackageFragment)parent).getElementName();
+			return fragmentName.length() + 1 + folderNameLenght;
+		} else if (parent instanceof IFolder) {
+			return getPrefixLength((IFolder)parent) + folderNameLenght;
+		} else {
+			return folderNameLenght;
 		}
 	}
 	

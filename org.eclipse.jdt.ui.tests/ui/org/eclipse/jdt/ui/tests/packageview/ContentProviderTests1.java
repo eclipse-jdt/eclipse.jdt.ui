@@ -16,6 +16,9 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
@@ -38,6 +41,8 @@ import org.eclipse.jdt.core.IJavaElementDelta;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
@@ -259,6 +264,17 @@ public class ContentProviderTests1 extends TestCase {
 		assertTrue("Remove happened", fMyPart.hasRemoveHappened()); //$NON-NLS-1$
 		assertTrue("Correct refresh", fMyPart.getRemovedObject().contains(fCU2)); //$NON-NLS-1$
 		assertEquals("No refreshes", 0, fMyPart.getRefreshedObject().size()); //$NON-NLS-1$
+	}
+	
+	public void testBug65240() throws Exception {
+		IClasspathEntry[] rawClasspath= fJProject2.getRawClasspath();
+		IClasspathEntry src1= rawClasspath[0];
+		CPListElement element= CPListElement.createFromExisting(src1, fJProject2);
+		element.setAttribute(CPListElement.INCLUSION, new IPath[] {new Path("pack3/pack5/")});
+		fJProject2.setRawClasspath(new IClasspathEntry[] {element.getClasspathEntry()}, null);
+		Object[] expectedChildren= new Object[]{fPack4.getResource(), fPack5};
+		Object[] children= fProvider.getChildren(fPack3.getResource());
+		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren));//$NON-NLS-1$
 	}
 	
 //	public void testAddWorkingCopyCU() throws Exception {

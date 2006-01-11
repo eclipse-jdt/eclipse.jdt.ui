@@ -13,10 +13,11 @@ package org.eclipse.jdt.internal.ui.packageview;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
@@ -125,6 +126,11 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 					default :
 						// do nothing
 				}
+			} else if (parentElement instanceof IFolder) {
+				IFolder folder= (IFolder)parentElement;
+				IResource[] resources= folder.members();
+				Object[] children = getFolders(resources).toArray();
+				return filter(children);
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
@@ -263,7 +269,11 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 							IResource res = folder.getParent();
 
 							IJavaElement el = JavaCore.create(res);
-							return el;
+							if (el != null) {
+								return el;
+							} else {
+								return res;
+							}
 						}
 					}
 					return parent;
@@ -406,6 +416,10 @@ public class PackageFragmentProvider implements IPropertyChangeListener {
 				IJavaElement el = (IJavaElement) gp;
 				if(el.exists())
 					fViewer.refresh(gp);
+			} else if (gp instanceof IFolder) {
+				IFolder folder= (IFolder)gp;
+				if (folder.exists())
+					fViewer.refresh(folder);
 			}
 		}
 	}
