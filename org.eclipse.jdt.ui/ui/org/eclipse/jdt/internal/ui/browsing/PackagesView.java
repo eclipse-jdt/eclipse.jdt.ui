@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.browsing;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.core.resources.IFolder;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
@@ -145,14 +147,14 @@ public class PackagesView extends JavaBrowsingPart{
 
 
 	/**
-	 * Creates new NonJavaElementFilter and overides method select to allow for
+	 * Creates new NonJavaElementFilter and overrides method select to allow for
 	 * LogicalPackages.
 	 * @return NonJavaElementFilter
 	 */
 	protected NonJavaElementFilter createNonJavaElementFilter() {
 		return new NonJavaElementFilter(){
 			public boolean select(Viewer viewer, Object parent, Object element){
-				return ((element instanceof IJavaElement) || (element instanceof LogicalPackage));
+				return ((element instanceof IJavaElement) || (element instanceof LogicalPackage) || (element instanceof IFolder));
 			}
 		};
 	}

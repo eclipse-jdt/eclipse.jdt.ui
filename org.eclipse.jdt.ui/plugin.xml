@@ -4410,6 +4410,14 @@
             class="org.eclipse.jdt.internal.ui.filters.EmptyInnerPackageFilter"
             id="org.eclipse.jdt.internal.ui.PackagesView.EmptyInnerPackageFilter">
       </filter>
+      <filter
+      		targetId="org.eclipse.jdt.ui.PackagesView"
+            name="%HideNoPackageContainingFolders.label"
+            enabled="true"
+            description="%HideNoPackageContainingFolders.description"
+            class="org.eclipse.jdt.internal.ui.filters.NoPackageContainingFoldersFilter"
+            id="org.eclipse.jdt.internal.ui.PackagesView.NoPackageContainingFolders">
+      </filter>
 <!-- Projects view -->
       <filter
             targetId="org.eclipse.jdt.ui.ProjectsView"

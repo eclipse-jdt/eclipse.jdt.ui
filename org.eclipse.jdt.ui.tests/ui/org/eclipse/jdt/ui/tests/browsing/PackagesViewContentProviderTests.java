@@ -24,6 +24,8 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.IWorkspaceDescription;
 import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.Path;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
@@ -33,12 +35,14 @@ import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 
 public class PackagesViewContentProviderTests extends TestCase {
@@ -346,6 +350,27 @@ public class PackagesViewContentProviderTests extends TestCase {
 
 	}
 	
+	public void testBug123424_1() throws Exception {
+		IClasspathEntry[] rawClasspath= fJProject2.getRawClasspath();
+		IClasspathEntry src1= rawClasspath[1];
+		CPListElement element= CPListElement.createFromExisting(src1, fJProject2);
+		element.setAttribute(CPListElement.INCLUSION, new IPath[] {new Path("pack3/pack5/")});
+		fJProject2.setRawClasspath(new IClasspathEntry[] {rawClasspath[0], element.getClasspathEntry(), rawClasspath[2]}, null);
+		Object[] expectedChildren= new Object[]{fPack12.getResource(), fPack32.getResource(), fPackDefault2};
+		Object[] children= fProvider.getChildren(fRoot2);
+		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren));//$NON-NLS-1$
+	}
+	
+	public void testBug123424_2() throws Exception {
+		IClasspathEntry[] rawClasspath= fJProject2.getRawClasspath();
+		IClasspathEntry src1= rawClasspath[1];
+		CPListElement element= CPListElement.createFromExisting(src1, fJProject2);
+		element.setAttribute(CPListElement.INCLUSION, new IPath[] {new Path("pack3/pack5/")});
+		fJProject2.setRawClasspath(new IClasspathEntry[] {rawClasspath[0], element.getClasspathEntry(), rawClasspath[2]}, null);
+		Object[] expectedChildren= new Object[]{fPack42.getResource(), fPack52};
+		Object[] children= fProvider.getChildren(fPack32.getResource());
+		assertTrue("Wrong children found for project", compareArrays(children, expectedChildren));//$NON-NLS-1$
+	}
 
 	/*
 	 * @see TestCase#setUp()

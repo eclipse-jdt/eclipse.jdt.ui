@@ -15,6 +15,8 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
 
@@ -80,8 +82,25 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 										list.add(fragment);
 								}
 							}
-
-							return combineSamePackagesIntoLogialPackages((IPackageFragment[]) list.toArray(new IPackageFragment[list.size()]));
+							
+							IPackageFragmentRoot[] packageFragmentRoots= project.getPackageFragmentRoots();
+							List folders= new ArrayList();
+							for (int i= 0; i < packageFragmentRoots.length; i++) {
+								IPackageFragmentRoot root= packageFragmentRoots[i];
+								IResource resource= root.getUnderlyingResource();
+								if (resource != null && resource instanceof IFolder) {
+									folders.addAll(getFolders(((IFolder)resource).members()));
+								}
+							}
+							
+							Object[] logicalPackages= combineSamePackagesIntoLogialPackages((IPackageFragment[]) list.toArray(new IPackageFragment[list.size()]));
+							if (folders.size() > 0) {
+								if (logicalPackages.length > 0)
+									folders.addAll(Arrays.asList(logicalPackages));
+								return folders.toArray();
+							} else {
+								return logicalPackages;
+							}
 						}
 
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT :
@@ -92,30 +111,39 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 							fMapToLogicalPackage.clear();
 							fMapToPackageFragments.clear();
 							IResource resource= root.getUnderlyingResource();
-							IPackageFragment[] fragments= new IPackageFragment[0];
 							if (root.isArchive()) {
+								IPackageFragment[] fragments= new IPackageFragment[0];
 								IJavaElement[] els= root.getChildren();
 								fragments= getTopLevelChildrenByElementName(els);
+								addFragmentsToMap(fragments);
+								return fragments;
 
 							} else if (resource != null && resource instanceof IFolder) {
-								fragments= getTopLevelChildrenByElementName(root.getChildren());
+								List children= getFoldersAndElements(((IFolder)resource).members());
+								
+								IPackageFragment defaultPackage= root.getPackageFragment(""); //$NON-NLS-1$
+								if(defaultPackage.exists())
+									children.add(defaultPackage);
+								
+								addFragmentsToMap(children);
+								return children.toArray();
+							} else {
+								return NO_CHILDREN;
 							}
-							addFragmentsToMap(fragments);
-							return fragments;
 						}
 
 					case IJavaElement.PACKAGE_FRAGMENT :
 						{
 							IPackageFragment packageFragment= (IPackageFragment) parentElement;
-							IPackageFragment[] fragments= new IPackageFragment[0];
-							IJavaElement parent= packageFragment.getParent();
-							if (parent instanceof IPackageFragmentRoot) {
-								IPackageFragmentRoot root= (IPackageFragmentRoot) parent;
-								fragments= findNextLevelChildrenByElementName(root, packageFragment);
+							if (packageFragment.isDefaultPackage())
+								return NO_CHILDREN;
+							
+							IResource resource= packageFragment.getUnderlyingResource();
+							if (resource != null && resource instanceof IFolder) {
+								List folders= getFoldersAndElements(((IFolder)resource).members());
+								addFragmentsToMap(folders);
+								return folders.toArray();
 							}
-
-							addFragmentsToMap(fragments);
-							return fragments;
 						}
 				}
 
@@ -131,12 +159,66 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 					children.addAll(Arrays.asList(objects));
 				}
 				return combineSamePackagesIntoLogialPackages((IPackageFragment[]) children.toArray(new IPackageFragment[children.size()]));
+			} else if (parentElement instanceof IFolder) {
+				IFolder folder= (IFolder)parentElement;
+				IResource[] resources= folder.members();
+				List children = getFoldersAndElements(resources);
+				addFragmentsToMap(children);
+				return children.toArray();
 			}
 
 		} catch (JavaModelException e) {
 			return NO_CHILDREN;
+		} catch (CoreException e) {
+			return NO_CHILDREN;
 		}
 		return NO_CHILDREN;
+	}
+
+	private void addFragmentsToMap(List elements) {
+		List packageFragments= new ArrayList();
+		for (Iterator iter= elements.iterator(); iter.hasNext();) {
+			Object elem= iter.next();
+			if (elem instanceof IPackageFragment) 
+				packageFragments.add(elem);
+		}
+		addFragmentsToMap((IPackageFragment[])packageFragments.toArray(new IPackageFragment[packageFragments.size()]));
+	}
+
+	private List getFoldersAndElements(IResource[] resources) throws CoreException {
+		List list= new ArrayList();
+		for (int i= 0; i < resources.length; i++) {
+			IResource resource= resources[i];
+			
+			if (resource instanceof IFolder) {
+				IFolder folder= (IFolder) resource;
+				IJavaElement element= JavaCore.create(folder);
+				
+				if (element instanceof IPackageFragment) {
+					list.add(element);	
+				} else {
+					list.add(folder);
+				}
+			}	
+		}
+		return list;
+	}
+	
+	private List getFolders(IResource[] resources) throws CoreException {
+		List list= new ArrayList();
+		for (int i= 0; i < resources.length; i++) {
+			IResource resource= resources[i];
+			
+			if (resource instanceof IFolder) {
+				IFolder folder= (IFolder) resource;
+				IJavaElement element= JavaCore.create(folder);
+				
+				if (element == null) {
+					list.add(folder);
+				}
+			}	
+		}
+		return list;
 	}
 
 	private IPackageFragment[] findNextLevelChildrenByElementName(IPackageFragmentRoot parent, IPackageFragment fragment) {
@@ -221,6 +303,16 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 					}
 				} else
 					return fragment.getJavaProject();
+			} else if (element instanceof IFolder) {
+				IFolder folder = (IFolder) element;
+				IResource res = folder.getParent();
+
+				IJavaElement el = JavaCore.create(res);
+				if (el != null) {
+					return el;
+				} else {
+					return res;
+				}
 			}
 
 		} catch (JavaModelException e) {
@@ -283,7 +375,11 @@ class PackagesViewHierarchicalContentProvider extends LogicalPackagesProvider im
 					IResource res= folder.getParent();
 
 					IJavaElement el= JavaCore.create(res);
-					return el;
+					if (el != null) {
+						return el;
+					} else {
+						return res;
+					}
 				}
 			}
 		}
