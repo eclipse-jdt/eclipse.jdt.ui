@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.ResourceMapping;
@@ -54,7 +53,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public final class JavaSynchronizationContentProvider extends AbstractRefactoringSynchronizationContentProvider {
 
 	/** The refactorings folder */
-	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
+//	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
 
 	/**
 	 * Returns the diff nodes associated with the element.
@@ -159,22 +158,22 @@ public final class JavaSynchronizationContentProvider extends AbstractRefactorin
 		final Set set= new HashSet();
 		for (int index= 0; index < children.length; index++)
 			set.add(children[index]);
-		final IResource resource= JavaModelProvider.getResource(parent);
-		if (resource != null) {
-			final IResource[] members= context.getDiffTree().members(resource);
-			for (int index= 0; index < members.length; index++) {
-				if (members[index].getType() == IResource.FOLDER && isInScope(parent, members[index])) {
-					final String name= members[index].getName();
-					if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
-						set.remove(members[index]);
-						set.add(new JavaProjectSettings((IJavaProject) parent));
-					} else if (name.equals(NAME_REFACTORING_FOLDER)) {
-						set.remove(members[index]);
-						set.add(getIncomingRefactorings(context, (IProject) resource, null));
-					}
-				}
-			}
-		}
+//		final IResource resource= JavaModelProvider.getResource(parent);
+//		if (resource != null) {
+//			final IResource[] members= context.getDiffTree().members(resource);
+//			for (int index= 0; index < members.length; index++) {
+//				if (members[index].getType() == IResource.FOLDER && isInScope(parent, members[index])) {
+//					final String name= members[index].getName();
+//					if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
+//						set.remove(members[index]);
+//						set.add(new JavaProjectSettings((IJavaProject) parent));
+//					} else if (name.equals(NAME_REFACTORING_FOLDER)) {
+//						set.remove(members[index]);
+//						set.add(getIncomingRefactorings(context, (IProject) resource, null));
+//					}
+//				}
+//			}
+//		}
 		return set.toArray(new Object[set.size()]);
 	}
 
