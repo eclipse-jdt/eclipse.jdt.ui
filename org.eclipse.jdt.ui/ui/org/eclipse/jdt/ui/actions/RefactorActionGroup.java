@@ -49,13 +49,15 @@ import org.eclipse.ui.part.Page;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
+import org.eclipse.jdt.ui.JavaUI;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
@@ -103,9 +105,17 @@ public class RefactorActionGroup extends ActionGroup {
 	 * @since 2.1
 	 */
 	public static final String GROUP_CODING= "codingGroup"; //$NON-NLS-1$
+	
+	/**
+	 * Pop-up menu: id of the coding group 2 of the refactor sub menu (value
+	 * <code>codingGroup2</code>).
+	 * 
+	 * @since 3.2
+	 */
+	public static final String GROUP_CODING2= "codingGroup2"; //$NON-NLS-1$
 
 	private IWorkbenchSite fSite;
-	private CompilationUnitEditor fEditor;
+	private JavaEditor fEditor;
 	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
 
  	private SelectionDispatchAction fMoveAction;
@@ -122,6 +132,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private SelectionDispatchAction fInferTypeArgumentsAction;
 	
 	private SelectionDispatchAction fInlineAction;
+	private SelectionDispatchAction fIntroduceIndirectionAction;
 	private SelectionDispatchAction fExtractMethodAction;
 	private SelectionDispatchAction fExtractTempAction;
 	private SelectionDispatchAction fExtractConstantAction;
@@ -137,7 +148,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"; //$NON-NLS-1$
 	
 	private class RefactorQuickAccessAction extends JDTQuickMenuAction {
-		public RefactorQuickAccessAction(CompilationUnitEditor editor) {
+		public RefactorQuickAccessAction(JavaEditor editor) {
 			super(editor, QUICK_MENU_ID); 
 		}
 		protected void fillMenu(IMenuManager menu) {
@@ -288,6 +299,12 @@ public class RefactorActionGroup extends ActionGroup {
 		editor.setAction("ExtractConstant", fExtractConstantAction); //$NON-NLS-1$
 		fEditorActions.add(fExtractConstantAction);
 		
+		fIntroduceIndirectionAction= new IntroduceIndirectionAction(editor);
+		fIntroduceIndirectionAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_INDIRECTION);
+		initAction(fIntroduceIndirectionAction, provider, selection);
+		editor.setAction("IntroduceIndirection", fIntroduceIndirectionAction); //$NON-NLS-1$
+		fEditorActions.add(fIntroduceIndirectionAction);
+		
 		fIntroduceParameterAction= new IntroduceParameterAction(editor);
 		fIntroduceParameterAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_PARAMETER);
 		initAction(fIntroduceParameterAction, provider, selection);
@@ -317,6 +334,32 @@ public class RefactorActionGroup extends ActionGroup {
 		fKeyBindingService.registerAction(fQuickAccessAction);
 		
 		stats.endRun();
+	}
+	
+	
+	/**
+	 * Note: This constructor is for internal use only. Clients should not call this constructor.
+	 * @param editor the compilation unit editor
+	 * @param groupName the group name to add the actions to
+	 */
+	public RefactorActionGroup(ClassFileEditor editor, String groupName) {
+		
+		fSite= editor.getEditorSite();
+		fEditor= editor;
+		fGroupName= groupName;
+		ISelectionProvider provider= editor.getSelectionProvider();
+		ISelection selection= provider.getSelection();
+		fEditorActions= new ArrayList();
+		
+		fIntroduceIndirectionAction= new IntroduceIndirectionAction(editor);
+		fIntroduceIndirectionAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_INDIRECTION);
+		initAction(fIntroduceIndirectionAction, provider, selection);
+		editor.setAction("IntroduceIndirection", fIntroduceIndirectionAction); //$NON-NLS-1$
+		fEditorActions.add(fIntroduceIndirectionAction);
+		
+		fQuickAccessAction= new RefactorQuickAccessAction(editor);
+		fKeyBindingService= editor.getEditorSite().getKeyBindingService();
+		fKeyBindingService.registerAction(fQuickAccessAction);
 	}
 
 	private RefactorActionGroup(IWorkbenchSite site, IKeyBindingService keyBindingService) {
@@ -376,6 +419,10 @@ public class RefactorActionGroup extends ActionGroup {
 		fInlineAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INLINE);
 		initAction(fInlineAction, provider, selection);
 		
+		fIntroduceIndirectionAction= new IntroduceIndirectionAction(fSite);
+		fIntroduceIndirectionAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_INDIRECTION);
+		initAction(fIntroduceIndirectionAction, provider, selection);
+		
 		fIntroduceFactoryAction= new IntroduceFactoryAction(fSite);
 		fIntroduceFactoryAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_FACTORY);
 		initAction(fIntroduceFactoryAction, provider, selection);
@@ -414,6 +461,7 @@ public class RefactorActionGroup extends ActionGroup {
 		actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_PARAMETER, fIntroduceParameterAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_FACTORY, fIntroduceFactoryAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_METHOD, fExtractMethodAction);
+		actionBars.setGlobalActionHandler(JdtActionConstants.INTRODUCE_INDIRECTION, fIntroduceIndirectionAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.INLINE, fInlineAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.EXTRACT_INTERFACE, fExtractInterfaceAction);
 		actionBars.setGlobalActionHandler(JdtActionConstants.CHANGE_TYPE, fChangeTypeAction);
@@ -461,6 +509,7 @@ public class RefactorActionGroup extends ActionGroup {
 		disposeAction(fIntroduceParameterAction, provider);
 		disposeAction(fIntroduceFactoryAction, provider);
 		disposeAction(fExtractMethodAction, provider);
+		disposeAction(fIntroduceIndirectionAction, provider);
 		disposeAction(fInlineAction, provider);
 		disposeAction(fExtractInterfaceAction, provider);
 		disposeAction(fChangeTypeAction, provider);
@@ -526,6 +575,8 @@ public class RefactorActionGroup extends ActionGroup {
 		added+= addAction(refactorSubmenu, fExtractMethodAction);
 		added+= addAction(refactorSubmenu, fExtractTempAction);
 		added+= addAction(refactorSubmenu, fExtractConstantAction);
+		refactorSubmenu.add(new Separator(GROUP_CODING2));
+		added+= addAction(refactorSubmenu, fIntroduceIndirectionAction);
 		added+= addAction(refactorSubmenu, fIntroduceParameterAction);
 		added+= addAction(refactorSubmenu, fIntroduceFactoryAction);
 		added+= addAction(refactorSubmenu, fConvertLocalToFieldAction);
@@ -572,13 +623,11 @@ public class RefactorActionGroup extends ActionGroup {
 	}
 	
 	private IJavaElement getEditorInput() {
-		return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(
-			fEditor.getEditorInput());		
+		return JavaUI.getEditorInputJavaElement(fEditor.getEditorInput());
 	}
 	
 	private IDocument getDocument() {
-		return JavaPlugin.getDefault().getCompilationUnitDocumentProvider().
-			getDocument(fEditor.getEditorInput());
+		return fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
 	}
 	
 	private void fillQuickMenu(IMenuManager menu) {

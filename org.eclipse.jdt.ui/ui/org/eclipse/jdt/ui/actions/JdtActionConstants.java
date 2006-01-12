@@ -345,6 +345,12 @@ public class JdtActionConstants {
 	 * (value <code>"org.eclipse.jdt.ui.actions.ExtractMethod"</code>).
 	 */
 	public static final String EXTRACT_METHOD= "org.eclipse.jdt.ui.actions.ExtractMethod"; //$NON-NLS-1$
+	
+	/**
+	 * Refactor menu: name of standard Introduce Indirection global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.IntroduceIndirection"</code>).
+	 */
+	public static final String INTRODUCE_INDIRECTION= "org.eclipse.jdt.ui.actions.IntroduceIndirection"; //$NON-NLS-1$
 
 	/**
 	 * Refactor menu: name of standard Inline global action 

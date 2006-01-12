@@ -128,20 +128,36 @@ public class CompilationUnitRewrite {
 		fTextEditGroups.add(result);
 		return result;
 	}
-
+	
 	/**
 	 * @return a {@link CompilationUnitChange}, or <code>null</code> for an empty change
 	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails
 	 * @throws IllegalArgumentException when the ast rewrite encounters problems
 	 */
 	public CompilationUnitChange createChange() throws CoreException {
+		CompilationUnitChange cuChange= new CompilationUnitChange(fCu.getElementName(), fCu);
+		MultiTextEdit multiEdit= new MultiTextEdit();
+		cuChange.setEdit(multiEdit);
+		return attachChange(cuChange);
+	}
+	
+	/**
+	 * Attaches the changes of this compilation unit rewrite to the given CU Change. The given
+	 * change <strong>must</strong> either have no root edit, or a MultiTextEdit as a root edit.
+	 * The edits in the given change <strong>must not</strong> overlap with the changes of
+	 * this cu.
+	 *  
+	 * @param cuChange existing CompilationUnitChange with a MultiTextEdit root or no root at all.
+	 * @return a change combining the changes of this rewrite and the given rewrite.
+	 * @throws CoreException
+	 */
+	public CompilationUnitChange attachChange(CompilationUnitChange cuChange) throws CoreException {
 		boolean needsAstRewrite= fRewrite != null; // TODO: do we need something like ASTRewrite#hasChanges() here?
 		boolean needsImportRemoval= fImportRemover != null && fImportRemover.hasRemovedNodes();
 		boolean needsImportRewrite= fImportRewrite != null && !fImportRewrite.isEmpty();
 		if (!needsAstRewrite && !needsImportRemoval && !needsImportRewrite)
 			return null;
-
-		CompilationUnitChange cuChange= new CompilationUnitChange(fCu.getElementName(), fCu);
+		
 		ITextFileBuffer buffer= null;
 		IDocument document= null;
 		try {
@@ -151,8 +167,13 @@ public class CompilationUnitRewrite {
 				buffer= RefactoringFileBuffers.acquire(fCu);
 				document= buffer.getDocument();
 			}
-			MultiTextEdit multiEdit= new MultiTextEdit();
-			cuChange.setEdit(multiEdit);
+			
+			MultiTextEdit multiEdit= (MultiTextEdit) cuChange.getEdit();
+			if (multiEdit == null) {
+				multiEdit= new MultiTextEdit();
+				cuChange.setEdit(multiEdit);
+			}
+				
 			if (needsAstRewrite) {
 				TextEdit rewriteEdit= fRewrite.rewriteAST(document, fCu.getJavaProject().getOptions(true));
 				if (!isEmptyEdit(rewriteEdit)) {

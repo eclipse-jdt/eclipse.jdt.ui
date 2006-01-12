@@ -1,0 +1,30 @@
+package p;
+
+import p.Foo.Inner.MoreInner;
+
+public class Foo {
+	
+	static class Inner {
+		
+		static class MoreInner {
+
+			/* (non-Javadoc)
+			 * @see p.Foo#foo()
+			 */
+			public static void bar(Foo target) {
+				target.foo();
+			}
+			
+		}
+		
+	}
+	
+	void foo() {	// <- create an intermediary in Inner. 
+		
+	}
+	
+	{
+		MoreInner.bar(this);
+	}
+
+}

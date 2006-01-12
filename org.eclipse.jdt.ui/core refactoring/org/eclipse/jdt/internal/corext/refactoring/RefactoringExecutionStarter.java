@@ -36,6 +36,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -52,6 +53,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceIndirectionRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
@@ -85,6 +87,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeTypeWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ConvertAnonymousToNestedWizard;
+import org.eclipse.jdt.internal.ui.refactoring.IntroduceIndirectionWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ExtractInterfaceWizard;
 import org.eclipse.jdt.internal.ui.refactoring.InferTypeArgumentsWizard;
 import org.eclipse.jdt.internal.ui.refactoring.InlineConstantWizard;
@@ -272,6 +275,24 @@ public final class RefactoringExecutionStarter {
 	public static void startIntroduceFactoryRefactoring(final ICompilationUnit unit, final ITextSelection selection, final Shell shell) throws JavaModelException {
 		final IntroduceFactoryRefactoring refactoring= new IntroduceFactoryRefactoring(unit, selection.getOffset(), selection.getLength());
 		new RefactoringStarter().activate(refactoring, new IntroduceFactoryWizard(refactoring, RefactoringMessages.IntroduceFactoryAction_use_factory), shell, RefactoringMessages.IntroduceFactoryAction_dialog_title, false);
+	}
+	
+	public static void startIntroduceIndirectionRefactoring(final ICompilationUnit unit, final int offset, final int length, final Shell shell) throws JavaModelException {
+		final IntroduceIndirectionRefactoring refactoring= IntroduceIndirectionRefactoring.create(unit, offset, length);
+		if (refactoring != null) 
+			new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
+	}
+	
+	public static void startIntroduceIndirectionRefactoring(final IClassFile file, final int offset, final int length, final Shell shell) throws JavaModelException {
+		final IntroduceIndirectionRefactoring refactoring= IntroduceIndirectionRefactoring.create(file, offset, length);
+		if (refactoring != null) 
+			new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
+	}
+	
+	public static void startIntroduceIndirectionRefactoring(final IMethod method, final Shell shell) throws JavaModelException {
+		final IntroduceIndirectionRefactoring refactoring= IntroduceIndirectionRefactoring.create(method);
+		if (refactoring != null) 
+			new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
 	}
 
 	public static void startMoveInnerRefactoring(final IType type, final Shell shell) throws JavaModelException {

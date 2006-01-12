@@ -171,8 +171,8 @@ public class CodeGeneration {
 	 * @param decl The MethodDeclaration AST node that will be added as new
 	 * method. The node does not need to exist in an AST (no parent needed) and does not need to resolve.
 	 * See {@link org.eclipse.jdt.core.dom.AST#newMethodDeclaration()} for how to create such a node.
-	 * @param overridden The binding of the method that will be overridden by the created
-	 * method or <code>null</code> if no method is overridden.
+	 * @param overridden The binding of the method to which to add an "@see" link or 
+	 * <code>null</code> if no link should be created.
 	 * @param lineDelimiter The line delimiter to be used.
 	 * @return Returns the generated method comment or <code>null</code> if the
 	 * code template is empty. The returned content is unformatted and not indented (formatting required).
@@ -182,10 +182,11 @@ public class CodeGeneration {
 		if (overridden != null) {
 			overridden= overridden.getMethodDeclaration();
 			String declaringClassQualifiedName= overridden.getDeclaringClass().getQualifiedName();
+			String linkToMethodName= overridden.getName();
 			String[] parameterTypesQualifiedNames= StubUtility.getParameterTypeNamesForSeeTag(overridden);
-			return StubUtility.getMethodComment(cu, declaringTypeName, decl, overridden.isDeprecated(), declaringClassQualifiedName, parameterTypesQualifiedNames, lineDelimiter);
+			return StubUtility.getMethodComment(cu, declaringTypeName, decl, overridden.isDeprecated(), linkToMethodName, declaringClassQualifiedName, parameterTypesQualifiedNames, lineDelimiter);
 		} else {
-			return StubUtility.getMethodComment(cu, declaringTypeName, decl, false, null, null, lineDelimiter);
+			return StubUtility.getMethodComment(cu, declaringTypeName, decl, false, null, null, null, lineDelimiter);
 		}
 	}
 
@@ -278,9 +279,10 @@ public class CodeGeneration {
 	 * method. The node does not need to exist in an AST (no parent needed) and does not need to resolve.
 	 * See {@link org.eclipse.jdt.core.dom.AST#newMethodDeclaration()} for how to create such a node.
 	 * @param isDeprecated If set, the method is deprecated
-	 * 	@param overriddenMethodDeclaringTypeName If a method is overridden, the fully qualified type name of the overridden method's declaring type,
+	 * @param overriddenMethodName If a method is overridden, the simple name of the overridden method, or <code>null</code> if no method is overridden.
+	 * @param overriddenMethodDeclaringTypeName If a method is overridden, the fully qualified type name of the overridden method's declaring type,
 	 * or <code>null</code> if no method is overridden.
-	 * 	@param overriddenMethodParameterTypeNames If a method is overridden, the fully qualified parameter type names of the overridden method,
+	 * @param overriddenMethodParameterTypeNames If a method is overridden, the fully qualified parameter type names of the overridden method,
 	 * or <code>null</code> if no method is overridden.
 	 * @param lineDelimiter The line delimiter to be used.
 	 * @return Returns the constructed comment or <code>null</code> if
@@ -289,8 +291,8 @@ public class CodeGeneration {
 	 * @since 3.2
 	 */
 
-	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, MethodDeclaration decl, boolean isDeprecated, String overriddenMethodDeclaringTypeName, String[] overriddenMethodParameterTypeNames, String lineDelimiter) throws CoreException {
-		return StubUtility.getMethodComment(cu, declaringTypeName, decl, isDeprecated, overriddenMethodDeclaringTypeName, overriddenMethodParameterTypeNames, lineDelimiter);
+	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, MethodDeclaration decl, boolean isDeprecated, String overriddenMethodName, String overriddenMethodDeclaringTypeName, String[] overriddenMethodParameterTypeNames, String lineDelimiter) throws CoreException {
+		return StubUtility.getMethodComment(cu, declaringTypeName, decl, isDeprecated, overriddenMethodName, overriddenMethodDeclaringTypeName, overriddenMethodParameterTypeNames, lineDelimiter);
 	}
 
 	/**

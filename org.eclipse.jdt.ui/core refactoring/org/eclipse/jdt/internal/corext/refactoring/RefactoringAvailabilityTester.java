@@ -470,6 +470,35 @@ public final class RefactoringAvailabilityTester {
 			return isIntroduceFactoryAvailable((IMethod) selection.getFirstElement());
 		return false;
 	}
+	
+	public static boolean isIntroduceIndirectionAvailable(IMethod method) throws JavaModelException {
+		if (method == null)
+			return false;
+		if (! method.exists())
+			return false;
+		if (! method.isStructureKnown())
+			return false;
+		if (method.isConstructor())
+			return false;
+		if (method.getDeclaringType().isAnnotation())
+			return false;
+		
+		return true;	
+	}
+
+	public static boolean isIntroduceIndirectionAvailable(final IStructuredSelection selection) throws JavaModelException {
+		if (selection.isEmpty() || selection.size() != 1)
+			return false;
+		final Object first= selection.getFirstElement();
+		return (first instanceof IMethod) && isIntroduceIndirectionAvailable(((IMethod) first));
+	}
+
+	public static boolean isIntroduceIndirectionAvailable(final JavaTextSelection selection) throws JavaModelException {
+		final IJavaElement[] elements= selection.resolveElementAtOffset();
+		if (elements.length != 1)
+			return false;
+		return (elements[0] instanceof IMethod) && isIntroduceIndirectionAvailable(((IMethod) elements[0]));
+	}
 
 	public static boolean isIntroduceFactoryAvailable(final JavaTextSelection selection) throws JavaModelException {
 		final IJavaElement[] elements= selection.resolveElementAtOffset();

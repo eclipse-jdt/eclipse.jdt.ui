@@ -54,6 +54,7 @@ public class AllRefactoringTests {
 		suite.addTest(RenameStaticMethodTests.suite());
 		suite.addTest(RenameParametersTests.suite());
 		suite.addTest(MoveInstanceMethodTests.suite());
+		suite.addTest(IntroduceIndirectionTests.suite());
 		
 		//--types
 		suite.addTest(RenameTypeTests.suite());	

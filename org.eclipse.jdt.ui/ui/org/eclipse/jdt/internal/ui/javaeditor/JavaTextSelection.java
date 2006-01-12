@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextSelection;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
@@ -95,7 +96,7 @@ public class JavaTextSelection extends TextSelection {
 		if (fPartialASTRequested)
 			return fPartialAST;
 		fPartialASTRequested= true;
-		if (! (fElement instanceof ICompilationUnit))
+		if (!(fElement instanceof ICompilationUnit) && !(fElement instanceof IClassFile)) //TODO and has source?
 			return null;
 		// long start= System.currentTimeMillis();
 		fPartialAST= JavaPlugin.getDefault().getASTProvider().getAST(fElement, ASTProvider.WAIT_YES, null);

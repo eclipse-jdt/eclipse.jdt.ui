@@ -361,6 +361,14 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	 * @since 2.1
 	 */
 	public static final String INLINE= "org.eclipse.jdt.ui.edit.text.java.inline"; //$NON-NLS-1$
+	
+	/**
+	 * Action definition ID of the refactor -> introduce indirection action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.create.indirection"</code>).
+	 *
+	 * @since 3.2
+	 */
+	public static final String INTRODUCE_INDIRECTION= "org.eclipse.jdt.ui.edit.text.java.introduce.indirection"; //$NON-NLS-1$
 
 	/**
 	 * Action definition ID of the refactor -> extract interface action

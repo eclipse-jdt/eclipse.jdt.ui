@@ -535,7 +535,7 @@ public class StubUtility {
 	 * Don't use this method directly, use CodeGeneration.
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, MethodDeclaration, boolean, String, String[], String)
 	 */
-	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, boolean isDeprecated, String overriddenMethodDeclaringTypeName, String[] overriddenMethodParameterTypeNames, String lineDelimiter) throws CoreException {
+	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, boolean isDeprecated, String overriddenName, String overriddenMethodDeclaringTypeName, String[] overriddenMethodParameterTypeNames, String lineDelimiter) throws CoreException {
 		
 		boolean isOverridden= overriddenMethodDeclaringTypeName != null && overriddenMethodParameterTypeNames != null;
 		String templateName= CodeTemplateContextType.METHODCOMMENT_ID;
@@ -555,11 +555,9 @@ public class StubUtility {
 		if (!decl.isConstructor()) {
 			context.setVariable(CodeTemplateContextType.RETURN_TYPE, ASTNodes.asString(getReturnType(decl)));
 		}
-		if (isOverridden) {
-			String methodName= decl.getName().getIdentifier();
-			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(overriddenMethodDeclaringTypeName, methodName, overriddenMethodParameterTypeNames));
-		}
-		
+		if (isOverridden) 
+			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(overriddenMethodDeclaringTypeName, overriddenName, overriddenMethodParameterTypeNames));
+				
 		TemplateBuffer buffer;
 		try {
 			buffer= context.evaluate(template);

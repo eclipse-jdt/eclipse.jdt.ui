@@ -53,6 +53,7 @@ public class RippleMethodFinder2 {
 	private MultiMap/*IType, IType*/ fRootReps;
 	private Map/*IType, ITypeHierarchy*/ fRootHierarchies;
 	private UnionFind fUnionFind;
+	private boolean fExcludeBinaries;
 
 	private static class MultiMap {
 		HashMap/*<IType, Collection>*/ fImplementation= new HashMap();
@@ -118,19 +119,23 @@ public class RippleMethodFinder2 {
 	}
 	
 	
-	private RippleMethodFinder2(IMethod method){
+	private RippleMethodFinder2(IMethod method, boolean excludeBinaries){
 		fMethod= method;
+		fExcludeBinaries= excludeBinaries;
 	}
 	
-	public static IMethod[] getRelatedMethods(IMethod method, IProgressMonitor pm, WorkingCopyOwner owner) throws CoreException {
+	public static IMethod[] getRelatedMethods(IMethod method, boolean excludeBinaries, IProgressMonitor pm, WorkingCopyOwner owner) throws CoreException {
 		try{
 			if (! MethodChecks.isVirtual(method))
 				return new IMethod[]{ method };
 			
-			return new RippleMethodFinder2(method).getAllRippleMethods(pm, owner);
+			return new RippleMethodFinder2(method, excludeBinaries).getAllRippleMethods(pm, owner);
 		} finally{
 			pm.done();
-		}	
+		}
+	}
+	public static IMethod[] getRelatedMethods(IMethod method, IProgressMonitor pm, WorkingCopyOwner owner) throws CoreException {
+		return getRelatedMethods(method, true, pm, owner);	
 	}
 	
 	private IMethod[] getAllRippleMethods(IProgressMonitor pm, WorkingCopyOwner owner) throws CoreException {
@@ -285,7 +290,7 @@ public class RippleMethodFinder2 {
 		if (owner != null)
 			engine.setOwner(owner);
 		engine.setScope(RefactoringScopeFactory.createRelatedProjectsScope(fMethod.getJavaProject(), IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.SYSTEM_LIBRARIES));
-		engine.setFiltering(true, true);
+		engine.setFiltering(false, fExcludeBinaries);
 		engine.setGrouping(false);
 		engine.searchPattern(new SubProgressMonitor(monitor, 1));
 		final SearchMatch[] matches= (SearchMatch[]) engine.getResults();

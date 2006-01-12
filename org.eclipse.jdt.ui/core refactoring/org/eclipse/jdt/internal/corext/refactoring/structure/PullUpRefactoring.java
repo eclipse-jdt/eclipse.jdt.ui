@@ -1074,7 +1074,7 @@ public final class PullUpRefactoring extends HierarchyRefactoring {
 				for (int i= 0; i < fullParamNames.length; i++) {
 					fullParamNames[i]= Bindings.getFullyQualifiedName(params[i]);
 				}
-				String comment= CodeGeneration.getMethodComment(cu, enclosingTypeName, newMethodNode, false, fullTypeName, fullParamNames, StubUtility.getLineDelimiterUsed(cu));
+				String comment= CodeGeneration.getMethodComment(cu, enclosingTypeName, newMethodNode, false, binding.getName(), fullTypeName, fullParamNames, StubUtility.getLineDelimiterUsed(cu));
 				return (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
 			}
 		}
