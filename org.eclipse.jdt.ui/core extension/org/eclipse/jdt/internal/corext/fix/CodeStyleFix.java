@@ -39,6 +39,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
@@ -167,13 +168,17 @@ public class CodeStyleFix extends AbstractFix {
 				}
 				if (firstExpression instanceof ThisExpression)
 					return;
+				if (firstExpression instanceof SuperFieldAccess)
+					return;
 				
 				if (firstExpression instanceof SimpleName) {
 					node= (SimpleName)firstExpression;
 				} else {
 					return;
 				}
-			}			
+			} else if (node.getParent() instanceof SuperFieldAccess)
+				return;
+			
 			if (node.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY)
 				return;
 			
