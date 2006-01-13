@@ -64,9 +64,6 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 	private static final int INTERMEDIARY_TYPE_COUNT= 10;
 	private static List fgIntemediaryTypes= new ArrayList(INTERMEDIARY_TYPE_COUNT);
 
-	private RefactoringStatus fMethodNameStatus;
-	private RefactoringStatus fDestinationStatus;
-
 	/**
 	 * Constructor for IntroduceIndirectionInputPage.
 	 * @param name the name of the page
@@ -110,7 +107,6 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		methNameLabel.setText(RefactoringMessages.IntroduceIndirectionInputPage_new_method_name);
 
 		fIntermediaryMethodName= createIntermediaryNameCombo(result);
-		fIntermediaryMethodName.setText(getIntroduceIndirectionRefactoring().getIntermediaryMethodName());
 
 		final Label intermediaryTypeLabel= new Label(result, SWT.NONE);
 		intermediaryTypeLabel.setText(RefactoringMessages.IntroduceIndirectionInputPage_declaring_class);
@@ -139,12 +135,14 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		gd.horizontalSpan= 2;
 		gd.verticalIndent= 2;
 		enableReferencesCheckBox.setLayoutData(gd);
+		
+		fIntermediaryMethodName.setText(getIntroduceIndirectionRefactoring().getIntermediaryMethodName());
+		fIntermediaryTypeName.setText(getIntroduceIndirectionRefactoring().getIntermediaryClassName());
 
 		fIntermediaryMethodName.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
-				fMethodNameStatus= getIntroduceIndirectionRefactoring().setIntermediaryMethodName(fIntermediaryMethodName.getText());
-				validateInput(true);
+				validateInput();
 			}
 		});
 		enableReferencesCheckBox.addSelectionListener(new SelectionAdapter() {
@@ -157,8 +155,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		fIntermediaryTypeName.addModifyListener(new ModifyListener() {
 
 			public void modifyText(ModifyEvent e) {
-				fDestinationStatus= getIntroduceIndirectionRefactoring().setIntermediaryClassName(fIntermediaryTypeName.getText());
-				validateInput(false);
+				validateInput();
 			}
 		});
 		browseTypes.addSelectionListener(new SelectionAdapter() {
@@ -169,13 +166,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 				if (intermediaryType == null)
 					return;
 
-				RefactoringStatus status= getIntroduceIndirectionRefactoring().setIntermediaryClassName(intermediaryType.getFullyQualifiedName());
-				boolean nameOk= status.isOK();
-
 				fIntermediaryTypeName.setText(intermediaryType.getFullyQualifiedName());
-				IntroduceIndirectionInputPage.this.setPageComplete(nameOk);
-				IntroduceIndirectionInputPage.this.setErrorMessage(nameOk ? "" : //$NON-NLS-1$
-						status.getMessageMatchingSeverity(RefactoringStatus.ERROR));
 			}
 		});
 
@@ -186,10 +177,10 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 			enableReferencesCheckBox.setEnabled(false);
 			getIntroduceIndirectionRefactoring().setEnableUpdateReferences(false);
 		}
-		fIntermediaryTypeName.setText(getIntroduceIndirectionRefactoring().getIntermediaryClassName());
 		
 		fIntermediaryMethodName.setFocus();
 		fIntermediaryMethodName.selectAll();
+		validateInput();
 
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(getControl(), IJavaHelpContextIds.INTRODUCE_INDIRECTION_WIZARD_PAGE);
 	}
@@ -218,12 +209,10 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		return (IntroduceIndirectionRefactoring) getRefactoring();
 	}
 
-	private void validateInput(boolean methodName) {
+	private void validateInput() {
 		RefactoringStatus merged= new RefactoringStatus();
-		if (fMethodNameStatus != null && (methodName || fMethodNameStatus.hasError()))
-			merged.merge(fMethodNameStatus);
-		if (fDestinationStatus != null && (!methodName || fDestinationStatus.hasError()))
-			merged.merge(fDestinationStatus);
+		merged.merge(getIntroduceIndirectionRefactoring().setIntermediaryMethodName(fIntermediaryMethodName.getText()));
+		merged.merge(getIntroduceIndirectionRefactoring().setIntermediaryClassName(fIntermediaryTypeName.getText()));
 
 		setPageComplete(!merged.hasError());
 		int severity= merged.getSeverity();

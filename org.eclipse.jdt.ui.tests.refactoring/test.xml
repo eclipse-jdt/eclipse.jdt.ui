@@ -106,6 +106,11 @@
 		<ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
 			<property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.type.ExtractInterfaceHeapAcceptanceTests" />
 		</ant>
+
+		<delete dir="${jdt-ui-refactoring-performance-folder}" quiet="true" />
+		<ant target="ui-test" antfile="${library-file}" dir="${eclipse-home}">
+			<property name="classname" value="org.eclipse.jdt.ui.tests.refactoring.reorg.IntroduceIndirectionPerfAcceptanceTests" />
+		</ant>
 	</target>
 
 	<!-- This target holds code to cleanup the testing environment after -->

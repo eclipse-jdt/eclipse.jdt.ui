@@ -7,8 +7,8 @@ class Bar {
 	/* (non-Javadoc)
 	 * @see p0.Foo#hello()
 	 */
-	public static void bar(Foo target) {
-		target.hello();
+	public static void bar(Foo foo) {
+		foo.hello();
 	}
 
 }

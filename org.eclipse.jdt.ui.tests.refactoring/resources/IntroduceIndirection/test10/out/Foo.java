@@ -7,8 +7,8 @@ public class Foo {
 	/* (non-Javadoc)
 	 * @see p.Bar#foo(java.lang.String)
 	 */
-	public static void foo(Bar target, String foo) {
-		target.foo(foo);
+	public static void foo(Bar bar, String foo) {
+		bar.foo(foo);
 	}
 
 	void foo(p.Bar bar, String foo)

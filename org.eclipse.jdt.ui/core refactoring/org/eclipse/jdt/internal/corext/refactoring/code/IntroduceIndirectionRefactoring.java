@@ -126,8 +126,6 @@ import org.eclipse.jdt.ui.JavaElementLabels;
  */
 public class IntroduceIndirectionRefactoring extends Refactoring {
 	
-	private static final String FIELD_NAME_OF_TARGET= "target";
-
 	// User selections:
 
 	/**
@@ -201,6 +199,17 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	 * manages all changes.
 	 */
 	private TextChangeManager fTextChangeManager;
+	
+	// Visibility
+	
+	/**
+	 * The visibility adjustor
+	 */
+	private MemberVisibilityAdjustor fAdjustor;
+	/**
+	 * Visibility adjustments for the intermediary
+	 */
+	private Map/*IMember, IVisibilityAdjustment*/ fIntermediaryAdjustments;
 
 
 	private class NoOverrideProgressMonitor extends SubProgressMonitor {
@@ -332,6 +341,9 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		IType target= null;
 
 		try {
+			if (fullyQualifiedTypeName.length() == 0)
+				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_class_not_selected_error);
+			
 			// find type (now including secondaries)
 			target= getProject().findType(fullyQualifiedTypeName, new NullProgressMonitor());
 			if (target == null || !target.exists())
@@ -355,8 +367,12 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		return checkOverloading();
 	}
 
+	/**
+	 * Returns the class name of the intermediary class, or the empty string if none has been set yet.
+	 * @return the intermediary class name or the empty string
+	 */
 	public String getIntermediaryClassName() {
-		return fIntermediaryClass.getFullyQualifiedName();
+		return fIntermediaryClass != null ? fIntermediaryClass.getFullyQualifiedName() : ""; //$NON-NLS-1$
 	}
 
 	// ********** CONDITION CHECKING **********
@@ -407,7 +423,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					targetMethodBinding= ((SuperMethodInvocation) selectionNode).resolveMethodBinding();
 
 				fTargetMethodBinding= targetMethodBinding.getMethodDeclaration(); // resolve generics
-				fTargetMethod= (IMethod) targetMethodBinding.getJavaElement();
+				fTargetMethod= (IMethod) fTargetMethodBinding.getJavaElement();
 
 				//allow single updating mode if an invocation was selected and the invocation can be updated
 				if (selectionNode instanceof MethodInvocation && fSelectionCompilationUnit != null)
@@ -442,8 +458,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 						IBinding[] bindings= parser.createBindings(new IJavaElement[] { fTargetMethod }, null);
 
 						// Bug in JDT/Core - wrong element returned for generic binary methods, see bug #122650 
-						if (bindings != null && bindings[0] != null && bindings[0] instanceof IMethodBinding)
-							fTargetMethodBinding= (IMethodBinding) bindings[0];
+						if (bindings != null && bindings[0] != null && bindings[0] instanceof IMethodBinding) 
+							fTargetMethodBinding= ((IMethodBinding) bindings[0]).getMethodDeclaration();
 						else
 							return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_no_generic_methods_inside_binary);
 					}
@@ -463,9 +479,9 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 				fIntermediaryMethodName= fTargetMethod.getElementName();
 
 			if (fIntermediaryClass == null) {
-				if (fSelectionCompilationUnit != null)
+				if (fSelectionCompilationUnit != null && !fSelectionCompilationUnit.isReadOnly())
 					fIntermediaryClass= getEnclosingInitialSelectionMember().getDeclaringType();
-				else
+				else if (!fTargetMethod.isBinary() && !fTargetMethod.isReadOnly())
 					fIntermediaryClass= fTargetMethod.getDeclaringType();
 			}
 
@@ -496,11 +512,17 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		result.merge(Checks.checkMethodName(fIntermediaryMethodName));
 		if (result.hasFatalError())
 			return result;
+		
+		if (fIntermediaryClass == null)
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_cannot_run_without_intermediary_type);
 
 		// intermediary class is already non binary/non-enum/non-interface.
 		CompilationUnitRewrite imRewrite= getCachedCURewrite(fIntermediaryClass.getCompilationUnit());
 		fIntermediaryClassBinding= typeToBinding(fIntermediaryClass, imRewrite.getRoot());
 
+		fAdjustor= new MemberVisibilityAdjustor(fIntermediaryClass, fIntermediaryClass);
+		fIntermediaryAdjustments= new HashMap();
+		
 		// check static method in non-static nested type
 		if (fIntermediaryClassBinding.isNested() && !Modifier.isStatic(fIntermediaryClassBinding.getModifiers()))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.IntroduceIndirectionRefactoring_cannot_create_in_nested_nonstatic, JavaStatusContext.create(fIntermediaryClass));
@@ -521,7 +543,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 				// create an edit for this particular call
 				result.merge(updateMethodInvocation(fSelectionMethodInvocation, enclosing, getCachedCURewrite(fSelectionCompilationUnit)));
 
-				if (!keepRewrite(fSelectionCompilationUnit))
+				if (!isRewriteKept(fSelectionCompilationUnit))
 					createChangeAndDiscardRewrite(fSelectionCompilationUnit);
 
 				// does call see the intermediary method?
@@ -553,6 +575,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 		pm.setTaskName(RefactoringCoreMessages.IntroduceIndirectionRefactoring_checking_conditions + " " + RefactoringCoreMessages.IntroduceIndirectionRefactoring_adjusting_visibility); //$NON-NLS-1$
 		result.merge(updateTargetVisibility(new NoOverrideProgressMonitor(pm, 0)));
+		result.merge(updateIntermediaryVisibility(new NoOverrideProgressMonitor(pm, 0)));
 		pm.worked(visibilityTicks);
 		pm.setTaskName(RefactoringCoreMessages.IntroduceIndirectionRefactoring_checking_conditions);
 
@@ -582,7 +605,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		ModifierKeyword neededVisibility= getNeededVisibility(fTargetMethod, fIntermediaryClass);
 		if (neededVisibility != null) {
 
-			result.merge(adjustVisibility(fTargetMethod, neededVisibility, false, monitor));
+			result.merge(adjustVisibility(fTargetMethod, neededVisibility,  monitor));
 			if (result.hasError())
 				return result; // binary
 
@@ -593,7 +616,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			for (int i= 0; i < subtypes.length; i++) {
 				IMethod method= tester.findOverridingMethodInType(subtypes[i], fTargetMethod);
 				if (method != null && method.exists()) {
-					result.merge(adjustVisibility(method, neededVisibility, false, monitor));
+					result.merge(adjustVisibility(method, neededVisibility, monitor));
 					if (result.hasError())
 						return result; // binary
 				}
@@ -601,6 +624,10 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		}
 
 		return result;
+	}
+	
+	private RefactoringStatus updateIntermediaryVisibility(NoOverrideProgressMonitor monitor) throws JavaModelException {
+		return rewriteVisibility(fIntermediaryAdjustments, fRewrites, monitor);
 	}
 
 	private RefactoringStatus updateReferences(IProgressMonitor monitor) throws CoreException {
@@ -659,7 +686,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					fIntermediaryFirstParameterType= typeBinding.getTypeDeclaration();
 				} else {
 					// check if current type is higher
-					result.merge(findCommonParent(typeBinding));
+					result.merge(findCommonParent(typeBinding.getTypeDeclaration()));
 				}
 
 				if (result.hasFatalError())
@@ -676,7 +703,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 					throw new OperationCanceledException();
 			}
 
-			if (!keepRewrite(group.getCompilationUnit()))
+			if (!isRewriteKept(group.getCompilationUnit()))
 				createChangeAndDiscardRewrite(group.getCompilationUnit());
 
 			monitor.worked(ticksPerCU);
@@ -764,10 +791,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		modifiers.add(imRewrite.getAST().newModifier(ModifierKeyword.STATIC_KEYWORD));
 
 		// Parameters
-		String targetParameterName= findNonClashingArgumentName(fTargetMethod.getParameterNames());
-			//StubUtility.suggestArgumentName(getProject(), fIntermediaryFirstParameterType.getName(), fTargetMethod.getParameterNames());
+		String targetParameterName= StubUtility.suggestArgumentName(getProject(), fIntermediaryFirstParameterType.getName(), fTargetMethod.getParameterNames());
 
-		List parameters= intermediary.parameters();
 		if (!isStaticTarget()) {
 			// Add first param
 			SingleVariableDeclaration parameter= imRewrite.getAST().newSingleVariableDeclaration();
@@ -781,23 +806,23 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			}
 			parameter.setType(t);
 			parameter.setName(imRewrite.getAST().newSimpleName(targetParameterName));
-			parameters.add(parameter);
+			intermediary.parameters().add(parameter);
 		}
 		// Add other params
-		copyArguments(parameters, imRewrite);
+		copyArguments(intermediary, imRewrite);
 
 		// Add type parameters of declaring class (and enclosing classes)
 		if (!isStaticTarget() && fIntermediaryFirstParameterType.isGenericType())
 			addTypeParameters(imRewrite, intermediary.typeParameters(), fIntermediaryFirstParameterType);
 
 		// Add type params of method
-		copyTypeParameters(intermediary.typeParameters(), imRewrite);
+		copyTypeParameters(intermediary, imRewrite);
 
 		// Return type
 		intermediary.setReturnType2(imRewrite.getImportRewrite().addImport(fTargetMethodBinding.getReturnType(), ast));
 
 		// Exceptions
-		copyExceptions(intermediary.thrownExceptions(), imRewrite);
+		copyExceptions(intermediary, imRewrite);
 
 		// Body
 		MethodInvocation invocation= imRewrite.getAST().newMethodInvocation();
@@ -808,7 +833,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		} else {
 			invocation.setExpression(imRewrite.getAST().newSimpleName(targetParameterName));
 		}
-		copyInvocationParameters(invocation.arguments(), ast);
+		copyInvocationParameters(invocation, ast);
 		Statement call= encapsulateInvocation(intermediary, invocation);
 
 		final Block body= imRewrite.getAST().newBlock();
@@ -853,7 +878,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		}
 	}
 
-	private Statement encapsulateInvocation(final MethodDeclaration declaration, final MethodInvocation invocation) {
+	private Statement encapsulateInvocation(MethodDeclaration declaration, MethodInvocation invocation) {
 		final Type type= declaration.getReturnType2();
 
 		if (type == null || (type instanceof PrimitiveType && PrimitiveType.VOID.equals( ((PrimitiveType) type).getPrimitiveTypeCode())))
@@ -864,13 +889,13 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		return statement;
 	}
 
-	private void copyInvocationParameters(final List arguments, AST ast) throws JavaModelException {
+	private void copyInvocationParameters(MethodInvocation invocation, AST ast) throws JavaModelException {
 		String[] names= fTargetMethod.getParameterNames();
 		for (int i= 0; i < names.length; i++)
-			arguments.add(ast.newSimpleName(names[i]));
+			invocation.arguments().add(ast.newSimpleName(names[i]));
 	}
 
-	private void copyArguments(List newParams, CompilationUnitRewrite rew) throws JavaModelException {
+	private void copyArguments(MethodDeclaration intermediary, CompilationUnitRewrite rew) throws JavaModelException {
 		String[] names= fTargetMethod.getParameterNames();
 		ITypeBinding[] types= fTargetMethodBinding.getParameterTypes();
 		for (int i= 0; i < names.length; i++) {
@@ -885,11 +910,11 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 			}
 
 			newElement.setType(rew.getImportRewrite().addImport(typeBinding, rew.getAST()));
-			newParams.add(newElement);
+			intermediary.parameters().add(newElement);
 		}
 	}
 
-	private void copyTypeParameters(List newParams, CompilationUnitRewrite rew) {
+	private void copyTypeParameters(MethodDeclaration intermediary, CompilationUnitRewrite rew) {
 		ITypeBinding[] typeParameters= fTargetMethodBinding.getTypeParameters();
 		for (int i= 0; i < typeParameters.length; i++) {
 			ITypeBinding current= typeParameters[i];
@@ -901,15 +926,15 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 				if (!"java.lang.Object".equals(bounds[j].getQualifiedName())) //$NON-NLS-1$
 					parameter.typeBounds().add(rew.getImportRewrite().addImport(bounds[j], rew.getAST()));
 
-			newParams.add(parameter);
+			intermediary.typeParameters().add(parameter);
 		}
 	}
 
-	private void copyExceptions(List list, CompilationUnitRewrite imRewrite) {
+	private void copyExceptions(MethodDeclaration intermediary, CompilationUnitRewrite imRewrite) {
 		ITypeBinding[] exceptionTypes= fTargetMethodBinding.getExceptionTypes();
 		for (int i= 0; i < exceptionTypes.length; i++) {
 			final String qualifiedName= imRewrite.getImportRewrite().addImport(exceptionTypes[i]);
-			list.add(ASTNodeFactory.newName(imRewrite.getAST(), qualifiedName));
+			intermediary.thrownExceptions().add(ASTNodeFactory.newName(imRewrite.getAST(), qualifiedName));
 		}
 	}
 
@@ -1062,7 +1087,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	}
 
 	private void collectSuperTypes(ITypeBinding curr, List list) {
-		if (list.add(curr)) {
+		if (list.add(curr.getTypeDeclaration())) {
 			ITypeBinding[] interfaces= curr.getInterfaces();
 			for (int i= 0; i < interfaces.length; i++) {
 				collectSuperTypes(interfaces[i], list);
@@ -1083,7 +1108,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 		return rewrite;
 	}
 
-	private boolean keepRewrite(ICompilationUnit compilationUnit) {
+	private boolean isRewriteKept(ICompilationUnit compilationUnit) {
 		return fIntermediaryClass.getCompilationUnit().equals(compilationUnit);
 	}
 
@@ -1209,77 +1234,75 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	// ***************** VISIBILITY ********************
 
 	private ModifierKeyword getNeededVisibility(IMember whoToAdjust, IMember fromWhereToLook) throws JavaModelException {
-		// PM replace with static adjustor methods when available
-		MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fIntermediaryClass, fIntermediaryClass);
-		return adjustor.getVisibilityThreshold(fromWhereToLook, whoToAdjust, new NullProgressMonitor());
+		return fAdjustor.getVisibilityThreshold(fromWhereToLook, whoToAdjust, new NullProgressMonitor());
 	}
 
 	private RefactoringStatus adjustVisibility(IMember whoToAdjust, IMember fromWhereToLook, IProgressMonitor monitor) throws CoreException {
 		return adjustVisibility(whoToAdjust, getNeededVisibility(whoToAdjust, fromWhereToLook), true, monitor);
 	}
-
+	
+	private RefactoringStatus adjustVisibility(IMember whoToAdjust, ModifierKeyword neededVisibility, IProgressMonitor monitor) throws CoreException {
+		return adjustVisibility(whoToAdjust, neededVisibility, false, monitor);
+	}
+	
 	private RefactoringStatus adjustVisibility(IMember whoToAdjust, ModifierKeyword neededVisibility, boolean alsoIncreaseEnclosing, IProgressMonitor monitor) throws CoreException {
-		// PM replace with static adjustor methods when available
-		MemberVisibilityAdjustor adjustor= new MemberVisibilityAdjustor(fIntermediaryClass, fIntermediaryClass);
-		Map adjustments= new HashMap();
-		adjust(whoToAdjust, neededVisibility, adjustments);
+		
+		Map adjustments;
+		if (isRewriteKept(whoToAdjust.getCompilationUnit()))
+			adjustments= fIntermediaryAdjustments;
+		else
+			adjustments= new HashMap();
+		
+		int existingAdjustments= adjustments.size();
+		addAdjustment(whoToAdjust, neededVisibility, adjustments);
 
 		if (alsoIncreaseEnclosing)
 			while (whoToAdjust.getDeclaringType() != null) {
 				whoToAdjust= whoToAdjust.getDeclaringType();
-				adjust(whoToAdjust, neededVisibility, adjustments);
+				addAdjustment(whoToAdjust, neededVisibility, adjustments);
 			}
 
-		if (adjustments.size() > 0 && ( (whoToAdjust.isReadOnly() || whoToAdjust.isBinary())))
+		boolean hasNewAdjustments= (adjustments.size() - existingAdjustments) > 0;
+		if (hasNewAdjustments && ( (whoToAdjust.isReadOnly() || whoToAdjust.isBinary())))
 			return RefactoringStatus.createErrorStatus(Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_cannot_update_binary_target_visibility, new String[] { JavaElementLabels
 					.getElementLabel(whoToAdjust, JavaElementLabels.ALL_DEFAULT) }), JavaStatusContext.create(whoToAdjust));
 
 		RefactoringStatus status= new RefactoringStatus();
 		
 		// Don't create a rewrite if it is not necessary
-		if (adjustments.size() == 0)
+		if (!hasNewAdjustments)
 			return status;
 
-		CompilationUnitRewrite rewrite= null;
 		Map rewrites;
-		if (keepRewrite(whoToAdjust.getCompilationUnit())) {
-			// normal case: intermediary class
-			rewrites= fRewrites;
-		} else {
-			// Special case: Use a separate, non-binding rewrite
-			rewrite= new CompilationUnitRewrite(whoToAdjust.getCompilationUnit());
+		if (!isRewriteKept(whoToAdjust.getCompilationUnit())) {
+			CompilationUnitRewrite rewrite= new CompilationUnitRewrite(whoToAdjust.getCompilationUnit());
 			rewrite.setResolveBindings(false);
 			rewrites= new HashMap();
 			rewrites.put(whoToAdjust.getCompilationUnit(), rewrite);
-		}
-		adjustor.setRewrites(rewrites);
-		adjustor.setAdjustments(adjustments);
-		adjustor.setStatus(status);
-		adjustor.rewriteVisibility(monitor);
-		if (rewrite != null)
-			// custom non-binding rewrite; attach the change.
+			status.merge(rewriteVisibility(adjustments, rewrites, monitor));
 			rewrite.attachChange((CompilationUnitChange) fTextChangeManager.get(whoToAdjust.getCompilationUnit()));
+		}
 
 		return status;
 	}
 
-	private void adjust(IMember whoToAdjust, ModifierKeyword neededVisibility, Map adjustments) throws JavaModelException {
-		ModifierKeyword currentVisibility= ModifierKeyword.fromFlagValue(JdtFlags.getVisibilityCode(whoToAdjust));
-		if (MemberVisibilityAdjustor.hasLowerVisibility(currentVisibility, neededVisibility))
-			adjustments.put(whoToAdjust, new MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment(whoToAdjust, neededVisibility, RefactoringStatus.createWarningStatus(Messages.format(
-					MemberVisibilityAdjustor.getMessage(whoToAdjust), new String[] { MemberVisibilityAdjustor.getLabel(whoToAdjust), MemberVisibilityAdjustor.getLabel(neededVisibility) }),
-					JavaStatusContext.create(whoToAdjust))));
+	private RefactoringStatus rewriteVisibility(Map adjustments, Map rewrites, IProgressMonitor monitor) throws JavaModelException {
+		RefactoringStatus status= new RefactoringStatus();
+		fAdjustor.setRewrites(rewrites);
+		fAdjustor.setAdjustments(adjustments);
+		fAdjustor.setStatus(status);
+		fAdjustor.rewriteVisibility(monitor);
+		return status;
 	}
 
-	private String findNonClashingArgumentName(String[] parameterNames) {
-		List parameters= Arrays.asList(parameterNames);
-		String suggestion= FIELD_NAME_OF_TARGET;
-		int i= 1;
-		while (parameters.contains(suggestion)) {
-			suggestion= FIELD_NAME_OF_TARGET + i;
-			i++;
-		}
-		return suggestion;
+	private void addAdjustment(IMember whoToAdjust, ModifierKeyword neededVisibility, Map adjustments) throws JavaModelException {
+		ModifierKeyword currentVisibility= ModifierKeyword.fromFlagValue(JdtFlags.getVisibilityCode(whoToAdjust));
+		if (MemberVisibilityAdjustor.hasLowerVisibility(currentVisibility, neededVisibility)
+				&& MemberVisibilityAdjustor.needsVisibilityAdjustments(whoToAdjust, neededVisibility, adjustments))
+			adjustments.put(whoToAdjust, new MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment(whoToAdjust, neededVisibility,
+					RefactoringStatus.createWarningStatus(Messages.format(MemberVisibilityAdjustor.getMessage(whoToAdjust), new String[] {
+							MemberVisibilityAdjustor.getLabel(whoToAdjust), MemberVisibilityAdjustor.getLabel(neededVisibility) }), JavaStatusContext
+							.create(whoToAdjust))));
 	}
 
 }

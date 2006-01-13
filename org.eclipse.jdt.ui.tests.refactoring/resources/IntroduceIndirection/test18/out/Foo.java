@@ -5,8 +5,8 @@ public class Foo<E, F, G extends Comparable<E>> {
 	/* (non-Javadoc)
 	 * @see p.Foo#foo()
 	 */
-	public static <E, F, G extends Comparable<E>> void bar(Foo<E, F, G> target) {
-		target.foo();
+	public static <E, F, G extends Comparable<E>> void bar(Foo<E, F, G> foo) {
+		foo.foo();
 	}
 
 	void foo() {

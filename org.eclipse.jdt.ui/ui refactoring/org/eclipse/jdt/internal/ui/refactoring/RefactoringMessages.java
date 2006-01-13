@@ -399,6 +399,7 @@ public final class RefactoringMessages extends NLS {
 	public static String IntroduceIndirectionAction_unknown_exception;
 	public static String IntroduceIndirectionInputPage_new_method_name;
 	public static String IntroduceIndirectionInputPage_declaring_class;
+	public static String IntroduceIndirectionInputPage_select_declaring_class;
 	public static String IntroduceIndirectionInputPage_browse;
 	public static String IntroduceIndirectionInputPage_update_references;
 	public static String IntroduceIndirectionInputPage_dialog_choose_declaring_class;

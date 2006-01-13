@@ -5,8 +5,8 @@ public class Foo {
 	/* (non-Javadoc)
 	 * @see p.A#foo()
 	 */
-	public static void bar(A target) {
-		target.foo();
+	public static void bar(A a) {
+		a.foo();
 	}
 
 	A a;

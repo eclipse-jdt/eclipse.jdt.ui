@@ -8,8 +8,8 @@ public class Bar {
 	/* (non-Javadoc)
 	 * @see p.Foo#foo(java.util.List, java.util.HashMap)
 	 */
-	public static void bar(Foo target, List a, HashMap b) {
-		target.foo(a, b);
+	public static void bar(Foo foo, List a, HashMap b) {
+		foo.foo(a, b);
 	}
 
 }

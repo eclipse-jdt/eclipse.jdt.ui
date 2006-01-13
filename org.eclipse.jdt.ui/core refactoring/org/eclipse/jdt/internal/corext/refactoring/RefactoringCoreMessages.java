@@ -909,6 +909,8 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String IntroduceIndirectionRefactoring_call_warning_anonymous_cannot_qualify;
 	public static String IntroduceIndirectionRefactoring_cannot_update_binary_target_visibility;
 	public static String IntroduceIndirectionRefactoring_not_available_on_annotation;
+	public static String IntroduceIndirectionRefactoring_class_not_selected_error;
+	public static String IntroduceIndirectionRefactoring_cannot_run_without_intermediary_type;
 
 	public static String InitializableRefactoring_argument_not_exist;
 	public static String InitializableRefactoring_inacceptable_arguments;

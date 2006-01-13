@@ -14,7 +14,7 @@ public class Foo {
 	/* (non-Javadoc)
 	 * @see p.Bar#getDisplay()
 	 */
-	public static void bar(Bar target) {
-		target.getDisplay();
+	public static void bar(Bar bar) {
+		bar.getDisplay();
 	}
 }

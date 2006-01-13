@@ -7,8 +7,8 @@ public class Foo extends Bar {
 	/* (non-Javadoc)
 	 * @see p.Bar#getDisplay()
 	 */
-	public static void bar(Bar target) {
-		target.getDisplay();
+	public static void bar(Bar bar) {
+		bar.getDisplay();
 	}
 
 	void foo() {

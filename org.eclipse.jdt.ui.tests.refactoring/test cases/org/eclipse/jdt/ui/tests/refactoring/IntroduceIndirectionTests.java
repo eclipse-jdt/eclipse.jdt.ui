@@ -283,5 +283,15 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 		// target (for parameter names and exceptions)
 		helperWarn(new String[] { "p.Foo", "p.Bar",}, "bar", "p.Foo", 10, 9, 10, 12);
 	}
+	
+	public void test29() throws Exception {
+		// don't adjust visibility twice
+		helperWarn(new String[] { "p0.Test", "p1.Other" }, "bar", "p1.Other", 5, 35, 5, 44);
+	}
+	
+	public void test30() throws Exception {
+		// multiple generic instantiations
+		helperPass(new String[] { "p.MultiGenerics" }, "bar", "p.MultiGenerics", 7, 16, 7, 26);
+	}
 
 }

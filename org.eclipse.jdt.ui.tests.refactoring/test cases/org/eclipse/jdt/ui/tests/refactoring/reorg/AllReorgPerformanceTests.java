@@ -35,6 +35,8 @@ public class AllReorgPerformanceTests {
 		suite.addTest(MoveStaticMembersPerfTests1.suite());
 		suite.addTest(MoveStaticMembersPerfTests2.suite());
 		
+		suite.addTest(IntroduceIndirectionPerfAcceptanceTests.suite());
+		
 		return suite;
 	}
 }

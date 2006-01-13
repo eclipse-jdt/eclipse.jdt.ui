@@ -7,8 +7,8 @@ public class A extends B {
 	/* (non-Javadoc)
 	 * @see p.B#foo()
 	 */
-	public static void bar(B target) {
-		target.foo();
+	public static void bar(B b) {
+		b.foo();
 	}
 
 	{

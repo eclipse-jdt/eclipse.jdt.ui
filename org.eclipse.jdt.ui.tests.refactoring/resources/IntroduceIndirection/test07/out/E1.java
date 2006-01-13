@@ -15,8 +15,8 @@ public class E1 {
 	/* (non-Javadoc)
 	 * @see p.E1.E1Inner1#foo()
 	 */
-	public static void bar(E1Inner1 target) {
-		target.foo();
+	public static void bar(E1Inner1 inner1) {
+		inner1.foo();
 	}
 
 	public void foo() {
