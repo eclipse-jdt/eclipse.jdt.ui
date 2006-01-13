@@ -31,6 +31,7 @@ import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Menu;
+import org.eclipse.swt.widgets.Tree;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IMenuListener;
@@ -42,7 +43,7 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.ListenerList; // compatibility with 3.1
+import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -112,6 +113,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	private Action fElementAtAction;
 	private Action fCreateFromHandleAction;
 	private Action fRefreshAction;
+	TreeCopyAction fCopyAction;
 	private Action fPropertiesAction;
 	Action fDoubleClickAction;
 	
@@ -203,6 +205,11 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		hookContextMenu();
 		hookDoubleClickAction();
 		getSite().setSelectionProvider(new JEViewSelectionProvider(fViewer));
+		fViewer.addSelectionChangedListener(new ISelectionChangedListener() {
+			public void selectionChanged(SelectionChangedEvent event) {
+				fCopyAction.setEnabled(! event.getSelection().isEmpty());
+			}
+		});
 		contributeToActionBars();
 	}
 
@@ -248,6 +255,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		fillLocalPullDown(bars.getMenuManager());
 		fillLocalToolBar(bars.getToolBarManager());
 		bars.setGlobalActionHandler(ActionFactory.REFRESH.getId(), fRefreshAction);
+		bars.setGlobalActionHandler(ActionFactory.COPY.getId(), fCopyAction);
 		bars.setGlobalActionHandler(ActionFactory.PROPERTIES.getId(), fPropertiesAction);
 	}
 
@@ -264,6 +272,8 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		addFocusActionOrNot(manager);
 		manager.add(fResetAction);
 		manager.add(fRefreshAction);
+		manager.add(new Separator());
+		manager.add(fCopyAction);
 		manager.add(new Separator());
 		fDrillDownAdapter.addNavigationActions(manager);
 		manager.add(new Separator());
@@ -388,6 +398,8 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		};
 		fRefreshAction.setToolTipText("Refresh");
 		fRefreshAction.setActionDefinitionId("org.eclipse.ui.file.refresh");
+		
+		fCopyAction= new TreeCopyAction(new Tree[] {fViewer.getTree()});
 		
 		fPropertiesAction= new Action("Properties", JEPluginImages.IMG_PROPERTIES) {
 			@Override
