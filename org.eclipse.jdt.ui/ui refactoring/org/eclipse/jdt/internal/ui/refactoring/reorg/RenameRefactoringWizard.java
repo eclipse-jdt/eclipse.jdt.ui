@@ -16,8 +16,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
-import org.eclipse.jdt.internal.corext.util.Messages;
-
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -67,9 +66,8 @@ public class RenameRefactoringWizard extends RefactoringWizard {
 		try{
 			return ref.checkNewElementName(newName);
 		} catch (CoreException e){
-			//XXX: should log the exception
-			String msg= e.getMessage() == null ? "": e.getMessage(); //$NON-NLS-1$
-			return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringMessages.RenameRefactoringWizard_internal_error, msg));
+			JavaPlugin.log(e);
+			return RefactoringStatus.createFatalErrorStatus(RefactoringMessages.RenameRefactoringWizard_internal_error);
 		}	
 	}
 }
