@@ -34,6 +34,7 @@ public class SourceActionTests extends TestCase {
 		suite.addTest(GenerateDelegateMethodsTest.allTests());
 		suite.addTest(AddUnimplementedConstructorsTest.allTests());
 		suite.addTest(GenerateConstructorUsingFieldsTest.allTests());
+		suite.addTest(GenerateHashCodeEqualsTest.allTests());
 
 		return new ProjectTestSetup(suite);
 	}
