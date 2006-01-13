@@ -118,7 +118,7 @@ public class JavadocContentAccess {
 		if (contentReader != null)
 			return new JavaDoc2HTMLTextReader(contentReader);
 		else if (useAttachedJavadoc) {
-			String s= member.getAttachedJavadoc(null, null);
+			String s= member.getAttachedJavadoc(null);
 			if (s != null)
 				return new StringReader(s);
 		}
