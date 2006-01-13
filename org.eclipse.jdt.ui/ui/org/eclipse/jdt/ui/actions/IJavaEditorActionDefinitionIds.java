@@ -232,6 +232,13 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	public static final String GENERATE_CONSTRUCTOR_USING_FIELDS= "org.eclipse.jdt.ui.edit.text.java.generate.constructor.using.fields"; //$NON-NLS-1$
 
 	/**
+	 * Action definition ID of the source ->generate hashcode() and equals() action
+	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.generate.hashcode.equals"</code>).
+	 * @since 3.2
+	 */
+	public static final String GENERATE_HASHCODE_EQUALS= "org.eclipse.jdt.ui.edit.text.java.generate.hashcode.equals"; //$NON-NLS-1$
+
+	/**
 	 * Action definition ID of the source -> generate setter/getter action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.create.getter.setter"</code>).
 	 */

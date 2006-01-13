@@ -30,8 +30,15 @@ public final class CodeGenerationMessages extends NLS {
 	public static String AddJavaDocStubOperation_description;
 	public static String AddDelegateMethodsOperation_monitor_message;
 	public static String ImportsStructure_operation_description;
+	public static String GenerateHashCodeEqualsOperation_description;
 
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, CodeGenerationMessages.class);
 	}
+
+	public static String GenerateHashCodeEqualsOperation_hash_code_comment;
+	public static String GenerateHashCodeEqualsOperation_tag_param;
+	public static String GenerateHashCodeEqualsOperation_hash_code_argument;
+	public static String GenerateHashCodeEqualsOperation_tag_return;
+	public static String GenerateHashCodeEqualsOperation_return_comment;
 }

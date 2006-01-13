@@ -95,6 +95,7 @@ public class GenerateActionGroup extends ActionGroup {
 	
 	private AddImportOnSelectionAction fAddImport;
 	private OverrideMethodsAction fOverrideMethods;
+	private GenerateHashCodeEqualsAction fHashCodeEquals;
 	private AddGetterSetterAction fAddGetterSetter;
 	private AddDelegateMethodsAction fAddDelegateMethods;
 	private AddUnimplementedConstructorsAction fAddUnimplementedConstructors;
@@ -171,6 +172,10 @@ public class GenerateActionGroup extends ActionGroup {
 		fGenerateConstructorUsingFields.setActionDefinitionId(IJavaEditorActionDefinitionIds.GENERATE_CONSTRUCTOR_USING_FIELDS);
 		editor.setAction("GenerateConstructorUsingFields", fGenerateConstructorUsingFields); //$NON-NLS-1$		
 
+		fHashCodeEquals= new GenerateHashCodeEqualsAction(editor);
+		fHashCodeEquals.setActionDefinitionId(IJavaEditorActionDefinitionIds.GENERATE_HASHCODE_EQUALS);
+		editor.setAction("GenerateHashCodeEquals", fHashCodeEquals); //$NON-NLS-1$
+
 		fAddJavaDocStub= new AddJavaDocStubAction(editor);
 		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
 		editor.setAction("AddJavadocComment", fAddJavaDocStub); //$NON-NLS-1$
@@ -235,7 +240,10 @@ public class GenerateActionGroup extends ActionGroup {
 		
 		fGenerateConstructorUsingFields= new GenerateNewConstructorUsingFieldsAction(site);
 		fGenerateConstructorUsingFields.setActionDefinitionId(IJavaEditorActionDefinitionIds.GENERATE_CONSTRUCTOR_USING_FIELDS);
-		
+
+		fHashCodeEquals= new GenerateHashCodeEqualsAction(site);
+		fHashCodeEquals.setActionDefinitionId(IJavaEditorActionDefinitionIds.GENERATE_HASHCODE_EQUALS);
+
 		fAddJavaDocStub= new AddJavaDocStubAction(site);
 		fAddJavaDocStub.setActionDefinitionId(IJavaEditorActionDefinitionIds.ADD_JAVADOC_COMMENT);
 		
@@ -271,6 +279,7 @@ public class GenerateActionGroup extends ActionGroup {
 		fAddDelegateMethods.update(selection);
 		fAddUnimplementedConstructors.update(selection);	
 		fGenerateConstructorUsingFields.update(selection);
+		fHashCodeEquals.update(selection);
 		fAddJavaDocStub.update(selection);
 		fExternalizeStrings.update(selection);
 		fFindStringsToExternalize.update(selection);
@@ -291,6 +300,7 @@ public class GenerateActionGroup extends ActionGroup {
 		registerSelectionListener(provider, fAddDelegateMethods);
 		registerSelectionListener(provider, fAddUnimplementedConstructors);
 		registerSelectionListener(provider, fGenerateConstructorUsingFields);
+		registerSelectionListener(provider, fHashCodeEquals);
 		registerSelectionListener(provider, fAddJavaDocStub);
 		registerSelectionListener(provider, fAddBookmark);
 		registerSelectionListener(provider, fExternalizeStrings);
@@ -380,6 +390,7 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(source, fAddDelegateMethods);
 		added+= addAction(source, fAddUnimplementedConstructors);
 		added+= addAction(source, fGenerateConstructorUsingFields);
+		added+= addAction(source, fHashCodeEquals);
 		added+= addAction(source, fAddJavaDocStub);
 		source.add(new Separator(GROUP_CODE));		
 		added+= addAction(source, fSurroundWithTryCatch);
@@ -401,6 +412,7 @@ public class GenerateActionGroup extends ActionGroup {
 		added+= addAction(source, fAddDelegateMethods);
 		added+= addAction(source, fAddUnimplementedConstructors);
 		added+= addAction(source, fGenerateConstructorUsingFields);
+		added+= addAction(source, fHashCodeEquals);
 		added+= addAction(source, fAddJavaDocStub);
 		source.add(new Separator(GROUP_CODE));		
 		added+= addAction(source, fSurroundWithTryCatch);
@@ -436,6 +448,7 @@ public class GenerateActionGroup extends ActionGroup {
 		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_DELEGATE_METHODS, fAddDelegateMethods);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_CONSTRUCTOR_FROM_SUPERCLASS, fAddUnimplementedConstructors);		
 		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_CONSTRUCTOR_USING_FIELDS, fGenerateConstructorUsingFields);
+		actionBar.setGlobalActionHandler(JdtActionConstants.GENERATE_HASHCODE_EQUALS, fHashCodeEquals);
 		actionBar.setGlobalActionHandler(JdtActionConstants.ADD_JAVA_DOC_COMMENT, fAddJavaDocStub);
 		actionBar.setGlobalActionHandler(JdtActionConstants.EXTERNALIZE_STRINGS, fExternalizeStrings);
 		actionBar.setGlobalActionHandler(JdtActionConstants.CLEAN_UP, fCleanUp);

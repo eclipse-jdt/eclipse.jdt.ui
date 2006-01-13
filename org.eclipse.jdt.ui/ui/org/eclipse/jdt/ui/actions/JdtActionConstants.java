@@ -220,6 +220,13 @@ public class JdtActionConstants {
 	public static final String GENERATE_CONSTRUCTOR_USING_FIELDS= "org.eclipse.jdt.ui.actions.GenerateConstructorUsingFields"; //$NON-NLS-1$
 	
 	/**
+	 * Source menu: name of standard Generate hashCode() and equals() global action
+	 * (value <code>"org.eclipse.jdt.ui.actions.GenerateHashCodeEquals"</code>).
+	 * @since 3.2
+	 */
+	public static final String GENERATE_HASHCODE_EQUALS= "org.eclipse.jdt.ui.actions.GenerateHashCodeEquals"; //$NON-NLS-1$
+
+	/**
 	 * Source menu: name of standard Add Javadoc Comment global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.AddJavaDocComment"</code>).
 	 */

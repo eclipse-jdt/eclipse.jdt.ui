@@ -103,6 +103,29 @@ public final class ActionMessages extends NLS {
 	public static String AddGetterSetterAction_methods_selected;
 	public static String AddGettSetterAction_typeContainsNoFields_message;
 	
+	public static String GenerateHashCodeEqualsAction_error_caption;
+	public static String GenerateHashCodeEqualsAction_error_not_applicable;
+	public static String GenerateHashCodeEqualsAction_error_removed_type;
+	public static String GenerateHashCodeEqualsAction_error_cannot_create;
+	public static String GenerateHashCodeEqualsAction_label;
+	public static String GenerateHashCodeEqualsAction_description;
+	public static String GenerateHashCodeEqualsAction_tooltip;
+	public static String GenerateHashCodeEqualsAction_annotation_not_applicable;
+	public static String GenerateHashCodeEqualsAction_interface_not_applicable;
+	public static String GenerateHashCodeEqualsAction_enum_not_applicable;
+	public static String GenerateHashCodeEqualsAction_anonymous_type_not_applicable;
+	public static String GenerateHashCodeEqualsAction_no_nonstatic_fields_error;
+	public static String GenerateHashCodeEqualsAction_transient_field_included_error;
+	public static String GenerateHashCodeEqualsAction_type_does_not_implement_hashCode_equals_error;
+	public static String GenerateHashCodeEqualsAction_interface_does_not_declare_hashCode_equals_error;
+	public static String GenerateHashCodeEqualsAction_final_hashCode_equals_in_superclass_error;
+	public static String GenerateHashCodeEqualsAction_already_has_hashCode_equals_error;
+	public static String GenerateHashCodeEqualsAction_super_class;
+	public static String GenerateHashCodeEqualsAction_field_type;
+	public static String GenerateHashCodeEqualsAction_equals;
+	public static String GenerateHashCodeEqualsAction_hashCode;
+	public static String GenerateHashCodeEqualsAction_equals_and_hashCode;
+	
 	public static String GetterSetterTreeSelectionDialog_select_getters;
 	public static String GetterSetterTreeSelectionDialog_select_setters;
 	public static String GetterSetterTreeSelectionDialog_alpha_pair_sort;

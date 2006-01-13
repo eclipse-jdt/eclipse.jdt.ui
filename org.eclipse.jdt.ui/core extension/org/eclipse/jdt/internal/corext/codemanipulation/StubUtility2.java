@@ -70,7 +70,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public final class StubUtility2 {
 
-	private static void addOverrideAnnotation(ASTRewrite rewrite, MethodDeclaration decl, IMethodBinding binding) {
+	public static void addOverrideAnnotation(ASTRewrite rewrite, MethodDeclaration decl, IMethodBinding binding) {
 		if (!binding.getDeclaringClass().isInterface()) {
 			final Annotation marker= rewrite.getAST().newMarkerAnnotation();
 			marker.setTypeName(rewrite.getAST().newSimpleName("Override")); //$NON-NLS-1$

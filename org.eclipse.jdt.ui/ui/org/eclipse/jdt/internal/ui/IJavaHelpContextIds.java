@@ -28,6 +28,8 @@ public interface IJavaHelpContextIds {
 	// Actions
 	public static final String GETTERSETTER_ACTION= 											PREFIX + "getter_setter_action_context"; //$NON-NLS-1$
 	public static final String ADD_UNIMPLEMENTED_METHODS_ACTION= 					PREFIX + "add_unimplemented_methods_action_context"; //$NON-NLS-1$
+	/* @since 3.2 */
+	public static final String GENERATE_HASHCODE_EQUALS_ACTION=						PREFIX + "add_hashcode_equals_action_context"; //$NON-NLS-1$
 	public static final String ADD_UNIMPLEMENTED_CONSTRUCTORS_ACTION= 			PREFIX + "add_unimplemented_constructors_action_context"; //$NON-NLS-1$	
 	public static final String CREATE_NEW_CONSTRUCTOR_ACTION= 					PREFIX + "create_new_constructor_action_context"; //$NON-NLS-1$	
 	public static final String SHOW_IN_PACKAGEVIEW_ACTION= 								PREFIX + "show_in_packageview_action_context"; //$NON-NLS-1$
@@ -223,6 +225,8 @@ public interface IJavaHelpContextIds {
 	public static final String MULTI_TYPE_SELECTION_DIALOG= PREFIX + "multi_type_selection_dialog_context"; //$NON-NLS-1$
 	public static final String SUPER_INTERFACE_SELECTION_DIALOG= PREFIX + "super_interface_selection_dialog_context"; //$NON-NLS-1$
 	public static final String OVERRIDE_TREE_SELECTION_DIALOG= PREFIX + "override_tree_selection_dialog_context"; //$NON-NLS-1$
+	/** @since 3.2 */
+	public static final String GENERATE_HASHCODE_EQUALS_SELECTION_DIALOG= PREFIX + "hash_code_equals_tree_selection_dialog_context"; //$NON-NLS-1$
 	public static final String MOVE_DESTINATION_DIALOG= PREFIX + "move_destination_dialog_context"; //$NON-NLS-1$
 	public static final String CHOOSE_VARIABLE_DIALOG= PREFIX + "choose_variable_dialog_context"; //$NON-NLS-1$	
 	public static final String EDIT_TEMPLATE_DIALOG= PREFIX + "edit_template_dialog_context"; //$NON-NLS-1$	

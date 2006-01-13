@@ -74,6 +74,13 @@ public final class JavaUIMessages extends NLS {
 	public static String OverrideMethodDialog_link_tooltip;
 	public static String OverrideMethodDialog_link_message;
 	
+	public static String GenerateHashCodeEqualsDialog_dialog_title;
+	public static String GenerateHashCodeEqualsDialog_dialog_description;
+	public static String GenerateHashCodeEqualsDialog_selectioninfo_more;
+	public static String GenerateHashCodeEqualsDialog_no_entries;
+	public static String GenerateHashCodeEqualsDialog_select_at_least_one_field;
+	public static String GenerateHashCodeEqualsDialog_select_fields_to_include;
+	
 	public static String GetterSetterMethodDialog_link_tooltip;
 	public static String GetterSetterMethodDialog_link_message;
 	
@@ -168,4 +175,5 @@ public final class JavaUIMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, JavaUIMessages.class);
 	}
+
 }
