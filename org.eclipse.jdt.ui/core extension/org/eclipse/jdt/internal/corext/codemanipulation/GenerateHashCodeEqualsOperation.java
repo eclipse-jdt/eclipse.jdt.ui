@@ -140,6 +140,14 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		public Expression getThisAccess(String name);
 	}
 
+	private static final String JAVA_UTIL_ARRAYS= "java.util.Arrays"; //$NON-NLS-1$
+
+	private static final String BOOLEAN_TRUE_CONSTANT= "1231"; //$NON-NLS-1$
+
+	private static final String BOOLEAN_FALSE_CONSTANT= "1237"; //$NON-NLS-1$
+
+	private static final String JAVA_LANG_OBJECT= "java.lang.Object"; //$NON-NLS-1$
+
 	private static final String METHODNAME_GETCLASS= "getClass"; //$NON-NLS-1$
 
 	private static final String METHODNAME_EQUALS= "equals"; //$NON-NLS-1$
@@ -372,19 +380,19 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		body.statements().add(primeNumberDeclaration);
 
 		// RESULT
-		VariableDeclarationFragment frag2= fAst.newVariableDeclarationFragment();
-		frag2.setName(fAst.newSimpleName(VARIABLE_NAME_RESULT));
+		VariableDeclarationFragment fragment= fAst.newVariableDeclarationFragment();
+		fragment.setName(fAst.newSimpleName(VARIABLE_NAME_RESULT));
 
-		VariableDeclarationStatement resultDeclaration= fAst.newVariableDeclarationStatement(frag2);
+		VariableDeclarationStatement resultDeclaration= fAst.newVariableDeclarationStatement(fragment);
 		resultDeclaration.setType(fAst.newPrimitiveType(PrimitiveType.INT));
 		body.statements().add(resultDeclaration);
 
 		if (isParentObject(fType)) {
-			frag2.setInitializer(fAst.newNumberLiteral(INITIAL_HASHCODE_VALUE));
+			fragment.setInitializer(fAst.newNumberLiteral(INITIAL_HASHCODE_VALUE));
 		} else {
 			SuperMethodInvocation invoc= fAst.newSuperMethodInvocation();
 			invoc.setName(fAst.newSimpleName(METHODNAME_HASH_CODE));
-			frag2.setInitializer(invoc);
+			fragment.setInitializer(invoc);
 		}
 
 		for (int i= 0; i < fFields.length; i++) {
@@ -412,7 +420,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		// method comment
 		if (fSettings != null && fSettings.createComments) {
-			ITypeBinding object= fAst.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+			ITypeBinding object= fAst.resolveWellKnownType(JAVA_LANG_OBJECT);
 			IMethodBinding[] objms= object.getDeclaredMethods();
 			IMethodBinding objectMethod= null;
 			for (int i= 0; i < objms.length; i++) {
@@ -430,29 +438,41 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		List statements= new ArrayList();
 
-		if (isPrimitiveType(type, PrimitiveType.BOOLEAN)) {
+		if (!type.isPrimitive()) {
+			// (element == null ? 0 : element.hashCode())
+			ConditionalExpression ce= fAst.newConditionalExpression();
+			InfixExpression exp= fAst.newInfixExpression();
+			ArrayAccess access= fAst.newArrayAccess();
+			access.setArray(fAst.newSimpleName(VARIABLE_NAME_HASHCODE_PARAM));
+			access.setIndex(fAst.newSimpleName(VARIABLE_NAME_INDEX));
+			exp.setLeftOperand(access);
+			exp.setOperator(Operator.EQUALS);
+			exp.setRightOperand(fAst.newNullLiteral());
+			ce.setExpression(exp);
+			ce.setThenExpression(fAst.newNumberLiteral("0")); //$NON-NLS-1$
+			MethodInvocation invoc= fAst.newMethodInvocation();
+			access= fAst.newArrayAccess();
+			access.setArray(fAst.newSimpleName(VARIABLE_NAME_HASHCODE_PARAM));
+			access.setIndex(fAst.newSimpleName(VARIABLE_NAME_INDEX));
+			invoc.setExpression(access);
+			invoc.setName(fAst.newSimpleName(METHODNAME_HASH_CODE));
+			ce.setElseExpression(invoc);
+			statements.add(prepareAssignment(parenthesize(ce)));
+		} else if (isPrimitiveType(type, PrimitiveType.BOOLEAN)) {
 			ConditionalExpression ce= fAst.newConditionalExpression();
 			ce.setExpression(provider.getThisAccess(name));
 			// see Boolean.hashCode(boolean)
-			ce.setThenExpression(fAst.newNumberLiteral("1231")); //$NON-NLS-1$
-			ce.setElseExpression(fAst.newNumberLiteral("1237")); //$NON-NLS-1$
+			ce.setThenExpression(fAst.newNumberLiteral(BOOLEAN_TRUE_CONSTANT));
+			ce.setElseExpression(fAst.newNumberLiteral(BOOLEAN_FALSE_CONSTANT));
 			statements.add(prepareAssignment(parenthesize(ce)));
-		}
-
-		if (isPrimitiveType(type, new PrimitiveType.Code[] { PrimitiveType.CHAR, PrimitiveType.INT, PrimitiveType.SHORT })) {
+		} else if (isPrimitiveType(type, new PrimitiveType.Code[] { PrimitiveType.CHAR, PrimitiveType.INT, PrimitiveType.SHORT })) {
 			statements.add(prepareAssignment(provider.getThisAccess(name)));
-		}
-
-		if (isPrimitiveType(type, PrimitiveType.FLOAT)) {
+		} else if (isPrimitiveType(type, PrimitiveType.FLOAT)) {
 			// Float.floatToIntBits(aFloat)
 			statements.add(prepareAssignment(createFloatInvocation(provider.getThisAccess(name))));
-		}
-
-		if (isPrimitiveType(type, PrimitiveType.LONG)) {
+		} else if (isPrimitiveType(type, PrimitiveType.LONG)) {
 			statements.add(prepareAssignment(createShiftAssignment(provider.getThisAccess(name), provider.getThisAccess(name))));
-		}
-
-		if (isPrimitiveType(type, PrimitiveType.DOUBLE)) {
+		} else if (isPrimitiveType(type, PrimitiveType.DOUBLE)) {
 
 			VariableDeclarationFragment fragment= null;
 			if (singleTemp || fDoubleCount == 0) {
@@ -486,7 +506,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		MethodInvocation invoc= fAst.newMethodInvocation();
 		if (JavaModelUtil.is50OrHigher(fRewrite.getCu().getJavaProject())) {
 			invoc.setName(fAst.newSimpleName(METHODNAME_HASH_CODE));
-			invoc.setExpression(getQualifiedName("java.util.Arrays")); //$NON-NLS-1$
+			invoc.setExpression(getQualifiedName(JAVA_UTIL_ARRAYS));
 			invoc.arguments().add(getThisAccessForHashCode(binding.getName()));
 		} else {
 			invoc.setName(fAst.newSimpleName(METHODNAME_HASH_CODE));
@@ -496,17 +516,16 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			invoc.arguments().add(getThisAccessForHashCode(binding.getName()));
 			final ITypeBinding type= binding.getType().getElementType();
 			if (!Bindings.isVoidType(type)) {
-				if (type.isPrimitive())
+				if (type.isPrimitive() && binding.getType().getDimensions() < 2)
 					fCustomHashCodeTypes.add(type);
 				else
-					fCustomHashCodeTypes.add(fAst.resolveWellKnownType("java.lang.Object")); //$NON-NLS-1$
+					fCustomHashCodeTypes.add(fAst.resolveWellKnownType(JAVA_LANG_OBJECT));
 			}
 		}
 		return prepareAssignment(invoc);
 	}
 
 	private MethodDeclaration createHashCodeHelper(ITypeBinding binding) {
-		Assert.isTrue(binding.isPrimitive());
 		Assert.isTrue(!binding.isArray());
 
 		MethodDeclaration hashCodeMethod= fAst.newMethodDeclaration();
@@ -518,7 +537,10 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		// ARGUMENTS
 		List parameters= hashCodeMethod.parameters();
 		SingleVariableDeclaration hashCodeParam= fAst.newSingleVariableDeclaration();
-		hashCodeParam.setType(fAst.newArrayType(fAst.newPrimitiveType(PrimitiveType.toCode(binding.getName())), 1));
+		if (!binding.isPrimitive())
+			hashCodeParam.setType(fAst.newArrayType(fAst.newSimpleType(getQualifiedName(JAVA_LANG_OBJECT)), 1));
+		else
+			hashCodeParam.setType(fAst.newArrayType(fAst.newPrimitiveType(PrimitiveType.toCode(binding.getName())), 1));
 		hashCodeParam.setName(fAst.newSimpleName(VARIABLE_NAME_HASHCODE_PARAM));
 		parameters.add(hashCodeParam);
 
@@ -771,12 +793,12 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 		// method comment
 		if (fSettings != null && fSettings.createComments) {
-			ITypeBinding object= fAst.resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
+			ITypeBinding object= fAst.resolveWellKnownType(JAVA_LANG_OBJECT);
 			IMethodBinding[] objms= object.getDeclaredMethods();
 			IMethodBinding objectMethod= null;
 			for (int i= 0; i < objms.length; i++) {
 				if (objms[i].getName().equals(METHODNAME_EQUALS) && objms[i].getParameterTypes().length == 1
-						&& objms[i].getParameterTypes()[0].getQualifiedName().equals("java.lang.Object")) //$NON-NLS-1$
+						&& objms[i].getParameterTypes()[0].getQualifiedName().equals(JAVA_LANG_OBJECT))
 					objectMethod= objms[i];
 			}
 			createMethodComment(equalsMethodDeclaration, objectMethod);
@@ -799,7 +821,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	private Statement createArrayComparison(String name) {
 		MethodInvocation invoc= fAst.newMethodInvocation();
 		invoc.setName(fAst.newSimpleName(METHODNAME_EQUALS));
-		invoc.setExpression(getQualifiedName("java.util.Arrays")); //$NON-NLS-1$
+		invoc.setExpression(getQualifiedName(JAVA_UTIL_ARRAYS));
 		invoc.arguments().add(getThisAccessForEquals(name));
 		invoc.arguments().add(getOtherAccess(name));
 
@@ -898,7 +920,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 	private boolean isParentObject(ITypeBinding typeBinding) {
 		ITypeBinding superClass= typeBinding.getSuperclass();
-		return "java.lang.Object".equals(superClass.getQualifiedName()); //$NON-NLS-1$
+		return JAVA_LANG_OBJECT.equals(superClass.getQualifiedName());
 	}
 
 	private Expression getThisAccessForEquals(String name) {
