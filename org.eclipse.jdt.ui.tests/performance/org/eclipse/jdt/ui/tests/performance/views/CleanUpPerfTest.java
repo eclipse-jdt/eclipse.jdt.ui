@@ -35,6 +35,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
@@ -106,6 +108,12 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			public void saveSettings(IDialogSettings settings) {}
 			public String[] getDescriptions() {return null;}
 			public boolean canCleanUp(IJavaProject project) {return true;}
+			public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+				return true;
+			}
+			public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+				return null;
+			}
 		});
 		tagAsSummary("Code clean up - no fix", Dimension.ELAPSED_PROCESS);
 		
