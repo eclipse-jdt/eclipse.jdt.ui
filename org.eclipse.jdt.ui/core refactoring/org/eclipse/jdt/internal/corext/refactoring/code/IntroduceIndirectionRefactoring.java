@@ -71,6 +71,7 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
@@ -1122,7 +1123,8 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 	private SearchResultGroup[] getReferences(IMethod[] methods, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(methods, IJavaSearchConstants.REFERENCES);
-		return RefactoringSearchEngine.search(pattern, RefactoringScopeFactory.create(methods), pm, status);
+		IJavaSearchScope scope= RefactoringScopeFactory.create(fIntermediaryClass);
+		return RefactoringSearchEngine.search(pattern, scope, pm, status);
 	}
 
 	private ITypeBinding typeToBinding(IType type, CompilationUnit root) throws JavaModelException {
