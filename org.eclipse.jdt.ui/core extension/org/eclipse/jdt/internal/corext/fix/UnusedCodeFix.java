@@ -288,12 +288,33 @@ public class UnusedCodeFix extends AbstractFix {
 			boolean removeUnusedLocalVariables, 
 			boolean removeUnusedImports) {
 
-		List/*<IFixRewriteOperation>*/ result= new ArrayList();
-
 		IProblem[] problems= compilationUnit.getProblems();
-
+		IProblemLocation[] locations= new IProblemLocation[problems.length];
 		for (int i= 0; i < problems.length; i++) {
-			IProblemLocation problem= getProblemLocation(problems[i]);
+			locations[i]= new ProblemLocation(problems[i]);
+		}
+		
+		return createCleanUp(compilationUnit, locations, 
+				removeUnusedPrivateMethods, 
+				removeUnusedPrivateConstructors, 
+				removeUnusedPrivateFields, 
+				removeUnusedPrivateTypes, 
+				removeUnusedLocalVariables, 
+				removeUnusedImports);
+	}
+	
+	public static IFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, 
+			boolean removeUnusedPrivateMethods, 
+			boolean removeUnusedPrivateConstructors, 
+			boolean removeUnusedPrivateFields, 
+			boolean removeUnusedPrivateTypes, 
+			boolean removeUnusedLocalVariables, 
+			boolean removeUnusedImports) {
+
+		List/*<IFixRewriteOperation>*/ result= new ArrayList();
+		
+		for (int i= 0; i < problems.length; i++) {
+			IProblemLocation problem= problems[i];
 			int id= problem.getProblemId();
 			
 			if (removeUnusedImports && id == IProblem.UnusedImport) {
@@ -423,6 +444,12 @@ public class UnusedCodeFix extends AbstractFix {
 				} else {
 					return UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_METHODS;
 				}
+			case IBinding.VARIABLE:
+				if (((IVariableBinding) binding).isField()) {
+					return UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS;
+				} else {
+					return UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES;
+				}
 			default:
 				return 0;
 		}
@@ -437,12 +464,6 @@ public class UnusedCodeFix extends AbstractFix {
 			}
 		}
 		return null;
-	}
-	
-	private static IProblemLocation getProblemLocation(IProblem problem) {
-		int offset= problem.getSourceStart();
-		int length= problem.getSourceEnd() - offset + 1;
-		return new ProblemLocation(offset, length, problem.getID(), problem.getArguments(), problem.isError());
 	}
 	
 	private final int fCleanUpFlags;

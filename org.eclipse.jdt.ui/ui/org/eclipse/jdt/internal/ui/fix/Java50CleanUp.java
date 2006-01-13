@@ -33,6 +33,8 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 /**
  * Create fixes which can transform pre Java50 code to Java50 code
  * @see org.eclipse.jdt.internal.corext.fix.Java50Fix
@@ -89,6 +91,18 @@ public class Java50CleanUp extends AbstractCleanUp {
 				isFlag(ADD_DEPRECATED_ANNOTATION),
 				isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP));
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+		if (compilationUnit == null)
+			return null;
+		
+		return Java50Fix.createCleanUp(compilationUnit, problems,
+				isFlag(ADD_OVERRIDE_ANNOATION), 
+				isFlag(ADD_DEPRECATED_ANNOTATION));
+	}
 
 	public Map getRequiredOptions() {
 		Map options= new Hashtable();
@@ -135,6 +149,23 @@ public class Java50CleanUp extends AbstractCleanUp {
 	 */
 	public boolean canCleanUp(IJavaProject project) {
 		return JavaModelUtil.is50OrHigher(project);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+		if (isFlag(ADD_OVERRIDE_ANNOATION)) {
+			Java50Fix fix= Java50Fix.createAddOverrideAnnotationFix(compilationUnit, problem);
+			if (fix != null)
+				return true;
+		}
+		if (isFlag(ADD_DEPRECATED_ANNOTATION)) {
+			Java50Fix fix= Java50Fix.createAddDeprectatedAnnotation(compilationUnit, problem);
+			if (fix != null)
+				return true;
+		}
+		return false;
 	}
 
 }

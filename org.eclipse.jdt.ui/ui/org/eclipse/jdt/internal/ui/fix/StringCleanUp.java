@@ -31,6 +31,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.StringFix;
 
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 /**
  * Create fixes which can solve problems in connection with Strings
  * @see org.eclipse.jdt.internal.corext.fix.StringFix
@@ -71,6 +73,18 @@ public class StringCleanUp extends AbstractCleanUp {
 				isFlag(ADD_MISSING_NLS_TAG), 
 				isFlag(REMOVE_UNNECESSARY_NLS_TAG));
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+		if (compilationUnit == null)
+			return null;
+		
+		return StringFix.createCleanUp(compilationUnit, problems,
+				isFlag(ADD_MISSING_NLS_TAG), 
+				isFlag(REMOVE_UNNECESSARY_NLS_TAG));
+	}
 
 	public Map getRequiredOptions() {
 		Map result= new Hashtable();
@@ -106,6 +120,14 @@ public class StringCleanUp extends AbstractCleanUp {
 		if (isFlag(REMOVE_UNNECESSARY_NLS_TAG))
 			result.add(removeMemonic(MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description));
 		return (String[])result.toArray(new String[result.size()]);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 * @throws CoreException 
+	 */
+	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+		return StringFix.createFix(compilationUnit, problem, isFlag(REMOVE_UNNECESSARY_NLS_TAG), isFlag(ADD_MISSING_NLS_TAG)) != null;
 	}
 
 }

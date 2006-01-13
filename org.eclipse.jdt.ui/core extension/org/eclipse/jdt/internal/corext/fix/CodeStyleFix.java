@@ -387,16 +387,58 @@ public class CodeStyleFix extends AbstractFix {
 			compilationUnit.accept(codeStyleVisitor);
 		}
 		
-		IProblem[] problems= compilationUnit.getProblems();
+		if (changeNonStaticAccessToStatic || changeIndirectStaticAccessToDirect) {
+			IProblem[] problems= compilationUnit.getProblems();
+			for (int i= 0; i < problems.length; i++) {
+				IProblemLocation problem= new ProblemLocation(problems[i]);
+				boolean isNonStaticAccess= changeNonStaticAccessToStatic && isNonStaticAccess(problem);
+				boolean isIndirectStaticAccess= changeIndirectStaticAccessToDirect && isIndirectStaticAccess(problem);
+				if (isNonStaticAccess || isIndirectStaticAccess) {
+					ToStaticAccessOperation[] nonStaticAccessInformation= createNonStaticAccessResolveOperations(compilationUnit, problem);
+					if (nonStaticAccessInformation != null) {
+						operations.add(nonStaticAccessInformation[0]);
+					}
+				}
+			}
+		}
+
+		if (operations.isEmpty())
+			return null;
 		
-		for (int i= 0; i < problems.length; i++) {
-			IProblemLocation problem= new ProblemLocation(problems[i]);
-			boolean isNonStaticAccess= changeNonStaticAccessToStatic && isNonStaticAccess(problem);
-			boolean isIndirectStaticAccess= changeIndirectStaticAccessToDirect && isIndirectStaticAccess(problem);
-			if (isNonStaticAccess || isIndirectStaticAccess) {
-				ToStaticAccessOperation[] nonStaticAccessInformation= createNonStaticAccessResolveOperations(compilationUnit, problem);
-				if (nonStaticAccessInformation != null) {
-					operations.add(nonStaticAccessInformation[0]);
+		IFixRewriteOperation[] operationsArray= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
+		return new CodeStyleFix("", compilationUnit, operationsArray); //$NON-NLS-1$
+	}
+	
+	public static CodeStyleFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, 
+			boolean addThisQualifier, 
+			boolean changeNonStaticAccessToStatic,
+			boolean changeIndirectStaticAccessToDirect) throws CoreException {
+		
+		if (!addThisQualifier && !changeNonStaticAccessToStatic && !changeIndirectStaticAccessToDirect)
+			return null;
+				
+		List/*<IFixRewriteOperation>*/ operations= new ArrayList(); 
+		if (addThisQualifier) {
+			for (int i= 0; i < problems.length; i++) {
+				IProblemLocation problem= problems[i];
+				if (problem.getProblemId() == IProblem.UnqualifiedFieldAccess) {
+					AddThisQualifierOperation operation= getUnqualifiedFieldAccessResolveOperation(compilationUnit, problem);
+					if (operation != null)
+						operations.add(operation);
+				}
+			}
+		}
+
+		if (changeNonStaticAccessToStatic || changeIndirectStaticAccessToDirect) {
+			for (int i= 0; i < problems.length; i++) {
+				IProblemLocation problem= problems[i];
+				boolean isNonStaticAccess= changeNonStaticAccessToStatic && isNonStaticAccess(problem);
+				boolean isIndirectStaticAccess= changeIndirectStaticAccessToDirect && isIndirectStaticAccess(problem);
+				if (isNonStaticAccess || isIndirectStaticAccess) {
+					ToStaticAccessOperation[] nonStaticAccessInformation= createNonStaticAccessResolveOperations(compilationUnit, problem);
+					if (nonStaticAccessInformation != null) {
+						operations.add(nonStaticAccessInformation[0]);
+					}
 				}
 			}
 		}

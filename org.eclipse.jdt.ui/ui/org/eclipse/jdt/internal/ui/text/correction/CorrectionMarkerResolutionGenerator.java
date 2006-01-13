@@ -13,9 +13,15 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Hashtable;
 import java.util.Iterator;
+import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
@@ -36,6 +42,11 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
 
+import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.TextChange;
+
 import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -43,6 +54,9 @@ import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+
+import org.eclipse.jdt.internal.corext.fix.IFix;
 
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -50,6 +64,8 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaMarkerAnnotation;
 
@@ -98,11 +114,102 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				}
 				if (part != null) {
 					IEditorInput input= part.getEditorInput();
-					IDocument doc= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getDocument(input);
+					IDocument doc= JavaPlugin.getDefault().getCompilationUnitDocumentProvider().getDocument(input);					
 					fProposal.apply(doc);
 				}
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
+			}
+		}
+		
+		public void run(IMarker[] markers, IProgressMonitor monitor) {
+			if (markers.length == 1) {
+				run(markers[0]);
+				return;
+			}
+			IProgressMonitor pm= monitor;
+			if (pm == null)
+				pm= new NullProgressMonitor();
+			
+			try {
+				if (fProposal instanceof FixCorrectionProposal) {
+					ICleanUp cleanUp= ((FixCorrectionProposal)fProposal).getCleanUp();
+					if (cleanUp != null) {
+						Hashtable/*<ICompilationUnit, List<IProblemLocation>*/ cus= new Hashtable();
+						for (int i= 0; i < markers.length; i++) {
+							IMarker marker= markers[i];
+							ICompilationUnit cu= getCompilationUnit(marker);
+							
+							if (cu != null) {
+								IProblemLocation location= getProblemLocation(marker, cu);
+								if (location != null) {
+									if (!cus.containsKey(cu.getPrimary())) {
+										cus.put(cu.getPrimary(), new ArrayList());
+									}
+									List l= (List)cus.get(cu.getPrimary());
+									l.add(location);
+								}
+							}
+						}
+						if (cus.size() > 0) {
+							pm.beginTask("", cus.size() * 2 + 2); //$NON-NLS-1$
+							Set keys= cus.keySet();
+							String name= ""; //$NON-NLS-1$
+							String[] descriptions= cleanUp.getDescriptions();
+							if (descriptions != null && descriptions.length == 1) {
+								name= descriptions[0];
+							}
+							CompositeChange allChanges= new CompositeChange(name);
+							for (Iterator iter= keys.iterator(); iter.hasNext();) {
+								ICompilationUnit cu= (ICompilationUnit)iter.next();
+								CompilationUnit root= JavaPlugin.getDefault().getASTProvider().getAST(cu, ASTProvider.WAIT_YES, new SubProgressMonitor(pm, 1));
+								List locationList= (List)cus.get(cu);
+								IProblemLocation[] locations= (IProblemLocation[])locationList.toArray(new IProblemLocation[locationList.size()]);
+								try {
+									IFix fix= cleanUp.createFix(root, locations);
+									
+									if (pm.isCanceled())
+										return;
+									
+									if (fix != null) {
+										TextChange change= fix.createChange();
+										
+										if (pm.isCanceled())
+											return;
+										
+										allChanges.add(change);
+										pm.worked(1);
+									}
+								} catch (CoreException e) {
+									JavaPlugin.log(e);
+								} finally {
+									pm.worked(1);
+								}
+							}
+							
+							if (pm.isCanceled())
+								return;
+							
+							allChanges.initializeValidationData(new SubProgressMonitor(pm, 1));
+							PerformChangeOperation op= new PerformChangeOperation(allChanges);
+							op.setUndoManager(RefactoringCore.getUndoManager(), allChanges.getName());
+							try {
+								op.run(new SubProgressMonitor(pm, 1));
+							} catch (CoreException e1) {
+								JavaPlugin.log(e1);
+							} finally {
+								pm.worked(1);
+							}
+							IEditorPart part= EditorUtility.isOpenInEditor(fCompilationUnit);
+							if (part instanceof ITextEditor) {
+								((ITextEditor) part).selectAndReveal(fOffset, fLength);
+								part.setFocus();
+							}
+						}
+					}
+				} 
+			} finally {
+				pm.done();
 			}
 		}
 
@@ -119,58 +226,54 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		public Image getImage() {
 			return fProposal.getImage();
 		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.views.markers.WorkbenchMarkerResolution#canBeGroupedWith(org.eclipse.ui.views.markers.WorkbenchMarkerResolution)
+		
+		/**
+		 * {@inheritDoc}
 		 */
-		public boolean canBeGroupedWith(WorkbenchMarkerResolution resolution) {
-			if (!(resolution instanceof CorrectionMarkerResolution))
-				return false;
-			
-			String proposalId= getProposalId();
-			if (proposalId == null)
-				return false;
-			
-			CorrectionMarkerResolution cmr= ((CorrectionMarkerResolution)resolution);
-			String otherProposalId= cmr.getProposalId();
-			if (otherProposalId == null)
-				return false;
-			
-			return otherProposalId.equals(proposalId);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.ui.views.markers.WorkbenchMarkerResolution#getUpdatedResolution()
-		 */
-		public WorkbenchMarkerResolution getUpdatedResolution() {
-			String proposalId= getProposalId();
-			if (proposalId == null)
-				return null;
-
-			IMarkerResolution[] resolutions= internalGetResolutions(fMarker);
-			for (int i= 0; i < resolutions.length; i++) {
-				CorrectionMarkerResolution resolution= (CorrectionMarkerResolution)resolutions[i];
-				String otherProposalId= resolution.getProposalId();
-				if (otherProposalId != null && otherProposalId.equals(proposalId)) {
-					return resolution;
+		public IMarker[] findOtherMarkers(IMarker[] markers) {
+			if (fProposal instanceof FixCorrectionProposal) {
+				FixCorrectionProposal fix= (FixCorrectionProposal)fProposal;
+				ICleanUp cleanUp= fix.getCleanUp();
+				if (cleanUp != null) {
+					List result= new ArrayList();
+					for (int i= 0; i < markers.length; i++) {
+						IMarker marker= markers[i];
+						if (!marker.equals(fMarker)) {
+							ICompilationUnit cu= getCompilationUnit(marker);
+							if (cu != null) {
+								IProblemLocation location= getProblemLocation(marker, cu);
+								try {
+									IInvocationContext context= new AssistContext(cu,  location.getOffset(), location.getLength());
+									CompilationUnit root= context.getASTRoot();
+									if (cleanUp.canFix(root, location)) {
+										result.add(marker);
+									}
+								} catch (CoreException e) {
+									JavaPlugin.log(e);
+								}
+							}
+						}
+					}
+					return (IMarker[])result.toArray(new IMarker[result.size()]);
 				}
 			}
-			return null;
+			return super.findOtherMarkers(markers);
 		}
-
-		public String getProposalId() {
-			if (!(fProposal instanceof ICommandAccess))
-				return null;
-			
-			ICommandAccess proposal= (ICommandAccess)fProposal;
-			String commandId= proposal.getCommandId();
-			if (commandId == null)
-				return null;
-			
-			if (!commandId.startsWith(CorrectionCommandInstaller.COMMAND_PREFIX))
-				return null;
-			
-			return commandId;
+		
+		private IProblemLocation getProblemLocation(IMarker marker, ICompilationUnit cu) {
+			int id= marker.getAttribute(IJavaModelMarker.ID, -1);
+			int start= marker.getAttribute(IMarker.CHAR_START, -1);
+			int end= marker.getAttribute(IMarker.CHAR_END, -1);
+			int severity= marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
+			String[] arguments= CorrectionEngine.getProblemArguments(marker);
+			IProblemLocation location;
+			if (cu != null && id != -1 && start != -1 && end != -1 && arguments != null) {
+				boolean isError= (severity == IMarker.SEVERITY_ERROR);
+				location= new ProblemLocation(start, end - start, id, arguments, isError);
+			} else {
+				location= null;
+			}
+			return location;
 		}
 
 	}

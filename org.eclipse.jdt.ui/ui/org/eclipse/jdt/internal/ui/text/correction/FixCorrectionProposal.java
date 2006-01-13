@@ -55,6 +55,10 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	public IFix getFix() {
 		return fFix;
 	}
+	
+	public ICleanUp getCleanUp() {
+		return fCleanUp;
+	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createTextChange()

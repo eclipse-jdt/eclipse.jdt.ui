@@ -32,6 +32,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 /**
  * Create fixes which can remove unused code
  * @see org.eclipse.jdt.internal.corext.fix.UnusedCodeFix
@@ -92,6 +94,23 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				isFlag(REMOVE_UNUSED_LOCAL_VARIABLES), 
 				isFlag(REMOVE_UNUSED_IMPORTS));
 	}
+	
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+		if (compilationUnit == null)
+			return null;
+		
+		return UnusedCodeFix.createCleanUp(compilationUnit, problems,
+				isFlag(REMOVE_UNUSED_PRIVATE_METHODS), 
+				isFlag(REMOVE_UNUSED_PRIVATE_CONSTRUCTORS), 
+				isFlag(REMOVE_UNUSED_PRIVATE_FIELDS), 
+				isFlag(REMOVE_UNUSED_PRIVATE_TYPES), 
+				isFlag(REMOVE_UNUSED_LOCAL_VARIABLES), 
+				isFlag(REMOVE_UNUSED_IMPORTS));
+	}
 
 	public Map getRequiredOptions() {
 		Map options= new Hashtable();
@@ -145,6 +164,28 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 		if (isFlag(REMOVE_UNUSED_LOCAL_VARIABLES))
 			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description));
 		return (String[])result.toArray(new String[result.size()]);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+		if (isFlag(REMOVE_UNUSED_IMPORTS)) {
+			UnusedCodeFix fix= UnusedCodeFix.createRemoveUnusedImportFix(compilationUnit, problem);
+			if (fix != null)
+				return true;
+		}
+		if (isFlag(REMOVE_UNUSED_PRIVATE_METHODS) ||
+				isFlag(REMOVE_UNUSED_PRIVATE_CONSTRUCTORS) ||
+				isFlag(REMOVE_UNUSED_PRIVATE_TYPES) ||
+				isFlag(REMOVE_UNUSED_PRIVATE_FIELDS) ||
+				isFlag(REMOVE_UNUSED_LOCAL_VARIABLES)) 
+		{
+			UnusedCodeFix fix= UnusedCodeFix.createUnusedMemberFix(compilationUnit, problem);
+			if (fix != null)
+				return true;
+		}
+		return false;
 	}
 
 }

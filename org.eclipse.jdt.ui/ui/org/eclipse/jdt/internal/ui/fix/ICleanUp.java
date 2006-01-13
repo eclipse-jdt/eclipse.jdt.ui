@@ -24,6 +24,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 /**
  * A clean up can solve several different problems in
  * a given <code>CompilationUnit</code>. The <code>CompilationUnit</code>
@@ -46,6 +48,17 @@ public interface ICleanUp {
 	 */
 	public abstract IFix createFix(CompilationUnit compilationUnit) throws CoreException;
 	
+	/**
+	 * Create a <code>IFix</code> which fixes all <code>problems</code> in
+	 * <code>CompilationUnit</code>
+	 * 
+	 * @param compilationUnit The compilation unit to fix, may be null
+	 * @param problems The locations of the problems to fix
+	 * @return The fix or null if no fixes possible
+	 * @throws CoreException
+	 */
+	public abstract IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException;
+
 	/**
 	 * Required compiler options to allow <code>createFix</code> to work
 	 * correct.
@@ -85,4 +98,17 @@ public interface ICleanUp {
 	 * @return true if clean up can fix problems in project
 	 */
 	public abstract boolean canCleanUp(IJavaProject project);
+	
+	/**
+	 * True if <code>problem</code> in <code>CompilationUnit</code> can be fixed
+	 * by this CleanUp. If true
+	 * <code>createFix(compilationUnit, new IProblemLocation[] {problem})</code>
+	 * does not return null.
+	 * 
+	 * @param compilationUnit The compilation unit to fix not null
+	 * @param problem The location of the problem to fix
+	 * @return True if problem can be fixed
+	 * @throws CoreException
+	 */
+	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException;
 }

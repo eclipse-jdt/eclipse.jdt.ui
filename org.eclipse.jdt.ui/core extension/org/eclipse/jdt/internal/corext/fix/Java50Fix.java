@@ -215,53 +215,18 @@ public class Java50Fix extends LinkedFix {
 			return null;
 
 		List/*<IFixRewriteOperation>*/ operations= new ArrayList();
-		
-		if (addOverrideAnnotation) {
-			IProblem[] problems= compilationUnit.getProblems();
-			for (int i= 0; i < problems.length; i++) {
-				
-				if (problems[i].getID() == IProblem.MissingOverrideAnnotation) {
 
-					IProblemLocation problem= getProblemLocation(problems[i]);
-
-					ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
-					if (selectedNode != null) { 
-						
-						ASTNode declaringNode= getDeclaringNode(selectedNode);
-						if (declaringNode instanceof BodyDeclaration) {
-							BodyDeclaration declaration= (BodyDeclaration) declaringNode;
-							AnnotationRewriteOperation operation= new AnnotationRewriteOperation(declaration, OVERRIDE);
-							operations.add(operation);
-						}
-					}
-				}	
-			}
+		IProblem[] problems= compilationUnit.getProblems();
+		IProblemLocation[] locations= new IProblemLocation[problems.length];
+		for (int i= 0; i < problems.length; i++) {
+			locations[i]= new ProblemLocation(problems[i]);
 		}
 		
-		if (addDeprecatedAnnotation) {
-			IProblem[] problems= compilationUnit.getProblems();
-			for (int i= 0; i < problems.length; i++) {
-				int id= problems[i].getID();
-				
-				if (id == IProblem.FieldMissingDeprecatedAnnotation ||
-					id == IProblem.MethodMissingDeprecatedAnnotation ||
-					id == IProblem.TypeMissingDeprecatedAnnotation) {
-					
-					IProblemLocation problem= getProblemLocation(problems[i]);
-
-					ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
-					if (selectedNode != null) { 
-						
-						ASTNode declaringNode= getDeclaringNode(selectedNode);
-						if (declaringNode instanceof BodyDeclaration) {
-							BodyDeclaration declaration= (BodyDeclaration) declaringNode;
-							AnnotationRewriteOperation operation= new AnnotationRewriteOperation(declaration, DEPRECATED);
-							operations.add(operation);
-						}
-					}
-				}	
-			}
-		}
+		if (addOverrideAnnotation)
+			createAddOverrideAnnotationOperations(compilationUnit, locations, operations);
+		
+		if (addDeprecatedAnnotation)
+			createAddDeprecatedAnnotationOperations(compilationUnit, locations, operations);
 		
 		if (convertToEnhancedForLoop) {
 			ForLoopConverterGenerator forLoopFinder= new ForLoopConverterGenerator(operations, compilationUnit);
@@ -275,6 +240,77 @@ public class Java50Fix extends LinkedFix {
 		return new Java50Fix("", compilationUnit, operationsArray); //$NON-NLS-1$
 	}
 	
+	public static IFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
+			boolean addOverrideAnnotation, 
+			boolean addDeprecatedAnnotation) {
+		
+		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
+		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
+			return null;
+		
+		if (!addOverrideAnnotation && !addDeprecatedAnnotation)
+			return null;
+
+		List/*<IFixRewriteOperation>*/ operations= new ArrayList();
+		
+		if (addOverrideAnnotation)
+			createAddOverrideAnnotationOperations(compilationUnit, problems, operations);
+		
+		if (addDeprecatedAnnotation)
+			createAddDeprecatedAnnotationOperations(compilationUnit, problems, operations);
+
+		if (operations.size() == 0)
+			return null;
+		
+		IFixRewriteOperation[] operationsArray= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
+		return new Java50Fix("", compilationUnit, operationsArray); //$NON-NLS-1$
+	}
+	
+	private static void createAddDeprecatedAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List result) {
+		for (int i= 0; i < locations.length; i++) {
+			int id= locations[i].getProblemId();
+			
+			if (id == IProblem.FieldMissingDeprecatedAnnotation ||
+				id == IProblem.MethodMissingDeprecatedAnnotation ||
+				id == IProblem.TypeMissingDeprecatedAnnotation) {
+				
+				IProblemLocation problem= locations[i];
+
+				ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
+				if (selectedNode != null) { 
+					
+					ASTNode declaringNode= getDeclaringNode(selectedNode);
+					if (declaringNode instanceof BodyDeclaration) {
+						BodyDeclaration declaration= (BodyDeclaration) declaringNode;
+						AnnotationRewriteOperation operation= new AnnotationRewriteOperation(declaration, DEPRECATED);
+						result.add(operation);
+					}
+				}
+			}	
+		}
+	}
+
+	private static void createAddOverrideAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List result) {
+		for (int i= 0; i < locations.length; i++) {
+			
+			if (locations[i].getProblemId() == IProblem.MissingOverrideAnnotation) {
+
+				IProblemLocation problem= locations[i];
+
+				ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
+				if (selectedNode != null) { 
+					
+					ASTNode declaringNode= getDeclaringNode(selectedNode);
+					if (declaringNode instanceof BodyDeclaration) {
+						BodyDeclaration declaration= (BodyDeclaration) declaringNode;
+						AnnotationRewriteOperation operation= new AnnotationRewriteOperation(declaration, OVERRIDE);
+						result.add(operation);
+					}
+				}
+			}	
+		}
+	}
+
 	private static ASTNode getDeclaringNode(ASTNode selectedNode) {
 		ASTNode declaringNode= null;		
 		if (selectedNode instanceof MethodDeclaration) {
@@ -288,12 +324,6 @@ public class Java50Fix extends LinkedFix {
 			}
 		}
 		return declaringNode;
-	}
-	
-	private static IProblemLocation getProblemLocation(IProblem problem) {
-		int offset= problem.getSourceStart();
-		int length= problem.getSourceEnd() - offset + 1;
-		return new ProblemLocation(offset, length, problem.getID(), problem.getArguments(), problem.isError());
 	}
 	
 	private Java50Fix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewrites) {

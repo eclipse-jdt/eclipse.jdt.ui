@@ -31,6 +31,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
+import org.eclipse.jdt.ui.text.java.IProblemLocation;
+
 /**
  * Creates fixes which can resolve code style issues 
  * @see org.eclipse.jdt.internal.corext.fix.CodeStyleFix
@@ -104,6 +106,19 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 				isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT),
 				isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS));
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
+		if (compilationUnit == null)
+			return null;
+		
+		return CodeStyleFix.createCleanUp(compilationUnit, problems,
+				isFlag(QUALIFY_FIELD_ACCESS), 
+				isFlag(CHANGE_NON_STATIC_ACCESS_TO_STATIC), 
+				isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT));
+	}
 
 	public Map getRequiredOptions() {
 		Map options= new Hashtable();
@@ -148,6 +163,28 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 		if (isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS))
 			result.add(removeMemonic(MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description));
 		return (String[])result.toArray(new String[result.size()]);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+		if (isFlag(QUALIFY_FIELD_ACCESS)) {
+			CodeStyleFix fix= CodeStyleFix.createAddFieldQualifierFix(compilationUnit, problem);
+			if (fix != null)
+				return true;
+		}
+		if (isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT)) {
+			CodeStyleFix fix= CodeStyleFix.createIndirectAccessToStaticFix(compilationUnit, problem);
+			if (fix != null)
+				return true;
+		}
+		if (isFlag(CHANGE_NON_STATIC_ACCESS_TO_STATIC)) {
+			CodeStyleFix[] fixes= CodeStyleFix.createNonStaticAccessFixes(compilationUnit, problem);
+			if (fixes != null && fixes.length > 0)
+				return true;
+		}
+		return false;
 	}
 	
 }

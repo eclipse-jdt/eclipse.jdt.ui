@@ -34,6 +34,8 @@ import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+
 /**
  * Fix which solves various issues with strings.
  * Supported:
@@ -80,21 +82,36 @@ public class StringFix implements IFix {
 			return null;
 		
 		IProblem[] problems= compilationUnit.getProblems();
+		IProblemLocation[] locations= new IProblemLocation[problems.length];
+		for (int i= 0; i < problems.length; i++) {
+			locations[i]= new ProblemLocation(problems[i]);
+		}
+		return createCleanUp(compilationUnit, addNLSTag, removeNLSTag, locations);
+	}
+	
+	public static IFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, boolean addNLSTag, boolean removeNLSTag) throws CoreException, JavaModelException {
+		if (!addNLSTag && !removeNLSTag)
+			return null;
+		
+		return createCleanUp(compilationUnit, addNLSTag, removeNLSTag, problems);
+	}
+
+	private static IFix createCleanUp(CompilationUnit compilationUnit, boolean addNLSTag, boolean removeNLSTag, IProblemLocation[] problems) throws CoreException, JavaModelException {
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		List result= new ArrayList();
 		
 		for (int i= 0; i < problems.length; i++) {
-			IProblem problem= problems[i];
-			if (addNLSTag && problem.getID() == IProblem.NonExternalizedStringLiteral) {
-				TextEdit edit= NLSUtil.createNLSEdit(cu, problem.getSourceStart());
+			IProblemLocation problem= problems[i];
+			if (addNLSTag && problem.getProblemId() == IProblem.NonExternalizedStringLiteral) {
+				TextEdit edit= NLSUtil.createNLSEdit(cu, problem.getOffset());
 				if (edit != null) {
 					result.add(new TextEditGroup(FixMessages.StringFix_AddNonNls_description, edit));
 				}
 			}
-			if (removeNLSTag && problem.getID() == IProblem.UnnecessaryNLSTag) {
+			if (removeNLSTag && problem.getProblemId() == IProblem.UnnecessaryNLSTag) {
 				IBuffer buffer= cu.getBuffer();
 				if (buffer != null) {
-					TextEdit edit= StringFix.getReplace(problem.getSourceStart(), problem.getSourceEnd() - problem.getSourceStart() + 1, buffer, false);
+					TextEdit edit= StringFix.getReplace(problem.getOffset(), problem.getLength(), buffer, false);
 					if (edit != null) {
 						result.add(new TextEditGroup(FixMessages.StringFix_RemoveNonNls_description, edit));
 					}
