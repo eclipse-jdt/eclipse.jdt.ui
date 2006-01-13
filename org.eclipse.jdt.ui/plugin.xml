@@ -2143,6 +2143,8 @@
             <separator name="reorgGroup"/>
             <separator name="typeGroup"/>
             <separator name="codingGroup"/>
+            <separator name="codingGroup2"/>
+            <separator name="scriptGroup"/>
          </menu>
 <!-- undo/redo group  -->
 		 <!--
