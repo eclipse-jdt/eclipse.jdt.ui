@@ -93,6 +93,7 @@ import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameResourceRefac
 import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameSourceFolderRefactoringInstanceCreator;
 import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeParameterRefactoringInstanceCreator;
 import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeRefactoringInstanceCreator;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.SelfEncapsulateRefactoringInstanceCreator;
 import org.eclipse.jdt.internal.corext.refactoring.scripting.UseSupertypeRefactoringInstanceCreator;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
@@ -378,6 +379,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 
 	/**
 	 * Registers the refactoring instance creators for the JDT refactorings.
+	 * 
+	 * TODO: use extension point in LTK core
 	 */
 	private static void registerRefactoringInstanceCreators() {
 		final RefactoringInstanceFactory factory= RefactoringInstanceFactory.getInstance();
@@ -410,6 +413,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		factory.registerCreator("org.eclipse.jdt.ui.introduce.parameter", new IntroduceParameterRefactoringInstanceCreator()); //$NON-NLS-1$
 		factory.registerCreator("org.eclipse.jdt.ui.introduce.factory", new IntroduceFactoryRefactoringInstanceCreator()); //$NON-NLS-1$
 		factory.registerCreator("org.eclipse.jdt.ui.promote.temp", new PromoteTempToFieldRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.self.encapsulate", new SelfEncapsulateRefactoringInstanceCreator()); //$NON-NLS-1$
 	}
 
 	/* package */ static void initializeAfterLoad(IProgressMonitor monitor) {

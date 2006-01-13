@@ -878,6 +878,7 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String IntroduceParameterRefactoring_descriptor_description;
 	public static String IntroduceFactory_descriptor_description;
 	public static String PromoteTempToFieldRefactoring_descriptor_description;
+	public static String SelfEncapsulateFieldRefactoring_descriptor_description;
 	public static String ProcessorBasedRefactoring_error_unsupported_initialization;
 
 	public static String IntroduceIndirectionRefactoring_introduce_indirection_name;
@@ -925,5 +926,4 @@ public final class RefactoringCoreMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
 	}
-
 }

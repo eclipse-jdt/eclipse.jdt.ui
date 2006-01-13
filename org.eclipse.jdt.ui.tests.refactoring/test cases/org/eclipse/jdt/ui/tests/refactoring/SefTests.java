@@ -28,6 +28,8 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 
 public class SefTests extends AbstractSelectionTestCase {
@@ -63,7 +65,7 @@ public class SefTests extends AbstractSelectionTestCase {
 		
 		initializePreferences();
 
-		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field);
+		SelfEncapsulateFieldRefactoring refactoring= ((Checks.checkAvailability(field).hasFatalError() || !RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field)) ? null : new SelfEncapsulateFieldRefactoring(field));
 		performTest(unit, refactoring, COMPARE_WITH_OUTPUT, getProofedContent(outputFolder, id), true);
 	}
 
@@ -74,7 +76,7 @@ public class SefTests extends AbstractSelectionTestCase {
 
 		initializePreferences();
 
-		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field);
+		SelfEncapsulateFieldRefactoring refactoring= ((Checks.checkAvailability(field).hasFatalError() || !RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field)) ? null : new SelfEncapsulateFieldRefactoring(field));
 		if (refactoring != null) {
 			RefactoringStatus status= refactoring.checkAllConditions(new NullProgressMonitor());
 			assertTrue(status.hasError());
@@ -250,7 +252,7 @@ public class SefTests extends AbstractSelectionTestCase {
 		
 		initializePreferences();
 
-		SelfEncapsulateFieldRefactoring refactoring= SelfEncapsulateFieldRefactoring.create(field);
+		SelfEncapsulateFieldRefactoring refactoring= ((Checks.checkAvailability(field).hasFatalError() || !RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field)) ? null : new SelfEncapsulateFieldRefactoring(field));
 		performTest(provider, refactoring, COMPARE_WITH_OUTPUT, getProofedContent("static_out", getName()), false);
 		String refContentOut= getProofedContent("static_ref_out", referenceName);
 		refContentOut= refContentOut.replaceAll("import static static_out", "import static static_in");
