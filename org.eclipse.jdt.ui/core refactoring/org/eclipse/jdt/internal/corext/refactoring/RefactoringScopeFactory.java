@@ -90,14 +90,27 @@ public class RefactoringScopeFactory {
 	}
 
 	/**
-	 * Creates a new search scope with all compilation units possibly referencing <code>javaElement</code>.
+	 * Creates a new search scope with all compilation units possibly referencing <code>javaElement</code>,
+	 * considering the visibility of the element.
 	 * 
 	 * @param javaElement the java element
 	 * @return the search scope
 	 * @throws JavaModelException if an error occurs
 	 */
 	public static IJavaSearchScope create(IJavaElement javaElement) throws JavaModelException {
-		if (javaElement instanceof IMember) {
+		return RefactoringScopeFactory.create(javaElement, true);
+	}
+	
+	/**
+	 * Creates a new search scope with all compilation units possibly referencing <code>javaElement</code>.
+	 * 
+	 * @param javaElement the java element
+	 * @param considerVisibility consider visibility of javaElement iff <code>true</code>
+	 * @return the search scope
+	 * @throws JavaModelException if an error occurs
+	 */
+	public static IJavaSearchScope create(IJavaElement javaElement, boolean considerVisibility) throws JavaModelException {
+		if (considerVisibility & javaElement instanceof IMember) {
 			IMember member= (IMember) javaElement;
 			if (JdtFlags.isPrivate(member)) {
 				if (member.getCompilationUnit() != null)

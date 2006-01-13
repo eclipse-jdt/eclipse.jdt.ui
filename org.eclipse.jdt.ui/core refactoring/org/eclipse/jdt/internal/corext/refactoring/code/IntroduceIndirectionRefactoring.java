@@ -1123,7 +1123,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 	private SearchResultGroup[] getReferences(IMethod[] methods, IProgressMonitor pm, RefactoringStatus status) throws CoreException {
 		SearchPattern pattern= RefactoringSearchEngine.createOrPattern(methods, IJavaSearchConstants.REFERENCES);
-		IJavaSearchScope scope= RefactoringScopeFactory.create(fIntermediaryClass);
+		IJavaSearchScope scope= RefactoringScopeFactory.create(fIntermediaryClass, false);
 		return RefactoringSearchEngine.search(pattern, scope, pm, status);
 	}
 
