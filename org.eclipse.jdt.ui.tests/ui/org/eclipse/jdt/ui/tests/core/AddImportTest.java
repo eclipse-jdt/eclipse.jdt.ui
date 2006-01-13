@@ -39,11 +39,11 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -92,7 +92,6 @@ public class AddImportTest extends CoreTests {
 
 
 	protected void tearDown() throws Exception {
-		setOrganizeImportSettings(null, 99, fJProject1);
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 	
@@ -116,7 +115,7 @@ public class AddImportTest extends CoreTests {
 		
 		String[] order= new String[] { "java", "com", "pack" };
 		
-		NewImportRewrite imports= newImportsRewrite(cu, order, 2, true);
+		ImportRewrite imports= newImportsRewrite(cu, order, 2, true);
 		imports.addImport("java.net.Socket");
 		imports.addImport("p.A");
 		imports.addImport("com.something.Foo");
@@ -159,7 +158,7 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "java", "java.util", "com", "pack" };
 
-		NewImportRewrite imports= newImportsRewrite(cu, order, 2, true);
+		ImportRewrite imports= newImportsRewrite(cu, order, 2, true);
 		imports.addImport("java.x.Socket");
 
 		apply(imports);
@@ -193,7 +192,7 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "java", "java.util", "com", "pack" };
 
-		NewImportRewrite imports= newImportsRewrite(cu, order, 99, true);
+		ImportRewrite imports= newImportsRewrite(cu, order, 99, true);
 		imports.addImport("java.util.Vector");
 
 		apply(imports);
@@ -229,7 +228,7 @@ public class AddImportTest extends CoreTests {
 		
 		String[] order= new String[] { "java", "com", "pack" };
 		
-		NewImportRewrite imports= newImportsRewrite(cu, order, 2, true);
+		ImportRewrite imports= newImportsRewrite(cu, order, 2, true);
 		imports.removeImport("java.util.Set");
 		imports.removeImport("pack.List");
 		
@@ -264,7 +263,7 @@ public class AddImportTest extends CoreTests {
 		
 		String[] order= new String[] { "java", "com", "pack" };
 		
-		NewImportRewrite imports= newImportsRewrite(cu, order, 2, true);
+		ImportRewrite imports= newImportsRewrite(cu, order, 2, true);
 		imports.removeImport("java.util.Vector");
 		
 		apply(imports);
@@ -295,7 +294,7 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { };
 
-		NewImportRewrite imports= newImportsRewrite(cu, order, 2, true);
+		ImportRewrite imports= newImportsRewrite(cu, order, 2, true);
 		imports.addImport("p.Inner");
 
 		apply(imports);
@@ -328,7 +327,7 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "java.awt", "java" };
 
-		NewImportRewrite imports= newImportsRewrite(cu, order, 99, true);
+		ImportRewrite imports= newImportsRewrite(cu, order, 99, true);
 		imports.addImport("java.applet.Applet");
 
 		apply(imports);
@@ -361,7 +360,7 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "java" };
 
-		NewImportRewrite imports= newImportsRewrite(cu, order, 99, true);
+		ImportRewrite imports= newImportsRewrite(cu, order, 99, true);
 		imports.addImport("java.io.Exception");
 
 		apply(imports);
@@ -392,7 +391,7 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "#", "java" };
 
-		NewImportRewrite imports= newImportsRewrite(cu, order, 99, true);
+		ImportRewrite imports= newImportsRewrite(cu, order, 99, true);
 		imports.addStaticImport("java.lang.Math", "min", true);
 		imports.addImport("java.lang.Math");
 		imports.addStaticImport("java.lang.Math", "max", true);
@@ -427,7 +426,7 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "#", "java" };
 
-		NewImportRewrite imports= newImportsRewrite(cu, order, 99, true);
+		ImportRewrite imports= newImportsRewrite(cu, order, 99, true);
 		imports.addStaticImport("xx.MyConstants", "SIZE", true);
 		imports.addStaticImport("xy.MyConstants", "*", true);
 		imports.addImport("xy.MyConstants");
@@ -481,7 +480,7 @@ public class AddImportTest extends CoreTests {
 		String[] order= new String[] { "java.util", "java.io", "java.net" };
 		int threshold= 99;
 		AST ast= AST.newAST(AST.JLS3);
-		NewImportRewrite importsRewrite= newImportsRewrite(cu2, order, threshold, true);
+		ImportRewrite importsRewrite= newImportsRewrite(cu2, order, threshold, true);
 		{
 			IJavaElement[] elements= cu1.codeSelect(content.indexOf("IOException"), "IOException".length());
 			assertEquals(1, elements.length);
@@ -548,7 +547,7 @@ public class AddImportTest extends CoreTests {
 		MethodInvocation inv= (MethodInvocation) NodeFinder.perform(astRoot, buf.indexOf(str), str.length());
 		ITypeBinding binding= inv.resolveTypeBinding();
 		
-		NewImportRewrite rewrite= NewImportRewrite.create(astRoot, true);
+		ImportRewrite rewrite= newImportsRewrite(astRoot, new String[0], 99, 99, true);
 		
 		String string= rewrite.addImport(binding);
 		assertEquals("Class<? extends E>", string);
@@ -588,7 +587,7 @@ public class AddImportTest extends CoreTests {
 		MethodInvocation inv= (MethodInvocation) NodeFinder.perform(astRoot, buf.indexOf(str), str.length());
 		ITypeBinding binding= inv.resolveTypeBinding();
 		
-		NewImportRewrite rewrite= NewImportRewrite.create(astRoot, true);
+		ImportRewrite rewrite= newImportsRewrite(astRoot, new String[0], 99, 99, true);
 		
 		String string= rewrite.addImport(binding);
 		assertEquals("E<?>", string);
@@ -628,7 +627,7 @@ public class AddImportTest extends CoreTests {
 		MethodInvocation inv= (MethodInvocation) NodeFinder.perform(astRoot, buf.indexOf(str), str.length());
 		ITypeBinding binding= inv.resolveTypeBinding();
 		
-		NewImportRewrite rewrite= NewImportRewrite.create(astRoot, true);
+		ImportRewrite rewrite= newImportsRewrite(astRoot, new String[0], 99, 99, true);
 		
 		String string= rewrite.addImport(binding);
 		assertEquals("E<?>", string);
@@ -673,7 +672,7 @@ public class AddImportTest extends CoreTests {
 		String[] order= new String[] { "java.util", "java.io", "java.net" };
 		int threshold= 99;
 		AST ast= AST.newAST(AST.JLS3);
-		NewImportRewrite importsRewrite= newImportsRewrite(cu2, order, threshold, true);
+		ImportRewrite importsRewrite= newImportsRewrite(cu2, order, threshold, true);
 		{
 			IJavaElement[] elements= cu1.codeSelect(content.indexOf("Map"), "Map".length());
 			assertEquals(1, elements.length);
@@ -717,7 +716,7 @@ public class AddImportTest extends CoreTests {
 
 		String[] order= new String[] { "#", "java" };
 
-		NewImportRewrite imports= newImportsRewrite(cu, order, 99, true);
+		ImportRewrite imports= newImportsRewrite(cu, order, 99, true);
 		imports.addStaticImport("java.lang.Math", "min", true);
 		imports.addImport("java.lang.Math");
 
@@ -768,7 +767,7 @@ public class AddImportTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
-	private void assertAddedAndRemoved(NewImportRewrite imports, String[] expectedAdded, String[] expectedRemoved, String[] expectedAddedStatic, String[] expectedRemovedStatic) {
+	private void assertAddedAndRemoved(ImportRewrite imports, String[] expectedAdded, String[] expectedRemoved, String[] expectedAddedStatic, String[] expectedRemovedStatic) {
 		assertEqualStringsIgnoreOrder(imports.getAddedImports(), expectedAdded);
 		assertEqualStringsIgnoreOrder(imports.getAddedStaticImports(), expectedAddedStatic);
 		assertEqualStringsIgnoreOrder(imports.getRemovedImports(), expectedRemoved);
@@ -1026,7 +1025,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		String[] addedImports= assertImportQualifierAsExpected(cu, "java.lang.Math.PI", "PI");
+		String[] addedImports= assertImportQualifierAsExpected(cu, "java.lang.Math.PI", "PI", new String[0], 99, 99);
 		assertEqualStringsIgnoreOrder(addedImports, new String[] {"java.lang.Math.PI"});
 	}
 	
@@ -1042,7 +1041,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		String[] addedImports= assertImportQualifierAsExpected(cu, "java.lang.Math.PI", "java.lang.Math.PI");
+		String[] addedImports= assertImportQualifierAsExpected(cu, "java.lang.Math.PI", "java.lang.Math.PI", new String[0], 99, 99);
 		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
 	}
 
@@ -1057,7 +1056,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		String[] addedImports= assertStaticImportAsExpected(cu, "java.lang.Math", "PI", "PI");
+		String[] addedImports= assertStaticImportAsExpected(cu, "java.lang.Math", "PI", "PI", new String[0], 99, 99);
 		assertEqualStringsIgnoreOrder(addedImports, new String[] {"java.lang.Math.PI"});
 	}
 	
@@ -1073,7 +1072,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		String[] addedImports= assertStaticImportAsExpected(cu, "java.lang.Math", "PI", "java.lang.Math.PI");
+		String[] addedImports= assertStaticImportAsExpected(cu, "java.lang.Math", "PI", "java.lang.Math.PI", new String[0], 99, 99);
 		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
 	}
 	
@@ -1092,7 +1091,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		String[] addedImports= assertImportQualifierAsExpected(cu, "pack2.E1.E11.E12", "E12");
+		String[] addedImports= assertImportQualifierAsExpected(cu, "pack2.E1.E11.E12", "E12", new String[0], 99, 99);
 		assertEqualStringsIgnoreOrder(addedImports, new String[] {"pack2.E1.E11.E12"});
 	}
 	
@@ -1111,7 +1110,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E11.E12", "pack1.E1.E11.E12");
+		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E11.E12", "pack1.E1.E11.E12", new String[0], 99, 99);
 		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
 	}
 		
@@ -1132,7 +1131,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E11.E12", "pack1.E1.E11.E12");
+		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E11.E12", "pack1.E1.E11.E12", new String[0], 99, 99);
 		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
 	}
 	
@@ -1155,7 +1154,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E2", "E2");
+		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E2", "E2", new String[0], 99, 99);
 		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
 	}
 	
@@ -1180,7 +1179,7 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
 		
-		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E2.E22", "pack1.E1.E2.E22");
+		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.E2.E22", "pack1.E1.E2.E22", new String[0], 99, 99);
 		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
 	}
 	
@@ -1202,42 +1201,43 @@ public class AddImportTest extends CoreTests {
 		buf.append("}\n");
 		ICompilationUnit cu= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
 		
-		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.C", "C");
+		String[] addedImports= assertImportQualifierAsExpected(cu, "pack1.E1.C", "C", new String[0], 99, 99);
 		assertEqualStringsIgnoreOrder(addedImports, new String[0]);
 	}
 
-	private String[] assertImportQualifierAsExpected(ICompilationUnit cu, String toImport, String expectedQualifier) throws JavaModelException {
+	private String[] assertImportQualifierAsExpected(ICompilationUnit cu, String toImport, String expectedQualifier, String[] importOrder, int threshold, int staticThreshold) throws JavaModelException {
 		String buf= cu.getSource();
 		String selection= "//<-insert";
 		int offset= buf.indexOf(selection);
 		int length= 0;
 		AssistContext context= new AssistContext(cu, offset, length);
 		
-		NewImportRewrite importRewrite= NewImportRewrite.create(context.getASTRoot(), true);
+		ImportRewrite importRewrite= newImportsRewrite(context.getASTRoot(), importOrder, threshold, staticThreshold, true);
+		
 		String qualifier= importRewrite.addImport(toImport, new ContextSensitiveImportRewriteContext(context.getASTRoot(), offset, importRewrite));
 		assertEquals("Type conflict not detected", expectedQualifier, qualifier);
 		return importRewrite.getAddedImports();
 	}
 	
-	private String[] assertStaticImportAsExpected(ICompilationUnit cu, String declaringClassName, String fieldName, String expectedQualifier) throws JavaModelException {
+	private String[] assertStaticImportAsExpected(ICompilationUnit cu, String declaringClassName, String fieldName, String expectedQualifier, String[] importOrder, int threshold, int staticThreshold) throws JavaModelException {
 		String code= cu.getSource();
 		String selection= "//<-insert";
 		int offset= code.indexOf(selection);
 		int length= 0;
 		AssistContext context= new AssistContext(cu, offset, length);
 		
-		NewImportRewrite importRewrite= NewImportRewrite.create(context.getASTRoot(), true);
+		ImportRewrite importRewrite= newImportsRewrite(context.getASTRoot(), importOrder, threshold, staticThreshold, true);
+		
 		String qualifier= importRewrite.addStaticImport(declaringClassName, fieldName, true, new ContextSensitiveImportRewriteContext(context.getASTRoot(), offset, importRewrite));
 		assertEquals("Type conflict not detected", expectedQualifier, qualifier);
 		return importRewrite.getAddedStaticImports();
 	}
 
-	private NewImportRewrite newImportsRewrite(ICompilationUnit cu, String[] order, int threshold, boolean restoreExistingImports) throws CoreException, BackingStoreException {
-		setOrganizeImportSettings(order, threshold, cu.getJavaProject());
-		return NewImportRewrite.create(cu, restoreExistingImports);
+	private ImportRewrite newImportsRewrite(ICompilationUnit cu, String[] order, int threshold, boolean restoreExistingImports) throws CoreException, BackingStoreException {
+		return newImportsRewrite(cu, order, threshold, threshold, restoreExistingImports);
 	}
 		
-	private void apply(NewImportRewrite rewrite) throws CoreException {
+	private void apply(ImportRewrite rewrite) throws CoreException {
 		TextEdit edit= rewrite.rewriteImports(null);
 		JavaModelUtil.applyEdit(rewrite.getCompilationUnit(), edit, true, null);
 	}

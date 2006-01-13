@@ -16,20 +16,17 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.core.runtime.preferences.IEclipsePreferences;
+import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.core.resources.ProjectScope;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.core.IJavaProject;
-
-import org.eclipse.jdt.ui.JavaUI;
-import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
 import org.eclipse.jdt.testplugin.StringAsserts;
 
 import org.eclipse.jdt.ui.tests.core.source.SourceActionTests;
-
-import org.osgi.service.prefs.BackingStoreException;
 
 /**
   */
@@ -84,20 +81,19 @@ public class CoreTests extends TestCase {
 		assertTrue("Wrong number of " + name + ", is: " + is + ", expected: " + expected, is == expected);
 	}
 	
-	protected  void setOrganizeImportSettings(String[] order, int threshold, IJavaProject project) throws BackingStoreException {
-		IEclipsePreferences scope= new ProjectScope(project.getProject()).getNode(JavaUI.ID_PLUGIN);
-		if (order == null) {
-			scope.remove(PreferenceConstants.ORGIMPORTS_IMPORTORDER);
-			scope.remove(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD);
-		} else {
-			StringBuffer buf= new StringBuffer();
-			for (int i= 0; i < order.length; i++) {
-				buf.append(order[i]);
-				buf.append(';');
-			}
-			scope.put(PreferenceConstants.ORGIMPORTS_IMPORTORDER, buf.toString());
-			scope.put(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, String.valueOf(threshold));
-		}
-		scope.flush();
+	protected ImportRewrite newImportsRewrite(ICompilationUnit cu, String[] order, int normalThreshold, int staticThreshold, boolean restoreExistingImports) throws CoreException {
+		ImportRewrite rewrite= StubUtility.createImportRewrite(cu, restoreExistingImports);
+		rewrite.setImportOrder(order);
+		rewrite.setOnDemandImportThreshold(normalThreshold);
+		rewrite.setStaticOnDemandImportThreshold(staticThreshold);
+		return rewrite;
+	}
+	
+	protected ImportRewrite newImportsRewrite(CompilationUnit cu, String[] order, int normalThreshold, int staticThreshold, boolean restoreExistingImports) {
+		ImportRewrite rewrite= ImportRewrite.create(cu, restoreExistingImports);
+		rewrite.setImportOrder(order);
+		rewrite.setOnDemandImportThreshold(normalThreshold);
+		rewrite.setStaticOnDemandImportThreshold(staticThreshold);
+		return rewrite;
 	}
 }
