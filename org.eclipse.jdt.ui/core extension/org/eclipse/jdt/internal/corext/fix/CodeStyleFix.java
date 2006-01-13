@@ -46,8 +46,9 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
@@ -66,7 +67,7 @@ public class CodeStyleFix extends AbstractFix {
 	private final static class CodeStyleVisitor extends GenericVisitor {
 		
 		private final List/*<IFixRewriteOperation>*/ fResult;
-		private final NewImportRewrite fImportRewrite;
+		private final ImportRewrite fImportRewrite;
 		private final boolean fFindUnqualifiedAccesses;
 		private final boolean fFindUnqualifiedStaticAccesses;
 		private final boolean fFindControlStatementsWithoutBlock;
@@ -80,7 +81,7 @@ public class CodeStyleFix extends AbstractFix {
 			fFindUnqualifiedAccesses= findUnqualifiedAccesses;
 			fFindUnqualifiedStaticAccesses= findUnqualifiedStaticAccesses;
 			fFindControlStatementsWithoutBlock= findControlStatementsWithoutBlock;
-			fImportRewrite= NewImportRewrite.create(compilationUnit, true);
+			fImportRewrite= StubUtility.createImportRewrite(compilationUnit, true);
 			fResult= resultingCollection;
 		}
 		
@@ -494,7 +495,7 @@ public class CodeStyleFix extends AbstractFix {
 		if (binding == null || binding.getKind() != IBinding.VARIABLE)
 			return null;
 		
-		NewImportRewrite imports= NewImportRewrite.create(compilationUnit, true);
+		ImportRewrite imports= StubUtility.createImportRewrite(compilationUnit, true);
 		
 		String replacement= getQualifier((IVariableBinding)binding, imports, name);
 		if (replacement == null)
@@ -503,7 +504,7 @@ public class CodeStyleFix extends AbstractFix {
 		return new AddThisQualifierOperation(replacement, name);
 	}
 	
-	private static String getQualifier(IVariableBinding binding, NewImportRewrite imports, SimpleName name) {
+	private static String getQualifier(IVariableBinding binding, ImportRewrite imports, SimpleName name) {
 		ITypeBinding declaringClass= binding.getDeclaringClass();
 		String qualifier;
 		if (Modifier.isStatic(binding.getModifiers())) {

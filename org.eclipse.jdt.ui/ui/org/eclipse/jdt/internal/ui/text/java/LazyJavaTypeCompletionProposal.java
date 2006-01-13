@@ -28,10 +28,11 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -54,7 +55,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	private String fQualifiedName;
 	private String fSimpleName;
 	private IType fType;
-	private NewImportRewrite fImportRewrite;
+	private ImportRewrite fImportRewrite;
 	private ContextSensitiveImportRewriteContext fImportContext;
 
 	public LazyJavaTypeCompletionProposal(CompletionProposal proposal, JavaContentAssistInvocationContext context) {
@@ -119,16 +120,16 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		return completion.length > 0 && completion[completion.length - 1] == ';';
 	}
 
-	private NewImportRewrite createImportRewrite() {
+	private ImportRewrite createImportRewrite() {
 		if (fCompilationUnit != null && allowAddingImports()) {
 			try {
 				CompilationUnit cu= createASTRoot(fCompilationUnit);
 				if (cu == null) {
-					NewImportRewrite rewrite= NewImportRewrite.create(fCompilationUnit, true);
+					ImportRewrite rewrite= StubUtility.createImportRewrite(fCompilationUnit, true);
 					fImportContext= null;
 					return rewrite;
 				} else {
-					NewImportRewrite rewrite= NewImportRewrite.create(cu, true);
+					ImportRewrite rewrite= StubUtility.createImportRewrite(cu, true);
 					fImportContext= new ContextSensitiveImportRewriteContext(cu, fInvocationContext.getInvocationOffset(), rewrite);
 					return rewrite;
 				}

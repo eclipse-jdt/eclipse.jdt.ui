@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -101,7 +102,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		
 		private Set fImplicitImports;
 		
-		private NewImportRewrite fImpStructure;
+		private ImportRewrite fImpStructure;
 		
 		private boolean fDoIgnoreLowerCaseNames;
 		
@@ -116,7 +117,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		private SourceRange[] fSourceRanges;
 		
 		
-		public TypeReferenceProcessor(Set oldSingleImports, Set oldDemandImports, CompilationUnit root, NewImportRewrite impStructure, boolean ignoreLowerCaseNames) {
+		public TypeReferenceProcessor(Set oldSingleImports, Set oldDemandImports, CompilationUnit root, ImportRewrite impStructure, boolean ignoreLowerCaseNames) {
 			fOldSingleImports= oldSingleImports;
 			fOldDemandImports= oldDemandImports;
 			fImpStructure= impStructure;
@@ -391,7 +392,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 				monitor.worked(2);
 			}
 			
-			NewImportRewrite importsRewrite= NewImportRewrite.create(astRoot, false);
+			ImportRewrite importsRewrite= StubUtility.createImportRewrite(astRoot, false);
 
 			Set/*<String>*/ oldSingleImports= new HashSet();
 			Set/*<String>*/  oldDemandImports= new HashSet();
@@ -440,7 +441,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 		}
 	}
 	
-	private void determineImportDifferences(NewImportRewrite importsStructure, Set oldSingleImports, Set oldDemandImports) {
+	private void determineImportDifferences(ImportRewrite importsStructure, Set oldSingleImports, Set oldDemandImports) {
   		ArrayList importsAdded= new ArrayList();
   		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedImports()));
   		importsAdded.addAll(Arrays.asList(importsStructure.getCreatedStaticImports()));
@@ -462,7 +463,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 	}
 	
 	
-	private void addStaticImports(List/*<SimpleName>*/ staticReferences, NewImportRewrite importsStructure) {
+	private void addStaticImports(List/*<SimpleName>*/ staticReferences, ImportRewrite importsStructure) {
 		for (int i= 0; i < staticReferences.size(); i++) {
 			Name name= (Name) staticReferences.get(i);
 			IBinding binding= name.resolveBinding();

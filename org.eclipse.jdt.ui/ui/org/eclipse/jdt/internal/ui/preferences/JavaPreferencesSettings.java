@@ -31,6 +31,7 @@ public class JavaPreferencesSettings  {
 		res.overrideAnnotation= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.CODEGEN_USE_OVERRIDE_ANNOTATION, project)).booleanValue();
 		res.importOrder= getImportOrderPreference(project);
 		res.importThreshold= getImportNumberThreshold(project);
+		res.staticImportThreshold= getStaticImportNumberThreshold(project);
 		res.importIgnoreLowercase= Boolean.valueOf(PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, project)).booleanValue();
 		res.tabWidth= CodeFormatterUtil.getTabWidth(project);
 		res.indentWidth= CodeFormatterUtil.getIndentWidth(project);
@@ -45,6 +46,19 @@ public class JavaPreferencesSettings  {
 	}
 
 	public static int getImportNumberThreshold(IJavaProject project) {
+		String thresholdStr= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, project);
+		try {
+			int threshold= Integer.parseInt(thresholdStr);
+			if (threshold < 0) {
+				threshold= Integer.MAX_VALUE;
+			}
+			return threshold;
+		} catch (NumberFormatException e) {
+			return Integer.MAX_VALUE;
+		}
+	}
+	
+	public static int getStaticImportNumberThreshold(IJavaProject project) {
 		String thresholdStr= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, project);
 		try {
 			int threshold= Integer.parseInt(thresholdStr);

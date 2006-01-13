@@ -28,8 +28,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 
@@ -68,7 +68,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 	 */
 	protected void addNewParameters(ASTRewrite rewrite, List takenNames, List params) throws CoreException {
 		AST ast= rewrite.getAST();
-		NewImportRewrite importRewrite= getImportRewrite();
+		ImportRewrite importRewrite= getImportRewrite();
 		ITypeBinding[] bindings= fMethod.getParameterTypes();
 
 		IJavaProject project= getCompilationUnit().getJavaProject();
@@ -129,7 +129,7 @@ public class NewDefiningMethodProposal extends AbstractMethodCompletionProposal 
 	 */
 	protected void addNewExceptions(ASTRewrite rewrite, List exceptions) throws CoreException {
 		AST ast= rewrite.getAST();
-		NewImportRewrite importRewrite= getImportRewrite();
+		ImportRewrite importRewrite= getImportRewrite();
 		ITypeBinding[] bindings= fMethod.getExceptionTypes();
 		for (int i= 0; i < bindings.length; i++) {
 			String typeName= importRewrite.addImport(bindings[i]);

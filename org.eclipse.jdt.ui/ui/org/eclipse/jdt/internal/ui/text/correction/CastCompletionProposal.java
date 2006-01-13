@@ -28,8 +28,8 @@ import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -54,7 +54,7 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 		setCommandId(ADD_CAST_ID);
 	}
 
-	private Type getNewCastTypeNode(ASTRewrite rewrite, NewImportRewrite importRewrite) throws CoreException {
+	private Type getNewCastTypeNode(ASTRewrite rewrite, ImportRewrite importRewrite) throws CoreException {
 		AST ast= rewrite.getAST();
 		if (fCastType != null) {
 			if (fCastType instanceof ITypeBinding) {
@@ -118,7 +118,7 @@ public class CastCompletionProposal extends LinkedCorrectionProposal {
 	protected ASTRewrite getRewrite() throws CoreException {
 		AST ast= fNodeToCast.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
-		NewImportRewrite importRewrite= createImportRewrite((CompilationUnit) fNodeToCast.getRoot());
+		ImportRewrite importRewrite= createImportRewrite((CompilationUnit) fNodeToCast.getRoot());
 
 		Type newTypeNode= getNewCastTypeNode(rewrite, importRewrite);
 

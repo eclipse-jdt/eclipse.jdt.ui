@@ -26,9 +26,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -92,7 +92,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 
 			ASTRewrite rewrite= ASTRewrite.create(ast);
 			
-			NewImportRewrite imports= createImportRewrite((CompilationUnit) decl.getRoot());
+			ImportRewrite imports= createImportRewrite((CompilationUnit) decl.getRoot());
 
 			SingleVariableDeclaration newDecl= ast.newSingleVariableDeclaration();
 			newDecl.setType(evaluateVariableType(ast, imports, methodDeclaration.resolveBinding()));
@@ -174,7 +174,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		}
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 		
-		NewImportRewrite imports= createImportRewrite((CompilationUnit) decl.getRoot());
+		ImportRewrite imports= createImportRewrite((CompilationUnit) decl.getRoot());
 
 		SimpleName[] names= getAllReferences(body);
 		ASTNode dominant= getDominantNode(names);
@@ -323,7 +323,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 			isInDifferentCU= true;
 		}
-		NewImportRewrite imports= createImportRewrite(astRoot);
+		ImportRewrite imports= createImportRewrite(astRoot);
 
 		if (newTypeDecl != null) {
 			AST ast= newTypeDecl.getAST();
@@ -382,7 +382,7 @@ public class NewVariableCompletionProposal extends LinkedCorrectionProposal {
 		return ASTNodes.getInsertionIndex(newDecl, decls);
 	}
 
-	private Type evaluateVariableType(AST ast, NewImportRewrite imports, IBinding targetContext) throws CoreException {
+	private Type evaluateVariableType(AST ast, ImportRewrite imports, IBinding targetContext) throws CoreException {
 		if (fOriginalNode.getParent() instanceof MethodInvocation) {
 			MethodInvocation parent= (MethodInvocation) fOriginalNode.getParent();
 			if (parent.getExpression() == fOriginalNode) {

@@ -33,9 +33,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -96,7 +96,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 		if (declNode != null) {
 			AST ast= declNode.getAST();
 			ASTRewrite rewrite= ASTRewrite.create(ast);
-			NewImportRewrite imports= createImportRewrite(newRoot);
+			ImportRewrite imports= createImportRewrite(newRoot);
 
 			Type type= imports.addImport(fNewType, ast);
 

@@ -30,9 +30,9 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
@@ -122,7 +122,7 @@ class AccessorClassCreator {
 	}
 
 	private void addImportsToAccessorCu(ICompilationUnit newCu, IProgressMonitor pm) throws CoreException {
-		NewImportRewrite is= NewImportRewrite.create(newCu, true);
+		ImportRewrite is= StubUtility.createImportRewrite(newCu, true);
 		if (fIsEclipseNLS) {
 			is.addImport("org.eclipse.osgi.util.NLS"); //$NON-NLS-1$
 		} else {

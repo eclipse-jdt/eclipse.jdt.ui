@@ -65,13 +65,14 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	private static final Key PREF_IMPORTORDER= getJDTUIKey(PreferenceConstants.ORGIMPORTS_IMPORTORDER);
 	private static final Key PREF_ONDEMANDTHRESHOLD= getJDTUIKey(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD);
 	private static final Key PREF_IGNORELOWERCASE= getJDTUIKey(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE);
+	private static final Key PREF_STATICONDEMANDTHRESHOLD= getJDTUIKey(PreferenceConstants.ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD);
 	
 	private static final String DIALOGSETTING_LASTLOADPATH= JavaUI.ID_PLUGIN + ".importorder.loadpath"; //$NON-NLS-1$
 	private static final String DIALOGSETTING_LASTSAVEPATH= JavaUI.ID_PLUGIN + ".importorder.savepath"; //$NON-NLS-1$
 
 	private static Key[] getAllKeys() {
 		return new Key[] {
-			PREF_IMPORTORDER, PREF_ONDEMANDTHRESHOLD, PREF_IGNORELOWERCASE
+			PREF_IMPORTORDER, PREF_ONDEMANDTHRESHOLD, PREF_STATICONDEMANDTHRESHOLD, PREF_IGNORELOWERCASE
 		};	
 	}
 	
@@ -163,6 +164,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 
 	private ListDialogField fOrderListField;
 	private StringDialogField fThresholdField;
+	private StringDialogField fStaticThresholdField;
 	private SelectionButtonDialogField fIgnoreLowerCaseTypesField;
 	
 	private PixelConverter fPixelConverter;
@@ -197,15 +199,17 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		fThresholdField= new StringDialogField();
 		fThresholdField.setDialogFieldListener(adapter);
 		fThresholdField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_threshold_label); 
-	
+
+		fStaticThresholdField= new StringDialogField();
+		fStaticThresholdField.setDialogFieldListener(adapter);
+		fStaticThresholdField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_staticthreshold_label); 
+
 		fIgnoreLowerCaseTypesField= new SelectionButtonDialogField(SWT.CHECK);
 		fIgnoreLowerCaseTypesField.setDialogFieldListener(adapter);
 		fIgnoreLowerCaseTypesField.setLabelText(PreferencesMessages.ImportOrganizeConfigurationBlock_ignoreLowerCase_label); 
 	
 		updateControls();
 	}
-	
-
 	
 	protected Control createContents(Composite parent) {
 		setShell(parent.getShell());
@@ -229,6 +233,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		
 		fThresholdField.doFillIntoGrid(composite, 2);
 		((GridData) fThresholdField.getTextControl(null).getLayoutData()).grabExcessHorizontalSpace= false;
+		fStaticThresholdField.doFillIntoGrid(composite, 2);
 		
 		fIgnoreLowerCaseTypesField.doFillIntoGrid(composite, 2);
 		
@@ -236,10 +241,9 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 
 		return composite;
 	}
-		
-	private void doThresholdChanged() {
+	
+	private void doThresholdChanged(String thresholdString) {
 		StatusInfo status= new StatusInfo();
-		String thresholdString= fThresholdField.getText();
 		try {
 			int threshold= Integer.parseInt(thresholdString);
 			if (threshold < 0) {
@@ -403,7 +407,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	 */
 	protected void updateControls() {
 		ImportOrderEntry[] importOrder= getImportOrderPreference();
-		int threshold= getImportNumberThreshold();
+		int threshold= getImportNumberThreshold(PREF_ONDEMANDTHRESHOLD);
+		int staticThreshold= getImportNumberThreshold(PREF_STATICONDEMANDTHRESHOLD);
 		boolean ignoreLowerCase= Boolean.valueOf(getValue(PREF_IGNORELOWERCASE)).booleanValue();
 		
 		fOrderListField.removeAllElements();
@@ -411,6 +416,7 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 			fOrderListField.addElement(importOrder[i]);
 		}
 		fThresholdField.setText(String.valueOf(threshold));
+		fStaticThresholdField.setText(String.valueOf(staticThreshold));
 		fIgnoreLowerCaseTypesField.setSelection(ignoreLowerCase);
 	}	
 	
@@ -421,9 +427,10 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 	  		setValue(PREF_IMPORTORDER, packOrderList(fOrderListField.getElements()));
 		} else if (field == fThresholdField) {
 	  		setValue(PREF_ONDEMANDTHRESHOLD, fThresholdField.getText());
-	  		
-	  		doThresholdChanged();
-	  		
+	  		doThresholdChanged(fThresholdField.getText());
+		} else if (field == fStaticThresholdField) {
+	  		setValue(PREF_STATICONDEMANDTHRESHOLD, fStaticThresholdField.getText());
+	  		doThresholdChanged(fStaticThresholdField.getText());
 		} else if (field == fIgnoreLowerCaseTypesField) {
 	  		setValue(PREF_IGNORELOWERCASE, fIgnoreLowerCaseTypesField.isSelected());
 		}
@@ -470,8 +477,8 @@ public class ImportOrganizeConfigurationBlock extends OptionsConfigurationBlock 
 		return new ImportOrderEntry[0];
 	}
 	
-	private int getImportNumberThreshold() {
-		String thresholdStr= getValue(PREF_ONDEMANDTHRESHOLD);
+	private int getImportNumberThreshold(Key key) {
+		String thresholdStr= getValue(key);
 		try {
 			int threshold= Integer.parseInt(thresholdStr);
 			if (threshold < 0) {

@@ -42,8 +42,8 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -144,15 +144,15 @@ public class TypeMismatchSubProcessor {
 				}
 
 				ASTRewrite rewrite= ASTRewrite.create(ast);
-				NewImportRewrite imports= NewImportRewrite.create(astRoot, true);
-
-				Type newReturnType= imports.addImport(currBinding, ast);
-				rewrite.replace(methodDeclaration.getReturnType2(), newReturnType, null);
 
 				String label= Messages.format(CorrectionMessages.TypeMismatchSubProcessor_changereturntype_description, currBinding.getName());
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 				LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 6, image);
-				proposal.setImportRewrite(imports);
+
+				ImportRewrite imports= proposal.createImportRewrite(astRoot);
+
+				Type newReturnType= imports.addImport(currBinding, ast);
+				rewrite.replace(methodDeclaration.getReturnType2(), newReturnType, null);
 
 				String returnKey= "return"; //$NON-NLS-1$
 				proposal.addLinkedPosition(rewrite.track(newReturnType), true, returnKey);

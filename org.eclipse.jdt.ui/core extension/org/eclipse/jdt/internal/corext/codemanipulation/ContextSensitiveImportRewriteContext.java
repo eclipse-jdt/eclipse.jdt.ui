@@ -25,8 +25,9 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -40,9 +41,9 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 	private final int fPosition;
 	private IBinding[] fDeclarationsInScope;
 	private Name[] fImportedNames;
-	private final NewImportRewrite fImportRewrite;
+	private final ImportRewrite fImportRewrite;
 	
-	public ContextSensitiveImportRewriteContext(CompilationUnit compilationUnit, int position, NewImportRewrite importRewrite) {
+	public ContextSensitiveImportRewriteContext(CompilationUnit compilationUnit, int position, ImportRewrite importRewrite) {
 		fCompilationUnit= compilationUnit;
 		fPosition= position;
 		fImportRewrite= importRewrite;

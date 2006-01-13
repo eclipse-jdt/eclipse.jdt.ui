@@ -45,8 +45,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
@@ -186,7 +186,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		return fRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 	}
 
-	private ITrackedNodePosition rewriteAST(final AST ast, final ASTRewrite astRewrite, final NewImportRewrite importRewrite, final TextEditGroup group) throws CoreException {
+	private ITrackedNodePosition rewriteAST(final AST ast, final ASTRewrite astRewrite, final ImportRewrite importRewrite, final TextEditGroup group) throws CoreException {
 		final ImportRemover remover= new ImportRemover(fCompilationUnit.getJavaProject(), (CompilationUnit) fStatement.getRoot());
 		
 		final EnhancedForStatement statement= ast.newEnhancedForStatement();
@@ -262,7 +262,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		getPositionGroup(fIdentifierName).addFirstPosition(astRewrite.track(simple));
 		declaration.setName(simple);
 		final ITypeBinding iterable= getIterableType(fIterator.getType());
-		final NewImportRewrite imports= importRewrite;
+		final ImportRewrite imports= importRewrite;
 		declaration.setType(importType(iterable, fStatement, importRewrite, fRoot));
 		remover.registerAddedImport(iterable.getQualifiedName());
 		statement.setParameter(declaration);

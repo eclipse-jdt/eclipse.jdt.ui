@@ -71,8 +71,8 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -581,11 +581,11 @@ public class UnresolvedElementsSubProcessor {
 	}
 		
 	private static CUCorrectionProposal createTypeRefChangeProposal(ICompilationUnit cu, String fullName, Name node, int relevance) throws CoreException {
-		NewImportRewrite importRewrite= null;
+		ImportRewrite importRewrite= null;
 		String simpleName= fullName;
 		String packName= Signature.getQualifier(fullName);
 		if (packName.length() > 0) { // no imports for primitive types, type variables
-			importRewrite= NewImportRewrite.create((CompilationUnit) node.getRoot(), true);
+			importRewrite= StubUtility.createImportRewrite((CompilationUnit) node.getRoot(), true);
 			simpleName= importRewrite.addImport(fullName);
 		}
 		
@@ -625,10 +625,11 @@ public class UnresolvedElementsSubProcessor {
 		String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_change_full_type_description, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_DEFAULT));
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		
-		NewImportRewrite imports= NewImportRewrite.create((CompilationUnit) node.getRoot(), true);
+
 		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, rewrite, relevance + 3, image);
+		
+		ImportRewrite imports= proposal.createImportRewrite((CompilationUnit) node.getRoot());
 		Type type= imports.addImport(binding, node.getAST());
-		proposal.setImportRewrite(imports);
 		
 		rewrite.replace(node, type, null);
 		return proposal;
@@ -1401,7 +1402,12 @@ public class UnresolvedElementsSubProcessor {
 		}
 
 		ASTRewrite rewrite= ASTRewrite.create(invocationNode.getAST());
-		NewImportRewrite imports= NewImportRewrite.create(context.getASTRoot(), true);
+		
+		String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changetoouter_description, ASTResolving.getTypeSignature(currType));
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
+		
+		ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
 		AST ast= invocationNode.getAST();
 
 		String qualifier= imports.addImport(currType);
@@ -1418,10 +1424,6 @@ public class UnresolvedElementsSubProcessor {
 
 		rewrite.set(invocationNode, MethodInvocation.EXPRESSION_PROPERTY, newExpression, null);
 
-		String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_changetoouter_description, ASTResolving.getTypeSignature(currType));
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 8, image);
-		proposal.setImportRewrite(imports);
 		proposals.add(proposal);
 	}
 
@@ -1501,13 +1503,14 @@ public class UnresolvedElementsSubProcessor {
 				String qualifiedTypeName= JavaModelUtil.getFullyQualifiedName((IType) curr);
 
 				CompilationUnit root= context.getASTRoot();
-				NewImportRewrite imports= NewImportRewrite.create(root, true);
-				imports.addImport(qualifiedTypeName);
-
+				
 				String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_importexplicit_description, qualifiedTypeName);
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);
 				ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, cu, ASTRewrite.create(root.getAST()), 5, image);
-				proposal.setImportRewrite(imports);
+
+				ImportRewrite imports= proposal.createImportRewrite(root);
+				imports.addImport(qualifiedTypeName);
+				
 				proposals.add(proposal);
 			}
 		}

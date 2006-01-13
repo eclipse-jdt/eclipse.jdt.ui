@@ -68,6 +68,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * Created on a Compilation unit, the ImportsStructure allows to add
  * Import Declarations that are added next to the existing import that
  * has the best match.
+ * @deprecated Use {@link org.eclipse.jdt.core.dom.rewrite.ImportRewrite} instead
  */
 public final class ImportsStructure implements IImportsStructure {
 	

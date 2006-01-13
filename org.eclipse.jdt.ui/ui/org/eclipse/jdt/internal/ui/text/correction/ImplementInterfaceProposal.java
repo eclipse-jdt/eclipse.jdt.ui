@@ -24,9 +24,9 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -68,7 +68,7 @@ public class ImplementInterfaceProposal extends LinkedCorrectionProposal {
 			newRoot= (CompilationUnit) astParser.createAST(null);
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());
 		}
-		NewImportRewrite imports= createImportRewrite(newRoot);
+		ImportRewrite imports= createImportRewrite(newRoot);
 		
 		if (declNode instanceof TypeDeclaration) {
 			AST ast= declNode.getAST();

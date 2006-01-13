@@ -23,8 +23,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+
 
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
@@ -38,7 +40,7 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	private ASTRewrite fRewrite;
-	private NewImportRewrite fImportRewrite;
+	private ImportRewrite fImportRewrite;
 
 	/**
 	 * Constructs a AST rewrite correction proposal.
@@ -58,22 +60,22 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	/**
 	 * Returns the import rewriter used for this compilation unit.
 	 */
-	public NewImportRewrite getImportRewrite() {
+	public ImportRewrite getImportRewrite() {
 		return fImportRewrite;
 	}
 
 	/**
 	 * Sets the import rewriter used for this compilation unit.
 	 */
-	public void setImportRewrite(NewImportRewrite rewrite) {
+	public void setImportRewrite(ImportRewrite rewrite) {
 		fImportRewrite= rewrite;
 	}
 	
 	/**
 	 * Sets the import rewriter used for this compilation unit.
 	 */
-	public NewImportRewrite createImportRewrite(CompilationUnit astRoot) {
-		fImportRewrite= NewImportRewrite.create(astRoot, true);
+	public ImportRewrite createImportRewrite(CompilationUnit astRoot) {
+		fImportRewrite= StubUtility.createImportRewrite(astRoot, true);
 		return fImportRewrite;
 	}
 	

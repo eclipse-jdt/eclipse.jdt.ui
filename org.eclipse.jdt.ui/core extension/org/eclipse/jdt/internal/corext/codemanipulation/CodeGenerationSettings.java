@@ -17,11 +17,13 @@ public class CodeGenerationSettings {
 	
 	public String[] importOrder= new String[0];
 	public int importThreshold= 99;
+	public int staticImportThreshold= 99;
 	public boolean importIgnoreLowercase= true;
 	public boolean overrideAnnotation= false;
 		
 	public int tabWidth;
 	public int indentWidth;
+
 
 	
 	public void setSettings(CodeGenerationSettings settings) {
@@ -29,6 +31,7 @@ public class CodeGenerationSettings {
 		settings.useKeywordThis= useKeywordThis;
 		settings.importOrder= importOrder;
 		settings.importThreshold= importThreshold;
+		settings.staticImportThreshold= staticImportThreshold;
 		settings.importIgnoreLowercase= importIgnoreLowercase;
 		settings.overrideAnnotation= overrideAnnotation;
 		settings.tabWidth= tabWidth;

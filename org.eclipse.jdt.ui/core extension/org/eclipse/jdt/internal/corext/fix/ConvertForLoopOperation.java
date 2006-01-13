@@ -51,8 +51,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -422,7 +422,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 		return fIndexBinding;
 	}
 
-	private ITrackedNodePosition doConvert(ASTRewrite rewrite, NewImportRewrite importRewrite, TextEditGroup group) throws CoreException {
+	private ITrackedNodePosition doConvert(ASTRewrite rewrite, ImportRewrite importRewrite, TextEditGroup group) throws CoreException {
 		doInferCollection();
 		doInferElement(importRewrite);
 		doFindAndReplaceInBody(rewrite, group);
@@ -569,7 +569,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 		}
 	}
 
-	private void doInferElement(NewImportRewrite importRewrite) throws CoreException {
+	private void doInferElement(ImportRewrite importRewrite) throws CoreException {
 		if (fCollectionName == null) {
 			createDefaultParameter();
 		} else {

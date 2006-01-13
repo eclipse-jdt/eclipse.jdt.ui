@@ -307,16 +307,6 @@ public class PreferenceConstants {
 	public static final String CODEGEN_USE_OVERRIDE_ANNOTATION= "org.eclipse.jdt.ui.overrideannotation"; //$NON-NLS-1$
 	
 	/**
-	 * A named preference that holds a list of semicolon separated package names. The list specifies the import order used by
-	 * the "Organize Imports" operation.
-	 * <p>
-	 * Value is of type <code>String</code>: semicolon separated list of package
-	 * names
-	 * </p>
-	 */
-	public static final String ORGIMPORTS_IMPORTORDER= "org.eclipse.jdt.ui.importorder"; //$NON-NLS-1$
-	
-	/**
 	 * A named preference that holds a list of semicolon separated fully qualified type names with wild card characters.
 	 * @since 3.0
 	 */	
@@ -330,6 +320,16 @@ public class PreferenceConstants {
 	
 	
 	/**
+	 * A named preference that holds a list of semicolon separated package names. The list specifies the import order used by
+	 * the "Organize Imports" operation.
+	 * <p>
+	 * Value is of type <code>String</code>: semicolon separated list of package
+	 * names
+	 * </p>
+	 */
+	public static final String ORGIMPORTS_IMPORTORDER= "org.eclipse.jdt.ui.importorder"; //$NON-NLS-1$
+		
+	/**
 	 * A named preference that specifies the number of imports added before a star-import declaration is used.
 	 * <p>
 	 * Value is of type <code>Integer</code>: positive value specifying the number of non star-import is used
@@ -337,6 +337,15 @@ public class PreferenceConstants {
 	 */
 	public static final String ORGIMPORTS_ONDEMANDTHRESHOLD= "org.eclipse.jdt.ui.ondemandthreshold"; //$NON-NLS-1$
 
+	/**
+	 * A named preference that specifies the number of static imports added before a star-import declaration is used.
+	 * <p>
+	 * Value is of type <code>Integer</code>: positive value specifying the number of non star-import is used
+	 * </p>
+	 * @since 3.2
+	 */
+	public static final String ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD= "org.eclipse.jdt.ui.staticondemandthreshold"; //$NON-NLS-1$
+	
 	/**
 	 * A named preferences that controls if types that start with a lower case letters get added by the
 	 * "Organize Import" operation.
@@ -3356,6 +3365,7 @@ public class PreferenceConstants {
 		// ImportOrganizePreferencePage
 		store.setDefault(PreferenceConstants.ORGIMPORTS_IMPORTORDER, "java;javax;org;com"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, 99);
+		store.setDefault(PreferenceConstants.ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD, 99);
 		store.setDefault(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, true);
 
 		// TypeFilterPreferencePage

@@ -37,9 +37,10 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite.ImportRewriteContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
@@ -167,7 +168,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 			AST ast= fASTRoot.getAST();
 			
 			ASTRewrite astRewrite= ASTRewrite.create(ast);
-			NewImportRewrite importRewrite= NewImportRewrite.create(fASTRoot, true);
+			ImportRewrite importRewrite= StubUtility.createImportRewrite(fASTRoot, true);
 			
 			ITypeBinding currTypeBinding= fType;
 			ListRewrite memberRewriter= null;
@@ -205,7 +206,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 
 			for (int i= 0; i < methodsToImplement.length; i++) {
 				IMethodBinding curr= methodsToImplement[i];
-				MethodDeclaration stub= StubUtility2.createImplementationStub(cu, astRewrite, new ImportRewrite(importRewrite), ast, curr, currTypeBinding.getName(), settings, currTypeBinding.isInterface(), context);
+				MethodDeclaration stub= StubUtility2.createImplementationStub(cu, astRewrite, new org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite(importRewrite), ast, curr, currTypeBinding.getName(), settings, currTypeBinding.isInterface(), context);
 				if (stub != null) {
 					fCreatedMethods.add(curr.getKey());
 					if (insertion != null)

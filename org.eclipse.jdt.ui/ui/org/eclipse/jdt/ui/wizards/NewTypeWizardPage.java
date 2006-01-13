@@ -99,6 +99,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -108,7 +109,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstruc
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
@@ -181,10 +181,10 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 */
 	public static class ImportsManager {
 
-		private NewImportRewrite fImportsRewrite;
+		private ImportRewrite fImportsRewrite;
 				
 		/* package */ ImportsManager(CompilationUnit astRoot) throws CoreException {
-			fImportsRewrite= NewImportRewrite.create(astRoot, true);
+			fImportsRewrite= StubUtility.createImportRewrite(astRoot, true);
 		}
 
 		/* package */ ICompilationUnit getCompilationUnit() {

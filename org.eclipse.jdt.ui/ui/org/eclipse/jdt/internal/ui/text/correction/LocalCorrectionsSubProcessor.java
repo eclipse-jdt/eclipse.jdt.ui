@@ -71,8 +71,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -159,13 +159,13 @@ public class LocalCorrectionsSubProcessor {
 		TryStatement surroundingTry= ASTResolving.findParentTryStatement(selectedNode);
 		if (surroundingTry != null && ASTNodes.isParent(selectedNode, surroundingTry.getBody())) {
 			ASTRewrite rewrite= ASTRewrite.create(surroundingTry.getAST());
-			NewImportRewrite imports= NewImportRewrite.create(context.getASTRoot(), true);
 
 			String label= CorrectionMessages.LocalCorrectionsSubProcessor_addadditionalcatch_description;
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_EXCEPTION);
 			LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, cu, rewrite, 7, image);
 			
-			proposal.setImportRewrite(imports);
+			ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
+
 
 			AST ast= astRoot.getAST();
 			ListRewrite clausesRewrite= rewrite.getListRewrite(surroundingTry, TryStatement.CATCH_CLAUSES_PROPERTY);

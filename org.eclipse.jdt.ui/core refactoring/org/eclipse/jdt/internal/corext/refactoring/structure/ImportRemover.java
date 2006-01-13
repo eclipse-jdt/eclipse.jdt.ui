@@ -30,10 +30,10 @@ import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.codemanipulation.NewImportRewrite;
+
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 public class ImportRemover {
@@ -215,22 +215,11 @@ public class ImportRemover {
 		fRemovedNodes.add(removed);
 	}
 
-	public void applyRemoves(ImportRewrite importRewrite) {
-		IBinding[] bindings= getImportsToRemove();
-		for (int i= 0; i < bindings.length; i++) {
-			if (bindings[i] instanceof ITypeBinding)
-				importRewrite.removeImport((ITypeBinding) bindings[i]);
-			else if (bindings[i] instanceof IMethodBinding) {
-				IMethodBinding binding= (IMethodBinding) bindings[i];
-				importRewrite.removeStaticImport(binding.getDeclaringClass().getQualifiedName() + '.' + binding.getName());
-			} else if (bindings[i] instanceof IVariableBinding) {
-				IVariableBinding binding= (IVariableBinding) bindings[i];
-				importRewrite.removeStaticImport(binding.getDeclaringClass().getQualifiedName() + '.' + binding.getName());
-			}
-		}
+	public void applyRemoves(org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite importRewrite) {
+		applyRemoves(importRewrite.getNewImportRewrite());
 	}
 	
-	public void applyRemoves(NewImportRewrite importRewrite) {
+	public void applyRemoves(ImportRewrite importRewrite) {
 		IBinding[] bindings= getImportsToRemove();
 		for (int i= 0; i < bindings.length; i++) {
 			if (bindings[i] instanceof ITypeBinding) {

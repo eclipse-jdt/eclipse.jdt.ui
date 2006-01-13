@@ -27,12 +27,13 @@ import org.eclipse.jdt.core.dom.Type;
 /**
  * A rewriter for imports that considers the organize import 
  * settings.
+ * @deprecated Use {@link org.eclipse.jdt.core.dom.rewrite.ImportRewrite} instead. 
  */
 public final class ImportRewrite {
 	
-	private NewImportRewrite fNewImportRewrite;
+	private org.eclipse.jdt.core.dom.rewrite.ImportRewrite fNewImportRewrite;
 	
-	public ImportRewrite(NewImportRewrite rewrite) {
+	public ImportRewrite(org.eclipse.jdt.core.dom.rewrite.ImportRewrite rewrite) {
 		fNewImportRewrite= rewrite;
 	}
 
@@ -43,7 +44,7 @@ public final class ImportRewrite {
 	 * @throws CoreException
 	 */
 	public ImportRewrite(ICompilationUnit cu, CompilationUnit root) throws CoreException {
-		this(NewImportRewrite.create(root, true));
+		this(StubUtility.createImportRewrite(root, true));
 	}
 	
 	/**
@@ -52,10 +53,10 @@ public final class ImportRewrite {
 	 * @throws CoreException
 	 */
 	public ImportRewrite(ICompilationUnit cu) throws CoreException {
-		this(NewImportRewrite.create(cu, true));
+		this(StubUtility.createImportRewrite(cu, true));
 	}
 	
-	public NewImportRewrite getNewImportRewrite() {
+	public org.eclipse.jdt.core.dom.rewrite.ImportRewrite getNewImportRewrite() {
 		return fNewImportRewrite;
 	}
 	

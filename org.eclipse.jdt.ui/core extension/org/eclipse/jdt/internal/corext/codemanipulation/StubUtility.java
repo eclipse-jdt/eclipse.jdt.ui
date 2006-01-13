@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -70,6 +71,7 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
@@ -264,7 +266,7 @@ public class StubUtility {
 		for (int i= 0; i < result.length; i++) {
 			ITypeBinding curr= typeBindings[i];
 			if (curr.isTypeVariable()) {
-				curr= curr.getErasure(); // in Javadoc only use type variable erasures
+				curr= curr.getErasure(); // in Javadoc only use type variable erasure
 			}
 			curr= curr.getTypeDeclaration(); // no parameterized types
 			result[i]= curr.getQualifiedName();
@@ -991,5 +993,42 @@ public class StubUtility {
 		}
 		return projectStore.findTemplateById(id);
 	}
+	
+
+	public static ImportRewrite createImportRewrite(ICompilationUnit cu, boolean restoreExistingImports) throws JavaModelException {
+		return configureImportRewrite(ImportRewrite.create(cu, restoreExistingImports));
+	}
+	
+	public static ImportRewrite createImportRewrite(CompilationUnit astRoot, boolean restoreExistingImports) {
+		return configureImportRewrite(ImportRewrite.create(astRoot, restoreExistingImports));
+	}
+	
+	private static ImportRewrite configureImportRewrite(ImportRewrite rewrite) {
+		IJavaProject project= rewrite.getCompilationUnit().getJavaProject();
+		String order= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IMPORTORDER, project);
+		rewrite.setImportOrder(order.split(String.valueOf(';')));
+
+		String thres= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, project);
+		try {
+			int num= Integer.parseInt(thres);
+			if (num == 0)
+				num= 1;
+			rewrite.setOnDemandImportThreshold(num);
+		} catch (NumberFormatException e) {
+			// ignore
+		}
+		String thresStatic= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD, project);
+		try {
+			int num= Integer.parseInt(thresStatic);
+			if (num == 0)
+				num= 1;
+			rewrite.setStaticOnDemandImportThreshold(num);
+		} catch (NumberFormatException e) {
+			// ignore
+		}
+		return rewrite;
+	}
+	
+	
 	
 }
