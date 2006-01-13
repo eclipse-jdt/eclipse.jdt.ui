@@ -176,20 +176,10 @@
                label="%searchMenu.label"
                path="navigate"
                id="org.eclipse.search.menu">
-            <groupMarker
-                  name="internalDialogGroup">
-            </groupMarker>
-<!-- not to be used by clients  -->
-            <groupMarker
-                  name="dialogGroup">
-            </groupMarker>
-<!-- to be used by clients      -->
-            <separator
-                  name="contextMenuActionsGroup">
-            </separator>
-            <separator
-                  name="internalOccurrencesGroup">
-            </separator>
+            <groupMarker name="internalDialogGroup"/>   <!-- not to be used by clients  -->
+            <groupMarker name="dialogGroup"/>           <!-- to be used by clients      -->
+            <separator name="contextMenuActionsGroup"/>
+            <separator name="internalOccurrencesGroup"/> <!-- not to be used by clients  -->
          </menu>
 		<action
                definitionId="org.eclipse.jdt.junit.gotoTest"
@@ -322,7 +312,6 @@
             name="%RenameTypeParticipant.name"
             class="org.eclipse.jdt.internal.junit.refactoring.TypeRenameParticipant"
             id="org.eclipse.jdt.junit.renameTypeParticipant">
-         <param name="handlesSimilarDeclarations" value="true"/>
          <enablement>
             <with
                   variable="affectedNatures">
