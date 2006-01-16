@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.jeview.views;
 
+import org.eclipse.core.resources.IMarker;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.LabelProvider;
@@ -59,6 +61,22 @@ public class JEViewLabelProvider extends LabelProvider /*implements IColorProvid
 			
 		} else if (element instanceof Error) {
 			return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
+			
+		} else if (element instanceof JEMarker) {
+			JEMarker marker= (JEMarker) element;
+			Object severity= marker.getMarkerAttribute(IMarker.SEVERITY);
+			if (severity instanceof Integer) {
+				Integer sev= (Integer) severity;
+				switch (sev.intValue()) {
+					case IMarker.SEVERITY_INFO:
+						return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_INFO_TSK);
+					case IMarker.SEVERITY_WARNING:
+						return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_WARN_TSK);
+					case IMarker.SEVERITY_ERROR:
+						return PlatformUI.getWorkbench().getSharedImages().getImage(ISharedImages.IMG_OBJS_ERROR_TSK);
+				}
+			}
+			return null;
 			
 		} else {
 			return super.getImage(element);

@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspaceRoot;
 
@@ -81,6 +82,8 @@ import org.eclipse.ui.views.properties.IPropertySource;
 import org.eclipse.ui.views.properties.IPropertySourceProvider;
 import org.eclipse.ui.views.properties.PropertySheetPage;
 
+import org.eclipse.ui.ide.IDE;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -99,6 +102,7 @@ import org.eclipse.jdt.jeview.EditorUtility;
 import org.eclipse.jdt.jeview.JEPluginImages;
 import org.eclipse.jdt.jeview.JEViewPlugin;
 import org.eclipse.jdt.jeview.properties.JavaElementProperties;
+import org.eclipse.jdt.jeview.properties.MarkerProperties;
 import org.eclipse.jdt.jeview.properties.ResourceProperties;
 
 
@@ -162,6 +166,8 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					IResource resource= ((JEResource) element).getResource();
 					if (! (resource instanceof IWorkspaceRoot)) // various selection listeners assume getProject() is non-null
 						externalSelection.add(resource);
+				} else if (element instanceof JEMarker) {
+					externalSelection.add(((JEMarker) element).getMarker());
 				} else {
 					//TODO: support for other node types?
 				}
@@ -464,6 +470,14 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				} else if (obj instanceof Error) {
 					Error error= (Error) obj;
 					JEViewPlugin.log(error.getException());
+					
+				} else if (obj instanceof JEMarker) {
+					JEMarker marker= (JEMarker) obj;
+					try {
+						IDE.openEditor(getSite().getPage(), marker.getMarker());
+					} catch (PartInitException e) {
+						showAndLogError("Could not open editor.", e); //$NON-NLS-1$
+					}
 				}
 			}
 		};
@@ -628,6 +642,8 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 						return new JavaElementProperties((IJavaElement) object);
 					else if (object instanceof IResource)
 						return new ResourceProperties((IResource) object);
+					else if (object instanceof IMarker)
+						return new MarkerProperties((IMarker) object);
 					else
 						return null;
 				}

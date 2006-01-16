@@ -17,6 +17,7 @@ import java.util.concurrent.Callable;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IContainer;
+import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.util.Assert;
@@ -101,6 +102,16 @@ public class JEResource extends JEAttribute {
 				}
 			});
 		}
+		result.add(new JavaElementChildrenProperty(this, "FIND MARKERS (DEPTH_ZERO)") {
+			@Override protected JEAttribute[] computeChildren() throws CoreException {
+				IMarker[] markers= getResource().findMarkers(null, true, IResource.DEPTH_ZERO);
+				JEAttribute[] children= new JEAttribute[markers.length];
+				for (int i= 0; i < markers.length; i++) {
+					children[i]= new JEMarker(this, "[" + i + "]", markers[i]);
+				}
+				return children;
+			}
+		});
 		return result.toArray(new JEAttribute[result.size()]);
 	}
 
