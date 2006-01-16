@@ -216,7 +216,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	@Override\r\n" + 
 				"	public int hashCode() {\r\n" + 
 				"		final int PRIME = 31;\r\n" + 
-				"		int result = super.hashCode();\r\n" + 
+				"		int result = 1;\r\n" + 
 				"		result = PRIME * result + (aBool ? 1231 : 1237);\r\n" + 
 				"		return result;\r\n" + 
 				"	}\r\n" + 
@@ -228,7 +228,9 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	public boolean equals(Object obj) {\r\n" + 
 				"		if (this == obj)\r\n" + 
 				"			return true;\r\n" + 
-				"		if (!super.equals(obj))\r\n" + 
+				"		if (obj == null)\r\n" + 
+				"			return false;\r\n" + 
+				"		if (getClass() != obj.getClass())\r\n" + 
 				"			return false;\r\n" + 
 				"		final A other = (A) obj;\r\n" + 
 				"		if (aBool != other.aBool)\r\n" + 
@@ -356,7 +358,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	@Override\r\n" + 
 				"	public int hashCode() {\r\n" + 
 				"		final int PRIME = 31;\r\n" + 
-				"		int result = super.hashCode();\r\n" + 
+				"		int result = 1;\r\n" + 
 				"		result = PRIME * result + ((anA == null) ? 0 : anA.hashCode());\r\n" + 
 				"		result = PRIME * result + ((aB == null) ? 0 : aB.hashCode());\r\n" + 
 				"		return result;\r\n" + 
@@ -368,7 +370,9 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 				"	public boolean equals(Object obj) {\r\n" + 
 				"		if (this == obj)\r\n" + 
 				"			return true;\r\n" + 
-				"		if (!super.equals(obj))\r\n" + 
+				"		if (obj == null)\r\n" + 
+				"			return false;\r\n" + 
+				"		if (getClass() != obj.getClass())\r\n" + 
 				"			return false;\r\n" + 
 				"		final A other = (A) obj;\r\n" + 
 				"		if (anA == null) {\r\n" + 
