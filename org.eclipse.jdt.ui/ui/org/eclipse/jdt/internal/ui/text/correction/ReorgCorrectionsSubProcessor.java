@@ -88,6 +88,8 @@ import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoRequestor;
 
 import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstall2;
+import org.eclipse.jdt.launching.IVMInstallType;
 import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -102,7 +104,6 @@ import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.preferences.BuildPathsPropertyPage;
 import org.eclipse.jdt.internal.ui.util.CoreUtility;
-import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathSupport;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
 
 public class ReorgCorrectionsSubProcessor {
@@ -338,12 +339,25 @@ public class ReorgCorrectionsSubProcessor {
 			f50JREFound= false;
 		}
 		
-		private boolean is50VMInstall(IVMInstall install) {
-			return BuildPathSupport.hasMatchingCompliance(install, JavaCore.VERSION_1_5);
+		private boolean is50orGreaterVMInstall(IVMInstall install) {
+			if (install instanceof IVMInstall2) {
+				String compliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) install, JavaCore.VERSION_1_3);
+				return JavaModelUtil.is50OrHigher(compliance);
+			}
+			return false;
 		}
 		
-		private IVMInstall find50VMInstall() {
-			return BuildPathSupport.findMatchingJREInstall(JavaCore.VERSION_1_5);
+		private IVMInstall find50OrGreaterVMInstall() {
+			IVMInstallType[] installTypes= JavaRuntime.getVMInstallTypes();
+			for (int i= 0; i < installTypes.length; i++) {
+				IVMInstall[] installs= installTypes[i].getVMInstalls();
+				for (int k= 0; k < installs.length; k++) {
+					if (is50orGreaterVMInstall(installs[k])) {
+						return installs[k];
+					}
+				}
+			}
+			return null;
 		}
 		
 		public void run(IProgressMonitor monitor) throws CoreException {
@@ -355,7 +369,7 @@ public class ReorgCorrectionsSubProcessor {
 		
 		private boolean updateJRE( IProgressMonitor monitor) throws CoreException, JavaModelException {
 			try {
-				IVMInstall vm50Install= find50VMInstall();
+				IVMInstall vm50Install= find50OrGreaterVMInstall();
 				f50JREFound= vm50Install != null;
 				if (vm50Install != null) {
 					IVMInstall install= JavaRuntime.getVMInstall(fProject); // can be null
@@ -368,13 +382,13 @@ public class ReorgCorrectionsSubProcessor {
 						} else {
 							monitor.worked(1);
 						}
-						if (defaultVM == null || !is50VMInstall(defaultVM)) {
+						if (defaultVM == null || !is50orGreaterVMInstall(defaultVM)) {
 							JavaRuntime.setDefaultVMInstall(vm50Install, new SubProgressMonitor(monitor, 3), true);
 							return false;
 						}
 						return true;
 					} else {
-						if (install == null || !is50VMInstall(install)) {
+						if (install == null || !is50orGreaterVMInstall(install)) {
 							IPath newPath= new Path(JavaRuntime.JRE_CONTAINER).append(vm50Install.getVMInstallType().getId()).append(vm50Install.getName());
 							updateClasspath(newPath, monitor);
 							return false;
@@ -410,7 +424,7 @@ public class ReorgCorrectionsSubProcessor {
 				message.append(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeproject_description);
 			}
 			
-			IVMInstall vm50Install= find50VMInstall();
+			IVMInstall vm50Install= find50OrGreaterVMInstall();
 			if (vm50Install != null) {
 				try {
 					IVMInstall install= JavaRuntime.getVMInstall(fProject); // can be null
@@ -419,11 +433,11 @@ public class ReorgCorrectionsSubProcessor {
 						if (defaultVM != null && !defaultVM.equals(install)) {
 							message.append(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJREToDefault_description);
 						}
-						if (defaultVM == null || !is50VMInstall(defaultVM)) {
+						if (defaultVM == null || !is50orGreaterVMInstall(defaultVM)) {
 							message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeWorkspaceJRE_description, vm50Install.getName()));
 						}
 					} else {
-						if (install == null || !is50VMInstall(install)) {
+						if (install == null || !is50orGreaterVMInstall(install)) {
 							message.append(Messages.format(CorrectionMessages.ReorgCorrectionsSubProcessor_50_compliance_changeProjectJRE_description, vm50Install.getName()));
 						}
 					}

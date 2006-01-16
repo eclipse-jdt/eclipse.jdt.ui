@@ -39,7 +39,11 @@ import org.eclipse.ui.preferences.IWorkbenchPreferenceContainer;
 
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.launching.IVMInstall;
+import org.eclipse.jdt.launching.IVMInstall2;
 import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -79,6 +83,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private static final String VERSION_1_3= JavaCore.VERSION_1_3;
 	private static final String VERSION_1_4= JavaCore.VERSION_1_4;
 	private static final String VERSION_1_5= JavaCore.VERSION_1_5;
+	private static final String VERSION_1_6= JavaCore.VERSION_1_6;
 	
 	private static final String ERROR= JavaCore.ERROR;
 	private static final String WARNING= JavaCore.WARNING;
@@ -177,11 +182,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private Composite createComplianceTabContent(Composite folder) {
 
 
-		String[] values345= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5 };
-		String[] values345Labels= new String[] {
+		String[] values3456= new String[] { VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6 };
+		String[] values3456Labels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_version13,  
 			PreferencesMessages.ComplianceConfigurationBlock_version14, 
-			PreferencesMessages.ComplianceConfigurationBlock_version15
+			PreferencesMessages.ComplianceConfigurationBlock_version15,
+			PreferencesMessages.ComplianceConfigurationBlock_version16
 		};
 
 		final ScrolledPageContent sc1 = new ScrolledPageContent(folder);
@@ -212,7 +218,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		group.setLayout(layout);
 	
 		String label= PreferencesMessages.ComplianceConfigurationBlock_compiler_compliance_label; 
-		addComboBox(group, label, PREF_COMPLIANCE, values345, values345Labels, 0);
+		addComboBox(group, label, PREF_COMPLIANCE, values3456, values3456Labels, 0);
 
 		label= PreferencesMessages.ComplianceConfigurationBlock_default_settings_label; 
 		addCheckBox(group, label, INTR_DEFAULT_COMPLIANCE, new String[] { DEFAULT_CONF, USER_CONF }, 0);	
@@ -220,20 +226,21 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		int indent= fPixelConverter.convertWidthInCharsToPixels(2);
 		Control[] otherChildren= group.getChildren();	
 				
-		String[] versions= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5 };
+		String[] versions= new String[] { VERSION_1_1, VERSION_1_2, VERSION_1_3, VERSION_1_4, VERSION_1_5, VERSION_1_6 };
 		String[] versionsLabels= new String[] {
 			PreferencesMessages.ComplianceConfigurationBlock_version11,  
 			PreferencesMessages.ComplianceConfigurationBlock_version12, 
 			PreferencesMessages.ComplianceConfigurationBlock_version13, 
-			PreferencesMessages.ComplianceConfigurationBlock_version14, 
-			PreferencesMessages.ComplianceConfigurationBlock_version15
+			PreferencesMessages.ComplianceConfigurationBlock_version14,
+			PreferencesMessages.ComplianceConfigurationBlock_version15, 
+			PreferencesMessages.ComplianceConfigurationBlock_version16
 		};
 		
 		label= PreferencesMessages.ComplianceConfigurationBlock_codegen_targetplatform_label; 
 		addComboBox(group, label, PREF_CODEGEN_TARGET_PLATFORM, versions, versionsLabels, indent);	
 
 		label= PreferencesMessages.ComplianceConfigurationBlock_source_compatibility_label; 
-		addComboBox(group, label, PREF_SOURCE_COMPATIBILITY, values345, values345Labels, indent);	
+		addComboBox(group, label, PREF_SOURCE_COMPATIBILITY, values3456, values3456Labels, indent);	
 
 		String[] errorWarningIgnore= new String[] { ERROR, WARNING, IGNORE };
 		
@@ -282,11 +289,6 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		addCheckBox(group, label, PREF_CODEGEN_INLINE_JSR_BYTECODE, enableDisableValues, 0);	
 		
 		fJRE50InfoText= new Link(composite, SWT.WRAP);
-		if (fProject == null) {
-			fJRE50InfoText.setText(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info);
-		} else {
-			fJRE50InfoText.setText(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project);
-		}
 		fJRE50InfoText.setFont(composite.getFont());
 		fJRE50InfoText.addSelectionListener(new SelectionListener() {
 			public void widgetDefaultSelected(SelectionEvent e) {
@@ -373,17 +375,26 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		if (fJRE50InfoText != null && !fJRE50InfoText.isDisposed()) {
 			boolean isVisible= false;
 			String compliance= getStoredValue(PREF_COMPLIANCE); // get actual value
-			if (VERSION_1_5.equals(compliance)) {
+			if (VERSION_1_5.equals(compliance) || VERSION_1_6.equals(compliance)) {
+				IVMInstall install= null;
 				if (fProject != null) { // project specific settings: only test if a 50 JRE is installed
 					try {
-						IVMInstall install= JavaRuntime.getVMInstall(JavaCore.create(fProject));
-						isVisible= (install == null) || !BuildPathSupport.hasMatchingCompliance(install, VERSION_1_5);
+						install= JavaRuntime.getVMInstall(JavaCore.create(fProject));
 					} catch (CoreException e) {
 						JavaPlugin.log(e);
 					}
 				} else {
-					IVMInstall defaultVMInstall= JavaRuntime.getDefaultVMInstall();
-					isVisible= (defaultVMInstall == null) || !BuildPathSupport.hasMatchingCompliance(defaultVMInstall, VERSION_1_5);
+					install= JavaRuntime.getDefaultVMInstall();
+				}
+				boolean matching= install instanceof IVMInstall2 && compliance.equals(JavaModelUtil.getCompilerCompliance((IVMInstall2) install, compliance));
+				isVisible= !matching;
+				if (isVisible) {
+					String complianceName= VERSION_1_5.equals(compliance) ? PreferencesMessages.ComplianceConfigurationBlock_version15 : PreferencesMessages.ComplianceConfigurationBlock_version16;
+					if (fProject == null) {
+						fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info, complianceName));
+					} else {
+						fJRE50InfoText.setText(Messages.format(PreferencesMessages.ComplianceConfigurationBlock_jrecompliance_info_project, complianceName));
+					}
 				}
 			}
 			fJRE50InfoText.setVisible(isVisible);
@@ -396,39 +407,31 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		String source= getValue(PREF_SOURCE_COMPATIBILITY);
 		String target= getValue(PREF_CODEGEN_TARGET_PLATFORM);
 		
-		if (VERSION_1_3.equals(compliance)) {
-			if (VERSION_1_4.equals(source) || VERSION_1_5.equals(source)) {
-				status.setError(PreferencesMessages.ComplianceConfigurationBlock_cpl13src145_error); 
-				return status;
-			} 
-			if (VERSION_1_4.equals(target) || VERSION_1_5.equals(target)) {
-				status.setError(PreferencesMessages.ComplianceConfigurationBlock_cpl13trg145_error); 
-				return status;
-			}
-		} else if (VERSION_1_4.equals(compliance)) {
-			if (VERSION_1_5.equals(source)) {
-				status.setError(PreferencesMessages.ComplianceConfigurationBlock_cpl14src15_error); 
-				return status;
-			} 
-			if (VERSION_1_5.equals(target)) {
-				status.setError(PreferencesMessages.ComplianceConfigurationBlock_cpl14trg15_error); 
-				return status;
-			}			
+		// compliance must not be smaller than source or target
+		if (isLessThan(compliance, source)) {
+			status.setError(PreferencesMessages.ComplianceConfigurationBlock_src_greater_compliance); 
+			return status;
 		}
-		if (VERSION_1_4.equals(source)) {
-			if (VERSION_1_1.equals(target) || VERSION_1_2.equals(target) || VERSION_1_3.equals(target)) {
-				status.setError(PreferencesMessages.ComplianceConfigurationBlock_src14tgt14_error); 
-				return status;
-			}
-		} else if (VERSION_1_5.equals(source)) {
-			if (!VERSION_1_5.equals(target)) {
-				status.setError(PreferencesMessages.ComplianceConfigurationBlock_src15tgt15_error); 
-				return status;
-			}
+		
+		if (isLessThan(compliance, target)) {
+			status.setError(PreferencesMessages.ComplianceConfigurationBlock_classfile_greater_compliance); 
+			return status;
 		}
+		
+		// target must not be smaller than source
+		if (!VERSION_1_3.equals(source) && isLessThan(source, target)) {
+			status.setError(PreferencesMessages.ComplianceConfigurationBlock_classfile_greater_source); 
+			return status;
+		}
+		
 		return status;
 	}
 	
+	
+	private static boolean isLessThan(String version1, String version2) {
+		return version1.compareTo(version2) < 0;
+	}
+		
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#useProjectSpecificSettings(boolean)
@@ -482,7 +485,9 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	}
 
 	private void updateInlineJSREnableState() {
-		boolean enabled= !checkValue(PREF_CODEGEN_TARGET_PLATFORM, VERSION_1_5);
+		String target= getValue(PREF_CODEGEN_TARGET_PLATFORM);
+		
+		boolean enabled= isLessThan(target, VERSION_1_5);
 		Button checkBox= getCheckBox(PREF_CODEGEN_INLINE_JSR_BYTECODE);
 		checkBox.setEnabled(enabled);
 		
@@ -534,6 +539,11 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				enumAsId= ERROR;
 				source= VERSION_1_5;
 				target= VERSION_1_5;
+			} else if (VERSION_1_6.equals(complianceLevel)) {
+				assertAsId= ERROR;
+				enumAsId= ERROR;
+				source= VERSION_1_6;
+				target= VERSION_1_6;				
 			} else {
 				assertAsId= IGNORE;
 				enumAsId= IGNORE;
@@ -580,7 +590,12 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 				&& ERROR.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
 				&& ERROR.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
 				&& VERSION_1_5.equals(getValue(PREF_SOURCE_COMPATIBILITY))
-				&& VERSION_1_5.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))) {
+				&& VERSION_1_5.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))
+			|| (VERSION_1_6.equals(complianceLevel)
+				&& ERROR.equals(getValue(PREF_PB_ASSERT_AS_IDENTIFIER))
+				&& ERROR.equals(getValue(PREF_PB_ENUM_AS_IDENTIFIER))
+				&& VERSION_1_6.equals(getValue(PREF_SOURCE_COMPATIBILITY))
+				&& VERSION_1_6.equals(getValue(PREF_CODEGEN_TARGET_PLATFORM)))) {
 			return DEFAULT_CONF;
 		}
 		return USER_CONF;

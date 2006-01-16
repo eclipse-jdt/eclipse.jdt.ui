@@ -554,9 +554,11 @@ public class JavaProjectWizardFirstPage extends WizardPage {
 			if (selectedJVM instanceof IVMInstall2) {
 				jvmCompliance= JavaModelUtil.getCompilerCompliance((IVMInstall2) selectedJVM, JavaCore.VERSION_1_4);
 			}
-			if (!selectedCompliance.equals(jvmCompliance) && (selectedCompliance.equals(JavaCore.VERSION_1_5) || jvmCompliance.equals(JavaCore.VERSION_1_5))) {
+			if (!selectedCompliance.equals(jvmCompliance) && (JavaModelUtil.is50OrHigher(selectedCompliance) || JavaModelUtil.is50OrHigher(jvmCompliance))) {
 				if (selectedCompliance.equals(JavaCore.VERSION_1_5))
 					selectedCompliance= "5.0"; //$NON-NLS-1$
+				else if (selectedCompliance.equals(JavaCore.VERSION_1_6))
+					selectedCompliance= "6.0"; //$NON-NLS-1$
 				
 				fHintText.setText(Messages.format(NewWizardMessages.JavaProjectWizardFirstPage_DetectGroup_jre_message, new String[] {selectedCompliance, jvmCompliance}));
 				fHintText.setVisible(true);

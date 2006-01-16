@@ -444,12 +444,6 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_pb_enum_as_identifier_label;
 	public static String ComplianceConfigurationBlock_compliance_group_label;
 	public static String ComplianceConfigurationBlock_classfiles_group_label;
-	public static String ComplianceConfigurationBlock_cpl13src145_error;
-	public static String ComplianceConfigurationBlock_cpl13trg145_error;
-	public static String ComplianceConfigurationBlock_cpl14src15_error;
-	public static String ComplianceConfigurationBlock_cpl14trg15_error;
-	public static String ComplianceConfigurationBlock_src14tgt14_error;
-	public static String ComplianceConfigurationBlock_src15tgt15_error;
 	public static String OptionsConfigurationBlock_job_title;
 	public static String OptionsConfigurationBlock_buildall_taskname;
 	public static String OptionsConfigurationBlock_buildproject_taskname;
@@ -725,5 +719,9 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaBasePreferencePage_do_not_hide_dialog_title;
 	public static String JavaBasePreferencePage_do_not_hide_dialog_message;
 	public static String CodeAssistConfigurationBlock_matchCamelCase_label;
+	public static String ComplianceConfigurationBlock_version16;
+	public static String ComplianceConfigurationBlock_src_greater_compliance;
+	public static String ComplianceConfigurationBlock_classfile_greater_compliance;
+	public static String ComplianceConfigurationBlock_classfile_greater_source;
 
 }

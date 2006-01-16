@@ -816,7 +816,13 @@ public final class JavaModelUtil {
 	}
 	
 	public static void setCompilanceOptions(Map map, String compliance) {
-		if (JavaCore.VERSION_1_5.equals(compliance)) {
+		if (JavaCore.VERSION_1_6.equals(compliance)) {
+			map.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_6);
+			map.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_6);
+			map.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_6);
+			map.put(JavaCore.COMPILER_PB_ASSERT_IDENTIFIER, JavaCore.ERROR);
+			map.put(JavaCore.COMPILER_PB_ENUM_IDENTIFIER, JavaCore.ERROR);
+		} else if (JavaCore.VERSION_1_5.equals(compliance)) {
 			map.put(JavaCore.COMPILER_COMPLIANCE, JavaCore.VERSION_1_5);
 			map.put(JavaCore.COMPILER_SOURCE, JavaCore.VERSION_1_5);
 			map.put(JavaCore.COMPILER_CODEGEN_TARGET_PLATFORM, JavaCore.VERSION_1_5);
@@ -839,10 +845,13 @@ public final class JavaModelUtil {
 		}
 	}
 	
+	public static boolean is50OrHigher(String compliance) {
+		return JavaCore.VERSION_1_5.equals(compliance) || JavaCore.VERSION_1_6.equals(compliance);
+	}
 	
 	public static boolean is50OrHigher(IJavaProject project) {
 		String compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-		return JavaCore.VERSION_1_5.equals(compliance);
+		return is50OrHigher(compliance);
 	}
 	
 	public static boolean is50OrHigherJRE(IJavaProject project) throws CoreException {
@@ -853,7 +862,7 @@ public final class JavaModelUtil {
 		String compliance= getCompilerCompliance((IVMInstall2) vmInstall, null);
 		if (compliance == null)
 			return true; // assume 5.0
-		return compliance.startsWith(JavaCore.VERSION_1_5);
+		return compliance.startsWith(JavaCore.VERSION_1_5) || compliance.startsWith(JavaCore.VERSION_1_6);
 	}
 	
 	public static String getCompilerCompliance(IVMInstall2 vMInstall, String defaultCompliance) {
@@ -861,7 +870,7 @@ public final class JavaModelUtil {
 		if (version == null) {
 			return defaultCompliance;
 		} else if (version.startsWith(JavaCore.VERSION_1_6)) {
-			return JavaCore.VERSION_1_5; // Note: 1_5 (until 1_6 is available in the UI)
+			return JavaCore.VERSION_1_6;
 		} else if (version.startsWith(JavaCore.VERSION_1_5)) {
 			return JavaCore.VERSION_1_5;
 		} else if (version.startsWith(JavaCore.VERSION_1_4)) {
