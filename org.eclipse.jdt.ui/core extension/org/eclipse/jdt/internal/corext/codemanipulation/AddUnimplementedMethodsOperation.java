@@ -206,7 +206,7 @@ public final class AddUnimplementedMethodsOperation implements IWorkspaceRunnabl
 
 			for (int i= 0; i < methodsToImplement.length; i++) {
 				IMethodBinding curr= methodsToImplement[i];
-				MethodDeclaration stub= StubUtility2.createImplementationStub(cu, astRewrite, new org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite(importRewrite), ast, curr, currTypeBinding.getName(), settings, currTypeBinding.isInterface(), context);
+				MethodDeclaration stub= StubUtility2.createImplementationStub(cu, astRewrite, importRewrite, ast, curr, currTypeBinding.getName(), settings, currTypeBinding.isInterface(), context);
 				if (stub != null) {
 					fCreatedMethods.add(curr.getKey());
 					if (insertion != null)

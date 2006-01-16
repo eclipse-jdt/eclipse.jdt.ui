@@ -223,7 +223,7 @@ public final class AddDelegateMethodsOperation implements IWorkspaceRunnable {
 								break;
 							for (int offset= 0; offset < bindings.length; offset++) {
 								if (bindings[offset][0].getKey().equals(variableKey) && bindings[offset][1].getKey().equals(methodKey)) {
-									stub= StubUtility2.createDelegationStub(rewrite.getCu(), rewrite.getASTRewrite(), rewrite.getImportRewrite(), rewrite.getAST(), bindings[offset], fSettings);
+									stub= StubUtility2.createDelegationStub(rewrite.getCu(), rewrite.getASTRewrite(), rewrite.getNewImportRewrite(), rewrite.getAST(), bindings[offset], fSettings);
 									if (stub != null) {
 										fCreated.add(methodKey);
 										if (insertion != null)

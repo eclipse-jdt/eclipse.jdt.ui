@@ -79,7 +79,7 @@ public final class StubUtility2 {
 		}
 	}
 
-	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite imports, IMethodBinding binding, String type, int modifiers, boolean omitSuper, CodeGenerationSettings settings) throws CoreException {
+	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, IMethodBinding binding, String type, int modifiers, boolean omitSuper, CodeGenerationSettings settings) throws CoreException {
 		AST ast= rewrite.getAST();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
@@ -142,7 +142,7 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite imports, ITypeBinding typeBinding, AST ast, IMethodBinding superConstructor, IVariableBinding[] variableBindings, int modifiers, CodeGenerationSettings settings) throws CoreException {
+	public static MethodDeclaration createConstructorStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, ITypeBinding typeBinding, AST ast, IMethodBinding superConstructor, IVariableBinding[] variableBindings, int modifiers, CodeGenerationSettings settings) throws CoreException {
 
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(ASTNodeFactory.newModifiers(ast, modifiers & ~Modifier.ABSTRACT & ~Modifier.NATIVE));
@@ -244,7 +244,7 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	public static MethodDeclaration createDelegationStub(ICompilationUnit unit, ASTRewrite rewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite imports, AST ast, IBinding[] bindings, CodeGenerationSettings settings) throws CoreException {
+	public static MethodDeclaration createDelegationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IBinding[] bindings, CodeGenerationSettings settings) throws CoreException {
 		Assert.isNotNull(bindings);
 		Assert.isTrue(bindings.length == 2);
 		Assert.isTrue(bindings[0] instanceof IVariableBinding);
@@ -350,9 +350,8 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite imports, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean deferred, ImportRewriteContext context) throws CoreException {
+	public static MethodDeclaration createImplementationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IMethodBinding binding, String type, CodeGenerationSettings settings, boolean deferred, ImportRewriteContext context) throws CoreException {
 
-		ImportRewrite newImports= imports.getNewImportRewrite();
 		MethodDeclaration decl= ast.newMethodDeclaration();
 		decl.modifiers().addAll(getImplementationModifiers(ast, binding, deferred));
 
@@ -369,20 +368,20 @@ public final class StubUtility2 {
 			if (typeBounds.length != 1 || !"java.lang.Object".equals(typeBounds[0].getQualifiedName())) {//$NON-NLS-1$
 				List newTypeBounds= newTypeParam.typeBounds();
 				for (int k= 0; k < typeBounds.length; k++) {
-					newTypeBounds.add(newImports.addImport(typeBounds[k], ast, context));
+					newTypeBounds.add(imports.addImport(typeBounds[k], ast, context));
 				}
 			}
 			typeParameters.add(newTypeParam);
 		}
 
-		decl.setReturnType2(newImports.addImport(binding.getReturnType(), ast, context));
+		decl.setReturnType2(imports.addImport(binding.getReturnType(), ast, context));
 
 		List parameters= createParameters(unit, imports, ast, binding, decl, context);
 
 		List thrownExceptions= decl.thrownExceptions();
 		ITypeBinding[] excTypes= binding.getExceptionTypes();
 		for (int i= 0; i < excTypes.length; i++) {
-			String excTypeName= newImports.addImport(excTypes[i], context);
+			String excTypeName= imports.addImport(excTypes[i], context);
 			thrownExceptions.add(ASTNodeFactory.newName(ast, excTypeName));
 		}
 
@@ -528,21 +527,20 @@ public final class StubUtility2 {
 		return decl;
 	}
 
-	private static List createParameters(ICompilationUnit unit, org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite imports, AST ast, IMethodBinding binding, MethodDeclaration decl, ImportRewriteContext context) {
-		ImportRewrite newImports= imports.getNewImportRewrite();
+	private static List createParameters(ICompilationUnit unit, ImportRewrite imports, AST ast, IMethodBinding binding, MethodDeclaration decl, ImportRewriteContext context) {
 		List parameters= decl.parameters();
 		ITypeBinding[] params= binding.getParameterTypes();
 		String[] paramNames= suggestArgumentNames(unit.getJavaProject(), binding);
 		for (int i= 0; i < params.length; i++) {
 			SingleVariableDeclaration var= ast.newSingleVariableDeclaration();
 			if (binding.isVarargs() && params[i].isArray() && i == params.length - 1) {
-				StringBuffer buffer= new StringBuffer(newImports.addImport(params[i].getElementType(), context));
+				StringBuffer buffer= new StringBuffer(imports.addImport(params[i].getElementType(), context));
 				for (int dim= 1; dim < params[i].getDimensions(); dim++)
 					buffer.append("[]"); //$NON-NLS-1$
 				var.setType(ASTNodeFactory.newType(ast, buffer.toString()));
 				var.setVarargs(true);
 			} else
-				var.setType(newImports.addImport(params[i], ast, context));
+				var.setType(imports.addImport(params[i], ast, context));
 			var.setName(ast.newSimpleName(paramNames[i]));
 			parameters.add(var);
 		}

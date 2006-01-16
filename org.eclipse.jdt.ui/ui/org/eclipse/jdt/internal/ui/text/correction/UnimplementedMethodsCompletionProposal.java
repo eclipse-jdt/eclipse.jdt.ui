@@ -23,12 +23,12 @@ import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite.ImportRewriteContext;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -79,8 +79,8 @@ public class UnimplementedMethodsCompletionProposal extends ASTRewriteCorrection
 		if (binding.isAnonymous()) {
 			settings.createComments= false;
 		}
-		ImportRewrite imports= new ImportRewrite(createImportRewrite((CompilationUnit) fTypeNode.getRoot()));
-		ImportRewriteContext context= new ContextSensitiveImportRewriteContext((CompilationUnit) fTypeNode.getRoot(), fTypeNode.getStartPosition(), imports.getNewImportRewrite());
+		ImportRewrite imports= createImportRewrite((CompilationUnit) fTypeNode.getRoot());
+		ImportRewriteContext context= new ContextSensitiveImportRewriteContext((CompilationUnit) fTypeNode.getRoot(), fTypeNode.getStartPosition(), imports);
 		for (int i= 0; i < methods.length; i++) {
 			MethodDeclaration newMethodDecl= StubUtility2.createImplementationStub(getCompilationUnit(), rewrite, imports, ast, methods[i], binding.getName(), settings, binding.isInterface(), context);
 			listRewrite.insertLast(newMethodDecl, null);

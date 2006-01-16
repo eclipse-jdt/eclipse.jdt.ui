@@ -215,6 +215,9 @@ public class ImportRemover {
 		fRemovedNodes.add(removed);
 	}
 
+	/**
+	 * @deprecated Use {@link #applyRemoves(ImportRewrite)} instead.
+	 */
 	public void applyRemoves(org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite importRewrite) {
 		applyRemoves(importRewrite.getNewImportRewrite());
 	}

@@ -19,11 +19,7 @@ import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
-
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
@@ -33,13 +29,12 @@ import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -129,12 +124,17 @@ public class CompilationUnitRewrite {
 		return result;
 	}
 	
+
+	public CompilationUnitChange createChange() throws CoreException {
+		return createChange(null);
+	}
+	
 	/**
 	 * @return a {@link CompilationUnitChange}, or <code>null</code> for an empty change
 	 * @throws CoreException when text buffer acquisition or import rewrite text edit creation fails
-	 * @throws IllegalArgumentException when the ast rewrite encounters problems
+	 * @throws IllegalArgumentException when the AST rewrite encounters problems
 	 */
-	public CompilationUnitChange createChange() throws CoreException {
+	public CompilationUnitChange createChange(IProgressMonitor monitor) throws CoreException {
 		CompilationUnitChange cuChange= new CompilationUnitChange(fCu.getElementName(), fCu);
 		MultiTextEdit multiEdit= new MultiTextEdit();
 		cuChange.setEdit(multiEdit);
@@ -142,65 +142,58 @@ public class CompilationUnitRewrite {
 	}
 	
 	/**
+	 * @deprecated Use {@link #attachChange(CompilationUnitChange, IProgressMonitor)} instead
+	 */
+	public CompilationUnitChange attachChange(CompilationUnitChange cuChange) throws CoreException {
+		return attachChange(cuChange, null);
+	}
+	
+	/**
 	 * Attaches the changes of this compilation unit rewrite to the given CU Change. The given
-	 * change <strong>must</strong> either have no root edit, or a MultiTextEdit as a root edit.
-	 * The edits in the given change <strong>must not</strong> overlap with the changes of
-	 * this cu.
+	 * change <b>must</b> either have no root edit, or a MultiTextEdit as a root edit.
+	 * The edits in the given change <b>must not</b> overlap with the changes of
+	 * this compilation unit.
 	 *  
 	 * @param cuChange existing CompilationUnitChange with a MultiTextEdit root or no root at all.
 	 * @return a change combining the changes of this rewrite and the given rewrite.
 	 * @throws CoreException
 	 */
-	public CompilationUnitChange attachChange(CompilationUnitChange cuChange) throws CoreException {
+	public CompilationUnitChange attachChange(CompilationUnitChange cuChange, IProgressMonitor monitor) throws CoreException {
 		boolean needsAstRewrite= fRewrite != null; // TODO: do we need something like ASTRewrite#hasChanges() here?
 		boolean needsImportRemoval= fImportRemover != null && fImportRemover.hasRemovedNodes();
-		boolean needsImportRewrite= fImportRewrite != null && !fImportRewrite.isEmpty();
+		boolean needsImportRewrite= fImportRewrite != null && fImportRewrite.hasRecordedChanges() || needsImportRemoval;
 		if (!needsAstRewrite && !needsImportRemoval && !needsImportRewrite)
 			return null;
-		
-		ITextFileBuffer buffer= null;
-		IDocument document= null;
-		try {
-			if (!JavaModelUtil.isPrimary(fCu))
-				document= new Document(fCu.getBuffer().getContents());
-			else {
-				buffer= RefactoringFileBuffers.acquire(fCu);
-				document= buffer.getDocument();
-			}
-			
-			MultiTextEdit multiEdit= (MultiTextEdit) cuChange.getEdit();
-			if (multiEdit == null) {
-				multiEdit= new MultiTextEdit();
-				cuChange.setEdit(multiEdit);
-			}
-				
-			if (needsAstRewrite) {
-				TextEdit rewriteEdit= fRewrite.rewriteAST(document, fCu.getJavaProject().getOptions(true));
-				if (!isEmptyEdit(rewriteEdit)) {
-					multiEdit.addChild(rewriteEdit);
-					for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
-						cuChange.addTextEditGroup((TextEditGroup) iter.next());
-					}
-				}
-			}
-			if (needsImportRemoval) {
-				fImportRemover.applyRemoves(getImportRewrite());
-			}
-			if (fImportRewrite != null && !fImportRewrite.isEmpty()) {
-				TextEdit importsEdit= fImportRewrite.createEdit(document, null);
-				if (!isEmptyEdit(importsEdit)) {
-					multiEdit.addChild(importsEdit);
-					String importUpdateName= RefactoringCoreMessages.ASTData_update_imports; 
-					cuChange.addTextEditGroup(new TextEditGroup(importUpdateName, importsEdit));
-				}
-			}
-			if (isEmptyEdit(multiEdit))
-				return null;
-			return cuChange;
-		} finally {
-			if (buffer != null)
-				RefactoringFileBuffers.release(fCu);
+					
+		MultiTextEdit multiEdit= (MultiTextEdit) cuChange.getEdit();
+		if (multiEdit == null) {
+			multiEdit= new MultiTextEdit();
+			cuChange.setEdit(multiEdit);
 		}
+			
+		if (needsAstRewrite) {
+			TextEdit rewriteEdit= fRewrite.rewriteAST();
+			if (!isEmptyEdit(rewriteEdit)) {
+				multiEdit.addChild(rewriteEdit);
+				for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
+					cuChange.addTextEditGroup((TextEditGroup) iter.next());
+				}
+			}
+		}
+		if (needsImportRemoval) {
+			fImportRemover.applyRemoves(getNewImportRewrite());
+		}
+		if (needsImportRewrite) {
+			TextEdit importsEdit= fImportRewrite.rewriteImports(null);
+			if (!isEmptyEdit(importsEdit)) {
+				multiEdit.addChild(importsEdit);
+				String importUpdateName= RefactoringCoreMessages.ASTData_update_imports; 
+				cuChange.addTextEditGroup(new TextEditGroup(importUpdateName, importsEdit));
+			}
+		}
+		if (isEmptyEdit(multiEdit))
+			return null;
+		return cuChange;
 	}
 
 	private static boolean isEmptyEdit(TextEdit edit) {
@@ -227,17 +220,29 @@ public class CompilationUnitRewrite {
 		return fRewrite;
 	}
 
-	public ImportRewrite getImportRewrite() {
+	public ImportRewrite getNewImportRewrite() {
 		if (fImportRewrite == null) {
 			// lazily initialized to avoid lengthy processing in checkInitialConditions(..)
 			try {
-				fImportRewrite= new ImportRewrite(fCu, getRoot());
+				if (fRoot == null) {
+					fImportRewrite= StubUtility.createImportRewrite(fCu, true);
+				} else {
+					fImportRewrite= StubUtility.createImportRewrite(getRoot(), true);
+				}
 			} catch (CoreException e) {
 				JavaPlugin.log(e);
 				throw new IllegalStateException(e.getMessage()); // like ASTParser#createAST(..) does
 			}
 		}
 		return fImportRewrite;
+		
+	}
+	
+	/**
+	 * @deprecated use {@link #getNewImportRewrite()} instead.
+	 */
+	public org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite getImportRewrite() {
+		return new org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite(getNewImportRewrite());
 	}
 	
 	public ImportRemover getImportRemover() {

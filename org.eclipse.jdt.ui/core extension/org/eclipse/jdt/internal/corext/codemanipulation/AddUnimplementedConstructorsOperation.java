@@ -37,8 +37,8 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -218,7 +218,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 			
 			for (int i= 0; i < toImplement.length; i++) {
 				IMethodBinding curr= toImplement[i];
-				MethodDeclaration stub= StubUtility2.createConstructorStub(cu, astRewrite, new org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite(importRewrite), curr, currTypeBinding.getName(), fVisibility, fOmitSuper, settings);
+				MethodDeclaration stub= StubUtility2.createConstructorStub(cu, astRewrite, importRewrite, curr, currTypeBinding.getName(), fVisibility, fOmitSuper, settings);
 				if (stub != null) {
 					fCreatedMethods.add(curr.getKey());
 					if (insertion != null)
