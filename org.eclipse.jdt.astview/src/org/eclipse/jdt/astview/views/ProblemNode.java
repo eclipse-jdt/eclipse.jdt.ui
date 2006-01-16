@@ -59,9 +59,9 @@ public class ProblemNode extends ASTAttribute {
 			buf.append("E");
 		if (fProblem.isWarning())
 			buf.append("W");
-		buf.append('[').append(offset).append(", ").append(length).append(']').append(' '); //$NON-NLS-1$
-		buf.append(fProblem.getMessage()).append(' '); //$NON-NLS-1$
-		buf.append("(").append(getErrorCode(id)).append(") ");  //$NON-NLS-1$//$NON-NLS-2$
+		buf.append('[').append(offset).append(", ").append(length).append(']').append(' ');
+		buf.append(fProblem.getMessage()).append(' ');
+		buf.append("(").append(getErrorCode(id)).append(" = 0x").append(Integer.toHexString(id)).append(" = ").append(id).append(") ");
 		return buf.toString();
 	}
 	
