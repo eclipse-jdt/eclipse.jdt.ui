@@ -24,6 +24,8 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.operation.IRunnableContext;
 
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
+
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 
@@ -138,6 +140,9 @@ public class JarPackageData {
 
 	// Should the exporter only export refactorings causing structural changes?
 	private boolean fRefactoringStructural= true;
+
+	// The refactoring descriptors to export
+	private RefactoringDescriptorProxy[] fRefactoringDescriptors= {};
 
 	/**
 	 * Creates a new Jar Package Data structure
@@ -1060,6 +1065,36 @@ public class JarPackageData {
 	 */
 	public void setRefactoringAware(boolean aware) {
 		fRefactoringAware= aware;
+	}
+
+	/**
+	 * Sets the refactoring descriptors to export.
+	 * <p>
+	 * This information is used in JAR export.
+	 * </p>
+	 * 
+	 * @param descriptors
+	 *            the refactoring descriptors
+	 * 
+	 * @since 3.2
+	 */
+	public void setRefactoringDescriptors(RefactoringDescriptorProxy[] descriptors) {
+		Assert.isNotNull(descriptors);
+		fRefactoringDescriptors= descriptors;
+	}
+
+	/**
+	 * Returns the refactoring descriptors to export.
+	 * <p>
+	 * This information is used in JAR export.
+	 * </p>
+	 * 
+	 * @return the refactoring descriptors to export
+	 * 
+	 * @since 3.2
+	 */
+	public RefactoringDescriptorProxy[] getRefactoringDescriptors() {
+		return fRefactoringDescriptors;
 	}
 
 	/**

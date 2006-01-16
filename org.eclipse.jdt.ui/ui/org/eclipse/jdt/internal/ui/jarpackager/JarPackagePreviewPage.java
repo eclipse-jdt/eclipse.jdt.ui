@@ -129,9 +129,13 @@ public class JarPackagePreviewPage extends WizardPage implements IJarPackageWiza
 		super.setVisible(visible);
 		if (visible && fJarPackageData.isRefactoringAware()) {
 			final RefactoringHistory history= retrieveRefactoringHistory();
-			if (history != null)
+			if (history != null) {
 				fHistoryControl.setInput(history);
-		} else
+				fHistoryControl.setCheckedDescriptors(fJarPackageData.getRefactoringDescriptors());
+			}
+		} else {
+			fJarPackageData.setRefactoringDescriptors(fHistoryControl.getCheckedDescriptors());
 			fHistoryControl.setInput(null);
+		}
 	}
 }
