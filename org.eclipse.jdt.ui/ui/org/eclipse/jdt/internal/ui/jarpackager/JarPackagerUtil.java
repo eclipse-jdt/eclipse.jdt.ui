@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -259,17 +260,21 @@ public class JarPackagerUtil {
 	 *            the start time stamp, inclusive
 	 * @param end
 	 *            the end time stamp, inclusive
+	 * @param filter
+	 *            the refactoring descriptor flags which must be present in
+	 *            order to be returned in the refactoring history object, or
+	 *            <code>RefactoringDescriptor#NONE</code>
 	 * @param monitor
 	 *            the progress monitor to use, or <code>null</code>
 	 * @return the refactoring history, or <code>null</code>
 	 */
-	public static RefactoringHistory retrieveHistory(final IProject[] projects, final long start, final long end, final IProgressMonitor monitor) {
+	public static RefactoringHistory retrieveHistory(final IProject[] projects, final long start, final long end, final int filter, final IProgressMonitor monitor) {
 		Assert.isNotNull(projects);
 		if (start >= 0 && end >= start) {
 			final IRefactoringHistoryService service= RefactoringCore.getRefactoringHistoryService();
 			try {
 				service.connect();
-				return service.getRefactoringHistory(projects, start, end, monitor);
+				return service.getRefactoringHistory(projects, start, end, JavaRefactorings.JAR_IMPORTABLE | filter, monitor);
 			} finally {
 				service.disconnect();
 			}

@@ -27,6 +27,7 @@ import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 import org.eclipse.ltk.ui.refactoring.history.IRefactoringHistoryControl;
@@ -76,8 +77,8 @@ public class JarPackagePreviewPage extends WizardPage implements IJarPackageWiza
 		setDescription(JarPackagerMessages.RefactoringPreviewPage_description);
 	}
 
-	/*
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void createControl(final Composite parent) {
 		initializeDialogUnits(parent);
@@ -91,8 +92,8 @@ public class JarPackagePreviewPage extends WizardPage implements IJarPackageWiza
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.JARPREVIEW_WIZARD_PAGE);
 	}
 
-	/*
-	 * @see org.eclipse.jdt.internal.ui.jarpackager.IJarPackageWizardPage#finish()
+	/**
+	 * {@inheritDoc}
 	 */
 	public void finish() {
 		// Do nothing
@@ -106,13 +107,11 @@ public class JarPackagePreviewPage extends WizardPage implements IJarPackageWiza
 	protected RefactoringHistory retrieveRefactoringHistory() {
 		final RefactoringHistory[] history= { null};
 		final IProject[] projects= fJarPackageData.getRefactoringProjects();
-		final long start= fJarPackageData.getHistoryStart();
-		final long end= fJarPackageData.getHistoryEnd();
 		try {
 			getContainer().run(false, true, new IRunnableWithProgress() {
 
 				public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					history[0]= JarPackagerUtil.retrieveHistory(projects, start, end, monitor);
+					history[0]= JarPackagerUtil.retrieveHistory(projects, 0, Long.MAX_VALUE, fJarPackageData.isExportStructuralOnly() ? RefactoringDescriptor.STRUCTURAL_CHANGE : RefactoringDescriptor.NONE, monitor);
 				}
 			});
 		} catch (InvocationTargetException exception) {
@@ -123,8 +122,8 @@ public class JarPackagePreviewPage extends WizardPage implements IJarPackageWiza
 		return history[0];
 	}
 
-	/*
-	 * @see org.eclipse.jface.dialogs.DialogPage#setVisible(boolean)
+	/**
+	 * {@inheritDoc}
 	 */
 	public final void setVisible(boolean visible) {
 		super.setVisible(visible);

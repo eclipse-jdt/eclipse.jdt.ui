@@ -277,7 +277,7 @@ public class JarWriter3 {
 		try {
 			monitor.beginTask("", 200); //$NON-NLS-1$
 			final IProject[] projects= data.getRefactoringProjects();
-			final RefactoringHistory history= JarPackagerUtil.retrieveHistory(projects, data.getHistoryStart(), data.getHistoryEnd(), new SubProgressMonitor(monitor, 150));
+			final RefactoringHistory history= JarPackagerUtil.retrieveHistory(projects, 0, Long.MAX_VALUE, data.isExportStructuralOnly() ? RefactoringDescriptor.STRUCTURAL_CHANGE : RefactoringDescriptor.NONE, new SubProgressMonitor(monitor, 150));
 			if (history != null && !history.isEmpty()) {
 				final RefactoringDescriptorProxy[] proxies= history.getDescriptors();
 				Arrays.sort(proxies, new Comparator() {

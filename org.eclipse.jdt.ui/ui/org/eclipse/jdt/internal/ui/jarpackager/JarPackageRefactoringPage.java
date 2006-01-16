@@ -10,9 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.jarpackager;
 
-import java.text.SimpleDateFormat;
 import java.util.Arrays;
-import java.util.Calendar;
 import java.util.Collection;
 import java.util.HashSet;
 
@@ -22,14 +20,11 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Combo;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
 
@@ -67,8 +62,8 @@ public final class JarPackageRefactoringPage extends WizardPage implements IJarP
 		/** The no children constant */
 		private static final Object[] NO_CHILDREN= {};
 
-		/*
-		 * @see org.eclipse.jface.viewers.IStructuredContentProvider#getElements(java.lang.Object)
+		/**
+		 * {@inheritDoc}
 		 */
 		public Object[] getElements(Object element) {
 			if (element instanceof IProject[])
@@ -77,67 +72,17 @@ public final class JarPackageRefactoringPage extends WizardPage implements IJarP
 		}
 	}
 
-	/** Listener for the time combo boxes */
-	private class TimeComboBoxListener extends SelectionAdapter implements ModifyListener {
-
-		/*
-		 * @see org.eclipse.swt.events.ModifyListener#modifyText(org.eclipse.swt.events.ModifyEvent)
-		 */
-		public void modifyText(final ModifyEvent event) {
-			try {
-				handleTimeChanged();
-			} catch (NumberFormatException exception) {
-				fJarPackageData.setHistoryStart(0);
-			}
-		}
-
-		/*
-		 * @see org.eclipse.swt.events.SelectionListener#widgetSelected(org.eclipse.swt.events.SelectionEvent)
-		 */
-		public void widgetSelected(final SelectionEvent event) {
-			try {
-				handleTimeChanged();
-			} catch (NumberFormatException exception) {
-				fJarPackageData.setHistoryStart(0);
-			}
-		}
-	}
-
-	/** Description */
-	private static final int MONTH_OFFSET= -1;
-
 	/** The page name */
 	private final static String PAGE_NAME= "jarRefactoringsWizardPage"; //$NON-NLS-1$
 
 	/** The export structual only dialog settings store */
 	private static final String STORE_EXPORT_STRUCTURAL_ONLY= PAGE_NAME + ".EXPORT_STRUCTURAL_ONLY"; //$NON-NLS-1$
 
-	/** The date label */
-	private Label fDateLabel;
-
-	/** The day combo */
-	private Combo fDayCombo;
-
-	/** The hour combo */
-	private Combo fHourCombo;
-
 	/** The jar package data */
 	private final JarPackageData fJarPackageData;
 
-	/** The minute combo */
-	private Combo fMinuteCombo;
-
-	/** The month combo */
-	private Combo fMonthCombo;
-
 	/** The projects table viewer */
 	private CheckboxTableViewer fTableViewer;
-
-	/** The time label */
-	private Label fTimeLabel;
-
-	/** The year combo */
-	private Combo fYearCombo;
 
 	/**
 	 * Creates a new jar package refactoring page.
@@ -149,12 +94,12 @@ public final class JarPackageRefactoringPage extends WizardPage implements IJarP
 		super(PAGE_NAME);
 		Assert.isNotNull(data);
 		fJarPackageData= data;
-		setTitle(JarPackagerMessages.RefactoringSelectionPage_title);
-		setDescription(JarPackagerMessages.RefactoringSelectionPage_description);
+		setTitle(JarPackagerMessages.JarPackageRefactoringPage_title);
+		setDescription(JarPackagerMessages.JarPackageRefactoringPage_description);
 	}
 
-	/*
-	 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void createControl(final Composite parent) {
 		initializeDialogUnits(parent);
@@ -165,131 +110,29 @@ public final class JarPackageRefactoringPage extends WizardPage implements IJarP
 		composite.setLayout(new GridLayout());
 		composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 		Label label= new Label(composite, SWT.NONE);
-		label.setText(JarPackagerMessages.RefactoringSelectionPage_viewer_caption);
+		label.setText(JarPackagerMessages.JarPackageRefactoringPage_viewer_caption);
 		createProjectTable(composite);
-		createExportStructuralButton(composite);
-		createExportSinceButton(composite);
-		createDateArea(composite);
-		createTimeArea(composite);
-		handleTimeChanged();
-		final TimeComboBoxListener listener= new TimeComboBoxListener();
-		fMonthCombo.addSelectionListener(listener);
-		fDayCombo.addSelectionListener(listener);
-		fYearCombo.addModifyListener(listener);
-		fHourCombo.addSelectionListener(listener);
-		fMinuteCombo.addSelectionListener(listener);
+		createPlainLabel(composite, JarPackagerMessages.JarPackageWizardPage_options_label);
+		createOptionsGroup(composite);
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.JARREFACTORING_WIZARD_PAGE);
 	}
 
 	/**
-	 * Creates the date area of this page.
+	 * Creates the options group of this page.
 	 * 
 	 * @param parent
 	 *            the parent control
 	 */
-	protected void createDateArea(final Composite parent) {
+	protected void createOptionsGroup(final Composite parent) {
 		Assert.isNotNull(parent);
-
-		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(new GridLayout(4, false));
-		final GridData data= new GridData(SWT.FILL, SWT.FILL, false, false);
-		data.horizontalIndent= IDialogConstants.HORIZONTAL_MARGIN;
-		composite.setLayoutData(data);
-
-		fDateLabel= new Label(composite, SWT.NONE);
-		fDateLabel.setText(JarPackagerMessages.RefactoringSelectionPage_date_label);
-
-		fMonthCombo= new Combo(composite, SWT.READ_ONLY);
-		fDayCombo= new Combo(composite, SWT.READ_ONLY);
-		fDayCombo.setTextLimit(2);
-		fYearCombo= new Combo(composite, SWT.READ_ONLY);
-		fYearCombo.setTextLimit(4);
-
-		final String days[]= new String[31];
-		for (int index= 0; index < 31; index++)
-			days[index]= String.valueOf(index + 1);
-
-		final String months[]= new String[12];
-		final SimpleDateFormat format= new SimpleDateFormat("MMMM"); //$NON-NLS-1$
-		Calendar calendar= Calendar.getInstance();
-		for (int index= 0; index < 12; index++) {
-			calendar.set(Calendar.MONTH, index);
-			months[index]= format.format(calendar.getTime());
-		}
-
-		final String years[]= new String[10];
-		calendar= Calendar.getInstance();
-		for (int index= 0; index < 10; index++)
-			years[index]= String.valueOf(calendar.get(Calendar.YEAR) - index);
-
-		fDayCombo.setItems(days);
-		fMonthCombo.setItems(months);
-		fYearCombo.setItems(years);
-
-		final long stamp= fJarPackageData.getHistoryStart();
-		if (stamp > 0)
-			calendar.setTimeInMillis(stamp);
-		else {
-			calendar.add(Calendar.MONTH, MONTH_OFFSET);
-			fYearCombo.setEnabled(false);
-			fMonthCombo.setEnabled(false);
-			fDayCombo.setEnabled(false);
-			fDateLabel.setEnabled(false);
-		}
-		updateDate(calendar);
-	}
-
-	/**
-	 * Creates the export since button of this page.
-	 * 
-	 * @param parent
-	 *            the parent control
-	 */
-	protected void createExportSinceButton(final Composite parent) {
-		Assert.isNotNull(parent);
-		final Button button= new Button(parent, SWT.CHECK);
-		final GridData data= new GridData(GridData.HORIZONTAL_ALIGN_FILL);
-		data.verticalIndent= IDialogConstants.VERTICAL_SPACING;
-		button.setText(JarPackagerMessages.JarPackageRefactoringPage_export_caption);
-		button.setLayoutData(data);
-		button.setSelection(fJarPackageData.getHistoryStart() > 0);
-		button.addSelectionListener(new SelectionAdapter() {
-
-			public void widgetSelected(final SelectionEvent event) {
-				final boolean selected= button.getSelection();
-				fYearCombo.setEnabled(selected);
-				fMonthCombo.setEnabled(selected);
-				fDayCombo.setEnabled(selected);
-				fDateLabel.setEnabled(selected);
-				fHourCombo.setEnabled(selected);
-				fMinuteCombo.setEnabled(selected);
-				fTimeLabel.setEnabled(selected);
-				if (!selected) {
-					fJarPackageData.setHistoryStart(0);
-					fJarPackageData.setHistoryEnd(Long.MAX_VALUE - 1);
-				} else {
-					final Calendar calendar= Calendar.getInstance();
-					calendar.add(Calendar.MONTH, MONTH_OFFSET);
-					updateDate(calendar);
-					updateTime(calendar);
-				}
-			}
-		});
-	}
-
-	/**
-	 * Creates the export structural refactorings button of this page.
-	 * 
-	 * @param parent
-	 *            the parent control
-	 */
-	protected void createExportStructuralButton(final Composite parent) {
-		Assert.isNotNull(parent);
-		final Button button= new Button(parent, SWT.CHECK);
-		button.setText(JarPackagerMessages.JarPackageRefactoringPage_export_label);
-		button.setLayoutData(new GridData(GridData.HORIZONTAL_ALIGN_FILL));
+		final Composite group= new Composite(parent, SWT.NONE);
+		final GridLayout layout= new GridLayout();
+		layout.marginHeight= 0;
+		group.setLayout(layout);
+		final Button button= new Button(group, SWT.CHECK | SWT.LEFT);
+		button.setText(JarPackagerMessages.JarPackageRefactoringPage_export_structural_only);
 		button.setSelection(fJarPackageData.isExportStructuralOnly());
 		button.addSelectionListener(new SelectionAdapter() {
 
@@ -297,6 +140,27 @@ public final class JarPackageRefactoringPage extends WizardPage implements IJarP
 				fJarPackageData.setExportStructuralOnly(button.getSelection());
 			}
 		});
+	}
+
+	/**
+	 * Creates a new label with a bold font.
+	 * 
+	 * @param parent
+	 *            the parent control
+	 * @param text
+	 *            the label text
+	 * @return the new label control
+	 */
+	protected Label createPlainLabel(Composite parent, String text) {
+		Label label= new Label(parent, SWT.NONE);
+		label.setText(text);
+		label.setFont(parent.getFont());
+		GridData data= new GridData();
+		data.verticalIndent= IDialogConstants.VERTICAL_SPACING;
+		data.verticalAlignment= GridData.FILL;
+		data.horizontalAlignment= GridData.FILL;
+		label.setLayoutData(data);
+		return label;
 	}
 
 	/**
@@ -325,57 +189,7 @@ public final class JarPackageRefactoringPage extends WizardPage implements IJarP
 	}
 
 	/**
-	 * Creates the time area of this page.
-	 * 
-	 * @param parent
-	 *            the parent control
-	 */
-	protected void createTimeArea(final Composite parent) {
-		Assert.isNotNull(parent);
-		final Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayout(new GridLayout(4, false));
-		final GridData data= new GridData(SWT.FILL, SWT.FILL, false, false);
-		data.horizontalIndent= IDialogConstants.HORIZONTAL_MARGIN;
-		composite.setLayoutData(data);
-
-		fTimeLabel= new Label(composite, SWT.NONE);
-		fTimeLabel.setText(JarPackagerMessages.RefactoringSelectionPage_time_label);
-
-		fHourCombo= new Combo(composite, SWT.READ_ONLY);
-		fHourCombo.setTextLimit(2);
-		fMinuteCombo= new Combo(composite, SWT.READ_ONLY);
-		fMinuteCombo.setTextLimit(2);
-
-		final String hours[]= new String[24];
-		for (int index= 0; index < 24; index++)
-			hours[index]= String.valueOf(index);
-
-		final String minutes[]= new String[60];
-		for (int index= 0; index < 60; index++) {
-			final String string= String.valueOf(index);
-			if (index < 10)
-				minutes[index]= "0" + string; //$NON-NLS-1$
-			else
-				minutes[index]= String.valueOf(index);
-		}
-
-		fHourCombo.setItems(hours);
-		fMinuteCombo.setItems(minutes);
-
-		final Calendar calendar= Calendar.getInstance();
-		final long stamp= fJarPackageData.getHistoryStart();
-		if (stamp > 0)
-			calendar.setTimeInMillis(stamp);
-		else {
-			fHourCombo.setEnabled(false);
-			fMinuteCombo.setEnabled(false);
-			fTimeLabel.setEnabled(false);
-		}
-		updateTime(calendar);
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.ui.jarpackager.IJarPackageWizardPage#finish()
+	 * {@inheritDoc}
 	 */
 	public void finish() {
 		final IDialogSettings settings= getDialogSettings();
@@ -424,51 +238,10 @@ public final class JarPackageRefactoringPage extends WizardPage implements IJarP
 	}
 
 	/**
-	 * Handles the time changed event.
-	 * 
-	 * @throws NumberFormatException
-	 *             if the selected time cannot be determined
-	 */
-	protected void handleTimeChanged() throws NumberFormatException {
-		final Calendar calendar= Calendar.getInstance();
-		calendar.set(Integer.parseInt(String.valueOf(fYearCombo.getText())), fMonthCombo.getSelectionIndex(), Integer.parseInt(String.valueOf(fDayCombo.getText())), fHourCombo.getSelectionIndex(), fMinuteCombo.getSelectionIndex(), 0);
-		fJarPackageData.setHistoryStart(calendar.getTimeInMillis());
-	}
-
-	/*
-	 * @see org.eclipse.jface.dialogs.DialogPage#setVisible(boolean)
+	 * {@inheritDoc}
 	 */
 	public void setVisible(final boolean visible) {
 		handleProjectsChanged();
 		super.setVisible(visible);
-	}
-
-	/**
-	 * Updates the date from the specified calendar.
-	 * 
-	 * @param calendar
-	 *            the calendar
-	 */
-	private void updateDate(final Calendar calendar) {
-		fDayCombo.select(calendar.get(Calendar.DATE) - 1);
-		fMonthCombo.select(calendar.get(Calendar.MONTH));
-		final String value= String.valueOf(calendar.get(Calendar.YEAR));
-		int index= fYearCombo.indexOf(value);
-		if (index == -1) {
-			fYearCombo.add(value);
-			index= fYearCombo.indexOf(value);
-		}
-		fYearCombo.select(index);
-	}
-
-	/**
-	 * Updates the time from the specified calendar.
-	 * 
-	 * @param calendar
-	 *            the calendar
-	 */
-	private void updateTime(final Calendar calendar) {
-		fHourCombo.select(calendar.get(Calendar.HOUR_OF_DAY));
-		fMinuteCombo.select(calendar.get(Calendar.MINUTE));
 	}
 }

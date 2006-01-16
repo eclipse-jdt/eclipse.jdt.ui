@@ -130,14 +130,8 @@ public class JarPackageData {
 	// Add directory entries to the jar
 	private boolean fIncludeDirectoryEntries;
 
-	// The end time stamp of the refactoring history
-	private long fRefactoringEnd= Long.MAX_VALUE - 1;
-
 	// Projects for which to store refactoring information
 	private IProject[] fRefactoringProjects= {};
-
-	// The start time stamp of the refactoring history
-	private long fRefactoringStart= 0;
 
 	// Should the package be refactoring aware?
 	private boolean fRefactoringAware= false;
@@ -991,20 +985,6 @@ public class JarPackageData {
 	}
 
 	/**
-	 * Returns the time stamp where to stop considering refactorings.
-	 * <p>
-	 * This information is used for JAR export.
-	 * </p>
-	 * 
-	 * @return the time stamp where to stop considering refactorings.
-	 * 
-	 * @since 3.2
-	 */
-	public long getHistoryEnd() {
-		return fRefactoringEnd;
-	}
-
-	/**
 	 * Returns the projects for which refactoring information should be stored.
 	 * <p>
 	 * This information is used for JAR export.
@@ -1017,20 +997,6 @@ public class JarPackageData {
 	 */
 	public IProject[] getRefactoringProjects() {
 		return fRefactoringProjects;
-	}
-
-	/**
-	 * Returns the time stamp where to start considering refactorings.
-	 * <p>
-	 * This information is used for JAR export.
-	 * </p>
-	 * 
-	 * @return the time stamp where to start considering refactorings.
-	 * 
-	 * @since 3.2
-	 */
-	public long getHistoryStart() {
-		return fRefactoringStart;
 	}
 
 	/**
@@ -1064,22 +1030,6 @@ public class JarPackageData {
 	}
 
 	/**
-	 * Sets the time stamp where to stop considering refactorings.
-	 * <p>
-	 * This information is used for JAR export.
-	 * </p>
-	 * 
-	 * @param stamp
-	 *            the time stamp to set
-	 * 
-	 * @since 3.2
-	 */
-	public void setHistoryEnd(long stamp) {
-		Assert.isTrue(stamp >= 0);
-		fRefactoringEnd= stamp;
-	}
-
-	/**
 	 * Sets the projects for which refactoring information should be stored.
 	 * <p>
 	 * This information is used for JAR export.
@@ -1094,22 +1044,6 @@ public class JarPackageData {
 	public void setRefactoringProjects(IProject[] projects) {
 		Assert.isNotNull(projects);
 		fRefactoringProjects= projects;
-	}
-
-	/**
-	 * Sets the time stamp where to start considering refactorings.
-	 * <p>
-	 * This information is used for JAR export.
-	 * </p>
-	 * 
-	 * @param stamp
-	 *            the time stamp to set
-	 * 
-	 * @since 3.2
-	 */
-	public void setHistoryStart(long stamp) {
-		Assert.isTrue(stamp >= 0);
-		fRefactoringStart= stamp;
 	}
 
 	/**
