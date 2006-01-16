@@ -49,15 +49,13 @@ import org.eclipse.ui.part.Page;
 import org.eclipse.jdt.core.IJavaElement;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.JavaUI;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.JDTQuickMenuAction;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaTextSelection;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 
@@ -115,7 +113,7 @@ public class RefactorActionGroup extends ActionGroup {
 	public static final String GROUP_CODING2= "codingGroup2"; //$NON-NLS-1$
 
 	private IWorkbenchSite fSite;
-	private JavaEditor fEditor;
+	private CompilationUnitEditor fEditor;
 	private String fGroupName= IContextMenuConstants.GROUP_REORGANIZE;
 
  	private SelectionDispatchAction fMoveAction;
@@ -148,7 +146,7 @@ public class RefactorActionGroup extends ActionGroup {
 	private static final String QUICK_MENU_ID= "org.eclipse.jdt.ui.edit.text.java.refactor.quickMenu"; //$NON-NLS-1$
 	
 	private class RefactorQuickAccessAction extends JDTQuickMenuAction {
-		public RefactorQuickAccessAction(JavaEditor editor) {
+		public RefactorQuickAccessAction(CompilationUnitEditor editor) {
 			super(editor, QUICK_MENU_ID); 
 		}
 		protected void fillMenu(IMenuManager menu) {
@@ -334,32 +332,6 @@ public class RefactorActionGroup extends ActionGroup {
 		fKeyBindingService.registerAction(fQuickAccessAction);
 		
 		stats.endRun();
-	}
-	
-	
-	/**
-	 * Note: This constructor is for internal use only. Clients should not call this constructor.
-	 * @param editor the compilation unit editor
-	 * @param groupName the group name to add the actions to
-	 */
-	public RefactorActionGroup(ClassFileEditor editor, String groupName) {
-		
-		fSite= editor.getEditorSite();
-		fEditor= editor;
-		fGroupName= groupName;
-		ISelectionProvider provider= editor.getSelectionProvider();
-		ISelection selection= provider.getSelection();
-		fEditorActions= new ArrayList();
-		
-		fIntroduceIndirectionAction= new IntroduceIndirectionAction(editor);
-		fIntroduceIndirectionAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.INTRODUCE_INDIRECTION);
-		initAction(fIntroduceIndirectionAction, provider, selection);
-		editor.setAction("IntroduceIndirection", fIntroduceIndirectionAction); //$NON-NLS-1$
-		fEditorActions.add(fIntroduceIndirectionAction);
-		
-		fQuickAccessAction= new RefactorQuickAccessAction(editor);
-		fKeyBindingService= editor.getEditorSite().getKeyBindingService();
-		fKeyBindingService.registerAction(fQuickAccessAction);
 	}
 
 	private RefactorActionGroup(IWorkbenchSite site, IKeyBindingService keyBindingService) {
@@ -623,11 +595,13 @@ public class RefactorActionGroup extends ActionGroup {
 	}
 	
 	private IJavaElement getEditorInput() {
-		return JavaUI.getEditorInputJavaElement(fEditor.getEditorInput());
+		return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(
+			fEditor.getEditorInput());		
 	}
 	
 	private IDocument getDocument() {
-		return fEditor.getDocumentProvider().getDocument(fEditor.getEditorInput());
+		return JavaPlugin.getDefault().getCompilationUnitDocumentProvider().
+			getDocument(fEditor.getEditorInput());
 	}
 	
 	private void fillQuickMenu(IMenuManager menu) {
