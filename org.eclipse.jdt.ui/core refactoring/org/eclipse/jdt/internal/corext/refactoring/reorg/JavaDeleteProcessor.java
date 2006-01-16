@@ -34,16 +34,15 @@ import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceVisitor;
+import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.DeleteArguments;
 import org.eclipse.ltk.core.refactoring.participants.DeleteProcessor;
-import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
+import org.eclipse.ltk.core.refactoring.participants.ResourceOperationChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -61,7 +60,6 @@ import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -78,7 +76,8 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private Object[] fElements;
 	private IResource[] fResources;
 	private IJavaElement[] fJavaElements;
-	private IReorgQueries fDeleteQueries;	
+	private IReorgQueries fDeleteQueries;
+	private DeleteModifications fDeleteModifications;
 
 	private Change fDeleteChange;
 	private boolean fDeleteSubPackages;
@@ -139,155 +138,9 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	}
 	
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
-		String[] natures= getAffectedProjectNatures();
-		ResourceModifications mod= new ResourceModifications();
-		List collected= new ArrayList();
-		for (int i= 0; i < fJavaElements.length; i++) {
-			handleJavaElementDelete(collected, fJavaElements[i], natures, mod, shared);
-		}
-		for (int i= 0; i < fResources.length; i++) {
-			handleResourceDelete(collected, fResources[i], natures, shared);
-		}
-		List result= new ArrayList();
-		for (Iterator iter= collected.iterator(); iter.hasNext();) {
-			result.addAll(Arrays.asList(ParticipantManager.loadDeleteParticipants(status, 
-				this, iter.next(), 
-				new DeleteArguments(), natures, shared)));
-		}
-		result.addAll(Arrays.asList(mod.getParticipants(status, this, natures, shared)));
-		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
+		return fDeleteModifications.loadParticipants(status, this, getAffectedProjectNatures(), shared);
 	}
 	
-	private void handleJavaElementDelete(List collected, IJavaElement element, String[] natures, ResourceModifications mod, SharableParticipants shared) throws CoreException {
-		switch(element.getElementType()) {
-			case IJavaElement.JAVA_MODEL:
-				return;
-			case IJavaElement.JAVA_PROJECT:
-				collected.add(element);
-				if (element.getResource() != null)
-					mod.addDelete(element.getResource());
-				return;
-			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-				collected.add(element);
-				IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-				if (!root.isArchive() && element.getResource() != null)
-					mod.addDelete(element.getResource());
-				return;
-			case IJavaElement.PACKAGE_FRAGMENT:
-				handlePackageFragmentDelete(collected, (IPackageFragment)element, mod);
-				return;
-			case IJavaElement.COMPILATION_UNIT:
-				collected.add(element);
-				IType[] types= ((ICompilationUnit)element).getTypes();
-				collected.addAll(Arrays.asList(types));
-				if (element.getResource() != null)
-					mod.addDelete(element.getResource());
-				return;
-			case IJavaElement.TYPE:
-				collected.add(element);
-				IType type= (IType)element;
-				ICompilationUnit unit= type.getCompilationUnit();
-				//TODO: Looks like a bug: unit.getElementName().endsWith(type.getElementName())
-				if (type.getDeclaringType() == null && unit.getElementName().endsWith(type.getElementName())) {
-					if (unit.getTypes().length == 1) {
-						collected.add(unit);
-						if (unit.getResource() != null)
-							mod.addDelete(unit.getResource());
-					}
-				}
-				return;
-			default:
-				collected.add(element);
-		}
-	}
-
-	/**
-	 * This method collects file and folder deletion for notifying
-	 * participants. Participants will get notified of 
-	 * 
-	 * * deletion of the package (in any case)
-	 * * deletion of files within the package if only the files are deleted without 
-	 *   the package folder ("package cleaning")
-	 * * deletion of the package folder if it is not only cleared and if its parent
-	 *   is not removed as well.
-	 *   
-	 */
-	private void handlePackageFragmentDelete(List collected, IPackageFragment pack, ResourceModifications mod) throws CoreException {
-
-		// The package is reported in any case.
-		collected.add(pack);
-		
-		final List/* <IPackageFragment */packagesToDelete= ReorgUtils.getElementsOfType(fJavaElements, IJavaElement.PACKAGE_FRAGMENT);
-		
-		final IContainer container= (IContainer)pack.getResource();
-		if (container == null)
-			return;
-		
-		final IResource[] members= container.members();
-
-		/*
-		 * Check whether this package is removed completely or only cleared.
-		 * The default package can never be removed completely.
-		 */
-		if (!pack.isDefaultPackage() && canRemoveCompletely(pack, packagesToDelete)) {
-			// This package is removed completely, which means its folder will be
-			// deleted as well. We only notify participants of the folder deletion
-			// if the parent folder of this folder will not be deleted as well:
-			boolean parentIsMarked= false;
-			final IPackageFragment parent= JavaElementUtil.getParentSubpackage(pack);
-			if (parent != null && parent.isDefaultPackage()) {
-				// Parent is the default package which will never be
-				// deleted physically
-				parentIsMarked= false;
-			} else {
-				// Parent is marked if it is in the list
-				parentIsMarked= packagesToDelete.contains(parent);
-			}
-			
-			if (parentIsMarked) {
-				// Parent is marked, but is it really deleted or only cleared?
-				if (canRemoveCompletely(parent, packagesToDelete)) {
-					// Parent can be removed completely, so we do not add
-					// this folder to the list.
-				} else {
-					// Parent cannot be removed completely, but as this folder
-					// can be removed, we notify the participant
-					mod.addDelete(container);
-				}
-			} else {
-				// Parent will not be removed, but we will 
-				mod.addDelete(container);
-			}
-		} else {
-			// This package is only cleared because it has subpackages (=subfolders)
-			// which are not deleted. As the package is only cleared, its folder
-			// will not be removed and so we must notify the participant of the deleted children.
-			for (int m= 0; m < members.length; m++) {
-				IResource member= members[m];
-				if (member instanceof IFile) {
-					IFile file= (IFile)member;
-					if ("class".equals(file.getFileExtension()) && file.isDerived()) //$NON-NLS-1$
-						continue;
-					if (pack.isDefaultPackage() && ! JavaCore.isJavaLikeFileName(file.getName()))
-						continue;
-					mod.addDelete(member);
-				}
-				if (!pack.isDefaultPackage() && member instanceof IFolder) {
-					// Normally, folder children of packages are packages
-					// as well, but in case they have been removed from the build
-					// path, notify the participant
-					IPackageFragment frag= (IPackageFragment) JavaCore.create(member);
-					if (frag == null)
-						mod.addDelete(member);
-				}
-			}
-		}
-	}
-	
-	private void handleResourceDelete(List collected, IResource element, String[] natures, SharableParticipants shared) {
-		collected.add(element);
-	}
-
 	private String[] getAffectedProjectNatures() throws CoreException {
 		String[] jNatures= JavaProcessors.computeAffectedNaturs(fJavaElements);
 		String[] rNatures= ResourceProcessors.computeAffectedNatures(fResources);
@@ -376,10 +229,22 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 			fDeleteChange= DeleteChangeCreator.createDeleteChange(manager, fResources, fJavaElements, getProcessorName());
 			checkDirtyCompilationUnits(result);
 			checkDirtyResources(result);
-			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
-			IFile[] classPathFiles= getClassPathFiles();
-			checker.addFiles(ResourceUtil.getFiles(manager.getAllCompilationUnits()));
-			checker.addFiles(classPathFiles);
+			fDeleteModifications= new DeleteModifications();
+			fDeleteModifications.delete(fResources);
+			fDeleteModifications.delete(fJavaElements);
+			fDeleteModifications.postProcess();
+			
+			ResourceOperationChecker checker= (ResourceOperationChecker) context.getChecker(ResourceOperationChecker.class);
+			IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
+			fDeleteModifications.createDelta(deltaFactory);
+			IFile[] files= getClassPathFiles();
+			for (int i= 0; i < files.length; i++) {
+				deltaFactory.change(files[i]);
+			}
+			files= ResourceUtil.getFiles(manager.getAllCompilationUnits());
+			for (int i= 0; i < files.length; i++) {
+				deltaFactory.change(files[i]);
+			}
 			return result;
 		} catch (OperationCanceledException e) {
 			fWasCanceled= true;

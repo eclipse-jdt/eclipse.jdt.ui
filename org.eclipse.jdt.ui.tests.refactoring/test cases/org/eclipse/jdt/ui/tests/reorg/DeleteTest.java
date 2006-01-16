@@ -26,6 +26,9 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -43,6 +46,7 @@ import org.eclipse.jdt.testplugin.JavaTestPlugin;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
+import org.eclipse.jdt.ui.tests.refactoring.TestModelProvider;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
@@ -102,7 +106,13 @@ public class DeleteTest extends RefactoringTest{
 	
 	private void checkDelete(IJavaElement[] elems, boolean deleteCu) throws JavaModelException, Exception {
 		ICompilationUnit newCuA= null;
+		IResourceChangeListener listener= new IResourceChangeListener() {
+			public void resourceChanged(IResourceChangeEvent event) {
+				TestModelProvider.assertTrue(event.getDelta());
+			}
+		};
 		try {
+			ResourcesPlugin.getWorkspace().addResourceChangeListener(listener);
 			DeleteRefactoring refactoring= createRefactoring(elems);
 			assertNotNull(refactoring);
 			RefactoringStatus status= performRefactoring(refactoring, false);
@@ -113,6 +123,7 @@ public class DeleteTest extends RefactoringTest{
 			if (! deleteCu)
 				assertEqualLines("incorrect content of A.java", getFileContents(getOutputTestFileName(CU_NAME)), newCuA.getSource());
 		} finally {
+			ResourcesPlugin.getWorkspace().removeResourceChangeListener(listener);
 			performDummySearch();
 			if (newCuA != null && newCuA.exists())
 				newCuA.delete(true, null);	
@@ -263,8 +274,6 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	public void testEnabled_defaultPackage() throws Exception{
-//		printTestDisabledMessage("enable this case once 38450 is fixed");
-		
 		IPackageFragment defaultPackage= getRoot().getPackageFragment("");
 		ICompilationUnit cu= defaultPackage.createCompilationUnit("A.java", "", false, new NullProgressMonitor());
 		
@@ -382,8 +391,6 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	public void testDeleteWithinCu0() throws Exception{
-//		printTestDisabledMessage("bug#15305 incorrect deletion of fields (multi-declaration case)");
-//		printTestDisabledMessage("test for bug#8405 Delete field action broken for multiple declarations");
 		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getField("i");
@@ -416,10 +423,6 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	public void testDeleteWithinCu3() throws Exception{
-//		printTestDisabledMessage("bug#15305 incorrect deletion of fields (multi-declaration case)");
-//		printTestDisabledMessage("test for bug#8405 Delete field action broken for multiple declarations");		
-//		if (true)
-//			return;
 		loadFileSetup();
 		ParticipantTesting.reset();
 		IJavaElement elem0= fCuA.getType("A").getField("i");
@@ -432,10 +435,6 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	public void testDeleteWithinCu4() throws Exception{
-//		printTestDisabledMessage("bug#15305 incorrect deletion of fields (multi-declaration case)");
-//		printTestDisabledMessage("test for bug#8405 Delete field action broken for multiple declarations");		
-//		if (true)
-//			return;
 		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getField("i");
@@ -448,10 +447,6 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	public void testDeleteWithinCu5() throws Exception{
-//		printTestDisabledMessage("bug#15305 incorrect deletion of fields (multi-declaration case)");
-//		printTestDisabledMessage("test for bug#8405 Delete field action broken for multiple declarations");		
-//		if (true)
-//			return;
 		loadFileSetup();
 		ParticipantTesting.reset();
 		IJavaElement elem0= fCuA.getType("A").getField("j");
@@ -463,10 +458,6 @@ public class DeleteTest extends RefactoringTest{
 	}
 
 	public void testDeleteWithinCu6() throws Exception{
-//		printTestDisabledMessage("test for bug#8405 Delete field action broken for multiple declarations");		
-//		printTestDisabledMessage("test for bug#9382 IField::delete incorrect on multiple field declarations with initializers");		
-//		if (true)
-//			return;
 		ParticipantTesting.reset();
 		loadFileSetup();
 		IJavaElement elem0= fCuA.getType("A").getField("j");

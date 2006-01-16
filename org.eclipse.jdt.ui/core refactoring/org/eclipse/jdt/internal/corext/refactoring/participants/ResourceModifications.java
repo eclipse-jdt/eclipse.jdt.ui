@@ -15,7 +15,10 @@ import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IPath;
+
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
@@ -174,5 +177,33 @@ public class ResourceModifications {
 			result.addAll(Arrays.asList(renames));
 		}
 		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
+	}
+	
+	public void createDelta(IResourceChangeDescriptionFactory builder) {
+		if (fDelete != null) {
+			for (Iterator iter= fDelete.iterator(); iter.hasNext();) {
+				builder.delete((IResource) iter.next());
+			}
+		}
+		if (fMove != null) {
+			for(int i= 0; i < fMove.size(); i++) {
+				IResource toMove= (IResource) fMove.get(i);
+				MoveArguments args= (MoveArguments) fMoveArguments.get(i);
+				IPath destination= ((IResource)args.getDestination()).getFullPath().append(toMove.getName());
+				builder.move(toMove, destination);
+			}
+		}
+		if (fCopy != null) {
+			for (int i= 0; i < fCopy.size(); i++) {
+				IResource toCopy= (IResource) fCopy.get(i);
+				CopyArguments args= (CopyArguments) fCopyArguments.get(i);
+				IPath destination= ((IResource)args.getDestination()).getFullPath().append(toCopy.getName());
+				builder.copy(toCopy, destination);
+			}
+		}
+		if (fRename != null) {
+			IPath newPath= fRename.getFullPath().removeLastSegments(1).append(fRenameArguments.getNewName());
+			builder.move(fRename, newPath);
+		}
 	}
 }
