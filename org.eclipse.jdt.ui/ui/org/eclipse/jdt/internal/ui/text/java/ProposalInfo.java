@@ -53,22 +53,16 @@ public class ProposalInfo {
 	 * Gets the text for this proposal info
 	 */
 	public String getInfo() {
-			IMember member;
-			try {
-				member= getMember();
-			} catch (JavaModelException e) {
-				JavaPlugin.log(e);
-				return null;
-			}
+		try {
+			IMember member= getMember();
 			if (member != null) {
-				try {
-					Reader reader= JavadocContentAccess.getHTMLContentReader(member, true, true);
-					if (reader != null)
-						return getString(reader);
-				} catch (JavaModelException e) {
-					return null;
-				}
+				Reader reader= JavadocContentAccess.getHTMLContentReader(member, true, true);
+				if (reader != null)
+					return getString(reader);
 			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
 		return null;
 	}
 	
