@@ -387,7 +387,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		resultDeclaration.setType(fAst.newPrimitiveType(PrimitiveType.INT));
 		body.statements().add(resultDeclaration);
 
-		if (isParentObject(fType)) {
+		if (needsNoSuperCall(fType, METHODNAME_HASH_CODE, new ITypeBinding[0])) {
 			fragment.setInitializer(fAst.newNumberLiteral(INITIAL_HASHCODE_VALUE));
 		} else {
 			SuperMethodInvocation invoc= fAst.newSuperMethodInvocation();
@@ -419,7 +419,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		body.statements().add(endReturn);
 
 		// method comment
-		if (fSettings != null && fSettings.createComments) {
+		if (fSettings != null) {
 			ITypeBinding object= fAst.resolveWellKnownType(JAVA_LANG_OBJECT);
 			IMethodBinding[] objms= object.getDeclaredMethods();
 			IMethodBinding objectMethod= null;
@@ -729,7 +729,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		body.statements().add(
 				createReturningIfStatement(fAst.newThisExpression(), fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM), Operator.EQUALS, true));
 
-		if (isParentObject(fType)) {
+		if (needsNoSuperCall(fType, METHODNAME_EQUALS, new ITypeBinding[] {fAst.resolveWellKnownType(JAVA_LANG_OBJECT)})) {
 			// if (obj == null) return false;
 			body.statements().add(
 					createReturningIfStatement(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM), fAst.newNullLiteral(), Operator.EQUALS, false));
@@ -792,7 +792,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		body.statements().add(endReturn);
 
 		// method comment
-		if (fSettings != null && fSettings.createComments) {
+		if (fSettings != null) {
 			ITypeBinding object= fAst.resolveWellKnownType(JAVA_LANG_OBJECT);
 			IMethodBinding[] objms= object.getDeclaredMethods();
 			IMethodBinding objectMethod= null;
@@ -908,19 +908,60 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	}
 
 	private void createMethodComment(MethodDeclaration newDeclaration, IMethodBinding copyFrom) throws CoreException {
-		String string= CodeGeneration.getMethodComment(fRewrite.getCu(), fType.getQualifiedName(), newDeclaration, copyFrom, StubUtility
-				.getLineDelimiterUsed(fRewrite.getCu()));
-		if (string != null) {
-			Javadoc javadoc= (Javadoc) fRewrite.getASTRewrite().createStringPlaceholder(string, ASTNode.JAVADOC);
-			newDeclaration.setJavadoc(javadoc);
+		if (fSettings.createComments) {
+			String string= CodeGeneration.getMethodComment(fRewrite.getCu(), fType.getQualifiedName(), newDeclaration, copyFrom, StubUtility.getLineDelimiterUsed(fRewrite.getCu()));
+			if (string != null) {
+				Javadoc javadoc= (Javadoc) fRewrite.getASTRewrite().createStringPlaceholder(string, ASTNode.JAVADOC);
+				newDeclaration.setJavadoc(javadoc);
+			}
 		}
 		if (fSettings.overrideAnnotation && JavaModelUtil.is50OrHigher(fUnit.getJavaElement().getJavaProject()))
 			StubUtility2.addOverrideAnnotation(fRewrite.getASTRewrite(), newDeclaration, copyFrom);
 	}
 
-	private boolean isParentObject(ITypeBinding typeBinding) {
-		ITypeBinding superClass= typeBinding.getSuperclass();
-		return JAVA_LANG_OBJECT.equals(superClass.getQualifiedName());
+	private boolean needsNoSuperCall(ITypeBinding typeBinding, String name, ITypeBinding[] parameters) {
+		Assert.isNotNull(typeBinding);
+		IMethodBinding binding= findMethodInHierarchy(typeBinding, name, parameters);
+		if (binding != null)
+			return binding.getDeclaringClass().getQualifiedName().equals(JAVA_LANG_OBJECT);
+		return true;
+	}
+
+	// Adapted from Bindings
+	public static IMethodBinding findMethodInType(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
+		if (type.isPrimitive())
+			return null;
+		IMethodBinding[] methods= type.getDeclaredMethods();
+		for (int i= 0; i < methods.length; i++) {
+			if (parameters == null) {
+				if (methodName.equals(methods[i].getName()) && !Modifier.isAbstract(methods[i].getModifiers()))
+					return methods[i];
+			} else {
+				if (Bindings.isEqualMethod(methods[i], methodName, parameters) && !Modifier.isAbstract(methods[i].getModifiers()))
+					return methods[i];
+			}
+		}
+		return null;
+	}
+
+	// Adapted from Bindings
+	public static IMethodBinding findMethodInHierarchy(ITypeBinding type, String methodName, ITypeBinding[] parameters) {
+		IMethodBinding method= findMethodInType(type, methodName, parameters);
+		if (method != null)
+			return method;
+		ITypeBinding superClass= type.getSuperclass();
+		if (superClass != null) {
+			method= findMethodInHierarchy(superClass, methodName, parameters);
+			if (method != null)
+				return method;			
+		}
+		ITypeBinding[] interfaces= type.getInterfaces();
+		for (int i= 0; i < interfaces.length; i++) {
+			method= findMethodInHierarchy(interfaces[i], methodName, parameters);
+			if (method != null)
+				return method;
+		}
+		return null;
 	}
 
 	private Expression getThisAccessForEquals(String name) {
