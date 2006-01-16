@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.dialogs;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
 
 import org.eclipse.core.runtime.IStatus;
@@ -30,6 +31,7 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.ui.dialogs.AbstractElementListSelectionDialog;
+import org.eclipse.ui.dialogs.FilteredList;
 
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
@@ -40,7 +42,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 public class MultiElementListSelectionDialog extends AbstractElementListSelectionDialog {
 
 	private static class Page {
-		public Object[] elements;
+		private Object[] elements;
 		public String filter;
 		public boolean okState= false;		
 		
@@ -58,7 +60,8 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	private Button fNextButton;
 	
 	private Label fPageInfoLabel;
-	private String fPageInfoMessage= JavaUIMessages.MultiElementListSelectionDialog_pageInfoMessage; 
+	private String fPageInfoMessage= JavaUIMessages.MultiElementListSelectionDialog_pageInfoMessage;
+	private Comparator fComparator; 
 	
 	/**
 	 * Constructs a multi-page list selection dialog.
@@ -296,6 +299,29 @@ public class MultiElementListSelectionDialog extends AbstractElementListSelectio
 	 */
 	public int getCurrentPage() {
 		return fCurrentPage;
+	}
+
+	/**
+	 * Set the <code>Compatator</code> used to sort
+	 * the elements in the List.
+	 * 
+	 * @param comparator the comparator to use, not null.
+	 */
+	public void setComparator(Comparator comparator) {
+		fComparator= comparator;
+		if (fFilteredList != null)
+			fFilteredList.setComparator(fComparator);
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	protected FilteredList createFilteredList(Composite parent) {
+		FilteredList filteredList= super.createFilteredList(parent);
+		if (fComparator != null) {
+			filteredList.setComparator(fComparator);
+		}
+		return filteredList;
 	}
 
 }

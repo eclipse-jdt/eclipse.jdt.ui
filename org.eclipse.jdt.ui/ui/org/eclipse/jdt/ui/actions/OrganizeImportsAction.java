@@ -84,6 +84,7 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
+import org.eclipse.jdt.internal.ui.dialogs.SelectionHistory;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -525,15 +526,19 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		};
 		fIsQueryShowing= true;
 		dialog.setTitle(ActionMessages.OrganizeImportsAction_selectiondialog_title); 
-		dialog.setMessage(ActionMessages.OrganizeImportsAction_selectiondialog_message); 
+		dialog.setMessage(ActionMessages.OrganizeImportsAction_selectiondialog_message);
 		dialog.setElements(openChoices);
+		SelectionHistory history= SelectionHistory.getInstance(SelectionHistory.ORGANIZE_IMPORT_ID);
+		dialog.setComparator(history.getComparator());
 		if (dialog.open() == Window.OK) {
 			Object[] res= dialog.getResult();			
 			result= new TypeInfo[res.length];
 			for (int i= 0; i < res.length; i++) {
 				Object[] array= (Object[]) res[i];
-				if (array.length > 0)
+				if (array.length > 0) {
 					result[i]= (TypeInfo) array[0];
+					history.remember(result[i]);
+				}
 			}
 		}
 		// restore selection
