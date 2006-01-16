@@ -287,7 +287,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 		}
 
 		if (allFields.isEmpty()) {
-			MessageDialog.openError(getShell(), ActionMessages.GenerateHashCodeEqualsAction_error_caption,
+			MessageDialog.openInformation(getShell(), ActionMessages.GenerateHashCodeEqualsAction_error_caption,
 					ActionMessages.GenerateHashCodeEqualsAction_no_nonstatic_fields_error);
 			notifyResult(false);
 			return;
