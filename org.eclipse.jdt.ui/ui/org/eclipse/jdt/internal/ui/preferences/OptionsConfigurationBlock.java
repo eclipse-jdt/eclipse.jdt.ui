@@ -713,9 +713,6 @@ public abstract class OptionsConfigurationBlock {
 	}
 	
 	protected boolean processChanges(IWorkbenchPreferenceContainer container) {
-
-
-		
 		IScopeContext currContext= fLookupOrder[0];
 		
 		List /* <Key>*/ changedOptions= new ArrayList();
