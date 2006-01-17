@@ -22,7 +22,9 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.eclipse.core.resources.IProject;
 
@@ -475,7 +477,7 @@ public class CodeTemplateBlock {
 	}
 	
 	private void export(List selected) {
-		List datas= new ArrayList();
+		Set datas= new HashSet();
 		for (int i= 0; i < selected.size(); i++) {
 			Object curr= selected.get(i);
 			if (curr instanceof TemplatePersistenceData) {
