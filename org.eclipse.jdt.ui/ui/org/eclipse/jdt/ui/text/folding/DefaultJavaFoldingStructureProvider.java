@@ -942,7 +942,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		}
 
 		IRegion[] regions= computeProjectionRanges((ISourceReference) element, ctx);
-		if (regions != null) {
+		if (regions.length > 0) {
 			// comments
 			for (int i= 0; i < regions.length - 1; i++) {
 				IRegion normalized= normalizeRegion(regions[i], ctx);
