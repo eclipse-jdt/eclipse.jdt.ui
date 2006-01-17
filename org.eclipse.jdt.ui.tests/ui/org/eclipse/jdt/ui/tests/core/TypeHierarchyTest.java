@@ -14,8 +14,6 @@ import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IEditorPart;
@@ -27,11 +25,14 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeHierarchyChangedListener;
+import org.eclipse.jdt.core.dom.AST;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 public class TypeHierarchyTest extends TestCase {
 	
@@ -53,9 +54,13 @@ public class TypeHierarchyTest extends TestCase {
 			return allTests();
 		} else {
 			TestSuite suite= new TestSuite();
-			suite.addTest(new TypeHierarchyTest("testHierarchyWithWorkingCopy"));
+			suite.addTest(new TypeHierarchyTest("testHierarchyWithWorkingCopy3"));
 			return new ProjectTestSetup(suite);
 		}	
+	}
+	
+	public static Test setUpTest(Test test) {
+		return new ProjectTestSetup(test);
 	}
 	
 	protected void setUp() throws Exception {
@@ -226,64 +231,69 @@ public class TypeHierarchyTest extends TestCase {
 
 	}
 	
-//	public void testHierarchyWithWorkingCopy3() throws Exception {
-//		
-//		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJavaProject1, "src");
-//		IPackageFragment pack1= root1.createPackageFragment("pack1", true, null);
-//		
-//		ICompilationUnit cu1= pack1.getCompilationUnit("A.java");
-//		cu1.createType("public class A {\n}\n", null, true, null);
-//		
-//		IPackageFragment pack2= root1.createPackageFragment("pack2", true, null);
-//		
-//		ICompilationUnit cu2= pack2.getCompilationUnit("B.java");
-//		IType type2= cu2.createType("public class B extends pack1.A {\n}\n", null, true, null);
-//		
-//		// open editor -> working copy will be created
-//		IEditorPart part= EditorUtility.openInEditor(type2);
-//
-//		final int[] updateCount= new int[] {0};
-//		
-//		// create on type in working copy
-//		ITypeHierarchy hierarchy= type2.newSupertypeHierarchy(null);
-//		hierarchy.addTypeHierarchyChangedListener(new ITypeHierarchyChangedListener() {
-//			public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
-//				updateCount[0]++;
-//			}
-//		});
-//		
-//		IType[] allTypes= hierarchy.getAllTypes();
-//	
-//		assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
-//		assertTrue("Update count should be 0, is: " + updateCount[0], updateCount[0] == 0);
-//		
-//		try {			
-//			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
-//			String superType= "pack1.A";
-//			
-//			int offset= document.get().indexOf(superType);
-//			// modify source
-//			document.replace(offset, superType.length(), "Object");
-//			
-//			allTypes= hierarchy.getAllTypes();
-//		
-//			// no update of hierarchies on working copies
-//			assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
-//			assertTrue("Update count should be 0, is: " + updateCount[0], updateCount[0] == 0);
-//			
-//			// no save
-//			
-//		} finally {
-//			JavaPlugin.getActivePage().closeAllEditors(false);
-//		}
-//		
-//		allTypes= hierarchy.getAllTypes();
-//		
-//		// update after save
-//		assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
-//		assertTrue("Update count should be 0, is: " + updateCount[0], updateCount[0] == 0);
-//
-//	}
+	public void testHierarchyWithWorkingCopy3() throws Exception {
+		
+		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJavaProject1, "src");
+		IPackageFragment pack1= root1.createPackageFragment("pack1", true, null);
+		
+		ICompilationUnit cu1= pack1.getCompilationUnit("A.java");
+		cu1.createType("public class A {\n}\n", null, true, null);
+		
+		IPackageFragment pack2= root1.createPackageFragment("pack2", true, null);
+		
+		ICompilationUnit cu2= pack2.getCompilationUnit("B.java");
+		IType type2= cu2.createType("public class B extends pack1.A {\n}\n", null, true, null);
+		
+		// open editor -> working copy will be created
+		IEditorPart part= EditorUtility.openInEditor(type2);
+
+		final int[] updateCount= new int[] {0};
+		
+		// create on type in primary working copy
+		ITypeHierarchy hierarchy= type2.newSupertypeHierarchy(null);
+		hierarchy.addTypeHierarchyChangedListener(new ITypeHierarchyChangedListener() {
+			public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
+				updateCount[0]++;
+			}
+		});
+		
+		IType[] allTypes= hierarchy.getAllTypes();
+	
+		assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
+		assertTrue("Update count should be 0, is: " + updateCount[0], updateCount[0] == 0);
+		
+		try {			
+			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+			String superType= "pack1.A";
+			
+			int offset= document.get().indexOf(superType);
+			// modify source
+			document.replace(offset, superType.length(), "Object");
+			
+			cu2.reconcile(AST.JLS3,
+					true /* force problem detection */, 
+					null /* use primary owner */, 
+					null /* no progress monitor */);
+			
+			allTypes= hierarchy.getAllTypes();
+		
+			// no update of hierarchies on working copies
+			assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
+			assertTrue("Update count should be 0, is: " + updateCount[0], updateCount[0] == 0);
+			
+			// no save
+			
+		} finally {
+			JavaPlugin.getActivePage().closeAllEditors(false);
+		}
+		
+		allTypes= hierarchy.getAllTypes();
+		
+		// update after close: hierarchy changed because of reconcile delta from closeAllEditors
+		assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
+		assertTrue("Update count should be 1, is: " + updateCount[0], updateCount[0] == 1);
+
+	}
 	
 	
 
