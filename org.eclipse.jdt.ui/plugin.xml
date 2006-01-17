@@ -4720,7 +4720,7 @@
 		<provider
 			id="org.eclipse.jdt.ui.text.defaultFoldingProvider"
 			name= "%defaultFoldingStructureProviderName"
-			class="org.eclipse.jdt.internal.ui.text.folding.DefaultJavaFoldingStructureProvider"
+			class="org.eclipse.jdt.ui.text.folding.DefaultJavaFoldingStructureProvider"
 			preferencesClass="org.eclipse.jdt.internal.ui.text.folding.DefaultJavaFoldingPreferenceBlock">
 		</provider>
 	</extension>
