@@ -13,10 +13,15 @@ package org.eclipse.jdt.internal.ui.text;
 
 import org.eclipse.core.runtime.Preferences;
 
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Adapts {@link org.eclipse.core.runtime.Preferences} to
@@ -99,10 +104,29 @@ public class PreferencesAdapter implements IPreferenceStore {
 	 */
 	public void firePropertyChangeEvent(String name, Object oldValue, Object newValue) {
 		if (!fSilent) {
-			PropertyChangeEvent event= new PropertyChangeEvent(this, name, oldValue, newValue);
+			final PropertyChangeEvent event= new PropertyChangeEvent(this, name, oldValue, newValue);
 			Object[] listeners= fListeners.getListeners();
-			for (int i= 0; i < listeners.length; i++)
-				((IPropertyChangeListener) listeners[i]).propertyChange(event);
+			for (int i= 0; i < listeners.length; i++) {
+				final IPropertyChangeListener listener= (IPropertyChangeListener)listeners[i];
+				Runnable runnable= new Runnable() {
+					public void run() {
+						listener.propertyChange(event);
+					}
+				};
+				
+				if (Display.getCurrent() != null)
+					runnable.run();
+				else {
+					// Post runnable into UI thread
+					Shell shell= JavaPlugin.getActiveWorkbenchShell();
+					Display display;
+					if (shell != null)
+						display= shell.getDisplay();
+					else
+						display= Display.getDefault();
+					display.syncExec(runnable);
+				}
+			}
 		}
 	}
 
