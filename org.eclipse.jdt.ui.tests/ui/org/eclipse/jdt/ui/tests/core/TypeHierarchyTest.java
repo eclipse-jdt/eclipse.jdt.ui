@@ -226,64 +226,64 @@ public class TypeHierarchyTest extends TestCase {
 
 	}
 	
-	public void testHierarchyWithWorkingCopy3() throws Exception {
-		
-		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJavaProject1, "src");
-		IPackageFragment pack1= root1.createPackageFragment("pack1", true, null);
-		
-		ICompilationUnit cu1= pack1.getCompilationUnit("A.java");
-		cu1.createType("public class A {\n}\n", null, true, null);
-		
-		IPackageFragment pack2= root1.createPackageFragment("pack2", true, null);
-		
-		ICompilationUnit cu2= pack2.getCompilationUnit("B.java");
-		IType type2= cu2.createType("public class B extends pack1.A {\n}\n", null, true, null);
-		
-		// open editor -> working copy will be created
-		IEditorPart part= EditorUtility.openInEditor(type2);
-
-		final int[] updateCount= new int[] {0};
-		
-		// create on type in working copy
-		ITypeHierarchy hierarchy= type2.newSupertypeHierarchy(null);
-		hierarchy.addTypeHierarchyChangedListener(new ITypeHierarchyChangedListener() {
-			public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
-				updateCount[0]++;
-			}
-		});
-		
-		IType[] allTypes= hierarchy.getAllTypes();
-	
-		assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
-		assertTrue("Update count should be 0, is: " + updateCount[0], updateCount[0] == 0);
-		
-		try {			
-			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
-			String superType= "pack1.A";
-			
-			int offset= document.get().indexOf(superType);
-			// modify source
-			document.replace(offset, superType.length(), "Object");
-			
-			allTypes= hierarchy.getAllTypes();
-		
-			// no update of hierarchies on working copies
-			assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
-			assertTrue("Update count should be 0, is: " + updateCount[0], updateCount[0] == 0);
-			
-			// no save
-			
-		} finally {
-			JavaPlugin.getActivePage().closeAllEditors(false);
-		}
-		
-		allTypes= hierarchy.getAllTypes();
-		
-		// update after save
-		assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
-		assertTrue("Update count should be 0, is: " + updateCount[0], updateCount[0] == 0);
-
-	}
+//	public void testHierarchyWithWorkingCopy3() throws Exception {
+//		
+//		IPackageFragmentRoot root1= JavaProjectHelper.addSourceContainer(fJavaProject1, "src");
+//		IPackageFragment pack1= root1.createPackageFragment("pack1", true, null);
+//		
+//		ICompilationUnit cu1= pack1.getCompilationUnit("A.java");
+//		cu1.createType("public class A {\n}\n", null, true, null);
+//		
+//		IPackageFragment pack2= root1.createPackageFragment("pack2", true, null);
+//		
+//		ICompilationUnit cu2= pack2.getCompilationUnit("B.java");
+//		IType type2= cu2.createType("public class B extends pack1.A {\n}\n", null, true, null);
+//		
+//		// open editor -> working copy will be created
+//		IEditorPart part= EditorUtility.openInEditor(type2);
+//
+//		final int[] updateCount= new int[] {0};
+//		
+//		// create on type in working copy
+//		ITypeHierarchy hierarchy= type2.newSupertypeHierarchy(null);
+//		hierarchy.addTypeHierarchyChangedListener(new ITypeHierarchyChangedListener() {
+//			public void typeHierarchyChanged(ITypeHierarchy typeHierarchy) {
+//				updateCount[0]++;
+//			}
+//		});
+//		
+//		IType[] allTypes= hierarchy.getAllTypes();
+//	
+//		assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
+//		assertTrue("Update count should be 0, is: " + updateCount[0], updateCount[0] == 0);
+//		
+//		try {			
+//			IDocument document= JavaUI.getDocumentProvider().getDocument(part.getEditorInput());
+//			String superType= "pack1.A";
+//			
+//			int offset= document.get().indexOf(superType);
+//			// modify source
+//			document.replace(offset, superType.length(), "Object");
+//			
+//			allTypes= hierarchy.getAllTypes();
+//		
+//			// no update of hierarchies on working copies
+//			assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
+//			assertTrue("Update count should be 0, is: " + updateCount[0], updateCount[0] == 0);
+//			
+//			// no save
+//			
+//		} finally {
+//			JavaPlugin.getActivePage().closeAllEditors(false);
+//		}
+//		
+//		allTypes= hierarchy.getAllTypes();
+//		
+//		// update after save
+//		assertTrue("Should contain 3 types, contains: " + allTypes.length, allTypes.length == 3);
+//		assertTrue("Update count should be 0, is: " + updateCount[0], updateCount[0] == 0);
+//
+//	}
 	
 	
 
