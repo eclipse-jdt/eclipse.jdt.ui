@@ -62,4 +62,18 @@ public class MockWorkbenchSite extends PlatformObject implements IWorkbenchSite 
 		Assert.isNotNull(provider);
 		fProvider= provider;
 	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.services.IServiceLocator#getService(java.lang.Object)
+	 */
+	public Object getService(Object key) {
+		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.ui.services.IServiceLocator#hasService(java.lang.Object)
+	 */
+	public boolean hasService(Object key) {
+		return false;
+	}
 }
