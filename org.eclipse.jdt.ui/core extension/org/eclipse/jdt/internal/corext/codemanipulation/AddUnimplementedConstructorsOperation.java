@@ -77,7 +77,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	private final boolean fSave;
 
 	/** Specified if comments should be created */
-	private boolean fDoCreateComments;
+	private boolean fCreateComments;
 
 	/** The type declaration to add the constructors to */
 	private final ITypeBinding fType;
@@ -92,7 +92,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 * Creates a new add unimplemented constructors operation.
 	 * 
 	 * @param astRoot the compilation unit AST node
-	 * 	@param type the type to add the methods to
+	 * @param type the type to add the methods to
 	 * @param constructorsToImplement the method binding keys to implement
 	 * @param insertPos the insertion point, or <code>-1</code>
 	 * @param imports <code>true</code> if the import edits should be applied, <code>false</code> otherwise
@@ -119,7 +119,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 		fApply= apply;
 		fImports= imports;
 		
-		fDoCreateComments= StubUtility.doAddComments(astRoot.getJavaElement().getJavaProject());
+		fCreateComments= StubUtility.doAddComments(astRoot.getJavaElement().getJavaProject());
 		fVisibility= Modifier.PUBLIC;
 		fOmitSuper= false;
 	}
@@ -129,7 +129,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 * 
 	 * @return the method binding keys
 	 */
-	public final String[] getCreatedConstructors() {
+	public String[] getCreatedConstructors() {
 		final String[] keys= new String[fCreatedMethods.size()];
 		fCreatedMethods.toArray(keys);
 		return keys;
@@ -140,7 +140,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 * 
 	 * @return the generated imports
 	 */
-	public final String[] getCreatedImports() {
+	public String[] getCreatedImports() {
 		return fCreatedImports;
 	}
 
@@ -149,7 +149,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 * 
 	 * @return the scheduling rule
 	 */
-	public final ISchedulingRule getSchedulingRule() {
+	public ISchedulingRule getSchedulingRule() {
 		return ResourcesPlugin.getWorkspace().getRoot();
 	}
 
@@ -158,7 +158,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 * 
 	 * @return the visibility
 	 */
-	public final int getVisibility() {
+	public int getVisibility() {
 		return fVisibility;
 	}
 
@@ -167,18 +167,22 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 * 
 	 * @return <code>true</code> to omit the super call, <code>false</code> otherwise
 	 */
-	public final boolean isOmitSuper() {
+	public boolean isOmitSuper() {
 		return fOmitSuper;
 	}
 
-	
-	public void setCreateComments(boolean createComments) {
-		fDoCreateComments= createComments;
+	/**
+	 * Determines whether to create comments.
+	 * @param comments <code>true</code> to create comments, <code>false</code> otherwise
+	 */
+	public void setCreateComments(final boolean comments) {
+		fCreateComments= comments;
 	}
+
 	/*
 	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public final void run(IProgressMonitor monitor) throws CoreException {
+	public void run(IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		try {
@@ -207,7 +211,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 			}
 			
 			final CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
-			settings.createComments= fDoCreateComments;
+			settings.createComments= fCreateComments;
 
 			ASTNode insertion= getNodeToInsertBefore(memberRewriter);
 			
@@ -216,15 +220,23 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 				toImplement= StubUtility2.getVisibleConstructors(currTypeBinding, true, true);
 			}
 			
+			int deprecationCount= 0;
+			for (int i= 0; i < toImplement.length; i++) {
+				if (toImplement[i].isDeprecated())
+					deprecationCount++;
+			}
+			boolean createDeprecated= deprecationCount == toImplement.length;
 			for (int i= 0; i < toImplement.length; i++) {
 				IMethodBinding curr= toImplement[i];
-				MethodDeclaration stub= StubUtility2.createConstructorStub(cu, astRewrite, importRewrite, curr, currTypeBinding.getName(), fVisibility, fOmitSuper, settings);
-				if (stub != null) {
-					fCreatedMethods.add(curr.getKey());
-					if (insertion != null)
-						memberRewriter.insertBefore(stub, insertion, null);
-					else
-						memberRewriter.insertLast(stub, null);
+				if (!curr.isDeprecated() || createDeprecated) {
+					MethodDeclaration stub= StubUtility2.createConstructorStub(cu, astRewrite, importRewrite, curr, currTypeBinding.getName(), fVisibility, fOmitSuper, settings);
+					if (stub != null) {
+						fCreatedMethods.add(curr.getKey());
+						if (insertion != null)
+							memberRewriter.insertBefore(stub, insertion, null);
+						else
+							memberRewriter.insertLast(stub, null);
+					}
 				}
 			}
 			MultiTextEdit edit= new MultiTextEdit();
@@ -249,7 +261,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 * 
 	 * @param omit <code>true</code> to omit the super call, <code>false</code> otherwise
 	 */
-	public final void setOmitSuper(final boolean omit) {
+	public void setOmitSuper(final boolean omit) {
 		fOmitSuper= omit;
 	}
 
@@ -258,7 +270,7 @@ public final class AddUnimplementedConstructorsOperation implements IWorkspaceRu
 	 * 
 	 * @param visibility the visibility
 	 */
-	public final void setVisibility(final int visibility) {
+	public void setVisibility(final int visibility) {
 		fVisibility= visibility;
 	}
 	
