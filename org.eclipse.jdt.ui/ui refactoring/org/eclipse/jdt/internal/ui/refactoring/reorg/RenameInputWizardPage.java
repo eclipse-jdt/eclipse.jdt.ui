@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 
 import org.eclipse.jdt.internal.ui.refactoring.DelegateUIHelper;
+import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.TextInputWizardPage;
 import org.eclipse.jdt.internal.ui.util.RowLayouter;
