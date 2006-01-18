@@ -212,14 +212,10 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		if (lhs != null && rhs != null)
 			JavaPlugin.getDefault().getContentAssistHistory().remember(lhs, rhs);
 		
-		try {
-			TypeInfo info= TypeInfoUtil.searchTypeInfo(fCompilationUnit.getJavaProject(), null, getQualifiedTypeName());
-			if (info != null) {
-				History history= TypeInfoHistory.getDefault();
-				history.accessed(info);
-			}
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
+		TypeInfo info= TypeInfoUtil.searchTypeInfo(fCompilationUnit.getJavaProject(), null, getQualifiedTypeName());
+		if (info != null) {
+			History history= TypeInfoHistory.getDefault();
+			history.accessed(info);
 		}
 	}
 
@@ -317,10 +313,23 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeRelevance()
 	 */
 	protected int computeRelevance() {
-		int historyBoost= fInvocationContext.getHistoryRelevance(getQualifiedTypeName());
-		if (historyBoost == 0) {
-			historyBoost= Math.round(TypeInfoHistory.getDefault().getNormalizedPosition(getQualifiedTypeName()) * 10);
-		}
-		return super.computeRelevance() +  historyBoost;
+		/*
+		 * There are two histories: the RHS history remembers types used for the current expected
+		 * type (right hand side), while the type history remembers recently used types in general).
+		 * 
+		 * The presence of an RHS ranking is a much more precise sign for relevance as it proves the
+		 * subtype relationship between the proposed type and the expected type.
+		 * 
+		 * The "recently used" factor (of either the RHS or general history) is less important, it should
+		 * not override other relevance factors such as if the type is already imported etc.
+		 */
+		float rhsHistoryRank= fInvocationContext.getHistoryRelevance(getQualifiedTypeName());
+		float typeHistoryRank= TypeInfoHistory.getDefault().getNormalizedPosition(getQualifiedTypeName());
+
+		int recencyBoost= Math.round((rhsHistoryRank + typeHistoryRank) * 5);
+		int rhsBoost= rhsHistoryRank > 0.0f ? 50 : 0;
+		int baseRelevance= super.computeRelevance();
+		
+		return baseRelevance +  rhsBoost + recencyBoost;
 	}
 }

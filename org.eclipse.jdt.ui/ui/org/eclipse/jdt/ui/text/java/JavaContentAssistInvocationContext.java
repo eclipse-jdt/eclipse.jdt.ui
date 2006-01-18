@@ -137,15 +137,15 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 	}
 
 	/**
-	 * Returns an integer in [0,&nbsp;10] based on whether the type has been recently used as a
+	 * Returns an float in [0.0,&nbsp;1.0] based on whether the type has been recently used as a
 	 * right hand side for the type expected in the current context. 0 signals that the
-	 * <code>qualifiedTypeName</code> does not match the expected type, while 10 signals that
+	 * <code>qualifiedTypeName</code> does not match the expected type, while 1.0 signals that
 	 * <code>qualifiedTypeName</code> has most recently been used in a similar context.
 	 * 
 	 * @param qualifiedTypeName the type name of the type of interest
-	 * @return a relevance in [0,&nbsp;10] based on previous content assist invocations
+	 * @return a relevance in [0.0,&nbsp;1.0] based on previous content assist invocations
 	 */
-	public int getHistoryRelevance(String qualifiedTypeName) {
+	public float getHistoryRelevance(String qualifiedTypeName) {
 		return getRHSHistory().getRank(qualifiedTypeName);
 	}
 	
@@ -161,7 +161,7 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 				char[][] expectedTypes= context.getExpectedTypesSignatures();
 				if (expectedTypes != null && expectedTypes.length > 0) {
 					String expected= SignatureUtil.stripSignatureToFQN(String.valueOf(expectedTypes[0]));
-					fRHSHistory= JavaPlugin.getDefault().getContentAssistHistory().getHistory(expected, 10);
+					fRHSHistory= JavaPlugin.getDefault().getContentAssistHistory().getHistory(expected);
 				}
 			}
 			if (fRHSHistory == null)

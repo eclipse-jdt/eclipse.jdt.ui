@@ -233,10 +233,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * @see ICompletionProposal#getAdditionalProposalInfo()
 	 */
 	public final String getAdditionalProposalInfo() {
-		if (getProposalInfo() != null) {
-			return getProposalInfo().getInfo();
-		}
-		return null;
+		return super.getAdditionalProposalInfo();
 	}
 
 	/*

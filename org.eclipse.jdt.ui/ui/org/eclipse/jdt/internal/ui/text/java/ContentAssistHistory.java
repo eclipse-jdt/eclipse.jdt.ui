@@ -277,19 +277,26 @@ public final class ContentAssistHistory {
 		}
 		
 		/**
-		 * Returns the inverse rank of the given type in the history. That is, the most recently
-		 * selected type will return the maximum value of the history, the nth most recently
-		 * selected type will return maxValue - n. The rank of any type that is not remembered is
-		 * zero.
+		 * Returns the rank of a type in the history in [0.0,&nbsp;1.0]. The rank of the most
+		 * recently selected type is 1.0, the rank of any type that is not remembered is zero.
 		 * 
 		 * @param type the fully qualified type name to get the rank for
-		 * @return the inverse rank of <code>type</code>
+		 * @return the rank of <code>type</code>
 		 */
-		public int getRank(String type) {
+		public float getRank(String type) {
 			if (fHistory == null)
-				return 0;
+				return 0.0F;
 			Integer integer= (Integer) fHistory.get(type);
-			return integer == null ? 0 : integer.intValue();
+			return integer == null ? 0.0F : integer.floatValue() / fHistory.size();
+		}
+		
+		/**
+		 * Returns the size of the history.
+		 * 
+		 * @return the size of the history
+		 */
+		public int size() {
+			return fHistory == null ? 0 : fHistory.size();
 		}
 		
 		/**
@@ -377,37 +384,8 @@ public final class ContentAssistHistory {
 	}
 	
 	/**
-	 * Returns the {@link RHSHistory history} of the <code>count</code> types that have been
-	 * selected most recently as right hand sides for the given type. The most recently selected
-	 * type has a rank of <code>count</code>. Any type that is not in the <code>count</code>
-	 * most recently selected types has a rank of zero.
-	 * 
-	 * @param lhs the fully qualified type name of an expected type for which right hand sides are
-	 *        requested, or <code>null</code>
-	 * @param count the number of types to include in the history
-	 * @return the right hand side history for the given type
-	 */
-	public RHSHistory getHistory(String lhs, int count) {
-		MRUSet rhsCache= (MRUSet) fLHSCache.get(lhs);
-		if (rhsCache != null) {
-			LinkedHashMap history= new LinkedHashMap((int) (count / 0.75));
-			final int first= rhsCache.size() - count;
-			int i= 1;
-			for (Iterator it= rhsCache.iterator(); it.hasNext(); i++) {
-				String type= (String) it.next();
-				if (i > first) {
-					history.put(type, new Integer(i - first));
-				}
-			}
-			return new RHSHistory(history);
-		}
-		return EMPTY_HISTORY;
-	}
-	
-	/**
 	 * Returns the {@link RHSHistory history} of the types that have been selected most recently as
-	 * right hand sides for the given type. The most recently selected type has a rank equal to the
-	 * number of remembered types. Any type that is not in the remembered types has a rank of zero.
+	 * right hand sides for the given type.
 	 * 
 	 * @param lhs the fully qualified type name of an expected type for which right hand sides are
 	 *        requested, or <code>null</code>
