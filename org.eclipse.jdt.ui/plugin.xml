@@ -3489,7 +3489,18 @@
             categoryId="org.eclipse.jdt.ui.category.refactoring"
             id="org.eclipse.jdt.ui.edit.text.java.self.encapsulate.field">
       </command>
-      
+      <command
+            categoryId="org.eclipse.jdt.ui.category.refactoring"
+            description="%ActionDefinition.apply.description"
+            id="org.eclipse.ltk.ui.refactor.apply.refactoring.script"
+            name="%ActionDefinition.apply.name">
+      </command>
+      <command
+            categoryId="org.eclipse.jdt.ui.category.refactoring"
+            description="%ActionDefinition.create.description"
+            id="org.eclipse.ltk.ui.refactor.create.refactoring.script"
+            name="%ActionDefinition.create.name">
+       </command>
 <!-- navigate -->
       <command
             name="%ActionDefinition.gotoNextMember.name"
