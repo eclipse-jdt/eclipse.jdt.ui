@@ -12,19 +12,21 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.jdt.core.IMethod;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
+
+import org.eclipse.jdt.core.IMethod;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameFieldProcessor;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -33,10 +35,6 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
-
-import org.eclipse.ltk.core.refactoring.Refactoring;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameFieldWizard extends RenameRefactoringWizard {
 
@@ -70,55 +68,6 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 			super(message, contextHelpId, true, initialValue);
 		}
 
-		/* non java-doc
-		 * @see DialogPage#createControl(org.eclipse.swt.widgets.Composite)
-		 */
-		public void createControl(Composite parent) {
-			super.createControl(parent);
-			Composite parentComposite= (Composite)getControl();
-				
-			Composite composite= new Composite(parentComposite, SWT.NONE);
-			composite.setLayout(new GridLayout());
-			composite.setLayoutData(new GridData(GridData.FILL_BOTH));
-		
-			Label separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
-			separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-
-			getGetterSetterRenamingEnablement();
-				
-			fRenameGetter= new Button(composite, SWT.CHECK);
-			boolean getterEnablement= fGetterRenamingErrorMessage == null;
-			fRenameGetter.setEnabled(getterEnablement);
-			boolean getterSelection= getterEnablement && getBooleanSetting(RENAME_GETTER, getRenameFieldProcessor().getRenameGetter());
-			fRenameGetter.setSelection(getterSelection);
-			getRenameFieldProcessor().setRenameGetter(getterSelection);
-			fRenameGetter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fRenameGetter.addSelectionListener(new SelectionAdapter(){
-				public void widgetSelected(SelectionEvent e) {
-					getRenameFieldProcessor().setRenameGetter(fRenameGetter.getSelection());
-					updateLeaveDelegateCheckbox(getRenameFieldProcessor().getDelegateCount());
-				}
-			});
-		
-			fRenameSetter= new Button(composite, SWT.CHECK);
-			boolean setterEnablement= fSetterRenamingErrorMessage == null;
-			fRenameSetter.setEnabled(setterEnablement);
-			boolean setterSelection= setterEnablement && getBooleanSetting(RENAME_SETTER, getRenameFieldProcessor().getRenameSetter());
-			fRenameSetter.setSelection(setterSelection);
-			getRenameFieldProcessor().setRenameSetter(setterSelection);
-			fRenameSetter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			fRenameSetter.addSelectionListener(new SelectionAdapter(){
-				public void widgetSelected(SelectionEvent e) {
-					getRenameFieldProcessor().setRenameSetter(fRenameSetter.getSelection());
-					updateLeaveDelegateCheckbox(getRenameFieldProcessor().getDelegateCount());
-				}
-			});
-		
-			updateGetterSetterLabels();
-			updateLeaveDelegateCheckbox(getRenameFieldProcessor().getDelegateCount());
-			Dialog.applyDialogFont(composite);
-		}
-		
 		public void dispose() {
 			if (saveSettings()) {
 				if (fRenameGetter.isEnabled())
@@ -224,6 +173,48 @@ public class RenameFieldWizard extends RenameRefactoringWizard {
 	
 		private RenameFieldProcessor getRenameFieldProcessor() {
 			return (RenameFieldProcessor)((RenameRefactoring)getRefactoring()).getProcessor();
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		protected void addAdditionalOptions(Composite composite) {
+			super.addAdditionalOptions(composite);
+			getGetterSetterRenamingEnablement();
+			fRenameGetter= new Button(composite, SWT.CHECK);
+			boolean getterEnablement= fGetterRenamingErrorMessage == null;
+			fRenameGetter.setEnabled(getterEnablement);
+			boolean getterSelection= getterEnablement && getBooleanSetting(RENAME_GETTER, getRenameFieldProcessor().getRenameGetter());
+			fRenameGetter.setSelection(getterSelection);
+			getRenameFieldProcessor().setRenameGetter(getterSelection);
+			fRenameGetter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			fRenameGetter.addSelectionListener(new SelectionAdapter(){
+				public void widgetSelected(SelectionEvent e) {
+					getRenameFieldProcessor().setRenameGetter(fRenameGetter.getSelection());
+					updateLeaveDelegateCheckbox(getRenameFieldProcessor().getDelegateCount());
+				}
+			});
+			GridData data= new GridData(GridData.FILL_HORIZONTAL);
+			data.horizontalIndent= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+			fRenameGetter.setLayoutData(data);
+			fRenameSetter= new Button(composite, SWT.CHECK);
+			boolean setterEnablement= fSetterRenamingErrorMessage == null;
+			fRenameSetter.setEnabled(setterEnablement);
+			boolean setterSelection= setterEnablement && getBooleanSetting(RENAME_SETTER, getRenameFieldProcessor().getRenameSetter());
+			fRenameSetter.setSelection(setterSelection);
+			getRenameFieldProcessor().setRenameSetter(setterSelection);
+			fRenameSetter.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			fRenameSetter.addSelectionListener(new SelectionAdapter(){
+				public void widgetSelected(SelectionEvent e) {
+					getRenameFieldProcessor().setRenameSetter(fRenameSetter.getSelection());
+					updateLeaveDelegateCheckbox(getRenameFieldProcessor().getDelegateCount());
+				}
+			});
+			data= new GridData(GridData.FILL_HORIZONTAL);
+			data.horizontalIndent= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
+			fRenameSetter.setLayoutData(data);
+			updateGetterSetterLabels();
+			updateLeaveDelegateCheckbox(getRenameFieldProcessor().getDelegateCount());
 		}
 	}
 }
