@@ -43,17 +43,19 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public class RenameResourceProcessor extends RenameProcessor implements IInitializableRefactoringComponent, INameUpdating {
+public class RenameResourceProcessor extends RenameProcessor implements IInitializableRefactoringComponent, ICommentProvider, INameUpdating {
 
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 
 	private IResource fResource;
 	private String fNewElementName;
+	private String fComment;
 		
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameResourceProcessor"; //$NON-NLS-1$
 	
@@ -173,7 +175,7 @@ public class RenameResourceProcessor extends RenameProcessor implements IInitial
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return new DynamicValidationStateChange(
-			  new RenameResourceChange(fResource, getNewElementName()));
+			  new RenameResourceChange(fResource, getNewElementName(), fComment));
 		} finally{
 			pm.done();
 		}	
@@ -197,5 +199,17 @@ public class RenameResourceProcessor extends RenameProcessor implements IInitial
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
+	}
+
+	public boolean canEnableComment() {
+		return true;
+	}
+
+	public String getComment() {
+		return fComment;
+	}
+
+	public void setComment(final String comment) {
+		fComment= comment;
 	}
 }

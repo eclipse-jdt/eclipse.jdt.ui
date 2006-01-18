@@ -43,7 +43,7 @@ public class RenameResourceChangeTests extends RefactoringTest {
 			file.create(getStream(content), true, new NullProgressMonitor());
 			assertTrue("should exist", file.exists());
 			
-			Change change= new RenameResourceChange(file, newName);
+			Change change= new RenameResourceChange(file, newName, null);
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 			assertTrue("after: should exist", folder.getFile(newName).exists());
@@ -67,7 +67,7 @@ public class RenameResourceChangeTests extends RefactoringTest {
 			assertTrue("should exist", file.exists());
 			
 			
-			Change change= new RenameResourceChange(file, newName);
+			Change change= new RenameResourceChange(file, newName, null);
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 			assertTrue("after: should exist", folder.getFile(newName).exists());
@@ -89,7 +89,7 @@ public class RenameResourceChangeTests extends RefactoringTest {
 			file.create(getStream(content), true, new NullProgressMonitor());
 			assertTrue("should exist", file.exists());
 			
-			Change change= new RenameResourceChange(file, newName);
+			Change change= new RenameResourceChange(file, newName, null);
 			change.initializeValidationData(new NullProgressMonitor());
 			Change undo= performChange(change);
 			assertTrue("after: should exist", folder.getFile(newName).exists());
@@ -119,7 +119,7 @@ public class RenameResourceChangeTests extends RefactoringTest {
 			assertTrue("should exist", subFolder.exists());
 			
 			
-			Change change= new RenameResourceChange(subFolder, newName);
+			Change change= new RenameResourceChange(subFolder, newName, null);
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 			assertTrue("after: should exist", folder.getFolder(newName).exists());
@@ -148,7 +148,7 @@ public class RenameResourceChangeTests extends RefactoringTest {
 			assertTrue("file1 should exist", file1.exists());
 			assertTrue("file2 should exist", file2.exists());
 			
-			Change change= new RenameResourceChange(subFolder, newName);
+			Change change= new RenameResourceChange(subFolder, newName, null);
 			change.initializeValidationData(new NullProgressMonitor());
 			performChange(change);
 			assertTrue("after: should exist", folder.getFolder(newName).exists());
@@ -171,7 +171,7 @@ public class RenameResourceChangeTests extends RefactoringTest {
 			assertTrue("should exist", subFolder.exists());
 			
 			
-			Change change= new RenameResourceChange(subFolder, newName);
+			Change change= new RenameResourceChange(subFolder, newName, null);
 			change.initializeValidationData(new NullProgressMonitor());
 			Change undo= performChange(change);
 			assertTrue("after: should exist", folder.getFolder(newName).exists());

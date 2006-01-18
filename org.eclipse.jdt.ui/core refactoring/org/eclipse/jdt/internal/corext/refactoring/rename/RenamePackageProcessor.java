@@ -88,6 +88,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibili
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor.ImportsManager.ImportChange;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
@@ -103,7 +104,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
-public class RenamePackageProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating {
+public class RenamePackageProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, ICommentProvider, IQualifiedNameUpdating {
 	
 	public static final String ID_RENAME_PACKAGE= "org.eclipse.jdt.ui.rename.package"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
@@ -123,7 +124,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	private boolean fUpdateQualifiedNames;
 	private String fFilePatterns;
 	private boolean fRenameSubpackages;
-
+	private String fComment;
 	
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renamePackageProcessor"; //$NON-NLS-1$
 	
@@ -509,7 +510,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				}
 			};
 			result.addAll(fChangeManager.getAllChanges());
-			result.add(new RenamePackageChange(fPackage, getNewElementName(), fRenameSubpackages));
+			result.add(new RenamePackageChange(fPackage, getNewElementName(), fComment, fRenameSubpackages));
 			monitor.worked(1);
 			return result;
 		} finally {
@@ -1016,5 +1017,17 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
+	}
+
+	public boolean canEnableComment() {
+		return true;
+	}
+
+	public String getComment() {
+		return fComment;
+	}
+
+	public void setComment(final String comment) {
+		fComment= comment;
 	}
 }

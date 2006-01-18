@@ -37,14 +37,14 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 
 	public static final String ID_RENAME_SOURCE_FOLDER= "org.eclipse.jdt.ui.rename.source.folder"; //$NON-NLS-1$
 
-	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName) {
-		this(sourceFolder.getPath(), sourceFolder.getElementName(), newName, IResource.NULL_STAMP);
+	public RenameSourceFolderChange(IPackageFragmentRoot sourceFolder, String newName, String comment) {
+		this(sourceFolder.getPath(), sourceFolder.getElementName(), newName, comment, IResource.NULL_STAMP);
 		Assert.isTrue(!sourceFolder.isReadOnly(), "should not be read only");  //$NON-NLS-1$
 		Assert.isTrue(!sourceFolder.isArchive(), "should not be an archive");  //$NON-NLS-1$
 	}
 	
-	private RenameSourceFolderChange(IPath resourcePath, String oldName, String newName, long stampToRestore) {
-		super(resourcePath, oldName, newName);
+	private RenameSourceFolderChange(IPath resourcePath, String oldName, String newName, String comment, long stampToRestore) {
+		super(resourcePath, oldName, newName, comment);
 	}
 	
 	protected IPath createNewPath(){
@@ -52,7 +52,7 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 	}
 	
 	protected Change createUndoChange(long stampToRestore) {
-		return new RenameSourceFolderChange(createNewPath(), getNewName(), getOldName(), stampToRestore);
+		return new RenameSourceFolderChange(createNewPath(), getNewName(), getOldName(), getComment(), stampToRestore);
 	}
 
 	public String getName() {
@@ -136,6 +136,6 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 		final IProject container= getResource().getProject();
 		if (container != null)
 			project= container.getName();
-		return new RefactoringDescriptor(ID_RENAME_SOURCE_FOLDER, project, MessageFormat.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { getResourcePath().toString(), getNewName()}), null, arguments, RefactoringDescriptor.NONE);
+		return new RefactoringDescriptor(ID_RENAME_SOURCE_FOLDER, project, MessageFormat.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { getResourcePath().toString(), getNewName()}), getComment(), arguments, RefactoringDescriptor.NONE);
 	}
 }

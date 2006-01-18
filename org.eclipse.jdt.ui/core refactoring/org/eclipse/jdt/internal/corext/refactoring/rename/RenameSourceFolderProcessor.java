@@ -41,14 +41,16 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameSourceFolderChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-public class RenameSourceFolderProcessor extends JavaRenameProcessor {
+public class RenameSourceFolderProcessor extends JavaRenameProcessor implements ICommentProvider {
 	
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
 	
 	private IPackageFragmentRoot fSourceFolder;
+	private String fComment;
 	
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameSourceFolderProcessor"; //$NON-NLS-1$
 	
@@ -163,7 +165,7 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return new DynamicValidationStateChange(
-				new RenameSourceFolderChange(fSourceFolder, getNewElementName()));
+				new RenameSourceFolderChange(fSourceFolder, getNewElementName(), fComment));
 		} finally{
 			pm.done();
 		}	
@@ -189,5 +191,17 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
+	}
+
+	public boolean canEnableComment() {
+		return true;
+	}
+
+	public String getComment() {
+		return fComment;
+	}
+
+	public void setComment(final String comment) {
+		fComment= comment;
 	}
 }

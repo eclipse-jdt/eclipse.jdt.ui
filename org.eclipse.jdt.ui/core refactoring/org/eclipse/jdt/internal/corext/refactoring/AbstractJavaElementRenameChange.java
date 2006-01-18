@@ -27,22 +27,24 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 
 public abstract class AbstractJavaElementRenameChange extends JDTChange {
 
-	private String fNewName;
-	private String fOldName;
-	private IPath fResourcePath;
-	private long fStampToRestore;
+	private final String fNewName;
+	private final String fOldName;
+	private final IPath fResourcePath;
+	private final long fStampToRestore;
+	private final String fComment;
 
-	protected AbstractJavaElementRenameChange(IPath resourcePath, String oldName, String newName) {
-		this(resourcePath, oldName, newName, IResource.NULL_STAMP);
+	protected AbstractJavaElementRenameChange(IPath resourcePath, String oldName, String newName, String comment) {
+		this(resourcePath, oldName, newName, comment, IResource.NULL_STAMP);
 	}
 
-	protected AbstractJavaElementRenameChange(IPath resourcePath, String oldName, String newName, long stampToRestore) {
+	protected AbstractJavaElementRenameChange(IPath resourcePath, String oldName, String newName, String comment, long stampToRestore) {
 		Assert.isNotNull(newName, "new name"); //$NON-NLS-1$
 		Assert.isNotNull(oldName, "old name"); //$NON-NLS-1$
 
 		fResourcePath= resourcePath;
 		fOldName= oldName;
 		fNewName= newName;
+		fComment= comment;
 		fStampToRestore= stampToRestore;
 	}
 
@@ -79,6 +81,10 @@ public abstract class AbstractJavaElementRenameChange extends JDTChange {
 
 	public String getNewName() {
 		return fNewName;
+	}
+
+	public String getComment() {
+		return fComment;
 	}
 
 	protected IPath getResourcePath() {

@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnit
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ISimilarDeclarationUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
@@ -59,7 +60,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
+public class RenameCompilationUnitProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, ICommentProvider, IResourceMapper, IJavaElementMapper {
 	
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
@@ -67,6 +68,7 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 	private RenameTypeProcessor fRenameTypeProcessor;
 	private boolean fWillRenameType;
 	private ICompilationUnit fCu;
+	private String fComment;
 	
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameCompilationUnitProcessor"; //$NON-NLS-1$
 	
@@ -390,10 +392,10 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 		IResource resource= ResourceUtil.getResource(fCu);
 		if (resource != null && resource.isLinked())
 			return new DynamicValidationStateChange( 
-			   new RenameResourceChange(resource, getNewElementName()));
+			   new RenameResourceChange(resource, getNewElementName(), getComment()));
 		
 		return new DynamicValidationStateChange( 
-			new RenameCompilationUnitChange(fCu, getNewElementName()));
+			new RenameCompilationUnitChange(fCu, getNewElementName(), getComment()));
 	}
 	
 	/**
@@ -442,5 +444,23 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 
 	public boolean isWillRenameType() {
 		return fWillRenameType;
+	}
+
+	public boolean canEnableComment() {
+		return true;
+	}
+
+	public String getComment() {
+		if (fComment != null && !"".equals(fComment)) //$NON-NLS-1$
+			return fComment;
+		if (fRenameTypeProcessor != null)
+			return fRenameTypeProcessor.getComment();
+		return null;
+	}
+
+	public void setComment(final String comment) {
+		fComment= comment;
+		if (fRenameTypeProcessor != null)
+			fRenameTypeProcessor.setComment(comment);
 	}
 }

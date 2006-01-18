@@ -40,20 +40,22 @@ public class RenameResourceChange extends JDTChange {
 	 * we cannot use handles because they became invalid when you rename the resource.
 	 * paths do not.
 	 */
-	private IPath fResourcePath;
-	private String fNewName;
-	private long fStampToRestore;
+	private final IPath fResourcePath;
+	private final String fNewName;
+	private final long fStampToRestore;
+	private final String fComment;
 
 	/**
 	 * @param newName includes the extension
 	 */
-	public RenameResourceChange(IResource resource, String newName) {
-		this(resource.getFullPath(), newName, IResource.NULL_STAMP);
+	public RenameResourceChange(IResource resource, String newName, String comment) {
+		this(resource.getFullPath(), newName, comment, IResource.NULL_STAMP);
 	}
 
-	private RenameResourceChange(IPath resourcePath, String newName, long stampToRestore) {
+	private RenameResourceChange(IPath resourcePath, String newName, String comment, long stampToRestore) {
 		fResourcePath= resourcePath;
 		fNewName= newName;
+		fComment= comment;
 		fStampToRestore= stampToRestore;
 	}
 
@@ -92,7 +94,7 @@ public class RenameResourceChange extends JDTChange {
 				newResource.revertModificationStamp(fStampToRestore);
 			}
 			String oldName= fResourcePath.lastSegment();
-			return new RenameResourceChange(newPath, oldName, currentStamp);
+			return new RenameResourceChange(newPath, oldName, fComment, currentStamp);
 		} finally {
 			pm.done();
 		}
@@ -129,7 +131,7 @@ public class RenameResourceChange extends JDTChange {
 		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE;
 		if (getResource().getType() == IResource.PROJECT)
 			flags|= RefactoringDescriptor.PROJECT_CHANGE;
-		return new RefactoringDescriptor(ID_RENAME_RESOURCE, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { getResource().getFullPath().toString(), fNewName}), null, arguments, flags);
+		return new RefactoringDescriptor(ID_RENAME_RESOURCE, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { getResource().getFullPath().toString(), fNewName}), fComment, arguments, flags);
 	}
 
 	public String getNewName() {

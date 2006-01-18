@@ -40,13 +40,13 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 
 	public static final String ID_RENAME_COMPILATION_UNIT= "org.eclipse.jdt.ui.rename.compilationunit"; //$NON-NLS-1$
 
-	public RenameCompilationUnitChange(ICompilationUnit cu, String newName) {
-		this(ResourceUtil.getResource(cu).getFullPath(), cu.getElementName(), newName, IResource.NULL_STAMP);
+	public RenameCompilationUnitChange(ICompilationUnit cu, String newName, String comment) {
+		this(ResourceUtil.getResource(cu).getFullPath(), cu.getElementName(), newName, comment, IResource.NULL_STAMP);
 		Assert.isTrue(!cu.isReadOnly(), "cu must not be read-only"); //$NON-NLS-1$
 	}
 	
-	private RenameCompilationUnitChange(IPath resourcePath, String oldName, String newName, long stampToRestore){
-		super(resourcePath, oldName, newName, stampToRestore);
+	private RenameCompilationUnitChange(IPath resourcePath, String oldName, String newName, String comment, long stampToRestore){
+		super(resourcePath, oldName, newName, comment, stampToRestore);
 	}
 	
 	public RefactoringStatus isValid(IProgressMonitor pm) throws CoreException {
@@ -68,7 +68,7 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 	 * @see AbstractRenameChange#createUndoChange()
 	 */
 	protected Change createUndoChange(long stampToRestore) throws JavaModelException{
-		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName(), stampToRestore);
+		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName(), getComment(), stampToRestore);
 	}
 	
 	protected void doRename(IProgressMonitor pm) throws CoreException {
@@ -94,6 +94,6 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 				label= unit.getElementName();
 		} else
 			label= getOldName();
-		return new RefactoringDescriptor(ID_RENAME_COMPILATION_UNIT, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, getNewName()}), null, arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+		return new RefactoringDescriptor(ID_RENAME_COMPILATION_UNIT, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, getNewName()}), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 	}
 }

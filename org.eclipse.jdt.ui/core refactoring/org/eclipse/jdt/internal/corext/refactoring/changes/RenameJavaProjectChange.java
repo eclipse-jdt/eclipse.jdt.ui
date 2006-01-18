@@ -44,15 +44,15 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 
 	private boolean fUpdateReferences;
 	
-	public RenameJavaProjectChange(IJavaProject project, String newName, boolean updateReferences) {
-		this(project.getPath(), project.getElementName(), newName, IResource.NULL_STAMP);
+	public RenameJavaProjectChange(IJavaProject project, String newName, String comment, boolean updateReferences) {
+		this(project.getPath(), project.getElementName(), newName, comment, IResource.NULL_STAMP);
 		Assert.isTrue(!project.isReadOnly(), "should not be read only");  //$NON-NLS-1$
 		
 		fUpdateReferences= updateReferences;
 	}
 	
-	private RenameJavaProjectChange(IPath resourcePath, String oldName, String newName, long stampToRestore) {
-		super(resourcePath, oldName, newName);
+	private RenameJavaProjectChange(IPath resourcePath, String oldName, String newName, String comment, long stampToRestore) {
+		super(resourcePath, oldName, comment, newName);
 	}
 
 	public String getName() {
@@ -85,7 +85,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	}
 	
 	protected Change createUndoChange(long stampToRestore) throws JavaModelException {
-		return new RenameJavaProjectChange(createNewPath(), getNewName(), getOldName(), stampToRestore);
+		return new RenameJavaProjectChange(createNewPath(), getNewName(), getOldName(), getComment(), stampToRestore);
 	}
 
 	private IProject getProject() {
@@ -148,6 +148,6 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 		arguments.put(RefactoringDescriptor.INPUT, getResourcePath().toPortableString());
 		arguments.put(RefactoringDescriptor.NAME, getNewName());
 		arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-		return new RefactoringDescriptor(ID_RENAME_JAVA_PROJECT, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameJavaProjectChange_descriptor_description, new String[] { getOldName(), getNewName()}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE | RefactoringDescriptor.PROJECT_CHANGE);
+		return new RefactoringDescriptor(ID_RENAME_JAVA_PROJECT, getResource().getProject().getName(), MessageFormat.format(RefactoringCoreMessages.RenameJavaProjectChange_descriptor_description, new String[] { getOldName(), getNewName()}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE | RefactoringDescriptor.PROJECT_CHANGE);
 	}
 }
