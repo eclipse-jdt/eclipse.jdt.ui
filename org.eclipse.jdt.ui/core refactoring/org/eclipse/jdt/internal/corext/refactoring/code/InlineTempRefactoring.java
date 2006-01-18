@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -227,7 +226,7 @@ public class InlineTempRefactoring extends Refactoring implements IInitializable
 						text= BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED);
 					else
 						text= '{' + JavaElementLabels.ELLIPSIS_STRING + '}';
-					return new RefactoringDescriptor(ID_INLINE_TEMP, project, MessageFormat.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), text}), null, arguments, RefactoringDescriptor.NONE);
+					return new RefactoringDescriptor(ID_INLINE_TEMP, project, Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), text}), null, arguments, RefactoringDescriptor.NONE);
 				}
 			}; 
 			inlineTemp(result, new SubProgressMonitor(pm, 1));

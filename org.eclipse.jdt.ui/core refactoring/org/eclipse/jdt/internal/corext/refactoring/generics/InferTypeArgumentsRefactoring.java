@@ -11,7 +11,6 @@
 
 package org.eclipse.jdt.internal.corext.refactoring.generics;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -185,7 +184,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring implements IIniti
 									for (int p= 0; p < problems.length; p++) {
 										if (problems[p].isError()) {
 											String cuName= JavaElementLabels.getElementLabel(source, JavaElementLabels.CU_QUALIFIED);
-											String msg= MessageFormat.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_error_in_cu_skipped, new Object[] {cuName});
+											String msg= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_error_in_cu_skipped, new Object[] {cuName});
 											result.addError(msg, JavaStatusContext.create(source, new SourceRange(problems[p])));
 											return;
 										}
@@ -194,9 +193,9 @@ public class InferTypeArgumentsRefactoring extends Refactoring implements IIniti
 								}
 								public void handleException(Throwable exception) {
 									String cuName= JavaElementLabels.getElementLabel(source, JavaElementLabels.CU_QUALIFIED);
-									String msg= MessageFormat.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_internal_error, new Object[] {cuName});
+									String msg= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_internal_error, new Object[] {cuName});
 									JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, msg, null));
-									String msg2= MessageFormat.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_error_skipped, new Object[] {cuName});
+									String msg2= Messages.format(RefactoringCoreMessages.InferTypeArgumentsRefactoring_error_skipped, new Object[] {cuName});
 									result.addError(msg2, JavaStatusContext.create(source));
 								}
 							});

@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.changes;
 
-import java.text.MessageFormat;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -136,6 +135,6 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 		final IProject container= getResource().getProject();
 		if (container != null)
 			project= container.getName();
-		return new RefactoringDescriptor(ID_RENAME_SOURCE_FOLDER, project, MessageFormat.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { getResourcePath().toString(), getNewName()}), getComment(), arguments, RefactoringDescriptor.NONE);
+		return new RefactoringDescriptor(ID_RENAME_SOURCE_FOLDER, project, Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { getResourcePath().toString(), getNewName()}), getComment(), arguments, RefactoringDescriptor.NONE);
 	}
 }

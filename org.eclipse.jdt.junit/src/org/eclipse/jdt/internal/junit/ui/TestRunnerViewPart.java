@@ -17,7 +17,6 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.text.MessageFormat;
 import java.text.NumberFormat;
 import java.util.ArrayList;
 import java.util.Enumeration;
@@ -925,7 +924,7 @@ public class TestRunnerViewPart extends ViewPart implements ITestRunListener3 {
 		fTestRunnerClient.startListening(listenerArray, port);
 		
 		fLastLaunch= launch;
-		setContentDescription(MessageFormat.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ launch.getLaunchConfiguration().getName() }));
+		setContentDescription(Messages.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ launch.getLaunchConfiguration().getName() }));
 		if (type instanceof IType)
 			setTitleToolTip(((IType)type).getFullyQualifiedName('.'));
 		else

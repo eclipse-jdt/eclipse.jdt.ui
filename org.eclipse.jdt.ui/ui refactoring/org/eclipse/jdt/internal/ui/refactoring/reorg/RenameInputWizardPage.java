@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
@@ -47,6 +46,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
 import org.eclipse.jdt.internal.ui.refactoring.DelegateUIHelper;
@@ -330,7 +330,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 							pattern= RefactoringMessages.RenameInputWizardPage_update_pattern_three;
 							break;
 					}
-					return MessageFormat.format(pattern, objects);
+					return Messages.format(pattern, objects);
 				}
 				return null;
 			}

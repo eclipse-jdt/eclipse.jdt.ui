@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.code;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -611,7 +610,7 @@ public class ExtractConstantRefactoring extends Refactoring implements IInitiali
 				} catch (JavaModelException exception) {
 					JavaPlugin.log(exception);
 				}
-				return new RefactoringDescriptor(ID_EXTRACT_CONSTANT, project, MessageFormat.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description, new String[] { description + fConstantName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression()) }), null, arguments, flags);
+				return new RefactoringDescriptor(ID_EXTRACT_CONSTANT, project, Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description, new String[] { description + fConstantName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression()) }), null, arguments, flags);
 			}
 		};
 	}

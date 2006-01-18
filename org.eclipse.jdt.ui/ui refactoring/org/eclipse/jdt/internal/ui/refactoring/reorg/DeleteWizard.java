@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
-import java.text.MessageFormat;
-
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
@@ -40,6 +38,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.refactoring.MessageWizardPage;
@@ -93,10 +92,10 @@ public class DeleteWizard extends RefactoringWizard {
 				if (1 == numberOfSelectedElements()) {
 					String pattern= createConfirmationStringForOneElement();
 					String name= getNameOfSingleSelectedElement();
-					return MessageFormat.format(pattern, new String[] { name });
+					return Messages.format(pattern, new String[] { name });
 				} else {
 					String pattern= createConfirmationStringForManyElements();
-					return MessageFormat.format(pattern, new String[] { String.valueOf(numberOfSelectedElements())});
+					return Messages.format(pattern, new String[] { String.valueOf(numberOfSelectedElements())});
 				}
 			} catch (JavaModelException e) {
 				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=19253

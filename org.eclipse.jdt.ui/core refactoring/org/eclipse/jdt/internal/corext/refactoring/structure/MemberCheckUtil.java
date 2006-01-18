@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
@@ -27,9 +29,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
 class MemberCheckUtil {
 	
@@ -83,20 +82,20 @@ class MemberCheckUtil {
 		String typeName= type.getElementName();
 		IType destinationTypeType= destinationType.getType(typeName);
 		if (destinationTypeType.exists()){
-			String message= MessageFormat.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict0,  
+			String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict0,  
 					new String[]{typeName, JavaModelUtil.getFullyQualifiedName(destinationType)});
 			RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationTypeType.getNameRange());
 			result.addError(message, context);
 		} else {
 			//need to check the hierarchy of enclosing and enclosed types
 			if (destinationType.getElementName().equals(typeName)){
-				String message= MessageFormat.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict1,  
+				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict1,  
 						new String[]{JavaModelUtil.getFullyQualifiedName(type)});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
 			}
 			if (typeNameExistsInEnclosingTypeChain(destinationType, typeName)){
-				String message= MessageFormat.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict2,  
+				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict2,  
 						new String[]{JavaModelUtil.getFullyQualifiedName(type)});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
@@ -110,13 +109,13 @@ class MemberCheckUtil {
 		for (int i= 0; i < enclosedTypes.length; i++) {
 			IType enclosedType= enclosedTypes[i];
 			if (destinationType.getElementName().equals(enclosedType.getElementName())){
-				String message= MessageFormat.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict3,  
+				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict3,  
 						new String[]{JavaModelUtil.getFullyQualifiedName(enclosedType), JavaModelUtil.getFullyQualifiedName(type)});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);
 			}
 			if (typeNameExistsInEnclosingTypeChain(destinationType, enclosedType.getElementName())){
-				String message= MessageFormat.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict4,  
+				String message= Messages.format(RefactoringCoreMessages.MemberCheckUtil_type_name_conflict4,  
 						new String[]{JavaModelUtil.getFullyQualifiedName(enclosedType), JavaModelUtil.getFullyQualifiedName(type)});
 				RefactoringStatusContext context= JavaStatusContext.create(destinationType.getCompilationUnit(), destinationType.getNameRange());
 				result.addError(message, context);

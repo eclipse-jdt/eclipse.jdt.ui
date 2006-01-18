@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.structure;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -1174,7 +1173,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IDelegati
 						JavaPlugin.log(exception);
 					}
 					try {
-						return new RefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, MessageFormat.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), null, arguments, flags);
+						return new RefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), null, arguments, flags);
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 						return null;

@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
@@ -99,6 +98,7 @@ import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
@@ -421,7 +421,7 @@ public class PasteAction extends SelectionDispatchAction{
 					final ICompilationUnit cu= fDestinationPack.getCompilationUnit(cuName);
 					boolean alreadyExists= cu.exists();
 					if (alreadyExists) {
-						String msg= MessageFormat.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] {cuName});
+						String msg= Messages.format(ReorgMessages.PasteAction_TextPaster_exists, new Object[] {cuName});
 						boolean overwrite= MessageDialog.openQuestion(getShell(), ReorgMessages.PasteAction_TextPaster_confirmOverwriting, msg);
 						if (! overwrite)
 							return;

@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.reorg;
 
 import java.net.URI;
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -136,7 +135,7 @@ public class ReorgUtils {
 	public static String getName(IResource resource) {
 		String pattern= createNamePattern(resource);
 		String[] args= createNameArguments(resource);
-		return MessageFormat.format(pattern, args);
+		return Messages.format(pattern, args);
 	}
 	
 	private static String createNamePattern(IResource resource) {
@@ -160,7 +159,7 @@ public class ReorgUtils {
 	public static String getName(IJavaElement element) throws JavaModelException {
 		String pattern= createNamePattern(element);
 		String[] args= createNameArguments(element);
-		return MessageFormat.format(pattern, args);
+		return Messages.format(pattern, args);
 	}
 
 	private static String[] createNameArguments(IJavaElement element) throws JavaModelException {
