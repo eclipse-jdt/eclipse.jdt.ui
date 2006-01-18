@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBuffer;
@@ -47,6 +48,8 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.IBufferChangedListener;
 import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -451,11 +454,14 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 			try {
 				String curr= tracker.getLineDelimiter(i);
 				if (curr != null && !fLegalLineDelimiters.contains(curr)) {
-					StringBuffer buf= new StringBuffer("New line delimiter added to new code: "); //$NON-NLS-1$
+					StringBuffer buf= new StringBuffer("WARNING: javaeditor.DocumentAdapter added new line delimiter to code: "); //$NON-NLS-1$
 					for (int k= 0; k < curr.length(); k++) {
-						buf.append(String.valueOf((int) curr.charAt(k)));
+						if (k > 0)
+							buf.append(' ');
+						buf.append((int)curr.charAt(k));
 					}
-					JavaPlugin.log(new Exception(buf.toString()));
+					IStatus status= new Status(IStatus.WARNING, JavaUI.ID_PLUGIN, IStatus.OK, buf.toString(), new Throwable());
+					JavaPlugin.log(status);
 				}
 			} catch (BadLocationException e) {
 				JavaPlugin.log(e);
