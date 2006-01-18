@@ -89,7 +89,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	/**
 	 * A context that contains the information needed to compute the folding structure of an
 	 * {@link ICompilationUnit} or an {@link IClassFile}. Computed folding regions are collected
-	 * via {@linkplain #addProjectionRange(DefaultJavaFoldingStructureProvider.JavaProjectionAnnotation, Position) addProjectionRange}.
+	 * via
+	 * {@linkplain #addProjectionRange(DefaultJavaFoldingStructureProvider.JavaProjectionAnnotation, Position) addProjectionRange}.
 	 * 
 	 * @since 3.2
 	 */
@@ -97,10 +98,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		private final ProjectionAnnotationModel fModel;
 		private final IDocument fDocument;
 		private final boolean fAllowCollapsing;
-		
+
 		private IType fFirstType;
 		private boolean fHasHeaderComment;
-		private boolean fIsCancelled= false;
 		private LinkedHashMap fMap= new LinkedHashMap();
 
 		FoldingStructureComputationContext(IDocument document, ProjectionAnnotationModel model, boolean allowCollapsing) {
@@ -133,14 +133,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			fHasHeaderComment= true;
 		}
 		
-		void cancel() {
-			fIsCancelled= true;
-		}
-		
-		boolean isCancelled() {
-			return fIsCancelled;
-		}
-
 		/**
 		 * Returns <code>true</code> if newly created folding regions may be collapsed,
 		 * <code>false</code> if not. This is usually <code>false</code> when updating the
@@ -262,9 +254,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		 */
 		public String toString() {
 			return "JavaProjectionAnnotation:\n" + //$NON-NLS-1$
-					"\telement: \t"+fJavaElement.toString()+"\n" + //$NON-NLS-1$ //$NON-NLS-2$
+					"\telement: \t"+ fJavaElement.toString() + "\n" + //$NON-NLS-1$ //$NON-NLS-2$
 					"\tcollapsed: \t" + isCollapsed() + "\n" + //$NON-NLS-1$ //$NON-NLS-2$
-					"\tcomment: \t" + fIsComment + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
+					"\tcomment: \t" + isComment() + "\n"; //$NON-NLS-1$ //$NON-NLS-2$
 		}
 	}
 	
@@ -734,7 +726,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * </p>
 	 */
 	protected void handleProjectionDisabled() {
-		// fContext.cancel(); FIXME cancel any running computation
 		if (fElementListener != null) {
 			JavaCore.removeElementChangedListener(fElementListener);
 			fElementListener= null;
@@ -935,6 +926,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 				break;
 			case IJavaElement.METHOD:
 			case IJavaElement.FIELD:
+			case IJavaElement.INITIALIZER:
 				collapse= ctx.collapseMembers();
 				break;
 			default:
@@ -1047,9 +1039,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	private IRegion computeHeaderComment(FoldingStructureComputationContext ctx) throws JavaModelException {
-		if (ctx.isCancelled())
-			return null;
-
 		// search at most up to the first type
 		ISourceRange range= ctx.getFirstType().getSourceRange();
 		if (range == null)
@@ -1134,7 +1123,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 *         <code>null</code> if the region is too small to be foldable (e.g. only one line)
 	 */
 	protected final IRegion normalizeRegion(IRegion region, FoldingStructureComputationContext ctx) {
-		if (region == null || ctx.isCancelled())
+		if (region == null)
 			return null;
 		
 		IDocument document= ctx.getDocument();
