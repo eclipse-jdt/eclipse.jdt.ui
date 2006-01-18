@@ -73,7 +73,7 @@ import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoFactory;
 import org.eclipse.jdt.internal.corext.util.TypeInfoFilter;
-import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
+import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 import org.eclipse.jdt.internal.corext.util.UnresolvableTypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfo.TypeInfoAdapter;
 
@@ -467,9 +467,9 @@ public class TypeInfoViewer {
 		protected TypeInfoLabelProvider fLabelProvider;
 		
 		protected TypeInfoFilter fFilter;
-		protected TypeInfoHistory fHistory;
+		protected OpenTypeHistory fHistory;
 		
-		protected AbstractSearchJob(int ticket, TypeInfoViewer viewer, TypeInfoFilter filter, TypeInfoHistory history, int numberOfVisibleItems, int mode) {
+		protected AbstractSearchJob(int ticket, TypeInfoViewer viewer, TypeInfoFilter filter, OpenTypeHistory history, int numberOfVisibleItems, int mode) {
 			super(JavaUIMessages.TypeInfoViewer_job_label, viewer);
 			fMode= mode;
 			fTicket= ticket;
@@ -614,7 +614,7 @@ public class TypeInfoViewer {
 		private int fElementKind;
 		private SearchRequestor fReqestor;
 		
-		public SearchEngineJob(int ticket, TypeInfoViewer viewer, TypeInfoFilter filter, TypeInfoHistory history, int numberOfVisibleItems, int mode, 
+		public SearchEngineJob(int ticket, TypeInfoViewer viewer, TypeInfoFilter filter, OpenTypeHistory history, int numberOfVisibleItems, int mode, 
 				IJavaSearchScope scope, int elementKind) {
 			super(ticket, viewer, filter, history, numberOfVisibleItems, mode);
 			fScope= scope;
@@ -654,7 +654,7 @@ public class TypeInfoViewer {
 	
 	private static class CachedResultJob extends AbstractSearchJob {
 		private TypeInfo[] fLastResult;
-		public CachedResultJob(int ticket, TypeInfo[] lastResult, TypeInfoViewer viewer, TypeInfoFilter filter, TypeInfoHistory history, int numberOfVisibleItems, int mode) {
+		public CachedResultJob(int ticket, TypeInfo[] lastResult, TypeInfoViewer viewer, TypeInfoFilter filter, OpenTypeHistory history, int numberOfVisibleItems, int mode) {
 			super(ticket, viewer, filter, history, numberOfVisibleItems, mode);
 			fLastResult= lastResult;
 		}
@@ -763,7 +763,7 @@ public class TypeInfoViewer {
 	private int fProgressCounter;
 	private ProgressUpdateJob fProgressUpdateJob;
 	
-	private TypeInfoHistory fHistory;
+	private OpenTypeHistory fHistory;
 
 	/* non virtual table */
 	private int fNextElement;
@@ -919,7 +919,7 @@ public class TypeInfoViewer {
 		// must be created in the UI thread.
 		fImageManager= new ImageManager();
 		
-		fHistory= TypeInfoHistory.getInstance();
+		fHistory= OpenTypeHistory.getInstance();
 		if (initialFilter != null && initialFilter.length() > 0)
 			fTypeInfoFilter= createTypeInfoFilter(initialFilter);
 		GC gc= null;

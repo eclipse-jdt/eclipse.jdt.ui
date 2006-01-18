@@ -11,12 +11,15 @@
 package org.eclipse.jdt.ui.tests.core;
 
 import java.util.Arrays;
+import java.util.Comparator;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.internal.ui.dialogs.SelectionHistory;
+import org.eclipse.jdt.internal.corext.util.History;
+
+import org.w3c.dom.Element;
 
 
 public class SelectionHistoryTest extends TestCase {
@@ -94,66 +97,96 @@ public class SelectionHistoryTest extends TestCase {
 		}
 		buf.append('}');
 	}
+	
+	private static final class TestHistoryComparator implements Comparator {
+
+		private final History fHistory;
+
+		public TestHistoryComparator(History history) {
+			fHistory= history;
+		}
+
+		public int compare(Object o1, Object o2) {
+			int histCompare= fHistory.compare(o1, o2);
+			assertTrue("Key compare not equals Object compare", histCompare == fHistory.compareByKeys(o1, o2));
+			if (histCompare != 0)
+				return histCompare;
+			
+			return ((String)o1).compareTo((String)o2);
+		}
+		
+	}
+	
+	private static final class TestHistory extends History {
+
+		public TestHistory() {
+			super("");
+		}
+		protected void setAttributes(Object object, Element element) {}
+		protected Object createFromElement(Element type) {return null;}
+		protected Object getKey(Object object) {return object;}
+		
+	}
 
 	public void testOrganizeImportHistory01() throws Exception {
-		SelectionHistory history= SelectionHistory.getInstance(SelectionHistory.ORGANIZE_IMPORT_ID);
-		history.clear();
+		History history= new TestHistory();
+		Comparator comparator= new TestHistoryComparator(history);
 		
 		String[] strings= {"d", "c", "b", "a"};
 		String[] expected= {"a", "b", "c", "d"};
 		
-		Arrays.sort(strings, history.getComparator());
+		Arrays.sort(strings, comparator);
 		assertEquals(strings, expected);
 	}
 	
 	public void testOrganizeImportHistory02() throws Exception {
-		SelectionHistory history= SelectionHistory.getInstance(SelectionHistory.ORGANIZE_IMPORT_ID);
-		history.clear();
+		History history= new TestHistory();
+		Comparator comparator= new TestHistoryComparator(history);
 		
 		String[] strings= {"a", "b", "c", "d"};
-		history.remember("a");
+		history.accessed("a");
 		String[] expected= {"a", "b", "c", "d"};
-		
-		Arrays.sort(strings, history.getComparator());
+
+		Arrays.sort(strings, comparator);
 		assertEquals(strings, expected);
 	}
 	
 	public void testOrganizeImportHistory03() throws Exception {
-		SelectionHistory history= SelectionHistory.getInstance(SelectionHistory.ORGANIZE_IMPORT_ID);
-		history.clear();
+		History history= new TestHistory();
+		Comparator comparator= new TestHistoryComparator(history);
 		
 		String[] strings= {"a", "b", "c", "d"};
-		history.remember("b");
+		history.accessed("b");
 		String[] expected= {"b", "a", "c", "d"};
-		
-		Arrays.sort(strings, history.getComparator());
+
+		Arrays.sort(strings, comparator);
 		assertEquals(strings, expected);
 	}
 	
 	public void testOrganizeImportHistory04() throws Exception {
-		SelectionHistory history= SelectionHistory.getInstance(SelectionHistory.ORGANIZE_IMPORT_ID);
-		history.clear();
+		History history= new TestHistory();
+		Comparator comparator= new TestHistoryComparator(history);
 		
 		String[] strings= {"a", "b", "c", "d"};
-		history.remember("b");
-		history.remember("d");
+		history.accessed("b");
+		history.accessed("d");
 		String[] expected= {"d", "b", "a", "c"};
-		
-		Arrays.sort(strings, history.getComparator());
+
+		Arrays.sort(strings, comparator);
 		assertEquals(strings, expected);
 	}
 	
 	public void testOrganizeImportHistory05() throws Exception {
-		SelectionHistory history= SelectionHistory.getInstance(SelectionHistory.ORGANIZE_IMPORT_ID);
-		history.clear();
+		History history= new TestHistory();
+		Comparator comparator= new TestHistoryComparator(history);
 		
 		String[] strings= {"a", "b", "c", "d"};
-		history.remember("b");
-		history.remember("d");
-		history.remember("b");
+		history.accessed("b");
+		history.accessed("d");
+		history.accessed("b");
 		String[] expected= {"b", "d", "a", "c"};
-		
-		Arrays.sort(strings, history.getComparator());
+
+		Arrays.sort(strings, comparator);
 		assertEquals(strings, expected);
 	}
 

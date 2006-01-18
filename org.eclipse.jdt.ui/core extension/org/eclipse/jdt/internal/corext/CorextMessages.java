@@ -32,8 +32,8 @@ public final class CorextMessages extends NLS {
 	public static String AllTypesCache_searching;
 	public static String AllTypesCache_checking_type_cache;
 	
-	public static String TypeInfoHistory_error_serialize;
-	public static String TypeInfoHistory_error_read;
+	public static String History_error_serialize;
+	public static String History_error_read;
 	public static String TypeInfoHistory_consistency_check;
 
 	static {

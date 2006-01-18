@@ -53,7 +53,7 @@ import org.eclipse.jdt.core.search.TypeNameRequestor;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
+import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.dialogs.TypeSelectionExtension;
@@ -226,7 +226,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 	public boolean close() {
 		boolean result;
 		try {
-			TypeInfoHistory.getInstance().save();
+			OpenTypeHistory.getInstance().save();
 		} finally {
 			result= super.close();
 		}
@@ -250,7 +250,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 			fScope= fContent.getScope();
 		}
 		
-		TypeInfoHistory history= TypeInfoHistory.getInstance();
+		OpenTypeHistory history= OpenTypeHistory.getInstance();
 		List result= new ArrayList(selected.length);
 		if (result != null) {
 			for (int i= 0; i < selected.length; i++) {
@@ -286,7 +286,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 					IJobManager manager= Platform.getJobManager();
 					manager.join(JavaUI.ID_PLUGIN, monitor);
 				}
-				TypeInfoHistory history= TypeInfoHistory.getInstance();
+				OpenTypeHistory history= OpenTypeHistory.getInstance();
 				if (fgFirstTime || history.isEmpty()) {
 					monitor.beginTask(JavaUIMessages.TypeSelectionDialog_progress_consistency, 100);
 					if (history.needConsistencyCheck()) {
@@ -302,7 +302,7 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 				}
 			}
 			public boolean needsExecution() {
-				TypeInfoHistory history= TypeInfoHistory.getInstance();
+				OpenTypeHistory history= OpenTypeHistory.getInstance();
 				return fgFirstTime || history.isEmpty() || history.needConsistencyCheck(); 
 			}
 			private void refreshSearchIndices(IProgressMonitor monitor) throws InvocationTargetException {

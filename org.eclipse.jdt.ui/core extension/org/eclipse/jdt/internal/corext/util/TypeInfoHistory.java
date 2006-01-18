@@ -8,186 +8,22 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
- package org.eclipse.jdt.internal.corext.util;
+package org.eclipse.jdt.internal.corext.util;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedHashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.StringTokenizer;
 
-import javax.xml.parsers.DocumentBuilder;
-import javax.xml.parsers.DocumentBuilderFactory;
-import javax.xml.parsers.ParserConfigurationException;
-import javax.xml.transform.OutputKeys;
-import javax.xml.transform.Transformer;
-import javax.xml.transform.TransformerException;
-import javax.xml.transform.TransformerFactory;
-import javax.xml.transform.TransformerFactoryConfigurationError;
-import javax.xml.transform.dom.DOMSource;
-import javax.xml.transform.stream.StreamResult;
-
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
-import org.eclipse.core.runtime.Status;
-import org.eclipse.core.runtime.jobs.Job;
-
-import org.eclipse.jdt.core.ElementChangedEvent;
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IElementChangedListener;
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaElementDelta;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.search.IJavaSearchScope;
-import org.eclipse.jdt.core.search.SearchEngine;
-
-import org.eclipse.jdt.internal.corext.CorextMessages;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaUIException;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
-
-import org.w3c.dom.Document;
 import org.w3c.dom.Element;
-import org.w3c.dom.Node;
-import org.w3c.dom.NodeList;
-import org.xml.sax.InputSource;
-import org.xml.sax.SAXException;
 
-public class TypeInfoHistory {
-	
-	private static class TypeHistoryDeltaListener implements IElementChangedListener {
-		public void elementChanged(ElementChangedEvent event) {
-			if (processDelta(event.getDelta())) {
-				TypeInfoHistory.getInstance().markAsInconsistent();
-			}
-		}
-		
-		/**
-		 * Computes whether the history needs a consistency check or not.
-		 * 
-		 * @param delta the Java element delta
-		 * 
-		 * @return <code>true</code> if consistency must be checked 
-		 *  <code>false</code> otherwise.
-		 */
-		private boolean processDelta(IJavaElementDelta delta) {
-			IJavaElement elem= delta.getElement();
-			
-			boolean isChanged= delta.getKind() == IJavaElementDelta.CHANGED;
-			boolean isRemoved= delta.getKind() == IJavaElementDelta.REMOVED;
-						
-			switch (elem.getElementType()) {
-				case IJavaElement.JAVA_PROJECT:
-					if (isRemoved || (isChanged && 
-							(delta.getFlags() & IJavaElementDelta.F_CLOSED) != 0)) {
-						return true;
-					}
-					return processChildrenDelta(delta);
-				case IJavaElement.PACKAGE_FRAGMENT_ROOT:
-					if (isRemoved || (isChanged && (
-							(delta.getFlags() & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0 ||
-							(delta.getFlags() & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0))) {
-						return true;
-					}
-					return processChildrenDelta(delta);
-				case IJavaElement.TYPE:
-					if (isChanged && (delta.getFlags() & IJavaElementDelta.F_MODIFIERS) != 0) {
-						return true;
-					}
-					// type children can be inner classes: fall through
-				case IJavaElement.JAVA_MODEL:
-				case IJavaElement.PACKAGE_FRAGMENT:
-				case IJavaElement.CLASS_FILE:
-					if (isRemoved) {
-						return true;
-					}				
-					return processChildrenDelta(delta);
-				case IJavaElement.COMPILATION_UNIT:
-					// Not the primary compilation unit. Ignore it 
-					if (!JavaModelUtil.isPrimary((ICompilationUnit) elem)) {
-						return false;
-					}
-
-					if (isRemoved || (isChanged && isUnknownStructuralChange(delta.getFlags()))) {
-						return true;
-					}
-					return processChildrenDelta(delta);
-				default:
-					// fields, methods, imports ect
-					return false;
-			}	
-		}
-		
-		private boolean isUnknownStructuralChange(int flags) {
-			if ((flags & IJavaElementDelta.F_CONTENT) == 0)
-				return false;
-			return (flags & IJavaElementDelta.F_FINE_GRAINED) == 0; 
-		}
-
-		/*
-		private boolean isPossibleStructuralChange(int flags) {
-			return (flags & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_FINE_GRAINED)) == IJavaElementDelta.F_CONTENT;
-		}
-		*/		
-		
-		private boolean processChildrenDelta(IJavaElementDelta delta) {
-			IJavaElementDelta[] children= delta.getAffectedChildren();
-			for (int i= 0; i < children.length; i++) {
-				if (processDelta(children[i])) {
-					return true;
-				}
-			}
-			return false;
-		}
-	}
-	
-	private static class UpdateJob extends Job {
-		public static final String FAMILY= UpdateJob.class.getName();
-		private UpdateJob fLastJob;
-		public UpdateJob(UpdateJob lastJob) {
-			super(CorextMessages.TypeInfoHistory_consistency_check);
-			fLastJob= lastJob;
-		}
-		protected IStatus run(IProgressMonitor monitor) {
-			TypeInfoHistory history= TypeInfoHistory.getInstance();
-			try {
-				if (fLastJob != null) {
-					boolean joined= false;
-					while (!joined) {
-						try {
-							fLastJob.join();
-							joined= true;
-						} catch (InterruptedException e) {
-						}
-					}
-					fLastJob= null;
-				}
-				history.internalCheckConsistency(monitor);
-			} finally {
-				history.clearUpdateJob(this);
-			}
-			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
-		}
-		public boolean belongsTo(Object family) {
-			return FAMILY.equals(family);
-		}
-	}
+/**
+ * History storing {@link TypeInfo}s as objects and 
+ * {@link TypeInfo#getFullyQualifiedName()}s as keys.
+ */
+public class TypeInfoHistory extends History {
 	
 	private static final String NODE_ROOT= "typeInfoHistroy"; //$NON-NLS-1$
 	private static final String NODE_TYPE_INFO= "typeInfo"; //$NON-NLS-1$
@@ -198,137 +34,37 @@ public class TypeInfoHistory {
 	private static final String NODE_MODIFIERS= "modifiers";  //$NON-NLS-1$
 	
 	private static final char[][] EMPTY_ENCLOSING_NAMES= new char[0][0];
-	
-	private Map fHistory= new LinkedHashMap(80, 0.75f, true) {
-		private static final long serialVersionUID= 1L;
-		protected boolean removeEldestEntry(Map.Entry eldest) {
-			return size() > 60;
-		}
-	};
-	
-	private boolean fNeedsConsistencyCheck;
-	private IElementChangedListener fDeltaListener;
-	private UpdateJob fUpdateJob;
-	
-	private static final String FILENAME= "TypeInfoHistory.xml"; //$NON-NLS-1$
 	private static TypeInfoHistory fgInstance;
 	
-	public static synchronized TypeInfoHistory getInstance() {
+	private final TypeInfoFactory fTypeInfoFactory;
+	
+	public static TypeInfoHistory getDefault() {
 		if (fgInstance == null)
-			fgInstance= new TypeInfoHistory();
+			fgInstance= new TypeInfoHistory("TypeInfoHistory.xml"); //$NON-NLS-1$
+		
 		return fgInstance;
 	}
 	
-	public static void shutdown() {
-		if (fgInstance == null)
-			return;
-		fgInstance.doShutdown();
-		
-	}
-	
-	private TypeInfoHistory() {
-		fNeedsConsistencyCheck= true;
-		fDeltaListener= new TypeHistoryDeltaListener();
-		JavaCore.addElementChangedListener(fDeltaListener);
+	public TypeInfoHistory(String fileName) {
+		super(fileName, NODE_ROOT, NODE_TYPE_INFO);
+		fTypeInfoFactory= new TypeInfoFactory();
 		load();
 	}
 	
-	public synchronized void markAsInconsistent() {
-		fNeedsConsistencyCheck= true;
-		if (fUpdateJob != null) {
-			fUpdateJob.cancel();
-		}
-		fUpdateJob= new UpdateJob(fUpdateJob);
-		fUpdateJob.setPriority(Job.SHORT);
-		fUpdateJob.schedule();
-	}
-	
-	public synchronized boolean needConsistencyCheck() {
-		return fNeedsConsistencyCheck;
-	}
-	
-	public synchronized boolean isEmpty() {
-		return fHistory.isEmpty();
-	}
-	
 	public synchronized boolean contains(TypeInfo type) {
-		return fHistory.get(type) != null;
-	}
-
-	public void checkConsistency(IProgressMonitor monitor) throws OperationCanceledException {
-		synchronized (this) {
-			if (!fNeedsConsistencyCheck)
-				return;
-		}
-		// When joining the update job make sure that we don't hold looks
-		// Otherwise the update Job can't continue normally. As a result
-		// the update job could have already finished before we join it.
-		// However this isn't a problem since the join will then be a NOP.
-		if (hasUpdateJob()) {
-			try {
-				Platform.getJobManager().join(UpdateJob.FAMILY, monitor);
-			} catch (OperationCanceledException e) {
-				// Ignore and do the consistency check without
-				// waiting for the update job.
-			} catch (InterruptedException e) {
-				// Ignore and do the consistency check without
-				// waiting for the update job.
-			}
-		}
-		// Since we gave up the lock when joining the update job
-		// we have to re check the fNeedsConsistencyCheck flag
-		synchronized(this) {
-			if (!fNeedsConsistencyCheck)
-				return;
-			internalCheckConsistency(monitor);
-		}
-	}
-
-	private synchronized void internalCheckConsistency(IProgressMonitor monitor) throws OperationCanceledException {
-		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
-		List keys= new ArrayList(fHistory.keySet());
-		monitor.beginTask(CorextMessages.TypeInfoHistory_consistency_check, keys.size());
-		monitor.setTaskName(CorextMessages.TypeInfoHistory_consistency_check);
-		for (Iterator iter= keys.iterator(); iter.hasNext();) {
-			TypeInfo type= (TypeInfo)iter.next();
-			try {
-				IType jType= type.resolveType(scope);
-				if (jType == null || !jType.exists()) {
-					fHistory.remove(type);
-				} else {
-					// copy over the modifiers since they may have changed
-					type.setModifiers(jType.getFlags());
-				}
-			} catch (JavaModelException e) {
-				fHistory.remove(type);
-			}
-			if (monitor.isCanceled())
-				throw new OperationCanceledException();
-			monitor.worked(1);
-		}
-		monitor.done();
-		fNeedsConsistencyCheck= false;
-	}
-	
-	private synchronized void clearUpdateJob(UpdateJob toClear) {
-		if (fUpdateJob == toClear)
-			fUpdateJob= null;
-	}
-	
-	private synchronized boolean hasUpdateJob() {
-		return fUpdateJob != null;
+		return super.contains(type);
 	}
 	
 	public synchronized void accessed(TypeInfo info) {
-		fHistory.put(info, info);
+		super.accessed(info);
 	}
 	
 	public synchronized TypeInfo remove(TypeInfo info) {
-		return (TypeInfo)fHistory.remove(info);
+		return (TypeInfo)super.remove(info);
 	}
 	
 	public synchronized TypeInfo[] getTypeInfos() {
-		Collection values= fHistory.values();
+		Collection values= getValues();
 		int size= values.size();
 		TypeInfo[] result= new TypeInfo[size];
 		int i= size - 1;
@@ -340,7 +76,7 @@ public class TypeInfoHistory {
 	}
 	
 	public synchronized TypeInfo[] getFilteredTypeInfos(TypeInfoFilter filter) {
-		Collection values= fHistory.values();
+		Collection values= getValues();
 		List result= new ArrayList();
 		for (Iterator iter= values.iterator(); iter.hasNext();) {
 			TypeInfo type= (TypeInfo)iter.next();
@@ -352,132 +88,33 @@ public class TypeInfoHistory {
 		
 	}
 	
-	private void load() {
-		IPath stateLocation= JavaPlugin.getDefault().getStateLocation().append(FILENAME);
-		File file= new File(stateLocation.toOSString());
-		if (file.exists()) {
-			InputStreamReader reader= null;
-	        try {
-				reader = new InputStreamReader(new FileInputStream(file), "utf-8");//$NON-NLS-1$
-				load(new InputSource(reader));
-			} catch (IOException e) {
-				JavaPlugin.log(e);
-			} catch (CoreException e) {
-				JavaPlugin.log(e);
-			} finally {
-				try {
-					if (reader != null)
-						reader.close();
-				} catch (IOException e) {
-					JavaPlugin.log(e);
-				}
-			}
-		}
+	protected Object getKey(Object object) {
+		return ((TypeInfo)object).getFullyQualifiedName();
 	}
-	
-	private void load(InputSource inputSource) throws CoreException {
-		TypeInfoFactory factory= new TypeInfoFactory();
-		Element root;
-		try {
-			DocumentBuilder parser = DocumentBuilderFactory.newInstance().newDocumentBuilder();
-			root = parser.parse(inputSource).getDocumentElement();
-		} catch (SAXException e) {
-			throw createException(e, CorextMessages.TypeInfoHistory_error_read);  
-		} catch (ParserConfigurationException e) {
-			throw createException(e, CorextMessages.TypeInfoHistory_error_read); 
-		} catch (IOException e) {
-			throw createException(e, CorextMessages.TypeInfoHistory_error_read); 
-		}
-		
-		if (root == null) return;
-		if (!root.getNodeName().equalsIgnoreCase(NODE_ROOT)) {
-			return;
-		}
-		NodeList list= root.getChildNodes();
-		int length= list.getLength();
-		for (int i= 0; i < length; ++i) {
-			Node node= list.item(i);
-			if (node.getNodeType() == Node.ELEMENT_NODE) {
-				Element type= (Element) node;
-				if (type.getNodeName().equalsIgnoreCase(NODE_TYPE_INFO)) {
-					String name= type.getAttribute(NODE_NAME);
-					String pack= type.getAttribute(NODE_PACKAGE);
-					char[][] enclosingNames= getEnclosingNames(type);
-					String path= type.getAttribute(NODE_PATH);
-					int modifiers= 0;
-					try {
-						modifiers= Integer.parseInt(type.getAttribute(NODE_MODIFIERS));
-					} catch (NumberFormatException e) {
-						// take zero
-					}
-					TypeInfo info= factory.create(
-						pack.toCharArray(), name.toCharArray(), enclosingNames, modifiers, path);
-					fHistory.put(info, info);
-				}
-			}
-		}
-	}
-	
-	public synchronized void save() {
-		IPath stateLocation= JavaPlugin.getDefault().getStateLocation().append(FILENAME);
-		File file= new File(stateLocation.toOSString());
-		OutputStream out= null;
-		try {
-			out= new FileOutputStream(file); 
-			save(out);
-		} catch (IOException e) {
-			JavaPlugin.log(e);
-		} catch (CoreException e) {
-			JavaPlugin.log(e);
-		} catch (TransformerFactoryConfigurationError e) {
-			// The XML library can be misconficgured (e.g. via 
-			// -Djava.endorsed.dirs=C:\notExisting\xerces-2_7_1)
-			JavaPlugin.log(e);
-		} finally {
-			try {
-				if (out != null) {
-					out.close();
-				}
-			} catch (IOException e) {
-				JavaPlugin.log(e);
-			}
-		}
-	}
-	
-	private void save(OutputStream stream) throws CoreException {
-		try {
-			DocumentBuilderFactory factory= DocumentBuilderFactory.newInstance();
-			DocumentBuilder builder= factory.newDocumentBuilder();		
-			Document document= builder.newDocument();
-			
-			Element rootElement = document.createElement(NODE_ROOT);
-			document.appendChild(rootElement);
-	
-			Iterator values= fHistory.values().iterator();
-			while (values.hasNext()) {
-				TypeInfo type= (TypeInfo)values.next();
-				Element typeElement= document.createElement(NODE_TYPE_INFO);
-				typeElement.setAttribute(NODE_NAME, type.getTypeName());
-				typeElement.setAttribute(NODE_PACKAGE, type.getPackageName());
-				typeElement.setAttribute(NODE_ENCLOSING_NAMES, type.getEnclosingName());
-				typeElement.setAttribute(NODE_PATH, type.getPath());
-				typeElement.setAttribute(NODE_MODIFIERS, Integer.toString(type.getModifiers()));
-				rootElement.appendChild(typeElement);
-			}
-			
-			Transformer transformer=TransformerFactory.newInstance().newTransformer();
-			transformer.setOutputProperty(OutputKeys.METHOD, "xml"); //$NON-NLS-1$
-			transformer.setOutputProperty(OutputKeys.ENCODING, "UTF-8"); //$NON-NLS-1$
-			transformer.setOutputProperty(OutputKeys.INDENT, "yes"); //$NON-NLS-1$
-			DOMSource source = new DOMSource(document);
-			StreamResult result = new StreamResult(stream);
 
-			transformer.transform(source, result);
-		} catch (TransformerException e) {
-			throw createException(e, CorextMessages.TypeInfoHistory_error_serialize);
-		} catch (ParserConfigurationException e) {
-			throw createException(e, CorextMessages.TypeInfoHistory_error_serialize);
+	protected Object createFromElement(Element type) {
+		String name= type.getAttribute(NODE_NAME);
+		String pack= type.getAttribute(NODE_PACKAGE);
+		char[][] enclosingNames= getEnclosingNames(type);
+		String path= type.getAttribute(NODE_PATH);
+		int modifiers= 0;
+		try {
+			modifiers= Integer.parseInt(type.getAttribute(NODE_MODIFIERS));
+		} catch (NumberFormatException e) {
+			// take zero
 		}
+		TypeInfo info= fTypeInfoFactory.create(
+			pack.toCharArray(), name.toCharArray(), enclosingNames, modifiers, path);
+		return info;
+	}
+	
+	protected void setAttributes(Object object, Element typeElement) {
+		TypeInfo type= (TypeInfo)object;
+		typeElement.setAttribute(NODE_NAME, type.getTypeName());
+		typeElement.setAttribute(NODE_PACKAGE, type.getPackageName());
+		typeElement.setAttribute(NODE_ENCLOSING_NAMES, type.getEnclosingName());
+		typeElement.setAttribute(NODE_PATH, type.getPath());
+		typeElement.setAttribute(NODE_MODIFIERS, Integer.toString(type.getModifiers()));
 	}
 	
 	private char[][] getEnclosingNames(Element type) {
@@ -493,11 +130,4 @@ public class TypeInfoHistory {
 		return (char[][])names.toArray(new char[names.size()][]);
 	}
 
-	private static JavaUIException createException(Throwable t, String message) {
-		return new JavaUIException(JavaUIStatus.createError(IStatus.ERROR, message, t));
-	}	
-	
-	private void doShutdown() {
-		JavaCore.removeElementChangedListener(fDeltaListener);
-	}
 }

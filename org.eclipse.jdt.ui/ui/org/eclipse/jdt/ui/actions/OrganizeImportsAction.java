@@ -13,6 +13,7 @@ package org.eclipse.jdt.ui.actions;
 import java.lang.reflect.InvocationTargetException;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Comparator;
 import java.util.HashSet;
 
 import org.eclipse.core.runtime.CoreException;
@@ -72,6 +73,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
@@ -84,7 +86,6 @@ import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.dialogs.MultiElementListSelectionDialog;
 import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
-import org.eclipse.jdt.internal.ui.dialogs.SelectionHistory;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
@@ -107,6 +108,8 @@ import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
  * @since 2.0
  */
 public class OrganizeImportsAction extends SelectionDispatchAction {
+
+	private static final OrganizeImportComparator ORGANIZE_IMPORT_COMPARATOR= new OrganizeImportComparator();
 	
 	private JavaEditor fEditor;
 	/** <code>true</code> if the query dialog is showing. */
@@ -127,6 +130,23 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			if (fAction == null)
 				action.setEnabled(false);
 		}
+	}
+	
+	private static final class OrganizeImportComparator implements Comparator {
+		
+		public int compare(Object o1, Object o2) {
+			if (((String)o1).equals(o2))
+				return 0;
+			
+			TypeInfoHistory history= TypeInfoHistory.getDefault();
+			
+			int histCompare= history.compareByKeys(o1, o2);
+			if (histCompare != 0)
+				return histCompare;
+			
+			return ((String)o1).compareTo(o2);
+		}
+		
 	}
 
 	/**
@@ -528,8 +548,8 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		dialog.setTitle(ActionMessages.OrganizeImportsAction_selectiondialog_title); 
 		dialog.setMessage(ActionMessages.OrganizeImportsAction_selectiondialog_message);
 		dialog.setElements(openChoices);
-		SelectionHistory history= SelectionHistory.getInstance(SelectionHistory.ORGANIZE_IMPORT_ID);
-		dialog.setComparator(history.getComparator());
+		dialog.setComparator(ORGANIZE_IMPORT_COMPARATOR);
+		TypeInfoHistory history= TypeInfoHistory.getDefault();
 		if (dialog.open() == Window.OK) {
 			Object[] res= dialog.getResult();			
 			result= new TypeInfo[res.length];
@@ -537,9 +557,10 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				Object[] array= (Object[]) res[i];
 				if (array.length > 0) {
 					result[i]= (TypeInfo) array[0];
-					history.remember(result[i]);
+					history.accessed(result[i]);
 				}
 			}
+			history.save();
 		}
 		// restore selection
 		if (sel instanceof ITextSelection) {

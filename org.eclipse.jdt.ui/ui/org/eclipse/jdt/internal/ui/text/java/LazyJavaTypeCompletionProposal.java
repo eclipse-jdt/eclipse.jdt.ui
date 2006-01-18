@@ -33,6 +33,10 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.util.History;
+import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
+import org.eclipse.jdt.internal.corext.util.TypeInfoUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -77,7 +81,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		return fType;
 	}
 
-	protected final String getQualifiedTypeName() {
+	public final String getQualifiedTypeName() {
 		if (fQualifiedName == null)
 			fQualifiedName= String.valueOf(Signature.toCharArray(Signature.getTypeErasure(fProposal.getSignature())));
 		return fQualifiedName;
@@ -168,9 +172,23 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 			
 			rememberSelection();
 			
+			updateHistory();
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
+		}
+	}
+	
+	private void updateHistory() {
+		try {
+			TypeInfo info= TypeInfoUtil.searchTypeInfo(fCompilationUnit.getJavaProject(), null, getQualifiedTypeName());
+			if (info != null) {
+				History history= TypeInfoHistory.getDefault();
+				history.accessed(info);
+				history.save();
+			}
+		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
 	}
