@@ -22,14 +22,14 @@ import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 
 public class QualifiedNameComponent extends Composite {
 
 	private static final String PATTERNS= "patterns"; //$NON-NLS-1$
 	private Text fPatterns;
 
-	public QualifiedNameComponent(Composite parent, int style, final IQualifiedNameUpdatingRefactoring refactoring, IDialogSettings settings) {
+	public QualifiedNameComponent(Composite parent, int style, final IQualifiedNameUpdating refactoring, IDialogSettings settings) {
 		super(parent, style);
 		GridLayout layout= new GridLayout();
 		layout.marginWidth=0; layout.marginHeight= 0;

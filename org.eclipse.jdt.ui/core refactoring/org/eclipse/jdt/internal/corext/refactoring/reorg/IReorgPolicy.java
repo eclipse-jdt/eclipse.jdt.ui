@@ -26,9 +26,9 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdatingRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 
-interface IReorgPolicy extends IReorgEnablementPolicy, IQualifiedNameUpdatingRefactoring {
+interface IReorgPolicy extends IReorgEnablementPolicy, IQualifiedNameUpdating {
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws JavaModelException;
 	public RefactoringStatus setDestination(IResource resource) throws JavaModelException;
 	public RefactoringStatus setDestination(IJavaElement javaElement) throws JavaModelException;

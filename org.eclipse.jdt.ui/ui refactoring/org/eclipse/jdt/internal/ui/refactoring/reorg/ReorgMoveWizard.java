@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 
+import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
