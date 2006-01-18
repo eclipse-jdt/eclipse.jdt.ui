@@ -59,7 +59,6 @@ public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 			if (info != null) {
 				History history= TypeInfoHistory.getDefault();
 				history.accessed(info);
-				history.save();
 			}
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, CorrectionMessages.CUCorrectionProposal_error_title, CorrectionMessages.CUCorrectionProposal_error_message);

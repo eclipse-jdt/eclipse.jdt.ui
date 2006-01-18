@@ -217,7 +217,6 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 			if (info != null) {
 				History history= TypeInfoHistory.getDefault();
 				history.accessed(info);
-				history.save();
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);

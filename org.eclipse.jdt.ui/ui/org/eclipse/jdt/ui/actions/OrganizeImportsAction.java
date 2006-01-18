@@ -560,7 +560,6 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 					history.accessed(result[i]);
 				}
 			}
-			history.save();
 		}
 		// restore selection
 		if (sel instanceof ITextSelection) {
