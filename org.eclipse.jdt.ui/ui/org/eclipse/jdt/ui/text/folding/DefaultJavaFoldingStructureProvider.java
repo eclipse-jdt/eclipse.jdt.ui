@@ -905,7 +905,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	/**
 	 * Computes the folding structure for a given {@link IJavaElement java element}. Computed
 	 * projection annotations are
-	 * {@link DefaultJavaFoldingStructureProvider.FoldingStructureComputationContext#addProjectionRange(DefaultJavaFoldingStructureProvider.JavaProjectionAnnotation, Position)} added
+	 * {@link DefaultJavaFoldingStructureProvider.FoldingStructureComputationContext#addProjectionRange(DefaultJavaFoldingStructureProvider.JavaProjectionAnnotation, Position) added}
 	 * to the computation context.
 	 * <p>
 	 * Subclasses may extend or replace. The default implementation creates projection annotations
