@@ -734,16 +734,6 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			body.statements().add(
 					createReturningIfStatement(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM), fAst.newNullLiteral(), Operator.EQUALS, false));
 
-			// if (getClass() != obj.getClass()) return false;
-			MethodInvocation thisClass= fAst.newMethodInvocation();
-			thisClass.setName(fAst.newSimpleName(METHODNAME_GETCLASS));
-
-			MethodInvocation objGetClass= fAst.newMethodInvocation();
-			objGetClass.setExpression(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM));
-			objGetClass.setName(fAst.newSimpleName(METHODNAME_GETCLASS));
-
-			body.statements().add(createReturningIfStatement(thisClass, objGetClass, Operator.NOT_EQUALS, false));
-
 		} else {
 			// if (!super.equals(obj)) return false;
 			SuperMethodInvocation superEqualsCall= fAst.newSuperMethodInvocation();
@@ -760,6 +750,16 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 
 			body.statements().add(superEqualsIf);
 		}
+
+		// if (getClass() != obj.getClass()) return false;
+		MethodInvocation thisClass= fAst.newMethodInvocation();
+		thisClass.setName(fAst.newSimpleName(METHODNAME_GETCLASS));
+
+		MethodInvocation objGetClass= fAst.newMethodInvocation();
+		objGetClass.setExpression(fAst.newSimpleName(VARIABLE_NAME_EQUALS_PARAM));
+		objGetClass.setName(fAst.newSimpleName(METHODNAME_GETCLASS));
+
+		body.statements().add(createReturningIfStatement(thisClass, objGetClass, Operator.NOT_EQUALS, false));
 
 		// Type other= (Type) obj;
 		VariableDeclarationFragment sd= fAst.newVariableDeclarationFragment();
