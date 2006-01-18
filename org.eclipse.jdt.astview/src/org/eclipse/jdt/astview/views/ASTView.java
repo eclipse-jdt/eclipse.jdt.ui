@@ -14,6 +14,7 @@ package org.eclipse.jdt.astview.views;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -117,6 +118,10 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class ASTView extends ViewPart implements IShowInSource {
 	
+	/**
+	 * Avoid reference to {@link JavaCore#COMPILER_STATEMENTS_RECOVERY}, since it will be removed again.
+	 */
+	private static final String COMPILER_STATEMENTS_RECOVERY= "org.eclipse.jdt.core.compiler.statementsRecovery";
 	private static final int JLS3= AST.JLS3;
 	/** (Used to get rid of deprecation warnings in code)
 	 * @deprecated
@@ -383,6 +388,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private final static String SETTINGS_LINK_WITH_EDITOR= "link_with_editor"; //$NON-NLS-1$
 	private final static String SETTINGS_INPUT_KIND= "input_kind"; //$NON-NLS-1$
 	private final static String SETTINGS_NO_BINDINGS= "create_bindings"; //$NON-NLS-1$
+	private final static String SETTINGS_STATEMENTS_RECOVERY= "statements_recovery"; //$NON-NLS-1$
 	private final static String SETTINGS_SHOW_NON_RELEVANT="show_non_relevant";//$NON-NLS-1$
 	private final static String SETTINGS_JLS= "jls"; //$NON-NLS-1$
 
@@ -392,6 +398,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private Action fFocusAction;
 	private Action fRefreshAction;
 	private Action fCreateBindingsAction;
+	private Action fStatementsRecoveryAction;
 	private Action fFilterNonRelevantAction;
 	private Action fResolveBindingKeyAction;
 	private Action fCollapseAction;
@@ -415,6 +422,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private boolean fDoLinkWithEditor;
 	private boolean fCreateBindings;
 	private NonRelevantFilter fNonRelevantFilter;
+	private boolean fStatementsRecovery;
 	
 	private Object fPreviousDouble;
 	
@@ -439,6 +447,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			fCurrentInputKind= ASTInputKindAction.USE_PARSER;
 		}
 		fCreateBindings= !fDialogSettings.getBoolean(SETTINGS_NO_BINDINGS); // inverse so that default is to create bindings
+		fStatementsRecovery= fDialogSettings.getBoolean(SETTINGS_STATEMENTS_RECOVERY);
 		fCurrentASTLevel= JLS3;
 		try {
 			int level= fDialogSettings.getInt(SETTINGS_JLS);
@@ -601,11 +610,16 @@ public class ASTView extends ViewPart implements IShowInSource {
 		} else {
 			ASTParser parser= ASTParser.newParser(astLevel);
 			parser.setResolveBindings(fCreateBindings);
+			Map options;
 			if (input instanceof ICompilationUnit) {
 				parser.setSource((ICompilationUnit) input);
+				options= ((ICompilationUnit) input).getJavaProject().getOptions(true);
 			} else {
 				parser.setSource((IClassFile) input);
+				options= ((IClassFile) input).getJavaProject().getOptions(true);
 			}
+			options.put(COMPILER_STATEMENTS_RECOVERY, fStatementsRecovery ? JavaCore.ENABLED : JavaCore.DISABLED);
+			parser.setCompilerOptions(options);
 			startTime= System.currentTimeMillis();
 			root= (CompilationUnit) parser.createAST(null);
 			endTime= System.currentTimeMillis();
@@ -803,11 +817,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 		manager.add(fResolveBindingKeyAction);
 		manager.add(new Separator());
 		manager.add(fLinkWithEditor);
-		MenuManager menu= new MenuManager("Advanced Options");
+		
+		MenuManager menu= new MenuManager("&Advanced Options");
 		manager.add(menu);
 		for (int i= 0; i < fASTInputKindActions.length; i++) {
 			menu.add(fASTInputKindActions[i]);	
 		}
+		menu.add(new Separator());
+		menu.add(fStatementsRecoveryAction);
 	}
 
 	protected void fillContextMenu(IMenuManager manager) {
@@ -878,6 +895,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fCreateBindingsAction.setChecked(fCreateBindings);
 		fCreateBindingsAction.setToolTipText("Create Bindings"); //$NON-NLS-1$
 		fCreateBindingsAction.setEnabled(true);
+		
+		fStatementsRecoveryAction = new Action("&Statements Recovery", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
+			public void run() {
+				performStatementsRecovery();
+			}
+		};
+		fStatementsRecoveryAction.setChecked(fStatementsRecovery);
+		fStatementsRecoveryAction.setEnabled(true);
 		
 		fFilterNonRelevantAction = new Action("&Hide Non-Relevant Attributes", IAction.AS_CHECK_BOX) { //$NON-NLS-1$
 			public void run() {
@@ -1187,6 +1212,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 	protected void performCreateBindings() {
 		fCreateBindings= fCreateBindingsAction.isChecked();
 		fDialogSettings.put(SETTINGS_NO_BINDINGS, !fCreateBindings);
+		performRefresh();
+	}
+	
+	protected void performStatementsRecovery() {
+		fStatementsRecovery= fStatementsRecoveryAction.isChecked();
+		fDialogSettings.put(SETTINGS_STATEMENTS_RECOVERY, fStatementsRecovery);
 		performRefresh();
 	}
 	
