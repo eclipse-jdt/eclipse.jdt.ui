@@ -14,6 +14,7 @@ package org.eclipse.jdt.astview.views;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Display;
 
@@ -29,12 +30,12 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
 
 public class ASTViewLabelProvider extends LabelProvider implements IColorProvider, IFontProvider {
-	
 	private int fSelectionStart;
 	private int fSelectionLength;
 	
-	private Color fBlue, fRed, fDarkGray, fYellow, fDarkGreen, fDarkRed, fLightRed;
-	private Font fBold;
+	private final Color fBlue, fRed, fDarkGray, fYellow, fDarkGreen, fDarkRed, fLightRed;
+	private final Font fBold;
+	private final Font fAllocatedBoldItalic;
 	
 	public ASTViewLabelProvider() {
 		fSelectionStart= -1;
@@ -51,6 +52,11 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		fLightRed= new Color(display, 255, 190, 190);
 		
 		fBold= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
+		FontData[] fontData= fBold.getFontData();
+		for (int i= 0; i < fontData.length; i++) {
+			fontData[i].setStyle(fontData[i].getStyle() | SWT.ITALIC);
+		}
+		fAllocatedBoldItalic= new Font(display, fontData);
 	}
 	
 	public void setSelectedRange(int start, int length) {
@@ -78,6 +84,9 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		buf.append(']');
 		if ((node.getFlags() & ASTNode.MALFORMED) != 0) {
 			buf.append(" (malformed)"); //$NON-NLS-1$
+		}
+		if ((node.getFlags() & ASTNode.RECOVERED) != 0) {
+			buf.append(" (recovered)"); //$NON-NLS-1$
 		}
 	}
 	
@@ -156,7 +165,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			ASTNode parent= node.getParent();
 			if (parent != null) {
 				int parentstart= parent.getStartPosition();
-				int parentend= start + parent.getLength();
+				int parentend= parentstart + parent.getLength();
 				
 				if (start < parentstart || end > parentend) {
 					return true;
@@ -193,7 +202,11 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	 */
 	public Font getFont(Object element) {
 		if (element instanceof ASTNode) {
-			return fBold;
+			ASTNode node= (ASTNode) element;
+			if ((node.getFlags() & ASTNode.RECOVERED) != 0)
+				return fAllocatedBoldItalic;
+			else
+				return fBold;
 		}
 		return null;
 	}
@@ -201,6 +214,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	public void dispose() {
 		super.dispose();
 		fLightRed.dispose();
+		fAllocatedBoldItalic.dispose();
 	}
 	
 }
