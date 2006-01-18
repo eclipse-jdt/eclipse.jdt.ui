@@ -403,7 +403,7 @@ public class UnresolvedElementsSubProcessor {
 					if (isFinal && curr.isField() && isWriteAccess) {
 						continue loop;
 					}
-					if (isInStaticContext && !Modifier.isStatic(curr.getModifiers())) {
+					if (isInStaticContext && !Modifier.isStatic(curr.getModifiers()) && curr.isField()) {
 						continue loop;
 					}
 
