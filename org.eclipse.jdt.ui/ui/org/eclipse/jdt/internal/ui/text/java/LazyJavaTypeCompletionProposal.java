@@ -171,24 +171,9 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 				setUpLinkedMode(document, ')');
 			
 			rememberSelection();
-			
-			updateHistory();
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
 		} catch (BadLocationException e) {
-			JavaPlugin.log(e);
-		}
-	}
-	
-	private void updateHistory() {
-		try {
-			TypeInfo info= TypeInfoUtil.searchTypeInfo(fCompilationUnit.getJavaProject(), null, getQualifiedTypeName());
-			if (info != null) {
-				History history= TypeInfoHistory.getDefault();
-				history.accessed(info);
-				history.save();
-			}
-		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
 		}
 	}
@@ -226,6 +211,17 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		IType rhs= getProposedType();
 		if (lhs != null && rhs != null)
 			JavaPlugin.getDefault().getContentAssistHistory().remember(lhs, rhs);
+		
+		try {
+			TypeInfo info= TypeInfoUtil.searchTypeInfo(fCompilationUnit.getJavaProject(), null, getQualifiedTypeName());
+			if (info != null) {
+				History history= TypeInfoHistory.getDefault();
+				history.accessed(info);
+				history.save();
+			}
+		} catch (JavaModelException e) {
+			JavaPlugin.log(e);
+		}
 	}
 
 	/**
@@ -322,6 +318,10 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 * @see org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal#computeRelevance()
 	 */
 	protected int computeRelevance() {
-		return super.computeRelevance() + fInvocationContext.getHistoryRelevance(getQualifiedTypeName());
+		int historyBoost= fInvocationContext.getHistoryRelevance(getQualifiedTypeName());
+		if (historyBoost == 0) {
+			historyBoost= Math.round(TypeInfoHistory.getDefault().getNormalizedPosition(getQualifiedTypeName()) * 10);
+		}
+		return super.computeRelevance() +  historyBoost;
 	}
 }

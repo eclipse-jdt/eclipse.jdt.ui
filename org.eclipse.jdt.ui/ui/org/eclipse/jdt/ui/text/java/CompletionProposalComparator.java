@@ -15,12 +15,7 @@ import java.util.Comparator;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.templates.TemplateProposal;
 
-import org.eclipse.jdt.internal.corext.util.History;
-import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
-
-import org.eclipse.jdt.internal.ui.text.correction.AddImportCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.java.LazyJavaCompletionProposal;
-import org.eclipse.jdt.internal.ui.text.java.LazyJavaTypeCompletionProposal;
 
 /**
  * Comparator for java completion proposals. Completion proposals can be sorted
@@ -58,33 +53,6 @@ public final class CompletionProposalComparator implements Comparator {
 		ICompletionProposal p2= (ICompletionProposal) o2;
 
 		if (!fOrderAlphabetically) {
-			
-			if (p1 instanceof AddImportCorrectionProposal && p2 instanceof AddImportCorrectionProposal) {
-				AddImportCorrectionProposal addImport1= (AddImportCorrectionProposal)p1;
-				AddImportCorrectionProposal addImport2= (AddImportCorrectionProposal)p2;
-				
-				String key1= addImport1.getQualifiedTypeName();
-				String key2= addImport2.getQualifiedTypeName();
-				
-				History history= TypeInfoHistory.getDefault();
-				int histCompare= history.compareByKeys(key1, key2);
-				if (histCompare != 0)
-					return histCompare;
-			}
-			
-			if (p1 instanceof LazyJavaTypeCompletionProposal && p2 instanceof LazyJavaTypeCompletionProposal) {
-				LazyJavaTypeCompletionProposal typeProposal1= (LazyJavaTypeCompletionProposal)p1;
-				LazyJavaTypeCompletionProposal typeProposal2= (LazyJavaTypeCompletionProposal)p2;
-				
-				String key1= typeProposal1.getQualifiedTypeName();
-				String key2= typeProposal2.getQualifiedTypeName();
-				
-				History history= TypeInfoHistory.getDefault();
-				int histCompare= history.compareByKeys(key1, key2);
-				if (histCompare != 0)
-					return histCompare;
-			}
-			
 			int r1= getRelevance(p1);
 			int r2= getRelevance(p2);
 			int relevanceDif= r2 - r1;

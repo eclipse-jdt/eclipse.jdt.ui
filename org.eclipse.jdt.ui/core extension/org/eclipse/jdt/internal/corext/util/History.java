@@ -113,6 +113,49 @@ public abstract class History {
 	}
 	
 	/**
+	 * Normalized position in history of object denoted by key.
+	 * The position is a value between zero and one where zero
+	 * means not contained in history and one means newest element
+	 * in history. The lower the value the older the element.
+	 * 
+	 * @param key The key of the object to inspect
+	 * @return value in [0.0, 1.0] the lower the older the element
+	 */
+	public synchronized float getNormalizedPosition(Object key) {
+		if (!containsKey(key)) 
+			return 0.0f;
+
+		int pos= getPosition(key) + 1;
+		
+		//containsKey(key) implies fHistory.size()>0	
+		return (float)pos / (float)fHistory.size();
+	}
+	
+	/**
+	 * Absolute position of object denoted by key in the
+	 * history or -1 if !containsKey(key). The higher the
+	 * newer.
+	 * 
+	 * @param key The key of the object to inspect
+	 * @return value between 0 and MAX_HISTORY_SIZE - 1, or -1
+	 */
+	public synchronized int getPosition(Object key) {
+		if (!containsKey(key))
+			return -1;
+		
+		int pos= 0;
+		Collection values= getValues();
+		for (Iterator iter= values.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			Object curKey= getKey(element);
+			if (curKey.equals(key))
+				return pos;
+			pos++;
+		}
+		return -1;
+	}
+	
+	/**
 	 * @param o1 the first object to be compared.
      * @param o2 the second object to be compared.
      * @return a negative integer if o1 is newer then o2
