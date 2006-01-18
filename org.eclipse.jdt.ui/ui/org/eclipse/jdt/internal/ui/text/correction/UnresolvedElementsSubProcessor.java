@@ -554,7 +554,10 @@ public class UnresolvedElementsSubProcessor {
 			simpleBinding= simpleBinding.getTypeDeclaration();
 			
 			resolvedTypeName= simpleBinding.getQualifiedName();
-			proposals.add(createTypeRefChangeProposal(cu, resolvedTypeName, node, relevance + 2, elements.length, true));
+			CUCorrectionProposal proposal= createTypeRefChangeProposal(cu, resolvedTypeName, node, relevance + 2, elements.length);
+			proposals.add(proposal);
+			if (proposal instanceof AddImportCorrectionProposal)
+				proposal.setRelevance(relevance + elements.length + 2);
 
 			if (binding.isParameterizedType() && node.getParent() instanceof SimpleType && !(node.getParent().getParent() instanceof Type)) {
 				proposals.add(createTypeRefChangeFullProposal(cu, binding, node, relevance + 2));
@@ -575,13 +578,13 @@ public class UnresolvedElementsSubProcessor {
 			if ((elem.getKind() & SimilarElementsRequestor.ALL_TYPES) != 0) {
 				String fullName= elem.getName();
 				if (!fullName.equals(resolvedTypeName)) {
-					proposals.add(createTypeRefChangeProposal(cu, fullName, node, relevance, elements.length, false));
+					proposals.add(createTypeRefChangeProposal(cu, fullName, node, relevance, elements.length));
 				}
 			}
 		}
 	}
 		
-	private static CUCorrectionProposal createTypeRefChangeProposal(ICompilationUnit cu, String fullName, Name node, int relevance, int maxProposals, boolean highestSeverity) throws CoreException {
+	private static CUCorrectionProposal createTypeRefChangeProposal(ICompilationUnit cu, String fullName, Name node, int relevance, int maxProposals) throws CoreException {
 		ImportRewrite importRewrite= null;
 		String simpleName= fullName;
 		String packName= Signature.getQualifier(fullName);
@@ -600,13 +603,8 @@ public class UnresolvedElementsSubProcessor {
 			String[] arg= { simpleName, packName };
 			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_importtype_description, arg);
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);
-			float boost;
-			if (highestSeverity) {
-				boost= maxProposals;
-			} else {
-				boost= TypeInfoHistory.getDefault().getNormalizedPosition(fullName) * maxProposals;
-			}
-			proposal= new AddImportCorrectionProposal(label, cu, relevance + 100 + Math.round(boost), image, packName, simpleName, (SimpleName)node);
+			int boost= TypeInfoHistory.getBoost(fullName, 0, maxProposals);
+			proposal= new AddImportCorrectionProposal(label, cu, relevance + 100 + boost, image, packName, simpleName, (SimpleName)node);
 			proposal.setCommandId(ADD_IMPORT_ID);
 		} else {
 			String label;

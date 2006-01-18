@@ -130,4 +130,10 @@ public class TypeInfoHistory extends History {
 		return (char[][])names.toArray(new char[names.size()][]);
 	}
 
+	public static int getBoost(String fullyQualifiedTypeName, int min, int max) {
+		float position= getDefault().getNormalizedPosition(fullyQualifiedTypeName);
+		int dist= max - min;
+		return Math.round(position * dist) + min;
+	}
+
 }
