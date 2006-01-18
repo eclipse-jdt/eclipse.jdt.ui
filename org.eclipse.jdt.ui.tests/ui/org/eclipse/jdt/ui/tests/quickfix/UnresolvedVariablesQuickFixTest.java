@@ -1528,7 +1528,7 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(previews, expected);	
 	}
 	
-	public void testVarWithGenricType() throws Exception {
+	public void testVarWithGenericType() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
 		
@@ -2339,5 +2339,113 @@ public class UnresolvedVariablesQuickFixTest extends QuickFixTest {
 		
 		assertExpectedExistInProposals(proposals, new String[] { expected1 });
 	}
+	
+	public void testSimilarVarsAndVisibility() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    int var1;\n");
+		buf.append("    static int var2;\n");
+		buf.append("    public static void main(String[] var3) {\n");
+		buf.append("        println(var);\n");
+		buf.append("    }\n");
+		buf.append("    public static void println(String[] s) {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 6);
+
+		String[] expected= new String[6];
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    int var1;\n");
+		buf.append("    static int var2;\n");
+		buf.append("    public static void main(String[] var3) {\n");
+		buf.append("        println(var3);\n");
+		buf.append("    }\n");
+		buf.append("    public static void println(String[] s) {}\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    int var1;\n");
+		buf.append("    static int var2;\n");
+		buf.append("    public static void main(String[] var3) {\n");
+		buf.append("        println(var2);\n");
+		buf.append("    }\n");
+		buf.append("    public static void println(String[] s) {}\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    int var1;\n");
+		buf.append("    static int var2;\n");
+		buf.append("    private static String[] var;\n");
+		buf.append("    public static void main(String[] var3) {\n");
+		buf.append("        println(var);\n");
+		buf.append("    }\n");
+		buf.append("    public static void println(String[] s) {}\n");
+		buf.append("}\n");
+		expected[2]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    private static final String[] var = null;\n");
+		buf.append("    int var1;\n");
+		buf.append("    static int var2;\n");
+		buf.append("    public static void main(String[] var3) {\n");
+		buf.append("        println(var);\n");
+		buf.append("    }\n");
+		buf.append("    public static void println(String[] s) {}\n");
+		buf.append("}\n");
+		expected[3]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    int var1;\n");
+		buf.append("    static int var2;\n");
+		buf.append("    public static void main(String[] var3, String[] var) {\n");
+		buf.append("        println(var);\n");
+		buf.append("    }\n");
+		buf.append("    public static void println(String[] s) {}\n");
+		buf.append("}\n");
+		expected[4]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    int var1;\n");
+		buf.append("    static int var2;\n");
+		buf.append("    public static void main(String[] var3) {\n");
+		buf.append("        String[] var;\n");
+		buf.append("        println(var);\n");
+		buf.append("    }\n");
+		buf.append("    public static void println(String[] s) {}\n");
+		buf.append("}\n");
+		expected[5]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+
 
 }
