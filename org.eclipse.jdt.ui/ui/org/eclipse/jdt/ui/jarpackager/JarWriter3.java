@@ -268,7 +268,6 @@ public class JarWriter3 {
 	 */
 	private void addHistory(final JarPackageData data, final IPath path, final IProgressMonitor monitor) throws IOException, CoreException {
 		Assert.isNotNull(data);
-		Assert.isNotNull(data.getRefactoringProjects());
 		Assert.isNotNull(path);
 		Assert.isNotNull(monitor);
 		final RefactoringDescriptorProxy[] proxies= data.getRefactoringDescriptors();
