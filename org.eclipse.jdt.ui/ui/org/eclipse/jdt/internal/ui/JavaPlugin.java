@@ -98,6 +98,7 @@ import org.eclipse.jdt.internal.corext.refactoring.scripting.UseSupertypeRefacto
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
+import org.eclipse.jdt.internal.corext.util.CorrectionHistory;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
 import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
@@ -584,6 +585,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 			}
 			
 			TypeInfoHistory.getDefault().save();
+			CorrectionHistory.getDefault().save();
 			
 			// must add here to guarantee that it is the first in the listener list
 

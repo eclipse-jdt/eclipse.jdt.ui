@@ -14,8 +14,6 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.text.IDocument;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -47,13 +45,7 @@ public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 		return fQualifierName + '.' + fTypeName;
 	}
 
-	public void apply(IDocument document) {
-		super.apply(document);
-		
-		updateHistory();
-	}
-
-	private void updateHistory() {
+	protected void rememberSelection() {
 		try {
 			TypeInfo info= TypeInfoUtil.searchTypeInfo(fCu.getJavaProject(), fNode, getQualifiedTypeName());
 			if (info != null) {

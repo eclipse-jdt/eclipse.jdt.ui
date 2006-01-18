@@ -44,6 +44,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.util.CorrectionHistory;
+import org.eclipse.jdt.internal.corext.util.History;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -228,8 +230,17 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				}
 			}
 			performChange(part, document);
+
+			rememberSelection();
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, CorrectionMessages.CUCorrectionProposal_error_title, CorrectionMessages.CUCorrectionProposal_error_message);
+		}
+	}
+
+	protected void rememberSelection() {
+		if (getCommandId() != null) {
+			History history= CorrectionHistory.getDefault();
+			history.accessed(getCommandId());
 		}
 	}
 
