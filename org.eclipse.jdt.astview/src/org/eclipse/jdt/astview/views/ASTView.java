@@ -524,7 +524,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 	
 	private int getInitialASTLevel(IJavaElement openable) {
 		IJavaProject project= (IJavaProject) openable.getAncestor(IJavaElement.JAVA_PROJECT);
-		if (JavaCore.VERSION_1_5.equals(project.getOption(JavaCore.COMPILER_SOURCE, true))) {
+		String option= project.getOption(JavaCore.COMPILER_SOURCE, true);
+		if (JavaCore.VERSION_1_5.equals(option) || JavaCore.VERSION_1_6.equals(option)) {
 			return JLS3;
 		}
 		return fCurrentASTLevel; // use previous level
