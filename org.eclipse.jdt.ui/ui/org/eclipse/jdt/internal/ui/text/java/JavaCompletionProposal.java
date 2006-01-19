@@ -61,9 +61,6 @@ public class JavaCompletionProposal extends AbstractJavaCompletionProposal {
 		setDisplayString(displayString == null ? replacementString : displayString);
 		setRelevance(relevance);
 		setCursorPosition(replacementString.length());
-		setContextInformation(null);
-		setTriggerCharacters(null);
-		setProposalInfo(null);
 		setInJavadoc(inJavadoc);
 		setSortString(displayString == null ? replacementString : displayString);
 	}
