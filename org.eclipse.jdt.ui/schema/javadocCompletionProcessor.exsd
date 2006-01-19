@@ -7,6 +7,9 @@
       </appInfo>
       <documentation>
          This extension point allows to add a Javadoc completion processor to e.g. offer new Javadoc tags.
+&lt;p&gt;
+Deprecated as of 3.2. Extenders should rather contribute to the &lt;tt&gt;org.eclipse.jdt.ui.javaCompletionProposalComputer&lt;/tt&gt; extension point, which allows to provide additional proposals not only for javadoc, but any part of a Java editor.
+&lt;/p&gt;
       </documentation>
    </annotation>
 
@@ -43,6 +46,11 @@
    </element>
 
    <element name="javadocCompletionProcessor">
+      <annotation>
+         <appInfo>
+            <meta.element deprecated="true"/>
+         </appInfo>
+      </annotation>
       <complexType>
          <attribute name="id" type="string" use="required">
             <annotation>
@@ -121,7 +129,7 @@ with a public 0-argument constructor.
          <meta.section type="copyright"/>
       </appInfo>
       <documentation>
-         Copyright (c) 2001, 2004 IBM Corporation and others.&lt;br&gt;
+         Copyright (c) 2001, 2006 IBM Corporation and others.&lt;br&gt;
 All rights reserved. This program and the accompanying materials are made available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at &lt;a href=&quot;http://www.eclipse.org/legal/epl-v10.html&quot;&gt;http://www.eclipse.org/legal/epl-v10.html&lt;/a&gt;
       </documentation>
    </annotation>
