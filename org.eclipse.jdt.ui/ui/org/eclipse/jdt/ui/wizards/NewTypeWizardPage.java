@@ -138,7 +138,6 @@ import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaPackageCompleti
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.JavaTypeCompletionProcessor;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
-import org.eclipse.jdt.internal.ui.wizards.StringWrapper;
 import org.eclipse.jdt.internal.ui.wizards.SuperInterfaceSelectionDialog;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -264,17 +263,31 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	/** Field ID of the method stubs check boxes. */
 	protected final static String METHODS= PAGE_NAME + ".methods"; //$NON-NLS-1$
 
-	private class InterfacesListLabelProvider extends LabelProvider {
-		
+	private static class InterfaceWrapper {
+		public String interfaceName;
+
+		public InterfaceWrapper(String interfaceName) {
+			this.interfaceName= interfaceName;
+		}
+
+		public int hashCode() {
+			return interfaceName.hashCode();
+		}
+
+		public boolean equals(Object obj) {
+			return obj != null && getClass().equals(obj.getClass()) && ((InterfaceWrapper) obj).interfaceName.equals(interfaceName);
+		}
+	}
+	
+	private static class InterfacesListLabelProvider extends LabelProvider {
 		private Image fInterfaceImage;
 		
 		public InterfacesListLabelProvider() {
-			super();
 			fInterfaceImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_INTERFACE);
 		}
 		
 		public String getText(Object element) {
-			return ((StringWrapper) element).getString();
+			return ((InterfaceWrapper) element).interfaceName;
 		}
 		
 		public Image getImage(Object element) {
@@ -778,11 +791,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				if (element instanceof Item)
 					element = ((Item) element).getData();
 				
-				((StringWrapper) element).setString((String) value);
+				((InterfaceWrapper) element).interfaceName= (String) value;
 				fSuperInterfacesDialogField.elementChanged(element);
 			}
 			public Object getValue(Object element, String property) {
-				return ((StringWrapper) element).getString();
+				return ((InterfaceWrapper) element).interfaceName;
 			}
 			public boolean canModify(Object element, String property) {
 				return true;
@@ -799,7 +812,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				} 
 			}
 		});
-		GridData gd= (GridData)fSuperInterfacesDialogField.getListControl(null).getLayoutData();
+		GridData gd= (GridData) fSuperInterfacesDialogField.getListControl(null).getLayoutData();
 		if (fTypeKind == CLASS_TYPE) {
 			gd.heightHint= convertHeightInCharsToPixels(3);
 		} else {
@@ -905,7 +918,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		if (field == fSuperInterfacesDialogField) {
 			chooseSuperInterfaces();
 			List interfaces= fSuperInterfacesDialogField.getElements();
-			if (interfaces.size() > 0) {
+			if (!interfaces.isEmpty()) {
 				Object element= interfaces.get(interfaces.size() - 1);
 				fSuperInterfacesDialogField.editElement(element);
 			}
@@ -1202,8 +1215,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		List interfaces= fSuperInterfacesDialogField.getElements();
 		ArrayList result= new ArrayList(interfaces.size());
 		for (Iterator iter= interfaces.iterator(); iter.hasNext();) {
-			StringWrapper superInterface= (StringWrapper) iter.next();
-			result.add(superInterface.getString());
+			InterfaceWrapper wrapper= (InterfaceWrapper) iter.next();
+			result.add(wrapper.interfaceName);
 		}
 		return result;
 	}
@@ -1219,7 +1232,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	public void setSuperInterfaces(List interfacesNames, boolean canBeModified) {
 		ArrayList interfaces= new ArrayList(interfacesNames.size());
 		for (Iterator iter= interfacesNames.iterator(); iter.hasNext();) {
-			interfaces.add(new StringWrapper((String) iter.next()));
+			interfaces.add(new InterfaceWrapper((String) iter.next()));
 		}
 		fSuperInterfacesDialogField.setElements(interfaces);
 		fSuperInterfacesDialogField.setEnabled(canBeModified);
@@ -1234,7 +1247,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @since 3.2
 	 */
 	public boolean addSuperInterface(String superInterface) {
-		return fSuperInterfacesDialogField.addElement(new StringWrapper(superInterface));
+		return fSuperInterfacesDialogField.addElement(new InterfaceWrapper(superInterface));
 	}
 	
 	
@@ -1662,7 +1675,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			List elements= fSuperInterfacesDialogField.getElements();
 			int nElements= elements.size();
 			for (int i= 0; i < nElements; i++) {
-				String intfname= ((StringWrapper) elements.get(i)).getString();
+				String intfname= ((InterfaceWrapper) elements.get(i)).interfaceName;
 				Type type= TypeContextChecker.parseSuperInterface(intfname);
 				if (type == null) {
 					status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidSuperInterfaceName, intfname)); 
