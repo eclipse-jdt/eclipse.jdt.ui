@@ -22,6 +22,7 @@ import org.eclipse.core.commands.ParameterizedCommand;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.bindings.TriggerSequence;
@@ -53,7 +54,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  * <p>
  * Subclasses may extend:
  * <ul>
- * <li><code>createContext</code> to modify the context object passed to the computers</li>
+ * <li><code>createContext</code> to provide the context object passed to the computers</li>
  * <li><code>createProgressMonitor</code> to change the way progress is reported</li>
  * <li><code>filterAndSort</code> to add sorting and filtering</li>
  * <li><code>getContextInformationValidator</code> to add context validation (needed if any
@@ -65,6 +66,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
  * @since 3.2
  */
 public class ContentAssistProcessor implements IContentAssistProcessor {
+	private static final boolean DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
 
 	private static final Comparator ORDER_COMPARATOR= new Comparator() {
 
@@ -139,22 +141,35 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#computeCompletionProposals(org.eclipse.jface.text.ITextViewer, int)
 	 */
 	public final ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int offset) {
+		long start= DEBUG ? System.currentTimeMillis() : 0;
+		
 		clearState();
 		
 		IProgressMonitor monitor= createProgressMonitor();
 		monitor.beginTask(JavaTextMessages.ContentAssistProcessor_computing_proposals, fCategories.size() + 1);
 
 		ContentAssistInvocationContext context= createContext(viewer, offset);
+		long setup= DEBUG ? System.currentTimeMillis() : 0;
 		
 		monitor.subTask(JavaTextMessages.ContentAssistProcessor_collecting_proposals);
 		List proposals= collectProposals(viewer, offset, monitor, context);
+		long collect= DEBUG ? System.currentTimeMillis() : 0;
 
 		monitor.subTask(JavaTextMessages.ContentAssistProcessor_sorting_proposals);
 		List filtered= filterAndSortProposals(proposals, monitor, context);
 		fNumberOfComputedResults= filtered.size();
+		long filter= DEBUG ? System.currentTimeMillis() : 0;
 		
 		ICompletionProposal[] result= (ICompletionProposal[]) filtered.toArray(new ICompletionProposal[filtered.size()]);
 		monitor.done();
+		
+		if (DEBUG) {
+			System.err.println("Code Assist Stats (" + result.length + " proposals)"); //$NON-NLS-1$ //$NON-NLS-2$
+			System.err.println("Code Assist (setup):\t" + (setup - start) ); //$NON-NLS-1$
+			System.err.println("Code Assist (collect):\t" + (collect - setup) ); //$NON-NLS-1$
+			System.err.println("Code Assist (sort):\t" + (filter - collect) ); //$NON-NLS-1$
+		}
+		
 		return result;
 	}
 

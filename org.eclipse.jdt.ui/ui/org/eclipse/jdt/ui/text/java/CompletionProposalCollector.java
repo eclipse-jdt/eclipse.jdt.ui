@@ -275,8 +275,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	public void endReporting() {
 		if (DEBUG) {
 			long total= System.currentTimeMillis() - fStartTime;
-			System.err.println("Code Assist (core): " + (total - fUITime)); //$NON-NLS-1$
-			System.err.println("Code Assist (UI): " + fUITime); //$NON-NLS-1$
+			System.err.println("Core Collector (core):\t" + (total - fUITime)); //$NON-NLS-1$
+			System.err.println("Core Collector (ui):\t" + fUITime); //$NON-NLS-1$
 		}
 	}
 
