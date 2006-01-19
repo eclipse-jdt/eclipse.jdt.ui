@@ -91,8 +91,6 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * {@link ICompilationUnit} or an {@link IClassFile}. Computed folding regions are collected
 	 * via
 	 * {@linkplain #addProjectionRange(DefaultJavaFoldingStructureProvider.JavaProjectionAnnotation, Position) addProjectionRange}.
-	 * 
-	 * @since 3.2
 	 */
 	protected final class FoldingStructureComputationContext {
 		private final ProjectionAnnotationModel fModel;
@@ -659,7 +657,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		Assert.isLegal(editor != null);
 		Assert.isLegal(viewer != null);
 
-		uninstall();
+		internalUninstall();
 		
 		if (editor instanceof JavaEditor) {
 			fEditor= editor;
@@ -674,6 +672,13 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * </p>
 	 */
 	public void uninstall() {
+		internalUninstall();
+	}
+	
+	/**
+	 * Internal implementation of {@link #uninstall()}.
+	 */
+	private void internalUninstall() {
 		if (isInstalled()) {
 			handleProjectionDisabled();
 			fProjectionListener.dispose();
@@ -937,7 +942,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		if (regions.length > 0) {
 			// comments
 			for (int i= 0; i < regions.length - 1; i++) {
-				IRegion normalized= normalizeRegion(regions[i], ctx);
+				IRegion normalized= alignRegion(regions[i], ctx);
 				if (normalized != null) {
 					Position position= createCommentPosition(normalized);
 					if (position != null) {
@@ -953,7 +958,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 			}
 			// code
 			if (collapseCode) {
-				IRegion normalized= normalizeRegion(regions[regions.length - 1], ctx);
+				IRegion normalized= alignRegion(regions[regions.length - 1], ctx);
 				if (normalized != null) {
 					Position position= element instanceof IMember ? createMemberPosition(normalized, (IMember) element) : createCommentPosition(normalized);
 					if (position != null)
@@ -1111,18 +1116,19 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	/**
-	 * Normalizes <code>region</code> to comprise full lines (i.e. the returned
-	 * {@link IRegion region} will start and end at a line offset, except for on the last line,
-	 * where the region will extend to the end of the document). <code>null</code> is returned if
-	 * <code>region</code> is <code>null</code> itself or does not comprise at least one line
-	 * delimiter, as a single line cannot be folded.
+	 * Aligns <code>region</code> to start and end at a line offset. The region's start is
+	 * decreased to the next line offset, and the end offset increased to the next line start or the
+	 * end of the document. <code>null</code> is returned if <code>region</code> is
+	 * <code>null</code> itself or does not comprise at least one line delimiter, as a single line
+	 * cannot be folded.
 	 * 
-	 * @param region the region to normalize, may be null
+	 * @param region the region to align, may be <code>null</code>
 	 * @param ctx the folding context
-	 * @return a region that is the normalized equivalent of <code>region</code>,
-	 *         <code>null</code> if the region is too small to be foldable (e.g. only one line)
+	 * @return a region equal or greater than <code>region</code> that is aligned with line
+	 *         offsets, <code>null</code> if the region is too small to be foldable (e.g. covers
+	 *         only one line)
 	 */
-	protected final IRegion normalizeRegion(IRegion region, FoldingStructureComputationContext ctx) {
+	protected final IRegion alignRegion(IRegion region, FoldingStructureComputationContext ctx) {
 		if (region == null)
 			return null;
 		
