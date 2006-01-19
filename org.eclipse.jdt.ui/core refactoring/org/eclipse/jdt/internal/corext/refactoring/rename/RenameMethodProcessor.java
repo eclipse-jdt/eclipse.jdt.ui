@@ -78,7 +78,6 @@ import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreat
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -92,7 +91,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating, ICommentProvider, IDelegatingUpdating {
+public abstract class RenameMethodProcessor extends JavaRenameProcessor implements IReferenceUpdating, IDelegatingUpdating {
 
 	public static final String ID_RENAME_METHOD= "org.eclipse.jdt.ui.rename.method"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
@@ -107,8 +106,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private boolean fIsComposite;
 	private GroupCategorySet fCategorySet;
 	private boolean fDelegatingUpdating;
-	private String fComment;
-	
+
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
 	
 	protected RenameMethodProcessor(IMethod method) {
@@ -675,7 +673,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					return new RefactoringDescriptor(ID_RENAME_METHOD, project, Messages.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), fComment, arguments, flags);
+					return new RefactoringDescriptor(ID_RENAME_METHOD, project, Messages.format(RefactoringCoreMessages.RenameMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, flags);
 				}
 			};
 		} finally {
@@ -827,16 +825,4 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			TextChangeCompatibility.addTextEdit(change, editName, replaceEdit);
 
 	}
-
-	public boolean canEnableComment() {
-		return true;
-	}
-
-	public String getComment() {
-		return fComment;
-	}
-
-	public void setComment(String comment) {
-		fComment= comment;
-	}
-}	
+}

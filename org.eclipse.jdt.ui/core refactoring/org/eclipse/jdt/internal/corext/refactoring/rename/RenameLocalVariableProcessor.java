@@ -60,7 +60,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -72,7 +71,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class RenameLocalVariableProcessor extends JavaRenameProcessor implements INameUpdating, ICommentProvider, IReferenceUpdating {
+public class RenameLocalVariableProcessor extends JavaRenameProcessor implements INameUpdating, IReferenceUpdating {
 
 	public static final String ID_RENAME_LOCAL_VARIABLE= "org.eclipse.jdt.ui.rename.local.variable"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
@@ -93,8 +92,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 	private GroupCategorySet fCategorySet;
 	private TextChangeManager fChangeManager;
 	private RenameAnalyzeUtil.LocalAnalyzePackage fLocalAnalyzePackage;
-	private String fComment;
-	
+
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameLocalVariableProcessor"; //$NON-NLS-1$
 	
 	public RenameLocalVariableProcessor(ILocalVariable localVariable) {
@@ -361,7 +359,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 						IJavaProject javaProject= fCu.getJavaProject();
 						if (javaProject != null)
 							project= javaProject.getElementName();
-						return new RefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName}), fComment, arguments, RefactoringDescriptor.NONE);
+						return new RefactoringDescriptor(ID_RENAME_LOCAL_VARIABLE, project, Messages.format(RefactoringCoreMessages.RenameLocalVariableProcessor_descriptor_description, new String[] { fCurrentName, JavaElementLabels.getElementLabel(fLocalVariable.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), fNewName}), getComment(), arguments, RefactoringDescriptor.NONE);
 					}
 				};
 				composite.markAsSynthetic();
@@ -432,17 +430,5 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 
 	public RenameAnalyzeUtil.LocalAnalyzePackage getLocalAnalyzePackage() {
 		return fLocalAnalyzePackage;
-	}
-
-	public boolean canEnableComment() {
-		return true;
-	}
-
-	public String getComment() {
-		return fComment;
-	}
-
-	public void setComment(String comment) {
-		fComment= comment;
 	}
 }

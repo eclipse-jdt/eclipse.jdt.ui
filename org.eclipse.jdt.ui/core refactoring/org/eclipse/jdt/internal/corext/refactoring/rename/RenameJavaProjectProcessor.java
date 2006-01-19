@@ -41,12 +41,11 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameJavaProjectChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public class RenameJavaProjectProcessor extends JavaRenameProcessor implements IReferenceUpdating, ICommentProvider {
+public class RenameJavaProjectProcessor extends JavaRenameProcessor implements IReferenceUpdating {
 	
 	private static final String ATTRIBUTE_PATH= "path"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
@@ -54,8 +53,7 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 	
 	private IJavaProject fProject;
 	private boolean fUpdateReferences;
-	private String fComment;
-	
+
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameJavaProjectProcessor"; //$NON-NLS-1$
 	
 	//---- IRefactoringProcessor ---------------------------------------------------
@@ -206,17 +204,5 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
-	}
-
-	public boolean canEnableComment() {
-		return true;
-	}
-
-	public String getComment() {
-		return fComment;
-	}
-
-	public void setComment(final String comment) {
-		fComment= comment;
 	}
 }

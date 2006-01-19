@@ -59,7 +59,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -72,7 +71,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Rename processor to rename type parameters.
  */
-public final class RenameTypeParameterProcessor extends JavaRenameProcessor implements INameUpdating, IReferenceUpdating, ICommentProvider {
+public final class RenameTypeParameterProcessor extends JavaRenameProcessor implements INameUpdating, IReferenceUpdating {
 
 	/**
 	 * AST visitor which searches for occurrences of the type parameter.
@@ -194,13 +193,6 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 			setNewElementName(parameter.getElementName());
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean canEnableComment() {
-		return true;
-	}
-
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating#canEnableUpdateReferences()
 	 */
@@ -209,8 +201,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	}
 
 	/*
-	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor,
-	 *      org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext)
+	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor,org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext)
 	 */
 	public final RefactoringStatus checkFinalConditions(final IProgressMonitor monitor, final CheckConditionsContext context) throws CoreException, OperationCanceledException {
 		Assert.isNotNull(monitor);
@@ -351,13 +342,6 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 		return JavaProcessors.computeAffectedNatures(fTypeParameter);
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getComment() {
-		return fComment;
-	}
-
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating#getCurrentElementName()
 	 */
@@ -449,9 +433,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	}
 
 	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#loadDerivedParticipants(org.eclipse.ltk.core.refactoring.RefactoringStatus,
-	 *      java.util.List, java.lang.String[],
-	 *      org.eclipse.ltk.core.refactoring.participants.SharableParticipants)
+	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#loadDerivedParticipants(org.eclipse.ltk.core.refactoring.RefactoringStatus,java.util.List,java.lang.String[],org.eclipse.ltk.core.refactoring.participants.SharableParticipants)
 	 */
 	protected final void loadDerivedParticipants(final RefactoringStatus status, final List result, final String[] natures, final SharableParticipants shared) throws CoreException {
 		// Do nothing
@@ -462,13 +444,6 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	 */
 	public boolean needsSavedEditors() {
 		return false;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void setComment(final String comment) {
-		fComment= comment;
 	}
 
 	/*

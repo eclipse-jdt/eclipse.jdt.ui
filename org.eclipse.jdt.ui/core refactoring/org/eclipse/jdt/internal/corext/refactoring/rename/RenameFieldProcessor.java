@@ -80,7 +80,6 @@ import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreat
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
@@ -97,7 +96,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IDelegatingUpdating, ICommentProvider {
+public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IDelegatingUpdating {
 
 	public static final String ID_RENAME_FIELD= "org.eclipse.jdt.ui.rename.field"; //$NON-NLS-1$
 	protected static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
@@ -116,7 +115,6 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private boolean fIsComposite;
 	private GroupCategorySet fCategorySet;
 	private boolean fDelegatingUpdating;
-	private String fComment;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
 
@@ -578,7 +576,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					return new RefactoringDescriptor(ID_RENAME_FIELD, project, Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "." + fField.getElementName(), getNewElementName()}), fComment, arguments, flags); //$NON-NLS-1$
+					return new RefactoringDescriptor(ID_RENAME_FIELD, project, Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "." + fField.getElementName(), getNewElementName()}), getComment(), arguments, flags); //$NON-NLS-1$
 				}
 			};
 		} finally {
@@ -869,17 +867,5 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
-	}
-
-	public boolean canEnableComment() {
-		return true;
-	}
-
-	public String getComment() {
-		return fComment;
-	}
-
-	public void setComment(final String comment) {
-		fComment= comment;
 	}
 }

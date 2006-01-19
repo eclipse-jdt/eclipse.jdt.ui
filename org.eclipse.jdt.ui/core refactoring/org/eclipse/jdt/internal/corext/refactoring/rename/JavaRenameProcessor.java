@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
@@ -30,9 +31,10 @@ import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
-public abstract class JavaRenameProcessor extends RenameProcessor implements IInitializableRefactoringComponent, INameUpdating {
+public abstract class JavaRenameProcessor extends RenameProcessor implements IInitializableRefactoringComponent, INameUpdating, ICommentProvider {
 	
 	private String fNewElementName;
+	private String fComment;
 	
 	public final RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants sharedParticipants) throws CoreException {
 		RenameArguments arguments= createRenameArguments();
@@ -100,7 +102,6 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements IIn
 		return null;
 	}
 	
-	
 	/**
 	 * <code>true</code> by default, subclasses may override.
 	 * 
@@ -109,5 +110,26 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements IIn
 	 */
 	public boolean needsSavedEditors() {
 		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final boolean canEnableComment() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final String getComment() {
+		return fComment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final void setComment(String comment) {
+		fComment= comment;
 	}
 }

@@ -100,7 +100,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ISimilarDeclarationUpdating;
@@ -122,7 +121,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, ICommentProvider, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
+public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpdating, IReferenceUpdating, IQualifiedNameUpdating, ISimilarDeclarationUpdating, IResourceMapper, IJavaElementMapper {
 
 	public static final String ID_RENAME_TYPE= "org.eclipse.jdt.ui.rename.type"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_QUALIFIED= "qualified"; //$NON-NLS-1$
@@ -1721,17 +1720,5 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		if (fPreloadedElementToName.size() == 0)
 			return false;
 		return true;
-	}
-
-	public boolean canEnableComment() {
-		return true;
-	}
-
-	public String getComment() {
-		return fComment;
-	}
-
-	public void setComment(final String comment) {
-		fComment= comment;
 	}
 }
