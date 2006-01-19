@@ -120,6 +120,7 @@ public final class NewWizardMessages extends NLS {
 	
 	public static String SuperInterfaceSelectionDialog_addButton_label;
 	public static String SuperInterfaceSelectionDialog_interfaceadded_info;
+	public static String SuperInterfaceSelectionDialog_interfacealreadyadded_info;
 	
 	public static String NewClassCreationWizard_title;
 	public static String NewClassWizardPage_title;

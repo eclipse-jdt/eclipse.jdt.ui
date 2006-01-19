@@ -904,6 +904,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	private void typePageCustomButtonPressed(DialogField field, int index) {		
 		if (field == fSuperInterfacesDialogField) {
 			chooseSuperInterfaces();
+			List interfaces= fSuperInterfacesDialogField.getElements();
+			if (interfaces.size() > 0) {
+				Object element= interfaces.get(interfaces.size() - 1);
+				fSuperInterfacesDialogField.editElement(element);
+			}
 		}
 	}
 	
@@ -1214,12 +1219,24 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	public void setSuperInterfaces(List interfacesNames, boolean canBeModified) {
 		ArrayList interfaces= new ArrayList(interfacesNames.size());
 		for (Iterator iter= interfacesNames.iterator(); iter.hasNext();) {
-			String name= (String) iter.next();
-			interfaces.add(new StringWrapper(name));
+			interfaces.add(new StringWrapper((String) iter.next()));
 		}
 		fSuperInterfacesDialogField.setElements(interfaces);
 		fSuperInterfacesDialogField.setEnabled(canBeModified);
 	}
+	
+	/**
+	 * Adds a super interface to the end of the list and selects it if it is not in the list yet.
+	 * 
+	 * @param superInterface the fully qualified type name of the interface.
+	 * @return returns <code>true</code>if the interfaces has been added, <code>false</code>
+	 * if the interface already is in the list.
+	 * @since 3.2
+	 */
+	public boolean addSuperInterface(String superInterface) {
+		return fSuperInterfacesDialogField.addElement(new StringWrapper(superInterface));
+	}
+	
 	
 	/**
 	 * Sets 'Add comment' checkbox. The value set will only be used when creating source when
@@ -1767,7 +1784,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}	
 	
 	/**
-	 * Opens a selection dialog that allows to select an superClass. 
+	 * Opens a selection dialog that allows to select a super class. 
 	 * 
 	 * @return returns the selected type or <code>null</code> if the dialog has been canceled.
 	 * The caller typically sets the result to the super class input field.
@@ -1798,25 +1815,27 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		return null;
 	}
 	
-	private void chooseSuperInterfaces() {
+	/**
+	 * Opens a selection dialog that allows to select the super interfaces. The selected interfaces are
+	 * directly added to the wizard page using {@link #addSuperInterface(String)}.
+	 * 
+	 * 	<p>
+	 * Clients can override this method if they want to offer a different dialog.
+	 * </p>
+	 * 
+	 * @since 3.2
+	 */
+	protected void chooseSuperInterfaces() {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		if (root == null) {
 			return;
 		}	
 
 		IJavaProject project= root.getJavaProject();
-		SuperInterfaceSelectionDialog dialog= new SuperInterfaceSelectionDialog(getShell(), getWizard().getContainer(), fSuperInterfacesDialogField, project);
+		SuperInterfaceSelectionDialog dialog= new SuperInterfaceSelectionDialog(getShell(), getWizard().getContainer(), this, project);
 		dialog.setTitle(getInterfaceDialogTitle());
 		dialog.setMessage(NewWizardMessages.NewTypeWizardPage_InterfacesDialog_message); 
 		dialog.open();
-		List interfaces= fSuperInterfacesDialogField.getElements();
-		if (interfaces.size() > 0) {
-			Object element= interfaces.get(interfaces.size() - 1);
-			TableViewer tableViewer= fSuperInterfacesDialogField.getTableViewer();
-			tableViewer.refresh(element);
-			tableViewer.editElement(element, 0);
-		}
-		return;
 	}
 	
 	private String getInterfaceDialogTitle() {
@@ -1824,7 +1843,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	        return NewWizardMessages.NewTypeWizardPage_InterfacesDialog_interface_title; 
 	    return NewWizardMessages.NewTypeWizardPage_InterfacesDialog_class_title; 
 	}
-	
 	
 		
 	// ---- creation ----------------
@@ -2117,8 +2135,8 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	
 
 	/**
-	 * Returns the created type. The method only returns a valid type 
-	 * after <code>createType</code> has been called.
+	 * Returns the created type or <code>null</code> is the type has not been created yet. The method
+	 * only returns a valid type after <code>createType</code> has been called.
 	 * 
 	 * @return the created type
 	 * @see #createType(IProgressMonitor)

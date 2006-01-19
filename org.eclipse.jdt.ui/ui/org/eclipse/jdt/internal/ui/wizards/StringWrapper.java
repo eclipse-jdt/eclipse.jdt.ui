@@ -29,4 +29,14 @@ public class StringWrapper {
 	public String toString() {
 		return getString();
 	}
+
+	public int hashCode() {
+		return fString.hashCode();
+	}
+
+	public boolean equals(Object obj) {
+		if (obj != null && getClass().equals(obj.getClass()))
+			return ((StringWrapper) obj).fString.equals(fString);
+		return false;
+	}
 }

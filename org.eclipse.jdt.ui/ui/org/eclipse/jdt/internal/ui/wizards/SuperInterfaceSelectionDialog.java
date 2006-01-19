@@ -32,24 +32,25 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 
+import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
-import org.eclipse.jdt.internal.ui.wizards.dialogfields.ListDialogField;
 
 public class SuperInterfaceSelectionDialog extends TypeSelectionDialog2 {
 	
 	private static final int ADD_ID= IDialogConstants.CLIENT_ID + 1;
 	
-	private ListDialogField fList;
+	private NewTypeWizardPage fTypeWizardPage;
 	private List fOldContent;
 	
-	public SuperInterfaceSelectionDialog(Shell parent, IRunnableContext context, ListDialogField list, IJavaProject p) {
+	public SuperInterfaceSelectionDialog(Shell parent, IRunnableContext context, NewTypeWizardPage page, IJavaProject p) {
 		super(parent, true, context, createSearchScope(p), IJavaSearchConstants.INTERFACE);
-		fList= list;
+		fTypeWizardPage= page;
 		// to restore the content of the dialog field if the dialog is canceled
-		fOldContent= fList.getElements(); 
+		fOldContent= fTypeWizardPage.getSuperInterfaces();
 		setStatusLineAboveButtons(true);
 	}
 
@@ -75,11 +76,11 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog2 {
 	protected void handleShellCloseEvent() {
 		super.handleShellCloseEvent();
 		// Handle the closing of the shell by selecting the close icon
-		fList.setElements(fOldContent);
+		fTypeWizardPage.setSuperInterfaces(fOldContent, true);
 	}	
 
 	protected void cancelPressed() {
-		fList.setElements(fOldContent);
+		fTypeWizardPage.setSuperInterfaces(fOldContent, true);
 		super.cancelPressed();
 	}
 	
@@ -102,21 +103,16 @@ public class SuperInterfaceSelectionDialog extends TypeSelectionDialog2 {
 		for (int i= 0; i < selection.length; i++) {
 			TypeInfo type= selection[i];
 			String qualifiedName= type.getFullyQualifiedName();
-			addStringWrapper(qualifiedName);
-			String message= Messages.format(NewWizardMessages.SuperInterfaceSelectionDialog_interfaceadded_info, qualifiedName); 
+			String message;
+			if (fTypeWizardPage.addSuperInterface(qualifiedName)) {
+				message= Messages.format(NewWizardMessages.SuperInterfaceSelectionDialog_interfaceadded_info, qualifiedName); 
+			} else {
+				message= Messages.format(NewWizardMessages.SuperInterfaceSelectionDialog_interfacealreadyadded_info, qualifiedName); 
+			}
 			updateStatus(new StatusInfo(IStatus.INFO, message));
 		}
 	}
 
-	private void addStringWrapper(String qualifiedName) {
-		for (int i= 0; i < fList.getSize(); i++) {
-			StringWrapper element= (StringWrapper) fList.getElement(i);
-			if (qualifiedName.equals(element.getString()))
-				return; // don't add again
-		}
-		fList.addElement(new StringWrapper(qualifiedName));
-	}
-	
 	private static IJavaSearchScope createSearchScope(IJavaProject p) {
 		return SearchEngine.createJavaSearchScope(new IJavaProject[] { p });
 	}

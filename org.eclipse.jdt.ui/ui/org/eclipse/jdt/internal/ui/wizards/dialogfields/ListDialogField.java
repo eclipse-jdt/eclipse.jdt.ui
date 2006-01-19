@@ -619,16 +619,16 @@ public class ListDialogField extends DialogField {
 	/**
 	 * Adds an element at the end of the list.
 	 */		
-	public void addElement(Object element) {
-		addElement(element, fElements.size());
+	public boolean addElement(Object element) {
+		return addElement(element, fElements.size());
 	}
 	
 	/**
 	 * Adds an element at a position.
 	 */		
-	public void addElement(Object element, int index) {
+	public boolean addElement(Object element, int index) {
 		if (fElements.contains(element)) {
-			return;
+			return false;
 		}
 		fElements.add(index, element);
 		if (isOkToUse(fTableControl)) {
@@ -637,12 +637,13 @@ public class ListDialogField extends DialogField {
 		}
 		
 		dialogFieldChanged();
+		return true;
 	}	
 
 	/**
 	 * Adds elements at the end of the list.
 	 */	
-	public void addElements(List elements) {
+	public boolean addElements(List elements) {
 		int nElements= elements.size();
 		
 		if (nElements > 0) {
@@ -655,13 +656,17 @@ public class ListDialogField extends DialogField {
 					elementsToAdd.add(elem);
 				}	
 			}
-			fElements.addAll(elementsToAdd);
-			if (isOkToUse(fTableControl)) {
-				fTable.add(elementsToAdd.toArray());
-				fTable.setSelection(new StructuredSelection(elementsToAdd));
+			if (!elementsToAdd.isEmpty()) {
+				fElements.addAll(elementsToAdd);
+				if (isOkToUse(fTableControl)) {
+					fTable.add(elementsToAdd.toArray());
+					fTable.setSelection(new StructuredSelection(elementsToAdd));
+				}
+				dialogFieldChanged();
+				return true;
 			}
-			dialogFieldChanged();
 		}
+		return false;
 	}	
 
 
@@ -736,6 +741,13 @@ public class ListDialogField extends DialogField {
 		}
 		if (element != null) {
 			selectElements(new StructuredSelection(element));
+		}
+	}
+	
+	public void editElement(Object element) {
+		if (isOkToUse(fTableControl)) {
+			fTable.refresh(element);
+			fTable.editElement(element, 0);
 		}
 	}
 	

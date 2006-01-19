@@ -552,9 +552,9 @@ public class TreeListDialogField extends DialogField {
 	/**
 	* Adds an element at the end of the tree list.
 	*/
-	public void addElement(Object element) {
+	public boolean addElement(Object element) {
 		if (fElements.contains(element)) {
-			return;
+			return false;
 		}
 		fElements.add(element);
 		if (isOkToUse(fTreeControl)) {
@@ -562,12 +562,13 @@ public class TreeListDialogField extends DialogField {
 			fTree.expandToLevel(element, fTreeExpandLevel);
 		}
 		dialogFieldChanged();
+		return true;
 	}
 
 	/**
 	* Adds elements at the end of the tree list.
 	*/
-	public void addElements(List elements) {
+	public boolean addElements(List elements) {
 		int nElements= elements.size();
 
 		if (nElements > 0) {
@@ -580,15 +581,19 @@ public class TreeListDialogField extends DialogField {
 					elementsToAdd.add(elem);
 				}
 			}
-			fElements.addAll(elementsToAdd);
-			if (isOkToUse(fTreeControl)) {
-				fTree.add(fParentElement, elementsToAdd.toArray());
-				for (int i= 0; i < elementsToAdd.size(); i++) {
-					fTree.expandToLevel(elementsToAdd.get(i), fTreeExpandLevel);
+			if (!elementsToAdd.isEmpty()) {
+				fElements.addAll(elementsToAdd);
+				if (isOkToUse(fTreeControl)) {
+					fTree.add(fParentElement, elementsToAdd.toArray());
+					for (int i= 0; i < elementsToAdd.size(); i++) {
+						fTree.expandToLevel(elementsToAdd.get(i), fTreeExpandLevel);
+					}
 				}
-			}
-			dialogFieldChanged();
+				dialogFieldChanged();
+				return true;
+			}			
 		}
+		return false;
 	}
 
 	/**
