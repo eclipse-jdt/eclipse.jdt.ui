@@ -102,11 +102,21 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 		
 		fContainerDialogField= new StringButtonDialogField(adapter);
 		fContainerDialogField.setDialogFieldListener(adapter);
-		fContainerDialogField.setLabelText(NewWizardMessages.NewContainerWizardPage_container_label); 
+		fContainerDialogField.setLabelText(getContainerLabel()); 
 		fContainerDialogField.setButtonLabel(NewWizardMessages.NewContainerWizardPage_container_button); 
 		
 		fContainerStatus= new StatusInfo();
 		fCurrRoot= null;
+	}
+
+	/**
+	 * Returns the label that is used for the container input field.
+	 * 
+	 * @return the label that is used for the container input field.
+	 * @since 3.2
+	 */
+	protected String getContainerLabel() {
+		return NewWizardMessages.NewContainerWizardPage_container_label;
 	}
 			
 	/**
@@ -276,8 +286,7 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 	
 	private void containerChangeControlPressed(DialogField field) {
 		// take the current jproject as init element of the dialog
-		IPackageFragmentRoot root= getPackageFragmentRoot();
-		root= chooseSourceContainer(root);
+		IPackageFragmentRoot root= chooseContainer();
 		if (root != null) {
 			setPackageFragmentRoot(root, true);
 		}
@@ -424,7 +433,19 @@ public abstract class NewContainerWizardPage extends NewElementWizardPage {
 		
 	// ------------- choose source container dialog
 	
-	private IPackageFragmentRoot chooseSourceContainer(IJavaElement initElement) {
+	/**
+	 * Opens a selection dialog that allows to select a source container. 
+	 * 
+	 * @return returns the selected package fragment root  or <code>null</code> if the dialog has been canceled.
+	 * The caller typically sets the result to the container input field.
+	 * <p>
+	 * Clients can override this method if they want to offer a different dialog.
+	 * </p>
+	 * 
+	 * @since 3.2
+	 */
+	protected IPackageFragmentRoot chooseContainer() {
+		IJavaElement initElement= getPackageFragmentRoot();
 		Class[] acceptedClasses= new Class[] { IPackageFragmentRoot.class, IJavaProject.class };
 		TypedElementSelectionValidator validator= new TypedElementSelectionValidator(acceptedClasses, false) {
 			public boolean isSelectedValid(Object element) {

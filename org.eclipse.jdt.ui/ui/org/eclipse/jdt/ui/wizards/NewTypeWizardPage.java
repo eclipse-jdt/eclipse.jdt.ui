@@ -108,7 +108,6 @@ import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedConstructorsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddUnimplementedMethodsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.IImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
@@ -126,7 +125,6 @@ import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TableTextCellEditor;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
@@ -380,13 +378,13 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		fPackageDialogField= new StringButtonStatusDialogField(adapter);
 		fPackageDialogField.setDialogFieldListener(adapter);
-		fPackageDialogField.setLabelText(NewWizardMessages.NewTypeWizardPage_package_label); 
+		fPackageDialogField.setLabelText(getPackageLabel()); 
 		fPackageDialogField.setButtonLabel(NewWizardMessages.NewTypeWizardPage_package_button); 
 		fPackageDialogField.setStatusWidthHint(NewWizardMessages.NewTypeWizardPage_default); 
 				
 		fEnclosingTypeSelection= new SelectionButtonDialogField(SWT.CHECK);
 		fEnclosingTypeSelection.setDialogFieldListener(adapter);
-		fEnclosingTypeSelection.setLabelText(NewWizardMessages.NewTypeWizardPage_enclosing_selection_label); 
+		fEnclosingTypeSelection.setLabelText(getEnclosingTypeLabel()); 
 		
 		fEnclosingTypeDialogField= new StringButtonDialogField(adapter);
 		fEnclosingTypeDialogField.setDialogFieldListener(adapter);
@@ -394,11 +392,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		
 		fTypeNameDialogField= new StringDialogField();
 		fTypeNameDialogField.setDialogFieldListener(adapter);
-		fTypeNameDialogField.setLabelText(NewWizardMessages.NewTypeWizardPage_typename_label); 
+		fTypeNameDialogField.setLabelText(getTypeNameLabel()); 
 		
 		fSuperClassDialogField= new StringButtonDialogField(adapter);
 		fSuperClassDialogField.setDialogFieldListener(adapter);
-		fSuperClassDialogField.setLabelText(NewWizardMessages.NewTypeWizardPage_superclass_label); 
+		fSuperClassDialogField.setLabelText(getSuperClassLabel()); 
 		fSuperClassDialogField.setButtonLabel(NewWizardMessages.NewTypeWizardPage_superclass_button); 
 		
 		String[] addButtons= new String[] {
@@ -409,8 +407,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fSuperInterfacesDialogField= new ListDialogField(adapter, addButtons, new InterfacesListLabelProvider());
 		fSuperInterfacesDialogField.setDialogFieldListener(adapter);
 		fSuperInterfacesDialogField.setTableColumns(new ListDialogField.ColumnsDescription(1, false));
-		String interfaceLabel= getInterfaceLabel();
-		fSuperInterfacesDialogField.setLabelText(interfaceLabel);
+		fSuperInterfacesDialogField.setLabelText(getSuperInterfacesLabel());
 		fSuperInterfacesDialogField.setRemoveButtonIndex(2);
 	
 		String[] buttonNames1= new String[] {
@@ -421,7 +418,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		};
 		fAccMdfButtons= new SelectionButtonDialogFieldGroup(SWT.RADIO, buttonNames1, 4);
 		fAccMdfButtons.setDialogFieldListener(adapter);
-		fAccMdfButtons.setLabelText(NewWizardMessages.NewTypeWizardPage_modifiers_acc_label);		 
+		fAccMdfButtons.setLabelText(getModifiersLabel());		 
 		fAccMdfButtons.setSelection(0, true);
 		
 		String[] buttonNames2;
@@ -473,12 +470,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		fSuperClassStatus= new StatusInfo();
 		fSuperInterfacesStatus= new StatusInfo();
 		fModifierStatus= new StatusInfo();
-	}
-		
-	private String getInterfaceLabel() {
-	    if (fTypeKind != INTERFACE_TYPE)
-	        return NewWizardMessages.NewTypeWizardPage_interfaces_class_label; 
-	    return NewWizardMessages.NewTypeWizardPage_interfaces_ifc_label; 
 	}
 	
 	/**
@@ -552,6 +543,68 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}		
 	
 	// -------- UI Creation ---------
+	
+	/**
+	 * Returns the label that is used for the package input field.
+	 * 
+	 * @return the label that is used for the package input field.
+	 * @since 3.2
+	 */
+	protected String getPackageLabel() {
+		return NewWizardMessages.NewTypeWizardPage_package_label;
+	}
+
+	/**
+	 * Returns the label that is used for the enclosing type input field.
+	 * 
+	 * @return the label that is used for the enclosing type input field.
+	 * @since 3.2
+	 */
+	protected String getEnclosingTypeLabel() {
+		return NewWizardMessages.NewTypeWizardPage_enclosing_selection_label;
+	}
+	
+	/**
+	 * Returns the label that is used for the type name input field.
+	 * 
+	 * @return the label that is used for the type name input field.
+	 * @since 3.2
+	 */
+	protected String getTypeNameLabel() {
+		return NewWizardMessages.NewTypeWizardPage_typename_label;
+	}
+
+	/**
+	 * Returns the label that is used for the modifiers input field.
+	 * 
+	 * @return the label that is used for the modifiers input field
+	 * @since 3.2
+	 */
+	protected String getModifiersLabel() {
+		return NewWizardMessages.NewTypeWizardPage_modifiers_acc_label;
+	}
+
+	/**
+	 * Returns the label that is used for the super class input field.
+	 * 
+	 * @return the label that is used for the super class input field.
+	 * @since 3.2
+	 */
+	protected String getSuperClassLabel() {
+		return NewWizardMessages.NewTypeWizardPage_superclass_label;
+	}
+
+	/**
+	 * Returns the label that is used for the super interfaces input field.
+	 * 
+	 * @return the label that is used for the super interfaces input field.
+	 * @since 3.2
+	 */
+	protected String getSuperInterfacesLabel() {
+	    if (fTypeKind != INTERFACE_TYPE)
+	        return NewWizardMessages.NewTypeWizardPage_interfaces_class_label; 
+	    return NewWizardMessages.NewTypeWizardPage_interfaces_ifc_label; 
+	}
 	
 	/**
 	 * Creates a separator line. Expects a <code>GridLayout</code> with at least 1 column.
@@ -710,7 +763,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		JavaTypeCompletionProcessor superInterfaceCompletionProcessor= new JavaTypeCompletionProcessor(false, false);
 		superInterfaceCompletionProcessor.setCompletionContextRequestor(new CompletionContextRequestor() {
 			public StubTypeContext getStubTypeContext() {
-				return getSuperInterfaceStubTypeContext();
+				return getSuperInterfacesStubTypeContext();
 			}
 		});
 		SubjectControlContentAssistant contentAssistant= ControlContentAssistHelper.createJavaContentAssistant(superInterfaceCompletionProcessor);
@@ -841,7 +894,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				fEnclosingTypeDialogField.setText(JavaModelUtil.getFullyQualifiedName(type));
 			}
 		} else if (field == fSuperClassDialogField) {
-			IType type= chooseSuperType();
+			IType type= chooseSuperClass();
 			if (type != null) {
 				fSuperClassDialogField.setText(JavaModelUtil.getFullyQualifiedName(type));
 			}
@@ -1607,7 +1660,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		return status;
 	}
 
-	private StubTypeContext getSuperInterfaceStubTypeContext() {
+	private StubTypeContext getSuperInterfacesStubTypeContext() {
 		if (fSuperInterfaceStubTypeContext == null) {
 			String typeName;
 			if (fCurrType != null) {
@@ -1639,8 +1692,19 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 	
 	// selection dialogs
-	
-	private IPackageFragment choosePackage() {
+
+	/**
+	 * Opens a selection dialog that allows to select a package. 
+	 * 
+	 * @return returns the selected package or <code>null</code> if the dialog has been canceled.
+	 * The caller typically sets the result to the package input field.
+	 * <p>
+	 * Clients can override this method if they want to offer a different dialog.
+	 * </p>
+	 * 
+	 * @since 3.2
+	 */
+	protected IPackageFragment choosePackage() {
 		IPackageFragmentRoot froot= getPackageFragmentRoot();
 		IJavaElement[] packages= null;
 		try {
@@ -1671,7 +1735,18 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		return null;
 	}
 	
-	private IType chooseEnclosingType() {
+	/**
+	 * Opens a selection dialog that allows to select an enclosing type. 
+	 * 
+	 * @return returns the selected type or <code>null</code> if the dialog has been canceled.
+	 * The caller typically sets the result to the enclosing type input field.
+	 * <p>
+	 * Clients can override this method if they want to offer a different dialog.
+	 * </p>
+	 * 
+	 * @since 3.2
+	 */
+	protected IType chooseEnclosingType() {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		if (root == null) {
 			return null;
@@ -1691,7 +1766,18 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		return null;
 	}	
 	
-	private IType chooseSuperType() {
+	/**
+	 * Opens a selection dialog that allows to select an superClass. 
+	 * 
+	 * @return returns the selected type or <code>null</code> if the dialog has been canceled.
+	 * The caller typically sets the result to the super class input field.
+	 * 	<p>
+	 * Clients can override this method if they want to offer a different dialog.
+	 * </p>
+	 * 
+	 * @since 3.2
+	 */
+	protected IType chooseSuperClass() {
 		IPackageFragmentRoot root= getPackageFragmentRoot();
 		if (root == null) {
 			return null;
@@ -2067,7 +2153,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 				buf.append(" extends "); //$NON-NLS-1$
 			}
 			String[] intfs= (String[]) interfaces.toArray(new String[interfaces.size()]);
-			ITypeBinding[] bindings= TypeContextChecker.resolveSuperInterfaces(intfs, fCurrType, getSuperInterfaceStubTypeContext());
+			ITypeBinding[] bindings= TypeContextChecker.resolveSuperInterfaces(intfs, fCurrType, getSuperInterfacesStubTypeContext());
 			for (int i= 0; i <= last; i++) {
 				ITypeBinding binding= bindings[i];
 				if (binding != null) {
@@ -2157,32 +2243,11 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	 * @see #createType(IProgressMonitor)
 	 */		
 	protected void createTypeMembers(IType newType, final ImportsManager imports, IProgressMonitor monitor) throws CoreException {
-		// call for compatibility
-		IImportsStructure wrapper= new IImportsStructure() {
-			public String addImport(String qualifiedTypeName) {
-				return imports.addImport(qualifiedTypeName);
-			}
-			public String addStaticImport(String qualifiedTypeName, String selector, boolean isField) {
-				return qualifiedTypeName + '.' + selector;
-			}
-		};
-		createTypeMembers(newType, wrapper, monitor);
-		
 		// default implementation does nothing
 		// example would be
 		// String mainMathod= "public void foo(Vector vec) {}"
 		// createdType.createMethod(main, null, false, null);
 		// imports.addImport("java.lang.Vector");
-	}
-	
-	/**
-	 * @deprecated Overwrite createTypeMembers(IType, IImportsManager, IProgressMonitor) instead
-	 */		
-	protected void createTypeMembers(IType newType, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
-		//deprecated
-		if (false) {
-			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, null));
-		}
 	}
 	
 		
@@ -2364,12 +2429,6 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 			imports.addImport(createdImports[index]);
 	}
 
-	/**
-	 * @deprecated Use createInheritedMethods(IType,boolean,boolean,IImportsManager,IProgressMonitor)
-	 */
-	protected IMethod[] createInheritedMethods(IType type, boolean doConstructors, boolean doUnimplementedMethods, IImportsStructure imports, IProgressMonitor monitor) throws CoreException {
-		return createInheritedMethods(type, doConstructors, doUnimplementedMethods, new ImportsManager(createASTForImports(type.getCompilationUnit())), monitor);
-	}
 	
 	// ---- creation ----------------
 
