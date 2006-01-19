@@ -107,12 +107,17 @@ public class SelectionHistoryTest extends TestCase {
 		}
 
 		public int compare(Object o1, Object o2) {
-			int histCompare= fHistory.compare(o1, o2);
-			assertTrue("Key compare not equals Object compare", histCompare == fHistory.compareByKeys(o1, o2));
-			if (histCompare != 0)
-				return histCompare;
+			int pos1= fHistory.getPosition(o1);
+			int pos2= fHistory.getPosition(o2);
 			
-			return ((String)o1).compareTo((String)o2);
+			if (pos1 == pos2)
+				return ((String)o1).compareTo(o2);	
+			
+			if (pos1 > pos2) {
+				return -1;
+			} else {
+				return 1;
+			}
 		}
 		
 	}
