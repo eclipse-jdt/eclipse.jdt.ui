@@ -57,7 +57,6 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 
 	private String fQualifiedName;
 	private String fSimpleName;
-	private IType fType;
 	private ImportRewrite fImportRewrite;
 	private ContextSensitiveImportRewriteContext fImportContext;
 
@@ -67,19 +66,6 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		fQualifiedName= null;
 	}
 	
-	/**
-	 * Returns the java model type of this type proposal.
-	 *
-	 * @return the java mode type of this type proposal
-	 * @throws JavaModelException
-	 */
-	protected final IType getProposedType() throws JavaModelException {
-		if (fType == null && fCompilationUnit != null) {
-			fType= fCompilationUnit.getJavaProject().findType(getQualifiedTypeName());
-		}
-		return fType;
-	}
-
 	public final String getQualifiedTypeName() {
 		if (fQualifiedName == null)
 			fQualifiedName= String.valueOf(Signature.toCharArray(Signature.getTypeErasure(fProposal.getSignature())));
@@ -207,7 +193,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	 */
 	protected final void rememberSelection() throws JavaModelException {
 		IType lhs= fInvocationContext.getExpectedType();
-		IType rhs= getProposedType();
+		IType rhs= (IType) getJavaElement();
 		if (lhs != null && rhs != null)
 			JavaPlugin.getDefault().getContentAssistHistory().remember(lhs, rhs);
 		

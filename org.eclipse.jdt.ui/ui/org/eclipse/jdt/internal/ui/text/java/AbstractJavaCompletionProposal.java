@@ -51,8 +51,10 @@ import org.eclipse.jface.text.link.LinkedModeUI.IExitPolicy;
 
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.CharOperation;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -212,7 +214,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * 
 	 * @return the additional proposal info, or <code>null</code> if none exists
 	 */
-	public ProposalInfo getProposalInfo() {
+	protected ProposalInfo getProposalInfo() {
 		return fProposalInfo;
 	}
 
@@ -799,5 +801,20 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 */
 	public String toString() {
 		return getDisplayString();
+	}
+	
+	/**
+	 * Returns the java element proposed by the receiver, possibly <code>null</code>.
+	 * 
+	 * @return the java element proposed by the receiver, possibly <code>null</code>
+	 */
+	public IJavaElement getJavaElement() {
+		if (getProposalInfo() != null)
+			try {
+				return getProposalInfo().getJavaElement();
+			} catch (JavaModelException x) {
+				JavaPlugin.log(x);
+			}
+		return null;
 	}
 }

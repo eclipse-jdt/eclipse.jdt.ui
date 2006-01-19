@@ -152,7 +152,7 @@ public class LazyJavaCompletionProposal extends AbstractJavaCompletionProposal {
 	 * @return the additional proposal info, or <code>null</code> if none
 	 *         exists
 	 */
-	public final ProposalInfo getProposalInfo() {
+	protected final ProposalInfo getProposalInfo() {
 		if (!fProposalInfoComputed)
 			setProposalInfo(computeProposalInfo());
 		return super.getProposalInfo();

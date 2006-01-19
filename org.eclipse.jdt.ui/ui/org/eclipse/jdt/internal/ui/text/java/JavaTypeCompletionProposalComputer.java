@@ -84,7 +84,7 @@ public class JavaTypeCompletionProposalComputer extends JavaCompletionProposalCo
 						int relevance= typeProposal.getRelevance() - history.size() - 1;
 						for (Iterator it= history.iterator(); it.hasNext();) {
 							String type= (String) it.next();
-							if (type.equals(typeProposal.getProposedType().getFullyQualifiedName()))
+							if (type.equals(((IType) typeProposal.getJavaElement()).getFullyQualifiedName()))
 								continue;
 							
 							IJavaCompletionProposal proposal= createTypeProposal(relevance, type, javaContext);

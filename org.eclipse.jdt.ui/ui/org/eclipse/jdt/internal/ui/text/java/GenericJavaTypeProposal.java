@@ -275,7 +275,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	private TypeArgumentProposal[] computeTypeArgumentProposals() throws JavaModelException {
 		if (fTypeArgumentProposals == null) {
 			
-			IType type= getProposedType();
+			IType type= (IType) getJavaElement();
 			if (type == null)
 				return new TypeArgumentProposal[0];
 			
@@ -765,7 +765,7 @@ public final class GenericJavaTypeProposal extends LazyJavaTypeCompletionProposa
 	
 	private boolean hasParameters() {
 		try {
-			IType type= getProposedType();
+			IType type= (IType) getJavaElement();
 			if (type == null)
 				return false;
 

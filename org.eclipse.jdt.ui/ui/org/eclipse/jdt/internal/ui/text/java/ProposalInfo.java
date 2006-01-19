@@ -14,9 +14,8 @@ package org.eclipse.jdt.internal.ui.text.java;
 import java.io.IOException;
 import java.io.Reader;
 
-import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavadocContentAccess;
@@ -26,42 +25,73 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class ProposalInfo {
 
-	private IJavaProject fJavaProject;
-	private String fFullTypeName;
-	private IMember fMember;
+	private boolean fJavadocResolved= false;
+	private String fJavadoc= null;
 
-	public ProposalInfo(IJavaProject jproject, String fullyQualifiedTypeName) {
-		fJavaProject= jproject;
-		fFullTypeName= fullyQualifiedTypeName;
-	}
+	protected IJavaElement fElement;
 
 	public ProposalInfo(IMember member) {
-		fMember= member;
+		fElement= member;
+	}
+	
+	protected ProposalInfo() {
+		fElement= null;
 	}
 
-	private IMember getMember() throws JavaModelException {
-		if (fMember == null) {
-			IType type= fJavaProject.findType(fFullTypeName);
-			if (type != null) {
-				fMember= type;
-			}
-		}
-		return fMember;
+	public IJavaElement getJavaElement() throws JavaModelException {
+		return fElement;
 	}
 
 	/**
-	 * Gets the text for this proposal info
+	 * Gets the text for this proposal info formatted as HTML, or
+	 * <code>null</code> if no text is available.
+	 *
+	 * @return the additional info text
 	 */
-	public String getInfo() {
+	public final String getInfo() {
+		if (!fJavadocResolved) {
+			fJavadocResolved= true;
+			fJavadoc= computeInfo();
+		}
+		return fJavadoc;
+	}
+
+	/**
+	 * Gets the text for this proposal info formatted as HTML, or
+	 * <code>null</code> if no text is available.
+	 *
+	 * @return the additional info text
+	 */
+	private String computeInfo() {
 		try {
-			IMember member= getMember();
-			if (member != null) {
-				Reader reader= JavadocContentAccess.getHTMLContentReader(member, true, true);
-				if (reader != null)
-					return getString(reader);
+			final IJavaElement javaElement= getJavaElement();
+			if (javaElement instanceof IMember) {
+				IMember member= (IMember) javaElement;
+				return extractJavadoc(member);
 			}
 		} catch (JavaModelException e) {
 			JavaPlugin.log(e);
+		} catch (IOException e) {
+			JavaPlugin.log(e);
+		}
+		return null;
+	}
+
+	/**
+	 * Extracts the javadoc for the given <code>IMember</code> and returns it
+	 * as HTML.
+	 *
+	 * @param member the member to get the documentation for
+	 * @return the javadoc for <code>member</code> or <code>null</code> if
+	 *         it is not available
+	 * @throws JavaModelException if accessing the javadoc fails
+	 * @throws IOException if reading the javadoc fails
+	 */
+	private String extractJavadoc(IMember member) throws JavaModelException, IOException {
+		if (member != null) {
+			Reader reader=  JavadocContentAccess.getHTMLContentReader(member, true, true);
+			if (reader != null)
+				return getString(reader);
 		}
 		return null;
 	}
@@ -81,5 +111,4 @@ public class ProposalInfo {
 		}
 		return buf.toString();
 	}
-	
 }

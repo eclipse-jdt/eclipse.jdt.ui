@@ -10,26 +10,16 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import java.io.IOException;
-import java.io.Reader;
-
 import org.eclipse.jface.text.Assert;
 
 import org.eclipse.jdt.core.CompletionProposal;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.ui.JavadocContentAccess;
-
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-
 /**
  * Proposal info that computes the javadoc lazily when it is queried.
- * <p>
- * TODO this class only subclasses ProposalInfo to be compatible - it does not
- * use any thing from it.
- * </p>
  *
  * @since 3.1
  */
@@ -39,8 +29,7 @@ public abstract class MemberProposalInfo extends ProposalInfo {
 	protected final CompletionProposal fProposal;
 
 	/* cache filled lazily */
-	private boolean fJavadocResolved= false;
-	private String fJavadoc= null;
+	private boolean fJavaElementResolved= false;
 
 	/**
 	 * Creates a new proposal info.
@@ -49,7 +38,6 @@ public abstract class MemberProposalInfo extends ProposalInfo {
 	 * @param proposal the proposal to generate information for
 	 */
 	public MemberProposalInfo(IJavaProject project, CompletionProposal proposal) {
-		super(null);
 		Assert.isNotNull(project);
 		Assert.isNotNull(proposal);
 		fJavaProject= project;
@@ -57,69 +45,17 @@ public abstract class MemberProposalInfo extends ProposalInfo {
 	}
 
 	/**
-	 * Gets the text for this proposal info formatted as HTML, or
-	 * <code>null</code> if no text is available.
-	 *
-	 * @return the additional info text
+	 * Returns the java element that this computer corresponds to, possibly <code>null</code>.
+	 * 
+	 * @return the java element that this computer corresponds to, possibly <code>null</code>
+	 * @throws JavaModelException
 	 */
-	public final String getInfo() {
-		if (!fJavadocResolved) {
-			fJavadocResolved= true;
-			fJavadoc= computeInfo();
+	public IJavaElement getJavaElement() throws JavaModelException {
+		if (!fJavaElementResolved) {
+			fJavaElementResolved= true;
+			fElement= resolveMember();
 		}
-		return fJavadoc;
-	}
-
-	/**
-	 * Gets the text for this proposal info formatted as HTML, or
-	 * <code>null</code> if no text is available.
-	 *
-	 * @return the additional info text
-	 */
-	private String computeInfo() {
-		try {
-			return extractJavadoc(resolveMember());
-		} catch (JavaModelException e) {
-			JavaPlugin.log(e);
-		} catch (IOException e) {
-			JavaPlugin.log(e);
-		}
-		return null;
-	}
-
-	/**
-	 * Extracts the javadoc for the given <code>IMember</code> and returns it
-	 * as HTML.
-	 *
-	 * @param member the member to get the documentation for
-	 * @return the javadoc for <code>member</code> or <code>null</code> if
-	 *         it is not available
-	 * @throws JavaModelException if accessing the javadoc fails
-	 * @throws IOException if reading the javadoc fails
-	 */
-	private String extractJavadoc(IMember member) throws JavaModelException, IOException {
-		if (member != null) {
-			Reader reader=  JavadocContentAccess.getHTMLContentReader(member, true, true);
-			if (reader != null)
-				return getString(reader);
-		}
-		return null;
-	}
-	
-	/**
-	 * Gets the reader content as a String
-	 */
-	private static String getString(Reader reader) {
-		StringBuffer buf= new StringBuffer();
-		char[] buffer= new char[1024];
-		int count;
-		try {
-			while ((count= reader.read(buffer)) != -1)
-				buf.append(buffer, 0, count);
-		} catch (IOException e) {
-			return null;
-		}
-		return buf.toString();
+		return fElement;
 	}
 
 	/**
