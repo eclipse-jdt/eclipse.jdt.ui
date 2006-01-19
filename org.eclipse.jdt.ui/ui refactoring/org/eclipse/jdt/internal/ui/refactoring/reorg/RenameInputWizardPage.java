@@ -291,7 +291,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		if (textUpdating == null || !textUpdating.canEnableTextUpdating())
 			return;
 		final IQualifiedNameUpdating qualifiedUpdating= (IQualifiedNameUpdating) getRefactoring().getAdapter(IQualifiedNameUpdating.class);
-		if (qualifiedUpdating == null || qualifiedUpdating.canEnableQualifiedNameUpdating())
+		if (qualifiedUpdating == null || !qualifiedUpdating.canEnableQualifiedNameUpdating())
 			return;
 		boolean value= false;
 		final ExpandableComposite expandable= createExpandableSection(parent, getRefactoring(), RefactoringMessages.RenameInputWizardPage_update_section, 1, new IDescriptionProvider() {
