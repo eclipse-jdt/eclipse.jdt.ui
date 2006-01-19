@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
-import org.eclipse.jdt.internal.corext.util.History;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 import org.eclipse.jdt.internal.corext.util.TypeInfoUtil;
@@ -213,10 +212,8 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 			JavaPlugin.getDefault().getContentAssistHistory().remember(lhs, rhs);
 		
 		TypeInfo info= TypeInfoUtil.searchTypeInfo(fCompilationUnit.getJavaProject(), null, getQualifiedTypeName());
-		if (info != null) {
-			History history= TypeInfoHistory.getDefault();
-			history.accessed(info);
-		}
+		if (info != null)
+			TypeInfoHistory.remember(info);
 	}
 
 	/**

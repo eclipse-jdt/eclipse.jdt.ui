@@ -13,41 +13,46 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.Comparator;
 
-import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
 
+import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IStatusLineManager;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IRegion;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.IEditingSupport;
 import org.eclipse.jface.text.IEditingSupportRegistry;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.source.ISourceViewer;
-
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IEditorActionBarContributor;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
+import org.eclipse.ui.dialogs.FilteredList;
 import org.eclipse.ui.part.EditorActionBarContributor;
 import org.eclipse.ui.progress.IProgressService;
 import org.eclipse.ui.texteditor.IUpdate;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation.IChooseImportQuery;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
+import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
+
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
@@ -58,6 +63,25 @@ import org.eclipse.jdt.internal.ui.util.TypeInfoLabelProvider;
 
 
 public class AddImportOnSelectionAction extends Action implements IUpdate {
+	
+	private static final AddImportComparator ADD_IMPORT_COMPARATOR= new AddImportComparator();
+	
+	private static final class AddImportComparator implements Comparator {
+		
+		public int compare(Object o1, Object o2) {
+			if (((String)o1).equals(o2))
+				return 0;
+			
+			TypeInfoHistory history= TypeInfoHistory.getDefault();
+			
+			int histCompare= history.compareByKeys(o1, o2);
+			if (histCompare != 0)
+				return histCompare;
+			
+			return ((String)o1).compareTo(o2);
+		}
+		
+	}
 
 	private CompilationUnitEditor fEditor;
 
@@ -187,13 +211,21 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 				}
 			}
 			fIsShowing= true;
-			ElementListSelectionDialog dialog= new ElementListSelectionDialog(fShell, new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED));
+			ElementListSelectionDialog dialog= new ElementListSelectionDialog(fShell, new TypeInfoLabelProvider(TypeInfoLabelProvider.SHOW_FULLYQUALIFIED)) {
+				protected FilteredList createFilteredList(Composite parent) {
+					FilteredList filteredList= super.createFilteredList(parent);
+					filteredList.setComparator(ADD_IMPORT_COMPARATOR);
+					return filteredList;
+				}
+			};
 			dialog.setTitle(JavaEditorMessages.AddImportOnSelection_dialog_title);
 			dialog.setMessage(JavaEditorMessages.AddImportOnSelection_dialog_message);
 			dialog.setElements(results);
 			if (dialog.open() == Window.OK) {
 				fIsShowing= false;
-				return (TypeInfo) dialog.getFirstResult();
+				TypeInfo result= (TypeInfo) dialog.getFirstResult();
+				TypeInfoHistory.remember(result);
+				return result;
 			}
 			fIsShowing= false;
 			return null;

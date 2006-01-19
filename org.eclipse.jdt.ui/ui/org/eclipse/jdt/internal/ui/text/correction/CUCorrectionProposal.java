@@ -237,7 +237,7 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		}
 	}
 
-	protected void rememberSelection() {
+	protected void rememberSelection() throws CoreException {
 		if (getCommandId() != null) {
 			History history= CorrectionHistory.getDefault();
 			history.accessed(getCommandId());

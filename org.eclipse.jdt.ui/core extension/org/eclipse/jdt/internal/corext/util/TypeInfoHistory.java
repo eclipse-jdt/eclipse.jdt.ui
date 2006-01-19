@@ -136,4 +136,8 @@ public class TypeInfoHistory extends History {
 		return Math.round(position * dist) + min;
 	}
 
+	public static void remember(TypeInfo typeInfo) {
+		getDefault().accessed(typeInfo);
+	}
+
 }

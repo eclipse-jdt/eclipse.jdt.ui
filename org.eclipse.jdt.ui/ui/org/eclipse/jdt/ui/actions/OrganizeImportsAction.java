@@ -549,7 +549,6 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		dialog.setMessage(ActionMessages.OrganizeImportsAction_selectiondialog_message);
 		dialog.setElements(openChoices);
 		dialog.setComparator(ORGANIZE_IMPORT_COMPARATOR);
-		TypeInfoHistory history= TypeInfoHistory.getDefault();
 		if (dialog.open() == Window.OK) {
 			Object[] res= dialog.getResult();			
 			result= new TypeInfo[res.length];
@@ -557,7 +556,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				Object[] array= (Object[]) res[i];
 				if (array.length > 0) {
 					result[i]= (TypeInfo) array[0];
-					history.accessed(result[i]);
+					TypeInfoHistory.remember(result[i]);
 				}
 			}
 		}

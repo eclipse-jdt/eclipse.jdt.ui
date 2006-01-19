@@ -12,19 +12,17 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 
 
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.util.History;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 import org.eclipse.jdt.internal.corext.util.TypeInfoUtil;
-
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 	
@@ -45,16 +43,10 @@ public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 		return fQualifierName + '.' + fTypeName;
 	}
 
-	protected void rememberSelection() {
-		try {
-			TypeInfo info= TypeInfoUtil.searchTypeInfo(fCu.getJavaProject(), fNode, getQualifiedTypeName());
-			if (info != null) {
-				History history= TypeInfoHistory.getDefault();
-				history.accessed(info);
-			}
-		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, CorrectionMessages.CUCorrectionProposal_error_title, CorrectionMessages.CUCorrectionProposal_error_message);
-		}
+	protected void rememberSelection() throws CoreException {
+		TypeInfo info= TypeInfoUtil.searchTypeInfo(fCu.getJavaProject(), fNode, getQualifiedTypeName());
+		if (info != null)
+			TypeInfoHistory.remember(info);
 	}
 
 }
