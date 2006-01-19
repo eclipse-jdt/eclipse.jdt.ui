@@ -21,6 +21,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 
+import org.eclipse.text.edits.TextEdit;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
@@ -92,6 +93,7 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -99,8 +101,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -576,24 +576,30 @@ public class MoveInnerToTopRefactoring extends Refactoring implements IInitializ
 	}
 
 	private void addImportsToTargetUnit(final ICompilationUnit targetUnit, final IProgressMonitor monitor) throws CoreException, JavaModelException {
-		final ImportsStructure structure= new ImportsStructure(targetUnit, fCodeGenerationSettings.importOrder, fCodeGenerationSettings.importThreshold, true);
-		if (fTypeImports != null) {
-			ITypeBinding type= null;
-			for (final Iterator iterator= fTypeImports.iterator(); iterator.hasNext();) {
-				type= (ITypeBinding) iterator.next();
-				structure.addImport(type);
+		monitor.beginTask("", 2); //$NON-NLS-1$
+		try {
+			ImportRewrite rewrite= StubUtility.createImportRewrite(targetUnit, true);
+			if (fTypeImports != null) {
+				ITypeBinding type= null;
+				for (final Iterator iterator= fTypeImports.iterator(); iterator.hasNext();) {
+					type= (ITypeBinding) iterator.next();
+					rewrite.addImport(type);
+				}
 			}
-		}
-		if (fStaticImports != null) {
-			IBinding binding= null;
-			for (final Iterator iterator= fStaticImports.iterator(); iterator.hasNext();) {
-				binding= (IBinding) iterator.next();
-				structure.addStaticImport(binding);
+			if (fStaticImports != null) {
+				IBinding binding= null;
+				for (final Iterator iterator= fStaticImports.iterator(); iterator.hasNext();) {
+					binding= (IBinding) iterator.next();
+					rewrite.addStaticImport(binding);
+				}
 			}
+			fTypeImports= null;
+			fStaticImports= null;
+			TextEdit edits= rewrite.rewriteImports(new SubProgressMonitor(monitor, 1));
+			JavaModelUtil.applyEdit(targetUnit, edits, false, new SubProgressMonitor(monitor, 1));
+		} finally {
+			monitor.done();
 		}
-		fTypeImports= null;
-		fStaticImports= null;
-		structure.create(false, monitor);
 	}
 
 	private void addInheritedTypeQualifications(final AbstractTypeDeclaration declaration, final CompilationUnitRewrite targetRewrite, final TextEditGroup group) {
@@ -865,6 +871,7 @@ public class MoveInnerToTopRefactoring extends Refactoring implements IInitializ
 		if (targetUnit.equals(sourceUnit)) {
 			final AbstractTypeDeclaration declaration= findTypeDeclaration(fType, root);
 			final TextEditGroup qualifierGroup= fSourceRewrite.createGroupDescription(RefactoringCoreMessages.MoveInnerToTopRefactoring_change_qualifier); 
+			ITypeBinding binding= declaration.resolveBinding();
 			if (!remove) {
 				if (!JdtFlags.isStatic(fType) && fCreateInstanceField) {
 					if (JavaElementUtil.getAllConstructors(fType).length == 0)
@@ -874,13 +881,14 @@ public class MoveInnerToTopRefactoring extends Refactoring implements IInitializ
 					addInheritedTypeQualifications(declaration, targetRewrite, qualifierGroup);
 					addEnclosingInstanceDeclaration(declaration, rewrite);
 				}
-				fTypeImports= new ArrayList();
-				fStaticImports= new ArrayList();
+				fTypeImports= new HashSet();
+				fStaticImports= new HashSet();
 				ImportRewriteUtil.collectImports(fType.getJavaProject(), declaration, fTypeImports, fStaticImports, false);
+				if (binding != null)
+					fTypeImports.remove(binding);
 			}
 			addEnclosingInstanceTypeParameters(parameters, declaration, rewrite);
 			modifyAccessToEnclosingInstance(targetRewrite, declaration, status, monitor);
-			final ITypeBinding binding= declaration.resolveBinding();
 			if (binding != null) {
 				modifyInterfaceMemberModifiers(binding);
 				final ITypeBinding declaring= binding.getDeclaringClass();
@@ -1538,7 +1546,7 @@ public class MoveInnerToTopRefactoring extends Refactoring implements IInitializ
 					}
 				}
 			} else
-				rewriter.removeImport(type);
+				rewriter.removeImport(type.getQualifiedName());
 		}
 	}
 

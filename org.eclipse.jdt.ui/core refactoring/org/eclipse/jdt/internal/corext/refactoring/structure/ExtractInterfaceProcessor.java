@@ -83,12 +83,12 @@ import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
@@ -676,7 +676,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 */
 	protected final String createTypeImports(final ICompilationUnit unit, final IProgressMonitor monitor) throws CoreException {
 		Assert.isNotNull(unit);
-		final ImportRewrite rewrite= new ImportRewrite(unit);
+		final ImportRewrite rewrite= StubUtility.createImportRewrite(unit, true);
 		ITypeBinding type= null;
 		for (final Iterator iterator= fTypeBindings.iterator(); iterator.hasNext();) {
 			type= (ITypeBinding) iterator.next();
@@ -694,7 +694,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 		}
 		final IDocument document= new Document();
 		try {
-			rewrite.createEdit(document, new SubProgressMonitor(monitor, 1)).apply(document);
+			rewrite.rewriteImports(new SubProgressMonitor(monitor, 1)).apply(document);
 		} catch (MalformedTreeException exception) {
 			JavaPlugin.log(exception);
 		} catch (BadLocationException exception) {

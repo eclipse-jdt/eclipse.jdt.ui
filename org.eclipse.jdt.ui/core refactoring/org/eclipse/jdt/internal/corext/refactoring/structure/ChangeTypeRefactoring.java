@@ -29,8 +29,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -59,13 +57,14 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -94,7 +93,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.SimpleTypeCon
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeConstraintFactory;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.TypeVariable;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
@@ -487,15 +485,11 @@ public class ChangeTypeRefactoring extends Refactoring {
 		CompilationUnit	unit= new RefactoringASTParser(AST.JLS3).parse(icu, false);
 		ASTRewrite unitRewriter= ASTRewrite.create(unit.getAST());
 		MultiTextEdit root= new MultiTextEdit();
-		try {
-			unitChange.setEdit(root); // Adam sez don't need this, but then unitChange.addGroupDescription() fails an assertion!
-			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(icu);
-			String typeName= updateImports(icu, buffer, root);
-			updateCu(unit, vars, unitChange, unitRewriter, typeName);
-			root.addChild(unitRewriter.rewriteAST(buffer.getDocument(), fCu.getJavaProject().getOptions(true)));
-		} finally {
-			RefactoringFileBuffers.release(icu);
-		}
+		unitChange.setEdit(root); // Adam sez don't need this, but then unitChange.addGroupDescription() fails an assertion!
+
+		String typeName= updateImports(unit, root);
+		updateCu(unit, vars, unitChange, unitRewriter, typeName);
+		root.addChild(unitRewriter.rewriteAST());
 	}
 
 	private class SourceRangeComputer extends TargetSourceRangeComputer {
@@ -1200,10 +1194,10 @@ public class ChangeTypeRefactoring extends Refactoring {
 	/**
 	 * update a CompilationUnit's imports after changing the type of declarations
 	 */
-	private String updateImports(ICompilationUnit icu, ITextFileBuffer buffer, MultiTextEdit rootEdit) throws CoreException{	
-		ImportRewrite rewrite= new ImportRewrite(icu);
+	private String updateImports(CompilationUnit astRoot, MultiTextEdit rootEdit) throws CoreException{	
+		ImportRewrite rewrite= StubUtility.createImportRewrite(astRoot, true);
 		String typeName= rewrite.addImport(fSelectedType.getQualifiedName());
-		rootEdit.addChild(rewrite.createEdit(buffer.getDocument(), null));
+		rootEdit.addChild(rewrite.rewriteImports(null));
 		return typeName;
 	}
 

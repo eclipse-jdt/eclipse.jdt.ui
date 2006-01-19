@@ -33,7 +33,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
-
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 
 public class ImportRemover {
@@ -215,12 +214,6 @@ public class ImportRemover {
 		fRemovedNodes.add(removed);
 	}
 
-	/**
-	 * @deprecated Use {@link #applyRemoves(ImportRewrite)} instead.
-	 */
-	public void applyRemoves(org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite importRewrite) {
-		applyRemoves(importRewrite.getNewImportRewrite());
-	}
 	
 	public void applyRemoves(ImportRewrite importRewrite) {
 		IBinding[] bindings= getImportsToRemove();

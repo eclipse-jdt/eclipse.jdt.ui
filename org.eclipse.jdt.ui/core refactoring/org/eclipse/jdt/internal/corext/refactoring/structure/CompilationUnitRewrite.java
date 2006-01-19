@@ -159,41 +159,48 @@ public class CompilationUnitRewrite {
 	 * @throws CoreException
 	 */
 	public CompilationUnitChange attachChange(CompilationUnitChange cuChange, IProgressMonitor monitor) throws CoreException {
-		boolean needsAstRewrite= fRewrite != null; // TODO: do we need something like ASTRewrite#hasChanges() here?
-		boolean needsImportRemoval= fImportRemover != null && fImportRemover.hasRemovedNodes();
-		boolean needsImportRewrite= fImportRewrite != null && fImportRewrite.hasRecordedChanges() || needsImportRemoval;
-		if (!needsAstRewrite && !needsImportRemoval && !needsImportRewrite)
-			return null;
-					
-		MultiTextEdit multiEdit= (MultiTextEdit) cuChange.getEdit();
-		if (multiEdit == null) {
-			multiEdit= new MultiTextEdit();
-			cuChange.setEdit(multiEdit);
-		}
-			
-		if (needsAstRewrite) {
-			TextEdit rewriteEdit= fRewrite.rewriteAST();
-			if (!isEmptyEdit(rewriteEdit)) {
-				multiEdit.addChild(rewriteEdit);
-				for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
-					cuChange.addTextEditGroup((TextEditGroup) iter.next());
+		try {
+			boolean needsAstRewrite= fRewrite != null; // TODO: do we need something like ASTRewrite#hasChanges() here?
+			boolean needsImportRemoval= fImportRemover != null && fImportRemover.hasRemovedNodes();
+			boolean needsImportRewrite= fImportRewrite != null && fImportRewrite.hasRecordedChanges() || needsImportRemoval;
+			if (!needsAstRewrite && !needsImportRemoval && !needsImportRewrite)
+				return null;
+						
+			MultiTextEdit multiEdit= (MultiTextEdit) cuChange.getEdit();
+			if (multiEdit == null) {
+				multiEdit= new MultiTextEdit();
+				cuChange.setEdit(multiEdit);
+			}
+				
+			if (needsAstRewrite) {
+				TextEdit rewriteEdit= fRewrite.rewriteAST();
+				if (!isEmptyEdit(rewriteEdit)) {
+					multiEdit.addChild(rewriteEdit);
+					for (Iterator iter= fTextEditGroups.iterator(); iter.hasNext();) {
+						cuChange.addTextEditGroup((TextEditGroup) iter.next());
+					}
 				}
 			}
-		}
-		if (needsImportRemoval) {
-			fImportRemover.applyRemoves(getNewImportRewrite());
-		}
-		if (needsImportRewrite) {
-			TextEdit importsEdit= fImportRewrite.rewriteImports(null);
-			if (!isEmptyEdit(importsEdit)) {
-				multiEdit.addChild(importsEdit);
-				String importUpdateName= RefactoringCoreMessages.ASTData_update_imports; 
-				cuChange.addTextEditGroup(new TextEditGroup(importUpdateName, importsEdit));
+			if (needsImportRemoval) {
+				fImportRemover.applyRemoves(getImportRewrite());
 			}
+			if (needsImportRewrite) {
+				TextEdit importsEdit= fImportRewrite.rewriteImports(monitor);
+				if (!isEmptyEdit(importsEdit)) {
+					multiEdit.addChild(importsEdit);
+					String importUpdateName= RefactoringCoreMessages.ASTData_update_imports; 
+					cuChange.addTextEditGroup(new TextEditGroup(importUpdateName, importsEdit));
+				}
+			} else {
+				
+			}
+			if (isEmptyEdit(multiEdit))
+				return null;
+			return cuChange;
+		} finally {
+			if (monitor != null)
+				monitor.done();
 		}
-		if (isEmptyEdit(multiEdit))
-			return null;
-		return cuChange;
 	}
 
 	private static boolean isEmptyEdit(TextEdit edit) {
@@ -220,7 +227,7 @@ public class CompilationUnitRewrite {
 		return fRewrite;
 	}
 
-	public ImportRewrite getNewImportRewrite() {
+	public ImportRewrite getImportRewrite() {
 		if (fImportRewrite == null) {
 			// lazily initialized to avoid lengthy processing in checkInitialConditions(..)
 			try {
@@ -236,13 +243,6 @@ public class CompilationUnitRewrite {
 		}
 		return fImportRewrite;
 		
-	}
-	
-	/**
-	 * @deprecated use {@link #getNewImportRewrite()} instead.
-	 */
-	public org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite getImportRewrite() {
-		return new org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite(getNewImportRewrite());
 	}
 	
 	public ImportRemover getImportRemover() {

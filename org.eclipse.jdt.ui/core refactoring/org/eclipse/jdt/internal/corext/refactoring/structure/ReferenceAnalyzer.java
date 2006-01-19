@@ -85,7 +85,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 	public boolean visit(QualifiedName node) {
 		if (isMovedMember(node.resolveBinding())) {
 			if (node.getParent() instanceof ImportDeclaration) {
-				fCuRewrite.getImportRewrite().removeImport(node.resolveTypeBinding());
+				ITypeBinding typeBinding= node.resolveTypeBinding();
+				if (typeBinding != null) 
+				 	fCuRewrite.getImportRewrite().removeImport(typeBinding.getQualifiedName());
 				String imp= fCuRewrite.getImportRewrite().addImport(fTarget.getQualifiedName() + '.' + node.getName().getIdentifier());
 				fCuRewrite.getImportRemover().registerAddedImport(imp);
 			} else {

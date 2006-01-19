@@ -25,10 +25,10 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 
 /**
  * Utility methods to manage static and non-static imports of a compilation unit.
@@ -38,10 +38,10 @@ import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 public final class ImportRewriteUtil {
 
 	/**
-	 * Adds the necessary imports for an ast node to the specified compilation unit.
+	 * Adds the necessary imports for an AST node to the specified compilation unit.
 	 * 
 	 * @param rewrite the compilation unit rewrite whose compilation unit's imports should be updated
-	 * @param node the ast node specifying the element for which imports should be added
+	 * @param node the AST node specifying the element for which imports should be added
 	 * @param typeImports the map of name nodes to strings (element type: Map <Name, String>).
 	 * @param staticImports the map of name nodes to strings (element type: Map <Name, String>).
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
@@ -51,10 +51,10 @@ public final class ImportRewriteUtil {
 	}
 
 	/**
-	 * Adds the necessary imports for an ast node to the specified compilation unit.
+	 * Adds the necessary imports for an AST node to the specified compilation unit.
 	 * 
 	 * @param rewrite the compilation unit rewrite whose compilation unit's imports should be updated
-	 * @param node the ast node specifying the element for which imports should be added
+	 * @param node the AST node specifying the element for which imports should be added
 	 * @param typeImports the map of name nodes to strings (element type: Map <Name, String>).
 	 * @param staticImports the map of name nodes to strings (element type: Map <Name, String>).
 	 * @param excludeBindings the set of bindings to exclude (element type: Set <IBinding>).
@@ -114,10 +114,10 @@ public final class ImportRewriteUtil {
 	}
 
 	/**
-	 * Collects the necessary imports for an element represented by the specified ast node.
+	 * Collects the necessary imports for an element represented by the specified AST node.
 	 * 
 	 * @param project the java project containing the element
-	 * @param node the ast node specifying the element for which imports should be collected
+	 * @param node the AST node specifying the element for which imports should be collected
 	 * @param typeBindings the set of type bindings (element type: Set <ITypeBinding>).
 	 * @param staticBindings the set of bindings (element type: Set <IBinding>).
 	 * @param declarations <code>true</code> if method declarations are treated as abstract, <code>false</code> otherwise
@@ -127,10 +127,10 @@ public final class ImportRewriteUtil {
 	}
 
 	/**
-	 * Collects the necessary imports for an element represented by the specified ast node.
+	 * Collects the necessary imports for an element represented by the specified AST node.
 	 * 
 	 * @param project the java project containing the element
-	 * @param node the ast node specifying the element for which imports should be collected
+	 * @param node the AST node specifying the element for which imports should be collected
 	 * @param typeBindings the set of type bindings (element type: Set <ITypeBinding>).
 	 * @param staticBindings the set of bindings (element type: Set <IBinding>).
 	 * @param excludeBindings the set of bindings to exclude (element type: Set <IBinding>).
