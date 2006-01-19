@@ -48,12 +48,13 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -62,7 +63,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIStatus;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorHighlightingSynchronizer;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
@@ -353,14 +353,6 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			fLinkedPositionGroup= group;
 		}
 
-		private ImportsStructure getImportStructure() throws CoreException {
-			IJavaProject project= fCompilationUnit.getJavaProject();
-			String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(project);
-			int threshold= JavaPreferencesSettings.getImportNumberThreshold(project);
-			ImportsStructure impStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
-			return impStructure;
-		}
-
 		/* (non-Javadoc)
 		 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension2#apply(org.eclipse.jface.text.ITextViewer, char, int, int)
 		 */
@@ -368,15 +360,15 @@ public class LinkedCorrectionProposal extends ASTRewriteCorrectionProposal {
 			IDocument document= viewer.getDocument();
 			try {
 				String replaceString= fProposal;
-				ImportsStructure impStructure= null;
+				ImportRewrite impRewrite= null;
 				if (fTypeProposal != null) {
-					impStructure= getImportStructure();
-					replaceString= impStructure.addImport(fTypeProposal);
+					impRewrite= StubUtility.createImportRewrite(fCompilationUnit, true);
+					replaceString= impRewrite.addImport(fTypeProposal);
 				}
 				IRegion region= getReplaceRegion(viewer, offset);
 				document.replace(region.getOffset(), region.getLength(), replaceString);
-				if (impStructure != null) {
-					impStructure.create(false, null);
+				if (impRewrite != null) {
+					JavaModelUtil.applyEdit(fCompilationUnit, impRewrite.rewriteImports(null), false, null);
 				}
 			} catch (BadLocationException e) {
 				JavaPlugin.log(e);

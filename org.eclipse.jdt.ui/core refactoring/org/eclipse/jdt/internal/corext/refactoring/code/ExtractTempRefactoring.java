@@ -90,12 +90,12 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -810,18 +810,10 @@ public class ExtractTempRefactoring extends Refactoring implements IInitializabl
 					tempTypeName= typeBinding.getName();
 				} else {
 					typeBinding= Bindings.normalizeForDeclarationUse(typeBinding, expression.getAST());
-					ImportRewrite importRewrite= new ImportRewrite(fCu);
+					
+					ImportRewrite importRewrite= StubUtility.createImportRewrite(fCu, true);
 					tempTypeName= importRewrite.addImport(typeBinding);
-					if (! importRewrite.isEmpty()) {
-						ITextFileBuffer buffer= null;
-						final ICompilationUnit original= WorkingCopyUtil.getOriginal(fCu);
-						try {
-							buffer= RefactoringFileBuffers.acquire(original);
-							fImportEdit= importRewrite.createEdit(buffer.getDocument(), new NullProgressMonitor());
-						} finally {
-							RefactoringFileBuffers.release(original);
-						}
-					}
+					fImportEdit= importRewrite.rewriteImports(new NullProgressMonitor());
 				}
 			}
 			fTempTypeName= tempTypeName;

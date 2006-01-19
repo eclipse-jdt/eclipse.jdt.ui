@@ -30,11 +30,6 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.TextUtilities;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -81,13 +76,14 @@ import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.GetterSetterUtil;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
@@ -100,7 +96,6 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -317,14 +312,14 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring implements IIni
 			((AbstractTypeDeclaration)ASTNodes.getParent(fFieldDeclaration, AbstractTypeDeclaration.class)).resolveBinding();
 		List ownerDescriptions= new ArrayList();
 		ICompilationUnit owner= fField.getCompilationUnit();
-		fImportRewrite= new ImportRewrite(owner);
+		fImportRewrite= StubUtility.createImportRewrite(fRoot, true);
 		
 		for (int i= 0; i < affectedCUs.length; i++) {
 			ICompilationUnit unit= affectedCUs[i];
 			sub.subTask(unit.getElementName());
 			CompilationUnit root= null;
 			ASTRewrite rewriter= null;
-			ImportRewrite importRewrite= new ImportRewrite(unit);
+			ImportRewrite importRewrite;
 			List descriptions;
 			if (owner.equals(unit)) {
 				root= fRoot;
@@ -335,7 +330,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring implements IIni
 				root= new RefactoringASTParser(AST.JLS3).parse(unit, true);
 				rewriter= ASTRewrite.create(root.getAST());
 				descriptions= new ArrayList();
-				importRewrite= new ImportRewrite(unit);
+				importRewrite= StubUtility.createImportRewrite(root, true);
 			}
 			checkCompileErrors(result, root, unit);
 			AccessAnalyzer analyzer= new AccessAnalyzer(this, unit, fieldIdentifier, declaringClass, rewriter, importRewrite);
@@ -354,34 +349,20 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring implements IIni
 			if (pm.isCanceled())
 				throw new OperationCanceledException();
 		}
-		try {
-			ITextFileBuffer buffer= RefactoringFileBuffers.acquire(owner);
-			ownerDescriptions.addAll(addGetterSetterChanges(fRoot, fRewriter, TextUtilities.getDefaultLineDelimiter(buffer.getDocument())));
-			createEdits(owner, fRewriter, ownerDescriptions, fImportRewrite, buffer);
-		} finally {
-			RefactoringFileBuffers.release(owner);
-		}
+		ownerDescriptions.addAll(addGetterSetterChanges(fRoot, fRewriter, owner.findRecommendedLineSeparator()));
+		createEdits(owner, fRewriter, ownerDescriptions, fImportRewrite);
+
 		sub.done();
 		result.merge(Checks.validateModifiesFiles(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()), getValidationContext()));
 		return result;
 	}
 
 	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups, ImportRewrite importRewrite) throws CoreException {
-		try {
-		ITextFileBuffer buffer= RefactoringFileBuffers.acquire(unit);
-			createEdits(unit, rewriter, groups, importRewrite, buffer);
-		} finally {
-			RefactoringFileBuffers.release(unit);
-		}
-	}
-
-	private void createEdits(ICompilationUnit unit, ASTRewrite rewriter, List groups, ImportRewrite importRewrite, ITextFileBuffer buffer) throws CoreException {
 		TextChange change= fChangeManager.get(unit);
 		MultiTextEdit root= new MultiTextEdit();
 		change.setEdit(root);
-		IDocument document= buffer.getDocument();
-		root.addChild(importRewrite.createEdit(document, null));
-		root.addChild(rewriter.rewriteAST(document, fField.getJavaProject().getOptions(true)));
+		root.addChild(importRewrite.rewriteImports(null));
+		root.addChild(rewriter.rewriteAST());
 		for (Iterator iter= groups.iterator(); iter.hasNext();) {
 			change.addTextEditGroup((TextEditGroup)iter.next());
 		}

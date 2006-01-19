@@ -72,9 +72,9 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -1058,7 +1058,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		AST ast= node.getAST();
 		ASTRewrite rewrite= ASTRewrite.create(ast);
 
-		ImportRewrite imports= new ImportRewrite(context.getCompilationUnit());
+		String label= CorrectionMessages.QuickAssistProcessor_typetoarrayInitializer_description;
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+
+		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		
+		ImportRewrite imports= proposal.createImportRewrite(context.getASTRoot());
 		String typeName= imports.addImport(typeBinding);
 
 		ArrayCreation creation= ast.newArrayCreation();
@@ -1066,11 +1071,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		creation.setType((ArrayType) ASTNodeFactory.newType(ast, typeName));
 
 		rewrite.replace(initializer, creation, null);
-
-		String label= CorrectionMessages.QuickAssistProcessor_typetoarrayInitializer_description;
-		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-
-		LinkedCorrectionProposal proposal= new LinkedCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		
 		resultingCollections.add(proposal);
 		return true;
 	}

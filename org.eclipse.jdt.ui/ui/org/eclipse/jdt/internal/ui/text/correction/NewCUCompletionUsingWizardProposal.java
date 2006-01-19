@@ -28,7 +28,6 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.AST;
@@ -38,11 +37,13 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -52,7 +53,6 @@ import org.eclipse.jdt.ui.wizards.NewTypeWizardPage;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 import org.eclipse.jdt.internal.ui.wizards.NewAnnotationCreationWizard;
@@ -237,11 +237,10 @@ public class NewCUCompletionUsingWizardProposal extends ChangeCorrectionProposal
 			}
 			if (!container.equals(fTypeContainer)) {
 				// add import
-				IJavaProject project= fCompilationUnit.getJavaProject();
 				try {
-					ImportsStructure imp= new ImportsStructure(fCompilationUnit, JavaPreferencesSettings.getImportOrderPreference(project), JavaPreferencesSettings.getImportNumberThreshold(project), true);
-					imp.addImport(createdType.getFullyQualifiedName('.'));
-					imp.create(false, null);
+					ImportRewrite rewrite= StubUtility.createImportRewrite(fCompilationUnit, true);
+					rewrite.addImport(createdType.getFullyQualifiedName('.'));
+					JavaModelUtil.applyEdit(fCompilationUnit, rewrite.rewriteImports(null), false, null);
 				} catch (CoreException e) {
 				}
 			}

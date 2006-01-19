@@ -34,12 +34,13 @@ import org.eclipse.swt.dnd.TransferData;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.viewers.ISelection;
+
 import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IRewriteTarget;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.viewers.ISelection;
 
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
@@ -50,21 +51,21 @@ import org.eclipse.ui.texteditor.TextEditorAction;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.Signature;
-
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+
+import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.dom.Bindings;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportReferencesCollector;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 
 /**
@@ -491,12 +492,10 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 
 	private void addImports(ICompilationUnit unit, ClipboardData data) throws CoreException {
-		CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject());
-		ImportsStructure importsStructure= new ImportsStructure(unit, settings.importOrder, settings.importThreshold, true);
-		importsStructure.setFindAmbiguousImports(false);
+		ImportRewrite rewrite= StubUtility.createImportRewrite(unit, true);
 		String[] imports= data.getTypeImports();
 		for (int i= 0; i < imports.length; i++) {
-			importsStructure.addImport(imports[i]);
+			rewrite.addImport(imports[i]);
 		}
 		String[] staticImports= data.getStaticImports();
 		for (int i= 0; i < staticImports.length; i++) {
@@ -506,10 +505,10 @@ public final class ClipboardOperationAction extends TextEditorAction {
 				name= name.substring(0, name.length() - 2);
 			}
 			String qualifier= Signature.getQualifier(staticImports[i]);
-			importsStructure.addStaticImport(qualifier, name, isField);
+			rewrite.addStaticImport(qualifier, name, isField);
 		}
 
-		importsStructure.create(false, null);
+		JavaModelUtil.applyEdit(unit, rewrite.rewriteImports(null), false, null);
 	}
 
 

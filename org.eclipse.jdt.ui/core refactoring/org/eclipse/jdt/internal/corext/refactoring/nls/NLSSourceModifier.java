@@ -16,25 +16,23 @@ import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.filebuffers.FileBuffers;
-import org.eclipse.core.filebuffers.ITextFileBufferManager;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.jface.text.Region;
+
+import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
-
-import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.TextChange;
 
 public class NLSSourceModifier {
 
@@ -192,24 +190,15 @@ public class NLSSourceModifier {
 	}
 
 	private String createImportForAccessor(MultiTextEdit parent, String accessorClassName, IPackageFragment accessorPackage, ICompilationUnit cu) throws CoreException {
+		IType type= accessorPackage.getCompilationUnit(accessorClassName + JavaModelUtil.DEFAULT_CU_SUFFIX).getType(accessorClassName);
+		String fullyQualifiedName= type.getFullyQualifiedName();
 
-		ITextFileBufferManager manager= FileBuffers.getTextFileBufferManager();
-		IPath path= cu.getPath();
-		try {
-			manager.connect(path, null);
-			
-			IType type= accessorPackage.getCompilationUnit(accessorClassName + JavaModelUtil.DEFAULT_CU_SUFFIX).getType(accessorClassName);
-			String fullyQualifiedName= type.getFullyQualifiedName();
+		ImportRewrite importRewrite= StubUtility.createImportRewrite(cu, true);
+		String nameToUse= importRewrite.addImport(fullyQualifiedName);
+		TextEdit edit= importRewrite.rewriteImports(null);
+		parent.addChild(edit);
 
-			ImportRewrite importRewrite= new ImportRewrite(cu);
-			String nameToUse= importRewrite.addImport(fullyQualifiedName);
-			TextEdit edit= importRewrite.createEdit(manager.getTextFileBuffer(path).getDocument(), null);
-			parent.addChild(edit);
-
-			return nameToUse;
-		} finally {
-			manager.disconnect(path, null);
-		}
+		return nameToUse;
 	}
 
 	private void addNLS(NLSSubstitution sub, TextChange change, String accessorName) {

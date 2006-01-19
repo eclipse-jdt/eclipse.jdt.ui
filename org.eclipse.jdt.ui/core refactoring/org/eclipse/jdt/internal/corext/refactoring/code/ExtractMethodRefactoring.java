@@ -88,10 +88,10 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTFlattener;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -223,7 +223,7 @@ public class ExtractMethodRefactoring extends Refactoring implements IInitializa
 	}
 
 	private void initialize(ICompilationUnit cu) throws CoreException {
-		fImportRewriter= new ImportRewrite(cu);
+		fImportRewriter= StubUtility.createImportRewrite(cu, true);
 	}
 
 	 public String getName() {
@@ -494,8 +494,8 @@ public class ExtractMethodRefactoring extends Refactoring implements IInitializa
 			
 			replaceDuplicates(result);
 		
-			if (!fImportRewriter.isEmpty()) {
-				TextEdit edit= fImportRewriter.createEdit(fDocument, null);
+			if (fImportRewriter.hasRecordedChanges()) {
+				TextEdit edit= fImportRewriter.rewriteImports(null);
 				root.addChild(edit);
 				result.addTextEditGroup(new TextEditGroup(
 					RefactoringCoreMessages.ExtractMethodRefactoring_organize_imports, 

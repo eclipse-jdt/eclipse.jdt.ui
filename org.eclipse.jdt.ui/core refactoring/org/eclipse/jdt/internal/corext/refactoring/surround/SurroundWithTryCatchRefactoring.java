@@ -62,9 +62,9 @@ import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.CodeScopeBuilder;
@@ -188,7 +188,7 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			fRewriter= ASTRewrite.create(fAnalyzer.getEnclosingBodyDeclaration().getAST());
 			fRewriter.setTargetSourceRangeComputer(new SelectionAwareSourceRangeComputer(
 				fAnalyzer.getSelectedNodes(), document, fSelection.getOffset(), fSelection.getLength()));
-			fImportRewrite= new ImportRewrite(fCUnit);
+			fImportRewrite= StubUtility.createImportRewrite(fRootNode, true);
 			
 			fScope= CodeScopeBuilder.perform(fAnalyzer.getEnclosingBodyDeclaration(), fSelection).
 				findScope(fSelection.getOffset(), fSelection.getLength());
@@ -198,8 +198,8 @@ public class SurroundWithTryCatchRefactoring extends Refactoring {
 			
 			createTryCatchStatement(document);
 			
-			if (!fImportRewrite.isEmpty()) {
-				TextEdit edit= fImportRewrite.createEdit(document, null);
+			if (fImportRewrite.hasRecordedChanges()) {
+				TextEdit edit= fImportRewrite.rewriteImports(null);
 				root.addChild(edit);
 				result.addTextEditGroup(new TextEditGroup(NN, new TextEdit[] {edit} ));
 			}

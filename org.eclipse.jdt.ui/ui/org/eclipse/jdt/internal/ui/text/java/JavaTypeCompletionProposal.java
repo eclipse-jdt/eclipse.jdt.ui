@@ -23,16 +23,15 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
 /**
  * If passed compilation unit is not null, the replacement string will be seen as a qualified type name.
@@ -59,16 +58,16 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 		fUnqualifiedTypeName= fullyQualifiedTypeName != null ? Signature.getSimpleName(fullyQualifiedTypeName) : null;
 	}
 
-	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
+	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportRewrite impRewrite) throws CoreException, BadLocationException {
 		// avoid adding imports when inside imports container
-		if (impStructure != null && fFullyQualifiedTypeName != null) {
+		if (impRewrite != null && fFullyQualifiedTypeName != null) {
 			String replacementString= getReplacementString();
 			String qualifiedType= fFullyQualifiedTypeName;
 			if (qualifiedType.indexOf('.') != -1 && replacementString.startsWith(qualifiedType) && !replacementString.endsWith(String.valueOf(';'))) {
-				IType[] types= impStructure.getCompilationUnit().getTypes();
+				IType[] types= impRewrite.getCompilationUnit().getTypes();
 				if (types.length > 0 && types[0].getSourceRange().getOffset() <= offset) {
 					// ignore positions above type.
-					setReplacementString(impStructure.addImport(getReplacementString()));
+					setReplacementString(impRewrite.addImport(getReplacementString()));
 					return true;
 				}
 			}
@@ -82,25 +81,22 @@ public class JavaTypeCompletionProposal extends JavaCompletionProposal {
 	 */
 	public void apply(IDocument document, char trigger, int offset) {
 		try {
-			ImportsStructure impStructure= null;
+			ImportRewrite impRewrite= null;
 
 			if (fCompilationUnit != null && allowAddingImports()) {
-				IJavaProject project= fCompilationUnit.getJavaProject();
-				String[] prefOrder= JavaPreferencesSettings.getImportOrderPreference(project);
-				int threshold= JavaPreferencesSettings.getImportNumberThreshold(project);
-				impStructure= new ImportsStructure(fCompilationUnit, prefOrder, threshold, true);
+				impRewrite= StubUtility.createImportRewrite(fCompilationUnit, true);
 			}
 
-			boolean importAdded= updateReplacementString(document, trigger, offset, impStructure);
+			boolean importAdded= updateReplacementString(document, trigger, offset, impRewrite);
 
 			if (importAdded)
 				setCursorPosition(getReplacementString().length());
 
 			super.apply(document, trigger, offset);
 
-			if (importAdded && impStructure != null) {
+			if (importAdded && impRewrite != null) {
 				int oldLen= document.getLength();
-				impStructure.getResultingEdits(document, new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
+				impRewrite.rewriteImports(new NullProgressMonitor()).apply(document, TextEdit.UPDATE_REGIONS);
 				setReplacementOffset(getReplacementOffset() + document.getLength() - oldLen);
 			}
 		} catch (CoreException e) {

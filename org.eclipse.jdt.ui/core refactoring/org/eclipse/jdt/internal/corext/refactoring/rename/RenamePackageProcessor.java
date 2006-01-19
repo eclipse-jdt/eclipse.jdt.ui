@@ -30,8 +30,6 @@ import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
@@ -64,6 +62,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -72,7 +71,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -95,7 +94,6 @@ import org.eclipse.jdt.internal.corext.refactoring.util.CommentAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameFinder;
 import org.eclipse.jdt.internal.corext.refactoring.util.QualifiedNameSearchResult;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -939,7 +937,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 				ICompilationUnit cu= (ICompilationUnit) entry.getKey();
 				ImportChange importChange= (ImportChange) entry.getValue();
 				
-				ImportRewrite importRewrite= new ImportRewrite(cu);
+				ImportRewrite importRewrite= StubUtility.createImportRewrite(cu, true);
 				importRewrite.setFilterImplicitImports(false);
 				for (Iterator iterator= importChange.fStaticToRemove.iterator(); iterator.hasNext();) {
 					importRewrite.removeStaticImport((String) iterator.next());
@@ -955,15 +953,10 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 					importRewrite.addImport((String) iterator.next());
 				}
 				
-				if (!importRewrite.isEmpty()) {
-					try {
-						ITextFileBuffer buffer= RefactoringFileBuffers.acquire(cu);
-						TextEdit importEdit= importRewrite.createEdit(buffer.getDocument(), pm);
-						String name= RefactoringCoreMessages.RenamePackageRefactoring_update_imports; 
-						TextChangeCompatibility.addTextEdit(changeManager.get(cu), name, importEdit);
-					} finally {
-						RefactoringFileBuffers.release(cu);
-					}
+				if (importRewrite.hasRecordedChanges()) {
+					TextEdit importEdit= importRewrite.rewriteImports(pm);
+					String name= RefactoringCoreMessages.RenamePackageRefactoring_update_imports; 
+					TextChangeCompatibility.addTextEdit(changeManager.get(cu), name, importEdit);
 				}
 			}
 		}

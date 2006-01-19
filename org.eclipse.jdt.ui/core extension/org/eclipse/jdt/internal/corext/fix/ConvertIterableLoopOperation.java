@@ -432,7 +432,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 		TextEditGroup group= new TextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
 		textEditGroups.add(group);
 		clearPositionGroups();
-		ITrackedNodePosition endPosition= rewriteAST(cuRewrite.getRoot().getAST(), cuRewrite.getASTRewrite(), cuRewrite.getImportRewrite().getNewImportRewrite(), group);
+		ITrackedNodePosition endPosition= rewriteAST(cuRewrite.getRoot().getAST(), cuRewrite.getASTRewrite(), cuRewrite.getImportRewrite(), group);
 		positionGroups.addAll(getAllPositionGroups());
 		return endPosition;
 	}

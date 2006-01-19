@@ -59,9 +59,9 @@ import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
 import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
@@ -240,7 +240,7 @@ public class InlineMethodRefactoring extends Refactoring implements IInitializab
 				BodyDeclaration[] bodies= fTargetProvider.getAffectedBodyDeclarations(unit, new SubProgressMonitor(pm, 1));
 				if (bodies.length == 0)
 					continue;
-				inliner= new CallInliner(unit, bodies[0].getAST(), fSourceProvider);
+				inliner= new CallInliner(unit, (CompilationUnit) bodies[0].getRoot(), fSourceProvider);
 				for (int b= 0; b < bodies.length; b++) {
 					BodyDeclaration body= bodies[b];
 					inliner.initialize(body);
@@ -273,8 +273,8 @@ public class InlineMethodRefactoring extends Refactoring implements IInitializab
 				} else {
 					root.addChild(inliner.getModifications());
 					ImportRewrite rewrite= inliner.getImportEdit();
-					if (!rewrite.isEmpty()) {
-						TextEdit edit= rewrite.createEdit(inliner.getBuffer().getDocument(), null);
+					if (rewrite.hasRecordedChanges()) {
+						TextEdit edit= rewrite.rewriteImports(null);
 						if (edit instanceof MultiTextEdit ? ((MultiTextEdit)edit).getChildrenSize() > 0 : true) {
 							root.addChild(edit);
 							change.addTextEditGroup(

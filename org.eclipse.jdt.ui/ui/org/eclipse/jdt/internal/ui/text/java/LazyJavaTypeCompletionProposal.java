@@ -31,8 +31,8 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
 import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 import org.eclipse.jdt.internal.corext.util.TypeInfoUtil;
@@ -109,7 +109,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		}
 		
 		if (fCompilationUnit != null) {
-			if (ImportsStructure.isImplicitImport(Signature.getQualifier(getQualifiedTypeName()), fCompilationUnit))
+			if (JavaModelUtil.isImplicitImport(Signature.getQualifier(getQualifiedTypeName()), fCompilationUnit))
 				return getSimpleTypeName();
 			else
 				return getQualifiedTypeName();

@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -74,11 +75,12 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -104,7 +106,7 @@ public class CallInliner {
 
 	private ICompilationUnit fCUnit;
 	private ASTRewrite fRewrite;
-	private ImportRewrite fImportEdit;
+	private ImportRewrite fImportRewrite;
 	private ITextFileBuffer fBuffer;
 	private SourceProvider fSourceProvider;
 	private TypeEnvironment fTypeEnvironment;
@@ -221,14 +223,14 @@ public class CallInliner {
 		}
 	}
 
-	public CallInliner(ICompilationUnit unit, AST ast, SourceProvider provider) throws CoreException {
+	public CallInliner(ICompilationUnit unit, CompilationUnit targetAstRoot, SourceProvider provider) throws CoreException {
 		super();
 		fCUnit= unit;
 		fBuffer= RefactoringFileBuffers.acquire(fCUnit);
 		fSourceProvider= provider;
-		fImportEdit= new ImportRewrite(fCUnit);
+		fImportRewrite= StubUtility.createImportRewrite(targetAstRoot, true);
 		fLocals= new ArrayList(3);
-		fRewrite= ASTRewrite.create(ast);
+		fRewrite= ASTRewrite.create(targetAstRoot.getAST());
 		fRewrite.setTargetSourceRangeComputer(new NoCommentSourceRangeComputer());
 		fTypeEnvironment= new TypeEnvironment();
 	}
@@ -241,12 +243,9 @@ public class CallInliner {
 		}
 	}
 	
-	/* package */ ITextFileBuffer getBuffer() {
-		return fBuffer;
-	}
 	
 	public ImportRewrite getImportEdit() {
-		return fImportEdit;
+		return fImportRewrite;
 	}
 	
 	public ASTNode getTargetNode() {
@@ -278,7 +277,7 @@ public class CallInliner {
 		initializeTargetNode();
 		flowAnalysis();
 		
-		fContext= new CallContext(fInvocation, fInvocationScope, fTargetNode.getNodeType(), fImportEdit);
+		fContext= new CallContext(fInvocation, fInvocationScope, fTargetNode.getNodeType(), fImportRewrite);
 		
 		try {
 			computeRealArguments();
@@ -511,7 +510,7 @@ public class CallInliner {
 			String name= fInvocationScope.createName(parameter.getName(), true);
 			realArguments[varargIndex]= name;
 			AST ast= fInvocation.getAST();
-			Type type= fImportEdit.addImport(parameter.getTypeBinding(), ast);
+			Type type= fImportRewrite.addImport(parameter.getTypeBinding(), ast);
 			VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
 			fragment.setName(ast.newSimpleName(name));
 			ArrayInitializer initializer= ast.newArrayInitializer();
@@ -632,7 +631,7 @@ public class CallInliner {
 				if(needsExplicitCast(status)) {
 					AST ast= node.getAST();
 					CastExpression castExpression= ast.newCastExpression();
-					Type returnType= fImportEdit.addImport(fSourceProvider.getReturnType(), ast);
+					Type returnType= fImportRewrite.addImport(fSourceProvider.getReturnType(), ast);
 					castExpression.setType(returnType);
 					castExpression.setExpression((Expression)node);
 					node= castExpression;
@@ -726,7 +725,7 @@ public class CallInliner {
 	}
 	
 	private VariableDeclarationStatement createLocalDeclaration(ITypeBinding type, String name, Expression initializer) {
-		String typeName= fImportEdit.addImport(type);
+		String typeName= fImportRewrite.addImport(type);
 		VariableDeclarationStatement decl= (VariableDeclarationStatement)ASTNodeFactory.newStatement(
 			fInvocation.getAST(), typeName + " " + name + ";"); //$NON-NLS-1$ //$NON-NLS-2$
 		((VariableDeclarationFragment)decl.fragments().get(0)).setInitializer(initializer);

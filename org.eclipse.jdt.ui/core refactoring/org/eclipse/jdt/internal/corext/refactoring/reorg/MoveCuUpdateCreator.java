@@ -25,8 +25,6 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -44,6 +42,7 @@ import org.eclipse.jdt.core.ToolFactory;
 import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.SearchEngine;
 import org.eclipse.jdt.core.search.SearchMatch;
@@ -51,7 +50,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.core.search.TypeReferenceMatch;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -59,7 +58,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ReferenceFinderUtil;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -109,13 +107,8 @@ public class MoveCuUpdateCreator {
 		for (Iterator iter= fImportRewrites.keySet().iterator(); iter.hasNext();) {
 			ICompilationUnit cu= (ICompilationUnit) iter.next();
 			ImportRewrite importRewrite= (ImportRewrite) fImportRewrites.get(cu);
-			if (importRewrite != null && !importRewrite.isEmpty()) {
-				try {
-					ITextFileBuffer buffer= RefactoringFileBuffers.acquire(cu);
-					TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.MoveCuUpdateCreator_update_imports, importRewrite.createEdit(buffer.getDocument(), null)); 
-				} finally {
-					RefactoringFileBuffers.release(cu);
-				}
+			if (importRewrite != null && importRewrite.hasRecordedChanges()) {
+				TextChangeCompatibility.addTextEdit(changeManager.get(cu), RefactoringCoreMessages.MoveCuUpdateCreator_update_imports, importRewrite.rewriteImports(null)); 
 			}
 		}
 	}
@@ -262,7 +255,7 @@ public class MoveCuUpdateCreator {
 	private ImportRewrite getImportRewrite(ICompilationUnit cu) throws CoreException{
 		if (fImportRewrites.containsKey(cu))	
 			return (ImportRewrite)fImportRewrites.get(cu);
-		ImportRewrite importEdit= new ImportRewrite(cu);
+		ImportRewrite importEdit= StubUtility.createImportRewrite(cu, true);
 		fImportRewrites.put(cu, importEdit);
 		return importEdit;	
 	}

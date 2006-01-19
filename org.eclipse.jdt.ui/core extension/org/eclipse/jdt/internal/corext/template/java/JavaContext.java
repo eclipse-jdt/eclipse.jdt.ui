@@ -42,17 +42,17 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
-import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitCompletion.LocalVariable;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.text.template.contentassist.MultiVariable;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -481,10 +481,9 @@ public class JavaContext extends CompilationUnitContext {
 
 			try {
 				
-				CodeGenerationSettings settings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
-				ImportsStructure structure= new ImportsStructure(cu, settings.importOrder, settings.importThreshold, true);
-				structure.addImport("java.util.Iterator"); //$NON-NLS-1$
-				structure.create(false, null);
+				ImportRewrite rewrite= StubUtility.createImportRewrite(cu, true);
+				rewrite.addImport("java.util.Iterator"); //$NON-NLS-1$
+				JavaModelUtil.applyEdit(cu, rewrite.rewriteImports(null), false, null);
 				
 				setCompletionOffset(position.getOffset());
 				setCompletionLength(position.getLength());

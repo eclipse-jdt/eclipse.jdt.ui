@@ -43,10 +43,10 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -88,9 +88,9 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 	}
 
 	/*
-	 * @see JavaTypeCompletionProposal#updateReplacementString(IDocument,char,int,ImportsStructure)
+	 * @see JavaTypeCompletionProposal#updateReplacementString(IDocument,char,int,ImportRewrite)
 	 */
-	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure structure) throws CoreException, BadLocationException {
+	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportRewrite importRewrite) throws CoreException, BadLocationException {
 		final IDocument buffer= new Document(document.get());
 		int index= offset - 1;
 		while (index >= 0 && Character.isJavaIdentifierPart(buffer.getChar(index)))
@@ -151,7 +151,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 					MethodDeclaration stub= null;
 					for (index= 0; index < bindings.length; index++) {
 						if (key.equals(bindings[index].getKey())) {
-							stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, structure, bindings[index], binding.getName(), binding.isInterface(), settings);
+							stub= StubUtility2.createImplementationStub(fCompilationUnit, rewrite, importRewrite, bindings[index], binding.getName(), binding.isInterface(), settings);
 							if (stub != null)
 								rewriter.insertFirst(stub, null);
 							break;

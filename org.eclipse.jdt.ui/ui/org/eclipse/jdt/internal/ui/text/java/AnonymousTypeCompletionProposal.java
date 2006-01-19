@@ -47,11 +47,11 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportsStructure;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -104,8 +104,8 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		return start;
 	}
 
-	private boolean createStubs(StringBuffer buffer, ImportsStructure structure) throws CoreException {
-		if (structure == null)
+	private boolean createStubs(StringBuffer buffer, ImportRewrite importRewrite) throws CoreException {
+		if (importRewrite == null)
 			return false;
 		if (fSuperType == null)
 			return true;
@@ -194,7 +194,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 							key= keys[index];
 							for (int offset= 0; offset < bindings.length; offset++) {
 								if (key.equals(bindings[offset].getKey())) {
-									stub= StubUtility2.createImplementationStub(copy, rewrite, structure, bindings[offset], binding.getName(), binding.isInterface(), settings);
+									stub= StubUtility2.createImplementationStub(copy, rewrite, importRewrite, bindings[offset], binding.getName(), binding.isInterface(), settings);
 									if (stub != null)
 										rewriter.insertFirst(stub, null);
 									break;
@@ -252,7 +252,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 		return false;
 	}
 
-	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportsStructure impStructure) throws CoreException, BadLocationException {
+	protected boolean updateReplacementString(IDocument document, char trigger, int offset, ImportRewrite impRewrite) throws CoreException, BadLocationException {
 		String replacementString= getReplacementString();
 
 		// construct replacement text: an expression to be formatted
@@ -263,7 +263,7 @@ public class AnonymousTypeCompletionProposal extends JavaTypeCompletionProposal 
 			buf.append(')');
 		}
 
-		if (!createStubs(buf, impStructure)) {
+		if (!createStubs(buf, impRewrite)) {
 			return false;
 		}
 		if (document.getChar(offset) != ')')

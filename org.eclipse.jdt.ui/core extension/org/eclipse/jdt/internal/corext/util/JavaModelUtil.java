@@ -991,4 +991,17 @@ public final class JavaModelUtil {
 		cu.getBuffer().setContents(document.get());
 		monitor.done();
 	}
+	
+	public static boolean isImplicitImport(String qualifier, ICompilationUnit cu) {
+		if ("java.lang".equals(qualifier)) {  //$NON-NLS-1$
+			return true;
+		}
+		String packageName= cu.getParent().getElementName();
+		if (qualifier.equals(packageName)) {
+			return true;
+		}
+		String typeName= JavaCore.removeJavaLikeExtension(cu.getElementName());
+		String mainTypeName= JavaModelUtil.concatenateName(packageName, typeName);
+		return qualifier.equals(mainTypeName);
+	}
 }

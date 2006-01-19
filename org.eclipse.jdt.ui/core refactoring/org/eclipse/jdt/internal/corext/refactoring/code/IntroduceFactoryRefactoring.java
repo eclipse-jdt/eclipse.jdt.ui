@@ -28,8 +28,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.filebuffers.ITextFileBuffer;
-
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.Refactoring;
@@ -72,13 +70,14 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.VariableDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.codemanipulation.ImportRewrite;
+import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -92,7 +91,6 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
-import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringFileBuffers;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
@@ -867,46 +865,41 @@ public class IntroduceFactoryRefactoring extends Refactoring implements IInitial
 		Assert.isTrue(rg == null || rg.getCompilationUnit() == unitHandle);
 		CompilationUnit		unit= getASTFor(unitHandle);
 		ASTRewrite			unitRewriter= ASTRewrite.create(unit.getAST());
-		ITextFileBuffer			buffer= null;
 		MultiTextEdit		root= new MultiTextEdit();
 		boolean				someChange= false;
 
-		try {
-			unitChange.setEdit(root);
-			buffer= RefactoringFileBuffers.acquire(unitHandle);
-			fImportRewriter= new ImportRewrite(unitHandle);
+		unitChange.setEdit(root);
+		fImportRewriter= StubUtility.createImportRewrite(unit, true);
 
-			// First create the factory method
-			if (unitHandle.equals(fFactoryUnitHandle)) {
-				TextEditGroup	factoryGD= new TextEditGroup(RefactoringCoreMessages.IntroduceFactory_addFactoryMethod); 
+		// First create the factory method
+		if (unitHandle.equals(fFactoryUnitHandle)) {
+			TextEditGroup	factoryGD= new TextEditGroup(RefactoringCoreMessages.IntroduceFactory_addFactoryMethod); 
 
-				createFactoryChange(unitRewriter, unit, factoryGD);
-				unitChange.addTextEditGroup(factoryGD);
+			createFactoryChange(unitRewriter, unit, factoryGD);
+			unitChange.addTextEditGroup(factoryGD);
+			someChange= true;
+		}
+
+		// Now rewrite all the constructor calls to use the factory method
+		if (rg != null)
+			if (replaceConstructorCalls(rg, unit, unitRewriter, unitChange))
+				someChange= true;
+
+		// Finally, make the constructor private, if requested.
+		if (shouldProtectConstructor() && isConstructorUnit(unitHandle)) {
+			TextEditGroup	declGD= new TextEditGroup(RefactoringCoreMessages.IntroduceFactory_protectConstructor); 
+
+			if (protectConstructor(unit, unitRewriter, declGD)) {
+				unitChange.addTextEditGroup(declGD);
 				someChange= true;
 			}
-
-			// Now rewrite all the constructor calls to use the factory method
-			if (rg != null)
-				if (replaceConstructorCalls(rg, unit, unitRewriter, unitChange))
-					someChange= true;
-
-			// Finally, make the constructor private, if requested.
-			if (shouldProtectConstructor() && isConstructorUnit(unitHandle)) {
-				TextEditGroup	declGD= new TextEditGroup(RefactoringCoreMessages.IntroduceFactory_protectConstructor); 
-
-				if (protectConstructor(unit, unitRewriter, declGD)) {
-					unitChange.addTextEditGroup(declGD);
-					someChange= true;
-				}
-			}
-
-			if (someChange) {
-				root.addChild(unitRewriter.rewriteAST(buffer.getDocument(), fCUHandle.getJavaProject().getOptions(true)));
-				root.addChild(fImportRewriter.createEdit(buffer.getDocument(), null));
-			}
-		} finally {
-			RefactoringFileBuffers.release(unitHandle);
 		}
+
+		if (someChange) {
+			root.addChild(unitRewriter.rewriteAST());
+			root.addChild(fImportRewriter.rewriteImports(null));
+		}
+
 		return someChange;
 	}
 

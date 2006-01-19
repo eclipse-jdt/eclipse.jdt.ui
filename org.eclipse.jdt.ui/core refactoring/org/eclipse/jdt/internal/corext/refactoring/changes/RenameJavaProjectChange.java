@@ -51,7 +51,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	}
 	
 	private RenameJavaProjectChange(IPath resourcePath, String oldName, String newName, String comment, long stampToRestore) {
-		super(resourcePath, oldName, comment, newName);
+		super(resourcePath, oldName, newName, comment);
 	}
 
 	public String getName() {
