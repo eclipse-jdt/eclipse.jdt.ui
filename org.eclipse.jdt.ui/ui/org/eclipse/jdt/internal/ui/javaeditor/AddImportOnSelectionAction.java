@@ -74,11 +74,17 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			
 			TypeInfoHistory history= TypeInfoHistory.getDefault();
 			
-			int histCompare= history.compareByKeys(o1, o2);
-			if (histCompare != 0)
-				return histCompare;
+			int pos1= history.getPosition(o1);
+			int pos2= history.getPosition(o2);
 			
-			return ((String)o1).compareTo(o2);
+			if (pos1 == pos2)
+				return ((String)o1).compareTo(o2);	
+			
+			if (pos1 > pos2) {
+				return -1;
+			} else {
+				return 1;
+			}
 		}
 		
 	}
