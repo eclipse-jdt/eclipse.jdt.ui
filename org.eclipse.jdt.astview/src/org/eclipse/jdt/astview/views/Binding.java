@@ -186,9 +186,20 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "TYPE ARGUMENTS", methodBinding.getTypeArguments(), true)); //$NON-NLS-1$			
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), true)); //$NON-NLS-1$
+					
+					res.add(new BindingProperty(this, "IS ANNOTATION MEMBER", methodBinding.isAnnotationMember(), true)); //$NON-NLS-1$
+					res.add(ResolvedAnnotationProperty.convertValue(this, "DEFAULT VALUE", methodBinding.getDefaultValue()));
+					
+					int parameterCount= methodBinding.getParameterTypes().length;
+					ResolvedAnnotationProperty[] parametersAnnotations= new ResolvedAnnotationProperty[parameterCount];
+					for (int i= 0; i < parameterCount; i++) {
+						parametersAnnotations[i]= new ResolvedAnnotationProperty(this, "Parameter " + String.valueOf(i), methodBinding.getParameterAnnotations(i));
+					}
+					res.add(new ResolvedAnnotationProperty(this, "PARAMETER ANNOTATIONS", parametersAnnotations));
 
 					break;
 			}
+			res.add(new ResolvedAnnotationProperty(this, "ANNOTATIONS", fBinding.getAnnotations())); //$NON-NLS-1$
 			try {
 				IJavaElement javaElement= fBinding.getJavaElement();
 				res.add(new JavaElement(this, javaElement));

@@ -47,7 +47,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.jface.util.ListenerList;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -109,6 +109,7 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IResolvedAnnotation;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
@@ -118,10 +119,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class ASTView extends ViewPart implements IShowInSource {
 	
-	/**
-	 * Avoid reference to {@link JavaCore#COMPILER_STATEMENTS_RECOVERY}, since it will be removed again.
-	 */
-	private static final String COMPILER_STATEMENTS_RECOVERY= "org.eclipse.jdt.core.compiler.statementsRecovery";
 	private static final int JLS3= AST.JLS3;
 	/** (Used to get rid of deprecation warnings in code)
 	 * @deprecated
@@ -129,7 +126,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private static final int JLS2= AST.JLS2;
 
 	private class ASTViewSelectionProvider implements ISelectionProvider {
-		ListenerList fListeners= new ListenerList();
+		ListenerList fListeners= new ListenerList(ListenerList.IDENTITY);
 
 		public void addSelectionChangedListener(ISelectionChangedListener listener) {
 			fListeners.add(listener);
@@ -619,7 +616,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 				parser.setSource((IClassFile) input);
 				options= ((IClassFile) input).getJavaProject().getOptions(true);
 			}
-			options.put(COMPILER_STATEMENTS_RECOVERY, fStatementsRecovery ? JavaCore.ENABLED : JavaCore.DISABLED);
+			options.put(JavaCore.COMPILER_STATEMENTS_RECOVERY, fStatementsRecovery ? JavaCore.ENABLED : JavaCore.DISABLED);
 			parser.setCompilerOptions(options);
 			startTime= System.currentTimeMillis();
 			root= (CompilationUnit) parser.createAST(null);
@@ -1083,10 +1080,15 @@ public class ASTView extends ViewPart implements IShowInSource {
 		
 		boolean addEnabled= false;
 		IStructuredSelection structuredSelection= (IStructuredSelection) selection;
-		if (structuredSelection.size() == 1) {
+		if (structuredSelection.size() == 1 && fViewer.getTree().isFocusControl()) {
 			Object first= structuredSelection.getFirstElement();
 			if (first instanceof Binding)
-				addEnabled= ((Binding) first).getBinding() != null && fViewer.getTree().isFocusControl();
+				addEnabled= ((Binding) first).getBinding() != null;
+//TODO: support comparisons between arbitrary ASTAttributes and ASTNodes
+//			else if (first instanceof ResolvedAnnotation)
+//				addEnabled= ((ResolvedAnnotation) first).getAnnotation() != null;
+//			else if (first instanceof ResolvedMemberValuePair)
+//				addEnabled= ((ResolvedMemberValuePair) first).getPair() != null;
 		}
 		fAddToTrayAction.setEnabled(addEnabled);
 	}
@@ -1298,6 +1300,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 		} else if (obj instanceof Binding) {
 			IBinding binding= ((Binding) obj).getBinding();
 			ASTNode declaring= fRoot.findDeclaringNode(binding);
+			if (declaring != null) {
+				fViewer.reveal(declaring);
+				fViewer.setSelection(new StructuredSelection(declaring));
+			}
+			return;
+		} else if (obj instanceof ResolvedAnnotation) {
+			IResolvedAnnotation annotation= ((ResolvedAnnotation) obj).getAnnotation();
+			ASTNode declaring= fRoot.findDeclaringNode(annotation);
 			if (declaring != null) {
 				fViewer.reveal(declaring);
 				fViewer.setSelection(new StructuredSelection(declaring));

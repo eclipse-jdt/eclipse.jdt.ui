@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.Viewer;
 
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
+import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
@@ -29,6 +30,7 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IResolvedAnnotation;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -124,6 +126,9 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 			} else if (expression instanceof SuperFieldAccess) {
 				IVariableBinding binding= ((SuperFieldAccess) expression).resolveFieldBinding();
 				res.add(createBinding(expression, binding));
+			} else if (expression instanceof Annotation) {
+				IResolvedAnnotation binding= ((Annotation) expression).resolveAnnotation();
+				res.add(createResolvedAnnotation(expression, binding));
 			}
 			// Expression attributes:
 			res.add(new LeafAttribute(expression, "Boxing: " + expression.resolveBoxing() + "; Unboxing: " + expression.resolveUnboxing())); //$NON-NLS-1$ //$NON-NLS-2$
@@ -221,10 +226,14 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 		return new Binding(parent, label, binding, true);
 	}
 	
-	
 	private Object createExpressionTypeBinding(ASTNode parent, ITypeBinding binding) {
 		String label= "> (Expression) type binding"; //$NON-NLS-1$
 		return new Binding(parent, label, binding, true);
+	}
+	
+	private Object createResolvedAnnotation(ASTNode parent, IResolvedAnnotation annotation) {
+		String label= "> resolved annotation"; //$NON-NLS-1$
+		return new ResolvedAnnotation(parent, label, annotation);
 	}
 	
 	public boolean hasChildren(Object parent) {
