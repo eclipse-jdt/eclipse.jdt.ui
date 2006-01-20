@@ -14,11 +14,14 @@ import java.util.ArrayList;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jdt.astview.ASTViewPlugin;
+
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
+import org.eclipse.jdt.core.dom.IResolvedAnnotation;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
@@ -199,7 +202,14 @@ public class Binding extends ASTAttribute {
 
 					break;
 			}
-			res.add(new ResolvedAnnotationProperty(this, "ANNOTATIONS", fBinding.getAnnotations())); //$NON-NLS-1$
+			try {
+				IResolvedAnnotation[] annotations= fBinding.getAnnotations();
+				res.add(new ResolvedAnnotationProperty(this, "ANNOTATIONS", annotations)); //$NON-NLS-1$
+			} catch (RuntimeException e) {
+				String label= "Error in IBinding#getAnnotations() for \"" + fBinding.getKey() + "\"";
+				res.add(new Error(this, label, e));
+				ASTViewPlugin.log("Exception thrown in IBinding#getAnnotations() for \"" + fBinding.getKey() + "\"", e);
+			}
 			try {
 				IJavaElement javaElement= fBinding.getJavaElement();
 				res.add(new JavaElement(this, javaElement));
