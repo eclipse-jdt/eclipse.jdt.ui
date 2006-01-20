@@ -101,7 +101,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 		}
 	
 		/**
-		 * Called after the document changed occured. It must be preceded by a call to preReplace().
+		 * Called after the document changed occurred. It must be preceded by a call to preReplace().
 		 *
 		 * @param document the document on which to track the reference position.
 		 */
