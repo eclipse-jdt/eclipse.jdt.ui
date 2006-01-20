@@ -531,7 +531,7 @@ public final class MemberVisibilityAdjustor {
 		for (int i= 0; i < references.length; i++) {
 			final SearchMatch[] searchResults= references[i].getSearchResults();
 			for (int k= 0; k < searchResults.length; k++) {
-				final IJavaElement referenceToMember= (IJavaElement) searchResults[i].getElement();
+				final IJavaElement referenceToMember= (IJavaElement) searchResults[k].getElement();
 				if (fAdjustments.get(memberToMove) == null && referenceToMember instanceof IMember && !isInsideMovedMember(referenceToMember)) {
 					// check whether the member is still visible from the
 					// destination. As we are moving a type, the destination is
