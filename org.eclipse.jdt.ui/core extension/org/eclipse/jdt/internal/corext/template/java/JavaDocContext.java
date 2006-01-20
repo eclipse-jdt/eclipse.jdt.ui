@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.template.java;
 
+import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.Template;
 import org.eclipse.jface.text.templates.TemplateBuffer;
@@ -19,6 +23,13 @@ import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateTranslator;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+
+import org.eclipse.jdt.internal.corext.util.Strings;
+
+import org.eclipse.jdt.ui.PreferenceConstants;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 
 /**
@@ -165,9 +176,34 @@ public class JavaDocContext extends CompilationUnitContext {
 		TemplateBuffer buffer= translator.translate(template);
 
 		getContextType().resolve(buffer, this);
+		
+		IPreferenceStore prefs= JavaPlugin.getDefault().getPreferenceStore();
+		boolean useCodeFormatter= prefs.getBoolean(PreferenceConstants.TEMPLATES_USE_CODEFORMATTER);
+
+		IJavaProject project= getCompilationUnit() != null ? getCompilationUnit().getJavaProject() : null;
+		JavaFormatter formatter= new JavaFormatter(TextUtilities.getDefaultLineDelimiter(getDocument()), getIndentation(), useCodeFormatter, project);
+		formatter.format(buffer, this);
 			
 		return buffer;
 	}
 
+	/**
+	 * Returns the indentation level at the position of code completion.
+	 * 
+	 * @return the indentation level at the position of the code completion
+	 */
+	private int getIndentation() {
+		int start= getStart();
+		IDocument document= getDocument();
+		try {
+			IRegion region= document.getLineInformationOfOffset(start);
+			String lineContent= document.get(region.getOffset(), region.getLength());
+			ICompilationUnit compilationUnit= getCompilationUnit();
+			IJavaProject project= compilationUnit == null ? null : compilationUnit.getJavaProject();
+			return Strings.computeIndentUnits(lineContent, project);
+		} catch (BadLocationException e) {
+			return 0;
+		}
+	}	
 }
 

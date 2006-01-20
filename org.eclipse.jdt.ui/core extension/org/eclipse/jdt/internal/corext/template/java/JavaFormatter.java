@@ -30,6 +30,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TypedPosition;
+import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.jface.text.source.LineRange;
 import org.eclipse.jface.text.templates.DocumentTemplateContext;
 import org.eclipse.jface.text.templates.TemplateBuffer;
@@ -42,7 +43,10 @@ import org.eclipse.jdt.core.formatter.CodeFormatter;
 
 import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
 
+import org.eclipse.jdt.ui.text.IJavaPartitions;
+
 import org.eclipse.jdt.internal.ui.javaeditor.IndentUtil;
+import org.eclipse.jdt.internal.ui.text.FastJavaPartitionScanner;
 
 /**
  * A template editor using the Java formatter to format a template buffer.
@@ -67,7 +71,7 @@ public class JavaFormatter {
 	 */
 	private static final class VariableTracker {
 		private static final String CATEGORY= "__template_variables"; //$NON-NLS-1$
-		private IDocument fDocument;
+		private Document fDocument;
 		private final TemplateBuffer fBuffer;
 		private List fPositions;
 		
@@ -82,9 +86,29 @@ public class JavaFormatter {
 			Assert.isLegal(buffer != null);
 			fBuffer= buffer;
 			fDocument= new Document(fBuffer.getString());
+			installJavaStuff(fDocument);
 			fDocument.addPositionCategory(CATEGORY);
 			fDocument.addPositionUpdater(new ExclusivePositionUpdater(CATEGORY));
 			fPositions= createRangeMarkers(fBuffer.getVariables(), fDocument);
+		}
+		
+		/**
+		 * Installs a java partitioner with <code>document</code>.
+		 *
+		 * @param document the document
+		 */
+		private static void installJavaStuff(Document document) {
+			String[] types= new String[] {
+										  IJavaPartitions.JAVA_DOC,
+										  IJavaPartitions.JAVA_MULTI_LINE_COMMENT,
+										  IJavaPartitions.JAVA_SINGLE_LINE_COMMENT,
+										  IJavaPartitions.JAVA_STRING,
+										  IJavaPartitions.JAVA_CHARACTER,
+										  IDocument.DEFAULT_CONTENT_TYPE
+			};
+			FastPartitioner partitioner= new FastPartitioner(new FastJavaPartitionScanner(), types);
+			partitioner.connect(document);
+			document.setDocumentPartitioner(IJavaPartitions.JAVA_PARTITIONING, partitioner);
 		}
 		
 		/**
