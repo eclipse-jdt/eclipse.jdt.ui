@@ -11,6 +11,8 @@
 
 package org.eclipse.jdt.astview.views;
 
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -118,6 +120,11 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class ASTView extends ViewPart implements IShowInSource {
+	
+	/**
+	 * Avoid direct reference to {@link JavaCore#COMPILER_STATEMENTS_RECOVERY}.
+	 */
+	private static final String COMPILER_STATEMENTS_RECOVERY= "org.eclipse.jdt.core.compiler.statementsRecovery";
 	
 	private static final int JLS3= AST.JLS3;
 	/** (Used to get rid of deprecation warnings in code)
@@ -616,8 +623,21 @@ public class ASTView extends ViewPart implements IShowInSource {
 				parser.setSource((IClassFile) input);
 				options= ((IClassFile) input).getJavaProject().getOptions(true);
 			}
-			options.put(JavaCore.COMPILER_STATEMENTS_RECOVERY, fStatementsRecovery ? JavaCore.ENABLED : JavaCore.DISABLED);
+			
+			//TODO: clean up once JDT/Core API has been settled
+			options.put(COMPILER_STATEMENTS_RECOVERY, fStatementsRecovery ? JavaCore.ENABLED : JavaCore.DISABLED);
 			parser.setCompilerOptions(options);
+//			parser.setStatementsRecovery(fStatementsRecovery);
+			try {
+				Method method= parser.getClass().getMethod("setStatementsRecovery", new Class[] { boolean.class });
+				method.invoke(parser, new Object[] { Boolean.valueOf(fStatementsRecovery) });
+			} catch (SecurityException e) {
+			} catch (NoSuchMethodException e) {
+			} catch (IllegalArgumentException e) {
+			} catch (IllegalAccessException e) {
+			} catch (InvocationTargetException e) {
+			}
+			
 			startTime= System.currentTimeMillis();
 			root= (CompilationUnit) parser.createAST(null);
 			endTime= System.currentTimeMillis();
