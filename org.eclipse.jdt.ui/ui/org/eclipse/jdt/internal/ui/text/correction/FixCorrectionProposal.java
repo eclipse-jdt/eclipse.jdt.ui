@@ -45,19 +45,29 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 public class FixCorrectionProposal extends LinkedCorrectionProposal implements ICompletionProposalExtension2 {
 	private final IFix fFix;
 	private final ICleanUp fCleanUp;
+	private final ICleanUp fMultiFix;
 
 	public FixCorrectionProposal(IFix fix, ICleanUp cleanUp, int relevance, Image image) {
+		this(fix, cleanUp, relevance, image, cleanUp);
+	}
+	
+	public FixCorrectionProposal(IFix fix, ICleanUp cleanUp, int relevance, Image image, ICleanUp multiFix) {
 		super(fix.getDescription(), fix.getCompilationUnit(), null, relevance, image);
 		fFix= fix;
 		fCleanUp= cleanUp;
+		fMultiFix= multiFix;
 	}
-	
+
 	public IFix getFix() {
 		return fFix;
 	}
 	
 	public ICleanUp getCleanUp() {
 		return fCleanUp;
+	}
+	
+	public ICleanUp getMultiFix() {
+		return fMultiFix;
 	}
 
 	/* (non-Javadoc)

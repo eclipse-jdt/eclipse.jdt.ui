@@ -71,6 +71,13 @@ public class Java50CleanUp extends AbstractCleanUp {
 	 */
 	public static final int CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP= 4;
 	
+	/**
+	 * Adds type parameters to raw type references.<p>
+	 * i.e.:<pre><code>
+	 * List l; -> List<Object> l;
+	 */
+	public static final int ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE= 8;
+	
 	private static final int DEFAULT_FLAG= ADD_DEPRECATED_ANNOTATION | ADD_OVERRIDE_ANNOATION;
 	private static final String SECTION_NAME= "CleanUp_Java50"; //$NON-NLS-1$
 
@@ -89,7 +96,8 @@ public class Java50CleanUp extends AbstractCleanUp {
 		return Java50Fix.createCleanUp(compilationUnit, 
 				isFlag(ADD_OVERRIDE_ANNOATION), 
 				isFlag(ADD_DEPRECATED_ANNOTATION),
-				isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP));
+				isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP), 
+				isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE));
 	}
 	
 	/**
@@ -101,7 +109,8 @@ public class Java50CleanUp extends AbstractCleanUp {
 		
 		return Java50Fix.createCleanUp(compilationUnit, problems,
 				isFlag(ADD_OVERRIDE_ANNOATION), 
-				isFlag(ADD_DEPRECATED_ANNOTATION));
+				isFlag(ADD_DEPRECATED_ANNOTATION),
+				isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE));
 	}
 
 	public Map getRequiredOptions() {
@@ -111,6 +120,10 @@ public class Java50CleanUp extends AbstractCleanUp {
 		
 		if (isFlag(ADD_DEPRECATED_ANNOTATION))
 			options.put(JavaCore.COMPILER_PB_MISSING_DEPRECATED_ANNOTATION, JavaCore.WARNING);
+		
+		if (isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE))
+			options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		
 		return options;
 	}
 
@@ -141,6 +154,8 @@ public class Java50CleanUp extends AbstractCleanUp {
 			result.add(removeMemonic(MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description));
 		if (isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP))
 			result.add(removeMemonic(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description));
+		if (isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE))
+			result.add(removeMemonic(MultiFixMessages.Java50CleanUp_AddTypeParameters_description));
 		return (String[])result.toArray(new String[result.size()]);
 	}
 
@@ -162,6 +177,11 @@ public class Java50CleanUp extends AbstractCleanUp {
 		}
 		if (isFlag(ADD_DEPRECATED_ANNOTATION)) {
 			Java50Fix fix= Java50Fix.createAddDeprectatedAnnotation(compilationUnit, problem);
+			if (fix != null)
+				return true;
+		}
+		if (isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE)) {
+			Java50Fix fix= Java50Fix.createRawTypeReferenceFix(compilationUnit, problem);
 			if (fix != null)
 				return true;
 		}

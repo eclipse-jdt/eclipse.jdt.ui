@@ -65,7 +65,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		if (true) {
 			return allTests();
 		}
-		return setUpTest(new AdvancedQuickAssistTest("testAssignToLocal1"));
+		return setUpTest(new LocalCorrectionsQuickFixTest("testTypePrametersToRawTypeReference04"));
 	}
 
 
@@ -5077,5 +5077,256 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	public void testTypePrametersToRawTypeReference01() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void test() {\n");
+		buf.append("        List l;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+		
+		String[] expected= new String[2];
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    public void test() {\n");
+		buf.append("        List l;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void test() {\n");
+		buf.append("        List<Object> l;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testTypePrametersToRawTypeReference02() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    private class E1<P1, P2> {}\n");
+		buf.append("    public void test() {\n");
+		buf.append("        E1 e1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+		
+		String[] expected= new String[2];
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    private class E1<P1, P2> {}\n");
+		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    public void test() {\n");
+		buf.append("        E1 e1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    private class E1<P1, P2> {}\n");
+		buf.append("    public void test() {\n");
+		buf.append("        E1<Object, Object> e1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testTypePrametersToRawTypeReference03() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    private class E1<P2 extends E2> {}\n");
+		buf.append("    private class E2 {}\n");
+		buf.append("    public void test() {\n");
+		buf.append("        E1 e1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+		
+		String[] expected= new String[2];
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    private class E1<P2 extends E2> {}\n");
+		buf.append("    private class E2 {}\n");
+		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    public void test() {\n");
+		buf.append("        E1 e1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    private class E1<P2 extends E2> {}\n");
+		buf.append("    private class E2 {}\n");
+		buf.append("    public void test() {\n");
+		buf.append("        E1<E2> e1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testTypePrametersToRawTypeReference04() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    private class E1<P2 extends E2<Integer>> {}\n");
+		buf.append("    private class E2<P1> {}\n");
+		buf.append("    public void test() {\n");
+		buf.append("        E1 e1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+		
+		String[] expected= new String[2];
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    private class E1<P2 extends E2<Integer>> {}\n");
+		buf.append("    private class E2<P1> {}\n");
+		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    public void test() {\n");
+		buf.append("        E1 e1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    private class E1<P2 extends E2<Integer>> {}\n");
+		buf.append("    private class E2<P1> {}\n");
+		buf.append("    public void test() {\n");
+		buf.append("        E1<E2<Integer>> e1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
+	
+	public void testTypePrametersToRawTypeReference05() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("import java.io.InputStream;\n");
+		buf.append("public class E2<P extends InputStream> {}\n");
+		pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void test() {\n");
+		buf.append("        E2 e1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot, 1);
+		
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+		
+		String[] expected= new String[2];
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"unchecked\")\n");
+		buf.append("    public void test() {\n");
+		buf.append("        E2 e1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("\n");
+		buf.append("import java.io.InputStream;\n");
+		buf.append("\n");
+		buf.append("public class E {\n");
+		buf.append("    public void test() {\n");
+		buf.append("        E2<InputStream> e1;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+		
+		assertExpectedExistInProposals(proposals, expected);
+	}
 
 }

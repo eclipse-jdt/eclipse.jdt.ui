@@ -502,7 +502,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				LocalCorrectionsSubProcessor.getAssignmentHasNoEffectProposals(context, problem, proposals);
 				break;
 			case IProblem.UnsafeTypeConversion:
-				LocalCorrectionsSubProcessor.addTypeParametersToClassInstanceCreation(context, problem, proposals);
+			case IProblem.RawTypeReference:
+				LocalCorrectionsSubProcessor.addTypePrametersToRawTypeReference(context, problem, proposals);
 				break;
 			default:
 		}

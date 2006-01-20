@@ -56,11 +56,9 @@ import org.eclipse.jdt.core.dom.InstanceofExpression;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
@@ -68,10 +66,9 @@ import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -80,6 +77,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import org.eclipse.jdt.internal.corext.fix.StringFix;
 import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -94,6 +92,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
@@ -105,6 +104,7 @@ import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal
   */
 public class LocalCorrectionsSubProcessor {
 
+	private static final String RAW_TYPE_REFERENCE_ID= "org.eclipse.jdt.ui.correction.rawTypeReference"; //$NON-NLS-1$
 	private static final String ADD_EXCEPTION_TO_THROWS_ID= "org.eclipse.jdt.ui.correction.addThrowsDecl"; //$NON-NLS-1$
 	private static final String ADD_NON_NLS_ID= "org.eclipse.jdt.ui.correction.addNonNLS"; //$NON-NLS-1$
 	private static final String ADD_FIELD_QUALIFICATION_ID= "org.eclipse.jdt.ui.correction.qualifyField"; //$NON-NLS-1$
@@ -862,52 +862,6 @@ public class LocalCorrectionsSubProcessor {
 		return new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, relevance, image);
 	}
 
-	public static void addTypeParametersToClassInstanceCreation(IInvocationContext context, IProblemLocation problem, Collection proposals) {
-		ASTNode coveringNode= problem.getCoveredNode(context.getASTRoot());
-		if (coveringNode instanceof ClassInstanceCreation) {
-			ClassInstanceCreation creation= (ClassInstanceCreation)coveringNode;
-			
-			if (coveringNode.getLocationInParent() == VariableDeclarationFragment.INITIALIZER_PROPERTY) {
-				VariableDeclarationStatement declStmt= (VariableDeclarationStatement)ASTNodes.getParent(coveringNode, VariableDeclarationStatement.class);
-				if (declStmt.getType() instanceof ParameterizedType && creation.getType() instanceof SimpleType) {
-					ParameterizedType type = (ParameterizedType)declStmt.getType();
-					
-					AST ast= context.getASTRoot().getAST();
-					ASTRewrite rewrite= ASTRewrite.create(ast);
-					
-					ParameterizedType copy= (ParameterizedType)ASTNode.copySubtree(ast, type);
-					SimpleType moveSimpleType= (SimpleType)rewrite.createMoveTarget(creation.getType());
-					
-					rewrite.replace(copy.getType(), moveSimpleType, null);
-					rewrite.replace(creation.getType(), copy, null);
-					
-					Name name= ((SimpleType)creation.getType()).getName();
-					String typeName;
-					if (name.isSimpleName())
-						typeName= ((SimpleName)name).getIdentifier();
-					else
-						typeName= name.getFullyQualifiedName();
-					
-					StringBuffer buf= new StringBuffer();
-					List typeArguments= type.typeArguments();
-					Iterator iter= typeArguments.iterator();
-					Type cur= (Type)iter.next();
-					buf.append('<').append(ASTResolving.getTypeSignature(cur.resolveBinding()));
-					while (iter.hasNext()) {
-						cur= (Type)iter.next();
-						buf.append(", ").append(ASTResolving.getTypeSignature(cur.resolveBinding())); //$NON-NLS-1$
-					}
-					buf.append('>');
-					
-					Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-					String label= Messages.format(CorrectionMessages.CorrectionMessages_add_type_parameters_to_instantiation, new String[] {buf.toString(), typeName});
-					ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 6, image);
-					proposals.add(proposal);			
-				}
-			}
-		}
-	}
-
 	public static void addValueForAnnotationProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
 		ICompilationUnit cu= context.getCompilationUnit();
 		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
@@ -921,6 +875,22 @@ public class LocalCorrectionsSubProcessor {
 		}
 	}
 
-
-	
+	public static void addTypePrametersToRawTypeReference(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		IFix fix= Java50Fix.createRawTypeReferenceFix(context.getASTRoot(), problem);
+		if (fix != null) {
+			for (Iterator iter= proposals.iterator(); iter.hasNext();) {
+				Object element= iter.next();
+				if (element instanceof FixCorrectionProposal) {
+					FixCorrectionProposal fixProp= (FixCorrectionProposal)element;
+					if (RAW_TYPE_REFERENCE_ID.equals(fixProp.getCommandId())) {
+						return;
+					}
+				}
+			}
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, 6, image, new Java50CleanUp(Java50CleanUp.ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE));
+			proposal.setCommandId(RAW_TYPE_REFERENCE_ID);
+			proposals.add(proposal);
+		}
+	}
 }

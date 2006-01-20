@@ -133,7 +133,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			
 			try {
 				if (fProposal instanceof FixCorrectionProposal) {
-					ICleanUp cleanUp= ((FixCorrectionProposal)fProposal).getCleanUp();
+					ICleanUp cleanUp= ((FixCorrectionProposal)fProposal).getMultiFix();
 					if (cleanUp != null) {
 						Hashtable/*<ICompilationUnit, List<IProblemLocation>*/ cus= new Hashtable();
 						for (int i= 0; i < markers.length; i++) {
@@ -233,7 +233,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 		public IMarker[] findOtherMarkers(IMarker[] markers) {
 			if (fProposal instanceof FixCorrectionProposal) {
 				FixCorrectionProposal fix= (FixCorrectionProposal)fProposal;
-				ICleanUp cleanUp= fix.getCleanUp();
+				ICleanUp cleanUp= fix.getMultiFix();
 				if (cleanUp != null) {
 					List result= new ArrayList();
 					for (int i= 0; i < markers.length; i++) {
