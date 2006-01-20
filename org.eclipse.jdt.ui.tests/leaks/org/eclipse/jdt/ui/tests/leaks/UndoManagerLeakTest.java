@@ -72,6 +72,7 @@ public class UndoManagerLeakTest extends LeakTestCase {
 		internalTestRandomAccess();
 		internalTestRandomAccessAsCompound();
 		
+		fUndoManager.disconnect();
 		fUndoManager= null;
 		
 		fShell.dispose();
