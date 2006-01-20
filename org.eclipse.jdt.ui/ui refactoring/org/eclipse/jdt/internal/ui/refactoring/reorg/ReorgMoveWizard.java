@@ -10,9 +10,15 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
+import java.util.ArrayList;
+import java.util.Iterator;
+import java.util.List;
+
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.TraverseEvent;
@@ -22,12 +28,21 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 
+import org.eclipse.ui.forms.events.ExpansionAdapter;
+import org.eclipse.ui.forms.events.ExpansionEvent;
+import org.eclipse.ui.forms.widgets.ExpandableComposite;
+
+import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
@@ -38,7 +53,10 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ICreateTargetQuery;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgDestinationValidator;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.internal.ui.preferences.ScrolledPageContent;
 import org.eclipse.jdt.internal.ui.refactoring.QualifiedNameComponent;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -66,9 +84,6 @@ public class ReorgMoveWizard extends RefactoringWizard {
 		return NO_PREVIEW_PAGE;
 	}
 
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizard#addUserInputPages()
-	 */
 	protected void addUserInputPages() {
 		addPage(new MoveInputPage());
 	}
@@ -76,12 +91,14 @@ public class ReorgMoveWizard extends RefactoringWizard {
 	private static class MoveInputPage extends ReorgUserInputPage{
 
 		private static final String PAGE_NAME= "MoveInputPage"; //$NON-NLS-1$
+		private Text fCommentField;
 		private Button fReferenceCheckbox;
 		private Button fQualifiedNameCheckbox;
 		private QualifiedNameComponent fQualifiedNameComponent;
 		private ICreateTargetQuery fCreateTargetQuery;
-		
+		private final List fExpandableSections= new ArrayList();
 		private Object fDestination;
+		private static final String SETTINGS_EXPANDED= "expanded"; //$NON-NLS-1$
 		
 		public MoveInputPage() {
 			super(PAGE_NAME);
@@ -106,10 +123,7 @@ public class ReorgMoveWizard extends RefactoringWizard {
 		protected IReorgDestinationValidator getDestinationValidator() {
 			return getJavaMoveProcessor();
 		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
-		 */
+
 		protected boolean performFinish() {
 			return super.performFinish() || getJavaMoveProcessor().wasCanceled(); //close the dialog if canceled
 		}
@@ -149,46 +163,110 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			}
 		}
 
-		private void addUpdateReferenceComponent(Composite result) {
-			final JavaMoveProcessor processor= getJavaMoveProcessor();
-			if (! processor.canUpdateReferences())
+		private void addOptionalCommentField(final Composite parent) {
+			final ICommentProvider provider= (ICommentProvider) getRefactoring().getAdapter(ICommentProvider.class);
+			if (provider == null || !provider.canEnableComment())
 				return;
-			fReferenceCheckbox= new Button(result, SWT.CHECK);
-			fReferenceCheckbox.setText(ReorgMessages.JdtMoveAction_update_references); 
-			fReferenceCheckbox.setSelection(processor.getUpdateReferences());
-			fReferenceCheckbox.setEnabled(canUpdateReferences());
-			
-			fReferenceCheckbox.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					processor.setUpdateReferences(((Button)e.widget).getSelection());
-					updateUIStatus();
+			final ExpandableComposite expandable= createExpandableSection(parent, getRefactoring(), RefactoringMessages.RenameInputWizardPage_comment_section, 1, new IDescriptionProvider() {
+
+				public String getDescription(final Refactoring refactoring) {
+					final ICommentProvider commentProvider= (ICommentProvider) refactoring.getAdapter(ICommentProvider.class);
+					if (commentProvider != null && commentProvider.canEnableComment()) {
+						final String comment= commentProvider.getComment();
+						if (comment != null && !"".equals(comment)) //$NON-NLS-1$
+							return RefactoringMessages.RenameInputWizardPage_expand_hint;
+					}
+					return null;
+				}
+			});
+			final Composite composite= new Composite(expandable, SWT.NONE);
+			expandable.setClient(composite);
+			composite.setLayout(new GridLayout(1, false));
+			fCommentField= new Text(composite, SWT.MULTI | SWT.BORDER);
+			final GridData data= new GridData(GridData.FILL, GridData.CENTER, true, false);
+			data.heightHint= convertHeightInCharsToPixels(3);
+			data.grabExcessHorizontalSpace= true;
+			fCommentField.setLayoutData(data);
+			makeScrollable(fCommentField);
+			fCommentField.addModifyListener(new ModifyListener() {
+
+				public void modifyText(final ModifyEvent e) {
+					final String text= fCommentField.getText();
+					if (text != null && !"".equals(text)) //$NON-NLS-1$
+						provider.setComment(text);
+					else
+						provider.setComment(null);
 				}
 			});
 		}
 
-		private void addUpdateQualifiedNameComponent(Composite parent, int marginWidth) {
+		private void addUpdateCheckboxes(final Composite parent, final int marginWidth) {
 			final JavaMoveProcessor processor= getJavaMoveProcessor();
+			if (!processor.canUpdateReferences() && !processor.canEnableQualifiedNameUpdating())
+				return;
+			final ExpandableComposite expandable= createExpandableSection(parent, getRefactoring(), RefactoringMessages.RenameInputWizardPage_update_section, 1, new IDescriptionProvider() {
+
+				public String getDescription(final Refactoring refactoring) {
+					final List settings= new ArrayList();
+					if (processor.canUpdateReferences() && processor.getUpdateReferences())
+						settings.add(RefactoringMessages.RenameInputWizardPage_references_setting);
+					if (processor.canEnableQualifiedNameUpdating() && processor.canUpdateQualifiedNames() && processor.getUpdateQualifiedNames())
+						settings.add(RefactoringMessages.RenameInputWizardPage_qualified_setting);
+					if (!settings.isEmpty()) {
+						String pattern= null;
+						final Object[] objects= settings.toArray(new String[settings.size()]);
+						switch (objects.length) {
+							case 1:
+								pattern= RefactoringMessages.RenameInputWizardPage_update_pattern_one;
+								break;
+							default:
+								pattern= RefactoringMessages.RenameInputWizardPage_update_pattern_two;
+								break;
+						}
+						return Messages.format(pattern, objects);
+					}
+					return null;
+				}
+			});
+			final Composite composite= new Composite(expandable, SWT.NONE);
+			expandable.setClient(composite);
+			composite.setLayout(new GridLayout(1, false));
+			if (processor.canUpdateReferences()) {
+			fReferenceCheckbox= new Button(composite, SWT.CHECK);
+			fReferenceCheckbox.setText(ReorgMessages.JdtMoveAction_update_references);
+			fReferenceCheckbox.setSelection(processor.getUpdateReferences());
+			makeScrollable(fReferenceCheckbox);
+			fReferenceCheckbox.setEnabled(canUpdateReferences());
+			fReferenceCheckbox.addSelectionListener(new SelectionAdapter() {
+
+				public void widgetSelected(SelectionEvent e) {
+					processor.setUpdateReferences(((Button) e.widget).getSelection());
+					updateUIStatus();
+				}
+			});
+			}
 			if (!processor.canEnableQualifiedNameUpdating() || !processor.canUpdateQualifiedNames())
 				return;
-			fQualifiedNameCheckbox= new Button(parent, SWT.CHECK);
+			fQualifiedNameCheckbox= new Button(composite, SWT.CHECK);
 			int indent= marginWidth + fQualifiedNameCheckbox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-			fQualifiedNameCheckbox.setText(RefactoringMessages.RenameInputWizardPage_update_qualified_names); 
+			fQualifiedNameCheckbox.setText(RefactoringMessages.RenameInputWizardPage_update_qualified_names);
 			fQualifiedNameCheckbox.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fQualifiedNameCheckbox.setSelection(processor.getUpdateQualifiedNames());
-		
-			fQualifiedNameComponent= new QualifiedNameComponent(parent, SWT.NONE, processor, getRefactoringSettings());
+			makeScrollable(fQualifiedNameCheckbox);
+			fQualifiedNameComponent= new QualifiedNameComponent(composite, SWT.NONE, processor, getRefactoringSettings());
 			fQualifiedNameComponent.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-			GridData gd= (GridData)fQualifiedNameComponent.getLayoutData();
-			gd.horizontalAlignment= GridData.FILL;
-			gd.horizontalIndent= indent;
+			GridData data= (GridData) fQualifiedNameComponent.getLayoutData();
+			data.horizontalAlignment= GridData.FILL;
+			data.horizontalIndent= indent;
+			makeScrollable(fQualifiedNameComponent);
 			updateQualifiedNameUpdating(processor, processor.getUpdateQualifiedNames());
 
 			fQualifiedNameCheckbox.addSelectionListener(new SelectionAdapter() {
+
 				public void widgetSelected(SelectionEvent e) {
-					boolean enabled= ((Button)e.widget).getSelection();
+					boolean enabled= ((Button) e.widget).getSelection();
 					updateQualifiedNameUpdating(processor, enabled);
 				}
-
 			});
 		}
 		
@@ -197,32 +275,114 @@ public class ReorgMoveWizard extends RefactoringWizard {
 			processor.setUpdateQualifiedNames(enabled);
 			updateUIStatus();
 		}
-		
+
 		public void createControl(Composite parent) {
-			Composite result;
-			
-			boolean showDestinationTree= ! getJavaMoveProcessor().hasDestinationSet();
+			Composite composite= null;
+			boolean showDestinationTree= !getJavaMoveProcessor().hasDestinationSet();
 			if (showDestinationTree) {
 				fCreateTargetQuery= getJavaMoveProcessor().getCreateTargetQuery();
 				super.createControl(parent);
 				getTreeViewer().getTree().setFocus();
-				result= (Composite)super.getControl();
-			} else  {
+				composite= (Composite) super.getControl();
+			} else {
 				initializeDialogUnits(parent);
-				result= new Composite(parent, SWT.NONE);
-				setControl(result);
-				result.setLayout(new GridLayout());
-				Dialog.applyDialogFont(result);
+				composite= new Composite(parent, SWT.NONE);
+				setControl(composite);
+				composite.setLayout(new GridLayout());
 			}
-			addUpdateReferenceComponent(result);
-			addUpdateQualifiedNameComponent(result, ((GridLayout)result.getLayout()).marginWidth);
-			setControl(result);
-			Dialog.applyDialogFont(result);
+			setControl(composite);
+			ScrolledPageContent content= new ScrolledPageContent(composite);
+			GridData data= new GridData(GridData.FILL, GridData.FILL, true, true);
+			data.heightHint= convertHeightInCharsToPixels(7);
+			content.setLayoutData(data);
+			Composite scrollingComposite= content.getBody();
+			GridLayout layout= new GridLayout();
+			layout.numColumns= 1;
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			scrollingComposite.setLayout(layout);
+			final int length= scrollingComposite.getChildren().length;
+			addUpdateCheckboxes(scrollingComposite, new GridLayout().marginWidth);
+			if (scrollingComposite.getChildren().length == length) {
+				data.heightHint= convertHeightInCharsToPixels(4);
+				content.setLayoutData(data);
+			}
+			addOptionalCommentField(scrollingComposite);
+			restoreSectionExpansionStates(getRefactoringSettings());
+			Dialog.applyDialogFont(parent);
 		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.ui.refactoring.reorg.ReorgUserInputPage#addLabel(org.eclipse.swt.widgets.Composite)
-		 */
+
+		private static ScrolledPageContent getScrolledPageContent(final Control control) {
+			Control parent= control.getParent();
+			while (!(parent instanceof ScrolledPageContent) && parent != null)
+				parent= parent.getParent();
+			if (parent instanceof ScrolledPageContent)
+				return (ScrolledPageContent) parent;
+			return null;
+		}
+
+		private static void makeScrollable(final Control control) {
+			final ScrolledPageContent content= getScrolledPageContent(control);
+			if (content != null)
+				content.adaptChild(control);
+		}
+
+		protected boolean saveSettings() {
+			if (getContainer() instanceof Dialog)
+				return ((Dialog)getContainer()).getReturnCode() == IDialogConstants.OK_ID;
+			return true;
+		}
+
+		public void dispose() {
+			if (saveSettings()) {
+				if (fQualifiedNameComponent != null)
+					fQualifiedNameComponent.savePatterns(getRefactoringSettings());
+			}
+			storeSectionExpansionStates(getRefactoringSettings());
+		}
+
+		private ExpandableSettingSection createExpandableSection(Composite parent, Refactoring refactoring, String label, int nColumns, IDescriptionProvider provider) {
+			final ExpandableSettingSection expandable= new ExpandableSettingSection(parent, refactoring, SWT.NONE, provider);
+			expandable.setText(label);
+			expandable.setExpanded(false);
+			expandable.setFont(JFaceResources.getFontRegistry().getBold(JFaceResources.DIALOG_FONT));
+			expandable.setLayoutData(new GridData(GridData.FILL, GridData.FILL, true, false, nColumns, 1));
+			expandable.addExpansionListener(new ExpansionAdapter() {
+
+				public void expansionStateChanged(ExpansionEvent event) {
+					final ExpandableComposite source= ((ExpandableComposite) event.getSource());
+					if (event.getState()) {
+						for (final Iterator iterator= fExpandableSections.iterator(); iterator.hasNext();) {
+							final ExpandableComposite composite= (ExpandableComposite) iterator.next();
+							if (composite != source)
+								composite.setExpanded(false);
+						}
+					}
+					final ScrolledPageContent content= getScrolledPageContent(source);
+					if (content != null)
+						content.reflow(true);
+				}
+			});
+			fExpandableSections.add(expandable);
+			makeScrollable(expandable);
+			return expandable;
+		}
+
+		private void storeSectionExpansionStates(final IDialogSettings settings) {
+			for (int index= 0; index < fExpandableSections.size(); index++)
+				settings.put(SETTINGS_EXPANDED + String.valueOf(index), ((ExpandableComposite) fExpandableSections.get(index)).isExpanded());
+		}
+
+		private void restoreSectionExpansionStates(final IDialogSettings settings) {
+			for (int index= 0; index < fExpandableSections.size(); index++) {
+				final ExpandableComposite expandable= (ExpandableComposite) fExpandableSections.get(index);
+				if (settings == null)
+					expandable.setExpanded(index == 0); // only expand the first node by default
+				else
+					expandable.setExpanded(settings.getBoolean(SETTINGS_EXPANDED + String.valueOf(index)));
+			}
+		}
+
 		protected Control addLabel(Composite parent) {
 			if (fCreateTargetQuery != null) {
 				Composite firstLine= new Composite(parent, SWT.NONE);

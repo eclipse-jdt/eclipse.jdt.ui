@@ -12,15 +12,18 @@ package org.eclipse.jdt.ui.tests.refactoring.reorg;
 
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
 
-import org.eclipse.jdt.ui.tests.reorg.MockReorgQueries;
-
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
+
+import org.eclipse.jdt.ui.tests.reorg.MockReorgQueries;
 
 
 public class AbstractMoveCompilationUnitPrefTest extends RepeatingRefactoringPerformanceTestCase {
@@ -31,9 +34,8 @@ public class AbstractMoveCompilationUnitPrefTest extends RepeatingRefactoringPer
 	
 	protected void doExecuteRefactoring(int numberOfCus, int numberOfRefs, boolean measure) throws Exception {
 		ICompilationUnit cunit= generateSources(numberOfCus, numberOfRefs);
-		JavaMoveProcessor processor= JavaMoveProcessor.create(
-			new IResource[0], 
-			new IJavaElement[] {cunit});
+		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy((new IResource[0]), (new IJavaElement[] {cunit}));
+		JavaMoveProcessor processor= (policy.canEnable() ? new JavaMoveProcessor(policy) : null);
 		IPackageFragment destination= fTestProject.getSourceFolder().createPackageFragment("destination", false, null); 
 		processor.setDestination(destination);
 		processor.setReorgQueries(new MockReorgQueries());

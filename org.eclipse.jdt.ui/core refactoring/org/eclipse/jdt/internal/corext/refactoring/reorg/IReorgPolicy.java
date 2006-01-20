@@ -28,7 +28,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 
-interface IReorgPolicy extends IReorgEnablementPolicy, IQualifiedNameUpdating {
+public interface IReorgPolicy extends IReorgEnablementPolicy, IQualifiedNameUpdating {
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws JavaModelException;
 	public RefactoringStatus setDestination(IResource resource) throws JavaModelException;
 	public RefactoringStatus setDestination(IJavaElement javaElement) throws JavaModelException;
@@ -53,11 +53,11 @@ interface IReorgPolicy extends IReorgEnablementPolicy, IQualifiedNameUpdating {
 	
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor processor, String[] natures, SharableParticipants shared) throws CoreException;
 	
-	static interface ICopyPolicy extends IReorgPolicy{
+	public static interface ICopyPolicy extends IReorgPolicy{
 		public Change createChange(IProgressMonitor pm, INewNameQueries copyQueries) throws JavaModelException;
 		public ReorgExecutionLog getReorgExecutionLog();
 	}
-	static interface IMovePolicy extends IReorgPolicy{
+	public static interface IMovePolicy extends IReorgPolicy{
 		public Change createChange(IProgressMonitor pm) throws JavaModelException;
 		public Change postCreateChange(Change[] participantChanges, IProgressMonitor pm) throws CoreException;
 		public ICreateTargetQuery getCreateTargetQuery(ICreateTargetQueries createQueries);

@@ -25,6 +25,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -47,9 +49,10 @@ public class ReorgMoveStarter {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);
-		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements);
-		if (processor == null)
+		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
+		if (!policy.canEnable())
 			return null;
+		JavaMoveProcessor processor= new JavaMoveProcessor(policy);
 		if (! processor.setDestination(destination).isOK())
 			return null;
 		return new ReorgMoveStarter(processor);
@@ -59,9 +62,10 @@ public class ReorgMoveStarter {
 		Assert.isNotNull(javaElements);
 		Assert.isNotNull(resources);
 		Assert.isNotNull(destination);
-		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements);
-		if (processor == null)
+		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
+		if (!policy.canEnable())
 			return null;
+		JavaMoveProcessor processor= new JavaMoveProcessor(policy);
 		if (! processor.setDestination(destination).isOK())
 			return null;
 		return new ReorgMoveStarter(processor);

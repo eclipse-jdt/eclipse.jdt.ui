@@ -111,7 +111,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 
 		ScrolledPageContent content= new ScrolledPageContent(composite);
 		data= new GridData(GridData.FILL, GridData.FILL, true, true);
-		data.heightHint= convertHeightInCharsToPixels(9);
+		data.heightHint= convertHeightInCharsToPixels(8);
 		content.setLayoutData(data);
 		Composite scrollingComposite= content.getBody();
 		layout= new GridLayout();
@@ -119,16 +119,20 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		layout.marginHeight= 0;
 		layout.marginWidth= 0;
 		scrollingComposite.setLayout(layout);
-		data= new GridData(GridData.FILL, GridData.FILL, true, true);
 
 		addAdditionalOptions(scrollingComposite);
-		if (scrollingComposite.getChildren().length > 0) {
+		final int length= scrollingComposite.getChildren().length;
+		if (length > 0) {
 			Label separator= new Label(scrollingComposite, SWT.NONE);
-			data= new GridData(GridData.FILL, GridData.FILL, true, false);
-			data.heightHint= convertVerticalDLUsToPixels(1);
-			separator.setLayoutData(data);
+			GridData gd= new GridData(GridData.FILL, GridData.FILL, true, false);
+			gd.heightHint= convertVerticalDLUsToPixels(1);
+			separator.setLayoutData(gd);
 		}
 		addOptionalUpdateCheckboxes(scrollingComposite, new GridLayout().marginWidth);
+		if (scrollingComposite.getChildren().length == length) {
+			data.heightHint= convertHeightInCharsToPixels(4);
+			content.setLayoutData(data);
+		}
 		addOptionalLeaveDelegateCheckbox(scrollingComposite);
 		addOptionalCommentField(scrollingComposite);
 		updateForcePreview();
@@ -284,14 +288,17 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	}
 
 	private void addOptionalUpdateCheckboxes(final Composite parent, final int marginWidth) {
+		int count= 0;
 		final IReferenceUpdating referenceUpdating= (IReferenceUpdating) getRefactoring().getAdapter(IReferenceUpdating.class);
 		if (referenceUpdating == null || !referenceUpdating.canEnableUpdateReferences())
-			return;
+			count++;
 		final ITextUpdating textUpdating= (ITextUpdating) getRefactoring().getAdapter(ITextUpdating.class);
 		if (textUpdating == null || !textUpdating.canEnableTextUpdating())
-			return;
+			count++;
 		final IQualifiedNameUpdating qualifiedUpdating= (IQualifiedNameUpdating) getRefactoring().getAdapter(IQualifiedNameUpdating.class);
 		if (qualifiedUpdating == null || !qualifiedUpdating.canEnableQualifiedNameUpdating())
+			count++;
+		if (count == 3)
 			return;
 		boolean value= false;
 		final ExpandableComposite expandable= createExpandableSection(parent, getRefactoring(), RefactoringMessages.RenameInputWizardPage_update_section, 1, new IDescriptionProvider() {
@@ -338,51 +345,57 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		final Composite composite= new Composite(expandable, SWT.NONE);
 		expandable.setClient(composite);
 		composite.setLayout(new GridLayout(1, false));
-		fUpdateReferences= new Button(composite, SWT.CHECK);
-		fUpdateReferences.setText(RefactoringMessages.RenameInputWizardPage_update_references);
-		fUpdateReferences.setSelection(true);
-		makeScrollable(fUpdateReferences); // bug 77901
-		referenceUpdating.setUpdateReferences(fUpdateReferences.getSelection());
-		fUpdateReferences.addSelectionListener(new SelectionAdapter() {
+		if (referenceUpdating != null && referenceUpdating.canEnableUpdateReferences()) {
+			fUpdateReferences= new Button(composite, SWT.CHECK);
+			fUpdateReferences.setText(RefactoringMessages.RenameInputWizardPage_update_references);
+			fUpdateReferences.setSelection(true);
+			makeScrollable(fUpdateReferences);
+			referenceUpdating.setUpdateReferences(fUpdateReferences.getSelection());
+			fUpdateReferences.addSelectionListener(new SelectionAdapter() {
 
-			public void widgetSelected(SelectionEvent e) {
-				referenceUpdating.setUpdateReferences(fUpdateReferences.getSelection());
-			}
-		});
-		value= getBooleanSetting(UPDATE_TEXTUAL_MATCHES, textUpdating.getUpdateTextualMatches());
-		fUpdateTextualMatches= new Button(composite, SWT.CHECK);
-		fUpdateTextualMatches.setText(RefactoringMessages.RenameInputWizardPage_update_textual_matches);
-		fUpdateTextualMatches.setSelection(value);
-		makeScrollable(fUpdateTextualMatches);
-		textUpdating.setUpdateTextualMatches(fUpdateTextualMatches.getSelection());
-		fUpdateTextualMatches.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					referenceUpdating.setUpdateReferences(fUpdateReferences.getSelection());
+				}
+			});
+		}
+		if (textUpdating != null && textUpdating.canEnableTextUpdating()) {
+			value= getBooleanSetting(UPDATE_TEXTUAL_MATCHES, textUpdating.getUpdateTextualMatches());
+			fUpdateTextualMatches= new Button(composite, SWT.CHECK);
+			fUpdateTextualMatches.setText(RefactoringMessages.RenameInputWizardPage_update_textual_matches);
+			fUpdateTextualMatches.setSelection(value);
+			makeScrollable(fUpdateTextualMatches);
+			textUpdating.setUpdateTextualMatches(fUpdateTextualMatches.getSelection());
+			fUpdateTextualMatches.addSelectionListener(new SelectionAdapter() {
 
-			public void widgetSelected(SelectionEvent e) {
-				textUpdating.setUpdateTextualMatches(fUpdateTextualMatches.getSelection());
-				updateForcePreview();
-			}
-		});
-		value= getBooleanSetting(UPDATE_QUALIFIED_NAMES, qualifiedUpdating.getUpdateQualifiedNames());
-		fUpdateQualifiedNames= new Button(composite, SWT.CHECK);
-		int indent= marginWidth + fUpdateQualifiedNames.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
-		fUpdateQualifiedNames.setText(RefactoringMessages.RenameInputWizardPage_update_qualified_names);
-		fUpdateQualifiedNames.setSelection(value);
-		makeScrollable(fUpdateQualifiedNames);
-		fQualifiedNameComponent= new QualifiedNameComponent(composite, SWT.NONE, qualifiedUpdating, getRefactoringSettings());
-		fQualifiedNameComponent.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		GridData data= (GridData) fQualifiedNameComponent.getLayoutData();
-		data.horizontalAlignment= GridData.FILL;
-		data.horizontalIndent= indent;
-		makeScrollable(fQualifiedNameComponent);
-		updateQulifiedNameUpdating(qualifiedUpdating, value);
+				public void widgetSelected(SelectionEvent e) {
+					textUpdating.setUpdateTextualMatches(fUpdateTextualMatches.getSelection());
+					updateForcePreview();
+				}
+			});
+		}
+		if (qualifiedUpdating != null && qualifiedUpdating.canEnableQualifiedNameUpdating()) {
+			value= getBooleanSetting(UPDATE_QUALIFIED_NAMES, qualifiedUpdating.getUpdateQualifiedNames());
+			fUpdateQualifiedNames= new Button(composite, SWT.CHECK);
+			int indent= marginWidth + fUpdateQualifiedNames.computeSize(SWT.DEFAULT, SWT.DEFAULT).x;
+			fUpdateQualifiedNames.setText(RefactoringMessages.RenameInputWizardPage_update_qualified_names);
+			fUpdateQualifiedNames.setSelection(value);
+			makeScrollable(fUpdateQualifiedNames);
+			fQualifiedNameComponent= new QualifiedNameComponent(composite, SWT.NONE, qualifiedUpdating, getRefactoringSettings());
+			fQualifiedNameComponent.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			GridData data= (GridData) fQualifiedNameComponent.getLayoutData();
+			data.horizontalAlignment= GridData.FILL;
+			data.horizontalIndent= indent;
+			makeScrollable(fQualifiedNameComponent);
+			updateQulifiedNameUpdating(qualifiedUpdating, value);
 
-		fUpdateQualifiedNames.addSelectionListener(new SelectionAdapter() {
+			fUpdateQualifiedNames.addSelectionListener(new SelectionAdapter() {
 
-			public void widgetSelected(SelectionEvent e) {
-				boolean enabled= ((Button) e.widget).getSelection();
-				updateQulifiedNameUpdating(qualifiedUpdating, enabled);
-			}
-		});
+				public void widgetSelected(SelectionEvent e) {
+					boolean enabled= ((Button) e.widget).getSelection();
+					updateQulifiedNameUpdating(qualifiedUpdating, enabled);
+				}
+			});
+		}
 	}
 
 	private void updateQulifiedNameUpdating(final IQualifiedNameUpdating qualifiedUpdating, boolean enabled) {

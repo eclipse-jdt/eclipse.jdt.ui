@@ -31,6 +31,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.util.Resources;
 import org.eclipse.ltk.core.refactoring.Change;
@@ -43,7 +44,7 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
-public final class JavaMoveProcessor extends MoveProcessor implements IInitializableRefactoringComponent, IQualifiedNameUpdating, IReorgDestinationValidator {
+public final class JavaMoveProcessor extends MoveProcessor implements IInitializableRefactoringComponent, ICommentProvider, IQualifiedNameUpdating, IReorgDestinationValidator {
 	//TODO: offer IMovePolicy getMovePolicy(); IReorgPolicy getReorgPolicy();
 	// and remove delegate methods (also for CopyRefactoring)?
 	
@@ -51,19 +52,12 @@ public final class JavaMoveProcessor extends MoveProcessor implements IInitializ
 	private IMovePolicy fMovePolicy;
 	private ICreateTargetQueries fCreateTargetQueries;
 	private boolean fWasCanceled;
+	private String fComment;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.MoveProcessor"; //$NON-NLS-1$
 	
-	public static JavaMoveProcessor create(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
-		IMovePolicy movePolicy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
-		if (! movePolicy.canEnable())
-			return null;
-		return new JavaMoveProcessor(movePolicy);
-	}
-
-	public JavaMoveProcessor(IMovePolicy movePolicy) {
-		Assert.isNotNull(movePolicy);
-		fMovePolicy= movePolicy;
+	public JavaMoveProcessor(IMovePolicy policy) {
+		fMovePolicy= policy;
 	}
 	
 	protected Object getDestination() {
@@ -260,5 +254,26 @@ public final class JavaMoveProcessor extends MoveProcessor implements IInitializ
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean canEnableComment() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getComment() {
+		return fComment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setComment(String comment) {
+		fComment= comment;
 	}
 }

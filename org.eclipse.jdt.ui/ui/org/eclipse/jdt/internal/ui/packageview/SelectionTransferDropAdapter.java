@@ -32,7 +32,9 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaCopyProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
@@ -164,8 +166,11 @@ public class SelectionTransferDropAdapter extends JdtViewerDropAdapter implement
 		if (target == null)
 			return DND.DROP_NONE;
 		
-		if (fMoveProcessor == null)
-			fMoveProcessor= JavaMoveProcessor.create(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
+		if (fMoveProcessor == null) {
+			IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(ReorgUtils.getResources(fElements), ReorgUtils.getJavaElements(fElements));
+			if (policy.canEnable())
+				fMoveProcessor= new JavaMoveProcessor(policy);
+		}
 
 		if (!canMoveElements())
 			return DND.DROP_NONE;	

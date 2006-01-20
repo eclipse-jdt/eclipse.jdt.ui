@@ -45,6 +45,9 @@ import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
+
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.MoveRefactoring;
@@ -81,13 +84,15 @@ public class MoveTest extends RefactoringTest {
 
 	private void verifyDisabled(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException {
 		assertTrue("move should be disabled", ! RefactoringAvailabilityTester.isMoveAvailable(resources, javaElements));
-		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements);
+		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
+		JavaMoveProcessor processor= (policy.canEnable() ? new JavaMoveProcessor(policy) : null);
 		assertTrue(processor == null);
 	}
 	
 	private JavaMoveProcessor verifyEnabled(IResource[] resources, IJavaElement[] javaElements, IReorgQueries reorgQueries) throws JavaModelException {
 		assertTrue("move should be enabled", RefactoringAvailabilityTester.isMoveAvailable(resources, javaElements));
-		JavaMoveProcessor processor= JavaMoveProcessor.create(resources, javaElements);
+		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, javaElements);
+		JavaMoveProcessor processor= (policy.canEnable() ? new JavaMoveProcessor(policy) : null);
 		if (reorgQueries != null)
 			processor.setReorgQueries(reorgQueries);
 		assertNotNull(processor);
