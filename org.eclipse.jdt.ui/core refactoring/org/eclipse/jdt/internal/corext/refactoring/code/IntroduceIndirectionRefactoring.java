@@ -28,8 +28,11 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
+import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IClassFile;
@@ -125,7 +128,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
  * @since 3.2
  * 
  */
-public class IntroduceIndirectionRefactoring extends Refactoring {
+public class IntroduceIndirectionRefactoring extends Refactoring implements IInitializableRefactoringComponent {
 	
 	// User selections:
 
@@ -226,51 +229,17 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 
 	// ********* CONSTRUCTORS AND CLASS CREATION ************
 
-	/**
-	 * Use this method to create the indirection refactoring. The given
-	 * parameters will be verified during checkInitialConditions().
-	 * 
-	 * @param unit the compilation unit in which the user invoked this refactoring
-	 * @param offset the offset within the compilation unit which marks the user selection start
-	 * @param length the length of the user selection
-	 */
-	public static IntroduceIndirectionRefactoring create(ICompilationUnit unit, int offset, int length) {
-		return new IntroduceIndirectionRefactoring(unit, offset, length);
-	}
-
-	/**
-	 * Use this method to create the indirection refactoring. The given
-	 * parameters will be verified during checkInitialConditions(). 
-	 * 
-	 * @param file the class file in which the user invoked this refactoring. The file must have a source attachment.
-	 * @param offset the offset within the compilation unit which marks the user selection start
-	 * @param length the length of the user selection
-	 */
-	public static IntroduceIndirectionRefactoring create(IClassFile file, int offset, int length) {
-		return new IntroduceIndirectionRefactoring(file, offset, length);
-	}
-
-	/**
-	 * Use this method to create the indirection refactoring. The given
-	 * parameters will be verified during checkInitialConditions().
-	 * 
-	 * @param method the method declaration to encapsulate. Need not be from source.
-	 */
-	public static IntroduceIndirectionRefactoring create(IMethod method) {
-		return new IntroduceIndirectionRefactoring(method);
-	}
-
-	private IntroduceIndirectionRefactoring(ICompilationUnit unit, int offset, int length) {
+	public IntroduceIndirectionRefactoring(ICompilationUnit unit, int offset, int length) {
 		fSelectionCompilationUnit= unit;
 		initialize(offset, length);
 	}
 
-	private IntroduceIndirectionRefactoring(IClassFile file, int offset, int length) {
+	public IntroduceIndirectionRefactoring(IClassFile file, int offset, int length) {
 		fSelectionClassFile= file;
 		initialize(offset, length);
 	}
 
-	private IntroduceIndirectionRefactoring(IMethod method) {
+	public IntroduceIndirectionRefactoring(IMethod method) {
 		fTargetMethod= method;
 		initialize(0, 0);
 	}
@@ -757,7 +726,12 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 	// ******************** CHANGE CREATION ***********************
 
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		CompositeChange result= new CompositeChange(RefactoringCoreMessages.IntroduceIndirectionRefactoring_introduce_indirection);
+		CompositeChange result= new CompositeChange(RefactoringCoreMessages.IntroduceIndirectionRefactoring_introduce_indirection) {
+		
+			public RefactoringDescriptor getRefactoringDescriptor() {
+				return null;
+			}
+		};
 		result.addAll(fTextChangeManager.getAllChanges());
 		return result;
 	}
@@ -1307,4 +1281,7 @@ public class IntroduceIndirectionRefactoring extends Refactoring {
 							.create(whoToAdjust))));
 	}
 
+	public RefactoringStatus initialize(final RefactoringArguments arguments) {
+		return null;
+	}
 }

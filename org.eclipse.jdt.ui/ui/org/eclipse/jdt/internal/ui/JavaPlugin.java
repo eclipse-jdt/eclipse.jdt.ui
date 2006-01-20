@@ -75,6 +75,7 @@ import org.eclipse.jdt.internal.corext.refactoring.scripting.InlineConstantRefac
 import org.eclipse.jdt.internal.corext.refactoring.scripting.InlineMethodRefactoringInstanceCreator;
 import org.eclipse.jdt.internal.corext.refactoring.scripting.InlineTempRefactoringInstanceCreator;
 import org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceFactoryRefactoringInstanceCreator;
+import org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceIndirectionRefactoringInstanceCreator;
 import org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceParameterRefactoringInstanceCreator;
 import org.eclipse.jdt.internal.corext.refactoring.scripting.MoveMemberTypeRefactoringInstanceCreator;
 import org.eclipse.jdt.internal.corext.refactoring.scripting.MoveMethodRefactoringInstanceCreator;
@@ -413,6 +414,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		factory.registerCreator("org.eclipse.jdt.ui.extract.constant", new ExtractConstantRefactoringInstanceCreator()); //$NON-NLS-1$
 		factory.registerCreator("org.eclipse.jdt.ui.introduce.parameter", new IntroduceParameterRefactoringInstanceCreator()); //$NON-NLS-1$
 		factory.registerCreator("org.eclipse.jdt.ui.introduce.factory", new IntroduceFactoryRefactoringInstanceCreator()); //$NON-NLS-1$
+		factory.registerCreator("org.eclipse.jdt.ui.introduce.indirection", new IntroduceIndirectionRefactoringInstanceCreator()); //$NON-NLS-1$
 		factory.registerCreator("org.eclipse.jdt.ui.promote.temp", new PromoteTempToFieldRefactoringInstanceCreator()); //$NON-NLS-1$
 		factory.registerCreator("org.eclipse.jdt.ui.self.encapsulate", new SelfEncapsulateRefactoringInstanceCreator()); //$NON-NLS-1$
 	}

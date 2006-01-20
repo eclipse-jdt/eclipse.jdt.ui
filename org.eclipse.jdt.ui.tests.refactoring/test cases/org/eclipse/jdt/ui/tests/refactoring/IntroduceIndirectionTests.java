@@ -83,7 +83,7 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 
 		ISourceRange selection= TextRangeUtil.getSelection(cu[0], startLine, startColumn, endLine, endColumn);
 		try {
-			IntroduceIndirectionRefactoring ref= IntroduceIndirectionRefactoring.create(cu[0], selection.getOffset(), selection.getLength());
+			IntroduceIndirectionRefactoring ref= new IntroduceIndirectionRefactoring(cu[0], selection.getOffset(), selection.getLength());
 			ref.setEnableUpdateReferences(updateReferences);
 			if (qTypeName != null)
 				ref.setIntermediaryClassName(qTypeName);

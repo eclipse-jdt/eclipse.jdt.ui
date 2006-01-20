@@ -53,16 +53,18 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.code.ConvertAnonymousToNestedRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceIndirectionRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceFactoryRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceIndirectionRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameResourceProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
 import org.eclipse.jdt.internal.corext.refactoring.sef.SelfEncapsulateFieldRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeTypeRefactoring;
@@ -87,12 +89,12 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeSignatureWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ChangeTypeWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ConvertAnonymousToNestedWizard;
-import org.eclipse.jdt.internal.ui.refactoring.IntroduceIndirectionWizard;
 import org.eclipse.jdt.internal.ui.refactoring.ExtractInterfaceWizard;
 import org.eclipse.jdt.internal.ui.refactoring.InferTypeArgumentsWizard;
 import org.eclipse.jdt.internal.ui.refactoring.InlineConstantWizard;
 import org.eclipse.jdt.internal.ui.refactoring.InlineTempWizard;
 import org.eclipse.jdt.internal.ui.refactoring.IntroduceFactoryWizard;
+import org.eclipse.jdt.internal.ui.refactoring.IntroduceIndirectionWizard;
 import org.eclipse.jdt.internal.ui.refactoring.MoveInnerToTopWizard;
 import org.eclipse.jdt.internal.ui.refactoring.MoveInstanceMethodWizard;
 import org.eclipse.jdt.internal.ui.refactoring.MoveMembersWizard;
@@ -278,19 +280,19 @@ public final class RefactoringExecutionStarter {
 	}
 	
 	public static void startIntroduceIndirectionRefactoring(final ICompilationUnit unit, final int offset, final int length, final Shell shell) throws JavaModelException {
-		final IntroduceIndirectionRefactoring refactoring= IntroduceIndirectionRefactoring.create(unit, offset, length);
+		final IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(unit, offset, length);
 		if (refactoring != null) 
 			new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
 	}
 	
 	public static void startIntroduceIndirectionRefactoring(final IClassFile file, final int offset, final int length, final Shell shell) throws JavaModelException {
-		final IntroduceIndirectionRefactoring refactoring= IntroduceIndirectionRefactoring.create(file, offset, length);
+		final IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(file, offset, length);
 		if (refactoring != null) 
 			new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
 	}
 	
 	public static void startIntroduceIndirectionRefactoring(final IMethod method, final Shell shell) throws JavaModelException {
-		final IntroduceIndirectionRefactoring refactoring= IntroduceIndirectionRefactoring.create(method);
+		final IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(method);
 		if (refactoring != null) 
 			new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
 	}
@@ -346,12 +348,15 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startRefactoring(final IResource[] resources, final IJavaElement[] elements, final Shell shell) throws JavaModelException {
-		final JavaMoveProcessor processor= JavaMoveProcessor.create(resources, elements);
-		final JavaMoveRefactoring refactoring= new JavaMoveRefactoring(processor);
-		final RefactoringWizard wizard= new ReorgMoveWizard(refactoring);
-		processor.setCreateTargetQueries(new CreateTargetQueries(wizard));
-		processor.setReorgQueries(new ReorgQueries(wizard));
-		new RefactoringStarter().activate(refactoring, wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
+		IMovePolicy policy= ReorgPolicyFactory.createMovePolicy(resources, elements);
+		if (policy.canEnable()) {
+			final JavaMoveProcessor processor= new JavaMoveProcessor(policy);
+			final JavaMoveRefactoring refactoring= new JavaMoveRefactoring(processor);
+			final RefactoringWizard wizard= new ReorgMoveWizard(refactoring);
+			processor.setCreateTargetQueries(new CreateTargetQueries(wizard));
+			processor.setReorgQueries(new ReorgQueries(wizard));
+			new RefactoringStarter().activate(refactoring, wizard, shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
+		}
 	}
 
 	public static void startRenameRefactoring(final IJavaElement element, final Shell shell) throws CoreException {

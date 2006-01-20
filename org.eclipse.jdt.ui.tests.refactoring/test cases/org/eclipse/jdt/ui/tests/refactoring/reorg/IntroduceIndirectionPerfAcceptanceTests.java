@@ -54,7 +54,7 @@ public class IntroduceIndirectionPerfAcceptanceTests extends RefactoringPerforma
 		IType control= fProject.findType("org.eclipse.swt.widgets.Widget");
 		IMethod m= control.getMethod("getDisplay", new String[0]);
 		Assert.assertTrue(m != null && m.exists());
-		fRefactoring= IntroduceIndirectionRefactoring.create(m);
+		fRefactoring= new IntroduceIndirectionRefactoring(m);
 		fRefactoring.setEnableUpdateReferences(true);
 		fRefactoring.setIntermediaryClassName("org.eclipse.swt.widgets.Widget");
 		fRefactoring.setIntermediaryMethodName("bar");
