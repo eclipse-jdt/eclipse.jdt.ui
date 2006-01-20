@@ -335,7 +335,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		 */
 		public void elementChanged(ElementChangedEvent e) {
 			IJavaElementDelta delta= findElement(fInput, e.getDelta());
-			if (delta != null && (delta.getFlags() & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) == 0)
+			if (delta != null && (delta.getFlags() & (IJavaElementDelta.F_CONTENT | IJavaElementDelta.F_CHILDREN)) != 0)
 				update();
 		}
 
