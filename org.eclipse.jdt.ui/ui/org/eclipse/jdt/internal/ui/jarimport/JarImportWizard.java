@@ -566,12 +566,14 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 		Assert.isNotNull(refactoring);
 		Assert.isNotNull(descriptor);
 		Assert.isNotNull(monitor);
-		final RefactoringStatus status= new RefactoringStatus();
+		monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 120);
+		final RefactoringStatus status= super.aboutToPerformRefactoring(refactoring, descriptor, new SubProgressMonitor(monitor, 20, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 		try {
-			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 100);
-			status.merge(createJarStubs(refactoring, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
-			if (!status.hasFatalError())
-				status.merge(aboutToPerformRefactoring(refactoring, descriptor));
+			if (!status.hasFatalError()) {
+				status.merge(createJarStubs(refactoring, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
+				if (!status.hasFatalError())
+					status.merge(aboutToPerformRefactoring(refactoring, descriptor));
+			}
 		} finally {
 			monitor.done();
 		}
@@ -801,6 +803,27 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	protected RefactoringStatus refactoringPerformed(final Refactoring refactoring, final IProgressMonitor monitor) {
+		try {
+			monitor.beginTask(JarImportMessages.JarImportWizard_cleanup_import, 120);
+			final RefactoringStatus status= super.refactoringPerformed(refactoring, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+			if (!status.hasFatalError()) {
+				if (fSourceFolder != null)
+					try {
+						fSourceFolder.refreshLocal(IResource.DEPTH_INFINITE, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+					} catch (CoreException exception) {
+						JavaPlugin.log(exception);
+					}
+			}
+			return status;
+		} finally {
+			monitor.done();
+		}
+	}
+
+	/**
 	 * Replaces the old jar file with the new one.
 	 * 
 	 * @param monitor
@@ -864,22 +887,21 @@ public final class JarImportWizard extends RefactoringHistoryWizard implements I
 						}
 					}
 				}
-				final RefactoringHistory history= fImportData.getRefactoringHistory();
-				if (!fCancelled) {
+				if (!fCancelled)
 					replaceJarFile(new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-					if (history != null)
-						RefactoringCore.getUndoManager().flush();
-				}
+				final RefactoringHistory history= fImportData.getRefactoringHistory();
+				if (history != null)
+					RefactoringCore.getUndoManager().flush();
 				if (history != null || rename)
 					fJavaProject.setRawClasspath(entries, rename, new SubProgressMonitor(monitor, 60, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 				fJavaProject= null;
 			}
 			if (fSourceFolder != null) {
-				final URI uri= fSourceFolder.getRawLocationURI();
-				final IFileStore store= EFS.getStore(uri);
+				final IFileStore store= EFS.getStore(fSourceFolder.getRawLocationURI());
 				if (store.fetchInfo(EFS.NONE, new SubProgressMonitor(monitor, 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)).exists())
 					store.delete(EFS.NONE, new SubProgressMonitor(monitor, 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
-				fSourceFolder.delete(true, false, new SubProgressMonitor(monitor, 20, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				fSourceFolder.delete(true, false, new SubProgressMonitor(monitor, 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+				fSourceFolder.clearHistory(new SubProgressMonitor(monitor, 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 				fSourceFolder= null;
 			}
 		} finally {

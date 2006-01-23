@@ -28,6 +28,7 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 import org.eclipse.ltk.ui.refactoring.history.IRefactoringHistoryControl;
@@ -133,9 +134,7 @@ public class JarPackagePreviewPage extends WizardPage implements IJarPackageWiza
 				fHistoryControl.setInput(history);
 				fHistoryControl.setCheckedDescriptors(fJarPackageData.getRefactoringDescriptors());
 			}
-		} else {
-			fJarPackageData.setRefactoringDescriptors(fHistoryControl.getCheckedDescriptors());
-			fHistoryControl.setInput(null);
-		}
+		} else
+			fJarPackageData.setRefactoringDescriptors(new RefactoringDescriptorProxy[0]);
 	}
 }

@@ -372,6 +372,8 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 		// options
 		if (fRefactoringsCheckbox != null)
 			fJarPackage.setRefactoringAware(fRefactoringsCheckbox.getSelection());
+		else
+			fJarPackage.setRefactoringAware(false);
 		fJarPackage.setCompress(fCompressCheckbox.getSelection());
 		fJarPackage.setIncludeDirectoryEntries(fIncludeDirectoryEntriesCheckbox.getSelection());
 		fJarPackage.setOverwrite(fOverwriteCheckbox.getSelection());
