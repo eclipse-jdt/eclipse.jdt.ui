@@ -1784,7 +1784,7 @@
       <wizard
             category="org.eclipse.jdt.ui.Java"
             class="org.eclipse.jdt.internal.ui.jarimport.JarImportWizard"
-            icon="$nl$/icons/full/etool16/exportjar_wiz.gif"
+            icon="$nl$/icons/full/etool16/importjar_wiz.gif"
             id="org.eclipse.jdt.internal.ui.jarimporter.JarImportWizard"
             name="%jarImportWizard.label">
          <description>
