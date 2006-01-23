@@ -23,6 +23,8 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.CheckStateChangedEvent;
+import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.wizard.WizardPage;
 
 import org.eclipse.ui.PlatformUI;
@@ -88,6 +90,12 @@ public class JarPackagePreviewPage extends WizardPage implements IJarPackageWiza
 		composite.setLayoutData(new GridData(GridData.VERTICAL_ALIGN_FILL | GridData.HORIZONTAL_ALIGN_FILL));
 		fHistoryControl= (IRefactoringHistoryControl) RefactoringUI.createRefactoringHistoryControl(composite, fControlConfiguration);
 		fHistoryControl.createControl();
+		fHistoryControl.addCheckStateListener(new ICheckStateListener() {
+
+			public final void checkStateChanged(final CheckStateChangedEvent event) {
+				fJarPackageData.setRefactoringDescriptors(fHistoryControl.getCheckedDescriptors());
+			}
+		});
 		setControl(composite);
 		Dialog.applyDialogFont(composite);
 		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.JARPREVIEW_WIZARD_PAGE);
@@ -106,7 +114,7 @@ public class JarPackagePreviewPage extends WizardPage implements IJarPackageWiza
 	 * @return the refactoring history, or <code>null</code>
 	 */
 	protected RefactoringHistory retrieveRefactoringHistory() {
-		final RefactoringHistory[] history= { null};
+		final RefactoringHistory[] history= { null };
 		final IProject[] projects= fJarPackageData.getRefactoringProjects();
 		try {
 			getContainer().run(false, true, new IRunnableWithProgress() {
