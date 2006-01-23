@@ -23,8 +23,8 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Label;
 
-import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -34,6 +34,7 @@ import org.eclipse.jdt.internal.corext.refactoring.tagging.ISimilarDeclarationUp
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 /**
  * Wizard page for renaming a type (with similarly named elements)
@@ -54,7 +55,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 		super(description, contextHelpId, isLastUserPage, initialValue);
 	}
 
-	protected void addAdditionalOptions(Composite parent) {
+	protected void addAdditionalOptions(Composite composite, RowLayouter layouter) {
 
 		if (getSimilarElementUpdating() == null || !getSimilarElementUpdating().canEnableSimilarDeclarationUpdating())
 			return;
@@ -67,15 +68,13 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 
 		getSimilarElementUpdating().setMatchStrategy(fSelectedStrategy);
 
-		final Composite composite= new Composite(parent, SWT.NONE);
+		Composite c= new Composite(composite, SWT.NULL);
 		GridLayout layout= new GridLayout(2, false);
+		layout.marginWidth= 0;
 		layout.marginHeight= 0;
-		composite.setLayout(layout);
-		GridData data= new GridData(GridData.FILL_HORIZONTAL);
-		data.horizontalIndent= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
-		composite.setLayoutData(data);
+		c.setLayout(layout);
 
-		fUpdateSimilarElements= new Button(composite, SWT.CHECK);
+		fUpdateSimilarElements= new Button(c, SWT.CHECK);
 		fUpdateSimilarElements.setText(RefactoringMessages.RenameTypeWizardInputPage_update_similar_elements);
 
 		final boolean updateSimilarElements= getBooleanSetting(UPDATE_SIMILAR_ELEMENTS, getSimilarElementUpdating().getUpdateSimilarDeclarations());
@@ -90,10 +89,10 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 			}
 		});
 
-		fUpdateSimilarElementsButton= new Button(composite, SWT.PUSH);
-		data= new GridData();
-		data.grabExcessHorizontalSpace= true;
-		data.horizontalAlignment= SWT.RIGHT;
+		fUpdateSimilarElementsButton= new Button(c, SWT.PUSH);
+		GridData d= new GridData();
+		d.grabExcessHorizontalSpace= true;
+		d.horizontalAlignment= SWT.RIGHT;
 		fUpdateSimilarElementsButton.setText(RefactoringMessages.RenameTypeWizardInputPage_update_similar_elements_configure);
 		fUpdateSimilarElementsButton.setEnabled(updateSimilarElements);
 		fUpdateSimilarElementsButton.addSelectionListener(new SelectionAdapter() {
@@ -106,13 +105,17 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 				}
 			}
 		});
-		fUpdateSimilarElementsButton.setLayoutData(data);
+		fUpdateSimilarElementsButton.setLayoutData(d);
 
-		data= new GridData();
-		data.grabExcessHorizontalSpace= true;
-		data.horizontalAlignment= SWT.FILL;
-		data.horizontalSpan= 2;
-		composite.setLayoutData(data);
+		GridData forC= new GridData();
+		forC.grabExcessHorizontalSpace= true;
+		forC.horizontalAlignment= SWT.FILL;
+		forC.horizontalSpan= 2;
+		c.setLayoutData(forC);
+
+		final Label separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
+		separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+		layouter.perform(separator);
 	}
 
 	public void dispose() {

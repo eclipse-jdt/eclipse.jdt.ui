@@ -22,17 +22,6 @@ public final class RefactoringMessages extends NLS {
 
 	public static String RefactorActionGroup_no_refactoring_available;
 	public static String RenameInputWizardPage_new_name;
-	public static String RenameInputWizardPage_comment_section;
-	public static String RenameInputWizardPage_update_section;
-	public static String RenameInputWizardPage_references_setting;
-	public static String RenameInputWizardPage_textual_setting;
-	public static String RenameInputWizardPage_qualified_setting;
-	public static String RenameInputWizardPage_delegation_section;
-	public static String RenameInputWizardPage_delegate_setting;
-	public static String RenameInputWizardPage_update_pattern_one;
-	public static String RenameInputWizardPage_update_pattern_two;
-	public static String RenameInputWizardPage_update_pattern_three;
-	public static String RenameInputWizardPage_expand_hint;
 	public static String RenameRefactoringWizard_internal_error;
 	public static String OpenRefactoringWizardAction_refactoring;
 	public static String OpenRefactoringWizardAction_exception;
@@ -103,7 +92,6 @@ public final class RefactoringMessages extends NLS {
 	public static String ExtractConstantInputPage_exception;
 	public static String ExtractConstantInputPage_access_modifiers;
 	public static String ExtractConstantInputPage_selection_refers_to_nonfinal_fields;
-	public static String ExpandableSettingSection_description_pattern;
 	public static String PromoteTempInputPage_description;
 	public static String MoveMembersWizard_page_title;
 	public static String RenameInputWizardPage_update_references;

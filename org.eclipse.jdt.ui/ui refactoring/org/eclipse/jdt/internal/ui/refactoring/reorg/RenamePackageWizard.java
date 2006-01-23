@@ -16,8 +16,7 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-
-import org.eclipse.jface.dialogs.IDialogConstants;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -28,6 +27,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
+import org.eclipse.jdt.internal.ui.util.RowLayouter;
 
 
 public class RenamePackageWizard extends RenameRefactoringWizard {
@@ -57,20 +57,23 @@ public class RenamePackageWizard extends RenameRefactoringWizard {
 			super(message, contextHelpId, true, initialValue);
 		}
 	
-		protected void addAdditionalOptions(Composite composite) {
+		protected void addAdditionalOptions(Composite composite, RowLayouter layouter) {
 			fRenameSubpackages= new Button(composite, SWT.CHECK);
 			fRenameSubpackages.setText(RefactoringMessages.RenamePackageWizard_rename_subpackages);
 			boolean subpackagesSelection= getBooleanSetting(RENAME_SUBPACKAGES, getRenamePackageProcessor().getRenameSubpackages());
 			fRenameSubpackages.setSelection(subpackagesSelection);
 			getRenamePackageProcessor().setRenameSubpackages(subpackagesSelection);
-			final GridData data= new GridData(GridData.FILL_HORIZONTAL);
-			data.horizontalIndent= convertHorizontalDLUsToPixels(IDialogConstants.HORIZONTAL_SPACING);
-			fRenameSubpackages.setLayoutData(data);
+			fRenameSubpackages.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 			fRenameSubpackages.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
 					getRenamePackageProcessor().setRenameSubpackages(fRenameSubpackages.getSelection());
 				}
 			});
+			layouter.perform(fRenameSubpackages);
+			
+			Label separator= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
+			separator.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
+			layouter.perform(separator);
 		}
 		
 		public void dispose() {
