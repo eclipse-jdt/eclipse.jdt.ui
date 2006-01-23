@@ -41,4 +41,20 @@ public interface IPackagesViewPart extends IViewPart {
 	 * @since 2.0
 	 */
 	TreeViewer getTreeViewer();
+	
+    /**
+     * Returns whether this Packages view's selection automatically tracks the active editor.
+     * 
+     * @return <code>true</code> if linking is enabled, <code>false</code> if not
+     * @since 3.2
+     */
+    boolean isLinkingEnabled();
+    
+    /**
+     * Sets whether this Packages view's selection automatically tracks the active editor.
+     * 
+     * @param enabled <code>true</code> to enable, <code>false</code> to disable
+     * @since 3.2
+     */
+    void setLinkingEnabled(boolean enabled);
 }

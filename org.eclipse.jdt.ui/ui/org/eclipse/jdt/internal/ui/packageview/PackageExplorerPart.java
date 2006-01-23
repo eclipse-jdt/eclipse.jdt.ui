@@ -1231,7 +1231,7 @@ public class PackageExplorerPart extends ViewPart
 		selectReveal(new StructuredSelection(element));
 	}
 	
-	boolean isLinkingEnabled() {
+	public boolean isLinkingEnabled() {
 		return fLinkingEnabled;
 	}
 	

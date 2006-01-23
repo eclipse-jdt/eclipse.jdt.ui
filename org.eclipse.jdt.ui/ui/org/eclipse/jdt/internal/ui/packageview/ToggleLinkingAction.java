@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
+import org.eclipse.jdt.ui.IPackagesViewPart;
+
 import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
 
 
@@ -21,12 +23,12 @@ import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
  */
 public class ToggleLinkingAction extends AbstractToggleLinkingAction {
 	
-	PackageExplorerPart fPackageExplorerPart;
+	private IPackagesViewPart fPackageExplorerPart;
 	
 	/**
 	 * Constructs a new action.
 	 */
-	public ToggleLinkingAction(PackageExplorerPart explorer) {
+	public ToggleLinkingAction(IPackagesViewPart explorer) {
 		setChecked(explorer.isLinkingEnabled());
 		fPackageExplorerPart= explorer;
 	}
