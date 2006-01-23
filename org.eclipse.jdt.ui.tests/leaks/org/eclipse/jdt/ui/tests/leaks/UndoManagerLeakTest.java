@@ -36,7 +36,7 @@ import org.eclipse.jdt.ui.leaktest.LeakTestSetup;
 public class UndoManagerLeakTest extends LeakTestCase {
 
 	/** The maximum undo level. */
-	private static final int MAX_UNDO_LEVEL = 256;
+	private static final int MAX_UNDO_LEVEL= 256;
 	
 	/** The shell. */
 	private Shell fShell;
