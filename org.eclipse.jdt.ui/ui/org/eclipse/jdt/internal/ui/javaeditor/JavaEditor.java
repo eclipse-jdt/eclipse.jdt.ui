@@ -1888,6 +1888,9 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 				};
 			}
 		}
+		
+		if (required == IJavaFoldingStructureProvider.class)
+			return fProjectionModelUpdater;
 
 		if (fProjectionSupport != null) {
 			Object adapter= fProjectionSupport.getAdapter(getSourceViewer(), required);
