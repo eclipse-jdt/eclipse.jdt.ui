@@ -4861,7 +4861,9 @@
    <extension
          point="org.eclipse.ui.navigator.navigatorContent">
       <navigatorContent
+            activeByDefault="true"
             contentProvider="org.eclipse.jdt.internal.ui.model.JavaSynchronizationContentProvider"
+            icon="$nl$/icons/full/obj16/java_model.gif"
             id="org.eclipse.jdt.ui.resourceContent"
             labelProvider="org.eclipse.jdt.internal.ui.model.JavaSynchronizationLabelProvider"
             name="%JavaModelContent.name">
