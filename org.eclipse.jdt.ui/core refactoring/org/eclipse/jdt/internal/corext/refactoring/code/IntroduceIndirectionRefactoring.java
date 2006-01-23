@@ -1248,16 +1248,20 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 		if (!hasNewAdjustments)
 			return status;
 
-		Map rewrites;
-		if (!isRewriteKept(whoToAdjust.getCompilationUnit())) {
-			CompilationUnitRewrite rewrite= new CompilationUnitRewrite(whoToAdjust.getCompilationUnit());
-			rewrite.setResolveBindings(false);
-			rewrites= new HashMap();
-			rewrites.put(whoToAdjust.getCompilationUnit(), rewrite);
-			status.merge(rewriteVisibility(adjustments, rewrites, monitor));
-			rewrite.attachChange((CompilationUnitChange) fTextChangeManager.get(whoToAdjust.getCompilationUnit()));
+		try {
+			monitor.beginTask(RefactoringCoreMessages.MemberVisibilityAdjustor_adjusting, 2);
+			Map rewrites;
+			if (!isRewriteKept(whoToAdjust.getCompilationUnit())) {
+				CompilationUnitRewrite rewrite= new CompilationUnitRewrite(whoToAdjust.getCompilationUnit());
+				rewrite.setResolveBindings(false);
+				rewrites= new HashMap();
+				rewrites.put(whoToAdjust.getCompilationUnit(), rewrite);
+				status.merge(rewriteVisibility(adjustments, rewrites, new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
+				rewrite.attachChange((CompilationUnitChange) fTextChangeManager.get(whoToAdjust.getCompilationUnit()), new SubProgressMonitor(monitor, 1, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+			}
+		} finally {
+			monitor.done();
 		}
-
 		return status;
 	}
 
