@@ -50,8 +50,7 @@ be respected. </td>
         <li>createPackageDialog(Shell parent, IRunnableContext
 context, IJavaSearchScope scope, boolean
 multipleSelection, boolean removeDuplicates, String filter)</li>
-		<li>getEditorInputJavaElement(IEditorInput)</li>
-		
+        <li>getEditorInputJavaElement(IEditorInput)</li>
       </ul>
       </td>
     </tr>
@@ -90,9 +89,56 @@ IJavaSearchScope, int, boolean, String, TypeSelectionExtension)
       </td>
     </tr>
     <tr>
+      <td style="vertical-align: top;">New API added on
+IPackagesViewPart<br>
+      <ul>
+        <li>isLinkingEnabled()</li>
+        <li>setLinkingEnabled(boolean)<br>
+        </li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
       <td>New API added on NewTypeWizardPage<br>
       <ul>
         <li>getCompilationUnitName(String)</li>
+        <li>accessors that return the input field labels can be
+overridden</li>
+        <ul>
+          <li>getPackageLabel()</li>
+          <li>getEnclosingTypeLabel()</li>
+          <li>getTypeNameLabel()</li>
+          <li>getModifiersLabel()</li>
+          <li>getSuperClassLabel()</li>
+          <li>getSuperInterfacesLabel()<br>
+          </li>
+        </ul>
+        <li>methods that open the selection dialogs can now be
+overridden</li>
+        <ul>
+          <li>choosePackage()</li>
+          <li>chooseEnclosingType()</li>
+          <li>chooseSuperClass()</li>
+          <li>chooseSuperInterfaces()<br>
+          </li>
+        </ul>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">New API added on
+NewContainerWizardPage<br>
+      <ul>
+        <li>accessors that return the input field labels can be
+overridden</li>
+        <ul>
+          <li>getContainerLabel()</li>
+        </ul>
+        <li>methods that open the delection dialogs can now be
+overridden</li>
+        <ul>
+          <li>chooseContainer()</li>
+        </ul>
       </ul>
       </td>
     </tr>
@@ -126,10 +172,12 @@ site, ISelectionProvider provider)</li>
       <td>New API to use the functionality of OverrideMethodsAction and
 AddUnimplementedConstructorsAction without UI.<br>
       <ul>
-        <li>New method OverrideMethodsAction.createRunnable(CompilationUnit
+        <li>New method
+OverrideMethodsAction.createRunnable(CompilationUnit
 astRoot, ITypeBinding type, IMethodBinding[] methodToOverride, int
 insertPos, boolean createComments)</li>
-        <li>New method AddUnimplementedConstructorsAction.createRunnable(CompilationUnit
+        <li>New method
+AddUnimplementedConstructorsAction.createRunnable(CompilationUnit
 astRoot,
 ITypeBinding type, IMethodBinding[] methodToOverride, int insertPos,
 boolean createComments, int visibility, boolean omitSuper)</li>
