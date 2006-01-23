@@ -75,7 +75,7 @@ public final class JavaSynchronizationContentProvider extends AbstractRefactorin
 	 *            the element to get the resource mapping
 	 * @return the resource mapping
 	 */
-	private static ResourceMapping getResourceMapping(final Object element) {
+	public static ResourceMapping getResourceMapping(final Object element) {
 		if (element instanceof IJavaElement)
 			return JavaElementResourceMapping.create((IJavaElement) element);
 		if (element instanceof IAdaptable) {
@@ -94,7 +94,7 @@ public final class JavaSynchronizationContentProvider extends AbstractRefactorin
 	 *            the element to get the resource traversals
 	 * @return the resource traversals
 	 */
-	private static ResourceTraversal[] getResourceTraversals(final Object element) {
+	public static ResourceTraversal[] getResourceTraversals(final Object element) {
 		final ResourceMapping mapping= getResourceMapping(element);
 		if (mapping != null) {
 			try {
