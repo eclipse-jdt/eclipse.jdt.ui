@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.model;
 
 import java.util.HashSet;
+import java.util.LinkedHashSet;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -155,7 +156,7 @@ public final class JavaSynchronizationContentProvider extends AbstractRefactorin
 	 * @return the java project children
 	 */
 	private Object[] getJavaProjectChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
-		final Set set= new HashSet();
+		final Set set= new LinkedHashSet();
 		for (int index= 0; index < children.length; index++)
 			set.add(children[index]);
 //		final IResource resource= JavaModelProvider.getResource(parent);
