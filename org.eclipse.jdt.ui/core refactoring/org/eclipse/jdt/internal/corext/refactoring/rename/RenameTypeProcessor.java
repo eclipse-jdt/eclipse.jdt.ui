@@ -168,8 +168,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	private int fCachedRenamingStrategy= -1;
 	private RefactoringStatus fCachedRefactoringStatus= null;
 
-	private String fComment;
-
 	public static final class ParticipantDescriptorFilter implements IParticipantDescriptorFilter {
 
 		public boolean select(IConfigurationElement element, RefactoringStatus status) {

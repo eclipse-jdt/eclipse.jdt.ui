@@ -172,9 +172,6 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	/** The change object */
 	private Change fChange= null;
 
-	/** The comment, or <code>null</code> */
-	private String fComment;
-
 	/** The type parameter to rename */
 	private ITypeParameter fTypeParameter;
 
