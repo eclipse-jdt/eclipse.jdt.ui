@@ -156,6 +156,7 @@ public final class NewWizardMessages extends NLS {
 	
 	public static String NewSourceFolderCreationWizard_title;
 	public static String NewSourceFolderCreationWizard_edit_title;
+	public static String NewSourceFolderCreationWizard_link_title;
 	public static String NewSourceFolderWizardPage_title;
 	public static String NewSourceFolderWizardPage_description;
 	public static String NewSourceFolderWizardPage_root_label;

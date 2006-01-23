@@ -24,13 +24,17 @@ public class AddSourceFolderWizard extends BuildPathWizard {
 	private final boolean fLinkedMode;
 
 	public AddSourceFolderWizard(CPListElement[] existingEntries, CPListElement newEntry, IPath outputLocation, boolean linkedMode) {
-		super(existingEntries, newEntry, outputLocation, getTitel(newEntry), JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR);
+		super(existingEntries, newEntry, outputLocation, getTitel(newEntry, linkedMode), JavaPluginImages.DESC_WIZBAN_NEWSRCFOLDR);
 		fLinkedMode= linkedMode;
 	}
 
-	private static String getTitel(CPListElement newEntry) {
+	private static String getTitel(CPListElement newEntry, boolean linkedMode) {
 		if (newEntry.getPath() == null) {
-			return NewWizardMessages.NewSourceFolderCreationWizard_title;
+			if (linkedMode) {
+				return NewWizardMessages.NewSourceFolderCreationWizard_link_title;
+			} else {
+				return NewWizardMessages.NewSourceFolderCreationWizard_title;
+			}
 		} else {
 			return NewWizardMessages.NewSourceFolderCreationWizard_edit_title;
 		}
