@@ -73,7 +73,7 @@ public class MockPluginView extends PackagesView {
 	
 	/* Override so that tests can set layout state.
 	 * 
-	 * (non-Javadoc)
+	 *
 	 * @see org.eclipse.jdt.internal.ui.browsing.PackagesView#isInListState()
 	 */
 	protected boolean isInListState(){

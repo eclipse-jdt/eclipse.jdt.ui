@@ -42,7 +42,7 @@ public class BreakContinueTargetFinderTest extends TestCase{
 	private IJavaProject fJProject1;
 	private IPackageFragmentRoot fSourceFolder;
 	
-	/* (non-Javadoc)
+	/*
 	 * @see junit.framework.TestCase#setUp()
 	 */
 	protected void setUp() throws Exception {
