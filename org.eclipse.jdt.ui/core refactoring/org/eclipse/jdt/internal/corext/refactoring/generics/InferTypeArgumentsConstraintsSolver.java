@@ -24,6 +24,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -78,7 +79,7 @@ public class InferTypeArgumentsConstraintsSolver {
 		fWorkList= new LinkedList();
 	}
 	
-	public InferTypeArgumentsUpdate solveConstraints(SubProgressMonitor pm) {
+	public InferTypeArgumentsUpdate solveConstraints(IProgressMonitor pm) {
 		pm.beginTask("", 2); //$NON-NLS-1$
 		fUpdate= new InferTypeArgumentsUpdate();
 		

@@ -11,12 +11,17 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.Signature;
@@ -31,6 +36,7 @@ import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
@@ -47,7 +53,17 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
+import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsConstraintCreator;
+import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsConstraintsSolver;
+import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsTCModel;
+import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsUpdate;
+import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsUpdate.CuUpdate;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -276,6 +292,9 @@ public class Java50Fix extends LinkedFix {
 			TextEditGroup group= new TextEditGroup(FixMessages.Java50Fix_ParametrizeTypeReference_description);
 			textEditGroups.add(group);
 			
+			if (smartFix(cuRewrite, positionGroups, group))
+				return endPosition(cuRewrite.getASTRewrite(), fType);
+			
 			if (classInstanceCreationFix(cuRewrite, group))
 				return endPosition(cuRewrite.getASTRewrite(), fType);
 		
@@ -283,6 +302,77 @@ public class Java50Fix extends LinkedFix {
 				return endPosition(cuRewrite.getASTRewrite(), fType);
 			
 			return null;
+		}
+
+		private boolean smartFix(CompilationUnitRewrite cuRewrite, List positionGroups, TextEditGroup group) {
+			InferTypeArgumentsTCModel tCModel= new InferTypeArgumentsTCModel();
+			InferTypeArgumentsConstraintCreator creator= new InferTypeArgumentsConstraintCreator(tCModel, true);
+			
+			CompilationUnit root= cuRewrite.getRoot();
+			root.setProperty(RefactoringASTParser.SOURCE_PROPERTY, cuRewrite.getCu());
+			root.accept(creator);
+			
+			InferTypeArgumentsConstraintsSolver solver= new InferTypeArgumentsConstraintsSolver(tCModel);
+			InferTypeArgumentsUpdate iTAUpdate= solver.solveConstraints(new NullProgressMonitor());
+			solver= null; //free caches
+			
+			filter(iTAUpdate, fType, root);
+			
+			HashMap/*<ICompilationUnit, CuUpdate>*/ updates= iTAUpdate.getUpdates();
+			Set entrySet= updates.entrySet();
+			
+			if (entrySet.size() == 0)
+				return false;
+			
+			boolean hasRewrite= false;
+			for (Iterator iter= entrySet.iterator(); iter.hasNext();) {
+				
+				Map.Entry entry= (Map.Entry) iter.next();
+
+				cuRewrite.setResolveBindings(false);
+				CuUpdate cuUpdate= (CuUpdate) entry.getValue();
+				
+				hasRewrite|= InferTypeArgumentsRefactoring.rewriteDeclarations(cuUpdate, cuRewrite, tCModel, true);
+			}
+			return hasRewrite;
+		}
+		
+		private void filter(InferTypeArgumentsUpdate update, SimpleType type, CompilationUnit root) {
+			Set entrySet= update.getUpdates().entrySet();
+			for (Iterator iter= entrySet.iterator(); iter.hasNext();) {
+				Map.Entry entry= (Map.Entry) iter.next();
+				CuUpdate cuUpdate= (CuUpdate) entry.getValue();
+				
+				for (Iterator cvIter= cuUpdate.getDeclarations().iterator(); cvIter.hasNext();) {
+					ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
+					
+					if (cv instanceof CollectionElementVariable2) {
+						ConstraintVariable2 parentElement= ((CollectionElementVariable2) cv).getParentConstraintVariable();
+						if (parentElement instanceof TypeVariable2) {
+							TypeVariable2 typeCv= (TypeVariable2) parentElement;
+							
+							ASTNode node= typeCv.getRange().getNode(root);
+							if (node instanceof Name && node.getParent() instanceof Type) {
+								Type originalType= (Type) node.getParent();
+							
+								if (originalType != type)
+									cvIter.remove();
+								
+							} else {
+								cvIter.remove();
+							}
+						} else {
+							cvIter.remove();
+						}
+					} else {
+						cvIter.remove();
+					}
+				}
+					
+				if (cuUpdate.getDeclarations().size() == 0) {
+					iter.remove();
+				}
+			}
 		}
 
 		private boolean dumbFix(CompilationUnitRewrite cuRewrite, List positionGroups, TextEditGroup group) {

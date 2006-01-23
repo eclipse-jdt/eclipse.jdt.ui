@@ -295,15 +295,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring implements IIniti
 			rewrite.setResolveBindings(false);
 			CuUpdate cuUpdate= (CuUpdate) entry.getValue();
 			
-			for (Iterator cvIter= cuUpdate.getDeclarations().iterator(); cvIter.hasNext();) {
-				ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
-				rewriteConstraintVariable(cv, rewrite);
-			}
-			
-			for (Iterator castsIter= cuUpdate.getCastsToRemove().iterator(); castsIter.hasNext();) {
-				CastVariable2 castCv= (CastVariable2) castsIter.next();
-				rewriteCastVariable(castCv, rewrite);
-			}
+			rewriteDeclarations(cuUpdate, rewrite, fTCModel, fLeaveUnconstrainedRaw);
 			
 			CompilationUnitChange change= rewrite.createChange();
 			if (change != null) {
@@ -313,19 +305,34 @@ public class InferTypeArgumentsRefactoring extends Refactoring implements IIniti
 		
 	}
 
-	private void rewriteConstraintVariable(ConstraintVariable2 cv, CompilationUnitRewrite rewrite) {
+	public static boolean rewriteDeclarations(CuUpdate cuUpdate, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw) {
+		boolean hasRewrite= false;
+		for (Iterator cvIter= cuUpdate.getDeclarations().iterator(); cvIter.hasNext();) {
+			ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
+			hasRewrite|= rewriteConstraintVariable(cv, rewrite, tCModel, leaveUnconstraindRaw);
+		}
+		
+		for (Iterator castsIter= cuUpdate.getCastsToRemove().iterator(); castsIter.hasNext();) {
+			CastVariable2 castCv= (CastVariable2) castsIter.next();
+			hasRewrite|= rewriteCastVariable(castCv, rewrite, tCModel);
+		}
+		return hasRewrite;
+	}
+
+	private static boolean rewriteConstraintVariable(ConstraintVariable2 cv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw) {
 		if (cv instanceof CollectionElementVariable2) {
 			ConstraintVariable2 parentElement= ((CollectionElementVariable2) cv).getParentConstraintVariable();
 			if (parentElement instanceof TypeVariable2) {
 				TypeVariable2 typeCv= (TypeVariable2) parentElement;
-				rewriteTypeVariable(typeCv, rewrite);
+				return rewriteTypeVariable(typeCv, rewrite, tCModel, leaveUnconstraindRaw);
 			} else {
 				//only rewrite type variables
 			}
 		}
+		return false;
 	}
 
-	private void rewriteTypeVariable(TypeVariable2 typeCv, CompilationUnitRewrite rewrite) {
+	private static boolean rewriteTypeVariable(TypeVariable2 typeCv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw) {
 		ASTNode node= typeCv.getRange().getNode(rewrite.getRoot());
 		if (node instanceof Name && node.getParent() instanceof Type) {
 			Type originalType= (Type) node.getParent();
@@ -333,13 +340,13 @@ public class InferTypeArgumentsRefactoring extends Refactoring implements IIniti
 			// Must rewrite all type arguments in one batch. Do the rewrite when the first one is encountered; skip the others.
 			Object rewritten= originalType.getProperty(REWRITTEN); 
 			if (rewritten == REWRITTEN)
-				return;
+				return false;
 			originalType.setProperty(REWRITTEN, REWRITTEN);
 			
-			ArrayList typeArgumentCvs= getTypeArgumentCvs(typeCv);
-			Type[] typeArguments= getTypeArguments(originalType, typeArgumentCvs, rewrite);
+			ArrayList typeArgumentCvs= getTypeArgumentCvs(typeCv, tCModel);
+			Type[] typeArguments= getTypeArguments(originalType, typeArgumentCvs, rewrite, tCModel, leaveUnconstraindRaw);
 			if (typeArguments == null)
-				return;
+				return false;
 			
 			Type movingType= (Type) rewrite.getASTRewrite().createMoveTarget(originalType);
 			ParameterizedType newType= rewrite.getAST().newParameterizedType(movingType);
@@ -348,13 +355,16 @@ public class InferTypeArgumentsRefactoring extends Refactoring implements IIniti
 				newType.typeArguments().add(typeArguments[i]);
 			
 			rewrite.getASTRewrite().replace(originalType, newType, rewrite.createGroupDescription(RefactoringCoreMessages.InferTypeArgumentsRefactoring_addTypeArguments)); 
-		} //TODO: other node types?
+		}  else {//TODO: other node types?
+			return false;
+		}
+		return true;
 	}
 
 	/**
 	 * @return the new type arguments, or <code>null</code> iff an argument could not be infered
 	 */
-	private Type[] getTypeArguments(Type baseType, ArrayList typeArgumentCvs, CompilationUnitRewrite rewrite) {
+	private static Type[] getTypeArguments(Type baseType, ArrayList typeArgumentCvs, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw) {
 		if (typeArgumentCvs.size() == 0)
 			return null;
 		
@@ -370,8 +380,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring implements IIniti
 					chosenType= chosenType.getTypeDeclaration();
 				BindingKey bindingKey= new BindingKey(chosenType.getBindingKey());
 				typeArgument= rewrite.getImportRewrite().addImportFromSignature(bindingKey.internalToSignature(), rewrite.getAST());
-				ArrayList nestedTypeArgumentCvs= getTypeArgumentCvs(elementCv);
-				Type[] nestedTypeArguments= getTypeArguments(typeArgument, nestedTypeArgumentCvs, rewrite); //recursion
+				ArrayList nestedTypeArgumentCvs= getTypeArgumentCvs(elementCv, tCModel);
+				Type[] nestedTypeArguments= getTypeArguments(typeArgument, nestedTypeArgumentCvs, rewrite, tCModel, leaveUnconstraindRaw); //recursion
 				if (nestedTypeArguments != null) {
 					ParameterizedType parameterizedType= rewrite.getAST().newParameterizedType(typeArgument);
 					for (int j= 0; j < nestedTypeArguments.length; j++)
@@ -380,7 +390,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring implements IIniti
 				}
 
 			} else { // couldn't infer an element type (no constraints)
-				if (fLeaveUnconstrainedRaw) {
+				if (leaveUnconstraindRaw) {
 					// every guess could be wrong => leave the whole thing raw
 					return null;
 				} else {
@@ -408,8 +418,8 @@ public class InferTypeArgumentsRefactoring extends Refactoring implements IIniti
 		return typeArguments;
 	}
 
-	private ArrayList/*<CollectionElementVariable2>*/ getTypeArgumentCvs(ConstraintVariable2 baseCv) {
-		Map elementCvs= fTCModel.getElementVariables(baseCv);
+	private static ArrayList/*<CollectionElementVariable2>*/ getTypeArgumentCvs(ConstraintVariable2 baseCv, InferTypeArgumentsTCModel tCModel) {
+		Map elementCvs= tCModel.getElementVariables(baseCv);
 		ArrayList typeArgumentCvs= new ArrayList();
 		for (Iterator iter= elementCvs.values().iterator(); iter.hasNext();) {
 			CollectionElementVariable2 elementCv= (CollectionElementVariable2) iter.next();
@@ -423,7 +433,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring implements IIniti
 		return typeArgumentCvs;
 	}
 
-	private boolean unboundedWildcardAllowed(Type originalType) {
+	private static boolean unboundedWildcardAllowed(Type originalType) {
 		ASTNode parent= originalType.getParent();
 		while (parent instanceof Type)
 			parent= parent.getParent();
@@ -438,19 +448,19 @@ public class InferTypeArgumentsRefactoring extends Refactoring implements IIniti
 		return true;
 	}
 
-	private void rewriteCastVariable(CastVariable2 castCv, CompilationUnitRewrite rewrite) {
+	private static boolean rewriteCastVariable(CastVariable2 castCv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel) {
 		ASTNode node= castCv.getRange().getNode(rewrite.getRoot());
 		
 		ConstraintVariable2 expressionVariable= castCv.getExpressionVariable();
-		ConstraintVariable2 methodReceiverCv= fTCModel.getMethodReceiverCv(expressionVariable);
+		ConstraintVariable2 methodReceiverCv= tCModel.getMethodReceiverCv(expressionVariable);
 		if (methodReceiverCv != null) {
 			TType chosenReceiverType= InferTypeArgumentsConstraintsSolver.getChosenType(methodReceiverCv);
 			if (chosenReceiverType == null)
-				return;
+				return false;
 			else if (! InferTypeArgumentsTCModel.isAGenericType(chosenReceiverType))
-				return;
-			else if (hasUnboundElement(methodReceiverCv))
-				return;
+				return false;
+			else if (hasUnboundElement(methodReceiverCv, tCModel))
+				return false;
 		}
 		
 		CastExpression castExpression= (CastExpression) node;
@@ -464,10 +474,11 @@ public class InferTypeArgumentsRefactoring extends Refactoring implements IIniti
 		Expression newExpression= (Expression) rewrite.getASTRewrite().createMoveTarget(expression);
 		rewrite.getASTRewrite().replace(nodeToReplace, newExpression, rewrite.createGroupDescription(RefactoringCoreMessages.InferTypeArgumentsRefactoring_removeCast)); 
 		rewrite.getImportRemover().registerRemovedNode(nodeToReplace);
+		return true;
 	}
 
-	private boolean hasUnboundElement(ConstraintVariable2 methodReceiverCv) {
-		ArrayList/*<CollectionElementVariable2>*/ typeArgumentCvs= getTypeArgumentCvs(methodReceiverCv);
+	private static boolean hasUnboundElement(ConstraintVariable2 methodReceiverCv, InferTypeArgumentsTCModel tCModel) {
+		ArrayList/*<CollectionElementVariable2>*/ typeArgumentCvs= getTypeArgumentCvs(methodReceiverCv, tCModel);
 		for (Iterator iter= typeArgumentCvs.iterator(); iter.hasNext();) {
 			CollectionElementVariable2 elementCv= (CollectionElementVariable2) iter.next();
 			TType chosenElementType= InferTypeArgumentsConstraintsSolver.getChosenType(elementCv);
