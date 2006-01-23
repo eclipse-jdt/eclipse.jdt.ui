@@ -175,7 +175,7 @@ public class RenameResourceProcessor extends RenameProcessor implements IInitial
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			return new DynamicValidationStateChange(
-			  new RenameResourceChange(fResource, getNewElementName(), fComment));
+			  new RenameResourceChange(fResource, getNewElementName(), getComment()));
 		} finally{
 			pm.done();
 		}	

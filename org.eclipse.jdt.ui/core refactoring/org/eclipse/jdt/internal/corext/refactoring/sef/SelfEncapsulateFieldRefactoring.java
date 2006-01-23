@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -95,6 +94,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.CommentRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -109,7 +109,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 /**
  * Encapsulates a field into getter and setter calls.
  */
-public class SelfEncapsulateFieldRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class SelfEncapsulateFieldRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	public static final String ID_SELF_ENCAPSULATE= "org.eclipse.jdt.ui.self.encapsulate"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
@@ -384,7 +384,7 @@ public class SelfEncapsulateFieldRefactoring extends Refactoring implements IIni
 				IJavaProject javaProject= fField.getJavaProject();
 				if (javaProject != null)
 					project= javaProject.getElementName();
-				return new RefactoringDescriptor(ID_SELF_ENCAPSULATE, project, NLS.bind(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, (JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE));
+				return new RefactoringDescriptor(ID_SELF_ENCAPSULATE, project, NLS.bind(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, (JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE));
 			}
 		};
 		TextChange[] changes= fChangeManager.getAllChanges();

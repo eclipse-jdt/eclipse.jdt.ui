@@ -32,7 +32,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.IRefactoringStatusEntryComparator;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
@@ -114,6 +113,7 @@ import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.CommentRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.OutgoingMemberVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -135,7 +135,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public class MoveInnerToTopRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class MoveInnerToTopRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	private static final String ID_MOVE_INNER= "org.eclipse.jdt.ui.move.inner"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FIELD= "field"; //$NON-NLS-1$
@@ -776,7 +776,7 @@ public class MoveInnerToTopRefactoring extends Refactoring implements IInitializ
 				IJavaProject javaProject= fType.getJavaProject();
 				if (javaProject != null)
 					project= javaProject.getElementName();
-				return new RefactoringDescriptor(ID_MOVE_INNER, project, Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fType.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) }), null, arguments, RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.STRUCTURAL_CHANGE);
+				return new RefactoringDescriptor(ID_MOVE_INNER, project, Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fType.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.STRUCTURAL_CHANGE);
 			}
 		};
 		result.addAll(fChangeManager.getAllChanges());

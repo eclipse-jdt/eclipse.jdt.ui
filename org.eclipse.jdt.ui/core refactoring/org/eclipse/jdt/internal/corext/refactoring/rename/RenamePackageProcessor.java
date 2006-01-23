@@ -501,7 +501,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 					IJavaProject javaProject= fPackage.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_RENAME_PACKAGE, project, Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description, new String[] { fPackage.getElementName(), getNewElementName()}), null, arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					return new RefactoringDescriptor(ID_RENAME_PACKAGE, project, Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description, new String[] { fPackage.getElementName(), getNewElementName()}), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 				}
 			};
 			result.addAll(fChangeManager.getAllChanges());

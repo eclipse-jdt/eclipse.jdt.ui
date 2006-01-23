@@ -27,7 +27,6 @@ import org.eclipse.core.filebuffers.ITextFileBuffer;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -97,7 +96,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public class PromoteTempToFieldRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class PromoteTempToFieldRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	public static final String ID_PROMOTE_TEMP= "org.eclipse.jdt.ui.promote.temp"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
@@ -631,7 +630,7 @@ public class PromoteTempToFieldRefactoring extends Refactoring implements IIniti
 				if (javaProject != null)
 					project= javaProject.getElementName();
 				final IVariableBinding binding= fTempDeclarationNode.resolveBinding();
-				return new RefactoringDescriptor(ID_PROMOTE_TEMP, project, Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
+				return new RefactoringDescriptor(ID_PROMOTE_TEMP, project, Messages.format(RefactoringCoreMessages.PromoteTempToFieldRefactoring_descriptor_description, new String[] { BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
 			}
 		};
         ITextFileBuffer buffer= RefactoringFileBuffers.acquire(fCu);

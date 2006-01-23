@@ -105,6 +105,7 @@ import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreato
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -119,7 +120,7 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegatingUpdating, IInitializableRefactoringComponent {
+public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegatingUpdating, IInitializableRefactoringComponent, ICommentProvider {
 
 	public static final String ID_STATIC_MOVE= "org.eclipse.jdt.ui.move.static"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELEGATE="delegate"; //$NON-NLS-1$
@@ -137,6 +138,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	private IBinding[] fMemberBindings;
 	private BodyDeclaration[] fMemberDeclarations;
 	private boolean fDelegatingUpdating;
+	private String fComment;
 
 	private static class TypeReferenceFinder extends ASTVisitor {
 		List fResult= new ArrayList();
@@ -687,7 +689,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_single, JavaElementLabels.getElementLabel(members[0], JavaElementLabels.ALL_FULLY_QUALIFIED));
 				else
 					description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_multi, String.valueOf(members.length));
-				return new RefactoringDescriptor(ID_STATIC_MOVE, project, Messages.format(description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+				return new RefactoringDescriptor(ID_STATIC_MOVE, project, Messages.format(description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 			}
 		}; 
 		fTarget= getCuRewrite(fDestinationType.getCompilationUnit());
@@ -1039,5 +1041,17 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
+	}
+
+	public boolean canEnableComment() {
+		return true;
+	}
+
+	public String getComment() {
+		return fComment;
+	}
+
+	public void setComment(String comment) {
+		fComment= comment;
 	}
 }

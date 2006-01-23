@@ -12,29 +12,29 @@ package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.resources.IResource;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.ProgressMonitorDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaMoveRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.IMovePolicy;
+import org.eclipse.jdt.internal.corext.refactoring.structure.JavaMoveRefactoring;
 
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.RefactoringMessages;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
 
 public class ReorgMoveStarter {

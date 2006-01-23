@@ -42,9 +42,10 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgPolicy.ICopyPolicy;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.util.Resources;
 
-public final class JavaCopyProcessor extends CopyProcessor implements IReorgDestinationValidator {
+public final class JavaCopyProcessor extends CopyProcessor implements IReorgDestinationValidator, ICommentProvider {
 	//TODO: offer ICopyPolicy getCopyPolicy(); IReorgPolicy getReorgPolicy();
 	// and remove delegate methods (also for JavaMoveProcessor)?
 
@@ -52,6 +53,7 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 	private IReorgQueries fReorgQueries;
 	private ICopyPolicy fCopyPolicy;
 	private ReorgExecutionLog fExecutionLog;
+	private String fComment;
 	
 	public static JavaCopyProcessor create(IResource[] resources, IJavaElement[] javaElements) throws JavaModelException{
 		ICopyPolicy copyPolicy= ReorgPolicyFactory.createCopyPolicy(resources, javaElements);
@@ -199,5 +201,17 @@ public final class JavaCopyProcessor extends CopyProcessor implements IReorgDest
 		result.addAll(Arrays.asList(jNatures));
 		result.addAll(Arrays.asList(rNatures));
 		return (String[])result.toArray(new String[result.size()]);
+	}
+
+	public boolean canEnableComment() {
+		return true;
+	}
+
+	public String getComment() {
+		return fComment;
+	}
+
+	public void setComment(String comment) {
+		fComment= comment;
 	}
 }

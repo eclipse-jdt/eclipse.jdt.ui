@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -76,6 +75,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.CommentRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.ASTCreator;
@@ -101,7 +101,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * @author tip
  */
-public class ChangeTypeRefactoring extends Refactoring {
+public class ChangeTypeRefactoring extends CommentRefactoring {
 
 	// ------------------------------------------------------------------------------------------------- //
 	// Fields

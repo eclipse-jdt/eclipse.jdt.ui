@@ -1044,7 +1044,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					return new RefactoringDescriptor(ID_RENAME_TYPE, project, Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), fComment, arguments, flags);
+					return new RefactoringDescriptor(ID_RENAME_TYPE, project, Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, flags);
 				}
 			};
 			result.addAll(fChangeManager.getAllChanges());

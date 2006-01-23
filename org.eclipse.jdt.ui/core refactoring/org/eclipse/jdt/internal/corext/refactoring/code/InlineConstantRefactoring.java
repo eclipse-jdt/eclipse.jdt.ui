@@ -37,7 +37,6 @@ import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
@@ -116,7 +115,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class InlineConstantRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class InlineConstantRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	private static final String ID_INLINE_CONSTANT= "org.eclipse.jdt.ui.inline.constant"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
@@ -828,7 +827,7 @@ public class InlineConstantRefactoring extends Refactoring implements IInitializ
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					return new RefactoringDescriptor(ID_INLINE_CONSTANT, project, Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, flags);
+					return new RefactoringDescriptor(ID_INLINE_CONSTANT, project, Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
 				}
 			}; 
 			result.addAll(fChanges);

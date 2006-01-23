@@ -34,7 +34,6 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -87,7 +86,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  *    assigned to a paramter again. No need for a separate local (important to be able
  *    to revers extract method correctly).
  */
-public class InlineMethodRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class InlineMethodRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	public static final String ID_INLINE_METHOD= "org.eclipse.jdt.ui.inline.method"; //$NON-NLS-1$
 	public static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
@@ -331,7 +330,7 @@ public class InlineMethodRefactoring extends Refactoring implements IInitializab
 				int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
 				if (!Modifier.isPrivate(binding.getModifiers()))
 					flags|= RefactoringDescriptor.MULTI_CHANGE;
-				return new RefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringClass(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, flags);
+				return new RefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringClass(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
 			}
 		}; 
 	}

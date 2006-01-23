@@ -61,6 +61,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -69,7 +70,7 @@ import org.eclipse.jdt.internal.corext.util.Resources;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public final class JavaDeleteProcessor extends DeleteProcessor {
+public final class JavaDeleteProcessor extends DeleteProcessor implements ICommentProvider {
 	
 	private boolean fWasCanceled;
 	private boolean fSuggestGetterSetterDeletion;
@@ -78,6 +79,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 	private IJavaElement[] fJavaElements;
 	private IReorgQueries fDeleteQueries;
 	private DeleteModifications fDeleteModifications;
+	private String fComment;
 
 	private Change fDeleteChange;
 	private boolean fDeleteSubPackages;
@@ -755,5 +757,17 @@ public final class JavaDeleteProcessor extends DeleteProcessor {
 				return false;
 		}
 		return true;
+	}
+
+	public boolean canEnableComment() {
+		return true;
+	}
+
+	public String getComment() {
+		return fComment;
+	}
+
+	public void setComment(String comment) {
+		fComment= comment;
 	}
 }

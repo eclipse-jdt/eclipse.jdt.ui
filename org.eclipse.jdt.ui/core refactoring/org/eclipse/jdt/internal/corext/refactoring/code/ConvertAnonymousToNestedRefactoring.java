@@ -40,7 +40,6 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -114,7 +113,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public class ConvertAnonymousToNestedRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	private static final String ID_CONVERT_ANONYMOUS= "org.eclipse.jdt.ui.convert.anonymous"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
@@ -487,7 +486,7 @@ public class ConvertAnonymousToNestedRefactoring extends Refactoring implements 
 				if (javaProject != null)
 					project= javaProject.getElementName();
 				final ITypeBinding binding= fAnonymousInnerClassNode.resolveBinding();
-				return new RefactoringDescriptor(ID_CONVERT_ANONYMOUS, project, Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
+				return new RefactoringDescriptor(ID_CONVERT_ANONYMOUS, project, Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
 			}
 		};
 		try {

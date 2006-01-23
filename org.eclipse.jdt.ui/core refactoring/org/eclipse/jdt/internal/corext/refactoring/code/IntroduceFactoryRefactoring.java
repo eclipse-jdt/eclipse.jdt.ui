@@ -30,7 +30,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
@@ -105,7 +104,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  * for direct calls to a given constructor.
  * @author rfuhrer
  */
-public class IntroduceFactoryRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class IntroduceFactoryRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	public static final String ID_INTRODUCE_FACTORY= "org.eclipse.jdt.ui.introduce.factory"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
@@ -1067,7 +1066,7 @@ public class IntroduceFactoryRefactoring extends Refactoring implements IInitial
 				IJavaProject javaProject= fCUHandle.getJavaProject();
 				if (javaProject != null)
 					project= javaProject.getElementName();
-				return new RefactoringDescriptor(ID_INTRODUCE_FACTORY, project, Messages.format(RefactoringCoreMessages.IntroduceFactory_descriptor_description, new String[] { fNewMethodName, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+				return new RefactoringDescriptor(ID_INTRODUCE_FACTORY, project, Messages.format(RefactoringCoreMessages.IntroduceFactory_descriptor_description, new String[] { fNewMethodName, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 			}
 		}; 
 

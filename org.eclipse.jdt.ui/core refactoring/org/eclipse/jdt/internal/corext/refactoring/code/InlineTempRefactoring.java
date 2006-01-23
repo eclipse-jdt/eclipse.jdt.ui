@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -78,7 +77,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
-public class InlineTempRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class InlineTempRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	private static final String ID_INLINE_TEMP= "org.eclipse.jdt.ui.inline.temp"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
@@ -226,7 +225,7 @@ public class InlineTempRefactoring extends Refactoring implements IInitializable
 						text= BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED);
 					else
 						text= '{' + JavaElementLabels.ELLIPSIS_STRING + '}';
-					return new RefactoringDescriptor(ID_INLINE_TEMP, project, Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), text}), null, arguments, RefactoringDescriptor.NONE);
+					return new RefactoringDescriptor(ID_INLINE_TEMP, project, Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), text}), getComment(), arguments, RefactoringDescriptor.NONE);
 				}
 			}; 
 			inlineTemp(result, new SubProgressMonitor(pm, 1));

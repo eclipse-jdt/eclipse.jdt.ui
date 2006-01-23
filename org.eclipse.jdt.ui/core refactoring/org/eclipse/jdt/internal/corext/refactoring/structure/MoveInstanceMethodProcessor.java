@@ -128,6 +128,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IVisibilityAdjustment;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
@@ -147,7 +148,10 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 /**
  * Refactoring processor to move instance methods.
  */
-public final class MoveInstanceMethodProcessor extends MoveProcessor implements IInitializableRefactoringComponent, IDelegatingUpdating {
+public final class MoveInstanceMethodProcessor extends MoveProcessor implements IInitializableRefactoringComponent, IDelegatingUpdating, ICommentProvider {
+
+	/** The comment */
+	private String fComment;
 
 	/**
 	 * AST visitor to find references to parameters occurring in anonymous classes of a method body.
@@ -1577,7 +1581,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					final IJavaProject javaProject= fMethod.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_MOVE_METHOD, project, Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fTarget, JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					return new RefactoringDescriptor(ID_MOVE_METHOD, project, Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fTarget, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 				}
 			}; 
 		} finally {
@@ -2758,5 +2762,26 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean canEnableComment() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getComment() {
+		return fComment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void setComment(final String comment) {
+		fComment= comment;
 	}
 }

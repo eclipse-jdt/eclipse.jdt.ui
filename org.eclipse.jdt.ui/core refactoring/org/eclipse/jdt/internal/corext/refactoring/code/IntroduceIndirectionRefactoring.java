@@ -29,7 +29,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -128,7 +127,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
  * @since 3.2
  * 
  */
-public class IntroduceIndirectionRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class IntroduceIndirectionRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 	
 	// User selections:
 

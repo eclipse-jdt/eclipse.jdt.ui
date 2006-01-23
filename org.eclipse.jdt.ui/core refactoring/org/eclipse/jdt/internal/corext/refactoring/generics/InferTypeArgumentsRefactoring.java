@@ -34,7 +34,6 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
@@ -69,6 +68,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.CommentRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsUpdate.CuUpdate;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
@@ -89,7 +89,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class InferTypeArgumentsRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class InferTypeArgumentsRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	private static final String ID_INFER_TYPE_ARGUMENTS= "org.eclipse.jdt.ui.infer.typearguments"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_CLONE= "clone"; //$NON-NLS-1$
@@ -503,7 +503,7 @@ public class InferTypeArgumentsRefactoring extends Refactoring implements IIniti
 					arguments.put(ATTRIBUTE_CLONE, Boolean.valueOf(fAssumeCloneReturnsSameType).toString());
 					arguments.put(ATTRIBUTE_LEAVE, Boolean.valueOf(fLeaveUnconstrainedRaw).toString());
 					final IJavaProject project= getSingleProject();
-					return new RefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, project != null ? project.getElementName() : null, project != null ? NLS.bind(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description, null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					return new RefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, project != null ? project.getElementName() : null, project != null ? NLS.bind(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description, getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 				}
 			}; 
 			return result;

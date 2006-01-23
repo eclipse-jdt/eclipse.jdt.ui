@@ -33,7 +33,6 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
@@ -104,7 +103,7 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 
-public class ExtractConstantRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class ExtractConstantRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	public static final String ID_EXTRACT_CONSTANT= "org.eclipse.jdt.ui.extract.constant"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
@@ -610,7 +609,7 @@ public class ExtractConstantRefactoring extends Refactoring implements IInitiali
 				} catch (JavaModelException exception) {
 					JavaPlugin.log(exception);
 				}
-				return new RefactoringDescriptor(ID_EXTRACT_CONSTANT, project, Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description, new String[] { description + fConstantName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression()) }), null, arguments, flags);
+				return new RefactoringDescriptor(ID_EXTRACT_CONSTANT, project, Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description, new String[] { description + fConstantName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression()) }), getComment(), arguments, flags);
 			}
 		};
 	}

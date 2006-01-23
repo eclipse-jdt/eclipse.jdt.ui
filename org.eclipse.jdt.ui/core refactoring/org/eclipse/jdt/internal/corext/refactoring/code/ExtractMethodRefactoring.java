@@ -42,7 +42,6 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
@@ -120,7 +119,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 /**
  * Extracts a method in a compilation unit based on a text selection range.
  */
-public class ExtractMethodRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class ExtractMethodRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	public static final String ID_EXTRACT_METHOD= "org.eclipse.jdt.ui.extract.method"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
@@ -457,7 +456,7 @@ public class ExtractMethodRefactoring extends Refactoring implements IInitializa
 					final MethodDeclaration node= (MethodDeclaration) enclosing;
 					method= node.resolveBinding();
 				}
-				return new RefactoringDescriptor(ID_EXTRACT_METHOD, project, Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_descriptor_description, new String[] {getSignature(), method != null ? BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED) : '{' + JavaElementLabels.ELLIPSIS_STRING + '}', BindingLabelProvider.getBindingLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)}), null, arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
+				return new RefactoringDescriptor(ID_EXTRACT_METHOD, project, Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_descriptor_description, new String[] {getSignature(), method != null ? BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED) : '{' + JavaElementLabels.ELLIPSIS_STRING + '}', BindingLabelProvider.getBindingLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
 			}
 		};
 		result.setSaveMode(TextFileChange.KEEP_SAVE_STATE);

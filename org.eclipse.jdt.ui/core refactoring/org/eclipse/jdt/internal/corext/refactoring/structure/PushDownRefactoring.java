@@ -640,7 +640,7 @@ public final class PushDownRefactoring extends HierarchyRefactoring {
 					final IJavaProject javaProject= declaring.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_PUSH_DOWN, project, fMembersToMove.length == 1 ? NLS.bind(RefactoringCoreMessages.PushDownRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) }) : NLS.bind(RefactoringCoreMessages.PushDownRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) }), null, arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					return new RefactoringDescriptor(ID_PUSH_DOWN, project, fMembersToMove.length == 1 ? NLS.bind(RefactoringCoreMessages.PushDownRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) }) : NLS.bind(RefactoringCoreMessages.PushDownRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 				}
 			};
 		} finally {

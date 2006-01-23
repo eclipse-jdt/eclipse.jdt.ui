@@ -31,7 +31,6 @@ import org.eclipse.jface.text.TextSelection;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
@@ -84,7 +83,7 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
-public class IntroduceParameterRefactoring extends Refactoring implements IInitializableRefactoringComponent, IDelegatingUpdating {
+public class IntroduceParameterRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent, IDelegatingUpdating {
 
 	public static final String ID_INTRODUCE_PARAMETER= "org.eclipse.jdt.ui.introduce.parameter"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
@@ -496,7 +495,7 @@ public class IntroduceParameterRefactoring extends Refactoring implements IIniti
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					return new RefactoringDescriptor(ID_INTRODUCE_PARAMETER, descriptor.getProject(), NLS.bind(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)}), null, arguments, descriptor.getFlags());
+					return new RefactoringDescriptor(ID_INTRODUCE_PARAMETER, descriptor.getProject(), NLS.bind(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)}), getComment(), arguments, descriptor.getFlags());
 				}
 				return null;
 			}

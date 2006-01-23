@@ -29,7 +29,6 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
@@ -83,6 +82,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.code.CommentRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.SourceReferenceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -99,7 +99,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Partial implementation of a refactoring executed on type hierarchies.
  */
-public abstract class HierarchyRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public abstract class HierarchyRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	/**
 	 * AST node visitor which performs the actual mapping.

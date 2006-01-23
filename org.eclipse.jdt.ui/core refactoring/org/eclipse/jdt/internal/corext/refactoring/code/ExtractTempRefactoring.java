@@ -37,7 +37,6 @@ import org.eclipse.jface.text.BadLocationException;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -123,7 +122,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Extract Local Variable (from selected expression inside method or initializer).
  */
-public class ExtractTempRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class ExtractTempRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	public static final String ID_EXTRACT_TEMP= "org.eclipse.jdt.ui.extract.temp"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
@@ -450,7 +449,7 @@ public class ExtractTempRefactoring extends Refactoring implements IInitializabl
 				IJavaProject javaProject= fCu.getJavaProject();
 				if (javaProject != null)
 					project= javaProject.getElementName();
-				return new RefactoringDescriptor(ID_EXTRACT_TEMP, project, Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_descriptor_description, new String[] { fTempName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression()) }), null, arguments, RefactoringDescriptor.NONE);
+				return new RefactoringDescriptor(ID_EXTRACT_TEMP, project, Messages.format(RefactoringCoreMessages.ExtractTempRefactoring_descriptor_description, new String[] { fTempName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression()) }), getComment(), arguments, RefactoringDescriptor.NONE);
 			}
 		};
 		try {

@@ -74,6 +74,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.CompilationUnitRange;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TType;
 import org.eclipse.jdt.internal.corext.refactoring.typeconstraints.types.TypeEnvironment;
@@ -89,7 +90,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.1
  */
-public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor implements IInitializableRefactoringComponent {
+public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor implements IInitializableRefactoringComponent, ICommentProvider {
 
 	protected static final String ATTRIBUTE_INSTANCEOF= "instanceof"; //$NON-NLS-1$
 
@@ -112,6 +113,9 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 
 	/** The obsolete casts (element type: <code>&ltICompilationUnit, Collection&ltCastVariable2&gt&gt</code>) */
 	protected Map fObsoleteCasts= null;
+
+	/** The comment */
+	protected String fComment;
 
 	/** The working copy owner */
 	protected final WorkingCopyOwner fOwner= new WorkingCopyOwner() {
@@ -736,5 +740,26 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 		} finally {
 			monitor.done();
 		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean canEnableComment() {
+		return true;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final String getComment() {
+		return fComment;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public final void setComment(final String comment) {
+		fComment= comment;
 	}
 }

@@ -286,7 +286,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 						IJavaProject javaProject= fTypeParameter.getJavaProject();
 						if (javaProject != null)
 							project= javaProject.getElementName();
-						return new RefactoringDescriptor(ID_RENAME_TYPE_PARAMETER, project, Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description, new String[] { fTypeParameter.getElementName(), JavaElementLabels.getElementLabel(fTypeParameter.getDeclaringMember(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), fComment, arguments, RefactoringDescriptor.NONE);
+						return new RefactoringDescriptor(ID_RENAME_TYPE_PARAMETER, project, Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description, new String[] { fTypeParameter.getElementName(), JavaElementLabels.getElementLabel(fTypeParameter.getDeclaringMember(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, RefactoringDescriptor.NONE);
 					}
 				};
 				composite.markAsSynthetic();

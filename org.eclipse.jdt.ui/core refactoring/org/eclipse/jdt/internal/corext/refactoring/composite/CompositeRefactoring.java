@@ -31,8 +31,8 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
-import org.eclipse.ltk.core.refactoring.MultiStateTextFileChange;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
+import org.eclipse.ltk.core.refactoring.MultiStateTextFileChange;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -46,6 +46,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.CommentRefactoring;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -55,7 +56,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.2
  */
-public class CompositeRefactoring extends Refactoring implements IInitializableRefactoringComponent {
+public class CompositeRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	/** The global working copy owner */
 	private static class GlobalWorkingCopyOwner extends WorkingCopyOwner {

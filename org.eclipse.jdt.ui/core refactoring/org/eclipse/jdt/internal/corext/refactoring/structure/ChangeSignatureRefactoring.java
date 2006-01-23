@@ -32,7 +32,6 @@ import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -115,6 +114,7 @@ import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
+import org.eclipse.jdt.internal.corext.refactoring.code.CommentRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
@@ -136,7 +136,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class ChangeSignatureRefactoring extends Refactoring implements IDelegatingUpdating, IInitializableRefactoringComponent {
+public class ChangeSignatureRefactoring extends CommentRefactoring implements IDelegatingUpdating, IInitializableRefactoringComponent {
 	
 	private static final String ID_CHANGE_METHOD_SIGNATURE= "org.eclipse.jdt.ui.change.method.signature"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RETURN= "return"; //$NON-NLS-1$
@@ -1173,7 +1173,7 @@ public class ChangeSignatureRefactoring extends Refactoring implements IDelegati
 						JavaPlugin.log(exception);
 					}
 					try {
-						return new RefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), null, arguments, flags);
+						return new RefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), getComment(), arguments, flags);
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 						return null;
