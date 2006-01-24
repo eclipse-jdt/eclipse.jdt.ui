@@ -559,8 +559,8 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		if (visible)
 			open();
 		else {
-			// FIXME: workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=120921
-			dispose();
+			saveDialogBounds(getShell());
+			getShell().setVisible(false);
 		}
 	}
 
