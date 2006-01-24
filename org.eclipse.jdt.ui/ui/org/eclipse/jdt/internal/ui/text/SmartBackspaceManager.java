@@ -35,10 +35,10 @@ import org.eclipse.jdt.internal.ui.text.TypingRun.ChangeType;
 
 
 /**
- * Installs as a verify key listener on a viewer and overwrites the behaviour
+ * Installs as a verify key listener on a viewer and overwrites the behavior
  * of the backspace key. Clients may register undo specifications for certain
  * offsets in a document. The <code>SmartBackspaceManager</code> will manage the
- * specfications and execute the contained <code>TextEdit</code>s when backspace
+ * specifications and execute the contained <code>TextEdit</code>s when backspace
  * is pressed at the given offset and the specification is still valid.
  * <p>
  * Undo specifications are removed after a number of typing runs.
@@ -141,7 +141,6 @@ public class SmartBackspaceManager {
 			if (viewer instanceof TextViewer) {
 				TextViewer v= (TextViewer) viewer;
 				v.getRewriteTarget().beginCompoundChange();
-				v.setRedraw(false);
 			}
 		}
 
@@ -150,7 +149,6 @@ public class SmartBackspaceManager {
 			if (viewer instanceof TextViewer) {
 				TextViewer v= (TextViewer) viewer;
 				v.getRewriteTarget().endCompoundChange();
-				v.setRedraw(true);
 			}
 		}
 
