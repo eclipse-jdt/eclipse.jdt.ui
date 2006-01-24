@@ -696,14 +696,6 @@ public final class JavaUI {
 	 * @since 3.2
 	 */
 	public static IJavaElement getEditorInputJavaElement(IEditorInput editorInput) {
-		Assert.isNotNull(editorInput);
-		IJavaElement je= getWorkingCopyManager().getWorkingCopy(editorInput); 
-		if (je != null)
-			return je;
-
-		/*
-		 * This needs work, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=120340
-		 */
 		return (IJavaElement)editorInput.getAdapter(IJavaElement.class);
 	}
 

@@ -100,6 +100,7 @@
             class="org.eclipse.jdt.internal.ui.EditorInputAdapterFactory" 
             adaptableType="org.eclipse.ui.IEditorInput">
             <adapter type="org.eclipse.search.ui.ISearchPageScoreComputer"/>
+            <adapter type="org.eclipse.jdt.core.IJavaElement"/>
 		</factory>
 		
 		<factory 

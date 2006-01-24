@@ -10,9 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdapterFactory;
 
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IStorageEditorInput;
+
 import org.eclipse.search.ui.ISearchPageScoreComputer;
+
+import org.eclipse.jdt.core.IJavaElement;
+
+import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.search.JavaSearchPageScoreComputer;
 import org.eclipse.jdt.internal.ui.search.SearchUtil;
@@ -22,7 +30,7 @@ import org.eclipse.jdt.internal.ui.search.SearchUtil;
  */
 public class EditorInputAdapterFactory implements IAdapterFactory {
 	
-	private static Class[] PROPERTIES= new Class[0];
+	private static Class[] PROPERTIES= new Class[] {IJavaElement.class};
 	
 	private Object fSearchPageScoreComputer;
 
@@ -30,11 +38,24 @@ public class EditorInputAdapterFactory implements IAdapterFactory {
 		updateLazyLoadedAdapters();
 		return PROPERTIES;
 	}
-	
+
 	public Object getAdapter(Object element, Class key) {
 		updateLazyLoadedAdapters();
 		if (fSearchPageScoreComputer != null && ISearchPageScoreComputer.class.equals(key))
 			return fSearchPageScoreComputer;
+		
+		if (IJavaElement.class.equals(key) && element instanceof IEditorInput) {
+			IJavaElement je= JavaUI.getWorkingCopyManager().getWorkingCopy((IEditorInput)element); 
+			if (je != null)
+				return je;
+			if (element instanceof IStorageEditorInput) {
+				try {
+					return ((IStorageEditorInput)element).getStorage().getAdapter(key);
+				} catch (CoreException ex) {
+					// Fall through
+				}
+			}
+		}
 		return null;
 	}
 
@@ -45,6 +66,6 @@ public class EditorInputAdapterFactory implements IAdapterFactory {
 	
 	private void createSearchPageScoreComputer() {
 		fSearchPageScoreComputer= new JavaSearchPageScoreComputer();
-		PROPERTIES= new Class[] {ISearchPageScoreComputer.class};
+		PROPERTIES= new Class[] {ISearchPageScoreComputer.class, IJavaElement.class};
 	}
 }
