@@ -59,11 +59,11 @@ import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.ParenthesizedExpression;
+import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
-import org.eclipse.jdt.internal.corext.fix.LinkedFix;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
@@ -296,7 +296,15 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 			rewrite.setResolveBindings(false);
 			CuUpdate cuUpdate= (CuUpdate) entry.getValue();
 			
-			rewriteDeclarations(cuUpdate, rewrite, fTCModel, fLeaveUnconstrainedRaw, null);
+			for (Iterator cvIter= cuUpdate.getDeclarations().iterator(); cvIter.hasNext();) {
+				ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
+				rewriteConstraintVariable(cv, rewrite, fTCModel, fLeaveUnconstrainedRaw, null);
+			}
+			
+			for (Iterator castsIter= cuUpdate.getCastsToRemove().iterator(); castsIter.hasNext();) {
+				CastVariable2 castCv= (CastVariable2) castsIter.next();
+				rewriteCastVariable(castCv, rewrite, fTCModel);
+			}
 			
 			CompilationUnitChange change= rewrite.createChange();
 			if (change != null) {
@@ -305,75 +313,80 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 		}
 		
 	}
-
-	public static boolean rewriteDeclarations(CuUpdate cuUpdate, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw, List positionGroups) {
-		boolean hasRewrite= false;
-		for (Iterator cvIter= cuUpdate.getDeclarations().iterator(); cvIter.hasNext();) {
-			ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
-			hasRewrite|= rewriteConstraintVariable(cv, rewrite, tCModel, leaveUnconstraindRaw, positionGroups);
+	
+	public static ASTNode[] inferArguments(SimpleType[] types, InferTypeArgumentsUpdate update, InferTypeArgumentsTCModel model, CompilationUnitRewrite rewrite) {
+		List result= new ArrayList();
+		HashMap/*<ICompilationUnit, CuUpdate>*/ updates= update.getUpdates();
+		Set entrySet= updates.entrySet();
+		for (Iterator iter= entrySet.iterator(); iter.hasNext();) {
+			
+			Map.Entry entry= (Map.Entry) iter.next();
+			
+			rewrite.setResolveBindings(false);
+			CuUpdate cuUpdate= (CuUpdate) entry.getValue();
+			
+			for (Iterator cvIter= cuUpdate.getDeclarations().iterator(); cvIter.hasNext();) {
+				ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
+				ASTNode newNode= rewriteConstraintVariable(cv, rewrite, model, false, types);
+				if (newNode != null)
+					result.add(newNode);
+			}
 		}
-		
-		for (Iterator castsIter= cuUpdate.getCastsToRemove().iterator(); castsIter.hasNext();) {
-			CastVariable2 castCv= (CastVariable2) castsIter.next();
-			hasRewrite|= rewriteCastVariable(castCv, rewrite, tCModel, positionGroups);
-		}
-		return hasRewrite;
+		return (ASTNode[])result.toArray(new ASTNode[result.size()]);
 	}
 
-	private static boolean rewriteConstraintVariable(ConstraintVariable2 cv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw, List positionGroups) {
+	private static ASTNode rewriteConstraintVariable(ConstraintVariable2 cv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw, SimpleType[] types) {
 		if (cv instanceof CollectionElementVariable2) {
 			ConstraintVariable2 parentElement= ((CollectionElementVariable2) cv).getParentConstraintVariable();
 			if (parentElement instanceof TypeVariable2) {
 				TypeVariable2 typeCv= (TypeVariable2) parentElement;
-				return rewriteTypeVariable(typeCv, rewrite, tCModel, leaveUnconstraindRaw, positionGroups);
+				return rewriteTypeVariable(typeCv, rewrite, tCModel, leaveUnconstraindRaw, types);
 			} else {
 				//only rewrite type variables
 			}
 		}
-		return false;
+		return null;
 	}
 
-	private static boolean rewriteTypeVariable(TypeVariable2 typeCv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw, List positionGroups) {
+	private static ASTNode rewriteTypeVariable(TypeVariable2 typeCv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw, SimpleType[] types) {
 		ASTNode node= typeCv.getRange().getNode(rewrite.getRoot());
 		if (node instanceof Name && node.getParent() instanceof Type) {
 			Type originalType= (Type) node.getParent();
 			
+			if (types != null && !has(types, originalType))
+				return null;
+			
 			// Must rewrite all type arguments in one batch. Do the rewrite when the first one is encountered; skip the others.
 			Object rewritten= originalType.getProperty(REWRITTEN); 
 			if (rewritten == REWRITTEN)
-				return false;
+				return null;
 			originalType.setProperty(REWRITTEN, REWRITTEN);
 			
 			ArrayList typeArgumentCvs= getTypeArgumentCvs(typeCv, tCModel);
 			Type[] typeArguments= getTypeArguments(originalType, typeArgumentCvs, rewrite, tCModel, leaveUnconstraindRaw);
 			if (typeArguments == null)
-				return false;
+				return null;
 			
 			Type movingType= (Type) rewrite.getASTRewrite().createMoveTarget(originalType);
 			ParameterizedType newType= rewrite.getAST().newParameterizedType(movingType);
 			
 			for (int i= 0; i < typeArguments.length; i++) {
 				newType.typeArguments().add(typeArguments[i]);
-				if (positionGroups != null) {
-					LinkedFix.PositionGroup pg= new LinkedFix.PositionGroup(((Name)node).getFullyQualifiedName()+i);
-					if (positionGroups.isEmpty()) {
-						pg.addFirstPosition(rewrite.getASTRewrite().track(typeArguments[i]));
-					} else {
-						pg.addPosition(rewrite.getASTRewrite().track(typeArguments[i]));
-					}
-					if (typeArguments[i].isWildcardType()) {
-						pg.addProposal("?", "?");  //$NON-NLS-1$//$NON-NLS-2$
-						pg.addProposal("Object", "Object");  //$NON-NLS-1$//$NON-NLS-2$
-					}
-					positionGroups.add(pg);
-				}
 			}
-			
-			rewrite.getASTRewrite().replace(originalType, newType, rewrite.createGroupDescription(RefactoringCoreMessages.InferTypeArgumentsRefactoring_addTypeArguments)); 
+
+			rewrite.getASTRewrite().replace(originalType, newType, rewrite.createGroupDescription(RefactoringCoreMessages.InferTypeArgumentsRefactoring_addTypeArguments));
+			return newType;
 		}  else {//TODO: other node types?
-			return false;
+			return null;
 		}
-		return true;
+	}
+
+	private static boolean has(SimpleType[] types, Type originalType) {
+		for (int i= 0; i < types.length; i++) {
+			if (types[i] == originalType)
+				return true;
+		}
+		return false;
 	}
 
 	/**
@@ -463,7 +476,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 		return true;
 	}
 
-	private static boolean rewriteCastVariable(CastVariable2 castCv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, List positionGroups) {
+	private static ASTNode rewriteCastVariable(CastVariable2 castCv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel) {//, List positionGroups) {
 		ASTNode node= castCv.getRange().getNode(rewrite.getRoot());
 		
 		ConstraintVariable2 expressionVariable= castCv.getExpressionVariable();
@@ -471,11 +484,11 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 		if (methodReceiverCv != null) {
 			TType chosenReceiverType= InferTypeArgumentsConstraintsSolver.getChosenType(methodReceiverCv);
 			if (chosenReceiverType == null)
-				return false;
+				return null;
 			else if (! InferTypeArgumentsTCModel.isAGenericType(chosenReceiverType))
-				return false;
+				return null;
 			else if (hasUnboundElement(methodReceiverCv, tCModel))
-				return false;
+				return null;
 		}
 		
 		CastExpression castExpression= (CastExpression) node;
@@ -489,12 +502,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 		Expression newExpression= (Expression) rewrite.getASTRewrite().createMoveTarget(expression);
 		rewrite.getASTRewrite().replace(nodeToReplace, newExpression, rewrite.createGroupDescription(RefactoringCoreMessages.InferTypeArgumentsRefactoring_removeCast)); 
 		rewrite.getImportRemover().registerRemovedNode(nodeToReplace);
-		if (positionGroups != null) {
-			LinkedFix.PositionGroup pg= new LinkedFix.PositionGroup("Expr:"+newExpression.getStartPosition()); //$NON-NLS-1$
-			pg.addPosition(rewrite.getASTRewrite().track(newExpression));
-			positionGroups.add(pg);
-		}
-		return true;
+		return newExpression;
 	}
 
 	private static boolean hasUnboundElement(ConstraintVariable2 methodReceiverCv, InferTypeArgumentsTCModel tCModel) {

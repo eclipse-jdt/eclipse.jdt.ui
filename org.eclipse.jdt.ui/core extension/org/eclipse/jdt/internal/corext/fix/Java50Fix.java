@@ -11,12 +11,9 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.text.edits.TextEditGroup;
 
@@ -53,7 +50,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
@@ -62,11 +58,7 @@ import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsCo
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsTCModel;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsUpdate;
-import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsUpdate.CuUpdate;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.CollectionElementVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ConstraintVariable2;
-import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.TypeVariable2;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -181,130 +173,55 @@ public class Java50Fix extends LinkedFix {
 	
 	private static class AddTypeParametersOperation extends AbstractLinkedFixRewriteOperation {
 		
-		private final SimpleType fType;
+		private final SimpleType[] fTypes;
 
-		public AddTypeParametersOperation(SimpleType type) {
-			fType= type;
+		public AddTypeParametersOperation(SimpleType[] types) {
+			fTypes= types;
 		}
 
 		/**
 		 * {@inheritDoc}
 		 */
 		public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, List positionGroups) throws CoreException {
-			
-			TextEditGroup group= new TextEditGroup(FixMessages.Java50Fix_ParametrizeTypeReference_description);
-			textEditGroups.add(group);
-			
-			if (smartFix(cuRewrite, positionGroups, group))
-				return endPosition(cuRewrite.getASTRewrite(), fType);
-			
-			if (classInstanceCreationFix(cuRewrite, group))
-				return endPosition(cuRewrite.getASTRewrite(), fType);
-			
-			return null;
-		}
-
-		private boolean smartFix(CompilationUnitRewrite cuRewrite, List positionGroups, TextEditGroup group) {
-			InferTypeArgumentsTCModel tCModel= new InferTypeArgumentsTCModel();
-			InferTypeArgumentsConstraintCreator creator= new InferTypeArgumentsConstraintCreator(tCModel, true);
+			InferTypeArgumentsTCModel model= new InferTypeArgumentsTCModel();
+			InferTypeArgumentsConstraintCreator creator= new InferTypeArgumentsConstraintCreator(model, true);
 			
 			CompilationUnit root= cuRewrite.getRoot();
 			root.setProperty(RefactoringASTParser.SOURCE_PROPERTY, cuRewrite.getCu());
 			root.accept(creator);
 			
-			InferTypeArgumentsConstraintsSolver solver= new InferTypeArgumentsConstraintsSolver(tCModel);
-			InferTypeArgumentsUpdate iTAUpdate= solver.solveConstraints(new NullProgressMonitor());
+			InferTypeArgumentsConstraintsSolver solver= new InferTypeArgumentsConstraintsSolver(model);
+			InferTypeArgumentsUpdate update= solver.solveConstraints(new NullProgressMonitor());
 			solver= null; //free caches
 			
-			filter(iTAUpdate, fType, root);
+			ASTNode[] nodes= InferTypeArgumentsRefactoring.inferArguments(fTypes, update, model, cuRewrite);
+			if (nodes.length == 0)
+				return null;
 			
-			HashMap/*<ICompilationUnit, CuUpdate>*/ updates= iTAUpdate.getUpdates();
-			Set entrySet= updates.entrySet();
-			
-			if (entrySet.size() == 0)
-				return false;
-			
-			boolean hasRewrite= false;
-			for (Iterator iter= entrySet.iterator(); iter.hasNext();) {
-				
-				Map.Entry entry= (Map.Entry) iter.next();
-
-				cuRewrite.setResolveBindings(false);
-				CuUpdate cuUpdate= (CuUpdate) entry.getValue();
-				
-				hasRewrite|= InferTypeArgumentsRefactoring.rewriteDeclarations(cuUpdate, cuRewrite, tCModel, false, positionGroups);
-			}
-			return hasRewrite;
-		}
-		
-		private void filter(InferTypeArgumentsUpdate update, SimpleType type, CompilationUnit root) {
-			Set entrySet= update.getUpdates().entrySet();
-			for (Iterator iter= entrySet.iterator(); iter.hasNext();) {
-				Map.Entry entry= (Map.Entry) iter.next();
-				CuUpdate cuUpdate= (CuUpdate) entry.getValue();
-				
-				for (Iterator cvIter= cuUpdate.getDeclarations().iterator(); cvIter.hasNext();) {
-					ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
-					
-					if (cv instanceof CollectionElementVariable2) {
-						ConstraintVariable2 parentElement= ((CollectionElementVariable2) cv).getParentConstraintVariable();
-						if (parentElement instanceof TypeVariable2) {
-							TypeVariable2 typeCv= (TypeVariable2) parentElement;
-							
-							ASTNode node= typeCv.getRange().getNode(root);
-							if (node instanceof Name && node.getParent() instanceof Type) {
-								Type originalType= (Type) node.getParent();
-							
-								if (originalType != type)
-									cvIter.remove();
-								
-							} else {
-								cvIter.remove();
-							}
+			ASTRewrite astRewrite= cuRewrite.getASTRewrite();
+			for (int i= 0; i < nodes.length; i++) {
+				if (nodes[i] instanceof ParameterizedType) {
+					ParameterizedType type= (ParameterizedType)nodes[0];
+					List args= (List)type.getStructuralProperty(ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
+					int j= 0;
+					for (Iterator iter= args.iterator(); iter.hasNext();) {
+						PositionGroup group= new PositionGroup("G" + i + "_" + j); //$NON-NLS-1$ //$NON-NLS-2$
+						Type argType= (Type)iter.next();
+						if (positionGroups.isEmpty()) {
+							group.addFirstPosition(astRewrite.track(argType));
 						} else {
-							cvIter.remove();
+							group.addPosition(astRewrite.track(argType));
 						}
-					} else {
-						cvIter.remove();
+						if (argType.isWildcardType()) {
+							group.addProposal("?", "?");  //$NON-NLS-1$//$NON-NLS-2$
+							group.addProposal("Object", "Object");  //$NON-NLS-1$//$NON-NLS-2$
+						}
+						positionGroups.add(group);
+						j++;
 					}
 				}
-					
-				if (cuUpdate.getDeclarations().size() == 0) {
-					iter.remove();
-				}
 			}
-		}
-
-		private boolean classInstanceCreationFix(CompilationUnitRewrite cuRewrite, TextEditGroup group) {
-			ClassInstanceCreation creation= (ClassInstanceCreation)ASTNodes.getParent(fType, ClassInstanceCreation.class);
-			if (creation == null)
-				return false;
-			
-			if (!(creation.getType() instanceof SimpleType))
-				return false;
-			
-			if (creation.getLocationInParent() != VariableDeclarationFragment.INITIALIZER_PROPERTY)
-				return false;
-			
-			VariableDeclarationStatement declStmt= (VariableDeclarationStatement)ASTNodes.getParent(creation, VariableDeclarationStatement.class);
-			
-			if (!(declStmt.getType() instanceof ParameterizedType))
-				return false;
-			
-			injectParameters((ParameterizedType)declStmt.getType(), fType, cuRewrite.getASTRewrite(), cuRewrite.getAST(), group);
-			return true;
-		}
-
-		private void injectParameters(ParameterizedType parameterizedType, SimpleType simpleType, ASTRewrite rewrite, AST ast, TextEditGroup group) {
-			ParameterizedType copy= (ParameterizedType)ASTNode.copySubtree(ast, parameterizedType);
-			SimpleType moveSimpleType= (SimpleType)rewrite.createMoveTarget(simpleType);
-			
-			rewrite.replace(copy.getType(), moveSimpleType, group);
-			rewrite.replace(simpleType, copy, group);
-		}
-		
-		private ITrackedNodePosition endPosition(ASTRewrite rewrite, SimpleType type) {
-			return rewrite.track(type);
+			return astRewrite.track(nodes[0]);
 		}
 	}
 	
@@ -489,33 +406,36 @@ public class Java50Fix extends LinkedFix {
 	}
 	
 	private static SimpleType createRawTypeReferenceOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List operations) {
-		SimpleType result= null;
+		List/*<SimpleType>*/ result= new ArrayList();
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
 			ASTNode node= problem.getCoveredNode(compilationUnit);
 			if (node instanceof ClassInstanceCreation) {
 				ASTNode rawReference= (ASTNode)node.getStructuralProperty(ClassInstanceCreation.TYPE_PROPERTY);
 				if (isRawTypeReference(rawReference)) {
-					operations.add(new AddTypeParametersOperation((SimpleType)rawReference));
-					result= (SimpleType)rawReference;
+					result.add(rawReference);
 				}
 			} else if (node instanceof SimpleName) {
 				ASTNode rawReference= node.getParent();
 				if (isRawTypeReference(rawReference)) {
-					operations.add(new AddTypeParametersOperation((SimpleType)rawReference));
-					result= (SimpleType)rawReference;
+					result.add(rawReference);
 				}
 			} else if (node instanceof MethodInvocation) {
 				MethodInvocation invocation= (MethodInvocation)node;
 				
 				ASTNode rawReference= getRawReference(invocation, compilationUnit);
 				if (rawReference != null) {
-					operations.add(new AddTypeParametersOperation((SimpleType)rawReference));
-					result= (SimpleType)rawReference;
+					result.add(rawReference);
 				}
 			}
 		}
-		return result;
+		
+		if (result.size() == 0)
+			return null;
+		
+		SimpleType[] types= (SimpleType[])result.toArray(new SimpleType[result.size()]);
+		operations.add(new AddTypeParametersOperation(types));
+		return types[0];
 	}
 
 	private static ASTNode getRawReference(MethodInvocation invocation, CompilationUnit compilationUnit) {
