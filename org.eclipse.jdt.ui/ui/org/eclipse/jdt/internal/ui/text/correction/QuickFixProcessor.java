@@ -503,6 +503,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.UnsafeTypeConversion:
 			case IProblem.RawTypeReference:
+			case IProblem.UnsafeRawMethodInvocation:
 				LocalCorrectionsSubProcessor.addTypePrametersToRawTypeReference(context, problem, proposals);
 				break;
 			default:

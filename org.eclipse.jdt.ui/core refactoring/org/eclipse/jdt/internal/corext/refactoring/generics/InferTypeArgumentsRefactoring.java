@@ -63,6 +63,7 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeLiteral;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
+import org.eclipse.jdt.internal.corext.fix.LinkedFix;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
@@ -295,7 +296,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 			rewrite.setResolveBindings(false);
 			CuUpdate cuUpdate= (CuUpdate) entry.getValue();
 			
-			rewriteDeclarations(cuUpdate, rewrite, fTCModel, fLeaveUnconstrainedRaw);
+			rewriteDeclarations(cuUpdate, rewrite, fTCModel, fLeaveUnconstrainedRaw, null);
 			
 			CompilationUnitChange change= rewrite.createChange();
 			if (change != null) {
@@ -305,26 +306,26 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 		
 	}
 
-	public static boolean rewriteDeclarations(CuUpdate cuUpdate, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw) {
+	public static boolean rewriteDeclarations(CuUpdate cuUpdate, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw, List positionGroups) {
 		boolean hasRewrite= false;
 		for (Iterator cvIter= cuUpdate.getDeclarations().iterator(); cvIter.hasNext();) {
 			ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
-			hasRewrite|= rewriteConstraintVariable(cv, rewrite, tCModel, leaveUnconstraindRaw);
+			hasRewrite|= rewriteConstraintVariable(cv, rewrite, tCModel, leaveUnconstraindRaw, positionGroups);
 		}
 		
 		for (Iterator castsIter= cuUpdate.getCastsToRemove().iterator(); castsIter.hasNext();) {
 			CastVariable2 castCv= (CastVariable2) castsIter.next();
-			hasRewrite|= rewriteCastVariable(castCv, rewrite, tCModel);
+			hasRewrite|= rewriteCastVariable(castCv, rewrite, tCModel, positionGroups);
 		}
 		return hasRewrite;
 	}
 
-	private static boolean rewriteConstraintVariable(ConstraintVariable2 cv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw) {
+	private static boolean rewriteConstraintVariable(ConstraintVariable2 cv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw, List positionGroups) {
 		if (cv instanceof CollectionElementVariable2) {
 			ConstraintVariable2 parentElement= ((CollectionElementVariable2) cv).getParentConstraintVariable();
 			if (parentElement instanceof TypeVariable2) {
 				TypeVariable2 typeCv= (TypeVariable2) parentElement;
-				return rewriteTypeVariable(typeCv, rewrite, tCModel, leaveUnconstraindRaw);
+				return rewriteTypeVariable(typeCv, rewrite, tCModel, leaveUnconstraindRaw, positionGroups);
 			} else {
 				//only rewrite type variables
 			}
@@ -332,7 +333,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 		return false;
 	}
 
-	private static boolean rewriteTypeVariable(TypeVariable2 typeCv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw) {
+	private static boolean rewriteTypeVariable(TypeVariable2 typeCv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw, List positionGroups) {
 		ASTNode node= typeCv.getRange().getNode(rewrite.getRoot());
 		if (node instanceof Name && node.getParent() instanceof Type) {
 			Type originalType= (Type) node.getParent();
@@ -351,8 +352,22 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 			Type movingType= (Type) rewrite.getASTRewrite().createMoveTarget(originalType);
 			ParameterizedType newType= rewrite.getAST().newParameterizedType(movingType);
 			
-			for (int i= 0; i < typeArguments.length; i++)
+			for (int i= 0; i < typeArguments.length; i++) {
 				newType.typeArguments().add(typeArguments[i]);
+				if (positionGroups != null) {
+					LinkedFix.PositionGroup pg= new LinkedFix.PositionGroup(((Name)node).getFullyQualifiedName()+i);
+					if (positionGroups.isEmpty()) {
+						pg.addFirstPosition(rewrite.getASTRewrite().track(typeArguments[i]));
+					} else {
+						pg.addPosition(rewrite.getASTRewrite().track(typeArguments[i]));
+					}
+					if (typeArguments[i].isWildcardType()) {
+						pg.addProposal("?", "?");  //$NON-NLS-1$//$NON-NLS-2$
+						pg.addProposal("Object", "Object");  //$NON-NLS-1$//$NON-NLS-2$
+					}
+					positionGroups.add(pg);
+				}
+			}
 			
 			rewrite.getASTRewrite().replace(originalType, newType, rewrite.createGroupDescription(RefactoringCoreMessages.InferTypeArgumentsRefactoring_addTypeArguments)); 
 		}  else {//TODO: other node types?
@@ -448,7 +463,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 		return true;
 	}
 
-	private static boolean rewriteCastVariable(CastVariable2 castCv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel) {
+	private static boolean rewriteCastVariable(CastVariable2 castCv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, List positionGroups) {
 		ASTNode node= castCv.getRange().getNode(rewrite.getRoot());
 		
 		ConstraintVariable2 expressionVariable= castCv.getExpressionVariable();
@@ -474,6 +489,11 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 		Expression newExpression= (Expression) rewrite.getASTRewrite().createMoveTarget(expression);
 		rewrite.getASTRewrite().replace(nodeToReplace, newExpression, rewrite.createGroupDescription(RefactoringCoreMessages.InferTypeArgumentsRefactoring_removeCast)); 
 		rewrite.getImportRemover().registerRemovedNode(nodeToReplace);
+		if (positionGroups != null) {
+			LinkedFix.PositionGroup pg= new LinkedFix.PositionGroup("Expr:"+newExpression.getStartPosition()); //$NON-NLS-1$
+			pg.addPosition(rewrite.getASTRewrite().track(newExpression));
+			positionGroups.add(pg);
+		}
 		return true;
 	}
 

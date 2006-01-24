@@ -24,7 +24,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -32,15 +31,19 @@ import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
+import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.Statement;
+import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -52,6 +55,7 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
+import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsConstraintCreator;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsConstraintsSolver;
@@ -176,107 +180,6 @@ public class Java50Fix extends LinkedFix {
 	}
 	
 	private static class AddTypeParametersOperation extends AbstractLinkedFixRewriteOperation {
-
-		private static final String HIERARCHY_SEPARATOR= "  "; //$NON-NLS-1$
-		
-		private static final Hashtable HARD_CODED_PROPOSALS= createHardCodedProposals();
-		
-		private static Hashtable createHardCodedProposals() {
-			Hashtable table= new Hashtable();
-			table.put("java.lang.Object", getObject()); //$NON-NLS-1$
-			table.put("java.lang.Number", getNumber()); //$NON-NLS-1$
-			table.put("java.lang.Iterable", getIterable()); //$NON-NLS-1$
-			table.put("java.util.Collection", getCollection()); //$NON-NLS-1$
-			table.put("java.util.List", getList()); //$NON-NLS-1$
-			table.put("java.util.Set", getSet()); //$NON-NLS-1$
-			table.put("java.util.Map", getMap()); //$NON-NLS-1$
-			return table;
-		}
-		
-		private static String[] getObject() {
-			List result= new ArrayList();
-			result.add("java.lang.Number"); //$NON-NLS-1$
-				String[] numbers= getNumber();
-				for (int i= 0; i < numbers.length; i++) {
-					result.add(HIERARCHY_SEPARATOR + numbers[i]);
-				}
-			result.add("java.util.Map"); //$NON-NLS-1$
-				String[] maps= getMap();
-				for (int i= 0; i < maps.length; i++) {
-					result.add(HIERARCHY_SEPARATOR + maps[i]);
-				}
-			result.add("java.util.Iterable"); //$NON-NLS-1$
-				String[] iterables= getIterable();
-				for (int i= 0; i < iterables.length; i++) {
-					result.add(HIERARCHY_SEPARATOR + iterables[i]);
-				}
-			return (String[])result.toArray(new String[result.size()]);
-		}
-		
-		private static String[] getNumber() {
-			String[] result= new String[8];
-			result[0]= "java.lang.Byte"; //$NON-NLS-1$
-			result[1]= "java.lang.Double"; //$NON-NLS-1$
-			result[2]= "java.lang.Float"; //$NON-NLS-1$
-			result[3]= "java.lang.Integer"; //$NON-NLS-1$
-			result[4]= "java.lang.Long"; //$NON-NLS-1$
-			result[5]= "java.lang.Short"; //$NON-NLS-1$
-			result[6]= "java.math.BigDecimal"; //$NON-NLS-1$
-			result[7]= "java.math.BigInteger"; //$NON-NLS-1$
-			return result;
-		}
-		
-		private static String[] getIterable() {
-			List result= new ArrayList();
-			result.add("java.lang.Collection"); //$NON-NLS-1$
-				String[] collections= getCollection();
-				for (int i= 0; i < collections.length; i++) {
-					result.add(HIERARCHY_SEPARATOR + collections[i]);
-				}
-			return (String[])result.toArray(new String[result.size()]);
-		}
-		
-		private static String[] getCollection() {
-			List result= new ArrayList();
-			result.add("java.util.List"); //$NON-NLS-1$
-				String[] lists= getList();
-				for (int i= 0; i < lists.length; i++) {
-					result.add(HIERARCHY_SEPARATOR + lists[i]);
-				}
-			result.add("java.util.Queue"); //$NON-NLS-1$
-			result.add("java.util.Set"); //$NON-NLS-1$
-				String[] sets= getSet();
-				for (int i= 0; i < sets.length; i++) {
-					result.add(HIERARCHY_SEPARATOR + sets[i]);
-				}
-			return (String[])result.toArray(new String[result.size()]);
-		}
-		
-		private static String[] getList() {
-			String[] result= new String[4];
-			result[0]= "java.util.ArrayList"; //$NON-NLS-1$
-			result[1]= "java.util.Collection"; //$NON-NLS-1$
-			result[2]= "java.util.LinkedList"; //$NON-NLS-1$
-			result[3]= "java.util.Vector"; //$NON-NLS-1$
-			return result;
-		}
-		
-		private static String[] getSet() {
-			String[] result= new String[3];
-			result[0]= "java.util.HashSet"; //$NON-NLS-1$
-			result[1]= "java.util.LinkedHashSet"; //$NON-NLS-1$
-			result[2]= "java.util.SortedSet"; //$NON-NLS-1$
-			return result;
-		}
-		
-		private static String[] getMap() {
-			String[] result= new String[4];
-			result[0]= "java.util.HashMap"; //$NON-NLS-1$
-			result[1]= "java.util.Hashtable"; //$NON-NLS-1$
-			result[2]= "java.util.LinkedList"; //$NON-NLS-1$
-			result[3]= "java.util.SortedMap"; //$NON-NLS-1$
-			return result;
-		}
 		
 		private final SimpleType fType;
 
@@ -296,9 +199,6 @@ public class Java50Fix extends LinkedFix {
 				return endPosition(cuRewrite.getASTRewrite(), fType);
 			
 			if (classInstanceCreationFix(cuRewrite, group))
-				return endPosition(cuRewrite.getASTRewrite(), fType);
-		
-			if (dumbFix(cuRewrite, positionGroups, group))
 				return endPosition(cuRewrite.getASTRewrite(), fType);
 			
 			return null;
@@ -332,7 +232,7 @@ public class Java50Fix extends LinkedFix {
 				cuRewrite.setResolveBindings(false);
 				CuUpdate cuUpdate= (CuUpdate) entry.getValue();
 				
-				hasRewrite|= InferTypeArgumentsRefactoring.rewriteDeclarations(cuUpdate, cuRewrite, tCModel, true);
+				hasRewrite|= InferTypeArgumentsRefactoring.rewriteDeclarations(cuUpdate, cuRewrite, tCModel, false, positionGroups);
 			}
 			return hasRewrite;
 		}
@@ -375,70 +275,6 @@ public class Java50Fix extends LinkedFix {
 			}
 		}
 
-		private boolean dumbFix(CompilationUnitRewrite cuRewrite, List positionGroups, TextEditGroup group) {
-			AST ast= cuRewrite.getAST();
-			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			
-			ITypeBinding resolveBinding= fType.resolveBinding();
-			if (resolveBinding == null)
-				return false;
-			
-			ITypeBinding binding= resolveBinding.getTypeDeclaration();
-			if (binding == null)
-				return false;
-			
-			ITypeBinding[] parameters= binding.getTypeParameters();
-			
-			Type moveTarget= (Type)rewrite.createMoveTarget(fType);
-			ParameterizedType parameterizedType= ast.newParameterizedType(moveTarget);				
-			rewrite.replace(fType, parameterizedType, group);
-
-			ListRewrite listRewrite= rewrite.getListRewrite(parameterizedType, ParameterizedType.TYPE_ARGUMENTS_PROPERTY);
-			for (int i= 0; i < parameters.length; i++) {
-				ITypeBinding parameter= parameters[i];
-				ITypeBinding[] typeBounds= parameter.getTypeBounds();
-				
-				String name;
-				SimpleName newName;
-				if (typeBounds.length == 1) {
-					name= typeBounds[0].getName();
-					newName= (SimpleName)rewrite.createStringPlaceholder(name, ASTNode.SIMPLE_NAME);
-					cuRewrite.getImportRewrite().addImport(typeBounds[0]);
-				} else {
-					name= "Object"; //$NON-NLS-1$
-					newName= ast.newSimpleName(name);
-				}
-				listRewrite.insertLast(newName, null);
-				
-				PositionGroup positionGroup= new PositionGroup(name);
-				if (i==0) {
-					positionGroup.addFirstPosition(rewrite.track(newName));
-				} else {
-					positionGroup.addPosition(rewrite.track(newName));
-				}
-				
-				positionGroup.addProposal("?", "?"); //$NON-NLS-1$ //$NON-NLS-2$
-				
-				String[] proposals;
-				if (name.equals("Object")) { //$NON-NLS-1$
-					proposals= (String[])HARD_CODED_PROPOSALS.get("java.lang.Object"); //$NON-NLS-1$
-				} else {
-					String qualifiedName= typeBounds[0].getTypeDeclaration().getErasure().getQualifiedName();
-					proposals= (String[])HARD_CODED_PROPOSALS.get(qualifiedName);
-				}
-				if (proposals != null) {
-					for (int j= 0; j < proposals.length; j++) {
-						String dispName= proposals[j];
-						String instName= Signature.getSimpleName(dispName);
-						positionGroup.addProposal(dispName, instName);
-					}
-				}
-				
-				positionGroups.add(positionGroup);
-			}
-			return true;
-		}
-
 		private boolean classInstanceCreationFix(CompilationUnitRewrite cuRewrite, TextEditGroup group) {
 			ClassInstanceCreation creation= (ClassInstanceCreation)ASTNodes.getParent(fType, ClassInstanceCreation.class);
 			if (creation == null)
@@ -468,11 +304,7 @@ public class Java50Fix extends LinkedFix {
 		}
 		
 		private ITrackedNodePosition endPosition(ASTRewrite rewrite, SimpleType type) {
-			Statement stmt= (Statement)ASTNodes.getParent(type, Statement.class);
-			if (stmt == null)
-				return null;
-			
-			return rewrite.track(stmt);
+			return rewrite.track(type);
 		}
 	}
 	
@@ -516,19 +348,11 @@ public class Java50Fix extends LinkedFix {
 	
 	public static Java50Fix createRawTypeReferenceFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		List operations= new ArrayList();
-		createRawTypeReferenceOperations(compilationUnit, new IProblemLocation[] {problem}, operations);
+		SimpleType node= createRawTypeReferenceOperations(compilationUnit, new IProblemLocation[] {problem}, operations);
 		if (operations.size() == 0)
 			return null;
 		
-		ASTNode node= problem.getCoveredNode(compilationUnit);
-		
-		if (node instanceof ClassInstanceCreation) {
-			node= (ASTNode)node.getStructuralProperty(ClassInstanceCreation.TYPE_PROPERTY);
-		} else if (node instanceof SimpleName) {
-			node= node.getParent();
-		}
-		
-		return new Java50Fix(Messages.format(FixMessages.Java50Fix_AddTypeParameters_description, ((SimpleType)node).getName()), compilationUnit, (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]));
+		return new Java50Fix(Messages.format(FixMessages.Java50Fix_AddTypeParameters_description, node.getName()), compilationUnit, (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]));
 	}
 	
 	public static Java50Fix createConvertForLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
@@ -664,27 +488,117 @@ public class Java50Fix extends LinkedFix {
 		}
 	}
 	
-	private static void createRawTypeReferenceOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List operations) {
+	private static SimpleType createRawTypeReferenceOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List operations) {
+		SimpleType result= null;
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
 			ASTNode node= problem.getCoveredNode(compilationUnit);
-			
 			if (node instanceof ClassInstanceCreation) {
-				node= (ASTNode)node.getStructuralProperty(ClassInstanceCreation.TYPE_PROPERTY);
+				ASTNode rawReference= (ASTNode)node.getStructuralProperty(ClassInstanceCreation.TYPE_PROPERTY);
+				if (isRawTypeReference(rawReference)) {
+					operations.add(new AddTypeParametersOperation((SimpleType)rawReference));
+					result= (SimpleType)rawReference;
+				}
 			} else if (node instanceof SimpleName) {
-				node= node.getParent();
-			}
-			
-			if (!(node instanceof SimpleType))
-				return;
+				ASTNode rawReference= node.getParent();
+				if (isRawTypeReference(rawReference)) {
+					operations.add(new AddTypeParametersOperation((SimpleType)rawReference));
+					result= (SimpleType)rawReference;
+				}
+			} else if (node instanceof MethodInvocation) {
+				MethodInvocation invocation= (MethodInvocation)node;
 				
-			ITypeBinding binding= ((SimpleType)node).resolveBinding().getTypeDeclaration();
-			ITypeBinding[] parameters= binding.getTypeParameters();
-			if (parameters.length == 0)
-				return;
-			
-			operations.add(new AddTypeParametersOperation((SimpleType)node));
+				ASTNode rawReference= getRawReference(invocation, compilationUnit);
+				if (rawReference != null) {
+					operations.add(new AddTypeParametersOperation((SimpleType)rawReference));
+					result= (SimpleType)rawReference;
+				}
+			}
 		}
+		return result;
+	}
+
+	private static ASTNode getRawReference(MethodInvocation invocation, CompilationUnit compilationUnit) {
+		Name name1= (Name)invocation.getStructuralProperty(MethodInvocation.NAME_PROPERTY);
+		if (name1 instanceof SimpleName) {
+			ASTNode rawReference= getRawReference((SimpleName)name1, compilationUnit);
+			if (rawReference != null) {
+				return rawReference;
+			}
+		}
+		
+		Expression expr= (Expression)invocation.getStructuralProperty(MethodInvocation.EXPRESSION_PROPERTY);
+		if (expr instanceof SimpleName) {
+			ASTNode rawReference= getRawReference((SimpleName)expr, compilationUnit);
+			if (rawReference != null) {
+				return rawReference;
+			}
+		} else if (expr instanceof QualifiedName) {
+			Name name= (Name)expr;
+			while (name instanceof QualifiedName) {
+				SimpleName simpleName= (SimpleName)name.getStructuralProperty(QualifiedName.NAME_PROPERTY);
+				ASTNode rawReference= getRawReference(simpleName, compilationUnit);
+				if (rawReference != null) {
+					return rawReference;
+				}
+				name= (Name)name.getStructuralProperty(QualifiedName.QUALIFIER_PROPERTY);
+			}
+			if (name instanceof SimpleName) {
+				ASTNode rawReference= getRawReference((SimpleName)name, compilationUnit);
+				if (rawReference != null) {
+					return rawReference;
+				}
+			}
+		} else if (expr instanceof MethodInvocation) {
+			ASTNode rawReference= getRawReference((MethodInvocation)expr, compilationUnit);
+			if (rawReference != null) {
+				return rawReference;
+			}
+		}
+		return null;
+	}
+
+	private static ASTNode getRawReference(SimpleName name, CompilationUnit compilationUnit) {
+		SimpleName[] names= LinkedNodeFinder.findByNode(compilationUnit, name);
+		for (int j= 0; j < names.length; j++) {
+			if (names[j].getParent() instanceof VariableDeclarationFragment) {
+				VariableDeclarationFragment fragment= (VariableDeclarationFragment)names[j].getParent();
+				if (fragment.getParent() instanceof VariableDeclarationStatement) {
+					VariableDeclarationStatement statement= (VariableDeclarationStatement)fragment.getParent();
+					ASTNode result= (ASTNode)statement.getStructuralProperty(VariableDeclarationStatement.TYPE_PROPERTY);
+					if (isRawTypeReference(result))
+						return result;
+				} else if (fragment.getParent() instanceof FieldDeclaration) {
+					FieldDeclaration declaration= (FieldDeclaration)fragment.getParent();
+					ASTNode result= (ASTNode)declaration.getStructuralProperty(FieldDeclaration.TYPE_PROPERTY);
+					if (isRawTypeReference(result))
+						return result;
+				}
+			} else if (names[j].getParent() instanceof SingleVariableDeclaration) {
+				SingleVariableDeclaration declaration= (SingleVariableDeclaration)names[j].getParent();
+				ASTNode result= (ASTNode)declaration.getStructuralProperty(SingleVariableDeclaration.TYPE_PROPERTY);
+				if (isRawTypeReference(result))
+					return result;
+			} else if (names[j].getParent() instanceof MethodDeclaration) {
+				MethodDeclaration methodDecl= (MethodDeclaration)names[j].getParent();
+				ASTNode result= (ASTNode)methodDecl.getStructuralProperty(MethodDeclaration.RETURN_TYPE2_PROPERTY);
+				if (isRawTypeReference(result))
+					return result;
+			}
+		}
+		return null;
+	}
+
+	private static boolean isRawTypeReference(ASTNode node) {
+		if (!(node instanceof SimpleType))
+			return false;
+			
+		ITypeBinding binding= ((SimpleType)node).resolveBinding().getTypeDeclaration();
+		ITypeBinding[] parameters= binding.getTypeParameters();
+		if (parameters.length == 0)
+			return false;
+		
+		return true;
 	}
 
 	private static ASTNode getDeclaringNode(ASTNode selectedNode) {
