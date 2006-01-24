@@ -42,6 +42,8 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
+import org.eclipse.jdt.internal.ui.text.java.ProposalSorterHandle;
+import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
 import org.eclipse.jdt.internal.ui.util.PixelConverter;
 import org.eclipse.jdt.internal.ui.wizards.IStatusChangeListener;
 
@@ -59,6 +61,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC= getJDTUIKey(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC);
 	private static final Key PREF_CODEASSIST_SHOW_VISIBLE_PROPOSALS= getJDTUIKey(PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS);
 	private static final Key PREF_CODEASSIST_ORDER_PROPOSALS= getJDTUIKey(PreferenceConstants.CODEASSIST_ORDER_PROPOSALS);
+	private static final Key PREF_CODEASSIST_SORTER= getJDTUIKey(PreferenceConstants.CODEASSIST_SORTER);
 	private static final Key PREF_CODEASSIST_CASE_SENSITIVITY= getJDTUIKey(PreferenceConstants.CODEASSIST_CASE_SENSITIVITY);
 	private static final Key PREF_CODEASSIST_ADDIMPORT= getJDTUIKey(PreferenceConstants.CODEASSIST_ADDIMPORT);
 	private static final Key PREF_CODEASSIST_INSERT_COMPLETION= getJDTUIKey(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
@@ -78,6 +81,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC,
 				PREF_CODEASSIST_SHOW_VISIBLE_PROPOSALS,
 				PREF_CODEASSIST_ORDER_PROPOSALS,
+				PREF_CODEASSIST_SORTER,
 				PREF_CODEASSIST_CASE_SENSITIVITY,
 				PREF_CODEASSIST_ADDIMPORT,
 				PREF_CODEASSIST_INSERT_COMPLETION,
@@ -187,8 +191,17 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	
 	private void addSortingSection(Composite composite) {
 		String label;
-		label= PreferencesMessages.JavaEditorPreferencePage_presentProposalsInAlphabeticalOrder; 
-		addCheckBox(composite, label, PREF_CODEASSIST_ORDER_PROPOSALS, trueFalse, 0);
+		label= PreferencesMessages.JavaEditorPreferencePage_presentProposalsInAlphabeticalOrder;
+		ProposalSorterHandle[] sorters= ProposalSorterRegistry.getDefault().getSorters();
+		String[] labels= new String[sorters.length];
+		String[] values= new String[sorters.length];
+		for (int i= 0; i < sorters.length; i++) {
+			ProposalSorterHandle handle= sorters[i];
+			labels[i]= handle.getName();
+			values[i]= handle.getId();
+		}
+		
+		addComboBox(composite, label, PREF_CODEASSIST_SORTER, values, labels, 0);
 		
 		label= PreferencesMessages.JavaEditorPreferencePage_showOnlyProposalsVisibleInTheInvocationContext; 
 		addCheckBox(composite, label, PREF_CODEASSIST_SHOW_VISIBLE_PROPOSALS, trueFalse, 0);

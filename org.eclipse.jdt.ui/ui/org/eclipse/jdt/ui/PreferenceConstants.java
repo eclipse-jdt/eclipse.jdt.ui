@@ -36,6 +36,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.SemanticHighlightings;
 import org.eclipse.jdt.internal.ui.preferences.NewJavaProjectPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.WorkInProgressPreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.formatter.ProfileManager;
+import org.eclipse.jdt.internal.ui.text.java.ProposalSorterRegistry;
 import org.eclipse.jdt.internal.ui.text.spelling.SpellCheckEngine;
 import org.eclipse.jdt.internal.ui.text.spelling.engine.ISpellCheckPreferenceKeys;
 
@@ -2692,6 +2693,7 @@ public class PreferenceConstants {
 	 * Value is of type <code>Boolean</code>. If <code>true</code> that are sorted in alphabetical 
 	 * order. If <code>false</code> that are unsorted.
 	 * </p>
+	 * @deprecated use {@link #CODEASSIST_SORTER} instead
 	 */
 	public final static String CODEASSIST_ORDER_PROPOSALS= "content_assist_order_proposals"; //$NON-NLS-1$
 
@@ -3326,7 +3328,17 @@ public class PreferenceConstants {
 	 */
 	public static final String CODEASSIST_LRU_HISTORY= "content_assist_lru_history"; //$NON-NLS-1$
 
-	
+	/**
+	 * A named preference that stores the content assist sorter id.
+	 * <p>
+	 * Value is a {@link String}.
+	 * </p>
+	 * 
+	 * @since 3.2
+	 * @see ProposalSorterRegistry
+	 */
+	public static final String CODEASSIST_SORTER= "content_assist_sorter"; //$NON-NLS-1$
+
 	/**
 	 * Initializes the given preference store with the default values.
 	 * 
@@ -3508,6 +3520,7 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_EXCLUDED_CATEGORIES, "org.eclipse.jdt.ui.spellingProposalCategory\0org.eclipse.jdt.ui.textProposalCategory\0"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_CATEGORY_ORDER, "org.eclipse.jdt.ui.spellingProposalCategory:65545\0org.eclipse.jdt.ui.javaTypeProposalCategory:65540\0org.eclipse.jdt.ui.javaNoTypeProposalCategory:65539\0org.eclipse.jdt.ui.textProposalCategory:65541\0org.eclipse.jdt.ui.templateProposalCategory:2\0"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_LRU_HISTORY, ""); //$NON-NLS-1$
+		store.setDefault(PreferenceConstants.CODEASSIST_SORTER, "org.eclipse.jdt.ui.RelevanceSorter"); //$NON-NLS-1$
 
 		store.setDefault(PreferenceConstants.EDITOR_SMART_HOME_END, true);
 		store.setDefault(PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION, true);

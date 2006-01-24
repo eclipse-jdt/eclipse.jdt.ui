@@ -11,6 +11,7 @@
    <extension-point id="foldingStructureProviders" name="%foldingStructureProvidersExtensionPoint" schema="schema/foldingStructureProviders.exsd"/>
    <extension-point id="queryParticipants" name="%queryParticipantsExtensionPoint" schema="schema/queryParticipants.exsd"/>
    <extension-point id="javaCompletionProposalComputer" name="%javaCompletionProposalComputer" schema="schema/javaCompletionProposalComputer.exsd"/>
+   <extension-point id="javaCompletionProposalSorters" name="%javaCompletionProposalSorters" schema="schema/javaCompletionProposalSorters.exsd"/>
    <extension-point id="internal_refactoringElementFilter" name="%internal_refactoringElementFilter" schema="schema/internal_refactoringElementFilter.exsd"/>
    
 
@@ -313,6 +314,18 @@
 				optional="false"
 				values="org.eclipse.jdt.internal.ui.text.java.ContentAssistComputerParameter"/>
 		</command>
+	</extension>
+	
+	<extension
+		point="org.eclipse.jdt.ui.javaCompletionProposalSorters">
+		<proposalSorter
+			id="org.eclipse.jdt.ui.RelevanceSorter"
+			name="%RelevanceSorter.name"
+			class="org.eclipse.jdt.internal.ui.text.java.RelevanceSorter"/>
+		<proposalSorter
+			id="org.eclipse.jdt.ui.AlphabeticSorter"
+			name="%AlphabeticSorter.name"
+			class="org.eclipse.jdt.internal.ui.text.java.AlphabeticSorter"/>
 	</extension>
 	
 	<!-- commands to surface java elements given handle id encoded parameter -->

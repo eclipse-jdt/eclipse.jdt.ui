@@ -103,9 +103,6 @@ public class ContentAssistPreference {
 
 		enabled= store.getBoolean(CASE_SENSITIVITY);
 		jcp.restrictProposalsToMatchingCases(enabled);
-
-		enabled= store.getBoolean(ORDER_PROPOSALS);
-		jcp.orderProposalsAlphabetically(enabled);
 	}
 
 	private static void configureJavaDocProcessor(ContentAssistant assistant, IPreferenceStore store) {
@@ -119,9 +116,6 @@ public class ContentAssistPreference {
 
 		boolean enabled= store.getBoolean(CASE_SENSITIVITY);
 		jdcp.restrictProposalsToMatchingCases(enabled);
-
-		enabled= store.getBoolean(ORDER_PROPOSALS);
-		jdcp.orderProposalsAlphabetically(enabled);
 	}
 
 	/**
@@ -179,9 +173,6 @@ public class ContentAssistPreference {
 		} else if (CASE_SENSITIVITY.equals(key)) {
 			boolean enabled= store.getBoolean(CASE_SENSITIVITY);
 			jcp.restrictProposalsToMatchingCases(enabled);
-		} else if (ORDER_PROPOSALS.equals(key)) {
-			boolean enable= store.getBoolean(ORDER_PROPOSALS);
-			jcp.orderProposalsAlphabetically(enable);
 		}
 	}
 
@@ -197,9 +188,6 @@ public class ContentAssistPreference {
 		} else if (CASE_SENSITIVITY.equals(key)) {
 			boolean enabled= store.getBoolean(CASE_SENSITIVITY);
 			jdcp.restrictProposalsToMatchingCases(enabled);
-		} else if (ORDER_PROPOSALS.equals(key)) {
-			boolean enable= store.getBoolean(ORDER_PROPOSALS);
-			jdcp.orderProposalsAlphabetically(enable);
 		}
 	}
 

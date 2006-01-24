@@ -61,4 +61,5 @@ final class JavaTextMessages extends NLS {
 	public static String ContentAssistProcessor_empty_message;
 	public static String ContentAssistHistory_serialize_error;
 	public static String ContentAssistHistory_deserialize_error;
+	public static String ProposalSorterHandle_blame;
 }

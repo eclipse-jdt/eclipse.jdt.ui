@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
-import java.util.Collections;
 import java.util.Hashtable;
 import java.util.List;
 
@@ -24,7 +23,6 @@ import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.JavaCore;
 
-import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
 
@@ -38,17 +36,11 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	private final static String DISABLED= "disabled"; //$NON-NLS-1$
 	
 	private IContextInformationValidator fValidator;
-
-	private final CompletionProposalComparator fAlphaComparator;
-	private final CompletionProposalComparator fComparator;
 	protected final IEditorPart fEditor;
 
 	public JavaCompletionProcessor(IEditorPart editor, ContentAssistant assistant, String partition) {
 		super(assistant, partition);
 		fEditor= editor;
-		fAlphaComparator= new CompletionProposalComparator();
-		fAlphaComparator.setOrderAlphabetically(true);
-		fComparator= new CompletionProposalComparator();
 	}
 
 	/**
@@ -67,15 +59,6 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 				JavaCore.setOptions(options);
 			}
 		}
-	}
-
-	/**
-	 * Tells this processor to order the proposals alphabetically.
-	 *
-	 * @param order <code>true</code> if proposals should be ordered.
-	 */
-	public void orderProposalsAlphabetically(boolean order) {
-		fComparator.setOrderAlphabetically(order);
 	}
 
 	/**
@@ -101,7 +84,7 @@ public class JavaCompletionProcessor extends ContentAssistProcessor {
 	 * @see org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor#filterAndSort(java.util.List, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected List filterAndSortProposals(List proposals, IProgressMonitor monitor, ContentAssistInvocationContext context) {
-		Collections.sort(proposals, fComparator);
+		ProposalSorterRegistry.getDefault().getCurrentSorter().sortProposals(context, proposals);
 		return proposals;
 	}
 
