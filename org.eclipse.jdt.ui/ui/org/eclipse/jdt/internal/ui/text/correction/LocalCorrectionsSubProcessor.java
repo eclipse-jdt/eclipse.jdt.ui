@@ -21,11 +21,20 @@ import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.IDocument;
 
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IEditorSite;
 import org.eclipse.ui.ISharedImages;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.part.FileEditorInput;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
@@ -86,6 +95,7 @@ import org.eclipse.jdt.internal.corext.refactoring.surround.ExceptionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.surround.SurroundWithTryCatchRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.actions.InferTypeArgumentsAction;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
@@ -94,6 +104,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
+import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.ChangeDescription;
@@ -892,5 +903,32 @@ public class LocalCorrectionsSubProcessor {
 			proposal.setCommandId(RAW_TYPE_REFERENCE_ID);
 			proposals.add(proposal);
 		}
+		
+		//Infer Generic Type Arguments... proposal
+		final ICompilationUnit cu= context.getCompilationUnit();
+		ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments, null, 5, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+			public void apply(IDocument document) {
+				IEditorInput input= new FileEditorInput((IFile) cu.getResource());
+				IWorkbenchPage p= JavaPlugin.getActivePage();
+				if (p == null)
+					return;
+				
+				IEditorPart part= p.findEditor(input);
+				if (!(part instanceof JavaEditor))
+					return;
+				
+				IEditorSite site= ((JavaEditor)part).getEditorSite();
+				InferTypeArgumentsAction action= new InferTypeArgumentsAction(site);
+				action.run(new StructuredSelection(cu));
+			}
+
+			/**
+			 * {@inheritDoc}
+			 */
+			public String getAdditionalProposalInfo() {
+				return CorrectionMessages.LocalCorrectionsSubProcessor_InferGenericTypeArguments_description;
+			}
+		};
+		proposals.add(proposal);
 	}
 }

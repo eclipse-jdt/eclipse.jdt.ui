@@ -93,6 +93,8 @@ final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_hiding_argument_label;
 	public static String LocalCorrectionsSubProcessor_setparenteses_description;
 	public static String LocalCorrectionsSubProcessor_setparenteses_instanceof_description;
+	public static String LocalCorrectionsSubProcessor_InferGenericTypeArguments;
+	public static String LocalCorrectionsSubProcessor_InferGenericTypeArguments_description;
 	public static String TypeMismatchSubProcessor_addcast_description;
 	public static String TypeMismatchSubProcessor_changecast_description;
 	public static String TypeMismatchSubProcessor_changereturntype_description;

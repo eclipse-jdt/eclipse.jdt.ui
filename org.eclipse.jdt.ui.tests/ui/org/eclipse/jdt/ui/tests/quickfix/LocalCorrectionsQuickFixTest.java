@@ -4940,7 +4940,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -4980,7 +4980,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 
 		String[] expected= new String[1];
 		buf= new StringBuffer();
@@ -5097,7 +5097,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot, 1);
 		
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		
 		String[] expected= new String[2];
 		
@@ -5145,7 +5145,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot, 1);
 		
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		
 		String[] expected= new String[2];
 		
@@ -5195,7 +5195,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //		ArrayList proposals= collectCorrections(cu, astRoot, 1);
 //		
 //		assertCorrectLabels(proposals);
-//		assertNumberOfProposals(proposals, 2);
+//		assertNumberOfProposals(proposals, 3);
 //		
 //		String[] expected= new String[2];
 //		
@@ -5246,7 +5246,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //		ArrayList proposals= collectCorrections(cu, astRoot, 1);
 //		
 //		assertCorrectLabels(proposals);
-//		assertNumberOfProposals(proposals, 2);
+//		assertNumberOfProposals(proposals, 3);
 //		
 //		String[] expected= new String[2];
 //		
@@ -5301,7 +5301,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 //		ArrayList proposals= collectCorrections(cu, astRoot, 1);
 //		
 //		assertCorrectLabels(proposals);
-//		assertNumberOfProposals(proposals, 2);
+//		assertNumberOfProposals(proposals, 3);
 //		
 //		String[] expected= new String[2];
 //		
@@ -5349,7 +5349,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot, 1);
 		
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		
 		String[] expected= new String[2];
 		
@@ -5396,7 +5396,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot, 1);
 		
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		
 		String[] expected= new String[2];
 		
@@ -5450,7 +5450,7 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		ArrayList proposals= collectCorrections(cu, astRoot, 1);
 		
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 2);
+		assertNumberOfProposals(proposals, 3);
 		
 		String[] expected= new String[2];
 		
