@@ -88,7 +88,7 @@ public class MissingAnnotationAttributesProposal extends LinkedCorrectionProposa
 		IMethodBinding[] declaredMethods= binding.getDeclaredMethods();
 		for (int i= 0; i < declaredMethods.length; i++) {
 			IMethodBinding curr= declaredMethods[i];
-			if (!implementedAttribs.contains(curr.getName())) {
+			if (!implementedAttribs.contains(curr.getName()) && curr.getDefaultValue() == null) {
 				MemberValuePair pair= ast.newMemberValuePair();
 				pair.setName(ast.newSimpleName(curr.getName()));
 				pair.setValue(newDefaultExpression(ast, curr.getReturnType()));
