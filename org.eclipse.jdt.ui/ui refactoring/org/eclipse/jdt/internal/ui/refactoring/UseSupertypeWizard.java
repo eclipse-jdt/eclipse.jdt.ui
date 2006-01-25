@@ -12,8 +12,10 @@ package org.eclipse.jdt.internal.ui.refactoring;
 
 import java.text.Collator;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Set;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -23,15 +25,17 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Tree;
+import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.IMessageProvider;
-import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.TableViewer;
+import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jface.wizard.IWizardPage;
@@ -40,12 +44,18 @@ import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.SuperTypeHierarchyCache;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementLabels;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class UseSupertypeWizard extends RefactoringWizard{
 
@@ -56,21 +66,76 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		setDefaultPageTitle(RefactoringMessages.UseSupertypeWizard_Use_Super_Type_Where_Possible); 
 	}
 
-	/* non java-doc
-	 * @see RefactoringWizard#addUserInputPages
-	 */ 
 	protected void addUserInputPages(){
 		addPage(new UseSupertypeInputPage());
 	}
-	
+
 	private static class UseSupertypeInputPage extends UserInputWizardPage{
+
+		private class UseSupertypeContentProvider implements ITreeContentProvider {
+
+			private ITypeHierarchy fHierarchy;
+			
+			public Object[] getChildren(Object element) {
+				if (element instanceof ITypeHierarchy)
+					return getElements(element);
+				return getDirectSuperTypes((IType)element).toArray();
+			}
+
+			public Set/*<IType>*/ getDirectSuperTypes(IType type){
+				Set/*<IType>*/ result= new HashSet();
+				final IType superclass= fHierarchy.getSuperclass(type);
+				if (superclass != null) {
+					result.add(superclass);
+				}	
+				IType[] superInterface= fHierarchy.getSuperInterfaces(type);
+				for (int i=0; i < superInterface.length; i++){
+					result.add(superInterface[i]);
+				}
+				try {
+					final IType subType= getUseSupertypeProcessor().getSubType();
+					if (subType.isInterface()) {
+						IType found= subType.getJavaProject().findType("java.lang.Object"); //$NON-NLS-1$
+						result.add(found);
+					}
+				} catch (JavaModelException exception) {
+					JavaPlugin.log(exception);
+				}
+				return result;
+			}	
+
+			public Object[] getElements(Object element) {
+				if (element instanceof ITypeHierarchy)
+					return getChildren(((ITypeHierarchy) element).getType());
+				return new Object[0];
+			}
+
+			public boolean hasChildren(Object element) {
+				return getChildren(element).length > 0;
+			}
+
+			public Object getParent(Object element) {
+				return null;
+			}
+
+			public void dispose() {
+				// Do nothing
+			}
+
+			public void inputChanged(Viewer viewer, Object oldInput, Object newInput) {
+				if (newInput instanceof ITypeHierarchy)
+					fHierarchy= (ITypeHierarchy) newInput;
+				else
+					fHierarchy= null;
+			}
+		}
 
 		private static final String REWRITE_INSTANCEOF= "rewriteInstanceOf";  //$NON-NLS-1$
 		public static final String PAGE_NAME= "UseSupertypeInputPage";//$NON-NLS-1$
-		private TableViewer fTableViewer; 
+		private TreeViewer fTreeViewer; 
 		private final Map fFileCount;  //IType -> Integer
 		private final static String MESSAGE= RefactoringMessages.UseSupertypeInputPage_Select_supertype; 
-		private JavaElementLabelProvider fTableLabelProvider;
+		private JavaElementLabelProvider fLabelProvider;
 		private IDialogSettings fSettings;
 		
 		public UseSupertypeInputPage() {
@@ -85,10 +150,19 @@ public class UseSupertypeWizard extends RefactoringWizard{
 				fSettings= getDialogSettings().addNewSection(UseSupertypeWizard.DIALOG_SETTING_SECTION);
 				fSettings.put(REWRITE_INSTANCEOF, false);
 			}
-			((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().setInstanceOf(fSettings.getBoolean(REWRITE_INSTANCEOF));
+			getUseSupertypeProcessor().setInstanceOf(fSettings.getBoolean(REWRITE_INSTANCEOF));
+		}
+
+		private UseSuperTypeProcessor getUseSupertypeProcessor() {
+			return getUseSupertypeRefactoring().getUseSuperTypeProcessor();
+		}
+
+		private UseSuperTypeRefactoring getUseSupertypeRefactoring() {
+			return ((UseSuperTypeRefactoring)getRefactoring());
 		}	
 
 		public void createControl(Composite parent) {
+			initializeDialogUnits(parent);
 			loadSettings();
 			Composite composite= new Composite(parent, SWT.NONE);
 			setControl(composite);
@@ -97,36 +171,39 @@ public class UseSupertypeWizard extends RefactoringWizard{
 			Label label= new Label(composite, SWT.NONE);
 			label.setText(Messages.format(
 					RefactoringMessages.UseSupertypeInputPage_Select_supertype_to_use, 
-					JavaElementLabels.getElementLabel(((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().getSubType(), JavaElementLabels.T_FULLY_QUALIFIED)));
+					JavaElementLabels.getElementLabel(getUseSupertypeProcessor().getSubType(), JavaElementLabels.T_FULLY_QUALIFIED)));
 			label.setLayoutData(new GridData());
 		
-			addTableComponent(composite);
+			addTreeViewer(composite);
 
 			final Button checkbox= new Button(composite, SWT.CHECK);
 			checkbox.setText(RefactoringMessages.UseSupertypeInputPage_Use_in_instanceof); 
 			checkbox.setLayoutData(new GridData());
-			checkbox.setSelection(((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().isInstanceOf());
+			checkbox.setSelection(getUseSupertypeProcessor().isInstanceOf());
 			checkbox.addSelectionListener(new SelectionAdapter(){
 				public void widgetSelected(SelectionEvent e) {
-					((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().setInstanceOf(checkbox.getSelection());
+					getUseSupertypeProcessor().setInstanceOf(checkbox.getSelection());
 					fSettings.put(REWRITE_INSTANCEOF, checkbox.getSelection());
 					setMessage(MESSAGE);
 					setPageComplete(true);
 					fFileCount.clear();
-					fTableViewer.refresh();
+					fTreeViewer.refresh();
 				}
 			});
 
 			Dialog.applyDialogFont(composite);
 		}
 
-		private void addTableComponent(Composite composite) {
-			fTableViewer= new TableViewer(composite, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
-			fTableViewer.getTable().setLayoutData(new GridData(GridData.FILL_BOTH));
-			fTableLabelProvider= new UseSupertypeLabelProvider(fFileCount);
-			fTableViewer.setLabelProvider(fTableLabelProvider);
-			fTableViewer.setContentProvider(new ArrayContentProvider());
-			fTableViewer.setSorter(new ViewerSorter() {
+		private void addTreeViewer(Composite composite) {
+			fTreeViewer= new TreeViewer(composite, SWT.SINGLE | SWT.BORDER | SWT.V_SCROLL | SWT.H_SCROLL);
+			final Tree tree= fTreeViewer.getTree();
+			final GridData data= new GridData(GridData.FILL_BOTH);
+			data.heightHint= convertHeightInCharsToPixels(12);
+			tree.setLayoutData(data);
+			fLabelProvider= new UseSupertypeLabelProvider(fFileCount);
+			fTreeViewer.setLabelProvider(fLabelProvider);
+			fTreeViewer.setContentProvider(new UseSupertypeContentProvider());
+			fTreeViewer.setSorter(new ViewerSorter() {
 			
 				private final Collator fCollator= Collator.getInstance();
 				
@@ -135,13 +212,20 @@ public class UseSupertypeWizard extends RefactoringWizard{
 				}
 			
 				public int compare(Viewer viewer, Object first, Object second) {
-					final IType left= (IType) first;
-					final IType right= (IType) second;
-					return fCollator.compare(left.getElementName(), right.getElementName());
+					final IType type1= (IType)first;
+					final IType type2= (IType)second;
+					try {
+						final int kind1= type1.isInterface() ? 1 : 0;
+						final int kind2= type2.isInterface() ? 1 : 0;
+						if (kind1 - kind2 != 0)
+							return kind1 - kind2;
+					} catch (JavaModelException exception) {
+						JavaPlugin.log(exception);
+					}
+					return fCollator.compare(type1.getElementName(), type2.getElementName());
 				}
-			
 			});
-			fTableViewer.addSelectionChangedListener(new ISelectionChangedListener(){
+			fTreeViewer.addSelectionChangedListener(new ISelectionChangedListener(){
 				public void selectionChanged(SelectionChangedEvent event) {
 					IStructuredSelection ss= (IStructuredSelection)event.getSelection();
 					if (new Integer(0).equals(fFileCount.get(ss.getFirstElement()))){
@@ -151,16 +235,20 @@ public class UseSupertypeWizard extends RefactoringWizard{
 						setMessage(MESSAGE);
 						setPageComplete(true);
 					}
-					fTableViewer.refresh();
+					fTreeViewer.refresh();
 				}
 			});
-			fTableViewer.setInput(((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().getSuperTypes());
-			fTableViewer.getTable().setSelection(0);
+			try {
+				fTreeViewer.setInput(SuperTypeHierarchyCache.getTypeHierarchy(getUseSupertypeProcessor().getSubType()));
+			} catch (JavaModelException exception) {
+				JavaPlugin.log(exception);
+			}
+			fTreeViewer.expandAll();
+			final TreeItem[] items= tree.getItems();
+			if (items.length > 0)
+				tree.setSelection(new TreeItem[] {items[0]});
 		}
-	
-		/*
-		 * @see org.eclipse.jface.wizard.IWizardPage#getNextPage()
-		 */
+
 		public IWizardPage getNextPage() {
 			initializeRefactoring();
 			IWizardPage nextPage= super.getNextPage();
@@ -170,13 +258,13 @@ public class UseSupertypeWizard extends RefactoringWizard{
 
 		private void updateUpdateLabels() {
 			IType selectedType= getSelectedSupertype();
-			final int count= ((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().getChanges();
+			final int count= getUseSupertypeProcessor().getChanges();
 			fFileCount.put(selectedType, new Integer(count));
 			if (count == 0) {
 				setMessage(RefactoringMessages.UseSupertypeInputPage_No_updates, IMessageProvider.INFORMATION); 
 				setPageComplete(false);
 			}
-			fTableViewer.refresh();
+			fTreeViewer.refresh();
 			if (noSupertypeCanBeUsed()){
 				setMessage(RefactoringMessages.UseSupertypeWizard_10, IMessageProvider.INFORMATION); 
 				setPageComplete(false);	
@@ -184,7 +272,7 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		}
 
 		private boolean noSupertypeCanBeUsed() {
-			return fTableViewer.getTable().getItemCount() == countFilesWithValue(0);
+			return fTreeViewer.getTree().getItemCount() == countFilesWithValue(0);
 		}
 
 		private int countFilesWithValue(int i) {
@@ -197,19 +285,16 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		}
 
 		private IType getSelectedSupertype() {
-			IStructuredSelection ss= (IStructuredSelection)fTableViewer.getSelection();
+			IStructuredSelection ss= (IStructuredSelection)fTreeViewer.getSelection();
 			return (IType)ss.getFirstElement();
 		}
 
-		/*
-		 * @see org.eclipse.jdt.internal.ui.refactoring.RefactoringWizardPage#performFinish()
-		 */
 		public boolean performFinish(){
 			initializeRefactoring();
 			boolean superFinish= super.performFinish();
 			if (! superFinish)
 				return false;
-			final int count= ((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().getChanges();
+			final int count= getUseSupertypeProcessor().getChanges();
 			if (count == 0) {
 				updateUpdateLabels();
 				return false;
@@ -218,17 +303,14 @@ public class UseSupertypeWizard extends RefactoringWizard{
 		}
 
 		private void initializeRefactoring() {
-			IStructuredSelection ss= (IStructuredSelection)fTableViewer.getSelection();
-			((UseSuperTypeRefactoring)getRefactoring()).getUseSuperTypeProcessor().setSuperType((IType)ss.getFirstElement());
+			IStructuredSelection ss= (IStructuredSelection)fTreeViewer.getSelection();
+			getUseSupertypeProcessor().setSuperType((IType)ss.getFirstElement());
 		}
-	
-		/*
-		 * @see org.eclipse.jface.dialogs.IDialogPage#dispose()
-		 */
+
 		public void dispose() {
-			fTableViewer= null;
+			fTreeViewer= null;
 			fFileCount.clear();
-			fTableLabelProvider= null;
+			fLabelProvider= null;
 			super.dispose();
 		}
 	
@@ -254,13 +336,11 @@ public class UseSupertypeWizard extends RefactoringWizard{
 				}	
 			}
 		}
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-		 */
+
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);
-			if (visible && fTableViewer != null)
-				fTableViewer.getTable().setFocus();
+			if (visible && fTreeViewer != null)
+				fTreeViewer.getTree().setFocus();
 		}
 	}
 }
