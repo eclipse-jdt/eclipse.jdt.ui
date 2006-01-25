@@ -278,7 +278,7 @@ public class JavaFormatter {
 		if (fUseCodeFormatter) {
 			// try to format and fall back to indenting
 			try {
-				format(document, (JavaContext) context);
+				format(document, (CompilationUnitContext) context);
 			} catch (BadLocationException e) {
 				indent(document);
 			} catch (MalformedTreeException e) {
@@ -316,7 +316,7 @@ public class JavaFormatter {
 		document.replace(0, i, ""); //$NON-NLS-1$
 	}
 
-	private void format(IDocument doc, JavaContext context) throws BadLocationException {
+	private void format(IDocument doc, CompilationUnitContext context) throws BadLocationException {
 		Map options;
 		if (context.getCompilationUnit() != null)
 			options= context.getCompilationUnit().getJavaProject().getOptions(true); 

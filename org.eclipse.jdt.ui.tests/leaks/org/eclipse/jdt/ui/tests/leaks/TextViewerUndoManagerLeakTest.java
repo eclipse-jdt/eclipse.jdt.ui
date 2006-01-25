@@ -109,7 +109,7 @@ public class TextViewerUndoManagerLeakTest extends LeakTestCase {
 	
 	private Class getDocumentUndoManagersInnerClass(String className) {
 		try {
-			return Class.forName("org.eclipse.jface.text.DocumentUndoManager$" + className, true, getClass().getClassLoader());
+			return Class.forName("org.eclipse.text.undo.DocumentUndoManager$" + className, true, getClass().getClassLoader());
 		} catch (ClassNotFoundException e) {
 			fail();
 			return null;
