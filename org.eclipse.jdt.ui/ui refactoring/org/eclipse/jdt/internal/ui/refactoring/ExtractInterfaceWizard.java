@@ -24,6 +24,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
 import org.eclipse.jface.viewers.CheckboxTableViewer;
@@ -70,18 +71,21 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 		private Button fDeclarePublicCheckbox;
 		private Button fDeclareAbstractCheckbox;
 		private Button fGenerateCommentsCheckbox;
+		private Button fInstanceofCheckbox;
 		private CheckboxTableViewer fTableViewer;
 		private static final String DESCRIPTION = RefactoringMessages.ExtractInterfaceInputPage_description; 
 		private static final String SETTING_PUBLIC= 		"Public";//$NON-NLS-1$
 		private static final String SETTING_ABSTRACT= 		"Abstract";//$NON-NLS-1$
 		private static final String SETTING_REPLACE= "Replace"; //$NON-NLS-1$
 		private static final String SETTING_COMMENTS= "Comments"; //$NON-NLS-1$
+		private static final String SETTING_INSTANCEOF= "InstanceOf"; //$NON-NLS-1$
 
 		public ExtractInterfaceInputPage() {
 			super(DESCRIPTION, true);
 		}
 
 		public void createControl(Composite parent) {
+			initializeDialogUnits(parent);
 			Composite result= new Composite(parent, SWT.NONE);
 			setControl(result);
 			GridLayout layout= new GridLayout();
@@ -96,6 +100,13 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			text.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
 				
 			addReplaceAllCheckbox(result);
+			addInstanceofCheckbox(result, layout.marginWidth);
+			fReplaceAllCheckbox.addSelectionListener(new SelectionAdapter() {
+				
+				public void widgetSelected(SelectionEvent e) {
+					fInstanceofCheckbox.setEnabled(fReplaceAllCheckbox.getSelection());
+				}
+			});
 			addDeclareAsPublicCheckbox(result);
 			addDeclareAsAbstractCheckbox(result);
 
@@ -111,9 +122,9 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			gd.horizontalSpan= 2;
 			tableLabel.setLayoutData(gd);
 		
-			Dialog.applyDialogFont(result);
 			addMemberListComposite(result);
 			addGenerateCommentsCheckbox(result);
+			Dialog.applyDialogFont(result);
 			initializeCheckboxes();
 			updateUIElementEnablement();
 		}
@@ -130,6 +141,24 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			});		
 		}
 
+		private void addInstanceofCheckbox(Composite result, int margin) {
+			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
+			String title= RefactoringMessages.ExtractInterfaceWizard_use_supertype;
+			fInstanceofCheckbox= new Button(result, SWT.CHECK);
+			fInstanceofCheckbox.setSelection(false);
+			GridData gd= new GridData();
+			gd.horizontalIndent= (margin + fInstanceofCheckbox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
+			gd.horizontalSpan= 2;
+			fInstanceofCheckbox.setLayoutData(gd);
+			fInstanceofCheckbox.setText(title);
+			processor.setInstanceOf(fInstanceofCheckbox.getSelection());
+			fInstanceofCheckbox.addSelectionListener(new SelectionAdapter(){
+				public void widgetSelected(SelectionEvent e) {
+					processor.setInstanceOf(fInstanceofCheckbox.getSelection());
+				}
+			});		
+		}
+		
 		private void addMemberListComposite(Composite result) {
 			Composite composite= new Composite(result, SWT.NONE);
 			GridLayout layout= new GridLayout();
@@ -138,6 +167,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			layout.marginHeight= 0;
 			composite.setLayout(layout);
 			GridData gd= new GridData(GridData.FILL_BOTH);
+			gd.heightHint= convertHeightInCharsToPixels(12);
 			gd.horizontalSpan= 2;
 			composite.setLayoutData(gd);
 		
@@ -166,6 +196,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			fDeclarePublicCheckbox.setEnabled(enabled);
 			fDeclareAbstractCheckbox.setEnabled(enabled);
 			fGenerateCommentsCheckbox.setEnabled(enabled);
+			fInstanceofCheckbox.setEnabled(fReplaceAllCheckbox.getSelection());
 		}
 
 		private static boolean containsMethods(IMember[] members) {
@@ -230,8 +261,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 
 		private void addReplaceAllCheckbox(Composite result) {
 			final ExtractInterfaceProcessor processor= getExtractInterfaceRefactoring().getExtractInterfaceProcessor();
-			String[] keys= {processor.getType().getElementName()};
-			String title= Messages.format(RefactoringMessages.ExtractInterfaceInputPage_change_references, keys);  
+			String title= RefactoringMessages.ExtractInterfaceInputPage_change_references;  
 			boolean defaultValue= processor.isReplace();
 			fReplaceAllCheckbox= createCheckbox(result,  title, defaultValue);
 			processor.setReplace(fReplaceAllCheckbox.getSelection());
@@ -330,6 +360,7 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			processor.setAbstract(fDeclareAbstractCheckbox.getSelection());
 			processor.setPublic(fDeclarePublicCheckbox.getSelection());
 			processor.setComments(fGenerateCommentsCheckbox.getSelection());
+			processor.setInstanceOf(fInstanceofCheckbox.getSelection());
 		}
 		
 		private IMember[] getCheckedMembers() {
@@ -337,36 +368,37 @@ public class ExtractInterfaceWizard extends RefactoringWizard {
 			return (IMember[]) checked.toArray(new IMember[checked.size()]);
 		}
 
-		/*
-		 * @see org.eclipse.jface.dialogs.IDialogPage#dispose()
-		 */
 		public void dispose() {
+			fInstanceofCheckbox= null;
 			fGenerateCommentsCheckbox= null;
 			fReplaceAllCheckbox= null;
 			fTableViewer= null;
 			super.dispose();
 		}
-		
+
 		private void initializeCheckboxes() {
 			initializeCheckBox(fDeclarePublicCheckbox, SETTING_PUBLIC, true);
-			initializeCheckBox(fDeclareAbstractCheckbox, SETTING_ABSTRACT, true);	
-			initializeCheckBox(fReplaceAllCheckbox, SETTING_REPLACE, true);					
-			initializeCheckBox(fGenerateCommentsCheckbox, SETTING_COMMENTS, true);				
+			initializeCheckBox(fDeclareAbstractCheckbox, SETTING_ABSTRACT, true);
+			initializeCheckBox(fReplaceAllCheckbox, SETTING_REPLACE, true);
+			initializeCheckBox(fGenerateCommentsCheckbox, SETTING_COMMENTS, true);
+			initializeCheckBox(fInstanceofCheckbox, SETTING_INSTANCEOF, false);
 		}
 
-		private void initializeCheckBox(Button checkbox, String property, boolean def){
+		private void initializeCheckBox(Button checkbox, String property, boolean def) {
 			String s= JavaPlugin.getDefault().getDialogSettings().get(property);
 			if (s != null)
 				checkbox.setSelection(new Boolean(s).booleanValue());
-			else	
+			else
 				checkbox.setSelection(def);
 		}
 
-		private void storeDialogSettings(){
-			JavaPlugin.getDefault().getDialogSettings().put(SETTING_PUBLIC, fDeclarePublicCheckbox.getSelection());
-			JavaPlugin.getDefault().getDialogSettings().put(SETTING_ABSTRACT, fDeclareAbstractCheckbox.getSelection());
-			JavaPlugin.getDefault().getDialogSettings().put(SETTING_REPLACE, fReplaceAllCheckbox.getSelection());
-			JavaPlugin.getDefault().getDialogSettings().put(SETTING_COMMENTS, fGenerateCommentsCheckbox.getSelection());
+		private void storeDialogSettings() {
+			final IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
+			settings.put(SETTING_PUBLIC, fDeclarePublicCheckbox.getSelection());
+			settings.put(SETTING_ABSTRACT, fDeclareAbstractCheckbox.getSelection());
+			settings.put(SETTING_REPLACE, fReplaceAllCheckbox.getSelection());
+			settings.put(SETTING_COMMENTS, fGenerateCommentsCheckbox.getSelection());
+			settings.put(SETTING_INSTANCEOF, fInstanceofCheckbox.getSelection());
 		}
 	}
 }
