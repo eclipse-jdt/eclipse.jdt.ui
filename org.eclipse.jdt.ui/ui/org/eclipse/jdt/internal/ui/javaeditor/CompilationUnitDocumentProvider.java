@@ -801,10 +801,10 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	/** Annotation model listener added to all created CU annotation models */
 	private GlobalAnnotationModelListener fGlobalAnnotationModelListener;
 	/**
-	 * Element information of all connected elements with a fake CU.
+	 * Element information of all connected elements with a fake CU but no file info.
 	 * @since 3.2
 	 */
-	private final Map fFakeCUInfoMap= new HashMap();
+	private final Map fFakeCUMapForMissingInfo= new HashMap();
 
 
 	/**
@@ -985,7 +985,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		if (getFileInfo(element) != null)
 			return;
 
-		CompilationUnitInfo info= (CompilationUnitInfo)fFakeCUInfoMap.get(element);
+		CompilationUnitInfo info= (CompilationUnitInfo)fFakeCUMapForMissingInfo.get(element);
 		if (info == null) {
 			ICompilationUnit cu= createFakeCompiltationUnit(element, true);
 			if (cu == null)
@@ -994,7 +994,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			info.fCopy= cu;
 			info.fElement= element;
 			info.fModel= new AnnotationModel();
-			fFakeCUInfoMap.put(element, info);
+			fFakeCUMapForMissingInfo.put(element, info);
 		}
 		info.fCount++;
 	}
@@ -1008,7 +1008,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		if (model != null)
 			return model;
 		
-		FileInfo info= (FileInfo)fFakeCUInfoMap.get(element);
+		FileInfo info= (FileInfo)fFakeCUMapForMissingInfo.get(element);
 		if (info != null) {
 			if (info.fModel != null)
 				return info.fModel;
@@ -1024,10 +1024,10 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 	 * @since 3.2
 	 */
 	public void disconnect(Object element) {
-		CompilationUnitInfo info= (CompilationUnitInfo)fFakeCUInfoMap.get(element);
+		CompilationUnitInfo info= (CompilationUnitInfo)fFakeCUMapForMissingInfo.get(element);
 		if (info != null)  {
 			if (info.fCount == 1) {
-				fFakeCUInfoMap.remove(element);
+				fFakeCUMapForMissingInfo.remove(element);
 				info.fModel= null;
 				// Destroy and unregister fake working copy
 				try {
@@ -1247,7 +1247,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			CompilationUnitInfo info= (CompilationUnitInfo)fileInfo;
 			return info.fCopy;
 		}
-		CompilationUnitInfo cuInfo= (CompilationUnitInfo)fFakeCUInfoMap.get(element);
+		CompilationUnitInfo cuInfo= (CompilationUnitInfo)fFakeCUMapForMissingInfo.get(element);
 		if (cuInfo != null)
 			return cuInfo.fCopy;
 		
@@ -1262,7 +1262,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		Iterator e= getConnectedElementsIterator();
 		while (e.hasNext())
 			disconnect(e.next());
-		fFakeCUInfoMap.clear();
+		fFakeCUMapForMissingInfo.clear();
 	}
 
 	/*
