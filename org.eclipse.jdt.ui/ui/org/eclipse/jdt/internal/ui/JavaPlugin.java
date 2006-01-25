@@ -104,7 +104,6 @@ import org.eclipse.jdt.internal.corext.util.TypeFilter;
 import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
-import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.JavaTextTools;
@@ -194,7 +193,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private TypeFilter fTypeFilter;
 
 
-	private IWorkingCopyManager fWorkingCopyManager;
+	private WorkingCopyManager fWorkingCopyManager;
 	
 	/**
 	 * @deprecated
@@ -651,7 +650,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		return fClassFileDocumentProvider;
 	}
 
-	public synchronized IWorkingCopyManager getWorkingCopyManager() {
+	public synchronized WorkingCopyManager getWorkingCopyManager() {
 		if (fWorkingCopyManager == null) {
 			ICompilationUnitDocumentProvider provider= getCompilationUnitDocumentProvider();
 			fWorkingCopyManager= new WorkingCopyManager(provider);
