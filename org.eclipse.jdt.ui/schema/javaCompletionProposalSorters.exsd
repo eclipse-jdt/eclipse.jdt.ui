@@ -105,13 +105,17 @@ and must have a public 0-argument constructor.
          <meta.section type="examples"/>
       </appInfo>
       <documentation>
-         &lt;extension
+         &lt;p&gt;
+&lt;pre&gt;
+&lt;extension
 	point=&quot;org.eclipse.jdt.ui.javaCompletionProposalSorters&quot;&gt;
 	&lt;proposalSorter
 		id=&quot;org.eclipse.jdt.ui.RelevanceSorter&quot;
 		name=&quot;by relevance&quot;
 		class=&quot;org.eclipse.jdt.internal.ui.text.java.RelevanceSorter&quot;/&gt;
 &lt;/extension&gt;
+&lt;/pre&gt;
+&lt;/p&gt;
       </documentation>
    </annotation>
 
@@ -120,7 +124,7 @@ and must have a public 0-argument constructor.
          <meta.section type="apiInfo"/>
       </appInfo>
       <documentation>
-         See &lt;code&gt;AbstractProposalSorter&lt;/code&gt;
+         See &lt;code&gt;AbstractProposalSorter&lt;/code&gt;.
       </documentation>
    </annotation>
 
@@ -129,7 +133,7 @@ and must have a public 0-argument constructor.
          <meta.section type="implementation"/>
       </appInfo>
       <documentation>
-         &lt;code&gt;org.eclipse.jdt.ui.RelevanceSorter&lt;/code&gt; and &lt;code&gt;org.eclipse.jdt.ui.AlphabeticSorter&lt;/code&gt; implement the two default sort behaviors.
+         &lt;code&gt;org.eclipse.jdt.internal.ui.text.java.RelevanceSorter&lt;/code&gt; and &lt;code&gt;org.eclipse.jdt.internal.ui.text.java.AlphabeticSorter&lt;/code&gt; implement the two default sort behaviors.
       </documentation>
    </annotation>
 
