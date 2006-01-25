@@ -14,12 +14,6 @@ import org.eclipse.osgi.util.NLS;
 
 public class ModelMessages extends NLS {
 
-	public static String AcceptRefactoringsAction_description;
-
-	public static String AcceptRefactoringsAction_title;
-
-	public static String AcceptRefactoringsAction_tool_tip;
-
 	private static final String BUNDLE_NAME= "org.eclipse.jdt.internal.ui.model.ModelMessages"; //$NON-NLS-1$
 
 	public static String JavaModelLabelProvider_project_preferences_label;

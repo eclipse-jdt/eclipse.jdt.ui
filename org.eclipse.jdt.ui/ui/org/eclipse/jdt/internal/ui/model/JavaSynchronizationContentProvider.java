@@ -34,7 +34,7 @@ import org.eclipse.team.core.mapping.IResourceDiffTree;
 import org.eclipse.team.core.mapping.ISynchronizationContext;
 
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
-import org.eclipse.ltk.ui.refactoring.model.AbstractRefactoringSynchronizationContentProvider;
+import org.eclipse.ltk.ui.refactoring.model.AbstractSynchronizationContentProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -51,7 +51,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.2
  */
-public final class JavaSynchronizationContentProvider extends AbstractRefactoringSynchronizationContentProvider {
+public final class JavaSynchronizationContentProvider extends AbstractSynchronizationContentProvider {
 
 	/** The refactorings folder */
 //	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
@@ -170,7 +170,7 @@ public final class JavaSynchronizationContentProvider extends AbstractRefactorin
 //						set.add(new JavaProjectSettings((IJavaProject) parent));
 //					} else if (name.equals(NAME_REFACTORING_FOLDER)) {
 //						set.remove(members[index]);
-//						set.add(getIncomingRefactorings(context, (IProject) resource, null));
+//						set.add(getPendingRefactorings(context, (IProject) resource, null));
 //					}
 //				}
 //			}

@@ -4857,7 +4857,7 @@
          id="jdtContentProvider"
          point="org.eclipse.team.ui.teamContentProviders">
       <teamContentProvider
-            contentExtensionId="org.eclipse.jdt.ui.resourceContent"
+            contentExtensionId="org.eclipse.jdt.ui.javaModelContent"
             modelProviderId="org.eclipse.jdt.ui.modelProvider"/>
    </extension>
    
@@ -4867,7 +4867,7 @@
          <includes>
             <contentExtension
                   isRoot="true"
-                  pattern="org.eclipse.jdt.ui.resourceContent"/>
+                  pattern="org.eclipse.jdt.ui.javaModelContent"/>
          </includes>
       </viewerContentBinding>
    </extension>
@@ -4878,17 +4878,21 @@
             activeByDefault="true"
             contentProvider="org.eclipse.jdt.internal.ui.model.JavaSynchronizationContentProvider"
             icon="$nl$/icons/full/obj16/java_model.gif"
-            id="org.eclipse.jdt.ui.resourceContent"
+            id="org.eclipse.jdt.ui.javaModelContent"
             labelProvider="org.eclipse.jdt.internal.ui.model.JavaSynchronizationLabelProvider"
-            name="%JavaModelContent.name">
+            name="%JavaModelContent.name"
+            priority="normal">
          <enablement>
             <or>
                <instanceof value="org.eclipse.jdt.internal.ui.model.JavaModelProvider"/>
-               <instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+               <instanceof value="org.eclipse.ltk.core.refactoring.history.RefactoringHistory"/>
+               <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy"/>
+               <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptor"/>
                <instanceof value="org.eclipse.team.core.mapping.IResourceMappingScope"/>
                <instanceof value="org.eclipse.team.core.mapping.ISynchronizationContext"/>
             </or>
          </enablement>
+         <actionProvider class="org.eclipse.ltk.ui.refactoring.model.RefactoringSynchronizationActionProvider"/>
       </navigatorContent>
    </extension>
    <extension

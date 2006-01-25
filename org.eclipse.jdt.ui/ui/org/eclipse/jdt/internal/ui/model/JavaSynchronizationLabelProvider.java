@@ -21,8 +21,7 @@ import org.eclipse.team.core.diff.IDiffNode;
 import org.eclipse.team.core.diff.IThreeWayDiff;
 import org.eclipse.team.core.mapping.ISynchronizationContext;
 
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
-import org.eclipse.ltk.ui.refactoring.model.AbstractRefactoringSynchronizationLabelProvider;
+import org.eclipse.ltk.ui.refactoring.model.AbstractSynchronizationLabelProvider;
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
@@ -34,7 +33,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
  * 
  * @since 3.2
  */
-public final class JavaSynchronizationLabelProvider extends AbstractRefactoringSynchronizationLabelProvider {
+public final class JavaSynchronizationLabelProvider extends AbstractSynchronizationLabelProvider {
 
 	/** The delegate label provider, or <code>null</code> */
 	private ILabelProvider fLabelProvider= null;
@@ -82,14 +81,14 @@ public final class JavaSynchronizationLabelProvider extends AbstractRefactoringS
 	/**
 	 * {@inheritDoc}
 	 */
-	protected int getDirection(final RefactoringDescriptorProxy proxy) {
+	protected int getDirection(final Object element) {
 		return IThreeWayDiff.INCOMING;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	protected int getKind(final RefactoringDescriptorProxy proxy) {
+	protected int getKind(final Object element) {
 		return IDiffNode.CHANGE;
 	}
 

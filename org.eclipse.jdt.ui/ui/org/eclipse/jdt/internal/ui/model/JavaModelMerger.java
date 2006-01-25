@@ -48,7 +48,7 @@ public final class JavaModelMerger extends AbstractRefactoringModelMerger {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IProject[] getDependentProjects(final IProject[] projects) {
+	protected IProject[] getDependencies(final IProject[] projects) {
 		Assert.isNotNull(projects);
 		final Set set= new HashSet();
 		for (int index= 0; index < projects.length; index++)
@@ -64,7 +64,7 @@ public final class JavaModelMerger extends AbstractRefactoringModelMerger {
 	 * @param set
 	 *            the project set
 	 * @param project
-	 *            the project
+	 *            the project to get its dependent projects
 	 */
 	private void getDependentProjects(final Set set, final IProject project) {
 		Assert.isNotNull(set);
