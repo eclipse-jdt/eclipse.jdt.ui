@@ -12,6 +12,18 @@ package org.eclipse.jdt.internal.ui.actions;
 
 import java.util.Iterator;
 
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
+
+import org.eclipse.ui.IEditorInput;
+import org.eclipse.ui.IWorkbenchPart;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -21,24 +33,12 @@ import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.swt.widgets.Shell;
-
-import org.eclipse.jface.text.ITextSelection;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.ui.IEditorInput;
-import org.eclipse.ui.IWorkbenchPart;
-
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.IWorkingCopyManager;
 
 public class SelectionConverter {
 
@@ -196,19 +196,17 @@ public class SelectionConverter {
 	public static IJavaElement getInput(JavaEditor editor) {
 		if (editor == null)
 			return null;
-		IEditorInput input= editor.getEditorInput();
-		if (input instanceof IClassFileEditorInput)
-			return ((IClassFileEditorInput)input).getClassFile();
-		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();				
-		return manager.getWorkingCopy(input);			
+		IEditorInput editorInput= editor.getEditorInput();
+		if (editorInput == null)
+			return null;
+		return JavaUI.getEditorInputJavaElement(editorInput);
 	}
 	
 	public static ICompilationUnit getInputAsCompilationUnit(JavaEditor editor) {
 		Object editorInput= SelectionConverter.getInput(editor);
 		if (editorInput instanceof ICompilationUnit)
 			return (ICompilationUnit)editorInput;
-		else
-			return null;
+		return null;
 	}
 
 	public static IJavaElement[] codeResolve(IJavaElement input, ITextSelection selection) throws JavaModelException {
