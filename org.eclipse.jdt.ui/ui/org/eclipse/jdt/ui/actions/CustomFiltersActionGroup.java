@@ -453,7 +453,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		fEnabledFilterIds= new HashMap(filterDescs.length);
 		for (int i= 0; i < filterDescs.length; i++) {
 			String id= filterDescs[i].getId();
-			Boolean isEnabled= new Boolean(filterDescs[i].isEnabled());
+			Boolean isEnabled= Boolean.valueOf(filterDescs[i].isEnabled());
 			if (fEnabledFilterIds.containsKey(id))
 				JavaPlugin.logErrorMessage("WARNING: Duplicate id for extension-point \"org.eclipse.jdt.ui.javaElementFilters\""); //$NON-NLS-1$
 			fEnabledFilterIds.put(id, isEnabled);
@@ -549,8 +549,10 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		Iterator iter= fEnabledFilterIds.keySet().iterator();
 		while (iter.hasNext()) {
 			String id= (String)iter.next();
-			Boolean isEnabled= new Boolean(store.getBoolean(id));
-			fEnabledFilterIds.put(id, isEnabled);
+			if (store.contains(id)) { // see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=73991 
+				Boolean isEnabled= Boolean.valueOf(store.getBoolean(id));
+				fEnabledFilterIds.put(id, isEnabled);
+			}
 		}
 		
 		fLRUFilterIdsStack.clear();
@@ -603,7 +605,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	 */
 	public void saveState(IMemento memento) {
 		IMemento customFilters= memento.createChild(TAG_CUSTOM_FILTERS);
-		customFilters.putString(TAG_USER_DEFINED_PATTERNS_ENABLED, new Boolean(fUserDefinedPatternsEnabled).toString());
+		customFilters.putString(TAG_USER_DEFINED_PATTERNS_ENABLED, Boolean.toString(fUserDefinedPatternsEnabled));
 		saveUserDefinedPatterns(customFilters);
 		saveXmlDefinedFilters(customFilters);
 		saveLRUFilters(customFilters);
