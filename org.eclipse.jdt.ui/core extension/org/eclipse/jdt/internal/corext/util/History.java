@@ -17,6 +17,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.util.Collection;
+import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -68,6 +69,7 @@ public abstract class History {
 	}
 
 	private final Map fHistory;
+	private final Hashtable fPositions;
 	private final String fFileName;
 	private final String fRootNodeName;
 	private final String fInfoNodeName;
@@ -82,6 +84,7 @@ public abstract class History {
 		fFileName= fileName;
 		fRootNodeName= rootNodeName;
 		fInfoNodeName= infoNodeName;
+		fPositions= new Hashtable(MAX_HISTORY_SIZE);
 	}
 	
 	public History(String fileName) {
@@ -90,6 +93,7 @@ public abstract class History {
 	
 	public synchronized void accessed(Object object) {
 		fHistory.put(getKey(object), object);
+		rebuildPositions();
 	}
 	
 	public synchronized boolean contains(Object object) {
@@ -105,11 +109,15 @@ public abstract class History {
 	}
 	
 	public synchronized Object remove(Object object) {
-		return fHistory.remove(getKey(object));
+		Object removed= fHistory.remove(getKey(object));
+		rebuildPositions();
+		return removed;
 	}
 	
 	public synchronized Object removeKey(Object key) {
-		return fHistory.remove(key);
+		Object removed= fHistory.remove(key);
+		rebuildPositions();
+		return removed;
 	}
 	
 	/**
@@ -125,7 +133,7 @@ public abstract class History {
 		if (!containsKey(key)) 
 			return 0.0f;
 
-		int pos= getPosition(key) + 1;
+		int pos= ((Integer)fPositions.get(key)).intValue() + 1;
 		
 		//containsKey(key) implies fHistory.size()>0	
 		return (float)pos / (float)fHistory.size();
@@ -143,16 +151,7 @@ public abstract class History {
 		if (!containsKey(key))
 			return -1;
 		
-		int pos= 0;
-		Collection values= getValues();
-		for (Iterator iter= values.iterator(); iter.hasNext();) {
-			Object element= iter.next();
-			Object curKey= getKey(element);
-			if (curKey.equals(key))
-				return pos;
-			pos++;
-		}
-		return -1;
+		return ((Integer)fPositions.get(key)).intValue();
 	}
 
 	public synchronized void load() {
@@ -234,6 +233,17 @@ public abstract class History {
 	 * @return The key for object, not null
 	 */
 	protected abstract Object getKey(Object object);
+	
+	private void rebuildPositions() {
+		fPositions.clear();
+		Collection values= fHistory.values();
+		int pos=0;
+		for (Iterator iter= values.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			fPositions.put(getKey(element), new Integer(pos));
+			pos++;
+		}
+	}
 
 	private void load(InputSource inputSource) throws CoreException {
 		Element root;
@@ -260,10 +270,11 @@ public abstract class History {
 				Element type= (Element) node;
 				if (type.getNodeName().equalsIgnoreCase(fInfoNodeName)) {
 					Object object= createFromElement(type);
-					accessed(object);
+					fHistory.put(getKey(object), object);
 				}
 			}
 		}
+		rebuildPositions();
 	}
 	
 	private void save(OutputStream stream) throws CoreException {
