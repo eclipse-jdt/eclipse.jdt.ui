@@ -42,10 +42,12 @@ import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Statement;
 
+import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
@@ -471,6 +473,36 @@ public final class RefactoringAvailabilityTester {
 		return false;
 	}
 	
+	public static boolean isIntroduceFactoryAvailable(final JavaTextSelection selection) throws JavaModelException {
+		final IJavaElement[] elements= selection.resolveElementAtOffset();
+		if (elements.length == 1 && elements[0] instanceof IMethod)
+			return isIntroduceFactoryAvailable((IMethod) elements[0]);
+		
+		// there's no IMethod for the default constructor
+		if (! Checks.isAvailable(selection.resolveEnclosingElement()))
+			return false;
+		ASTNode node= selection.resolveCoveringNode();
+		if (node == null) {
+			ASTNode[] selectedNodes= selection.resolveSelectedNodes();
+			if (selectedNodes != null && selectedNodes.length == 1) {
+				node= selectedNodes[0];
+				if (node == null)
+					return false;
+			} else {
+				return false;
+			}
+		}
+		
+		if (node.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION)
+			return true;
+		
+		node= ASTNodes.getNormalizedNode(node);
+		if (node.getLocationInParent() == ClassInstanceCreation.TYPE_PROPERTY)
+			return true;
+		
+		return false;
+	}
+	
 	public static boolean isIntroduceIndirectionAvailable(IMethod method) throws JavaModelException {
 		if (method == null)
 			return false;
@@ -498,13 +530,6 @@ public final class RefactoringAvailabilityTester {
 		if (elements.length != 1)
 			return false;
 		return (elements[0] instanceof IMethod) && isIntroduceIndirectionAvailable(((IMethod) elements[0]));
-	}
-
-	public static boolean isIntroduceFactoryAvailable(final JavaTextSelection selection) throws JavaModelException {
-		final IJavaElement[] elements= selection.resolveElementAtOffset();
-		if (elements.length == 1 && elements[0] instanceof IMethod)
-			return isIntroduceFactoryAvailable((IMethod) elements[0]);
-		return false;
 	}
 
 	public static boolean isIntroduceParameterAvailable(final ASTNode[] selectedNodes, ASTNode coveringNode) {
