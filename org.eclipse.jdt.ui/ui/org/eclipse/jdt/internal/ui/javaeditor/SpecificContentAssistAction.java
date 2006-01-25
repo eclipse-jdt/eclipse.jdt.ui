@@ -13,10 +13,10 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 import org.eclipse.jface.action.Action;
 
+import org.eclipse.jface.text.ITextOperationTarget;
+import org.eclipse.jface.text.source.ISourceViewer;
+
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
@@ -25,7 +25,8 @@ import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 final class SpecificContentAssistAction extends Action {
 	private final CompletionProposalCategory fCategory;
 	private final SpecificContentAssistExecutor fExecutor= new SpecificContentAssistExecutor(CompletionProposalComputerRegistry.getDefault());
-
+	private JavaEditor fEditor;
+	
 	public SpecificContentAssistAction(CompletionProposalCategory category) {
 		fCategory= category;
 		setText(category.getName());
@@ -47,15 +48,28 @@ final class SpecificContentAssistAction extends Action {
 	}
 
 	private ITextEditor getActiveEditor() {
-		IWorkbenchWindow window= PlatformUI.getWorkbench().getActiveWorkbenchWindow();
-		if (window != null) {
-			IWorkbenchPage page= window.getActivePage();
-			if (page != null) {
-				IEditorPart editor= page.getActiveEditor();
-				if (editor instanceof ITextEditor)
-					return (JavaEditor) editor;
-			}
-		}
-		return null;
+		return fEditor;
+	}
+
+	/**
+	 * Sets the active editor part.
+	 * 
+	 * @param part the editor, possibly <code>null</code>
+	 */
+	public void setActiveEditor(IEditorPart part) {
+		JavaEditor editor;
+		if (part instanceof JavaEditor)
+			editor= (JavaEditor) part;
+		else
+			editor= null;
+		fEditor= editor;
+		setEnabled(computeEnablement(fEditor));
+	}
+	
+	private boolean computeEnablement(ITextEditor editor) {
+		if (editor == null)
+			return false;
+		ITextOperationTarget target= (ITextOperationTarget) editor.getAdapter(ITextOperationTarget.class);
+		return target != null && target.canDoOperation(ISourceViewer.CONTENTASSIST_PROPOSALS);
 	}
 }

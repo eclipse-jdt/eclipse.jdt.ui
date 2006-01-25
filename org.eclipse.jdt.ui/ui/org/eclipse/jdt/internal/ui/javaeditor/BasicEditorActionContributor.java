@@ -11,8 +11,10 @@
 package org.eclipse.jdt.internal.ui.javaeditor;
 
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.List;
 
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
@@ -47,6 +49,7 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 	protected RetargetTextEditorAction fContextInformation;
 	protected RetargetTextEditorAction fCorrectionAssist;
 	protected RetargetTextEditorAction fChangeEncodingAction;
+	protected SpecificContentAssistAction[] fSpecificAssistActions;
 
 
 	public BasicEditorActionContributor() {
@@ -84,13 +87,16 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 			
 			caMenu.add(fRetargetContentAssist);
 			Collection descriptors= CompletionProposalComputerRegistry.getDefault().getProposalCategories();
+			List specificAssistActions= new ArrayList(descriptors.size());
 			for (Iterator it= descriptors.iterator(); it.hasNext();) {
 				final CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
 				if (cat.hasComputers()) {
 					IAction caAction= new SpecificContentAssistAction(cat);
 					caMenu.add(caAction);
+					specificAssistActions.add(caAction);
 				}
 			}
+			fSpecificAssistActions= (SpecificContentAssistAction[]) specificAssistActions.toArray(new SpecificContentAssistAction[specificAssistActions.size()]);
 			
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fCorrectionAssist);
 			editMenu.appendToGroup(IContextMenuConstants.GROUP_GENERATE, fContextInformation);
@@ -110,6 +116,13 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 		fContentAssist.setAction(getAction(textEditor, "ContentAssistProposal")); //$NON-NLS-1$
 		fContextInformation.setAction(getAction(textEditor, "ContentAssistContextInformation")); //$NON-NLS-1$
 		fCorrectionAssist.setAction(getAction(textEditor, "CorrectionAssistProposal")); //$NON-NLS-1$
+		
+		if (fSpecificAssistActions != null) {
+			for (int i= 0; i < fSpecificAssistActions.length; i++) {
+				SpecificContentAssistAction assistAction= fSpecificAssistActions[i];
+				assistAction.setActiveEditor(part);
+			}
+		}
 
 		fChangeEncodingAction.setAction(getAction(textEditor, ITextEditorActionConstants.CHANGE_ENCODING));
 
