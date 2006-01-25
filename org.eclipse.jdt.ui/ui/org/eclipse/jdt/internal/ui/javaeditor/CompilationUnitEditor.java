@@ -1378,16 +1378,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	}
 
 	/*
-	 * @see JavaEditor#setOutlinePageInput(JavaOutlinePage, IEditorInput)
-	 */
-	protected void setOutlinePageInput(JavaOutlinePage page, IEditorInput input) {
-		if (page != null) {
-			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-			page.setInput(manager.getWorkingCopy(input));
-		}
-	}
-
-	/*
 	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#performSave(boolean, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	protected void performSave(boolean overwrite, IProgressMonitor progressMonitor) {

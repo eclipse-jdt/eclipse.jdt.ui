@@ -549,20 +549,6 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	}
 
 	/*
-	 * @see JavaEditor#setOutlinePageInput(JavaOutlinePage, IEditorInput)
-	 */
-	protected void setOutlinePageInput(JavaOutlinePage page, IEditorInput input) {
-		if (page != null && input instanceof IClassFileEditorInput) {
-			IClassFileEditorInput cfi= (IClassFileEditorInput)input;
-			IClassFile cf= cfi.getClassFile();
-			if (cf != null && cf.exists())
-				page.setInput(cf);
-			else
-				page.setInput(null);
-		}
-	}
-
-	/*
 	 * 1GEPKT5: ITPJUI:Linux - Source in editor for external classes is editable
 	 * Removed methods isSaveOnClosedNeeded and isDirty.
 	 * Added method isEditable.
