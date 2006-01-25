@@ -26,4 +26,4 @@ org.eclipse.jdt.ui/perf/search/participants=300
 org.eclipse.jdt.ui/perf/content_assist/extensions=1000
 
 #Reports the time for a single completion proposal sorter
-org.eclipse.jdt.ui//perf/content_assist_sorters/extensions
+org.eclipse.jdt.ui/perf/content_assist_sorters/extensions
