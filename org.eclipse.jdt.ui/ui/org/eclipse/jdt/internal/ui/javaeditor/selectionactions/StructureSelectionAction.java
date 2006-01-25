@@ -148,7 +148,7 @@ public abstract class StructureSelectionAction extends Action {
 		if (input instanceof IClassFileEditorInput) {
 			return ((IClassFileEditorInput)input).getClassFile();
 		} else {
-			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input);
+			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input, false);
 		}
 	}
 

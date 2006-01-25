@@ -11,20 +11,21 @@
 package org.eclipse.jdt.internal.ui.text;
 
 
+import org.eclipse.jface.viewers.IStructuredSelection;
+
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.IInformationProviderExtension;
-import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
@@ -83,7 +84,10 @@ public class JavaElementProvider implements IInformationProvider, IInformationPr
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
 			if (element != null)
 				return element;
-			return SelectionConverter.getInput(fEditor);
+			IJavaElement je= SelectionConverter.getInput(fEditor);
+			if (je != null)
+				return je;
+			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput(), false);
 		} catch (JavaModelException e) {
 			return null;
 		}

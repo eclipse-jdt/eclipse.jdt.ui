@@ -38,18 +38,18 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 
-import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 
 public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcilingStrategyExtension {
 
 
 	private ITextEditor fEditor;
 
-	private IWorkingCopyManager fManager;
+	private WorkingCopyManager fManager;
 	private IDocumentProvider fDocumentProvider;
 	private IProgressMonitor fProgressMonitor;
 	private boolean fNotify= true;
@@ -77,7 +77,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 	private void reconcile(final boolean initialReconcile) {
 		final CompilationUnit[] ast= new CompilationUnit[1];
 		try {
-			final ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput());
+			final ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput(), false);
 			if (unit != null) {
 				Platform.run(new ISafeRunnable() {
 					public void run() {

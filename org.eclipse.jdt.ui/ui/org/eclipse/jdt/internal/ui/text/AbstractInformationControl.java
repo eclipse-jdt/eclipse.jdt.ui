@@ -59,6 +59,7 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 
+import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IWorkbenchPage;
@@ -460,10 +461,15 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 						if (page != null) {
 							IEditorPart editor= page.getActiveEditor();
 							if (editor != null) {
-								IJavaElement editorCU= JavaUI.getEditorInputJavaElement(editor.getEditorInput());
-								if (editorCU == cu) {
-									EditorUtility.revealInEditor(editor, (IJavaElement)selectedElement);
-									return;
+								IEditorInput editorInput= editor.getEditorInput();
+								if (editorInput != null) {
+									IJavaElement editorCU= JavaUI.getEditorInputJavaElement(editorInput);
+									if (editorCU == null)
+										editorCU= JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput, false);
+									if (editorCU == cu) {
+										EditorUtility.revealInEditor(editor, (IJavaElement)selectedElement);
+										return;
+									}
 								}
 							}
 						}
