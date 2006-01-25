@@ -4273,37 +4273,29 @@
    
    <extension
          point="org.eclipse.ui.ide.markerSupport">
-      <hierarchy>
-         <markerTypeReference id="org.eclipse.jdt.core.problem"/>
-         <hierarchyReference
-               direction="DESCENDING"
-               type="SEVERITY"/>
-         <hierarchyReference
-               direction="ASCENDING"
-               type="PROJECT"/>
-         <hierarchyReference
-               direction="ASCENDING"
-               type="RESOURCE"/>
-      </hierarchy>
-      <hierarchy>
-         <markerTypeReference id="org.eclipse.jdt.core.buildpath_problem"/>
-         <hierarchyReference
-               direction="DESCENDING"
-               type="SEVERITY"/>
-         <hierarchyReference
-               direction="ASCENDING"
-               type="PROJECT"/>
-         <hierarchyReference
-               direction="ASCENDING"
-               type="RESOURCE"/>
-      </hierarchy>
-      
       <markerCategory name="%markerCategory.problem">
          <markerTypeReference id="org.eclipse.jdt.core.problem"/>
       </markerCategory>
       <markerCategory name="%markerCategory.buildpath_problem">
          <markerTypeReference id="org.eclipse.jdt.core.buildpath_problem"/>
       </markerCategory>
+      <markerGrouping name="Java problem type" attribute="categoryId">
+        <!--<markerTypeReference id="org.eclipse.jdt.core.buildpath_problem"/> bug 125201 -->
+        <markerTypeReference id="org.eclipse.jdt.core.problem"/>
+        <markerAttributeMapping value="10" name="%MarkerCategory.buildpath"/>
+        <markerAttributeMapping value="20" name="%MarkerCategory.fatalerrors"/>
+        <markerAttributeMapping value="30" name="%MarkerCategory.fatalerrors"/>
+        <markerAttributeMapping value="40" name="%MarkerCategory.fatalerrors"/>
+        <markerAttributeMapping value="50" name="%MarkerCategory.fatalerrors"/>
+        <markerAttributeMapping value="60" name="%MarkerCategory.documentation"/>
+        <markerAttributeMapping value="70" name="%MarkerCategory.codestyle"/>
+        <markerAttributeMapping value="80" name="%MarkerCategory.potential"/>
+        <markerAttributeMapping value="90" name="%MarkerCategory.potential"/>
+        <markerAttributeMapping value="110" name="%MarkerCategory.potential"/>
+        <markerAttributeMapping value="100" name="%MarkerCategory.potential"/>
+        <markerAttributeMapping value="120" name="%MarkerCategory.deprecation"/>
+        <markerAttributeMapping value="130" name="%MarkerCategory.nls"/>
+      </markerGrouping>
    </extension>
    
 <!-- =========================================================================== -->
