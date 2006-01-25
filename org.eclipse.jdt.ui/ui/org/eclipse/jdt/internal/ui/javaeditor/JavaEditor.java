@@ -1246,7 +1246,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 *
 	 * @since 3.0
 	 */
-	protected class FormatElementAction extends Action {
+	protected class FormatElementAction extends Action implements IUpdate {
+		
+		/*
+		 * @since 3.2
+		 */
+		FormatElementAction() {
+			setEnabled(isEditorInputModifiable());
+		}
 
 		/*
 		 * @see org.eclipse.jface.action.IAction#run()
@@ -1294,6 +1301,14 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 					viewer.restoreSelection();
 				}
 			}
+		}
+
+		/*
+		 * @see org.eclipse.ui.texteditor.IUpdate#update()
+		 * @since 3.2
+		 */
+		public void update() {
+			setEnabled(isEditorInputModifiable());
 		}
 	}
 
@@ -1623,19 +1638,28 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	abstract protected IJavaElement getCorrespondingElement(IJavaElement element);
 
 	/**
+	 * Default constructor.
+	 */
+	public JavaEditor() {
+		super();
+	}
+	
+	/**
 	 * Sets the input of the editor's outline page.
 	 *
 	 * @param page the Java outline page
 	 * @param input the editor input
 	 */
-	abstract protected void setOutlinePageInput(JavaOutlinePage page, IEditorInput input);
-
-
-	/**
-	 * Default constructor.
-	 */
-	public JavaEditor() {
-		super();
+	protected void setOutlinePageInput(JavaOutlinePage page, IEditorInput input) {
+		if (page == null)
+			return;
+		
+		IJavaElement je= getInputJavaElement();
+		if (je != null && je.exists())
+			page.setInput(je);
+		else
+			page.setInput(null);
+		
 	}
 
 	/*
@@ -2364,6 +2388,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		action= new FormatElementAction();
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.QUICK_FORMAT);
 		setAction("QuickFormat", action); //$NON-NLS-1$
+		markAsStateDependentAction("QuickFormat", true); //$NON-NLS-1$
 
 		action= new RemoveOccurrenceAnnotations(this);
 		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.REMOVE_OCCURRENCE_ANNOTATIONS);
@@ -3153,7 +3178,11 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		IEditorInput editorInput= getEditorInput();
 		if (editorInput == null)
 			return null;
-		return JavaUI.getEditorInputJavaElement(getEditorInput());
+		IJavaElement je= JavaUI.getEditorInputJavaElement(getEditorInput());
+		if (je == null)
+			je= JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput, false);
+		return je;
+		
 	}
 
 	protected void updateStatusLine() {
