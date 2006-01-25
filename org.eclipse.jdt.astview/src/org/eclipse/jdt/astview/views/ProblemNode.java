@@ -12,6 +12,7 @@ package org.eclipse.jdt.astview.views;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 /**
@@ -62,6 +63,9 @@ public class ProblemNode extends ASTAttribute {
 		buf.append('[').append(offset).append(", ").append(length).append(']').append(' ');
 		buf.append(fProblem.getMessage()).append(' ');
 		buf.append("(").append(getErrorCode(id)).append(" = 0x").append(Integer.toHexString(id)).append(" = ").append(id).append(") ");
+		if (fProblem instanceof CategorizedProblem) {
+			buf.append(", category id: ").append(((CategorizedProblem) fProblem).getCategoryID());
+		}
 		return buf.toString();
 	}
 	
