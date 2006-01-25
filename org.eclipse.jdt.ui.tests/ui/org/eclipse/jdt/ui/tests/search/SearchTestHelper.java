@@ -41,7 +41,6 @@ public class SearchTestHelper {
 
 	static JavaSearchQuery runMethodRefQuery(String TypeName, String methodName, String[] parameterTypes) throws JavaModelException {
 		IMethod method= getMethod(TypeName, methodName, parameterTypes);
-		NewSearchUI.activateSearchResultView();
 		JavaSearchQuery query= new JavaSearchQuery(new ElementQuerySpecification(method, IJavaSearchConstants.REFERENCES, JavaSearchScopeFactory.getInstance().createWorkspaceScope(true), "workspace scope"));
 		NewSearchUI.runQueryInForeground(null, query);
 		return query;
@@ -50,14 +49,12 @@ public class SearchTestHelper {
 	
 	static JavaSearchQuery runTypeRefQuery(String typeName) throws JavaModelException {
 		IType type= getType(typeName);
-		NewSearchUI.activateSearchResultView();
 		JavaSearchQuery query= new JavaSearchQuery(new ElementQuerySpecification(type, IJavaSearchConstants.REFERENCES, JavaSearchScopeFactory.getInstance().createWorkspaceScope(true), "workspace scope"));
 		NewSearchUI.runQueryInForeground(null, query);
 		return query;
 	}
 
 	static JavaSearchQuery runMethodRefQuery(String methodName, String[] parameterTypes) throws JavaModelException {
-		NewSearchUI.activateSearchResultView();
 		JavaSearchQuery query= new JavaSearchQuery(new PatternQuerySpecification(methodName, IJavaSearchConstants.METHOD, true, IJavaSearchConstants.REFERENCES, JavaSearchScopeFactory.getInstance().createWorkspaceScope(true), "workspace scope"));
 		NewSearchUI.runQueryInForeground(null, query);
 		return query;

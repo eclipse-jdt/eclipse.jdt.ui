@@ -196,7 +196,6 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 		}
 		
 		NLSSearchQuery query= new NLSSearchQuery(data.wrapperClass, data.propertyFile, scope, scopeDescription);
-		NewSearchUI.activateSearchResultView();
 		NewSearchUI.runQueryInBackground(query); // NLSSearchQuery can be run in background
 		return true;
 	}

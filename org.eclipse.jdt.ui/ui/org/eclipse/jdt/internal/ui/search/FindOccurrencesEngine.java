@@ -113,7 +113,6 @@ public abstract class FindOccurrencesEngine {
 	}
 	
 	private void performNewSearch(IOccurrencesFinder finder, IDocument document, IJavaElement element) {
-		NewSearchUI.activateSearchResultView();
 		NewSearchUI.runQueryInBackground(new OccurrencesSearchQuery(finder, document, element));
 	}
 }

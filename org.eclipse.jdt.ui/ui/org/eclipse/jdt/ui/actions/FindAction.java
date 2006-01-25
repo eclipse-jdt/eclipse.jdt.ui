@@ -25,8 +25,6 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.progress.IProgressService;
 
-import org.eclipse.search.ui.NewSearchUI;
-
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -283,7 +281,6 @@ public abstract class FindAction extends SelectionDispatchAction {
 	private void performNewSearch(IJavaElement element) throws JavaModelException {
 		JavaSearchQuery query= new JavaSearchQuery(createQuery(element));
 		if (query != null) {
-			NewSearchUI.activateSearchResultView();
 			if (query.canRunInBackground()) {
 				/*
 				 * This indirection with Object as parameter is needed to prevent the loading
