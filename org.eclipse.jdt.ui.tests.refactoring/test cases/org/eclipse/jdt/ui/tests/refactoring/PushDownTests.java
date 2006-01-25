@@ -21,6 +21,8 @@ import junit.framework.TestSuite;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IMember;
@@ -31,8 +33,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring.MemberActionInfo;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor.MemberActionInfo;
 
 public class PushDownTests extends RefactoringTest {
 
@@ -57,7 +59,9 @@ public class PushDownTests extends RefactoringTest {
 	}
 
 	private static PushDownRefactoring createRefactoring(IMember[] members) throws JavaModelException{
-		return (RefactoringAvailabilityTester.isPushDownAvailable(members) ? new PushDownRefactoring(members) : null);
+		if (RefactoringAvailabilityTester.isPushDownAvailable(members))
+			return new PushDownRefactoring(new PushDownRefactoringProcessor(members));
+		return null;
 	}
 
 	private PushDownRefactoring createRefactoringPrepareForInputCheck(String[] selectedMethodNames, String[][] selectedMethodSignatures, 
@@ -85,7 +89,7 @@ public class PushDownTests extends RefactoringTest {
 		List membersToPushDown= Arrays.asList(merge(methodsToPushDown, fieldsToPushDown));
 		List methodsToDeclareAbstract= Arrays.asList(findMethods(selectedMethods, namesOfMethodsToDeclareAbstract, signaturesOfMethodsToDeclareAbstract));
 		
-		PushDownRefactoring.MemberActionInfo[] infos= ref.getMemberActionInfos();
+		MemberActionInfo[] infos= ref.getPushDownProcessor().getMemberActionInfos();
 		for (int i= 0; i < infos.length; i++) {
 			if (membersToPushDown.contains(infos[i].getMember())){
 				infos[i].setAction(MemberActionInfo.PUSH_DOWN_ACTION);
@@ -213,9 +217,10 @@ public class PushDownTests extends RefactoringTest {
 			PushDownRefactoring ref= createRefactoring(members);
 			assertTrue("activation", ref.checkInitialConditions(new NullProgressMonitor()).isOK());
 
-			ref.computeAdditionalRequiredMembersToPushDown(new NullProgressMonitor());
+			final PushDownRefactoringProcessor processor= ref.getPushDownProcessor();
+			processor.computeAdditionalRequiredMembersToPushDown(new NullProgressMonitor());
 			List required= getMembersToPushDown(ref);
-			ref.getMemberActionInfos();
+			processor.getMemberActionInfos();
 			IField[] expectedFields= getFields(type, expectedFieldNames);
 			IMethod[] expectedMethods= getMethods(type, expectedMethodNames, expectedMethodSignatures);
 			List expected= Arrays.asList(merge(expectedFields, expectedMethods));
@@ -235,7 +240,7 @@ public class PushDownTests extends RefactoringTest {
 	}
 	
 	private static List getMembersToPushDown(PushDownRefactoring ref){
-		MemberActionInfo[] infos= ref.getMemberActionInfos();
+		MemberActionInfo[] infos= ref.getPushDownProcessor().getMemberActionInfos();
 		List result= new ArrayList(infos.length);
 		for (int i= 0; i < infos.length; i++) {
 			if (infos[i].isToBePushedDown())

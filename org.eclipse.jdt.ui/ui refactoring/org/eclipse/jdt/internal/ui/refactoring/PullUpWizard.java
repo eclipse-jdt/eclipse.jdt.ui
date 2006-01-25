@@ -85,6 +85,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IMemberActionInfo;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -381,7 +382,7 @@ public class PullUpWizard extends RefactoringWizard {
 			gd.horizontalSpan= 2;
 			fCreateStubsButton.setLayoutData(gd);
 			fCreateStubsButton.setEnabled(false);
-			fCreateStubsButton.setSelection(getPullUpRefactoring().getCreateMethodStubs());
+			fCreateStubsButton.setSelection(getPullUpRefactoring().getPullUpProcessor().getCreateMethodStubs());
 		}
 
 		private void createSpacer(Composite parent) {
@@ -420,7 +421,7 @@ public class PullUpWizard extends RefactoringWizard {
 			label.setLayoutData(new GridData());
 		
 			fSuperclassCombo= new Combo(parent, SWT.READ_ONLY);
-			fSuperclasses= getPullUpRefactoring().getPossibleTargetClasses(new RefactoringStatus(), pm);
+			fSuperclasses= getPullUpRefactoring().getPullUpProcessor().getPossibleTargetClasses(new RefactoringStatus(), pm);
 			Assert.isTrue(fSuperclasses.length > 0);
 			for (int i= 0; i < fSuperclasses.length; i++) {
 				String comboLabel= JavaModelUtil.getFullyQualifiedName(fSuperclasses[i]);
@@ -597,7 +598,7 @@ public class PullUpWizard extends RefactoringWizard {
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, new IRunnableWithProgress() {
 					public void run(IProgressMonitor pm) throws InvocationTargetException {
 						try {
-							markAsMembersToPullUp(getPullUpRefactoring().getAdditionalRequiredMembersToPullUp(pm), true);						
+							markAsMembersToPullUp(getPullUpRefactoring().getPullUpProcessor().getAdditionalRequiredMembersToPullUp(pm), true);						
 						} catch (JavaModelException e) {
 							throw new InvocationTargetException(e);
 						} finally {
@@ -663,7 +664,7 @@ public class PullUpWizard extends RefactoringWizard {
 
 		
 			setTableInput();
-			markAsMembersToPullUp(getPullUpRefactoring().getMembersToMove(), false);
+			markAsMembersToPullUp(getPullUpRefactoring().getPullUpProcessor().getMembersToMove(), false);
 			setupCellEditors(table);
 		}
 
@@ -684,8 +685,9 @@ public class PullUpWizard extends RefactoringWizard {
 		}
 
 		private MemberActionInfo[] convertPullableMemberToMemberActionInfoArray() {
-			List toPullUp= Arrays.asList(getPullUpRefactoring().getMembersToMove());
-			IMember[] members= getPullUpRefactoring().getPullableMembersOfDeclaringType();
+			final PullUpRefactoringProcessor processor= getPullUpRefactoring().getPullUpProcessor();
+			List toPullUp= Arrays.asList(processor.getMembersToMove());
+			IMember[] members= processor.getPullableMembersOfDeclaringType();
 			MemberActionInfo[] result= new MemberActionInfo[members.length];
 			for (int i= 0; i < members.length; i++) {
 				IMember member= members[i];
@@ -772,11 +774,12 @@ public class PullUpWizard extends RefactoringWizard {
 		}
 	
 		private void initializeRefactoring() {
-			getPullUpRefactoring().setMembersToMove(getMembersToPullUp());
-			getPullUpRefactoring().setMethodsToDeclareAbstract(getMethodsToDeclareAbstract());
-			getPullUpRefactoring().setTargetClass(getSelectedClass());
-			getPullUpRefactoring().setCreateMethodStubs(fCreateStubsButton.getSelection());
-			getPullUpRefactoring().setMethodsToDelete(getMethodsToPullUp());
+			final PullUpRefactoringProcessor processor= getPullUpRefactoring().getPullUpProcessor();
+			processor.setMembersToMove(getMembersToPullUp());
+			processor.setMethodsToDeclareAbstract(getMethodsToDeclareAbstract());
+			processor.setTargetClass(getSelectedClass());
+			processor.setCreateMethodStubs(fCreateStubsButton.getSelection());
+			processor.setMethodsToDelete(getMethodsToPullUp());
 		}
 	
 		private IType getSelectedClass() {
@@ -1059,8 +1062,9 @@ public class PullUpWizard extends RefactoringWizard {
 	
 		public void checkPulledUp() {
 			uncheckAll();
-			fTreeViewer.setCheckedElements(getPullUpMethodsRefactoring().getMembersToMove());
-			IType parent= getPullUpMethodsRefactoring().getDeclaringType();
+			final PullUpRefactoringProcessor processor= getPullUpMethodsRefactoring().getPullUpProcessor();
+			fTreeViewer.setCheckedElements(processor.getMembersToMove());
+			IType parent= processor.getDeclaringType();
 			fTreeViewer.setChecked(parent, true);
 			checkAllParents(parent);
 		}
@@ -1159,7 +1163,7 @@ public class PullUpWizard extends RefactoringWizard {
 		}
 
 		private void initializeRefactoring() {
-			getPullUpMethodsRefactoring().setMethodsToDelete(getCheckedMethods());
+			getPullUpMethodsRefactoring().getPullUpProcessor().setMethodsToDelete(getCheckedMethods());
 		} 
 	
 	  private IMethod[] getCheckedMethods(){
@@ -1228,7 +1232,7 @@ public class PullUpWizard extends RefactoringWizard {
 		}
 	
 		private String getSupertypeSignature(){
-				return JavaElementUtil.createSignature(getPullUpMethodsRefactoring().getTargetClass());
+				return JavaElementUtil.createSignature(getPullUpMethodsRefactoring().getPullUpProcessor().getTargetClass());
 		}
 
 		private void createTreeViewer(Composite composite) {
@@ -1251,7 +1255,7 @@ public class PullUpWizard extends RefactoringWizard {
 		}
 	
 		private void precheckElements(final PullUpTreeViewer treeViewer) {
-			IMember[] members= getPullUpMethodsRefactoring().getMembersToMove();
+			IMember[] members= getPullUpMethodsRefactoring().getPullUpProcessor().getMembersToMove();
 			for (int i= 0; i < members.length; i++) {
 				treeViewer.setCheckState(members[i], true);
 			}
@@ -1259,11 +1263,12 @@ public class PullUpWizard extends RefactoringWizard {
 
 		private void initializeTreeViewer(IProgressMonitor pm) {
 			try {
-				IMember[] matchingMethods= getPullUpMethodsRefactoring().getMatchingElements(new SubProgressMonitor(pm, 1), false);
-				ITypeHierarchy hierarchy= getPullUpMethodsRefactoring().getTypeHierarchyOfTargetClass(new SubProgressMonitor(pm, 1));
+				final PullUpRefactoringProcessor processor= getPullUpMethodsRefactoring().getPullUpProcessor();
+				IMember[] matchingMethods= processor.getMatchingElements(new SubProgressMonitor(pm, 1), false);
+				ITypeHierarchy hierarchy= processor.getTypeHierarchyOfTargetClass(new SubProgressMonitor(pm, 1));
 				removeAllTreeViewFilters();
 				fTreeViewer.addFilter(new PullUpFilter(hierarchy, matchingMethods));
-				fTreeViewer.setContentProvider(new PullUpHierarchyContentProvider(getPullUpMethodsRefactoring().getDeclaringType(), matchingMethods));
+				fTreeViewer.setContentProvider(new PullUpHierarchyContentProvider(processor.getDeclaringType(), matchingMethods));
 				fTreeViewer.setInput(hierarchy);
 				precheckElements(fTreeViewer);
 				fTreeViewer.expandAll();

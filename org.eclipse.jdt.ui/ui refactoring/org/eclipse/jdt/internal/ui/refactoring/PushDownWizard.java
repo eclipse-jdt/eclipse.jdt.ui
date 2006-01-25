@@ -20,8 +20,6 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -59,21 +57,23 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
+import org.eclipse.jdt.core.JavaModelException;
+
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
-import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring.MemberActionInfo;
+import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor.MemberActionInfo;
 import org.eclipse.jdt.internal.corext.util.Messages;
+
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 public class PushDownWizard extends RefactoringWizard {
 
@@ -83,9 +83,6 @@ public class PushDownWizard extends RefactoringWizard {
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REFACTOR_PULL_UP);//XXX incorrect icon
 	}
 
-	/* non java-doc
-	 * @see RefactoringWizard#addUserInputPages
-	 */ 
 	protected void addUserInputPages(){
 		addPage(new PushDownInputPage());
 	}
@@ -93,9 +90,7 @@ public class PushDownWizard extends RefactoringWizard {
 	private static class PushDownInputPage extends UserInputWizardPage {
 	
 		private class PushDownCellModifier implements ICellModifier {
-			/*
-			 * @see org.eclipse.jface.viewers.ICellModifier#getValue(java.lang.Object, java.lang.String)
-			 */
+
 			public Object getValue(Object element, String property) {
 				if (! ACTION_PROPERTY.equals(property))
 					return null;
@@ -103,17 +98,13 @@ public class PushDownWizard extends RefactoringWizard {
 				MemberActionInfo mac= (MemberActionInfo)element;
 				return new Integer(mac.getAction());
 			}
-			/*
-			 * @see org.eclipse.jface.viewers.ICellModifier#canModify(java.lang.Object, java.lang.String)
-			 */
+
 			public boolean canModify(Object element, String property) {
 				if (! ACTION_PROPERTY.equals(property))
 					return false;
 				return ((MemberActionInfo)element).isEditable();
 			}
-			/*
-			 * @see org.eclipse.jface.viewers.ICellModifier#modify(java.lang.Object, java.lang.String, java.lang.Object)
-			 */
+
 			public void modify(Object element, String property, Object value) {
 				if (! ACTION_PROPERTY.equals(property))
 					return;
@@ -134,9 +125,6 @@ public class PushDownWizard extends RefactoringWizard {
 		private static class MemberActionInfoLabelProvider extends LabelProvider implements ITableLabelProvider {
 			private final ILabelProvider fJavaElementLabelProvider= new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT | JavaElementLabelProvider.SHOW_SMALL_ICONS);
 
-			/*
-			 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnText(java.lang.Object, int)
-			 */
 			public String getColumnText(Object element, int columnIndex) {
 				MemberActionInfo mac= (MemberActionInfo)element;
 				switch (columnIndex) {
@@ -172,9 +160,6 @@ public class PushDownWizard extends RefactoringWizard {
 				}
 			}
 
-			/* 
-			 * @see org.eclipse.jface.viewers.ITableLabelProvider#getColumnImage(java.lang.Object, int)
-			 */
 			public Image getColumnImage(Object element, int columnIndex) {
 				MemberActionInfo mac= (MemberActionInfo)element;
 				switch (columnIndex) {
@@ -185,9 +170,7 @@ public class PushDownWizard extends RefactoringWizard {
 						return null;
 				}
 			}
-			/*
-			 * @see org.eclipse.jface.viewers.IBaseLabelProvider#dispose()
-			 */
+
 			public void dispose() {
 				super.dispose();
 				fJavaElementLabelProvider.dispose();
@@ -210,9 +193,6 @@ public class PushDownWizard extends RefactoringWizard {
 			super(PAGE_NAME);
 		}
 
-		/*
-		 * @see org.eclipse.jface.dialogs.IDialogPage#createControl(org.eclipse.swt.widgets.Composite)
-		 */
 		public void createControl(Composite parent) {
 			Composite composite= new Composite(parent, SWT.NONE);
 			GridLayout gl= new GridLayout();
@@ -306,16 +286,16 @@ public class PushDownWizard extends RefactoringWizard {
 			});
 
 		
-			fTableViewer.setInput(getPushDownRefactoring().getMemberActionInfos());
+			fTableViewer.setInput(getPushDownRefactoring().getPushDownProcessor().getMemberActionInfos());
 			updateUIElements(null, false);
 			setupCellEditors(table);
 		}
 
 		private MemberActionInfo[] getActiveInfos() {
-			MemberActionInfo[] infos= getPushDownRefactoring().getMemberActionInfos();
+			MemberActionInfo[] infos= getPushDownRefactoring().getPushDownProcessor().getMemberActionInfos();
 			List result= new ArrayList(infos.length);
 			for (int i= 0; i < infos.length; i++) {
-				PushDownRefactoring.MemberActionInfo info= infos[i];
+				MemberActionInfo info= infos[i];
 				if (info.isActive())
 					result.add(info);
 			}
@@ -380,7 +360,7 @@ public class PushDownWizard extends RefactoringWizard {
 				PlatformUI.getWorkbench().getActiveWorkbenchWindow().run(false, false, new IRunnableWithProgress() {
 					public void run(IProgressMonitor pm) throws InvocationTargetException {
 						try {
-							getPushDownRefactoring().computeAdditionalRequiredMembersToPushDown(pm);
+							getPushDownRefactoring().getPushDownProcessor().computeAdditionalRequiredMembersToPushDown(pm);
 							updateUIElements(null, true);
 						} catch (JavaModelException e) {
 							throw new InvocationTargetException(e);
@@ -551,10 +531,7 @@ public class PushDownWizard extends RefactoringWizard {
 		private PushDownRefactoring getPushDownRefactoring(){
 			return (PushDownRefactoring)getRefactoring();
 		}
-	
-		/* (non-Javadoc)
-		 * @see org.eclipse.jface.dialogs.IDialogPage#setVisible(boolean)
-		 */
+
 		public void setVisible(boolean visible) {
 			super.setVisible(visible);
 			if (visible){

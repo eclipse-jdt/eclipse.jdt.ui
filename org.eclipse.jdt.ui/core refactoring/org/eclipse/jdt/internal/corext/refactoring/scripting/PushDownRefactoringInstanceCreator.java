@@ -17,6 +17,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringInstanceCreator;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor;
 
 /**
  * Refactoring instance creator for the push down refactoring.
@@ -29,6 +30,6 @@ public final class PushDownRefactoringInstanceCreator extends RefactoringInstanc
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(final RefactoringDescriptor descriptor) throws CoreException {
-		return new PushDownRefactoring(null);
+		return new PushDownRefactoring(new PushDownRefactoringProcessor(null));
 	}
 }

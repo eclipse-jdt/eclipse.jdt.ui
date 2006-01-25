@@ -63,7 +63,6 @@ import org.eclipse.jdt.internal.corext.refactoring.typeconstraints2.ITypeConstra
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -118,9 +117,6 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	/** The supertype as replacement */
 	private IType fSuperType= null;
 
-	/** The supertypes of the subtype */
-	private IType[] fSuperTypes= null;
-
 	/**
 	 * Creates a new super type processor.
 	 * 
@@ -173,7 +169,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 		try {
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.UseSuperTypeProcessor_checking);
-			fSuperTypes= JavaModelUtil.getAllSuperTypes(fSubType, new SubProgressMonitor(monitor, 1));
+			// No checks
 		} finally {
 			monitor.done();
 		}
@@ -333,15 +329,6 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	 */
 	public final IType getSuperType() {
 		return fSuperType;
-	}
-
-	/**
-	 * Returns the supertypes as possible replacements.
-	 * 
-	 * @return the supertypes as replacements
-	 */
-	public final IType[] getSuperTypes() {
-		return fSuperTypes;
 	}
 
 	/*

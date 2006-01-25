@@ -17,6 +17,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringInstanceCreator;
 
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 
 /**
  * Refactoring instance creator for the pull up refactoring.
@@ -29,6 +30,6 @@ public final class PullUpRefactoringInstanceCreator extends RefactoringInstanceC
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(final RefactoringDescriptor descriptor) throws CoreException {
-		return new PullUpRefactoring(null, null);
+		return new PullUpRefactoring(new PullUpRefactoringProcessor(null, null));
 	}
 }

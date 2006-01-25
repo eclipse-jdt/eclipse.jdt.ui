@@ -76,7 +76,9 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodP
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveInstanceMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.PullUpRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.structure.PushDownRefactoringProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.structure.UseSuperTypeRefactoring;
 
@@ -153,13 +155,15 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startChangeSignatureRefactoring(final IMethod method, final SelectionDispatchAction action, final Shell shell) throws JavaModelException {
-		final ChangeSignatureRefactoring change= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
-		if (!ActionUtil.isProcessable(shell, change.getMethod()))
+		if (!RefactoringAvailabilityTester.isChangeSignatureAvailable(method))
+			return;
+		final ChangeSignatureRefactoring refactoring= new ChangeSignatureRefactoring(method);
+		if (!ActionUtil.isProcessable(shell, refactoring.getMethod()))
 			return;
 		final UserInterfaceStarter starter= new UserInterfaceStarter() {
 
-			public final void activate(final Refactoring refactoring, final Shell parent, final boolean save) throws CoreException {
-				final RefactoringStatus status= refactoring.checkInitialConditions(new NullProgressMonitor());
+			public final void activate(final Refactoring ref, final Shell parent, final boolean save) throws CoreException {
+				final RefactoringStatus status= ref.checkInitialConditions(new NullProgressMonitor());
 				if (status.hasFatalError()) {
 					final RefactoringStatusEntry entry= status.getEntryMatchingSeverity(RefactoringStatus.FATAL);
 					if (entry.getCode() == RefactoringStatusCodes.OVERRIDES_ANOTHER_METHOD || entry.getCode() == RefactoringStatusCodes.METHOD_DECLARED_IN_INTERFACE) {
@@ -184,12 +188,12 @@ public final class RefactoringExecutionStarter {
 						return;
 					}
 				}
-				super.activate(refactoring, parent, save);
+				super.activate(ref, parent, save);
 			}
 		};
-		starter.initialize(new ChangeSignatureWizard(change));
+		starter.initialize(new ChangeSignatureWizard(refactoring));
 		try {
-			starter.activate(change, shell, true);
+			starter.activate(refactoring, shell, true);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.OpenRefactoringWizardAction_refactoring, RefactoringMessages.RefactoringStarter_unexpected_exception);
 		}
@@ -197,14 +201,11 @@ public final class RefactoringExecutionStarter {
 
 	public static void startChangeTypeRefactoring(final ICompilationUnit unit, final Shell shell, final int offset, final int length) throws JavaModelException {
 		final ChangeTypeRefactoring refactoring= new ChangeTypeRefactoring(unit, offset, length);
-		if (refactoring != null)
-			new RefactoringStarter().activate(refactoring, new ChangeTypeWizard(refactoring), shell, RefactoringMessages.ChangeTypeAction_dialog_title, false);
+		new RefactoringStarter().activate(refactoring, new ChangeTypeWizard(refactoring), shell, RefactoringMessages.ChangeTypeAction_dialog_title, false);
 	}
 
 	public static void startConvertAnonymousRefactoring(final ICompilationUnit unit, final int offset, final int length, final Shell shell) throws JavaModelException {
 		final ConvertAnonymousToNestedRefactoring refactoring= new ConvertAnonymousToNestedRefactoring(unit, offset, length);
-		if (refactoring == null)
-			return;
 		new RefactoringStarter().activate(refactoring, new ConvertAnonymousToNestedWizard(refactoring), shell, RefactoringMessages.ConvertAnonymousToNestedAction_dialog_title, false);
 	}
 
@@ -228,12 +229,12 @@ public final class RefactoringExecutionStarter {
 	}
 
 	public static void startInferTypeArgumentsRefactoring(final IJavaElement[] elements, final Shell shell) {
-		if (! ActionUtil.areProcessable(shell, elements))
+		if (!ActionUtil.areProcessable(shell, elements))
 			return;
 		try {
-			final InferTypeArgumentsRefactoring refactoring= ((RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements)) ? new InferTypeArgumentsRefactoring(elements) : null);
-			if (refactoring == null)
+			if (!RefactoringAvailabilityTester.isInferTypeArgumentsAvailable(elements))
 				return;
+			final InferTypeArgumentsRefactoring refactoring= new InferTypeArgumentsRefactoring(elements);
 			new RefactoringStarter().activate(refactoring, new InferTypeArgumentsWizard(refactoring), shell, RefactoringMessages.InferTypeArgumentsAction_dialog_title, true);
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, RefactoringMessages.InferTypeArgumentsAction_dialog_title, RefactoringMessages.OpenRefactoringWizardAction_exception);
@@ -281,26 +282,23 @@ public final class RefactoringExecutionStarter {
 	
 	public static void startIntroduceIndirectionRefactoring(final ICompilationUnit unit, final int offset, final int length, final Shell shell) throws JavaModelException {
 		final IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(unit, offset, length);
-		if (refactoring != null) 
-			new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
+		new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
 	}
 	
 	public static void startIntroduceIndirectionRefactoring(final IClassFile file, final int offset, final int length, final Shell shell) throws JavaModelException {
 		final IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(file, offset, length);
-		if (refactoring != null) 
-			new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
+		new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
 	}
 	
 	public static void startIntroduceIndirectionRefactoring(final IMethod method, final Shell shell) throws JavaModelException {
 		final IntroduceIndirectionRefactoring refactoring= new IntroduceIndirectionRefactoring(method);
-		if (refactoring != null) 
-			new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
+		new RefactoringStarter().activate(refactoring, new IntroduceIndirectionWizard(refactoring, RefactoringMessages.IntroduceIndirectionAction_dialog_title), shell, RefactoringMessages.IntroduceIndirectionAction_dialog_title, true);
 	}
 
 	public static void startMoveInnerRefactoring(final IType type, final Shell shell) throws JavaModelException {
-		final MoveInnerToTopRefactoring refactoring= (RefactoringAvailabilityTester.isMoveInnerAvailable(type) ? new MoveInnerToTopRefactoring(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject())) : null);
-		if (refactoring == null)
+		if (!RefactoringAvailabilityTester.isMoveInnerAvailable(type))
 			return;
+		final MoveInnerToTopRefactoring refactoring= new MoveInnerToTopRefactoring(type, JavaPreferencesSettings.getCodeGenerationSettings(type.getJavaProject()));
 		if (!ActionUtil.isProcessable(shell, refactoring.getInputType()))
 			return;
 		new RefactoringStarter().activate(refactoring, new MoveInnerToTopWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
@@ -308,41 +306,40 @@ public final class RefactoringExecutionStarter {
 
 	public static void startMoveMethodRefactoring(final IMethod method, final Shell shell) throws JavaModelException {
 		final MoveInstanceMethodRefactoring refactoring= new MoveInstanceMethodRefactoring(new MoveInstanceMethodProcessor(method, JavaPreferencesSettings.getCodeGenerationSettings(method.getJavaProject())));
-		if (refactoring == null)
-			MessageDialog.openInformation(shell, RefactoringMessages.MoveInstanceMethodAction_dialog_title, RefactoringMessages.MoveInstanceMethodAction_No_reference_or_declaration);
-		else
-			new RefactoringStarter().activate(refactoring, new MoveInstanceMethodWizard(refactoring), shell, RefactoringMessages.MoveInstanceMethodAction_dialog_title, true);
+		new RefactoringStarter().activate(refactoring, new MoveInstanceMethodWizard(refactoring), shell, RefactoringMessages.MoveInstanceMethodAction_dialog_title, true);
 	}
 
 	public static void startMoveStaticMembersRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
+		if (!RefactoringAvailabilityTester.isMoveStaticAvailable(members))
+			return;
 		final Set set= new HashSet();
 		set.addAll(Arrays.asList(members));
 		final IMember[] elements= (IMember[]) set.toArray(new IMember[set.size()]);
 		IJavaProject project= null;
 		if (elements.length > 0)
 			project= elements[0].getJavaProject();
-		final JavaMoveRefactoring refactoring= new JavaMoveRefactoring((RefactoringAvailabilityTester.isMoveStaticMembersAvailable(elements) ? new MoveStaticMembersProcessor(elements, JavaPreferencesSettings.getCodeGenerationSettings(project)) : null));
+		final JavaMoveRefactoring refactoring= new JavaMoveRefactoring(new MoveStaticMembersProcessor(elements, JavaPreferencesSettings.getCodeGenerationSettings(project)));
 		if (ActionUtil.isProcessable(shell, ((MoveStaticMembersProcessor) refactoring.getAdapter(MoveStaticMembersProcessor.class)).getMembersToMove()[0].getCompilationUnit()))
 			new RefactoringStarter().activate(refactoring, new MoveMembersWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
 
 	public static void startPullUpRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
+		if (!RefactoringAvailabilityTester.isPullUpAvailable(members))
+			return;
 		IJavaProject project= null;
 		if (members != null && members.length > 0)
 			project= members[0].getJavaProject();
-		final PullUpRefactoring refactoring= (RefactoringAvailabilityTester.isPullUpAvailable(members) ? new PullUpRefactoring(members, JavaPreferencesSettings.getCodeGenerationSettings(project)) : null);
-		if (refactoring == null)
-			return;
-		if (!ActionUtil.isProcessable(shell, refactoring.getDeclaringType()))
+		final PullUpRefactoring refactoring= new PullUpRefactoring(new PullUpRefactoringProcessor(members, JavaPreferencesSettings.getCodeGenerationSettings(project)));
+		if (!ActionUtil.isProcessable(shell, refactoring.getPullUpProcessor().getDeclaringType()))
 			return;
 		new RefactoringStarter().activate(refactoring, new PullUpWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
 
 	public static void startPushDownRefactoring(final IMember[] members, final Shell shell) throws JavaModelException {
-		final PushDownRefactoring refactoring= (RefactoringAvailabilityTester.isPushDownAvailable(members) ? new PushDownRefactoring(members) : null);
-		if (refactoring == null)
+		if (!RefactoringAvailabilityTester.isPushDownAvailable(members))
 			return;
-		if (!ActionUtil.isProcessable(shell, refactoring.getDeclaringType()))
+		final PushDownRefactoring refactoring= new PushDownRefactoring(new PushDownRefactoringProcessor(members));
+		if (!ActionUtil.isProcessable(shell, refactoring.getPushDownProcessor().getDeclaringType()))
 			return;
 		new RefactoringStarter().activate(refactoring, new PushDownWizard(refactoring), shell, RefactoringMessages.OpenRefactoringWizardAction_refactoring, true);
 	}
@@ -374,9 +371,9 @@ public final class RefactoringExecutionStarter {
 		if (!ActionUtil.isProcessable(shell, field))
 			return;
 		try {
-			final SelfEncapsulateFieldRefactoring refactoring= ((Checks.checkAvailability(field).hasFatalError() || !RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field)) ? null : new SelfEncapsulateFieldRefactoring(field));
-			if (refactoring == null)
+			if (!RefactoringAvailabilityTester.isSelfEncapsulateAvailable(field))
 				return;
+			final SelfEncapsulateFieldRefactoring refactoring= new SelfEncapsulateFieldRefactoring(field);
 			new RefactoringStarter().activate(refactoring, new SelfEncapsulateFieldWizard(refactoring), shell, ActionMessages.SelfEncapsulateFieldAction_dialog_title, true);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, ActionMessages.SelfEncapsulateFieldAction_dialog_title, ActionMessages.SelfEncapsulateFieldAction_dialog_cannot_perform);
