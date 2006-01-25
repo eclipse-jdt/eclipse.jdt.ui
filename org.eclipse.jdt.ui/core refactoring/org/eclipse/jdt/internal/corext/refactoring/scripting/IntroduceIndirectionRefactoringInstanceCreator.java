@@ -16,8 +16,7 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringInstanceCreator;
 
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.structure.ExtractInterfaceRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.code.IntroduceIndirectionRefactoring;
 
 /**
  * Refactoring instance creator for the introduce indirection refactoring.
@@ -30,6 +29,6 @@ public final class IntroduceIndirectionRefactoringInstanceCreator extends Refact
 	 * {@inheritDoc}
 	 */
 	public final Refactoring createRefactoring(final RefactoringDescriptor descriptor) throws CoreException {
-		return new ExtractInterfaceRefactoring(new ExtractInterfaceProcessor(null, null));
+		return new IntroduceIndirectionRefactoring(null);
 	}
 }
