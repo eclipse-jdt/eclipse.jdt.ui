@@ -314,7 +314,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 		
 	}
 	
-	public static ASTNode[] inferArguments(SimpleType[] types, InferTypeArgumentsUpdate update, InferTypeArgumentsTCModel model, CompilationUnitRewrite rewrite) {
+	public static ParameterizedType[] inferArguments(SimpleType[] types, InferTypeArgumentsUpdate update, InferTypeArgumentsTCModel model, CompilationUnitRewrite rewrite) {
 		List result= new ArrayList();
 		HashMap/*<ICompilationUnit, CuUpdate>*/ updates= update.getUpdates();
 		Set entrySet= updates.entrySet();
@@ -327,15 +327,15 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 			
 			for (Iterator cvIter= cuUpdate.getDeclarations().iterator(); cvIter.hasNext();) {
 				ConstraintVariable2 cv= (ConstraintVariable2) cvIter.next();
-				ASTNode newNode= rewriteConstraintVariable(cv, rewrite, model, false, types);
+				ParameterizedType newNode= rewriteConstraintVariable(cv, rewrite, model, false, types);
 				if (newNode != null)
 					result.add(newNode);
 			}
 		}
-		return (ASTNode[])result.toArray(new ASTNode[result.size()]);
+		return (ParameterizedType[])result.toArray(new ParameterizedType[result.size()]);
 	}
 
-	private static ASTNode rewriteConstraintVariable(ConstraintVariable2 cv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw, SimpleType[] types) {
+	private static ParameterizedType rewriteConstraintVariable(ConstraintVariable2 cv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw, SimpleType[] types) {
 		if (cv instanceof CollectionElementVariable2) {
 			ConstraintVariable2 parentElement= ((CollectionElementVariable2) cv).getParentConstraintVariable();
 			if (parentElement instanceof TypeVariable2) {
@@ -348,7 +348,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 		return null;
 	}
 
-	private static ASTNode rewriteTypeVariable(TypeVariable2 typeCv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw, SimpleType[] types) {
+	private static ParameterizedType rewriteTypeVariable(TypeVariable2 typeCv, CompilationUnitRewrite rewrite, InferTypeArgumentsTCModel tCModel, boolean leaveUnconstraindRaw, SimpleType[] types) {
 		ASTNode node= typeCv.getRange().getNode(rewrite.getRoot());
 		if (node instanceof Name && node.getParent() instanceof Type) {
 			Type originalType= (Type) node.getParent();
