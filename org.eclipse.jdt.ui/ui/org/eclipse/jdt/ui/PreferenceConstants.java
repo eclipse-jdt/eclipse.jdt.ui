@@ -3511,7 +3511,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.CODEASSIST_AUTOACTIVATION_TRIGGERS_JAVADOC, "@#"); //$NON-NLS-1$
 		store.setDefault(PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_CASE_SENSITIVITY, false);
-		store.setDefault(PreferenceConstants.CODEASSIST_ORDER_PROPOSALS, false);
 		store.setDefault(PreferenceConstants.CODEASSIST_ADDIMPORT, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_INSERT_COMPLETION, true);
 		store.setDefault(PreferenceConstants.CODEASSIST_FILL_ARGUMENT_NAMES, true);

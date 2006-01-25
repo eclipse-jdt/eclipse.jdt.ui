@@ -54,8 +54,6 @@ public class ContentAssistPreference {
 
 	/** Preference key for visibility of proposals */
 	private final static String SHOW_VISIBLE_PROPOSALS= PreferenceConstants.CODEASSIST_SHOW_VISIBLE_PROPOSALS;
-	/** Preference key for alphabetic ordering of proposals */
-	private final static String ORDER_PROPOSALS= PreferenceConstants.CODEASSIST_ORDER_PROPOSALS;
 	/** Preference key for case sensitivity of proposals */
 	private final static String CASE_SENSITIVITY= PreferenceConstants.CODEASSIST_CASE_SENSITIVITY;
 	/** Preference key for adding imports on code assist */

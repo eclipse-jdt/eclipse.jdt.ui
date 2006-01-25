@@ -523,6 +523,21 @@ public class JavaPlugin extends AbstractUIPlugin {
 		}
 		
 		ProfileStore.checkCurrentOptionsVersion();
+		
+		/*
+		 * Backward compatibility: migrate "alphabetic ordering" preference to point the sorter
+		 * preference to the alphabetic sorter.
+		 */
+		String proposalOrderMigrated= "proposalOrderMigrated"; //$NON-NLS-1$
+		if (store.contains(PreferenceConstants.CODEASSIST_ORDER_PROPOSALS)) {
+			if (!store.getBoolean(proposalOrderMigrated)) {
+				boolean alphabetic= store.getBoolean(PreferenceConstants.CODEASSIST_ORDER_PROPOSALS);
+				if (alphabetic)
+					store.setValue(PreferenceConstants.CODEASSIST_SORTER, "org.eclipse.jdt.ui.AlphabeticSorter"); //$NON-NLS-1$
+			}
+		}
+		store.setValue(proposalOrderMigrated, true);
+
 	}
 	
 	/**
