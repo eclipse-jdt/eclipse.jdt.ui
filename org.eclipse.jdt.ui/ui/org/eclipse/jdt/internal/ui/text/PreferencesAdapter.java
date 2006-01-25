@@ -124,7 +124,7 @@ public class PreferencesAdapter implements IPreferenceStore {
 						display= shell.getDisplay();
 					else
 						display= Display.getDefault();
-					display.syncExec(runnable);
+					display.asyncExec(runnable);
 				}
 			}
 		}
