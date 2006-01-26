@@ -493,7 +493,7 @@ public class BracketInserterTest extends TestCase {
 			protected boolean condition() {
 				return false;
 			}
-		}.waitForCondition(EditorTestHelper.getActiveDisplay(), 100);
+		}.waitForCondition(EditorTestHelper.getActiveDisplay(), 200);
 		
 	}
 
