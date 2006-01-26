@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Vector;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.core.resources.IResource;
 
@@ -42,7 +43,6 @@ import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.util.TransferDragSourceListener;
 import org.eclipse.jface.util.TransferDropTargetListener;
@@ -886,8 +886,8 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 	private MemberFilterActionGroup fMemberFilterActionGroup;
 
-	private ListenerList fSelectionChangedListeners= new ListenerList();
-	private ListenerList fPostSelectionChangedListeners= new ListenerList();
+	private ListenerList fSelectionChangedListeners= new ListenerList(ListenerList.IDENTITY);
+	private ListenerList fPostSelectionChangedListeners= new ListenerList(ListenerList.IDENTITY);
 	private Hashtable fActions= new Hashtable();
 
 	private TogglePresentationAction fTogglePresentation;

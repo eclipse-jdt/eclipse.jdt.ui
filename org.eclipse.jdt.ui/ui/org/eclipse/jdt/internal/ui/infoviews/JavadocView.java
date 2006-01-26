@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.SWT;
@@ -34,7 +35,6 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.MessageDialogWithToggle;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
@@ -171,7 +171,7 @@ public class JavadocView extends AbstractInfoView {
 	private static class SelectionProvider implements ISelectionProvider {
 
 		/** The selection changed listeners. */
-		private ListenerList fListeners= new ListenerList();
+		private ListenerList fListeners= new ListenerList(ListenerList.IDENTITY);
 		/** The widget. */
 		private Control fControl;
 

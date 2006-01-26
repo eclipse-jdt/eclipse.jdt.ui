@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IFile;
@@ -44,7 +45,6 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.preference.IPreferenceStore;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.window.Window;
 
@@ -1164,7 +1164,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * Reconciling listeners.
 	 * @since 3.0
 	 */
-	private ListenerList fReconcilingListeners= new ListenerList();
+	private ListenerList fReconcilingListeners= new ListenerList(ListenerList.IDENTITY);
 
 	/**
 	 * Mutex for the reconciler. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=63898

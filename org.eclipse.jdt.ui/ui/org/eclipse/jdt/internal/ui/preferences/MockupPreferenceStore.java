@@ -11,9 +11,10 @@
 
 package org.eclipse.jdt.internal.ui.preferences;
 
+import org.eclipse.core.runtime.ListenerList;
+
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 /**
@@ -29,7 +30,7 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 public class MockupPreferenceStore implements IPreferenceStore {
 
 	/** Listeners on this store */
-	private ListenerList fListeners= new ListenerList();
+	private ListenerList fListeners= new ListenerList(ListenerList.IDENTITY);
 
 	/**
 	 * {@inheritDoc}

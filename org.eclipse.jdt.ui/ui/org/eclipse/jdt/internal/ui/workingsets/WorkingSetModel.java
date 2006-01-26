@@ -20,11 +20,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.IElementComparer;
 
@@ -230,7 +230,7 @@ public class WorkingSetModel {
 	}
 	
 	private void addListenersToWorkingSetManagers() {
-		fListeners= new ListenerList();
+		fListeners= new ListenerList(ListenerList.IDENTITY);
 		fWorkingSetManagerListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				workingSetManagerChanged(event);

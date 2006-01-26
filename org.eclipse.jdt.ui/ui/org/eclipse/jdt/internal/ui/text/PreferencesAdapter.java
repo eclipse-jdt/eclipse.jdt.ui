@@ -11,6 +11,7 @@
 
 package org.eclipse.jdt.internal.ui.text;
 
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Preferences;
 
 import org.eclipse.swt.widgets.Display;
@@ -18,7 +19,6 @@ import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -48,7 +48,7 @@ public class PreferencesAdapter implements IPreferenceStore {
 	}
 
 	/** Listeners on the adapter */
-	private ListenerList fListeners= new ListenerList();
+	private ListenerList fListeners= new ListenerList(ListenerList.IDENTITY);
 
 	/** Listener on the adapted Preferences */
 	private PropertyChangeListener fListener= new PropertyChangeListener();

@@ -25,6 +25,7 @@ import org.eclipse.core.commands.operations.IUndoContext;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.jobs.Job;
@@ -53,7 +54,6 @@ import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -332,7 +332,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		}
 
 		/** Listeners on on this adapter */
-		private ListenerList fListeners= new ListenerList();
+		private ListenerList fListeners= new ListenerList(ListenerList.IDENTITY);
 
 		/** Listener on the node */
 		private IEclipsePreferences.IPreferenceChangeListener fListener= new PreferenceChangeListener();

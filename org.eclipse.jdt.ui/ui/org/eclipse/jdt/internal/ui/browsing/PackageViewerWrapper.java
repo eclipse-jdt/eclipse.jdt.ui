@@ -12,13 +12,14 @@ package org.eclipse.jdt.internal.ui.browsing;
 
 import java.util.List;
 
+import org.eclipse.core.runtime.ListenerList;
+
 import org.eclipse.swt.events.HelpListener;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Item;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.IBaseLabelProvider;
 import org.eclipse.jface.viewers.IContentProvider;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -34,10 +35,10 @@ import org.eclipse.jface.viewers.ViewerSorter;
 import org.eclipse.jdt.core.IPackageFragment;
 
 /**
- * Wrapper who transfers listneres and filters and to which clients
+ * Wrapper who transfers listeners and filters and to which clients
  * can refer.
  *
- * @deprecated needs to be replaced by a manager who handles transfer of listneres and filters
+ * @deprecated needs to be replaced by a manager who handles transfer of listeners and filters
  */
 class PackageViewerWrapper extends StructuredViewer {
 
@@ -47,9 +48,9 @@ class PackageViewerWrapper extends StructuredViewer {
 	private ListenerList fPostSelectionChangedListenerList;
 
 	public PackageViewerWrapper() {
-		fListenerList= new ListenerList();
-		fPostSelectionChangedListenerList= new ListenerList();
-		fSelectionChangedListenerList= new ListenerList();
+		fListenerList= new ListenerList(ListenerList.IDENTITY);
+		fPostSelectionChangedListenerList= new ListenerList(ListenerList.IDENTITY);
+		fSelectionChangedListenerList= new ListenerList(ListenerList.IDENTITY);
 	}
 
 	public void setViewer(StructuredViewer viewer) {
