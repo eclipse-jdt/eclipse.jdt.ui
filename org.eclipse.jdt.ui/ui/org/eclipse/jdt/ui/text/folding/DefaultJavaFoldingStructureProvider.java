@@ -62,7 +62,6 @@ import org.eclipse.jdt.core.compiler.InvalidInputException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -70,6 +69,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
 import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
+import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
 
 
@@ -783,8 +783,8 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private IJavaElement getInputElement() {
 		IJavaElement javaElement= null;
 		if (fEditor instanceof CompilationUnitEditor) {
-			IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-			javaElement= manager.getWorkingCopy(fEditor.getEditorInput());
+			WorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
+			javaElement= manager.getWorkingCopy(fEditor.getEditorInput(), false);
 			if (javaElement instanceof ICompilationUnit) {
 				ICompilationUnit unit= (ICompilationUnit) javaElement;
 				try {
