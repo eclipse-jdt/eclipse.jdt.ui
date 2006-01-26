@@ -57,45 +57,12 @@ import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.editors.text.templates.ContributionContextTypeRegistry;
 import org.eclipse.ui.editors.text.templates.ContributionTemplateStore;
 
-import org.eclipse.ltk.internal.core.refactoring.history.RefactoringInstanceFactory;
-
 import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 
 import org.eclipse.jdt.internal.corext.javadoc.JavaDocLocations;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.ChangeMethodSignatureRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.ConvertAnonymousRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractConstantRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractInterfaceRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractMethodRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractTempRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.InlineConstantRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.InlineMethodRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.InlineTempRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceFactoryRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceIndirectionRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceParameterRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.MoveMemberTypeRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.MoveMethodRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.MoveStaticMembersRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.PromoteTempToFieldRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.PullUpRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.PushDownRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameCompilationUnitRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameEnumConstRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameFieldRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameJavaProjectRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameLocalVariableRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameMethodRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.RenamePackageRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameResourceRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameSourceFolderRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeParameterRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.SelfEncapsulateRefactoringInstanceCreator;
-import org.eclipse.jdt.internal.corext.refactoring.scripting.UseSupertypeRefactoringInstanceCreator;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
@@ -371,51 +338,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 		});
 
 		ensurePreferenceStoreBackwardsCompatibility();
-		// Initialize refactoring creators
-		registerRefactoringInstanceCreators();
 		// Initialize AST provider
 		getASTProvider();
 		new InitializeAfterLoadJob().schedule();
-	}
-
-	/**
-	 * Registers the refactoring instance creators for the JDT refactorings.
-	 * 
-	 * TODO: use extension point in LTK core
-	 */
-	private static void registerRefactoringInstanceCreators() {
-		final RefactoringInstanceFactory factory= RefactoringInstanceFactory.getInstance();
-		factory.registerCreator("org.eclipse.jdt.ui.rename.resource", new RenameResourceRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.rename.compilationunit", new RenameCompilationUnitRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.rename.enum.constant", new RenameEnumConstRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.rename.field", new RenameFieldRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.rename.java.project", new RenameJavaProjectRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.rename.local.variable", new RenameLocalVariableRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.rename.method", new RenameMethodRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.rename.package", new RenamePackageRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.rename.source.folder", new RenameSourceFolderRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.rename.type.parameter", new RenameTypeParameterRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.rename.type", new RenameTypeRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.change.method.signature", new ChangeMethodSignatureRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.move.method", new MoveMethodRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.move.static", new MoveStaticMembersRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.extract.interface", new ExtractInterfaceRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.use.supertype", new UseSupertypeRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.pull.up", new PullUpRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.push.down", new PushDownRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.convert.anonymous", new ConvertAnonymousRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.move.inner", new MoveMemberTypeRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.inline.method", new InlineMethodRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.inline.temp", new InlineTempRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.inline.constant", new InlineConstantRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.extract.method", new ExtractMethodRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.extract.temp", new ExtractTempRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.extract.constant", new ExtractConstantRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.introduce.parameter", new IntroduceParameterRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.introduce.factory", new IntroduceFactoryRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.introduce.indirection", new IntroduceIndirectionRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.promote.temp", new PromoteTempToFieldRefactoringInstanceCreator()); //$NON-NLS-1$
-		factory.registerCreator("org.eclipse.jdt.ui.self.encapsulate", new SelfEncapsulateRefactoringInstanceCreator()); //$NON-NLS-1$
 	}
 
 	/* package */ static void initializeAfterLoad(IProgressMonitor monitor) {
