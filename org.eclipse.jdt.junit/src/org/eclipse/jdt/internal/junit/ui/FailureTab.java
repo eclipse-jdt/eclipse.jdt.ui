@@ -14,23 +14,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.jdt.junit.ITestRunListener;
+import org.eclipse.core.runtime.ListenerList;
 
-import org.eclipse.jdt.internal.junit.Messages;
-
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.util.ListenerList;
-import org.eclipse.jface.util.OpenStrategy;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -50,6 +35,25 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableItem;
 
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.util.OpenStrategy;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.ui.IWorkbenchActionConstants;
+
+import org.eclipse.debug.core.ILaunchManager;
+
+import org.eclipse.jdt.junit.ITestRunListener;
+
+import org.eclipse.jdt.internal.junit.Messages;
+
 
 /**
  * A tab presenting the failed tests in a table.
@@ -59,7 +63,7 @@ public class FailureTab extends TestRunTab implements IMenuListener, ISelectionP
 	private TestRunnerViewPart fRunnerViewPart;
 	private Clipboard fClipboard;	
 	private boolean fMoveSelection= false;
-	private ListenerList fSelectionListeners= new ListenerList();
+	private ListenerList fSelectionListeners= new ListenerList(ListenerList.IDENTITY);
 	
 	private final Image fErrorIcon= TestRunnerViewPart.createImage("obj16/testerr.gif"); //$NON-NLS-1$
 	private final Image fFailureIcon= TestRunnerViewPart.createImage("obj16/testfail.gif"); //$NON-NLS-1$

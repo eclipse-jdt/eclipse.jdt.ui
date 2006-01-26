@@ -19,24 +19,8 @@ import java.util.ListIterator;
 import java.util.Map;
 import java.util.Vector;
 
-import org.eclipse.debug.core.ILaunchManager;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.junit.ITestRunListener;
-import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IMenuListener;
-import org.eclipse.jface.action.IMenuManager;
-import org.eclipse.jface.action.MenuManager;
-import org.eclipse.jface.action.Separator;
-import org.eclipse.jface.util.ListenerList;
-import org.eclipse.jface.util.OpenStrategy;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.ISelectionChangedListener;
-import org.eclipse.jface.viewers.ISelectionProvider;
-import org.eclipse.jface.viewers.SelectionChangedEvent;
-import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.ui.IWorkbenchActionConstants;
+import org.eclipse.core.runtime.ListenerList;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.CTabFolder;
 import org.eclipse.swt.custom.CTabItem;
@@ -55,6 +39,28 @@ import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.Tree;
 import org.eclipse.swt.widgets.TreeItem;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.util.OpenStrategy;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.ISelectionChangedListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
+import org.eclipse.jface.viewers.SelectionChangedEvent;
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.ui.IWorkbenchActionConstants;
+
+import org.eclipse.debug.core.ILaunchManager;
+
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
+
+import org.eclipse.jdt.junit.ITestRunListener;
+
 /*
  * A view that shows the contents of a test suite
  * as a tree.
@@ -70,7 +76,7 @@ public class TestHierarchyTab extends TestRunTab implements IMenuListener, ISele
 	private List fExecutionPath;
 	
 	private boolean fMoveSelection= false;
-	private ListenerList fSelectionListeners= new ListenerList();
+	private ListenerList fSelectionListeners= new ListenerList(ListenerList.IDENTITY);
 	
 	/**
 	 * Helper used to resurrect test hierarchy
