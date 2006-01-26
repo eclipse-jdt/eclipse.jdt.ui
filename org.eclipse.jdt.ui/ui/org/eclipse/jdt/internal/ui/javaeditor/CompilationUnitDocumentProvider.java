@@ -23,9 +23,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
@@ -37,7 +39,6 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.GC;
@@ -48,7 +49,6 @@ import org.eclipse.swt.widgets.Display;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
 import org.eclipse.jface.text.Assert;
@@ -82,11 +82,10 @@ import org.eclipse.ui.editors.text.ForwardingDocumentProvider;
 import org.eclipse.ui.editors.text.TextFileDocumentProvider;
 
 import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -95,6 +94,8 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+
+import org.eclipse.jdt.launching.JavaRuntime;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
@@ -753,7 +754,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			private ListenerList fListenerList;
 
 			public GlobalAnnotationModelListener() {
-				fListenerList= new ListenerList();
+				fListenerList= new ListenerList(ListenerList.IDENTITY);
 			}
 
 			/**
@@ -913,13 +914,6 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		
 		try {
 			final IStorage storage= sei.getStorage();
-			IJavaModel jm= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-			IJavaProject jp;
-			
-			jp= jm.getJavaProject("__projectWorkingcopy__"); //$NON-NLS-1$
-			IPackageFragmentRoot root= jp.getPackageFragmentRoot(jp.getProject());
-			IPackageFragment pkg= root.getPackageFragment(""); //$NON-NLS-1$
-			ICompilationUnit cu= pkg.getCompilationUnit(storage.getName());
 			
 			WorkingCopyOwner woc= new WorkingCopyOwner() {
 				/*
@@ -930,8 +924,16 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					return new DocumentAdapter(workingCopy, storage.getFullPath());
 				}
 			};
-			cu= cu.getWorkingCopy(woc, null, getProgressMonitor());
+
+			IClasspathEntry[] cpEntries= null;
+			IJavaProject jp= findJavaProject(storage.getFullPath());
+			if (jp != null)
+				cpEntries= jp.getResolvedClasspath(true);
 			
+			if (cpEntries == null || cpEntries.length == 0)
+				cpEntries= new IClasspathEntry[] { JavaRuntime.getDefaultJREContainerEntry() };
+
+			ICompilationUnit cu= woc.newWorkingCopy(storage.getName(), cpEntries, null, getProgressMonitor());
 			if (setContents) {
 				int READER_CHUNK_SIZE= 2048;
 				int BUFFER_SIZE= 8 * READER_CHUNK_SIZE;
@@ -955,6 +957,36 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		} catch (CoreException ex) {
 			return null;
 		}
+	}
+	
+	/**
+	 * Fuzzy search for Java project in the workspace that matches
+	 * the given path.
+	 * 
+	 * @param path the path to match
+	 * @return the matching Java project or <code>null</code>
+	 * @since 3.2
+	 */
+	private IJavaProject findJavaProject(IPath path) {
+		if (path == null)
+			return null;
+
+		String[] pathSegments= path.segments();
+		IJavaModel model= JavaCore.create(JavaPlugin.getWorkspace().getRoot());
+		IJavaProject[] projects;
+		try {
+			projects= model.getJavaProjects();
+		} catch (JavaModelException e) {
+			return null; // ignore - use default JRE
+		}
+		for (int i= 0; i < projects.length; i++) {
+			IPath projectPath= projects[i].getProject().getFullPath();
+			String projectSegment= projectPath.segments()[0];
+			for (int j= 0; j < pathSegments.length; j++)
+				if (projectSegment.equals(pathSegments[j]))
+					return projects[i];
+		}
+		return null;
 	}
 
     /*
