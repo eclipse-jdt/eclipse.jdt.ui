@@ -12,7 +12,10 @@ package org.eclipse.jdt.internal.ui;
 
 
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
+import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -175,13 +178,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	private MembersOrderPreferenceCache fMembersOrderPreferenceCache;
 	private IPropertyChangeListener fFontPropertyChangeListener;
 	
-	/**
-	 * Property change listener on this plugin's preference store.
-	 * 
-	 * @since 3.0
-	 */
-	private IPropertyChangeListener fPropertyChangeListener;
-	
 	private JavaEditorTextHoverDescriptor[] fJavaEditorTextHoverDescriptors;
 		
 	/**
@@ -215,6 +211,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 * @since 3.2
 	 */
 	private ContentAssistHistory fContentAssistHistory;
+	/**
+	 * The property change listeners to remove from the preference store on {@link #stop(BundleContext)}.
+	 * 
+	 * @since 3.2
+	 */
+	private List fPreferenceListeners= new ArrayList();
 	
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
@@ -420,7 +422,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		 */
 		store.putValue(oldTabWidthKey, store.getString(newTabWidthKey));
 
-		fPropertyChangeListener= new IPropertyChangeListener() {
+		IPropertyChangeListener propertyChangeListener= new IPropertyChangeListener() {
 			public void propertyChange(PropertyChangeEvent event) {
 				if (newTabWidthKey.equals(event.getProperty())) {
 					IPreferenceStore prefStore= getPreferenceStore();
@@ -428,7 +430,8 @@ public class JavaPlugin extends AbstractUIPlugin {
 				}
 			}
 		};
-		store.addPropertyChangeListener(fPropertyChangeListener);
+		store.addPropertyChangeListener(propertyChangeListener);
+		fPreferenceListeners.add(propertyChangeListener);
 		
 		/*
 		 * Backward compatibility for the refactoring preference key. 
@@ -469,7 +472,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	private void uninstallPreferenceStoreBackwardsCompatibility() {
 		JFaceResources.getFontRegistry().removeListener(fFontPropertyChangeListener);
-		getPreferenceStore().removePropertyChangeListener(fPropertyChangeListener);
 	}
 	
 	/*
@@ -518,6 +520,15 @@ public class JavaPlugin extends AbstractUIPlugin {
 			}
 			
 			uninstallPreferenceStoreBackwardsCompatibility();
+			
+			if (!fPreferenceListeners.isEmpty()) {
+				IPreferenceStore store= getPreferenceStore();
+				for (Iterator it= fPreferenceListeners.iterator(); it.hasNext();) {
+					IPropertyChangeListener listener= (IPropertyChangeListener) it.next();
+					store.removePropertyChangeListener(listener);
+				}
+				fPreferenceListeners.clear();
+			}
 			
 			if (fMembersOrderPreferenceCache != null) {
 				fMembersOrderPreferenceCache.dispose();
@@ -715,12 +726,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	public TemplateStore getTemplateStore() {
 		if (fTemplateStore == null) {
-			boolean alreadyMigrated= getPreferenceStore().getBoolean(TEMPLATES_MIGRATION_KEY);
+			final IPreferenceStore store= getPreferenceStore();
+			boolean alreadyMigrated= store.getBoolean(TEMPLATES_MIGRATION_KEY);
 			if (alreadyMigrated)
-				fTemplateStore= new ContributionTemplateStore(getTemplateContextRegistry(), getPreferenceStore(), TEMPLATES_KEY);
+				fTemplateStore= new ContributionTemplateStore(getTemplateContextRegistry(), store, TEMPLATES_KEY);
 			else {
-				fTemplateStore= new CompatibilityTemplateStore(getTemplateContextRegistry(), getPreferenceStore(), TEMPLATES_KEY, getOldTemplateStoreInstance());
-				getPreferenceStore().setValue(TEMPLATES_MIGRATION_KEY, true);
+				fTemplateStore= new CompatibilityTemplateStore(getTemplateContextRegistry(), store, TEMPLATES_KEY, getOldTemplateStoreInstance());
+				store.setValue(TEMPLATES_MIGRATION_KEY, true);
 			}
 
 			try {
@@ -728,6 +740,19 @@ public class JavaPlugin extends AbstractUIPlugin {
 			} catch (IOException e) {
 				log(e);
 			}
+			
+			final IPropertyChangeListener updater= new IPropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent event) {
+					if (TEMPLATES_KEY.equals(event.getProperty()))
+						try {
+							fTemplateStore.load();
+						} catch (IOException x) {
+							log(x);
+						}
+				}
+			};
+			store.addPropertyChangeListener(updater);
+			fPreferenceListeners.add(updater);
 		}
 		
 		return fTemplateStore;
@@ -766,12 +791,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	public TemplateStore getCodeTemplateStore() {
 		if (fCodeTemplateStore == null) {
-			boolean alreadyMigrated= getPreferenceStore().getBoolean(CODE_TEMPLATES_MIGRATION_KEY);
+			IPreferenceStore store= getPreferenceStore();
+			boolean alreadyMigrated= store.getBoolean(CODE_TEMPLATES_MIGRATION_KEY);
 			if (alreadyMigrated)
-				fCodeTemplateStore= new ContributionTemplateStore(getCodeTemplateContextRegistry(), getPreferenceStore(), CODE_TEMPLATES_KEY);
+				fCodeTemplateStore= new ContributionTemplateStore(getCodeTemplateContextRegistry(), store, CODE_TEMPLATES_KEY);
 			else {
-				fCodeTemplateStore= new CompatibilityTemplateStore(getCodeTemplateContextRegistry(), getPreferenceStore(), CODE_TEMPLATES_KEY, getOldCodeTemplateStoreInstance());
-				getPreferenceStore().setValue(CODE_TEMPLATES_MIGRATION_KEY, true);
+				fCodeTemplateStore= new CompatibilityTemplateStore(getCodeTemplateContextRegistry(), store, CODE_TEMPLATES_KEY, getOldCodeTemplateStoreInstance());
+				store.setValue(CODE_TEMPLATES_MIGRATION_KEY, true);
 			}
 
 			try {
@@ -783,6 +809,19 @@ public class JavaPlugin extends AbstractUIPlugin {
 			// compatibility / bug fixing code for duplicated templates
 			// TODO remove for 3.0
 			CompatibilityTemplateStore.pruneDuplicates(fCodeTemplateStore, true);
+			
+			final IPropertyChangeListener updater= new IPropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent event) {
+					if (CODE_TEMPLATES_KEY.equals(event.getProperty()))
+						try {
+							fCodeTemplateStore.load();
+						} catch (IOException x) {
+							log(x);
+						}
+				}
+			};
+			store.addPropertyChangeListener(updater);
+			fPreferenceListeners.add(updater);
 		}
 		
 		return fCodeTemplateStore;
