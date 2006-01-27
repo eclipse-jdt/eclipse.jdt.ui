@@ -24,6 +24,7 @@ import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Link;
 
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.window.Window;
@@ -49,7 +50,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 
 	private static final String UPDATE_SIMILAR_ELEMENTS= "updateSimilarElements"; //$NON-NLS-1$
 	private final static String DIALOG_SETTINGS_SIMILAR_MATCH_STRATEGY= "updateSimilarElementsMatchStrategy"; //$NON-NLS-1$
-	private Button fUpdateSimilarElementsButton;
+	private Link fUpdateSimilarElementsButton;
 
 	public RenameTypeWizardInputPage(String description, String contextHelpId, boolean isLastUserPage, String initialValue) {
 		super(description, contextHelpId, isLastUserPage, initialValue);
@@ -89,7 +90,7 @@ class RenameTypeWizardInputPage extends RenameInputWizardPage {
 			}
 		});
 
-		fUpdateSimilarElementsButton= new Button(c, SWT.PUSH);
+		fUpdateSimilarElementsButton= new Link(c, SWT.NONE);
 		GridData d= new GridData();
 		d.grabExcessHorizontalSpace= true;
 		d.horizontalAlignment= SWT.RIGHT;
