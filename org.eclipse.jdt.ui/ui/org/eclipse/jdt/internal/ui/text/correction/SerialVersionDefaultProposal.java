@@ -10,16 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.core.runtime.IProgressMonitor;
-import org.eclipse.core.runtime.NullProgressMonitor;
+import java.util.List;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.fix.PositionGroup;
 
 /**
  * Proposal for a default serial version id.
@@ -36,20 +37,22 @@ public final class SerialVersionDefaultProposal extends AbstractSerialVersionPro
 	 * 
 	 * @param unit
 	 *            the compilation unit
-	 * @param node
-	 *            the originally selected node
+	 * @param simpleNames
+	 *            the originally selected nodes
 	 */
-	public SerialVersionDefaultProposal(final ICompilationUnit unit, final ASTNode node) {
-		super(CorrectionMessages.SerialVersionSubProcessor_createdefault_description, unit, node);
+
+	public SerialVersionDefaultProposal(ICompilationUnit unit, SimpleName[] simpleNames) {
+		super(unit, simpleNames);
 	}
+
 
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void addInitializer(final VariableDeclarationFragment fragment) {
+	protected void addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) {
 		Assert.isNotNull(fragment);
 
-		final Expression expression= computeDefaultExpression(new NullProgressMonitor());
+		final Expression expression= fragment.getAST().newNumberLiteral(DEFAULT_EXPRESSION);
 		if (expression != null)
 			fragment.setInitializer(expression);
 	}
@@ -57,27 +60,17 @@ public final class SerialVersionDefaultProposal extends AbstractSerialVersionPro
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment) {
+	protected void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final List positionGroups) {
 
 		Assert.isNotNull(rewrite);
 		Assert.isNotNull(fragment);
 
 		final Expression initializer= fragment.getInitializer();
-		if (initializer != null)
-			addLinkedPosition(rewrite.track(initializer), true, GROUP_INITIALIZER);
+		if (initializer != null) {
+			PositionGroup group= new PositionGroup(GROUP_INITIALIZER);
+			group.addFirstPosition(rewrite.track(initializer));
+			positionGroups.add(group);
+		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	protected Expression computeDefaultExpression(final IProgressMonitor monitor) {
-		return getAST().newNumberLiteral(DEFAULT_EXPRESSION);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getAdditionalProposalInfo() {
-		return CorrectionMessages.SerialVersionDefaultProposal_message_default_info;
-	}
 }

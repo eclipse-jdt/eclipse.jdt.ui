@@ -10,8 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import org.eclipse.text.edits.TextEditGroup;
+
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
@@ -19,8 +23,8 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.ParameterizedType;
@@ -28,21 +32,23 @@ import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-
-import org.eclipse.jdt.ui.CodeGeneration;
+import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.fix.ILinkedFixRewriteOperation;
+import org.eclipse.jdt.internal.corext.fix.PositionGroup;
+import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.ui.CodeGeneration;
 
 /**
  * Partial implementation of a serial version correction proposal.
  *
  * @since 3.1
  */
-public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProposal {
+public abstract class AbstractSerialVersionProposal implements ILinkedFixRewriteOperation {
 
 	/** The long literal suffix */
 	protected static final String LONG_SUFFIX= "L"; //$NON-NLS-1$
@@ -55,69 +61,41 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 
 	/** The name of the serial version field */
 	protected static final String NAME_FIELD= "serialVersionUID"; //$NON-NLS-1$
-
-	/** The proposal relevance */
-	private static final int PROPOSAL_RELEVANCE= 9;
-
+	
 	/** The originally selected node */
-	private final ASTNode fNode;
+	private final ASTNode[] fNodes;
+	private final ICompilationUnit fUnit;
 
-	/**
-	 * Creates a new abstract serial version proposal.
-	 *
-	 * @param label the label of this proposal
-	 * @param unit the compilation unit
-	 * @param node the originally selected node
-	 */
-	protected AbstractSerialVersionProposal(final String label, final ICompilationUnit unit, final ASTNode node) {
-		super(label, unit, null, PROPOSAL_RELEVANCE, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD));
-
-		Assert.isNotNull(node);
-
-		fNode= node;
+	protected AbstractSerialVersionProposal(final ICompilationUnit unit, final ASTNode[] node) {
+		fUnit= unit;
+		fNodes= node;
 	}
 
 	/**
 	 * Adds an initializer to the specified variable declaration fragment.
 	 *
 	 * @param fragment the variable declaration fragment to add an initializer
+	 * @throws CoreException 
 	 */
-	protected abstract void addInitializer(final VariableDeclarationFragment fragment);
-
+	protected abstract void addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) throws CoreException;
+	
 	/**
 	 * Adds the necessary linked positions for the specified fragment.
 	 *
 	 * @param rewrite the ast rewrite to operate on
 	 * @param fragment the fragment to add linked positions to
+	 * @param positionGroups the list of {@link PositionGroup}s
 	 */
-	protected abstract void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment);
-
-	/**
-	 * Computes the default expression to initialize the serial version id with.
-	 *
-	 * @param monitor the progress monitor to use
-	 *
-	 * @return the default expression for the serial version id
-	 */
-	protected abstract Expression computeDefaultExpression(final IProgressMonitor monitor);
-
-	/**
-	 * Returns the AST to operate on.
-	 *
-	 * @return the AST to operate on
-	 */
-	protected final AST getAST() {
-		return fNode.getAST();
-	}
+	protected abstract void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final List positionGroups);
 
 	/**
 	 * Returns the declaration node for the originally selected node.
 	 *
 	 * @return the declaration node
 	 */
-	protected final ASTNode getDeclarationNode() {
+	protected ASTNode getDeclarationNode(ASTNode node) {
 
-		ASTNode parent= fNode.getParent();
+		ASTNode parent= node.getParent();
 		if (!(parent instanceof AbstractTypeDeclaration)) {
 
 			parent= parent.getParent();
@@ -131,53 +109,90 @@ public abstract class AbstractSerialVersionProposal extends LinkedCorrectionProp
 		}
 		return parent;
 	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.ui.text.correction.ASTRewriteCorrectionProposal#getRewrite()
+	
+	/**
+	 * {@inheritDoc}
 	 */
-	protected final ASTRewrite getRewrite() throws CoreException {
+	public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+		rewriteAST(cuRewrite, textEditGroups, new ArrayList());
+	}
 
-		final ASTNode node= getDeclarationNode();
+	/**
+	 * {@inheritDoc}
+	 */
+	public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, List positionGroups) throws CoreException {
+		final ASTRewrite rewrite= cuRewrite.getASTRewrite();
+		VariableDeclarationFragment fragment= null;
+		for (int i= 0; i < fNodes.length; i++) {
+			final ASTNode node= getDeclarationNode(fNodes[i]);
+			
+			final AST ast= node.getAST();
 
-		final AST ast= node.getAST();
-		final ASTRewrite rewrite= ASTRewrite.create(ast);
+			fragment= ast.newVariableDeclarationFragment();
+			fragment.setName(ast.newSimpleName(NAME_FIELD));
 
-		final VariableDeclarationFragment fragment= ast.newVariableDeclarationFragment();
+			final FieldDeclaration declaration= ast.newFieldDeclaration(fragment);
+			declaration.setType(ast.newPrimitiveType(PrimitiveType.LONG));
+			declaration.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL));
 
-		fragment.setName(ast.newSimpleName(NAME_FIELD));
+			addInitializer(fragment, node);
 
-		final FieldDeclaration declaration= ast.newFieldDeclaration(fragment);
-		declaration.setType(ast.newPrimitiveType(PrimitiveType.LONG));
-		declaration.modifiers().addAll(ASTNodeFactory.newModifiers(ast, Modifier.PRIVATE | Modifier.STATIC | Modifier.FINAL));
+			if (fragment.getInitializer() != null) {
+				
+				final TextEditGroup editGroup= new TextEditGroup(CorrectionMessages.SerialVersionProposal_AddId_editGroup_description);
+				textEditGroups.add(editGroup);
 
-		addInitializer(fragment);
+				if (node instanceof AbstractTypeDeclaration)
+					rewrite.getListRewrite(node, ((AbstractTypeDeclaration) node).getBodyDeclarationsProperty()).insertAt(declaration, 0, editGroup);
+				else if (node instanceof AnonymousClassDeclaration)
+					rewrite.getListRewrite(node, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(declaration, 0, editGroup);
+				else if (node instanceof ParameterizedType) {
+					final ParameterizedType type= (ParameterizedType) node;
+					final ASTNode parent= type.getParent();
+					if (parent instanceof ClassInstanceCreation) {
+						final ClassInstanceCreation creation= (ClassInstanceCreation) parent;
+						final AnonymousClassDeclaration anonymous= creation.getAnonymousClassDeclaration();
+						if (anonymous != null)
+							rewrite.getListRewrite(anonymous, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(declaration, 0, editGroup);
+					}
+				} else
+					Assert.isTrue(false);
+				
+				addLinkedPositions(rewrite, fragment, positionGroups);
+			}
 
-		if (fragment.getInitializer() != null) {
-
-			if (node instanceof AbstractTypeDeclaration)
-				rewrite.getListRewrite(node, ((AbstractTypeDeclaration) node).getBodyDeclarationsProperty()).insertAt(declaration, 0, null);
-			else if (node instanceof AnonymousClassDeclaration)
-				rewrite.getListRewrite(node, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(declaration, 0, null);
-			else if (node instanceof ParameterizedType) {
-				final ParameterizedType type= (ParameterizedType) node;
-				final ASTNode parent= type.getParent();
-				if (parent instanceof ClassInstanceCreation) {
-					final ClassInstanceCreation creation= (ClassInstanceCreation) parent;
-					final AnonymousClassDeclaration anonymous= creation.getAnonymousClassDeclaration();
-					if (anonymous != null)
-						rewrite.getListRewrite(anonymous, AnonymousClassDeclaration.BODY_DECLARATIONS_PROPERTY).insertAt(declaration, 0, null);
-				}
-			} else
-				Assert.isTrue(false);
-
-			addLinkedPositions(rewrite, fragment);
+			final String comment= CodeGeneration.getFieldComment(fUnit, declaration.getType().toString(), NAME_FIELD, StubUtility.getLineDelimiterUsed(fUnit));
+			if (comment != null && comment.length() > 0) {
+				final Javadoc doc= (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
+				declaration.setJavadoc(doc);
+			}
 		}
-
-		final String comment= CodeGeneration.getFieldComment(getCompilationUnit(), declaration.getType().toString(), NAME_FIELD, StubUtility.getLineDelimiterUsed(getCompilationUnit()));
-		if (comment != null && comment.length() > 0) {
-			final Javadoc doc= (Javadoc) rewrite.createStringPlaceholder(comment, ASTNode.JAVADOC);
-			declaration.setJavadoc(doc);
+		if (fragment == null)
+			return null;
+			
+		return rewrite.track(fragment);
+	}
+	
+	/**
+	 * Returns the qualified type name of the class declaration.
+	 * 
+	 * @return the qualified type name of the class
+	 */
+	protected String getQualifiedName(final ASTNode parent) {
+		ITypeBinding binding= null;
+		if (parent instanceof AbstractTypeDeclaration) {
+			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) parent;
+			binding= declaration.resolveBinding();
+		} else if (parent instanceof AnonymousClassDeclaration) {
+			final AnonymousClassDeclaration declaration= (AnonymousClassDeclaration) parent;
+			final ClassInstanceCreation creation= (ClassInstanceCreation) declaration.getParent();
+			binding= creation.resolveTypeBinding();
+		} else if (parent instanceof ParameterizedType) {
+			final ParameterizedType type= (ParameterizedType) parent;
+			binding= type.resolveBinding();
 		}
-		return rewrite;
+		if (binding != null)
+			return binding.getBinaryName();
+		return null;
 	}
 }

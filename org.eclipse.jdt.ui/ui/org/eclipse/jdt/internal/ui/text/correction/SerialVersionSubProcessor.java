@@ -12,22 +12,20 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Collection;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.Name;
-import org.eclipse.jdt.core.dom.ParameterizedType;
-import org.eclipse.jdt.core.dom.QualifiedName;
-import org.eclipse.jdt.core.dom.QualifiedType;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.SimpleType;
-import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 
 /**
  * Subprocessor for serial version quickfix proposals.
@@ -35,6 +33,32 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
  * @since 3.1
  */
 public final class SerialVersionSubProcessor {
+
+	public static final class SerialVersionHashProposal extends FixCorrectionProposal {
+		public SerialVersionHashProposal(IFix fix, ICleanUp up, int relevance, Image image) {
+			super(fix, up, relevance, image);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public String getAdditionalProposalInfo() {
+			return CorrectionMessages.SerialVersionHashProposal_message_generated_info;
+		}
+	}
+
+	public static final class SerialVersionDefaultProposal extends FixCorrectionProposal {
+		public SerialVersionDefaultProposal(IFix fix, ICleanUp up, int relevance, Image image) {
+			super(fix, up, relevance, image);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public String getAdditionalProposalInfo() {
+			return CorrectionMessages.SerialVersionDefaultProposal_message_default_info;
+		}
+	}
 
 	/**
 	 * Determines the serial version quickfix proposals.
@@ -45,39 +69,21 @@ public final class SerialVersionSubProcessor {
 	 *        the problem location
 	 * @param proposals
 	 *        the proposal collection to extend
+	 * @throws CoreException 
 	 */
-	public static final void getSerialVersionProposals(final IInvocationContext context, final IProblemLocation location, final Collection proposals) {
+	public static final void getSerialVersionProposals(final IInvocationContext context, final IProblemLocation location, final Collection proposals) throws CoreException {
 
 		Assert.isNotNull(context);
 		Assert.isNotNull(location);
 		Assert.isNotNull(proposals);
-
-		final CompilationUnit root= context.getASTRoot();
-
-		final ASTNode selection= location.getCoveredNode(root);
-		if (selection != null) {
-			Name name= null;
-			if (selection instanceof SimpleType) {
-				final SimpleType type= (SimpleType) selection;
-				name= type.getName();
-			} else if (selection instanceof ParameterizedType) {
-				final ParameterizedType type= (ParameterizedType) selection;
-				final Type raw= type.getType();
-				if (raw instanceof SimpleType)
-					name= ((SimpleType) raw).getName();
-				else if (raw instanceof QualifiedType)
-					name= ((QualifiedType) raw).getName();
-			} else if (selection instanceof Name) {
-				name= (Name) selection;
-			}
-			if (name != null) {
-				final SimpleName simple= name.isSimpleName() ? (SimpleName) name : ((QualifiedName) name).getName();
-				final ICompilationUnit unit= context.getCompilationUnit();
-				if (JavaModelUtil.isEditable(unit)) {
-					proposals.add(new SerialVersionDefaultProposal(unit, simple));
-					proposals.add(new SerialVersionHashProposal(unit, simple));
-				}
-			}
+		
+		IFix[] fixes= Java50Fix.createMissingSerialVersionFixes(context.getASTRoot(), location);
+		if (fixes != null) {
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
+			FixCorrectionProposal prop1= new SerialVersionDefaultProposal(fixes[0], null, 9, image);
+			proposals.add(prop1);
+			FixCorrectionProposal prop2= new SerialVersionHashProposal(fixes[1], new Java50CleanUp(Java50CleanUp.ADD_CALCULATED_SERIAL_VERSION_ID), 9, image);
+			proposals.add(prop2);
 		}
 	}
 }

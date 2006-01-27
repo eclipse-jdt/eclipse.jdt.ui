@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.fix;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.Iterator;
@@ -18,9 +19,19 @@ import java.util.List;
 import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -38,6 +49,7 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.ParameterizedType;
 import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.QualifiedType;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -65,7 +77,11 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.correction.AbstractSerialVersionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
+import org.eclipse.jdt.internal.ui.text.correction.SerialVersionDefaultProposal;
+import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashProposal;
 
 /**
  * Fix which introduce new language constructs to pre Java50 code.
@@ -80,6 +96,79 @@ public class Java50Fix extends LinkedFix {
 	private static final String OVERRIDE= "Override"; //$NON-NLS-1$
 	private static final String DEPRECATED= "Deprecated"; //$NON-NLS-1$
 	private static final String FOR_LOOP_ELEMENT_IDENTIFIER= "element"; //$NON-NLS-1$
+	
+	/** Name of the externalizable class */
+	private static final String EXTERNALIZABLE_NAME= "java.io.Externalizable"; //$NON-NLS-1$
+	
+	/** Name of the serializable class */
+	private static final String SERIALIZABLE_NAME= "java.io.Serializable"; //$NON-NLS-1$
+	
+	/** The name of the serial version field */
+	private static final String NAME_FIELD= "serialVersionUID"; //$NON-NLS-1$
+
+	/** The default serial value */
+	private static final long SERIAL_VALUE= 1;
+	
+	public interface ISerialVersionFixContext {
+		public long getSerialVersionId(String qualifiedName) throws CoreException;
+	}
+	
+	private static class SerialVersionHashContext implements ISerialVersionFixContext {
+		
+		private final IJavaProject fProject;
+		private final String[] fQualifiedNames;
+		private Hashtable fIdsTable;
+
+		public SerialVersionHashContext(IJavaProject project, String[] qualifiedNames) {
+			fProject= project;
+			fQualifiedNames= qualifiedNames;
+		}
+		
+		public void initialize(IProgressMonitor monitor) throws CoreException, IOException {
+			fIdsTable= new Hashtable();
+			if (fQualifiedNames.length > 0) {
+				long[] ids= SerialVersionHashProposal.calculateSerialVersionIds(fQualifiedNames, fProject, monitor);
+				
+				if (ids.length != fQualifiedNames.length) {
+					for (int i= 0; i < fQualifiedNames.length; i++) {
+						fIdsTable.put(fQualifiedNames[i], new Long(SERIAL_VALUE));
+					}
+					return;
+				}
+					
+				for (int i= 0; i < ids.length; i++) {
+					fIdsTable.put(fQualifiedNames[i], new Long(ids[i]));
+				}
+			}
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public long getSerialVersionId(String qualifiedName) throws CoreException {
+			if (fIdsTable == null)
+				throw new CoreException(new Status(IStatus.ERROR,  JavaPlugin.getPluginId(), 0, FixMessages.Java50Fix_SerialVersionNotInitialized_exception_description, null));
+			
+			Long id= (Long)fIdsTable.get(qualifiedName);
+			
+			if (id == null) {
+				try {
+					long[] ids= SerialVersionHashProposal.calculateSerialVersionIds(new String[] {qualifiedName}, fProject, new NullProgressMonitor());
+					if (ids.length == 0)
+						throw new CoreException(new Status(IStatus.ERROR,  JavaPlugin.getPluginId(), 0, Messages.format(FixMessages.Java50Fix_SerialVersionNotFound_exception_description, qualifiedName), null));
+					
+					fIdsTable.put(qualifiedName, new Long(ids[0]));
+					return ids[0];
+				} catch (CoreException e) {
+					throw new CoreException(new Status(IStatus.ERROR,  JavaPlugin.getPluginId(), 0, Messages.format(FixMessages.Java50Fix_SerialVersionNotFound_exception_description, qualifiedName), e));
+				} catch (IOException e) {
+					throw new CoreException(new Status(IStatus.ERROR,  JavaPlugin.getPluginId(), 0, Messages.format(FixMessages.Java50Fix_SerialVersionNotFound_exception_description, qualifiedName), e));
+				}
+			}
+				
+			return id.longValue();
+		}
+	}
 
 	private static class ForLoopConverterGenerator extends GenericVisitor {
 
@@ -146,6 +235,35 @@ public class Java50Fix extends LinkedFix {
 			}
 			return names;
 		}
+	}
+	
+	private static class SerialVersionHashBatchOperation extends AbstractSerialVersionProposal {
+
+		private final ISerialVersionFixContext fContext;
+
+		protected SerialVersionHashBatchOperation(ICompilationUnit unit, ASTNode[] node, ISerialVersionFixContext context) {
+			super(unit, node);
+			fContext= context;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		protected void addInitializer(VariableDeclarationFragment fragment, ASTNode declarationNode) throws CoreException {
+			long id= fContext.getSerialVersionId(getQualifiedName(declarationNode));
+			if (id == -1)
+				id= SERIAL_VALUE;
+			
+			fragment.setInitializer(fragment.getAST().newNumberLiteral(id + LONG_SUFFIX));
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		protected void addLinkedPositions(ASTRewrite rewrite, VariableDeclarationFragment fragment, List positionGroups) {
+			//Do nothing
+		}
+		
 	}
 	
 	private static class AnnotationRewriteOperation implements IFixRewriteOperation {
@@ -288,17 +406,45 @@ public class Java50Fix extends LinkedFix {
 		return new Java50Fix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {loopConverter});
 	}
 	
+	public static Java50Fix[] createMissingSerialVersionFixes(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
+		if (problem.getProblemId() != IProblem.MissingSerialVersion)
+			return null;
+		
+		final ICompilationUnit unit= (ICompilationUnit)compilationUnit.getJavaElement();
+		if (unit == null)
+			return null;
+		
+		if (!JavaModelUtil.is50OrHigher(unit.getJavaProject()))
+			return null;
+		
+		if (!JavaModelUtil.isEditable(unit))
+			return null;
+		
+		final SimpleName simpleName= getSimpleTypeName(compilationUnit, problem);
+		if (simpleName == null)
+			return null;
+		
+		SerialVersionDefaultProposal defop= new SerialVersionDefaultProposal(unit, new SimpleName[] {simpleName});
+		Java50Fix fix1= new Java50Fix(FixMessages.Java50Fix_SerialVersion_default_description, compilationUnit, new IFixRewriteOperation[] {defop});
+		
+		SerialVersionHashProposal hashop= new SerialVersionHashProposal(unit, new SimpleName[] {simpleName});
+		Java50Fix fix2= new Java50Fix(FixMessages.Java50Fix_SerialVersion_hash_description, compilationUnit, new IFixRewriteOperation[] {hashop});
+
+		return new Java50Fix[] {fix1, fix2};
+	}
+	
 	public static IFix createCleanUp(CompilationUnit compilationUnit, 
 			boolean addOverrideAnnotation, 
 			boolean addDeprecatedAnnotation, 
 			boolean convertToEnhancedForLoop, 
-			boolean rawTypeReference) {
+			boolean rawTypeReference,
+			boolean addSerialVersionId, ISerialVersionFixContext context) {
 		
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
 		
-		if (!addOverrideAnnotation && !addDeprecatedAnnotation && !convertToEnhancedForLoop && !rawTypeReference)
+		if (!addOverrideAnnotation && !addDeprecatedAnnotation && !convertToEnhancedForLoop && !rawTypeReference && !addSerialVersionId)
 			return null;
 
 		List/*<IFixRewriteOperation>*/ operations= new ArrayList();
@@ -323,6 +469,12 @@ public class Java50Fix extends LinkedFix {
 		if (rawTypeReference)
 			createRawTypeReferenceOperations(compilationUnit, locations, operations);
 		
+		if (addSerialVersionId) {
+			SerialVersionHashBatchOperation op= createSerialVersionHashOperation(compilationUnit, locations, context);
+			if (op != null)
+				operations.add(op);
+		}
+		
 		if (operations.size() == 0)
 			return null;
 		
@@ -333,13 +485,14 @@ public class Java50Fix extends LinkedFix {
 	public static IFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems,
 			boolean addOverrideAnnotation, 
 			boolean addDeprecatedAnnotation,
-			boolean rawTypeReferences) {
+			boolean rawTypeReferences,
+			boolean addSerialVersionId, ISerialVersionFixContext context) {
 		
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
 		
-		if (!addOverrideAnnotation && !addDeprecatedAnnotation && !rawTypeReferences)
+		if (!addOverrideAnnotation && !addDeprecatedAnnotation && !rawTypeReferences && !addSerialVersionId)
 			return null;
 
 		List/*<IFixRewriteOperation>*/ operations= new ArrayList();
@@ -352,12 +505,92 @@ public class Java50Fix extends LinkedFix {
 		
 		if (rawTypeReferences)
 			createRawTypeReferenceOperations(compilationUnit, problems, operations);
+		
+		if (addSerialVersionId) {
+			SerialVersionHashBatchOperation op= createSerialVersionHashOperation(compilationUnit, problems, context);
+			if (op != null)
+				operations.add(op);
+		}
+			
 
 		if (operations.size() == 0)
 			return null;
 		
 		IFixRewriteOperation[] operationsArray= (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]);
 		return new Java50Fix("", compilationUnit, operationsArray); //$NON-NLS-1$
+	}
+	
+	public static SerialVersionHashContext createSerialVersionHashContext(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+
+		IType serializable= project.findType(SERIALIZABLE_NAME);
+		IType externalizable= project.findType(EXTERNALIZABLE_NAME);
+		
+		List qualifiedClassNames= new ArrayList();
+		for (int i= 0; i < compilationUnits.length; i++) {
+			findTypesWithoutSerialVersionId(compilationUnits[i].getChildren(), serializable, externalizable, qualifiedClassNames);
+		}
+	
+		SerialVersionHashContext result= new SerialVersionHashContext(project, (String[])qualifiedClassNames.toArray(new String[qualifiedClassNames.size()]));
+		try {
+			result.initialize(monitor);
+		} catch (IOException e) {
+			JavaPlugin.log(e);
+		}
+		return result;
+	}
+	
+	private static void findTypesWithoutSerialVersionId(IJavaElement[] children, IType serializable, IType externalizable, List/*<String>*/ qualifiedClassNames) throws JavaModelException {
+		for (int i= 0; i < children.length; i++) {
+			IJavaElement child= children[i];
+			if (child instanceof IType) {
+				IType type= (IType)child;
+				ITypeHierarchy hierarchy= type.newSupertypeHierarchy(new NullProgressMonitor());
+				IType[] allInterfaces= hierarchy.getAllInterfaces();
+				for (int j= 0; j < allInterfaces.length; j++) {
+					if (allInterfaces[j].equals(serializable) || allInterfaces[j].equals(externalizable)) {
+						IField field= type.getField(NAME_FIELD);
+						if (!field.exists()) {
+							qualifiedClassNames.add(type.getFullyQualifiedName());
+						}
+						break;
+					}
+				}
+
+				findTypesWithoutSerialVersionId(type.getChildren(), serializable, externalizable, qualifiedClassNames);
+			} else if (child instanceof IMethod) {
+				IMethod method= (IMethod)child;
+				findTypesWithoutSerialVersionId(method.getChildren(), serializable, externalizable, qualifiedClassNames);
+			} else if (child instanceof IField) {
+				IField field= (IField)child;
+				findTypesWithoutSerialVersionId(field.getChildren(), serializable, externalizable, qualifiedClassNames);
+			}
+		}
+	}
+	
+	private static SerialVersionHashBatchOperation createSerialVersionHashOperation(CompilationUnit compilationUnit, IProblemLocation[] problems, ISerialVersionFixContext context) {
+		final ICompilationUnit unit= (ICompilationUnit)compilationUnit.getJavaElement();
+		if (unit == null)
+			return null;
+		
+		if (!JavaModelUtil.is50OrHigher(unit.getJavaProject()))
+			return null;
+		
+		if (!JavaModelUtil.isEditable(unit))
+			return null;
+		
+		List simpleNames= new ArrayList();
+		for (int i= 0; i < problems.length; i++) {
+			if (problems[i].getProblemId() == IProblem.MissingSerialVersion) {
+				final SimpleName simpleName= getSimpleTypeName(compilationUnit, problems[i]);
+				if (simpleName != null) {
+					simpleNames.add(simpleName);
+				}
+			}
+		}
+		if (simpleNames.size() == 0)
+			return null;
+		
+		return new SerialVersionHashBatchOperation(unit, (SimpleName[])simpleNames.toArray(new SimpleName[simpleNames.size()]), context);
 	}
 	
 	private static void createAddDeprecatedAnnotationOperations(CompilationUnit compilationUnit, IProblemLocation[] locations, List result) {
@@ -534,6 +767,33 @@ public class Java50Fix extends LinkedFix {
 			}
 		}
 		return declaringNode;
+	}
+	
+	private static SimpleName getSimpleTypeName(CompilationUnit compilationUnit, IProblemLocation problem) {
+		final ASTNode selection= problem.getCoveredNode(compilationUnit);
+		if (selection == null)
+			return null;
+		
+		Name name= null;
+		if (selection instanceof SimpleType) {
+			final SimpleType type= (SimpleType) selection;
+			name= type.getName();
+		} else if (selection instanceof ParameterizedType) {
+			final ParameterizedType type= (ParameterizedType) selection;
+			final Type raw= type.getType();
+			if (raw instanceof SimpleType)
+				name= ((SimpleType) raw).getName();
+			else if (raw instanceof QualifiedType)
+				name= ((QualifiedType) raw).getName();
+		} else if (selection instanceof Name) {
+			name= (Name) selection;
+		}
+		if (name == null)
+			return null;
+		
+		final SimpleName result= name.isSimpleName() ? (SimpleName) name : ((QualifiedName) name).getName();
+		
+		return result;
 	}
 	
 	private Java50Fix(String name, CompilationUnit compilationUnit, IFixRewriteOperation[] fixRewrites) {

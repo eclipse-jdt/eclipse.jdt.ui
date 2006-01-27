@@ -31,10 +31,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 
 public class LinkedFix extends AbstractFix {
 	
-	public interface ILinkedFixRewriteOperation extends IFixRewriteOperation {
-		public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List/*<TextEditGroup>*/ textEditGroups, List/*<PositionGroup>*/ positionGroups) throws CoreException;
-	}
-	
 	public static abstract class AbstractLinkedFixRewriteOperation extends AbstractFixRewriteOperation implements ILinkedFixRewriteOperation {
 		
 		private Hashtable fPositionGroups;
@@ -66,56 +62,6 @@ public class LinkedFix extends AbstractFix {
 				return null;
 			
 			return fPositionGroups.values();
-		}
-	}
-	
-	public static class PositionGroup {
-
-		private final String fGroupId;
-		private final List/*<ITrackedNodePosition>*/ fPositions;
-		private final List/*<String>*/ fProposals;
-		private final List/*<String>*/ fDisplayStrings;
-		private ITrackedNodePosition fFirstPosition;
-		
-		public ITrackedNodePosition getFirstPosition() {
-			return fFirstPosition;
-		}
-
-		public PositionGroup(String groupID) {
-			fGroupId= groupID;
-			fPositions= new ArrayList();
-			fProposals= new ArrayList();
-			fDisplayStrings= new ArrayList();
-		}
-
-		public void addPosition(ITrackedNodePosition position) {
-			fPositions.add(position);
-		}
-		
-		public void addFirstPosition(ITrackedNodePosition position) {
-			addPosition(position);
-			fFirstPosition= position;
-		}
-
-		public void addProposal(String displayString, String proposal) {
-			fProposals.add(proposal);
-			fDisplayStrings.add(displayString);
-		}
-
-		public String getGroupId() {
-			return fGroupId;
-		}
-
-		public ITrackedNodePosition[] getPositions() {
-			return (ITrackedNodePosition[])fPositions.toArray(new ITrackedNodePosition[fPositions.size()]);
-		}
-
-		public String[] getDisplayStrings() {
-			return (String[])fDisplayStrings.toArray(new String[fDisplayStrings.size()]);
-		}
-
-		public String[] getProposals() {
-			return (String[])fProposals.toArray(new String[fProposals.size()]);
 		}
 	}
 	

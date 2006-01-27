@@ -16,6 +16,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
@@ -25,12 +26,14 @@ import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
+import org.eclipse.jdt.internal.corext.fix.Java50Fix.ISerialVersionFixContext;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -78,8 +81,22 @@ public class Java50CleanUp extends AbstractCleanUp {
 	 */
 	public static final int ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE= 8;
 	
+	/**
+	 * Adds a generated serial version id to subtypes of
+	 * java.io.Serializable and java.io.Externalizable
+	 * 
+	 * public class E implements Serializable {}
+	 * ->
+	 * public class E implements Serializable {
+	 * 		private static final long serialVersionUID = 4381024239L;
+	 * }
+	 */
+	public static final int ADD_CALCULATED_SERIAL_VERSION_ID= 16;
+	
 	private static final int DEFAULT_FLAG= ADD_DEPRECATED_ANNOTATION | ADD_OVERRIDE_ANNOATION;
 	private static final String SECTION_NAME= "CleanUp_Java50"; //$NON-NLS-1$
+
+	private ISerialVersionFixContext fContext;
 
 	public Java50CleanUp(int flag) {
 		super(flag);
@@ -97,7 +114,8 @@ public class Java50CleanUp extends AbstractCleanUp {
 				isFlag(ADD_OVERRIDE_ANNOATION), 
 				isFlag(ADD_DEPRECATED_ANNOTATION),
 				isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP), 
-				isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE));
+				isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE),
+				isFlag(ADD_CALCULATED_SERIAL_VERSION_ID), fContext);
 	}
 	
 	/**
@@ -110,7 +128,8 @@ public class Java50CleanUp extends AbstractCleanUp {
 		return Java50Fix.createCleanUp(compilationUnit, problems,
 				isFlag(ADD_OVERRIDE_ANNOATION), 
 				isFlag(ADD_DEPRECATED_ANNOTATION),
-				isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE));
+				isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE),
+				isFlag(ADD_CALCULATED_SERIAL_VERSION_ID), fContext);
 	}
 
 	public Map getRequiredOptions() {
@@ -124,6 +143,9 @@ public class Java50CleanUp extends AbstractCleanUp {
 		if (isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE))
 			options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		
+		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID))
+			options.put(JavaCore.COMPILER_PB_MISSING_SERIAL_VERSION, JavaCore.WARNING);
+		
 		return options;
 	}
 
@@ -135,6 +157,7 @@ public class Java50CleanUp extends AbstractCleanUp {
 		addCheckBox(composite, ADD_OVERRIDE_ANNOATION, MultiFixMessages.Java50MultiFix_AddMissingOverride_description);
 		addCheckBox(composite, ADD_DEPRECATED_ANNOTATION, MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description);
 		addCheckBox(composite, CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP, MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description);
+		addCheckBox(composite, ADD_CALCULATED_SERIAL_VERSION_ID, MultiFixMessages.SerialVersionCleanUp_Generated_description);
 		
 		return composite;
 	}
@@ -156,6 +179,8 @@ public class Java50CleanUp extends AbstractCleanUp {
 			result.add(removeMemonic(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description));
 		if (isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE))
 			result.add(removeMemonic(MultiFixMessages.Java50CleanUp_AddTypeParameters_description));
+		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID))
+			result.add(removeMemonic(MultiFixMessages.SerialVersionCleanUp_Generated_description));
 		return (String[])result.toArray(new String[result.size()]);
 	}
 
@@ -185,7 +210,29 @@ public class Java50CleanUp extends AbstractCleanUp {
 			if (fix != null)
 				return true;
 		}
+		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID)) {
+			Java50Fix[] fix= Java50Fix.createMissingSerialVersionFixes(compilationUnit, problem);
+			if (fix != null)
+				return true;
+		}
 		return false;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void beginCleanUp(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+		super.beginCleanUp(project, compilationUnits, monitor);
+		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID))
+			fContext= Java50Fix.createSerialVersionHashContext(project, compilationUnits, monitor);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void endCleanUp() throws CoreException {
+		super.endCleanUp();
+		fContext= null;
 	}
 
 }

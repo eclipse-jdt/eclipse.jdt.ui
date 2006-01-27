@@ -18,6 +18,7 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -113,6 +114,10 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			}
 			public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 				return null;
+			}
+			public void endCleanUp() throws CoreException {
+			}
+			public void beginCleanUp(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 			}
 		});
 		tagAsSummary("Code clean up - no fix", Dimension.ELAPSED_PROCESS);

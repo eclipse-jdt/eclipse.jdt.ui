@@ -19,6 +19,7 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.io.Writer;
 import java.text.DateFormat;
+import java.text.MessageFormat;
 import java.util.Date;
 
 /**
@@ -39,6 +40,9 @@ import java.util.Date;
  * @since 3.1
  */
 public final class SerialVersionComputer {
+
+	private static final String NON_RESOLVABLE_CLASS= "The class {0} could not be resolved."; //$NON-NLS-1$
+	private static final String NON_SERIALIZABLE_CLASS= "The class {0} does not implement ''java.io.Serializable'' or ''java.io.Externalizable'' or has already an id"; //$NON-NLS-1$
 
 	/**
 	 * Should the process be debugged? (adapt the path of the log file
@@ -88,18 +92,20 @@ public final class SerialVersionComputer {
 						file.delete();
 						file.createNewFile();
 						writer= new BufferedWriter(new OutputStreamWriter(new FileOutputStream(file), TEMP_FILE_ENCODING));
-						try {
-							final ObjectStreamClass clazz= ObjectStreamClass.lookup(Class.forName(arguments[0]));
-							if (clazz != null) {
-								writer.write(new Long(clazz.getSerialVersionUID()).toString());
-								writer.write('\n');
-							} else {
-								writer.write(SerialVersionMessages.getString("SerialVersionComputer.not.serializable")); //$NON-NLS-1$
+						for (int i= 0; i < arguments.length; i++) {
+							try {
+								final ObjectStreamClass clazz= ObjectStreamClass.lookup(Class.forName(arguments[i]));
+								if (clazz != null) {
+									writer.write(new Long(clazz.getSerialVersionUID()).toString());
+									writer.write('\n');
+								} else {
+									writer.write(format(NON_SERIALIZABLE_CLASS, arguments[i]));
+									writer.write('\n');
+								}
+							} catch (ClassNotFoundException exception) {
+								writer.write(format(NON_RESOLVABLE_CLASS, arguments[i]));
 								writer.write('\n');
 							}
-						} catch (ClassNotFoundException exception) {
-							writer.write(SerialVersionMessages.getString("SerialVersionComputer.not.resolvable")); //$NON-NLS-1$
-							writer.write('\n');
 						}
 					} catch (Throwable throwable) {
 						if (DEBUG) {
@@ -136,5 +142,9 @@ public final class SerialVersionComputer {
 				// Do nothing
 			}
 		}
+	}
+	
+	private static String format(String message, Object object) {
+		return MessageFormat.format(message, new Object[] { object});
 	}
 }

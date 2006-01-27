@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.fix;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -19,10 +22,11 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 
 public abstract class AbstractCleanUp implements ICleanUp {
-	
+
 	protected static IDialogSettings getSection(IDialogSettings settings, String sectionName) {
 		IDialogSettings section= settings.getSection(sectionName);
 		if (section == null)
@@ -93,6 +97,20 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	 */
 	public boolean canCleanUp(IJavaProject project) {
 		return true;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void beginCleanUp(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+		//Default do nothing
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void endCleanUp() throws CoreException {
+		//Default do nothing
 	}
 	
 }

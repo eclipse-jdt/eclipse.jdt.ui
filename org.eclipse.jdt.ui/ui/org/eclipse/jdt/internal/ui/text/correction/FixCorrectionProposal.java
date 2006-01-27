@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix;
-import org.eclipse.jdt.internal.corext.fix.LinkedFix.PositionGroup;
+import org.eclipse.jdt.internal.corext.fix.PositionGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;

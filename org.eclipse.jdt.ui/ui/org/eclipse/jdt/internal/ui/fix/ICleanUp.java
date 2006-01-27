@@ -13,12 +13,14 @@ package org.eclipse.jdt.internal.ui.fix;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -98,6 +100,21 @@ public interface ICleanUp {
 	 * @return true if clean up can fix problems in project
 	 */
 	public abstract boolean canCleanUp(IJavaProject project);
+	
+	/**
+	 * After call to beginCleanUp clients will start creating fixes for <code>compilationUnits</code>
+	 * int <code>project</code>
+	 * 
+	 * @param project The project to clean up
+	 * @param compilationUnits The compilation Units to clean up, all member of project
+	 * @param monitor the monitor to show progress
+	 */
+	public abstract void beginCleanUp(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException;
+	
+	/**
+	 * Called when done cleaning up.
+	 */
+	public abstract void endCleanUp() throws CoreException;
 	
 	/**
 	 * True if <code>problem</code> in <code>CompilationUnit</code> can be fixed

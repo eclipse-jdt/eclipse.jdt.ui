@@ -39,12 +39,7 @@ import org.eclipse.ui.PlatformUI;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
-import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
-import org.eclipse.jdt.core.dom.ClassInstanceCreation;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.ParameterizedType;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
@@ -75,7 +70,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 	 * @throws CoreException
 	 *             if the project's class path cannot be computed
 	 */
-	private static String[] computeUserAndBootClasspath(final IJavaProject project) throws CoreException {
+	public static String[] computeUserAndBootClasspath(final IJavaProject project) throws CoreException {
 		final IRuntimeClasspathEntry[] unresolved= JavaRuntime.computeUnresolvedRuntimeClasspath(project);
 		final List resolved= new ArrayList(unresolved.length);
 		for (int index= 0; index < unresolved.length; index++) {
@@ -92,6 +87,17 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 		}
 		return (String[]) resolved.toArray(new String[resolved.size()]);
 	}
+	
+	public static long[] calculateSerialVersionIds(String[] qualifiedNames, IJavaProject project, final IProgressMonitor monitor) throws CoreException, IOException {
+		final String[] entries= computeUserAndBootClasspath(project);
+		final IRuntimeClasspathEntry[] classpath= new IRuntimeClasspathEntry[entries.length + 2];
+		classpath[0]= JavaRuntime.newRuntimeContainerClasspathEntry(new Path(JavaRuntime.JRE_CONTAINER), IRuntimeClasspathEntry.STANDARD_CLASSES, project);
+		classpath[1]= JavaRuntime.newArchiveRuntimeClasspathEntry(Path.fromOSString(Platform.asLocalURL(JavaPlugin.getDefault().getBundle().getEntry(SERIAL_SUPPORT_JAR)).getFile()));
+		for (int index= 2; index < classpath.length; index++)
+			classpath[index]= JavaRuntime.newArchiveRuntimeClasspathEntry(Path.fromOSString(entries[index - 2]));
+		return SerialVersionComputationHelper.computeSerialIDs(classpath, project, qualifiedNames, monitor);
+	}
+	
 
 	/**
 	 * Displays an appropriate error message for a specific problem.
@@ -105,7 +111,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 			display.asyncExec(new Runnable() {
 
 				public final void run() {
-					if (display != null && !display.isDisposed()) {
+					if (!display.isDisposed()) {
 						final Shell shell= display.getActiveShell();
 						if (shell != null && !shell.isDisposed())
 							MessageDialog.openError(shell, CorrectionMessages.SerialVersionHashProposal_dialog_error_caption, Messages.format(CorrectionMessages.SerialVersionHashProposal_dialog_error_message, message));
@@ -140,7 +146,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 			display.syncExec(new Runnable() {
 
 				public final void run() {
-					if (display != null && !display.isDisposed()) {
+					if (!display.isDisposed()) {
 						final Shell shell= display.getActiveShell();
 						if (shell != null && !shell.isDisposed())
 							result[0]= MessageDialog.openQuestion(shell, title, message);
@@ -151,29 +157,26 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 		return result[0];
 	}
 
-	/**
-	 * Creates a new serial version hash proposal.
-	 * 
-	 * @param unit
-	 *            the compilation unit
-	 * @param node
-	 *            the originally selected node
-	 */
-	public SerialVersionHashProposal(final ICompilationUnit unit, final ASTNode node) {
-		super(CorrectionMessages.SerialVersionSubProcessor_createhashed_description, unit, node);
+	private final ICompilationUnit fCompilationUnit;
+	
+	public SerialVersionHashProposal(ICompilationUnit unit, SimpleName[] simpleNames) {
+		super(unit, simpleNames);
+		fCompilationUnit= unit;
 	}
 
 	/**
 	 * {@inheritDoc}
+	 * @throws CoreException 
 	 */
-	protected void addInitializer(final VariableDeclarationFragment fragment) {
+	protected void addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) throws CoreException {
 		Assert.isNotNull(fragment);
 		try {
 			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
 
 				public final void run(final IProgressMonitor monitor) {
 					Assert.isNotNull(monitor);
-					fragment.setInitializer(computeDefaultExpression(monitor));
+					String id= computeId(declarationNode, monitor);
+					fragment.setInitializer(fragment.getAST().newNumberLiteral(id));
 				}
 			});
 		} catch (InvocationTargetException exception) {
@@ -186,21 +189,17 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment) {
-		// Do nothing
+	protected void addLinkedPositions(ASTRewrite rewrite, VariableDeclarationFragment fragment, List positionGroups) {
+		//Do nothing
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	protected Expression computeDefaultExpression(final IProgressMonitor monitor) {
+	private String computeId(final ASTNode declarationNode, final IProgressMonitor monitor) {
 		Assert.isNotNull(monitor);
 		long serialVersionID= SERIAL_VALUE;
 		try {
 			monitor.beginTask(CorrectionMessages.SerialVersionHashProposal_computing_id, 200);
-			final ICompilationUnit unit= getCompilationUnit();
-			final IJavaProject project= unit.getJavaProject();
-			final IPath path= unit.getResource().getFullPath();
+			final IJavaProject project= fCompilationUnit.getJavaProject();
+			final IPath path= fCompilationUnit.getResource().getFullPath();
 			try {
 				FileBuffers.getTextFileBufferManager().connect(path, new SubProgressMonitor(monitor, 10));
 				final ITextFileBuffer buffer= FileBuffers.getTextFileBufferManager().getTextFileBuffer(path);
@@ -212,15 +211,9 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 				FileBuffers.getTextFileBufferManager().disconnect(path, new SubProgressMonitor(monitor, 10));
 			}
 			project.getProject().build(IncrementalProjectBuilder.INCREMENTAL_BUILD, new SubProgressMonitor(monitor, 60));
-			final String[] entries= computeUserAndBootClasspath(project);
-			final IRuntimeClasspathEntry[] classpath= new IRuntimeClasspathEntry[entries.length + 2];
-			classpath[0]= JavaRuntime.newRuntimeContainerClasspathEntry(new Path(JavaRuntime.JRE_CONTAINER), IRuntimeClasspathEntry.STANDARD_CLASSES, project);
-			classpath[1]= JavaRuntime.newArchiveRuntimeClasspathEntry(Path.fromOSString(Platform.asLocalURL(JavaPlugin.getDefault().getBundle().getEntry(SERIAL_SUPPORT_JAR)).getFile()));
-			for (int index= 2; index < classpath.length; index++)
-				classpath[index]= JavaRuntime.newArchiveRuntimeClasspathEntry(Path.fromOSString(entries[index - 2]));
-			final long[] result= SerialVersionComputationHelper.computeSerialIDs(classpath, project, new String[] { getQualifiedName()}, new SubProgressMonitor(monitor, 100));
-			if (result.length > 0)
-				serialVersionID= result[0];
+			long[] ids= calculateSerialVersionIds(new String[] {getQualifiedName(declarationNode)}, project, new SubProgressMonitor(monitor, 100));
+			if (ids.length == 1)
+				serialVersionID= ids[0];
 		} catch (CoreException exception) {
 			displayErrorMessage(exception);
 		} catch (IOException exception) {
@@ -228,37 +221,7 @@ public final class SerialVersionHashProposal extends AbstractSerialVersionPropos
 		} finally {
 			monitor.done();
 		}
-		return getAST().newNumberLiteral(serialVersionID + LONG_SUFFIX);
+		return serialVersionID + LONG_SUFFIX;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getAdditionalProposalInfo() {
-		return CorrectionMessages.SerialVersionHashProposal_message_generated_info;
-	}
-
-	/**
-	 * Returns the qualified type name of the class declaration.
-	 * 
-	 * @return the qualified type name of the class
-	 */
-	private String getQualifiedName() {
-		final ASTNode parent= getDeclarationNode();
-		ITypeBinding binding= null;
-		if (parent instanceof AbstractTypeDeclaration) {
-			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) parent;
-			binding= declaration.resolveBinding();
-		} else if (parent instanceof AnonymousClassDeclaration) {
-			final AnonymousClassDeclaration declaration= (AnonymousClassDeclaration) parent;
-			final ClassInstanceCreation creation= (ClassInstanceCreation) declaration.getParent();
-			binding= creation.resolveTypeBinding();
-		} else if (parent instanceof ParameterizedType) {
-			final ParameterizedType type= (ParameterizedType) parent;
-			binding= type.resolveBinding();
-		}
-		if (binding != null)
-			return binding.getBinaryName();
-		return null;
-	}
 }

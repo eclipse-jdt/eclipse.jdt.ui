@@ -18,7 +18,10 @@ import junit.framework.Test;
 import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.Preferences;
+
+import org.eclipse.core.resources.IncrementalProjectBuilder;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 
@@ -60,6 +63,8 @@ import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 public class CleanUpTest extends QuickFixTest {
 	
+	private static final String FIELD_COMMENT= "/* Test */";
+	
 	private static final Class THIS= CleanUpTest.class;
 	
 	private IJavaProject fJProject1;
@@ -74,7 +79,10 @@ public class CleanUpTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		return allTests();
+		if (true)
+			return allTests();
+		
+		return setUpTest(new CleanUpTest("testSerialVersion01"));
 	}
 
 	public static Test setUpTest(Test test) {
@@ -94,12 +102,13 @@ public class CleanUpTest extends QuickFixTest {
 		store.setValue(PreferenceConstants.CODEGEN_KEYWORD_THIS, false);
 		
 		StubUtility.setCodeTemplate(CodeTemplateContextType.METHODSTUB_ID, "//TODO\n${body_statement}", null);
+		StubUtility.setCodeTemplate(CodeTemplateContextType.FIELDCOMMENT_ID, FIELD_COMMENT, null);
 		
 		Preferences corePrefs= JavaCore.getPlugin().getPluginPreferences();
 		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_PREFIXES, "");
 		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_PREFIXES, "");
 		corePrefs.setValue(JavaCore.CODEASSIST_FIELD_SUFFIXES, "");
-		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");		
+		corePrefs.setValue(JavaCore.CODEASSIST_STATIC_FIELD_SUFFIXES, "");	
 		
 		fJProject1= ProjectTestSetup.getProject();
 
@@ -3460,6 +3469,204 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("            System.out.println(element);\n");
 		buf.append("        }\n");
 		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testSerialVersion01() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class E1 implements Serializable {\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		fJProject1.getProject().build(IncrementalProjectBuilder.FULL_BUILD, new NullProgressMonitor());
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp1= new Java50CleanUp(Java50CleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
+		refactoring.addCleanUp(cleanUp1);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class E1 implements Serializable {\n");
+		buf.append("\n");
+		buf.append("    " + FIELD_COMMENT + "\n");
+		buf.append("    private static final long serialVersionUID = 1L;\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testSerialVersion02() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class E1 implements Serializable {\n");
+		buf.append("    public class B1 implements Serializable {\n");
+		buf.append("    }\n");
+		buf.append("    public class B2 extends B1 {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp1= new Java50CleanUp(Java50CleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
+		refactoring.addCleanUp(cleanUp1);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class E1 implements Serializable {\n");
+		buf.append("    " + FIELD_COMMENT + "\n");
+		buf.append("    private static final long serialVersionUID = 1L;\n");
+		buf.append("    public class B1 implements Serializable {\n");
+		buf.append("\n");
+		buf.append("        " + FIELD_COMMENT + "\n");
+		buf.append("        private static final long serialVersionUID = 1L;\n");
+		buf.append("    }\n");
+		buf.append("    public class B2 extends B1 {\n");
+		buf.append("\n");
+		buf.append("        " + FIELD_COMMENT + "\n");
+		buf.append("        private static final long serialVersionUID = 1L;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testSerialVersion03() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class E1 implements Serializable {\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Externalizable;\n");
+		buf.append("public class E2 implements Externalizable {\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		
+		ICleanUp cleanUp1= new Java50CleanUp(Java50CleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
+		refactoring.addCleanUp(cleanUp1);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class E1 implements Serializable {\n");
+		buf.append("\n");
+		buf.append("    " + FIELD_COMMENT + "\n");
+		buf.append("    private static final long serialVersionUID = 1L;\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Externalizable;\n");
+		buf.append("public class E2 implements Externalizable {\n");
+		buf.append("\n");
+		buf.append("    " + FIELD_COMMENT + "\n");
+		buf.append("    private static final long serialVersionUID = 1L;\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2});
+	}
+	
+	public void testSerialVersion04() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class E1 implements Serializable {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Serializable s= new Serializable() {\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp1= new Java50CleanUp(Java50CleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
+		refactoring.addCleanUp(cleanUp1);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class E1 implements Serializable {\n");
+		buf.append("    " + FIELD_COMMENT + "\n");
+		buf.append("    private static final long serialVersionUID = 1L;\n");
+		buf.append("\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        Serializable s= new Serializable() {\n");
+		buf.append("\n");
+		buf.append("            " + FIELD_COMMENT + "\n");
+		buf.append("            private static final long serialVersionUID = 1L;\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testSerialVersion05() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class E1 implements Serializable {\n");
+		buf.append("\n");
+		buf.append("    private Serializable s= new Serializable() {\n");
+		buf.append("        \n");
+		buf.append("    };\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp1= new Java50CleanUp(Java50CleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
+		refactoring.addCleanUp(cleanUp1);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class E1 implements Serializable {\n");
+		buf.append("\n");
+		buf.append("    " + FIELD_COMMENT + "\n");
+		buf.append("    private static final long serialVersionUID = 1L;\n");
+		buf.append("    private Serializable s= new Serializable() {\n");
+		buf.append("\n");
+		buf.append("        " + FIELD_COMMENT + "\n");
+		buf.append("        private static final long serialVersionUID = 1L;\n");
+		buf.append("        \n");
+		buf.append("    };\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 		

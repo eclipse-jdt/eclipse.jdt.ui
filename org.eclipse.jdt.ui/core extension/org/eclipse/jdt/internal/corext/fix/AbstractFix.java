@@ -35,10 +35,6 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 
 public abstract class AbstractFix implements IFix {
 	
-	public interface IFixRewriteOperation {
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, List/*<TextEditGroup>*/ textEditGroups) throws CoreException;
-	}
-	
 	public static abstract class AbstractFixRewriteOperation implements IFixRewriteOperation {
 		
 		protected Type importType(final ITypeBinding toImport, final ASTNode accessor, ImportRewrite imports, final CompilationUnit compilationUnit) {

@@ -240,9 +240,11 @@ public class CleanUpRefactoring extends Refactoring {
 			List toParse= toGo.subList(start, end);
 			
 			IJavaProject javaProject= ((ParseListElement)toParse.get(0)).getCompilationUnit().getJavaProject();
+			initCleanUps(javaProject, toParse, new SubProgressMonitor(pm, 1));
 			ASTParser parser= createParser(cleanUpOptions, javaProject);
 			List redoList= parse(resultingFixes, start, toParse, new SubProgressMonitor(pm, toParse.size()), parser, toGo.size());
 			toGo.addAll(redoList);
+			endCleanUps();
 			
 			start= end;
 		}
@@ -256,6 +258,32 @@ public class CleanUpRefactoring extends Refactoring {
 		pm.done();
 		
 		return result;
+	}
+
+	private void initCleanUps(IJavaProject javaProject, List toParse, IProgressMonitor monitor) throws CoreException {
+		ICompilationUnit[] cus= new ICompilationUnit[toParse.size()];
+		int i=0;
+		for (Iterator iter= toParse.iterator(); iter.hasNext();) {
+			ParseListElement element= (ParseListElement)iter.next();
+			cus[i]= element.getCompilationUnit();
+			i++;
+		}
+		ICleanUp[] cleanUps= getCleanUps();
+		monitor.subTask(Messages.format(FixMessages.CleanUpRefactoring_Initialize_message, javaProject.getElementName()));
+		try {
+			for (int j= 0; j < cleanUps.length; j++) {
+				cleanUps[j].beginCleanUp(javaProject, cus, new SubProgressMonitor(monitor, 1));
+			}
+		} finally {
+			monitor.done();
+		}
+	}
+	
+	private void endCleanUps() throws CoreException {
+		ICleanUp[] cleanUps= getCleanUps();
+		for (int j= 0; j < cleanUps.length; j++) {
+			cleanUps[j].endCleanUp();
+		}
 	}
 
 	/**
