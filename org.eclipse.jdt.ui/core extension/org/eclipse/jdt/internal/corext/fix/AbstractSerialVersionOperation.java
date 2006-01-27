@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.ui.text.correction;
+package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -37,8 +37,6 @@ import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
-import org.eclipse.jdt.internal.corext.fix.ILinkedFixRewriteOperation;
-import org.eclipse.jdt.internal.corext.fix.PositionGroup;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -48,13 +46,13 @@ import org.eclipse.jdt.ui.CodeGeneration;
  *
  * @since 3.1
  */
-public abstract class AbstractSerialVersionProposal implements ILinkedFixRewriteOperation {
+public abstract class AbstractSerialVersionOperation implements ILinkedFixRewriteOperation {
 
 	/** The long literal suffix */
 	protected static final String LONG_SUFFIX= "L"; //$NON-NLS-1$
 
 	/** The default serial value */
-	protected static final long SERIAL_VALUE= 1;
+	public static final long SERIAL_VALUE= 1;
 
 	/** The default serial id expression */
 	protected static final String DEFAULT_EXPRESSION= SERIAL_VALUE + LONG_SUFFIX; 
@@ -66,7 +64,7 @@ public abstract class AbstractSerialVersionProposal implements ILinkedFixRewrite
 	private final ASTNode[] fNodes;
 	private final ICompilationUnit fUnit;
 
-	protected AbstractSerialVersionProposal(final ICompilationUnit unit, final ASTNode[] node) {
+	protected AbstractSerialVersionOperation(final ICompilationUnit unit, final ASTNode[] node) {
 		fUnit= unit;
 		fNodes= node;
 	}
@@ -139,7 +137,7 @@ public abstract class AbstractSerialVersionProposal implements ILinkedFixRewrite
 
 			if (fragment.getInitializer() != null) {
 				
-				final TextEditGroup editGroup= new TextEditGroup(CorrectionMessages.SerialVersionProposal_AddId_editGroup_description);
+				final TextEditGroup editGroup= new TextEditGroup(FixMessages.SerialVersion_group_description);
 				textEditGroups.add(editGroup);
 
 				if (node instanceof AbstractTypeDeclaration)

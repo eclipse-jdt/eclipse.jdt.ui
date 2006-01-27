@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
+import org.eclipse.jdt.internal.corext.fix.AbstractSerialVersionOperation;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.launching.IRuntimeClasspathEntry;
@@ -55,7 +56,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.1
  */
-public final class SerialVersionHashProposal extends AbstractSerialVersionProposal {
+public final class SerialVersionHashProposal extends AbstractSerialVersionOperation {
 
 	/** The serial support jar */
 	private static final String SERIAL_SUPPORT_JAR= "serialsupport.jar"; //$NON-NLS-1$

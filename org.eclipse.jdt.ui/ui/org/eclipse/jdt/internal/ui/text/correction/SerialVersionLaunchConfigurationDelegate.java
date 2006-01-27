@@ -30,6 +30,7 @@ import org.eclipse.debug.core.DebugPlugin;
 import org.eclipse.debug.core.ILaunch;
 import org.eclipse.debug.core.ILaunchConfiguration;
 
+import org.eclipse.jdt.internal.corext.fix.AbstractSerialVersionOperation;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.launching.AbstractJavaLaunchConfigurationDelegate;
@@ -239,7 +240,7 @@ public final class SerialVersionLaunchConfigurationDelegate extends AbstractJava
 									try {
 										fSerialVersionID[index]= Long.parseLong(line);
 									} catch (NumberFormatException exception) {
-										fSerialVersionID[index]= AbstractSerialVersionProposal.SERIAL_VALUE;
+										fSerialVersionID[index]= AbstractSerialVersionOperation.SERIAL_VALUE;
 										fErrorMessage= line;
 									}
 								}

@@ -81,7 +81,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.AbstractSerialVersionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
 import org.eclipse.jdt.internal.ui.text.correction.SerialVersionDefaultProposal;
 import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashProposal;
@@ -240,7 +239,7 @@ public class Java50Fix extends LinkedFix {
 		}
 	}
 	
-	private static class SerialVersionHashBatchOperation extends AbstractSerialVersionProposal {
+	private static class SerialVersionHashBatchOperation extends AbstractSerialVersionOperation {
 
 		private final ISerialVersionFixContext fContext;
 
