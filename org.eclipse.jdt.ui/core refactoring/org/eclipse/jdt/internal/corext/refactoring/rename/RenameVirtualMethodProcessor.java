@@ -101,7 +101,9 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 				if (!declaringType.isInterface())
 					hierarchy= getCachedHierarchy(declaringType, new SubProgressMonitor(monitor, 1));
 
-				IMethod topmost= MethodChecks.getTopmostMethod(getMethod(), hierarchy, monitor);
+				IMethod topmost= getMethod();
+				if (MethodChecks.isVirtual(topmost))
+					topmost= MethodChecks.getTopmostMethod(getMethod(), hierarchy, monitor);
 				if (topmost != null)
 					initialize(topmost);
 				fActivationChecked= true;

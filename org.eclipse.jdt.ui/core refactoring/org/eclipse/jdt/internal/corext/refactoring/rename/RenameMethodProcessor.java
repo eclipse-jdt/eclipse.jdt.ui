@@ -106,6 +106,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private boolean fIsComposite;
 	private GroupCategorySet fCategorySet;
 	private boolean fDelegatingUpdating;
+	protected boolean fInitialized= false;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
 	
@@ -124,10 +125,12 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	
 	protected void initialize(IMethod method) {
 		fMethod= method;
-		if (method != null)
-			setNewElementName(method.getElementName());
-		fUpdateReferences= true;
-		initializeWorkingCopyOwner();
+		if (!fInitialized) {
+			if (method != null)
+				setNewElementName(method.getElementName());
+			fUpdateReferences= true;
+			initializeWorkingCopyOwner();
+		}		
 	}
 
 	protected void initializeWorkingCopyOwner() {
@@ -778,6 +781,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (arguments instanceof GenericRefactoringArguments) {
+			fInitialized= true;
 			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
 			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
 			if (handle != null) {
