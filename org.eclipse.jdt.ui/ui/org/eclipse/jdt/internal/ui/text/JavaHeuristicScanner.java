@@ -243,7 +243,10 @@ public final class JavaHeuristicScanner implements Symbols {
 	private char fChar;
 	/** the most recently read position. */
 	private int fPos;
-	/** the most recently used partition. */
+	/**
+	 * The most recently used partition.
+	 * @since 3.2
+	 */
 	private ITypedRegion fCachedPartition= new TypedRegion(-1, 0, "__no_partition_at_all"); //$NON-NLS-1$
 
 	/* preset stop conditions */
@@ -787,6 +790,7 @@ public final class JavaHeuristicScanner implements Symbols {
 	 * @param region a region
 	 * @param position an offset
 	 * @return <code>true</code> if <code>region</code> contains <code>position</code>
+	 * @since 3.2
 	 */
 	private boolean contains(IRegion region, int position) {
 		int offset= region.getOffset();

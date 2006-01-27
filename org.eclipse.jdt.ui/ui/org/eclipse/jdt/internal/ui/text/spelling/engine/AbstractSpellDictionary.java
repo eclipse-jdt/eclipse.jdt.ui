@@ -56,7 +56,10 @@ public abstract class AbstractSpellDictionary implements ISpellDictionary {
 
 	/** Is the dictionary already loaded? */
 	private boolean fLoaded= false;
-	/** Must the dictionary be loaded? */
+	/**
+	 * Must the dictionary be loaded?
+	 * @since 3.2
+	 */
 	private boolean fMustLoad= true;
 
 	/**

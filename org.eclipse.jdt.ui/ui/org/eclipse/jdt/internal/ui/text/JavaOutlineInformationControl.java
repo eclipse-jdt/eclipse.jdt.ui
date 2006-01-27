@@ -404,22 +404,25 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 
 	private class OutlineSorter extends AbstractHierarchyViewerSorter {
 
-		/* (non-Javadoc)
+		/*
 		 * @see org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter#getHierarchy(org.eclipse.jdt.core.IType)
+		 * @since 3.2
 		 */
 		protected ITypeHierarchy getHierarchy(IType type) {
 			return getSuperTypeHierarchy(type);
 		}
 
-		/* (non-Javadoc)
+		/*
 		 * @see org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter#isSortByDefiningType()
+		 * @since 3.2
 		 */
 		public boolean isSortByDefiningType() {
 			return fSortByDefiningTypeAction.isChecked();
 		}
 
-		/* (non-Javadoc)
+		/*
 		 * @see org.eclipse.jdt.internal.ui.typehierarchy.AbstractHierarchyViewerSorter#isSortAlphabetically()
+		 * @since 3.2
 		 */
 		public boolean isSortAlphabetically() {
 			return fLexicalSortingAction.isChecked();

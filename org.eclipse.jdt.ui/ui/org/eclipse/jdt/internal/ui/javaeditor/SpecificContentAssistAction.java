@@ -22,6 +22,10 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 
+/**
+ * 
+ * @since 3.2
+ */
 final class SpecificContentAssistAction extends Action {
 	private final CompletionProposalCategory fCategory;
 	private final SpecificContentAssistExecutor fExecutor= new SpecificContentAssistExecutor(CompletionProposalComputerRegistry.getDefault());

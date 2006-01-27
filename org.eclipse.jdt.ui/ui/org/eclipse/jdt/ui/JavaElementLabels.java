@@ -1149,6 +1149,8 @@ public class JavaElementLabels {
 	 * referenced. This means it is own by a different project but is referenced
 	 * by the root's parent. Returns <code>false</code> if the given root
 	 * doesn't have an underlying resource.
+	 *
+	 * @since 3.2
 	 */
 	private static boolean isReferenced(IPackageFragmentRoot root) {
 		IResource resource= root.getResource();

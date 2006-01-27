@@ -457,6 +457,7 @@ public class EditorUtility {
 	 * presented in more than one editor, only one of those editor parts is part of the result.
 	 * 
 	 * @return an array of all dirty editor parts.
+	 * @since 3.2
 	 */
 	public static IEditorPart[] getDirtyEditors() {
 		Set inputs= new HashSet();

@@ -855,8 +855,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 	
 	/**
 	 * Returns a section in the Java plugin's dialog settings. If the section doesn't exist yet, it is created.
+	 *
 	 * @param name the name of the section
 	 * @return the section of the given name
+	 * @since 3.2
 	 */
 	public IDialogSettings getDialogSettingsSection(String name) {
 		IDialogSettings dialogSettings= getDialogSettings();

@@ -198,11 +198,15 @@ public class SemanticHighlightingReconciler implements IJavaReconcilingListener,
 	private Job fJob;
 	/** Background job lock */
 	private final Object fJobLock= new Object();
-	/** Reconcile operation lock. */
+	/**
+	 * Reconcile operation lock.
+	 * @since 3.2
+	 */
 	private final Object fReconcileLock= new Object();
 	/**
 	 * <code>true</code> if any thread is executing
 	 * <code>reconcile</code>, <code>false</code> otherwise.
+	 * @since 3.2
 	 */
 	private boolean fIsReconciling= false;
 

@@ -73,7 +73,7 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 	
 	/*
 	 * @see org.eclipse.jface.action.IAction#runWithEvent(org.eclipse.swt.widgets.Event)
-	 * @since 3.1
+	 * @since 3.2
 	 */
 	public void runWithEvent(Event event) {
 		if (fAnnotation instanceof OverrideIndicatorManager.OverrideIndicator) {

@@ -1132,7 +1132,10 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 
 		fOutlineViewer.setInput(fInput);
 	}
-	
+
+	/*
+	 * @since 3.2
+	 */
 	private void updateSelectionProvider(IPageSite site) {
 		ISelectionProvider provider= fOutlineViewer;
 		if (fInput != null) {

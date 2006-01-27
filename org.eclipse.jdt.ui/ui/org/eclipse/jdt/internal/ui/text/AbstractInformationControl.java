@@ -544,6 +544,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * Overridden to call the old framework method.
 	 * 
 	 * @see org.eclipse.jface.dialogs.PopupDialog#fillDialogMenu(IMenuManager)
+	 * @since 3.2
 	 */
 	protected void fillDialogMenu(IMenuManager dialogMenu) {
 		super.fillDialogMenu(dialogMenu);

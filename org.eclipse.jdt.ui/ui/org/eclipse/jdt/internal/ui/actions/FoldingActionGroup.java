@@ -69,18 +69,15 @@ public class FoldingActionGroup extends ActionGroup {
 	private final TextOperationAction fExpand;
 	private final TextOperationAction fCollapse;
 	private final TextOperationAction fExpandAll;
+	private final IProjectionListener fProjectionListener;
 	
 	/* since 3.2 */
 	private final PreferenceAction fRestoreDefaults;
 	private final FoldingAction fCollapseMembers;
 	private final FoldingAction fCollapseComments;
 	private final TextOperationAction fCollapseAll;
-	
-	private final IProjectionListener fProjectionListener;
 
 
-
-	
 	/**
 	 * Creates a new projection action group for <code>editor</code>. If the
 	 * supplied viewer is not an instance of <code>ProjectionViewer</code>, the

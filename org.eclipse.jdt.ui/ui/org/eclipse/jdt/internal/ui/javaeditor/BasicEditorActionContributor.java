@@ -49,6 +49,10 @@ public class BasicEditorActionContributor extends BasicJavaEditorActionContribut
 	protected RetargetTextEditorAction fContextInformation;
 	protected RetargetTextEditorAction fCorrectionAssist;
 	protected RetargetTextEditorAction fChangeEncodingAction;
+	
+	/*
+	 * @since 3.2
+	 */
 	protected SpecificContentAssistAction[] fSpecificAssistActions;
 
 

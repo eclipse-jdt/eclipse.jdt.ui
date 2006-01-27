@@ -40,6 +40,8 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 /**
  * Java doc completion processor using contributed IJavaDocCompletionProcessor's
  * to evaluate proposals.
+ *
+ * @since 3.2
  */
 public class LegacyJavadocCompletionProposalComputer implements IJavaCompletionProposalComputer {
 

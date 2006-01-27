@@ -35,6 +35,10 @@ import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
  */
 public final class JavaIndenter {
 	
+	/**
+	 * The JDT Core preferences.
+	 * @since 3.2
+	 */
 	private final class CorePrefs {
 		final boolean prefUseTabs;
 		final int prefTabSize;
@@ -391,6 +395,10 @@ public final class JavaIndenter {
 	 * on the same document as the one we get.
 	 */
 	private final JavaHeuristicScanner fScanner;
+	/**
+	 * The JDT Core preferences.
+	 * @since 3.2
+	 */
 	private final CorePrefs fPrefs;
 
 	/**

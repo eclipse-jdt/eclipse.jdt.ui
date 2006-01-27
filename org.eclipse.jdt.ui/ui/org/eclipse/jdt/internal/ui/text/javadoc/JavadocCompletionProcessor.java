@@ -26,6 +26,8 @@ import org.eclipse.jdt.internal.ui.text.java.JavaCompletionProcessor;
 
 /**
  * Javadoc completion processor.
+ *
+ * @since 3.2
  */
 public class JavadocCompletionProcessor extends JavaCompletionProcessor {
 

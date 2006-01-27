@@ -50,6 +50,9 @@ public class EditorHighlightingSynchronizer implements ILinkedModeListener {
 			fEditor.installOccurrencesFinder(true);
 	}
 
+	/*
+	 * @since 3.2
+	 */
 	private boolean isEditorDisposed() {
 		return fEditor == null || fEditor.getSelectionProvider() == null;
 	}

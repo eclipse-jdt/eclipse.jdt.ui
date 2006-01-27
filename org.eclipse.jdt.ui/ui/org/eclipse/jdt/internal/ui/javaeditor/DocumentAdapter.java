@@ -152,6 +152,9 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	private List fBufferListeners= new ArrayList(3);
 	private IStatus fStatus;
 
+	/*
+	 * @since 3.2
+	 */
 	private IPath fPath;
 
 
