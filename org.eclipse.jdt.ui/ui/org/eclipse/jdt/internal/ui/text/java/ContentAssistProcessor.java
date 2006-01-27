@@ -33,6 +33,7 @@ import org.eclipse.jface.text.contentassist.ContentAssistant;
 import org.eclipse.jface.text.contentassist.ICompletionListener;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.jface.text.contentassist.IContentAssistantExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 
@@ -110,13 +111,19 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 				fCategoryIteration= getCategoryIteration();
 				fRepetition= 0;
 				fIterationGesture= getIterationGesture();
-				if (fCategoryIteration.size() == 1) {
-					event.assistant.setCyclingMode(false);
-					event.assistant.setShowEmptyList(false);
-				} else {
-					event.assistant.setCyclingMode(true);
-					event.assistant.setMessage(createIterationMessage());
-					event.assistant.setShowEmptyList(true);
+				if (event.assistant instanceof IContentAssistantExtension2) {
+					IContentAssistantExtension2 extension= (IContentAssistantExtension2) event.assistant;
+
+					if (fCategoryIteration.size() == 1) {
+						extension.setRepeatedInvocationMode(false);
+						extension.setShowEmptyList(false);
+					} else {
+						extension.setRepeatedInvocationMode(true);
+						extension.setStatusLineVisible(true);
+						extension.setStatusMessage(createIterationMessage());
+						extension.setShowEmptyList(true);
+					}
+				
 				}
 			}
 			
@@ -130,8 +137,12 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 				fCategoryIteration= null;
 				fRepetition= -1;
 				fIterationGesture= null;
-				event.assistant.setShowEmptyList(false);
-				event.assistant.setCyclingMode(false);
+				if (event.assistant instanceof IContentAssistantExtension2) {
+					IContentAssistantExtension2 extension= (IContentAssistantExtension2) event.assistant;
+					extension.setShowEmptyList(false);
+					extension.setRepeatedInvocationMode(false);
+					extension.setStatusLineVisible(false);
+				}
 			}
 			
 		});
@@ -332,10 +343,12 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			return fCategories;
 		
 		int iteration= fRepetition % fCategoryIteration.size();
-		fAssistant.setMessage(createIterationMessage());
+		fAssistant.setStatusMessage(createIterationMessage());
 		fAssistant.setEmptyMessage(createEmptyMessage());
 		fRepetition++;
 		
+//		fAssistant.setShowMessage(fRepetition % 2 != 0);
+//		
 		return (List) fCategoryIteration.get(iteration);
 	}
 
