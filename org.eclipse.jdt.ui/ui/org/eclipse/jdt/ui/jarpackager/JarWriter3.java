@@ -68,7 +68,7 @@ import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
  * </p>
  * 
  * @see org.eclipse.jdt.ui.jarpackager.JarPackageData
- * @since 3.1
+ * @since 3.2
  */
 public class JarWriter3 {
 
