@@ -12,11 +12,16 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import junit.framework.Assert;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
+import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
 import org.eclipse.core.resources.mapping.ModelProvider;
+import org.eclipse.core.resources.mapping.ResourceMapping;
+import org.eclipse.core.resources.mapping.ResourceMappingContext;
+import org.eclipse.core.resources.mapping.ResourceTraversal;
 
 public class TestModelProvider extends ModelProvider {
 	public static IResourceDelta LAST_DELTA;
@@ -43,5 +48,17 @@ public class TestModelProvider extends ModelProvider {
 		for (int i= 0; i < expectedChildren.length; i++) {
 			assertTrue(expectedChildren[i], actualChildren[i]);
 		}
+	}
+
+	public ResourceMapping[] getMappings(IResource resource, ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
+		return new ResourceMapping[0];
+	}
+
+	public ResourceMapping[] getMappings(IResource[] resources, ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
+		return new ResourceMapping[0];
+	}
+
+	public ResourceTraversal[] getTraversals(ResourceMapping[] mappings, ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {
+		return new ResourceTraversal[0];
 	}
 }
