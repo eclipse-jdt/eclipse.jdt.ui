@@ -38,6 +38,7 @@ public class FixMessages extends NLS {
 	public static String Java50Fix_SerialVersionNotFound_exception_description;
 	public static String Java50Fix_SerialVersion_default_description;
 	public static String Java50Fix_SerialVersion_hash_description;
+	public static String Java50Fix_InitializeSerialVersionId_subtask_description;
 	
 	public static String StringFix_AddRemoveNonNls_description;
 	public static String StringFix_AddNonNls_description;

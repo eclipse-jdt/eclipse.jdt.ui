@@ -103,6 +103,8 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	 * {@inheritDoc}
 	 */
 	public void beginCleanUp(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
+		if (monitor != null)
+			monitor.done();
 		//Default do nothing
 	}
 

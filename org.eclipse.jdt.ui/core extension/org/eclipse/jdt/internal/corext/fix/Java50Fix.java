@@ -22,7 +22,9 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -521,22 +523,31 @@ public class Java50Fix extends LinkedFix {
 	}
 	
 	public static SerialVersionHashContext createSerialVersionHashContext(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
-
-		IType serializable= project.findType(SERIALIZABLE_NAME);
-		IType externalizable= project.findType(EXTERNALIZABLE_NAME);
-		
-		List qualifiedClassNames= new ArrayList();
-		for (int i= 0; i < compilationUnits.length; i++) {
-			findTypesWithoutSerialVersionId(compilationUnits[i].getChildren(), serializable, externalizable, qualifiedClassNames);
-		}
-	
-		SerialVersionHashContext result= new SerialVersionHashContext(project, (String[])qualifiedClassNames.toArray(new String[qualifiedClassNames.size()]));
 		try {
-			result.initialize(monitor);
-		} catch (IOException e) {
-			JavaPlugin.log(e);
+			monitor.beginTask("", compilationUnits.length + 10); //$NON-NLS-1$
+			
+			IType serializable= project.findType(SERIALIZABLE_NAME);
+			IType externalizable= project.findType(EXTERNALIZABLE_NAME);
+			
+			List qualifiedClassNames= new ArrayList();
+			for (int i= 0; i < compilationUnits.length; i++) {
+				monitor.subTask(Messages.format(FixMessages.Java50Fix_InitializeSerialVersionId_subtask_description, new Object[] {project.getElementName(), compilationUnits[i].getElementName()}));
+				findTypesWithoutSerialVersionId(compilationUnits[i].getChildren(), serializable, externalizable, qualifiedClassNames);
+				if (monitor.isCanceled())
+					throw new OperationCanceledException();
+				monitor.worked(1);
+			}
+		
+			SerialVersionHashContext result= new SerialVersionHashContext(project, (String[])qualifiedClassNames.toArray(new String[qualifiedClassNames.size()]));
+			try {
+				result.initialize(new SubProgressMonitor(monitor, 10));
+			} catch (IOException e) {
+				JavaPlugin.log(e);
+			}
+			return result;
+		} finally {
+			monitor.done();
 		}
-		return result;
 	}
 	
 	private static void findTypesWithoutSerialVersionId(IJavaElement[] children, IType serializable, IType externalizable, List/*<String>*/ qualifiedClassNames) throws JavaModelException {

@@ -117,6 +117,91 @@ public class CleanUpRefactoring extends Refactoring {
 			return fCleanUpsArray;
 		}
 	}
+	
+	
+	private final class SolutionGenerator extends ASTRequestor {
+
+		private final IProgressMonitor fMonitor;
+		private final List fResult;
+		private final Hashtable fSolutions;
+		private final int fSize;
+		private final Iterator fToParseIter;
+		private ParseListElement fCurElement;
+		private int fIndex;
+
+		private SolutionGenerator(List/*<ParseListElement>*/ toSolve, int startIndex, int totalSize, Hashtable solutions, IProgressMonitor monitor) {
+			fMonitor= monitor;
+			fResult= new ArrayList();
+			fSolutions= solutions;
+			fSize= totalSize;
+			fIndex= startIndex + 1;
+			
+			fToParseIter= toSolve.iterator();
+			fCurElement= (ParseListElement)fToParseIter.next();
+			fMonitor.subTask(getSubTaskMessage(fCurElement, fIndex, fSize));
+		}
+
+		public List getResult() {
+			return fResult;
+		}
+
+		public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
+			ParseListElement tuple= calculateSolution(fSolutions, ast, fCurElement.getCleanUps());
+			if (tuple != null) {
+				fResult.add(tuple);
+			}
+			if (fToParseIter.hasNext()) {
+				fIndex++;
+				fCurElement= (ParseListElement)fToParseIter.next();
+				fMonitor.subTask(getSubTaskMessage(fCurElement, fIndex, fSize));
+			}
+		}
+		
+		private String getSubTaskMessage(ParseListElement element, int index, int size) {
+			return Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {getTypeName(element.getCompilationUnit()), new Integer(index), new Integer(size)});
+		}
+		
+		private ParseListElement calculateSolution(Hashtable solutions, CompilationUnit ast, ICleanUp[] cleanUps) {
+			TextChange solution= null;
+			ParseListElement result= null;
+			for (int i= 0; i < cleanUps.length; i++) {
+				ICleanUp cleanUp= cleanUps[i];
+				try {
+					IFix fix= cleanUp.createFix(ast);
+					if (fix != null) {
+						TextChange current= fix.createChange();
+						if (solution != null) {
+							if (intersects(current.getEdit(),solution.getEdit())) {
+								if (result == null) {
+									result= new ParseListElement((ICompilationUnit)ast.getJavaElement().getPrimaryElement());
+								}
+								result.addCleanUp(cleanUp);
+							} else {
+								mergeTextChanges(current, solution);
+								solution= current;
+							}
+						} else {
+							solution= current;
+						}
+					}
+				} catch (CoreException e) {
+					throw new FixCalculationException(e);
+				}
+			}
+			
+			if (solution != null) {
+				if (solutions.containsKey(ast.getJavaElement().getPrimaryElement())) {
+					MultiStateCompilationUnitChange oldChange= (MultiStateCompilationUnitChange)solutions.get(ast.getJavaElement().getPrimaryElement());
+					oldChange.addChange(solution);
+				} else {
+					solutions.put(ast.getJavaElement(), solution);
+				}
+			}
+			
+			return result;
+		}
+	}
+
 
 	private static final RefactoringTickProvider CLEAN_UP_REFACTORING_TICK_PROVIDER= new RefactoringTickProvider(0, 0, 1, 0);
 	
@@ -226,72 +311,63 @@ public class CleanUpRefactoring extends Refactoring {
 			cuCount+= ((List)fProjects.get(project)).size();
 		}
 		
-		pm.beginTask("", cuCount); //$NON-NLS-1$
+		pm.beginTask("", cuCount * 3 * fCleanUps.size()); //$NON-NLS-1$
+
+		try {
+			CompositeChange result= new CompositeChange(getName());
+			for (Iterator projectIter= fProjects.keySet().iterator(); projectIter.hasNext();) {
+				IJavaProject project= (IJavaProject)projectIter.next();
+				
+				List compilationUnits= (List)fProjects.get(project);
+				ICompilationUnit[] cus= (ICompilationUnit[])compilationUnits.toArray(new ICompilationUnit[compilationUnits.size()]);
+				
+				ICleanUp[] cleanUps= (ICleanUp[])fCleanUps.toArray(new ICleanUp[fCleanUps.size()]);
+				
+				cleanUpProject(project, cus, cleanUps, result, pm);
+			}
+			return result;
+			
+		} finally {
+			pm.done();
+		}
+	}
+
+	private void cleanUpProject(IJavaProject project, ICompilationUnit[] compilationUnits, ICleanUp[] cleanUps, CompositeChange result, IProgressMonitor monitor) throws CoreException {
+		initCleanUps(project, compilationUnits, new SubProgressMonitor(monitor, compilationUnits.length * cleanUps.length));
 		
+		List toGo= new ArrayList();
+		for (int i= 0; i < compilationUnits.length; i++) {
+			toGo.add(new ParseListElement(compilationUnits[i], cleanUps));
+		}
+		Hashtable resultingFixes= new Hashtable();
 		Map cleanUpOptions= getCleanUpOptions();
 		
-		Hashtable resultingFixes= new Hashtable();
-		
-		for (Iterator projectIter= fProjects.keySet().iterator(); projectIter.hasNext();) {
-			IJavaProject project= (IJavaProject)projectIter.next();
+		int start= 0;
+		int end= 0;
+		while (end < toGo.size()) {
+			end= Math.min(start + BATCH_SIZE, toGo.size());
+			List toParse= toGo.subList(start, end);
 			
-			List compilationUnits= (List)fProjects.get(project);
+			ASTParser parser= createParser(cleanUpOptions, project);
+			List redoList= parse(resultingFixes, start, toParse, new SubProgressMonitor(monitor, toParse.size() * 2 * cleanUps.length), parser, toGo.size());
+			toGo.addAll(redoList);
 			
-			initCleanUps(project, (ICompilationUnit[])compilationUnits.toArray(new ICompilationUnit[compilationUnits.size()]), new SubProgressMonitor(pm, 1));
-			
-			ICleanUp[] cleanUps= (ICleanUp[])fCleanUps.toArray(new ICleanUp[fCleanUps.size()]);
-			List toGo= new ArrayList();
-			for (Iterator iter= compilationUnits.iterator(); iter.hasNext();) {
-				ICompilationUnit cu= (ICompilationUnit)iter.next();
-				toGo.add(new ParseListElement(cu, cleanUps));
-			}
-			
-			int start= 0;
-			int end= 0;
-			ICompilationUnit beforeEndUnit= ((ParseListElement)toGo.get(start)).getCompilationUnit();
-			while (end < toGo.size()) {
-				while (end - start < BATCH_SIZE && end < toGo.size()) {
-					end++;
-					if (end == toGo.size()) {
-						break;
-					} else {
-						ICompilationUnit endUnit = ((ParseListElement)toGo.get(end)).getCompilationUnit();
-						if (!endUnit.getJavaProject().equals(beforeEndUnit.getJavaProject())) {
-							beforeEndUnit= endUnit;
-							break;
-						} else {
-							beforeEndUnit= endUnit;
-						}
-					}
-				}
-				List toParse= toGo.subList(start, end);
-				
-				ASTParser parser= createParser(cleanUpOptions, project);
-				List redoList= parse(resultingFixes, start, toParse, new SubProgressMonitor(pm, toParse.size()), parser, toGo.size());
-				toGo.addAll(redoList);
-				
-				start= end;
-			}
-			endCleanUps();
+			start= end;
 		}
-				
-		CompositeChange result= new CompositeChange(getName());
 		for (Iterator iter= resultingFixes.values().iterator(); iter.hasNext();) {
 			Change element= (Change)iter.next();
 			result.add(element);
 		}
-		
-		pm.done();
-		
-		return result;
+
+		endCleanUps();
 	}
 
 	private void initCleanUps(IJavaProject javaProject, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 		ICleanUp[] cleanUps= getCleanUps();
-		monitor.subTask(Messages.format(FixMessages.CleanUpRefactoring_Initialize_message, javaProject.getElementName()));
+		monitor.beginTask(Messages.format(FixMessages.CleanUpRefactoring_Initialize_message, javaProject.getElementName()), compilationUnits.length * cleanUps.length);
 		try {
 			for (int j= 0; j < cleanUps.length; j++) {
-				cleanUps[j].beginCleanUp(javaProject, compilationUnits, new SubProgressMonitor(monitor, 1));
+				cleanUps[j].beginCleanUp(javaProject, compilationUnits, new SubProgressMonitor(monitor, compilationUnits.length));
 			}
 		} finally {
 			monitor.done();
@@ -319,12 +395,10 @@ public class CleanUpRefactoring extends Refactoring {
 		return cleanUpOptions;
 	}
 
-	private List/*<ParseListElement>*/ parse(final Hashtable solutions, final int start, List/*<ParseListElement*/ toParse, final SubProgressMonitor sub, ASTParser parser, int totalElementsCount) throws CoreException {
-		
+	private List/*<ParseListElement>*/ parse(final Hashtable solutions, final int start, List/*<ParseListElement*/ toParse, final IProgressMonitor monitor, ASTParser parser, final int size) throws CoreException {
+
 		final ICompilationUnit[] compilationUnits= new ICompilationUnit[toParse.size()];
-		final ICleanUp[][] cleanUps= new ICleanUp[toParse.size()][];
 		final List workingCopys= new ArrayList();
-		
 		try {
 			int i= 0;
 			for (Iterator iter= toParse.iterator(); iter.hasNext();) {
@@ -340,37 +414,22 @@ public class CleanUpRefactoring extends Refactoring {
 				} else {
 					compilationUnits[i]= compilationUnit;
 				}
-				cleanUps[i]= element.getCleanUps();
 				i++;
 			}
-			final List result= new ArrayList();
-			final int[] index= new int[] {start};
-			final Integer size= new Integer(totalElementsCount);
-			sub.subTask(Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {getTypeName(compilationUnits[index[0] - start]), new Integer(index[0] + 1), size}));
+
+			SolutionGenerator solutionGenerator= new SolutionGenerator(toParse, start, size, solutions, monitor);
 			try {
-				parser.createASTs(compilationUnits, new String[0], new ASTRequestor() {
-
-					public void acceptAST(ICompilationUnit source, CompilationUnit ast) {
-						ParseListElement tuple= calculateSolution(solutions, ast, cleanUps[index[0] - start]);
-						if (tuple != null) {
-							result.add(tuple);
-						}
-						index[0]++;
-						if (index[0] - start < compilationUnits.length) {
-							sub.subTask(Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {getTypeName(compilationUnits[index[0] - start]), new Integer(index[0] + 1), size}));
-						}
-					}
-
-				}, sub);
+				parser.createASTs(compilationUnits, new String[0], solutionGenerator, monitor);
 			} catch (FixCalculationException e) {
 				throw e.getException();
 			}
-			return result;
+			return solutionGenerator.getResult();
 		} finally { 
 			for (Iterator iter= workingCopys.iterator(); iter.hasNext();) {
 				ICompilationUnit cu= (ICompilationUnit)iter.next();
 				cu.discardWorkingCopy();
 			}
+			monitor.done();
 		}
 	}
 
@@ -421,48 +480,8 @@ public class CleanUpRefactoring extends Refactoring {
 	private String getTypeName(final ICompilationUnit unit) {
 		return JavaCore.removeJavaLikeExtension(unit.getElementName());
 	}
-	
-	private ParseListElement calculateSolution(Hashtable solutions, CompilationUnit ast, ICleanUp[] cleanUps) {
-		TextChange solution= null;
-		ParseListElement result= null;
-		for (int i= 0; i < cleanUps.length; i++) {
-			ICleanUp cleanUp= cleanUps[i];
-			try {
-				IFix fix= cleanUp.createFix(ast);
-				if (fix != null) {
-					TextChange current= fix.createChange();
-					if (solution != null) {
-						if (intersects(current.getEdit(),solution.getEdit())) {
-							if (result == null) {
-								result= new ParseListElement((ICompilationUnit)ast.getJavaElement().getPrimaryElement());
-							}
-							result.addCleanUp(cleanUp);
-						} else {
-							mergeTextChanges(current, solution);
-							solution= current;
-						}
-					} else {
-						solution= current;
-					}
-				}
-			} catch (CoreException e) {
-				throw new FixCalculationException(e);
-			}
-		}
-		
-		if (solution != null) {
-			if (solutions.containsKey(ast.getJavaElement().getPrimaryElement())) {
-				MultiStateCompilationUnitChange oldChange= (MultiStateCompilationUnitChange)solutions.get(ast.getJavaElement().getPrimaryElement());
-				oldChange.addChange(solution);
-			} else {
-				solutions.put(ast.getJavaElement(), solution);
-			}
-		}
-		
-		return result;
-	}
 
-	private boolean intersects(TextEdit edit1, TextEdit edit2) {
+	private static boolean intersects(TextEdit edit1, TextEdit edit2) {
 		if (edit1 instanceof MultiTextEdit && edit2 instanceof MultiTextEdit) {
 			MultiTextEdit multiTextEdit1= (MultiTextEdit)edit1;
 			TextEdit[] children1= multiTextEdit1.getChildren();
