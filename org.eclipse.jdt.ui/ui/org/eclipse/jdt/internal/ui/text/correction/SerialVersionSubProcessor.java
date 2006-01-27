@@ -47,19 +47,6 @@ public final class SerialVersionSubProcessor {
 		}
 	}
 
-	public static final class SerialVersionDefaultProposal extends FixCorrectionProposal {
-		public SerialVersionDefaultProposal(IFix fix, ICleanUp up, int relevance, Image image) {
-			super(fix, up, relevance, image);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public String getAdditionalProposalInfo() {
-			return CorrectionMessages.SerialVersionDefaultProposal_message_default_info;
-		}
-	}
-
 	/**
 	 * Determines the serial version quickfix proposals.
 	 *

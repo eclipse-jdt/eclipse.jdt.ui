@@ -82,7 +82,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
-import org.eclipse.jdt.internal.ui.text.correction.SerialVersionDefaultProposal;
 import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashProposal;
 
 /**
@@ -426,7 +425,7 @@ public class Java50Fix extends LinkedFix {
 		if (simpleName == null)
 			return null;
 		
-		SerialVersionDefaultProposal defop= new SerialVersionDefaultProposal(unit, new SimpleName[] {simpleName});
+		SerialVersionDefaultOperation defop= new SerialVersionDefaultOperation(unit, new SimpleName[] {simpleName});
 		Java50Fix fix1= new Java50Fix(FixMessages.Java50Fix_SerialVersion_default_description, compilationUnit, new IFixRewriteOperation[] {defop});
 		
 		SerialVersionHashProposal hashop= new SerialVersionHashProposal(unit, new SimpleName[] {simpleName});

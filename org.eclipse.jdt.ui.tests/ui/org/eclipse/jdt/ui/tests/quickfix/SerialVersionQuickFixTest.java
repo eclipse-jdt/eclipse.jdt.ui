@@ -38,7 +38,7 @@ import org.eclipse.jdt.launching.JavaRuntime;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.text.correction.SerialVersionSubProcessor.SerialVersionDefaultProposal;
+import org.eclipse.jdt.internal.ui.text.correction.SerialVersionDefaultProposal;
 import org.eclipse.jdt.internal.ui.text.correction.SerialVersionSubProcessor.SerialVersionHashProposal;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;

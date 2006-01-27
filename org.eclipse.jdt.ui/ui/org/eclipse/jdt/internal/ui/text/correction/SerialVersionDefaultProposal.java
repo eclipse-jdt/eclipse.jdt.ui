@@ -10,68 +10,22 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import java.util.List;
+import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jdt.core.ICompilationUnit;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.Expression;
-import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
+import org.eclipse.jdt.internal.corext.fix.IFix;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.fix.AbstractSerialVersionOperation;
-import org.eclipse.jdt.internal.corext.fix.PositionGroup;
+import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 
-/**
- * Proposal for a default serial version id.
- * 
- * @since 3.1
- */
-public final class SerialVersionDefaultProposal extends AbstractSerialVersionOperation {
-
-	/** The initializer linked position group id */
-	private static final String GROUP_INITIALIZER= "initializer"; //$NON-NLS-1$
-
-	/**
-	 * Creates a new serial version default proposal.
-	 * 
-	 * @param unit
-	 *            the compilation unit
-	 * @param simpleNames
-	 *            the originally selected nodes
-	 */
-
-	public SerialVersionDefaultProposal(ICompilationUnit unit, SimpleName[] simpleNames) {
-		super(unit, simpleNames);
-	}
-
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected void addInitializer(final VariableDeclarationFragment fragment, final ASTNode declarationNode) {
-		Assert.isNotNull(fragment);
-
-		final Expression expression= fragment.getAST().newNumberLiteral(DEFAULT_EXPRESSION);
-		if (expression != null)
-			fragment.setInitializer(expression);
+public final class SerialVersionDefaultProposal extends FixCorrectionProposal {
+	
+	public SerialVersionDefaultProposal(IFix fix, ICleanUp up, int relevance, Image image) {
+		super(fix, up, relevance, image);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	protected void addLinkedPositions(final ASTRewrite rewrite, final VariableDeclarationFragment fragment, final List positionGroups) {
-
-		Assert.isNotNull(rewrite);
-		Assert.isNotNull(fragment);
-
-		final Expression initializer= fragment.getInitializer();
-		if (initializer != null) {
-			PositionGroup group= new PositionGroup(GROUP_INITIALIZER);
-			group.addFirstPosition(rewrite.track(initializer));
-			positionGroups.add(group);
-		}
+	public String getAdditionalProposalInfo() {
+		return CorrectionMessages.SerialVersionDefaultProposal_message_default_info;
 	}
-
 }
