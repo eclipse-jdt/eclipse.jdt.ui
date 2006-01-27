@@ -46,6 +46,7 @@ Export-Package: org.eclipse.jdt.internal.corext;x-friends:="org.eclipse.jdt.juni
  org.eclipse.jdt.internal.ui.actions;x-friends:="org.eclipse.jdt.junit",
  org.eclipse.jdt.internal.ui.browsing;x-internal:=true,
  org.eclipse.jdt.internal.ui.callhierarchy;x-internal:=true,
+ org.eclipse.jdt.internal.ui.commands;x-internal:=true,
  org.eclipse.jdt.internal.ui.compare;x-internal:=true,
  org.eclipse.jdt.internal.ui.dialogs;x-internal:=true,
  org.eclipse.jdt.internal.ui.dnd;x-internal:=true,
