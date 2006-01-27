@@ -4279,7 +4279,7 @@
       <markerCategory name="%markerCategory.buildpath_problem">
          <markerTypeReference id="org.eclipse.jdt.core.buildpath_problem"/>
       </markerCategory>
-      <markerGrouping name="Java problem type" attribute="categoryId">
+      <markerGrouping name="%MarkerCategory.name" attribute="categoryId">
         <!--<markerTypeReference id="org.eclipse.jdt.core.buildpath_problem"/> bug 125201 -->
         <markerTypeReference id="org.eclipse.jdt.core.problem"/>
         <markerAttributeMapping value="10" name="%MarkerCategory.buildpath"/>
