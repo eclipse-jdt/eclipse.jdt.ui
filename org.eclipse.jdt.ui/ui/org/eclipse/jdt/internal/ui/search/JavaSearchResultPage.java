@@ -12,11 +12,8 @@ package org.eclipse.jdt.internal.ui.search;
 
 import java.text.Collator;
 import java.text.MessageFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.HashSet;
-import java.util.Iterator;
-import java.util.Set;
-import java.util.StringTokenizer;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
@@ -67,14 +64,12 @@ import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.search.ui.IContextMenuConstants;
 import org.eclipse.search.ui.ISearchResult;
-import org.eclipse.search.ui.ISearchResultListener;
 import org.eclipse.search.ui.ISearchResultViewPart;
 import org.eclipse.search.ui.NewSearchUI;
 import org.eclipse.search.ui.SearchResultEvent;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.AbstractTextSearchViewPage;
 import org.eclipse.search.ui.text.Match;
-import org.eclipse.search.ui.text.MatchEvent;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -88,6 +83,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
 import org.eclipse.jdt.internal.ui.dnd.ResourceTransferDragAdapter;
 import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDragAdapter;
+import org.eclipse.jdt.internal.ui.search.JavaSearchResult.MatchFilterEvent;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTableViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
@@ -130,7 +126,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	private static final String TRUE = "TRUE"; //$NON-NLS-1$
 	private static final String KEY_GROUPING= "org.eclipse.jdt.search.resultpage.grouping"; //$NON-NLS-1$
 	private static final String KEY_SORTING= "org.eclipse.jdt.search.resultpage.sorting"; //$NON-NLS-1$
-	private static final String KEY_FILTERS= "org.eclipse.jdt.search.resultpage.filters"; //$NON-NLS-1$
 	private static final String KEY_LIMIT_ENABLED= "org.eclipse.jdt.search.resultpage.limit_enabled"; //$NON-NLS-1$
 	private static final String KEY_LIMIT= "org.eclipse.jdt.search.resultpage.limit"; //$NON-NLS-1$
 	
@@ -150,10 +145,8 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	private GroupAction fGroupProjectAction;
 	private int fCurrentGrouping;
 	
-	private Set fMatchFilters= new HashSet();
 	private FilterAction[] fFilterActions;
 	private FiltersDialogAction fFilterDialogAction;
-	private ISearchResultListener fFilterListener;
 	
 	private static final String[] SHOW_IN_TARGETS= new String[] { JavaUI.ID_PACKAGES , IPageLayout.ID_RES_NAV };
 	public static final IShowInTargetList SHOW_IN_TARGET_LIST= new IShowInTargetList() {
@@ -170,19 +163,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		initSortActions();
 		initGroupingActions();
 		initFilterActions();
-		fFilterListener= new ISearchResultListener() {
-			public void searchResultChanged(SearchResultEvent e) {
-				if (e instanceof MatchEvent) {
-					MatchEvent evt= (MatchEvent) e;
-					if (evt.getKind() == MatchEvent.ADDED) {
-						Match[] matches= evt.getMatches();
-						for (int i= 0; i < matches.length; i++) {
-							updateFilterState(matches[i]);
-						}
-					}
-				}
-			}
-		};
 	}
 	
 	private void initFilterActions() {
@@ -266,7 +246,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 
 		fActionGroup.setContext(new ActionContext(getSite().getSelectionProvider().getSelection()));
 		fActionGroup.fillContextMenu(mgr);
-		
 	}
 	
 	private void addSortActions(IMenuManager mgr) {
@@ -492,8 +471,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		} catch (NumberFormatException e) {
 			fCurrentGrouping= LevelTreeContentProvider.LEVEL_PACKAGE;
 		}
-		String encodedFilters= getSettings().get(KEY_FILTERS);
-		restoreFilters(encodedFilters);
 		fLimitElements= !FALSE.equals(getSettings().get(KEY_LIMIT_ENABLED));
 		try {
 			fElementLimit= getSettings().getInt(KEY_LIMIT);
@@ -507,35 +484,11 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 			value= memento.getInteger(KEY_SORTING);
 			if (value != null)
 				fCurrentSortOrder= value.intValue();
-			encodedFilters= memento.getString(KEY_FILTERS);
-			restoreFilters(encodedFilters);
 			fLimitElements= !FALSE.equals(memento.getString(KEY_LIMIT_ENABLED));
 			value= memento.getInteger(KEY_LIMIT);
 			if (value != null)
 				fElementLimit= value.intValue();
 		}
-	}
-	
-	private void restoreFilters(String encodedFilters) {
-		if (encodedFilters != null) {
-			fMatchFilters.clear();
-			String[] decodedFilters= decodeFiltersString(encodedFilters);
-			for (int i= 0; i < decodedFilters.length; i++) {
-				MatchFilter filter= findMatchFilter(decodedFilters[i]);
-				if (filter != null)
-					fMatchFilters.add(filter);
-			}
-		}
-		updateFilterActions();
-	}
-
-	private MatchFilter findMatchFilter(String id) {
-		MatchFilter[] allFilters= MatchFilter.allFilters();
-		for (int i= 0; i < allFilters.length; i++) {
-			if (allFilters[i].getID().equals(id))
-				return allFilters[i];
-		}
-		return null;
 	}
 
 	/* (non-Javadoc)
@@ -545,7 +498,6 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		super.saveState(memento);
 		memento.putInteger(KEY_GROUPING, fCurrentGrouping);
 		memento.putInteger(KEY_SORTING, fCurrentSortOrder);
-		memento.putString(KEY_FILTERS, encodeFilters());
 		if (fLimitElements)
 			memento.putString(KEY_LIMIT_ENABLED, TRUE);
 		else 
@@ -553,10 +505,7 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		memento.putInteger(KEY_LIMIT, getElementLimit());
 	}
 	
-	void addMatchFilter(MatchFilter filter) {
-		fMatchFilters.add(filter);
-		filtersChanged();
-	}
+
 	
 	void enableLimit(boolean enable) {
 		fLimitElements= enable;
@@ -580,52 +529,53 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	}
 	
 	void removeMatchFilter(MatchFilter filter) {
-		fMatchFilters.remove(filter);
-		filtersChanged();
+		String id= filter.getID();
+		MatchFilter[] matchFilters= getMatchFilters();
+		ArrayList res= new ArrayList(matchFilters.length);
+		for (int i= 0; i < matchFilters.length; i++) {
+			if (!id.equals(matchFilters[i].getID())) {
+				res.add(matchFilters[i]);
+			}
+		}
+		MatchFilter[] newFilters= (MatchFilter[]) res.toArray(new MatchFilter[res.size()]);
+		setFilters(newFilters);
 	}
 	
-	private void filtersChanged() {
+	void addMatchFilter(MatchFilter filter) {
+		String id= filter.getID();
+		MatchFilter[] matchFilters= getMatchFilters();
+		ArrayList res= new ArrayList(matchFilters.length);
+		for (int i= 0; i < matchFilters.length; i++) {
+			if (!id.equals(matchFilters[i].getID())) {
+				res.add(matchFilters[i]);
+			}
+		}
+		res.add(filter);
+		MatchFilter[] newFilters= (MatchFilter[]) res.toArray(new MatchFilter[res.size()]);
+		setFilters(newFilters);
+	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.search.ui.text.AbstractTextSearchViewPage#handleSearchResultChanged(org.eclipse.search.ui.SearchResultEvent)
+	 */
+	protected synchronized void handleSearchResultChanged(SearchResultEvent e) {
+		super.handleSearchResultChanged(e);
+		if (e instanceof MatchFilterEvent) {
+			filtersChanged(((MatchFilterEvent) e).getActivatedFilters());
+		}
+	}
+	
+	private void filtersChanged(MatchFilter[] newFilters) {
 		StructuredViewer viewer= getViewer();
 		JavaSearchContentProvider cp= (JavaSearchContentProvider) viewer.getContentProvider();
 		cp.filtersChanged(getMatchFilters());
 		
-		AbstractTextSearchResult input= getInput();
-		refilterMatches(input);
 		updateFilterActions();
 		
-		// trigger a refresh
-		Object state= getUIState();
-		super.setInput(null, null);
-		super.setInput(input, state);
+		getViewer().refresh();
 		
 		getViewPart().updateLabel();
-		getSettings().put(KEY_FILTERS, encodeFilters());
-	}
-
-	private void refilterMatches(AbstractTextSearchResult input) {
-		if (input == null)
-			return;
-		Object[] elements= input.getElements();
-		for (int e= 0; e < elements.length; e++) {
-			Match[] matches= input.getMatches(elements[e]);
-			for (int m= 0; m < matches.length; m++) {
-				updateFilterState(matches[m]);
-			}
-		}
-	}
-	
-	private void updateFilterState(Match match) {
-		if (!(match instanceof JavaElementMatch))
-			return;
-		for (Iterator iter= fMatchFilters.iterator(); iter.hasNext();) {
-			MatchFilter filter= (MatchFilter)iter.next();
-			if (filter.filters((JavaElementMatch)match)) {
-				match.setFiltered(true);
-				return;
-			}
-		}
-		match.setFiltered(false);
-	}
+	}	
 
 	private void updateFilterActions() {
 		IMenuManager menu= getSite().getActionBars().getMenuManager();
@@ -638,34 +588,20 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		menu.updateAll(true);
 	}
 
-	private String encodeFilters() {
-		StringBuffer buf= new StringBuffer();
-		MatchFilter[] enabledFilters= getMatchFilters();
-		buf.append(enabledFilters.length);
-		for (int i= 0; i < enabledFilters.length; i++) {
-			buf.append(';');
-			buf.append(enabledFilters[i].getID());
-		}
-		return buf.toString();
-	}
-	
-	private String[] decodeFiltersString(String encodedString) {
-		StringTokenizer tokenizer= new StringTokenizer(encodedString, ";"); //$NON-NLS-1$
-		int count= Integer.valueOf(tokenizer.nextToken()).intValue();
-		String[] ids= new String[count];
-		for (int i= 0; i < count; i++) {
-			ids[i]= tokenizer.nextToken();
-		}
-		return ids;
-	}
-
 	boolean hasMatchFilter(MatchFilter filter) {
-		return fMatchFilters.contains(filter);
+		JavaSearchResult input= (JavaSearchResult) getInput();
+		if (input != null) {
+			return (input).hasMatchFilterActivated(filter);
+		}
+		return false;
 	}
 	
 	MatchFilter[] getMatchFilters() {
-		MatchFilter[] filters= new MatchFilter[fMatchFilters.size()];
-		return (MatchFilter[]) fMatchFilters.toArray(filters);
+		JavaSearchResult input= (JavaSearchResult) getInput();
+		if (input != null) {
+			return input.getActivatedMatchFilters();
+		}
+		return new MatchFilter[0];
 	}
 	
 	public int getDisplayedMatchCount(Object element) {
@@ -702,30 +638,10 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		return filteredMatches;
 	}
 
-	/*
-	private boolean isFiltered(Match match) {
-		MatchFilter[] filters= getMatchFilters();
-		for (int j= 0; j < filters.length; j++) {
-			if ((match instanceof JavaElementMatch) && filters[j].filters((JavaElementMatch) match))
-				return true;
-		}
-		return false;
-
-	}
-	*/
-
 	public void setInput(ISearchResult search, Object viewState) {
-		ISearchResult oldInput= getInput();
-		if (oldInput instanceof JavaSearchResult) {
-			((JavaSearchResult)oldInput).setFilterListner(null);
-		}
-		JavaSearchResult input= (JavaSearchResult)search;
-		updateFilterEnablement(input);
-		refilterMatches(input);
-		if (search instanceof JavaSearchResult) {
-			((JavaSearchResult)search).setFilterListner(fFilterListener);
-		}
 		super.setInput(search, viewState);
+		JavaSearchResult input= (JavaSearchResult) search;
+		updateFilterEnablement(input);
 	}
 
 	private void updateFilterEnablement(JavaSearchResult result) {
@@ -736,8 +652,10 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 		}
 
 		for (int i= fFilterActions.length-1; i >= 0 ; i--) {
-			if (shouldEnable(result, fFilterActions[i]))
-				menu.prependToGroup(GROUP_FILTERING, fFilterActions[i]);
+			FilterAction filterAction= fFilterActions[i];
+			if (shouldEnable(result, filterAction))
+				menu.prependToGroup(GROUP_FILTERING, filterAction);
+			filterAction.updateCheckState();
 		}
 		
 		menu.updateAll(true);
@@ -872,11 +790,10 @@ public class JavaSearchResultPage extends AbstractTextSearchViewPage implements 
 	}
 
 	public void setFilters(MatchFilter[] enabledFilters) {
-		fMatchFilters.clear();
-		for (int i = 0; i < enabledFilters.length; i++) {
-			fMatchFilters.add(enabledFilters[i]);
+		JavaSearchResult input= (JavaSearchResult) getInput();
+		if (input != null) {
+			input.setActivatedFilters(enabledFilters);
 		}
-		filtersChanged();
 	}
 
 	void setElementLimit(int elementLimit) {

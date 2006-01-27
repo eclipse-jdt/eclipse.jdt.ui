@@ -26,12 +26,13 @@ import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.search.ui.ISearchQuery;
-import org.eclipse.search.ui.ISearchResultListener;
+import org.eclipse.search.ui.ISearchResult;
 import org.eclipse.search.ui.SearchResultEvent;
 import org.eclipse.search.ui.text.AbstractTextSearchResult;
 import org.eclipse.search.ui.text.IEditorMatchAdapter;
 import org.eclipse.search.ui.text.IFileMatchAdapter;
 import org.eclipse.search.ui.text.Match;
+import org.eclipse.search.ui.text.MatchEvent;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -44,14 +45,32 @@ import org.eclipse.jdt.ui.search.IMatchPresentation;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class JavaSearchResult extends AbstractTextSearchResult implements IEditorMatchAdapter, IFileMatchAdapter {
+	
+	public static class MatchFilterEvent extends SearchResultEvent {
+		private static final long serialVersionUID= 1234L;
+		
+		private final MatchFilter[] fActivatedFilters;
+
+		public MatchFilterEvent(ISearchResult searchResult, MatchFilter[] activatedFilters) {
+			super(searchResult);
+			fActivatedFilters= activatedFilters;
+		}
+		
+		public MatchFilter[] getActivatedFilters() {
+			return fActivatedFilters;
+		}
+	}
+	
 	private JavaSearchQuery fQuery;
 	private Map fElementsToParticipants;
 	private static final Match[] NO_MATCHES= new Match[0];
-	private ISearchResultListener fFilterListener;
+	
+	private MatchFilter[] fActivatedMatchFilters;
 	
 	public JavaSearchResult(JavaSearchQuery query) {
 		fQuery= query;
 		fElementsToParticipants= new HashMap();
+		fActivatedMatchFilters= MatchFilter.getLastUsedFilters();
 	}
 
 	public ImageDescriptor getImageDescriptor() {
@@ -66,15 +85,60 @@ public class JavaSearchResult extends AbstractTextSearchResult implements IEdito
 		return getLabel();
 	}
 	
-	public void setFilterListner(ISearchResultListener listener) {
-		fFilterListener= listener;
+	public void setActivatedFilters(MatchFilter[] matchFilters) {
+		fActivatedMatchFilters= matchFilters;
+		updateFilterStateForAllMarkers();
+		fireChange(new MatchFilterEvent(this, matchFilters));
 	}
 	
+	public MatchFilter[] getActivatedMatchFilters() {
+		return fActivatedMatchFilters;
+	}
+	
+	public boolean hasMatchFilterActivated(MatchFilter filter) {
+		String id= filter.getID();
+		for (int i= 0; i < fActivatedMatchFilters.length; i++) {
+			if (fActivatedMatchFilters[i].getID().equals(id)) {
+				return true;
+			}
+		}
+		return false;
+	}
+		
 	protected void fireChange(SearchResultEvent e) {
-		if (fFilterListener != null)
-			fFilterListener.searchResultChanged(e);
+		if (e instanceof MatchEvent && ((MatchEvent) e).getKind() == MatchEvent.ADDED) {
+			// initialize all new markers
+			updateFilterState(((MatchEvent) e).getMatches());
+		}
 		super.fireChange(e);
 	}
+	
+	private void updateFilterStateForAllMarkers() {
+		Object[] elements= getElements();
+		for (int i= 0; i < elements.length; i++) {
+			updateFilterState(getMatches(elements[i]));
+		}		
+	}
+	
+	private void updateFilterState(Match[] matches) {
+		for (int i= 0; i < matches.length; i++) {
+			Object match= matches[i];
+			if (match instanceof JavaElementMatch) {
+				updateFilterState((JavaElementMatch) match);
+			}
+		}
+	}
+		
+	private void updateFilterState(JavaElementMatch match) {	
+		for (int i= 0; i < fActivatedMatchFilters.length; i++) {
+			if (fActivatedMatchFilters[i].filters(match)) {
+				match.setFiltered(true);
+				return;
+			}
+		}
+		match.setFiltered(false);
+	}
+	
 
 	public Match[] computeContainedMatches(AbstractTextSearchResult result, IEditorPart editor) {
 		return computeContainedMatches(editor.getEditorInput());

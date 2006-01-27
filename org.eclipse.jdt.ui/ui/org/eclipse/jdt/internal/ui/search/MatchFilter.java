@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.search;
 
+import java.util.StringTokenizer;
+
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IImportDeclaration;
 import org.eclipse.jdt.core.IMethod;
@@ -23,7 +25,50 @@ import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.ui.search.PatternQuerySpecification;
 import org.eclipse.jdt.ui.search.QuerySpecification;
 
-abstract class  MatchFilter {
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+
+abstract class MatchFilter {
+	
+	private static final String SETTINGS_LAST_USED_FILTERS= "filters_last_used";  //$NON-NLS-1$
+	
+	public static MatchFilter[] getLastUsedFilters() {
+		String string= JavaPlugin.getDefault().getDialogSettings().get(SETTINGS_LAST_USED_FILTERS);
+		if (string != null && string.length() > 0) {
+			return decodeFiltersString(string);
+		}
+		return getDefaultFilters();
+	}
+	
+	public static void setLastUsedFilters(MatchFilter[] filters) {
+		String encoded= encodeFilters(filters);
+		JavaPlugin.getDefault().getDialogSettings().put(SETTINGS_LAST_USED_FILTERS, encoded);
+	}
+	
+	public static MatchFilter[] getDefaultFilters() {
+		return new MatchFilter[] { IMPORT_FILTER };
+	}
+	
+	private static String encodeFilters(MatchFilter[] enabledFilters) {
+		StringBuffer buf= new StringBuffer();
+		buf.append(enabledFilters.length);
+		for (int i= 0; i < enabledFilters.length; i++) {
+			buf.append(';');
+			buf.append(enabledFilters[i].getID());
+		}
+		return buf.toString();
+	}
+	
+	private static MatchFilter[] decodeFiltersString(String encodedString) {
+		StringTokenizer tokenizer= new StringTokenizer(encodedString, String.valueOf(';'));
+		int count= Integer.valueOf(tokenizer.nextToken()).intValue();
+		MatchFilter[] res= new MatchFilter[count];
+		for (int i= 0; i < count; i++) {
+			res[i]= findMatchFilter(tokenizer.nextToken());
+		}
+		return res;
+	}
+		
+	
 	public abstract boolean isApplicable(JavaSearchQuery query);
 	
 	public abstract boolean filters(JavaElementMatch match);
@@ -53,7 +98,17 @@ abstract class  MatchFilter {
 		
 	public static MatchFilter[] allFilters() {
 		return ALL_FILTERS;
-	}	
+	}
+	
+	private static MatchFilter findMatchFilter(String id) {
+		for (int i= 0; i < ALL_FILTERS.length; i++) {
+			if (ALL_FILTERS[i].getID().equals(id))
+				return ALL_FILTERS[i];
+		}
+		return IMPORT_FILTER; // just return something, should not happen
+	}
+
+
 }
 
 class ImportFilter extends MatchFilter {
