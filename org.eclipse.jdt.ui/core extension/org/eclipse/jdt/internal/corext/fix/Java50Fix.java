@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.fix;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -524,23 +525,22 @@ public class Java50Fix extends LinkedFix {
 	
 	public static SerialVersionHashContext createSerialVersionHashContext(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 		try {
-			monitor.beginTask("", compilationUnits.length + 10); //$NON-NLS-1$
-			
-			IType serializable= project.findType(SERIALIZABLE_NAME);
-			IType externalizable= project.findType(EXTERNALIZABLE_NAME);
+			monitor.beginTask("", compilationUnits.length * 2 + 20); //$NON-NLS-1$
 			
 			List qualifiedClassNames= new ArrayList();
-			for (int i= 0; i < compilationUnits.length; i++) {
-				monitor.subTask(Messages.format(FixMessages.Java50Fix_InitializeSerialVersionId_subtask_description, new Object[] {project.getElementName(), compilationUnits[i].getElementName()}));
-				findTypesWithoutSerialVersionId(compilationUnits[i].getChildren(), serializable, externalizable, qualifiedClassNames);
-				if (monitor.isCanceled())
-					throw new OperationCanceledException();
-				monitor.worked(1);
+			
+			if (compilationUnits.length > 500) {
+				//500 is a guess. Building the type hierarchy on serializable is very expensive
+				//depending on how many subtypes exit in the project. Finding out how many
+				//suptypes exist would be as expensive as finding the subtypes...
+				findWithTypeHierarchy(project, compilationUnits, qualifiedClassNames, monitor);
+			} else {
+				findWithRecursion(project, compilationUnits, qualifiedClassNames, monitor);
 			}
 		
 			SerialVersionHashContext result= new SerialVersionHashContext(project, (String[])qualifiedClassNames.toArray(new String[qualifiedClassNames.size()]));
 			try {
-				result.initialize(new SubProgressMonitor(monitor, 10));
+				result.initialize(new SubProgressMonitor(monitor, 20));
 			} catch (IOException e) {
 				JavaPlugin.log(e);
 			}
@@ -549,7 +549,52 @@ public class Java50Fix extends LinkedFix {
 			monitor.done();
 		}
 	}
+
+	private static void findWithRecursion(IJavaProject project, ICompilationUnit[] compilationUnits, List qualifiedClassNames, IProgressMonitor monitor) throws JavaModelException {
+		IType serializable= project.findType(SERIALIZABLE_NAME);
+		IType externalizable= project.findType(EXTERNALIZABLE_NAME);
+		
+		for (int i= 0; i < compilationUnits.length; i++) {
+			monitor.subTask(Messages.format(FixMessages.Java50Fix_InitializeSerialVersionId_subtask_description, new Object[] {project.getElementName(), compilationUnits[i].getElementName()}));
+			findTypesWithoutSerialVersionId(compilationUnits[i].getChildren(), serializable, externalizable, qualifiedClassNames);
+			if (monitor.isCanceled())
+				throw new OperationCanceledException();
+			monitor.worked(2);
+		}
+	}
+
+	private static void findWithTypeHierarchy(IJavaProject project, ICompilationUnit[] compilationUnits, List qualifiedClassNames, IProgressMonitor monitor) throws JavaModelException {
+		IType serializable= project.findType(SERIALIZABLE_NAME);
+		IType externalizable= project.findType(EXTERNALIZABLE_NAME);
+		
+		HashSet cus= new HashSet();
+		for (int i= 0; i < compilationUnits.length; i++) {
+			cus.add(compilationUnits[i]);
+		}
+		
+		monitor.subTask(Messages.format(FixMessages.Java50Fix_SerialVersion_CalculateHierarchy_description, SERIALIZABLE_NAME));
+		ITypeHierarchy hierarchy1= serializable.newTypeHierarchy(project, new SubProgressMonitor(monitor, compilationUnits.length));
+		IType[] allSubtypes1= hierarchy1.getAllSubtypes(serializable);
+		addTypes(allSubtypes1, cus, qualifiedClassNames);
+
+		monitor.subTask(Messages.format(FixMessages.Java50Fix_SerialVersion_CalculateHierarchy_description, EXTERNALIZABLE_NAME));
+		ITypeHierarchy hierarchy2= externalizable.newTypeHierarchy(project, new SubProgressMonitor(monitor, compilationUnits.length));
+		IType[] allSubtypes2= hierarchy2.getAllSubtypes(externalizable);
+		addTypes(allSubtypes2, cus, qualifiedClassNames);
+	}
 	
+	private static void addTypes(IType[] allSubtypes, HashSet cus, List qualifiedClassNames) throws JavaModelException {
+		for (int i= 0; i < allSubtypes.length; i++) {
+			IType type= allSubtypes[i];
+			if (type.isClass() && cus.contains(type.getCompilationUnit())){
+				IField field= type.getField(NAME_FIELD);
+				if (!field.exists()) {
+					qualifiedClassNames.add(type.getFullyQualifiedName());
+				}
+			}
+		}
+	}
+
 	private static void findTypesWithoutSerialVersionId(IJavaElement[] children, IType serializable, IType externalizable, List/*<String>*/ qualifiedClassNames) throws JavaModelException {
 		for (int i= 0; i < children.length; i++) {
 			IJavaElement child= children[i];
