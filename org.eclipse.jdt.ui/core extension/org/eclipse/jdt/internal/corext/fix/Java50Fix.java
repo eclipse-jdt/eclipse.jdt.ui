@@ -82,7 +82,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.ProblemLocation;
-import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashProposal;
+import org.eclipse.jdt.internal.ui.text.correction.SerialVersionHashOperation;
 
 /**
  * Fix which introduce new language constructs to pre Java50 code.
@@ -128,7 +128,7 @@ public class Java50Fix extends LinkedFix {
 		public void initialize(IProgressMonitor monitor) throws CoreException, IOException {
 			fIdsTable= new Hashtable();
 			if (fQualifiedNames.length > 0) {
-				long[] ids= SerialVersionHashProposal.calculateSerialVersionIds(fQualifiedNames, fProject, monitor);
+				long[] ids= SerialVersionHashOperation.calculateSerialVersionIds(fQualifiedNames, fProject, monitor);
 				
 				if (ids.length != fQualifiedNames.length) {
 					for (int i= 0; i < fQualifiedNames.length; i++) {
@@ -154,7 +154,7 @@ public class Java50Fix extends LinkedFix {
 			
 			if (id == null) {
 				try {
-					long[] ids= SerialVersionHashProposal.calculateSerialVersionIds(new String[] {qualifiedName}, fProject, new NullProgressMonitor());
+					long[] ids= SerialVersionHashOperation.calculateSerialVersionIds(new String[] {qualifiedName}, fProject, new NullProgressMonitor());
 					if (ids.length == 0)
 						throw new CoreException(new Status(IStatus.ERROR,  JavaPlugin.getPluginId(), 0, Messages.format(FixMessages.Java50Fix_SerialVersionNotFound_exception_description, qualifiedName), null));
 					
@@ -428,7 +428,7 @@ public class Java50Fix extends LinkedFix {
 		SerialVersionDefaultOperation defop= new SerialVersionDefaultOperation(unit, new SimpleName[] {simpleName});
 		Java50Fix fix1= new Java50Fix(FixMessages.Java50Fix_SerialVersion_default_description, compilationUnit, new IFixRewriteOperation[] {defop});
 		
-		SerialVersionHashProposal hashop= new SerialVersionHashProposal(unit, new SimpleName[] {simpleName});
+		SerialVersionHashOperation hashop= new SerialVersionHashOperation(unit, new SimpleName[] {simpleName});
 		Java50Fix fix2= new Java50Fix(FixMessages.Java50Fix_SerialVersion_hash_description, compilationUnit, new IFixRewriteOperation[] {hashop});
 
 		return new Java50Fix[] {fix1, fix2};

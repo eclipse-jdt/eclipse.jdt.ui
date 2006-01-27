@@ -24,7 +24,6 @@ import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 
 /**
@@ -33,19 +32,6 @@ import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
  * @since 3.1
  */
 public final class SerialVersionSubProcessor {
-
-	public static final class SerialVersionHashProposal extends FixCorrectionProposal {
-		public SerialVersionHashProposal(IFix fix, ICleanUp up, int relevance, Image image) {
-			super(fix, up, relevance, image);
-		}
-
-		/**
-		 * {@inheritDoc}
-		 */
-		public String getAdditionalProposalInfo() {
-			return CorrectionMessages.SerialVersionHashProposal_message_generated_info;
-		}
-	}
 
 	/**
 	 * Determines the serial version quickfix proposals.
