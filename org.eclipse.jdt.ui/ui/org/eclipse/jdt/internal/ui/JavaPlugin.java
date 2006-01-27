@@ -274,9 +274,9 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	/**
-	 * Log a message that is potentionally repeated after a very short time.
+	 * Log a message that is potentially repeated after a very short time.
 	 * The first time this method is called with a given message, the
-	 * message is written to the log along with the detail message and a stacktrace. 
+	 * message is written to the log along with the detail message and a stack trace. 
 	 * <p>
 	 * Only intended for use in debug statements.
 	 * 
@@ -353,10 +353,13 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 	
 	/** @deprecated */
-	private String DEPRECATED_EDITOR_TAB_WIDTH= PreferenceConstants.EDITOR_TAB_WIDTH;
+	private static final String DEPRECATED_EDITOR_TAB_WIDTH= PreferenceConstants.EDITOR_TAB_WIDTH;
 	
 	/** @deprecated */
-	private String DEPRECATED_REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD= PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD;
+	private static final String DEPRECATED_REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD= PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD;
+	
+	/** @deprecated */
+	private static final String DEPRECATED_CODEASSIST_ORDER_PROPOSALS= PreferenceConstants.CODEASSIST_ORDER_PROPOSALS;
 	
 	/**
 	 * Installs backwards compatibility for the preference store.
@@ -415,7 +418,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 		/*
 		 * Backwards compatibility: set the Java editor tab width in this plug-in's
 		 * preference store with the old key to let older versions access it.
-		 * Since 3.0 the tab width is managed by the extended texteditor and
+		 * Since 3.0 the tab width is managed by the extended text editor and
 		 * uses a new key.
 		 */
 		store.putValue(oldTabWidthKey, store.getString(newTabWidthKey));
@@ -437,7 +440,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 //			PreferenceConstants.REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD, 
 //			RefactoringCore.getConditionCheckingFailedSeverity());
 		
-		// The commented call above triggers the eager loading of the LTK core plugin
+		// The commented call above triggers the eager loading of the LTK core plug-in
 		// Since the condition checking failed severity is guaranteed to be of RefactoringStatus.SEVERITY_WARNING,
 		// we directly insert the inlined value of this constant
 		store.setToDefault(DEPRECATED_REFACTOR_ERROR_PAGE_SEVERITY_THRESHOLD);
@@ -453,9 +456,10 @@ public class JavaPlugin extends AbstractUIPlugin {
 		 * preference to the alphabetic sorter.
 		 */
 		String proposalOrderMigrated= "proposalOrderMigrated"; //$NON-NLS-1$
-		if (store.contains(PreferenceConstants.CODEASSIST_ORDER_PROPOSALS)) {
+
+		if (store.contains(DEPRECATED_CODEASSIST_ORDER_PROPOSALS)) {
 			if (!store.getBoolean(proposalOrderMigrated)) {
-				boolean alphabetic= store.getBoolean(PreferenceConstants.CODEASSIST_ORDER_PROPOSALS);
+				boolean alphabetic= store.getBoolean(DEPRECATED_CODEASSIST_ORDER_PROPOSALS);
 				if (alphabetic)
 					store.setValue(PreferenceConstants.CODEASSIST_SORTER, "org.eclipse.jdt.ui.AlphabeticSorter"); //$NON-NLS-1$
 			}
@@ -669,7 +673,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 	}
 
 	/**
-	 * Creates the Java plugin standard groups in a context menu.
+	 * Creates the Java plug-in standard groups in a context menu.
 	 * 
 	 * @param menu the menu manager to be populated
 	 */
