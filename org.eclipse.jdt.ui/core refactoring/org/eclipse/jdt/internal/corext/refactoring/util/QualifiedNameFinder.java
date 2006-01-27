@@ -26,7 +26,6 @@ import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceProxy;
 
 import org.eclipse.search.core.text.TextSearchEngine;
 import org.eclipse.search.core.text.TextSearchMatchAccess;
@@ -63,13 +62,7 @@ public class QualifiedNameFinder {
 			fNewValue= newValue;
 		}
 		
-		public boolean acceptFile(IResourceProxy fileProxy) throws CoreException {
-			if (fileProxy.getType() == IResource.FOLDER) {
-				return true;
-			}
-			
-			IFile file= (IFile) fileProxy.requestResource();
-			
+		public boolean acceptFile(IFile file) throws CoreException {			
 			IJavaElement element= JavaCore.create(file);
 			if ((element != null && element.exists()))
 				return false;
