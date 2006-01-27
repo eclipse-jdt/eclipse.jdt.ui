@@ -12,6 +12,7 @@ package org.eclipse.jdt.ui.tests.refactoring;
 
 import junit.framework.Assert;
 
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IResourceDelta;
@@ -20,9 +21,9 @@ import org.eclipse.core.resources.mapping.ModelProvider;
 public class TestModelProvider extends ModelProvider {
 	public static IResourceDelta LAST_DELTA;
 	
-	public IStatus validateChange(IResourceDelta delta) {
+	public IStatus validateChange(IResourceDelta delta, IProgressMonitor monitor) {
 		LAST_DELTA= delta;
-		return super.validateChange(delta);
+		return super.validateChange(delta, monitor);
 	}
 	
 	public static void assertTrue(IResourceDelta expected) {
