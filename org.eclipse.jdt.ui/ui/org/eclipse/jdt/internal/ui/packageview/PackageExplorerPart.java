@@ -1903,7 +1903,7 @@ public class PackageExplorerPart extends ViewPart
 		} finally {
 			fViewer.getControl().setRedraw(true);
 		}
-		if (isRootInputChange && fWorkingSetModel.needsConfiguration()) {
+		if (isRootInputChange && showWorkingSets() && fWorkingSetModel.needsConfiguration()) {
 			ConfigureWorkingSetAction action= new ConfigureWorkingSetAction(getSite());
 			action.setWorkingSetModel(fWorkingSetModel);
 			action.run();
