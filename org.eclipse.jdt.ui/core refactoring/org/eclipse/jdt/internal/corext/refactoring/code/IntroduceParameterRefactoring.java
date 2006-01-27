@@ -77,13 +77,13 @@ import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.structure.BodyUpdater;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ChangeSignatureRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 
-public class IntroduceParameterRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent, IDelegatingUpdating {
+public class IntroduceParameterRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent, IDelegateUpdating {
 
 	public static final String ID_INTRODUCE_PARAMETER= "org.eclipse.jdt.ui.introduce.parameter"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
@@ -112,22 +112,31 @@ public class IntroduceParameterRefactoring extends CommentRefactoring implements
 		fSelectionLength= selectionLength;
 	}
 	
-	// ------------------- IDelegatingUpdating ----------------------
+	// ------------------- IDelegateUpdating ----------------------
 
-	public boolean canEnableDelegatingUpdating() {
+	public boolean canEnableDelegateUpdating() {
 		return true;
 	}
 
-	public boolean getDelegatingUpdating() {
-		return (fChangeSignatureRefactoring != null) ? fChangeSignatureRefactoring.getDelegatingUpdating() : false;
+	public boolean getDelegateUpdating() {
+		return (fChangeSignatureRefactoring != null) ? fChangeSignatureRefactoring.getDelegateUpdating() : false;
 	}
 
-	public void setDelegatingUpdating(boolean delegatingUpdating) {
+	public void setDelegateUpdating(boolean updating) {
 		if (fChangeSignatureRefactoring != null)
-			fChangeSignatureRefactoring.setDelegatingUpdating(delegatingUpdating);
+			fChangeSignatureRefactoring.setDelegateUpdating(updating);
 	}
-	
-	// ------------------- /IDelegatingUpdating ---------------------
+
+	public void setDeprecateDelegates(boolean deprecate) {
+		if (fChangeSignatureRefactoring != null)
+			fChangeSignatureRefactoring.setDeprecateDelegates(deprecate);
+	}
+
+	public boolean getDeprecateDelegates() {
+		return (fChangeSignatureRefactoring != null) ? fChangeSignatureRefactoring.getDeprecateDelegates() : false;
+	}
+
+	// ------------------- /IDelegateUpdating ---------------------
 
 	public String getName() {
 		return RefactoringCoreMessages.IntroduceParameterRefactoring_name; 

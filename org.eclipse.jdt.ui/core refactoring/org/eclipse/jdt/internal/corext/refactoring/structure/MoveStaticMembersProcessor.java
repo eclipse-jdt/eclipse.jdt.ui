@@ -106,7 +106,7 @@ import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreat
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IncomingMemberVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
@@ -120,10 +120,11 @@ import org.eclipse.jdt.ui.refactoring.IRefactoringProcessorIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
-public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegatingUpdating, IInitializableRefactoringComponent, ICommentProvider {
+public final class MoveStaticMembersProcessor extends MoveProcessor implements IDelegateUpdating, IInitializableRefactoringComponent, ICommentProvider {
 
 	public static final String ID_STATIC_MOVE= "org.eclipse.jdt.ui.move.static"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELEGATE="delegate"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_DEPRECATE="deprecate"; //$NON-NLS-1$
 	private static final String TRACKED_POSITION_PROPERTY= "MoveStaticMembersProcessor.trackedPosition"; //$NON-NLS-1$
 
 	private IMember[] fMembersToMove;
@@ -137,7 +138,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	private CompilationUnitRewrite fTarget;
 	private IBinding[] fMemberBindings;
 	private BodyDeclaration[] fMemberDeclarations;
-	private boolean fDelegatingUpdating;
+	private boolean fDelegateUpdating;
+	private boolean fDelegateDeprecation;
 	private String fComment;
 
 	private static class TypeReferenceFinder extends ASTVisitor {
@@ -172,10 +174,10 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		}
 	}
 
-	public MoveStaticMembersProcessor(IMember[] elements, CodeGenerationSettings preferenceSettings) {
+	public MoveStaticMembersProcessor(IMember[] elements, CodeGenerationSettings settings) {
 		fMembersToMove= elements;
-		fPreferences= preferenceSettings;
-		fDelegatingUpdating= false; 
+		fPreferences= settings;
+		fDelegateUpdating= false; 
 	}
 	
 	/**
@@ -216,9 +218,9 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
 	}
 	
-	//------------------- IDelegatingUpdating ----------------------
+	//------------------- IDelegateUpdating ----------------------
 	
-	public boolean canEnableDelegatingUpdating() {
+	public boolean canEnableDelegateUpdating() {
 		try {
 			for (int i= 0; i < fMembersToMove.length; i++) {
 				if (isDelegateCreationAvailable(fMembersToMove[i]))
@@ -238,17 +240,22 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		return false;
 	}
 	
-	public boolean getDelegatingUpdating() {
-		return fDelegatingUpdating;
+	public boolean getDelegateUpdating() {
+		return fDelegateUpdating;
 	}
 
-	public void setDelegatingUpdating(boolean delegatingUpdating) {
-		fDelegatingUpdating= delegatingUpdating;
+	public void setDelegateUpdating(boolean updating) {
+		fDelegateUpdating= updating;
 	}
-	
-	/*
-	 * @see IRefactoring#getName()
-	 */
+
+	public boolean getDeprecateDelegates() {
+		return fDelegateDeprecation;
+	}
+
+	public void setDeprecateDelegates(boolean deprecate) {
+		fDelegateDeprecation= deprecate;
+	}
+
 	public String getProcessorName() {
 		return RefactoringCoreMessages.MoveMembersRefactoring_Move_Members; 
 	}
@@ -521,7 +528,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			}
 		}
 		
-		if (fDelegatingUpdating && isDelegateCreationAvailable(member)) {
+		if (fDelegateUpdating && isDelegateCreationAvailable(member)) {
 			// ensure moved member is visible from the delegate
 			IType type= member.getDeclaringType();
 			if (!blindAccessorTypes.contains(type) && !isVisibleFrom(member, getDestinationType(), type))
@@ -676,7 +683,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			public final RefactoringDescriptor getRefactoringDescriptor() {
 				final Map arguments= new HashMap();
 				arguments.put(RefactoringDescriptor.INPUT, fDestinationType.getHandleIdentifier());
-				arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegatingUpdating).toString());
+				arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
+				arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
 				final IMember[] members= getMembersToMove();
 				for (int index= 0; index < members.length; index++)
 					arguments.put(RefactoringDescriptor.ELEMENT + (index + 1), members[index].getHandleIdentifier());
@@ -717,7 +725,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				adjustor.setRewrite(fSource.getASTRewrite(), fSource.getRoot());
 				adjustor.adjustVisibility(new NullProgressMonitor());
 
-				if (fDelegatingUpdating && isDelegateCreationAvailable(member)) {
+				if (fDelegateUpdating && isDelegateCreationAvailable(member)) {
 					// Add a visibility adjustment so the moved member
 					// will be visible from within the delegate
 					ModifierKeyword threshold= adjustor.getVisibilityThreshold(member, fDestinationType, new NullProgressMonitor());
@@ -910,7 +918,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			ASTNode removeImportsOf= null;
 			boolean addedDelegate= false;
 			
-			if (fDelegatingUpdating) {
+			if (fDelegateUpdating) {
 				if (declaration instanceof MethodDeclaration) {
 
 					DelegateMethodCreator d= new DelegateMethodCreator();
@@ -1013,9 +1021,14 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
 			final String delegate= generic.getAttribute(ATTRIBUTE_DELEGATE);
 			if (delegate != null) {
-				fDelegatingUpdating= Boolean.valueOf(delegate).booleanValue();
+				fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
+			final String deprecate= generic.getAttribute(ATTRIBUTE_DEPRECATE);
+			if (deprecate != null) {
+				fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
 			int count= 1;
 			final List elements= new ArrayList();
 			String attribute= RefactoringDescriptor.ELEMENT + count;

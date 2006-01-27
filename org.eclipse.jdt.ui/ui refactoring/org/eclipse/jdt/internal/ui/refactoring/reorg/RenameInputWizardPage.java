@@ -27,7 +27,7 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
@@ -217,14 +217,14 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	}
 	
 	private void addOptionalLeaveDelegateCheckbox(Composite result, RowLayouter layouter) {
-		final IDelegatingUpdating refactoring= (IDelegatingUpdating) getRefactoring().getAdapter(IDelegatingUpdating.class);
-		if (refactoring == null || !refactoring.canEnableDelegatingUpdating())
+		final IDelegateUpdating refactoring= (IDelegateUpdating) getRefactoring().getAdapter(IDelegateUpdating.class);
+		if (refactoring == null || !refactoring.canEnableDelegateUpdating())
 			return;
 		fLeaveDelegateCheckBox= createCheckbox(result, DelegateUIHelper.getLeaveDelegateCheckBoxTitle(false), DelegateUIHelper.loadLeaveDelegateSetting(refactoring), layouter);
-		refactoring.setDelegatingUpdating(fLeaveDelegateCheckBox.getSelection());
+		refactoring.setDelegateUpdating(fLeaveDelegateCheckBox.getSelection());
 		fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				refactoring.setDelegatingUpdating(fLeaveDelegateCheckBox.getSelection());
+				refactoring.setDelegateUpdating(fLeaveDelegateCheckBox.getSelection());
 			}
 		});
 	}
@@ -236,8 +236,8 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		fLeaveDelegateCheckBox.setText(DelegateUIHelper.getLeaveDelegateCheckBoxTitle(delegateCount > 1));
 		if (delegateCount == 0) {
 			fLeaveDelegateCheckBox.setSelection(false);
-			final IDelegatingUpdating refactoring= (IDelegatingUpdating) getRefactoring().getAdapter(IDelegatingUpdating.class);
-			refactoring.setDelegatingUpdating(false);
+			final IDelegateUpdating refactoring= (IDelegateUpdating) getRefactoring().getAdapter(IDelegateUpdating.class);
+			refactoring.setDelegateUpdating(false);
 		}
 	}
 	

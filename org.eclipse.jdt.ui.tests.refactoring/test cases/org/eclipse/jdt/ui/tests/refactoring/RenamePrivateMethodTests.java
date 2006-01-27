@@ -70,7 +70,7 @@ public class RenamePrivateMethodTests extends RefactoringTest {
 		RenameRefactoring refactoring= new RenameRefactoring(processor);
 		processor.setUpdateReferences(updateReferences);
 		processor.setNewElementName(newMethodName);
-		processor.setDelegatingUpdating(createDelegate);
+		processor.setDelegateUpdating(createDelegate);
 		assertEquals("was supposed to pass", null, performRefactoring(refactoring));
 		assertEqualLines("invalid renaming", getFileContents(getOutputTestFileName("A")), cu.getSource());
 		

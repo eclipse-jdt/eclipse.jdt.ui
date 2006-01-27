@@ -120,7 +120,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RefactoringAnalyzeUtil;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
 import org.eclipse.jdt.internal.corext.refactoring.rename.TempOccurrenceAnalyzer;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -136,7 +136,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class ChangeSignatureRefactoring extends CommentRefactoring implements IDelegatingUpdating, IInitializableRefactoringComponent {
+public class ChangeSignatureRefactoring extends CommentRefactoring implements IDelegateUpdating, IInitializableRefactoringComponent {
 	
 	private static final String ID_CHANGE_METHOD_SIGNATURE= "org.eclipse.jdt.ui.change.method.signature"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RETURN= "return"; //$NON-NLS-1$
@@ -144,7 +144,8 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 	private static final String ATTRIBUTE_PARAMETER= "parameter"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DEFAULT= "default"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_KIND= "kind"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_DELEGATING_UPDATING= "delegatingUpdating"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_DELEGATE= "delegate"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_DEPRECATE= "deprecate"; //$NON-NLS-1$
 	
 	private List fParameterInfos;
 
@@ -168,12 +169,13 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 	private BodyUpdater fBodyUpdater;
 
 	private ITypeHierarchy fCachedTypeHierarchy= null;
-	private boolean fDelegatingUpdating;
+	private boolean fDelegateUpdating;
+	private boolean fDelegateDeprecation;
 
 	public ChangeSignatureRefactoring(IMethod method) throws JavaModelException {
 		fMethod= method;
 		fOldVarargIndex= -1;
-		fDelegatingUpdating= false;
+		fDelegateUpdating= false;
 		if (fMethod != null) {
 			fParameterInfos= createParameterInfoList(method);
 			// fExceptionInfos is created in checkInitialConditions
@@ -308,21 +310,29 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 		return fBaseCuRewrite;
 	}
 	
-	//------------------- IDelegatingUpdating ----------------------
+	//------------------- IDelegateUpdating ----------------------
 	
-	public boolean canEnableDelegatingUpdating() {
+	public boolean canEnableDelegateUpdating() {
 		return true;
 	}
 
-	public boolean getDelegatingUpdating() {
-		return fDelegatingUpdating;
+	public boolean getDelegateUpdating() {
+		return fDelegateUpdating;
 	}
 
-	public void setDelegatingUpdating(boolean delegatingUpdating) {
-		fDelegatingUpdating= delegatingUpdating;
+	public void setDelegateUpdating(boolean updating) {
+		fDelegateUpdating= updating;
 	}
-	
-	//------------------- /IDelegatingUpdating ---------------------
+
+	public void setDeprecateDelegates(boolean deprecate) {
+		fDelegateDeprecation= deprecate;
+	}
+
+	public boolean getDeprecateDelegates() {
+		return fDelegateDeprecation;
+	}
+
+	//------------------- /IDelegateUpdating ---------------------
 	
 	public RefactoringStatus checkSignature() {
 		return checkSignature(false);
@@ -758,7 +768,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			if (result.hasFatalError())
 				return result;
 			
-			if (fDelegatingUpdating && isSignatureClashWithInitial()) 
+			if (fDelegateUpdating && isSignatureClashWithInitial()) 
 				result.merge(RefactoringStatus.createErrorStatus(RefactoringCoreMessages.ChangeSignatureRefactoring_old_and_new_signatures_not_sufficiently_different ));
 
 			fRippleMethods= RippleMethodFinder2.getRelatedMethods(fMethod, new SubProgressMonitor(pm, 1), null);
@@ -1124,7 +1134,8 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 					final Map arguments= new HashMap();
 					arguments.put(RefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
 					arguments.put(RefactoringDescriptor.NAME, fMethodName);
-					arguments.put(ATTRIBUTE_DELEGATING_UPDATING, Boolean.valueOf(fDelegatingUpdating).toString());
+					arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
+					arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
 					if (fReturnTypeInfo.isTypeNameChanged())
 						arguments.put(ATTRIBUTE_RETURN, fReturnTypeInfo.getNewTypeName());
 					try {
@@ -1744,7 +1755,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 		
 		// Prevent import removing if delegate is created.
 		protected void registerImportRemoveNode(ASTNode node) {
-			if (!fDelegatingUpdating)
+			if (!fDelegateUpdating)
 				super.registerImportRemoveNode(node);
 		}
 
@@ -1768,7 +1779,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			if (fBodyUpdater != null)
 				fBodyUpdater.updateBody(fMethDecl, fCuRewrite, fResult);
 			
-			if (fDelegatingUpdating)
+			if (fDelegateUpdating)
 				addDelegate();
 		}
 
@@ -2469,11 +2480,16 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 				count++;
 				attribute= RefactoringDescriptor.ELEMENT + count;
 			}
-			final String delegatingUpdating= generic.getAttribute(ATTRIBUTE_DELEGATING_UPDATING);
-			if (delegatingUpdating != null) {
-				fDelegatingUpdating= Boolean.valueOf(delegatingUpdating).booleanValue();
+			final String deprecate= generic.getAttribute(ATTRIBUTE_DEPRECATE);
+			if (deprecate != null) {
+				fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATING_UPDATING));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
+			final String delegate= generic.getAttribute(ATTRIBUTE_DELEGATE);
+			if (delegate != null) {
+				fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();

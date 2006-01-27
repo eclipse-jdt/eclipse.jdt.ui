@@ -225,7 +225,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			 * 
 			 */
 			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(control, getRefactoring(), false);
-			fProcessor.setDeprecated(true); 
+			fProcessor.setDeprecateDelegates(true); 
 			fProcessor.setInlineDelegator(!fLeaveDelegateCheckBox.getSelection());
 			fProcessor.setRemoveDelegator(!fLeaveDelegateCheckBox.getSelection());
 

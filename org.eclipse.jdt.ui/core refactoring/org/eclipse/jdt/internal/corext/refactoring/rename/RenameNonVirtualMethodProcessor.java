@@ -164,7 +164,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	
 	final void addDeclarationUpdate(TextChangeManager manager) throws CoreException {
 
-		if (getDelegatingUpdating()) {
+		if (getDelegateUpdating()) {
 			// create the delegate
 			CompilationUnitRewrite rewrite= new CompilationUnitRewrite(getDeclaringCU());
 			rewrite.setResolveBindings(false);

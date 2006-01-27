@@ -80,7 +80,7 @@ import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreat
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
@@ -96,14 +96,15 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IDelegatingUpdating {
+public class RenameFieldProcessor extends JavaRenameProcessor implements IReferenceUpdating, ITextUpdating, IDelegateUpdating {
 
 	public static final String ID_RENAME_FIELD= "org.eclipse.jdt.ui.rename.field"; //$NON-NLS-1$
 	protected static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RENAME_GETTER= "getter"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RENAME_SETTER= "setter"; //$NON-NLS-1$
 	protected static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_DELEGATING_UPDATING= "delegatingUpdating"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_DELEGATE= "delegate"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_DEPRECATE= "deprecate"; //$NON-NLS-1$
 
 	protected IField fField;
 	private SearchResultGroup[] fReferences;
@@ -114,7 +115,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private boolean fRenameSetter;
 	private boolean fIsComposite;
 	private GroupCategorySet fCategorySet;
-	private boolean fDelegatingUpdating;
+	private boolean fDelegateUpdating;
+	private boolean fDelegateDeprecation;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
 
@@ -127,7 +129,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		initialize(field);
 		fChangeManager= manager;
 		fCategorySet= categorySet;
-		fDelegatingUpdating= false;
+		fDelegateUpdating= false;
+		fDelegateDeprecation= false;
 		fIsComposite= true;
 	}
 
@@ -141,8 +144,6 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		fRenameGetter= false;
 		fRenameSetter= false;
 	}
-	
-	//---- IRefactoringProcessor --------------------------------
 
 	public String getIdentifier() {
 		return IDENTIFIER;
@@ -332,18 +333,26 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return GetterSetterUtil.getSetterName(fField.getJavaProject(), getNewElementName(), fField.getFlags(), JavaModelUtil.isBoolean(fField), null);
 	}
 	
-	// ------------------- IDelegatingUpdating ----------------------
+	// ------------------- IDelegateUpdating ----------------------
 
-	public boolean canEnableDelegatingUpdating() {
+	public boolean canEnableDelegateUpdating() {
 		return (getDelegateCount() > 0);
 	}
 
-	public boolean getDelegatingUpdating() {
-		return fDelegatingUpdating;
+	public boolean getDelegateUpdating() {
+		return fDelegateUpdating;
 	}
 
-	public void setDelegatingUpdating(boolean delegatingUpdating) {
-		fDelegatingUpdating= delegatingUpdating;
+	public void setDelegateUpdating(boolean update) {
+		fDelegateUpdating= update;
+	}
+
+	public void setDeprecateDelegates(boolean deprecate) {
+		fDelegateDeprecation= deprecate;
+	}
+
+	public boolean getDeprecateDelegates() {
+		return fDelegateDeprecation;
 	}
 
 	/**
@@ -564,7 +573,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
 					arguments.put(ATTRIBUTE_RENAME_GETTER, Boolean.valueOf(fRenameGetter).toString());
 					arguments.put(ATTRIBUTE_RENAME_SETTER, Boolean.valueOf(fRenameSetter).toString());
-					arguments.put(ATTRIBUTE_DELEGATING_UPDATING, Boolean.valueOf(fDelegatingUpdating).toString());
+					arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
+					arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
 					String project= null;
 					IJavaProject javaProject= fField.getJavaProject();
 					if (javaProject != null)
@@ -594,7 +604,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 		// Delegate creation requires ASTRewrite which
 		// creates a new change -> do this first.
-		if (fDelegatingUpdating)
+		if (fDelegateUpdating)
 			result.merge(addDelegates());
 		
 		addDeclarationUpdate();
@@ -796,7 +806,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			return new SearchResultGroup[0];
 		
 		CollectingSearchRequestor requestor= null;
-		if (fDelegatingUpdating && RefactoringAvailabilityTester.isDelegateCreationAvailable(getField())) {
+		if (fDelegateUpdating && RefactoringAvailabilityTester.isDelegateCreationAvailable(getField())) {
 			// There will be two new matches inside the delegate (the invocation
 			// and the javadoc) which are OK and must not be reported.
 			final IField oldField= getFieldInWorkingCopy(declaringCuWorkingCopy, getCurrentElementName());
@@ -859,11 +869,16 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				fRenameSetter= Boolean.valueOf(setters).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_RENAME_SETTER));
-			final String delegatingUpdating= generic.getAttribute(ATTRIBUTE_DELEGATING_UPDATING);
-			if (delegatingUpdating != null) {
-				fDelegatingUpdating= Boolean.valueOf(delegatingUpdating).booleanValue();
+			final String delegate= generic.getAttribute(ATTRIBUTE_DELEGATE);
+			if (delegate != null) {
+				fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATING_UPDATING));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
+			final String deprecate= generic.getAttribute(ATTRIBUTE_DEPRECATE);
+			if (deprecate != null) {
+				fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
+			} else
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();

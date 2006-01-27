@@ -18,7 +18,7 @@ import org.eclipse.swt.widgets.Composite;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -34,15 +34,15 @@ public class DelegateUIHelper {
 
 	public static Button generateLeaveDelegateCheckbox(Composite result, Refactoring ref, boolean plural) {
 
-		final IDelegatingUpdating refactoring= (IDelegatingUpdating) ref.getAdapter(IDelegatingUpdating.class);
-		if (refactoring == null || !refactoring.canEnableDelegatingUpdating())
+		final IDelegateUpdating refactoring= (IDelegateUpdating) ref.getAdapter(IDelegateUpdating.class);
+		if (refactoring == null || !refactoring.canEnableDelegateUpdating())
 			return null;
 
 		final Button leaveDelegateCheckBox= createCheckbox(result, getLeaveDelegateCheckBoxTitle(plural), loadLeaveDelegateSetting(refactoring));
-		refactoring.setDelegatingUpdating(leaveDelegateCheckBox.getSelection());
+		refactoring.setDelegateUpdating(leaveDelegateCheckBox.getSelection());
 		leaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				refactoring.setDelegatingUpdating(leaveDelegateCheckBox.getSelection());
+				refactoring.setDelegateUpdating(leaveDelegateCheckBox.getSelection());
 			}
 		});
 		return leaveDelegateCheckBox;
@@ -53,8 +53,8 @@ public class DelegateUIHelper {
 		saveBooleanSetting(DELEGATING_UPDATING, checkbox);
 	}
 
-	public static boolean loadLeaveDelegateSetting(final IDelegatingUpdating refactoring) {
-		return getBooleanSetting(DELEGATING_UPDATING, refactoring.getDelegatingUpdating());
+	public static boolean loadLeaveDelegateSetting(final IDelegateUpdating refactoring) {
+		return getBooleanSetting(DELEGATING_UPDATING, refactoring.getDelegateUpdating());
 	}
 
 	public static String getLeaveDelegateCheckBoxTitle(boolean plural) {

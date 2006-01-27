@@ -26,7 +26,7 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
 
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 
@@ -97,8 +97,8 @@ public class MoveMembersTests extends RefactoringTest {
 		}
 		MoveRefactoring ref= createRefactoring(members, destinationType);
 		
-		IDelegatingUpdating delUp= (IDelegatingUpdating) ref.getProcessor().getAdapter(IDelegatingUpdating.class);
-		delUp.setDelegatingUpdating(addDelegate);
+		IDelegateUpdating delUp= (IDelegateUpdating) ref.getProcessor().getAdapter(IDelegateUpdating.class);
+		delUp.setDelegateUpdating(addDelegate);
 	
 		RefactoringStatus result= performRefactoringWithStatus(ref);
 		assertTrue("precondition was supposed to pass", result.getSeverity() <= RefactoringStatus.WARNING);

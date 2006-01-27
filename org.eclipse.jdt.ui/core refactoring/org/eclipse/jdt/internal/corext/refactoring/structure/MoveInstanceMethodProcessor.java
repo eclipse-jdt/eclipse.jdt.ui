@@ -129,7 +129,7 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MemberVisibilityAdjustor.IVisibilityAdjustment;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegatingUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavadocUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
@@ -148,7 +148,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 /**
  * Refactoring processor to move instance methods.
  */
-public final class MoveInstanceMethodProcessor extends MoveProcessor implements IInitializableRefactoringComponent, IDelegatingUpdating, ICommentProvider {
+public final class MoveInstanceMethodProcessor extends MoveProcessor implements IInitializableRefactoringComponent, IDelegateUpdating, ICommentProvider {
 
 	/** The comment */
 	private String fComment;
@@ -1002,7 +1002,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	private TextChangeManager fChangeManager= null;
 
 	/** Should the delegator be deprecated? */
-	private boolean fDeprecated= false;
+	private boolean fDelegateDeprecation= false;
 
 	/** Should the delegator be inlined? */
 	private boolean fInline= false;
@@ -1072,24 +1072,29 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fMethod.getJavaProject());
 	}
 
-	//------------------- IDelegatingUpdating ----------------------
-	
-	public boolean canEnableDelegatingUpdating() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public final boolean canEnableDelegateUpdating() {
 		return true;
 	}
 
-	public boolean getDelegatingUpdating() {
+	/**
+	 * {@inheritDoc}
+	 */
+	public final boolean getDelegateUpdating() {
 		return fDelegatingUpdating;
 	}
 
-	public void setDelegatingUpdating(boolean delegatingUpdating) {
-		fDelegatingUpdating= delegatingUpdating;
-		setInlineDelegator(!delegatingUpdating);
-		setRemoveDelegator(!delegatingUpdating);
+	/**
+	 * {@inheritDoc}
+	 */
+	public final void setDelegateUpdating(final boolean updating) {
+		fDelegatingUpdating= updating;
+		setInlineDelegator(!updating);
+		setRemoveDelegator(!updating);
 	}
-	
-	//------------------- /IDelegatingUpdating ---------------------
-	
+
 	/**
 	 * Checks whether a method with the proposed name already exists in the target type.
 	 * 
@@ -1571,7 +1576,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					arguments.put(RefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
 					arguments.put(RefactoringDescriptor.NAME, fMethodName);
 					arguments.put(ATTRIBUTE_TARGET_NAME, fTargetName);
-					arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDeprecated).toString());
+					arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
 					arguments.put(ATTRIBUTE_REMOVE, Boolean.valueOf(fRemove).toString());
 					arguments.put(ATTRIBUTE_INLINE, Boolean.valueOf(fInline).toString());
 					arguments.put(ATTRIBUTE_USE_GETTER, Boolean.valueOf(fUseGetters).toString());
@@ -2044,7 +2049,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 		final DelegateInstanceMethodCreator creator= new DelegateInstanceMethodCreator(adjustments, rewrites);
 		creator.setSourceRewrite(fSourceRewrite);
 		creator.setCopy(false);
-		creator.setDeclareDeprecated(fDeprecated);
+		creator.setDeclareDeprecated(fDelegateDeprecation);
 		creator.setDeclaration(declaration);
 		creator.setNewElementName(fMethodName);
 		creator.prepareDelegate();
@@ -2399,23 +2404,21 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	}
 
 	/**
-	 * Should the delegator be deprecated?
-	 * 
-	 * @return <code>true</code> if the delegator should be deprecated, <code>false</code> otherwise
+	 * {@inheritDoc}
 	 */
-	public final boolean getDeprecated() {
-		return fDeprecated;
+	public final boolean getDeprecateDelegates() {
+		return fDelegateDeprecation;
 	}
 
-	/*
-	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getElements()
+	/**
+	 * {@inheritDoc}
 	 */
 	public final Object[] getElements() {
 		return new Object[] { fMethod};
 	}
 
-	/*
-	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#getIdentifier()
+	/**
+	 * {@inheritDoc}
 	 */
 	public final String getIdentifier() {
 		return IDENTIFIER;
@@ -2548,12 +2551,10 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	}
 
 	/**
-	 * Determines whether the delegator has to be deprecated.
-	 * 
-	 * @param deprecate <code>true</code> if the delegator has to be deprecated, <code>false</code> otherwise
+	 * {@inheritDoc}
 	 */
-	public final void setDeprecated(final boolean deprecate) {
-		fDeprecated= deprecate;
+	public final void setDeprecateDelegates(final boolean deprecate) {
+		fDelegateDeprecation= deprecate;
 	}
 
 	/**
@@ -2710,7 +2711,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
 			final String deprecate= generic.getAttribute(ATTRIBUTE_DEPRECATE);
 			if (deprecate != null) {
-				fDeprecated= Boolean.valueOf(deprecate).booleanValue();
+				fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
 			final String remove= generic.getAttribute(ATTRIBUTE_REMOVE);

@@ -77,7 +77,7 @@ public class RenameVirtualMethodInClassTests extends RefactoringTest {
 		RenameRefactoring ref= new RenameRefactoring(processor);
 		processor.setUpdateReferences(updateReferences);
 		processor.setNewElementName(newMethodName);
-		processor.setDelegatingUpdating(createDelegate);
+		processor.setDelegateUpdating(createDelegate);
 		
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		if (!shouldPass){

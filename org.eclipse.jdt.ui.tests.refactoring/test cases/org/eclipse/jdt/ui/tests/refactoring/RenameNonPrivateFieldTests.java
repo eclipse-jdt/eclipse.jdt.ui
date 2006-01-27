@@ -121,7 +121,7 @@ public class RenameNonPrivateFieldTests extends RefactoringTest{
 		processor.setUpdateTextualMatches(fUpdateTextualMatches);
 		processor.setRenameGetter(fRenameGetter);
 		processor.setRenameSetter(fRenameSetter);
-		processor.setDelegatingUpdating(createDelegates);
+		processor.setDelegateUpdating(createDelegates);
 		
 		int numbers= 1;
 		List elements= new ArrayList();

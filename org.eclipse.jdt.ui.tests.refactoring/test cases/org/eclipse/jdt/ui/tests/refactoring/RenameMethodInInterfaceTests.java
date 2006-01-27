@@ -77,7 +77,7 @@ public class RenameMethodInInterfaceTests extends RefactoringTest {
 		RenameRefactoring ref= new RenameRefactoring(processor);
 		processor.setUpdateReferences(updateReferences);
 		processor.setNewElementName(newMethodName);
-		processor.setDelegatingUpdating(createDelegate);
+		processor.setDelegateUpdating(createDelegate);
 		assertEquals("was supposed to pass", null, performRefactoring(ref));
 		if (!shouldPass){
 			assertTrue("incorrect renaming because of a java model bug", ! getFileContents(getOutputTestFileName("A")).equals(cu.getSource()));

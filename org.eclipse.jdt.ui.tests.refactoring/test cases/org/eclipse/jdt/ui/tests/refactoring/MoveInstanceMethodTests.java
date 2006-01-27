@@ -217,7 +217,7 @@ public class MoveInstanceMethodTests extends RefactoringTest {
 		MoveInstanceMethodProcessor processor= ref.getMoveMethodProcessor();
 		processor.setInlineDelegator(inlineDelegator);
 		processor.setRemoveDelegator(removeDelegator);
-		processor.setDeprecated(deprecate);
+		processor.setDeprecateDelegates(deprecate);
 		if (newMethodName != null)
 			processor.setMethodName(newMethodName);
 

@@ -120,7 +120,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
 		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
-		ref.setDelegatingUpdating(createDelegate);
+		ref.setDelegateUpdating(createDelegate);
 		addInfos(ref.getParameterInfos(), newParamInfos, newIndices);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);
@@ -172,7 +172,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
 		if (returnTypeName != null)
 			ref.setNewReturnTypeName(returnTypeName);
-		ref.setDelegatingUpdating(createDelegate);
+		ref.setDelegateUpdating(createDelegate);
 		markAsDeleted(ref.getParameterInfos(), deleted);	
 		modifyInfos(ref.getParameterInfos(), newParamInfos, newIndices, oldParamNames, newParamNames, newParameterTypeNames, permutation);
 		if (newVisibility != JdtFlags.VISIBILITY_CODE_INVALID)
@@ -221,7 +221,7 @@ public class ChangeSignatureTests extends RefactoringTest {
 		IMethod method = classA.getMethod("m", signature);
 		assertTrue("method does not exist", method.exists());
 		ChangeSignatureRefactoring ref= (RefactoringAvailabilityTester.isChangeSignatureAvailable(method) ? new ChangeSignatureRefactoring(method) : null);
-		ref.setDelegatingUpdating(createDelegate);
+		ref.setDelegateUpdating(createDelegate);
 		modifyInfos(ref.getParameterInfos(), newOrder, oldNames, newNames);
 		RefactoringStatus result= performRefactoring(ref);
 		assertEquals("precondition was supposed to pass", null, result);

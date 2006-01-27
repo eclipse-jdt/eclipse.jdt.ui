@@ -17,7 +17,7 @@ package org.eclipse.jdt.internal.corext.refactoring.tagging;
  * @since 3.2
  *
  */
-public interface IDelegatingUpdating {
+public interface IDelegateUpdating {
 
 	/**
 	 * Performs a dynamic check whether this refactoring object is capable of
@@ -25,24 +25,41 @@ public interface IDelegatingUpdating {
 	 * return value of this method may change according to the state of the
 	 * refactoring.
 	 */
-	public boolean canEnableDelegatingUpdating();
+	public boolean canEnableDelegateUpdating();
 
 	/**
-	 * If <code>canEnableDelegatingUpdating</code> returns
+	 * If <code>canEnableDelegateUpdating</code> returns
 	 * <code>true</code>, then this method is used to ask the refactoring
 	 * object whether delegates will be created.
-	 * This call can be ignored if <code>canEnableDelegatingUpdating</code>
+	 * This call can be ignored if <code>canEnableDelegateUpdating</code>
 	 * returns <code>false</code>.
 	 */
-	public boolean getDelegatingUpdating();
+	public boolean getDelegateUpdating();
 
 	/**
-	 * If <code>canEnableDelegatingUpdating</code> returns
+	 * If <code>canEnableDelegateUpdating</code> returns
 	 * <code>true</code>, then this method may be called to set whether
 	 * to create delegates.
-	 * This call can be ignored if <code>canEnableDelegatingUpdating</code>
+	 * This call can be ignored if <code>canEnableDelegateUpdating</code>
 	 * returns <code>false</code>.
 	 */
-	public void setDelegatingUpdating(boolean delegatingUpdating);
+	public void setDelegateUpdating(boolean updating);
 
+	/**
+	 * If <code>canEnableDelegateUpdating</code> returns
+	 * <code>true</code>, then this method is used to ask the refactoring
+	 * object whether delegates will be decprecated.
+	 * This call can be ignored if <code>canEnableDelegateUpdating</code>
+	 * returns <code>false</code>.
+	 */
+	public boolean getDeprecateDelegates();
+	
+	/**
+	 * If <code>canEnableDelegateUpdating</code> returns
+	 * <code>true</code>, then this method may be called to set whether
+	 * to deprecate delegates.
+	 * This call can be ignored if <code>canEnableDelegateUpdating</code>
+	 * returns <code>false</code>.
+	 */
+	public void setDeprecateDelegates(boolean deprecate);
 }
