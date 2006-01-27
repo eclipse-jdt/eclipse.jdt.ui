@@ -11,7 +11,7 @@
 package org.eclipse.jdt.internal.ui.model;
 
 import java.util.HashSet;
-import java.util.LinkedHashSet;
+import java.util.LinkedList;
 import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
@@ -156,9 +156,9 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 * @return the java project children
 	 */
 	private Object[] getJavaProjectChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
-		final Set set= new LinkedHashSet();
+		final LinkedList list= new LinkedList();
 		for (int index= 0; index < children.length; index++)
-			set.add(children[index]);
+			list.add(children[index]);
 //		final IResource resource= JavaModelProvider.getResource(parent);
 //		if (resource != null) {
 //			final IResource[] members= context.getDiffTree().members(resource);
@@ -166,16 +166,16 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 //				if (members[index].getType() == IResource.FOLDER && isInScope(parent, members[index])) {
 //					final String name= members[index].getName();
 //					if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
-//						set.remove(members[index]);
-//						set.add(new JavaProjectSettings((IJavaProject) parent));
+//						list.remove(members[index]);
+//						list.addFirst(new JavaProjectSettings((IJavaProject) parent));
 //					} else if (name.equals(NAME_REFACTORING_FOLDER)) {
-//						set.remove(members[index]);
-//						set.add(getPendingRefactorings(context, (IProject) resource, null));
+//						list.remove(members[index]);
+//						list.addFirst(getPendingRefactorings(context, (IProject) resource, null));
 //					}
 //				}
 //			}
 //		}
-		return set.toArray(new Object[set.size()]);
+		return list.toArray(new Object[list.size()]);
 	}
 
 	/**
