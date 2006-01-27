@@ -242,10 +242,10 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		
 		private void createGroups(Composite parent) {
 			CleanUpRefactoring refactoring= (CleanUpRefactoring)getRefactoring();
-			ICompilationUnit[] compilationUnits= refactoring.getCompilationUnits();
+			IJavaProject[] projects= refactoring.getProjects();
 			final IJavaProject project;
-			if (areInSameProject(compilationUnits)) {
-				project= compilationUnits[0].getJavaProject();
+			if (projects.length == 1) {
+				project= projects[0];
 			} else {
 				project= null;
 			}
@@ -277,27 +277,6 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 					child.setEnabled(false);
 				}
 			}
-		}
-
-		private boolean areInSameProject(ICompilationUnit[] compilationUnits) {
-			if (compilationUnits.length == 0)
-				return false;
-			
-			IJavaProject p= compilationUnits[0].getJavaProject();
-			if (p == null)
-				return false;
-			
-			for (int i= 1; i < compilationUnits.length; i++) {
-				IJavaProject q= compilationUnits[i].getJavaProject();
-				if (q == null)
-					return false;
-				
-				if (!p.equals(q))
-					return false;
-				
-				p= q;
-			}
-			return true;
 		}
 
 		protected boolean performFinish() {

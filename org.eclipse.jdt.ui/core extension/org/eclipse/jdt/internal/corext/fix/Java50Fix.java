@@ -545,7 +545,7 @@ public class Java50Fix extends LinkedFix {
 			if (child instanceof IType) {
 				IType type= (IType)child;
 				ITypeHierarchy hierarchy= type.newSupertypeHierarchy(new NullProgressMonitor());
-				IType[] allInterfaces= hierarchy.getAllInterfaces();
+				IType[] allInterfaces= hierarchy.getAllSuperInterfaces(type);
 				for (int j= 0; j < allInterfaces.length; j++) {
 					if (allInterfaces[j].equals(serializable) || allInterfaces[j].equals(externalizable)) {
 						IField field= type.getField(NAME_FIELD);
