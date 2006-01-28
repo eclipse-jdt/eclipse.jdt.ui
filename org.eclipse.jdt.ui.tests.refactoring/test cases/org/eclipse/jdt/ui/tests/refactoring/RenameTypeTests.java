@@ -42,10 +42,10 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ISimilarDeclarationUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ISimilarDeclarationUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ITextUpdating;
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.DebugUtils;
@@ -144,6 +144,7 @@ public class RenameTypeTests extends RefactoringTest {
 		setSomeFieldOptions(getPackageP().getJavaProject(), "fs", "_suffix", true);
 		setSomeLocalOptions(getPackageP().getJavaProject(), "lv", "_lv");
 		setSomeArgumentOptions(getPackageP().getJavaProject(), "pm", "_pm");
+		fIsPreDeltaTest= true;
 	}
 	
 	private void helper3(String oldName, String newName, boolean updateRef, boolean updateTextual, boolean updateSimilar, String nonJavaFiles) throws JavaModelException, CoreException, IOException, Exception {

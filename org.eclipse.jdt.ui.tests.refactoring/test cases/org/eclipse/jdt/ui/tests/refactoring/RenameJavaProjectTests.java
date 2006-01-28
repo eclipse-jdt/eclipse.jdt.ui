@@ -33,6 +33,11 @@ public class RenameJavaProjectTests extends RefactoringTest {
 	public static Test suite() {
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
+	
+	protected void setUp() throws Exception {
+		super.setUp();
+		fIsPreDeltaTest= true;
+	}
 
 	public void test0() throws Exception {
 		IJavaProject p1= null;

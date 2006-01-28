@@ -51,8 +51,6 @@ import org.eclipse.ltk.core.refactoring.participants.IParticipantDescriptorFilte
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.Flags;
@@ -99,7 +97,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnit
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameResourceChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.ISimilarDeclarationUpdating;
@@ -230,31 +227,16 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		return new Object[] {fType};
 	}
 	
-	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
-		String newCUName= getNewCompilationUnit().getElementName();
-		RenameArguments arguments= new RenameArguments(newCUName, getUpdateReferences());
-		loadDerivedParticipants(status, result, 
-			computeDerivedElements(), arguments, 
-			computeResourceModifications(), natures, shared);
-	}
-	
-	private Object[] computeDerivedElements() {
-		if (! isPrimaryType())
-			return new Object[0];
-		return new Object[] { fType.getCompilationUnit() };
-	}
-
-	private ResourceModifications computeResourceModifications() {
-		if (! isPrimaryType())
-			return null;
-		ICompilationUnit cu= fType.getCompilationUnit();
-		IResource resource= cu.getResource();
-		if (resource == null)
-			return null;
-		ResourceModifications result= new ResourceModifications();
-		String renamedCUName= JavaModelUtil.getRenamedCUName(cu, getNewElementName());
-		result.setRename(resource, new RenameArguments(renamedCUName, getUpdateReferences()));
-		return result;		
+	protected RenameModifications computeRenameModifications() {
+		RenameModifications result= new RenameModifications();
+		result.rename(fType, new RenameTypeArguments(getNewElementName(), getUpdateReferences(), 
+			getUpdateSimilarDeclarations(), getSimilarElements()), createParticipantDescriptorFilter());
+		if (isPrimaryType()) {
+			ICompilationUnit cu= fType.getCompilationUnit();
+			String newCUName= getNewCompilationUnit().getElementName();
+			result.rename(cu, new RenameArguments(newCUName, getUpdateReferences()));
+		}
+		return result;
 	}
 		
 	/*
@@ -314,6 +296,16 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		if (!getUpdateSimilarDeclarations())
 			return null;
 		return new ParticipantDescriptorFilter();
+	}
+	
+	protected IFile[] getChangedFiles() throws CoreException {
+		List result= new ArrayList();
+		result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
+		if (fQualifiedNameSearchResult != null)
+			result.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
+		if (willRenameCU())
+			result.add(ResourceUtil.getFile(fType.getCompilationUnit()));
+		return (IFile[]) result.toArray(new IFile[result.size()]);
 	}
 	
 	//---- ITextUpdating -------------------------------------------------
@@ -447,11 +439,11 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		
 		return Checks.checkIfCuBroken(fType);
 	}
-
+	
 	/* non java-doc
 	 * @see Refactoring#checkInput
 	 */		
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		Assert.isNotNull(fType, "type"); //$NON-NLS-1$
 		Assert.isNotNull(getNewElementName(), "newName"); //$NON-NLS-1$
 		RefactoringStatus result= new RefactoringStatus();
@@ -551,8 +543,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			if (fUpdateQualifiedNames)			
 				computeQualifiedNameMatches(new SubProgressMonitor(pm, qualifiedNamesTicks));
 	
-			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
-			checker.addFiles(getAllFilesToModify());
 			return result;
 		} finally {
 			pm.done();
@@ -943,16 +933,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			//cast safe: see JavaModelUtility.convertFromImportDeclaration
 			analyzeImportedTypes(((IType)imported).getTypes(), result, imp);
 		}
-	}
-	
-	private IFile[] getAllFilesToModify() throws CoreException {
-		List result= new ArrayList();
-		result.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
-		if (fQualifiedNameSearchResult != null)
-			result.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
-		if (willRenameCU())
-			result.add(ResourceUtil.getFile(fType.getCompilationUnit()));
-		return (IFile[]) result.toArray(new IFile[result.size()]);
 	}
 	
 	/*

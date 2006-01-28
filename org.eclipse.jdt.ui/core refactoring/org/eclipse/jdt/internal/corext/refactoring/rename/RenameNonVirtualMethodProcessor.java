@@ -66,11 +66,11 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 	
 	//----------- preconditions --------------
 	
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext checkContext) throws CoreException {
+	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext checkContext) throws CoreException {
 		try{
 			pm.beginTask("", 3); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
-			result.merge(super.checkFinalConditions(new SubProgressMonitor(pm, 1), checkContext));
+			result.merge(super.doCheckFinalConditions(new SubProgressMonitor(pm, 1), checkContext));
 			if (result.hasFatalError())
 				return result;
 			

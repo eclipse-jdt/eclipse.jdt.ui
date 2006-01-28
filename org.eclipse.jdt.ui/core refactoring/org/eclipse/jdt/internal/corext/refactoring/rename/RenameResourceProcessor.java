@@ -10,10 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Path;
@@ -21,17 +17,18 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
-import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
+import org.eclipse.ltk.core.refactoring.participants.ResourceOperationChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.osgi.util.NLS;
 
@@ -56,6 +53,7 @@ public class RenameResourceProcessor extends RenameProcessor implements IInitial
 	private IResource fResource;
 	private String fNewElementName;
 	private String fComment;
+	private RenameModifications fRenameModifications;
 		
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameResourceProcessor"; //$NON-NLS-1$
 	
@@ -114,16 +112,7 @@ public class RenameResourceProcessor extends RenameProcessor implements IInitial
 	}
 	
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
-		Object[] elements= getElements();
-		String[] natures= getAffectedProjectNatures();
-		List result= new ArrayList();
-		RenameArguments arguments= new RenameArguments(getNewElementName(), getUpdateReferences());
-		for (int i= 0; i < elements.length; i++) {
-			result.addAll(Arrays.asList(ParticipantManager.loadRenameParticipants(status, 
-				this, elements[i],
-				arguments, natures, shared)));
-		}
-		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
+		return fRenameModifications.loadParticipants(status, this, getAffectedProjectNatures(), shared);
 	}
 	
 	//--- Condition checking --------------------------------------------
@@ -159,6 +148,13 @@ public class RenameResourceProcessor extends RenameProcessor implements IInitial
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws JavaModelException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
+			fRenameModifications= new RenameModifications();
+			fRenameModifications.rename(fResource, new RenameArguments(getNewElementName(), getUpdateReferences()));
+			
+			ResourceOperationChecker checker= (ResourceOperationChecker) context.getChecker(ResourceOperationChecker.class);
+			IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
+			fRenameModifications.buildDelta(deltaFactory);
+			
 			return new RefactoringStatus();
 		} finally{
 			pm.done();

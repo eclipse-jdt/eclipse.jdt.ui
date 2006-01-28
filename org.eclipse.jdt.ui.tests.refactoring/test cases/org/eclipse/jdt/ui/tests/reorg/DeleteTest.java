@@ -26,9 +26,9 @@ import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IResourceChangeEvent;
-import org.eclipse.core.resources.IResourceChangeListener;
-import org.eclipse.core.resources.ResourcesPlugin;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -40,16 +40,13 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.reorg.IReorgQueries;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.JavaDeleteProcessor;
+
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.JavaTestPlugin;
 
-import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
-import org.eclipse.jdt.ui.tests.refactoring.TestModelProvider;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.DeleteRefactoring;
+import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
 
 
 public class DeleteTest extends RefactoringTest{
@@ -67,6 +64,11 @@ public class DeleteTest extends RefactoringTest{
 
 	public static Test setUpTest(Test someTest) {
 		return new RefactoringTestSetup(someTest);
+	}
+	
+	protected void setUp() throws Exception {
+		super.setUp();
+		fIsPreDeltaTest= true;
 	}
 
 	protected String getRefactoringPath() {
@@ -106,13 +108,7 @@ public class DeleteTest extends RefactoringTest{
 	
 	private void checkDelete(IJavaElement[] elems, boolean deleteCu) throws JavaModelException, Exception {
 		ICompilationUnit newCuA= null;
-		IResourceChangeListener listener= new IResourceChangeListener() {
-			public void resourceChanged(IResourceChangeEvent event) {
-				TestModelProvider.assertTrue(event.getDelta());
-			}
-		};
 		try {
-			ResourcesPlugin.getWorkspace().addResourceChangeListener(listener);
 			DeleteRefactoring refactoring= createRefactoring(elems);
 			assertNotNull(refactoring);
 			RefactoringStatus status= performRefactoring(refactoring, false);
@@ -123,7 +119,6 @@ public class DeleteTest extends RefactoringTest{
 			if (! deleteCu)
 				assertEqualLines("incorrect content of A.java", getFileContents(getOutputTestFileName(CU_NAME)), newCuA.getSource());
 		} finally {
-			ResourcesPlugin.getWorkspace().removeResourceChangeListener(listener);
 			performDummySearch();
 			if (newCuA != null && newCuA.exists())
 				newCuA.delete(true, null);	
@@ -772,7 +767,7 @@ public class DeleteTest extends RefactoringTest{
 		Object[] elements= {internalJAR};
 		verifyEnabled(elements);			
 		performDummySearch();
-		String[] handles= ParticipantTesting.createHandles(internalJAR);
+		String[] handles= ParticipantTesting.createHandles(internalJAR, internalJAR.getResource());
 
 		DeleteRefactoring ref= createRefactoring(elements);
 		RefactoringStatus status= performRefactoring(ref, false);

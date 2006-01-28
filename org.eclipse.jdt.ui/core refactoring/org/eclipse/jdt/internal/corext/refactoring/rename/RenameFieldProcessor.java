@@ -32,12 +32,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
-import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
-import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.Flags;
@@ -171,27 +167,28 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return new Object[] { fField};
 	}
 	
-	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
+	protected RenameModifications computeRenameModifications() throws CoreException {
+		RenameModifications result= new RenameModifications();
+		result.rename(fField, new RenameArguments(getNewElementName(), getUpdateReferences()));
 		if (fRenameGetter) {
 			IMethod getter= getGetter();
 			if (getter != null) {
-				addParticipants(status, result, getter, getNewGetterName(), natures, shared);
+				result.rename(getter, new RenameArguments(getNewGetterName(), getUpdateReferences()));
 			}
 		}
 		if (fRenameSetter) {
 			IMethod setter= getSetter();
 			if (setter != null) {
-				addParticipants(status, result, setter, getNewSetterName(), natures, shared);
+				result.rename(setter, new RenameArguments(getNewSetterName(), getUpdateReferences()));
 			}
 		}
+		return result;
 	}
-
-	private void addParticipants(RefactoringStatus status, List result, IMethod method, String methodName, String[] natures, SharableParticipants shared) {
-		RenameArguments args= new RenameArguments(methodName, getUpdateReferences());
-		RenameParticipant[] participants= ParticipantManager.loadRenameParticipants(status, this, method, args, natures, shared);
-		result.addAll(Arrays.asList(participants));
+	
+	protected IFile[] getChangedFiles() {
+		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
-
+	
 	//---- IRenameProcessor -------------------------------------
 	
 	public final String getCurrentElementName(){
@@ -390,7 +387,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		return Checks.checkIfCuBroken(fField);
 	}
 	
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try{
 			pm.beginTask("", 18); //$NON-NLS-1$
 			pm.setTaskName(RefactoringCoreMessages.RenameFieldRefactoring_checking); 
@@ -437,8 +434,6 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			if (result.hasFatalError())
 				return result;
 			
-			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
-			checker.addFiles(getAllFilesToModify());
 			return result;
 		} finally{
 			pm.done();
@@ -541,10 +536,6 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		
 		result.merge(Checks.checkCompileErrorsInAffectedFiles(fReferences));	
 		return result;
-	}
-	
-	private IFile[] getAllFilesToModify() {
-		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
 	}
 	
 	private SearchPattern createSearchPattern(){

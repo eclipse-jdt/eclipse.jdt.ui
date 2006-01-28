@@ -26,15 +26,10 @@ import org.eclipse.text.edits.ReplaceEdit;
 import org.eclipse.text.edits.TextEdit;
 
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
@@ -42,13 +37,8 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
-import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
-import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
-import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.Flags;
@@ -84,7 +74,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStat
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenamePackageChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamePackageProcessor.ImportsManager.ImportChange;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IQualifiedNameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
@@ -155,57 +144,28 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		return new Object[] {fPackage};
 	}
 	
-	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
+	protected RenameModifications computeRenameModifications() throws CoreException {
+		RenameModifications result= new RenameModifications();
+		result.rename(fPackage, new RenameArguments(getNewElementName(), getUpdateReferences()), fRenameSubpackages);
+		return result;
+	}
+	
+	protected IFile[] getChangedFiles() throws CoreException {
+		Set combined= new HashSet();
+		combined.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
 		if (fRenameSubpackages) {
 			IPackageFragment[] allPackages= JavaElementUtil.getPackageAndSubpackages(fPackage);
 			for (int i= 0; i < allPackages.length; i++) {
-				IPackageFragment pack= allPackages[i];
-				if (! pack.equals(fPackage)) {
-					RenameArguments renameArguments= new RenameArguments(getNewPackageName(pack.getElementName()), fUpdateReferences);
-					RenameParticipant[] participants= ParticipantManager.loadRenameParticipants(
-							status, this, pack, renameArguments, natures, shared);
-					result.addAll(Arrays.asList(participants));
-				}
-				ResourceModifications resourceModifications= computeResourceModifications(pack);
-				result.addAll(Arrays.asList(resourceModifications.getParticipants(status, this, natures, shared)));
+				combined.addAll(Arrays.asList(ResourceUtil.getFiles(allPackages[i].getCompilationUnits())));
 			}
 		} else {
-			ResourceModifications resourceModifications= computeResourceModifications(fPackage);
-			result.addAll(Arrays.asList(resourceModifications.getParticipants(status, this, natures, shared)));
+			combined.addAll(Arrays.asList(ResourceUtil.getFiles(fPackage.getCompilationUnits())));
 		}
+		if (fQualifiedNameSearchResult != null)
+			combined.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
+		return (IFile[]) combined.toArray(new IFile[combined.size()]);
 	}
 	
-	private ResourceModifications computeResourceModifications(IPackageFragment pack) throws CoreException {
-		ResourceModifications result= new ResourceModifications();
-		IContainer container= (IContainer)pack.getResource();
-		if (container == null)
-			return null;
-		IPath path= pack.getParent().getPath();
-		path= path.append(getNewPackageName(pack.getElementName()).replace('.', IPath.SEPARATOR));
-		IFolder target= ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
-		if (!target.exists()) {
-			result.addCreate(target);
-		}
-		MoveArguments arguments= new MoveArguments(target, fUpdateReferences);
-		IResource[] members= container.members();
-		int files= 0;
-		for (int i= 0; i < members.length; i++) {
-			IResource member= members[i];
-			if (member instanceof IFile) {
-				files++;
-				IFile file= (IFile)member;
-				if ("class".equals(file.getFileExtension()) && file.isDerived()) //$NON-NLS-1$
-					continue;
-				result.addMove(member, arguments);
-			}
-		}
-		if (fRenameSubpackages && fPackage.equals(pack)
-				|| ! fRenameSubpackages && files == members.length) {
-			result.addDelete(container);
-		}
-		return result;		
-	}
-		 
 	//---- ITextUpdating -------------------------------------------------
 
 	public boolean canEnableTextUpdating() {
@@ -303,7 +263,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 		return new RefactoringStatus();
 	}
 	
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try{
 			pm.beginTask("", 23 + (fUpdateQualifiedNames ? 10 : 0)); //$NON-NLS-1$
 			pm.setTaskName(RefactoringCoreMessages.RenamePackageRefactoring_checking); 
@@ -345,8 +305,6 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			if (fUpdateQualifiedNames)
 				computeQualifiedNameMatches(new SubProgressMonitor(pm, 10));
 			
-			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
-			checker.addFiles(getAllFilesToModify());
 			return result;
 		} finally{
 			pm.done();
@@ -462,22 +420,6 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 			}	
 		}
 		return result;
-	}
-	
-	private IFile[] getAllFilesToModify() throws CoreException {
-		Set combined= new HashSet();
-		combined.addAll(Arrays.asList(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits())));
-		if (fRenameSubpackages) {
-			IPackageFragment[] allPackages= JavaElementUtil.getPackageAndSubpackages(fPackage);
-			for (int i= 0; i < allPackages.length; i++) {
-				combined.addAll(Arrays.asList(ResourceUtil.getFiles(allPackages[i].getCompilationUnits())));
-			}
-		} else {
-			combined.addAll(Arrays.asList(ResourceUtil.getFiles(fPackage.getCompilationUnits())));
-		}
-		if (fQualifiedNameSearchResult != null)
-			combined.addAll(Arrays.asList(fQualifiedNameSearchResult.getAllFiles()));
-		return (IFile[]) combined.toArray(new IFile[combined.size()]);
 	}
 	
 	// ----------- Changes ---------------

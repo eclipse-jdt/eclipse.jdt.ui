@@ -33,7 +33,6 @@ import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
@@ -50,8 +49,10 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
  * </p>
  */
 public class DeleteModifications {
+	
 	private List fDelete;
 	private List fPackagesToDelete;
+	// The resource modifications caused by modifying Java elements 
 	private ResourceModifications fResourceModifications;
 	
 	public DeleteModifications() {
@@ -87,9 +88,12 @@ public class DeleteModifications {
 				return;
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				fDelete.add(element);
-				IPackageFragmentRoot root= (IPackageFragmentRoot)element;
-				if (!root.isArchive() && element.getResource() != null)
-					fResourceModifications.addDelete(element.getResource());
+				IResource resource= element.getResource();
+				// Flag an resource change even if we have an archive. If it is
+				// internal (we have a underlying resource then we have a resource
+				// change.
+				if (resource != null)
+					fResourceModifications.addDelete(resource);
 				return;
 			case IJavaElement.PACKAGE_FRAGMENT:
 				fDelete.add(element);
@@ -129,7 +133,13 @@ public class DeleteModifications {
 	}
 	
 	public void createDelta(IResourceChangeDescriptionFactory deltaFactory) {
-		fResourceModifications.createDelta(deltaFactory);
+		for (Iterator iter= fDelete.iterator(); iter.hasNext();) {
+			Object element= iter.next();
+			if (element instanceof IResource) {
+				deltaFactory.delete((IResource)element);
+			}
+		}
+		fResourceModifications.buildDelta(deltaFactory);
 	}
 	
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {

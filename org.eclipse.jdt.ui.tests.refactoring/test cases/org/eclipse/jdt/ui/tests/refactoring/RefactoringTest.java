@@ -27,6 +27,9 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -67,6 +70,7 @@ public abstract class RefactoringTest extends TestCase {
 	private IPackageFragment fPackageP;
 	
 	public boolean fIsVerbose= false;
+	public boolean fIsPreDeltaTest= false;
 
 	public static final String TEST_PATH_PREFIX= "";
 
@@ -81,6 +85,7 @@ public abstract class RefactoringTest extends TestCase {
 	protected void setUp() throws Exception {
 		fRoot= RefactoringTestSetup.getDefaultSourceFolder();
 		fPackageP= RefactoringTestSetup.getPackageP();
+		fIsPreDeltaTest= false;
 		
 		if (fIsVerbose){
 			System.out.println("\n---------------------------------------------");
@@ -172,12 +177,32 @@ public abstract class RefactoringTest extends TestCase {
 	protected final RefactoringStatus performRefactoring(Refactoring ref, boolean providesUndo) throws Exception {
 		performDummySearch();
 		IUndoManager undoManager= getUndoManager();
-		CreateChangeOperation create= new CreateChangeOperation(
+		final CreateChangeOperation create= new CreateChangeOperation(
 			new CheckConditionsOperation(ref, CheckConditionsOperation.ALL_CONDITIONS),
 			RefactoringStatus.FATAL);
-		PerformChangeOperation perform= new PerformChangeOperation(create);
+		final PerformChangeOperation perform= new PerformChangeOperation(create);
 		perform.setUndoManager(undoManager, ref.getName());
-		ResourcesPlugin.getWorkspace().run(perform, new NullProgressMonitor());
+		
+		IWorkspace workspace= ResourcesPlugin.getWorkspace();
+		if (fIsPreDeltaTest) {
+			IResourceChangeListener listener= new IResourceChangeListener() {
+				public void resourceChanged(IResourceChangeEvent event) {
+					if (create.getConditionCheckingStatus().isOK() &&  perform.changeExecuted()) {
+						TestModelProvider.assertTrue(event.getDelta());
+					}
+				}
+			};
+			try {
+				TestModelProvider.reset();
+				workspace.checkpoint(false);
+				workspace.addResourceChangeListener(listener);
+				workspace.run(perform, new NullProgressMonitor());
+			} finally {
+				workspace.removeResourceChangeListener(listener);
+			}
+		} else {
+			workspace.run(perform, new NullProgressMonitor());
+		}
 		RefactoringStatus status= create.getConditionCheckingStatus();
 		if (!status.isOK())
 			return status;

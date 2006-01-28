@@ -26,6 +26,8 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
@@ -35,8 +37,6 @@ import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.Flags;
@@ -167,15 +167,22 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return new Object[] {fMethod};
 	}
 
-	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
-		Set derived= new HashSet(fMethodsToRename);
-		derived.remove(fMethod);
-		loadDerivedParticipants(status, result, 
-			derived.toArray(), 
-			new RenameArguments(getNewElementName(), getUpdateReferences()), 
-			null, natures, shared);
+	protected RenameModifications computeRenameModifications() throws CoreException {
+		RenameModifications result= new RenameModifications();
+		RenameArguments args= new RenameArguments(getNewElementName(), getUpdateReferences());
+		for (Iterator iter= fMethodsToRename.iterator(); iter.hasNext();) {
+			IMethod method= (IMethod) iter.next();
+			result.rename(method, args);
+		}
+		return result;
 	}
-
+	
+	protected IFile[] getChangedFiles() throws CoreException {
+		return ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits());
+	}
+	
+	//---- IRenameProcessor -------------------------------------
+	
 	public final String getCurrentElementName(){
 		return fMethod.getElementName();
 	}
@@ -272,7 +279,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		return result;
 	}
 
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		try{
 			RefactoringStatus result= new RefactoringStatus();
 			pm.beginTask("", 9); //$NON-NLS-1$
@@ -348,8 +355,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 			else
 				pm.worked(1);
 			
-			ValidateEditChecker checker= (ValidateEditChecker)context.getChecker(ValidateEditChecker.class);
-			checker.addFiles(ResourceUtil.getFiles(fChangeManager.getAllCompilationUnits()));
 			return result;
 		} finally{
 			pm.done();

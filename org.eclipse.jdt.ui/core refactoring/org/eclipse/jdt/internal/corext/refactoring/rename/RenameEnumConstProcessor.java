@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
@@ -23,7 +22,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.Flags;
@@ -95,13 +93,6 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	 */
 	public String getProcessorName() {
 		return Messages.format(RefactoringCoreMessages.RenameEnumConstRefactoring_name, new String[] { getCurrentElementName(), getNewElementName()}); 
-	}
-
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#loadDerivedParticipants(org.eclipse.ltk.core.refactoring.RefactoringStatus, java.util.List, java.lang.String[], org.eclipse.ltk.core.refactoring.participants.SharableParticipants)
-	 */
-	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
-		// Don't load participants to rename getters and setters
 	}
 
 	/*

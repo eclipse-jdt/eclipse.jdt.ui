@@ -10,9 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Map;
+
 import junit.framework.Assert;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
@@ -24,30 +33,123 @@ import org.eclipse.core.resources.mapping.ResourceMappingContext;
 import org.eclipse.core.resources.mapping.ResourceTraversal;
 
 public class TestModelProvider extends ModelProvider {
-	public static IResourceDelta LAST_DELTA;
 	
-	public IStatus validateChange(IResourceDelta delta, IProgressMonitor monitor) {
-		LAST_DELTA= delta;
-		return super.validateChange(delta, monitor);
+	private static class Sorter implements Comparator {
+		public int compare(Object o1, Object o2) {
+			IResourceDelta d1= (IResourceDelta) o1;
+			IResourceDelta d2= (IResourceDelta) o2;
+			return d1.getResource().getFullPath().toPortableString().compareTo(
+				d2.getResource().getFullPath().toPortableString());
+		}
 	}
 	
-	public static void assertTrue(IResourceDelta expected) {
-		Assert.assertNotNull(LAST_DELTA);
-		assertTrue(expected, LAST_DELTA);
+	private static class Status {
+		private int kind;
+		private int flags;
+		public Status(int kind, int flags) {
+			this.kind= kind;
+			this.flags= flags;
+		}
+		public int hashCode() {
+			final int PRIME= 31;
+			int result= 1;
+			result= PRIME * result + kind;
+			result= PRIME * result + flags;
+			return result;
+		}
+		public boolean equals(Object obj) {
+			if (this == obj)
+				return true;
+			if (obj == null || getClass() != obj.getClass())
+				return false;
+			final Status other= (Status) obj;
+			return kind == other.kind && flags == other.flags;
+		}
+		public String toString() {
+			return "Status: kind(" + kind + ") flags(" + flags + ")";
+		}
+	}
+	
+	private static final Comparator COMPARATOR= new Sorter();
+	
+	public static IResourceDelta LAST_DELTA;
+
+	private static final int PRE_DELTA_FLAGS= IResourceDelta.CONTENT | IResourceDelta.MOVED_TO | 
+		IResourceDelta.MOVED_FROM | IResourceDelta.OPEN; 
+	
+	public static void reset() {
 		LAST_DELTA= null;
 	}
 	
-	private static void assertTrue(IResourceDelta expected, IResourceDelta actual) {
+	public IStatus validateChange(IResourceDelta delta, IProgressMonitor pm) {
+		LAST_DELTA= delta;
+		return super.validateChange(delta, pm);
+	}
+	
+	public static void assertTrue(IResourceDelta expected) {
+		Map expectedPostProcess= new HashMap();
+		Map actualPostProcess= new HashMap();
+		Assert.assertNotNull(LAST_DELTA);
+		assertTrue(expected, LAST_DELTA, expectedPostProcess, actualPostProcess);
+		for (Iterator iter= expectedPostProcess.keySet().iterator(); iter.hasNext();) {
+			IPath resource= (IPath) iter.next();
+			Status expectedValue= (Status) expectedPostProcess.get(resource);
+			Status actualValue= (Status) actualPostProcess.get(resource);
+			Assert.assertEquals("Same status value", expectedValue, actualValue);
+		}
+		LAST_DELTA= null;
+	}
+	
+	private static void assertTrue(IResourceDelta expected, IResourceDelta actual, Map expectedPostProcess, Map actualPostProcess) {
 		Assert.assertEquals("Same resource", expected.getResource(), actual.getResource());
 		int actualKind= actual.getKind();
-		Assert.assertEquals("Same kind", expected.getKind(), actualKind);
-		Assert.assertEquals("Same flags", expected.getFlags(), actual.getFlags());
-		IResourceDelta[] expectedChildren= expected.getAffectedChildren();
+		int actualFlags= actual.getFlags();
+		// The real delta can't combine kinds so we remove it from the received one as well.
+		if ((actualKind & (IResourceDelta.ADDED | IResourceDelta.REMOVED)) != 0) {
+			actualKind= actualKind & ~IResourceDelta.CHANGED;
+		}
+		// There is a difference between a pre and a post delta. For example if I change and
+		// move a resource then in the pre delta we have the change on the MOVE_TO whereas in
+		// the post delta we have the changed on the MOVED_FROM.
+		if ((actualKind & IResourceDelta.REMOVED) != 0 && (actualFlags & IResourceDelta.MOVED_TO) != 0) {
+			IPath moveTo= actual.getMovedToPath();
+			actualPostProcess.put(moveTo, new Status(IResourceDelta.ADDED, (actualFlags & ~IResourceDelta.MOVED_TO) | IResourceDelta.MOVED_FROM));
+			actualFlags= actualFlags & ~IResourceDelta.CONTENT;
+		}
+		int expectKind= expected.getKind();
+		int expectedFlags= expected.getFlags() & PRE_DELTA_FLAGS;
+		if ((expectKind & IResourceDelta.ADDED) != 0 && (expectedFlags & IResourceDelta.MOVED_FROM) != 0) {
+			expectedFlags= expectedFlags & ~IResourceDelta.OPEN;
+			expectedPostProcess.put(expected.getResource().getFullPath(), new Status(expectKind, expectedFlags));
+			expectedFlags= expectedFlags & ~IResourceDelta.CONTENT;
+		}
+		Assert.assertEquals("Same kind", expectKind, actualKind);
+		Assert.assertEquals("Same flags", expectedFlags, actualFlags);
+		IResourceDelta[] expectedChildren=  getExpectedChildren(expected);
 		IResourceDelta[] actualChildren= actual.getAffectedChildren();
 		Assert.assertEquals("Same number of children", expectedChildren.length, actualChildren.length);
+		Arrays.sort(expectedChildren, COMPARATOR);
+		Arrays.sort(actualChildren, COMPARATOR);
 		for (int i= 0; i < expectedChildren.length; i++) {
-			assertTrue(expectedChildren[i], actualChildren[i]);
+			assertTrue(expectedChildren[i], actualChildren[i], expectedPostProcess, actualPostProcess);
 		}
+	}
+	
+	private static IResourceDelta[] getExpectedChildren(IResourceDelta delta) {
+		List result= new ArrayList();
+		IResourceDelta[] children= delta.getAffectedChildren();
+		for (int i= 0; i < children.length; i++) {
+			IResourceDelta child= children[i];
+			if (child.getAffectedChildren().length > 0) {
+				result.add(child);
+			} else {
+				int flags= child.getFlags();
+				if (flags == 0 || (flags & PRE_DELTA_FLAGS) != 0) {
+					result.add(child);
+				}
+			}
+		}
+		return (IResourceDelta[]) result.toArray(new IResourceDelta[result.size()]);
 	}
 
 	public ResourceMapping[] getMappings(IResource resource, ResourceMappingContext context, IProgressMonitor monitor) throws CoreException {

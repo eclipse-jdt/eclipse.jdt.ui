@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -27,8 +25,6 @@ import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.IJavaProject;
@@ -40,7 +36,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameJavaProjectChange;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.Resources;
@@ -87,21 +82,23 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 		return new Object[] {fProject};
 	}
 
-	protected void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException {
-		loadDerivedParticipants(status, result, 
-			null, null, 
-			computeResourceModifications(), natures, shared);
-	}
-	
-	private ResourceModifications computeResourceModifications() {
-		ResourceModifications result= new ResourceModifications();
-		result.setRename(fProject.getProject(), new RenameArguments(getNewElementName(), getUpdateReferences()));
-		return result;		
-	}
-		 
 	public Object getNewElement() throws CoreException {
 		IPath newPath= fProject.getPath().removeLastSegments(1).append(getNewElementName());
 		return JavaCore.create(ResourcesPlugin.getWorkspace().getRoot().findMember(newPath));
+	}
+	
+	protected RenameModifications computeRenameModifications() throws CoreException {
+		RenameModifications result= new RenameModifications();
+		result.rename(fProject, new RenameArguments(getNewElementName(), getUpdateReferences()));
+		return result;
+	}
+	
+	protected IFile[] getChangedFiles() throws CoreException {
+		IFile projectFile= fProject.getProject().getFile(".project"); //$NON-NLS-1$
+		if (projectFile != null && projectFile.exists()) {
+			return new IFile[] {projectFile};
+		}
+		return new IFile[0];
 	}
 	
 	//---- IReferenceUpdating --------------------------------------
@@ -140,18 +137,13 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 		return new RefactoringStatus();
 	}
 	
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
+	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try{
 			if (isReadOnly()){
 				String message= Messages.format(RefactoringCoreMessages.RenameJavaProjectRefactoring_read_only, 
 									fProject.getElementName());
 				return RefactoringStatus.createErrorStatus(message);
-			}
-			IFile projectFile= fProject.getProject().getFile(".project"); //$NON-NLS-1$
-			if (projectFile != null && projectFile.exists()) {
-				ValidateEditChecker validateEditChecker= (ValidateEditChecker) context.getChecker(ValidateEditChecker.class);
-				validateEditChecker.addFile(projectFile);
 			}
 			return new RefactoringStatus();
 		} finally{

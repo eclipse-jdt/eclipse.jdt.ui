@@ -61,6 +61,7 @@ public class RenamePrivateFieldTests extends RefactoringTest {
 		fPrefixPref= options.get(JavaCore.CODEASSIST_FIELD_PREFIXES);
 		options.put(JavaCore.CODEASSIST_FIELD_PREFIXES, getPrefixes());
 		JavaCore.setOptions(options);
+		fIsPreDeltaTest= true;
 	}
 	
 	protected void tearDown() throws Exception {

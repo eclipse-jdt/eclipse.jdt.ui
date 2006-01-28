@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.StringTokenizer;
 
@@ -24,6 +23,8 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
@@ -33,8 +34,7 @@ import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
-import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
-import org.eclipse.ltk.core.refactoring.participants.ValidateEditChecker;
+import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -119,13 +119,6 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		return false;
 	}
 	
-	/*
-	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#loadDerivedParticipants(org.eclipse.ltk.core.refactoring.RefactoringStatus, java.util.List, java.lang.String[], org.eclipse.ltk.core.refactoring.participants.SharableParticipants)
-	 */
-	protected final void loadDerivedParticipants(final RefactoringStatus status, final List result, final String[] natures, final SharableParticipants shared) throws CoreException {
-		// Do nothing
-	}
-
 	/*
 	 * @see org.eclipse.jdt.internal.corext.refactoring.rename.JavaRenameProcessor#getAffectedProjectNatures()
 	 */
@@ -242,18 +235,21 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		fCurrentName= fTempDeclarationNode.getName().getIdentifier();
 	}
 	
+	protected RenameModifications computeRenameModifications() throws CoreException {
+		RenameModifications result= new RenameModifications();
+		result.rename(fLocalVariable, new RenameArguments(getNewElementName(), getUpdateReferences()));
+		return result;
+	}
 	
-	/*
-	 * @see org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor, org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext)
-	 */
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context)
+	protected IFile[] getChangedFiles() throws CoreException {
+		return new IFile[] {ResourceUtil.getFile(fCu)};
+	}
+	
+	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context)
 			throws CoreException, OperationCanceledException {
 		try {
 			pm.beginTask("", 1);	 //$NON-NLS-1$
 
-			ValidateEditChecker checker= (ValidateEditChecker) context.getChecker(ValidateEditChecker.class);
-			checker.addFile(ResourceUtil.getFile(fCu));
-			
 			RefactoringStatus result= checkNewElementName(fNewName);
 			if (result.hasFatalError())
 				return result;

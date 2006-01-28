@@ -10,77 +10,63 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
-import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
-import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.mapping.IResourceChangeDescriptionFactory;
 
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.IParticipantDescriptorFilter;
-import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
+import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
-import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
-import org.eclipse.ltk.core.refactoring.participants.RenameParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
+import org.eclipse.ltk.core.refactoring.participants.ResourceOperationChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
+
+import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.ICommentProvider;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 
 public abstract class JavaRenameProcessor extends RenameProcessor implements IInitializableRefactoringComponent, INameUpdating, ICommentProvider {
 	
 	private String fNewElementName;
 	private String fComment;
+	private RenameModifications fRenameModifications;
 	
-	public final RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants sharedParticipants) throws CoreException {
-		RenameArguments arguments= createRenameArguments();
-		String[] natures= getAffectedProjectNatures();
-		List result= new ArrayList();
-		loadElementParticipants(status, result, arguments, natures, sharedParticipants);
-		loadDerivedParticipants(status, result, natures, sharedParticipants);
-		return (RefactoringParticipant[])result.toArray(new RefactoringParticipant[result.size()]);
+	public final RefactoringParticipant[] loadParticipants(RefactoringStatus status, SharableParticipants shared) throws CoreException {
+		return getRenameModifications().loadParticipants(status, this, getAffectedProjectNatures(), shared);
 	}
 	
-	protected void loadElementParticipants(RefactoringStatus status, List result, RenameArguments arguments, String[] natures, SharableParticipants shared) throws CoreException {
-		Object[] elements= getElements();
-		for (int i= 0; i < elements.length; i++) {
-			result.addAll(Arrays.asList(ParticipantManager.loadRenameParticipants(status, 
-				this,  elements[i],
-				arguments, createParticipantDescriptorFilter(), natures, shared)));
+	public final RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException, OperationCanceledException {
+		ResourceOperationChecker checker= (ResourceOperationChecker) context.getChecker(ResourceOperationChecker.class);
+		IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
+		RefactoringStatus result= doCheckFinalConditions(pm, context);
+		if (result.hasFatalError())
+			return result;
+		getRenameModifications().buildDelta(deltaFactory);
+		IFile[] changed= getChangedFiles();
+		for (int i= 0; i < changed.length; i++) {
+			deltaFactory.change(changed[i]);
 		}
+		return result;
 	}
 	
-	protected abstract void loadDerivedParticipants(RefactoringStatus status, List result, String[] natures, SharableParticipants shared) throws CoreException;
-	
-	protected void loadDerivedParticipants(RefactoringStatus status, List result, 
-			Object[] derivedElements, RenameArguments arguments, 
-			ResourceModifications resourceModifications, 
-			String[] natures, SharableParticipants shared) throws CoreException {
-		loadDerivedParticipants(status, result, derivedElements, arguments, null, resourceModifications, natures, shared);
+	private RenameModifications getRenameModifications() throws CoreException {
+		if (fRenameModifications == null)
+			fRenameModifications= computeRenameModifications();
+		return fRenameModifications;
 	}
 	
-	protected void loadDerivedParticipants(RefactoringStatus status, List result, 
-			Object[] derivedElements, RenameArguments arguments, IParticipantDescriptorFilter filter,
-			ResourceModifications resourceModifications, 
-			String[] natures, SharableParticipants shared) throws CoreException {
-		if (derivedElements != null) {
-			for (int i= 0; i < derivedElements.length; i++) {
-				RenameParticipant[] participants= ParticipantManager.loadRenameParticipants(
-					status, this, 
-					derivedElements[i], arguments, 
-					filter, natures, shared);
-				result.addAll(Arrays.asList(participants));
-			}
-		}
-		if (resourceModifications != null) {
-			result.addAll(Arrays.asList(resourceModifications.getParticipants(status, this, natures, shared)));
-		}
-	}
+	protected abstract RenameModifications computeRenameModifications() throws CoreException;
 	
+	protected abstract RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext context) throws CoreException, OperationCanceledException;
+	
+	protected abstract IFile[] getChangedFiles() throws CoreException;
+
+	protected abstract String[] getAffectedProjectNatures() throws CoreException;
+
 	public void setNewElementName(String newName) {
 		Assert.isNotNull(newName);
 		fNewElementName= newName;
@@ -88,18 +74,6 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements IIn
 
 	public String getNewElementName() {
 		return fNewElementName;
-	}
-	
-	public abstract boolean getUpdateReferences();	
-	
-	protected abstract String[] getAffectedProjectNatures() throws CoreException;
-
-	protected RenameArguments createRenameArguments() {
-		return new RenameArguments(getNewElementName(), getUpdateReferences());
-	}
-	
-	protected IParticipantDescriptorFilter createParticipantDescriptorFilter() {
-		return null;
 	}
 	
 	/**
@@ -112,23 +86,14 @@ public abstract class JavaRenameProcessor extends RenameProcessor implements IIn
 		return true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public final boolean canEnableComment() {
 		return true;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public final String getComment() {
 		return fComment;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 */
 	public final void setComment(String comment) {
 		fComment= comment;
 	}

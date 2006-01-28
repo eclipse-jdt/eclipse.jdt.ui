@@ -114,12 +114,12 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 		return result;
 	}
 
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext checkContext) throws CoreException {
+	protected RefactoringStatus doCheckFinalConditions(IProgressMonitor pm, CheckConditionsContext checkContext) throws CoreException {
 		try{
 			pm.beginTask("", 9); //$NON-NLS-1$
 			RefactoringStatus result= new RefactoringStatus();
 
-			result.merge(super.checkFinalConditions(new SubProgressMonitor(pm, 7), checkContext));
+			result.merge(super.doCheckFinalConditions(new SubProgressMonitor(pm, 7), checkContext));
 			if (result.hasFatalError())
 				return result;
 
