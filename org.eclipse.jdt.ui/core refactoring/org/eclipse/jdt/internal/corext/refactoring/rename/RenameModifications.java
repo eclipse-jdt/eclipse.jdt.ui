@@ -52,24 +52,18 @@ import org.eclipse.jdt.core.refactoring.RenameTypeArguments;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
+import org.eclipse.jdt.internal.corext.refactoring.reorg.RefactoringModifications;
 
-public class RenameModifications {
+public class RenameModifications extends RefactoringModifications {
 	
 	private List fRename;
 	private List fRenameArguments;
 	private List fParticipantDescriptorFilter;
-	// The resource modifications caused by modifying Java elements 
-	private ResourceModifications fResourceModifications;
 	
 	public RenameModifications() {
 		fRename= new ArrayList();
 		fRenameArguments= new ArrayList();
 		fParticipantDescriptorFilter= new ArrayList();
-		fResourceModifications= new ResourceModifications();
-	}
-	
-	public ResourceModifications getResourceModifications() {
-		return fResourceModifications;
 	}
 	
 	public void rename(IResource resource, RenameArguments args) {
@@ -80,13 +74,12 @@ public class RenameModifications {
 		add(project, args, null);
 		IProject rProject= project.getProject();
 		if (rProject != null) {
-			fResourceModifications.setRename(rProject, args);
+			getResourceModifications().addRename(rProject, args);
 			IProject[] referencingProjects= rProject.getReferencingProjects();
 			for (int i= 0; i < referencingProjects.length; i++) {
-				IProject referencingProject= referencingProjects[i];
-				IResource classpath= referencingProject.findMember(".classpath"); //$NON-NLS-1$
-				if (classpath instanceof IFile) {
-					fResourceModifications.addChanged((IFile)classpath);
+				IFile classpath= getClasspathFile(referencingProjects[i]);
+				if (classpath != null) {
+					getResourceModifications().addChanged(classpath);
 				}
 			}
 		}
@@ -95,7 +88,7 @@ public class RenameModifications {
 	public void rename(IPackageFragmentRoot sourceFolder, RenameArguments arguments) {
 		add(sourceFolder, arguments, null);
 		if (sourceFolder.getResource() != null) {
-			fResourceModifications.setRename(sourceFolder.getResource(), arguments);
+			getResourceModifications().addRename(sourceFolder.getResource(), arguments);
 		}
 	}
 	
@@ -120,19 +113,19 @@ public class RenameModifications {
 		if ((!rootPackage.hasSubpackages() || renameSubPackages) && canMove(container, target)) {
 			createIncludingParents(target.getParent());
 			if (container.getParent().equals(target.getParent())) {
-				fResourceModifications.setRename(container, new RenameArguments(target.getName(), args.getUpdateReferences()));
+				getResourceModifications().addRename(container, new RenameArguments(target.getName(), args.getUpdateReferences()));
 			} else {
 				// This is a little tricky. The problem is that the refactoring participants
 				// don't support a generic move like the resource API does. So for the delta
 				// we generate one move, however for the participants we have to generate single
 				// moves and deletes.
 				try {
-					fResourceModifications.ignoreForDelta();
+					getResourceModifications().ignoreForDelta();
 					addAllResourceModifications(rootPackage, args, renameSubPackages, allSubPackages);
 				} finally {
-					fResourceModifications.trackForDelta();
+					getResourceModifications().trackForDelta();
 				}
-				fResourceModifications.addDelta(new ResourceModifications.MoveDescription(container, target.getFullPath()));
+				getResourceModifications().addDelta(new ResourceModifications.MoveDescription(container, target.getFullPath()));
 			}
 		} else {
 			addAllResourceModifications(rootPackage, args, renameSubPackages, allSubPackages);
@@ -142,7 +135,7 @@ public class RenameModifications {
 	public void rename(ICompilationUnit unit, RenameArguments args) {
 		add(unit, args, null);
 		if (unit.getResource() != null) {
-			fResourceModifications.setRename(unit.getResource(), new RenameArguments(args.getNewName(), args.getUpdateReferences()));
+			getResourceModifications().addRename(unit.getResource(), new RenameArguments(args.getNewName(), args.getUpdateReferences()));
 		}
 	}
 	
@@ -173,7 +166,7 @@ public class RenameModifications {
 				ResourceModifications.buildMoveDelta(builder, (IResource) element, (RenameArguments) fRenameArguments.get(i));
 			}
 		}
-		fResourceModifications.buildDelta(builder);
+		getResourceModifications().buildDelta(builder);
 	}
 	
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
@@ -185,7 +178,7 @@ public class RenameModifications {
 				(IParticipantDescriptorFilter) fParticipantDescriptorFilter.get(i), 
 				natures, shared)));
 		}
-		result.addAll(Arrays.asList(fResourceModifications.getParticipants(status, owner, natures, shared)));
+		result.addAll(Arrays.asList(getResourceModifications().getParticipants(status, owner, natures, shared)));
 		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
 	}
 	
@@ -218,29 +211,22 @@ public class RenameModifications {
 		Set allMembers= new HashSet(Arrays.asList(container.members()));
 		for (int i= 0; i < resourcesToMove.length; i++) {
 			IResource toMove= resourcesToMove[i];
-			fResourceModifications.addMove(toMove, arguments);
+			getResourceModifications().addMove(toMove, arguments);
 			allMembers.remove(toMove);
 		}
 		for (Iterator iter= allMembers.iterator(); iter.hasNext();) {
 			IResource element= (IResource) iter.next();
 			if (element instanceof IFile) {
-				fResourceModifications.addDelete(element);
+				getResourceModifications().addDelete(element);
 				iter.remove();
 			}
 		}
 		if (renameSubPackages && rootPackage.equals(pack)
 				|| ! renameSubPackages && allMembers.isEmpty()) {
-			fResourceModifications.addDelete(container);
+			getResourceModifications().addDelete(container);
 		}
 	}
 
-	private void createIncludingParents(IContainer container) {
-		while (container != null && !(container.exists() || fResourceModifications.willExist(container))) {
-			fResourceModifications.addCreate(container);
-			container= container.getParent();
-		}
-	}
-	
 	private boolean canMove(IContainer source, IContainer target) {
 		return !target.exists() && !source.getFullPath().isPrefixOf(target.getFullPath());
 	}
@@ -270,29 +256,5 @@ public class RenameModifications {
 	private String getNewPackageName(IPackageFragment rootPackage, String newPackageName, String oldSubPackageName) {
 		String oldPackageName= rootPackage.getElementName();
 		return newPackageName + oldSubPackageName.substring(oldPackageName.length());
-	}
-	
-	private IResource[] collectResourcesOfInterest(IPackageFragment source) throws CoreException {
-		IJavaElement[] children = source.getChildren();
-		int childOfInterest = IJavaElement.COMPILATION_UNIT;
-		if (source.getKind() == IPackageFragmentRoot.K_BINARY) {
-			childOfInterest = IJavaElement.CLASS_FILE;
-		}
-		ArrayList result = new ArrayList(children.length);
-		for (int i = 0; i < children.length; i++) {
-			IJavaElement child = children[i];
-			if (child.getElementType() == childOfInterest && child.getResource() != null) {
-				result.add(child.getResource());
-			}
-		}
-		// Gather non-java resources
-		Object[] nonJavaResources = source.getNonJavaResources();
-		for (int i= 0; i < nonJavaResources.length; i++) {
-			Object element= nonJavaResources[i];
-			if (element instanceof IResource) {
-				result.add(element);
-			}
-		}
-		return (IResource[]) result.toArray(new IResource[result.size()]);
 	}
 } 

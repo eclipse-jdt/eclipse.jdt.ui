@@ -37,7 +37,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 
 /**
@@ -48,17 +47,14 @@ import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
  * algorithm to check if a parent folder can be deleted.
  * </p>
  */
-public class DeleteModifications {
+public class DeleteModifications extends RefactoringModifications {
 	
 	private List fDelete;
 	private List fPackagesToDelete;
-	// The resource modifications caused by modifying Java elements 
-	private ResourceModifications fResourceModifications;
 	
 	public DeleteModifications() {
 		fDelete= new ArrayList();
 		fPackagesToDelete= new ArrayList();
-		fResourceModifications= new ResourceModifications();
 	}
 	
 	public void delete(IResource resource) {
@@ -84,7 +80,7 @@ public class DeleteModifications {
 			case IJavaElement.JAVA_PROJECT:
 				fDelete.add(element);
 				if (element.getResource() != null)
-					fResourceModifications.addDelete(element.getResource());
+					getResourceModifications().addDelete(element.getResource());
 				return;
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 				fDelete.add(element);
@@ -93,7 +89,7 @@ public class DeleteModifications {
 				// internal (we have a underlying resource then we have a resource
 				// change.
 				if (resource != null)
-					fResourceModifications.addDelete(resource);
+					getResourceModifications().addDelete(resource);
 				return;
 			case IJavaElement.PACKAGE_FRAGMENT:
 				fDelete.add(element);
@@ -104,7 +100,7 @@ public class DeleteModifications {
 				IType[] types= ((ICompilationUnit)element).getTypes();
 				fDelete.addAll(Arrays.asList(types));
 				if (element.getResource() != null)
-					fResourceModifications.addDelete(element.getResource());
+					getResourceModifications().addDelete(element.getResource());
 				return;
 			case IJavaElement.TYPE:
 				fDelete.add(element);
@@ -115,7 +111,7 @@ public class DeleteModifications {
 					if (unit.getTypes().length == 1) {
 						fDelete.add(unit);
 						if (unit.getResource() != null)
-							fResourceModifications.addDelete(unit.getResource());
+							getResourceModifications().addDelete(unit.getResource());
 					}
 				}
 				return;
@@ -132,14 +128,14 @@ public class DeleteModifications {
 		}
 	}
 	
-	public void createDelta(IResourceChangeDescriptionFactory deltaFactory) {
+	public void buildDelta(IResourceChangeDescriptionFactory deltaFactory) {
 		for (Iterator iter= fDelete.iterator(); iter.hasNext();) {
 			Object element= iter.next();
 			if (element instanceof IResource) {
 				deltaFactory.delete((IResource)element);
 			}
 		}
-		fResourceModifications.buildDelta(deltaFactory);
+		getResourceModifications().buildDelta(deltaFactory);
 	}
 	
 	public RefactoringParticipant[] loadParticipants(RefactoringStatus status, RefactoringProcessor owner, String[] natures, SharableParticipants shared) {
@@ -149,7 +145,7 @@ public class DeleteModifications {
 				owner, iter.next(), 
 				new DeleteArguments(), natures, shared)));
 		}
-		result.addAll(Arrays.asList(fResourceModifications.getParticipants(status, owner, natures, shared)));
+		result.addAll(Arrays.asList(getResourceModifications().getParticipants(status, owner, natures, shared)));
 		return (RefactoringParticipant[]) result.toArray(new RefactoringParticipant[result.size()]);
 	}
 	
@@ -198,11 +194,11 @@ public class DeleteModifications {
 				} else {
 					// Parent cannot be removed completely, but as this folder
 					// can be removed, we notify the participant
-					fResourceModifications.addDelete(container);
+					getResourceModifications().addDelete(container);
 				}
 			} else {
 				// Parent will not be removed, but we will 
-				fResourceModifications.addDelete(container);
+				getResourceModifications().addDelete(container);
 			}
 		} else {
 			// This package is only cleared because it has subpackages (=subfolders)
@@ -216,7 +212,7 @@ public class DeleteModifications {
 						continue;
 					if (pack.isDefaultPackage() && ! JavaCore.isJavaLikeFileName(file.getName()))
 						continue;
-					fResourceModifications.addDelete(member);
+					getResourceModifications().addDelete(member);
 				}
 				if (!pack.isDefaultPackage() && member instanceof IFolder) {
 					// Normally, folder children of packages are packages
@@ -224,7 +220,7 @@ public class DeleteModifications {
 					// path, notify the participant
 					IPackageFragment frag= (IPackageFragment) JavaCore.create(member);
 					if (frag == null)
-						fResourceModifications.addDelete(member);
+						getResourceModifications().addDelete(member);
 				}
 			}
 		}

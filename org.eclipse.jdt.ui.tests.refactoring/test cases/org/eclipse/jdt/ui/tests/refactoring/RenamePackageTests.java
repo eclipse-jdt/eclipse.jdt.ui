@@ -178,6 +178,7 @@ public class RenamePackageTests extends RefactoringTest {
 				}
 			}
 			IPackageFragment thisPackage= packages[0];
+			boolean hasSubpackages= thisPackage.hasSubpackages();
 			
 			IPath path= thisPackage.getParent().getPath();
 			path= path.append(newPackageName.replace('.', '/'));
@@ -250,7 +251,11 @@ public class RenamePackageTests extends RefactoringTest {
 			
 			//---
 			
-			assertTrue("package not renamed", ! getRoot().getPackageFragment(packageNames[0]).exists());
+			if (hasSubpackages) {
+				assertTrue("old package does not exist anymore", getRoot().getPackageFragment(packageNames[0]).exists());
+			} else {
+				assertTrue("package not renamed", ! getRoot().getPackageFragment(packageNames[0]).exists());
+			}
 			IPackageFragment newPackage= getRoot().getPackageFragment(newPackageName);
 			assertTrue("new package does not exist", newPackage.exists());
 			
@@ -697,11 +702,9 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	public void test7() throws Exception{
-		if (BUG_125580) {
-			printTestDisabledMessage("Disabled due to bug: 125580");
-			return;
+		if (!BUG_125580) {
+			fIsPreDeltaTest= true;
 		}
-		fIsPreDeltaTest= true;
 		helper2(new String[]{"r", "r.s"}, new String[][]{{"A"}, {"B"}}, "q");
 	}
 	

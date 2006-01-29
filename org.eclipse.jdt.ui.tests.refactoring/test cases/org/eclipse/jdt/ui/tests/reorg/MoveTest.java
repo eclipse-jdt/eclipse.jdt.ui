@@ -70,6 +70,11 @@ public class MoveTest extends RefactoringTest {
 		return new RefactoringTestSetup(someTest);
 	}
 
+	protected void setUp() throws Exception {
+		super.setUp();
+		fIsPreDeltaTest= true;
+	}
+	
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}

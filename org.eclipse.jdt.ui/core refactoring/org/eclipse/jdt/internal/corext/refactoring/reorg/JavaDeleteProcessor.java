@@ -238,7 +238,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IComme
 			
 			ResourceOperationChecker checker= (ResourceOperationChecker) context.getChecker(ResourceOperationChecker.class);
 			IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
-			fDeleteModifications.createDelta(deltaFactory);
+			fDeleteModifications.buildDelta(deltaFactory);
 			IFile[] files= getClassPathFiles();
 			for (int i= 0; i < files.length; i++) {
 				deltaFactory.change(files[i]);

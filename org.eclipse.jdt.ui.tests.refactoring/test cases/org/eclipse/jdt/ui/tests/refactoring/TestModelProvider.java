@@ -73,11 +73,12 @@ public class TestModelProvider extends ModelProvider {
 	private static final Comparator COMPARATOR= new Sorter();
 	
 	public static IResourceDelta LAST_DELTA;
+	public static boolean IS_COPY_TEST;
 
 	private static final int PRE_DELTA_FLAGS= IResourceDelta.CONTENT | IResourceDelta.MOVED_TO | 
 		IResourceDelta.MOVED_FROM | IResourceDelta.OPEN; 
 	
-	public static void reset() {
+	public static void clearDelta() {
 		LAST_DELTA= null;
 	}
 	
@@ -101,13 +102,17 @@ public class TestModelProvider extends ModelProvider {
 	}
 	
 	private static void assertTrue(IResourceDelta expected, IResourceDelta actual, Map expectedPostProcess, Map actualPostProcess) {
-		Assert.assertEquals("Same resource", expected.getResource(), actual.getResource());
+		assertEqual(expected.getResource(), actual.getResource());
 		int actualKind= actual.getKind();
 		int actualFlags= actual.getFlags();
 		// The real delta can't combine kinds so we remove it from the received one as well.
 		if ((actualKind & (IResourceDelta.ADDED | IResourceDelta.REMOVED)) != 0) {
 			actualKind= actualKind & ~IResourceDelta.CHANGED;
 		}
+		
+		// The expected delta doesn't support copy from flag. So remove it
+		actualFlags= actualFlags & ~IResourceDelta.COPIED_FROM;
+		
 		// There is a difference between a pre and a post delta. For example if I change and
 		// move a resource then in the pre delta we have the change on the MOVE_TO whereas in
 		// the post delta we have the changed on the MOVED_FROM.
@@ -132,6 +137,25 @@ public class TestModelProvider extends ModelProvider {
 		Arrays.sort(actualChildren, COMPARATOR);
 		for (int i= 0; i < expectedChildren.length; i++) {
 			assertTrue(expectedChildren[i], actualChildren[i], expectedPostProcess, actualPostProcess);
+		}
+	}
+
+	private static void assertEqual(IResource expected, IResource actual) {
+		// This is a simple approach to deal with renamed resources in the deltas.
+		// However it will not work if there is more than on child per delta since
+		// the children will be sorted and their order might change.
+		if (IS_COPY_TEST) {
+			IPath expectedPath= expected.getFullPath();
+			IPath actualPath= actual.getFullPath();
+			Assert.assertEquals("Same path length", expectedPath.segmentCount(), actualPath.segmentCount());
+			for(int i= 0; i < expectedPath.segmentCount(); i++) {
+				String expectedSegment= expectedPath.segment(i);
+				if (expectedSegment.startsWith("UnusedName") || expectedSegment.equals("unusedName"))
+					continue;
+				Assert.assertEquals("Different path segment", expectedSegment, actualPath.segment(i));
+			}
+		} else {
+			Assert.assertEquals("Same resource", expected, actual);
 		}
 	}
 	

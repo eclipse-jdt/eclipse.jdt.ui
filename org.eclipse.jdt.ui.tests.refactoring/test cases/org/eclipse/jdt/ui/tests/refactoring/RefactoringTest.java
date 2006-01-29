@@ -193,15 +193,15 @@ public abstract class RefactoringTest extends TestCase {
 				}
 			};
 			try {
-				TestModelProvider.reset();
+				TestModelProvider.clearDelta();
 				workspace.checkpoint(false);
 				workspace.addResourceChangeListener(listener);
-				workspace.run(perform, new NullProgressMonitor());
+				executePerformOperation(perform, workspace);
 			} finally {
 				workspace.removeResourceChangeListener(listener);
 			}
 		} else {
-			workspace.run(perform, new NullProgressMonitor());
+			executePerformOperation(perform, workspace);
 		}
 		RefactoringStatus status= create.getConditionCheckingStatus();
 		if (!status.isOK())
@@ -215,6 +215,10 @@ public abstract class RefactoringTest extends TestCase {
 			assertNull("Undo manager contains undo but shouldn't", undo);
 		}
 		return null;
+	}
+
+	protected void executePerformOperation(final PerformChangeOperation perform, IWorkspace workspace) throws CoreException {
+		workspace.run(perform, new NullProgressMonitor());
 	}
 	
 	protected final RefactoringStatus performRefactoringWithStatus(Refactoring ref) throws Exception {

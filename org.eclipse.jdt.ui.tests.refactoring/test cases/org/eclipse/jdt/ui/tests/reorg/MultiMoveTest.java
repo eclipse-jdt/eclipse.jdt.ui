@@ -48,6 +48,8 @@ public class MultiMoveTest extends RefactoringTest {
 	private static final Class clazz= MultiMoveTest.class;
 	private static final String REFACTORING_PATH= "MultiMove/";
 
+	private static final boolean BUG_125580= true;
+	
 	public MultiMoveTest(String name) {
 		super(name);
 	}
@@ -56,11 +58,15 @@ public class MultiMoveTest extends RefactoringTest {
 		return new RefactoringTestSetup(new TestSuite(clazz));
 	}
 
-	// https://bugs.eclipse.org/bugs/show_bug.cgi?id=47316
 	public static Test setUpTest(Test someTest) {
 		return new RefactoringTestSetup(someTest);
 	}
 
+	protected void setUp() throws Exception {
+		super.setUp();
+		fIsPreDeltaTest= true;
+	}
+	
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -350,12 +356,10 @@ public class MultiMoveTest extends RefactoringTest {
 			r1= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src1");
 			r2= JavaProjectHelper.addSourceContainer(RefactoringTestSetup.getProject(), "src2");
 			IPackageFragment p1= r1.createPackageFragment("p1", true, null);
-			ICompilationUnit c1= p1.createCompilationUnit("A.java", "public class A {}", true, null);
-			ICompilationUnit c2= p1.createCompilationUnit("B.java", "public class B {}", true, null);
+			p1.createCompilationUnit("A.java", "public class A {}", true, null);
+			p1.createCompilationUnit("B.java", "public class B {}", true, null);
 			
-			String[] moveHandes= ParticipantTesting.createHandles(new Object[] {
-				p1, c1.getResource(), c2.getResource() });
-			String[] deleteHandles= ParticipantTesting.createHandles(new Object[] {p1.getResource()});
+			String[] moveHandes= ParticipantTesting.createHandles(new Object[] {p1, p1.getResource()});
 
 			IResource[] resources= {};
 			IJavaElement[] javaElements= {p1};
@@ -369,20 +373,11 @@ public class MultiMoveTest extends RefactoringTest {
 			//-- checks
 			assertEquals("status should be ok here", null, status);
 
-			IPath path= r2.getResource().getFullPath();
-			path= path.append(p1.getElementName().replace('.', '/'));
-			IFolder target= ResourcesPlugin.getWorkspace().getRoot().getFolder(path);
-			String[] createHandles= ParticipantTesting.createHandles(new Object[] { target });
-			
-			ParticipantTesting.testDelete(deleteHandles);
-			ParticipantTesting.testCreate(createHandles);
-			
 			ParticipantTesting.testMove(
 				moveHandes,
 				new MoveArguments[] {
 					new MoveArguments(r2, processor.getUpdateReferences()),
-					new MoveArguments(target, processor.getUpdateReferences()),
-					new MoveArguments(target, processor.getUpdateReferences()),
+					new MoveArguments(r2.getResource(), processor.getUpdateReferences()),
 				});
 		} finally {
 			delete(r1);
@@ -391,6 +386,9 @@ public class MultiMoveTest extends RefactoringTest {
 	}
 	
 	public void testPackageMoveParticipants2() throws Exception {
+		if (BUG_125580) {
+			fIsPreDeltaTest= false;
+		}
 		ParticipantTesting.reset();
 		IPackageFragmentRoot r1= null;
 		IPackageFragmentRoot r2= null;
@@ -487,4 +485,3 @@ public class MultiMoveTest extends RefactoringTest {
 		return performRefactoring(new MoveRefactoring(processor), providesUndo);
 	}	
 }
-

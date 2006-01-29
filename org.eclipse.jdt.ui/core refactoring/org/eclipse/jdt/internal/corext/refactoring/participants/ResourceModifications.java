@@ -204,10 +204,7 @@ public class ResourceModifications {
 		}
 		fCopy.add(copy);
 		fCopyArguments.add(arguments);
-		if (fIgnoreCount == 0) {
-			IPath destination= ((IResource)arguments.getDestination()).getFullPath().append(copy.getName());
-			internalAdd(new CopyDescription(copy, destination));
-		}
+		addCopyDelta(copy, arguments);
 	}
 
 	/**
@@ -217,7 +214,7 @@ public class ResourceModifications {
 	 * @param rename the resource to be renamed
 	 * @param arguments the arguments of the rename
 	 */
-	public void setRename(IResource rename, RenameArguments arguments) {
+	public void addRename(IResource rename, RenameArguments arguments) {
 		Assert.isNotNull(rename);
 		Assert.isNotNull(arguments);
 		if (fRename == null) {
@@ -300,6 +297,13 @@ public class ResourceModifications {
 		internalAdd(description);
 	}
 	
+	public void addCopyDelta(IResource copy, CopyArguments arguments) {
+		if (fIgnoreCount == 0) {
+			IPath destination= ((IResource)arguments.getDestination()).getFullPath().append(copy.getName());
+			internalAdd(new CopyDescription(copy, destination));
+		}
+	}
+	
 	/**
 	 * Checks if the resource will exist in the future based on 
 	 * the recorded resource modifications.
@@ -330,6 +334,16 @@ public class ResourceModifications {
 	public static void buildMoveDelta(IResourceChangeDescriptionFactory builder, IResource resource, RenameArguments args) {
 		IPath newPath= resource.getFullPath().removeLastSegments(1).append(args.getNewName());
 		builder.move(resource, newPath);
+	}
+	
+	public static void buildMoveDelta(IResourceChangeDescriptionFactory builder, IResource resource, MoveArguments args) {
+		IPath destination= ((IResource)args.getDestination()).getFullPath().append(resource.getName());
+		builder.move(resource, destination);
+	}
+	
+	public static void buildCopyDelta(IResourceChangeDescriptionFactory builder, IResource resource, CopyArguments args) {
+		IPath destination= ((IResource)args.getDestination()).getFullPath().append(resource.getName());
+		builder.copy(resource, destination);
 	}
 	
 	private void internalAdd(DeltaDescription description) {

@@ -15,6 +15,7 @@ import java.io.IOException;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 
@@ -22,9 +23,11 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 
+import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CopyArguments;
 import org.eclipse.ltk.core.refactoring.participants.CopyRefactoring;
@@ -56,6 +59,7 @@ import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.ui.tests.refactoring.ParticipantTesting;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTest;
 import org.eclipse.jdt.ui.tests.refactoring.RefactoringTestSetup;
+import org.eclipse.jdt.ui.tests.refactoring.TestModelProvider;
 
 
 public class CopyTest extends RefactoringTest {
@@ -75,6 +79,24 @@ public class CopyTest extends RefactoringTest {
 		return new RefactoringTestSetup(test);
 	}
 
+	protected void setUp() throws Exception {
+		super.setUp();
+		fIsPreDeltaTest= true;
+	}
+	
+	protected void executePerformOperation(PerformChangeOperation perform, IWorkspace workspace) throws CoreException {
+		if (fIsPreDeltaTest) {
+			try {
+				TestModelProvider.IS_COPY_TEST= true;
+				super.executePerformOperation(perform, workspace);
+			} finally {
+				TestModelProvider.IS_COPY_TEST= false;
+			}
+		} else {
+			super.executePerformOperation(perform, workspace);
+		}
+	}
+	
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
 	}
@@ -137,8 +159,8 @@ public class CopyTest extends RefactoringTest {
 	
 	private static class MockNewNameQueries implements INewNameQueries{
 
-		private static final String NEW_PACKAGE_NAME= "unused.name";
-		private static final String NEW_PACKAGE_FOLDER_NAME= "name";
+		private static final String NEW_PACKAGE_NAME= "unusedName";
+		private static final String NEW_PACKAGE_FOLDER_NAME= "unusedName";
 		private static final String NEW_PACKAGE_FRAGMENT_ROOT_NAME= "UnusedName";
 		private static final String NEW_FILE_NAME= "UnusedName.gif";
 		private static final String NEW_FOLDER_NAME= "UnusedName";
@@ -2691,7 +2713,8 @@ public class CopyTest extends RefactoringTest {
 			});
 		} finally {
 			performDummySearch();
-			newPackage.delete(true, new NullProgressMonitor());
+			if (newPackage != null)
+				newPackage.delete(true, new NullProgressMonitor());
 		}
 	}
 
@@ -3113,8 +3136,14 @@ public class CopyTest extends RefactoringTest {
 		ParticipantTesting.reset();
 		IPackageFragmentRoot newRoot= null;
 		try {
-			IJavaElement[] javaElements= { getRoot()};
-			IResource[] resources= {			};
+			// Delete the unnamed folder so that the delta is a ADD not a CHANGED
+			IResource folder= RefactoringTestSetup.getProject().getProject().findMember(MockNewNameQueries.NEW_PACKAGE_FRAGMENT_ROOT_NAME);
+			if (folder != null) {
+				folder.delete(IResource.FORCE, null);
+			}
+			
+			IJavaElement[] javaElements= { getRoot() };
+			IResource[] resources= {};
 			JavaCopyProcessor ref= verifyEnabled(resources, javaElements, new MockNewNameQueries(), createReorgQueries());
 			ResourceMapping mapping= JavaElementResourceMapping.create(getRoot());
 			String[] handles= ParticipantTesting.createHandles(getRoot(), mapping);
