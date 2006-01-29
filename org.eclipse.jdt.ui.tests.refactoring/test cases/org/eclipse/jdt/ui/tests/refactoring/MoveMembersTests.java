@@ -50,7 +50,7 @@ public class MoveMembersTests extends RefactoringTest {
 
 	public static Test setUpTest(Test someTest) {
 		return new RefactoringTestSetup(someTest);
-	}	
+	}
 
 	protected String getRefactoringPath() {
 		return REFACTORING_PATH;
@@ -76,6 +76,7 @@ public class MoveMembersTests extends RefactoringTest {
 		if (fIsVerbose)
 			DebugUtils.dump("--------- " + getName() + " ---------------");
 		super.setUp();
+		fIsPreDeltaTest= true;
 	}
 	
 	private void fieldMethodTypePackageHelper_passing(String[] fieldNames, String[] methodNames, String[][] signatures, String[] typeNames, IPackageFragment packForA, IPackageFragment packForB, boolean addDelegate) throws Exception {
