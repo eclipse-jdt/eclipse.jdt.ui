@@ -57,13 +57,13 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 //	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
 
 	/**
-	 * Returns the diff nodes associated with the element.
+	 * Returns the diffs associated with the element.
 	 * 
 	 * @param context
 	 *            the synchronization context
 	 * @param element
 	 *            the element
-	 * @return an array of diff nodes
+	 * @return an array of diffs
 	 */
 	public static IDiffNode[] getDiffs(final ISynchronizationContext context, final Object element) {
 		return context.getDiffTree().getDiffs(getResourceTraversals(element));
@@ -213,8 +213,8 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		if (resource != null) {
 			final IResource[] members= tree.members(resource);
 			for (int index= 0; index < members.length; index++) {
-				final IDiffNode node= tree.getDiff(members[index]);
-				if (node != null) {
+				final IDiffNode diff= tree.getDiff(members[index]);
+				if (diff != null) {
 					if (members[index].getType() == IResource.FILE && isInScope(parent, members[index]))
 						set.add(JavaCore.create(members[index]));
 				}
@@ -252,8 +252,8 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 					try {
 						tree.accept(((IFolder) members[index]).getFullPath(), new IDiffVisitor() {
 
-							public final boolean visit(final IDiffNode node) throws CoreException {
-								final IResource current= tree.getResource(node);
+							public final boolean visit(final IDiffNode diff) throws CoreException {
+								final IResource current= tree.getResource(diff);
 								if (current.getType() == IResource.FILE)
 									set.add(JavaCore.create(current.getParent()));
 								else
@@ -290,8 +290,8 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		if (resource != null) {
 			final IResource[] members= tree.members(resource);
 			for (int index= 0; index < members.length; index++) {
-				final IDiffNode node= tree.getDiff(members[index]);
-				if (node != null) {
+				final IDiffNode diff= tree.getDiff(members[index]);
+				if (diff != null) {
 					if (members[index].getType() == IResource.FILE && isInScope(parent, members[index]))
 						set.add(members[index]);
 				}
