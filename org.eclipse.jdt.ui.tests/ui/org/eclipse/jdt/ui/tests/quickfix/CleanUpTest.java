@@ -968,6 +968,60 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 	
+	public void testUnusedCode11() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1  {\n");
+		buf.append("    private void foo(String s) {\n");
+		buf.append("        String s1= (String)s;\n");
+		buf.append("        Object o= (Object)new Object();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    String s1;\n");
+		buf.append("    String s2= (String)s1;\n");
+		buf.append("    public void foo(Integer i) {\n");
+		buf.append("        Number n= (Number)i;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu2= pack1.createCompilationUnit("E2.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		refactoring.addCompilationUnit(cu2);
+		
+		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_CAST);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1  {\n");
+		buf.append("    private void foo(String s) {\n");
+		buf.append("        String s1= s;\n");
+		buf.append("        Object o= new Object();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E2 {\n");
+		buf.append("    String s1;\n");
+		buf.append("    String s2= s1;\n");
+		buf.append("    public void foo(Integer i) {\n");
+		buf.append("        Number n= i;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected2= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1, expected2});
+	}
+	
 	public void testUnusedCodeBug123766() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();

@@ -27,6 +27,7 @@ public class MultiFixMessages extends NLS {
 	public static String UnusedCodeMultiFix_RemoveUnusedConstructor_description;
 	public static String UnusedCodeMultiFix_RemoveUnusedMethod_description;
 	public static String UnusedCodeMultiFix_RemoveUnusedImport_description;
+	public static String UnusedCodeCleanUp_RemoveUnusedCasts_description;
 	
 	public static String CodeStyleMultiFix_ChangeNonStaticAccess_description;
 	public static String CodeStyleMultiFix_AddThisQualifier_description;
@@ -59,4 +60,5 @@ public class MultiFixMessages extends NLS {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, MultiFixMessages.class);
 	}
+
 }

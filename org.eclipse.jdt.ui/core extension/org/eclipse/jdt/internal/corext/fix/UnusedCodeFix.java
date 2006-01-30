@@ -23,6 +23,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
@@ -37,6 +38,7 @@ import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
+import org.eclipse.jdt.core.dom.ParenthesizedExpression;
 import org.eclipse.jdt.core.dom.PostfixExpression;
 import org.eclipse.jdt.core.dom.PrefixExpression;
 import org.eclipse.jdt.core.dom.QualifiedName;
@@ -246,6 +248,35 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 	}
 	
+	private static class RemoveCastOperation implements IFixRewriteOperation {
+
+		private final CastExpression fCast;
+		private final ASTNode fSelectedNode;
+
+		public RemoveCastOperation(CastExpression cast, ASTNode selectedNode) {
+			fCast= cast;
+			fSelectedNode= selectedNode;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+			
+			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+
+			CastExpression cast= fCast;
+			Expression expression= cast.getExpression();
+			ASTNode placeholder= rewrite.createCopyTarget(expression);
+
+			if (ASTNodes.needsParentheses(expression)) {
+				rewrite.replace(fCast, placeholder, null);
+			} else {
+				rewrite.replace(fSelectedNode, placeholder, null);
+			}
+		}
+	}
+	
 	public static UnusedCodeFix createRemoveUnusedImportFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		int id= problem.getProblemId();
 		if (id == IProblem.UnusedImport || id == IProblem.DuplicateImport || id == IProblem.ConflictingImport ||
@@ -282,13 +313,28 @@ public class UnusedCodeFix extends AbstractFix {
 		return null;
 	}
 	
+	public static IFix createRemoveUnusedCastFix(CompilationUnit compilationUnit, IProblemLocation problem) {
+		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
+
+		ASTNode curr= selectedNode;
+		while (curr instanceof ParenthesizedExpression) {
+			curr= ((ParenthesizedExpression) curr).getExpression();
+		}
+
+		if (!(curr instanceof CastExpression))
+			return null;
+		
+		return new UnusedCodeFix(FixMessages.UnusedCodeFix_RemoveCast_description, compilationUnit, new IFixRewriteOperation[] {new RemoveCastOperation((CastExpression)curr, selectedNode)});
+	}
+	
 	public static IFix createCleanUp(CompilationUnit compilationUnit, 
 			boolean removeUnusedPrivateMethods, 
 			boolean removeUnusedPrivateConstructors, 
 			boolean removeUnusedPrivateFields, 
 			boolean removeUnusedPrivateTypes, 
 			boolean removeUnusedLocalVariables, 
-			boolean removeUnusedImports) {
+			boolean removeUnusedImports,
+			boolean removeUnusedCast) {
 
 		IProblem[] problems= compilationUnit.getProblems();
 		IProblemLocation[] locations= new IProblemLocation[problems.length];
@@ -302,7 +348,8 @@ public class UnusedCodeFix extends AbstractFix {
 				removeUnusedPrivateFields, 
 				removeUnusedPrivateTypes, 
 				removeUnusedLocalVariables, 
-				removeUnusedImports);
+				removeUnusedImports,
+				removeUnusedCast);
 	}
 	
 	public static IFix createCleanUp(CompilationUnit compilationUnit, IProblemLocation[] problems, 
@@ -311,7 +358,8 @@ public class UnusedCodeFix extends AbstractFix {
 			boolean removeUnusedPrivateFields, 
 			boolean removeUnusedPrivateTypes, 
 			boolean removeUnusedLocalVariables, 
-			boolean removeUnusedImports) {
+			boolean removeUnusedImports,
+			boolean removeUnusedCast) {
 
 		List/*<IFixRewriteOperation>*/ result= new ArrayList();
 		Hashtable/*<ASTNode, List>*/ variableDeclarations= new Hashtable();
@@ -354,6 +402,19 @@ public class UnusedCodeFix extends AbstractFix {
 							result.add(new RemoveUnusedMemberOperation(new SimpleName[] {name}));
 						}
 					}
+				}
+			}
+			
+			if (removeUnusedCast && id == IProblem.UnnecessaryCast) {
+				ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
+
+				ASTNode curr= selectedNode;
+				while (curr instanceof ParenthesizedExpression) {
+					curr= ((ParenthesizedExpression) curr).getExpression();
+				}
+
+				if (curr instanceof CastExpression) {
+					result.add(new RemoveCastOperation((CastExpression)curr, selectedNode));
 				}
 			}
 		}

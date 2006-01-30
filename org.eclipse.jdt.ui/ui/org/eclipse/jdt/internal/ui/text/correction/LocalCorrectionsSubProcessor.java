@@ -47,7 +47,6 @@ import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
-import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CatchClause;
 import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -104,6 +103,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 import org.eclipse.jdt.internal.ui.refactoring.nls.ExternalizeWizard;
@@ -465,29 +465,11 @@ public class LocalCorrectionsSubProcessor {
 	}
 
 	public static void addUnnecessaryCastProposal(IInvocationContext context, IProblemLocation problem,  Collection proposals) {
-		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
-
-		ASTNode curr= selectedNode;
-		while (curr instanceof ParenthesizedExpression) {
-			curr= ((ParenthesizedExpression) curr).getExpression();
-		}
-
-		if (curr instanceof CastExpression) {
-			ASTRewrite rewrite= ASTRewrite.create(selectedNode.getAST());
-
-			CastExpression cast= (CastExpression) curr;
-			Expression expression= cast.getExpression();
-			ASTNode placeholder= rewrite.createCopyTarget(expression);
-
-			if (ASTNodes.needsParentheses(expression)) {
-				rewrite.replace(curr, placeholder, null);
-			} else {
-				rewrite.replace(selectedNode, placeholder, null);
-			}
-
-			String label= CorrectionMessages.LocalCorrectionsSubProcessor_unnecessarycast_description;
+		
+		IFix fix= UnusedCodeFix.createRemoveUnusedCastFix(context.getASTRoot(), problem);
+		if (fix != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+			FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_CAST), 5, image, context);
 			proposals.add(proposal);
 		}
 	}

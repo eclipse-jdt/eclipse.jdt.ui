@@ -71,8 +71,14 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 	 */
 	public static final int REMOVE_UNUSED_LOCAL_VARIABLES= 32;
 	
+	/**
+	 * Removes unused casts.
+	 */
+	public static final int REMOVE_UNUSED_CAST= 64;
+	
 	private static final int DEFAULT_FLAG= REMOVE_UNUSED_IMPORTS;
 	private static final String SECTION_NAME= "CleanUp_UnusedCode"; //$NON-NLS-1$
+
 	
 	public UnusedCodeCleanUp(int flag) {
 		super(flag);
@@ -92,7 +98,8 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				isFlag(REMOVE_UNUSED_PRIVATE_FIELDS), 
 				isFlag(REMOVE_UNUSED_PRIVATE_TYPES), 
 				isFlag(REMOVE_UNUSED_LOCAL_VARIABLES), 
-				isFlag(REMOVE_UNUSED_IMPORTS));
+				isFlag(REMOVE_UNUSED_IMPORTS),
+				isFlag(REMOVE_UNUSED_CAST));
 	}
 	
 
@@ -109,7 +116,8 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				isFlag(REMOVE_UNUSED_PRIVATE_FIELDS), 
 				isFlag(REMOVE_UNUSED_PRIVATE_TYPES), 
 				isFlag(REMOVE_UNUSED_LOCAL_VARIABLES), 
-				isFlag(REMOVE_UNUSED_IMPORTS));
+				isFlag(REMOVE_UNUSED_IMPORTS),
+				isFlag(REMOVE_UNUSED_CAST));
 	}
 
 	public Map getRequiredOptions() {
@@ -123,6 +131,9 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 		
 		if (isFlag(REMOVE_UNUSED_LOCAL_VARIABLES))
 			options.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.WARNING);
+		
+		if (isFlag(REMOVE_UNUSED_CAST))
+			options.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.WARNING);
 
 		return options;
 	}
@@ -138,6 +149,7 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 		addCheckBox(composite, REMOVE_UNUSED_PRIVATE_TYPES, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedType_description);
 		addCheckBox(composite, REMOVE_UNUSED_PRIVATE_FIELDS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description);
 		addCheckBox(composite, REMOVE_UNUSED_LOCAL_VARIABLES, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description);
+		addCheckBox(composite, REMOVE_UNUSED_CAST, MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description);
 		
 		return composite;
 	}
@@ -163,6 +175,8 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description));
 		if (isFlag(REMOVE_UNUSED_LOCAL_VARIABLES))
 			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description));
+		if (isFlag(REMOVE_UNUSED_CAST))
+			result.add(removeMemonic(MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description));
 		return (String[])result.toArray(new String[result.size()]);
 	}
 
@@ -182,6 +196,11 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				isFlag(REMOVE_UNUSED_LOCAL_VARIABLES)) 
 		{
 			UnusedCodeFix fix= UnusedCodeFix.createUnusedMemberFix(compilationUnit, problem);
+			if (fix != null)
+				return true;
+		}
+		if (isFlag(REMOVE_UNUSED_CAST)) {
+			IFix fix= UnusedCodeFix.createRemoveUnusedCastFix(compilationUnit, problem);
 			if (fix != null)
 				return true;
 		}

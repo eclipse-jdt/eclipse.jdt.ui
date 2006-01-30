@@ -27,6 +27,7 @@ public class FixMessages extends NLS {
 	public static String UnusedCodeFix_RemoveConstructor_description;
 	public static String UnusedCodeFix_RemoveType_description;
 	public static String UnusedCodeFix_RemoveImport_description;
+	public static String UnusedCodeFix_RemoveCast_description;
 	
 	public static String Java50Fix_AddMissingAnnotation_description;
 	public static String Java50Fix_AddDeprecated_description;
