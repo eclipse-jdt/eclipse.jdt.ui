@@ -28,9 +28,10 @@ import org.eclipse.core.resources.mapping.ResourceTraversal;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
 
-import org.eclipse.team.core.diff.IDiffNode;
+import org.eclipse.team.core.diff.IDiff;
 import org.eclipse.team.core.diff.IDiffVisitor;
 import org.eclipse.team.core.mapping.IResourceDiffTree;
+import org.eclipse.team.core.mapping.IResourceMappingScope;
 import org.eclipse.team.core.mapping.ISynchronizationContext;
 
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
@@ -65,7 +66,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 *            the element
 	 * @return an array of diffs
 	 */
-	public static IDiffNode[] getDiffs(final ISynchronizationContext context, final Object element) {
+	public static IDiff[] getDiffs(final ISynchronizationContext context, final Object element) {
 		return context.getDiffTree().getDiffs(getResourceTraversals(element));
 	}
 
@@ -116,23 +117,21 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	/**
 	 * {@inheritDoc}
 	 */
-	protected Object[] getChildrenInScope(final Object parent, final Object[] children) {
-		final Object[] elements= super.getChildrenInScope(parent, children);
-		final ISynchronizationContext context= getContext();
-		if (context != null) {
-			final IResourceDiffTree tree= context.getDiffTree();
-			if (parent instanceof IPackageFragment) {
-				return getPackageFragmentChildren(tree, parent, elements);
-			} else if (parent instanceof IPackageFragmentRoot) {
-				return getPackageFragmentRootChildren(tree, parent, elements);
-			} else if (parent instanceof IJavaProject) {
-				return getJavaProjectChildren(context, parent, elements);
-			} else if (parent instanceof JavaProjectSettings) {
-				return getProjectSettingsChildren(tree, parent, elements);
-			} else if (parent instanceof RefactoringHistory)
-				return ((RefactoringHistory) parent).getDescriptors();
-		}
-		return elements;
+	protected Object[] getChildrenInContext(final ISynchronizationContext context, final Object parent, final Object[] children) {
+		Object[] elements= null;
+		if (parent instanceof IPackageFragment)
+			elements= getPackageFragmentChildren(context, parent, children);
+		else if (parent instanceof IPackageFragmentRoot)
+			elements= getPackageFragmentRootChildren(context, parent, children);
+		else if (parent instanceof IJavaProject)
+			elements= getJavaProjectChildren(context, parent, children);
+		else if (parent instanceof JavaProjectSettings)
+			elements= getProjectSettingsChildren(context, parent, children);
+		else if (parent instanceof RefactoringHistory)
+			elements= ((RefactoringHistory) parent).getDescriptors();
+		else
+			elements= children;
+		return super.getChildrenInContext(context, parent, elements);
 	}
 
 	/**
@@ -163,7 +162,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 //		if (resource != null) {
 //			final IResource[] members= context.getDiffTree().members(resource);
 //			for (int index= 0; index < members.length; index++) {
-//				if (members[index].getType() == IResource.FOLDER && isInScope(parent, members[index])) {
+//				if (members[index].getType() == IResource.FOLDER && isInScope(context.getScope(), parent, members[index])) {
 //					final String name= members[index].getName();
 //					if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
 //						list.remove(members[index]);
@@ -197,25 +196,26 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	/**
 	 * Returns the package fragment children in the current scope.
 	 * 
-	 * @param tree
-	 *            the resource diff tree
+	 * @param context
+	 *            the synchronization context
 	 * @param parent
 	 *            the parent element
 	 * @param children
 	 *            the child elements
 	 * @return the package fragment children
 	 */
-	private Object[] getPackageFragmentChildren(final IResourceDiffTree tree, final Object parent, final Object[] children) {
+	private Object[] getPackageFragmentChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
 		final Set set= new HashSet();
 		for (int index= 0; index < children.length; index++)
 			set.add(children[index]);
 		final IResource resource= ((IPackageFragment) parent).getResource();
 		if (resource != null) {
+			final IResourceDiffTree tree= context.getDiffTree();
 			final IResource[] members= tree.members(resource);
 			for (int index= 0; index < members.length; index++) {
-				final IDiffNode diff= tree.getDiff(members[index]);
+				final IDiff diff= tree.getDiff(members[index]);
 				if (diff != null) {
-					if (members[index].getType() == IResource.FILE && isInScope(parent, members[index]))
+					if (members[index].getType() == IResource.FILE && isInScope(context.getScope(), parent, members[index]))
 						set.add(JavaCore.create(members[index]));
 				}
 			}
@@ -226,24 +226,25 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	/**
 	 * Returns the package fragment root children in the current scope.
 	 * 
-	 * @param tree
-	 *            the resource diff tree
+	 * @param context
+	 *            the synchronization context
 	 * @param parent
 	 *            the parent element
 	 * @param children
 	 *            the child elements
 	 * @return the package fragment root children
 	 */
-	private Object[] getPackageFragmentRootChildren(final IResourceDiffTree tree, final Object parent, final Object[] children) {
+	private Object[] getPackageFragmentRootChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
 		final Set set= new HashSet();
 		for (int index= 0; index < children.length; index++)
 			set.add(children[index]);
 		final IResource resource= JavaModelProvider.getResource(parent);
 		if (resource != null) {
+			final IResourceDiffTree tree= context.getDiffTree();
 			final IResource[] members= tree.members(resource);
 			for (int index= 0; index < members.length; index++) {
 				final int type= members[index].getType();
-				final boolean contained= isInScope(parent, members[index]);
+				final boolean contained= isInScope(context.getScope(), parent, members[index]);
 				if (type == IResource.FILE && contained)
 					set.add(JavaCore.create((IFile) members[index]));
 				else if (type == IResource.FOLDER && contained)
@@ -252,7 +253,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 					try {
 						tree.accept(((IFolder) members[index]).getFullPath(), new IDiffVisitor() {
 
-							public final boolean visit(final IDiffNode diff) throws CoreException {
+							public final boolean visit(final IDiff diff) throws CoreException {
 								final IResource current= tree.getResource(diff);
 								if (current.getType() == IResource.FILE)
 									set.add(JavaCore.create(current.getParent()));
@@ -274,25 +275,26 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	/**
 	 * Returns the project settings children in the current scope.
 	 * 
-	 * @param tree
-	 *            the resource diff tree
+	 * @param context
+	 *            the synchronization context
 	 * @param parent
 	 *            the parent element
 	 * @param children
 	 *            the child elements
 	 * @return the project settings children
 	 */
-	private Object[] getProjectSettingsChildren(final IResourceDiffTree tree, final Object parent, final Object[] children) {
+	private Object[] getProjectSettingsChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
 		final Set set= new HashSet();
 		for (int index= 0; index < children.length; index++)
 			set.add(children[index]);
 		final IResource resource= JavaModelProvider.getResource(parent);
 		if (resource != null) {
+			final IResourceDiffTree tree= context.getDiffTree();
 			final IResource[] members= tree.members(resource);
 			for (int index= 0; index < members.length; index++) {
-				final IDiffNode diff= tree.getDiff(members[index]);
+				final IDiff diff= tree.getDiff(members[index]);
 				if (diff != null) {
-					if (members[index].getType() == IResource.FILE && isInScope(parent, members[index]))
+					if (members[index].getType() == IResource.FILE && isInScope(context.getScope(), parent, members[index]))
 						set.add(members[index]);
 				}
 			}
@@ -303,13 +305,15 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	/**
 	 * {@inheritDoc}
 	 */
-	protected ResourceTraversal[] getTraversals(final Object element) {
-		return getResourceTraversals(element);
+	protected ResourceTraversal[] getTraversals(final ISynchronizationContext context, final Object object) {
+		return getResourceTraversals(object);
 	}
 
 	/**
 	 * Returns whether the element has some children in the current scope.
 	 * 
+	 * @param scope
+	 *            the resource mapping scope
 	 * @param element
 	 *            the element
 	 * @param resource
@@ -317,8 +321,8 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 * @return <code>true</code> if it has some children, <code>false</code>
 	 *         otherwise
 	 */
-	private boolean hasChildrenInScope(final Object element, final IResource resource) {
-		final IResource[] roots= getScope().getRoots();
+	private boolean hasChildrenInScope(final IResourceMappingScope scope, final Object element, final IResource resource) {
+		final IResource[] roots= scope.getRoots();
 		if (element instanceof IPackageFragment) {
 			for (int index= 0; index < roots.length; index++)
 				if (resource.getFullPath().equals((roots[index].getFullPath().removeLastSegments(1))))
@@ -335,13 +339,13 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	/**
 	 * {@inheritDoc}
 	 */
-	protected boolean isInScope(final Object parent, final Object element) {
+	protected boolean isInScope(final IResourceMappingScope scope, final Object parent, final Object element) {
 		final IResource resource= JavaModelProvider.getResource(element);
 		if (resource == null)
 			return false;
-		if (getScope().contains(resource))
+		if (scope.contains(resource))
 			return true;
-		if (hasChildrenInScope(element, resource))
+		if (hasChildrenInScope(scope, element, resource))
 			return true;
 		return false;
 	}

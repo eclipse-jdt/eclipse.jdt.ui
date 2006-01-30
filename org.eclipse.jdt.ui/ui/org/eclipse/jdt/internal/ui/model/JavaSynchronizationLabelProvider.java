@@ -17,7 +17,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.viewers.ILabelProvider;
 
-import org.eclipse.team.core.diff.IDiffNode;
+import org.eclipse.team.core.diff.IDiff;
 import org.eclipse.team.core.diff.IThreeWayDiff;
 import org.eclipse.team.core.mapping.ISynchronizationContext;
 
@@ -89,7 +89,7 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	 * {@inheritDoc}
 	 */
 	protected int getKind(final Object element) {
-		return IDiffNode.CHANGE;
+		return IDiff.CHANGE;
 	}
 
 	/**
@@ -104,11 +104,11 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IDiffNode getDiff(final Object element) {
+	protected IDiff getDiff(final Object element) {
 		final ISynchronizationContext context= getContext();
 		final IResource resource= JavaModelProvider.getResource(element);
 		if (context != null && resource != null) {
-			final IDiffNode[] diff= JavaSynchronizationContentProvider.getDiffs(context, element);
+			final IDiff[] diff= JavaSynchronizationContentProvider.getDiffs(context, element);
 			for (int index= 0; index < diff.length; index++) {
 				if (context.getDiffTree().getResource(diff[index]).equals(resource))
 					return diff[index];
