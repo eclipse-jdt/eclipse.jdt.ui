@@ -79,7 +79,10 @@ public class CleanUpTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		return allTests();
+		if (true)
+			return allTests();
+		
+		return setUpTest(new CleanUpTest("testCombinationBug125455"));
 	}
 
 	public static Test setUpTest(Test test) {
@@ -3497,6 +3500,52 @@ public class CleanUpTest extends QuickFixTest {
 		
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
+	
+	public void testCombinationBug125455() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1  {\n");
+		buf.append("    private void bar(boolean wait) {\n");
+		buf.append("        if (!wait) \n");
+		buf.append("            return;\n");
+		buf.append("    }\n");
+		buf.append("    private void foo(String s) {\n");
+		buf.append("        String s1= \"\";\n");
+		buf.append("        if (s.equals(\"\"))\n");
+		buf.append("            System.out.println();\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp1= new CodeStyleCleanUp(CodeStyleCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		ICleanUp cleanUp2= new StringCleanUp(StringCleanUp.ADD_MISSING_NLS_TAG);
+		refactoring.addCleanUp(cleanUp1);
+		refactoring.addCleanUp(cleanUp2);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1  {\n");
+		buf.append("    private void bar(boolean wait) {\n");
+		buf.append("        if (!wait) {\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    private void foo(String s) {\n");
+		buf.append("        String s1= \"\"; //$NON-NLS-1$\n");
+		buf.append("        if (s.equals(\"\")) { //$NON-NLS-1$\n");
+		buf.append("            System.out.println();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
 	
 	public void testSerialVersion01() throws Exception {
 		

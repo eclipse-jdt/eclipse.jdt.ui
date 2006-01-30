@@ -492,16 +492,20 @@ public class CleanUpRefactoring extends Refactoring {
 			int i1= 0;
 			int i2= 0;
 			while (i1 < children1.length && i2 < children2.length) {
-				while (i1 + 1 < children1.length && children1[i1 + 1].getOffset() < children2[i2].getOffset()) {
+				while (children1[i1].getExclusiveEnd() < children2[i2].getOffset()) {
 					i1++;
+					if (i1 >= children1.length)
+						return false;
 				}
-				while (i2 + 1 < children2.length && children2[i2 + 1].getOffset() < children1[i1].getOffset()) {
+				while (children2[i2].getExclusiveEnd() < children1[i1].getOffset()) {
 					i2++;
+					if (i2 >= children2.length)
+						return false;
 				}
 				if (intersects(children1[i1], children2[i2]))
 					return true;
 				
-				if (children1[i1].getOffset() < children2[i2].getOffset()) {
+				if (children1[i1].getExclusiveEnd() < children2[i2].getExclusiveEnd()) {
 					i1++;
 				} else {
 					i2++;
