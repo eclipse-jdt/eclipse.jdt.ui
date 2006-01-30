@@ -4271,31 +4271,60 @@
       </markerResolutionGenerator>
    </extension>
    
-   <extension
-         point="org.eclipse.ui.ide.markerSupport">
+   <extension point="org.eclipse.ui.ide.markerSupport">
       <markerCategory name="%markerCategory.problem">
          <markerTypeReference id="org.eclipse.jdt.core.problem"/>
       </markerCategory>
       <markerCategory name="%markerCategory.buildpath_problem">
          <markerTypeReference id="org.eclipse.jdt.core.buildpath_problem"/>
       </markerCategory>
-      <markerGrouping name="%MarkerCategory.name" attribute="categoryId">
-        <!--<markerTypeReference id="org.eclipse.jdt.core.buildpath_problem"/> bug 125201 -->
-        <markerTypeReference id="org.eclipse.jdt.core.problem"/>
-        <markerAttributeMapping value="10" name="%MarkerCategory.buildpath"/>
-        <markerAttributeMapping value="20" name="%MarkerCategory.fatalerrors"/>
-        <markerAttributeMapping value="30" name="%MarkerCategory.fatalerrors"/>
-        <markerAttributeMapping value="40" name="%MarkerCategory.fatalerrors"/>
-        <markerAttributeMapping value="50" name="%MarkerCategory.fatalerrors"/>
-        <markerAttributeMapping value="60" name="%MarkerCategory.documentation"/>
-        <markerAttributeMapping value="70" name="%MarkerCategory.codestyle"/>
-        <markerAttributeMapping value="80" name="%MarkerCategory.potential"/>
-        <markerAttributeMapping value="90" name="%MarkerCategory.potential"/>
-        <markerAttributeMapping value="110" name="%MarkerCategory.potential"/>
-        <markerAttributeMapping value="100" name="%MarkerCategory.potential"/>
-        <markerAttributeMapping value="120" name="%MarkerCategory.deprecation"/>
-        <markerAttributeMapping value="130" name="%MarkerCategory.nls"/>
-      </markerGrouping>
+      
+    <markerGrouping id="org.eclipse.jdt.ui.java_marker_category" label="%MarkerCategory.name"/>
+    <markerGroupingEntry id="org.eclipse.jdt.ui.category.buildpath"
+        markerGrouping="org.eclipse.jdt.ui.java_marker_category"
+        label="%MarkerCategory.buildpath"
+        priority="100"/>
+    <markerGroupingEntry id="org.eclipse.jdt.ui.category.fatalerrors"
+        markerGrouping="org.eclipse.jdt.ui.java_marker_category"
+        label="%MarkerCategory.fatalerrors"
+        priority="90"/>
+    <markerGroupingEntry id="org.eclipse.jdt.ui.category.documentation"
+        markerGrouping="org.eclipse.jdt.ui.java_marker_category"
+        label="%MarkerCategory.documentation"
+        priority="80"/>
+    <markerGroupingEntry id="org.eclipse.jdt.ui.category.codestyle"
+        markerGrouping="org.eclipse.jdt.ui.java_marker_category"
+        label="%MarkerCategory.codestyle"
+        priority="70"/>
+    <markerGroupingEntry id="org.eclipse.jdt.ui.category.potential"
+        markerGrouping="org.eclipse.jdt.ui.java_marker_category"
+        label="%MarkerCategory.potential"
+        priority="50"/>
+    <markerGroupingEntry id="org.eclipse.jdt.ui.category.deprecation"
+        markerGrouping="org.eclipse.jdt.ui.java_marker_category"
+        label="%MarkerCategory.deprecation"
+        priority="30"/>
+    <markerGroupingEntry id="org.eclipse.jdt.ui.category.nls"
+        markerGrouping="org.eclipse.jdt.ui.java_marker_category"
+        label="%MarkerCategory.nls"
+        priority="10"/>
+    <markerAttributeGrouping markerType="org.eclipse.jdt.core.problem" attribute="categoryId">
+        <markerAttributeMapping value="10" markerGroupingEntry="org.eclipse.jdt.ui.category.buildpath"/>
+        <markerAttributeMapping value="20" markerGroupingEntry="org.eclipse.jdt.ui.category.fatalerrors"/>
+        <markerAttributeMapping value="30" markerGroupingEntry="org.eclipse.jdt.ui.category.fatalerrors"/>
+        <markerAttributeMapping value="40" markerGroupingEntry="org.eclipse.jdt.ui.category.fatalerrors"/>
+        <markerAttributeMapping value="50" markerGroupingEntry="org.eclipse.jdt.ui.category.fatalerrors"/>
+        <markerAttributeMapping value="60" markerGroupingEntry="org.eclipse.jdt.ui.category.documentation"/>
+        <markerAttributeMapping value="70" markerGroupingEntry="org.eclipse.jdt.ui.category.codestyle"/>
+        <markerAttributeMapping value="80" markerGroupingEntry="org.eclipse.jdt.ui.category.potential"/>
+        <markerAttributeMapping value="90" markerGroupingEntry="org.eclipse.jdt.ui.category.potential"/>
+        <markerAttributeMapping value="100" markerGroupingEntry="org.eclipse.jdt.ui.category.deprecation"/>
+        <markerAttributeMapping value="110" markerGroupingEntry="org.eclipse.jdt.ui.category.potential"/>
+        <markerAttributeMapping value="120" markerGroupingEntry="org.eclipse.jdt.ui.category.deprecation"/>
+        <markerAttributeMapping value="130" markerGroupingEntry="org.eclipse.jdt.ui.category.nls"/>
+     </markerAttributeGrouping>
+     <markerAttributeGrouping markerType="org.eclipse.jdt.core.buildpath_problem"
+        defaultGroupingEntry="org.eclipse.jdt.ui.category.buildpath"/>
    </extension>
    
 <!-- =========================================================================== -->
