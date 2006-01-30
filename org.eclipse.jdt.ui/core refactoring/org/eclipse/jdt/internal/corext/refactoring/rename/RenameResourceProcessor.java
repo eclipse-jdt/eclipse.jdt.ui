@@ -28,7 +28,7 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameProcessor;
-import org.eclipse.ltk.core.refactoring.participants.ResourceOperationChecker;
+import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.osgi.util.NLS;
 
@@ -151,7 +151,7 @@ public class RenameResourceProcessor extends RenameProcessor implements IInitial
 			fRenameModifications= new RenameModifications();
 			fRenameModifications.rename(fResource, new RenameArguments(getNewElementName(), getUpdateReferences()));
 			
-			ResourceOperationChecker checker= (ResourceOperationChecker) context.getChecker(ResourceOperationChecker.class);
+			ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
 			IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
 			fRenameModifications.buildDelta(deltaFactory);
 			

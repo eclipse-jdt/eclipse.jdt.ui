@@ -47,6 +47,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -238,17 +239,18 @@ public class ExtractMethodRefactoring extends CommentRefactoring implements IIni
 	 */
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
+		pm.beginTask("", 100); //$NON-NLS-1$
 		
 		if (fSelectionStart < 0 || fSelectionLength == 0)
 			return mergeTextSelectionStatus(result);
 		
-		result.merge(Checks.validateModifiesFiles(
-			ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit}),
-			getValidationContext()));
+		IFile[] changedFiles= ResourceUtil.getFiles(new ICompilationUnit[]{fCUnit});
+		result.merge(Checks.validateModifiesFiles(changedFiles, getValidationContext()));
 		if (result.hasFatalError())
 			return result;
+		result.merge(ResourceChangeChecker.checkFilesToBeChanged(changedFiles, new SubProgressMonitor(pm, 1)));
 		
-		fRoot= new RefactoringASTParser(AST.JLS3).parse(fCUnit, true, pm);
+		fRoot= new RefactoringASTParser(AST.JLS3).parse(fCUnit, true, new SubProgressMonitor(pm, 99));
 		fAST= fRoot.getAST();
 		fRoot.accept(createVisitor());
 		

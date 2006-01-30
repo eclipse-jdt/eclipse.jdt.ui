@@ -41,7 +41,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
 import org.eclipse.ltk.core.refactoring.participants.DeleteProcessor;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
-import org.eclipse.ltk.core.refactoring.participants.ResourceOperationChecker;
+import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -236,7 +236,7 @@ public final class JavaDeleteProcessor extends DeleteProcessor implements IComme
 			fDeleteModifications.delete(fJavaElements);
 			fDeleteModifications.postProcess();
 			
-			ResourceOperationChecker checker= (ResourceOperationChecker) context.getChecker(ResourceOperationChecker.class);
+			ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
 			IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
 			fDeleteModifications.buildDelta(deltaFactory);
 			IFile[] files= getClassPathFiles();

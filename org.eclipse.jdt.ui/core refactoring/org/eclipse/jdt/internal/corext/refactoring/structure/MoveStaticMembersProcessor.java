@@ -49,7 +49,7 @@ import org.eclipse.ltk.core.refactoring.participants.MoveProcessor;
 import org.eclipse.ltk.core.refactoring.participants.ParticipantManager;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
-import org.eclipse.ltk.core.refactoring.participants.ResourceOperationChecker;
+import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 import org.eclipse.osgi.util.NLS;
 
@@ -367,7 +367,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			List modifiedCus= new ArrayList();
 			createChange(modifiedCus, result, new SubProgressMonitor(pm, 7));
 			IFile[] changedFiles= getAllFilesToModify(modifiedCus);
-			ResourceOperationChecker checker= (ResourceOperationChecker)context.getChecker(ResourceOperationChecker.class);
+			ResourceChangeChecker checker= (ResourceChangeChecker)context.getChecker(ResourceChangeChecker.class);
 			for (int i= 0; i < changedFiles.length; i++) {
 				checker.getDeltaFactory().change(changedFiles[i]);
 			}

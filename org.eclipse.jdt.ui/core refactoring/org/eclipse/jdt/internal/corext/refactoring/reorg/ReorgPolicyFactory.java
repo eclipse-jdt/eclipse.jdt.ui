@@ -50,7 +50,7 @@ import org.eclipse.ltk.core.refactoring.participants.MoveArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringProcessor;
 import org.eclipse.ltk.core.refactoring.participants.ReorgExecutionLog;
-import org.eclipse.ltk.core.refactoring.participants.ResourceOperationChecker;
+import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -294,7 +294,7 @@ public class ReorgPolicyFactory {
 		}
 		public RefactoringStatus checkFinalConditions(IProgressMonitor pm, CheckConditionsContext context, IReorgQueries reorgQueries) throws CoreException{
 			Assert.isNotNull(reorgQueries);
-			ResourceOperationChecker checker= (ResourceOperationChecker) context.getChecker(ResourceOperationChecker.class);
+			ResourceChangeChecker checker= (ResourceChangeChecker) context.getChecker(ResourceChangeChecker.class);
 			IFile[] allModifiedFiles= getAllModifiedFiles();
 			RefactoringModifications modifications= getModifications();
 			IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();

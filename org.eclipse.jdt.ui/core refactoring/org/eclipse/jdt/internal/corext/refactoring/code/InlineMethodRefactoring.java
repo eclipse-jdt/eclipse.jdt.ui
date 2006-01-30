@@ -39,6 +39,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.Flags;
@@ -210,7 +211,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 	}
 	
 	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException {
-		pm.beginTask("", 3); //$NON-NLS-1$
+		pm.beginTask("", 20); //$NON-NLS-1$
 		fChangeManager= new TextChangeManager();
 		RefactoringStatus result= new RefactoringStatus();
 		fSourceProvider.initialize();
@@ -222,11 +223,13 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 			result.merge(searchStatus);
 			return result;
 		}
-		result.merge(Checks.validateModifiesFiles(getFilesToBeModified(units), getValidationContext()));
+		IFile[] filesToBeModified= getFilesToBeModified(units);
+		result.merge(Checks.validateModifiesFiles(filesToBeModified, getValidationContext()));
 		if (result.hasFatalError())
 			return result;
-		checkOverridden(result, new SubProgressMonitor(pm, 1));
-		IProgressMonitor sub= new SubProgressMonitor(pm, 1);
+		result.merge(ResourceChangeChecker.checkFilesToBeChanged(filesToBeModified, new SubProgressMonitor(pm, 1)));
+		checkOverridden(result, new SubProgressMonitor(pm, 4));
+		IProgressMonitor sub= new SubProgressMonitor(pm, 15);
 		sub.beginTask("", units.length * 3); //$NON-NLS-1$
 		for (int c= 0; c < units.length; c++) {
 			ICompilationUnit unit= units[c];
@@ -246,7 +249,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 					inliner.initialize(body);
 					RefactoringStatus nestedInvocations= new RefactoringStatus();
 					ASTNode[] invocations= removeNestedCalls(nestedInvocations, unit, 
-						fTargetProvider.getInvocations(body, new SubProgressMonitor(pm, 1)));
+						fTargetProvider.getInvocations(body, new SubProgressMonitor(sub, 2)));
 					for (int i= 0; i < invocations.length; i++) {
 						ASTNode invocation= invocations[i];
 						result.merge(inliner.initialize(invocation, fTargetProvider.getStatusSeverity()));
@@ -405,9 +408,11 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 			if (file != null)
 				result.add(file);
 		}
-		file= getFile(fSourceProvider.getCompilationUnit());
-		if (file != null && !result.contains(file))
-			result.add(file);
+		if (fDeleteSource) {
+			file= getFile(fSourceProvider.getCompilationUnit());
+			if (file != null && !result.contains(file))
+				result.add(file);
+		}
 		return (IFile[])result.toArray(new IFile[result.size()]);
 	}
 	
