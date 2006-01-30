@@ -53,7 +53,12 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public static Test setUpTest(Test someTest) {
 		fgTestSetup= new InlineMethodTestSetup(someTest);
 		return fgTestSetup;
-	}	
+	}
+	
+	protected void setUp() throws Exception {
+		super.setUp();
+		fIsPreDeltaTest= true;
+	}
 	
 	protected String getResourceLocation() {
 		return "InlineMethodWorkspace/TestCases/";

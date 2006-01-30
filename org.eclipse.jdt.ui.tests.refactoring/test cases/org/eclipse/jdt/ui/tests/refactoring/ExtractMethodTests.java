@@ -49,6 +49,11 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		return fgTestSetup;
 	}
 
+	protected void setUp() throws Exception {
+		super.setUp();
+		fIsPreDeltaTest= true;
+	}
+	
 	protected String getResourceLocation() {
 		return "ExtractMethodWorkSpace/ExtractMethodTests/";
 	}
@@ -79,6 +84,7 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		ExtractMethodRefactoring refactoring= new ExtractMethodRefactoring(unit, selection[0], selection[1]);
 		refactoring.setMethodName("extracted");
 		refactoring.setVisibility(Modifier.PROTECTED);
+		TestModelProvider.clearDelta();
 		RefactoringStatus status= refactoring.checkInitialConditions(new NullProgressMonitor());
 		switch (mode) {
 			case VALID_SELECTION:
@@ -115,6 +121,11 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 	
 	protected int getCheckingStyle() {
 		return CheckConditionsOperation.FINAL_CONDITIONS;
+	}
+	
+	protected void clearPreDelta() {
+		// Do nothing. We clear the delta before 
+		// initial condition checking
 	}
 	
 	protected void invalidSelectionTest() throws Exception {

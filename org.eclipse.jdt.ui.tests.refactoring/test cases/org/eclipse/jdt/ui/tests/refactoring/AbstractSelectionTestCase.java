@@ -17,6 +17,11 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.core.resources.IResourceChangeEvent;
+import org.eclipse.core.resources.IResourceChangeListener;
+import org.eclipse.core.resources.IWorkspace;
+import org.eclipse.core.resources.ResourcesPlugin;
+
 import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.text.TextSelection;
 
@@ -47,6 +52,7 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 	
 	private boolean fIgnoreSelectionMarker;
 	private int[] fSelection;
+	protected boolean fIsPreDeltaTest;
 	
 	public AbstractSelectionTestCase(String name) {
 		this(name, false);
@@ -57,6 +63,11 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 		fIgnoreSelectionMarker= ignoreSelectionMarker;
 	}
 
+	protected void setUp() throws Exception {
+		super.setUp();
+		fIsPreDeltaTest= false;
+	}
+	
 	protected int[] getSelection() {
 		return fSelection;
 	}
@@ -94,9 +105,26 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 				undoManager.flush();
 				String original= unit.getSource();
 				
-				PerformRefactoringOperation op= new PerformRefactoringOperation(
+				final PerformRefactoringOperation op= new PerformRefactoringOperation(
 					refactoring, getCheckingStyle());
-				JavaCore.run(op, new NullProgressMonitor());
+				if (fIsPreDeltaTest) {
+					IWorkspace workspace= ResourcesPlugin.getWorkspace();
+					IResourceChangeListener listener= new IResourceChangeListener() {
+						public void resourceChanged(IResourceChangeEvent event) {
+							TestModelProvider.assertTrue(event.getDelta());
+						}
+					};
+					try {
+						clearPreDelta();
+						workspace.checkpoint(false);
+						workspace.addResourceChangeListener(listener);
+						JavaCore.run(op, new NullProgressMonitor());
+					} finally {
+						workspace.removeResourceChangeListener(listener);
+					}
+				} else {
+					JavaCore.run(op, new NullProgressMonitor());
+				}
 				assertTrue("Precondition check failed", !op.getConditionStatus().hasFatalError());
 				assertTrue("Validation check failed", !op.getValidationStatus().hasFatalError());
 				assertNotNull("No Undo", op.getUndoChange());
@@ -123,6 +151,10 @@ public abstract class AbstractSelectionTestCase extends AbstractCUTestCase {
 	
 	protected int getCheckingStyle() {
 		return CheckConditionsOperation.ALL_CONDITIONS;
+	}
+	
+	protected void clearPreDelta() {
+		TestModelProvider.clearDelta();
 	}
 	
 	private void initializeSelection(String source) {

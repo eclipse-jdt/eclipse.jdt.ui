@@ -94,7 +94,5 @@ public abstract class AbstractCUTestCase extends TestCase {
 		index= skipPackageDeclaration ? proofed.indexOf(';') : 0;
 		proofed= proofed.substring(index);
 		RefactoringTest.assertEqualLines(proofed, refactored);
-	}
-			
+	}			
 }
-
