@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -384,10 +383,7 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			
 			CompilationUnit astRoot= fASTRoot;
 			if (astRoot == null) {
-				ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
-				parser.setSource(fCompilationUnit);
-				parser.setResolveBindings(true);
-				astRoot= (CompilationUnit) parser.createAST(new SubProgressMonitor(monitor, 2));
+				astRoot= ASTProvider.getASTProvider().getAST(fCompilationUnit, ASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 2));
 			} else {
 				monitor.worked(2);
 			}

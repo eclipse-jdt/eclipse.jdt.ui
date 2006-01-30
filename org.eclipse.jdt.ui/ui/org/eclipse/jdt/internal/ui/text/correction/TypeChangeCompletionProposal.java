@@ -16,7 +16,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.Block;
@@ -32,8 +31,8 @@ import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
@@ -42,7 +41,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
@@ -87,10 +85,7 @@ public class TypeChangeCompletionProposal extends LinkedCorrectionProposal {
 		if (boundNode != null) {
 			declNode= boundNode; // is same CU
 		} else {
-			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
-			astParser.setSource(getCompilationUnit());
-			astParser.setResolveBindings(true);
-			newRoot= (CompilationUnit) astParser.createAST(null);
+			newRoot= ASTResolving.createQuickFixAST(getCompilationUnit(), null);
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());
 		}
 		if (declNode != null) {

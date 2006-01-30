@@ -17,12 +17,15 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IProgressMonitor;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
@@ -90,6 +93,7 @@ import org.eclipse.jdt.internal.corext.dom.TypeBindingVisitor;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 public class ASTResolving {
@@ -1164,6 +1168,14 @@ public class ASTResolving {
 		}
 		buf.append(')');
 		return buf.toString();
+	}
+
+	public static CompilationUnit createQuickFixAST(ICompilationUnit compilationUnit, IProgressMonitor monitor) {
+		ASTParser astParser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
+		astParser.setSource(compilationUnit);
+		astParser.setResolveBindings(true);
+		astParser.setStatementsRecovery(ASTProvider.SHARED_AST_STATEMENT_RECOVERY);
+		return (CompilationUnit) astParser.createAST(monitor);
 	}
 
 }

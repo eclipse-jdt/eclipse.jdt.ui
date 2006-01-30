@@ -20,7 +20,6 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.AnnotationTypeMemberDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
@@ -35,8 +34,6 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  * 
@@ -62,10 +59,7 @@ public class NewAnnotationMemberProposal extends LinkedCorrectionProposal {
 		if (typeDecl != null) {
 			newTypeDecl= typeDecl;
 		} else {
-			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
-			astParser.setSource(getCompilationUnit());
-			astParser.setResolveBindings(true);
-			astRoot= (CompilationUnit) astParser.createAST(null);
+			astRoot= ASTResolving.createQuickFixAST(getCompilationUnit(), null);
 			newTypeDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 		}
 		createImportRewrite(astRoot);

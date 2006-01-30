@@ -25,7 +25,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.ITypeHierarchyChangedListener;
-import org.eclipse.jdt.core.dom.AST;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -270,10 +271,7 @@ public class TypeHierarchyTest extends TestCase {
 			// modify source
 			document.replace(offset, superType.length(), "Object");
 			
-			cu2.reconcile(AST.JLS3,
-					true /* force problem detection */, 
-					null /* use primary owner */, 
-					null /* no progress monitor */);
+			JavaModelUtil.reconcile(cu2);
 			
 			allTypes= hierarchy.getAllTypes();
 		

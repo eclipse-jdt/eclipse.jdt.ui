@@ -34,8 +34,6 @@ import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
@@ -45,6 +43,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
@@ -216,7 +215,7 @@ public class QuickFixTest extends TestCase {
 		
 		ICompilationUnit wc= cu.getWorkingCopy(new WorkingCopyOwner() {}, requestor, null);
 		try {
-			wc.reconcile(ICompilationUnit.NO_AST, true, wc.getOwner(), null);
+			wc.reconcile(ICompilationUnit.NO_AST, true, true, wc.getOwner(), null);
 		} finally {
 			wc.discardWorkingCopy();
 		}
@@ -309,10 +308,7 @@ public class QuickFixTest extends TestCase {
 	}
 	
 	protected static CompilationUnit getASTRoot(ICompilationUnit cu) {
-		ASTParser parser= ASTParser.newParser(AST.JLS3);
-		parser.setSource(cu);
-		parser.setResolveBindings(true);
-		return (CompilationUnit) parser.createAST(null);
+		return ASTResolving.createQuickFixAST(cu, null);
 	}
 	
 	

@@ -129,7 +129,6 @@ import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.dialogs.TableTextCellEditor;
 import org.eclipse.jdt.internal.ui.dialogs.TextFieldNavigationHandler;
 import org.eclipse.jdt.internal.ui.dialogs.TypeSelectionDialog2;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.preferences.CodeTemplatePreferencePage;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
 import org.eclipse.jdt.internal.ui.refactoring.contentassist.CompletionContextRequestor;
@@ -1585,21 +1584,22 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		}
 		
 		if (typeNameWithParameters != typeName) {
-			if (getPackageFragmentRoot() != null && ! JavaModelUtil.is50OrHigher(getPackageFragmentRoot().getJavaProject())) {
-				status.setError(NewWizardMessages.NewTypeWizardPage_error_TypeParameters); 
-				return status;
-			}
-			String typeDeclaration= "class " + typeNameWithParameters + " {}"; //$NON-NLS-1$//$NON-NLS-2$
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
-			parser.setSource(typeDeclaration.toCharArray());
-			if (getPackageFragmentRoot() != null) {
-				parser.setProject(getPackageFragmentRoot().getJavaProject());
-			}
-			CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
-			IProblem[] problems= compilationUnit.getProblems();
-			if (problems.length > 0) {
-				status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidTypeName, problems[0].getMessage())); 
-				return status;
+			IPackageFragmentRoot root= getPackageFragmentRoot();
+			if (root != null) {
+				if (!JavaModelUtil.is50OrHigher(root.getJavaProject())) {
+					status.setError(NewWizardMessages.NewTypeWizardPage_error_TypeParameters); 
+					return status;
+				}
+				String typeDeclaration= "class " + typeNameWithParameters + " {}"; //$NON-NLS-1$//$NON-NLS-2$
+				ASTParser parser= ASTParser.newParser(AST.JLS3);
+				parser.setSource(typeDeclaration.toCharArray());
+				parser.setProject(root.getJavaProject());
+				CompilationUnit compilationUnit= (CompilationUnit) parser.createAST(null);
+				IProblem[] problems= compilationUnit.getProblems();
+				if (problems.length > 0) {
+					status.setError(Messages.format(NewWizardMessages.NewTypeWizardPage_error_InvalidTypeName, problems[0].getMessage())); 
+					return status;
+				}
 			}
 		}
 		return status;
@@ -2044,7 +2044,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}	
 	
 	private CompilationUnit createASTForImports(ICompilationUnit cu) {
-		ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setSource(cu);
 		parser.setResolveBindings(false);
 		parser.setFocalPosition(0);
@@ -2062,7 +2062,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 	}
 
 	private void removeUnusedImports(ICompilationUnit cu, Set existingImports, boolean needsSave) throws CoreException {
-		ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
+		ASTParser parser= ASTParser.newParser(AST.JLS3);
 		parser.setSource(cu);
 		parser.setResolveBindings(true);
 		

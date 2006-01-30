@@ -18,16 +18,11 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.ui.IEditorInput;
-
-import org.eclipse.jdt.core.IClassFile;
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
-import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 
@@ -35,9 +30,10 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
+import org.eclipse.jdt.ui.JavaUI;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public abstract class StructureSelectionAction extends Action {
@@ -144,33 +140,11 @@ public abstract class StructureSelectionAction extends Action {
 	}
 
 	private ISourceReference getSourceReference() {
-		IEditorInput input= fEditor.getEditorInput();
-		if (input instanceof IClassFileEditorInput) {
-			return ((IClassFileEditorInput)input).getClassFile();
-		} else {
-			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input, false);
-		}
+		return (ISourceReference) JavaUI.getEditorInputJavaElement(fEditor.getEditorInput());
 	}
 
 	private static CompilationUnit getAST(ISourceReference sr) {
-
-		if (sr instanceof ICompilationUnit) {
-			CompilationUnit sharedAST= JavaPlugin.getDefault().getASTProvider().getAST((ICompilationUnit) sr, ASTProvider.WAIT_NO, null);
-			if (sharedAST != null)
-				return sharedAST;
-			ASTParser p= ASTParser.newParser(AST.JLS3);
-			p.setSource((ICompilationUnit) sr);
-			return (CompilationUnit) p.createAST(null);
-
-		} else if (sr instanceof IClassFile) {
-			CompilationUnit sharedAST= JavaPlugin.getDefault().getASTProvider().getAST((IClassFile) sr, ASTProvider.WAIT_NO, null);
-			if (sharedAST != null)
-				return sharedAST;
-			ASTParser p= ASTParser.newParser(AST.JLS3);
-			p.setSource((IClassFile) sr);
-			return (CompilationUnit) p.createAST(null);
-		}
-		return null;
+		return ASTProvider.getASTProvider().getAST((IJavaElement) sr, ASTProvider.WAIT_YES, null);
 	}
 
 	//-- helper methods for this class and subclasses

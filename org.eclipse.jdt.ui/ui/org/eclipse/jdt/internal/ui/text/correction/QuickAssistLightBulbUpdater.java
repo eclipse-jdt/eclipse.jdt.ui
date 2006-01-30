@@ -20,6 +20,9 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Canvas;
 
+import org.eclipse.jface.util.IPropertyChangeListener;
+import org.eclipse.jface.util.PropertyChangeEvent;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextSelection;
@@ -30,19 +33,15 @@ import org.eclipse.jface.text.source.IAnnotationAccessExtension;
 import org.eclipse.jface.text.source.IAnnotationModel;
 import org.eclipse.jface.text.source.IAnnotationPresentation;
 import org.eclipse.jface.text.source.ImageUtilities;
-import org.eclipse.jface.util.IPropertyChangeListener;
-import org.eclipse.jface.util.PropertyChangeEvent;
 
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.editors.text.EditorsUI;
 import org.eclipse.ui.texteditor.AnnotationPreference;
 import org.eclipse.ui.texteditor.ITextEditor;
 
+import org.eclipse.ui.editors.text.EditorsUI;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.ui.JavaUI;
@@ -171,11 +170,10 @@ public class QuickAssistLightBulbUpdater {
 				if (cu != null) {
 					installSelectionListener();
 					Point point= fViewer.getSelectedRange();
-					ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
-					parser.setSource(cu);
-					parser.setResolveBindings(true);
-					CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
-					doSelectionChanged(point.x, point.y, astRoot);
+					CompilationUnit astRoot= ASTProvider.getASTProvider().getAST(cu, ASTProvider.WAIT_ACTIVE_ONLY, null);
+					if (astRoot != null) {
+						doSelectionChanged(point.x, point.y, astRoot);
+					}
 				}
 			} else {
 				uninstallSelectionListener();
@@ -184,8 +182,7 @@ public class QuickAssistLightBulbUpdater {
 	}
 
 	private ICompilationUnit getCompilationUnit() {
-		IEditorInput input= fEditor.getEditorInput();
-		Object elem= input.getAdapter(IJavaElement.class);
+		IJavaElement elem= JavaUI.getEditorInputJavaElement(fEditor.getEditorInput());
 		if (elem instanceof ICompilationUnit) {
 			return (ICompilationUnit) elem;
 		}

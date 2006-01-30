@@ -242,7 +242,8 @@ public final class ASTProvider {
 		}
 	}
 
-	public static final int AST_LEVEL= AST.JLS3;
+	public static final int SHARED_AST_LEVEL= AST.JLS3;
+	public static final boolean SHARED_AST_STATEMENT_RECOVERY= true;
 
 	private static final String DEBUG_PREFIX= "ASTProvider > "; //$NON-NLS-1$
 
@@ -256,6 +257,11 @@ public final class ASTProvider {
 	private boolean fIsReconciling;
 	private IWorkbenchPart fActiveEditor;
 
+	
+	public static ASTProvider getASTProvider() {
+		return JavaPlugin.getDefault().getASTProvider();
+	}
+	
 	/**
 	 * Creates a new AST provider.
 	 */
@@ -558,8 +564,9 @@ public final class ASTProvider {
 	 * @return AST
 	 */
 	private CompilationUnit createAST(IJavaElement je, final IProgressMonitor progressMonitor) {
-		final ASTParser parser = ASTParser.newParser(AST_LEVEL);
+		final ASTParser parser = ASTParser.newParser(SHARED_AST_LEVEL);
 		parser.setResolveBindings(true);
+		parser.setStatementsRecovery(SHARED_AST_STATEMENT_RECOVERY);
 
 		if (je.getElementType() == IJavaElement.COMPILATION_UNIT)
 			parser.setSource((ICompilationUnit)je);

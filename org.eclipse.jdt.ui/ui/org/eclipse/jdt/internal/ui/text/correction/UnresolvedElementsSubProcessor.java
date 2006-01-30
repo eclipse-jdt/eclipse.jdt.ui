@@ -32,7 +32,6 @@ import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTMatcher;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -90,7 +89,6 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.ChangeDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.EditDescription;
 import org.eclipse.jdt.internal.ui.text.correction.ChangeMethodSignatureProposal.InsertDescription;
@@ -1189,23 +1187,7 @@ public class UnresolvedElementsSubProcessor {
 	}
 
 	private static boolean isImplicitConstructor(IMethodBinding meth, ICompilationUnit targetCU) {
-		if (meth.isConstructor() && meth.getParameterTypes().length == 0) {
-			IMethodBinding[] bindings= meth.getDeclaringClass().getDeclaredMethods();
-			// implicit constructors must be the only constructor
-			for (int i= 0; i < bindings.length; i++) {
-				IMethodBinding curr= bindings[i];
-				if (curr.isConstructor() && curr != meth) {
-					return false;
-				}
-			}
-			ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
-			parser.setSource(targetCU);
-			parser.setFocalPosition(0);
-			parser.setResolveBindings(true);
-			CompilationUnit unit= (CompilationUnit) parser.createAST(null);
-			return unit.findDeclaringNode(meth.getKey()) == null;
-		}
-		return false;
+		return meth.isDefaultConstructor();
 	}
 
 

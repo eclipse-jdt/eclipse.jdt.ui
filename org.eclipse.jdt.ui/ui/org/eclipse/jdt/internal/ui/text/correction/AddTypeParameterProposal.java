@@ -18,7 +18,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
@@ -38,7 +37,6 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 /**
  *
@@ -80,10 +78,7 @@ public class AddTypeParameterProposal extends LinkedCorrectionProposal {
 			declNode= boundNode; // is same CU
 			createImportRewrite(fAstRoot);
 		} else {
-			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
-			astParser.setSource(getCompilationUnit());
-			astParser.setResolveBindings(true);
-			CompilationUnit newRoot= (CompilationUnit) astParser.createAST(null);
+			CompilationUnit newRoot= ASTResolving.createQuickFixAST(getCompilationUnit(), null);
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());
 			createImportRewrite(newRoot);
 		}

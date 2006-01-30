@@ -23,7 +23,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ArrayType;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.IBinding;
@@ -39,8 +38,8 @@ import org.eclipse.jdt.core.dom.TagElement;
 import org.eclipse.jdt.core.dom.TextElement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
-import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
@@ -49,8 +48,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
-
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 
@@ -120,10 +117,7 @@ public class ChangeMethodSignatureProposal extends LinkedCorrectionProposal {
 			newMethodDecl= methodDecl;
 		} else {
 			isInDifferentCU= true;
-			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
-			astParser.setSource(getCompilationUnit());
-			astParser.setResolveBindings(true);
-			astRoot= (CompilationUnit) astParser.createAST(null);
+			astRoot= ASTResolving.createQuickFixAST(getCompilationUnit(), null);
 			newMethodDecl= astRoot.findDeclaringNode(fSenderBinding.getKey());
 		}
 		createImportRewrite(astRoot);

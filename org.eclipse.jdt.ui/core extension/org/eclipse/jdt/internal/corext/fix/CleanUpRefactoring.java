@@ -467,7 +467,7 @@ public class CleanUpRefactoring extends Refactoring {
 	}
 
 	private ASTParser createParser(Map cleanUpOptions, IJavaProject javaProject) {
-		ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
+		ASTParser parser= ASTParser.newParser(ASTProvider.SHARED_AST_LEVEL);
 		parser.setResolveBindings(true);
 		parser.setProject(javaProject);
 				

@@ -16,16 +16,14 @@ import org.eclipse.text.edits.TextEditGroup;
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.ICompilationUnit;
-
-import org.eclipse.jdt.core.dom.*;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationExpression;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
@@ -33,7 +31,6 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
-import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 
@@ -62,10 +59,7 @@ public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 		} else {
 			selectionDescription= new TextEditGroup("selection"); // in different CU, needs selection //$NON-NLS-1$
 			//setSelectionDescription(selectionDescription);
-			ASTParser astParser= ASTParser.newParser(ASTProvider.AST_LEVEL);
-			astParser.setSource(getCompilationUnit());
-			astParser.setResolveBindings(true);
-			CompilationUnit newRoot= (CompilationUnit) astParser.createAST(null);
+			CompilationUnit newRoot= ASTResolving.createQuickFixAST(getCompilationUnit(), null);
 			declNode= newRoot.findDeclaringNode(fBinding.getKey());
 		}
 		if (declNode != null) {

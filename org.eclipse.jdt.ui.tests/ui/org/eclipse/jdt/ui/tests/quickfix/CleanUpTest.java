@@ -36,7 +36,6 @@ import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -55,6 +54,7 @@ import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -79,10 +79,7 @@ public class CleanUpTest extends QuickFixTest {
 	}
 	
 	public static Test suite() {
-		if (true)
-			return allTests();
-		
-		return setUpTest(new CleanUpTest("testSerialVersion01"));
+		return allTests();
 	}
 
 	public static Test setUpTest(Test test) {
@@ -155,10 +152,7 @@ public class CleanUpTest extends QuickFixTest {
 		CompilationUnit result= JavaPlugin.getDefault().getASTProvider().getAST(compilationUnit, ASTProvider.WAIT_YES, null);
 		if (result == null) {
 			// see bug 63554
-			ASTParser parser= ASTParser.newParser(ASTProvider.AST_LEVEL);
-			parser.setSource(compilationUnit);
-			parser.setResolveBindings(true);
-			result= (CompilationUnit) parser.createAST(null);
+			result= ASTResolving.createQuickFixAST(compilationUnit, null);
 		}
 		return result;
 	}

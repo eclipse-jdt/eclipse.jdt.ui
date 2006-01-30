@@ -48,7 +48,9 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
+import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -61,7 +63,6 @@ import org.eclipse.jdt.core.dom.SuperMethodInvocation;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.dom.JavaElementMapper;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
@@ -353,10 +354,13 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 				status.addFatalError(Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_error_classFile, method.getElementName())); 
 				return null;
 			}
-			
-			declaration= (MethodDeclaration)JavaElementMapper.perform(method, MethodDeclaration.class);
-			if (declaration != null) {
-				return new SourceProvider(source, declaration);
+			ASTParser parser= ASTParser.newParser(AST.JLS3);
+			parser.setSource(source);
+			parser.setResolveBindings(true);
+			CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
+			ASTNode node= astRoot.findDeclaringNode(methodBinding.getKey());
+			if (node instanceof MethodDeclaration) {
+				return new SourceProvider(source, (MethodDeclaration) node);
 			}
 		}
 		status.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_error_noMethodDeclaration); 
