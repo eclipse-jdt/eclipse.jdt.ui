@@ -49,6 +49,11 @@ public class SefTests extends AbstractSelectionTestCase {
 		fgTestSetup= new SefTestSetup(test);
 		return fgTestSetup;
 	}
+	
+	protected void setUp() throws Exception {
+		super.setUp();
+		fIsPreDeltaTest= true;
+	}
 
 	protected String getResourceLocation() {
 		return "SefWorkSpace/SefTests/";
