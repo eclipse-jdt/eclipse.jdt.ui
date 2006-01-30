@@ -122,7 +122,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		fChangeManager= manager;
 		fCategorySet= categorySet;
 		fDelegateUpdating= false;
-		fDelegateDeprecation= false;
+		fDelegateDeprecation= true;
 		fIsComposite= true;
 	}
 	
@@ -737,6 +737,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 						SearchMatch element= (SearchMatch) iter.next();
 						MethodDeclaration method= ASTNodeSearchUtil.getMethodDeclarationNode((IMethod) element.getElement(), rewrite.getRoot());
 						DelegateCreator creator= new DelegateMethodCreator();
+						creator.setDeclareDeprecated(fDelegateDeprecation);
 						creator.setDeclaration(method);
 						creator.setSourceRewrite(rewrite);
 						creator.setNewElementName(getNewElementName());

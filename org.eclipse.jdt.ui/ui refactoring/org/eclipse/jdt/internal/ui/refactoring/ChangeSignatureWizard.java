@@ -74,6 +74,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		private JavaSourceViewer fSignaturePreview;
 		private Document fSignaturePreviewDocument;
 		private Button fLeaveDelegateCheckBox;
+		private Button fDeprecateDelegateCheckBox;
 		
 		public ChangeSignatureInputPage() {
 			super(PAGE_NAME);
@@ -86,7 +87,8 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 		 */
 		public void createControl(Composite parent) {
 			Composite composite= new Composite(parent, SWT.NONE);
-			composite.setLayout((new GridLayout()));
+			final GridLayout layout= new GridLayout();
+			composite.setLayout(layout);
 			initializeDialogUnits(composite);
 		
 			try {
@@ -94,6 +96,29 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 
 				createParameterExceptionsFolder(composite);
 				fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(composite, getRefactoring(), false);
+				fDeprecateDelegateCheckBox= new Button(composite, SWT.CHECK);
+				GridData data= new GridData();
+				data.horizontalAlignment= GridData.FILL;
+				data.horizontalIndent= (layout.marginWidth + fDeprecateDelegateCheckBox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
+				data.horizontalSpan= 2;
+				fDeprecateDelegateCheckBox.setLayoutData(data);
+				fDeprecateDelegateCheckBox.setText(DelegateUIHelper.getDeprecateDelegateCheckBoxTitle());
+				final ChangeSignatureRefactoring refactoring= getChangeMethodSignatureRefactoring();
+				fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(refactoring));
+				refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+				fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+						refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+					}
+				});
+				if (fLeaveDelegateCheckBox != null) {
+					fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
+					fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+						public void widgetSelected(SelectionEvent e) {
+							fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
+						}
+					});
+				}
 				Label sep= new Label(composite, SWT.SEPARATOR | SWT.HORIZONTAL);
 				sep.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
 				createSignaturePreview(composite);
@@ -286,6 +311,7 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 
 		public void dispose() {
 			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
+			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
 			super.dispose();
 		}
 		

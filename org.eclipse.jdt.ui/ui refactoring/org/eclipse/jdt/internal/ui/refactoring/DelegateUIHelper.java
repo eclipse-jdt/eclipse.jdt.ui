@@ -32,43 +32,70 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class DelegateUIHelper {
 
-	public static Button generateLeaveDelegateCheckbox(Composite result, Refactoring ref, boolean plural) {
-
-		final IDelegateUpdating refactoring= (IDelegateUpdating) ref.getAdapter(IDelegateUpdating.class);
-		if (refactoring == null || !refactoring.canEnableDelegateUpdating())
+	public static Button generateDeprecateDelegateCheckbox(Composite parent, Refactoring refactoring) {
+		final IDelegateUpdating updating= (IDelegateUpdating) refactoring.getAdapter(IDelegateUpdating.class);
+		if (updating == null || !updating.canEnableDelegateUpdating())
 			return null;
+		final Button button= createCheckbox(parent, getDeprecateDelegateCheckBoxTitle(), loadDeprecateDelegateSetting(updating));
+		updating.setDeprecateDelegates(button.getSelection());
+		button.addSelectionListener(new SelectionAdapter() {
 
-		final Button leaveDelegateCheckBox= createCheckbox(result, getLeaveDelegateCheckBoxTitle(plural), loadLeaveDelegateSetting(refactoring));
-		refactoring.setDelegateUpdating(leaveDelegateCheckBox.getSelection());
-		leaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
-				refactoring.setDelegateUpdating(leaveDelegateCheckBox.getSelection());
+				updating.setDeprecateDelegates(button.getSelection());
 			}
 		});
-		return leaveDelegateCheckBox;
-
+		return button;
 	}
 
-	public static void saveLeaveDelegateSetting(Button checkbox) {
-		saveBooleanSetting(DELEGATING_UPDATING, checkbox);
+	public static Button generateLeaveDelegateCheckbox(Composite parent, Refactoring refactoring, boolean plural) {
+		final IDelegateUpdating updating= (IDelegateUpdating) refactoring.getAdapter(IDelegateUpdating.class);
+		if (updating == null || !updating.canEnableDelegateUpdating())
+			return null;
+		final Button button= createCheckbox(parent, getLeaveDelegateCheckBoxTitle(plural), loadLeaveDelegateSetting(updating));
+		updating.setDelegateUpdating(button.getSelection());
+		button.addSelectionListener(new SelectionAdapter() {
+
+			public void widgetSelected(SelectionEvent e) {
+				updating.setDelegateUpdating(button.getSelection());
+			}
+		});
+		return button;
 	}
 
-	public static boolean loadLeaveDelegateSetting(final IDelegateUpdating refactoring) {
-		return getBooleanSetting(DELEGATING_UPDATING, refactoring.getDelegateUpdating());
+	public static void saveLeaveDelegateSetting(Button button) {
+		saveBooleanSetting(DELEGATE_UPDATING, button);
+	}
+
+	public static void saveDeprecateDelegateSetting(Button button) {
+		saveBooleanSetting(DELEGATE_DEPRECATION, button);
+	}
+
+	public static boolean loadLeaveDelegateSetting(IDelegateUpdating refactoring) {
+		return getBooleanSetting(DELEGATE_UPDATING, refactoring.getDelegateUpdating());
+	}
+
+	public static boolean loadDeprecateDelegateSetting(IDelegateUpdating refactoring) {
+		return getBooleanSetting(DELEGATE_DEPRECATION, refactoring.getDeprecateDelegates());
 	}
 
 	public static String getLeaveDelegateCheckBoxTitle(boolean plural) {
 		return plural ? RefactoringMessages.DelegateCreator_leave_several_delegates : RefactoringMessages.DelegateCreator_leave_one_delegate;
 	}
 
+	public static String getDeprecateDelegateCheckBoxTitle() {
+		return RefactoringMessages.DelegateCreator_deprecate_delegates;
+	}
+
 	// ************** Helper methods *******************
 
-	private static final String DELEGATING_UPDATING= "delegatingUpdating"; //$NON-NLS-1$
+	private static final String DELEGATE_UPDATING= "delegateUpdating"; //$NON-NLS-1$
+
+	private static final String DELEGATE_DEPRECATION= "delegateDeprecation"; //$NON-NLS-1$
 
 	private DelegateUIHelper() {
 		// no instances
 	}
-	
+
 	private static Button createCheckbox(Composite parent, String title, boolean value) {
 		Button checkBox= new Button(parent, SWT.CHECK);
 		checkBox.setText(title);
@@ -84,9 +111,8 @@ public class DelegateUIHelper {
 			return defaultValue;
 	}
 
-	private static void saveBooleanSetting(String key, Button checkBox) {
-		if (checkBox != null && !checkBox.isDisposed() && checkBox.getEnabled())
-			JavaPlugin.getDefault().getDialogSettings().put(key, checkBox.getSelection());
+	private static void saveBooleanSetting(String key, Button button) {
+		if (button != null && !button.isDisposed() && button.getEnabled())
+			JavaPlugin.getDefault().getDialogSettings().put(key, button.getSelection());
 	}
-
 }

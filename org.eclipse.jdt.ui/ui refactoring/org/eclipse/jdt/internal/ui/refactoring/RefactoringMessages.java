@@ -211,6 +211,7 @@ public final class RefactoringMessages extends NLS {
 	public static String ExtractInterfaceInputPage_change_references;
 	public static String ExtractInterfaceWizard_Extract_Interface;
 	public static String ExtractInterfaceWizard_generate_comments;
+	public static String ExtractInterfaceWizard_use_supertype;
 	public static String InlineConstantInputPage_Inline;
 	public static String InlineConstantInputPage_All_references;
 	public static String InlineConstantInputPage_Delete_constant;
@@ -367,6 +368,7 @@ public final class RefactoringMessages extends NLS {
 	
 	public static String DelegateCreator_leave_several_delegates;
 	public static String DelegateCreator_leave_one_delegate;
+	public static String DelegateCreator_deprecate_delegates;
 	
 	public static String RenameTypeParameterWizard_defaultPageTitle;
 	public static String RenameTypeParameterWizard_inputPage_description;
@@ -454,6 +456,4 @@ public final class RefactoringMessages extends NLS {
 	public static void reloadMessages() {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringMessages.class);
 	}
-
-	public static String ExtractInterfaceWizard_use_supertype;
 }

@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.refactoring;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
@@ -72,6 +74,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 		private JavaSourceViewer fSignaturePreview;
 		private Document fSignaturePreviewDocument;
 		private Button fLeaveDelegateCheckBox;
+		private Button fDeprecateDelegateCheckBox;
     
 		public IntroduceParameterInputPage(String[] tempNameProposals) {
 			super(PAGE_NAME);
@@ -93,6 +96,30 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 			
 			createParameterTableControl(result);
 			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(result, getRefactoring(), false);
+			fDeprecateDelegateCheckBox= new Button(result, SWT.CHECK);
+			GridData data= new GridData();
+			data.horizontalAlignment= GridData.FILL;
+			data.horizontalIndent= (layout.marginWidth + fDeprecateDelegateCheckBox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
+			fDeprecateDelegateCheckBox.setLayoutData(data);
+			fDeprecateDelegateCheckBox.setText(DelegateUIHelper.getDeprecateDelegateCheckBoxTitle());
+			final IntroduceParameterRefactoring refactoring= getIntroduceParameterRefactoring();
+			fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(refactoring));
+			refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+			fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+				}
+			});
+			if (fLeaveDelegateCheckBox != null) {
+				fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
+				fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+						fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
+					}
+				});
+			}
+			Label sep= new Label(result, SWT.SEPARATOR | SWT.HORIZONTAL);
+			sep.setLayoutData((new GridData(GridData.FILL_HORIZONTAL)));
 			createSignaturePreview(result);
 			
 			update(false);
@@ -121,6 +148,7 @@ public class IntroduceParameterWizard extends RefactoringWizard {
 
 		public void dispose() {
 			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
+			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
 			super.dispose();
 		}
 	

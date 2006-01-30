@@ -177,7 +177,8 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	public MoveStaticMembersProcessor(IMember[] elements, CodeGenerationSettings settings) {
 		fMembersToMove= elements;
 		fPreferences= settings;
-		fDelegateUpdating= false; 
+		fDelegateUpdating= false;
+		fDelegateDeprecation= true;
 	}
 	
 	/**
@@ -926,6 +927,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 					DelegateMethodCreator d= new DelegateMethodCreator();
 					d.setDeclaration(declaration);
+					d.setDeclareDeprecated(fDelegateDeprecation);
 					d.setSourceRewrite(fSource);
 					d.setCopy(false);
 					d.setNewLocation(getDestinationBinding());
@@ -949,6 +951,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					} else {
 						DelegateFieldCreator d= new DelegateFieldCreator();
 						d.setDeclaration(declaration);
+						d.setDeclareDeprecated(fDelegateDeprecation);
 						d.setSourceRewrite(fSource);
 						d.setCopy(false);
 						d.setNewLocation(getDestinationBinding());

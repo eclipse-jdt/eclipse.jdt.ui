@@ -176,6 +176,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 		fMethod= method;
 		fOldVarargIndex= -1;
 		fDelegateUpdating= false;
+		fDelegateDeprecation= true;
 		if (fMethod != null) {
 			fParameterInfos= createParameterInfoList(method);
 			// fExceptionInfos is created in checkInitialConditions
@@ -1787,6 +1788,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 
 			DelegateMethodCreator d= new DelegateMethodCreator();
 			d.setDeclaration(fMethDecl);
+			d.setDeclareDeprecated(fDelegateDeprecation);
 			d.setSourceRewrite(fCuRewrite);
 			d.prepareDelegate();
 			

@@ -1002,7 +1002,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	private TextChangeManager fChangeManager= null;
 
 	/** Should the delegator be deprecated? */
-	private boolean fDelegateDeprecation= false;
+	private boolean fDelegateDeprecation= true;
 
 	/** Should the delegator be inlined? */
 	private boolean fInline= false;

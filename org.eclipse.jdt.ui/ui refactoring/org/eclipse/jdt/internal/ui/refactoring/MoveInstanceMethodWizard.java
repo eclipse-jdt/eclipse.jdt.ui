@@ -13,6 +13,8 @@ package org.eclipse.jdt.internal.ui.refactoring;
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -68,9 +70,12 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 
 		/** The page name */
 		protected static final String PAGE_NAME= "MoveInstanceMethodPage"; //$NON-NLS-1$
-		
+
 		/** The "leave delegate" checkbox */
 		protected Button fLeaveDelegateCheckBox= null;
+
+		/** The "deprecate delegate" checkbox */
+		protected Button fDeprecateDelegateCheckBox= null;
 
 		/** The method name text field */
 		protected Text fMethodNameField= null;
@@ -215,17 +220,31 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 			data= new GridData();
 			data.horizontalSpan= 2;
 			label.setLayoutData(data);
-			
-			/*
-			 * Changed the implementation to use the refactoring-independent
-			 * DelegateCreator and removed user option to choose whether to 
-			 * deprecated the delegate (default is now true). When re-enabling this 
-			 * option, consider adding it for all other
-			 * affected refactorings as well.
-			 * 
-			 */
+
 			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(control, getRefactoring(), false);
-			fProcessor.setDeprecateDelegates(true); 
+			fDeprecateDelegateCheckBox= new Button(control, SWT.CHECK);
+			data= new GridData();
+			data.horizontalAlignment= GridData.FILL;
+			data.horizontalIndent= (layout.marginWidth + fDeprecateDelegateCheckBox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
+			data.horizontalSpan= 2;
+			fDeprecateDelegateCheckBox.setLayoutData(data);
+			fDeprecateDelegateCheckBox.setText(DelegateUIHelper.getDeprecateDelegateCheckBoxTitle());
+			fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(fProcessor));
+			fProcessor.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+			fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					fProcessor.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+				}
+			});
+			if (fLeaveDelegateCheckBox != null) {
+				fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
+				fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+						fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
+					}
+				});
+			}
+
 			fProcessor.setInlineDelegator(!fLeaveDelegateCheckBox.getSelection());
 			fProcessor.setRemoveDelegator(!fLeaveDelegateCheckBox.getSelection());
 
@@ -237,6 +256,7 @@ public final class MoveInstanceMethodWizard extends RefactoringWizard {
 		
 		public void dispose() {
 			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
+			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
 			super.dispose();
 		}
 

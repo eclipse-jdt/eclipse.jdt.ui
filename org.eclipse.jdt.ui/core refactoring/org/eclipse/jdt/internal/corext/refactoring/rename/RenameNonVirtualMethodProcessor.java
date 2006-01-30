@@ -171,6 +171,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 			MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(getMethod(), rewrite.getRoot());
 			DelegateMethodCreator creator= new DelegateMethodCreator();
 			creator.setDeclaration(methodDeclaration);
+			creator.setDeclareDeprecated(getDeprecateDelegates());
 			creator.setSourceRewrite(rewrite);
 			creator.setCopy(true);
 			creator.setNewElementName(getNewElementName());

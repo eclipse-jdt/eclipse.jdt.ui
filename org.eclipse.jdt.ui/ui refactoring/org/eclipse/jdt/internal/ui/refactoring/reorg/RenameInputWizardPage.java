@@ -46,6 +46,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 	private Button fUpdateTextualMatches;
 	private Button fUpdateQualifiedNames;
 	private Button fLeaveDelegateCheckBox;
+	private Button fDeprecateDelegateCheckBox;
 	private QualifiedNameComponent fQualifiedNameComponent;
 	
 	private static final String UPDATE_TEXTUAL_MATCHES= "updateTextualMatches"; //$NON-NLS-1$
@@ -94,6 +95,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 		addOptionalUpdateTextualMatches(composite, layouter);
 		addOptionalUpdateQualifiedNameComponent(composite, layouter, layout.marginWidth);
 		addOptionalLeaveDelegateCheckbox(composite, layouter);
+		addOptionalDeprecateDelegateCheckbox(composite, layouter, layout.marginWidth);
 		updateForcePreview();
 		
 		Dialog.applyDialogFont(superComposite);
@@ -148,6 +150,7 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 			if (fQualifiedNameComponent != null)
 				fQualifiedNameComponent.savePatterns(getRefactoringSettings());
 			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
+			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
 		}
 		super.dispose();
 	}
@@ -227,6 +230,34 @@ abstract class RenameInputWizardPage extends TextInputWizardPage {
 				refactoring.setDelegateUpdating(fLeaveDelegateCheckBox.getSelection());
 			}
 		});
+	}
+
+	private void addOptionalDeprecateDelegateCheckbox(Composite result, RowLayouter layouter, int marginWidth) {
+		final IDelegateUpdating refactoring= (IDelegateUpdating) getRefactoring().getAdapter(IDelegateUpdating.class);
+		if (refactoring == null || !refactoring.canEnableDelegateUpdating())
+			return;
+		fDeprecateDelegateCheckBox= new Button(result, SWT.CHECK);
+		GridData data= new GridData();
+		data.horizontalAlignment= GridData.FILL;
+		data.horizontalIndent= (marginWidth + fDeprecateDelegateCheckBox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
+		fDeprecateDelegateCheckBox.setLayoutData(data);
+		fDeprecateDelegateCheckBox.setText(DelegateUIHelper.getDeprecateDelegateCheckBoxTitle());
+		fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(refactoring));
+		layouter.perform(fDeprecateDelegateCheckBox);
+		refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+		fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+			}
+		});
+		if (fLeaveDelegateCheckBox != null) {
+			fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
+			fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
+				}
+			});
+		}
 	}
 
 	protected void updateLeaveDelegateCheckbox(int delegateCount) {

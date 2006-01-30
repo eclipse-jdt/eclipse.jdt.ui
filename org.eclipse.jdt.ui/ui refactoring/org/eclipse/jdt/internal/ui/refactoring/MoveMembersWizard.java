@@ -86,6 +86,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 
 		private Combo fDestinationField;
 		private Button fLeaveDelegateCheckBox;
+		private Button fDeprecateDelegateCheckBox;
 		private static final int MRU_COUNT= 10;
 		private static List fgMruDestinations= new ArrayList(MRU_COUNT);
 
@@ -105,15 +106,38 @@ public class MoveMembersWizard extends RefactoringWizard {
 	
 		public void createControl(Composite parent) {		
 			Composite composite= new Composite(parent, SWT.NONE);
-			GridLayout gl= new GridLayout();
-			gl.numColumns= 2;
-			composite.setLayout(gl);
+			GridLayout layout= new GridLayout();
+			layout.numColumns= 2;
+			composite.setLayout(layout);
 		
 			addLabel(composite);
 			addDestinationControls(composite);
-			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(composite, getRefactoring(),
-					getMoveProcessor().getMembersToMove().length > 1);
-		
+			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(composite, getRefactoring(), getMoveProcessor().getMembersToMove().length > 1);
+			GridData data= new GridData();
+			data.horizontalSpan= 2;
+			fLeaveDelegateCheckBox.setLayoutData(data);
+			fDeprecateDelegateCheckBox= new Button(composite, SWT.CHECK);
+			data= new GridData();
+			data.horizontalAlignment= GridData.FILL;
+			data.horizontalIndent= (layout.marginWidth + fDeprecateDelegateCheckBox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
+			data.horizontalSpan= 2;
+			fDeprecateDelegateCheckBox.setLayoutData(data);
+			fDeprecateDelegateCheckBox.setText(DelegateUIHelper.getDeprecateDelegateCheckBoxTitle());
+			fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(getMoveProcessor()));
+			getMoveProcessor().setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+			fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					getMoveProcessor().setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+				}
+			});
+			if (fLeaveDelegateCheckBox != null) {
+				fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
+				fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+						fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
+					}
+				});
+			}
 			setControl(composite);
 			Dialog.applyDialogFont(composite);
 			PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.MOVE_MEMBERS_WIZARD_PAGE);
@@ -121,6 +145,7 @@ public class MoveMembersWizard extends RefactoringWizard {
 
 		public void dispose() {
 			DelegateUIHelper.saveLeaveDelegateSetting(fLeaveDelegateCheckBox);
+			DelegateUIHelper.saveDeprecateDelegateSetting(fDeprecateDelegateCheckBox);
 			super.dispose();
 		}
 		

@@ -96,9 +96,9 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	public static final String ID_RENAME_FIELD= "org.eclipse.jdt.ui.rename.field"; //$NON-NLS-1$
 	protected static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
+	protected static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RENAME_GETTER= "getter"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_RENAME_SETTER= "setter"; //$NON-NLS-1$
-	protected static final String ATTRIBUTE_TEXTUAL_MATCHES= "textual"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELEGATE= "delegate"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DEPRECATE= "deprecate"; //$NON-NLS-1$
 
@@ -126,7 +126,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 		fChangeManager= manager;
 		fCategorySet= categorySet;
 		fDelegateUpdating= false;
-		fDelegateDeprecation= false;
+		fDelegateDeprecation= true;
 		fIsComposite= true;
 	}
 
@@ -654,6 +654,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 						.getElementName()), JavaStatusContext.create(fField));
 			} else {
 				DelegateFieldCreator d= new DelegateFieldCreator();
+				d.setDeclareDeprecated(fDelegateDeprecation);
 				d.setDeclaration(fieldDeclaration);
 				d.setNewElementName(getNewElementName());
 				d.setSourceRewrite(rewrite);
@@ -681,6 +682,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private void addMethodDelegate(IMethod getter, String newName, CompilationUnitRewrite rewrite) throws JavaModelException {
 		MethodDeclaration m= ASTNodeSearchUtil.getMethodDeclarationNode(getter, rewrite.getRoot());
 		DelegateCreator d= new DelegateMethodCreator();
+		d.setDeclareDeprecated(fDelegateDeprecation);
 		d.setDeclaration(m);
 		d.setNewElementName(newName);
 		d.setSourceRewrite(rewrite);
