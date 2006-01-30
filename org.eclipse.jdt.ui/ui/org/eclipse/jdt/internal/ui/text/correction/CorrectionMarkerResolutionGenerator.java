@@ -51,6 +51,7 @@ import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -135,7 +136,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				if (fProposal instanceof FixCorrectionProposal) {
 					ICleanUp cleanUp= ((FixCorrectionProposal)fProposal).getCleanUp();
 					if (cleanUp != null) {
-						Hashtable/*<ICompilationUnit, List<IProblemLocation>*/ cus= new Hashtable();
+						Hashtable/*<ICompilationUnit, List<IProblemLocation>*/ problemLocations= new Hashtable();
 						for (int i= 0; i < markers.length; i++) {
 							IMarker marker= markers[i];
 							ICompilationUnit cu= getCompilationUnit(marker);
@@ -143,50 +144,50 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 							if (cu != null) {
 								IProblemLocation location= getProblemLocation(marker, cu);
 								if (location != null) {
-									if (!cus.containsKey(cu.getPrimary())) {
-										cus.put(cu.getPrimary(), new ArrayList());
+									if (!problemLocations.containsKey(cu.getPrimary())) {
+										problemLocations.put(cu.getPrimary(), new ArrayList());
 									}
-									List l= (List)cus.get(cu.getPrimary());
+									List l= (List)problemLocations.get(cu.getPrimary());
 									l.add(location);
 								}
 							}
 						}
-						if (cus.size() > 0) {
-							pm.beginTask("", cus.size() * 2 + 2); //$NON-NLS-1$
-							Set keys= cus.keySet();
+						if (problemLocations.size() > 0) {
+									
+							Set cus= problemLocations.keySet();
+							Hashtable projects= new Hashtable();
+							for (Iterator iter= cus.iterator(); iter.hasNext();) {
+								ICompilationUnit cu= (ICompilationUnit)iter.next();
+								IJavaProject project= cu.getJavaProject();
+								if (!projects.containsKey(project)) {
+									projects.put(project, new ArrayList());
+								}
+								((List)projects.get(project)).add(cu);
+							}
+							
+							pm.beginTask("", problemLocations.size() * 2 + 2 + projects.keySet().size()); //$NON-NLS-1$
+							
 							String name= ""; //$NON-NLS-1$
 							String[] descriptions= cleanUp.getDescriptions();
 							if (descriptions != null && descriptions.length == 1) {
 								name= descriptions[0];
 							}
 							CompositeChange allChanges= new CompositeChange(name);
-							for (Iterator iter= keys.iterator(); iter.hasNext();) {
-								ICompilationUnit cu= (ICompilationUnit)iter.next();
-								CompilationUnit root= JavaPlugin.getDefault().getASTProvider().getAST(cu, ASTProvider.WAIT_YES, new SubProgressMonitor(pm, 1));
-								List locationList= (List)cus.get(cu);
-								IProblemLocation[] locations= (IProblemLocation[])locationList.toArray(new IProblemLocation[locationList.size()]);
+							
+							for (Iterator projectIter= projects.keySet().iterator(); projectIter.hasNext();) {
+								IJavaProject project= (IJavaProject)projectIter.next();
+								List compilationUnitsList= (List)projects.get(project);
+								ICompilationUnit[] compilationUnits= (ICompilationUnit[])compilationUnitsList.toArray(new ICompilationUnit[compilationUnitsList.size()]);
+								
 								try {
-									IFix fix= cleanUp.createFix(root, locations);
-									
-									if (pm.isCanceled())
-										return;
-									
-									if (fix != null) {
-										TextChange change= fix.createChange();
-										
-										if (pm.isCanceled())
-											return;
-										
-										allChanges.add(change);
-										pm.worked(1);
-									}
+									cleanUpProject(project, compilationUnits, cleanUp, problemLocations, allChanges, pm);
 								} catch (CoreException e) {
 									JavaPlugin.log(e);
 								} finally {
 									pm.worked(1);
 								}
 							}
-							
+
 							if (pm.isCanceled())
 								return;
 							
@@ -210,6 +211,33 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				} 
 			} finally {
 				pm.done();
+			}
+		}
+
+		private void cleanUpProject(IJavaProject project, ICompilationUnit[] compilationUnits, ICleanUp cleanUp, Hashtable problemLocations, CompositeChange result, IProgressMonitor monitor) throws CoreException {
+			cleanUp.beginCleanUp(project, compilationUnits, new SubProgressMonitor(monitor, 1));
+			for (int i= 0; i < compilationUnits.length; i++) {
+				ICompilationUnit cu= compilationUnits[i];
+				CompilationUnit root= JavaPlugin.getDefault().getASTProvider().getAST(cu, ASTProvider.WAIT_YES, new SubProgressMonitor(monitor, 1));
+				List locationList= (List)problemLocations.get(cu);
+				IProblemLocation[] locations= (IProblemLocation[])locationList.toArray(new IProblemLocation[locationList.size()]);
+
+				IFix fix= cleanUp.createFix(root, locations);
+				
+				if (monitor.isCanceled())
+					return;
+				
+				if (fix != null) {
+					TextChange change= fix.createChange();
+					
+					if (monitor.isCanceled())
+						return;
+					
+					result.add(change);
+					monitor.worked(1);
+				}
+
+				cleanUp.endCleanUp();	
 			}
 		}
 
