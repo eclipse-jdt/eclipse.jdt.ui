@@ -31,6 +31,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix.ISerialVersionFixContext;
@@ -93,6 +94,18 @@ public class Java50CleanUp extends AbstractCleanUp {
 	 */
 	public static final int ADD_CALCULATED_SERIAL_VERSION_ID= 16;
 	
+	/**
+	 * Adds a default serial version it to subtypes of
+	 * java.io.Serializable and java.io.Externalizable
+	 * 
+	 * public class E implements Serializable {}
+	 * ->
+	 * public class E implements Serializable {
+	 * 		private static final long serialVersionUID = 1L;
+	 * }
+	 */
+	public static final int ADD_DEFAULT_SERIAL_VERSION_ID= 32;
+	
 	private static final int DEFAULT_FLAG= ADD_DEPRECATED_ANNOTATION | ADD_OVERRIDE_ANNOATION;
 	private static final String SECTION_NAME= "CleanUp_Java50"; //$NON-NLS-1$
 
@@ -110,12 +123,14 @@ public class Java50CleanUp extends AbstractCleanUp {
 		if (compilationUnit == null)
 			return null;
 		
+		Assert.isTrue(!(isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) && isFlag(ADD_DEFAULT_SERIAL_VERSION_ID)));
+		
 		return Java50Fix.createCleanUp(compilationUnit, 
 				isFlag(ADD_OVERRIDE_ANNOATION), 
 				isFlag(ADD_DEPRECATED_ANNOTATION),
 				isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP), 
 				isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE),
-				isFlag(ADD_CALCULATED_SERIAL_VERSION_ID), fContext);
+				isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) || isFlag(ADD_DEFAULT_SERIAL_VERSION_ID), getContext());
 	}
 	
 	/**
@@ -124,12 +139,14 @@ public class Java50CleanUp extends AbstractCleanUp {
 	public IFix createFix(CompilationUnit compilationUnit, IProblemLocation[] problems) throws CoreException {
 		if (compilationUnit == null)
 			return null;
+
+		Assert.isTrue(!(isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) && isFlag(ADD_DEFAULT_SERIAL_VERSION_ID)));
 		
 		return Java50Fix.createCleanUp(compilationUnit, problems,
 				isFlag(ADD_OVERRIDE_ANNOATION), 
 				isFlag(ADD_DEPRECATED_ANNOTATION),
 				isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE),
-				isFlag(ADD_CALCULATED_SERIAL_VERSION_ID), fContext);
+				isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) || isFlag(ADD_DEFAULT_SERIAL_VERSION_ID), getContext());
 	}
 
 	public Map getRequiredOptions() {
@@ -143,7 +160,7 @@ public class Java50CleanUp extends AbstractCleanUp {
 		if (isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE))
 			options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 		
-		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID))
+		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) || isFlag(ADD_DEFAULT_SERIAL_VERSION_ID))
 			options.put(JavaCore.COMPILER_PB_MISSING_SERIAL_VERSION, JavaCore.WARNING);
 		
 		return options;
@@ -181,6 +198,8 @@ public class Java50CleanUp extends AbstractCleanUp {
 			result.add(removeMemonic(MultiFixMessages.Java50CleanUp_AddTypeParameters_description));
 		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID))
 			result.add(removeMemonic(MultiFixMessages.SerialVersionCleanUp_Generated_description));
+		if (isFlag(ADD_DEFAULT_SERIAL_VERSION_ID))
+			result.add("Add default serial version ID");
 		return (String[])result.toArray(new String[result.size()]);
 	}
 
@@ -210,7 +229,7 @@ public class Java50CleanUp extends AbstractCleanUp {
 			if (fix != null)
 				return true;
 		}
-		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID)) {
+		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) || isFlag(ADD_DEFAULT_SERIAL_VERSION_ID)) {
 			Java50Fix[] fix= Java50Fix.createMissingSerialVersionFixes(compilationUnit, problem);
 			if (fix != null)
 				return true;
@@ -233,6 +252,19 @@ public class Java50CleanUp extends AbstractCleanUp {
 	public void endCleanUp() throws CoreException {
 		super.endCleanUp();
 		fContext= null;
+	}
+	
+	private ISerialVersionFixContext getContext() {
+		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID)) {
+			return fContext;
+		} else if (isFlag(ADD_DEFAULT_SERIAL_VERSION_ID)){
+			return new ISerialVersionFixContext() {
+				public long getSerialVersionId(String qualifiedName) throws CoreException {
+					return 1;
+				}
+			};
+		}
+		return null;
 	}
 
 }
