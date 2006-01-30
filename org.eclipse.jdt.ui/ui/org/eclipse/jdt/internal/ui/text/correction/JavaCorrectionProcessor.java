@@ -26,8 +26,11 @@ import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.contentassist.ContentAssistEvent;
+import org.eclipse.jface.text.contentassist.ICompletionListener;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
+import org.eclipse.jface.text.contentassist.IContentAssistantExtension2;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 import org.eclipse.jface.text.contentassist.IContextInformationValidator;
 import org.eclipse.jface.text.source.Annotation;
@@ -155,6 +158,23 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	 */
 	public JavaCorrectionProcessor(JavaCorrectionAssistant assistant) {
 		fAssistant= assistant;
+		fAssistant.addCompletionListener(new ICompletionListener() {
+		
+			public void assistSessionEnded(ContentAssistEvent event) {
+				if (event.assistant instanceof IContentAssistantExtension2) {
+					IContentAssistantExtension2 statusAssistant= (IContentAssistantExtension2)event.assistant;
+					statusAssistant.setStatusLineVisible(false);
+				}
+			}
+		
+			public void assistSessionStarted(ContentAssistEvent event) {
+				if (event.assistant instanceof IContentAssistantExtension2) {
+					IContentAssistantExtension2 statusAssistant= (IContentAssistantExtension2)event.assistant;
+					statusAssistant.setStatusLineVisible(true);
+				}
+			}
+		
+		});
 	}
 
 	/*
@@ -168,6 +188,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		
 		int length= viewer != null ? viewer.getSelectedRange().y : 0;
 		AssistContext context= new AssistContext(cu, documentOffset, length);
+		context.setContentAssistant(fAssistant);
 
 		Annotation[] annotations= fAssistant.getAnnotationsAtOffset();
 		

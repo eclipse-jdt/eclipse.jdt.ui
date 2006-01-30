@@ -53,9 +53,9 @@ public final class SerialVersionSubProcessor {
 		IFix[] fixes= Java50Fix.createMissingSerialVersionFixes(context.getASTRoot(), location);
 		if (fixes != null) {
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_ADD);
-			FixCorrectionProposal prop1= new SerialVersionDefaultProposal(fixes[0], null, 9, image);
+			FixCorrectionProposal prop1= new SerialVersionDefaultProposal(fixes[0], null, 9, image, context);
 			proposals.add(prop1);
-			FixCorrectionProposal prop2= new SerialVersionHashProposal(fixes[1], new Java50CleanUp(Java50CleanUp.ADD_CALCULATED_SERIAL_VERSION_ID), 9, image);
+			FixCorrectionProposal prop2= new SerialVersionHashProposal(fixes[1], new Java50CleanUp(Java50CleanUp.ADD_CALCULATED_SERIAL_VERSION_ID), 9, image, context);
 			proposals.add(prop2);
 		}
 	}

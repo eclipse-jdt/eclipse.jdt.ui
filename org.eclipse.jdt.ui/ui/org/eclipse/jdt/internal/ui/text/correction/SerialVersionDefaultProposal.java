@@ -14,12 +14,14 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 
 public final class SerialVersionDefaultProposal extends FixCorrectionProposal {
 	
-	public SerialVersionDefaultProposal(IFix fix, ICleanUp up, int relevance, Image image) {
-		super(fix, up, relevance, image);
+	public SerialVersionDefaultProposal(IFix fix, ICleanUp up, int relevance, Image image, IInvocationContext context) {
+		super(fix, up, relevance, image, context);
 	}
 
 	/**

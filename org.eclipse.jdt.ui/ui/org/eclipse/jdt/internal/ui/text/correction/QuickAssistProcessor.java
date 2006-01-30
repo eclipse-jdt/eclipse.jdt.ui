@@ -466,11 +466,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			}
 		}
 
-		if (resultingCollections != null) {
-			AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, null, typeBinding, 3);
-			fieldProposal.setCommandId(ASSIGN_PARAM_TO_FIELD_ID);
-			resultingCollections.add(fieldProposal);
-		}
+		AssignToVariableAssistProposal fieldProposal= new AssignToVariableAssistProposal(context.getCompilationUnit(), paramDecl, null, typeBinding, 3);
+		fieldProposal.setCommandId(ASSIGN_PARAM_TO_FIELD_ID);
+		resultingCollections.add(fieldProposal);
 		return true;
 	}
 
@@ -1138,11 +1136,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (fix == null)
 			return false;
 		
-		FixCorrectionProposal proposal= new FixCorrectionProposal(
-				fix, 
-				new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP), 
-				1, 
-				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		Java50CleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 1, image, context);
 		
 		resultingCollections.add(proposal);
 		return true;
@@ -1160,10 +1156,9 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (fix == null)
 			return false;
 		
-		FixCorrectionProposal proposal= new FixCorrectionProposal(
-				fix, new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP),
-				1,
-				JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE));
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		Java50CleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 1, image, context);
 		
 		resultingCollections.add(proposal);
 		return true;

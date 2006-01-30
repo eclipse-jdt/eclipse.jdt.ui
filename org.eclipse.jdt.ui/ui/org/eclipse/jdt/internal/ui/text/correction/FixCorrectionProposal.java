@@ -10,20 +10,23 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.lang.reflect.InvocationTargetException;
+
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
+import org.eclipse.jface.text.contentassist.IContentAssistantExtension2;
 
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
 
-import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
@@ -32,10 +35,12 @@ import org.eclipse.jdt.internal.corext.fix.LinkedFix;
 import org.eclipse.jdt.internal.corext.fix.PositionGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 
+import org.eclipse.jdt.ui.text.java.IInvocationContext;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
-import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
+import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
+import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
 
 /**
  * A correction proposal which uses an {@link IFix} to
@@ -45,36 +50,33 @@ import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
 public class FixCorrectionProposal extends LinkedCorrectionProposal implements ICompletionProposalExtension2 {
 	private final IFix fFix;
 	private final ICleanUp fCleanUp;
-	private final ICleanUp fMultiFix;
-
-	public FixCorrectionProposal(IFix fix, ICleanUp cleanUp, int relevance, Image image) {
-		this(fix, cleanUp, relevance, image, cleanUp);
-	}
+	private final IContentAssistantExtension2 fAssistant;
 	
-	public FixCorrectionProposal(IFix fix, ICleanUp cleanUp, int relevance, Image image, ICleanUp multiFix) {
+	public FixCorrectionProposal(IFix fix, ICleanUp cleanUp, int relevance, Image image, IInvocationContext context) {
 		super(fix.getDescription(), fix.getCompilationUnit(), null, relevance, image);
 		fFix= fix;
 		fCleanUp= cleanUp;
-		fMultiFix= multiFix;
-	}
-
-	public IFix getFix() {
-		return fFix;
+		if (context instanceof AssistContext) {
+			AssistContext assistContext= (AssistContext)context;
+			if (assistContext.getContentAssistant() instanceof IContentAssistantExtension2) {
+				fAssistant= (IContentAssistantExtension2)assistContext.getContentAssistant();
+			} else {
+				fAssistant= null;
+			}
+		} else {
+			fAssistant= null;
+		}
 	}
 	
 	public ICleanUp getCleanUp() {
 		return fCleanUp;
-	}
-	
-	public ICleanUp getMultiFix() {
-		return fMultiFix;
 	}
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal#createTextChange()
 	 */
 	protected TextChange createTextChange() throws CoreException {
-		IFix fix= getFix();
+		IFix fix= fFix;
 		TextChange createChange= fix.createChange();
 
 		if (fix instanceof LinkedFix) {
@@ -127,12 +129,14 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 			refactoring.addCompilationUnit(getCompilationUnit());
 			refactoring.addCleanUp(fCleanUp);
 			
-			CleanUpRefactoringWizard refactoringWizard= new CleanUpRefactoringWizard(refactoring, RefactoringWizard.WIZARD_BASED_USER_INTERFACE, true, false);
-			
-			RefactoringStarter starter= new RefactoringStarter();
+			int stopSeverity= RefactoringCore.getConditionCheckingFailedSeverity();
+			Shell shell= JavaPlugin.getActiveWorkbenchShell();
+			BusyIndicatorRunnableContext context= new BusyIndicatorRunnableContext();
+			RefactoringExecutionHelper executer= new RefactoringExecutionHelper(refactoring, stopSeverity, false, shell, context);
 			try {
-				starter.activate(refactoring, refactoringWizard, JavaPlugin.getActiveWorkbenchShell(), refactoring.getName(), true);
-			} catch (JavaModelException e) {
+				executer.perform();
+			} catch (InterruptedException e) {
+			} catch (InvocationTargetException e) {
 				JavaPlugin.log(e);
 			}
 			return;
@@ -140,9 +144,21 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		apply(viewer.getDocument());
 	}
 
-	public void selected(ITextViewer viewer, boolean smartToggle) {}
+	public void selected(ITextViewer viewer, boolean smartToggle) {
+		if (fAssistant != null) {
+			if (fCleanUp != null) {
+				fAssistant.setStatusMessage(CorrectionMessages.FixCorrectionProposal_HitCtrlEnter_description);
+			} else {
+				fAssistant.setStatusMessage(""); //$NON-NLS-1$
+			}
+		}
+	}
 
-	public void unselected(ITextViewer viewer) {}
+	public void unselected(ITextViewer viewer) {
+		if (fAssistant != null) {
+			fAssistant.setStatusMessage(""); //$NON-NLS-1$
+		}
+	}
 
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		return false;
