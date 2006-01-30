@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.Hashtable;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEditGroup;
@@ -128,18 +130,19 @@ public class UnusedCodeFix extends AbstractFix {
 	
 	private static class RemoveUnusedMemberOperation implements IFixRewriteOperation {
 
-		private final SimpleName fUnusedName;
+		private final SimpleName[] fUnusedNames;
 		
-		public RemoveUnusedMemberOperation(SimpleName unusedName) {
-			fUnusedName= unusedName;
+		public RemoveUnusedMemberOperation(SimpleName[] unusedNames) {
+			fUnusedNames= unusedNames;
 		}
 
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List)
 		 */
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
-			SimpleName name= fUnusedName;
-			removeUnusedName(cuRewrite.getASTRewrite(), name, cuRewrite.getRoot(), textEditGroups);
+			for (int i= 0; i < fUnusedNames.length; i++) {
+				removeUnusedName(cuRewrite.getASTRewrite(), fUnusedNames[i], cuRewrite.getRoot(), textEditGroups);	
+			}
 		}
 		
 		private void removeUnusedName(ASTRewrite rewrite, SimpleName simpleName, CompilationUnit completeRoot, List groups) {
@@ -219,7 +222,7 @@ public class UnusedCodeFix extends AbstractFix {
 				} else {
 					fragments= ((VariableDeclarationStatement) varDecl).fragments();
 				}
-				if (fragments.size() == 1) {
+				if (fragments.size() == fUnusedNames.length) {
 					rewrite.remove(varDecl, group);
 				} else {
 					rewrite.remove(frag, group); // don't try to preserve
@@ -241,7 +244,6 @@ public class UnusedCodeFix extends AbstractFix {
 				// do nothing yet
 			}
 		}
-		
 	}
 	
 	public static UnusedCodeFix createRemoveUnusedImportFix(CompilationUnit compilationUnit, IProblemLocation problem) {
@@ -272,7 +274,7 @@ public class UnusedCodeFix extends AbstractFix {
 						return null;
 						
 					String label= getDisplayString(name, binding);
-					RemoveUnusedMemberOperation operation= new RemoveUnusedMemberOperation(name);
+					RemoveUnusedMemberOperation operation= new RemoveUnusedMemberOperation(new SimpleName[] {name});
 					return new UnusedCodeFix(label, compilationUnit, new IFixRewriteOperation[] {operation}, getCleanUpFlag(binding));
 				}
 			}
@@ -312,7 +314,7 @@ public class UnusedCodeFix extends AbstractFix {
 			boolean removeUnusedImports) {
 
 		List/*<IFixRewriteOperation>*/ result= new ArrayList();
-		
+		Hashtable/*<ASTNode, List>*/ variableDeclarations= new Hashtable();
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];
 			int id= problem.getProblemId();
@@ -331,7 +333,7 @@ public class UnusedCodeFix extends AbstractFix {
 				if (name != null) {
 					IBinding binding= name.resolveBinding();
 					if (binding != null) {
-						result.add(new RemoveUnusedMemberOperation(name));
+						result.add(new RemoveUnusedMemberOperation(new SimpleName[] {name}));
 					}
 				}
 			}
@@ -341,10 +343,24 @@ public class UnusedCodeFix extends AbstractFix {
 				if (name != null) {
 					IBinding binding= name.resolveBinding();
 					if (binding != null && !isFormalParameterInEnhancedForStatement(name) && isSideEffectFree(name, compilationUnit)) {
-						result.add(new RemoveUnusedMemberOperation(name));
+						VariableDeclarationFragment parent= (VariableDeclarationFragment)ASTNodes.getParent(name, VariableDeclarationFragment.class);
+						if (parent != null) {
+							ASTNode varDecl= parent.getParent();
+							if (!variableDeclarations.containsKey(varDecl)) {
+								variableDeclarations.put(varDecl, new ArrayList());
+							}
+							((List)variableDeclarations.get(varDecl)).add(name);
+						} else {
+							result.add(new RemoveUnusedMemberOperation(new SimpleName[] {name}));
+						}
 					}
 				}
 			}
+		}
+		for (Iterator iter= variableDeclarations.keySet().iterator(); iter.hasNext();) {
+			ASTNode node= (ASTNode)iter.next();
+			List names= (List)variableDeclarations.get(node);
+			result.add(new RemoveUnusedMemberOperation((SimpleName[])names.toArray(new SimpleName[names.size()])));
 		}
 		
 		if (result.size() == 0)
