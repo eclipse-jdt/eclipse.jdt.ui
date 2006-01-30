@@ -4300,6 +4300,10 @@
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.potential"
         priority="50"/>
+    <markerGroupingEntry id="org.eclipse.jdt.ui.category.restrictedAPI"
+        markerGrouping="org.eclipse.jdt.ui.java_marker_category"
+        label="%MarkerCategory.restrictedAPI"
+        priority="40"/>        
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.deprecation"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.deprecation"
@@ -4322,6 +4326,7 @@
         <markerAttributeMapping value="110" markerGroupingEntry="org.eclipse.jdt.ui.category.potential"/>
         <markerAttributeMapping value="120" markerGroupingEntry="org.eclipse.jdt.ui.category.deprecation"/>
         <markerAttributeMapping value="130" markerGroupingEntry="org.eclipse.jdt.ui.category.nls"/>
+        <markerAttributeMapping value="140" markerGroupingEntry="org.eclipse.jdt.ui.category.restrictedAPI"/>
      </markerAttributeGrouping>
      <markerAttributeGrouping markerType="org.eclipse.jdt.core.buildpath_problem"
         defaultGroupingEntry="org.eclipse.jdt.ui.category.buildpath"/>
