@@ -18,6 +18,8 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jface.text.ITextSelection;
 
+import org.eclipse.ui.IEditorInput;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
@@ -30,10 +32,9 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
-import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public abstract class StructureSelectionAction extends Action {
@@ -140,7 +141,12 @@ public abstract class StructureSelectionAction extends Action {
 	}
 
 	private ISourceReference getSourceReference() {
-		return (ISourceReference) JavaUI.getEditorInputJavaElement(fEditor.getEditorInput());
+		IEditorInput input= fEditor.getEditorInput();
+		if (input instanceof IClassFileEditorInput) {
+			return ((IClassFileEditorInput)input).getClassFile();
+		} else {
+			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input, false);
+		}
 	}
 
 	private static CompilationUnit getAST(ISourceReference sr) {
