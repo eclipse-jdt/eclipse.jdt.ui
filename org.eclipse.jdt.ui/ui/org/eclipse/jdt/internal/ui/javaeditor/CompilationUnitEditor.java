@@ -1334,8 +1334,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @return the most narrow element which includes the given offset
 	 */
 	protected IJavaElement getElementAt(int offset, boolean reconcile) {
-		IWorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-		ICompilationUnit unit= manager.getWorkingCopy(getEditorInput());
+		ICompilationUnit unit= (ICompilationUnit)getInputJavaElement();
 
 		if (unit != null) {
 			try {

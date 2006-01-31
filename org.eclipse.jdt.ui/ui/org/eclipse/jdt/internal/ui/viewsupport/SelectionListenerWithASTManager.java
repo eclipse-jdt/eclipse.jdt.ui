@@ -28,7 +28,6 @@ import org.eclipse.jface.viewers.SelectionChangedEvent;
 
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.ISelectionListener;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -39,6 +38,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 
 /**
  * Infrastructure to share an AST for editor post selection listeners.
@@ -126,7 +126,7 @@ public class SelectionListenerWithASTManager {
 			if (fCurrentJob != null) {
 				fCurrentJob.cancel();
 			}
-			final IJavaElement input= getJavaElement();
+			final IJavaElement input= EditorUtility.getEditorInputJavaElement(fPart, false);
 			if (input == null) {
 				return;
 			}
@@ -144,14 +144,6 @@ public class SelectionListenerWithASTManager {
 			fCurrentJob.setPriority(Job.DECORATE);
 			fCurrentJob.setSystem(true);
 			fCurrentJob.schedule();
-		}
-		
-		private IJavaElement getJavaElement() {
-			IEditorInput editorInput= fPart.getEditorInput();
-			if (editorInput != null)
-				return (IJavaElement)editorInput.getAdapter(IJavaElement.class);
-
-			return null;
 		}
 		
 		protected IStatus calculateASTandInform(IJavaElement input, ITextSelection selection, IProgressMonitor monitor) {
