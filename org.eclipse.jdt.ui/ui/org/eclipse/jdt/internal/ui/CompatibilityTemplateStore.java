@@ -62,7 +62,7 @@ public final class CompatibilityTemplateStore extends ContributionTemplateStore 
 			}
 			
 			save();
-//			fLegacySet= null;
+			fLegacySet= null;
 		}
 	}
 	
