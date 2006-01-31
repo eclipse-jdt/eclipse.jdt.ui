@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.templates.*;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -50,11 +51,17 @@ public class JavaDocContextType extends CompilationUnitContextType {
 		addResolver(new Project());
 	}
 	
-	/* (non-Javadoc)
+	/*
 	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, int, int, org.eclipse.jdt.core.ICompilationUnit)
 	 */
 	public CompilationUnitContext createContext(IDocument document, int offset, int length, ICompilationUnit compilationUnit) {
 		return new JavaDocContext(this, document, offset, length, compilationUnit);
 	}	
 	
+	/*
+	 * @see org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType#createContext(org.eclipse.jface.text.IDocument, org.eclipse.jface.text.Position, org.eclipse.jdt.core.ICompilationUnit)
+	 */
+	public CompilationUnitContext createContext(IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
+		return new JavaDocContext(this, document, completionPosition, compilationUnit);
+	}
 }

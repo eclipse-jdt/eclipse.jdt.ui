@@ -11,8 +11,9 @@
 package org.eclipse.jdt.internal.corext.template.java;
 
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.templates.TemplateContextType;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.templates.DocumentTemplateContext;
+import org.eclipse.jface.text.templates.TemplateContextType;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -42,10 +43,22 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	 * @param completionLength the completion length within the document
 	 * @param compilationUnit the compilation unit (may be <code>null</code>)
 	 */
-	protected CompilationUnitContext(TemplateContextType type, IDocument document, int completionOffset,
-		int completionLength, ICompilationUnit compilationUnit)
-	{
+	protected CompilationUnitContext(TemplateContextType type, IDocument document, int completionOffset, int completionLength, ICompilationUnit compilationUnit) {
 		super(type, document, completionOffset, completionLength);
+		fCompilationUnit= compilationUnit;
+	}
+	
+	/**
+	 * Creates a compilation unit context.
+	 * 
+	 * @param type   the context type
+	 * @param document the document
+	 * @param completionPosition the position defining the completion offset and length 
+	 * @param compilationUnit the compilation unit (may be <code>null</code>)
+	 * @since 3.2
+	 */
+	protected CompilationUnitContext(TemplateContextType type, IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
+		super(type, document, completionPosition);
 		fCompilationUnit= compilationUnit;
 	}
 	

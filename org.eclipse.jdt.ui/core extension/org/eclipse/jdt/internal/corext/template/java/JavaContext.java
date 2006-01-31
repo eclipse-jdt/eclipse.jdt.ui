@@ -73,10 +73,21 @@ public class JavaContext extends CompilationUnitContext {
 	 * @param completionLength the completion length.
 	 * @param compilationUnit the compilation unit (may be <code>null</code>).
 	 */
-	public JavaContext(TemplateContextType type, IDocument document, int completionOffset, int completionLength,
-		ICompilationUnit compilationUnit)
-	{
+	public JavaContext(TemplateContextType type, IDocument document, int completionOffset, int completionLength, ICompilationUnit compilationUnit) {
 		super(type, document, completionOffset, completionLength, compilationUnit);
+	}
+	
+	/**
+	 * Creates a java template context.
+	 * 
+	 * @param type   the context type.
+	 * @param document the document.
+	 * @param completionPosition the position defining the completion offset and length 
+	 * @param compilationUnit the compilation unit (may be <code>null</code>).
+	 * @since 3.2
+	 */
+	public JavaContext(TemplateContextType type, IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
+		super(type, document, completionPosition, compilationUnit);
 	}
 	
 	/**

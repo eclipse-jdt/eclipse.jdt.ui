@@ -173,7 +173,9 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 					statusAssistant.setStatusLineVisible(true);
 				}
 			}
-		
+
+			public void selectionChanged(ICompletionProposal proposal, boolean smartToggle) {
+			}
 		});
 	}
 

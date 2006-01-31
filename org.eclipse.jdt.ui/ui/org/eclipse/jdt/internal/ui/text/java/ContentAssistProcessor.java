@@ -144,6 +144,11 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 					extension.setStatusLineVisible(false);
 				}
 			}
+
+			/*
+			 * @see org.eclipse.jface.text.contentassist.ICompletionListener#selectionChanged(org.eclipse.jface.text.contentassist.ICompletionProposal, boolean)
+			 */
+			public void selectionChanged(ICompletionProposal proposal, boolean smartToggle) {}
 			
 		});
 	}

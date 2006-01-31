@@ -15,6 +15,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.Template;
@@ -45,18 +46,29 @@ public class JavaDocContext extends CompilationUnitContext {
 	/**
 	 * Creates a javadoc template context.
 	 * 
-	 * @param type   the context type.
+	 * @param type the context type.
 	 * @param document the document.
 	 * @param completionOffset the completion offset within the document.
 	 * @param completionLength the completion length within the document.
 	 * @param compilationUnit the compilation unit (may be <code>null</code>).
 	 */
-	public JavaDocContext(TemplateContextType type, IDocument document, int completionOffset, int completionLength,
-		ICompilationUnit compilationUnit)
-	{
+	public JavaDocContext(TemplateContextType type, IDocument document, int completionOffset, int completionLength, ICompilationUnit compilationUnit) {
 		super(type, document, completionOffset, completionLength, compilationUnit);
 	}
 
+	/**
+	 * Creates a javadoc template context.
+	 * 
+	 * @param type the context type.
+	 * @param document the document.
+	 * @param completionPosition the position defining the completion offset and length 
+	 * @param compilationUnit the compilation unit (may be <code>null</code>).
+	 * @since 3.2
+	 */
+	public JavaDocContext(TemplateContextType type, IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
+		super(type, document, completionPosition, compilationUnit);
+	}
+	
 	/*
 	 * @see TemplateContext#canEvaluate(Template templates)
 	 */
