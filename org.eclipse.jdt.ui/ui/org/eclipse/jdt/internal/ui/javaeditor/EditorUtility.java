@@ -315,6 +315,27 @@ public class EditorUtility {
 		return null;
 	}
 
+	/**
+	 * Returns the given editor's input as Java element.
+	 *
+	 * @param editor the editor
+	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
+	 * @return the given editor's input as Java element or <code>null</code> if none
+	 * @since 3.2
+	 */
+	public static IJavaElement getEditorInputJavaElement(IEditorPart editor, boolean primaryOnly) {
+		Assert.isNotNull(editor);
+		IEditorInput editorInput= editor.getEditorInput();
+		if (editorInput == null)
+			return null;
+		
+		IJavaElement je= JavaUI.getEditorInputJavaElement(editorInput);
+		if (je != null || primaryOnly)
+			return je;
+
+		return  JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput, false);
+	}
+
 	private static IEditorInput getEditorInput(IJavaElement element) throws JavaModelException {
 		while (element != null) {
 			if (element instanceof ICompilationUnit) {
