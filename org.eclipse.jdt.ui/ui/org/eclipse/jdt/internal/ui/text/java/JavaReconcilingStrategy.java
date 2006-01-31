@@ -94,12 +94,11 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 								boolean isASTNeeded= initialReconcile || JavaPlugin.getDefault().getASTProvider().isActive(unit);
 								// reconcile
 								if (fIsJavaReconcilingListener && isASTNeeded) {
-									CompilationUnit astRoot= unit.reconcile(ASTProvider.SHARED_AST_LEVEL, true, ASTProvider.SHARED_AST_STATEMENT_RECOVERY, null, fProgressMonitor);
-									if (astRoot != null) {
+									ast[0]= unit.reconcile(ASTProvider.SHARED_AST_LEVEL, true, ASTProvider.SHARED_AST_STATEMENT_RECOVERY, null, fProgressMonitor);
+									if (ast[0] != null) {
 										// mark as unmodifiable
-										ASTNodes.setFlagsToAST(astRoot, ASTNode.PROTECT);
+										ASTNodes.setFlagsToAST(ast[0], ASTNode.PROTECT);
 									}
-									ast[0]= astRoot;
 								} else
 									unit.reconcile(ICompilationUnit.NO_AST, true, null, fProgressMonitor);
 							} catch (OperationCanceledException ex) {
