@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
-import java.util.List;
-
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
@@ -44,6 +42,7 @@ import org.eclipse.swt.widgets.TreeItem;
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.bindings.TriggerSequence;
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.PopupDialog;
@@ -59,7 +58,6 @@ import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlExtension;
 import org.eclipse.jface.text.IInformationControlExtension2;
 
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IWorkbenchPage;
@@ -68,12 +66,9 @@ import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.commands.ActionHandler;
 import org.eclipse.ui.commands.HandlerSubmission;
-import org.eclipse.ui.commands.ICommand;
-import org.eclipse.ui.commands.ICommandManager;
-import org.eclipse.ui.commands.IKeySequenceBinding;
 import org.eclipse.ui.commands.Priority;
 import org.eclipse.ui.contexts.IWorkbenchContextSupport;
-import org.eclipse.ui.keys.KeySequence;
+import org.eclipse.ui.keys.IBindingService;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
@@ -81,7 +76,6 @@ import org.eclipse.jdt.core.IParent;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.CustomFiltersActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -141,8 +135,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	private TreeViewer fTreeViewer;
 	/** The current string matcher */
 	private StringMatcher fStringMatcher;
-	private ICommand fInvokingCommand;
-	private KeySequence[] fInvokingCommandKeySequences;
 
 	/**
 	 * Fields that support the dialog menu
@@ -153,10 +145,11 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
 
+	private IBindingService fBindingService;
 	private IKeyBindingService fKeyBindingService;
+	private HandlerSubmission fShowViewMenuHandlerSubmission;
 	private String[] fKeyBindingScopes;
 	private IAction fShowViewMenuAction;
-	private HandlerSubmission fShowViewMenuHandlerSubmission;
 
 	/**
 	 * Field for tree style since it must be remembered by the instance.
@@ -164,6 +157,12 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * @since 3.2
 	 */
 	private int fTreeStyle;
+	
+	/**
+	 * The ID of the invoking command.
+	 * @since 3.2
+	 */
+	private String fCommandId;
 
 	/**
 	 * Creates a tree information control with the given shell as parent. The given
@@ -177,15 +176,12 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 */
 	public AbstractInformationControl(Shell parent, int shellStyle, int treeStyle, String invokingCommandId, boolean showStatusField) {
 		super(parent, shellStyle, true, true, true, true, null, null);
+		
 		if (invokingCommandId != null) {
-			ICommandManager commandManager= PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
-			fInvokingCommand= commandManager.getCommand(invokingCommandId);
-			if (fInvokingCommand != null && !fInvokingCommand.isDefined())
-				fInvokingCommand= null;
-			else
-				// Pre-fetch key sequence - do not change because scope will change later.
-				getInvokingCommandKeySequences();
+			fBindingService= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+			fCommandId= invokingCommandId;
 		}
+		
 		fTreeStyle= treeStyle;
 		// Title and status text must be set to get the title label created, so force empty values here. 
 		if (hasHeader())
@@ -461,15 +457,10 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 						if (page != null) {
 							IEditorPart editor= page.getActiveEditor();
 							if (editor != null) {
-								IEditorInput editorInput= editor.getEditorInput();
-								if (editorInput != null) {
-									IJavaElement editorCU= JavaUI.getEditorInputJavaElement(editorInput);
-									if (editorCU == null)
-										editorCU= JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput, false);
-									if (editorCU == cu) {
-										EditorUtility.revealInEditor(editor, (IJavaElement)selectedElement);
-										return;
-									}
+								IJavaElement editorCU= EditorUtility.getEditorInputJavaElement(editor, false);
+								if (editorCU == cu) {
+									EditorUtility.revealInEditor(editor, (IJavaElement)selectedElement);
+									return;
 								}
 							}
 						}
@@ -598,6 +589,8 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 			fKeyBindingScopes= null;
 			fKeyBindingService= null;
 		}
+		
+		fBindingService= null;
 	}
 
 	/**
@@ -706,24 +699,17 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		getShell().removeFocusListener(listener);
 	}
 
-	final protected ICommand getInvokingCommand() {
-		return fInvokingCommand;
+	final protected String getBestActiveBindingFormatted() {
+		if (fCommandId == null || fBindingService == null)
+			return null;
+		return fBindingService.getBestActiveBindingFormattedFor(fCommandId);
 	}
-
-	final protected KeySequence[] getInvokingCommandKeySequences() {
-		if (fInvokingCommandKeySequences == null) {
-			if (getInvokingCommand() != null) {
-				List list= getInvokingCommand().getKeySequenceBindings();
-				if (!list.isEmpty()) {
-					fInvokingCommandKeySequences= new KeySequence[list.size()];
-					for (int i= 0; i < fInvokingCommandKeySequences.length; i++) {
-						fInvokingCommandKeySequences[i]= ((IKeySequenceBinding) list.get(i)).getKeySequence();
-					}
-					return fInvokingCommandKeySequences;
-				}
-			}
-		}
-		return fInvokingCommandKeySequences;
+	
+	final protected TriggerSequence[] getBestActiveBinding() {
+		if (fCommandId == null || fBindingService == null)
+			return null;
+		
+		return fBindingService.getActiveBindingsFor(fCommandId);
 	}
 
 	/*
