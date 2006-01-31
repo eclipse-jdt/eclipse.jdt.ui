@@ -258,6 +258,12 @@ public final class ASTProvider {
 	private IWorkbenchPart fActiveEditor;
 
 	
+	/**
+	 * Returns the Java plug-in's AST provider.
+	 * 
+	 * @return the AST provider
+	 * @since 3.2
+	 */
 	public static ASTProvider getASTProvider() {
 		return JavaPlugin.getDefault().getASTProvider();
 	}
