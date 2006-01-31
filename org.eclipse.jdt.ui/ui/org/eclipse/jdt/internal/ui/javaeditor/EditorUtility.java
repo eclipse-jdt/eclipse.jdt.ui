@@ -138,6 +138,27 @@ public class EditorUtility {
 		if (inputElement instanceof IFile)
 			return openInEditor((IFile) inputElement, activate);
 
+		if (inputElement instanceof IJavaElement) {
+			ICompilationUnit cu= (ICompilationUnit)((IJavaElement)inputElement).getAncestor(IJavaElement.COMPILATION_UNIT);
+			if (cu != null && !JavaModelUtil.isPrimary(cu)) {
+				/*
+				 * Support for non-primary working copy. 
+				 * Try to reveal it in the active editor.
+				 */
+				IWorkbenchPage page= JavaPlugin.getActivePage();
+				if (page != null) {
+					IEditorPart editor= page.getActiveEditor();
+					if (editor != null) {
+						IJavaElement editorCU= EditorUtility.getEditorInputJavaElement(editor, false);
+						if (editorCU == cu) {
+							EditorUtility.revealInEditor(editor, (IJavaElement)inputElement);
+							return editor;
+						}
+					}
+				}
+			}
+		}
+		
 		IEditorInput input= getEditorInput(inputElement);
 		if (input != null)
 			return openInEditor(input, getEditorID(input, inputElement), activate);
