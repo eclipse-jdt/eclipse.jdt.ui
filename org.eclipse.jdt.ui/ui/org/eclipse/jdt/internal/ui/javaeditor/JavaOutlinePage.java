@@ -856,7 +856,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			}
 
 		}
-		
+
 		/**
 		 * Empty selection provider.
 		 * 
@@ -872,7 +872,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			}
 			public void setSelection(ISelection selection) {
 			}
-		}			
+		}
 
 
 	/** A flag to show contents of top level type only */
