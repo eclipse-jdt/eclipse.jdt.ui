@@ -298,11 +298,11 @@ public class ReorgPolicyFactory {
 			IFile[] allModifiedFiles= getAllModifiedFiles();
 			RefactoringModifications modifications= getModifications();
 			IResourceChangeDescriptionFactory deltaFactory= checker.getDeltaFactory();
-			if (modifications != null) {
-				modifications.buildDelta(deltaFactory);
-			}
 			for (int i= 0; i < allModifiedFiles.length; i++) {
 				deltaFactory.change(allModifiedFiles[i]);
+			}
+			if (modifications != null) {
+				modifications.buildDelta(deltaFactory);
 			}
 			return new RefactoringStatus();
 		}
