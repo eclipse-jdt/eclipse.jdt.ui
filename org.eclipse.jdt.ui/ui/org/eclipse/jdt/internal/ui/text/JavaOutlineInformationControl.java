@@ -35,6 +35,9 @@ import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.Separator;
+import org.eclipse.jface.bindings.TriggerSequence;
+import org.eclipse.jface.bindings.keys.KeySequence;
+import org.eclipse.jface.bindings.keys.SWTKeySupport;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
@@ -44,8 +47,6 @@ import org.eclipse.ui.IDecoratorManager;
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.keys.KeySequence;
-import org.eclipse.ui.keys.SWTKeySupport;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -582,16 +583,14 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 	 * {@inheritDoc}
 	 */
 	protected String getStatusFieldText() {
-		KeySequence[] sequences= getInvokingCommandKeySequences();
-		if (sequences == null || sequences.length == 0)
+		String keyName= getBestActiveBindingFormatted();
+		if (keyName == null)
 			return ""; //$NON-NLS-1$
 
-		String keySequence= sequences[0].format();
-
 		if (fOutlineContentProvider.isShowingInheritedMembers())
-			return Messages.format(JavaUIMessages.JavaOutlineControl_statusFieldText_hideInheritedMembers, keySequence);
+			return Messages.format(JavaUIMessages.JavaOutlineControl_statusFieldText_hideInheritedMembers, keyName);
 		else
-			return Messages.format(JavaUIMessages.JavaOutlineControl_statusFieldText_showInheritedMembers, keySequence);
+			return Messages.format(JavaUIMessages.JavaOutlineControl_statusFieldText_showInheritedMembers, keyName);
 	}
 
 	/*
@@ -626,7 +625,7 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 				public void keyPressed(KeyEvent e) {
 					int accelerator = SWTKeySupport.convertEventToUnmodifiedAccelerator(e);
 					KeySequence keySequence = KeySequence.getInstance(SWTKeySupport.convertAcceleratorToKeyStroke(accelerator));
-					KeySequence[] sequences= getInvokingCommandKeySequences();
+					TriggerSequence[] sequences= getBestActiveBinding();
 					if (sequences == null)
 						return;
 					for (int i= 0; i < sequences.length; i++) {

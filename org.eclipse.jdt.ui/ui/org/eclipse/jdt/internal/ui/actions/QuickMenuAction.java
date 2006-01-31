@@ -30,9 +30,7 @@ import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.MenuManager;
 
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.commands.ICommand;
-import org.eclipse.ui.commands.ICommandManager;
-import org.eclipse.ui.commands.IKeySequenceBinding;
+import org.eclipse.ui.keys.IBindingService;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -114,18 +112,12 @@ public abstract class QuickMenuAction extends Action {
 	 * @return the shortcut as a human readable string or <code>null</code>
 	 */
 	private String getShortcutString() {
-		final ICommandManager commandManager = PlatformUI.getWorkbench().getCommandSupport().getCommandManager();
-		final ICommand command = commandManager.getCommand(getActionDefinitionId());
-		if (command.isDefined()) {
-			List l= command.getKeySequenceBindings();
-			if (!l.isEmpty()) {
-				IKeySequenceBinding binding= (IKeySequenceBinding)l.get(0);
-				return binding.getKeySequence().format();
-			}
-		}
-		return null; 
+		IBindingService bindingService= (IBindingService)PlatformUI.getWorkbench().getAdapter(IBindingService.class);
+		if (bindingService == null)
+			return null;
+		return bindingService.getBestActiveBindingFormattedFor(getActionDefinitionId());
 	}
-	
+
 	private Point computeMenuLocation(Control focus, Menu menu) {
 		Point cursorLocation= focus.getDisplay().getCursorLocation();
 		Rectangle clientArea= null;
