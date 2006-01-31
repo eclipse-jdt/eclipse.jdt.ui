@@ -24,8 +24,8 @@ import org.eclipse.ui.IEditorPart;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 /**
@@ -84,10 +84,8 @@ public class JavaElementProvider implements IInformationProvider, IInformationPr
 			IJavaElement element= SelectionConverter.getElementAtOffset(fEditor);
 			if (element != null)
 				return element;
-			IJavaElement je= SelectionConverter.getInput(fEditor);
-			if (je != null)
-				return je;
-			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput(), false);
+			
+			return EditorUtility.getEditorInputJavaElement(fEditor, false);
 		} catch (JavaModelException e) {
 			return null;
 		}

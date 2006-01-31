@@ -65,11 +65,8 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.javaeditor.ClassFileEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.CompilationUnitEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
-import org.eclipse.jdt.internal.ui.javaeditor.WorkingCopyManager;
 import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
 
 
@@ -781,22 +778,19 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 	
 	private IJavaElement getInputElement() {
-		IJavaElement javaElement= null;
-		if (fEditor instanceof CompilationUnitEditor) {
-			WorkingCopyManager manager= JavaPlugin.getDefault().getWorkingCopyManager();
-			javaElement= manager.getWorkingCopy(fEditor.getEditorInput(), false);
-			if (javaElement instanceof ICompilationUnit) {
-				ICompilationUnit unit= (ICompilationUnit) javaElement;
-				try {
-					JavaModelUtil.reconcile(unit);
-				} catch (JavaModelException x) {
-					JavaPlugin.log(x);
-				}
+		if (fEditor == null)
+			return null;
+		
+		IJavaElement javaElement= EditorUtility.getEditorInputJavaElement(fEditor, false);
+		if (javaElement instanceof ICompilationUnit) {
+			ICompilationUnit unit= (ICompilationUnit) javaElement;
+			try {
+				JavaModelUtil.reconcile(unit);
+			} catch (JavaModelException x) {
+				JavaPlugin.log(x);
 			}
-		} else if (fEditor instanceof ClassFileEditor) {
-			IClassFileEditorInput editorInput= (IClassFileEditorInput) fEditor.getEditorInput();
-			javaElement= editorInput.getClassFile();
 		}
+		
 		return javaElement;
 	}
 

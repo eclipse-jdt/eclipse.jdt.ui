@@ -3175,14 +3175,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @since 3.0
 	 */
 	protected IJavaElement getInputJavaElement() {
-		IEditorInput editorInput= getEditorInput();
-		if (editorInput == null)
-			return null;
-		IJavaElement je= JavaUI.getEditorInputJavaElement(getEditorInput());
-		if (je == null)
-			je= JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(editorInput, false);
-		return je;
-		
+		return EditorUtility.getEditorInputJavaElement(this, false);
 	}
 
 	protected void updateStatusLine() {

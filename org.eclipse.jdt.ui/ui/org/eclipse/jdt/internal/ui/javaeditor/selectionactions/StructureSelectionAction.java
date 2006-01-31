@@ -18,8 +18,6 @@ import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.ui.IEditorInput;
-
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
@@ -34,7 +32,7 @@ import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
-import org.eclipse.jdt.internal.ui.javaeditor.IClassFileEditorInput;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 
 public abstract class StructureSelectionAction extends Action {
@@ -62,15 +60,15 @@ public abstract class StructureSelectionAction extends Action {
 		super(""); //$NON-NLS-1$
 	}
 
-	/* (non-JavaDoc)
+	/*
 	 * Method declared in IAction.
 	 */
 	public final  void run() {
-		ITextSelection selection= getTextSelection();
-		ISourceReference source= getSourceReference();
-		if (source == null || ! source.exists())
+		IJavaElement inputElement= EditorUtility.getEditorInputJavaElement(fEditor, false);
+		if (!(inputElement instanceof ISourceReference && inputElement.exists()))
 			return;
 
+		ISourceReference source= (ISourceReference)inputElement;
 		ISourceRange sourceRange;
 		try {
 			sourceRange= source.getSourceRange();
@@ -82,6 +80,7 @@ public abstract class StructureSelectionAction extends Action {
 			}
 		} catch (JavaModelException e) {
 		}
+		ITextSelection selection= getTextSelection();
 		ISourceRange newRange= getNewSelectionRange(createSourceRange(selection), source);
 		// Check if new selection differs from current selection
 		if (selection.getOffset() == newRange.getOffset() && selection.getLength() == newRange.getLength())
@@ -138,15 +137,6 @@ public abstract class StructureSelectionAction extends Action {
 
 	private static ISourceRange createSourceRange(ITextSelection ts){
 		return new SourceRange(ts.getOffset(), ts.getLength());
-	}
-
-	private ISourceReference getSourceReference() {
-		IEditorInput input= fEditor.getEditorInput();
-		if (input instanceof IClassFileEditorInput) {
-			return ((IClassFileEditorInput)input).getClassFile();
-		} else {
-			return JavaPlugin.getDefault().getWorkingCopyManager().getWorkingCopy(input, false);
-		}
 	}
 
 	private static CompilationUnit getAST(ISourceReference sr) {
