@@ -12,37 +12,42 @@ package org.eclipse.jdt.ui.actions;
 
 import java.util.Iterator;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
-import org.eclipse.core.resources.IStorage;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IStorage;
+
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.jface.util.OpenStrategy;
 import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.ITextSelection;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.IEditorStatusLine;
 
+import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.OpenActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -86,7 +91,7 @@ public class OpenAction extends SelectionDispatchAction {
 		this(editor.getEditorSite());
 		fEditor= editor;
 		setText(ActionMessages.OpenAction_declaration_label); 
-		setEnabled(SelectionConverter.canOperateOn(fEditor));
+		setEnabled(EditorUtility.getEditorInputJavaElement(fEditor, false) != null);
 	}
 	
 	/* (non-Javadoc)
@@ -122,7 +127,7 @@ public class OpenAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction.
 	 */
 	public void run(ITextSelection selection) {
-		if (!ActionUtil.isProcessable(getShell(), fEditor))
+		if (!isProcessable())
 			return;
 		try {
 			IJavaElement element= SelectionConverter.codeResolve(fEditor, getShell(), getDialogTitle(), 
@@ -134,14 +139,22 @@ public class OpenAction extends SelectionDispatchAction {
 				getShell().getDisplay().beep();
 				return;
 			}
-			IJavaElement input= SelectionConverter.getInput(fEditor);
 			int type= element.getElementType();
 			if (type == IJavaElement.JAVA_PROJECT || type == IJavaElement.PACKAGE_FRAGMENT_ROOT || type == IJavaElement.PACKAGE_FRAGMENT)
-				element= input;
+				element= EditorUtility.getEditorInputJavaElement(fEditor, false);
 			run(new Object[] {element} );
 		} catch (JavaModelException e) {
 			showError(e);
 		}
+	}
+
+	private boolean isProcessable() {
+		if (fEditor != null) {
+			IJavaElement je= EditorUtility.getEditorInputJavaElement(fEditor, false);
+			if (je instanceof ICompilationUnit && !JavaModelUtil.isPrimary((ICompilationUnit)je))
+				return true; // can process non-primary working copies
+		}
+		return ActionUtil.isProcessable(getShell(), fEditor);
 	}
 	
 	/* (non-Javadoc)

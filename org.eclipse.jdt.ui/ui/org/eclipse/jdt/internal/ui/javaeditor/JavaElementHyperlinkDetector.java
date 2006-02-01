@@ -27,8 +27,6 @@ import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-
 
 /**
  * Java element hyperlink detector.
@@ -62,7 +60,7 @@ public class JavaElementHyperlinkDetector implements IHyperlinkDetector {
 
 		int offset= region.getOffset();
 
-		IJavaElement input= SelectionConverter.getInput((JavaEditor)fTextEditor);
+		IJavaElement input= EditorUtility.getEditorInputJavaElement(fTextEditor, false);
 		if (input == null)
 			return null;
 
