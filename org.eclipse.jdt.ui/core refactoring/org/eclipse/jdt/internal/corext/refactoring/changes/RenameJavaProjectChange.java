@@ -44,14 +44,14 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	private boolean fUpdateReferences;
 	
 	public RenameJavaProjectChange(IJavaProject project, String newName, String comment, boolean updateReferences) {
-		this(project.getPath(), project.getElementName(), newName, comment, IResource.NULL_STAMP);
+		this(project.getPath(), project.getElementName(), newName, comment, IResource.NULL_STAMP, updateReferences);
 		Assert.isTrue(!project.isReadOnly(), "should not be read only");  //$NON-NLS-1$
-		
-		fUpdateReferences= updateReferences;
 	}
 	
-	private RenameJavaProjectChange(IPath resourcePath, String oldName, String newName, String comment, long stampToRestore) {
+	private RenameJavaProjectChange(IPath resourcePath, String oldName, String newName, String comment, long stampToRestore, boolean updateReferences) {
 		super(resourcePath, oldName, newName, comment);
+		
+		fUpdateReferences= updateReferences;
 	}
 
 	public String getName() {
@@ -84,7 +84,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 	}
 	
 	protected Change createUndoChange(long stampToRestore) throws JavaModelException {
-		return new RenameJavaProjectChange(createNewPath(), getNewName(), getOldName(), getComment(), stampToRestore);
+		return new RenameJavaProjectChange(createNewPath(), getNewName(), getOldName(), getComment(), stampToRestore, fUpdateReferences);
 	}
 
 	private IProject getProject() {
@@ -118,7 +118,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 		IClasspathEntry[] newEntries= new IClasspathEntry[oldEntries.length];
 		for (int i= 0; i < newEntries.length; i++) {
 			if (isOurEntry(oldEntries[i]))
-				newEntries[i]= createModifiedEntry();
+				newEntries[i]= createModifiedEntry(oldEntries[i]);
 			else
 				newEntries[i]= oldEntries[i];	
 		}
@@ -134,8 +134,14 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 		return true;	
 	}
 	
-	private IClasspathEntry createModifiedEntry(){
-		return JavaCore.newProjectEntry(createNewPath());
+	private IClasspathEntry createModifiedEntry(IClasspathEntry oldEntry){
+		return JavaCore.newProjectEntry(
+				createNewPath(),
+				oldEntry.getAccessRules(),
+				oldEntry.combineAccessRules(),
+				oldEntry.getExtraAttributes(),
+				oldEntry.isExported()
+		);
 	}
 	
 	private IProject[] getReferencingProjects() {
