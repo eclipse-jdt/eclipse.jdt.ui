@@ -14,10 +14,17 @@ import java.util.ArrayList;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -28,7 +35,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
-import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix;
 import org.eclipse.jdt.internal.corext.fix.PotentialProgrammingProblemsFix.ISerialVersionFixContext;
@@ -60,9 +66,22 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	 * }
 	 */
 	public static final int ADD_DEFAULT_SERIAL_VERSION_ID= 2;
+	
+	/**
+	 * Adds a default serial version it to subtypes of
+	 * java.io.Serializable and java.io.Externalizable
+	 * 
+	 * public class E implements Serializable {}
+	 * ->
+	 * public class E implements Serializable {
+	 * 		private static final long serialVersionUID = 84504L;
+	 * }
+	 */
+	public static final int ADD_RANDOM_SERIAL_VERSION_ID= 4;
 
 	private static final int DEFAULT_FLAG= 0;
 	private static final String SECTION_NAME= "CleanUp_PotentialProgrammingProblems"; //$NON-NLS-1$
+	private static final Random RANDOM_NUMBER_GENERATOR= new Random();
 
 	private ISerialVersionFixContext fContext;
 
@@ -81,10 +100,10 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 		if (compilationUnit == null)
 			return null;
 		
-		Assert.isTrue(!(isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) && isFlag(ADD_DEFAULT_SERIAL_VERSION_ID)));
-		
 		return PotentialProgrammingProblemsFix.createCleanUp(compilationUnit,
-				isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) || isFlag(ADD_DEFAULT_SERIAL_VERSION_ID), getContext());
+				isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) || 
+				isFlag(ADD_DEFAULT_SERIAL_VERSION_ID) ||
+				isFlag(ADD_RANDOM_SERIAL_VERSION_ID), getContext());
 	}
 
 	/**
@@ -94,10 +113,10 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 		if (compilationUnit == null)
 			return null;
 		
-		Assert.isTrue(!(isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) && isFlag(ADD_DEFAULT_SERIAL_VERSION_ID)));
-		
 		return PotentialProgrammingProblemsFix.createCleanUp(compilationUnit, problems, 
-				isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) || isFlag(ADD_DEFAULT_SERIAL_VERSION_ID), getContext());
+				isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) || 
+				isFlag(ADD_DEFAULT_SERIAL_VERSION_ID) ||
+				isFlag(ADD_RANDOM_SERIAL_VERSION_ID), getContext());
 	}
 
 	/**
@@ -105,7 +124,9 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	 */
 	public Map getRequiredOptions() {
 		Map options= new Hashtable();
-		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) || isFlag(ADD_DEFAULT_SERIAL_VERSION_ID))
+		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) || 
+				isFlag(ADD_DEFAULT_SERIAL_VERSION_ID)  ||
+				isFlag(ADD_RANDOM_SERIAL_VERSION_ID))
 			options.put(JavaCore.COMPILER_PB_MISSING_SERIAL_VERSION, JavaCore.WARNING);
 		return options;
 	}
@@ -114,12 +135,47 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	 * {@inheritDoc}
 	 */
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
+
+		Button button= new Button(parent, SWT.CHECK);
+		button.setText(MultiFixMessages.PotentialProgrammingProblemsCleanUp_AddSerialId_section_name);
+		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
-		addCheckBox(parent, ADD_CALCULATED_SERIAL_VERSION_ID, MultiFixMessages.SerialVersionCleanUp_Generated_description);
+		Composite sub= new Composite(parent, SWT.NONE);
+		sub.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		sub.setLayout(new GridLayout(2, false));
+		
+		final Button button1= addRadioButton(sub, ADD_CALCULATED_SERIAL_VERSION_ID, MultiFixMessages.PotentialProgrammingProblemsCleanUp_Generated_radioButton_name); 
+		final Button button2= addRadioButton(sub, ADD_RANDOM_SERIAL_VERSION_ID, MultiFixMessages.PotentialProgrammingProblemsCleanUp_Random_radioButton_name);
+		
+		if (!isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) && !isFlag(ADD_RANDOM_SERIAL_VERSION_ID)) {
+			button.setSelection(false);
+			button1.setSelection(true);
+			button1.setEnabled(false);
+			button2.setEnabled(false);
+		} else {
+			button.setSelection(true);
+		}
+		
+		button.addSelectionListener(new SelectionAdapter() {
+
+			public void widgetSelected(SelectionEvent e) {
+				boolean isSelected= ((Button)e.getSource()).getSelection();
+				button1.setEnabled(isSelected);
+				button2.setEnabled(isSelected);
+				if (!isSelected) {
+					setFlag(ADD_CALCULATED_SERIAL_VERSION_ID, false);
+					setFlag(ADD_RANDOM_SERIAL_VERSION_ID, false);
+				} else {
+					setFlag(ADD_CALCULATED_SERIAL_VERSION_ID, button1.getSelection());
+					setFlag(ADD_RANDOM_SERIAL_VERSION_ID, button2.getSelection());
+				}
+			}
+			
+		});
 		
 		return parent;
 	}
-	
+
 	public void saveSettings(IDialogSettings settings) {
 		super.saveSettings(getSection(settings, SECTION_NAME));
 	}
@@ -130,9 +186,11 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	public String[] getDescriptions() {
 		List result= new ArrayList();
 		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID))
-			result.add(removeMemonic(MultiFixMessages.SerialVersionCleanUp_Generated_description));
+			result.add(MultiFixMessages.SerialVersionCleanUp_Generated_description);
 		if (isFlag(ADD_DEFAULT_SERIAL_VERSION_ID))
 			result.add(MultiFixMessages.CodeStyleCleanUp_addDefaultSerialVersionId_description);
+		if (isFlag(ADD_RANDOM_SERIAL_VERSION_ID))
+			result.add(MultiFixMessages.PotentialProgrammingProblemsCleanUp_RandomSerialId_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
 
@@ -173,6 +231,13 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 				public long getSerialVersionId(String qualifiedName) throws CoreException {
 					return 1;
 				}
+			};
+		} else if (isFlag(ADD_RANDOM_SERIAL_VERSION_ID)) {
+			return new ISerialVersionFixContext() {
+				public long getSerialVersionId(String qualifiedName) throws CoreException {
+					return RANDOM_NUMBER_GENERATOR.nextLong();
+				}
+				
 			};
 		}
 		return null;

@@ -77,7 +77,24 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	protected Button addCheckBox(Composite parent, final int flag, String label, SelectionAdapter adapter) {
 		Button button= new Button(parent, SWT.CHECK);
 		button.setText(label);
-		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
+		button.setSelection(isFlag(flag));
+		button.addSelectionListener(adapter);
+		return button;
+	}
+	
+	protected Button addRadioButton(Composite parent, final int flag, String label) {
+		return addRadioButton(parent, flag, label, new SelectionAdapter() {
+			public void widgetSelected(SelectionEvent e) {
+				setFlag(flag, ((Button)e.getSource()).getSelection());
+			}
+		});
+	}
+
+	protected Button addRadioButton(Composite parent, final int flag, String label, SelectionAdapter adapter) {
+		Button button= new Button(parent, SWT.RADIO);
+		button.setText(label);
+		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, false, false));
 		button.setSelection(isFlag(flag));
 		button.addSelectionListener(adapter);
 		return button;
