@@ -286,17 +286,18 @@ public class ScopeAnalyzer {
 			}
 			
 			ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(selector);
-			
-			ITypeBinding binding= getQualifier(selector);
-			if (binding == null) {
-				addLocalDeclarations(selector, flags);
-				addTypeDeclarations(parentTypeBinding, flags);
-			} else {
-				addInherited(binding, flags);
-			}
-			
-			if (hasFlag(CHECK_VISIBILITY, flags)) {
-				filterNonVisible(parentTypeBinding);
+			if (parentTypeBinding != null) {			
+				ITypeBinding binding= getQualifier(selector);
+				if (binding == null && parentTypeBinding != null) {
+					addLocalDeclarations(selector, flags);
+					addTypeDeclarations(parentTypeBinding, flags);
+				} else {
+					addInherited(binding, flags);
+				}
+
+				if (hasFlag(CHECK_VISIBILITY, flags)) {
+					filterNonVisible(parentTypeBinding);
+				}
 			}
 			return (IBinding[]) fRequestor.toArray(new IBinding[fRequestor.size()]);
 		} finally {

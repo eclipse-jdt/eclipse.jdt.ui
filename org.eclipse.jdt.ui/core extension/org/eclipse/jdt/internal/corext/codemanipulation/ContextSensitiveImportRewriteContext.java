@@ -83,11 +83,13 @@ public class ContextSensitiveImportRewriteContext extends ImportRewriteContext {
 		for (Iterator iter= list.iterator(); iter.hasNext();) {
 			AbstractTypeDeclaration type= (AbstractTypeDeclaration)iter.next();
 			ITypeBinding binding= type.resolveBinding();
-			if (isSameType(binding, qualifier, name)) {
-				return RES_NAME_FOUND;
-			} else {
-				if (containsDeclaration(binding, qualifier, name))
-					return RES_NAME_CONFLICT;
+			if (binding != null) {
+				if (isSameType(binding, qualifier, name)) {
+					return RES_NAME_FOUND;
+				} else {
+					if (containsDeclaration(binding, qualifier, name))
+						return RES_NAME_CONFLICT;
+				}
 			}
 		}
 		
