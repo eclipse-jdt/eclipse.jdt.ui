@@ -407,7 +407,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 				if (chosenType.isParameterizedType()) // workaround for bug 99124
 					chosenType= chosenType.getTypeDeclaration();
 				BindingKey bindingKey= new BindingKey(chosenType.getBindingKey());
-				typeArgument= rewrite.getImportRewrite().addImportFromSignature(bindingKey.internalToSignature(), rewrite.getAST());
+				typeArgument= rewrite.getImportRewrite().addImportFromSignature(bindingKey.toSignature(), rewrite.getAST());
 				ArrayList nestedTypeArgumentCvs= getTypeArgumentCvs(elementCv, tCModel);
 				Type[] nestedTypeArguments= getTypeArguments(typeArgument, nestedTypeArgumentCvs, rewrite, tCModel, leaveUnconstraindRaw); //recursion
 				if (nestedTypeArguments != null) {

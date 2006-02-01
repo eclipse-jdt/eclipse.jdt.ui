@@ -105,7 +105,7 @@ public abstract class SuperTypeRefactoringProcessor extends RefactoringProcessor
 	 * @return A corresponding ast node
 	 */
 	protected static ASTNode createCorrespondingNode(final CompilationUnitRewrite rewrite, final TType type) {
-		return rewrite.getImportRewrite().addImportFromSignature(new BindingKey(type.getBindingKey()).internalToSignature(), rewrite.getAST());
+		return rewrite.getImportRewrite().addImportFromSignature(new BindingKey(type.getBindingKey()).toSignature(), rewrite.getAST());
 	}
 
 	/** Should type occurrences on instanceof's also be rewritten? */

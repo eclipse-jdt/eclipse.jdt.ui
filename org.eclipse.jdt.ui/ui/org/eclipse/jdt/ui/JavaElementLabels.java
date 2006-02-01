@@ -461,7 +461,7 @@ public class JavaElementLabels {
 	public static void getMethodLabel(IMethod method, long flags, StringBuffer buf) {
 		try {
 			BindingKey resolvedKey= getFlag(flags, USE_RESOLVED) && method.isResolved() ? new BindingKey(method.getKey()) : null;
-			String resolvedSig= (resolvedKey != null) ? resolvedKey.internalToSignature() : null;
+			String resolvedSig= (resolvedKey != null) ? resolvedKey.toSignature() : null;
 			
 			// category
 			if (getFlag(flags, M_CATEGORY) && method.exists()) {
@@ -520,7 +520,7 @@ public class JavaElementLabels {
 				boolean renderVarargs= false;
 				if (getFlag(flags, M_PARAMETER_TYPES)) {
 					if (resolvedKey != null) {
-						types= Signature.getParameterTypes(resolvedKey.internalToSignature());
+						types= Signature.getParameterTypes(resolvedKey.toSignature());
 					} else {
 						types= method.getParameterTypes();
 					}
@@ -665,7 +665,7 @@ public class JavaElementLabels {
 			
 			if (getFlag(flags, F_PRE_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
 				if (getFlag(flags, USE_RESOLVED) && field.isResolved()) {
-					getTypeSignatureLabel(new BindingKey(field.getKey()).internalToSignature(), flags, buf);
+					getTypeSignatureLabel(new BindingKey(field.getKey()).toSignature(), flags, buf);
 				} else {
 					getTypeSignatureLabel(field.getTypeSignature(), flags, buf);
 				}
@@ -682,7 +682,7 @@ public class JavaElementLabels {
 			if (getFlag(flags, F_APP_TYPE_SIGNATURE) && field.exists() && !Flags.isEnum(field.getFlags())) {
 				buf.append(DECL_STRING);
 				if (getFlag(flags, USE_RESOLVED) && field.isResolved()) {
-					getTypeSignatureLabel(new BindingKey(field.getKey()).internalToSignature(), flags, buf);
+					getTypeSignatureLabel(new BindingKey(field.getKey()).toSignature(), flags, buf);
 				} else {
 					getTypeSignatureLabel(field.getTypeSignature(), flags, buf);
 				}
@@ -891,7 +891,7 @@ public class JavaElementLabels {
 					String[] typeArguments= key.getTypeArguments();
 					getTypeArgumentSignaturesLabel(typeArguments, flags, buf);
 				} else {
-					String[] typeParameters= Signature.getTypeParameters(key.internalToSignature());
+					String[] typeParameters= Signature.getTypeParameters(key.toSignature());
 					getTypeParameterSignaturesLabel(typeParameters, flags, buf);
 				}
 			} else if (type.exists()) {
