@@ -10,21 +10,43 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.compare;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 import java.util.Map;
 import java.util.ResourceBundle;
-import java.lang.reflect.InvocationTargetException;
+
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
+import org.eclipse.core.resources.IFile;
+
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.*;
-import org.eclipse.swt.widgets.Shell;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextUtilities;
+
 import org.eclipse.ui.IEditorInput;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.*;
+import org.eclipse.compare.EditionSelectionDialog;
+import org.eclipse.compare.IStreamContentAccessor;
+import org.eclipse.compare.ITypedElement;
+import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
 
-import org.eclipse.jdt.core.*;
+import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -36,17 +58,16 @@ import org.eclipse.jdt.core.dom.PackageDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.textmanipulation.*;
+import org.eclipse.jdt.internal.corext.util.Resources;
+
+import org.eclipse.jdt.ui.IWorkingCopyManager;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
-import org.eclipse.jdt.ui.IWorkingCopyManager;
-
-import org.eclipse.compare.*;
-import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
 
 
 class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
@@ -67,7 +88,7 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 		IParent parent= null;
 		IMember input= null;
 		
-		// analyse selection
+		// analyze selection
 		if (selection.isEmpty()) {
 			// no selection: we try to use the editor's input
 			JavaEditor editor= getEditor();
@@ -113,22 +134,23 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 		}
 				
 		boolean inEditor= beingEdited(file);
-		if (inEditor) {
-			parent= (IParent) getWorkingCopy((IJavaElement)parent);
-			if (input != null)
-				input= (IMember) getWorkingCopy(input);
-		}
 
-		// get a TextBuffer where to insert the text
-		TextBuffer buffer= null;
-		try {
-			buffer= TextBuffer.acquire(file);
+		IStatus status= Resources.makeCommittable(file, shell);
+		if (!status.isOK()) {
+			return;
+		}
 		
-			if (! buffer.makeCommittable(shell).isOK())
-				return;
+		// get the document where to insert the text
+		IPath path= file.getFullPath();
+		ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
+		ITextFileBuffer textFileBuffer= null;
+		try {
+			bufferManager.connect(path, null);
+			textFileBuffer= bufferManager.getTextFileBuffer(path);
+			IDocument document= textFileBuffer.getDocument();
 			
 			// configure EditionSelectionDialog and let user select an edition
-			ITypedElement target= new JavaTextBufferNode(file, buffer, inEditor);
+			ITypedElement target= new JavaTextBufferNode(file, document, inEditor);
 			ITypedElement[] editions= buildEditions(target, file);
 											
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
@@ -150,7 +172,7 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 			for (int i= 0; i < results.length; i++) {
 				
 			    // create an AST node
-				ASTNode newNode= createASTNode(rewriter, results[i], buffer.getLineDelimiter());
+				ASTNode newNode= createASTNode(rewriter, results[i], TextUtilities.getDefaultLineDelimiter(document), cu.getJavaProject());
 				if (newNode == null) {
 					MessageDialog.openError(shell, errorTitle, errorMessage);
 					return;	
@@ -185,7 +207,7 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 							lw.insertAt(newNode, index, null);
 						}
 					} else {
-						JavaPlugin.logErrorMessage("JavaAddElementFromHistoryImpl1: unkown container " + parent); //$NON-NLS-1$
+						JavaPlugin.logErrorMessage("JavaAddElementFromHistoryImpl: unknown container " + parent); //$NON-NLS-1$
 					}
 					
 				}
@@ -195,7 +217,7 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 			IJavaProject javaProject= cu2.getJavaProject();
 			if (javaProject != null)
 				options= javaProject.getOptions(true);
-			applyChanges(rewriter, buffer, shell, inEditor, options);
+			applyChanges(rewriter, document, textFileBuffer, shell, inEditor, options);
 
 	 	} catch(InvocationTargetException ex) {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
@@ -208,8 +230,12 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
 			
 		} finally {
-			if (buffer != null)
-				TextBuffer.release(buffer);
+			try {
+				if (textFileBuffer != null)
+					bufferManager.disconnect(path, null);
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
 		}
 	}
 	
@@ -218,14 +244,15 @@ class JavaAddElementFromHistoryImpl extends JavaHistoryActionImpl {
 	 * @param rewriter
 	 * @param element
 	 * @param delimiter the line delimiter
+	 * @param project 
 	 * @return a ASTNode or null
 	 * @throws CoreException
 	 */
-	private ASTNode createASTNode(ASTRewrite rewriter, ITypedElement element, String delimiter) throws CoreException {
+	private ASTNode createASTNode(ASTRewrite rewriter, ITypedElement element, String delimiter, IJavaProject project) throws CoreException {
 		if (element instanceof IStreamContentAccessor) {
 			String content= JavaCompareUtilities.readString((IStreamContentAccessor)element);
 			if (content != null) {
-				content= trimTextBlock(content, delimiter);
+				content= trimTextBlock(content, delimiter, project);
 				if (content != null) {
 				    int type= getPlaceHolderType(element);
 				    if (type != -1)

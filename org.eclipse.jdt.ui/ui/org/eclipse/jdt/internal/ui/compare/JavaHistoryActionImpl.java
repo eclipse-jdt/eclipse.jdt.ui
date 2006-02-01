@@ -16,19 +16,45 @@ import java.util.Map;
 import org.eclipse.text.edits.MultiTextEdit;
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.compare.HistoryItem;
-import org.eclipse.compare.ITypedElement;
-import org.eclipse.compare.ResourceNode;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
 
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.StructuredSelection;
+
+import org.eclipse.jface.text.BadLocationException;
+import org.eclipse.jface.text.DocumentRewriteSession;
+import org.eclipse.jface.text.DocumentRewriteSessionType;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IDocumentExtension4;
+
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.IWorkbench;
+import org.eclipse.ui.IWorkbenchPage;
+import org.eclipse.ui.IWorkbenchWindow;
+import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.part.FileEditorInput;
+import org.eclipse.ui.texteditor.IDocumentProvider;
+
+import org.eclipse.compare.HistoryItem;
+import org.eclipse.compare.ITypedElement;
+import org.eclipse.compare.ResourceNode;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
@@ -41,31 +67,7 @@ import org.eclipse.jdt.core.dom.EnumDeclaration;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.swt.widgets.Shell;
-
-//import org.eclipse.jface.action.Action;
-import org.eclipse.jface.action.IAction;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.operation.IRunnableWithProgress;
-import org.eclipse.jface.text.DocumentRewriteSession;
-import org.eclipse.jface.text.DocumentRewriteSessionType;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.IDocumentExtension4;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.viewers.StructuredSelection;
-
-import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.IWorkbench;
-import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.part.FileEditorInput;
-import org.eclipse.ui.texteditor.IDocumentProvider;
-
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBufferEditor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
@@ -141,7 +143,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 	}
 	
 	/**
-	 * Tries to find the given element in a workingcopy.
+	 * Tries to find the given element in a working copy.
 	 */
 	final IJavaElement getWorkingCopy(IJavaElement input) {
 		// TODO: With new working copy story: original == working copy.
@@ -208,15 +210,12 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		IFile file= getFile(m);
 		if (!isEnabled(file))
 			return false;
-		if (file != null && beingEdited(file))
-			return getWorkingCopy(m) != null;
 		return true;
 	}
 	
-	void applyChanges(ASTRewrite rewriter, final TextBuffer buffer, Shell shell, boolean inEditor, Map options)
+	void applyChanges(ASTRewrite rewriter, final IDocument document, final ITextFileBuffer textFileBuffer, Shell shell, boolean inEditor, Map options)
 							throws CoreException, InvocationTargetException, InterruptedException {
 
-		final IDocument document= buffer.getDocument();
 		
 		MultiTextEdit edit= new MultiTextEdit();
 		try {
@@ -231,9 +230,9 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 			if (document instanceof IDocumentExtension4)
 				session= ((IDocumentExtension4)document).startRewriteSession(DocumentRewriteSessionType.UNRESTRICTED);
 			
-			TextBufferEditor editor= new TextBufferEditor(buffer);
-			editor.add(edit);
-			editor.performEdits(new NullProgressMonitor());
+			edit.apply(document, TextEdit.UPDATE_REGIONS);
+		} catch (BadLocationException e) {
+			JavaPlugin.log(e);
 		} finally {
 			if (session != null)
 				((IDocumentExtension4)document).stopRewriteSession(session);
@@ -242,7 +241,7 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		IRunnableWithProgress r= new IRunnableWithProgress() {
 			public void run(IProgressMonitor pm) throws InvocationTargetException {
 				try {
-					TextBuffer.commitChanges(buffer, false, pm);
+					textFileBuffer.commit(pm, false);
 				} catch (CoreException ex) {
 					throw new InvocationTargetException(ex);
 				}
@@ -257,11 +256,11 @@ abstract class JavaHistoryActionImpl /* extends Action implements IActionDelegat
 		}
 	}
 
-	static String trimTextBlock(String content, String delimiter) {
+	static String trimTextBlock(String content, String delimiter, IJavaProject currentProject) {
 		if (content != null) {
 			String[] lines= Strings.convertIntoLines(content);
 			if (lines != null) {
-				Strings.trimIndentation(lines, JavaCompareUtilities.getTabSize());
+				Strings.trimIndentation(lines, currentProject);
 				return Strings.concatenate(lines, delimiter);
 			}
 		}

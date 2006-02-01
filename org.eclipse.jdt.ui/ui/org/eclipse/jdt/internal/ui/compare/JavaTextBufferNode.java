@@ -13,20 +13,26 @@ package org.eclipse.jdt.internal.ui.compare;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
-import org.eclipse.compare.HistoryItem;
-import org.eclipse.compare.IEncodedStreamContentAccessor;
-import org.eclipse.compare.ITypedElement;
-import org.eclipse.compare.ResourceNode;
-import org.eclipse.compare.IResourceProvider;
-import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
+import org.eclipse.core.runtime.CoreException;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFileState;
 import org.eclipse.core.resources.IResource;
-import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.ui.JavaPlugin;
+
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.compare.HistoryItem;
+import org.eclipse.compare.IEncodedStreamContentAccessor;
+import org.eclipse.compare.IResourceProvider;
+import org.eclipse.compare.ITypedElement;
+import org.eclipse.compare.ResourceNode;
+import org.eclipse.compare.structuremergeviewer.DocumentRangeNode;
+
+import org.eclipse.jdt.core.dom.ASTNode;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
  * Implements the IStreamContentAccessor and ITypedElement protocols
@@ -35,12 +41,12 @@ import org.eclipse.swt.graphics.Image;
 class JavaTextBufferNode implements ITypedElement, IEncodedStreamContentAccessor, IResourceProvider {
 	
 	private IFile fFile;
-	private TextBuffer fBuffer;
+	private IDocument fDocument;
 	private boolean fInEditor;
 	
-	JavaTextBufferNode(IFile file, TextBuffer buffer, boolean inEditor) {
+	JavaTextBufferNode(IFile file, IDocument document, boolean inEditor) {
 		fFile= file;
-		fBuffer= buffer;
+		fDocument= document;
 		fInEditor= inEditor;
 	}
 	
@@ -59,7 +65,7 @@ class JavaTextBufferNode implements ITypedElement, IEncodedStreamContentAccessor
 	}
 	
 	public InputStream getContents() {
-		return new ByteArrayInputStream(JavaCompareUtilities.getBytes(fBuffer.getContent(), "UTF-16")); //$NON-NLS-1$
+		return new ByteArrayInputStream(JavaCompareUtilities.getBytes(fDocument.get(), "UTF-16")); //$NON-NLS-1$
 	}
 	
 	public String getCharset() {

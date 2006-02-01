@@ -12,20 +12,28 @@ package org.eclipse.jdt.internal.ui.compare;
 
 import java.util.ResourceBundle;
 
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.viewers.ISelection;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
-import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.viewers.ISelection;
 
-import org.eclipse.compare.*;
+import org.eclipse.compare.EditionSelectionDialog;
+import org.eclipse.compare.ITypedElement;
+
+import org.eclipse.jdt.core.IMember;
+
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 
 /**
@@ -59,15 +67,18 @@ class JavaCompareWithEditionActionImpl extends JavaHistoryActionImpl {
 		}
 		
 		boolean inEditor= beingEdited(file);
-		if (inEditor)
-			input= (IMember) getWorkingCopy(input);
 
 		// get a TextBuffer
-		TextBuffer buffer= null;
+		
+		IPath path= file.getFullPath();
+		ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
+		
+		ITextFileBuffer textFileBuffer= null;
 		try {
-			buffer= TextBuffer.acquire(file);
+			bufferManager.connect(path, null);
+			textFileBuffer= bufferManager.getTextFileBuffer(path);
 
-			ITypedElement target= new JavaTextBufferNode(file, buffer, inEditor);
+			ITypedElement target= new JavaTextBufferNode(file, textFileBuffer.getDocument(), inEditor);
 
 			ITypedElement[] editions= buildEditions(target, file);
 
@@ -83,8 +94,12 @@ class JavaCompareWithEditionActionImpl extends JavaHistoryActionImpl {
 		} catch(CoreException ex) {
 			ExceptionHandler.handle(ex, getShell(), errorTitle, errorMessage);
 		} finally {
-			if (buffer != null)
-				TextBuffer.release(buffer);
+			try {
+				if (textFileBuffer != null)
+					bufferManager.disconnect(path, null);
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
 		}
 	}
 }

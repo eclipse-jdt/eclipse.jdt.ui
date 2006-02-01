@@ -43,8 +43,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IType;
 
-import org.eclipse.jdt.internal.corext.util.CodeFormatterUtil;
-
 import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
@@ -64,11 +62,7 @@ class JavaCompareUtilities {
 	private static final char INITIALIZER= '|';
 	private static final char COMPILATIONUNIT= '{';
 	private static final char TYPE= '[';
-	
-	static int getTabSize() {
-		return CodeFormatterUtil.getTabWidth();
-	}
-		
+			
 	static String getString(ResourceBundle bundle, String key, String dfltValue) {
 		
 		if (bundle != null) {

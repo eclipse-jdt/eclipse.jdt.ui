@@ -14,14 +14,31 @@ import java.lang.reflect.InvocationTargetException;
 import java.util.Map;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+
+import org.eclipse.core.filebuffers.FileBuffers;
+import org.eclipse.core.filebuffers.ITextFileBuffer;
+import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFileState;
+
+import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.util.Assert;
+import org.eclipse.jface.viewers.ISelection;
+
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.TextUtilities;
+
 import org.eclipse.compare.EditionSelectionDialog;
 import org.eclipse.compare.HistoryItem;
 import org.eclipse.compare.IStreamContentAccessor;
 import org.eclipse.compare.ITypedElement;
 import org.eclipse.compare.ResourceNode;
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IFileState;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
@@ -37,14 +54,12 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
-import org.eclipse.jdt.internal.corext.textmanipulation.TextBuffer;
+import org.eclipse.jdt.internal.corext.util.Resources;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-import org.eclipse.jface.dialogs.MessageDialog;
-import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.swt.widgets.Shell;
 
 
 /**
@@ -80,24 +95,29 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 			MessageDialog.openError(shell, errorTitle, errorMessage);
 			return;
 		}
-										
+		
+		
+		IStatus status= Resources.makeCommittable(file, shell);
+		if (!status.isOK()) {
+			return;
+		}
+		
 		boolean inEditor= beingEdited(file);
-		if (inEditor)
-			input= (IMember) getWorkingCopy(input);
 
-		// get a TextBuffer where to insert the text
-		TextBuffer buffer= null;
+		// get the document where to insert the text
+		IPath path= file.getFullPath();
+		ITextFileBufferManager bufferManager= FileBuffers.getTextFileBufferManager();
+		ITextFileBuffer textFileBuffer= null;
 		try {
-			buffer= TextBuffer.acquire(file);
-			
-			if (! buffer.makeCommittable(shell).isOK())
-				return;
+			bufferManager.connect(path, null);
+			textFileBuffer= bufferManager.getTextFileBuffer(path);
+			IDocument document= textFileBuffer.getDocument();
 
 			ResourceBundle bundle= ResourceBundle.getBundle(BUNDLE_NAME);
 			EditionSelectionDialog d= new EditionSelectionDialog(shell, bundle);
 			d.setHelpContextId(IJavaHelpContextIds.REPLACE_ELEMENT_WITH_HISTORY_DIALOG);
 			
-			ITypedElement target= new JavaTextBufferNode(file, buffer, inEditor);
+			ITypedElement target= new JavaTextBufferNode(file, document, inEditor);
 
 			ITypedElement[] editions= buildEditions(target, file);
 
@@ -114,7 +134,7 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 			if (ti instanceof IStreamContentAccessor) {
 				
 				String content= JavaCompareUtilities.readString((IStreamContentAccessor)ti);
-				String newContent= trimTextBlock(content, buffer.getLineDelimiter());
+				String newContent= trimTextBlock(content, TextUtilities.getDefaultLineDelimiter(document), input.getJavaProject());
 				if (newContent == null) {
 					MessageDialog.openError(shell, errorTitle, errorMessage);
 					return;
@@ -155,22 +175,26 @@ class JavaReplaceWithEditionActionImpl extends JavaHistoryActionImpl {
 				IJavaProject javaProject= compilationUnit.getJavaProject();
 				if (javaProject != null)
 					options= javaProject.getOptions(true);
-				applyChanges(rewriter, buffer, shell, inEditor, options);
+				applyChanges(rewriter, document, textFileBuffer, shell, inEditor, options);
 				
 			}
 	 	} catch(InvocationTargetException ex) {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
 			
 		} catch(InterruptedException ex) {
-			// shouldn't be called because is not cancable
+			// shouldn't be called because is not cancelable
 			Assert.isTrue(false);
 			
 		} catch(CoreException ex) {
 			ExceptionHandler.handle(ex, shell, errorTitle, errorMessage);
 			
 		} finally {
-			if (buffer != null)
-				TextBuffer.release(buffer);
+			try {
+				if (textFileBuffer != null)
+					bufferManager.disconnect(path, null);
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
 		}
 	}
 	

@@ -40,7 +40,6 @@ Export-Package: org.eclipse.jdt.internal.corext;x-friends:="org.eclipse.jdt.juni
  org.eclipse.jdt.internal.corext.refactoring.typeconstraints2;x-internal:=true,
  org.eclipse.jdt.internal.corext.refactoring.util;x-internal:=true,
  org.eclipse.jdt.internal.corext.template.java;x-internal:=true,
- org.eclipse.jdt.internal.corext.textmanipulation;x-internal:=true,
  org.eclipse.jdt.internal.corext.util;x-friends:="org.eclipse.jdt.junit",
  org.eclipse.jdt.internal.ui;x-friends:="org.eclipse.jdt.junit",
  org.eclipse.jdt.internal.ui.actions;x-friends:="org.eclipse.jdt.junit",
