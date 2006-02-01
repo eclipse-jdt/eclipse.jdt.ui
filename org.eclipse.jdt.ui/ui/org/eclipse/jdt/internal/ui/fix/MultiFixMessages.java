@@ -34,6 +34,7 @@ public class MultiFixMessages extends NLS {
 	public static String CodeStyleMultiFix_QualifyAccessToStaticField;
 	public static String CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect;
 	public static String CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description;
+	public static String CodeStyleCleanUp_addDefaultSerialVersionId_description;
 	
 	public static String Java50MultiFix_AddMissingDeprecated_description;
 	public static String Java50MultiFix_AddMissingOverride_description;
@@ -55,6 +56,7 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_J2SE50Section_description;
 	public static String CleanUpRefactoringWizard_UnusedCodeSection_description;
 	public static String CleanUpRefactoringWizard_StringExternalization_description;
+	public static String CleanUpRefactoringWizard_PotentialProgrammingProblems_description;
 	
 	static {
 		// initialize resource bundle

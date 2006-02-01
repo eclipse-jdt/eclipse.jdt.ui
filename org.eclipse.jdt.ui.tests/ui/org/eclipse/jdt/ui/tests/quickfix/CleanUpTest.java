@@ -51,6 +51,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
+import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
@@ -3615,7 +3616,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp1= new Java50CleanUp(Java50CleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
+		ICleanUp cleanUp1= new PotentialProgrammingProblemsCleanUp(PotentialProgrammingProblemsCleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
 		refactoring.addCleanUp(cleanUp1);
 		
 		buf= new StringBuffer();
@@ -3648,7 +3649,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp1= new Java50CleanUp(Java50CleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
+		ICleanUp cleanUp1= new PotentialProgrammingProblemsCleanUp(PotentialProgrammingProblemsCleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
 		refactoring.addCleanUp(cleanUp1);
 		
 		buf= new StringBuffer();
@@ -3694,7 +3695,7 @@ public class CleanUpTest extends QuickFixTest {
 		refactoring.addCompilationUnit(cu1);
 		refactoring.addCompilationUnit(cu2);
 		
-		ICleanUp cleanUp1= new Java50CleanUp(Java50CleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
+		ICleanUp cleanUp1= new PotentialProgrammingProblemsCleanUp(PotentialProgrammingProblemsCleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
 		refactoring.addCleanUp(cleanUp1);
 		
 		buf= new StringBuffer();
@@ -3737,7 +3738,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp1= new Java50CleanUp(Java50CleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
+		ICleanUp cleanUp1= new PotentialProgrammingProblemsCleanUp(PotentialProgrammingProblemsCleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
 		refactoring.addCleanUp(cleanUp1);
 		
 		buf= new StringBuffer();
@@ -3777,7 +3778,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp1= new Java50CleanUp(Java50CleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
+		ICleanUp cleanUp1= new PotentialProgrammingProblemsCleanUp(PotentialProgrammingProblemsCleanUp.ADD_CALCULATED_SERIAL_VERSION_ID);
 		refactoring.addCleanUp(cleanUp1);
 		
 		buf= new StringBuffer();

@@ -311,11 +311,12 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		private NameCleanUpTuple[] getNamedCleanUps() {
 			if (fCleanUps == null) {
 				ICleanUp[] fixes= createAllCleanUps();
-				fCleanUps= new NameCleanUpTuple[4];
+				fCleanUps= new NameCleanUpTuple[5];
 				fCleanUps[0]= new NameCleanUpTuple(MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description, fixes[0]);
 				fCleanUps[1]= new NameCleanUpTuple(MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description, fixes[1]);
 				fCleanUps[2]= new NameCleanUpTuple(MultiFixMessages.CleanUpRefactoringWizard_J2SE50Section_description, fixes[2]);
 				fCleanUps[3]= new NameCleanUpTuple(MultiFixMessages.CleanUpRefactoringWizard_StringExternalization_description, fixes[3]);
+				fCleanUps[4]= new NameCleanUpTuple(MultiFixMessages.CleanUpRefactoringWizard_PotentialProgrammingProblems_description, fixes[4]);
 			}
 			return fCleanUps;
 		}
@@ -378,11 +379,12 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 	public static ICleanUp[] createAllCleanUps() {
 		IDialogSettings section= getCleanUpWizardSettings();
 		
-		ICleanUp[] result= new ICleanUp[4];
+		ICleanUp[] result= new ICleanUp[5];
 		result[0]= new CodeStyleCleanUp(section);
 		result[1]= new UnusedCodeCleanUp(section);
 		result[2]= new Java50CleanUp(section);
 		result[3]= new StringCleanUp(section);
+		result[4]= new PotentialProgrammingProblemsCleanUp(section);
 		
 		return result;
 	}
