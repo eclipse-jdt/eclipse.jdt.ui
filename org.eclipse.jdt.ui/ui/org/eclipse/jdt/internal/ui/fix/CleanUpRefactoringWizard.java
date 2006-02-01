@@ -261,7 +261,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			fCleanUps[2].createConfigurationControl(group, project);
 			
 			//Java50Fix Group
-			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_J2SE50Section_description);
+			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_Annotations_sectionName);
 			fCleanUps[3]= new Java50CleanUp(section);
 			fCleanUps[3].createConfigurationControl(group, project);
 			

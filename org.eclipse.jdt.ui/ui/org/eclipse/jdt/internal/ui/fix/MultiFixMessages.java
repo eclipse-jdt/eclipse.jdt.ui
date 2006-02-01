@@ -53,10 +53,10 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_WindowTitle;
 	public static String CleanUpRefactoringWizard_PageTitle;
 	public static String CleanUpRefactoringWizard_CodeStyleSection_description;
-	public static String CleanUpRefactoringWizard_J2SE50Section_description;
 	public static String CleanUpRefactoringWizard_UnusedCodeSection_description;
 	public static String CleanUpRefactoringWizard_StringExternalization_description;
 	public static String CleanUpRefactoringWizard_PotentialProgrammingProblems_description;
+	public static String CleanUpRefactoringWizard_Annotations_sectionName;
 	
 	static {
 		// initialize resource bundle
