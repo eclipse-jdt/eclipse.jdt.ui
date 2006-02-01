@@ -91,7 +91,6 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.compiler.IProblem;
-import org.eclipse.jdt.core.dom.AST;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -951,7 +950,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					JavaPlugin.log(e);
 				}
 				cu.getBuffer().setContents(buffer.toString());
-				cu.reconcile(AST.JLS3, false, null, getProgressMonitor());
+				cu.reconcile(ASTProvider.SHARED_AST_LEVEL, false, ASTProvider.SHARED_AST_STATEMENT_RECOVERY, null, getProgressMonitor());
 			}
 			return cu;
 		} catch (CoreException ex) {
