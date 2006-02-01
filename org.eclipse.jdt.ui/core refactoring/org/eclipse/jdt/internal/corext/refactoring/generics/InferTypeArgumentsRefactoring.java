@@ -315,6 +315,9 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 	}
 	
 	public static ParameterizedType[] inferArguments(SimpleType[] types, InferTypeArgumentsUpdate update, InferTypeArgumentsTCModel model, CompilationUnitRewrite rewrite) {
+		for (int i= 0; i < types.length; i++) {
+			types[i].setProperty(REWRITTEN, null);
+		}
 		List result= new ArrayList();
 		HashMap/*<ICompilationUnit, CuUpdate>*/ updates= update.getUpdates();
 		Set entrySet= updates.entrySet();
