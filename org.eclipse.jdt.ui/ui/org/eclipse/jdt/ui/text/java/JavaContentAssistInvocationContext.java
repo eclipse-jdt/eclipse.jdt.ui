@@ -16,6 +16,7 @@ import org.eclipse.ui.IEditorPart;
 
 import org.eclipse.jdt.core.CompletionContext;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
@@ -23,9 +24,8 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.java.SignatureUtil;
 
-import org.eclipse.jdt.ui.JavaUI;
-
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory.RHSHistory;
 
 /**
@@ -86,8 +86,11 @@ public class JavaContentAssistInvocationContext extends ContentAssistInvocationC
 			fCUComputed= true;
 			if (fCollector != null)
 				fCU= fCollector.getCompilationUnit();
-			else
-				fCU= JavaUI.getWorkingCopyManager().getWorkingCopy(fEditor.getEditorInput());
+			else {
+				IJavaElement je= EditorUtility.getEditorInputJavaElement(fEditor, false);
+				if (je instanceof ICompilationUnit)
+					fCU= (ICompilationUnit)je;
+			}
 		}
 		return fCU;
 	}
