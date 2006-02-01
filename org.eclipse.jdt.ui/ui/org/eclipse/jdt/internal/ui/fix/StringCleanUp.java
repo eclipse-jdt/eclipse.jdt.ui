@@ -17,14 +17,12 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -95,15 +93,12 @@ public class StringCleanUp extends AbstractCleanUp {
 		return result;
 	}
 
-	public Control createConfigurationControl(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
-		composite.setLayout(new GridLayout(1, true));
+	public Control createConfigurationControl(Composite parent, IJavaProject project) {
+
+		addCheckBox(parent, ADD_MISSING_NLS_TAG, MultiFixMessages.StringMultiFix_AddMissingNonNls_description);
+		addCheckBox(parent, REMOVE_UNNECESSARY_NLS_TAG, MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description);
 		
-		addCheckBox(composite, ADD_MISSING_NLS_TAG, MultiFixMessages.StringMultiFix_AddMissingNonNls_description);
-		addCheckBox(composite, REMOVE_UNNECESSARY_NLS_TAG, MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description);
-		
-		return composite;
+		return parent;
 	}
 	
 	public void saveSettings(IDialogSettings settings) {

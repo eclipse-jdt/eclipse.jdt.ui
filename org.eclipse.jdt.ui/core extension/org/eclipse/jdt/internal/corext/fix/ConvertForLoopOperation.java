@@ -25,6 +25,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
+import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.EnhancedForStatement;
 import org.eclipse.jdt.core.dom.Expression;
@@ -52,6 +53,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
@@ -80,6 +82,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 	private final ICompilationUnit fCompilationUnit;
 	private FieldAccess fFieldAccess;
 	private final CompilationUnit fRoot;
+	private final boolean fAddBlock;
 
 	/**
 	 * Visitor class for finding all references to a certain Name within the
@@ -155,9 +158,11 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 	/**
 	 * @param forStatement The For statement to be converted
 	 * @param root 
+	 * @param addBlock 
 	 */
-	public ConvertForLoopOperation(CompilationUnit root, ForStatement forStatement, String parameterName) {
+	public ConvertForLoopOperation(CompilationUnit root, ForStatement forStatement, String parameterName, boolean addBlock) {
 		fRoot= root;
+		fAddBlock= addBlock;
 		fCompilationUnit= (ICompilationUnit)root.getJavaElement();
 		this.fOldForStatement= forStatement;
 		fAst= root.getAST();
@@ -428,8 +433,15 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 
 		AST ast= fOldForStatement.getAST();
 		fEnhancedForStatement= ast.newEnhancedForStatement();
-		ASTNode theBody= rewrite.createMoveTarget(fOldForStatement.getBody());
-		fEnhancedForStatement.setBody((Statement) theBody);
+		Statement theBody= (Statement)rewrite.createMoveTarget(fOldForStatement.getBody());
+		if (fAddBlock && !(theBody instanceof Block)) {
+			Block newBody= ast.newBlock();
+			ListRewrite listRewrite= rewrite.getListRewrite(newBody, Block.STATEMENTS_PROPERTY);
+			listRewrite.insertFirst(theBody, group);
+			fEnhancedForStatement.setBody(newBody);
+		} else {
+			fEnhancedForStatement.setBody(theBody);
+		}
 		fEnhancedForStatement.setExpression(createExpression(rewrite, ast));
 		fEnhancedForStatement.setParameter(fParameterDeclaration);
 		PositionGroup pg= getPositionGroup(fParameterName);

@@ -49,6 +49,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
@@ -2338,7 +2339,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -2398,7 +2399,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -2449,7 +2450,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -2506,7 +2507,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -2566,7 +2567,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -2646,8 +2647,10 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp codeStyle= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		ICleanUp codeStyle= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS);
 		refactoring.addCleanUp(codeStyle);
+		ControlStatementsCleanUp statmentsCleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		refactoring.addCleanUp(statmentsCleanUp);
 		ICleanUp stringFix= new StringCleanUp(StringCleanUp.REMOVE_UNNECESSARY_NLS_TAG);
 		refactoring.addCleanUp(stringFix);
 		
@@ -2682,8 +2685,10 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp codeStyle= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS | CodeStyleCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		ICleanUp codeStyle= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS);
 		refactoring.addCleanUp(codeStyle);
+		ControlStatementsCleanUp statmentsCleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		refactoring.addCleanUp(statmentsCleanUp);
 		ICleanUp stringFix= new StringCleanUp(StringCleanUp.REMOVE_UNNECESSARY_NLS_TAG | StringCleanUp.ADD_MISSING_NLS_TAG);
 		refactoring.addCleanUp(stringFix);
 		
@@ -2968,7 +2973,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -3014,7 +3019,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -3059,7 +3064,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -3104,7 +3109,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -3144,7 +3149,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp);
 		
 		assertRefactoringHasNoChange(refactoring);
@@ -3165,7 +3170,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp);
 		
 		assertRefactoringHasNoChange(refactoring);
@@ -3186,7 +3191,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp);
 		
 		assertRefactoringHasNoChange(refactoring);
@@ -3208,7 +3213,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp);
 		
 		assertRefactoringHasNoChange(refactoring);
@@ -3231,7 +3236,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -3265,7 +3270,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp);
 		
 		assertRefactoringHasNoChange(refactoring);
@@ -3291,7 +3296,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -3329,7 +3334,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -3364,7 +3369,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp);
 		
 		assertRefactoringHasNoChange(refactoring);
@@ -3410,7 +3415,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
@@ -3490,7 +3495,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp1= new CodeStyleCleanUp(CodeStyleCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
 		ICleanUp cleanUp2= new StringCleanUp(StringCleanUp.ADD_MISSING_NLS_TAG);
 		refactoring.addCleanUp(cleanUp1);
 		refactoring.addCleanUp(cleanUp2);
@@ -3516,6 +3521,46 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 	
+	public void testCombination03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;  \n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1  {\n");
+		buf.append("    private List<String> fList;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (Iterator<String> iter = fList.iterator(); iter.hasNext();) {\n");
+		buf.append("            String element = (String) iter.next();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp1= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_FIELD_ACCESS);
+		refactoring.addCleanUp(cleanUp1);
+		ICleanUp cleanUp2= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp2);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;  \n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1  {\n");
+		buf.append("    private List<String> fList;\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (String string : this.fList) {\n");
+		buf.append("            String element = (String) string;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
 	public void testCombinationBug120585() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
@@ -3534,12 +3579,10 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp1= new CodeStyleCleanUp(CodeStyleCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS | ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		ICleanUp cleanUp2= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS);
-		ICleanUp cleanUp3= new Java50CleanUp(Java50CleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
 		refactoring.addCleanUp(cleanUp1);
 		refactoring.addCleanUp(cleanUp2);
-		refactoring.addCleanUp(cleanUp3);
 		
 		buf= new StringBuffer();
 		buf.append("package test1;\n");
@@ -3576,7 +3619,7 @@ public class CleanUpTest extends QuickFixTest {
 		CleanUpRefactoring refactoring= new CleanUpRefactoring();
 		refactoring.addCompilationUnit(cu1);
 		
-		ICleanUp cleanUp1= new CodeStyleCleanUp(CodeStyleCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
 		ICleanUp cleanUp2= new StringCleanUp(StringCleanUp.ADD_MISSING_NLS_TAG);
 		refactoring.addCleanUp(cleanUp1);
 		refactoring.addCleanUp(cleanUp2);

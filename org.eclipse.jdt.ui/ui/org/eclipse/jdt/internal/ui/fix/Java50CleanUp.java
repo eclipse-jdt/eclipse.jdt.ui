@@ -17,9 +17,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -65,13 +63,6 @@ public class Java50CleanUp extends AbstractCleanUp {
 	public static final int ADD_OVERRIDE_ANNOATION= 2;
 	
 	/**
-	 * Convert for loops to enhanced for loops.<p>
-	 * i.e.:<pre><code>
-	 * for (int i = 0; i < array.length; i++) {} -> for (int element : array) {}</code></pre>
-	 */
-	public static final int CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP= 4;
-	
-	/**
 	 * Adds type parameters to raw type references.<p>
 	 * i.e.:<pre><code>
 	 * List l; -> List<Object> l;
@@ -95,8 +86,7 @@ public class Java50CleanUp extends AbstractCleanUp {
 		
 		return Java50Fix.createCleanUp(compilationUnit, 
 				isFlag(ADD_OVERRIDE_ANNOATION), 
-				isFlag(ADD_DEPRECATED_ANNOTATION),
-				isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP), 
+				isFlag(ADD_DEPRECATED_ANNOTATION), 
 				isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE));
 	}
 	
@@ -127,16 +117,16 @@ public class Java50CleanUp extends AbstractCleanUp {
 		return options;
 	}
 
-	public Control createConfigurationControl(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
-		composite.setLayout(new GridLayout(1, true));
+	public Control createConfigurationControl(Composite parent, IJavaProject project) {
 		
-		addCheckBox(composite, ADD_OVERRIDE_ANNOATION, MultiFixMessages.Java50MultiFix_AddMissingOverride_description);
-		addCheckBox(composite, ADD_DEPRECATED_ANNOTATION, MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description);
-		addCheckBox(composite, CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP, MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description);
+		Button box1= addCheckBox(parent, ADD_OVERRIDE_ANNOATION, MultiFixMessages.Java50MultiFix_AddMissingOverride_description);
+		Button box2= addCheckBox(parent, ADD_DEPRECATED_ANNOTATION, MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description);
+		if (project != null && !JavaModelUtil.is50OrHigher(project)) {
+			box1.setEnabled(false);
+			box2.setEnabled(false);
+		}
 		
-		return composite;
+		return parent;
 	}
 	
 	public void saveSettings(IDialogSettings settings) {
@@ -152,18 +142,9 @@ public class Java50CleanUp extends AbstractCleanUp {
 			result.add(removeMemonic(MultiFixMessages.Java50MultiFix_AddMissingOverride_description));
 		if (isFlag(ADD_DEPRECATED_ANNOTATION))
 			result.add(removeMemonic(MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description));
-		if (isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP))
-			result.add(removeMemonic(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description));
 		if (isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE))
 			result.add(removeMemonic(MultiFixMessages.Java50CleanUp_AddTypeParameters_description));
 		return (String[])result.toArray(new String[result.size()]);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean canCleanUp(IJavaProject project) {
-		return JavaModelUtil.is50OrHigher(project);
 	}
 
 	/**

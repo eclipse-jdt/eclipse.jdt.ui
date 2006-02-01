@@ -39,6 +39,7 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
@@ -105,10 +106,9 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		cleanUpRefactoring.addCleanUp(new ICleanUp() {
 			public IFix createFix(CompilationUnit compilationUnit) throws CoreException {return null;}
 			public Map getRequiredOptions() {return null;}
-			public Control createConfigurationControl(Composite parent) {return null;}
+			public Control createConfigurationControl(Composite parent, IJavaProject project) {return null;}
 			public void saveSettings(IDialogSettings settings) {}
 			public String[] getDescriptions() {return null;}
-			public boolean canCleanUp(IJavaProject project) {return true;}
 			public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
 				return true;
 			}
@@ -135,11 +135,13 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		addAllCUs(cleanUpRefactoring, MyTestSetup.fJProject1.getChildren());
 		
 		cleanUpRefactoring.addCleanUp(new CodeStyleCleanUp(
-				CodeStyleCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS | 
 				CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT | 
 				CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC | 
 				CodeStyleCleanUp.QUALIFY_FIELD_ACCESS |
 				CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS));
+		
+		cleanUpRefactoring.addCleanUp(new ControlStatementsCleanUp(
+				ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS));
 		
 		cleanUpRefactoring.addCleanUp(new Java50CleanUp(
 				Java50CleanUp.ADD_DEPRECATED_ANNOTATION | 

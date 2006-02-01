@@ -18,14 +18,12 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -138,20 +136,17 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 		return options;
 	}
 
-	public Control createConfigurationControl(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
-		composite.setLayout(new GridLayout(1, true));
+	public Control createConfigurationControl(Composite parent, IJavaProject project) {
+
+		addCheckBox(parent, REMOVE_UNUSED_IMPORTS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedImport_description);
+		addCheckBox(parent, REMOVE_UNUSED_PRIVATE_METHODS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedMethod_description);
+		addCheckBox(parent, REMOVE_UNUSED_PRIVATE_CONSTRUCTORS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedConstructor_description);
+		addCheckBox(parent, REMOVE_UNUSED_PRIVATE_TYPES, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedType_description);
+		addCheckBox(parent, REMOVE_UNUSED_PRIVATE_FIELDS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description);
+		addCheckBox(parent, REMOVE_UNUSED_LOCAL_VARIABLES, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description);
+		addCheckBox(parent, REMOVE_UNUSED_CAST, MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description);
 		
-		addCheckBox(composite, REMOVE_UNUSED_IMPORTS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedImport_description);
-		addCheckBox(composite, REMOVE_UNUSED_PRIVATE_METHODS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedMethod_description);
-		addCheckBox(composite, REMOVE_UNUSED_PRIVATE_CONSTRUCTORS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedConstructor_description);
-		addCheckBox(composite, REMOVE_UNUSED_PRIVATE_TYPES, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedType_description);
-		addCheckBox(composite, REMOVE_UNUSED_PRIVATE_FIELDS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description);
-		addCheckBox(composite, REMOVE_UNUSED_LOCAL_VARIABLES, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description);
-		addCheckBox(composite, REMOVE_UNUSED_CAST, MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description);
-		
-		return composite;
+		return parent;
 	}
 
 	public void saveSettings(IDialogSettings settings) {

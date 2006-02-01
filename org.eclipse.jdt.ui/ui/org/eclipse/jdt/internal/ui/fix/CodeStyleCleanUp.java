@@ -17,14 +17,12 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -76,13 +74,6 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 	 * }</code></pre>
 	 */
 	public static final int CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT= 8;
-	
-	/**
-	 * Adds block to control statement body if the body is not a block.<p>
-	 * i.e.:<pre><code>
-	 * 	 if (b) foo(); -> if (b) {foo();}</code></pre>
-	 */
-	public static final int ADD_BLOCK_TO_CONTROL_STATEMENTS= 16;
 
 	private static final int DEFAULT_FLAG= CHANGE_NON_STATIC_ACCESS_TO_STATIC | CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT;
 	private static final String SECTION_NAME= "CleanUp_CodeStyle"; //$NON-NLS-1$
@@ -103,8 +94,7 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 				isFlag(QUALIFY_FIELD_ACCESS), 
 				isFlag(CHANGE_NON_STATIC_ACCESS_TO_STATIC), 
 				isFlag(QUALIFY_STATIC_FIELD_ACCESS), 
-				isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT),
-				isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS));
+				isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT));
 	}
 	
 	/**
@@ -129,18 +119,14 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 		return options;
 	}
 
-	public Control createConfigurationControl(Composite parent) {
-		Composite composite= new Composite(parent, SWT.NONE);
-		composite.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, true));
-		composite.setLayout(new GridLayout(1, true));
+	public Control createConfigurationControl(Composite parent, IJavaProject project) {
 		
-		addCheckBox(composite, QUALIFY_FIELD_ACCESS, MultiFixMessages.CodeStyleMultiFix_AddThisQualifier_description);
-		addCheckBox(composite, QUALIFY_STATIC_FIELD_ACCESS, MultiFixMessages.CodeStyleMultiFix_QualifyAccessToStaticField);
-		addCheckBox(composite, CHANGE_NON_STATIC_ACCESS_TO_STATIC, MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description);
-		addCheckBox(composite, CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT, MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect);
-		addCheckBox(composite, ADD_BLOCK_TO_CONTROL_STATEMENTS, MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description);
+		addCheckBox(parent, QUALIFY_FIELD_ACCESS, MultiFixMessages.CodeStyleMultiFix_AddThisQualifier_description);
+		addCheckBox(parent, QUALIFY_STATIC_FIELD_ACCESS, MultiFixMessages.CodeStyleMultiFix_QualifyAccessToStaticField);
+		addCheckBox(parent, CHANGE_NON_STATIC_ACCESS_TO_STATIC, MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description);
+		addCheckBox(parent, CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT, MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect);
 		
-		return composite;
+		return parent;
 	}
 
 	public void saveSettings(IDialogSettings settings) {
@@ -160,8 +146,6 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 			result.add(removeMemonic(MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description));
 		if (isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT))
 			result.add(removeMemonic(MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect));
-		if (isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS))
-			result.add(removeMemonic(MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description));
 		return (String[])result.toArray(new String[result.size()]);
 	}
 

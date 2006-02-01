@@ -11,7 +11,6 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
-import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
 
@@ -30,8 +29,6 @@ import org.eclipse.jdt.core.dom.ClassInstanceCreation;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.ForStatement;
-import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -50,9 +47,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
-import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsConstraintCreator;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsConstraintsSolver;
 import org.eclipse.jdt.internal.corext.refactoring.generics.InferTypeArgumentsRefactoring;
@@ -79,74 +74,6 @@ public class Java50Fix extends LinkedFix {
 	
 	private static final String OVERRIDE= "Override"; //$NON-NLS-1$
 	private static final String DEPRECATED= "Deprecated"; //$NON-NLS-1$
-	private static final String FOR_LOOP_ELEMENT_IDENTIFIER= "element"; //$NON-NLS-1$
-
-	private static class ForLoopConverterGenerator extends GenericVisitor {
-
-		private final List fForConverters;
-		private final Hashtable fUsedNames;
-		private final CompilationUnit fCompilationUnit;
-		
-		public ForLoopConverterGenerator(List forConverters, CompilationUnit compilationUnit) {
-			fForConverters= forConverters;
-			fCompilationUnit= compilationUnit;
-			fUsedNames= new Hashtable();
-		}
-		
-		public boolean visit(ForStatement node) {
-			List usedVaribles= getUsedVariableNames(node);
-			usedVaribles.addAll(fUsedNames.values());
-			String[] used= (String[])usedVaribles.toArray(new String[usedVaribles.size()]);
-
-			String identifierName= FOR_LOOP_ELEMENT_IDENTIFIER;
-			int count= 0;
-			for (int i= 0; i < used.length; i++) {
-				if (used[i].equals(identifierName)) {
-					identifierName= FOR_LOOP_ELEMENT_IDENTIFIER + count;
-					count++;
-					i= 0;
-				}
-			}
-			
-			ConvertForLoopOperation forConverter= new ConvertForLoopOperation(fCompilationUnit, node, identifierName);
-			if (forConverter.satisfiesPreconditions()) {
-				fForConverters.add(forConverter);
-				fUsedNames.put(node, identifierName);
-			} else {
-				ConvertIterableLoopOperation iterableConverter= new ConvertIterableLoopOperation(fCompilationUnit, node, identifierName);
-				if (iterableConverter.isApplicable()) {
-					fForConverters.add(iterableConverter);
-					fUsedNames.put(node, identifierName);
-				}
-			}
-			return super.visit(node);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#endVisit(org.eclipse.jdt.core.dom.ForStatement)
-		 */
-		public void endVisit(ForStatement node) {
-			fUsedNames.remove(node);
-			super.endVisit(node);
-		}
-
-		private List getUsedVariableNames(ASTNode node) {
-			CompilationUnit root= (CompilationUnit)node.getRoot();
-			IBinding[] varsBefore= (new ScopeAnalyzer(root)).getDeclarationsInScope(node.getStartPosition(),
-				ScopeAnalyzer.VARIABLES);
-			IBinding[] varsAfter= (new ScopeAnalyzer(root)).getDeclarationsAfter(node.getStartPosition()
-				+ node.getLength(), ScopeAnalyzer.VARIABLES);
-
-			List names= new ArrayList();
-			for (int i= 0; i < varsBefore.length; i++) {
-				names.add(varsBefore[i].getName());
-			}
-			for (int i= 0; i < varsAfter.length; i++) {
-				names.add(varsAfter[i].getName());
-			}
-			return names;
-		}
-	}
 	
 	private static class AnnotationRewriteOperation implements IFixRewriteOperation {
 		private final BodyDeclaration fBodyDeclaration;
@@ -271,34 +198,17 @@ public class Java50Fix extends LinkedFix {
 		
 		return new Java50Fix(Messages.format(FixMessages.Java50Fix_AddTypeParameters_description, node.getName()), compilationUnit, (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]));
 	}
-	
-	public static Java50Fix createConvertForLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
-		ConvertForLoopOperation loopConverter= new ConvertForLoopOperation(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER);
-		if (!loopConverter.satisfiesPreconditions())
-			return null;
 		
-		return new Java50Fix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {loopConverter});
-	}
-	
-	public static Java50Fix createConvertIterableLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
-		ConvertIterableLoopOperation loopConverter= new ConvertIterableLoopOperation(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER);
-		if (!loopConverter.isApplicable())
-			return null;
-
-		return new Java50Fix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {loopConverter});
-	}
-	
 	public static IFix createCleanUp(CompilationUnit compilationUnit, 
 			boolean addOverrideAnnotation, 
 			boolean addDeprecatedAnnotation, 
-			boolean convertToEnhancedForLoop, 
 			boolean rawTypeReference) {
 		
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (!JavaModelUtil.is50OrHigher(cu.getJavaProject()))
 			return null;
 		
-		if (!addOverrideAnnotation && !addDeprecatedAnnotation && !convertToEnhancedForLoop && !rawTypeReference)
+		if (!addOverrideAnnotation && !addDeprecatedAnnotation && !rawTypeReference)
 			return null;
 
 		List/*<IFixRewriteOperation>*/ operations= new ArrayList();
@@ -314,11 +224,6 @@ public class Java50Fix extends LinkedFix {
 		
 		if (addDeprecatedAnnotation)
 			createAddDeprecatedAnnotationOperations(compilationUnit, locations, operations);
-		
-		if (convertToEnhancedForLoop) {
-			ForLoopConverterGenerator forLoopFinder= new ForLoopConverterGenerator(operations, compilationUnit);
-			compilationUnit.accept(forLoopFinder);
-		}
 		
 		if (rawTypeReference)
 			createRawTypeReferenceOperations(compilationUnit, locations, operations);

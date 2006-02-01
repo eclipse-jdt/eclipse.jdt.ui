@@ -74,9 +74,11 @@ public interface ICleanUp {
 	 * in a UI.
 	 * 
 	 * @param parent The composite in which the result is contained in
+	 * @param project The project within compilation units are going to be fixed
+	 * 					or null if multiple projects.
 	 * @return The control, not null.
 	 */
-	public abstract Control createConfigurationControl(Composite parent);
+	public abstract Control createConfigurationControl(Composite parent, IJavaProject project);
 
 	/**
 	 * Persist current settings of this in <code>settings</code>
@@ -91,15 +93,6 @@ public interface ICleanUp {
 	 * @return descriptions or null
 	 */
 	public String[] getDescriptions();
-
-	/**
-	 * Can the clean up operate on compilation units which are part of
-	 * <code>project</code>?
-	 * 
-	 * @param project The project, not null
-	 * @return true if clean up can fix problems in project
-	 */
-	public abstract boolean canCleanUp(IJavaProject project);
 	
 	/**
 	 * After call to beginCleanUp clients will start creating fixes for <code>compilationUnits</code>

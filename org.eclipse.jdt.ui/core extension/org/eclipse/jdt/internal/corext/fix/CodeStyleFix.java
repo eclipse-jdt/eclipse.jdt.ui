@@ -20,30 +20,23 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Assignment;
-import org.eclipse.jdt.core.dom.Block;
-import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.DoStatement;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
-import org.eclipse.jdt.core.dom.ForStatement;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
-import org.eclipse.jdt.core.dom.IfStatement;
 import org.eclipse.jdt.core.dom.Initializer;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
-import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SwitchCase;
 import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
-import org.eclipse.jdt.core.dom.WhileStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 
@@ -69,75 +62,16 @@ public class CodeStyleFix extends AbstractFix {
 		private final ImportRewrite fImportRewrite;
 		private final boolean fFindUnqualifiedAccesses;
 		private final boolean fFindUnqualifiedStaticAccesses;
-		private final boolean fFindControlStatementsWithoutBlock;
 		
 		public CodeStyleVisitor(CompilationUnit compilationUnit, 
 				boolean findUnqualifiedAccesses, 
 				boolean findUnqualifiedStaticAccesses, 
-				boolean findControlStatementsWithoutBlock,
 				List resultingCollection) throws CoreException {
 			
 			fFindUnqualifiedAccesses= findUnqualifiedAccesses;
 			fFindUnqualifiedStaticAccesses= findUnqualifiedStaticAccesses;
-			fFindControlStatementsWithoutBlock= findControlStatementsWithoutBlock;
 			fImportRewrite= StubUtility.createImportRewrite(compilationUnit, true);
 			fResult= resultingCollection;
-		}
-		
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.DoStatement)
-		 */
-		public boolean visit(DoStatement node) {
-			if (fFindControlStatementsWithoutBlock) {
-				ASTNode doBody= node.getBody();
-				if (!(doBody instanceof Block)) {
-					fResult.add(new AddBlockOperation(DoStatement.BODY_PROPERTY, doBody, node));
-				}
-			}
-			return super.visit(node);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.ForStatement)
-		 */
-		public boolean visit(ForStatement node) {
-			if (fFindControlStatementsWithoutBlock) {
-				ASTNode forBody= node.getBody();
-				if (!(forBody instanceof Block)) {
-					fResult.add(new AddBlockOperation(ForStatement.BODY_PROPERTY, forBody, node));
-				}
-			}
-			return super.visit(node);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.IfStatement)
-		 */
-		public boolean visit(IfStatement statement) {
-			if (fFindControlStatementsWithoutBlock) {
-				ASTNode then= statement.getThenStatement();
-				if (!(then instanceof Block)) {
-					fResult.add(new AddBlockOperation(IfStatement.THEN_STATEMENT_PROPERTY, then, statement));
-				}
-				ASTNode elseStatement= statement.getElseStatement();
-				if (elseStatement != null && !(elseStatement instanceof Block) && !(elseStatement instanceof IfStatement)) {
-					fResult.add(new AddBlockOperation(IfStatement.ELSE_STATEMENT_PROPERTY, elseStatement, statement));
-				}
-			}
-			return super.visit(statement);
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.dom.GenericVisitor#visit(org.eclipse.jdt.core.dom.WhileStatement)
-		 */
-		public boolean visit(WhileStatement node) {
-			if (fFindControlStatementsWithoutBlock) {
-				ASTNode whileBody= node.getBody();
-				if (!(whileBody instanceof Block)) {
-					fResult.add(new AddBlockOperation(WhileStatement.BODY_PROPERTY, whileBody, node));
-				}
-			}
-			return super.visit(node);
 		}
 
 		public boolean visit(QualifiedName node) {
@@ -291,42 +225,6 @@ public class CodeStyleFix extends AbstractFix {
 		}
 	}
 	
-	private static final class AddBlockOperation implements IFixRewriteOperation {
-
-		private final ChildPropertyDescriptor fBodyProperty;
-		private final ASTNode fBody;
-		private final Statement fStatement;
-
-		public AddBlockOperation(ChildPropertyDescriptor bodyProperty, ASTNode body, Statement statement) {
-			fBodyProperty= bodyProperty;
-			fBody= body;
-			fStatement= statement;
-		}
-
-		/* (non-Javadoc)
-		 * @see org.eclipse.jdt.internal.corext.fix.AbstractFix.IFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List)
-		 */
-		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
-			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			String label;
-			if (fBodyProperty == IfStatement.THEN_STATEMENT_PROPERTY) {
-				label = FixMessages.CodeStyleFix_ChangeIfToBlock_desription;
-			} else if (fBodyProperty == IfStatement.ELSE_STATEMENT_PROPERTY) {
-				label = FixMessages.CodeStyleFix_ChangeElseToBlock_description;
-			} else {
-				label = FixMessages.CodeStyleFix_ChangeControlToBlock_description;
-			}
-			
-			TextEditGroup group= new TextEditGroup(label);
-			textEditGroups.add(group);
-			
-			ASTNode childPlaceholder= rewrite.createMoveTarget(fBody);
-			Block replacingBody= cuRewrite.getRoot().getAST().newBlock();
-			replacingBody.statements().add(childPlaceholder);
-			rewrite.set(fStatement, fBodyProperty, replacingBody, group);
-		}
-	}
-	
 	public static CodeStyleFix[] createNonStaticAccessFixes(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
 		if (!isNonStaticAccess(problem))
 			return null;
@@ -374,15 +272,14 @@ public class CodeStyleFix extends AbstractFix {
 			boolean addThisQualifier, 
 			boolean changeNonStaticAccessToStatic, 
 			boolean qualifyStaticFieldAccess,
-			boolean changeIndirectStaticAccessToDirect,
-			boolean addBlockToControlStatements) throws CoreException {
+			boolean changeIndirectStaticAccessToDirect) throws CoreException {
 		
-		if (!addThisQualifier && !changeNonStaticAccessToStatic && !qualifyStaticFieldAccess && !changeIndirectStaticAccessToDirect && !addBlockToControlStatements)
+		if (!addThisQualifier && !changeNonStaticAccessToStatic && !qualifyStaticFieldAccess && !changeIndirectStaticAccessToDirect)
 			return null;
 
 		List/*<IFixRewriteOperation>*/ operations= new ArrayList(); 
-		if (addThisQualifier || qualifyStaticFieldAccess || addBlockToControlStatements) {
-			CodeStyleVisitor codeStyleVisitor= new CodeStyleVisitor(compilationUnit, addThisQualifier, qualifyStaticFieldAccess, addBlockToControlStatements, operations);
+		if (addThisQualifier || qualifyStaticFieldAccess) {
+			CodeStyleVisitor codeStyleVisitor= new CodeStyleVisitor(compilationUnit, addThisQualifier, qualifyStaticFieldAccess, operations);
 			compilationUnit.accept(codeStyleVisitor);
 		}
 		

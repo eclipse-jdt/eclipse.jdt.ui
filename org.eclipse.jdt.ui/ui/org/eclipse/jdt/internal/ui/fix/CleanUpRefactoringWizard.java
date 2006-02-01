@@ -20,7 +20,6 @@ import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -189,30 +188,25 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				}
 			}
 		}
+		
+		private ICleanUp[] createAllCleanUps() {
+			IDialogSettings section= getCleanUpWizardSettings();
+			
+			ICleanUp[] result= new ICleanUp[6];
+			result[0]= new CodeStyleCleanUp(section);
+			result[1]= new ControlStatementsCleanUp(section);
+			result[2]= new UnusedCodeCleanUp(section);
+			result[3]= new Java50CleanUp(section);
+			result[4]= new StringCleanUp(section);
+			result[5]= new PotentialProgrammingProblemsCleanUp(section);
+			
+			return result;
+		}
 	}
 	
 	private class SelectCleanUpPage extends UserInputWizardPage {
 		
-		private class NameCleanUpTuple {
-
-			private final ICleanUp fCleanUp;
-			private final String fName;
-
-			public NameCleanUpTuple(String name, ICleanUp cleanUp) {
-				fName= name;
-				fCleanUp= cleanUp;
-			}
-
-			public ICleanUp getCleanUp() {
-				return fCleanUp;
-			}
-
-			public String getName() {
-				return fName;
-			}
-		}
-		
-		private NameCleanUpTuple[] fCleanUps;
+		private ICleanUp[] fCleanUps;
 		
 		public SelectCleanUpPage(String name) {
 			super(name);
@@ -249,34 +243,47 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			} else {
 				project= null;
 			}
-			NameCleanUpTuple[] cleanUps= getNamedCleanUps();
-			for (int i= 0; i < cleanUps.length; i++) {
-				NameCleanUpTuple tuple= cleanUps[i];
-				
-				Group group= new Group(parent, SWT.NONE);
-				group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-				group.setLayout(new GridLayout(1, true));
-				group.setText(tuple.getName());
-				
-				ICleanUp cleanUp= tuple.getCleanUp();
-				cleanUp.createConfigurationControl(group);
-				if (project != null && !cleanUp.canCleanUp(project)) {
-					disableGroup(group);
-				}
-			}
+			
+			IDialogSettings section= getCleanUpWizardSettings();
+			
+			fCleanUps= new ICleanUp[6];
+			
+			//Code Style Group
+			Composite group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description);
+			fCleanUps[0]= new CodeStyleCleanUp(section);
+			fCleanUps[0].createConfigurationControl(group, project);
+			fCleanUps[1]= new ControlStatementsCleanUp(section);
+			fCleanUps[1].createConfigurationControl(group, project);
+			
+			//Unused Code Group
+			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description);
+			fCleanUps[2]= new UnusedCodeCleanUp(section);
+			fCleanUps[2].createConfigurationControl(group, project);
+			
+			//Java50Fix Group
+			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_J2SE50Section_description);
+			fCleanUps[3]= new Java50CleanUp(section);
+			fCleanUps[3].createConfigurationControl(group, project);
+			
+			//String Group
+			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_StringExternalization_description);
+			fCleanUps[4]= new StringCleanUp(section);
+			fCleanUps[4].createConfigurationControl(group, project);
+			
+			//Potential Programming Problems Group
+			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_PotentialProgrammingProblems_description);
+			fCleanUps[5]= new PotentialProgrammingProblemsCleanUp(section);
+			fCleanUps[5].createConfigurationControl(group, project);
 		}
 		
-		private void disableGroup(Composite composite) {
-			composite.setEnabled(false);
-			Control[] children= composite.getChildren();
-			for (int i= 0; i < children.length; i++) {
-				Control child= children[i];
-				if (child instanceof Composite) {
-					disableGroup((Composite)child);
-				} else {
-					child.setEnabled(false);
-				}
-			}
+		private Composite createGroup(Composite parent, String description) {
+			
+			Group group= new Group(parent, SWT.NONE);
+			group.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			group.setLayout(new GridLayout(1, true));
+			group.setText(description);
+			
+			return group;
 		}
 
 		protected boolean performFinish() {
@@ -292,34 +299,24 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 		
 		private void storeSettings() {
-			IDialogSettings settings= getCleanUpWizardSettings();
-			NameCleanUpTuple[] tuple= getNamedCleanUps();
-			for (int i= 0; i < tuple.length; i++) {
-				tuple[i].getCleanUp().saveSettings(settings);
+			if (fCleanUps != null) {
+				IDialogSettings settings= getCleanUpWizardSettings();
+				for (int i= 0; i < fCleanUps.length; i++) {
+					fCleanUps[i].saveSettings(settings);
+				}
 			}
 		}
 
 		private void initializeRefactoring() {
-			CleanUpRefactoring refactoring= (CleanUpRefactoring)getRefactoring();
-			refactoring.clearCleanUps();
-			NameCleanUpTuple[] tuple= getNamedCleanUps();
-			for (int i= 0; i < tuple.length; i++) {
-				refactoring.addCleanUp(tuple[i].getCleanUp());
+			if (fCleanUps != null) {
+				CleanUpRefactoring refactoring= (CleanUpRefactoring)getRefactoring();
+				refactoring.clearCleanUps();
+				for (int i= 0; i < fCleanUps.length; i++) {
+					refactoring.addCleanUp(fCleanUps[i]);
+				}
 			}
-		}	
-		
-		private NameCleanUpTuple[] getNamedCleanUps() {
-			if (fCleanUps == null) {
-				ICleanUp[] fixes= createAllCleanUps();
-				fCleanUps= new NameCleanUpTuple[5];
-				fCleanUps[0]= new NameCleanUpTuple(MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description, fixes[0]);
-				fCleanUps[1]= new NameCleanUpTuple(MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description, fixes[1]);
-				fCleanUps[2]= new NameCleanUpTuple(MultiFixMessages.CleanUpRefactoringWizard_J2SE50Section_description, fixes[2]);
-				fCleanUps[3]= new NameCleanUpTuple(MultiFixMessages.CleanUpRefactoringWizard_StringExternalization_description, fixes[3]);
-				fCleanUps[4]= new NameCleanUpTuple(MultiFixMessages.CleanUpRefactoringWizard_PotentialProgrammingProblems_description, fixes[4]);
-			}
-			return fCleanUps;
 		}
+		
 	}
 	
 	private final boolean fShowCUPage;
@@ -374,19 +371,6 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			}
 			addPage(selectSolverPage);
 		}
-	}
-		
-	public static ICleanUp[] createAllCleanUps() {
-		IDialogSettings section= getCleanUpWizardSettings();
-		
-		ICleanUp[] result= new ICleanUp[5];
-		result[0]= new CodeStyleCleanUp(section);
-		result[1]= new UnusedCodeCleanUp(section);
-		result[2]= new Java50CleanUp(section);
-		result[3]= new StringCleanUp(section);
-		result[4]= new PotentialProgrammingProblemsCleanUp(section);
-		
-		return result;
 	}
 	
 	private static IDialogSettings getCleanUpWizardSettings() {

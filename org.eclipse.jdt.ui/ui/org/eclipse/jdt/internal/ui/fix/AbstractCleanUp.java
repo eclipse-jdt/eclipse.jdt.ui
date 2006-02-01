@@ -92,12 +92,6 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		return buf.toString();
 	}
 	
-	/**
-	 * {@inheritDoc}
-	 */
-	public boolean canCleanUp(IJavaProject project) {
-		return true;
-	}
 	
 	/**
 	 * {@inheritDoc}
