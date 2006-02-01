@@ -33,12 +33,15 @@ import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.refactoring.IJavaElementMapper;
 
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenameTypeProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RenamingNameSuggestor;
@@ -152,14 +155,32 @@ public class RenameTypeTests extends RefactoringTest {
 		RefactoringStatus status= performRefactoring(ref);
 		assertNull("was supposed to pass", status);
 		checkResultInClass(newName);
+		checkMappedSimilarElementsExist(ref);
 	}
 	
 	private void helper3_inner(String oldName, String oldInnerName, String newName, String innerNewName, boolean updateRef, boolean updateTextual, boolean updateSimilar, String nonJavaFiles) throws JavaModelException, CoreException, IOException, Exception {
 		RenameRefactoring ref= initWithAllOptions(oldName, oldInnerName, newName, innerNewName, updateRef, updateTextual, updateSimilar, nonJavaFiles, RenamingNameSuggestor.STRATEGY_EMBEDDED);
 		assertNull("was supposed to pass", performRefactoring(ref));
 		checkResultInClass(newName);
+		checkMappedSimilarElementsExist(ref);
 	}
 	
+	private void checkMappedSimilarElementsExist(RenameRefactoring ref) {
+		RenameTypeProcessor rtp= (RenameTypeProcessor) ref.getProcessor();
+		IJavaElementMapper mapper= (IJavaElementMapper) rtp.getAdapter(IJavaElementMapper.class);
+		IJavaElement[] similarElements= rtp.getSimilarElements();
+		if (similarElements == null)
+			return;
+		for (int i= 0; i < similarElements.length; i++) {
+			IJavaElement element= similarElements[i];
+			if (! (element instanceof ILocalVariable)) {
+				IJavaElement newElement= mapper.getRefactoredJavaElement(element);
+				assertTrue(newElement.exists());
+				assertFalse(element.exists());
+			}
+		}
+	}
+
 	private void helper3(String oldName, String newName, boolean updateSimilar, boolean updateTextual, boolean updateRef) throws JavaModelException, CoreException, IOException, Exception {
 		helper3(oldName, newName, updateSimilar, updateTextual, updateRef, null);
 	}
