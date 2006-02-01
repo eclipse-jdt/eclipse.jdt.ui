@@ -390,8 +390,9 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	}
 
 	/**
-	 * Returns the similar elements of the type, i.e. IFields, IMethods,
-	 * and ILocalVariables.
+	 * Returns the similar elements of the type, i.e. IFields, IMethods, and
+	 * ILocalVariables. Returns <code>null</code> iff similar declaration updating
+	 * is not requested.
 	 */
 	public IJavaElement[] getSimilarElements() {
 		if (fFinalSimilarElementToName == null)
