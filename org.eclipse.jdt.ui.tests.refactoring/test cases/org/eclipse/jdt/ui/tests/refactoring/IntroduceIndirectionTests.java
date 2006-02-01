@@ -197,12 +197,12 @@ public class IntroduceIndirectionTests extends RefactoringTest {
 	
 	public void test12() throws Exception {
 		// cannot put the intermediary into an inner non-static type
-		helperFail(new String[] { "p.Foo" }, "bar", "p.Foo$Inner", 9, 10, 9, 13);
+		helperFail(new String[] { "p.Foo" }, "bar", "p.Foo.Inner", 9, 10, 9, 13);
 	}
 	
 	public void test13() throws Exception {
 		// create intermediary inside nested static types
-		helperPass(new String[] { "p.Foo", "p.Bar" }, "bar", "p.Foo$Inner$MoreInner", 13, 10, 13, 13);
+		helperPass(new String[] { "p.Foo", "p.Bar" }, "bar", "p.Foo.Inner.MoreInner", 13, 10, 13, 13);
 	}
 	
 	public void test14() throws Exception {
