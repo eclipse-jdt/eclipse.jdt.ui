@@ -130,8 +130,7 @@ public class OpenAction extends SelectionDispatchAction {
 		if (!isProcessable())
 			return;
 		try {
-			IJavaElement element= SelectionConverter.codeResolve(fEditor, getShell(), getDialogTitle(), 
-				ActionMessages.OpenAction_select_element); 
+			IJavaElement element= SelectionConverter.codeResolve(fEditor, false, getShell(), getDialogTitle(), ActionMessages.OpenAction_select_element); 
 			if (element == null) {
 				IEditorStatusLine statusLine= (IEditorStatusLine) fEditor.getAdapter(IEditorStatusLine.class);
 				if (statusLine != null)

@@ -21,7 +21,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
 
-import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IWorkbenchPart;
 
 import org.eclipse.jdt.core.IClassFile;
@@ -35,8 +34,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
-import org.eclipse.jdt.ui.JavaUI;
-
+import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
@@ -75,7 +73,7 @@ public class SelectionConverter {
 	/**
 	 * Converts the given structured selection into an array of Java elements.
 	 * An empty array is returned if one of the elements stored in the structured
-	 * selection is not of tupe <code>IJavaElement</code>
+	 * selection is not of type <code>IJavaElement</code>
 	 */
 	public static IJavaElement[] getElements(IStructuredSelection selection) {
 		if (!selection.isEmpty()) {
@@ -125,7 +123,7 @@ public class SelectionConverter {
 	
 	/**
 	 * Converts the text selection provided by the given editor a Java element by
-	 * asking the user if code reolve returned more than one result. If the selection 
+	 * asking the user if code resolve returned more than one result. If the selection 
 	 * doesn't cover a Java element and the selection's length is greater than 0 the 
 	 * methods returns the editor's input element.
 	 */
@@ -150,16 +148,36 @@ public class SelectionConverter {
 	}
 		
 	public static IJavaElement[] codeResolve(JavaEditor editor) throws JavaModelException {
-		return codeResolve(getInput(editor), (ITextSelection)editor.getSelectionProvider().getSelection());
+		return codeResolve(editor, true);
+	}
+	
+	/**
+	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
+	 * @since 3.2
+	 */
+	private static IJavaElement[] codeResolve(JavaEditor editor, boolean primaryOnly) throws JavaModelException {
+		return codeResolve(getInput(editor, primaryOnly), (ITextSelection)editor.getSelectionProvider().getSelection());
 	}
 
 	/**
 	 * Converts the text selection provided by the given editor a Java element by
-	 * asking the user if code reolve returned more than one result. If the selection 
+	 * asking the user if code resolve returned more than one result. If the selection 
 	 * doesn't cover a Java element <code>null</code> is returned.
 	 */
 	public static IJavaElement codeResolve(JavaEditor editor, Shell shell, String title, String message) throws JavaModelException {
-		IJavaElement[] elements= codeResolve(editor);
+		return codeResolve(editor, true, shell, title, message);
+	}
+	
+	/**
+	 * Converts the text selection provided by the given editor a Java element by
+	 * asking the user if code resolve returned more than one result. If the selection 
+	 * doesn't cover a Java element <code>null</code> is returned.
+	 * 
+	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
+	 * @since 3.2
+	 */
+	public static IJavaElement codeResolve(JavaEditor editor, boolean primaryOnly, Shell shell, String title, String message) throws JavaModelException {
+		IJavaElement[] elements= codeResolve(editor, primaryOnly);
 		if (elements == null || elements.length == 0)
 			return null;
 		IJavaElement candidate= elements[0];
@@ -179,7 +197,15 @@ public class SelectionConverter {
 	}
 	
 	public static IJavaElement getElementAtOffset(JavaEditor editor) throws JavaModelException {
-		return getElementAtOffset(getInput(editor), (ITextSelection)editor.getSelectionProvider().getSelection());
+		return getElementAtOffset(editor, true);
+	}
+	
+	/**
+	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
+	 * @since 3.2
+	 */
+	private static IJavaElement getElementAtOffset(JavaEditor editor, boolean primaryOnly) throws JavaModelException {
+		return getElementAtOffset(getInput(editor, primaryOnly), (ITextSelection)editor.getSelectionProvider().getSelection());
 	}
 	
 	public static IType getTypeAtOffset(JavaEditor editor) throws JavaModelException {
@@ -194,12 +220,17 @@ public class SelectionConverter {
 	}
 	
 	public static IJavaElement getInput(JavaEditor editor) {
+		return getInput(editor, true);
+	}
+	
+	/**
+	 * @param primaryOnly if <code>true</code> only primary working copies will be returned
+	 * @since 3.2
+	 */
+	private static IJavaElement getInput(JavaEditor editor, boolean primaryOnly) {
 		if (editor == null)
 			return null;
-		IEditorInput editorInput= editor.getEditorInput();
-		if (editorInput == null)
-			return null;
-		return JavaUI.getEditorInputJavaElement(editorInput);
+		return EditorUtility.getEditorInputJavaElement(editor, primaryOnly);
 	}
 	
 	public static ICompilationUnit getInputAsCompilationUnit(JavaEditor editor) {
