@@ -119,17 +119,14 @@ public class IndentAction extends TextEditorAction {
 			
 			Runnable runnable= new Runnable() {
 				public void run() {
-					final boolean multiLine= nLines > 1;
 					IRewriteTarget target= (IRewriteTarget)getTextEditor().getAdapter(IRewriteTarget.class);
-					if (target != null) {
+					if (target != null)
 						target.beginCompoundChange();
-						if (multiLine)
-							target.setRedraw(false);
-					}
 					
 					try {
 						JavaHeuristicScanner scanner= new JavaHeuristicScanner(document);
 						JavaIndenter indenter= new JavaIndenter(document, scanner, getJavaProject());
+						final boolean multiLine= nLines > 1;
 						boolean hasChanged= false;
 						for (int i= 0; i < nLines; i++) {
 							hasChanged |= indentLine(document, firstLine + i, offset, indenter, scanner, multiLine);
@@ -157,12 +154,8 @@ public class IndentAction extends TextEditorAction {
 						JavaPlugin.log(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IStatus.OK, "ConcurrentModification in IndentAction", e)); //$NON-NLS-1$
 						
 					} finally {
-						
-						if (target != null) {
+						if (target != null)
 							target.endCompoundChange();
-							if (multiLine)
-								target.setRedraw(true);
-						}
 					}
 				}
 			};
