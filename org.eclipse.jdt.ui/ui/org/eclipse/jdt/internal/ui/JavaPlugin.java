@@ -12,10 +12,7 @@ package org.eclipse.jdt.internal.ui;
 
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -220,13 +217,6 @@ public class JavaPlugin extends AbstractUIPlugin {
 	 */
 	private ContentAssistHistory fContentAssistHistory;
 
-	/**
-	 * The property change listeners to remove from the preference store on {@link #stop(BundleContext)}.
-	 * 
-	 * @since 3.2
-	 */
-	private final List fPreferenceListeners= new ArrayList();
-	
 	public static JavaPlugin getDefault() {
 		return fgJavaPlugin;
 	}
@@ -534,13 +524,14 @@ public class JavaPlugin extends AbstractUIPlugin {
 			
 			uninstallPreferenceStoreBackwardsCompatibility();
 			
-			if (!fPreferenceListeners.isEmpty()) {
-				IPreferenceStore store= getPreferenceStore();
-				for (Iterator it= fPreferenceListeners.iterator(); it.hasNext();) {
-					IPropertyChangeListener listener= (IPropertyChangeListener) it.next();
-					store.removePropertyChangeListener(listener);
-				}
-				fPreferenceListeners.clear();
+			if (fTemplateStore != null) {
+				fTemplateStore.stopListeningForPreferenceChanges();
+				fTemplateStore= null;
+			}
+			
+			if (fCodeTemplateStore != null) {
+				fCodeTemplateStore.stopListeningForPreferenceChanges();
+				fCodeTemplateStore= null;
 			}
 			
 			if (fMembersOrderPreferenceCache != null) {
@@ -753,19 +744,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 			} catch (IOException e) {
 				log(e);
 			}
-			
-			final IPropertyChangeListener updater= new IPropertyChangeListener() {
-				public void propertyChange(PropertyChangeEvent event) {
-					if (TEMPLATES_KEY.equals(event.getProperty()))
-						try {
-							fTemplateStore.load();
-						} catch (IOException x) {
-							log(x);
-						}
-				}
-			};
-			store.addPropertyChangeListener(updater);
-			fPreferenceListeners.add(updater);
+			fTemplateStore.startListeningForPreferenceChanges();
 		}
 		
 		return fTemplateStore;
@@ -819,22 +798,12 @@ public class JavaPlugin extends AbstractUIPlugin {
 				log(e);
 			}
 			
+			fCodeTemplateStore.startListeningForPreferenceChanges();
+			
 			// compatibility / bug fixing code for duplicated templates
 			// TODO remove for 3.0
 			CompatibilityTemplateStore.pruneDuplicates(fCodeTemplateStore, true);
 			
-			final IPropertyChangeListener updater= new IPropertyChangeListener() {
-				public void propertyChange(PropertyChangeEvent event) {
-					if (CODE_TEMPLATES_KEY.equals(event.getProperty()))
-						try {
-							fCodeTemplateStore.load();
-						} catch (IOException x) {
-							log(x);
-						}
-				}
-			};
-			store.addPropertyChangeListener(updater);
-			fPreferenceListeners.add(updater);
 		}
 		
 		return fCodeTemplateStore;
