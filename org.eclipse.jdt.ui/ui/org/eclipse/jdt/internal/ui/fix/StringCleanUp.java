@@ -53,7 +53,7 @@ public class StringCleanUp extends AbstractCleanUp {
 	public static final int REMOVE_UNNECESSARY_NLS_TAG= 2;
 	
 	private static final int DEFAULT_FLAG= REMOVE_UNNECESSARY_NLS_TAG;
-	private static final String SECTION_NAME= "CleanUp_Strings"; //$NON-NLS-1$
+	private static final String SECTION_NAME= "CleanUp_NLSTag"; //$NON-NLS-1$
 
 	public StringCleanUp(int flag) {
 		super(flag);
@@ -95,7 +95,6 @@ public class StringCleanUp extends AbstractCleanUp {
 
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
 
-		addCheckBox(parent, ADD_MISSING_NLS_TAG, MultiFixMessages.StringMultiFix_AddMissingNonNls_description);
 		addCheckBox(parent, REMOVE_UNNECESSARY_NLS_TAG, MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description);
 		
 		return parent;

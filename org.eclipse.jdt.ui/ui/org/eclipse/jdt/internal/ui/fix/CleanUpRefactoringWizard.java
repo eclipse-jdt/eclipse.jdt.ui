@@ -259,21 +259,18 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description);
 			fCleanUps[2]= new UnusedCodeCleanUp(section);
 			fCleanUps[2].createConfigurationControl(group, project);
+			fCleanUps[5]= new StringCleanUp(section);
+			fCleanUps[5].createConfigurationControl(group, project);
 			
 			//Java50Fix Group
 			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_Annotations_sectionName);
 			fCleanUps[3]= new Java50CleanUp(section);
 			fCleanUps[3].createConfigurationControl(group, project);
-			
-			//String Group
-			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_StringExternalization_description);
-			fCleanUps[4]= new StringCleanUp(section);
-			fCleanUps[4].createConfigurationControl(group, project);
-			
+
 			//Potential Programming Problems Group
 			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_PotentialProgrammingProblems_description);
-			fCleanUps[5]= new PotentialProgrammingProblemsCleanUp(section);
-			fCleanUps[5].createConfigurationControl(group, project);
+			fCleanUps[4]= new PotentialProgrammingProblemsCleanUp(section);
+			fCleanUps[4].createConfigurationControl(group, project);
 		}
 		
 		private Composite createGroup(Composite parent, String description) {
