@@ -23,14 +23,29 @@ import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 
 /**
+ * Action to run content assist on a specific proposal category.
  * 
  * @since 3.2
  */
 final class SpecificContentAssistAction extends Action {
+	/**
+	 * The category represented by this action.
+	 */
 	private final CompletionProposalCategory fCategory;
+	/**
+	 * The content assist executor.
+	 */
 	private final SpecificContentAssistExecutor fExecutor= new SpecificContentAssistExecutor(CompletionProposalComputerRegistry.getDefault());
+	/**
+	 * The editor.
+	 */
 	private JavaEditor fEditor;
 	
+	/**
+	 * Creates a new action for a certain proposal category.
+	 * 
+	 * @param category
+	 */
 	public SpecificContentAssistAction(CompletionProposalCategory category) {
 		fCategory= category;
 		setText(category.getName());

@@ -24,13 +24,19 @@ import org.eclipse.jdt.internal.ui.text.java.CompletionProposalCategory;
 import org.eclipse.jdt.internal.ui.text.java.CompletionProposalComputerRegistry;
 
 /**
- * 
+ * A content assist executor can invoke content assist for a specific proposal category on an editor.
+ *  
  * @since 3.2
  */
 public final class SpecificContentAssistExecutor {
 
 	private final CompletionProposalComputerRegistry fRegistry;
 
+	/**
+	 * Creates a new executor.
+	 * 
+	 * @param registry the computer registry to use for the enablement of proposal categories
+	 */
 	public SpecificContentAssistExecutor(CompletionProposalComputerRegistry registry) {
 		Assert.isNotNull(registry);
 		fRegistry= registry;
