@@ -94,8 +94,8 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	 */
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
 
-		addCheckBox(parent, ADD_BLOCK_TO_CONTROL_STATEMENTS, MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description);
-		Button box1= addCheckBox(parent, CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP, MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description);
+		addTab(parent);addCheckBox(parent, ADD_BLOCK_TO_CONTROL_STATEMENTS, MultiFixMessages.ControlStatementsCleanUp_useBlocks_checkBoxLabel);
+		addTab(parent);Button box1= addCheckBox(parent, CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP, MultiFixMessages.ControlStatementsCleanUp_convertLoops_checkBoxLabel);
 		if (project != null && !JavaModelUtil.is50OrHigher(project)) {
 			box1.setEnabled(false);
 		}
@@ -109,9 +109,9 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	public String[] getDescriptions() {
 		List result= new ArrayList();
 		if (isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS))
-			result.add(removeMemonic(MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description));
+			result.add(MultiFixMessages.CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description);
 		if (isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP))
-			result.add(removeMemonic(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description));
+			result.add(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description);
 		
 		return (String[])result.toArray(new String[result.size()]);
 	}

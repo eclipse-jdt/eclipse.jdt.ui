@@ -44,6 +44,11 @@ public class MultiFixMessages extends NLS {
 	public static String CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect;
 	public static String CodeStyleMultiFix_ConvertSingleStatementInControlBodeyToBlock_description;
 	public static String CodeStyleCleanUp_addDefaultSerialVersionId_description;
+	public static String CodeStyleCleanUp_useThis_checkBoxLabel;
+	public static String CodeStyleCleanUp_useDeclaring_checkBoxLabel;
+	public static String CodeStyleCleanUp_changeNonStatic_checkBoxLabel;
+	public static String CodeStyleCleanUp_changeIndirect_checkBoxLabel;
+	public static String CodeStyleCleanUp_addStaticQualifier_checkBoxLabel;
 	
 	public static String Java50MultiFix_AddMissingDeprecated_description;
 	public static String Java50MultiFix_AddMissingOverride_description;
@@ -69,11 +74,16 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_PotentialProgrammingProblems_description;
 	public static String CleanUpRefactoringWizard_Annotations_sectionName;
 	public static String CleanUpRefactoringWizard_Remove_sectionTitle;
+	public static String CleanUpRefactoringWizard_memberAccesses_sectionDescription;
+	public static String CleanUpRefactoringWizard_controlStatements_sectionDescription;
 	
 	public static String PotentialProgrammingProblemsCleanUp_AddSerialId_section_name;
 	public static String PotentialProgrammingProblemsCleanUp_Generated_radioButton_name;
 	public static String PotentialProgrammingProblemsCleanUp_Random_radioButton_name;
 	public static String PotentialProgrammingProblemsCleanUp_RandomSerialId_description;
+	
+	public static String ControlStatementsCleanUp_useBlocks_checkBoxLabel;
+	public static String ControlStatementsCleanUp_convertLoops_checkBoxLabel;
 	
 	static {
 		// initialize resource bundle

@@ -17,6 +17,9 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -121,10 +124,20 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
 		
-		addCheckBox(parent, QUALIFY_FIELD_ACCESS, MultiFixMessages.CodeStyleMultiFix_AddThisQualifier_description);
-		addCheckBox(parent, QUALIFY_STATIC_FIELD_ACCESS, MultiFixMessages.CodeStyleMultiFix_QualifyAccessToStaticField);
-		addCheckBox(parent, CHANGE_NON_STATIC_ACCESS_TO_STATIC, MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description);
-		addCheckBox(parent, CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT, MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect);
+		addTab(parent);addCheckBox(parent, QUALIFY_FIELD_ACCESS, MultiFixMessages.CodeStyleCleanUp_useThis_checkBoxLabel);
+		
+		addTab(parent);
+			Button button= new Button(parent, SWT.CHECK);
+			button.setText(MultiFixMessages.CodeStyleCleanUp_useDeclaring_checkBoxLabel);
+			button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+			
+		addTab(parent);
+		
+			final int[] flags= new int[] {CHANGE_NON_STATIC_ACCESS_TO_STATIC, CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT, QUALIFY_STATIC_FIELD_ACCESS};
+			final int[] uiFlags= new int[] {1073741824, 536870912, 268435456};
+			final String[] labels= new String[] {MultiFixMessages.CodeStyleCleanUp_changeNonStatic_checkBoxLabel, MultiFixMessages.CodeStyleCleanUp_changeIndirect_checkBoxLabel, MultiFixMessages.CodeStyleCleanUp_addStaticQualifier_checkBoxLabel};
+		
+			createSubGroup(parent, button, SWT.CHECK, flags, labels, uiFlags, true);
 		
 		return parent;
 	}
@@ -139,13 +152,13 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 	public String[] getDescriptions() {
 		List result= new ArrayList();
 		if (isFlag(QUALIFY_FIELD_ACCESS))
-			result.add(removeMemonic(MultiFixMessages.CodeStyleMultiFix_AddThisQualifier_description));
+			result.add(MultiFixMessages.CodeStyleMultiFix_AddThisQualifier_description);
 		if (isFlag(QUALIFY_STATIC_FIELD_ACCESS))
-			result.add(removeMemonic(MultiFixMessages.CodeStyleMultiFix_QualifyAccessToStaticField));
+			result.add(MultiFixMessages.CodeStyleMultiFix_QualifyAccessToStaticField);
 		if (isFlag(CHANGE_NON_STATIC_ACCESS_TO_STATIC))
-			result.add(removeMemonic(MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description));
+			result.add(MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description);
 		if (isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT))
-			result.add(removeMemonic(MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect));
+			result.add(MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect);
 		return (String[])result.toArray(new String[result.size()]);
 	}
 

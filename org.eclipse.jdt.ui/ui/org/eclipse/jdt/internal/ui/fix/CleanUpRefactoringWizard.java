@@ -251,10 +251,28 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			//Code Style Group
 			Composite group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description);
+			
+			Label accesses= new Label(group, SWT.NONE);
+			accesses.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			accesses.setText(MultiFixMessages.CleanUpRefactoringWizard_memberAccesses_sectionDescription);
+			
+			Composite composite= new Composite(group, SWT.NONE);
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			composite.setLayout(new GridLayout(2, false));
+			
 			fCleanUps[0]= new CodeStyleCleanUp(section);
-			fCleanUps[0].createConfigurationControl(group, project);
+			fCleanUps[0].createConfigurationControl(composite, project);
+			
+			Label statements= new Label(group, SWT.NONE);
+			statements.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			statements.setText(MultiFixMessages.CleanUpRefactoringWizard_controlStatements_sectionDescription);
+			
+			composite= new Composite(group, SWT.NONE);
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			composite.setLayout(new GridLayout(2, false));
+			
 			fCleanUps[1]= new ControlStatementsCleanUp(section);
-			fCleanUps[1].createConfigurationControl(group, project);
+			fCleanUps[1].createConfigurationControl(composite, project);
 			
 			//Unused Code Group
 			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description);
@@ -263,7 +281,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			remove.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
 			remove.setText(MultiFixMessages.CleanUpRefactoringWizard_Remove_sectionTitle);
 			
-			Composite composite= new Composite(group, SWT.NONE);
+			composite= new Composite(group, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 			composite.setLayout(new GridLayout(2, false));
 			
