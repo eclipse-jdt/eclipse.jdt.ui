@@ -298,14 +298,14 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 	 * Start to listen for selection changes.
 	 */
 	protected void startListeningForSelectionChanges() {
-		getSite().getWorkbenchWindow().getSelectionService().addPostSelectionListener(this);
+		getSite().getPage().addPostSelectionListener(this);
 	}
 
 	/**
 	 * Stop to listen for selection changes.
 	 */
 	protected void stopListeningForSelectionChanges() {
-		getSite().getWorkbenchWindow().getSelectionService().removePostSelectionListener(this);
+		getSite().getPage().removePostSelectionListener(this);
 	}
 
 	/*
