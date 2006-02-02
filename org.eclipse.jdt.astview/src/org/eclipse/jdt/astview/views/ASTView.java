@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.astview.views;
 
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,6 +19,7 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.filebuffers.FileBuffers;
@@ -49,7 +48,6 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.InputDialog;
-import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -120,12 +118,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class ASTView extends ViewPart implements IShowInSource {
-	
-	/**
-	 * Avoid direct reference to {@link JavaCore#COMPILER_STATEMENTS_RECOVERY}.
-	 */
-	private static final String COMPILER_STATEMENTS_RECOVERY= "org.eclipse.jdt.core.compiler.statementsRecovery";
-	
+		
 	private static final int JLS3= AST.JLS3;
 	/** (Used to get rid of deprecation warnings in code)
 	 * @deprecated
@@ -392,7 +385,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private final static String SETTINGS_LINK_WITH_EDITOR= "link_with_editor"; //$NON-NLS-1$
 	private final static String SETTINGS_INPUT_KIND= "input_kind"; //$NON-NLS-1$
 	private final static String SETTINGS_NO_BINDINGS= "create_bindings"; //$NON-NLS-1$
-	private final static String SETTINGS_STATEMENTS_RECOVERY= "statements_recovery"; //$NON-NLS-1$
+	private final static String SETTINGS_NO_STATEMENTS_RECOVERY= "no_statements_recovery"; //$NON-NLS-1$
 	private final static String SETTINGS_SHOW_NON_RELEVANT="show_non_relevant";//$NON-NLS-1$
 	private final static String SETTINGS_JLS= "jls"; //$NON-NLS-1$
 
@@ -451,7 +444,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			fCurrentInputKind= ASTInputKindAction.USE_PARSER;
 		}
 		fCreateBindings= !fDialogSettings.getBoolean(SETTINGS_NO_BINDINGS); // inverse so that default is to create bindings
-		fStatementsRecovery= fDialogSettings.getBoolean(SETTINGS_STATEMENTS_RECOVERY);
+		fStatementsRecovery= !fDialogSettings.getBoolean(SETTINGS_NO_STATEMENTS_RECOVERY); // inverse so that default is use recovery
 		fCurrentASTLevel= JLS3;
 		try {
 			int level= fDialogSettings.getInt(SETTINGS_JLS);
@@ -602,7 +595,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 //				buffer.replace(buffer.getLength() - 1, 1, new char[0]);
 				
 				startTime= System.currentTimeMillis();
-				root= wc.reconcile(getCurrentASTLevel(), true, null, null);
+				root= wc.reconcile(getCurrentASTLevel(), true, fStatementsRecovery, null, null);
 				endTime= System.currentTimeMillis();
 			} finally {
 				wc.discardWorkingCopy();
@@ -624,19 +617,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 				options= ((IClassFile) input).getJavaProject().getOptions(true);
 			}
 			
-			//TODO: clean up once JDT/Core API has been settled
-			options.put(COMPILER_STATEMENTS_RECOVERY, fStatementsRecovery ? JavaCore.ENABLED : JavaCore.DISABLED);
 			parser.setCompilerOptions(options);
-//			parser.setStatementsRecovery(fStatementsRecovery);
-			try {
-				Method method= parser.getClass().getMethod("setStatementsRecovery", new Class[] { boolean.class });
-				method.invoke(parser, new Object[] { Boolean.valueOf(fStatementsRecovery) });
-			} catch (SecurityException e) {
-			} catch (NoSuchMethodException e) {
-			} catch (IllegalArgumentException e) {
-			} catch (IllegalAccessException e) {
-			} catch (InvocationTargetException e) {
-			}
+			parser.setStatementsRecovery(fStatementsRecovery);
 			
 			startTime= System.currentTimeMillis();
 			root= (CompilationUnit) parser.createAST(null);
@@ -830,6 +812,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		}
 		manager.add(new Separator());
 		manager.add(fCreateBindingsAction);
+		manager.add(fStatementsRecoveryAction);
 		manager.add(fFilterNonRelevantAction);
 		manager.add(new Separator());
 		manager.add(fResolveBindingKeyAction);
@@ -841,8 +824,6 @@ public class ASTView extends ViewPart implements IShowInSource {
 		for (int i= 0; i < fASTInputKindActions.length; i++) {
 			menu.add(fASTInputKindActions[i]);	
 		}
-		menu.add(new Separator());
-		menu.add(fStatementsRecoveryAction);
 	}
 
 	protected void fillContextMenu(IMenuManager manager) {
@@ -1240,7 +1221,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	
 	protected void performStatementsRecovery() {
 		fStatementsRecovery= fStatementsRecoveryAction.isChecked();
-		fDialogSettings.put(SETTINGS_STATEMENTS_RECOVERY, fStatementsRecovery);
+		fDialogSettings.put(SETTINGS_NO_STATEMENTS_RECOVERY, !fStatementsRecovery);
 		performRefresh();
 	}
 	
