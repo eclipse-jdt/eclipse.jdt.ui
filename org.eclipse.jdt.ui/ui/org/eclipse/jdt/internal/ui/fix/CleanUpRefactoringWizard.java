@@ -258,7 +258,10 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			Composite composite= new Composite(group, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-			composite.setLayout(new GridLayout(2, false));
+			GridLayout layout= new GridLayout(2, false);
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			composite.setLayout(layout);
 			
 			fCleanUps[0]= new CodeStyleCleanUp(section);
 			fCleanUps[0].createConfigurationControl(composite, project);
@@ -269,7 +272,10 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			composite= new Composite(group, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-			composite.setLayout(new GridLayout(2, false));
+			layout= new GridLayout(2, false);
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			composite.setLayout(layout);
 			
 			fCleanUps[1]= new ControlStatementsCleanUp(section);
 			fCleanUps[1].createConfigurationControl(composite, project);
@@ -283,7 +289,10 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			composite= new Composite(group, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-			composite.setLayout(new GridLayout(2, false));
+			layout= new GridLayout(2, false);
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			composite.setLayout(layout);
 			
 			fCleanUps[2]= new UnusedCodeCleanUp(section);
 			fCleanUps[2].createConfigurationControl(composite, project);

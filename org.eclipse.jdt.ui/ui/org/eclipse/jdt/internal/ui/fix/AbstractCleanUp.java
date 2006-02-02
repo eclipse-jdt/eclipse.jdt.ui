@@ -38,6 +38,7 @@ public abstract class AbstractCleanUp implements ICleanUp {
 
 	private static final String SETTINGS_FLAG_NAME= "flag"; //$NON-NLS-1$
 	private static final String TAB= "    "; //$NON-NLS-1$
+	protected static final int MARGIN_SIZE= 0;
 	
 	private int fFlags;
 	
@@ -107,9 +108,15 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		Composite sub= new Composite(parent, SWT.NONE);
 		sub.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		if (isVertical) {
-			sub.setLayout(new GridLayout(2, false));
+			GridLayout layout= new GridLayout(2, false);
+			layout.marginHeight= MARGIN_SIZE;
+			layout.marginWidth= MARGIN_SIZE;
+			sub.setLayout(layout);
 		} else {
-			sub.setLayout(new GridLayout(flags.length + 1, false));
+			GridLayout layout= new GridLayout(flags.length + 1, false);
+			layout.marginHeight= MARGIN_SIZE;
+			layout.marginWidth= MARGIN_SIZE;
+			sub.setLayout(layout);
 			addTab(sub);
 		}
 
