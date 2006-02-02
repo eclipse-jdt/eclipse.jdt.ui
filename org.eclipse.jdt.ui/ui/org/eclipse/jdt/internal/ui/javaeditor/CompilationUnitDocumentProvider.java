@@ -950,7 +950,6 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 					JavaPlugin.log(e);
 				}
 				cu.getBuffer().setContents(buffer.toString());
-				cu.reconcile(ASTProvider.SHARED_AST_LEVEL, false, ASTProvider.SHARED_AST_STATEMENT_RECOVERY, null, getProgressMonitor());
 			}
 			return cu;
 		} catch (CoreException ex) {
