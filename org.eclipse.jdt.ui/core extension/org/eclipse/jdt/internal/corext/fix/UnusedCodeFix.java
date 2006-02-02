@@ -522,11 +522,7 @@ public class UnusedCodeFix extends AbstractFix {
 					return UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_METHODS;
 				}
 			case IBinding.VARIABLE:
-				if (((IVariableBinding) binding).isField()) {
-					return UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS;
-				} else {
-					return UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES;
-				}
+					return UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS |UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES;
 			default:
 				return 0;
 		}
