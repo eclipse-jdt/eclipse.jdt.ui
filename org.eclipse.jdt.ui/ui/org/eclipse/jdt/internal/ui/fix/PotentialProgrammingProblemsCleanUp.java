@@ -140,7 +140,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 		int[] flags= new int[] {ADD_CALCULATED_SERIAL_VERSION_ID, ADD_RANDOM_SERIAL_VERSION_ID};		
 		final int[] uiFlags= new int[] {1073741824, 536870912};
 		String[] labels= new String[] {MultiFixMessages.PotentialProgrammingProblemsCleanUp_Generated_radioButton_name, MultiFixMessages.PotentialProgrammingProblemsCleanUp_Random_radioButton_name};
-		createSubGroup(parent, button, SWT.RADIO, flags, labels, uiFlags);
+		createSubGroup(parent, button, SWT.RADIO, flags, labels, uiFlags, false);
 
 		return parent;
 	}

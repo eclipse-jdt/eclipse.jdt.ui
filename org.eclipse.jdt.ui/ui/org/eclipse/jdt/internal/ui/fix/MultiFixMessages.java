@@ -49,6 +49,9 @@ public class MultiFixMessages extends NLS {
 	public static String Java50MultiFix_AddMissingOverride_description;
 	public static String Java50CleanUp_ConvertToEnhancedForLoop_description;
 	public static String Java50CleanUp_AddTypeParameters_description;
+	public static String Java50CleanUp_addMissingAnnotations_checkBoxLabel;
+	public static String Java50CleanUp_override_checkBoxLabel;
+	public static String Java50CleanUp_deprecated_checkBoxLabel;
 
 	public static String SerialVersionCleanUp_Generated_description;
 	

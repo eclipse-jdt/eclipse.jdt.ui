@@ -17,6 +17,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -119,11 +121,20 @@ public class Java50CleanUp extends AbstractCleanUp {
 
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
 		
-		Button box1= addCheckBox(parent, ADD_OVERRIDE_ANNOATION, MultiFixMessages.Java50MultiFix_AddMissingOverride_description);
-		Button box2= addCheckBox(parent, ADD_DEPRECATED_ANNOTATION, MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description);
+		Button button= new Button(parent, SWT.CHECK);
+		button.setText(MultiFixMessages.Java50CleanUp_addMissingAnnotations_checkBoxLabel);
+		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		
+		int[] flags= new int[] {ADD_OVERRIDE_ANNOATION, ADD_DEPRECATED_ANNOTATION};
+		int[] uiFlags= new int[] {1073741824, 536870912};
+		String[] labels= new String[] {MultiFixMessages.Java50CleanUp_override_checkBoxLabel, MultiFixMessages.Java50CleanUp_deprecated_checkBoxLabel};
+		
+		Button[] boxes= createSubGroup(parent, button, SWT.CHECK, flags, labels, uiFlags, true);
+		
 		if (project != null && !JavaModelUtil.is50OrHigher(project)) {
-			box1.setEnabled(false);
-			box2.setEnabled(false);
+			boxes[0].setEnabled(false);
+			boxes[1].setEnabled(false);
+			button.setEnabled(false);
 		}
 		
 		return parent;
@@ -139,11 +150,11 @@ public class Java50CleanUp extends AbstractCleanUp {
 	public String[] getDescriptions() {
 		List result= new ArrayList();
 		if (isFlag(ADD_OVERRIDE_ANNOATION))
-			result.add(removeMemonic(MultiFixMessages.Java50MultiFix_AddMissingOverride_description));
+			result.add(MultiFixMessages.Java50MultiFix_AddMissingOverride_description);
 		if (isFlag(ADD_DEPRECATED_ANNOTATION))
-			result.add(removeMemonic(MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description));
+			result.add(MultiFixMessages.Java50MultiFix_AddMissingDeprecated_description);
 		if (isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE))
-			result.add(removeMemonic(MultiFixMessages.Java50CleanUp_AddTypeParameters_description));
+			result.add(MultiFixMessages.Java50CleanUp_AddTypeParameters_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
 

@@ -153,7 +153,7 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 			final int[] uiFlags= new int[] {1073741824, 536870912, 268435456, 134217728};
 			final String[] labels= new String[] {MultiFixMessages.UnusedCodeCleanUp_unusedTypes_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedConstructors_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedMethods_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedFields_checkBoxLabel};
 		
-			createSubGroup(composite, button, SWT.CHECK, flags, labels, uiFlags);
+			createSubGroup(composite, button, SWT.CHECK, flags, labels, uiFlags, false);
 		
 		addTab(composite);addCheckBox(composite, REMOVE_UNUSED_LOCAL_VARIABLES, MultiFixMessages.UnusedCodeCleanUp_unusedLocalVariables_checkBoxLabel);	
 		addTab(composite);addCheckBox(composite, REMOVE_UNUSED_CAST, MultiFixMessages.UnusedCodeCleanUp_unnecessaryCasts_checkBoxLabel);

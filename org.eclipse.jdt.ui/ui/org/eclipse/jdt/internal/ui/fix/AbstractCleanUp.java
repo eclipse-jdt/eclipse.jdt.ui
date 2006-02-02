@@ -103,14 +103,20 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		return button;
 	}
 	
-	protected Button[] createSubGroup(Composite parent, Button controlButton, final int style, final int[] flags, final String[] labels, final int[] uiFlags) {
+	protected Button[] createSubGroup(Composite parent, Button controlButton, final int style, final int[] flags, final String[] labels, final int[] uiFlags, boolean isVertical) {
 		Composite sub= new Composite(parent, SWT.NONE);
 		sub.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		sub.setLayout(new GridLayout(flags.length + 1, false));
+		if (isVertical) {
+			sub.setLayout(new GridLayout(2, false));
+		} else {
+			sub.setLayout(new GridLayout(flags.length + 1, false));
+			addTab(sub);
+		}
 
-		addTab(sub);
 		final Button[] buttons= new Button[flags.length];
 		for (int i= 0; i < buttons.length; i++) {
+			if (isVertical)
+				addTab(sub);
 			if (style == SWT.CHECK) {
 				buttons[i]= addCheckBox(sub, flags[i], labels[i]);
 			} else {
