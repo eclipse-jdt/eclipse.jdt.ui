@@ -13,7 +13,7 @@ package org.eclipse.jdt.text.tests;
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
-import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
 
 public class StringsTest extends TestCase {
 
@@ -28,19 +28,19 @@ public class StringsTest extends TestCase {
 
 	
 	public void testIsIndentChar() {
-		assertTrue(Strings.isIndentChar(' '));
-		assertTrue(Strings.isIndentChar('\t'));
-		assertTrue(!Strings.isIndentChar('x'));
-		assertTrue(!Strings.isIndentChar('\n'));
-		assertTrue(!Strings.isIndentChar('\r'));
+		assertTrue(IndentManipulation.isIndentChar(' '));
+		assertTrue(IndentManipulation.isIndentChar('\t'));
+		assertTrue(!IndentManipulation.isIndentChar('x'));
+		assertTrue(!IndentManipulation.isIndentChar('\n'));
+		assertTrue(!IndentManipulation.isIndentChar('\r'));
 	}
 		
 	public void testIsLineDelimiterChar() {
-		assertTrue(!Strings.isLineDelimiterChar(' '));
-		assertTrue(!Strings.isLineDelimiterChar('\t'));
-		assertTrue(!Strings.isLineDelimiterChar('x'));
-		assertTrue(Strings.isLineDelimiterChar('\n'));
-		assertTrue(Strings.isLineDelimiterChar('\r'));
+		assertTrue(!IndentManipulation.isLineDelimiterChar(' '));
+		assertTrue(!IndentManipulation.isLineDelimiterChar('\t'));
+		assertTrue(!IndentManipulation.isLineDelimiterChar('x'));
+		assertTrue(IndentManipulation.isLineDelimiterChar('\n'));
+		assertTrue(IndentManipulation.isLineDelimiterChar('\r'));
 	}
 	
 }
