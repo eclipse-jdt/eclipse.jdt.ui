@@ -351,12 +351,18 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 	private TextEdit fImportEdit;
 	private TextChange fChange;
 
-	public ExtractTempRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
+	/**
+	 * Creates a new extract temp refactoring
+	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
+	 * @param selectionStart
+	 * @param selectionLength
+	 */
+	public ExtractTempRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
-		fCu= cu;
+		fCu= unit;
 
 		fReplaceAllOccurrences= true; // default
 		fDeclareFinal= false; // default

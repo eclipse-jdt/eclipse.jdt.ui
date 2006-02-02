@@ -105,6 +105,10 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 	private boolean fAssumeCloneReturnsSameType;
 	private boolean fLeaveUnconstrainedRaw;
 	
+	/**
+	 * Creates a new infer type arguments refactoring.
+	 * @param elements the elements to process, or <code>null</code> if invoked by scripting
+	 */
 	public InferTypeArgumentsRefactoring(IJavaElement[] elements) {
 		fElements= elements;
 	}

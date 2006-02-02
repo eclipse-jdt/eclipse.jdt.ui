@@ -212,14 +212,20 @@ public class ExtractMethodRefactoring extends CommentRefactoring implements IIni
 		}
 	}
 
-	public ExtractMethodRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) throws CoreException {
-		fCUnit= cu;
+	/**
+	 * Creates a new extract method refactoring
+	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
+	 * @param selectionStart
+	 * @param selectionLength
+	 */
+	public ExtractMethodRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) throws CoreException {
+		fCUnit= unit;
 		fMethodName= "extracted"; //$NON-NLS-1$
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 		fVisibility= -1;
-		if (cu != null)
-			initialize(cu);
+		if (unit != null)
+			initialize(unit);
 	}
 
 	private void initialize(ICompilationUnit cu) throws CoreException {

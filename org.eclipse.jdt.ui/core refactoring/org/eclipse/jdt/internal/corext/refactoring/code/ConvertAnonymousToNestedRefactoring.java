@@ -158,15 +158,21 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
     private Set fClassNamesUsed;
 	private boolean fSelfInitializing= false;
 
-    public ConvertAnonymousToNestedRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
+	/**
+	 * Creates a new convert anonymous to nested refactoring
+	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
+	 * @param selectionStart
+	 * @param selectionLength
+	 */
+    public ConvertAnonymousToNestedRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
         Assert.isTrue(selectionStart >= 0);
         Assert.isTrue(selectionLength >= 0);
-        Assert.isTrue(cu == null || cu.exists());
+        Assert.isTrue(unit == null || unit.exists());
         fSelectionStart= selectionStart;
         fSelectionLength= selectionLength;
-        fCu= cu;
-        if (cu != null)
-        	fSettings= JavaPreferencesSettings.getCodeGenerationSettings(cu.getJavaProject());
+        fCu= unit;
+        if (unit != null)
+        	fSettings= JavaPreferencesSettings.getCodeGenerationSettings(unit.getJavaProject());
     }
 
     public int[] getAvailableVisibilities() {

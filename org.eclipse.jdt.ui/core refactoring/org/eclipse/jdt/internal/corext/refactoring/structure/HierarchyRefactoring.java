@@ -486,6 +486,10 @@ public abstract class HierarchyRefactoring extends CommentRefactoring implements
 
 	protected IMember[] fMembersToMove;
 
+	/**
+	 * Creates a new hierarchy refactoring
+	 * @param members the members to move, or <code>null</code> if invoked by scripting
+	 */
 	protected HierarchyRefactoring(final IMember[] members) {
 		if (members != null)
 			fMembersToMove= (IMember[]) SourceReferenceUtil.sortByOffset(members);

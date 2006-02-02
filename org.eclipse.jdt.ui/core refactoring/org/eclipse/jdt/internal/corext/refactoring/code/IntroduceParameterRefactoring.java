@@ -104,10 +104,16 @@ public class IntroduceParameterRefactoring extends CommentRefactoring implements
 	private Expression fSelectedExpression;
 	private String[] fExcludedParameterNames;
 	
-	public IntroduceParameterRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength) {
+	/**
+	 * Creates a new introduce parameter refactoring.
+	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
+	 * @param selectionStart
+	 * @param selectionLength
+	 */
+	public IntroduceParameterRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
-		fSourceCU= cu;
+		fSourceCU= unit;
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
 	}

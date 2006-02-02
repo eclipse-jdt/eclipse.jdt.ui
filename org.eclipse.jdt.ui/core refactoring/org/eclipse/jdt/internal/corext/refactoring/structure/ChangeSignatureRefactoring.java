@@ -172,6 +172,11 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 	private boolean fDelegateUpdating;
 	private boolean fDelegateDeprecation;
 
+	/**
+	 * Creates a new change signature refactoring.
+	 * @param method the method, or <code>null</code> if invoked by scripting framework
+	 * @throws JavaModelException
+	 */
 	public ChangeSignatureRefactoring(IMethod method) throws JavaModelException {
 		fMethod= method;
 		fOldVarargIndex= -1;

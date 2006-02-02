@@ -233,7 +233,7 @@ public class IntroduceFactoryRefactoring extends CommentRefactoring implements I
 	/**
 	 * Creates a new <code>IntroduceFactoryRefactoring</code> with the given selection
 	 * on the given compilation unit.
-	 * @param cu the <code>ICompilationUnit</code> in which the user selection was made
+	 * @param cu the <code>ICompilationUnit</code> in which the user selection was made, or <code>null</code> if invoked from scripting
 	 * @param selectionStart the start of the textual selection in <code>cu</code>
 	 * @param selectionLength the length of the textual selection in <code>cu</code>
 	 */
