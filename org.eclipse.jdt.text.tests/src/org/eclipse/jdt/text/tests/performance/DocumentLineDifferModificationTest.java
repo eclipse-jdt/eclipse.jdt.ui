@@ -151,6 +151,7 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 	private DifferenceMeter fMeter;
 	private Document fDocument;
 	private FindReplaceDocumentAdapter fFindReplaceAdapter;
+	private boolean fInitialized;
 	
 	protected void setUp() throws Exception {
 		super.setUp();
@@ -207,12 +208,12 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 			// difference measurement
 			fDocument.set(contents);
 			differ= ensureInitialized(fDocument);
-			reinitialized= waitForSynchronization(differ);
+			fInitialized= false;
 			meter.startMeasured();
 			replaceAll(searchExpression, replacementString);
 			meter.stopMeasured();
 			
-			assertFalse("QuickDiff reinitialization makes performance results unusable", reinitialized.isDone());
+			assertFalse("QuickDiff reinitialization makes performance results unusable", fInitialized);
 		} finally {
 			if (reinitialized != null)
 				reinitialized.cancel();
@@ -230,7 +231,15 @@ public class DocumentLineDifferModificationTest extends AbstractDocumentLineDiff
 	}
 	
 	private DocumentLineDiffer ensureInitialized(Document document) throws InterruptedException {
-		DocumentLineDiffer differ= new DocumentLineDiffer();
+		DocumentLineDiffer differ= new DocumentLineDiffer() {
+			/*
+			 * @see org.eclipse.ui.internal.texteditor.quickdiff.DocumentLineDiffer#initialize()
+			 */
+			protected synchronized void initialize() {
+				fInitialized= true;
+				super.initialize();
+			}
+		};
 		setUpDiffer(differ);
 		BooleanFuture future= waitForSynchronization(differ);
 		differ.connect(document);
