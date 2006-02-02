@@ -35,6 +35,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
@@ -67,16 +68,19 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDeprecationResolving;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.JavaElementLabels;
 
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /*
@@ -88,7 +92,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
  *    assigned to a paramter again. No need for a separate local (important to be able
  *    to revers extract method correctly).
  */
-public class InlineMethodRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public class InlineMethodRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent, IDeprecationResolving {
 
 	public static final String ID_INLINE_METHOD= "org.eclipse.jdt.ui.inline.method"; //$NON-NLS-1$
 	public static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
@@ -112,10 +116,26 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 	private Mode fInitialMode;
 	private int fSelectionStart;
 	private int fSelectionLength;
+	private final IMethod fMethod;
+
+	/**
+	 * Creates a new inline method refactoring.
+	 * <p>
+	 * This constructor is only used by <code>DelegateCreator</code>.
+	 * </p>
+	 * 
+	 * @param method the method to inline
+	 */
+	public InlineMethodRefactoring(IMethod method) {
+		Assert.isNotNull(method);
+		Assert.isTrue(!method.isBinary());
+		fMethod= method;
+	}
 
 	private InlineMethodRefactoring(ICompilationUnit unit, ASTNode node, int offset, int length) {
 		Assert.isNotNull(unit);
 		Assert.isNotNull(node);
+		fMethod= null;
 		fInitialCUnit= unit;
 		fInitialNode= node;
 		fSelectionStart= offset;
@@ -151,18 +171,25 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		fDeleteSource= true;
 	}
 	
-	public static InlineMethodRefactoring create(ICompilationUnit unit, CompilationUnit root, int offset, int length) {
-		ASTNode node= getTargetNode(unit, root, offset, length);
-		if (node == null)
+	/**
+	 * Creates a new inline constant refactoring
+	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
+	 * @param node the compilation unit node, or <code>null</code> if invoked by scripting
+	 * @param selectionStart
+	 * @param selectionLength
+	 */
+	public static InlineMethodRefactoring create(ICompilationUnit unit, CompilationUnit node, int selectionStart, int selectionLength) {
+		ASTNode target= getTargetNode(unit, node, selectionStart, selectionLength);
+		if (target == null)
 			return null;
-		if (node.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			return new InlineMethodRefactoring(unit, (MethodInvocation)node, offset, length);
-		} else if (node.getNodeType() == ASTNode.METHOD_DECLARATION) {
-			return new InlineMethodRefactoring(unit, (MethodDeclaration)node, offset, length);
-		} else if (node.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
-			return new InlineMethodRefactoring(unit, (SuperMethodInvocation)node, offset, length);
-		} else if (node.getNodeType() == ASTNode.CONSTRUCTOR_INVOCATION) {
-			return new InlineMethodRefactoring(unit, (ConstructorInvocation)node, offset, length);
+		if (target.getNodeType() == ASTNode.METHOD_INVOCATION) {
+			return new InlineMethodRefactoring(unit, (MethodInvocation)target, selectionStart, selectionLength);
+		} else if (target.getNodeType() == ASTNode.METHOD_DECLARATION) {
+			return new InlineMethodRefactoring(unit, (MethodDeclaration)target, selectionStart, selectionLength);
+		} else if (target.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
+			return new InlineMethodRefactoring(unit, (SuperMethodInvocation)target, selectionStart, selectionLength);
+		} else if (target.getNodeType() == ASTNode.CONSTRUCTOR_INVOCATION) {
+			return new InlineMethodRefactoring(unit, (ConstructorInvocation)target, selectionStart, selectionLength);
 		}
 		return null;
 	}
@@ -532,5 +559,30 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
+	}
+
+	public boolean canEnableDeprecationResolving() {
+		return true;
+	}
+
+	public RefactoringSessionDescriptor createDeprecationResolution() {
+		Assert.isNotNull(fMethod);
+		final Map arguments= new HashMap();
+		arguments.put(RefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
+		arguments.put(ATTRIBUTE_DELETE, Boolean.TRUE.toString());
+		arguments.put(ATTRIBUTE_MODE, String.valueOf(1));
+		String project= null;
+		IJavaProject javaProject= fMethod.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactorings.DEPRECATION_RESOLVING;
+		try {
+			if (!Flags.isPrivate(fMethod.getFlags()))
+				flags|= RefactoringDescriptor.MULTI_CHANGE;
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		final RefactoringDescriptor descriptor= new RefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_deprecation_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED)}), RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment, arguments, flags);
+		return new RefactoringSessionDescriptor(new RefactoringDescriptor[] { descriptor}, RefactoringSessionDescriptor.VERSION_1_0, RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment);
 	}
 }

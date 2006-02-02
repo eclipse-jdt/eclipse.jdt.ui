@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.delegates;
 
+import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
+
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -91,5 +93,8 @@ public class DelegateFieldCreator extends DelegateCreator {
 			return access;
 		}
 	}
-	
+
+	protected RefactoringSessionDescriptor createRefactoringScript() {
+		return null;
+	}
 }

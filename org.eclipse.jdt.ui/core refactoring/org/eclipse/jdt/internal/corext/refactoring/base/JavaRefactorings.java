@@ -24,7 +24,26 @@ import org.eclipse.jdt.internal.corext.SourceRange;
 public final class JavaRefactorings {
 
 	/**
-	 * Constant describing the importable flag (value: 65536)
+	 * Constant describing the deprecation resolving flag.
+	 * <p>
+	 * Clients should set this flag to indicate that the refactoring can used to
+	 * resolve deprecation problems of members declared in source.
+	 * </p>
+	 */
+	public static final int DEPRECATION_RESOLVING= 1 << 17;
+
+	/**
+	 * Constant describing the jar deprecation resolving flag.
+	 * <p>
+	 * Clients should set this flag to indicate that the refactoring can used to
+	 * resolve deprecation problems both of binary members contained in JAR
+	 * files and members declared in source.
+	 * </p>
+	 */
+	public static final int JAR_DEPRECATION_RESOLVING= 1 << 18;
+
+	/**
+	 * Constant describing the importable flag.
 	 * <p>
 	 * Clients should set this flag to indicate that the refactoring can be
 	 * imported from a JAR file.

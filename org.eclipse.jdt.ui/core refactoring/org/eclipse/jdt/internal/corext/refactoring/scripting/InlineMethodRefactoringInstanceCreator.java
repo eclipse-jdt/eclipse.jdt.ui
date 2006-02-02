@@ -25,7 +25,10 @@ import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -66,16 +69,33 @@ public final class InlineMethodRefactoringInstanceCreator extends RefactoringIns
 					selectionStart= offset;
 					selectionLength= length;
 				} else
-					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, InlineMethodRefactoring.ATTRIBUTE_SELECTION }), null));
-			} else
-				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, InlineMethodRefactoring.ATTRIBUTE_SELECTION), null));
+					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, InlineMethodRefactoring.ATTRIBUTE_SELECTION}), null));
+			}
 			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
 					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, InlineMethodRefactoring.ID_INLINE_METHOD), null));
 				else {
-					unit= (ICompilationUnit) element;
+					if (element instanceof ICompilationUnit) {
+						unit= (ICompilationUnit) element;
+						if (selection == null)
+							throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, InlineMethodRefactoring.ATTRIBUTE_SELECTION), null));
+					} else if (element instanceof IMethod) {
+						final IMethod method= (IMethod) element;
+						try {
+							final ISourceRange range= method.getNameRange();
+							if (range != null) {
+								selectionStart= range.getOffset();
+								selectionLength= range.getLength();
+							} else
+								throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle, RefactoringDescriptor.INPUT}), null));
+						} catch (JavaModelException exception) {
+							throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, InlineMethodRefactoring.ID_INLINE_METHOD), exception));
+						}
+						unit= method.getCompilationUnit();
+					} else
+						throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle, RefactoringDescriptor.INPUT}), null));
 					final ASTParser parser= ASTParser.newParser(AST.JLS3);
 					parser.setResolveBindings(true);
 					parser.setSource(unit);

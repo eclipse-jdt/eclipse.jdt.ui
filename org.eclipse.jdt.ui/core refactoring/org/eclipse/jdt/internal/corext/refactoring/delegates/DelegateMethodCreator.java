@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.corext.refactoring.delegates;
 
 import java.util.List;
 
+import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
+
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -208,4 +210,7 @@ public class DelegateMethodCreator extends DelegateCreator {
 		return statement;
 	}
 
+	protected RefactoringSessionDescriptor createRefactoringScript() {
+		return null;
+	}
 }

@@ -22,6 +22,7 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
+import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -234,6 +235,13 @@ public abstract class DelegateCreator {
 	protected abstract void initialize();
 
 	/**
+	 * Creates a refactoring script which can be used to fix this deprecation.
+	 * 
+	 * This method is only called if isDeclareDeprecated() == true.
+	 */
+	protected abstract RefactoringSessionDescriptor createRefactoringScript();
+
+	/**
 	 * 
 	 * Creates the body of the delegate.
 	 * 
@@ -330,16 +338,29 @@ public abstract class DelegateCreator {
 		}
 
 		if (fDeclareDeprecated) {
-			TagElement tag= getDelegateJavadocTag(fDeclaration);
-
-			Javadoc comment= fDeclaration.getJavadoc();
-			if (comment == null) {
-				comment= getAst().newJavadoc();
-				comment.tags().add(tag);
-				fDelegateRewrite.getASTRewrite().set(fDeclaration, getJavaDocProperty(), comment, null);
-			} else
-				fDelegateRewrite.getASTRewrite().getListRewrite(comment, Javadoc.TAGS_PROPERTY).insertLast(tag, null);
+			final RefactoringSessionDescriptor descriptor= createRefactoringScript();
+			if (descriptor != null) {
+				
+			}
+			createJavadoc();
 		}
+	}
+
+	/**
+	 * Creates the javadoc for the delegate.
+	 * 
+	 * @throws JavaModelException
+	 */
+	private void createJavadoc() throws JavaModelException {
+		TagElement tag= getDelegateJavadocTag(fDeclaration);
+
+		Javadoc comment= fDeclaration.getJavadoc();
+		if (comment == null) {
+			comment= getAst().newJavadoc();
+			comment.tags().add(tag);
+			fDelegateRewrite.getASTRewrite().set(fDeclaration, getJavaDocProperty(), comment, null);
+		} else
+			fDelegateRewrite.getASTRewrite().getListRewrite(comment, Javadoc.TAGS_PROPERTY).insertLast(tag, null);
 	}
 	
 	/**

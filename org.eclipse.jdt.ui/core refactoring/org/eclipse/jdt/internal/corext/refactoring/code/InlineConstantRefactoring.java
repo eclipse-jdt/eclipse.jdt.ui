@@ -38,6 +38,7 @@ import org.eclipse.jface.text.TextUtilities;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -48,6 +49,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
@@ -100,11 +102,13 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDeprecationResolving;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.TightSourceRangeComputer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -115,7 +119,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
-public class InlineConstantRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
+public class InlineConstantRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent, IDeprecationResolving {
 
 	private static final String ID_INLINE_CONSTANT= "org.eclipse.jdt.ui.inline.constant"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
@@ -557,14 +561,35 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 
 	private CompilationUnitChange[] fChanges;
 	
-	public InlineConstantRefactoring(ICompilationUnit cu, CompilationUnit node, int selectionStart, int selectionLength) {
+	/**
+	 * Creates a new inline constant refactoring.
+	 * <p>
+	 * This constructor is only used by <code>DelegateCreator</code>.
+	 * </p>
+	 * 
+	 * @param field the field to inline
+	 */
+	public InlineConstantRefactoring(IField field) {
+		Assert.isNotNull(field);
+		Assert.isTrue(!field.isBinary());
+		fField= field;
+	}
+
+	/**
+	 * Creates a new inline constant refactoring.
+	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
+	 * @param node the compilation unit node, or <code>null</code> if invoked by scripting
+	 * @param selectionStart
+	 * @param selectionLength
+	 */
+	public InlineConstantRefactoring(ICompilationUnit unit, CompilationUnit node, int selectionStart, int selectionLength) {
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
-		fSelectionCu= cu;
+		fSelectionCu= unit;
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
-		if (cu != null)
-			initialize(cu, node);
+		if (unit != null)
+			initialize(unit, node);
 	}
 
 	private void initialize(ICompilationUnit cu, CompilationUnit node) {
@@ -837,7 +862,6 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 			fChanges= null;
 		}
 	}
-	
 
 	private void checkInvariant() {
 		if (isDeclarationSelected())
@@ -889,20 +913,38 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 					fSelectionLength= length;
 				} else
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
-			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
+			}
 			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INLINE_CONSTANT));
 				else {
-					fSelectionCu= (ICompilationUnit) element;
-		        	final ASTParser parser= ASTParser.newParser(AST.JLS3);
-		        	parser.setResolveBindings(true);
-		        	parser.setSource(fSelectionCu);
-		        	initialize(fSelectionCu, (CompilationUnit) parser.createAST(null));
-		    		if (checkStaticFinalConstantNameSelected().hasFatalError())
+					if (element instanceof ICompilationUnit) {
+						fSelectionCu= (ICompilationUnit) element;
+						if (selection == null)
+							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
+					} else if (element instanceof IField) {
+						final IField field= (IField) element;
+						try {
+							final ISourceRange range= field.getNameRange();
+							if (range != null) {
+								fSelectionStart= range.getOffset();
+								fSelectionLength= range.getLength();
+							} else
+								return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ID_INLINE_CONSTANT));
+						} catch (JavaModelException exception) {
+							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INLINE_CONSTANT));
+						}
+						fSelectionCu= field.getCompilationUnit();
+					} else
+						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle, RefactoringDescriptor.INPUT}));
+					final ASTParser parser= ASTParser.newParser(AST.JLS3);
+					parser.setResolveBindings(true);
+					parser.setSource(fSelectionCu);
+					final CompilationUnit unit= (CompilationUnit) parser.createAST(null);
+					initialize(fSelectionCu, unit);
+					if (checkStaticFinalConstantNameSelected().hasFatalError())
 						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INLINE_CONSTANT));
 				}
 			} else
@@ -920,5 +962,29 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();
+	}
+
+	public boolean canEnableDeprecationResolving() {
+		return true;
+	}
+
+	public RefactoringSessionDescriptor createDeprecationResolution() {
+		final Map arguments= new HashMap();
+		arguments.put(RefactoringDescriptor.INPUT, fField.getHandleIdentifier());
+		arguments.put(ATTRIBUTE_REMOVE, Boolean.TRUE.toString());
+		arguments.put(ATTRIBUTE_REPLACE, Boolean.TRUE.toString());
+		String project= null;
+		IJavaProject javaProject= fField.getJavaProject();
+		if (javaProject != null)
+			project= javaProject.getElementName();
+		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactorings.DEPRECATION_RESOLVING;
+		try {
+			if (!Flags.isPrivate(fField.getFlags()))
+				flags|= RefactoringDescriptor.MULTI_CHANGE;
+		} catch (JavaModelException exception) {
+			JavaPlugin.log(exception);
+		}
+		final RefactoringDescriptor descriptor= new RefactoringDescriptor(ID_INLINE_CONSTANT, project, Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_deprecation_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED)}), RefactoringCoreMessages.InlineConstantRefactoring_deprecation_comment, arguments, flags);
+		return new RefactoringSessionDescriptor(new RefactoringDescriptor[] { descriptor}, RefactoringSessionDescriptor.VERSION_1_0, RefactoringCoreMessages.InlineConstantRefactoring_deprecation_comment);
 	}
 }

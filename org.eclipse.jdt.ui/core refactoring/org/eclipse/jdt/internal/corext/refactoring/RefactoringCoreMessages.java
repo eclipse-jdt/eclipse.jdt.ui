@@ -871,7 +871,9 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String MoveInnerToTopRefactoring_descriptor_description;
 	public static String InlineTempRefactoring_descriptor_description;
 	public static String InlineConstantRefactoring_descriptor_description;
+	public static String InlineConstantRefactoring_deprecation_description;
 	public static String InlineMethodRefactoring_descriptor_description;
+	public static String InlineMethodRefactoring_deprecation_description;
 	public static String ExtractMethodRefactoring_descriptor_description;
 	public static String ExtractTempRefactoring_descriptor_description;
 	public static String ExtractConstantRefactoring_descriptor_description;
@@ -927,4 +929,7 @@ public final class RefactoringCoreMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
 	}
+
+	public static String InlineConstantRefactoring_deprecation_comment;
+	public static String InlineMethodRefactoring_deprecation_comment;
 }
