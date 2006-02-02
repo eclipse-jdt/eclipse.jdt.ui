@@ -95,7 +95,7 @@ public class StringCleanUp extends AbstractCleanUp {
 
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
 
-		addTab(parent);addCheckBox(parent, REMOVE_UNNECESSARY_NLS_TAG, MultiFixMessages.StringCleanUp_RemoveNLSTag_label);
+		indent(addCheckBox(parent, REMOVE_UNNECESSARY_NLS_TAG, MultiFixMessages.StringCleanUp_RemoveNLSTag_label));
 		
 		return parent;
 	}

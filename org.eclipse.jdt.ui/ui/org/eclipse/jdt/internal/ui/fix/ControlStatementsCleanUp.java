@@ -94,8 +94,9 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	 */
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
 
-		addTab(parent);addCheckBox(parent, ADD_BLOCK_TO_CONTROL_STATEMENTS, MultiFixMessages.ControlStatementsCleanUp_useBlocks_checkBoxLabel);
-		addTab(parent);Button box1= addCheckBox(parent, CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP, MultiFixMessages.ControlStatementsCleanUp_convertLoops_checkBoxLabel);
+		indent(addCheckBox(parent, ADD_BLOCK_TO_CONTROL_STATEMENTS, MultiFixMessages.ControlStatementsCleanUp_useBlocks_checkBoxLabel));
+		Button box1= addCheckBox(parent, CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP, MultiFixMessages.ControlStatementsCleanUp_convertLoops_checkBoxLabel);
+		indent(box1);
 		if (project != null && !JavaModelUtil.is50OrHigher(project)) {
 			box1.setEnabled(false);
 		}

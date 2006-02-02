@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -140,23 +141,29 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 
 	public Control createConfigurationControl(Composite composite, IJavaProject project) {
 
-		addTab(composite);addCheckBox(composite, REMOVE_UNUSED_IMPORTS, MultiFixMessages.UnusedCodeCleanUp_unusedImports_checkBoxLabel);
+		indent(addCheckBox(composite, REMOVE_UNUSED_IMPORTS, MultiFixMessages.UnusedCodeCleanUp_unusedImports_checkBoxLabel));
 		
-		addTab(composite);
 			Button button= new Button(composite, SWT.CHECK);
 			button.setText(MultiFixMessages.UnusedCodeCleanUp_unusedPrivateMembers_checkBoxLabel);
 			button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		indent(button);
 			
-		addTab(composite);
+		Composite sub= new Composite(composite, SWT.NONE);
+		sub.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+		GridLayout layout= new GridLayout(1, false);
+		layout.marginHeight= 0;
+		layout.marginWidth= 0;
+		sub.setLayout(layout);
+		indent(sub);
 		
 			final int[] flags= new int[] {REMOVE_UNUSED_PRIVATE_TYPES, REMOVE_UNUSED_PRIVATE_CONSTRUCTORS, REMOVE_UNUSED_PRIVATE_METHODS, REMOVE_UNUSED_PRIVATE_FIELDS};
 			final int[] uiFlags= new int[] {1073741824, 536870912, 268435456, 134217728};
 			final String[] labels= new String[] {MultiFixMessages.UnusedCodeCleanUp_unusedTypes_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedConstructors_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedMethods_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedFields_checkBoxLabel};
 		
-			createSubGroup(composite, button, SWT.CHECK, flags, labels, uiFlags, false);
+			createSubGroup(sub, button, SWT.CHECK, flags, labels, uiFlags, false);
 		
-		addTab(composite);addCheckBox(composite, REMOVE_UNUSED_LOCAL_VARIABLES, MultiFixMessages.UnusedCodeCleanUp_unusedLocalVariables_checkBoxLabel);	
-		addTab(composite);addCheckBox(composite, REMOVE_UNUSED_CAST, MultiFixMessages.UnusedCodeCleanUp_unnecessaryCasts_checkBoxLabel);
+		indent(addCheckBox(composite, REMOVE_UNUSED_LOCAL_VARIABLES, MultiFixMessages.UnusedCodeCleanUp_unusedLocalVariables_checkBoxLabel));	
+		indent(addCheckBox(composite, REMOVE_UNUSED_CAST, MultiFixMessages.UnusedCodeCleanUp_unnecessaryCasts_checkBoxLabel));
 		
 		return composite;
 	}

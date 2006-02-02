@@ -258,7 +258,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			Composite composite= new Composite(group, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-			GridLayout layout= new GridLayout(2, false);
+			GridLayout layout= new GridLayout(1, false);
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
 			composite.setLayout(layout);
@@ -272,7 +272,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			composite= new Composite(group, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-			layout= new GridLayout(2, false);
+			layout= new GridLayout(1, false);
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
 			composite.setLayout(layout);
@@ -289,7 +289,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			composite= new Composite(group, SWT.NONE);
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-			layout= new GridLayout(2, false);
+			layout= new GridLayout(1, false);
 			layout.marginHeight= 0;
 			layout.marginWidth= 0;
 			composite.setLayout(layout);

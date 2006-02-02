@@ -20,7 +20,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Control;
 
 import org.eclipse.jface.dialogs.IDialogSettings;
 
@@ -37,8 +37,8 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	}
 
 	private static final String SETTINGS_FLAG_NAME= "flag"; //$NON-NLS-1$
-	private static final String TAB= "    "; //$NON-NLS-1$
 	protected static final int MARGIN_SIZE= 0;
+	private static final int INDENT_WIDTH= 20;
 	
 	private int fFlags;
 	
@@ -107,27 +107,20 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	protected Button[] createSubGroup(Composite parent, Button controlButton, final int style, final int[] flags, final String[] labels, final int[] uiFlags, boolean isVertical) {
 		Composite sub= new Composite(parent, SWT.NONE);
 		sub.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		if (isVertical) {
-			GridLayout layout= new GridLayout(2, false);
-			layout.marginHeight= MARGIN_SIZE;
-			layout.marginWidth= MARGIN_SIZE;
-			sub.setLayout(layout);
-		} else {
-			GridLayout layout= new GridLayout(flags.length + 1, false);
-			layout.marginHeight= MARGIN_SIZE;
-			layout.marginWidth= MARGIN_SIZE;
-			sub.setLayout(layout);
-			addTab(sub);
-		}
+		GridLayout layout= new GridLayout(isVertical?1:flags.length, false);
+		layout.marginHeight= MARGIN_SIZE;
+		layout.marginWidth= MARGIN_SIZE;
+		sub.setLayout(layout);
 
 		final Button[] buttons= new Button[flags.length];
 		for (int i= 0; i < buttons.length; i++) {
-			if (isVertical)
-				addTab(sub);
 			if (style == SWT.CHECK) {
 				buttons[i]= addCheckBox(sub, flags[i], labels[i]);
 			} else {
 				buttons[i]= addRadioButton(sub, flags[i], labels[i]);
+			}
+			if (i == 0 || isVertical) {
+				indent(buttons[i]);
 			}
 			final int index= i;
 			buttons[i].addSelectionListener(new SelectionAdapter() {
@@ -202,10 +195,9 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		return false;
 	}
 	
-	protected void addTab(Composite composite) {
-		Label tab= new Label(composite, SWT.NONE);
-		tab.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-		tab.setText(TAB);
+	protected void indent(Control control) {
+		GridData data= (GridData)control.getLayoutData();
+		data.horizontalIndent= INDENT_WIDTH;
 	}
 	
 	/**
