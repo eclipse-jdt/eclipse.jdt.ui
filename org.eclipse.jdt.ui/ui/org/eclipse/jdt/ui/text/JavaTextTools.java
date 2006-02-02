@@ -19,7 +19,6 @@ import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IDocumentExtension3;
 import org.eclipse.jface.text.IDocumentPartitioner;
-import org.eclipse.jface.text.rules.DefaultPartitioner;
 import org.eclipse.jface.text.rules.FastPartitioner;
 import org.eclipse.jface.text.rules.IPartitionTokenScanner;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
@@ -306,7 +305,7 @@ public class JavaTextTools {
 	 * @deprecated As of 3.0, replaced by {@link org.eclipse.jface.text.TextUtilities#computePartitionManagingCategories(IDocument)}
 	 */
 	public String[] getPartitionManagingPositionCategories() {
-		return new String[] { DefaultPartitioner.CONTENT_TYPES_CATEGORY };
+		return new String[] { org.eclipse.jface.text.rules.DefaultPartitioner.CONTENT_TYPES_CATEGORY };
 	}
 
 	/**
