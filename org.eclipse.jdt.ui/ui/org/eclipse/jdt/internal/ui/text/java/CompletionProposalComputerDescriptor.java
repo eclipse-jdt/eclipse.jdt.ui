@@ -72,6 +72,8 @@ final class CompletionProposalComputerDescriptor {
 	/* log constants */
 	private static final String COMPUTE_COMPLETION_PROPOSALS= "computeCompletionProposals()"; //$NON-NLS-1$
 	private static final String COMPUTE_CONTEXT_INFORMATION= "computeContextInformation()"; //$NON-NLS-1$
+	private static final String SESSION_STARTED= "sessionStarted()"; //$NON-NLS-1$
+	private static final String SESSION_ENDED= "sessionEnded()"; //$NON-NLS-1$
 	
 	static {
 		Set partitions= new HashSet();
@@ -276,7 +278,9 @@ final class CompletionProposalComputerDescriptor {
 		IStatus status;
 		try {
 			IJavaCompletionProposalComputer computer= getComputer();
-			
+			if (computer == null) // not active yet
+				return Collections.EMPTY_LIST;
+
 			PerformanceStats stats= startMeter(context, computer);
 			List proposals= computer.computeCompletionProposals(context, monitor);
 			stopMeter(stats, COMPUTE_COMPLETION_PROPOSALS);
@@ -319,7 +323,9 @@ final class CompletionProposalComputerDescriptor {
 		IStatus status;
 		try {
 			IJavaCompletionProposalComputer computer= getComputer();
-			
+			if (computer == null) // not active yet
+				return Collections.EMPTY_LIST;
+
 			PerformanceStats stats= startMeter(context, computer);
 			List proposals= computer.computeContextInformation(context, monitor);
 			stopMeter(stats, COMPUTE_CONTEXT_INFORMATION);
@@ -345,6 +351,66 @@ final class CompletionProposalComputerDescriptor {
 		return Collections.EMPTY_LIST;
 	}
 	
+
+	/**
+	 * Notifies the described extension of a proposal computation session start.
+	 */
+	public void sessionStarted() {
+		if (!isEnabled())
+			return;
+		
+		IStatus status;
+		try {
+			IJavaCompletionProposalComputer computer= getComputer();
+			if (computer == null) // not active yet
+				return;
+			
+			PerformanceStats stats= startMeter(SESSION_STARTED, computer);
+			computer.sessionStarted();
+			stopMeter(stats, SESSION_ENDED);
+			
+			return;
+		} catch (InvalidRegistryObjectException x) {
+			status= createExceptionStatus(x);
+		} catch (CoreException x) {
+			status= createExceptionStatus(x);
+		} catch (RuntimeException x) {
+			status= createExceptionStatus(x);
+		}
+		
+		fRegistry.remove(this, status);
+	}
+
+	/**
+	 * Notifies the described extension of a proposal computation session end.
+	 */
+	public void sessionEnded() {
+		if (!isEnabled())
+			return;
+		
+		IStatus status;
+		try {
+			IJavaCompletionProposalComputer computer= getComputer();
+			if (computer == null) // not active yet
+				return;
+			
+			PerformanceStats stats= startMeter(SESSION_ENDED, computer);
+			computer.sessionEnded();
+			stopMeter(stats, SESSION_ENDED);
+			
+			return;
+		} catch (InvalidRegistryObjectException x) {
+			status= createExceptionStatus(x);
+		} catch (CoreException x) {
+			status= createExceptionStatus(x);
+		} catch (RuntimeException x) {
+			status= createExceptionStatus(x);
+		}
+		
+		fRegistry.remove(this, status);
+	}
+	
+	
 	private void stopMeter(final PerformanceStats stats, String operation) {
 		IStatus status;
 		if (MEASURE_PERFORMANCE) {
@@ -356,7 +422,7 @@ final class CompletionProposalComputerDescriptor {
 		}
 	}
 
-	private PerformanceStats startMeter(ContentAssistInvocationContext context, IJavaCompletionProposalComputer computer) {
+	private PerformanceStats startMeter(Object context, IJavaCompletionProposalComputer computer) {
 		final PerformanceStats stats;
 		if (MEASURE_PERFORMANCE) {
 			stats= PerformanceStats.getStats(PERFORMANCE_EVENT, computer);

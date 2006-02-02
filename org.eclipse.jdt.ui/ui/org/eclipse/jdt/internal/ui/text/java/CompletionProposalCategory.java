@@ -27,10 +27,8 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.jface.resource.ImageDescriptor;
 
-
-import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 import org.eclipse.jdt.ui.text.java.ContentAssistInvocationContext;
-
+import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
@@ -288,6 +286,34 @@ public final class CompletionProposalCategory {
 	 */
 	public String getErrorMessage() {
 		return fLastError;
+	}
+
+	/**
+	 * Notifies the computers in this category of a proposal computation session start.
+	 */
+	public void sessionStarted() {
+		List descriptors= new ArrayList(fRegistry.getProposalComputerDescriptors());
+		for (Iterator it= descriptors.iterator(); it.hasNext();) {
+			CompletionProposalComputerDescriptor desc= (CompletionProposalComputerDescriptor) it.next();
+			if (desc.getCategory() == this)
+				desc.sessionStarted();
+			if (fLastError == null)
+				fLastError= desc.getErrorMessage();
+		}
+	}
+	
+	/**
+	 * Notifies the computers in this category of a proposal computation session end.
+	 */
+	public void sessionEnded() {
+		List descriptors= new ArrayList(fRegistry.getProposalComputerDescriptors());
+		for (Iterator it= descriptors.iterator(); it.hasNext();) {
+			CompletionProposalComputerDescriptor desc= (CompletionProposalComputerDescriptor) it.next();
+			if (desc.getCategory() == this)
+				desc.sessionEnded();
+			if (fLastError == null)
+				fLastError= desc.getErrorMessage();
+		}
 	}
 	
 }

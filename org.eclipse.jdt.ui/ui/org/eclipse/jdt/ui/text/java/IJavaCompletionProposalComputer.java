@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -17,16 +17,20 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.contentassist.IContextInformation;
 
-
 /**
  * Computes completions and context information displayed by the Java editor content assistant.
- * <p>
- * XXX this API is provisional and may change anytime during the course of 3.2
- * </p>
  * 
  * @since 3.2
  */
 public interface IJavaCompletionProposalComputer {
+	/**
+	 * Informs the computer that a content assist session has started. This call will always be
+	 * followed by a {@link #sessionEnded()} call, but not necessarily by calls to
+	 * {@linkplain #computeCompletionProposals(ContentAssistInvocationContext, IProgressMonitor) computeCompletionProposals}
+	 * or
+	 * {@linkplain #computeContextInformation(ContentAssistInvocationContext, IProgressMonitor) computeContextInformation}.
+	 */
+	void sessionStarted();
 
 	/**
 	 * Returns a list of completion proposals valid at the given invocation context.
@@ -34,7 +38,7 @@ public interface IJavaCompletionProposalComputer {
 	 * @param context the context of the content assist invocation
 	 * @param monitor a progress monitor to report progress. The monitor is private to this
 	 *        invocation, i.e. there is no need for the receiver to spawn a sub monitor.
-	 * @return an array of completion proposals (element type: {@link ICompletionProposal})
+	 * @return a list of completion proposals (element type: {@link ICompletionProposal})
 	 */
 	List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor);
 
@@ -44,7 +48,7 @@ public interface IJavaCompletionProposalComputer {
 	 * @param context the context of the content assist invocation
 	 * @param monitor a progress monitor to report progress. The monitor is private to this
 	 *        invocation, i.e. there is no need for the receiver to spawn a sub monitor.
-	 * @return an array of context information objects (element type: {@link IContextInformation})
+	 * @return a list of context information objects (element type: {@link IContextInformation})
 	 */
 	List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor);
 
@@ -55,4 +59,13 @@ public interface IJavaCompletionProposalComputer {
 	 * @return an error message or <code>null</code> if no error occurred
 	 */
 	String getErrorMessage();
+
+	/**
+	 * Informs the computer that a content assist session has ended. This call will always be after
+	 * any calls to
+	 * {@linkplain #computeCompletionProposals(ContentAssistInvocationContext, IProgressMonitor) computeCompletionProposals}
+	 * and
+	 * {@linkplain #computeContextInformation(ContentAssistInvocationContext, IProgressMonitor) computeContextInformation}.
+	 */
+	void sessionEnded();
 }

@@ -87,6 +87,9 @@ public class JavaDocContext extends CompilationUnitContext {
 	 * @see DocumentTemplateContext#getStart()
 	 */ 
 	public int getStart() {
+		if (fIsManaged)
+			return super.getStart();
+		
 		try {
 			IDocument document= getDocument();
 
@@ -139,7 +142,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	 */
 	public int getEnd() {
 		
-		if (getCompletionLength() == 0)		
+		if (fIsManaged || getCompletionLength() == 0)		
 			return super.getEnd();
 
 		try {			

@@ -56,4 +56,16 @@ public final class HippieProposalComputer implements IJavaCompletionProposalComp
 	public String getErrorMessage() {
 		return fProcessor.getErrorMessage();
 	}
+
+	/*
+	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionStarted()
+	 */
+	public void sessionStarted() {
+	}
+
+	/*
+	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionEnded()
+	 */
+	public void sessionEnded() {
+	}
 }

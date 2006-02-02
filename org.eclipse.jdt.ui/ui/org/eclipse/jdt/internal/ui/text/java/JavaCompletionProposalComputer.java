@@ -174,7 +174,6 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeContextInformation(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public List computeContextInformation(ContentAssistInvocationContext context, IProgressMonitor monitor) {
-		fErrorMessage= null;
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
 			
@@ -189,7 +188,6 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalComputer#computeCompletionProposals(org.eclipse.jface.text.contentassist.TextContentAssistInvocationContext, org.eclipse.core.runtime.IProgressMonitor)
 	 */
 	public List computeCompletionProposals(ContentAssistInvocationContext context, IProgressMonitor monitor) {
-		fErrorMessage= null;
 		if (context instanceof JavaContentAssistInvocationContext) {
 			JavaContentAssistInvocationContext javaContext= (JavaContentAssistInvocationContext) context;
 			return internalComputeCompletionProposals(context.getInvocationOffset(), javaContext, monitor);
@@ -256,5 +254,18 @@ public class JavaCompletionProposalComputer implements IJavaCompletionProposalCo
 	 */
 	public String getErrorMessage() {
 		return fErrorMessage;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionStarted()
+	 */
+	public void sessionStarted() {
+	}
+
+	/*
+	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionEnded()
+	 */
+	public void sessionEnded() {
+		fErrorMessage= null;
 	}
 }

@@ -93,7 +93,6 @@ public final class TemplateCompletionProposalComputer implements IJavaCompletion
 			if (unit == null)
 				return Collections.EMPTY_LIST;
 			
-			engine.reset();
 			engine.complete(javaContext.getViewer(), javaContext.getInvocationOffset(), unit);
 
 			TemplateProposal[] templateProposals= engine.getResults();
@@ -196,5 +195,19 @@ public final class TemplateCompletionProposalComputer implements IJavaCompletion
 	 */
 	public String getErrorMessage() {
 		return null;
+	}
+
+	/*
+	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionStarted()
+	 */
+	public void sessionStarted() {
+	}
+
+	/*
+	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionEnded()
+	 */
+	public void sessionEnded() {
+		fJavadocTemplateEngine.reset();
+		fJavaTemplateEngine.reset();
 	}
 }

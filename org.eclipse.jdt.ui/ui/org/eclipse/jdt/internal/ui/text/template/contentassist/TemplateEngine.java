@@ -11,6 +11,10 @@
 package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
+import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.swt.graphics.Point;
 
@@ -18,16 +22,18 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
+import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.Region;
-import org.eclipse.jface.text.templates.TemplateContextType;
 import org.eclipse.jface.text.templates.GlobalTemplateVariables;
 import org.eclipse.jface.text.templates.Template;
+import org.eclipse.jface.text.templates.TemplateContextType;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContext;
 import org.eclipse.jdt.internal.corext.template.java.CompilationUnitContextType;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -40,6 +46,8 @@ public class TemplateEngine {
 	private TemplateContextType fContextType;
 	/** The result proposals. */
 	private ArrayList fProposals= new ArrayList();
+	/** Positions created on the key documents to remove in reset. */
+	private final Map fPositions= new HashMap();
 
 	/**
 	 * Creates the template engine for a particular context type.
@@ -55,6 +63,13 @@ public class TemplateEngine {
 	 */
 	public void reset() {
 		fProposals.clear();
+		for (Iterator it= fPositions.entrySet().iterator(); it.hasNext();) {
+			Entry entry= (Entry) it.next();
+			IDocument doc= (IDocument) entry.getKey();
+			Position position= (Position) entry.getValue();
+			doc.removePosition(position);
+		}
+		fPositions.clear();
 	}
 
 	/**
@@ -78,17 +93,19 @@ public class TemplateEngine {
 			return;
 
 		Point selection= viewer.getSelectedRange();
+		Position position= new Position(completionPosition, selection.y);
 
 		// remember selected text
 		String selectedText= null;
 		if (selection.y != 0) {
 			try {
 				selectedText= document.get(selection.x, selection.y);
+				document.addPosition(position);
+				fPositions.put(document, position);
 			} catch (BadLocationException e) {}
 		}
 
-
-		CompilationUnitContext context= ((CompilationUnitContextType) fContextType).createContext(document, completionPosition, selection.y, compilationUnit);
+		CompilationUnitContext context= ((CompilationUnitContextType) fContextType).createContext(document, position, compilationUnit);
 		context.setVariable("selection", selectedText); //$NON-NLS-1$
 		int start= context.getStart();
 		int end= context.getEnd();

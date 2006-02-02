@@ -118,4 +118,16 @@ public final class WordCompletionProposalComputer implements IJavaCompletionProp
 	public String getErrorMessage() {
 		return null; // no error message available
 	}
+
+	/*
+	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionStarted()
+	 */
+	public void sessionStarted() {
+	}
+
+	/*
+	 * @see org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer#sessionEnded()
+	 */
+	public void sessionEnded() {
+	}
 }

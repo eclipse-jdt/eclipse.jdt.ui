@@ -109,6 +109,11 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 					return;
 				
 				fCategoryIteration= getCategoryIteration();
+				for (Iterator it= fCategories.iterator(); it.hasNext();) {
+					CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
+					cat.sessionStarted();
+				}
+				
 				fRepetition= 0;
 				fIterationGesture= getIterationGesture();
 				if (event.assistant instanceof IContentAssistantExtension2) {
@@ -133,7 +138,12 @@ public class ContentAssistProcessor implements IContentAssistProcessor {
 			public void assistSessionEnded(ContentAssistEvent event) {
 				if (event.processor != ContentAssistProcessor.this)
 					return;
-				
+
+				for (Iterator it= fCategories.iterator(); it.hasNext();) {
+					CompletionProposalCategory cat= (CompletionProposalCategory) it.next();
+					cat.sessionEnded();
+				}
+
 				fCategoryIteration= null;
 				fRepetition= -1;
 				fIterationGesture= null;

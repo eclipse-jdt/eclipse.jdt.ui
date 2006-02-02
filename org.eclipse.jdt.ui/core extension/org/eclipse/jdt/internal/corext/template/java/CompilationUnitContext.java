@@ -33,6 +33,8 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	protected boolean fForceEvaluation;
 	/** A global state for proposals that change if a master proposal changes. */
 	protected MultiVariableGuess fMultiVariableGuess;
+	/** <code>true</code> if the context has a managed (i.e. added to the document) position, <code>false</code> otherwise. */
+	protected final boolean fIsManaged;
 
 	/**
 	 * Creates a compilation unit context.
@@ -46,6 +48,7 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	protected CompilationUnitContext(TemplateContextType type, IDocument document, int completionOffset, int completionLength, ICompilationUnit compilationUnit) {
 		super(type, document, completionOffset, completionLength);
 		fCompilationUnit= compilationUnit;
+		fIsManaged= false;
 	}
 	
 	/**
@@ -60,6 +63,7 @@ public abstract class CompilationUnitContext extends DocumentTemplateContext {
 	protected CompilationUnitContext(TemplateContextType type, IDocument document, Position completionPosition, ICompilationUnit compilationUnit) {
 		super(type, document, completionPosition);
 		fCompilationUnit= compilationUnit;
+		fIsManaged= true;
 	}
 	
 	/**
