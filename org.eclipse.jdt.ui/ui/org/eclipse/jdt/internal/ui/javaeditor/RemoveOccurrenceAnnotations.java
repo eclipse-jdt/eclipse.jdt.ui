@@ -26,7 +26,7 @@ class RemoveOccurrenceAnnotations extends Action {
 	/**
 	 * Creates this action.
 	 *
-	 * @param JavaEditor the Java editor for which to remove the occurrence annotations
+	 * @param editor the Java editor for which to remove the occurrence annotations
 	 */
 	RemoveOccurrenceAnnotations(JavaEditor editor) {
 		fEditor = editor;
