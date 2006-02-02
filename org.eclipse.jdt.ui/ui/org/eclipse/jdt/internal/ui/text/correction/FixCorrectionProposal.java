@@ -22,7 +22,6 @@ import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
-import org.eclipse.jface.text.contentassist.IContentAssistantExtension2;
 
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -47,25 +46,15 @@ import org.eclipse.jdt.internal.ui.util.BusyIndicatorRunnableContext;
  * fix a problem. A fix correction proposal may have an {@link ICleanUp}
  * attached which can be executed instead of the provided IFix.
  */
-public class FixCorrectionProposal extends LinkedCorrectionProposal implements ICompletionProposalExtension2 {
+public class FixCorrectionProposal extends LinkedCorrectionProposal implements ICompletionProposalExtension2, IStatusLineProposal {
+	
 	private final IFix fFix;
 	private final ICleanUp fCleanUp;
-	private final IContentAssistantExtension2 fAssistant;
 	
 	public FixCorrectionProposal(IFix fix, ICleanUp cleanUp, int relevance, Image image, IInvocationContext context) {
 		super(fix.getDescription(), fix.getCompilationUnit(), null, relevance, image);
 		fFix= fix;
 		fCleanUp= cleanUp;
-		if (context instanceof AssistContext) {
-			AssistContext assistContext= (AssistContext)context;
-			if (assistContext.getContentAssistant() instanceof IContentAssistantExtension2) {
-				fAssistant= (IContentAssistantExtension2)assistContext.getContentAssistant();
-			} else {
-				fAssistant= null;
-			}
-		} else {
-			fAssistant= null;
-		}
 	}
 	
 	public ICleanUp getCleanUp() {
@@ -145,23 +134,23 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	}
 
 	public void selected(ITextViewer viewer, boolean smartToggle) {
-		if (fAssistant != null) {
-			if (fCleanUp != null) {
-				fAssistant.setStatusMessage(CorrectionMessages.FixCorrectionProposal_HitCtrlEnter_description);
-			} else {
-				fAssistant.setStatusMessage(""); //$NON-NLS-1$
-			}
-		}
 	}
 
 	public void unselected(ITextViewer viewer) {
-		if (fAssistant != null) {
-			fAssistant.setStatusMessage(""); //$NON-NLS-1$
-		}
 	}
 
 	public boolean validate(IDocument document, int offset, DocumentEvent event) {
 		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getStatusMessage() {
+		if (fCleanUp == null)
+			return null;
+		
+		return CorrectionMessages.FixCorrectionProposal_HitCtrlEnter_description;
 	}
 
 }

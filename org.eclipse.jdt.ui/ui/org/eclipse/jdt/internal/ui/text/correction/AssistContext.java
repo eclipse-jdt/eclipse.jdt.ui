@@ -10,8 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
-import org.eclipse.jface.text.contentassist.IContentAssistant;
-
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -31,7 +29,6 @@ public class AssistContext implements IInvocationContext {
 	private int fLength;
 
 	private CompilationUnit fASTRoot;
-	private IContentAssistant fAssistant;
 
 	/*
 	 * Constructor for CorrectionContext.
@@ -103,14 +100,6 @@ public class AssistContext implements IInvocationContext {
 		NodeFinder finder= new NodeFinder(fOffset, fLength);
 		getASTRoot().accept(finder);
 		return finder.getCoveredNode();
-	}
-
-	public void setContentAssistant(IContentAssistant assistant) {
-		fAssistant= assistant;
-	}
-	
-	public IContentAssistant getContentAssistant() {
-		return fAssistant;
 	}
 
 }
