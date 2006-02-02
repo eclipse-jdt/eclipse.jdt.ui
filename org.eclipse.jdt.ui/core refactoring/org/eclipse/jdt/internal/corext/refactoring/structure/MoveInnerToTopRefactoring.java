@@ -511,7 +511,7 @@ public class MoveInnerToTopRefactoring extends CommentRefactoring implements IIn
 
 	private IType fType;
 
-	private String[] fTypeComponents;
+	private String fQualifiedTypeName;
 
 	private Collection fTypeImports;
 
@@ -524,7 +524,7 @@ public class MoveInnerToTopRefactoring extends CommentRefactoring implements IIn
 	}
 
 	private void initialize() throws JavaModelException {
-		fTypeComponents= Strings.splitByToken((fType.getPackageFragment().getElementName() + '.' + fType.getElementName()), "."); //$NON-NLS-1$
+		fQualifiedTypeName= fType.getFullyQualifiedName('.');
 		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
 		fSourceRewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
 		fIsInstanceFieldCreationPossible= !(JdtFlags.isStatic(fType) || fType.isAnnotation() || fType.isEnum());
@@ -750,7 +750,7 @@ public class MoveInnerToTopRefactoring extends CommentRefactoring implements IIn
 
 	private Expression createAccessExpressionToEnclosingInstanceFieldText(ASTNode node, IBinding binding, AbstractTypeDeclaration declaration) {
 		if (Modifier.isStatic(binding.getModifiers()))
-			return node.getAST().newName(Strings.splitByToken(JavaModelUtil.getTypeQualifiedName(fType.getDeclaringType()), ".")); //$NON-NLS-1$
+			return node.getAST().newName(JavaModelUtil.getTypeQualifiedName(fType.getDeclaringType()));
 		else if ((isInAnonymousTypeInsideInputType(node, declaration) || isInLocalTypeInsideInputType(node, declaration) || isInNonStaticMemberTypeInsideInputType(node, declaration)))
 			return createQualifiedReadAccessExpressionForEnclosingInstance(node.getAST());
 		else
@@ -1191,12 +1191,12 @@ public class MoveInnerToTopRefactoring extends CommentRefactoring implements IIn
 		if (binding != null && binding.isRawType())
 			raw= true;
 		if (parameters != null && parameters.length > 0 && !raw) {
-			final ParameterizedType type= ast.newParameterizedType(ast.newSimpleType(ast.newName(fTypeComponents)));
+			final ParameterizedType type= ast.newParameterizedType(ast.newSimpleType(ast.newName(fQualifiedTypeName)));
 			for (int index= 0; index < parameters.length; index++)
 				type.typeArguments().add(ast.newSimpleType(ast.newSimpleName(parameters[index].getName())));
 			return type;
 		}
-		return ast.newName(fTypeComponents);
+		return ast.newName(fQualifiedTypeName);
 	}
 
 	private ASTNode getNewUnqualifiedTypeNode(ITypeBinding[] parameters, Name name) {

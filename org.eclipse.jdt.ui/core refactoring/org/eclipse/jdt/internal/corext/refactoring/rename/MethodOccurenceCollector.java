@@ -13,11 +13,11 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jdt.core.search.SearchMatch;
 
 import org.eclipse.jdt.internal.corext.refactoring.CollectingSearchRequestor;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 class MethodOccurenceCollector extends CollectingSearchRequestor {
 
@@ -56,7 +56,7 @@ class MethodOccurenceCollector extends CollectingSearchRequestor {
 				super.acceptSearchMatch(match);
 			} else {
 				start= start + theDotIndex + 1;
-				for (int i= theDotIndex + 1; i < matchText.length() && Strings.isIndentChar(matchText.charAt(i)); i++) {
+				for (int i= theDotIndex + 1; i < matchText.length() && IndentManipulation.isIndentChar(matchText.charAt(i)); i++) {
 					start++;
 				}
 				match.setOffset(start);

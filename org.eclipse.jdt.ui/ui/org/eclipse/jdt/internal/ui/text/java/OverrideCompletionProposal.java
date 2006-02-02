@@ -45,6 +45,7 @@ import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility2;
@@ -161,7 +162,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 						IDocument contents= new Document(fCompilationUnit.getBuffer().getContents());
 						IRegion region= contents.getLineInformationOfOffset(getReplacementOffset());
 						ITrackedNodePosition position= rewrite.track(stub);
-						String indent= Strings.getIndentString(contents.get(region.getOffset(), region.getLength()), settings.tabWidth, settings.indentWidth);
+						String indent= IndentManipulation.extractIndentString(contents.get(region.getOffset(), region.getLength()), settings.tabWidth, settings.indentWidth);
 						try {
 							rewrite.rewriteAST(contents, fJavaProject.getOptions(true)).apply(contents, TextEdit.UPDATE_REGIONS);
 						} catch (MalformedTreeException exception) {
@@ -169,7 +170,7 @@ public class OverrideCompletionProposal extends JavaTypeCompletionProposal imple
 						} catch (BadLocationException exception) {
 							JavaPlugin.log(exception);
 						}
-						setReplacementString(Strings.changeIndent(Strings.trimIndentation(contents.get(position.getStartPosition(), position.getLength()), settings.tabWidth, settings.indentWidth, false), 0, settings.tabWidth, settings.indentWidth, indent, TextUtilities.getDefaultLineDelimiter(contents)));
+						setReplacementString(IndentManipulation.changeIndent(Strings.trimIndentation(contents.get(position.getStartPosition(), position.getLength()), settings.tabWidth, settings.indentWidth, false), 0, settings.tabWidth, settings.indentWidth, indent, TextUtilities.getDefaultLineDelimiter(contents)));
 					}
 				}
 			}

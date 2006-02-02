@@ -12,8 +12,7 @@ package org.eclipse.jdt.internal.corext.javadoc;
 
 
 import org.eclipse.jdt.core.IBuffer;
-
-import org.eclipse.jdt.internal.corext.util.Strings;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
 
 /**
  * Reads a java doc comment from a java doc comment. Skips star-character
@@ -59,7 +58,7 @@ public class JavaDocCommentReader extends SingleCharReader {
 			} else {
 				ch= fBuffer.getChar(fCurrPos++);
 			}
-			fWasNewLine= Strings.isLineDelimiterChar(ch);
+			fWasNewLine= IndentManipulation.isLineDelimiterChar(ch);
 			
 			return ch;
 		}

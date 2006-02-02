@@ -27,9 +27,9 @@ import org.eclipse.jdt.core.IBuffer;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 public class NLSUtil {
 
@@ -156,7 +156,7 @@ public class NLSUtil {
 		IBuffer buffer= cu.getBuffer();
 		int length= buffer.getLength();
 		for (int i= position; i < length; i++) {
-			if (Strings.isLineDelimiterChar(buffer.getChar(i))) {
+			if (IndentManipulation.isLineDelimiterChar(buffer.getChar(i))) {
 				return i;
 			}
 		}

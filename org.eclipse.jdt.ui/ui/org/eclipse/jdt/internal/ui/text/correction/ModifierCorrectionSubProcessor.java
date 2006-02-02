@@ -77,6 +77,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.Modifier.ModifierKeyword;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -85,7 +86,6 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -689,7 +689,7 @@ public class ModifierCorrectionSubProcessor {
 
 					int end= currentPosition.offset + currentPosition.length; // current end position
 					int k= end;
-					while (k < documentLen && Strings.isIndentChar(document.getChar(k))) {
+					while (k < documentLen && IndentManipulation.isIndentChar(document.getChar(k))) {
 						k++;
 					}
 					// first remove space then replace range (remove space can destroy empty position)

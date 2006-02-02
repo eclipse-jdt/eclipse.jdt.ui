@@ -485,7 +485,7 @@ public class AddImportTest extends CoreTests {
 			IJavaElement[] elements= cu1.codeSelect(content.indexOf("IOException"), "IOException".length());
 			assertEquals(1, elements.length);
 			String key= ((IType) elements[0]).getKey();
-			String signature= new BindingKey(key).internalToSignature();
+			String signature= new BindingKey(key).toSignature();
 			
 			importsRewrite.addImportFromSignature(signature, ast);
 		}
@@ -493,7 +493,7 @@ public class AddImportTest extends CoreTests {
 			IJavaElement[] elements= cu1.codeSelect(content.indexOf("URL"), "URL".length());
 			assertEquals(1, elements.length);
 			String key= ((IType) elements[0]).getKey();
-			String signature= new BindingKey(key).internalToSignature();
+			String signature= new BindingKey(key).toSignature();
 			
 			importsRewrite.addImportFromSignature(signature, ast);
 		}
@@ -501,7 +501,7 @@ public class AddImportTest extends CoreTests {
 			IJavaElement[] elements= cu1.codeSelect(content.indexOf("List"), "List".length());
 			assertEquals(1, elements.length);
 			String key= ((IType) elements[0]).getKey();
-			String signature= new BindingKey(key).internalToSignature();
+			String signature= new BindingKey(key).toSignature();
 			
 			importsRewrite.addImportFromSignature(signature, ast);
 		}
@@ -555,7 +555,7 @@ public class AddImportTest extends CoreTests {
 		Type resNode= rewrite.addImport(binding, astRoot.getAST());
 		assertEquals("Class<? extends E>", ASTNodes.asString(resNode));
 		
-		String signature= new BindingKey(binding.getKey()).internalToSignature();
+		String signature= new BindingKey(binding.getKey()).toSignature();
 		
 		Type resNode2= rewrite.addImportFromSignature(signature, astRoot.getAST());
 		assertEquals("Class<? extends E>", ASTNodes.asString(resNode2));
@@ -596,7 +596,7 @@ public class AddImportTest extends CoreTests {
 		assertEquals("E<?>", ASTNodes.asString(resNode));
 		
 		if (!BUG_120082) {
-			String signature= new BindingKey(binding.getKey()).internalToSignature();
+			String signature= new BindingKey(binding.getKey()).toSignature();
 			
 			Type resNode2= rewrite.addImportFromSignature(signature, astRoot.getAST());
 			assertEquals("E<?>", ASTNodes.asString(resNode2));
@@ -636,7 +636,7 @@ public class AddImportTest extends CoreTests {
 		assertEquals("E<?>", ASTNodes.asString(resNode));
 		
 		if (!BUG_120082) {
-			String signature= new BindingKey(binding.getKey()).internalToSignature();
+			String signature= new BindingKey(binding.getKey()).toSignature();
 			
 			Type resNode2= rewrite.addImportFromSignature(signature, astRoot.getAST());
 			assertEquals("E<?>", ASTNodes.asString(resNode2));
@@ -677,7 +677,7 @@ public class AddImportTest extends CoreTests {
 			IJavaElement[] elements= cu1.codeSelect(content.indexOf("Map"), "Map".length());
 			assertEquals(1, elements.length);
 			String key= ((IType) elements[0]).getKey();
-			String signature= new BindingKey(key).internalToSignature();
+			String signature= new BindingKey(key).toSignature();
 			
 			importsRewrite.addImportFromSignature(signature, ast);
 		}			

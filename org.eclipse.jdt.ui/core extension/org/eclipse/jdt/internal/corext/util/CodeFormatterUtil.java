@@ -39,14 +39,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class CodeFormatterUtil {
-			
-	/**
-	 * @deprecated use createIndentString(int, IJavaProject) instead to support project specific settings
-	 */
-	public static String createIndentString(int indent) {
-		return createIndentString(indent, null);
-	}
-	
+				
 	/**
 	 * Creates a string that represents the given number of indentation units.
 	 * The returned string can contain tabs and/or spaces depending on the core
@@ -58,46 +51,10 @@ public class CodeFormatterUtil {
 	 * @return the indent string
 	 */
 	public static String createIndentString(int indentationUnits, IJavaProject project) {
-		final String tabChar= getCoreOption(project, DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR);
-		final int tabs, spaces;
-		if (JavaCore.SPACE.equals(tabChar)) {
-			tabs= 0;
-			spaces= indentationUnits * getIndentWidth(project);
-		} else if (JavaCore.TAB.equals(tabChar)) {
-			// indentWidth == tabWidth
-			tabs= indentationUnits;
-			spaces= 0;
-		} else if (DefaultCodeFormatterConstants.MIXED.equals(tabChar)){
-			int tabWidth= getTabWidth(project);
-			int spaceEquivalents= indentationUnits * getIndentWidth(project);
-			if (tabWidth > 0) {
-				tabs= spaceEquivalents / tabWidth;
-				spaces= spaceEquivalents % tabWidth;
-			} else {
-				tabs= 0;
-				spaces= spaceEquivalents;
-			}
-		} else {
-			// new indent type not yet handled
-			Assert.isTrue(false);
-			return null;
-		}
-		
-		StringBuffer buffer= new StringBuffer(tabs + spaces);
-		for(int i= 0; i < tabs; i++)
-			buffer.append('\t');
-		for(int i= 0; i < spaces; i++)
-			buffer.append(' ');
-		return buffer.toString();
+		Map options= project != null ? project.getOptions(true) : JavaCore.getOptions();		
+		return ToolFactory.createCodeFormatter(options).createIndentationString(indentationUnits);
 	} 
-	
-	/**
-	 * @deprecated use getTabWidth(IJavaProject) instead to support project specific settings
-	 */
-	public static int getTabWidth() {
-		return getTabWidth(null);
-	}
-	
+		
 	/**
 	 * Gets the current tab width.
 	 * 
@@ -254,7 +211,7 @@ public class CodeFormatterUtil {
 			return doc.get();
 		} catch (BadLocationException e) {
 			JavaPlugin.log(e); // bug in the formatter
-			Assert.isTrue(false, "Fromatter created edits with wrong positions: " + e.getMessage()); //$NON-NLS-1$
+			Assert.isTrue(false, "Formatter created edits with wrong positions: " + e.getMessage()); //$NON-NLS-1$
 		}
 		return null;
 	}

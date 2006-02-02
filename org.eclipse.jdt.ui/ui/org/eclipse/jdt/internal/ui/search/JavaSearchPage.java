@@ -60,12 +60,12 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
 import org.eclipse.jdt.ui.search.PatternQuerySpecification;
@@ -829,7 +829,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 		String selectedText= selection.getText();
 		if (selectedText != null && selectedText.length() > 0) {
 			int i= 0;
-			while (i < selectedText.length() && !Strings.isLineDelimiterChar(selectedText.charAt(i))) {
+			while (i < selectedText.length() && !IndentManipulation.isLineDelimiterChar(selectedText.charAt(i))) {
 				i++;
 			}
 			if (i > 0) {

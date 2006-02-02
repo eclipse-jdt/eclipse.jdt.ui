@@ -26,11 +26,11 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
 
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSUtil;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
@@ -133,9 +133,9 @@ public class StringFix implements IFix {
 		int next= offset + length;
 		while (next < buffer.getLength()) {
 			char ch= buffer.getChar(next);
-			if (Strings.isIndentChar(ch)) {
+			if (IndentManipulation.isIndentChar(ch)) {
 				next++; // remove all whitespace
-			} else if (Strings.isLineDelimiterChar(ch)) {
+			} else if (IndentManipulation.isLineDelimiterChar(ch)) {
 				length= next - offset; 
 				break;
 			} else if (ch == '/') {
@@ -154,7 +154,7 @@ public class StringFix implements IFix {
 			}
 		}
 		if (!hasMoreInComment && removeLeadingIndents) {
-			while (offset > 0 && Strings.isIndentChar(buffer.getChar(offset - 1))) {
+			while (offset > 0 && IndentManipulation.isIndentChar(buffer.getChar(offset - 1))) {
 				offset--;
 				length++;
 			}

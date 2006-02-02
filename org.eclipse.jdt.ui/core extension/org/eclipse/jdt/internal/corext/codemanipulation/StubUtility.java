@@ -72,6 +72,7 @@ import org.eclipse.jdt.core.dom.Name;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.TypeParameter;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
 
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
@@ -761,7 +762,7 @@ public class StubUtility {
 				int offset= ((ISourceReference)elem).getSourceRange().getOffset();
 				int i= offset;
 				// find beginning of line
-				while (i > 0 && !Strings.isLineDelimiterChar(buf.getChar(i - 1)) ){
+				while (i > 0 && !IndentManipulation.isLineDelimiterChar(buf.getChar(i - 1)) ){
 					i--;
 				}
 				return Strings.computeIndentUnits(buf.getText(i, offset - i), elem.getJavaProject());

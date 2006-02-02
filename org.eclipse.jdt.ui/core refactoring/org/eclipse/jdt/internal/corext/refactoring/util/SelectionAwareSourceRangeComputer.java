@@ -23,9 +23,9 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.rewrite.TargetSourceRangeComputer;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
 
 import org.eclipse.jdt.internal.corext.dom.TokenScanner;
-import org.eclipse.jdt.internal.corext.util.Strings;
 
 public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer {
 
@@ -95,7 +95,7 @@ public class SelectionAwareSourceRangeComputer extends TargetSourceRangeComputer
 		}
 		if (token == ITerminalSymbols.TokenNameCOMMENT_LINE) {
 			int index= pos - 1;
-			while(index >= 0 && Strings.isLineDelimiterChar(documentPortionToScan.charAt(index))) {
+			while(index >= 0 && IndentManipulation.isLineDelimiterChar(documentPortionToScan.charAt(index))) {
 				pos--;
 				index--;
 			}
