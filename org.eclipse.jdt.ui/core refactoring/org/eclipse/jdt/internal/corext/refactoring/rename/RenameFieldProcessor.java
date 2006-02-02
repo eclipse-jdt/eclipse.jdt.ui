@@ -116,12 +116,25 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
 
+	/**
+	 * Creates a new rename field processor.
+	 * @param field the field, or <code>null</code> if invoked by scripting
+	 */
 	public RenameFieldProcessor(IField field) {
 		this(field, new TextChangeManager(true), null);
 		fIsComposite= false;
 	}
 	
-	protected RenameFieldProcessor(IField field, TextChangeManager manager, GroupCategorySet categorySet) {
+	/**
+	 * Creates a new rename field processor.
+	 * <p>
+	 * This constructor is only used by <code>RenameTypeProcessor</code>.
+	 * </p>
+	 * @param field the field
+	 * @param manager the change manager
+	 * @param categorySet the group category set
+	 */
+	RenameFieldProcessor(IField field, TextChangeManager manager, GroupCategorySet categorySet) {
 		initialize(field);
 		fChangeManager= manager;
 		fCategorySet= categorySet;

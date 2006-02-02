@@ -174,8 +174,13 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		}
 	}
 
-	public MoveStaticMembersProcessor(IMember[] elements, CodeGenerationSettings settings) {
-		fMembersToMove= elements;
+	/**
+	 * Creates a new move static members processor.
+	 * @param members the members to move, or <code>null</code> if invoked by scripting
+	 * @param settings the code generation settings, or <code>null</code> if invoked by scripting
+	 */
+	public MoveStaticMembersProcessor(IMember[] members, CodeGenerationSettings settings) {
+		fMembersToMove= members;
 		fPreferences= settings;
 		fDelegateUpdating= false;
 		fDelegateDeprecation= true;

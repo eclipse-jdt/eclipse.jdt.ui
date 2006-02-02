@@ -47,6 +47,10 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	public static final String ID_RENAME_ENUM_CONSTANT= "org.eclipse.jdt.ui.rename.enum.constant"; //$NON-NLS-1$
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameEnumConstProcessor"; //$NON-NLS-1$
 
+	/**
+	 * Creates a new rename enum const processor.
+	 * @param field the enum constant, or <code>null</code> if invoked by scripting
+	 */
 	public RenameEnumConstProcessor(IField field) {
 		super(field);
 	}

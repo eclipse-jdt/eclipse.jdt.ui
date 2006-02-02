@@ -1048,8 +1048,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	/**
 	 * Creates a new move instance method processor.
 	 * 
-	 * @param method the method to move, or <code>null</code>
-	 * @param settings the code generation settings to apply, or <code>null</code>
+	 * @param method the method to move, or <code>null</code> if invoked by scripting
+	 * @param settings the code generation settings to apply, or <code>null</code> if invoked by scripting
 	 */
 	public MoveInstanceMethodProcessor(final IMethod method, final CodeGenerationSettings settings) {
 		fSettings= settings;

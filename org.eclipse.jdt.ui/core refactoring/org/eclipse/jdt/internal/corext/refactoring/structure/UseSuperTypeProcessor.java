@@ -120,7 +120,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	/**
 	 * Creates a new super type processor.
 	 * 
-	 * @param subType the subtype to replace its occurrences
+	 * @param subType the subtype to replace its occurrences, or <code>null</code> if invoked by scripting
 	 */
 	public UseSuperTypeProcessor(final IType subType) {
 		fSubType= subType;
@@ -129,8 +129,8 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	/**
 	 * Creates a new super type processor.
 	 * 
-	 * @param subType the subtype to replace its occurrences
-	 * @param superType the supertype as replacement
+	 * @param subType the subtype to replace its occurrences, or <code>null</code> if invoked by scripting
+	 * @param superType the supertype as replacement, or <code>null</code> if invoked by scripting
 	 */
 	public UseSuperTypeProcessor(final IType subType, final IType superType) {
 		fSubType= subType;

@@ -50,9 +50,11 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 	private boolean fUpdateReferences;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameJavaProjectProcessor"; //$NON-NLS-1$
-	
-	//---- IRefactoringProcessor ---------------------------------------------------
-	
+
+	/**
+	 * Creates a new rename java project processor.
+	 * @param project the java project, or <code>null</code> if invoked by scripting
+	 */
 	public RenameJavaProjectProcessor(IJavaProject project) {
 		fProject= project;
 		if (fProject != null)

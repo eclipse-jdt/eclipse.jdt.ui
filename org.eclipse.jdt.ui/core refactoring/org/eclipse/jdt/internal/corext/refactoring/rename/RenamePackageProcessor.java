@@ -111,9 +111,11 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 	private boolean fRenameSubpackages;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renamePackageProcessor"; //$NON-NLS-1$
-	
-	//---- IRefactoringProcessor ---------------------------------------------------
-	
+
+	/**
+	 * Creates a new rename package processor.
+	 * @param fragment the package fragment, or <code>null</code> if invoked by scripting
+	 */
 	public RenamePackageProcessor(IPackageFragment fragment) {
 		fPackage= fragment;
 		if (fPackage != null)

@@ -112,11 +112,25 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
 	
+	/**
+	 * Creates a new rename method processor.
+	 * @param method the method, or <code>null</code> if invoked by scripting
+	 */
 	protected RenameMethodProcessor(IMethod method) {
 		this(method, new TextChangeManager(true), null);
 		fIsComposite= false;
 	}
 	
+	/**
+	 * Creates a new rename method processor.
+	 * <p>
+	 * This constructor is only invoked by <code>RenameTypeProcessor</code>.
+	 * </p>
+	 * 
+	 * @param method the method
+	 * @param manager the change manager
+	 * @param categorySet the group category set
+	 */
 	protected RenameMethodProcessor(IMethod method, TextChangeManager manager, GroupCategorySet categorySet) {
 		initialize(method);
 		fChangeManager= manager;

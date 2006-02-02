@@ -130,19 +130,26 @@ public class PromoteTempToFieldRefactoring extends CommentRefactoring implements
 	//------ scripting --------//
 	private boolean fSelfInitializing= false;
 
-	public PromoteTempToFieldRefactoring(ICompilationUnit cu, int selectionStart, int selectionLength, CodeGenerationSettings codeGenerationSettings){
+	/**
+	 * Creates a new promote temp to field refactoring.
+	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
+	 * @param selectionStart
+	 * @param selectionLength
+	 * @param settings the code generation settings, or <code>null</code> if invoked by scripting
+	 */
+	public PromoteTempToFieldRefactoring(ICompilationUnit unit, int selectionStart, int selectionLength, CodeGenerationSettings settings){
 		Assert.isTrue(selectionStart >= 0);
 		Assert.isTrue(selectionLength >= 0);
 		fSelectionStart= selectionStart;
 		fSelectionLength= selectionLength;
-		fCu= cu;
+		fCu= unit;
 		
         fFieldName= ""; //$NON-NLS-1$
         fVisibility= Modifier.PRIVATE;
         fDeclareStatic= false;
         fDeclareFinal= false;
         fInitializeIn= INITIALIZE_IN_METHOD;
-        fCodeGenerationSettings= codeGenerationSettings;
+        fCodeGenerationSettings= settings;
 	}
 
     public String getName() {

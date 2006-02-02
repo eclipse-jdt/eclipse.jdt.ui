@@ -57,6 +57,10 @@ public class RenameResourceProcessor extends RenameProcessor implements IInitial
 		
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameResourceProcessor"; //$NON-NLS-1$
 	
+	/**
+	 * Creates a new rename resource processor.
+	 * @param resource the resource, or <code>null</code> if invoked by scripting
+	 */
 	public RenameResourceProcessor(IResource resource) {
 		fResource= resource;
 		if (resource != null) {

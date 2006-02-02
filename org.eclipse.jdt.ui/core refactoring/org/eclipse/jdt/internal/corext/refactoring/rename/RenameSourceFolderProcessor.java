@@ -48,9 +48,11 @@ public class RenameSourceFolderProcessor extends JavaRenameProcessor {
 	private IPackageFragmentRoot fSourceFolder;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameSourceFolderProcessor"; //$NON-NLS-1$
-	
-	//---- IRefactoringProcessor ---------------------------------------------------
-	
+
+	/**
+	 * Creates a new rename source folder processor.
+	 * @param root the package fragment root, or <code>null</code> if invoked by scripting
+	 */
 	public RenameSourceFolderProcessor(IPackageFragmentRoot root) {
 		fSourceFolder= root;
 		if (root != null)

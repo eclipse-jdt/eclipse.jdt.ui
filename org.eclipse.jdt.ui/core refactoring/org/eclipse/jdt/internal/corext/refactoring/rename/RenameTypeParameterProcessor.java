@@ -182,7 +182,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	 * Creates a new rename type parameter processor.
 	 * 
 	 * @param parameter
-	 *            the type parameter to rename
+	 *            the type parameter to rename, or <code>null</code> if invoked by scripting
 	 */
 	public RenameTypeParameterProcessor(final ITypeParameter parameter) {
 		fTypeParameter= parameter;

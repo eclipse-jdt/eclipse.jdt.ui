@@ -196,8 +196,8 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	/**
 	 * Creates a new extract interface processor.
 	 * 
-	 * @param type The type where to extract the supertype
-	 * @param settings The code generation settings
+	 * @param type the type where to extract the supertype, or <code>null</code> if invoked by scripting
+	 * @param settings the code generation settings, or <code>null</code> if invoked by scripting
 	 */
 	public ExtractInterfaceProcessor(final IType type, final CodeGenerationSettings settings) {
 		fSubType= type;

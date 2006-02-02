@@ -495,6 +495,10 @@ public abstract class HierarchyProcessor extends SuperTypeRefactoringProcessor {
 
 	protected IMember[] fMembersToMove;
 
+	/**
+	 * Creates a new hierarchy processor.
+	 * @param members the members, or <code>null</code> if invoked by scripting
+	 */
 	protected HierarchyProcessor(final IMember[] members) {
 		if (members != null)
 			fMembersToMove= (IMember[]) SourceReferenceUtil.sortByOffset(members);

@@ -342,9 +342,9 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 	 * Creates a new pull up refactoring processor.
 	 * 
 	 * @param members
-	 *            the members to pull up, or <code>null</code>
+	 *            the members to pull up, or <code>null</code> if invoked by scripting
 	 * @param settings
-	 *            the code generation settings, or <code>null</code>
+	 *            the code generation settings, or <code>null</code> if invoked by scripting
 	 */
 	public PullUpRefactoringProcessor(final IMember[] members, final CodeGenerationSettings settings) {
 		super(members);

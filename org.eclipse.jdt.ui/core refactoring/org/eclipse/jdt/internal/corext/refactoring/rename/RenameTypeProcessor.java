@@ -189,6 +189,10 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 		}
 	}
 
+	/**
+	 * Creates a new rename type processor.
+	 * @param type the type, or <code>null</code> if invoked by scripting
+	 */
 	public RenameTypeProcessor(IType type) {
 		fType= type;
 		if (type != null)
@@ -202,8 +206,6 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	public IType getType() {
 		return fType;
 	}
-
-	//---- IRefactoringProcessor ---------------------------------------------------
 
 	public String getIdentifier() {
 		return IDENTIFIER;

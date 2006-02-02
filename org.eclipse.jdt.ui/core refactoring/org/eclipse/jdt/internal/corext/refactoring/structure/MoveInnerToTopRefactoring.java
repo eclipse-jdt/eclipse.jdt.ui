@@ -515,6 +515,12 @@ public class MoveInnerToTopRefactoring extends CommentRefactoring implements IIn
 
 	private Collection fTypeImports;
 
+	/**
+	 * Creates a new move inner to top refactoring.
+	 * @param type the type, or <code>null</code> if invoked by scripting
+	 * @param settings the code generation settings, or <code>null</code> if invoked by scripting
+	 * @throws JavaModelException
+	 */
 	public MoveInnerToTopRefactoring(IType type, CodeGenerationSettings settings) throws JavaModelException {
 		fType= type;
 		fCodeGenerationSettings= settings;

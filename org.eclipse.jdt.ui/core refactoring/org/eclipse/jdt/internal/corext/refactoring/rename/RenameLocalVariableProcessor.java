@@ -95,6 +95,10 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameLocalVariableProcessor"; //$NON-NLS-1$
 	
+	/**
+	 * Creates a new rename local variable processor.
+	 * @param localVariable the local variable, or <code>null</code> if invoked by scripting
+	 */
 	public RenameLocalVariableProcessor(ILocalVariable localVariable) {
 		fLocalVariable= localVariable;
 		fUpdateReferences= true;
@@ -104,11 +108,22 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 		fIsComposite= false;
 	}
 	
-	protected RenameLocalVariableProcessor(ILocalVariable localVariable, TextChangeManager manager, CompilationUnit compilUnit, GroupCategorySet categorySet) {
+	/**
+	 * Creates a new rename local variable processor.
+	 * <p>
+	 * This constructor is only used by <code>RenameTypeProcessor</code>.
+	 * </p>
+	 * 
+	 * @param localVariable the local variable
+	 * @param manager the change manager
+	 * @param node the compilation unit node
+	 * @param categorySet the group category set
+	 */
+	RenameLocalVariableProcessor(ILocalVariable localVariable, TextChangeManager manager, CompilationUnit node, GroupCategorySet categorySet) {
 		this(localVariable);
 		fChangeManager= manager;
 		fCategorySet= categorySet;
-		fCompilationUnitNode= compilUnit;
+		fCompilationUnitNode= node;
 		fIsComposite= true;
 	}
 

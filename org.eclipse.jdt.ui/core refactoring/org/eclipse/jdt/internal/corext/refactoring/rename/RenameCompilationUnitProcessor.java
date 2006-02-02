@@ -65,8 +65,11 @@ public class RenameCompilationUnitProcessor extends JavaRenameProcessor implemen
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameCompilationUnitProcessor"; //$NON-NLS-1$
 	
-	//---- IRefactoringProcessor --------------------------------
-	
+	/**
+	 * Creates a new rename compilation unit processor.
+	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
+	 * @throws CoreException
+	 */
 	public RenameCompilationUnitProcessor(ICompilationUnit unit) throws CoreException {
 		fCu= unit;
 		if (fCu != null) {

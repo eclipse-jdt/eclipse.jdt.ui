@@ -300,7 +300,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	 * Creates a new push down refactoring processor.
 	 * 
 	 * @param members
-	 *            the members to pull up, or <code>null</code>
+	 *            the members to pull up, or <code>null</code> if invoked by scripting
 	 */
 	public PushDownRefactoringProcessor(IMember[] members) {
 		super(members);

@@ -51,11 +51,25 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
-	
-	protected RenameNonVirtualMethodProcessor(IMethod method, TextChangeManager manager, GroupCategorySet categorySet) {
+
+	/**
+	 * Creates a new rename method processor.
+	 * <p>
+	 * This constructor is only invoked by <code>RenameTypeProcessor</code>.
+	 * </p>
+	 * 
+	 * @param method the method
+	 * @param manager the change manager
+	 * @param categorySet the group category set
+	 */
+	RenameNonVirtualMethodProcessor(IMethod method, TextChangeManager manager, GroupCategorySet categorySet) {
 		super(method, manager, categorySet);
 	}
-	
+
+	/**
+	 * Creates a new rename method processor.
+	 * @param method the method, or <code>null</code> if invoked by scripting
+	 */
 	public RenameNonVirtualMethodProcessor(IMethod method) {
 		super(method);
 	}

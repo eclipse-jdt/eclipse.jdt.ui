@@ -47,6 +47,10 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	private boolean fActivationChecked;
 	private ITypeHierarchy fCachedHierarchy= null;
 	
+	/**
+	 * Creates a new rename method processor.
+	 * @param method the method, or <code>null</code> if invoked by scripting
+	 */
 	public RenameVirtualMethodProcessor(IMethod method) {
 		super(method);
 		fOriginalMethod= getMethod();
@@ -60,7 +64,7 @@ public class RenameVirtualMethodProcessor extends RenameMethodProcessor {
 	 * methods.
 	 * 
 	 */
-	protected RenameVirtualMethodProcessor(IMethod topLevel, IMethod[] ripples, TextChangeManager changeManager, ITypeHierarchy hierarchy, GroupCategorySet categorySet) {
+	RenameVirtualMethodProcessor(IMethod topLevel, IMethod[] ripples, TextChangeManager changeManager, ITypeHierarchy hierarchy, GroupCategorySet categorySet) {
 		super(topLevel, changeManager, categorySet);
 		fOriginalMethod= getMethod();
 		fActivationChecked= true; // is top level
