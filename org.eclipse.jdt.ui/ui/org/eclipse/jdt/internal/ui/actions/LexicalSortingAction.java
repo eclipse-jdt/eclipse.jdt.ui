@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.browsing.JavaBrowsingMessages;
+import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionSorter;
 
 /*
  * XXX: This class should become part of the MemberFilterActionGroup
@@ -30,6 +31,7 @@ import org.eclipse.jdt.internal.ui.browsing.JavaBrowsingMessages;
  */
 public class LexicalSortingAction extends Action {
 	private JavaElementSorter fSorter= new JavaElementSorter();
+	private SourcePositionSorter fSourcePositonSorter= new SourcePositionSorter();
 	private StructuredViewer fViewer;
 	private String fPreferenceKey;
 
@@ -57,7 +59,7 @@ public class LexicalSortingAction extends Action {
 				if (on)
 					fViewer.setSorter(fSorter);
 				else
-					fViewer.setSorter(null);
+					fViewer.setSorter(fSourcePositonSorter);
 			}
 		});
 		

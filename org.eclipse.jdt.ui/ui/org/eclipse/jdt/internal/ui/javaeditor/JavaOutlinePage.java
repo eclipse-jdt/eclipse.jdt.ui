@@ -127,6 +127,7 @@ import org.eclipse.jdt.internal.ui.packageview.SelectionTransferDropAdapter;
 import org.eclipse.jdt.internal.ui.preferences.MembersOrderPreferenceCache;
 import org.eclipse.jdt.internal.ui.viewsupport.AppearanceAwareLabelProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.DecoratingJavaLabelProvider;
+import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionSorter;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 
 
@@ -764,6 +765,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			class LexicalSortingAction extends Action {
 
 				private JavaElementSorter fSorter= new JavaElementSorter();
+				private SourcePositionSorter fSourcePositonSorter= new SourcePositionSorter();
 
 				public LexicalSortingAction() {
 					super();
@@ -785,7 +787,11 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 					setChecked(on);
 					BusyIndicator.showWhile(fOutlineViewer.getControl().getDisplay(), new Runnable() {
 						public void run() {
-							fOutlineViewer.setSorter(on ? fSorter : null);						}
+							if (on)
+								fOutlineViewer.setSorter(fSorter);
+							else
+								fOutlineViewer.setSorter(fSourcePositonSorter);
+						}
 					});
 
 					if (store)

@@ -21,6 +21,8 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.ui.JavaElementSorter;
 
+import org.eclipse.jdt.internal.ui.viewsupport.SourcePositionSorter;
+
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.MethodOverrideTester;
 
@@ -34,9 +36,11 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerSorter {
 	private static final int ANONYM= 4;
 	
 	private JavaElementSorter fNormalSorter;
+	private SourcePositionSorter fSourcePositonSorter;
 	
 	public AbstractHierarchyViewerSorter() {
 		fNormalSorter= new JavaElementSorter();
+		fSourcePositonSorter= new SourcePositionSorter();
 	}
 	
 	protected abstract ITypeHierarchy getHierarchy(IType type);
@@ -76,7 +80,7 @@ public abstract class AbstractHierarchyViewerSorter extends ViewerSorter {
 	 */
 	public int compare(Viewer viewer, Object e1, Object e2) {
 		if (!isSortAlphabetically() && !isSortByDefiningType()) {
-			return 0;
+			return fSourcePositonSorter.compare(viewer, e1, e2);
 		}
 		
 		int cat1= category(e1);
