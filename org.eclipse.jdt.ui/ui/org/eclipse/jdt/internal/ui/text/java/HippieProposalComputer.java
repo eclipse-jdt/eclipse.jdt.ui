@@ -27,7 +27,7 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposalComputer;
  * @since 3.2
  */
 public final class HippieProposalComputer implements IJavaCompletionProposalComputer {
-
+	/** The wrapped processor. */
 	private final HippieProposalProcessor fProcessor= new HippieProposalProcessor();
 
 	/**

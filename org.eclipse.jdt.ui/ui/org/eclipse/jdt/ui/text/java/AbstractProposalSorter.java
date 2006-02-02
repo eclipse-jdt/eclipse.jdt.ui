@@ -18,7 +18,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposal;
 
 /**
  * Abstract base class for sorters contributed to the
- * <code>org.eclipse.jdt.ui.javaCompletionProposalFilters</code> extension point.
+ * <code>org.eclipse.jdt.ui.javaCompletionProposalSorters</code> extension point.
  * <p>
  * Subclasses need to implement {@link #compare(ICompletionProposal, ICompletionProposal)} and may
  * override {@link #beginSorting(ContentAssistInvocationContext) beginSorting} and

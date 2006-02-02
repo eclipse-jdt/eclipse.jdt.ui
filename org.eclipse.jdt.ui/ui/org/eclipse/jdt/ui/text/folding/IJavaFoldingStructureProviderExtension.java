@@ -12,7 +12,6 @@ package org.eclipse.jdt.ui.text.folding;
 
 import org.eclipse.jdt.core.IJavaElement;
 
-
 /**
  * Extends {@link IJavaFoldingStructureProvider} with the following
  * functions:
@@ -20,9 +19,6 @@ import org.eclipse.jdt.core.IJavaElement;
  * <li>collapsing of comments and members</li>
  * <li>expanding and collapsing of certain java elements</li>
  * </ul>
- * <p>
- * XXX: This is work in progress and can change anytime until API for 3.2 is frozen.
- * </p>
  * 
  * @since 3.2
  */
@@ -31,21 +27,24 @@ public interface IJavaFoldingStructureProviderExtension {
 	 * Collapses all members except for top level types.
 	 */
 	void collapseMembers();
+
 	/**
 	 * Collapses all comments.
 	 */
 	void collapseComments();
+
 	/**
 	 * Collapses the given elements.
 	 * 
-	 * @param elements the java elements to collapse (the array and its elements will not be
+	 * @param elements the java elements to collapse (the array and its elements must not be
 	 *        modified)
 	 */
 	void collapseElements(IJavaElement[] elements);
+
 	/**
 	 * Expands the given elements.
 	 * 
-	 * @param elements the java elements to expand (the array and its elements will not be modified)
+	 * @param elements the java elements to expand (the array and its elements must not be modified)
 	 */
 	void expandElements(IJavaElement[] elements);
 }

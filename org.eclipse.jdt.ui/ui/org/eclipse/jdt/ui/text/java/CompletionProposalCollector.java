@@ -119,10 +119,10 @@ public class CompletionProposalCollector extends CompletionRequestor {
 
 	/**
 	 * The UI invocation context or <code>null</code>.
+	 * 
 	 * @since 3.2
 	 */
 	private JavaContentAssistInvocationContext fInvocationContext;
-
 
 	/**
 	 * Creates a new instance ready to collect proposals. If the passed
@@ -167,10 +167,11 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	/**
 	 * Sets the invocation context.
 	 * <p>
-	 * XXX this API is provisional and may change anytime during the course of 3.2
+	 * Subclasses may extend.
 	 * </p>
 	 * 
 	 * @param context the invocation context
+	 * @see #getInvocationContext()
 	 * @since 3.2
 	 */
 	public void setInvocationContext(JavaContentAssistInvocationContext context) {
@@ -180,10 +181,8 @@ public class CompletionProposalCollector extends CompletionRequestor {
 	}
 	
 	/**
-	 * Returns the invocation context.
-	 * <p>
-	 * XXX this API is provisional and may change anytime during the course of 3.2
-	 * </p>
+	 * Returns the invocation context. If none has been set via
+	 * {@link #setInvocationContext(JavaContentAssistInvocationContext)}, a new one is created.
 	 * 
 	 * @return invocationContext the invocation context
 	 * @since 3.2

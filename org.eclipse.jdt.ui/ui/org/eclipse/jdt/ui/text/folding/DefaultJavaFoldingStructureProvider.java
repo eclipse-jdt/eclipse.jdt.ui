@@ -76,11 +76,9 @@ import org.eclipse.jdt.internal.ui.text.DocumentCharacterIterator;
  * Clients may instantiate or subclass. Subclasses must make sure to always call the superclass'
  * code when overriding methods that are marked with "subclasses may extend".
  * </p>
- * <p>
- * XXX this is provisional API and may change any time during the 3.2 development cycle.
- * </p>
  * 
- * @since 3.2
+ * @since 3.0 (internal)
+ * @since 3.2 (API)
  */
 public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructureProvider, IJavaFoldingStructureProviderExtension {
 	/**
@@ -214,14 +212,21 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	
 	/**
 	 * A {@link ProjectionAnnotation} for java code.
-	 * 
-	 * @since 3.2
 	 */
 	protected static final class JavaProjectionAnnotation extends ProjectionAnnotation {
 
 		private IJavaElement fJavaElement;
 		private boolean fIsComment;
 
+		/**
+		 * Creates a new projection annotation.
+		 * 
+		 * @param isCollapsed <code>true</code> to set the initial state to collapsed,
+		 *        <code>false</code> to set it to expanded
+		 * @param element the java element this annotation refers to
+		 * @param isComment <code>true</code> for a foldable comment, <code>false</code> for a
+		 *        foldable code element
+		 */
 		public JavaProjectionAnnotation(boolean isCollapsed, IJavaElement element, boolean isComment) {
 			super(isCollapsed);
 			fJavaElement= element;
@@ -605,12 +610,12 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 		}
 	}
 	
+	/* context and listeners */
 	private ITextEditor fEditor;
 	private ProjectionListener fProjectionListener;
 	private IJavaElement fInput;
 	private IElementChangedListener fElementListener;
 
-	
 	/* preferences */
 	private boolean fCollapseJavadoc= false;
 	private boolean fCollapseImportContainer= true;
@@ -619,16 +624,10 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private boolean fCollapseHeaderComments= true;
 
 	/* filters */
-	/**
-	 * Member filter, matches nested members (but not top-level types).
-	 */
+	/** Member filter, matches nested members (but not top-level types). */
 	private final Filter fMemberFilter = new MemberFilter();
-	
-	/**
-	 * Comment filter, matches comments.
-	 */
+	/** Comment filter, matches comments. */
 	private final Filter fCommentFilter = new CommentFilter();
-
 
 	/**
 	 * Creates a new folding provider. It must be
@@ -902,8 +901,9 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	 * for the following elements:
 	 * <ul>
 	 * <li>true members (not for top-level types)</li>
-	 * <li>any member's javadoc comments</li>
-	 * <li>header comments.</li>
+	 * <li>the javadoc comments of any member</li>
+	 * <li>header comments (javadoc or multi-line comments appearing before the first type's
+	 * javadoc or before the package or import declarations).</li>
 	 * </ul>
 	 * </p>
 	 * 
@@ -973,12 +973,13 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 
 	/**
-	 * Computes the projection ranges for a given <code>ISourceReference</code>. More than range
-	 * or none at all may be returned. If there are no foldable regions, an empty array is returned.
+	 * Computes the projection ranges for a given <code>ISourceReference</code>. More than one
+	 * range or none at all may be returned. If there are no foldable regions, an empty array is
+	 * returned.
 	 * <p>
-	 * The last region in the returned array (if not empty) describe the region for the java element
-	 * that implements the source reference. Any preceding regions describe javadoc comments of that
-	 * java element.
+	 * The last region in the returned array (if not empty) describes the region for the java
+	 * element that implements the source reference. Any preceding regions describe javadoc comments
+	 * of that java element.
 	 * </p>
 	 * 
 	 * @param reference a java element that is a source reference
@@ -1089,24 +1090,28 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	}
 	
 	/**
-	 * Creates a comment folding position from a normalized region.
+	 * Creates a comment folding position from an
+	 * {@link #alignRegion(IRegion, DefaultJavaFoldingStructureProvider.FoldingStructureComputationContext) aligned}
+	 * region.
 	 * 
-	 * @param normalized a normalized region 
-	 * @return a folding position corresponding to <code>normalized</code>
+	 * @param aligned an aligned region
+	 * @return a folding position corresponding to <code>aligned</code>
 	 */
-	protected final Position createCommentPosition(IRegion normalized) {
-		return new CommentPosition(normalized.getOffset(), normalized.getLength());
+	protected final Position createCommentPosition(IRegion aligned) {
+		return new CommentPosition(aligned.getOffset(), aligned.getLength());
 	}
 	
 	/**
-	 * Creates a folding position that remembers its member from a normalized region.
+	 * Creates a folding position that remembers its member from an
+	 * {@link #alignRegion(IRegion, DefaultJavaFoldingStructureProvider.FoldingStructureComputationContext) aligned}
+	 * region.
 	 * 
-	 * @param normalized a normalized region 
+	 * @param aligned an aligned region
 	 * @param member the member to remember
-	 * @return a folding position corresponding to <code>normalized</code>
+	 * @return a folding position corresponding to <code>aligned</code>
 	 */
-	protected final Position createMemberPosition(IRegion normalized, IMember member) {
-		return new JavaElementPosition(normalized.getOffset(), normalized.getLength(), member);
+	protected final Position createMemberPosition(IRegion aligned, IMember member) {
+		return new JavaElementPosition(aligned.getOffset(), aligned.getLength(), member);
 	}
 
 	/**

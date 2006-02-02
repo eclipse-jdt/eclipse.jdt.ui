@@ -7,7 +7,6 @@
       </appInfo>
       <documentation>
          This extension point allows to contribute sorters and filters that may modify the completion proposals displayed in the Java editor.
-&lt;p&gt;XXX this API is provisional and may change anytime during the course of 3.2&lt;/p&gt;
       </documentation>
    </annotation>
 
@@ -108,11 +107,11 @@ and must have a public 0-argument constructor.
          &lt;p&gt;
 &lt;pre&gt;
 &lt;extension
-	point=&quot;org.eclipse.jdt.ui.javaCompletionProposalSorters&quot;&gt;
-	&lt;proposalSorter
-		id=&quot;org.eclipse.jdt.ui.RelevanceSorter&quot;
-		name=&quot;by relevance&quot;
-		class=&quot;org.eclipse.jdt.internal.ui.text.java.RelevanceSorter&quot;/&gt;
+ point=&quot;org.eclipse.jdt.ui.javaCompletionProposalSorters&quot;&gt;
+ &lt;proposalSorter
+  id=&quot;org.eclipse.jdt.ui.RelevanceSorter&quot;
+  name=&quot;by relevance&quot;
+  class=&quot;org.eclipse.jdt.internal.ui.text.java.RelevanceSorter&quot;/&gt;
 &lt;/extension&gt;
 &lt;/pre&gt;
 &lt;/p&gt;

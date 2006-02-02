@@ -26,9 +26,6 @@ import org.eclipse.jface.text.ITextViewer;
  * <p>
  * Clients may instantiate and subclass.
  * </p>
- * <p>
- * XXX this API is provisional and may change anytime during the course of 3.2
- * </p>
  * 
  * @since 3.2
  */
@@ -124,7 +121,8 @@ public class ContentAssistInvocationContext {
 	 * Computes the identifier (as specified by {@link Character#isJavaIdentifierPart(char)}) that
 	 * immediately precedes the invocation offset.
 	 * 
-	 * @return the prefix preceding the content assist invocation offset, <code>null</code> if there is no document
+	 * @return the prefix preceding the content assist invocation offset, <code>null</code> if
+	 *         there is no document
 	 * @throws BadLocationException if accessing the document fails
 	 */
 	public CharSequence computeIdentifierPrefix() throws BadLocationException {

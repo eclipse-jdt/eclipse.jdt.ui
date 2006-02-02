@@ -33,9 +33,6 @@ import org.eclipse.jdt.internal.ui.text.java.ContentAssistHistory.RHSHistory;
  * <p>
  * Clients may use but not subclass this class.
  * </p>
- * <p>
- * XXX this API is provisional and may change anytime during the course of 3.2
- * </p>
  * 
  * @since 3.2
  */
