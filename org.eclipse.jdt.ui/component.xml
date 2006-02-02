@@ -161,7 +161,6 @@
  </package>
 
  <package name="org.eclipse.jdt.ui.text.java">
-   <type name="CompletionProposalComparator" subclass="false"/>
    <type name="IInvocationContext" implement="false"/>
    <type name="IProblemLocation" implement="false"/>
  </package>
