@@ -144,6 +144,11 @@ public class SelfEncapsulateFieldRefactoring extends CommentRefactoring implemen
 	
 	private static final String NO_NAME= ""; //$NON-NLS-1$
 	
+	/**
+	 * Creates a new self encapsulate field refactoring.
+	 * @param field the field, or <code>null</code> if invoked by scripting
+	 * @throws JavaModelException
+	 */
 	public SelfEncapsulateFieldRefactoring(IField field) throws JavaModelException {
 		fEncapsulateDeclaringClass= true;
 		fChangeManager= new TextChangeManager();
