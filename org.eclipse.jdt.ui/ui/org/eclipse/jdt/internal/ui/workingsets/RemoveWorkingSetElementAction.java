@@ -18,14 +18,13 @@ import java.util.List;
 import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
+import org.eclipse.jface.viewers.TreePath;
 
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.IWorkingSet;
 
 import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
-
-import org.eclipse.jdt.internal.ui.packageview.MultiElementSelection;
-import org.eclipse.jdt.internal.ui.packageview.TreePath;
 
 public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 
@@ -40,14 +39,14 @@ public class RemoveWorkingSetElementAction extends SelectionDispatchAction {
 	}
 
 	private IWorkingSet getWorkingSet(IStructuredSelection selection) {
-		if (!(selection instanceof MultiElementSelection))
+		if (!(selection instanceof ITreeSelection))
 			return null;
-		MultiElementSelection ms= (MultiElementSelection)selection;
-		List elements= ms.toList();
+		ITreeSelection treeSelection= (ITreeSelection)selection;
+		List elements= treeSelection.toList();
 		IWorkingSet result= null;
 		for (Iterator iter= elements.iterator(); iter.hasNext();) {
 			Object element= iter.next();
-			TreePath[] paths= ms.getTreePaths(element);
+			TreePath[] paths= treeSelection.getPathsFor(element);
 			if (paths.length != 1)
 				return null;
 			TreePath path= paths[0];

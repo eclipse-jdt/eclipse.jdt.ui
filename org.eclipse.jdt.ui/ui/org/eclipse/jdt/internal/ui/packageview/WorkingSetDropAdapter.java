@@ -30,6 +30,8 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.jface.util.TransferDropTargetListener;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
+import org.eclipse.jface.viewers.ITreeSelection;
+import org.eclipse.jface.viewers.TreePath;
 
 import org.eclipse.ui.IWorkingSet;
 
@@ -132,11 +134,11 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 				if (ReorgUtils.containsElementOrParent(fCurrentElements, element))
 					return DND.DROP_NONE;
 			}
-			if (!(fSelection instanceof MultiElementSelection)) {
+			if (!(fSelection instanceof ITreeSelection)) {
 				return DND.DROP_COPY;
 			}
-			MultiElementSelection ms= (MultiElementSelection)fSelection;
-			TreePath[] paths= ms.getAllTreePaths();
+			ITreeSelection treeSelection= (ITreeSelection)fSelection;
+			TreePath[] paths= treeSelection.getPaths();
 			for (int i= 0; i < paths.length; i++) {
 				TreePath path= paths[i];
 				if (path.getSegmentCount() != 2)
@@ -225,8 +227,8 @@ public class WorkingSetDropAdapter extends JdtViewerDropAdapter implements Trans
 			fWorkingSet.setElements((IAdaptable[])elements.toArray(new IAdaptable[elements.size()]));
 		}
 		if (eventDetail == DND.DROP_MOVE) {
-			MultiElementSelection ms= (MultiElementSelection)fSelection;
-			Map workingSets= groupByWorkingSets(ms.getAllTreePaths());
+			ITreeSelection treeSelection= (ITreeSelection)fSelection;
+			Map workingSets= groupByWorkingSets(treeSelection.getPaths());
 			for (Iterator iter= workingSets.keySet().iterator(); iter.hasNext();) {
 				IWorkingSet ws= (IWorkingSet)iter.next();
 				List toRemove= (List)workingSets.get(ws);

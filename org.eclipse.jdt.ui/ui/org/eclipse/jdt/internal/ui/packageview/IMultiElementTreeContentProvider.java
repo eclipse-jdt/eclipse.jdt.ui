@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.packageview;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.TreePath;
 
 public interface IMultiElementTreeContentProvider extends ITreeContentProvider {
 	public TreePath[] getTreePaths(Object element);

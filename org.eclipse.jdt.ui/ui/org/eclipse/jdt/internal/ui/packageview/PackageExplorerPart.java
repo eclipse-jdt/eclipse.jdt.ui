@@ -15,12 +15,8 @@ import java.io.StringReader;
 import java.io.StringWriter;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
-import java.util.Set;
 
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
@@ -75,11 +71,13 @@ import org.eclipse.jface.viewers.ISelectionChangedListener;
 import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.ITreeSelection;
 import org.eclipse.jface.viewers.ITreeViewerListener;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeExpansionEvent;
+import org.eclipse.jface.viewers.TreePath;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
@@ -152,7 +150,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
 import org.eclipse.jdt.internal.ui.viewsupport.ProblemTreeViewer;
 import org.eclipse.jdt.internal.ui.viewsupport.StatusBarUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.ConfigureWorkingSetAction;
-import org.eclipse.jdt.internal.ui.workingsets.HistoryWorkingSetUpdater;
 import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetFilterActionGroup;
 import org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel;
@@ -250,19 +247,7 @@ public class PackageExplorerPart extends ViewPart
 		public void add(Object parentElement, Object[] childElements) {
 			if (fPendingGetChildren.contains(parentElement)) 
 				return;
-			// we have to remember the list before we actually do something since
-			// the super.add call already modifies the mapping.
-			List l= (List)fAdditionalMappings.get(parentElement);
-			if (l == null) {
-				super.add(parentElement, childElements);
-			} else {
-				List stable= new ArrayList(l);
-				super.add(parentElement, childElements);
-				for (Iterator iter= stable.iterator(); iter.hasNext();) {
-					Widget item= (Widget)iter.next();
-					super.internalAdd(item, parentElement, childElements);				
-				}
-			}
+			super.add(parentElement, childElements);
 		}
 				
 		protected Object[] getRawChildren(Object parent) {
@@ -432,190 +417,6 @@ public class PackageExplorerPart extends ViewPart
 			}
 		}
 		
-		//---- support for multiple elements in tree
-		
-		// TODO Use custome hash table and use comparator. Currently not an
-		// issue since the package explorer doesn't have a comparator
-		Map fAdditionalMappings= new HashMap();
-		protected void mapElement(Object element, Widget item) {
-			Widget existingItem= findItem(element);
-			// if the widget is part of the map managed in the tree
-			// simply call super since we might remap the element.
-			// See comment in StructuredViewer#associate
-			if (existingItem == null || existingItem == item) {
-				super.mapElement(element, item);
-			} else {
-				List l= (List)fAdditionalMappings.get(element);
-				if (l == null) {
-					l= new ArrayList();
-					fAdditionalMappings.put(element, l);
-				}
-				// Only add if not already part. See comment above
-				if (!l.contains(item)) {
-					l.add(item);
-					fResourceToItemsMapper.addToMap(element, (Item)item);
-				}
-			}
-		}
-		protected void unmapElement(Object element, Widget item) {
-			List l= (List)fAdditionalMappings.get(element);
-			if (l == null) {
-				super.unmapElement(element, item);
-				return;
-			}
-			if (findItem(element) == item) {
-				super.unmapElement(element, item);
-				if (l != null && l.size() >= 1) {
-					// Take the first item and store it into
-					// the normal map managed by the tree
-					Widget widget= (Widget)l.remove(0);
-					// we have to remove the item from the resource map here
-					// since the super call below maps it again
-					fResourceToItemsMapper.removeFromMap(element, (Item)widget);
-					super.mapElement(element, widget);
-				}
-			} else {
-				l.remove(item);
-				fResourceToItemsMapper.removeFromMap(element, (Item) item);
-			}
-			if (l.size() == 0)
-				fAdditionalMappings.remove(element);
-		}
-		protected void unmapAllElements() {
-			fAdditionalMappings.clear();
-			super.unmapAllElements();
-		}
-		protected void internalRemove(Object[] elements) {
-			IContentProvider cp= getContentProvider();
-			if (!(cp instanceof IMultiElementTreeContentProvider)) {
-				super.internalRemove(elements);
-				return;
-			}
-			Map stable= new HashMap();
-			for (int i= 0; i < elements.length; i++) {
-				List l= (List)fAdditionalMappings.get(elements[i]);
-				if (l != null) {
-					stable.put(elements[i], new Integer(l.size()));
-				}
-			}
-			super.internalRemove(elements);
-			for (int i= 0; i < elements.length; i++) {
-				Object element= elements[i];
-				Integer size= (Integer)stable.get(element);
-				if (size != null) {
-					int loop= size.intValue();
-					Object[] toRemove= new Object[] {element};
-					while(loop > 0) {
-						super.internalRemove(toRemove);
-						loop--;
-					}
-				}
-			}
-		}
-		protected void internalRefresh(Object element, boolean updateLabels) {
-			List l= (List)fAdditionalMappings.get(element);
-			if (l == null) {
-				super.internalRefresh(element, updateLabels);
-			} else {
-				List stable= new ArrayList(l);
-				super.internalRefresh(element, updateLabels);
-				for (Iterator iter= stable.iterator(); iter.hasNext();) {
-					Widget item= (Widget)iter.next();
-					super.internalRefresh(item, element, true, updateLabels);				
-				}
-			}
-		}
-		protected void internalUpdate(Widget item, Object element, String[] properties) {
-			List l= (List)fAdditionalMappings.get(element);
-			if (l == null) {
-				super.internalUpdate(item, element, properties);
-			} else {
-				List stable= new ArrayList(l);
-				super.internalUpdate(item, element, properties);
-				for (Iterator iter= stable.iterator(); iter.hasNext();) {
-					Widget additionalItem= (Widget)iter.next();
-					super.internalUpdate(additionalItem, element, properties);
-				}
-			}
-		}
-		public ISelection getSelection() {
-			IContentProvider cp= getContentProvider();
-			if (!(cp instanceof IMultiElementTreeContentProvider)) {
-				return super.getSelection();
-			}
-			Control control = getControl();
-			if (control == null || control.isDisposed()) {
-				return StructuredSelection.EMPTY;
-			}
-			Tree tree= getTree();
-			TreeItem[] selection= tree.getSelection();
-			List result= new ArrayList(selection.length);
-			List treePaths= new ArrayList();
-			for (int i= 0; i < selection.length; i++) {
-				TreeItem item= selection[i];
-				Object element= getElement(item);
-				if (element == null)
-					continue;
-				if (!result.contains(element)) {
-					result.add(element);
-				}
-				treePaths.add(createTreePath(item));
-			}
-			return new MultiElementSelection(this, result, (TreePath[])treePaths.toArray(new TreePath[treePaths.size()]));
-		}
-		private TreePath createTreePath(TreeItem item) {
-			List result= new ArrayList();
-			result.add(item.getData());
-			TreeItem parent= item.getParentItem();
-			while (parent != null) {
-				result.add(parent.getData());
-				parent= parent.getParentItem();
-			}
-			Collections.reverse(result);
-			return new TreePath(result.toArray());
-		}
-		private Object getElement(TreeItem item) {
-			Object result= item.getData();
-			if (result == null)
-				return null;
-			return result;
-		}
-		protected Widget internalGetWidgetToSelect(Object element) {
-			Widget result= findItem(element);
-			if (!(result instanceof TreeItem))
-				return result;
-			if (isInHistroyWorkingSet((TreeItem)result)) {
-				List l= (List)fAdditionalMappings.get(element);
-				if (l != null && !l.isEmpty()) {
-					return (Widget)l.get(0);
-				} else {
-					// this force to read the parent of the item which will not return
-					// the history working set. See corresponding content provider.
-					return null;
-				}
-			}
-			return result;
-		}
-		private boolean isInHistroyWorkingSet(TreeItem item) {
-			TreeItem parent= item.getParentItem();
-			while (parent != null) {
-				Object data= getElement(parent);
-				if (data instanceof IWorkingSet && HistoryWorkingSetUpdater.ID.equals(((IWorkingSet)data).getId()))
-					return true;
-				parent= parent.getParentItem();
-			}
-			return false;
-		}
-	    protected boolean isSameSelection(List items, Item[] current) {
-	    	if (items.size() != current.length)
-	    		return false;
-	    	Set newSelection= new HashSet(items);
-	    	for (int i= 0; i < current.length; i++) {
-				if (!newSelection.contains(current[i]))
-					return false;
-			}
-	    	return true;
-	    }
 	    //---- special handling to preserve the selection correctly
 	    private boolean fInPreserveSelection;
 		protected void preservingSelection(Runnable updateCode) {
@@ -627,7 +428,11 @@ public class PackageExplorerPart extends ViewPart
 			}
 		}
 		protected void setSelectionToWidget(ISelection selection, boolean reveal) {
-			if (!fInPreserveSelection || !(selection instanceof MultiElementSelection)) {
+			if (true) {
+				super.setSelectionToWidget(selection, reveal);
+				return;
+			}
+			if (!fInPreserveSelection || !(selection instanceof ITreeSelection)) {
 				super.setSelectionToWidget(selection, reveal);
 				return;
 			}
@@ -637,11 +442,11 @@ public class PackageExplorerPart extends ViewPart
 				return;
 			}
 			IMultiElementTreeContentProvider contentProvider= (IMultiElementTreeContentProvider)cp;
-			MultiElementSelection toRestore= (MultiElementSelection)selection;
+			ITreeSelection toRestore= (ITreeSelection)selection;
 			List pathsToSelect= new ArrayList();
 			for (Iterator iter= toRestore.iterator(); iter.hasNext();) {
 				Object element= iter.next();
-				TreePath[] pathsToRestore= toRestore.getTreePaths(element);
+				TreePath[] pathsToRestore= toRestore.getPathsFor(element);
 				CustomHashtable currentParents= createRootAccessedMap(contentProvider.getTreePaths(element));
 				for (int i= 0; i < pathsToRestore.length; i++) {
 					TreePath path= pathsToRestore[i];

@@ -20,26 +20,28 @@ import org.eclipse.core.runtime.IAdaptable;
 
 import org.eclipse.core.resources.IFolder;
 
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-
 import org.eclipse.swt.dnd.DND;
+
+import org.eclipse.jface.viewers.ITreeSelection;
+import org.eclipse.jface.viewers.TreePath;
+import org.eclipse.jface.viewers.TreeSelection;
 
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkingSet;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.views.navigator.LocalSelectionTransfer;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.ui.JavaUI;
 
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDropAdapter;
-import org.eclipse.jdt.internal.ui.packageview.MultiElementSelection;
 import org.eclipse.jdt.internal.ui.packageview.PackageExplorerPart;
-import org.eclipse.jdt.internal.ui.packageview.TreePath;
 import org.eclipse.jdt.internal.ui.packageview.WorkingSetDropAdapter;
 import org.eclipse.jdt.internal.ui.workingsets.OthersWorkingSetUpdater;
+
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
 
 public class WorkingSetDropAdapterTest extends TestCase {
 
@@ -66,7 +68,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 	public void testInvalidTarget2() throws Exception {
 		List selectedElements= new ArrayList();
 		selectedElements.add(fProject);
-		MultiElementSelection selection= createSelection(selectedElements, null);
+		ITreeSelection selection= createSelection(selectedElements, null);
 		
 		performDnD(DND.DROP_NONE, selection, fProject);
 	}
@@ -76,7 +78,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		List selectedElements= new ArrayList();
 		selectedElements.add(root);
 		
-		MultiElementSelection selection= createSelection(selectedElements, null);
+		ITreeSelection selection= createSelection(selectedElements, null);
 		IWorkingSet target= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Target", new IAdaptable[] {fProject});
 		performDnD(DND.DROP_NONE, selection, target);
@@ -89,7 +91,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		List selectedElements= new ArrayList();
 		selectedElements.add(folder);
 		
-		MultiElementSelection selection= createSelection(selectedElements, null);
+		ITreeSelection selection= createSelection(selectedElements, null);
 		IWorkingSet target= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Target", new IAdaptable[] {fProject});
 		performDnD(DND.DROP_NONE, selection, target);
@@ -98,7 +100,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 	public void testAddProject() throws Exception {
 		List selectedElements= new ArrayList();
 		selectedElements.add(fProject);
-		MultiElementSelection selection= createSelection(selectedElements, null);
+		ITreeSelection selection= createSelection(selectedElements, null);
 		
 		IWorkingSet target= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Target", new IAdaptable[0]);
@@ -115,7 +117,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 			"Source", new IAdaptable[] {fProject});
 		List treePathes= new ArrayList();
 		treePathes.add(new TreePath(new Object[] {source, fProject}));
-		MultiElementSelection selection= createSelection(selectedElements, treePathes);
+		ITreeSelection selection= createSelection(selectedElements, treePathes);
 		
 		IWorkingSet target= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Target", new IAdaptable[0]);
@@ -134,7 +136,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 			"Source", new IAdaptable[] {fProject});
 		List treePathes= new ArrayList();
 		treePathes.add(new TreePath(new Object[] {source, fProject}));
-		MultiElementSelection selection= createSelection(selectedElements, treePathes);
+		ITreeSelection selection= createSelection(selectedElements, treePathes);
 		
 		IWorkingSet target= PlatformUI.getWorkbench().getWorkingSetManager().createWorkingSet(
 			"Target", new IAdaptable[0]);
@@ -158,7 +160,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		fPackageExplorer.internalTestShowWorkingSets(new IWorkingSet[] {ws1, ws2, ws3});
 		List selectedElements= new ArrayList();
 		selectedElements.add(ws3);
-		MultiElementSelection selection= createSelection(selectedElements, null);
+		ITreeSelection selection= createSelection(selectedElements, null);
 		performDnD(DND.DROP_MOVE, selection, ws1, JdtViewerDropAdapter.LOCATION_BEFORE);
 		IWorkingSet[] actual= fPackageExplorer.getWorkingSetModel().getActiveWorkingSets();
 		assertEquals(ws3, actual[0]);
@@ -176,7 +178,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		fPackageExplorer.internalTestShowWorkingSets(new IWorkingSet[] {ws1, ws2, ws3});
 		List selectedElements= new ArrayList();
 		selectedElements.add(ws3);
-		MultiElementSelection selection= createSelection(selectedElements, null);
+		ITreeSelection selection= createSelection(selectedElements, null);
 		performDnD(DND.DROP_MOVE, selection, ws1, JdtViewerDropAdapter.LOCATION_AFTER);
 		IWorkingSet[] actual= fPackageExplorer.getWorkingSetModel().getActiveWorkingSets();
 		assertEquals(ws1, actual[0]);
@@ -194,7 +196,7 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		fPackageExplorer.internalTestShowWorkingSets(new IWorkingSet[] {ws1, ws2, ws3});
 		List selectedElements= new ArrayList();
 		selectedElements.add(ws1);
-		MultiElementSelection selection= createSelection(selectedElements, null);
+		ITreeSelection selection= createSelection(selectedElements, null);
 		performDnD(DND.DROP_MOVE, selection, ws3, JdtViewerDropAdapter.LOCATION_AFTER);
 		IWorkingSet[] actual= fPackageExplorer.getWorkingSetModel().getActiveWorkingSets();
 		assertEquals(ws2, actual[0]);
@@ -202,24 +204,22 @@ public class WorkingSetDropAdapterTest extends TestCase {
 		assertEquals(ws1, actual[2]);
 	}
 
-	private MultiElementSelection createSelection(List selectedElements, List treePathes) {
+	private ITreeSelection createSelection(List selectedElements, List treePathes) {
 		if (treePathes == null) {
 			treePathes= new ArrayList();
 			for (Iterator iter= selectedElements.iterator(); iter.hasNext();) {
 				treePathes.add(new TreePath(new Object[] { iter.next() }));
 			}
 		}
-		return new MultiElementSelection(
-			fPackageExplorer.getTreeViewer(), 
-			selectedElements, 
-			(TreePath[])treePathes.toArray(new TreePath[treePathes.size()]));
+		return new TreeSelection((TreePath[])treePathes.toArray(new TreePath[treePathes.size()]),
+			fPackageExplorer.getTreeViewer().getComparer());
 	}
 	
-	private void performDnD(int validateResult, MultiElementSelection selection, Object target) throws Exception {
+	private void performDnD(int validateResult, ITreeSelection selection, Object target) throws Exception {
 		performDnD(validateResult, selection, target, DND.FEEDBACK_SELECT);
 		
 	}
-	private void performDnD(int validateResult, MultiElementSelection selection, Object target, int location) throws Exception {
+	private void performDnD(int validateResult, ITreeSelection selection, Object target, int location) throws Exception {
 		try {
 			LocalSelectionTransfer.getInstance().setSelection(selection);
 			fAdapter.internalTestSetLocation(location);
