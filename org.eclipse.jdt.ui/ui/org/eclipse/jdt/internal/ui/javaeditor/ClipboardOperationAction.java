@@ -45,7 +45,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.ui.IWorkbenchPartSite;
 import org.eclipse.ui.texteditor.IAbstractTextEditorHelpContextIds;
 import org.eclipse.ui.texteditor.ITextEditor;
-import org.eclipse.ui.texteditor.ITextEditorActionDefinitionIds;
+import org.eclipse.ui.texteditor.IWorkbenchActionDefinitionIds;
 import org.eclipse.ui.texteditor.TextEditorAction;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -211,13 +211,13 @@ public final class ClipboardOperationAction extends TextEditorAction {
 
 		if (operationCode == ITextOperationTarget.CUT) {
 			setHelpContextId(IAbstractTextEditorHelpContextIds.CUT_ACTION);
-			setActionDefinitionId(ITextEditorActionDefinitionIds.CUT);
+			setActionDefinitionId(IWorkbenchActionDefinitionIds.CUT);
 		} else if (operationCode == ITextOperationTarget.COPY) {
 			setHelpContextId(IAbstractTextEditorHelpContextIds.COPY_ACTION);
-			setActionDefinitionId(ITextEditorActionDefinitionIds.COPY);
+			setActionDefinitionId(IWorkbenchActionDefinitionIds.COPY);
 		} else if (operationCode == ITextOperationTarget.PASTE) {
 			setHelpContextId(IAbstractTextEditorHelpContextIds.PASTE_ACTION);
-			setActionDefinitionId(ITextEditorActionDefinitionIds.PASTE);
+			setActionDefinitionId(IWorkbenchActionDefinitionIds.PASTE);
 		} else {
 			Assert.isTrue(false, "Invalid operation code"); //$NON-NLS-1$
 		}
