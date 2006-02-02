@@ -20,10 +20,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -140,39 +137,11 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 		button.setText(MultiFixMessages.PotentialProgrammingProblemsCleanUp_AddSerialId_section_name);
 		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
-		Composite sub= new Composite(parent, SWT.NONE);
-		sub.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		sub.setLayout(new GridLayout(2, false));
-		
-		final Button button1= addRadioButton(sub, ADD_CALCULATED_SERIAL_VERSION_ID, MultiFixMessages.PotentialProgrammingProblemsCleanUp_Generated_radioButton_name); 
-		final Button button2= addRadioButton(sub, ADD_RANDOM_SERIAL_VERSION_ID, MultiFixMessages.PotentialProgrammingProblemsCleanUp_Random_radioButton_name);
-		
-		if (!isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) && !isFlag(ADD_RANDOM_SERIAL_VERSION_ID)) {
-			button.setSelection(false);
-			button1.setSelection(true);
-			button1.setEnabled(false);
-			button2.setEnabled(false);
-		} else {
-			button.setSelection(true);
-		}
-		
-		button.addSelectionListener(new SelectionAdapter() {
+		int[] flags= new int[] {ADD_CALCULATED_SERIAL_VERSION_ID, ADD_RANDOM_SERIAL_VERSION_ID};		
+		final int[] uiFlags= new int[] {1073741824, 536870912};
+		String[] labels= new String[] {MultiFixMessages.PotentialProgrammingProblemsCleanUp_Generated_radioButton_name, MultiFixMessages.PotentialProgrammingProblemsCleanUp_Random_radioButton_name};
+		createSubGroup(parent, button, SWT.RADIO, flags, labels, uiFlags);
 
-			public void widgetSelected(SelectionEvent e) {
-				boolean isSelected= ((Button)e.getSource()).getSelection();
-				button1.setEnabled(isSelected);
-				button2.setEnabled(isSelected);
-				if (!isSelected) {
-					setFlag(ADD_CALCULATED_SERIAL_VERSION_ID, false);
-					setFlag(ADD_RANDOM_SERIAL_VERSION_ID, false);
-				} else {
-					setFlag(ADD_CALCULATED_SERIAL_VERSION_ID, button1.getSelection());
-					setFlag(ADD_RANDOM_SERIAL_VERSION_ID, button2.getSelection());
-				}
-			}
-			
-		});
-		
 		return parent;
 	}
 

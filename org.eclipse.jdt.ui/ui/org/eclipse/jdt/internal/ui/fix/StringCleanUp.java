@@ -95,7 +95,7 @@ public class StringCleanUp extends AbstractCleanUp {
 
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
 
-		addCheckBox(parent, REMOVE_UNNECESSARY_NLS_TAG, MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description);
+		addTab(parent);addCheckBox(parent, REMOVE_UNNECESSARY_NLS_TAG, MultiFixMessages.StringCleanUp_RemoveNLSTag_label);
 		
 		return parent;
 	}
@@ -110,9 +110,9 @@ public class StringCleanUp extends AbstractCleanUp {
 	public String[] getDescriptions() {
 		List result= new ArrayList();
 		if (isFlag(ADD_MISSING_NLS_TAG))
-			result.add(removeMemonic(MultiFixMessages.StringMultiFix_AddMissingNonNls_description));
+			result.add(MultiFixMessages.StringMultiFix_AddMissingNonNls_description);
 		if (isFlag(REMOVE_UNNECESSARY_NLS_TAG))
-			result.add(removeMemonic(MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description));
+			result.add(MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
 

@@ -21,6 +21,7 @@ import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -257,10 +258,19 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			//Unused Code Group
 			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description);
+			
+			Label remove= new Label(group, SWT.NONE);
+			remove.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			remove.setText(MultiFixMessages.CleanUpRefactoringWizard_Remove_sectionTitle);
+			
+			Composite composite= new Composite(group, SWT.NONE);
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			composite.setLayout(new GridLayout(2, false));
+			
 			fCleanUps[2]= new UnusedCodeCleanUp(section);
-			fCleanUps[2].createConfigurationControl(group, project);
+			fCleanUps[2].createConfigurationControl(composite, project);
 			fCleanUps[5]= new StringCleanUp(section);
-			fCleanUps[5].createConfigurationControl(group, project);
+			fCleanUps[5].createConfigurationControl(composite, project);
 			
 			//Java50Fix Group
 			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_Annotations_sectionName);

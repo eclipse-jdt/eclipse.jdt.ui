@@ -20,6 +20,7 @@ public class MultiFixMessages extends NLS {
 
 	public static String StringMultiFix_AddMissingNonNls_description;
 	public static String StringMultiFix_RemoveUnnecessaryNonNls_description;
+	public static String StringCleanUp_RemoveNLSTag_label;
 	
 	public static String UnusedCodeMultiFix_RemoveUnusedVariable_description;
 	public static String UnusedCodeMultiFix_RemoveUnusedField_description;
@@ -28,6 +29,14 @@ public class MultiFixMessages extends NLS {
 	public static String UnusedCodeMultiFix_RemoveUnusedMethod_description;
 	public static String UnusedCodeMultiFix_RemoveUnusedImport_description;
 	public static String UnusedCodeCleanUp_RemoveUnusedCasts_description;
+	public static String UnusedCodeCleanUp_unusedImports_checkBoxLabel;
+	public static String UnusedCodeCleanUp_unusedPrivateMembers_checkBoxLabel;
+	public static String UnusedCodeCleanUp_unusedTypes_checkBoxLabel;
+	public static String UnusedCodeCleanUp_unusedConstructors_checkBoxLabel;
+	public static String UnusedCodeCleanUp_unusedMethods_checkBoxLabel;
+	public static String UnusedCodeCleanUp_unusedFields_checkBoxLabel;
+	public static String UnusedCodeCleanUp_unusedLocalVariables_checkBoxLabel;
+	public static String UnusedCodeCleanUp_unnecessaryCasts_checkBoxLabel;
 	
 	public static String CodeStyleMultiFix_ChangeNonStaticAccess_description;
 	public static String CodeStyleMultiFix_AddThisQualifier_description;
@@ -56,6 +65,7 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_UnusedCodeSection_description;
 	public static String CleanUpRefactoringWizard_PotentialProgrammingProblems_description;
 	public static String CleanUpRefactoringWizard_Annotations_sectionName;
+	public static String CleanUpRefactoringWizard_Remove_sectionTitle;
 	
 	public static String PotentialProgrammingProblemsCleanUp_AddSerialId_section_name;
 	public static String PotentialProgrammingProblemsCleanUp_Generated_radioButton_name;

@@ -18,6 +18,9 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -76,7 +79,6 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 	
 	private static final int DEFAULT_FLAG= REMOVE_UNUSED_IMPORTS;
 	private static final String SECTION_NAME= "CleanUp_UnusedCode"; //$NON-NLS-1$
-
 	
 	public UnusedCodeCleanUp(int flag) {
 		super(flag);
@@ -136,17 +138,27 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 		return options;
 	}
 
-	public Control createConfigurationControl(Composite parent, IJavaProject project) {
+	public Control createConfigurationControl(Composite composite, IJavaProject project) {
 
-		addCheckBox(parent, REMOVE_UNUSED_IMPORTS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedImport_description);
-		addCheckBox(parent, REMOVE_UNUSED_PRIVATE_METHODS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedMethod_description);
-		addCheckBox(parent, REMOVE_UNUSED_PRIVATE_CONSTRUCTORS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedConstructor_description);
-		addCheckBox(parent, REMOVE_UNUSED_PRIVATE_TYPES, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedType_description);
-		addCheckBox(parent, REMOVE_UNUSED_PRIVATE_FIELDS, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description);
-		addCheckBox(parent, REMOVE_UNUSED_LOCAL_VARIABLES, MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description);
-		addCheckBox(parent, REMOVE_UNUSED_CAST, MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description);
+		addTab(composite);addCheckBox(composite, REMOVE_UNUSED_IMPORTS, MultiFixMessages.UnusedCodeCleanUp_unusedImports_checkBoxLabel);
 		
-		return parent;
+		addTab(composite);
+			Button button= new Button(composite, SWT.CHECK);
+			button.setText(MultiFixMessages.UnusedCodeCleanUp_unusedPrivateMembers_checkBoxLabel);
+			button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+			
+		addTab(composite);
+		
+			final int[] flags= new int[] {REMOVE_UNUSED_PRIVATE_TYPES, REMOVE_UNUSED_PRIVATE_CONSTRUCTORS, REMOVE_UNUSED_PRIVATE_METHODS, REMOVE_UNUSED_PRIVATE_FIELDS};
+			final int[] uiFlags= new int[] {1073741824, 536870912, 268435456, 134217728};
+			final String[] labels= new String[] {MultiFixMessages.UnusedCodeCleanUp_unusedTypes_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedConstructors_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedMethods_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedFields_checkBoxLabel};
+		
+			createSubGroup(composite, button, SWT.CHECK, flags, labels, uiFlags);
+		
+		addTab(composite);addCheckBox(composite, REMOVE_UNUSED_LOCAL_VARIABLES, MultiFixMessages.UnusedCodeCleanUp_unusedLocalVariables_checkBoxLabel);	
+		addTab(composite);addCheckBox(composite, REMOVE_UNUSED_CAST, MultiFixMessages.UnusedCodeCleanUp_unnecessaryCasts_checkBoxLabel);
+		
+		return composite;
 	}
 
 	public void saveSettings(IDialogSettings settings) {
@@ -159,19 +171,19 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 	public String[] getDescriptions() {
 		List result= new ArrayList();
 		if (isFlag(REMOVE_UNUSED_IMPORTS))
-			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedImport_description));
+			result.add(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedImport_description);
 		if (isFlag(REMOVE_UNUSED_PRIVATE_METHODS))
-			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedMethod_description));
+			result.add(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedMethod_description);
 		if (isFlag(REMOVE_UNUSED_PRIVATE_CONSTRUCTORS))
-			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedConstructor_description));
+			result.add(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedConstructor_description);
 		if (isFlag(REMOVE_UNUSED_PRIVATE_TYPES))
-			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedType_description));
+			result.add(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedType_description);
 		if (isFlag(REMOVE_UNUSED_PRIVATE_FIELDS))
-			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description));
+			result.add(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description);
 		if (isFlag(REMOVE_UNUSED_LOCAL_VARIABLES))
-			result.add(removeMemonic(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description));
+			result.add(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description);
 		if (isFlag(REMOVE_UNUSED_CAST))
-			result.add(removeMemonic(MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description));
+			result.add(MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
 
