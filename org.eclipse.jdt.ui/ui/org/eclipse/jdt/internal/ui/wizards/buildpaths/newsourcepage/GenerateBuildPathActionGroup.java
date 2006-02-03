@@ -34,7 +34,6 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.wizard.Wizard;
 
 import org.eclipse.ui.IActionBars;
-import org.eclipse.ui.IKeyBindingService;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -96,7 +95,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     public static final String MENU_ID= "org.eclipse.jdt.ui.buildpath.menu"; //$NON-NLS-1$
     
     /**
-     * Pop-up menu: id of the buildpath (add /remove) group of the buildpath sub menu (value
+     * Pop-up menu: id of the build path (add /remove) group of the build path sub menu (value
      * <code>buildpathGroup</code>).
      * 
      * @since 3.1
@@ -104,7 +103,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     public static final String GROUP_BUILDPATH= "buildpathGroup";  //$NON-NLS-1$
     
     /**
-     * Pop-up menu: id of the filter (include / exclude) group of the buildpath sub menu (value
+     * Pop-up menu: id of the filter (include / exclude) group of the build path sub menu (value
      * <code>filterGroup</code>).
      * 
      * @since 3.1
@@ -112,7 +111,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     public static final String GROUP_FILTER= "filterGroup";  //$NON-NLS-1$
     
     /**
-     * Pop-up menu: id of the customize (filters / output folder) group of the buildpath sub menu (value
+     * Pop-up menu: id of the customize (filters / output folder) group of the build path sub menu (value
      * <code>customizeGroup</code>).
      * 
      * @since 3.1
@@ -335,7 +334,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
      * @param page the page that owns this action group
      */
     public GenerateBuildPathActionGroup(Page page) {
-        this(page.getSite(), null);
+        this(page.getSite());
     }
     
     /**
@@ -346,10 +345,10 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
      * @param part the view part that owns this action group
      */
     public GenerateBuildPathActionGroup(IViewPart part) {
-        this(part.getSite(), part.getSite().getKeyBindingService());
+        this(part.getSite());
     }
     
-    private GenerateBuildPathActionGroup(IWorkbenchSite site, IKeyBindingService keyBindingService) {
+    private GenerateBuildPathActionGroup(IWorkbenchSite site) {
         fSite= site;
         
         final AddSourceFolderAction addSourceFolderAction= new AddSourceFolderAction();
