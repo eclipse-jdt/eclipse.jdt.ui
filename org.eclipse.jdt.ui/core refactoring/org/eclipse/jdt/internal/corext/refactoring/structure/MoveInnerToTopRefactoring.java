@@ -530,7 +530,7 @@ public class MoveInnerToTopRefactoring extends CommentRefactoring implements IIn
 	}
 
 	private void initialize() throws JavaModelException {
-		fQualifiedTypeName= fType.getFullyQualifiedName('.');
+		fQualifiedTypeName= JavaModelUtil.concatenateName(fType.getPackageFragment().getElementName(), fType.getElementName());
 		fEnclosingInstanceFieldName= getInitialNameForEnclosingInstanceField();
 		fSourceRewrite= new CompilationUnitRewrite(fType.getCompilationUnit());
 		fIsInstanceFieldCreationPossible= !(JdtFlags.isStatic(fType) || fType.isAnnotation() || fType.isEnum());
