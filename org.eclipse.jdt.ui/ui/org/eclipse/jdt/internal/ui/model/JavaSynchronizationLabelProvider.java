@@ -15,6 +15,7 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.team.core.diff.IDiff;
@@ -25,6 +26,8 @@ import org.eclipse.ltk.ui.refactoring.model.AbstractSynchronizationLabelProvider
 
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.ProblemsLabelDecorator;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
@@ -74,8 +77,24 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	 */
 	protected ILabelProvider getDelegateLabelProvider() {
 		if (fLabelProvider == null)
-			fLabelProvider= new JavaModelLabelProvider(ModelMessages.JavaModelLabelProvider_project_preferences_label, ModelMessages.JavaModelLabelProvider_refactorings_label);
+			fLabelProvider= new DecoratingLabelProvider(new JavaModelLabelProvider(ModelMessages.JavaModelLabelProvider_project_preferences_label, ModelMessages.JavaModelLabelProvider_refactorings_label), new ProblemsLabelDecorator());
 		return fLabelProvider;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected IDiff getDiff(final Object element) {
+		final ISynchronizationContext context= getContext();
+		final IResource resource= JavaModelProvider.getResource(element);
+		if (context != null && resource != null) {
+			final IDiff[] diff= JavaSynchronizationContentProvider.getDiffs(context, element);
+			for (int index= 0; index < diff.length; index++) {
+				if (context.getDiffTree().getResource(diff[index]).equals(resource))
+					return diff[index];
+			}
+		}
+		return super.getDiff(element);
 	}
 
 	/**
@@ -95,25 +114,17 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 	/**
 	 * {@inheritDoc}
 	 */
-	protected Object getModelRoot() {
-		if (fModelRoot == null)
-			fModelRoot= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
-		return fModelRoot;
+	protected int getMarkerSeverity(final Object element) {
+		// Decoration label provider is handling this
+		return -1;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IDiff getDiff(final Object element) {
-		final ISynchronizationContext context= getContext();
-		final IResource resource= JavaModelProvider.getResource(element);
-		if (context != null && resource != null) {
-			final IDiff[] diff= JavaSynchronizationContentProvider.getDiffs(context, element);
-			for (int index= 0; index < diff.length; index++) {
-				if (context.getDiffTree().getResource(diff[index]).equals(resource))
-					return diff[index];
-			}
-		}
-		return super.getDiff(element);
+	protected Object getModelRoot() {
+		if (fModelRoot == null)
+			fModelRoot= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
+		return fModelRoot;
 	}
 }
