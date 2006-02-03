@@ -19,6 +19,7 @@ import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.team.core.diff.IDiff;
+import org.eclipse.team.core.diff.IDiffTree;
 import org.eclipse.team.core.diff.IThreeWayDiff;
 import org.eclipse.team.core.mapping.ISynchronizationContext;
 
@@ -126,5 +127,34 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 		if (fModelRoot == null)
 			fModelRoot= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot());
 		return fModelRoot;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected boolean hasDecendantConflicts(final Object element) {
+		final ISynchronizationContext context= getContext();
+		final IResource resource= JavaModelProvider.getResource(element);
+		if (context != null && resource != null)
+			return context.getDiffTree().getProperty(resource.getFullPath(), IDiffTree.P_HAS_DESCENDANT_CONFLICTS);
+		return super.hasDecendantConflicts(element);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected boolean isBusy(final Object element) {
+		final ISynchronizationContext context= getContext();
+		final IResource resource= JavaModelProvider.getResource(element);
+		if (context != null && resource != null)
+			return context.getDiffTree().getProperty(resource.getFullPath(), IDiffTree.P_BUSY_HINT);
+		return super.isBusy(element);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected boolean isIncludeOverlays() {
+		return true;
 	}
 }
