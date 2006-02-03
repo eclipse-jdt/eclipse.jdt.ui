@@ -16,6 +16,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -118,20 +119,18 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 * {@inheritDoc}
 	 */
 	protected Object[] getChildrenInContext(final ISynchronizationContext context, final Object parent, final Object[] children) {
-		Object[] elements= null;
+		final Object[] elements= super.getChildrenInContext(context, parent, children);
 		if (parent instanceof IPackageFragment)
-			elements= getPackageFragmentChildren(context, parent, children);
+			return getPackageFragmentChildren(context, parent, elements);
 		else if (parent instanceof IPackageFragmentRoot)
-			elements= getPackageFragmentRootChildren(context, parent, children);
+			return getPackageFragmentRootChildren(context, parent, elements);
 		else if (parent instanceof IJavaProject)
-			elements= getJavaProjectChildren(context, parent, children);
+			return getJavaProjectChildren(context, parent, elements);
 		else if (parent instanceof JavaProjectSettings)
-			elements= getProjectSettingsChildren(context, parent, children);
+			return getProjectSettingsChildren(context, parent, elements);
 		else if (parent instanceof RefactoringHistory)
-			elements= ((RefactoringHistory) parent).getDescriptors();
-		else
-			elements= children;
-		return super.getChildrenInContext(context, parent, elements);
+			return ((RefactoringHistory) parent).getDescriptors();
+		return elements;
 	}
 
 	/**
@@ -162,7 +161,8 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 //		if (resource != null) {
 //			final IResource[] members= context.getDiffTree().members(resource);
 //			for (int index= 0; index < members.length; index++) {
-//				if (members[index].getType() == IResource.FOLDER && isInScope(context.getScope(), parent, members[index])) {
+//				final int type= members[index].getType();
+//				if (type == IResource.FOLDER && isInScope(context.getScope(), parent, members[index])) {
 //					final String name= members[index].getName();
 //					if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
 //						list.remove(members[index]);
@@ -215,7 +215,8 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			for (int index= 0; index < members.length; index++) {
 				final IDiff diff= tree.getDiff(members[index]);
 				if (diff != null) {
-					if (members[index].getType() == IResource.FILE && isInScope(context.getScope(), parent, members[index]))
+					final int type= members[index].getType();
+					if (type == IResource.FILE && isInScope(context.getScope(), parent, members[index]))
 						set.add(JavaCore.create(members[index]));
 				}
 			}
@@ -249,16 +250,20 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 					set.add(JavaCore.create((IFile) members[index]));
 				else if (type == IResource.FOLDER && contained)
 					set.add(JavaCore.create(members[index]));
-				if (members[index] instanceof IFolder) {
+				if (type == IResource.FOLDER) {
+					final IFolder folder= (IFolder) members[index];
 					try {
-						tree.accept(((IFolder) members[index]).getFullPath(), new IDiffVisitor() {
+						tree.accept(folder.getFullPath(), new IDiffVisitor() {
 
 							public final boolean visit(final IDiff diff) throws CoreException {
 								final IResource current= tree.getResource(diff);
-								if (current.getType() == IResource.FILE)
-									set.add(JavaCore.create(current.getParent()));
-								else
-									set.add(JavaCore.create(current));
+								if (current != null) {
+									final int kind= current.getType();
+									if (kind == IResource.FILE)
+										set.add(JavaCore.create(current.getParent()));
+									else
+										set.add(JavaCore.create(current));
+								}
 								return true;
 							}
 						}, IResource.DEPTH_INFINITE);
@@ -294,7 +299,8 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			for (int index= 0; index < members.length; index++) {
 				final IDiff diff= tree.getDiff(members[index]);
 				if (diff != null) {
-					if (members[index].getType() == IResource.FILE && isInScope(context.getScope(), parent, members[index]))
+					final int type= members[index].getType();
+					if (type == IResource.FILE && isInScope(context.getScope(), parent, members[index]))
 						set.add(members[index]);
 				}
 			}
@@ -323,14 +329,15 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 */
 	private boolean hasChildrenInScope(final IResourceMappingScope scope, final Object element, final IResource resource) {
 		final IResource[] roots= scope.getRoots();
+		final IPath path= resource.getFullPath();
 		if (element instanceof IPackageFragment) {
 			for (int index= 0; index < roots.length; index++)
-				if (resource.getFullPath().equals((roots[index].getFullPath().removeLastSegments(1))))
+				if (path.equals(roots[index].getFullPath().removeLastSegments(1)))
 					return true;
 			return false;
 		}
 		for (int index= 0; index < roots.length; index++) {
-			if (resource.getFullPath().isPrefixOf(roots[index].getFullPath()))
+			if (path.isPrefixOf(roots[index].getFullPath()))
 				return true;
 		}
 		return false;
