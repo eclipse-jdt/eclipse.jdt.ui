@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.ltk.internal.core.refactoring.model;
+package org.eclipse.jdt.internal.ui.model;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -20,12 +20,11 @@ import org.eclipse.core.resources.mapping.ResourceMappingContext;
 import org.eclipse.core.resources.mapping.ResourceTraversal;
 
 /**
- * Default implementation for a resource mapping for the refactoring model
- * provider.
+ * Default implementation for a resource mapping for the java model provider.
  * 
  * @since 3.2
  */
-public class RefactoringResourceMapping extends ResourceMapping {
+public class JavaResourceMapping extends ResourceMapping {
 
 	/** The model provider id */
 	private final String fProviderId;
@@ -34,14 +33,14 @@ public class RefactoringResourceMapping extends ResourceMapping {
 	private final IResource fResource;
 
 	/**
-	 * Creates a new refactoring resource mapping.
+	 * Creates a new java resource mapping.
 	 * 
 	 * @param resource
 	 *            the resource to map
 	 * @param id
 	 *            the fully qualified id of the model provider
 	 */
-	public RefactoringResourceMapping(final IResource resource, final String id) {
+	public JavaResourceMapping(final IResource resource, final String id) {
 		Assert.isNotNull(resource);
 		Assert.isNotNull(id);
 		fResource= resource;
@@ -66,13 +65,13 @@ public class RefactoringResourceMapping extends ResourceMapping {
 	 * {@inheritDoc}
 	 */
 	public IProject[] getProjects() {
-		return new IProject[] { fResource.getProject() };
+		return new IProject[] { fResource.getProject()};
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public ResourceTraversal[] getTraversals(final ResourceMappingContext context, final IProgressMonitor monitor) {
-		return new ResourceTraversal[] { new ResourceTraversal(new IResource[] { fResource }, IResource.DEPTH_INFINITE, IResource.NONE) };
+		return new ResourceTraversal[] { new ResourceTraversal(new IResource[] { fResource}, IResource.DEPTH_INFINITE, IResource.NONE)};
 	}
 }

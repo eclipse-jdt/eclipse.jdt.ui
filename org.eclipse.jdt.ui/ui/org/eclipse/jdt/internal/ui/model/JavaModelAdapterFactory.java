@@ -21,7 +21,6 @@ import org.eclipse.team.core.mapping.IResourceMappingMerger;
 import org.eclipse.team.ui.mapping.ICompareAdapter;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
-import org.eclipse.ltk.core.refactoring.model.AbstractRefactoringModelProvider;
 
 /**
  * Adaptor factory for model support.
@@ -34,7 +33,7 @@ public final class JavaModelAdapterFactory implements IAdapterFactory {
 	 * {@inheritDoc}
 	 */
 	public Object getAdapter(final Object adaptable, final Class adapter) {
-		if (adaptable instanceof AbstractRefactoringModelProvider) {
+		if (adaptable instanceof JavaModelProvider) {
 			if (adapter == IResourceMappingMerger.class)
 				return new JavaModelMerger((ModelProvider) adaptable);
 			else if (adapter == ICompareAdapter.class)

@@ -16,10 +16,9 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.mapping.ModelProvider;
 import org.eclipse.core.resources.mapping.ResourceMapping;
 import org.eclipse.core.resources.mapping.ResourceMappingContext;
-
-import org.eclipse.ltk.core.refactoring.model.AbstractRefactoringModelProvider;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
@@ -31,7 +30,7 @@ import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
  * 
  * @since 3.2
  */
-public final class JavaModelProvider extends AbstractRefactoringModelProvider {
+public final class JavaModelProvider extends ModelProvider {
 
 	/** The model provider id */
 	public static final String JAVA_MODEL_PROVIDER_ID= "org.eclipse.jdt.ui.modelProvider"; //$NON-NLS-1$
@@ -66,7 +65,7 @@ public final class JavaModelProvider extends AbstractRefactoringModelProvider {
 	 * Creates a new java model provider.
 	 */
 	public JavaModelProvider() {
-		super(JAVA_MODEL_PROVIDER_ID);
+		// Used by the runtime
 	}
 
 	/**
@@ -75,10 +74,10 @@ public final class JavaModelProvider extends AbstractRefactoringModelProvider {
 	public ResourceMapping[] getMappings(final IResource resource, final ResourceMappingContext context, final IProgressMonitor monitor) throws CoreException {
 		final IJavaElement element= JavaCore.create(resource);
 		if (element != null)
-			return new ResourceMapping[] { JavaElementResourceMapping.create(element) };
+			return new ResourceMapping[] { JavaElementResourceMapping.create(element)};
 		final Object adapted= resource.getAdapter(ResourceMapping.class);
 		if (adapted instanceof ResourceMapping)
-			return new ResourceMapping[] { ((ResourceMapping) adapted) };
-		return super.getMappings(resource, context, monitor);
+			return new ResourceMapping[] { ((ResourceMapping) adapted)};
+		return new ResourceMapping[] { new JavaResourceMapping(resource, JAVA_MODEL_PROVIDER_ID)};
 	}
 }

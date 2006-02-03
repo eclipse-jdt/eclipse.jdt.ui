@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.ResourceMapping;
@@ -56,7 +57,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public final class JavaSynchronizationContentProvider extends AbstractSynchronizationContentProvider {
 
 	/** The refactorings folder */
-//	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
+	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
 
 	/**
 	 * Returns the diffs associated with the element.
@@ -157,26 +158,26 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		final LinkedList list= new LinkedList();
 		for (int index= 0; index < children.length; index++)
 			list.add(children[index]);
-//		final IResource resource= JavaModelProvider.getResource(parent);
-//		if (resource != null) {
-//			final IResource[] members= context.getDiffTree().members(resource);
-//			for (int index= 0; index < members.length; index++) {
-//				final int type= members[index].getType();
-//				if (type == IResource.FOLDER && isInScope(context.getScope(), parent, members[index])) {
-//					final String name= members[index].getName();
-//					if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
-//						list.remove(members[index]);
-//						list.addFirst(new JavaProjectSettings((IJavaProject) parent));
-//					} else if (name.equals(NAME_REFACTORING_FOLDER)) {
-//						final RefactoringHistory history= getPendingRefactorings(context, (IProject) resource, null);
-//						if (!history.isEmpty()) {
-//							list.remove(members[index]);
-//							list.addFirst(history);
-//						}
-//					}
-//				}
-//			}
-//		}
+		final IResource resource= JavaModelProvider.getResource(parent);
+		if (resource != null) {
+			final IResource[] members= context.getDiffTree().members(resource);
+			for (int index= 0; index < members.length; index++) {
+				final int type= members[index].getType();
+				if (type == IResource.FOLDER && isInScope(context.getScope(), parent, members[index])) {
+					final String name= members[index].getName();
+					if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
+						list.remove(members[index]);
+						list.addFirst(new JavaProjectSettings((IJavaProject) parent));
+					} else if (name.equals(NAME_REFACTORING_FOLDER)) {
+						final RefactoringHistory history= getPendingRefactorings(context, (IProject) resource, null);
+						if (!history.isEmpty()) {
+							list.remove(members[index]);
+							list.addFirst(history);
+						}
+					}
+				}
+			}
+		}
 		return list.toArray(new Object[list.size()]);
 	}
 
