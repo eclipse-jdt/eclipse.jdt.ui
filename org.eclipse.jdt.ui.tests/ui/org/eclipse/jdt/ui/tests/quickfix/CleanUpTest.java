@@ -84,7 +84,7 @@ public class CleanUpTest extends QuickFixTest {
 		if (true)
 			return allTests();
 		
-		return setUpTest(new CleanUpTest("testCombinationBug125455"));
+		return setUpTest(new CleanUpTest("testRemoveBlock05"));
 	}
 
 	public static Test setUpTest(Test test) {
@@ -3842,5 +3842,223 @@ public class CleanUpTest extends QuickFixTest {
 		
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
+	
+	public void testRemoveBlock01() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void if_() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else if (false) {\n");
+		buf.append("            ;\n");
+		buf.append("        } else {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;;\n");
+		buf.append("        } else if (false) {\n");
+		buf.append("            ;;\n");
+		buf.append("        } else {\n");
+		buf.append("            ;;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS | ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp1);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void if_() {\n");
+		buf.append("        if (true)\n");
+		buf.append("            ;\n");
+		buf.append("        else if (false)\n");
+		buf.append("            ;\n");
+		buf.append("        else\n");
+		buf.append("            ;\n");
+		buf.append("        \n");
+		buf.append("        if (true) {\n");
+		buf.append("            ;;\n");
+		buf.append("        } else if (false) {\n");
+		buf.append("            ;;\n");
+		buf.append("        } else {\n");
+		buf.append("            ;;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testRemoveBlock02() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (;;) {\n");
+		buf.append("            ; \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        for (;;) {\n");
+		buf.append("            ;; \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS | ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp1);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (;;);\n");
+		buf.append("    }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        for (;;) {\n");
+		buf.append("            ;; \n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testRemoveBlock03() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        while (true) {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        while (true) {\n");
+		buf.append("            ;;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS | ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp1);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        while (true);\n");
+		buf.append("    }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        while (true) {\n");
+		buf.append("            ;;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testRemoveBlock04() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        do {\n");
+		buf.append("            ;\n");
+		buf.append("        } while (true);\n");
+		buf.append("    }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        do {\n");
+		buf.append("            ;;\n");
+		buf.append("        } while (true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS | ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp1);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        do; while (true);\n");
+		buf.append("    }\n");
+		buf.append("    public void bar() {\n");
+		buf.append("        do {\n");
+		buf.append("            ;;\n");
+		buf.append("        } while (true);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testRemoveBlock05() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int[] is= null;\n");
+		buf.append("        for (int i= 0;i < is.length;i++) {\n");
+		buf.append("            ;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS | ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
+		refactoring.addCleanUp(cleanUp1);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int[] is= null;\n");
+		buf.append("        for (int element : is);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
 	
 }

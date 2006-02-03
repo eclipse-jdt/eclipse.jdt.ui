@@ -16,6 +16,9 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -46,6 +49,13 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	 * for (int i = 0; i < array.length; i++) {} -> for (int element : array) {}</code></pre>
 	 */
 	public static final int CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP= 2;
+	
+	/**
+	 * Remove unnecessary blocks in control statement bodies.<p>
+	 * i.e.:<pre><code>
+	 *   if (b) {foo();} -> if (b) foo();
+	 */
+	public static final int REMOVE_UNNECESSARY_BLOCKS= 4;
 
 	private static final int DEFAULT_FLAG= 0;
 	private static final String SECTION_NAME= "CleanUp_ControlStatements"; //$NON-NLS-1$
@@ -67,6 +77,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 		
 		return ControlStatementsFix.createCleanUp(compilationUnit,
 				isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS),
+				isFlag(REMOVE_UNNECESSARY_BLOCKS),
 				isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP));
 	}
 
@@ -93,8 +104,27 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	 * {@inheritDoc}
 	 */
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
-
-		indent(addCheckBox(parent, ADD_BLOCK_TO_CONTROL_STATEMENTS, MultiFixMessages.ControlStatementsCleanUp_useBlocks_checkBoxLabel));
+		
+			Button button= new Button(parent, SWT.CHECK);
+			button.setText(MultiFixMessages.ControlStatementsCleanUp_useBlocks_checkBoxLabel);
+			button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		indent(button);
+		
+			Composite sub= new Composite(parent, SWT.NONE);
+			sub.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
+			GridLayout layout= new GridLayout(1, false);
+			layout.marginHeight= 0;
+			layout.marginWidth= 0;
+			sub.setLayout(layout);
+		indent(sub);
+	
+			final int[] flags= new int[] {ADD_BLOCK_TO_CONTROL_STATEMENTS, REMOVE_UNNECESSARY_BLOCKS};
+			final int[] uiFlags= new int[] {1073741824, 536870912};
+			final String[] labels= new String[] {MultiFixMessages.ControlStatementsCleanUp_always_checkBoxLabel, MultiFixMessages.ControlStatementsCleanUp_removeIfPossible_checkBoxLabel};
+	
+			createSubGroup(sub, button, SWT.RADIO, flags, labels, uiFlags, false);
+		
+		
 		Button box1= addCheckBox(parent, CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP, MultiFixMessages.ControlStatementsCleanUp_convertLoops_checkBoxLabel);
 		indent(box1);
 		if (project != null && !JavaModelUtil.is50OrHigher(project)) {

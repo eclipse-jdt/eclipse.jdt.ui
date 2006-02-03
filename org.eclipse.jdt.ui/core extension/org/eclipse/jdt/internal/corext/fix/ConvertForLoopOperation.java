@@ -83,6 +83,7 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 	private FieldAccess fFieldAccess;
 	private final CompilationUnit fRoot;
 	private final boolean fAddBlock;
+	private final boolean fRemoveUnnecessaryBlocks;
 
 	/**
 	 * Visitor class for finding all references to a certain Name within the
@@ -159,10 +160,12 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 	 * @param forStatement The For statement to be converted
 	 * @param root 
 	 * @param addBlock 
+	 * @param removeUnnecessaryBlocks 
 	 */
-	public ConvertForLoopOperation(CompilationUnit root, ForStatement forStatement, String parameterName, boolean addBlock) {
+	public ConvertForLoopOperation(CompilationUnit root, ForStatement forStatement, String parameterName, boolean addBlock, boolean removeUnnecessaryBlocks) {
 		fRoot= root;
 		fAddBlock= addBlock;
+		fRemoveUnnecessaryBlocks= removeUnnecessaryBlocks;
 		fCompilationUnit= (ICompilationUnit)root.getJavaElement();
 		this.fOldForStatement= forStatement;
 		fAst= root.getAST();
@@ -433,13 +436,17 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 
 		AST ast= fOldForStatement.getAST();
 		fEnhancedForStatement= ast.newEnhancedForStatement();
-		Statement theBody= (Statement)rewrite.createMoveTarget(fOldForStatement.getBody());
-		if (fAddBlock && !(theBody instanceof Block)) {
+		if (fAddBlock && !(fOldForStatement.getBody() instanceof Block)) {
+			Statement theBody= (Statement)rewrite.createMoveTarget(fOldForStatement.getBody());
 			Block newBody= ast.newBlock();
 			ListRewrite listRewrite= rewrite.getListRewrite(newBody, Block.STATEMENTS_PROPERTY);
 			listRewrite.insertFirst(theBody, group);
 			fEnhancedForStatement.setBody(newBody);
+		} else if (fRemoveUnnecessaryBlocks && fOldForStatement.getBody() instanceof Block && ((Block)fOldForStatement.getBody()).statements().size() == 1) {
+			Statement moveTarget= (Statement)rewrite.createMoveTarget((Statement)((Block)fOldForStatement.getBody()).statements().get(0));
+			fEnhancedForStatement.setBody(moveTarget);
 		} else {
+			Statement theBody= (Statement)rewrite.createMoveTarget(fOldForStatement.getBody());
 			fEnhancedForStatement.setBody(theBody);
 		}
 		fEnhancedForStatement.setExpression(createExpression(rewrite, ast));

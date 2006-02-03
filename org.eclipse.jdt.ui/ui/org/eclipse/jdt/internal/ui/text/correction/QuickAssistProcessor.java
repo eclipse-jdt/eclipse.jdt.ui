@@ -802,10 +802,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	private boolean getRemoveBlockProposals(IInvocationContext context, ASTNode coveringNode, Collection resultingCollections) {
 		IFix[] fixes= ControlStatementsFix.createRemoveBlockFix(context.getASTRoot(), coveringNode);
 		if (fixes != null) {
+			ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS);
 			for (int i= 0; i < fixes.length; i++) {
 				IFix fix= fixes[i];
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, 10, image, null);
+				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 10, image, null);
 				resultingCollections.add(proposal);
 			}
 			return true;
