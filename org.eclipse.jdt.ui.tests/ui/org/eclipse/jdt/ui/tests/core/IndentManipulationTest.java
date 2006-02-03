@@ -8,24 +8,25 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.text.tests;
+package org.eclipse.jdt.ui.tests.core;
 
 import junit.framework.Test;
 import junit.framework.TestCase;
 import junit.framework.TestSuite;
 import org.eclipse.jdt.core.formatter.IndentManipulation;
 
-public class StringsTest extends TestCase {
-
-
-	public StringsTest(String name) {
+public class IndentManipulationTest extends TestCase {
+	public IndentManipulationTest(String name) {
 		super(name);
 	}
 
 	public static Test suite() {
-		return new TestSuite(StringsTest.class);
+		return allTests();
 	}
 
+	public static Test allTests() {
+		return new TestSuite(IndentManipulationTest.class);
+	}
 	
 	public void testIsIndentChar() {
 		assertTrue(IndentManipulation.isIndentChar(' '));
@@ -42,6 +43,5 @@ public class StringsTest extends TestCase {
 		assertTrue(IndentManipulation.isLineDelimiterChar('\n'));
 		assertTrue(IndentManipulation.isLineDelimiterChar('\r'));
 	}
-	
 }
 

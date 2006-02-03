@@ -42,7 +42,6 @@ public class JdtTextTestSuite {
 		suite.addTest(JavaPartitionerTest.suite());
 		suite.addTest(PropertiesFilePartitionerTest.suite());
 //		suite.addTest(PartitionTokenScannerTest.suite());
-		suite.addTest(StringsTest.suite());
 		suite.addTest(MarkOccurrenceTest.suite());
 		suite.addTest(PluginsNotLoadedTest.suite());
 		suite.addTest(BracketInserterTest.suite());
