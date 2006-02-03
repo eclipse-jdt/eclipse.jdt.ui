@@ -24,6 +24,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
@@ -124,4 +125,19 @@ public class StringCleanUp extends AbstractCleanUp {
 		return StringFix.createFix(compilationUnit, problem, isFlag(REMOVE_UNNECESSARY_NLS_TAG), isFlag(ADD_MISSING_NLS_TAG)) != null;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
+		int result= 0;
+		IProblem[] problems= compilationUnit.getProblems();
+		if (isFlag(ADD_MISSING_NLS_TAG))
+			result+= getNumberOfProblems(problems, IProblem.NonExternalizedStringLiteral);
+		
+		if (isFlag(REMOVE_UNNECESSARY_NLS_TAG))
+			result+= getNumberOfProblems(problems, IProblem.UnnecessaryNLSTag);
+		
+		return result;
+	}
+	
 }

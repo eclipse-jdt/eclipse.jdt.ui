@@ -29,6 +29,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
@@ -219,6 +220,35 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				return true;
 		}
 		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
+		int result= 0;
+		IProblem[] problems= compilationUnit.getProblems();
+		if (isFlag(REMOVE_UNUSED_IMPORTS)) {
+			for (int i=0;i<problems.length;i++) {
+				int id= problems[i].getID();
+				if (id == IProblem.UnusedImport || id == IProblem.DuplicateImport || id == IProblem.ConflictingImport ||
+					    id == IProblem.CannotImportPackage || id == IProblem.ImportNotFound)
+					result++;
+			}
+		}
+		if (isFlag(REMOVE_UNUSED_PRIVATE_METHODS))
+			result+= getNumberOfProblems(problems, IProblem.UnusedPrivateMethod);
+		if (isFlag(REMOVE_UNUSED_PRIVATE_CONSTRUCTORS))
+			result+= getNumberOfProblems(problems, IProblem.UnusedPrivateConstructor);
+		if (isFlag(REMOVE_UNUSED_PRIVATE_TYPES))
+			result+= getNumberOfProblems(problems, IProblem.UnusedPrivateType);
+		if (isFlag(REMOVE_UNUSED_PRIVATE_FIELDS))
+			result+= getNumberOfProblems(problems, IProblem.UnusedPrivateField);
+		if (isFlag(REMOVE_UNUSED_LOCAL_VARIABLES))
+			result+= getNumberOfProblems(problems, IProblem.LocalVariableIsNeverUsed);
+		if (isFlag(REMOVE_UNUSED_CAST))
+			result+= getNumberOfProblems(problems, IProblem.UnnecessaryCast);
+		return result;
 	}
 
 }

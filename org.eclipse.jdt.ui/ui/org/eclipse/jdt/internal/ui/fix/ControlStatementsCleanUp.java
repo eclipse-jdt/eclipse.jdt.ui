@@ -154,4 +154,11 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 		return false;
 	}
 
+	/**
+	 * {@inheritDoc}
+	 */
+	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
+		return -1;
+	}
+
 }

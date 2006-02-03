@@ -314,6 +314,9 @@ public class UnusedCodeFix extends AbstractFix {
 	}
 	
 	public static IFix createRemoveUnusedCastFix(CompilationUnit compilationUnit, IProblemLocation problem) {
+		if (problem.getProblemId() != IProblem.UnnecessaryCast)
+			return null;
+		
 		ASTNode selectedNode= problem.getCoveringNode(compilationUnit);
 
 		ASTNode curr= selectedNode;

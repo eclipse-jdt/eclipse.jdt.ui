@@ -30,6 +30,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
@@ -210,6 +211,16 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 			};
 		}
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
+		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID) || isFlag(ADD_DEFAULT_SERIAL_VERSION_ID) || isFlag(ADD_RANDOM_SERIAL_VERSION_ID))
+			return getNumberOfProblems(compilationUnit.getProblems(), IProblem.MissingSerialVersion);
+		
+		return 0;
 	}
 
 }

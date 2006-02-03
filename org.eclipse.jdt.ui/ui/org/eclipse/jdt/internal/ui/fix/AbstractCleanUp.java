@@ -26,6 +26,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.compiler.IProblem;
 
 public abstract class AbstractCleanUp implements ICleanUp {
 
@@ -198,6 +199,15 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	protected void indent(Control control) {
 		GridData data= (GridData)control.getLayoutData();
 		data.horizontalIndent= INDENT_WIDTH;
+	}
+	
+	protected int getNumberOfProblems(IProblem[] problems, int problemId) {
+		int result= 0;
+		for (int i=0;i<problems.length;i++) {
+			if (problems[i].getID() == problemId)
+				result++;
+		}
+		return result;
 	}
 	
 	/**

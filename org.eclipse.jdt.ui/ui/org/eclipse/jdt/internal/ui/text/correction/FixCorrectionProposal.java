@@ -26,6 +26,7 @@ import org.eclipse.jface.text.contentassist.ICompletionProposalExtension2;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
+import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 
 import org.eclipse.jdt.internal.corext.fix.CleanUpRefactoring;
@@ -33,6 +34,7 @@ import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.LinkedFix;
 import org.eclipse.jdt.internal.corext.fix.PositionGroup;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 
@@ -50,11 +52,13 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 	
 	private final IFix fFix;
 	private final ICleanUp fCleanUp;
+	private CompilationUnit fCompilationUnit;
 	
 	public FixCorrectionProposal(IFix fix, ICleanUp cleanUp, int relevance, Image image, IInvocationContext context) {
 		super(fix.getDescription(), fix.getCompilationUnit(), null, relevance, image);
 		fFix= fix;
 		fCleanUp= cleanUp;
+		fCompilationUnit= context.getASTRoot();
 	}
 	
 	public ICleanUp getCleanUp() {
@@ -150,7 +154,14 @@ public class FixCorrectionProposal extends LinkedCorrectionProposal implements I
 		if (fCleanUp == null)
 			return null;
 		
-		return CorrectionMessages.FixCorrectionProposal_HitCtrlEnter_description;
+		int count= fCleanUp.maximalNumberOfFixes(fCompilationUnit);
+		if (count == -1) {
+			return CorrectionMessages.FixCorrectionProposal_HitCtrlEnter_description;
+		} else if (count < 2) {
+			return ""; //$NON-NLS-1$
+		} else {
+			return Messages.format(CorrectionMessages.FixCorrectionProposal_hitCtrlEnter_variable_description, new Integer(count));
+		}
 	}
 
 }

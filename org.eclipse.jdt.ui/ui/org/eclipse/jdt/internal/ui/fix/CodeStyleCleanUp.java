@@ -28,6 +28,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.CodeStyleFix;
@@ -190,6 +191,31 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 				return true;
 		}
 		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
+		int result= 0;
+		IProblem[] problems= compilationUnit.getProblems();
+		if (isFlag(QUALIFY_FIELD_ACCESS))
+			result+= getNumberOfProblems(problems, IProblem.UnqualifiedFieldAccess);
+		if (isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT)) {
+			for (int i=0;i<problems.length;i++) {
+				int id= problems[i].getID();
+				if (id == IProblem.IndirectAccessToStaticField || id == IProblem.IndirectAccessToStaticMethod)
+					result++;
+			}
+		}
+		if (isFlag(CHANGE_NON_STATIC_ACCESS_TO_STATIC)) {
+			for (int i=0;i<problems.length;i++) {
+				int id= problems[i].getID();
+				if (id == IProblem.NonStaticAccessToStaticField || id == IProblem.NonStaticAccessToStaticMethod)
+					result++;
+			}
+		}
+		return result;
 	}
 	
 }

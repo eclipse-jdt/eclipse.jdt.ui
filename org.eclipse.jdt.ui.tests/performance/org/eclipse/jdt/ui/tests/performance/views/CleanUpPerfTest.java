@@ -119,6 +119,9 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			}
 			public void beginCleanUp(IJavaProject project, ICompilationUnit[] compilationUnits, IProgressMonitor monitor) throws CoreException {
 			}
+			public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
+				return 0;
+			}
 		});
 		tagAsSummary("Code clean up - no fix", Dimension.ELAPSED_PROCESS);
 		

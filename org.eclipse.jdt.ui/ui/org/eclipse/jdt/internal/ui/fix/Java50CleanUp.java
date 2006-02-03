@@ -27,6 +27,7 @@ import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
@@ -178,6 +179,32 @@ public class Java50CleanUp extends AbstractCleanUp {
 				return true;
 		}
 		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
+		int result= 0;
+		IProblem[] problems= compilationUnit.getProblems();
+		if (isFlag(ADD_OVERRIDE_ANNOATION)) {
+			result+= getNumberOfProblems(problems, IProblem.MissingOverrideAnnotation);
+		}
+		if (isFlag(ADD_DEPRECATED_ANNOTATION)) {
+			for (int i=0;i<problems.length;i++) {
+				int id= problems[i].getID();
+				if (id == IProblem.FieldMissingDeprecatedAnnotation || id == IProblem.MethodMissingDeprecatedAnnotation || id == IProblem.TypeMissingDeprecatedAnnotation)
+					result++;
+			}
+		}
+		if (isFlag(ADD_TYPE_PARAMETERS_TO_RAW_TYPE_REFERENCE)) {
+			for (int i=0;i<problems.length;i++) {
+				int id= problems[i].getID();
+				if (id == IProblem.UnsafeTypeConversion || id == IProblem.RawTypeReference || id == IProblem.UnsafeRawMethodInvocation)
+					result++;
+			}
+		}
+		return result;
 	}
 	
 }

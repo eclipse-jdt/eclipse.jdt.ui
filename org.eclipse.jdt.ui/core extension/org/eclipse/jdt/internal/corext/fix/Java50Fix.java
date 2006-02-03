@@ -315,23 +315,27 @@ public class Java50Fix extends LinkedFix {
 		List/*<SimpleType>*/ result= new ArrayList();
 		for (int i= 0; i < locations.length; i++) {
 			IProblemLocation problem= locations[i];
-			ASTNode node= problem.getCoveredNode(compilationUnit);
-			if (node instanceof ClassInstanceCreation) {
-				ASTNode rawReference= (ASTNode)node.getStructuralProperty(ClassInstanceCreation.TYPE_PROPERTY);
-				if (isRawTypeReference(rawReference)) {
-					result.add(rawReference);
-				}
-			} else if (node instanceof SimpleName) {
-				ASTNode rawReference= node.getParent();
-				if (isRawTypeReference(rawReference)) {
-					result.add(rawReference);
-				}
-			} else if (node instanceof MethodInvocation) {
-				MethodInvocation invocation= (MethodInvocation)node;
-				
-				ASTNode rawReference= getRawReference(invocation, compilationUnit);
-				if (rawReference != null) {
-					result.add(rawReference);
+			int id= problem.getProblemId();
+			if (id == IProblem.UnsafeTypeConversion || id == IProblem.RawTypeReference || id == IProblem.UnsafeRawMethodInvocation) {
+		
+				ASTNode node= problem.getCoveredNode(compilationUnit);
+				if (node instanceof ClassInstanceCreation) {
+					ASTNode rawReference= (ASTNode)node.getStructuralProperty(ClassInstanceCreation.TYPE_PROPERTY);
+					if (isRawTypeReference(rawReference)) {
+						result.add(rawReference);
+					}
+				} else if (node instanceof SimpleName) {
+					ASTNode rawReference= node.getParent();
+					if (isRawTypeReference(rawReference)) {
+						result.add(rawReference);
+					}
+				} else if (node instanceof MethodInvocation) {
+					MethodInvocation invocation= (MethodInvocation)node;
+					
+					ASTNode rawReference= getRawReference(invocation, compilationUnit);
+					if (rawReference != null) {
+						result.add(rawReference);
+					}
 				}
 			}
 		}
