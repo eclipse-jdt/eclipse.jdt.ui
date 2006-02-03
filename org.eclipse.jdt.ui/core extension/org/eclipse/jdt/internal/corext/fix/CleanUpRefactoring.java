@@ -30,6 +30,8 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.NullChange;
@@ -50,6 +52,8 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.composite.MultiStateCompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -203,10 +207,12 @@ public class CleanUpRefactoring extends Refactoring {
 	}
 
 
-	private static final RefactoringTickProvider CLEAN_UP_REFACTORING_TICK_PROVIDER= new RefactoringTickProvider(0, 0, 1, 0);
+	private static final RefactoringTickProvider CLEAN_UP_REFACTORING_TICK_PROVIDER= new RefactoringTickProvider(0, 1, 0, 0);
 	
 	private List/*<ICleanUp>*/ fCleanUps;
 	private Hashtable/*<IJavaProject, List<ICompilationUnit>*/ fProjects;
+
+	private Change fChange;
 	
 	public CleanUpRefactoring() {
 		fCleanUps= new ArrayList();
@@ -279,21 +285,22 @@ public class CleanUpRefactoring extends Refactoring {
 	}
 
 	/* (non-Javadoc)
-	 * @see org.eclipse.ltk.core.refactoring.Refactoring#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor)
+	 * @see org.eclipse.ltk.core.refactoring.Refactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
+	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		if (pm != null) {
 			pm.beginTask("", 1); //$NON-NLS-1$
 			pm.worked(1);
 			pm.done();
 		}
-		return new RefactoringStatus();
+		return fChange;
 	}
 
+
 	/* (non-Javadoc)
-	 * @see org.eclipse.ltk.core.refactoring.Refactoring#createChange(org.eclipse.core.runtime.IProgressMonitor)
+	 * @see org.eclipse.ltk.core.refactoring.Refactoring#checkFinalConditions(org.eclipse.core.runtime.IProgressMonitor)
 	 */
-	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
+	public RefactoringStatus checkFinalConditions(IProgressMonitor pm) throws CoreException, OperationCanceledException {
 		
 		if (pm == null)
 			pm= new NullProgressMonitor();
@@ -302,7 +309,9 @@ public class CleanUpRefactoring extends Refactoring {
 			pm.beginTask("", 1); //$NON-NLS-1$
 			pm.worked(1);
 			pm.done();
-			return new NullChange();
+			fChange= new NullChange();
+
+			return new RefactoringStatus();
 		}
 		
 		int cuCount= 0;
@@ -314,7 +323,7 @@ public class CleanUpRefactoring extends Refactoring {
 		pm.beginTask("", cuCount * 3 * fCleanUps.size()); //$NON-NLS-1$
 
 		try {
-			CompositeChange result= new CompositeChange(getName());
+			CompositeChange change= new CompositeChange(getName());
 			for (Iterator projectIter= fProjects.keySet().iterator(); projectIter.hasNext();) {
 				IJavaProject project= (IJavaProject)projectIter.next();
 				
@@ -323,12 +332,34 @@ public class CleanUpRefactoring extends Refactoring {
 				
 				ICleanUp[] cleanUps= (ICleanUp[])fCleanUps.toArray(new ICleanUp[fCleanUps.size()]);
 				
-				cleanUpProject(project, cus, cleanUps, result, pm);
+				cleanUpProject(project, cus, cleanUps, change, pm);
 			}
-			return result;
-			
+			fChange= change;
+
+			RefactoringStatus result= new RefactoringStatus();
+			List files= new ArrayList();
+			findFilesToBeModified(change, files);
+			result.merge(Checks.validateModifiesFiles((IFile[])files.toArray(new IFile[files.size()]), getValidationContext()));
+			if (result.hasFatalError())
+				return result;
 		} finally {
 			pm.done();
+		}
+		
+		return new RefactoringStatus();
+	}
+
+	private void findFilesToBeModified(CompositeChange change, List result) throws JavaModelException {
+		Change[] children= change.getChildren();
+		for (int i=0;i < children.length;i++) {
+			Change child= children[i];
+			if (child instanceof CompositeChange) {
+				findFilesToBeModified((CompositeChange)child, result);
+			} else if (child instanceof MultiStateCompilationUnitChange) {
+				result.add(((MultiStateCompilationUnitChange)child).getCompilationUnit().getCorrespondingResource());
+			} else if (child instanceof CompilationUnitChange) {
+				result.add(((CompilationUnitChange)child).getCompilationUnit().getCorrespondingResource());
+			}
 		}
 	}
 
