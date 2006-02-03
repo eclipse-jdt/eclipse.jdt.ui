@@ -4272,12 +4272,12 @@
    </extension>
    
    <extension point="org.eclipse.ui.ide.markerSupport">
-      <markerCategory name="%markerCategory.problem">
+      <markerTypeCategory name="%markerCategory.problem">
          <markerTypeReference id="org.eclipse.jdt.core.problem"/>
-      </markerCategory>
-      <markerCategory name="%markerCategory.buildpath_problem">
+      </markerTypeCategory>
+      <markerTypeCategory name="%markerCategory.buildpath_problem">
          <markerTypeReference id="org.eclipse.jdt.core.buildpath_problem"/>
-      </markerCategory>
+      </markerTypeCategory>
       
     <markerGrouping id="org.eclipse.jdt.ui.java_marker_category" label="%MarkerCategory.name"/>
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.buildpath"
