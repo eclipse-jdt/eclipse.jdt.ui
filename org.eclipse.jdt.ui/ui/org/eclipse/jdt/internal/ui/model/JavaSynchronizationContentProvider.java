@@ -168,8 +168,11 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 //						list.remove(members[index]);
 //						list.addFirst(new JavaProjectSettings((IJavaProject) parent));
 //					} else if (name.equals(NAME_REFACTORING_FOLDER)) {
-//						list.remove(members[index]);
-//						list.addFirst(getPendingRefactorings(context, (IProject) resource, null));
+//						final RefactoringHistory history= getPendingRefactorings(context, (IProject) resource, null);
+//						if (!history.isEmpty()) {
+//							list.remove(members[index]);
+//							list.addFirst(history);
+//						}
 //					}
 //				}
 //			}
