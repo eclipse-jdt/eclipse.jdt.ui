@@ -93,6 +93,7 @@ public final class TemplateCompletionProposalComputer implements IJavaCompletion
 			if (unit == null)
 				return Collections.EMPTY_LIST;
 			
+			engine.reset();
 			engine.complete(javaContext.getViewer(), javaContext.getInvocationOffset(), unit);
 
 			TemplateProposal[] templateProposals= engine.getResults();
