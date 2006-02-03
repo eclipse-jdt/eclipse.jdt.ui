@@ -34,6 +34,8 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+
 public class ControlStatementsFix extends AbstractFix {
 	
 	private static final String FOR_LOOP_ELEMENT_IDENTIFIER= "element"; //$NON-NLS-1$
@@ -210,6 +212,31 @@ public class ControlStatementsFix extends AbstractFix {
 		}
 	}
 	
+	private static class RemoveBlockOperation implements IFixRewriteOperation {
+
+		private final Block fBlock;
+		private final Statement fStatement;
+		private final ChildPropertyDescriptor fChild;
+
+		public RemoveBlockOperation(Block block, Statement statement, ChildPropertyDescriptor child) {
+			fBlock= block;
+			fStatement= statement;
+			fChild= child;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			Statement moveTarget= (Statement)rewrite.createMoveTarget((ASTNode)fBlock.statements().get(0));
+			rewrite.set(fStatement, fChild, moveTarget, null);
+		}
+
+	}
+
+
+	
 	public static IFix createConvertForLoopToEnhancedFix(CompilationUnit compilationUnit, ForStatement loop) {
 		ConvertForLoopOperation loopConverter= new ConvertForLoopOperation(compilationUnit, loop, FOR_LOOP_ELEMENT_IDENTIFIER, false);
 		if (!loopConverter.satisfiesPreconditions())
@@ -226,6 +253,60 @@ public class ControlStatementsFix extends AbstractFix {
 		return new ControlStatementsFix(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description, compilationUnit, new ILinkedFixRewriteOperation[] {loopConverter});
 	}
 	
+	public static IFix[] createRemoveBlockFix(CompilationUnit compilationUnit, ASTNode node) {
+		Statement statement= ASTResolving.findParentStatement(node);
+		if (statement == null) {
+			return null;
+		}
+		
+		if (statement instanceof IfStatement) {
+			String label1= FixMessages.ControlStatementsFix_removeIfBlock_proposalDescription;
+			RemoveBlockOperation op1= createRemoveBlockOperation (statement, IfStatement.THEN_STATEMENT_PROPERTY);
+			String label2= FixMessages.ControlStatementsFix_removeElseBlock_proposalDescription;
+			RemoveBlockOperation op2= createRemoveBlockOperation(statement, IfStatement.ELSE_STATEMENT_PROPERTY);
+			if (op1 != null && op2 != null) {
+				return new IFix[] {
+						new ControlStatementsFix(label1, compilationUnit, new IFixRewriteOperation[] {op1}),
+						new ControlStatementsFix(label2, compilationUnit, new IFixRewriteOperation[] {op2}),
+						new ControlStatementsFix(FixMessages.ControlStatementsFix_removeIfElseBlock_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op1, op2})
+				};
+			} else if (op1 != null) {
+				return new IFix[] {new ControlStatementsFix(label1, compilationUnit, new IFixRewriteOperation[] {op1})};
+			} else if (op2 != null) {
+				return new IFix[] {new ControlStatementsFix(label2, compilationUnit, new IFixRewriteOperation[] {op2})};
+			}
+		} else if (statement instanceof WhileStatement) {
+			RemoveBlockOperation op= createRemoveBlockOperation(statement, WhileStatement.BODY_PROPERTY);
+			if (op != null) {
+				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
+			}
+		} else if (statement instanceof ForStatement) {
+			RemoveBlockOperation op= createRemoveBlockOperation(statement, ForStatement.BODY_PROPERTY);
+			if (op != null) {
+				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
+			}
+		} else if (statement instanceof DoStatement) {
+			RemoveBlockOperation op= createRemoveBlockOperation(statement, DoStatement.BODY_PROPERTY);
+			if (op != null) {
+				return new IFix[] {new ControlStatementsFix(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription, compilationUnit, new IFixRewriteOperation[] {op})};
+			}
+		}
+		
+		return null;
+	}
+	
+	private static RemoveBlockOperation createRemoveBlockOperation(Statement statement, ChildPropertyDescriptor child) {
+		ASTNode node= (ASTNode)statement.getStructuralProperty(child);
+		
+		if (node instanceof Block) {
+			Block block= (Block)node;
+			if (block.statements().size() == 1) {
+				return new RemoveBlockOperation(block, statement, child);
+			}
+		}
+		return null;
+	}
+
 	public static IFix createCleanUp(CompilationUnit compilationUnit, 
 			boolean convertSingleStatementToBlock, 
 			boolean convertForLoopToEnhanced) throws CoreException {

@@ -130,12 +130,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getConvertForLoopProposal(context, coveringNode, null)
 				|| getExtractLocalProposal(context, coveringNode, null)
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
-				|| getSurroundWithRunnableProposal(context, coveringNode, null);
+				|| getSurroundWithRunnableProposal(context, coveringNode, null)
+				|| getRemoveBlockProposals(context, coveringNode, null);
 
 		}
 		return false;
 	}
-
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IAssistProcessor#getAssists(org.eclipse.jdt.internal.ui.text.correction.IAssistContext, org.eclipse.jdt.internal.ui.text.correction.IProblemLocation[])
@@ -166,6 +166,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				if (!getConvertForLoopProposal(context, coveringNode, resultingCollections))
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getSurroundWithRunnableProposal(context, coveringNode, resultingCollections);
+				getRemoveBlockProposals(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -798,6 +799,19 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 	}
 
+	private boolean getRemoveBlockProposals(IInvocationContext context, ASTNode coveringNode, Collection resultingCollections) {
+		IFix[] fixes= ControlStatementsFix.createRemoveBlockFix(context.getASTRoot(), coveringNode);
+		if (fixes != null) {
+			for (int i= 0; i < fixes.length; i++) {
+				IFix fix= fixes[i];
+				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, null, 10, image, null);
+				resultingCollections.add(proposal);
+			}
+			return true;
+		}
+		return false;
+	}
 
 	private static boolean getAddBlockProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {
 		Statement statement= ASTResolving.findParentStatement(node);
@@ -1139,7 +1153,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 1, image, context);
+		FixCorrectionProposal proposal= new ConvertForLoopProposal(fix, cleanUp, 1, image, context);
 		
 		resultingCollections.add(proposal);
 		return true;
@@ -1159,7 +1173,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 1, image, context);
+		FixCorrectionProposal proposal= new ConvertForLoopProposal(fix, cleanUp, 1, image, context);
 		
 		resultingCollections.add(proposal);
 		return true;

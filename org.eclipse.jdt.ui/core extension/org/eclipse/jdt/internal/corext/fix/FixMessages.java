@@ -56,6 +56,11 @@ public class FixMessages extends NLS {
 	public static String CodeStyleFix_ChangeControlToBlock_description;
 	
 	public static String SerialVersion_group_description;
+	
+	public static String ControlStatementsFix_removeIfBlock_proposalDescription;
+	public static String ControlStatementsFix_removeElseBlock_proposalDescription;
+	public static String ControlStatementsFix_removeIfElseBlock_proposalDescription;
+	public static String ControlStatementsFix_removeBrackets_proposalDescription;
 
 	static {
 		// initialize resource bundle
