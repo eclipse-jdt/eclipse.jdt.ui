@@ -157,7 +157,7 @@ public class JavaContext extends CompilationUnitContext {
 	 */
 	public int getStart() {
 
-		if (fIsManaged)
+		if (fIsManaged && getCompletionLength() > 0)
 			return super.getStart();
 		
 		try {

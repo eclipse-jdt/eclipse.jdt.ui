@@ -87,7 +87,7 @@ public class JavaDocContext extends CompilationUnitContext {
 	 * @see DocumentTemplateContext#getStart()
 	 */ 
 	public int getStart() {
-		if (fIsManaged)
+		if (fIsManaged && getCompletionLength() > 0)
 			return super.getStart();
 		
 		try {
