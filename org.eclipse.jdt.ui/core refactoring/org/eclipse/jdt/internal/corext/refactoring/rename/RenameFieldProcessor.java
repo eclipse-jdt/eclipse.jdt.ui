@@ -654,7 +654,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 		RefactoringStatus status= new RefactoringStatus();
 		CompilationUnitRewrite rewrite= new CompilationUnitRewrite(fField.getCompilationUnit());
-		rewrite.setResolveBindings(false);
+		rewrite.setResolveBindings(true);
 
 		// add delegate for the field
 		if (RefactoringAvailabilityTester.isDelegateCreationAvailable(fField)) {

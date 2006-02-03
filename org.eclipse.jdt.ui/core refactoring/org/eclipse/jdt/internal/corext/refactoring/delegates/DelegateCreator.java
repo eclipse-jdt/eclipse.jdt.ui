@@ -15,6 +15,9 @@ import java.util.List;
 
 import org.eclipse.text.edits.TextEdit;
 
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
@@ -24,6 +27,7 @@ import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -104,9 +108,11 @@ import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
  * 
  */
 public abstract class DelegateCreator {
-	
+
 	public static final GroupCategorySet CATEGORY_DELEGATE= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.refactoring.delegates.delegate", RefactoringCoreMessages.DelegateCreator_change_category_title, RefactoringCoreMessages.DelegateCreator_change_category_description)); //$NON-NLS-1$
-	
+
+	public static final String SCRIPT_NAME_PREFIX= "."; //$NON-NLS-1$
+
 	/*
 	 * We are dealing with two CURewrites here: 
 	 * 
@@ -340,11 +346,63 @@ public abstract class DelegateCreator {
 		if (fDeclareDeprecated) {
 			final RefactoringSessionDescriptor descriptor= createRefactoringScript();
 			if (descriptor != null) {
-				
+				final String name= createRefactoringScriptName();
+				if (name != null) {
+					final IPackageFragment fragment= getRefactoringScriptPackage();
+					if (fragment != null) {
+						final IResource resource= fragment.getResource();
+						if (resource instanceof IFolder) {
+//							final IFolder folder= (IFolder) resource;
+//							final URI uri= folder.getFile(name).getLocationURI();
+//							if (uri != null) {
+//								OutputStream stream= null;
+//								try {
+//									final IFileStore store= EFS.getStore(uri);
+//									if (store != null) {
+//										stream= new BufferedOutputStream(store.openOutputStream(EFS.NONE, null));
+//										RefactoringCore.getRefactoringHistoryService().writeRefactoringSession(descriptor, stream);
+//									}
+//								} catch (CoreException exception) {
+//									JavaPlugin.log(exception);
+//								} finally {
+//									if (stream != null) {
+//										try {
+//											stream.close();
+//										} catch (IOException exception) {
+//											// Do nothing
+//										}
+//									}
+//								}
+//							}
+						}
+					}
+				}
 			}
 			createJavadoc();
 		}
 	}
+
+	/**
+	 * Returns the package fragment where to store refactoring scripts.
+	 * 
+	 * This method is only called if isDeclareDeprecated() == true.
+	 * 
+	 * @return the package fragment
+	 */
+	protected abstract IPackageFragment getRefactoringScriptPackage();
+
+	/**
+	 * Creates the name of the refactoring script.
+	 * 
+	 * This name is used by the quick fix infrastructure to find the appropriate script
+	 * to resolve a deprecation message. The name must be unique enough to find the script
+	 * in a package fragment.
+	 * 
+	 * This method is only called if isDeclareDeprecated() == true.
+	 * 
+	 * @return the name of the refactoring script
+	 */
+	protected abstract String createRefactoringScriptName();
 
 	/**
 	 * Creates the javadoc for the delegate.

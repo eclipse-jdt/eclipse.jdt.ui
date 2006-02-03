@@ -14,6 +14,10 @@ import java.util.List;
 
 import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -21,6 +25,9 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IMethodBinding;
+import org.eclipse.jdt.core.dom.IPackageBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
@@ -34,6 +41,8 @@ import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDeprecationResolving;
 
 /**
  * Delegate creator for static and non-static methods.
@@ -104,6 +113,103 @@ public class DelegateMethodCreator extends DelegateCreator {
 		return fDocMethodReference;
 	}
 
+	/**
+	 * Creates the corresponding statement for the method invocation, based on
+	 * the return type.
+	 * 
+	 * @param declaration the method declaration where the invocation statement
+	 *            is inserted
+	 * @param invocation the method invocation being encapsulated by the
+	 *            resulting statement
+	 * @return the corresponding statement
+	 */
+	protected Statement createMethodInvocation(final MethodDeclaration declaration, final MethodInvocation invocation) {
+		Assert.isNotNull(declaration);
+		Assert.isNotNull(invocation);
+		Statement statement= null;
+		final Type type= declaration.getReturnType2();
+		if (type == null)
+			statement= createExpressionStatement(invocation);
+		else {
+			if (type instanceof PrimitiveType) {
+				final PrimitiveType primitive= (PrimitiveType) type;
+				if (primitive.getPrimitiveTypeCode().equals(PrimitiveType.VOID))
+					statement= createExpressionStatement(invocation);
+				else
+					statement= createReturnStatement(invocation);
+			} else
+				statement= createReturnStatement(invocation);
+		}
+		return statement;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected RefactoringSessionDescriptor createRefactoringScript() {
+		final MethodDeclaration declaration= (MethodDeclaration) getDeclaration();
+		final IMethodBinding binding= declaration.resolveBinding();
+		if (binding != null) {
+			final IJavaElement element= binding.getJavaElement();
+			if (element instanceof IMethod) {
+				final IMethod method= (IMethod) element;
+				final IDeprecationResolving resolving= new InlineMethodRefactoring(method);
+				if (resolving.canEnableDeprecationResolving())
+					return resolving.createDeprecationResolution();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected String createRefactoringScriptName() {
+		final MethodDeclaration declaration= (MethodDeclaration) getDeclaration();
+		final IMethodBinding binding= declaration.resolveBinding();
+		if (binding != null) {
+			final StringBuffer buffer= new StringBuffer();
+			buffer.append(SCRIPT_NAME_PREFIX);
+			final IJavaElement element= binding.getDeclaringClass().getJavaElement();
+			if (element instanceof IType) {
+				final IType type= (IType) element;
+				buffer.append(type.getFullyQualifiedName());
+				buffer.append('.');
+				buffer.append(binding.getName());
+				buffer.append('(');
+				final ITypeBinding[] parameters= binding.getParameterTypes();
+				for (int index= 0; index < parameters.length; index++) {
+					if (index != 0)
+						buffer.append(',');
+					final IType paramType= (IType) parameters[index].getJavaElement();
+					buffer.append(paramType.getFullyQualifiedName());
+				}
+				buffer.append(')');
+				buffer.append(".xml"); //$NON-NLS-1$
+				return buffer.toString();
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected IPackageFragment getRefactoringScriptPackage() {
+		final MethodDeclaration declaration= (MethodDeclaration) getDeclaration();
+		final IMethodBinding binding= declaration.resolveBinding();
+		if (binding != null) {
+			final ITypeBinding declaring= binding.getDeclaringClass();
+			if (declaring != null) {
+				final IPackageBinding pack= declaring.getPackage();
+				if (pack != null) {
+					return (IPackageFragment) pack.getJavaElement();
+				}
+			}
+		}
+		return null;
+	}
+
 	// ******************* INTERNAL HELPERS ***************************
 
 	private void createArguments(final MethodDeclaration declaration, final List arguments, boolean methodInvocation) throws JavaModelException {
@@ -157,36 +263,6 @@ public class DelegateMethodCreator extends DelegateCreator {
 	}
 
 	/**
-	 * Creates the corresponding statement for the method invocation, based on
-	 * the return type.
-	 * 
-	 * @param declaration the method declaration where the invocation statement
-	 *            is inserted
-	 * @param invocation the method invocation being encapsulated by the
-	 *            resulting statement
-	 * @return the corresponding statement
-	 */
-	protected Statement createMethodInvocation(final MethodDeclaration declaration, final MethodInvocation invocation) {
-		Assert.isNotNull(declaration);
-		Assert.isNotNull(invocation);
-		Statement statement= null;
-		final Type type= declaration.getReturnType2();
-		if (type == null)
-			statement= createExpressionStatement(invocation);
-		else {
-			if (type instanceof PrimitiveType) {
-				final PrimitiveType primitive= (PrimitiveType) type;
-				if (primitive.getPrimitiveTypeCode().equals(PrimitiveType.VOID))
-					statement= createExpressionStatement(invocation);
-				else
-					statement= createReturnStatement(invocation);
-			} else
-				statement= createReturnStatement(invocation);
-		}
-		return statement;
-	}
-
-	/**
 	 * Creates a new expression statement for the method invocation.
 	 * 
 	 * @param invocation the method invocation
@@ -208,9 +284,5 @@ public class DelegateMethodCreator extends DelegateCreator {
 		final ReturnStatement statement= invocation.getAST().newReturnStatement();
 		statement.setExpression(invocation);
 		return statement;
-	}
-
-	protected RefactoringSessionDescriptor createRefactoringScript() {
-		return null;
 	}
 }

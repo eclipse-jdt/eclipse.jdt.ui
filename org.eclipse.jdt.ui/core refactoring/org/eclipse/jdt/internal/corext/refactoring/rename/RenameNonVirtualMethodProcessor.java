@@ -181,7 +181,7 @@ public class RenameNonVirtualMethodProcessor extends RenameMethodProcessor {
 		if (getDelegateUpdating()) {
 			// create the delegate
 			CompilationUnitRewrite rewrite= new CompilationUnitRewrite(getDeclaringCU());
-			rewrite.setResolveBindings(false);
+			rewrite.setResolveBindings(true);
 			MethodDeclaration methodDeclaration= ASTNodeSearchUtil.getMethodDeclarationNode(getMethod(), rewrite.getRoot());
 			DelegateMethodCreator creator= new DelegateMethodCreator();
 			creator.setDeclaration(methodDeclaration);

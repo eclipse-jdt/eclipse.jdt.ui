@@ -745,7 +745,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 				if (fDelegateUpdating) {
 					// Update with delegates
 					CompilationUnitRewrite rewrite= new CompilationUnitRewrite(cu);
-					rewrite.setResolveBindings(false);
+					rewrite.setResolveBindings(true);
 
 					for (Iterator iter= declarationsInThisCu.iterator(); iter.hasNext();) {
 						SearchMatch element= (SearchMatch) iter.next();

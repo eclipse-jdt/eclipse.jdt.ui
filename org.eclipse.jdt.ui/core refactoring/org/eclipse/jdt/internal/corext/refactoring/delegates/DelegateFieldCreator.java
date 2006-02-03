@@ -12,6 +12,10 @@ package org.eclipse.jdt.internal.corext.refactoring.delegates;
 
 import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
@@ -19,12 +23,17 @@ import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
+import org.eclipse.jdt.core.dom.IPackageBinding;
+import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
+import org.eclipse.jdt.internal.corext.refactoring.tagging.IDeprecationResolving;
 
 /**
  * Delegate creator for static fields. Note that this implementation assumes a
@@ -77,6 +86,51 @@ public class DelegateFieldCreator extends DelegateCreator {
 		return VariableDeclarationFragment.INITIALIZER_PROPERTY;
 	}
 
+	protected RefactoringSessionDescriptor createRefactoringScript() {
+		final IVariableBinding binding= fOldFieldFragment.resolveBinding();
+		if (binding != null) {
+			final IJavaElement element= binding.getJavaElement();
+			if (element instanceof IField) {
+				final IField field= (IField) element;
+				final IDeprecationResolving resolving= new InlineConstantRefactoring(field);
+				if (resolving.canEnableDeprecationResolving())
+					return resolving.createDeprecationResolution();
+			}
+		}
+		return null;
+	}
+
+	protected IPackageFragment getRefactoringScriptPackage() {
+		final IVariableBinding binding= fOldFieldFragment.resolveBinding();
+		if (binding != null) {
+			final ITypeBinding declaring= binding.getDeclaringClass();
+			if (declaring != null) {
+				final IPackageBinding pack= declaring.getPackage();
+				if (pack != null)
+					return (IPackageFragment) pack.getJavaElement();
+			}
+		}
+		return null;
+	}
+
+	protected String createRefactoringScriptName() {
+		final IVariableBinding binding= fOldFieldFragment.resolveBinding();
+		if (binding != null) {
+			final StringBuffer buffer= new StringBuffer();
+			buffer.append(SCRIPT_NAME_PREFIX);
+			final IJavaElement element= binding.getDeclaringClass().getJavaElement();
+			if (element instanceof IType) {
+				final IType type= (IType) element;
+				buffer.append(type.getFullyQualifiedName());
+				buffer.append('.');
+				buffer.append(binding.getName());
+				buffer.append(".xml"); //$NON-NLS-1$
+				return buffer.toString();
+			}
+		}
+		return null;
+	}
+
 	// ******************* INTERNAL HELPERS ***************************
 
 	private Expression createDelegateFieldInitializer(final FieldDeclaration declaration) throws JavaModelException {
@@ -92,9 +146,5 @@ public class DelegateFieldCreator extends DelegateCreator {
 			SimpleName access= getAst().newSimpleName(getNewElementName());
 			return access;
 		}
-	}
-
-	protected RefactoringSessionDescriptor createRefactoringScript() {
-		return null;
 	}
 }
