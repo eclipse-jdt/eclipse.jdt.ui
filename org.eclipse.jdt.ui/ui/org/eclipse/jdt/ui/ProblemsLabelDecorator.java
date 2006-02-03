@@ -172,6 +172,7 @@ public class ProblemsLabelDecorator implements ILabelDecorator, ILightweightLabe
 				IJavaElement element= (IJavaElement) obj;
 				int type= element.getElementType();
 				switch (type) {
+					case IJavaElement.JAVA_MODEL:
 					case IJavaElement.JAVA_PROJECT:
 					case IJavaElement.PACKAGE_FRAGMENT_ROOT:
 						return getErrorTicksFromMarkers(element.getResource(), IResource.DEPTH_INFINITE, null);
