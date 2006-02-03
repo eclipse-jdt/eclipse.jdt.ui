@@ -22,6 +22,7 @@ import java.util.SortedSet;
 import java.util.Stack;
 import java.util.StringTokenizer;
 import java.util.TreeSet;
+import java.util.Map.Entry;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -69,6 +70,8 @@ import org.eclipse.jdt.internal.ui.filters.NamePatternFilter;
  * @since 2.0
  */
 public class CustomFiltersActionGroup extends ActionGroup {
+
+	private static final String TAG_DUMMY_TO_TEST_EXISTENCE= "TAG_DUMMY_TO_TEST_EXISTENCE"; //$NON-NLS-1$
 
 	class ShowFilterDialogAction extends Action {
 		ShowFilterDialogAction() {
@@ -165,7 +168,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 	private NamePatternFilter fPatternFilter;
 	private Map fInstalledBuiltInFilters;
 	
-	private Map fEnabledFilterIds;
+	private Map/*<String, Boolean>*/ fEnabledFilterIds;
 	private boolean fUserDefinedPatternsEnabled;
 	private String[] fUserDefinedPatterns;
 	private FilterDescriptor[] fCachedFilterDescriptors;
@@ -323,7 +326,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		fLRUFilterIdsStack.remove(filterId);
 		fLRUFilterIdsStack.add(0, filterId);
 		
-		fEnabledFilterIds.put(filterId, new Boolean(state));
+		fEnabledFilterIds.put(filterId, Boolean.valueOf(state));
 		storeViewDefaults();
 		
 		updateViewerFilters(true);
@@ -540,19 +543,20 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 
 		// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=22533
-		if (!store.contains(getPreferenceKey("TAG_DUMMY_TO_TEST_EXISTENCE")))//$NON-NLS-1$
+		if (!store.contains(getPreferenceKey(TAG_DUMMY_TO_TEST_EXISTENCE)))
 			return;
 		
 		fUserDefinedPatternsEnabled= store.getBoolean(getPreferenceKey(TAG_USER_DEFINED_PATTERNS_ENABLED));
 		setUserDefinedPatterns(CustomFiltersDialog.convertFromString(store.getString(getPreferenceKey(TAG_USER_DEFINED_PATTERNS)), SEPARATOR));
 
-		Iterator iter= fEnabledFilterIds.keySet().iterator();
+		Iterator iter= fEnabledFilterIds.entrySet().iterator();
 		while (iter.hasNext()) {
-			String id= (String)iter.next();
-			if (store.contains(id)) { // see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=73991 
-				Boolean isEnabled= Boolean.valueOf(store.getBoolean(id));
-				fEnabledFilterIds.put(id, isEnabled);
-			}
+			Entry entry= (Entry) iter.next();
+			String id= (String) entry.getKey();
+			// set default to value from plugin contributions (fixes https://bugs.eclipse.org/bugs/show_bug.cgi?id=73991 ):
+			store.setDefault(id, ((Boolean) entry.getValue()).booleanValue());
+			Boolean isEnabled= Boolean.valueOf(store.getBoolean(id));
+			fEnabledFilterIds.put(id, isEnabled);
 		}
 		
 		fLRUFilterIdsStack.clear();
@@ -570,7 +574,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 		IPreferenceStore store= JavaPlugin.getDefault().getPreferenceStore();
 
 		// see bug https://bugs.eclipse.org/bugs/show_bug.cgi?id=22533
-		store.setValue(getPreferenceKey("TAG_DUMMY_TO_TEST_EXISTENCE"), "storedViewPreferences");//$NON-NLS-1$//$NON-NLS-2$
+		store.setValue(getPreferenceKey(TAG_DUMMY_TO_TEST_EXISTENCE), "storedViewPreferences");//$NON-NLS-1$
 		
 		store.setValue(getPreferenceKey(TAG_USER_DEFINED_PATTERNS_ENABLED), fUserDefinedPatternsEnabled);
 		store.setValue(getPreferenceKey(TAG_USER_DEFINED_PATTERNS), CustomFiltersDialog.convertToString(fUserDefinedPatterns ,SEPARATOR));
@@ -699,7 +703,7 @@ public class CustomFiltersActionGroup extends ActionGroup {
 			IMemento[] children= xmlDefinedFilters.getChildren(TAG_CHILD);
 			for (int i= 0; i < children.length; i++) {
 				String id= children[i].getString(TAG_FILTER_ID);
-				Boolean isEnabled= new Boolean(children[i].getString(TAG_IS_ENABLED));
+				Boolean isEnabled= Boolean.valueOf(children[i].getString(TAG_IS_ENABLED));
 				fEnabledFilterIds.put(id, isEnabled);
 			}
 		}
