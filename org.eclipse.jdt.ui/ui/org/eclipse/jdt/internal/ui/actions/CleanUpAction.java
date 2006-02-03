@@ -204,6 +204,10 @@ public class CleanUpAction extends SelectionDispatchAction {
 	public void runOnMultiple(final ICompilationUnit[] cus) {
 		String message= ActionMessages.CleanUpAction_MultiStateErrorTitle; 
 		final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, message, null);
+		
+		if (!ElementValidator.check(cus, getShell(), ActionMessages.CleanUpAction_ErrorDialogTitle, true))
+			return;
+		
 		for (int i= 0; i < cus.length; i++) {
 			testOnBuildPath(cus[i], status);
 		}
