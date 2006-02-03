@@ -181,7 +181,7 @@ public class JavaElementProperties implements IPropertySource {
 		
 		addProperty(new Property(ILocalVariable.class, "nameRange") {
 			@Override public Object compute(IJavaElement element) {
-				return getNameRangeString(((ILocalVariable) element).getNameRange());
+				return getSourceRangeString(((ILocalVariable) element).getNameRange());
 			}
 		});
 		addProperty(new Property(ILocalVariable.class, "typeSignature") {
@@ -192,7 +192,7 @@ public class JavaElementProperties implements IPropertySource {
 		
 		addProperty(new Property(IMember.class, "nameRange") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
-				return getNameRangeString(((IMember) element).getNameRange());
+				return getSourceRangeString(((IMember) element).getNameRange());
 			}
 		});
 		addProperty(new Property(IMember.class, "flags") {
@@ -388,7 +388,7 @@ public class JavaElementProperties implements IPropertySource {
 		
 		addProperty(new Property(ITypeParameter.class, "nameRange") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
-				return getNameRangeString(((ITypeParameter) element).getNameRange());
+				return getSourceRangeString(((ITypeParameter) element).getNameRange());
 			}
 		});
 		
@@ -401,7 +401,7 @@ public class JavaElementProperties implements IPropertySource {
 		
 		addProperty(new Property(ISourceReference.class, "sourceRange") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
-				return ((ISourceReference) element).getSourceRange();
+				return getSourceRangeString(((ISourceReference) element).getSourceRange());
 			}
 		});
 		
@@ -523,8 +523,8 @@ public class JavaElementProperties implements IPropertySource {
 		return elementType + " (" + name + ")";
 	}
 	
-	static String getNameRangeString(ISourceRange range) {
-		return range.getOffset() + " + " + range.getLength();
+	static String getSourceRangeString(ISourceRange range) {
+		return range == null ? "null" : range.getOffset() + " + " + range.getLength();
 	}
 
 	static String getFlagsString(int flags) {
