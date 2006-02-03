@@ -334,10 +334,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 		try {
 			String message= ActionMessages.OrganizeImportsAction_multi_status_description; 
 			final MultiStatus status= new MultiStatus(JavaUI.ID_PLUGIN, IStatus.OK, message, null);
-			
-			if (!ElementValidator.check(cus, getShell(), ActionMessages.OrganizeImportsAction_error_title, true))
-				return;
-			
+
 			IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
 			progressService.run(true, true, new WorkbenchRunnableAdapter(new IWorkspaceRunnable() {
 				public void run(IProgressMonitor monitor) {
