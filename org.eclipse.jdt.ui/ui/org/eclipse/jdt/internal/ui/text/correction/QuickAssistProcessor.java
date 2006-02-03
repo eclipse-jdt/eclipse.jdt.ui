@@ -98,6 +98,7 @@ import org.eclipse.jdt.internal.ui.fix.ICleanUp;
   */
 public class QuickAssistProcessor implements IQuickAssistProcessor {
 
+	public static final String CONVERT_FOR_LOOP_ID= "org.eclipse.jdt.ui.correction.convertForLoop.assist"; //$NON-NLS-1$
 	public static final String ASSIGN_TO_LOCAL_ID= "org.eclipse.jdt.ui.correction.assignToLocal.assist"; //$NON-NLS-1$
 	public static final String ASSIGN_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.assignToField.assist"; //$NON-NLS-1$
 	public static final String ASSIGN_PARAM_TO_FIELD_ID= "org.eclipse.jdt.ui.correction.assignParamToField.assist"; //$NON-NLS-1$
@@ -1154,7 +1155,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		FixCorrectionProposal proposal= new ConvertForLoopProposal(fix, cleanUp, 1, image, context);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 1, image, context);
+		proposal.setCommandId(CONVERT_FOR_LOOP_ID);
 		
 		resultingCollections.add(proposal);
 		return true;
@@ -1174,7 +1176,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
 		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP);
-		FixCorrectionProposal proposal= new ConvertForLoopProposal(fix, cleanUp, 1, image, context);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 1, image, context);
+		proposal.setCommandId(CONVERT_FOR_LOOP_ID);
 		
 		resultingCollections.add(proposal);
 		return true;

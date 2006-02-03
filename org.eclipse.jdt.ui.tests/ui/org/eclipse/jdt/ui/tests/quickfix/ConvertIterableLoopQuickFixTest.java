@@ -31,8 +31,8 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.AssistContext;
 import org.eclipse.jdt.internal.ui.text.correction.CUCorrectionProposal;
-import org.eclipse.jdt.internal.ui.text.correction.ConvertForLoopProposal;
 import org.eclipse.jdt.internal.ui.text.correction.FixCorrectionProposal;
+import org.eclipse.jdt.internal.ui.text.correction.QuickAssistProcessor;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
 import org.eclipse.jdt.testplugin.TestOptions;
@@ -72,8 +72,8 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		for (Iterator it= proposals.iterator(); it.hasNext();) {
 			CUCorrectionProposal proposal= (CUCorrectionProposal) it.next();
-			if (proposal instanceof ConvertForLoopProposal) {
-				fConvertLoopProposal= (FixCorrectionProposal) proposal;
+			if (QuickAssistProcessor.CONVERT_FOR_LOOP_ID.equals(proposal.getCommandId())) {
+				fConvertLoopProposal= (FixCorrectionProposal)proposal;
 			}
 		}
 		return proposals;
