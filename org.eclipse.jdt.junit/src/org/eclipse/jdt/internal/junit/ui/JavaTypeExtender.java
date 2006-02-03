@@ -10,18 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
-import org.eclipse.core.expressions.PropertyTester;
 import org.eclipse.core.runtime.IAdaptable;
+
+import org.eclipse.core.expressions.PropertyTester;
+
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
+
 import org.eclipse.jdt.internal.junit.util.TestSearchEngine;
 
 /**
@@ -41,11 +41,6 @@ public class JavaTypeExtender extends PropertyTester  {
 			if (!javaElement.exists()) {
 				return false;
 			}
-		}
-		if (javaElement instanceof IJavaProject ||
-			javaElement instanceof IPackageFragmentRoot ||
-			javaElement instanceof IPackageFragment) {
-				return true;
 		}
 		if (javaElement != null) {
 			if (PROPERTY_IS_Test.equals(method)) { 

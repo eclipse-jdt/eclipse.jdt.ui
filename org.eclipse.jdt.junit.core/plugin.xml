@@ -254,11 +254,13 @@
                   </count>
                		<iterate>
                  		<or>
-                   			<test property="org.eclipse.debug.ui.matchesPattern" value="*.java"/>
-                   			<test property="org.eclipse.debug.ui.matchesPattern" value="*.class"/>
-                   			<adapt type="org.eclipse.jdt.core.IJavaElement"/>
+                 			<test property="org.eclipse.jdt.launching.extendsInterface" args="junit.framework.Test"/>
+                 			<test property="org.eclipse.jdt.launching.hasMethod" args="suite, ()QTest;, public static"/>
+                 			<and>
+                 				<test property="org.eclipse.jdt.launching.isContainer"/>
+                 				<test property="org.eclipse.jdt.launching.buildpathReference" args="junit"/>
+                 			</and>
                  		</or>
-                 		<test property="org.eclipse.jdt.junit.isTest"/>
                		</iterate>
                </with>
             </enablement>
