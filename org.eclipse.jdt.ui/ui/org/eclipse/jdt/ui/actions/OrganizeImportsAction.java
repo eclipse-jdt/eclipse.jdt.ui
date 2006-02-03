@@ -11,6 +11,7 @@
 package org.eclipse.jdt.ui.actions;
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Comparator;
@@ -144,7 +145,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			int pos2= history.getPosition(o2);
 			
 			if (pos1 == pos2)
-				return ((String)o1).compareTo(o2);	
+				return Collator.getInstance().compare(o1, o2);
 			
 			if (pos1 > pos2) {
 				return -1;

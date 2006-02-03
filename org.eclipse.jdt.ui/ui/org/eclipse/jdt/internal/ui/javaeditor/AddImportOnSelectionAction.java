@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 
 
 import java.lang.reflect.InvocationTargetException;
+import java.text.Collator;
 import java.util.Comparator;
 
 import org.eclipse.core.runtime.IStatus;
@@ -78,7 +79,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			int pos2= history.getPosition(o2);
 			
 			if (pos1 == pos2)
-				return ((String)o1).compareTo(o2);	
+				return Collator.getInstance().compare(o1, o2);
 			
 			if (pos1 > pos2) {
 				return -1;

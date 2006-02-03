@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.core;
 
+import java.text.Collator;
 import java.util.Arrays;
 import java.util.Comparator;
 
@@ -111,7 +112,7 @@ public class SelectionHistoryTest extends TestCase {
 			int pos2= fHistory.getPosition(o2);
 			
 			if (pos1 == pos2)
-				return ((String)o1).compareTo(o2);	
+				return Collator.getInstance().compare(o1, o2);
 			
 			if (pos1 > pos2) {
 				return -1;
