@@ -188,6 +188,7 @@ public class CleanUpTest extends QuickFixTest {
 	}
 	
 	private void assertRefactoringResultAsExpected(CleanUpRefactoring refactoring, String[] expected) throws CoreException {
+		refactoring.checkAllConditions(new NullProgressMonitor());
 		CompositeChange change= (CompositeChange)refactoring.createChange(null);
 		Change[] children= change.getChildren();
 		String[] previews= new String[children.length]; 
@@ -199,6 +200,7 @@ public class CleanUpTest extends QuickFixTest {
 	}
 	
 	private void assertRefactoringHasNoChange(CleanUpRefactoring refactoring) throws CoreException {
+		refactoring.checkAllConditions(new NullProgressMonitor());
 		CompositeChange change= (CompositeChange)refactoring.createChange(null);
 		Change[] children= change.getChildren();
 		StringBuffer buf= new StringBuffer();
