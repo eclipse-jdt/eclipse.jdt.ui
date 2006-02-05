@@ -106,7 +106,7 @@ public class MessageIds {
 	public static final String TEST_RERAN=  "%TSTRERN"; //$NON-NLS-1$
 	/**
 	 * Notification about a test inside the test suite.
-	 * TEST_TREE+ testId"," + testName","isSuite","testcount
+	 * TEST_TREE + testId + "," + testName + "," + isSuite + "," + testcount
 	 * isSuite = "true" or "false"
 	 */ 
 	public static final String TEST_TREE="%TSTTREE"; //$NON-NLS-1$
