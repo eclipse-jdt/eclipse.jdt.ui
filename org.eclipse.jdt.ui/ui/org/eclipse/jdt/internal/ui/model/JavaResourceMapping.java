@@ -20,14 +20,11 @@ import org.eclipse.core.resources.mapping.ResourceMappingContext;
 import org.eclipse.core.resources.mapping.ResourceTraversal;
 
 /**
- * Default implementation for a resource mapping for the java model provider.
+ * Resource mapping for the java model provider.
  * 
  * @since 3.2
  */
-public class JavaResourceMapping extends ResourceMapping {
-
-	/** The model provider id */
-	private final String fProviderId;
+public final class JavaResourceMapping extends ResourceMapping {
 
 	/** The resource to map */
 	private final IResource fResource;
@@ -37,14 +34,10 @@ public class JavaResourceMapping extends ResourceMapping {
 	 * 
 	 * @param resource
 	 *            the resource to map
-	 * @param id
-	 *            the fully qualified id of the model provider
 	 */
-	public JavaResourceMapping(final IResource resource, final String id) {
+	public JavaResourceMapping(final IResource resource) {
 		Assert.isNotNull(resource);
-		Assert.isNotNull(id);
 		fResource= resource;
-		fProviderId= id;
 	}
 
 	/**
@@ -58,20 +51,20 @@ public class JavaResourceMapping extends ResourceMapping {
 	 * {@inheritDoc}
 	 */
 	public String getModelProviderId() {
-		return fProviderId;
+		return JavaModelProvider.JAVA_MODEL_PROVIDER_ID;
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public IProject[] getProjects() {
-		return new IProject[] { fResource.getProject()};
+		return new IProject[] { fResource.getProject() };
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
 	public ResourceTraversal[] getTraversals(final ResourceMappingContext context, final IProgressMonitor monitor) {
-		return new ResourceTraversal[] { new ResourceTraversal(new IResource[] { fResource}, IResource.DEPTH_INFINITE, IResource.NONE)};
+		return new ResourceTraversal[] { new ResourceTraversal(new IResource[] { fResource }, IResource.DEPTH_INFINITE, IResource.NONE) };
 	}
 }

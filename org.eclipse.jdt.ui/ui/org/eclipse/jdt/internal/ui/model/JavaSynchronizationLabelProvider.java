@@ -20,7 +20,6 @@ import org.eclipse.jface.viewers.ILabelProvider;
 
 import org.eclipse.team.core.diff.IDiff;
 import org.eclipse.team.core.diff.IDiffTree;
-import org.eclipse.team.core.diff.IThreeWayDiff;
 import org.eclipse.team.core.mapping.ISynchronizationContext;
 
 import org.eclipse.ltk.ui.refactoring.model.AbstractSynchronizationLabelProvider;
@@ -96,20 +95,6 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 			}
 		}
 		return super.getDiff(element);
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected int getDirection(final Object element) {
-		return IThreeWayDiff.INCOMING;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected int getKind(final Object element) {
-		return IDiff.CHANGE;
 	}
 
 	/**

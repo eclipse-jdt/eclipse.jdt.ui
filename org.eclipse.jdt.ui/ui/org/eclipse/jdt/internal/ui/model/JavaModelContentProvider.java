@@ -50,7 +50,7 @@ public final class JavaModelContentProvider extends StandardJavaElementContentPr
 		else if (element instanceof RefactoringHistory)
 			return true;
 		else if (element instanceof RefactoringDescriptorProxy)
-			return true;
+			return false;
 		return super.hasChildren(element);
 	}
 }

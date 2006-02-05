@@ -26,7 +26,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
 /**
- * Java-aware resource mapping model provider.
+ * Java-aware model provider.
  * 
  * @since 3.2
  */
@@ -78,6 +78,6 @@ public final class JavaModelProvider extends ModelProvider {
 		final Object adapted= resource.getAdapter(ResourceMapping.class);
 		if (adapted instanceof ResourceMapping)
 			return new ResourceMapping[] { ((ResourceMapping) adapted)};
-		return new ResourceMapping[] { new JavaResourceMapping(resource, JAVA_MODEL_PROVIDER_ID)};
+		return new ResourceMapping[] { new JavaResourceMapping(resource)};
 	}
 }

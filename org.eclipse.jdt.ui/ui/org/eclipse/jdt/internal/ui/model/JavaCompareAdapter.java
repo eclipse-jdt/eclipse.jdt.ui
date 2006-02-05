@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.ui.model;
 
 import org.eclipse.core.resources.IResource;
 
-import org.eclipse.compare.structuremergeviewer.Differencer;
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
 
 import org.eclipse.team.core.mapping.ISynchronizationContext;
@@ -21,7 +20,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.ui.refactoring.model.AbstractRefactoringCompareAdapter;
 
 /**
- * Java-aware compare adapter.
+ * Java-aware refactoring compare adapter.
  * 
  * @since 3.2
  */
@@ -37,12 +36,5 @@ public final class JavaCompareAdapter extends AbstractRefactoringCompareAdapter 
 		if (resource != null)
 			return super.asCompareInput(context, resource);
 		return null;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	protected int getKind(final ISynchronizationContext context, final RefactoringDescriptorProxy proxy) {
-		return Differencer.ADDITION | Differencer.LEFT;
 	}
 }

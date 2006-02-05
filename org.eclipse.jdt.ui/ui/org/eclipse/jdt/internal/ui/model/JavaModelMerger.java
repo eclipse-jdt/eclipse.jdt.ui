@@ -29,7 +29,7 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 /**
- * Java-aware resource mapping merger.
+ * Java-aware refactoring model merger.
  * 
  * @since 3.2
  */
