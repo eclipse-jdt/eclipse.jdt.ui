@@ -325,6 +325,10 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
 //        printTestDisabledMessage("disabled: bug 43360");
     	helper1(10, 27, 10, 27, true, "Inner", Modifier.PRIVATE);   
     }
+    
+    public void test29() throws Exception{
+    		helper1(6, 14, 6, 14, true, "Inner", Modifier.PRIVATE);   
+    }
 
 	public void testGenerics0() throws Exception{
 		helper1(5, 20, 5, 20, true, "Inner", Modifier.PRIVATE);

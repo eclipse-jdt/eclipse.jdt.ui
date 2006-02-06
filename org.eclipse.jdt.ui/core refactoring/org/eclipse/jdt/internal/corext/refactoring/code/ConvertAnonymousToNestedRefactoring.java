@@ -714,6 +714,9 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
     private boolean isBindingToTemp(IBinding binding) {
 		if (!(binding instanceof IVariableBinding))
 			return false;
+		final IVariableBinding variable= (IVariableBinding) binding;
+		if (variable.isField())
+			return false;
 		if (!Modifier.isFinal(binding.getModifiers()))
 			return false;
 		ASTNode declaringNode= fCompilationUnitNode.findDeclaringNode(binding);
@@ -721,8 +724,7 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 			return false;
 		if (ASTNodes.isParent(declaringNode, fAnonymousInnerClassNode))
 			return false;
-		final IVariableBinding variable= (IVariableBinding) binding;
-		return !variable.isEnumConstant();
+		return true;
 	}
 
     private void createNewConstructorIfNeeded(CompilationUnitRewrite rewrite, AbstractTypeDeclaration declaration) throws JavaModelException {
