@@ -175,9 +175,7 @@ public class TypeMismatchSubProcessor {
 			addChangeSenderTypeProposals(context, receiverNode, currBinding, true, 6, proposals);
 		}
 
-		if (castTypeBinding != null) {
-			addChangeSenderTypeProposals(context, nodeToCast, castTypeBinding, false, 5, proposals);
-		}
+		addChangeSenderTypeProposals(context, nodeToCast, castTypeBinding, false, 5, proposals);
 	}
 
 	public static void addChangeSenderTypeProposals(IInvocationContext context, Expression nodeToCast, ITypeBinding castTypeBinding, boolean isAssignedNode, int relevance, Collection proposals) throws JavaModelException {
@@ -344,9 +342,9 @@ public class TypeMismatchSubProcessor {
 			proposals.add(new ChangeMethodSignatureProposal(label, cu, astRoot, methodDeclBinding, null, changes, 8, image));
 		}
 
-		ITypeBinding declaringType= overridden.getDeclaringClass();
+		ITypeBinding declaringType= overridden.getDeclaringClass();	
 		ICompilationUnit targetCu= cu;
-		if (declaringType != null && declaringType.isFromSource()) {
+		if (declaringType.isFromSource()) {
 			targetCu= ASTResolving.findCompilationUnitForBinding(cu, astRoot, declaringType);
 		}
 		if (targetCu != null) {
