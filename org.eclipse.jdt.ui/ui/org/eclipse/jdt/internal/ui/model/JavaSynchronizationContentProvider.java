@@ -67,7 +67,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 *            the element
 	 * @return an array of diffs
 	 */
-	public static IDiff[] getDiffs(final ISynchronizationContext context, final Object element) {
+	static IDiff[] getDiffs(final ISynchronizationContext context, final Object element) {
 		return context.getDiffTree().getDiffs(getResourceTraversals(element));
 	}
 
@@ -78,7 +78,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 *            the element to get the resource mapping
 	 * @return the resource mapping
 	 */
-	public static ResourceMapping getResourceMapping(final Object element) {
+	static ResourceMapping getResourceMapping(final Object element) {
 		if (element instanceof IJavaElement)
 			return JavaElementResourceMapping.create((IJavaElement) element);
 		if (element instanceof IAdaptable) {
@@ -97,7 +97,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 *            the element to get the resource traversals
 	 * @return the resource traversals
 	 */
-	public static ResourceTraversal[] getResourceTraversals(final Object element) {
+	static ResourceTraversal[] getResourceTraversals(final Object element) {
 		final ResourceMapping mapping= getResourceMapping(element);
 		if (mapping != null) {
 			try {
@@ -168,7 +168,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 //						list.remove(members[index]);
 //						list.addFirst(new JavaProjectSettings((IJavaProject) parent));
 //					} else if (name.equals(NAME_REFACTORING_FOLDER)) {
-//						final RefactoringHistory history= getPendingRefactorings(context, (IProject) resource, null);
+//						final RefactoringHistory history= getRefactorings(context, (IProject) resource, null);
 //						if (!history.isEmpty()) {
 //							list.remove(members[index]);
 //							list.addFirst(history);
