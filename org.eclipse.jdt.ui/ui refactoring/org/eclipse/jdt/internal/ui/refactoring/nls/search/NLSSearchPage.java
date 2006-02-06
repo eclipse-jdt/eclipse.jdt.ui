@@ -10,9 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.nls.search;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.StringReader;
 import java.util.ArrayList;
 
 import org.eclipse.core.runtime.IAdaptable;
@@ -76,6 +73,7 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.formatter.IndentManipulation;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
@@ -614,14 +612,14 @@ public class NLSSearchPage extends DialogPage implements ISearchPage, IJavaSearc
 	private SearchPatternData trySimpleTextSelection(ISelection selection) {
 		SearchPatternData result= null;
 		if (selection instanceof ITextSelection) {
-			BufferedReader reader= new BufferedReader(new StringReader(((ITextSelection) selection).getText()));
-			String text;
-			try {
-				text= reader.readLine();
-				if (text == null)
-					text= ""; //$NON-NLS-1$
-			} catch (IOException ex) {
-				text= ""; //$NON-NLS-1$
+			String selectionText= ((ITextSelection) selection).getText();
+			String text= ""; //$NON-NLS-1$
+			if (selectionText != null && selectionText.length() > 0) {
+				int i= 0;
+				while (i < selectionText.length() && !IndentManipulation.isLineDelimiterChar(selectionText.charAt(i))) {
+					i++;
+				}
+				text= selectionText.substring(0, i);
 			}
 			result= new SearchPatternData(text, null, ""); //$NON-NLS-1$
 		}

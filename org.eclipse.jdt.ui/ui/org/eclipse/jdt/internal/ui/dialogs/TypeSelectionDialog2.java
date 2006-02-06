@@ -212,10 +212,13 @@ public class TypeSelectionDialog2 extends SelectionStatusDialog {
 			if (window != null) {
 				ISelection selection= window.getSelectionService().getSelection();
 				if (selection instanceof ITextSelection) {
-					String text= ((ITextSelection)selection).getText().trim();
-					if (text.length() > 0 && JavaConventions.validateJavaTypeName(text).isOK()) {
-						fInitialFilter= text;
-						fSelectionMode= FULL_SELECTION;
+					String text= ((ITextSelection)selection).getText();
+					if (text != null) {
+						text= text.trim();
+						if (text.length() > 0 && JavaConventions.validateJavaTypeName(text).isOK()) {
+							fInitialFilter= text;
+							fSelectionMode= FULL_SELECTION;
+						}
 					}
 				}
 			}

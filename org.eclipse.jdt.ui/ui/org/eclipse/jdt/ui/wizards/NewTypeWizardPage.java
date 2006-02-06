@@ -538,7 +538,7 @@ public abstract class NewTypeWizardPage extends NewContainerWizardPage {
 		ITextSelection selection= getCurrentTextSelection();
 		if (selection != null) {
 			String text= selection.getText();
-			if (JavaConventions.validateJavaTypeName(text).isOK()) {
+			if (text != null && JavaConventions.validateJavaTypeName(text).isOK()) {
 				typeName= text;
 			}
 		}

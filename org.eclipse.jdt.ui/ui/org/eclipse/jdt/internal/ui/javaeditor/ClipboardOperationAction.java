@@ -379,9 +379,11 @@ public final class ClipboardOperationAction extends TextEditorAction {
 	private boolean isNonTrivialSelection(ITextSelection selection) {
 		if (selection.getLength() < 30) {
 			String text= selection.getText();
-			for (int i= 0; i < text.length(); i++) {
-				if (!Character.isJavaIdentifierPart(text.charAt(i))) {
-					return true;
+			if (text != null) {
+				for (int i= 0; i < text.length(); i++) {
+					if (!Character.isJavaIdentifierPart(text.charAt(i))) {
+						return true;
+					}
 				}
 			}
 			return false;
