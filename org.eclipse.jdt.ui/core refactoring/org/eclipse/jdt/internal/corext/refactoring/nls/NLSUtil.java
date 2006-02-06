@@ -14,7 +14,9 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import org.eclipse.text.edits.InsertEdit;
 import org.eclipse.text.edits.TextEdit;
@@ -86,6 +88,51 @@ public class NLSUtil {
 		int editOffset= computeInsertOffset(elements, indexInElementList, cu);
 		String editText= ' ' + NLSElement.createTagText(indexInElementList + 1); //tags are 1-based
 		return new InsertEdit(editOffset, editText);
+	}
+	
+	/**
+	 * Creates and returns NLS tag edits for strings that are at the specified positions in 
+	 * a compilation unit. Returns <code>null</code> if all the strings are already NLSed 
+	 * or the edits could not be created for some other reason.
+	 * @throws CoreException 
+	 */
+	public static TextEdit[] createNLSEdits(ICompilationUnit cu, int[] positions) throws CoreException {
+		List result= new ArrayList();
+		try {
+			NLSLine[] allLines= NLSScanner.scan(cu);
+			for (int i= 0; i < allLines.length; i++) {
+				NLSLine line= allLines[i];
+				NLSElement[] elements= line.getElements();
+				for (int j= 0; j < elements.length; j++) {
+					NLSElement element= elements[j];
+					if (!element.hasTag()) {
+						for (int k= 0; k < positions.length; k++) {
+							if (isPositionInElement(element, positions[k])) {
+								int editOffset;
+								if (j==0) {
+									if (elements.length > j+1) {
+										editOffset= elements[j+1].getTagPosition().getOffset();
+									} else {
+										editOffset= findLineEnd(cu, element.getPosition().getOffset());
+									}
+								} else {
+									Region previousPosition= elements[j-1].getTagPosition();
+									editOffset=  previousPosition.getOffset() + previousPosition.getLength();
+								}
+								String editText= ' ' + NLSElement.createTagText(j + 1); //tags are 1-based
+								result.add(new InsertEdit(editOffset, editText));
+							}
+						}
+					}
+				}
+			}
+		} catch (InvalidInputException e) {
+			return null;
+		}
+		if (result.isEmpty())
+			return null;
+		
+		return (TextEdit[])result.toArray(new TextEdit[result.size()]);
 	}
 
 	private static NLSLine scanCurrentLine(ICompilationUnit cu, int position) throws JavaModelException {

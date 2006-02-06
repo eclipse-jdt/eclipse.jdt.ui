@@ -128,7 +128,7 @@ public class CleanUpRefactoring extends Refactoring {
 		private final IProgressMonitor fMonitor;
 		private final List fResult;
 		private final Hashtable fSolutions;
-		private final int fSize;
+		private final Integer fSize;
 		private final Iterator fToParseIter;
 		private ParseListElement fCurElement;
 		private int fIndex;
@@ -137,12 +137,12 @@ public class CleanUpRefactoring extends Refactoring {
 			fMonitor= monitor;
 			fResult= new ArrayList();
 			fSolutions= solutions;
-			fSize= totalSize;
+			fSize= new Integer(totalSize);
 			fIndex= startIndex + 1;
 			
 			fToParseIter= toSolve.iterator();
 			fCurElement= (ParseListElement)fToParseIter.next();
-			fMonitor.subTask(getSubTaskMessage(fCurElement, fIndex, fSize));
+			fMonitor.subTask(getSubTaskMessage(fCurElement.getCompilationUnit(), fIndex, fSize));
 		}
 
 		public List getResult() {
@@ -157,12 +157,13 @@ public class CleanUpRefactoring extends Refactoring {
 			if (fToParseIter.hasNext()) {
 				fIndex++;
 				fCurElement= (ParseListElement)fToParseIter.next();
-				fMonitor.subTask(getSubTaskMessage(fCurElement, fIndex, fSize));
+				fMonitor.subTask(getSubTaskMessage(fCurElement.getCompilationUnit(), fIndex, fSize));
 			}
 		}
 		
-		private String getSubTaskMessage(ParseListElement element, int index, int size) {
-			return Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {getTypeName(element.getCompilationUnit()), new Integer(index), new Integer(size)});
+		private String getSubTaskMessage(ICompilationUnit cu, int index, Integer size) {
+			String typeName= JavaCore.removeJavaLikeExtension(cu.getElementName());
+			return Messages.format(FixMessages.CleanUpRefactoring_ProcessingCompilationUnit_message, new Object[] {typeName, new Integer(index), size});
 		}
 		
 		private ParseListElement calculateSolution(Hashtable solutions, CompilationUnit ast, ICleanUp[] cleanUps) {
@@ -456,9 +457,11 @@ public class CleanUpRefactoring extends Refactoring {
 			}
 			return solutionGenerator.getResult();
 		} finally { 
-			for (Iterator iter= workingCopys.iterator(); iter.hasNext();) {
-				ICompilationUnit cu= (ICompilationUnit)iter.next();
-				cu.discardWorkingCopy();
+			if (!workingCopys.isEmpty()) {
+				for (Iterator iter= workingCopys.iterator(); iter.hasNext();) {
+					ICompilationUnit cu= (ICompilationUnit)iter.next();
+					cu.discardWorkingCopy();
+				}
 			}
 			monitor.done();
 		}
@@ -506,10 +509,6 @@ public class CleanUpRefactoring extends Refactoring {
 		options.putAll(cleanUpOptions);
 		parser.setCompilerOptions(options);
 		return parser;
-	}
-
-	private String getTypeName(final ICompilationUnit unit) {
-		return JavaCore.removeJavaLikeExtension(unit.getElementName());
 	}
 
 	private static boolean intersects(TextEdit edit1, TextEdit edit2) {

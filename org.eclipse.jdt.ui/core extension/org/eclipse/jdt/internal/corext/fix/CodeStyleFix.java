@@ -32,10 +32,11 @@ import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleName;
+import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SwitchCase;
-import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
+import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
@@ -73,6 +74,16 @@ public class CodeStyleFix extends AbstractFix {
 			fImportRewrite= StubUtility.createImportRewrite(compilationUnit, true);
 			fResult= resultingCollection;
 		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean visit(TypeDeclaration node) {
+			if (!fFindUnqualifiedStaticAccesses && node.isInterface())
+				return false;
+			
+			return super.visit(node);
+		}
 
 		public boolean visit(QualifiedName node) {
 			if (fFindUnqualifiedAccesses || fFindUnqualifiedStaticAccesses) {
@@ -95,50 +106,47 @@ public class CodeStyleFix extends AbstractFix {
 		}
 
 		private void handleSimpleName(SimpleName node) {
-			if (node.getParent() instanceof FieldAccess) {
-				ASTNode firstExpression= node.getParent();
+			ASTNode firstExpression= node.getParent();
+			if (firstExpression instanceof FieldAccess) {
 				while (firstExpression instanceof FieldAccess) {
 					firstExpression= ((FieldAccess)firstExpression).getExpression();
 				}
-				if (firstExpression instanceof ThisExpression)
-					return;
-				if (firstExpression instanceof SuperFieldAccess)
+				if (!(firstExpression instanceof SimpleName))
 					return;
 				
-				if (firstExpression instanceof SimpleName) {
-					node= (SimpleName)firstExpression;
-				} else {
-					return;
-				}
-			} else if (node.getParent() instanceof SuperFieldAccess)
+				node= (SimpleName)firstExpression;
+			} else if (firstExpression instanceof SuperFieldAccess)
 				return;
 			
-			if (node.getLocationInParent() == VariableDeclarationFragment.NAME_PROPERTY)
-				return;
-			
-			if (node.getLocationInParent() == SwitchCase.EXPRESSION_PROPERTY)
+			StructuralPropertyDescriptor parentDescription= node.getLocationInParent();
+			if (parentDescription == VariableDeclarationFragment.NAME_PROPERTY || parentDescription == SwitchCase.EXPRESSION_PROPERTY)
 				return;
 			
 			IBinding binding= node.resolveBinding();
-			if (binding == null || (binding.getKind() != IBinding.VARIABLE) || !((IVariableBinding) binding).isField())
+			if (!(binding instanceof IVariableBinding))
+				return;
+			
+			IVariableBinding varbinding= ((IVariableBinding) binding);
+			if (!varbinding.isField())
 				return;
 
-			if (Modifier.isStatic(binding.getModifiers())) {
+			if (Modifier.isStatic(varbinding.getModifiers())) {
 				if (fFindUnqualifiedStaticAccesses) {
 					Initializer initializer= (Initializer) ASTNodes.getParent(node, Initializer.class);
 					//Do not qualify assignments to static final fields in static initializers (would result in compile error)
 					if (initializer != null && Modifier.isStatic(initializer.getModifiers())
-							&& Modifier.isFinal(binding.getModifiers()) && node.getLocationInParent() == Assignment.LEFT_HAND_SIDE_PROPERTY)
+							&& Modifier.isFinal(varbinding.getModifiers()) && parentDescription == Assignment.LEFT_HAND_SIDE_PROPERTY)
+						return;
+						
+					//Do not qualify static fields if defined inside an anonymous class
+					if (varbinding.getDeclaringClass().isAnonymous())
 						return;
 					
-					//Do not qualify static fields if defined inside an anonymous class
-					if (((IVariableBinding)binding).getDeclaringClass().isAnonymous())
-						return;
 	
-					fResult.add(new AddStaticQualifierOperation((IVariableBinding) binding, node));
+					fResult.add(new AddStaticQualifierOperation(varbinding, node));
 				}
 			} else if (fFindUnqualifiedAccesses){
-				String qualifier= getQualifier((IVariableBinding) binding, fImportRewrite, node);
+				String qualifier= getQualifier(varbinding, fImportRewrite, node);
 				if (qualifier == null)
 					return;
 

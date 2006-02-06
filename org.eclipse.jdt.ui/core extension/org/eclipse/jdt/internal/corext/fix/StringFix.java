@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.text.edits.ReplaceEdit;
@@ -100,13 +101,11 @@ public class StringFix implements IFix {
 		ICompilationUnit cu= (ICompilationUnit)compilationUnit.getJavaElement();
 		List result= new ArrayList();
 		
+		List missingNLSProblems= new ArrayList();
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];
 			if (addNLSTag && problem.getProblemId() == IProblem.NonExternalizedStringLiteral) {
-				TextEdit edit= NLSUtil.createNLSEdit(cu, problem.getOffset());
-				if (edit != null) {
-					result.add(new TextEditGroup(FixMessages.StringFix_AddNonNls_description, edit));
-				}
+				missingNLSProblems.add(problem);
 			}
 			if (removeNLSTag && problem.getProblemId() == IProblem.UnnecessaryNLSTag) {
 				IBuffer buffer= cu.getBuffer();
@@ -115,6 +114,21 @@ public class StringFix implements IFix {
 					if (edit != null) {
 						result.add(new TextEditGroup(FixMessages.StringFix_RemoveNonNls_description, edit));
 					}
+				}
+			}
+		}
+		if (!missingNLSProblems.isEmpty()) {
+			int[] positions= new int[missingNLSProblems.size()];
+			int i=0;
+			for (Iterator iter= missingNLSProblems.iterator(); iter.hasNext();) {
+				IProblemLocation problem= (IProblemLocation)iter.next();
+				positions[i]= problem.getOffset();
+				i++;
+			}
+			TextEdit[] edits= NLSUtil.createNLSEdits(cu, positions);
+			if (edits != null) {
+				for (int j= 0; j < edits.length; j++) {
+					result.add(new TextEditGroup(FixMessages.StringFix_AddNonNls_description, edits[j]));	
 				}
 			}
 		}
