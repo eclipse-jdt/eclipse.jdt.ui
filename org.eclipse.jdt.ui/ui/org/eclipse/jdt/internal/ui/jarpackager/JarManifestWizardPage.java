@@ -448,8 +448,10 @@ class JarManifestWizardPage extends WizardPage implements IJarPackageWizardPage 
 	private IType findMainMethodByName(String name) {
 		if (fMainTypes == null) {
 			List resources= JarPackagerUtil.asResources(fJarPackage.getElements());
-			if (resources == null)
-				setErrorMessage(JarPackagerMessages.JarManifestWizardPage_error_noResourceSelected); 
+			if (resources == null) {
+				setErrorMessage(JarPackagerMessages.JarManifestWizardPage_error_noResourceSelected);
+				return null;
+			}
 			IJavaSearchScope searchScope= JavaSearchScopeFactory.getInstance().createJavaSearchScope((IResource[])resources.toArray(new IResource[resources.size()]), true);
 			MainMethodSearchEngine engine= new MainMethodSearchEngine();
 			try {

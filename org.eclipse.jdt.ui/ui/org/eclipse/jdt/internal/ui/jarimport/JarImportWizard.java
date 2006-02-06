@@ -296,9 +296,9 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 				}
 				status.merge(component.initialize(generic));
 			} else
-				status.addFatalError(MessageFormat.format(JarImportMessages.PerformRefactoringsOperation_init_error, new String[] { descriptor.getDescription() }));
+				status.addFatalError(MessageFormat.format(JarImportMessages.PerformRefactoringsOperation_init_error, new String[] { descriptor.getDescription()}));
 		} else
-			status.addFatalError(MessageFormat.format(JarImportMessages.PerformRefactoringsOperation_init_error, new String[] { descriptor.getDescription() }));
+			status.addFatalError(MessageFormat.format(JarImportMessages.PerformRefactoringsOperation_init_error, new String[] { descriptor.getDescription()}));
 		return status;
 	}
 
@@ -435,9 +435,9 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 						if (project != null)
 							sourceIdentifier= project.getHandleIdentifier();
 					}
+					if (sourceIdentifier != null)
+						return targetIdentifier + element.getHandleIdentifier().substring(sourceIdentifier.length());
 				}
-				if (sourceIdentifier != null)
-					return targetIdentifier + element.getHandleIdentifier().substring(sourceIdentifier.length());
 			}
 		}
 		return value;

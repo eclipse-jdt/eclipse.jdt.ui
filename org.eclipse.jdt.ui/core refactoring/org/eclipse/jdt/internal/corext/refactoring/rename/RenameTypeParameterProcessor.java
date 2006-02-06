@@ -317,7 +317,8 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 			}
 			monitor.worked(1);
 			final RenameTypeParameterVisitor visitor= new RenameTypeParameterVisitor(rewrite, fTypeParameter.getNameRange(), status);
-			declaration.accept(visitor);
+			if (declaration != null)
+				declaration.accept(visitor);
 			fChange= visitor.getResult();
 		} finally {
 			monitor.done();

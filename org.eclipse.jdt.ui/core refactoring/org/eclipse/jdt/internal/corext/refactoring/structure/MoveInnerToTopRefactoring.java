@@ -1267,7 +1267,7 @@ public class MoveInnerToTopRefactoring extends CommentRefactoring implements IIn
 		final AnonymousClassDeclaration anonymous= (AnonymousClassDeclaration) ASTNodes.getParent(node, AnonymousClassDeclaration.class);
 		boolean isAnonymous= anonymous != null && ASTNodes.isParent(anonymous, declaration);
 		if (isAnonymous)
-			return isSubclassBindingOfEnclosingType(anonymous.resolveBinding());
+			return anonymous != null && isSubclassBindingOfEnclosingType(anonymous.resolveBinding());
 		return isSubclassBindingOfEnclosingType(declaration.resolveBinding());
 	}
 

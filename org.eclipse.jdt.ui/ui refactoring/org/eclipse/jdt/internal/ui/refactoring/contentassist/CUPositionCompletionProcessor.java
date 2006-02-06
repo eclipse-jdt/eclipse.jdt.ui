@@ -199,7 +199,8 @@ public class CUPositionCompletionProcessor implements IContentAssistProcessor, I
 			return null;
 		} finally {
 			try {
-				cu.discardWorkingCopy();
+				if (cu != null)
+					cu.discardWorkingCopy();
 			} catch (JavaModelException e) {
 				JavaPlugin.log(e);
 			}

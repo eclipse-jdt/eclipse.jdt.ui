@@ -158,7 +158,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		if (key == null)
 			return true; // Parse error - don't check key
 
-		if (key != null && fProperties.getProperty(key) != null) {
+		if (fProperties.getProperty(key) != null) {
 			fUsedPropertyNames.add(key);
 			return true;
 		}

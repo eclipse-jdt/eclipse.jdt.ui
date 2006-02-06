@@ -383,7 +383,7 @@ public final class SuperTypeConstraintsCreator extends HierarchicalASTVisitor {
 				final ConstraintVariable2 ancestor= fModel.createDeclaringTypeVariable(type);
 				if (ancestor != null) {
 					final ConstraintVariable2 descendant= (ConstraintVariable2) qualifier.getProperty(PROPERTY_CONSTRAINT_VARIABLE);
-					if (ancestor != null && descendant != null)
+					if (descendant != null)
 						fModel.createSubtypeConstraint(descendant, ancestor);
 				}
 			}
