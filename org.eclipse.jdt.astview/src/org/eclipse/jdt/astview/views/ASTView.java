@@ -14,7 +14,6 @@ package org.eclipse.jdt.astview.views;
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Iterator;
-import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
@@ -118,7 +117,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 
 public class ASTView extends ViewPart implements IShowInSource {
-		
+	
 	private static final int JLS3= AST.JLS3;
 	/** (Used to get rid of deprecation warnings in code)
 	 * @deprecated
@@ -600,24 +599,21 @@ public class ASTView extends ViewPart implements IShowInSource {
 			} finally {
 				wc.discardWorkingCopy();
 			}
+			
 		} else if (input instanceof ICompilationUnit && (getCurrentInputKind() == ASTInputKindAction.USE_CACHE)) {
 			ICompilationUnit cu= (ICompilationUnit) input;
 			startTime= System.currentTimeMillis();
 			root= JavaPlugin.getDefault().getASTProvider().getAST(cu, ASTProvider.WAIT_NO, null);
 			endTime= System.currentTimeMillis();
+			
 		} else {
 			ASTParser parser= ASTParser.newParser(astLevel);
 			parser.setResolveBindings(fCreateBindings);
-			Map options;
 			if (input instanceof ICompilationUnit) {
 				parser.setSource((ICompilationUnit) input);
-				options= ((ICompilationUnit) input).getJavaProject().getOptions(true);
 			} else {
 				parser.setSource((IClassFile) input);
-				options= ((IClassFile) input).getJavaProject().getOptions(true);
 			}
-			
-			parser.setCompilerOptions(options);
 			parser.setStatementsRecovery(fStatementsRecovery);
 			
 			startTime= System.currentTimeMillis();
@@ -710,11 +706,13 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fTrayUpdater= new ISelectionChangedListener() {
 			public void selectionChanged(SelectionChangedEvent event) {
 				IStructuredSelection viewerSelection= (IStructuredSelection) fViewer.getSelection();
-				if (viewerSelection.size() == 1 && viewerSelection.getFirstElement() instanceof Binding) {
-					trayLabelProvider.setViewerElement((Binding) viewerSelection.getFirstElement());
-				} else {
-					trayLabelProvider.setViewerElement(null);
+				if (viewerSelection.size() == 1) {
+					if (DynamicAttributeProperty.unwrapAttribute(viewerSelection.getFirstElement()) != null) {
+						trayLabelProvider.setViewerElement(viewerSelection.getFirstElement());
+						return;
+					}
 				}
+				trayLabelProvider.setViewerElement(null);
 			}
 		};
 		fTray.addPostSelectionChangedListener(fTrayUpdater);
@@ -1083,13 +1081,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 		IStructuredSelection structuredSelection= (IStructuredSelection) selection;
 		if (structuredSelection.size() == 1 && fViewer.getTree().isFocusControl()) {
 			Object first= structuredSelection.getFirstElement();
-			if (first instanceof Binding)
-				addEnabled= ((Binding) first).getBinding() != null;
-//TODO: support comparisons between arbitrary ASTAttributes and ASTNodes
-//			else if (first instanceof ResolvedAnnotation)
-//				addEnabled= ((ResolvedAnnotation) first).getAnnotation() != null;
-//			else if (first instanceof ResolvedMemberValuePair)
-//				addEnabled= ((ResolvedMemberValuePair) first).getPair() != null;
+			Object unwrapped= DynamicAttributeProperty.unwrapAttribute(first);
+			addEnabled= unwrapped != null;
 		}
 		fAddToTrayAction.setEnabled(addEnabled);
 	}

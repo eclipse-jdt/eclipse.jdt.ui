@@ -13,12 +13,12 @@ package org.eclipse.jdt.astview.views;
 
 import java.util.ArrayList;
 
+import org.eclipse.jface.viewers.ITreeContentProvider;
+import org.eclipse.jface.viewers.Viewer;
+
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-
-import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.viewers.Viewer;
 
 
 public class TrayContentProvider implements ITreeContentProvider {
@@ -33,21 +33,54 @@ public class TrayContentProvider implements ITreeContentProvider {
 	 */
 	public Object[] getChildren(Object parentElement) {
 		ArrayList result= new ArrayList();
-		if (! (parentElement instanceof Binding))
-			return EMPTY;
-		
-		Binding trayElement= (Binding) parentElement;
-		IBinding trayBinding= trayElement.getBinding();
-		
-		addBindingComparisons(result, trayElement);
-		if (trayBinding instanceof ITypeBinding)
-			addTypeBindingComparions(result, trayElement);
-		if (trayBinding instanceof IMethodBinding)
-			addMethodBindingComparions(result, trayElement);
+		if (parentElement instanceof Binding) {
+			Binding trayElement= (Binding) parentElement;
+			IBinding trayBinding= trayElement.getBinding();
+			
+			addBindingComparisons(result, trayElement);
+			if (trayBinding instanceof ITypeBinding)
+				addTypeBindingComparions(result, trayElement);
+			if (trayBinding instanceof IMethodBinding)
+				addMethodBindingComparions(result, trayElement);
+			
+		} else if (! (parentElement instanceof ExceptionAttribute)){
+			addObjectComparisons(result, parentElement);
+		}
 		
 		return result.toArray();
 	}
 	
+	private void addObjectComparisons(ArrayList result, Object trayElement) {
+		class IdentityProperty extends DynamicAttributeProperty {
+			public IdentityProperty(Object parent) {
+				super(parent);
+			}
+			protected String getName() {
+				return "* == this: ";
+			}
+			protected String executeQuery(Object viewerObject, Object trayObject) {
+				return Boolean.toString(viewerObject == trayObject);
+			}
+		} 
+		result.add(new IdentityProperty(trayElement));
+		
+		class EqualsProperty extends DynamicAttributeProperty {
+			public EqualsProperty(Object parent) {
+				super(parent);
+			}
+			protected String getName() {
+				return "*.equals(this): ";
+			}
+			protected String executeQuery(Object viewerObject, Object trayObject) {
+				if (viewerObject != null)
+					return Boolean.toString(viewerObject.equals(trayObject));
+				else
+					return "* is null";
+			}
+		} 
+		result.add(new EqualsProperty(trayElement));
+	}
+
 	private void addBindingComparisons(ArrayList result, Binding trayElement) {
 		class IdentityProperty extends DynamicBindingProperty {
 			public IdentityProperty(Binding parent) {
