@@ -1697,4 +1697,45 @@ public class TypeMismatchQuickFixTests extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 	}
 
+	
+	public void testTypeMismatchWithArrayLength() throws Exception {
+		// test for bug 126488
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class TestShort {\n");
+		buf.append("        public static void main(String[] args) {\n");
+		buf.append("                short test=args.length;\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("TestShort.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 2);
+
+		String[] expected= new String[2];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class TestShort {\n");
+		buf.append("        public static void main(String[] args) {\n");
+		buf.append("                short test=(short) args.length;\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("public class TestShort {\n");
+		buf.append("        public static void main(String[] args) {\n");
+		buf.append("                int test=args.length;\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		expected[1]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 }
