@@ -104,9 +104,13 @@ public class BindingLabelProvider extends LabelProvider {
 			buffer.append(' ');
 		}
 		// qualification
+
 		if ((flags & JavaElementLabels.F_FULLY_QUALIFIED) != 0) {
-			getTypeLabel(binding.getDeclaringClass(), JavaElementLabels.T_FULLY_QUALIFIED | (flags & JavaElementLabels.P_COMPRESSED), buffer);
-			buffer.append('.');
+			ITypeBinding declaringClass= binding.getDeclaringClass();
+			if (declaringClass != null) { // test for array.length
+				getTypeLabel(declaringClass, JavaElementLabels.T_FULLY_QUALIFIED | (flags & JavaElementLabels.P_COMPRESSED), buffer);
+				buffer.append('.');
+			}
 		}
 		buffer.append(binding.getName());
 		if (((flags & JavaElementLabels.F_APP_TYPE_SIGNATURE) != 0) && !binding.isEnumConstant()) {
@@ -115,8 +119,11 @@ public class BindingLabelProvider extends LabelProvider {
 		}
 		// post qualification
 		if ((flags & JavaElementLabels.F_POST_QUALIFIED) != 0) {
-			buffer.append(JavaElementLabels.CONCAT_STRING);
-			getTypeLabel(binding.getDeclaringClass(), JavaElementLabels.T_FULLY_QUALIFIED | (flags & JavaElementLabels.P_COMPRESSED), buffer);
+			ITypeBinding declaringClass= binding.getDeclaringClass();
+			if (declaringClass != null) { // test for array.length
+				buffer.append(JavaElementLabels.CONCAT_STRING);
+				getTypeLabel(declaringClass, JavaElementLabels.T_FULLY_QUALIFIED | (flags & JavaElementLabels.P_COMPRESSED), buffer);
+			}
 		}
 	}
 
@@ -221,15 +228,13 @@ public class BindingLabelProvider extends LabelProvider {
 					if (index > 0) {
 						buffer.append(JavaElementLabels.COMMA_STRING); 
 					}
-					if (parameters != null) {
-						ITypeBinding paramType= parameters[index];
-						if (binding.isVarargs() && (index == parameters.length - 1)) {
-							getTypeLabel(paramType.getElementType(), (flags & JavaElementLabels.T_TYPE_PARAMETERS), buffer);
-							appendDimensions(paramType.getDimensions() - 1, buffer);
-							buffer.append(JavaElementLabels.ELLIPSIS_STRING);
-						} else {
-							getTypeLabel(paramType, (flags & JavaElementLabels.T_TYPE_PARAMETERS), buffer);
-						}
+					ITypeBinding paramType= parameters[index];
+					if (binding.isVarargs() && (index == parameters.length - 1)) {
+						getTypeLabel(paramType.getElementType(), (flags & JavaElementLabels.T_TYPE_PARAMETERS), buffer);
+						appendDimensions(paramType.getDimensions() - 1, buffer);
+						buffer.append(JavaElementLabels.ELLIPSIS_STRING);
+					} else {
+						getTypeLabel(paramType, (flags & JavaElementLabels.T_TYPE_PARAMETERS), buffer);
 					}
 				}
 			}

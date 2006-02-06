@@ -207,6 +207,7 @@ public class TypeMismatchSubProcessor {
 		IBinding callerBindingDecl= callerBinding;
 		if (callerBinding instanceof IVariableBinding) {
 			IVariableBinding variableBinding= (IVariableBinding) callerBinding;
+
 			if (variableBinding.isEnumConstant()) {
 				return;
 			}
@@ -214,7 +215,11 @@ public class TypeMismatchSubProcessor {
 				targetCu= cu;
 			} else {
 				callerBindingDecl= variableBinding.getVariableDeclaration();
-				declaringType= variableBinding.getDeclaringClass().getTypeDeclaration();
+				ITypeBinding declaringClass= variableBinding.getDeclaringClass();
+				if (declaringClass == null) {
+					return; // array length
+				}
+				declaringType= declaringClass.getTypeDeclaration();
 			}
 		} else if (callerBinding instanceof IMethodBinding) {
 			IMethodBinding methodBinding= (IMethodBinding) callerBinding;

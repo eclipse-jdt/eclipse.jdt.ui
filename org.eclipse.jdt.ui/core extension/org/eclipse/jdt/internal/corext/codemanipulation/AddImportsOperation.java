@@ -222,6 +222,9 @@ public class AddImportsOperation implements IWorkspaceRunnable {
 				} else if (binding instanceof IVariableBinding || binding instanceof IMethodBinding) {
 					boolean isField= binding instanceof IVariableBinding;
 					ITypeBinding declaringClass= isField ? ((IVariableBinding) binding).getDeclaringClass() : ((IMethodBinding) binding).getDeclaringClass();
+					if (declaringClass == null) {
+						return null; // variablebinding.getDeclaringClass() is null for array.length
+					}
 					if (Modifier.isStatic(binding.getModifiers())) {
 						if (containerName.length() > 0) { 
 							if (containerName.equals(declaringClass.getName()) || containerName.equals(declaringClass.getQualifiedName()) ) {

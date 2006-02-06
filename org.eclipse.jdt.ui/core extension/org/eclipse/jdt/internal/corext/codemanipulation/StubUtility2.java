@@ -246,6 +246,7 @@ public final class StubUtility2 {
 
 	public static MethodDeclaration createDelegationStub(ICompilationUnit unit, ASTRewrite rewrite, ImportRewrite imports, AST ast, IBinding[] bindings, CodeGenerationSettings settings) throws CoreException {
 		Assert.isNotNull(bindings);
+		Assert.isNotNull(settings);
 		Assert.isTrue(bindings.length == 2);
 		Assert.isTrue(bindings[0] instanceof IVariableBinding);
 		Assert.isTrue(bindings[1] instanceof IMethodBinding);
@@ -333,6 +334,10 @@ public final class StubUtility2 {
 		body.statements().add(statement);
 
 		ITypeBinding declaringType= variableBinding.getDeclaringClass();
+		if (declaringType == null) { // can be null for
+			return decl;
+		}
+		
 		String qualifiedName= declaringType.getQualifiedName();
 		IPackageBinding packageBinding= declaringType.getPackage();
 		if (packageBinding != null) {
@@ -340,7 +345,7 @@ public final class StubUtility2 {
 				qualifiedName= qualifiedName.substring(packageBinding.getName().length());
 		}
 
-		if (settings != null && settings.createComments) {
+		if (settings.createComments) {
 			String string= CodeGeneration.getMethodComment(unit, qualifiedName, decl, methodBinding, delimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);

@@ -185,6 +185,10 @@ public class Bindings {
 				break;
 			case IBinding.VARIABLE:
 				declaring= ((IVariableBinding) binding).getDeclaringClass();
+				if (declaring == null) {
+					return binding.getName(); // array.length
+				}
+				
 				break;
 			default:
 				return binding.getName();
@@ -1058,8 +1062,7 @@ public class Bindings {
 			case IBinding.TYPE:
 				return ((ITypeBinding) binding).getTypeDeclaration() == binding;
 			case IBinding.VARIABLE:
-				IVariableBinding var= (IVariableBinding) binding;
-				return !var.isField() || isDeclarationBinding(var.getDeclaringClass());
+				return ((IVariableBinding) binding).getVariableDeclaration() == binding;
 			case IBinding.METHOD:
 				return ((IMethodBinding) binding).getMethodDeclaration() == binding;
 		}
