@@ -389,7 +389,7 @@ public class ScopeAnalyzer {
 		if (Modifier.isPublic(modifiers) || declaring.isInterface()) {
 			return true;
 		} else if (Modifier.isProtected(modifiers) || !Modifier.isPrivate(modifiers)) {
-			if (declaring != null && declaring.getPackage() == context.getPackage()) {
+			if (declaring.getPackage() == context.getPackage()) {
 				return true;
 			}
 			return isTypeInScope(declaring, context, Modifier.isProtected(modifiers));

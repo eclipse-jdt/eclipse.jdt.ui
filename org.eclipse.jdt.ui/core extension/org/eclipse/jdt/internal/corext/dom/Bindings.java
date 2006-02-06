@@ -491,7 +491,7 @@ public class Bindings {
 		} else if (Modifier.isPrivate(otherflags)) {
 			return false;
 		}		
-		return pack == declaringType.getPackage();
+		return declaringType != null && pack == declaringType.getPackage();
 	}
 		
 	/**
