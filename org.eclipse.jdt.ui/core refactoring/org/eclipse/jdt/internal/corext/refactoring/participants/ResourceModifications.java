@@ -97,7 +97,7 @@ public class ResourceModifications {
 			super(resource);
 		}
 		public void buildDelta(IResourceChangeDescriptionFactory builder) {
-			// builder.add(fResource);
+			builder.create(fResource);
 		}
 		public IPath getDestinationPath() {
 			return fResource.getFullPath();

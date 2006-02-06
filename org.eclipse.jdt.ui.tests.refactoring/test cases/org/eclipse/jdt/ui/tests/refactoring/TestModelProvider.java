@@ -13,19 +13,18 @@ package org.eclipse.jdt.ui.tests.refactoring;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Comparator;
-import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import junit.framework.Assert;
 
+import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IResourceDelta;
+import org.eclipse.core.resources.IResourceDeltaVisitor;
 import org.eclipse.core.resources.mapping.ModelProvider;
 
 public class TestModelProvider extends ModelProvider {
@@ -36,33 +35,6 @@ public class TestModelProvider extends ModelProvider {
 			IResourceDelta d2= (IResourceDelta) o2;
 			return d1.getResource().getFullPath().toPortableString().compareTo(
 				d2.getResource().getFullPath().toPortableString());
-		}
-	}
-	
-	private static class Status {
-		private int kind;
-		private int flags;
-		public Status(int kind, int flags) {
-			this.kind= kind;
-			this.flags= flags;
-		}
-		public int hashCode() {
-			final int PRIME= 31;
-			int result= 1;
-			result= PRIME * result + kind;
-			result= PRIME * result + flags;
-			return result;
-		}
-		public boolean equals(Object obj) {
-			if (this == obj)
-				return true;
-			if (obj == null || getClass() != obj.getClass())
-				return false;
-			final Status other= (Status) obj;
-			return kind == other.kind && flags == other.flags;
-		}
-		public String toString() {
-			return "Status: kind(" + kind + ") flags(" + flags + ")";
 		}
 	}
 	
@@ -84,20 +56,12 @@ public class TestModelProvider extends ModelProvider {
 	}
 	
 	public static void assertTrue(IResourceDelta expected) {
-		Map expectedPostProcess= new HashMap();
-		Map actualPostProcess= new HashMap();
 		Assert.assertNotNull(LAST_DELTA);
-		assertTrue(expected, LAST_DELTA, expectedPostProcess, actualPostProcess);
-		for (Iterator iter= expectedPostProcess.keySet().iterator(); iter.hasNext();) {
-			IPath resource= (IPath) iter.next();
-			Status expectedValue= (Status) expectedPostProcess.get(resource);
-			Status actualValue= (Status) actualPostProcess.get(resource);
-			Assert.assertEquals("Same status value", expectedValue, actualValue);
-		}
+		assertTrue(expected, LAST_DELTA);
 		LAST_DELTA= null;
 	}
 	
-	private static void assertTrue(IResourceDelta expected, IResourceDelta actual, Map expectedPostProcess, Map actualPostProcess) {
+	private static void assertTrue(IResourceDelta expected, IResourceDelta actual) {
 		assertEqual(expected.getResource(), actual.getResource());
 		int actualKind= actual.getKind();
 		int actualFlags= actual.getFlags();
@@ -109,30 +73,20 @@ public class TestModelProvider extends ModelProvider {
 		// The expected delta doesn't support copy from flag. So remove it
 		actualFlags= actualFlags & ~IResourceDelta.COPIED_FROM;
 		
-		// There is a difference between a pre and a post delta. For example if I change and
-		// move a resource then in the pre delta we have the change on the MOVE_TO whereas in
-		// the post delta we have the changed on the MOVED_FROM.
-		if ((actualKind & IResourceDelta.REMOVED) != 0 && (actualFlags & IResourceDelta.MOVED_TO) != 0) {
-			IPath moveTo= actual.getMovedToPath();
-			actualPostProcess.put(moveTo, new Status(IResourceDelta.ADDED, (actualFlags & ~IResourceDelta.MOVED_TO) | IResourceDelta.MOVED_FROM));
-			actualFlags= actualFlags & ~IResourceDelta.CONTENT;
-		}
 		int expectKind= expected.getKind();
 		int expectedFlags= expected.getFlags() & PRE_DELTA_FLAGS;
 		if ((expectKind & IResourceDelta.ADDED) != 0 && (expectedFlags & IResourceDelta.MOVED_FROM) != 0) {
 			expectedFlags= expectedFlags & ~IResourceDelta.OPEN;
-			expectedPostProcess.put(expected.getResource().getFullPath(), new Status(expectKind, expectedFlags));
-			expectedFlags= expectedFlags & ~IResourceDelta.CONTENT;
 		}
 		Assert.assertEquals("Same kind", expectKind, actualKind);
 		Assert.assertEquals("Same flags", expectedFlags, actualFlags);
 		IResourceDelta[] expectedChildren=  getExpectedChildren(expected);
-		IResourceDelta[] actualChildren= actual.getAffectedChildren();
+		IResourceDelta[] actualChildren= getActualChildren(actual, expectedChildren);
 		Assert.assertEquals("Same number of children", expectedChildren.length, actualChildren.length);
 		Arrays.sort(expectedChildren, COMPARATOR);
 		Arrays.sort(actualChildren, COMPARATOR);
 		for (int i= 0; i < expectedChildren.length; i++) {
-			assertTrue(expectedChildren[i], actualChildren[i], expectedPostProcess, actualPostProcess);
+			assertTrue(expectedChildren[i], actualChildren[i]);
 		}
 	}
 
@@ -170,5 +124,57 @@ public class TestModelProvider extends ModelProvider {
 			}
 		}
 		return (IResourceDelta[]) result.toArray(new IResourceDelta[result.size()]);
+	}
+	
+	private static IResourceDelta[] getActualChildren(IResourceDelta delta, IResourceDelta[] expectedChildren) {
+		if (!IS_COPY_TEST)
+			return delta.getAffectedChildren();
+		List result= new ArrayList();
+		IResourceDelta[] candidates= delta.getAffectedChildren();
+		for (int i= 0; i < candidates.length; i++) {
+			if (contains(expectedChildren, candidates[i])) {
+				result.add(candidates[i]);
+			} else {
+				assertCopySource(candidates[i]);
+			}
+		}
+		return (IResourceDelta[]) result.toArray(new IResourceDelta[result.size()]);
+	}
+
+	private static boolean contains(IResourceDelta[] expectedChildren, IResourceDelta actualDelta) {
+		IResource actualResource= actualDelta.getResource();
+		for (int i= 0; i < expectedChildren.length; i++) {
+			if (isSameResourceInCopy(expectedChildren[i].getResource(), actualResource))
+				return true;
+		}
+		return false;
+	}
+	
+	private static boolean isSameResourceInCopy(IResource expected, IResource actual) {
+		IPath expectedPath= expected.getFullPath();
+		IPath actualPath= actual.getFullPath();
+		if (expectedPath.segmentCount()!= actualPath.segmentCount())
+			return false;
+		for(int i= 0; i < expectedPath.segmentCount(); i++) {
+			String expectedSegment= expectedPath.segment(i);
+			if (expectedSegment.startsWith("UnusedName") || expectedSegment.equals("unusedName"))
+				continue;
+			if (!expectedSegment.equals(actualPath.segment(i)))
+				return false;
+		}
+		return true;
+	}
+	
+	private static void assertCopySource(IResourceDelta delta) {
+		try {
+			delta.accept(new IResourceDeltaVisitor() {
+				public boolean visit(IResourceDelta delta) throws CoreException {
+					Assert.assertTrue("Not a copy delta", (delta.getKind() & ~IResourceDelta.CHANGED) == 0);
+					return true;
+				}
+			});
+		} catch (CoreException e) {
+			Assert.assertTrue("Shouldn't happen", false);
+		}
 	}
 }

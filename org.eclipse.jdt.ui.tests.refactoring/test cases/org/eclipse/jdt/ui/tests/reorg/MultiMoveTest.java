@@ -48,8 +48,6 @@ public class MultiMoveTest extends RefactoringTest {
 	private static final Class clazz= MultiMoveTest.class;
 	private static final String REFACTORING_PATH= "MultiMove/";
 
-	private static final boolean BUG_125580= true;
-	
 	public MultiMoveTest(String name) {
 		super(name);
 	}
@@ -386,9 +384,7 @@ public class MultiMoveTest extends RefactoringTest {
 	}
 	
 	public void testPackageMoveParticipants2() throws Exception {
-		if (BUG_125580) {
-			fIsPreDeltaTest= false;
-		}
+		fIsPreDeltaTest= false;
 		ParticipantTesting.reset();
 		IPackageFragmentRoot r1= null;
 		IPackageFragmentRoot r2= null;

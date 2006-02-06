@@ -66,7 +66,6 @@ import org.eclipse.jdt.ui.tests.refactoring.infra.ZipTools;
 public class RenamePackageTests extends RefactoringTest {
 	private static final boolean BUG_6054= true;
 	private static final boolean BUG_54962_71267= false;
-	private static final boolean BUG_125580= true;
 	
 	private static final Class clazz= RenamePackageTests.class;
 	private static final String REFACTORING_PATH= "RenamePackage/";
@@ -702,9 +701,6 @@ public class RenamePackageTests extends RefactoringTest {
 	}
 	
 	public void test7() throws Exception{
-		if (!BUG_125580) {
-			fIsPreDeltaTest= true;
-		}
 		helper2(new String[]{"r", "r.s"}, new String[][]{{"A"}, {"B"}}, "q");
 	}
 	
