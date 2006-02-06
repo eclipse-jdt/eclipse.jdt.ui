@@ -81,6 +81,7 @@ public class Binding extends ASTAttribute {
 					IVariableBinding variableBinding= (IVariableBinding) fBinding;
 					res.add(new BindingProperty(this, "IS FIELD", variableBinding.isField(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS ENUM CONSTANT", variableBinding.isEnumConstant(), true)); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "IS PARAMETER", variableBinding.isParameter(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "VARIABLE ID", variableBinding.getVariableId(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()), true)); //$NON-NLS-1$
 					res.add(new Binding(this, "TYPE", variableBinding.getType(), true)); //$NON-NLS-1$
@@ -176,6 +177,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "PARAMETER TYPES", methodBinding.getParameterTypes(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS VARARGS", methodBinding.isVarargs(), true)); //$NON-NLS-1$
+					res.add(new BindingProperty(this, "IS OVERRIDING", methodBinding.isOverriding(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "EXCEPTION TYPES", methodBinding.getExceptionTypes(), true)); //$NON-NLS-1$
 					
 					StringBuffer genericsM= new StringBuffer("GENERICS:"); //$NON-NLS-1$
