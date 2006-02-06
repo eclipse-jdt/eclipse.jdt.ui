@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerSorter;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
@@ -33,6 +34,9 @@ public class SourcePositionSorter extends ViewerSorter {
 		if (!(e1 instanceof ISourceReference))
 			return 0;
 		if (!(e2 instanceof ISourceReference))
+			return 0;
+		
+		if (((IJavaElement)e1).getParent() != ((IJavaElement)e2).getParent())
 			return 0;
 		
 		try {
