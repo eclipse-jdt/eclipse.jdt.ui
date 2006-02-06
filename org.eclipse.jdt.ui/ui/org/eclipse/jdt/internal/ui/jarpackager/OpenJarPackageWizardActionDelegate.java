@@ -12,22 +12,22 @@ package org.eclipse.jdt.internal.ui.jarpackager;
 
 import java.io.IOException;
 
-import org.eclipse.core.resources.IFile;
 import org.eclipse.core.runtime.CoreException;
+
+import org.eclipse.core.resources.IFile;
 
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.wizard.WizardDialog;
 
-import org.xml.sax.SAXException;
-
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionReader;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
-import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
+import org.xml.sax.SAXException;
 
 /**
  * This action delegate opens the JAR Package Wizard and initializes
@@ -61,7 +61,7 @@ public class OpenJarPackageWizardActionDelegate extends JarPackageActionDelegate
 		}
 
 		if (fReader != null && !fReader.getStatus().isOK())
-			ProblemDialog.open(parent, JarPackagerMessages.OpenJarPackageWizardDelegate_jarDescriptionReaderWarnings_title, null, fReader.getStatus()); 
+			ErrorDialog.openError(parent, JarPackagerMessages.OpenJarPackageWizardDelegate_jarDescriptionReaderWarnings_title, null, fReader.getStatus()); 
 		JarPackageWizard wizard= new JarPackageWizard();
 		wizard.init(getWorkbench(), jarPackage);
 		WizardDialog dialog= new WizardDialog(parent, wizard);

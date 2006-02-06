@@ -24,19 +24,19 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.IAction;
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
-import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
-
 import org.eclipse.jdt.ui.jarpackager.IJarDescriptionReader;
 import org.eclipse.jdt.ui.jarpackager.IJarExportRunnable;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
+
+import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 public class CreateJarActionDelegate extends JarPackageActionDelegate {
 
@@ -73,7 +73,7 @@ public class CreateJarActionDelegate extends JarPackageActionDelegate {
 			mergedStatus= readStatus;
 		
 		if (!mergedStatus.isOK())
-			ProblemDialog.open(getShell(), JarPackagerMessages.CreateJarActionDelegate_jarExport_title, null, mergedStatus); 
+			ErrorDialog.openError(getShell(), JarPackagerMessages.CreateJarActionDelegate_jarExport_title, null, mergedStatus); 
 	}
 
 	private JarPackageData[] readJarPackages(IFile[] descriptions, MultiStatus readStatus) {

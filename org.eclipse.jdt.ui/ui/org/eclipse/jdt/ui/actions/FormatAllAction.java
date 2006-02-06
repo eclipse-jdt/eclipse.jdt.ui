@@ -75,7 +75,6 @@ import org.eclipse.jdt.internal.ui.actions.ActionMessages;
 import org.eclipse.jdt.internal.ui.actions.WorkbenchRunnableAdapter;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
 import org.eclipse.jdt.internal.ui.dialogs.OptionalMessageDialog;
-import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
@@ -304,7 +303,7 @@ public class FormatAllAction extends SelectionDispatchAction {
 			})); // workspace lock
 			if (!status.isOK()) {
 				String title= ActionMessages.FormatAllAction_multi_status_title; 
-				ProblemDialog.open(getShell(), title, null, status);
+				ErrorDialog.openError(getShell(), title, null, status);
 			}
 		} catch (InvocationTargetException e) {
 			ExceptionHandler.handle(e, getShell(), ActionMessages.FormatAllAction_error_title, ActionMessages.FormatAllAction_error_message); 

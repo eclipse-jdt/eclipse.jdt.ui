@@ -46,7 +46,6 @@ import org.eclipse.jdt.ui.search.QuerySpecification;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.actions.ActionUtil;
 import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
-import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.search.JavaSearchQuery;
 import org.eclipse.jdt.internal.ui.search.SearchMessages;
@@ -280,27 +279,25 @@ public abstract class FindAction extends SelectionDispatchAction {
 
 	private void performNewSearch(IJavaElement element) throws JavaModelException {
 		JavaSearchQuery query= new JavaSearchQuery(createQuery(element));
-		if (query != null) {
-			if (query.canRunInBackground()) {
-				/*
-				 * This indirection with Object as parameter is needed to prevent the loading
-				 * of the Search plug-in: the VM verifies the method call and hence loads the
-				 * types used in the method signature, eventually triggering the loading of
-				 * a plug-in (in this case ISearchQuery results in Search plug-in being loaded).
-				 */
-				SearchUtil.runQueryInBackground(query);
-			} else {
-				IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
-				/*
-				 * This indirection with Object as parameter is needed to prevent the loading
-				 * of the Search plug-in: the VM verifies the method call and hence loads the
-				 * types used in the method signature, eventually triggering the loading of
-				 * a plug-in (in this case it would be ISearchQuery).
-				 */
-				IStatus status= SearchUtil.runQueryInForeground(progressService, query);
-				if (status.matches(IStatus.ERROR | IStatus.INFO | IStatus.WARNING)) {
-					ProblemDialog.open(getShell(), SearchMessages.Search_Error_search_title, SearchMessages.Search_Error_search_message, status); 
-				}
+		if (query.canRunInBackground()) {
+			/*
+			 * This indirection with Object as parameter is needed to prevent the loading
+			 * of the Search plug-in: the VM verifies the method call and hence loads the
+			 * types used in the method signature, eventually triggering the loading of
+			 * a plug-in (in this case ISearchQuery results in Search plug-in being loaded).
+			 */
+			SearchUtil.runQueryInBackground(query);
+		} else {
+			IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
+			/*
+			 * This indirection with Object as parameter is needed to prevent the loading
+			 * of the Search plug-in: the VM verifies the method call and hence loads the
+			 * types used in the method signature, eventually triggering the loading of
+			 * a plug-in (in this case it would be ISearchQuery).
+			 */
+			IStatus status= SearchUtil.runQueryInForeground(progressService, query);
+			if (status.matches(IStatus.ERROR | IStatus.INFO | IStatus.WARNING)) {
+				ErrorDialog.openError(getShell(), SearchMessages.Search_Error_search_title, SearchMessages.Search_Error_search_message, status); 
 			}
 		}
 	}

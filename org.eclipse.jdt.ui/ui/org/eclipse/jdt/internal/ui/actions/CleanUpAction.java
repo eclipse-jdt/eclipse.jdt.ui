@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 
 import org.eclipse.jface.text.ITextSelection;
@@ -44,7 +45,6 @@ import org.eclipse.jdt.ui.actions.SelectionDispatchAction;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.browsing.LogicalPackage;
-import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.fix.CleanUpRefactoringWizard;
 import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.refactoring.actions.RefactoringStarter;
@@ -211,7 +211,7 @@ public class CleanUpAction extends SelectionDispatchAction {
 		
 		if (!status.isOK()) {
 			String title= ActionMessages.CleanUpAction_ErrorDialogTitle; 
-			ProblemDialog.open(getShell(), title, null, status);
+			ErrorDialog.openError(getShell(), title, null, status);
 			return;
 		}
 			
@@ -236,7 +236,7 @@ public class CleanUpAction extends SelectionDispatchAction {
 		String message2= Messages.format(ActionMessages.CleanUpAction_UnexpectedErrorMessage, e.getStatus().getMessage()); 
 		IStatus status= new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.ERROR, message2, null);
 		String title= ActionMessages.CleanUpAction_ErrorDialogTitle; 
-		ProblemDialog.open(getShell(), title, null, status);
+		ErrorDialog.openError(getShell(), title, null, status);
 	}
 	
 	private boolean testOnBuildPath(ICompilationUnit cu, MultiStatus status) {

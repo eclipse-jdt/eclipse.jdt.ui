@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
+import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.viewers.ISelection;
@@ -48,7 +49,6 @@ import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.dialogs.ProblemDialog;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
@@ -181,7 +181,7 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 		}
 		IStatus status= op.getStatus();
 		if (!status.isOK()) {
-			ProblemDialog.open(getShell(), JarPackagerMessages.JarPackageWizard_jarExport_title, null, status);
+			ErrorDialog.openError(getShell(), JarPackagerMessages.JarPackageWizard_jarExport_title, null, status);
 			return !(status.matches(IStatus.ERROR));
 		}
 		return true;
