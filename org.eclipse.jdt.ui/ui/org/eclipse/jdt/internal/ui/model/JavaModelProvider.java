@@ -36,7 +36,7 @@ public final class JavaModelProvider extends ModelProvider {
 	public static final String JAVA_MODEL_PROVIDER_ID= "org.eclipse.jdt.ui.modelProvider"; //$NON-NLS-1$
 
 	/**
-	 * Returns the resource associated with the corresponding element.
+	 * Returns the resource associated with the corresponding model element.
 	 * 
 	 * @param element
 	 *            the model element
