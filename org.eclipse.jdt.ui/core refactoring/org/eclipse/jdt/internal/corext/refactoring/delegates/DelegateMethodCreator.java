@@ -18,6 +18,7 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.Block;
@@ -181,9 +182,11 @@ public class DelegateMethodCreator extends DelegateCreator {
 				for (int index= 0; index < parameters.length; index++) {
 					if (index != 0)
 						buffer.append(',');
-					final IType paramType= (IType) parameters[index].getJavaElement();
-					if (paramType != null)
-						buffer.append(paramType.getFullyQualifiedName());
+					final IJavaElement javaElem= parameters[index].getJavaElement();
+					if (javaElem instanceof IType)
+						buffer.append(((IType) javaElem).getFullyQualifiedName());
+					else if (javaElem instanceof ITypeParameter)
+						buffer.append(((ITypeParameter) javaElem).getElementName());
 					else
 						buffer.append(parameters[index].getQualifiedName());
 				}
