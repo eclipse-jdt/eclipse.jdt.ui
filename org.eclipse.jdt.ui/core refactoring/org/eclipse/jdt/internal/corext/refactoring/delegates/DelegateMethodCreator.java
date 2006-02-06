@@ -182,7 +182,10 @@ public class DelegateMethodCreator extends DelegateCreator {
 					if (index != 0)
 						buffer.append(',');
 					final IType paramType= (IType) parameters[index].getJavaElement();
-					buffer.append(paramType.getFullyQualifiedName());
+					if (paramType != null)
+						buffer.append(paramType.getFullyQualifiedName());
+					else
+						buffer.append(parameters[index].getQualifiedName());
 				}
 				buffer.append(')');
 				buffer.append(".xml"); //$NON-NLS-1$

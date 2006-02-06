@@ -360,7 +360,7 @@ public abstract class DelegateCreator {
 //									final IFileStore store= EFS.getStore(uri);
 //									if (store != null) {
 //										stream= new BufferedOutputStream(store.openOutputStream(EFS.NONE, null));
-//										RefactoringCore.getRefactoringHistoryService().writeRefactoringSession(descriptor, stream);
+//										RefactoringCore.getRefactoringHistoryService().writeRefactoringSession(descriptor, stream, false);
 //									}
 //								} catch (CoreException exception) {
 //									JavaPlugin.log(exception);
