@@ -19,6 +19,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -128,6 +129,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		joinBackgroudActivities();
 		startMeasuring();
 		
+		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);
 
 		finishMeasurements();
@@ -165,6 +167,7 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		joinBackgroudActivities();
 		startMeasuring();
 		
+		cleanUpRefactoring.checkAllConditions(new NullProgressMonitor());
 		cleanUpRefactoring.createChange(null);
 
 		finishMeasurements();
