@@ -285,14 +285,12 @@ public class JarWriter3 {
 			file= File.createTempFile("history", null); //$NON-NLS-1$
 			output= new BufferedOutputStream(new FileOutputStream(file));
 			try {
-				RefactoringCore.getRefactoringHistoryService().writeRefactoringDescriptors(proxies, output, RefactoringDescriptor.NONE, monitor);
-				if (output != null) {
-					try {
-						output.close();
-						output= null;
-					} catch (IOException exception) {
-						// Do nothing
-					}
+				RefactoringCore.getRefactoringHistoryService().writeRefactoringDescriptors(proxies, output, RefactoringDescriptor.NONE, false, monitor);
+				try {
+					output.close();
+					output= null;
+				} catch (IOException exception) {
+					// Do nothing
 				}
 				writeHistory(data, file, path);
 			} finally {
@@ -452,8 +450,11 @@ public class JarWriter3 {
 			while ((count= stream.read(buffer, 0, buffer.length)) != -1)
 				fJarOutputStream.write(buffer, 0, count);
 		} finally {
-			if (stream != null)
+			try {
 				stream.close();
+			} catch (IOException exception) {
+				// Do nothing
+			}
 		}
 	}
 }
