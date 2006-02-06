@@ -42,6 +42,7 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
+import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.Annotation;
 import org.eclipse.jdt.core.dom.AnonymousClassDeclaration;
 import org.eclipse.jdt.core.dom.Assignment;
@@ -359,8 +360,8 @@ public class LocalCorrectionsSubProcessor {
 		}
 		ASTNode typeNode= null;
 		ITypeBinding binding= null;
-		if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME && selectedNode.getParent().getNodeType() == ASTNode.TYPE_DECLARATION) {
-			TypeDeclaration typeDecl= (TypeDeclaration) selectedNode.getParent();
+		if (selectedNode.getNodeType() == ASTNode.SIMPLE_NAME && selectedNode.getParent() instanceof AbstractTypeDeclaration) {
+			AbstractTypeDeclaration typeDecl= (AbstractTypeDeclaration) selectedNode.getParent();
 			binding= typeDecl.resolveBinding();
 			typeNode= typeDecl;
 		} else if (selectedNode.getNodeType() == ASTNode.CLASS_INSTANCE_CREATION) {

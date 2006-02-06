@@ -2358,6 +2358,41 @@ public class LocalCorrectionsQuickFixTest extends QuickFixTest {
 		assertEqualStringsIgnoreOrder(new String[] { preview1, preview2 }, new String[] { expected1, expected2 });
 	}
 
+	public void testUnimplementedMethodsInEnum() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("pack", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("enum TestEnum implements IA {\n");
+		buf.append("    test1,test2;\n");
+		buf.append("}\n");
+		buf.append("interface IA {\n");
+		buf.append("    void foo();\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("TestEnum.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package pack;\n");
+		buf.append("enum TestEnum implements IA {\n");
+		buf.append("    test1,test2;\n");
+		buf.append("\n");
+		buf.append("    public void foo() {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		buf.append("interface IA {\n");
+		buf.append("    void foo();\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
 	
 	public void testUnitializedVariable() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
