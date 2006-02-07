@@ -39,7 +39,8 @@ public class NewLinesTabPage extends ModifyDialogTabPage {
 	"enum MyEnum {" + //$NON-NLS-1$
 	"    UNDEFINED(0) { }" + //$NON-NLS-1$
 	"}" + //$NON-NLS-1$
-	"enum EmptyEnum { }";//$NON-NLS-1$
+	"enum EmptyEnum { }" +//$NON-NLS-1$
+	"@interface EmptyAnnotation { }";//$NON-NLS-1$
 	
 
 	protected CheckboxPreference fThenStatementPref, fSimpleIfPref;
@@ -58,7 +59,8 @@ public class NewLinesTabPage extends ModifyDialogTabPage {
 		createPref(newlinesGroup, numColumns, FormatterMessages.NewLinesTabPage_newlines_group_option_empty_method_body, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_METHOD_BODY, DO_NOT_INSERT_INSERT); 
 		createPref(newlinesGroup, numColumns, FormatterMessages.NewLinesTabPage_newlines_group_option_empty_block, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_BLOCK, DO_NOT_INSERT_INSERT); 
 		createPref(newlinesGroup, numColumns, FormatterMessages.NewLinesTabPage_newlines_group_option_empty_enum_declaration, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_DECLARATION, DO_NOT_INSERT_INSERT); 
-		createPref(newlinesGroup, numColumns, FormatterMessages.NewLinesTabPage_newlines_group_option_empty_enum_constant, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_CONSTANT, DO_NOT_INSERT_INSERT); 
+		createPref(newlinesGroup, numColumns, FormatterMessages.NewLinesTabPage_newlines_group_option_empty_enum_constant, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ENUM_CONSTANT, DO_NOT_INSERT_INSERT);
+		createPref(newlinesGroup, numColumns, FormatterMessages.NewLinesTabPage_newlines_group_option_empty_annotation_decl_body, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_IN_EMPTY_ANNOTATION_DECLARATION, DO_NOT_INSERT_INSERT); 
 		createPref(newlinesGroup, numColumns, FormatterMessages.NewLinesTabPage_newlines_group_option_empty_end_of_file, DefaultCodeFormatterConstants.FORMATTER_INSERT_NEW_LINE_AT_END_OF_FILE_IF_MISSING, DO_NOT_INSERT_INSERT); 
 		
 		final Group arrayInitializerGroup= createGroup(numColumns, composite, FormatterMessages.NewLinesTabPage_arrayInitializer_group_title); 
