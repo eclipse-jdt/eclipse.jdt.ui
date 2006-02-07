@@ -462,6 +462,9 @@ public class Bindings {
 	 * @return the method binding representing the method
 	 */
 	public static IMethodBinding findOverriddenMethod(IMethodBinding overriding, boolean testVisibility) {
+		if (! overriding.isOverriding()) {
+			return null;
+		}
 		int modifiers= overriding.getModifiers();
 		if (Modifier.isPrivate(modifiers) || Modifier.isStatic(modifiers) || overriding.isConstructor()) {
 			return null;
