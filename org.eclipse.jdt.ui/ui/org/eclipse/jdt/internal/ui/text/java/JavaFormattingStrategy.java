@@ -58,18 +58,15 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 		final TypedPosition partition= (TypedPosition)fPartitions.removeFirst();
 
 		if (document != null && partition != null) {
+			Map partitioners= null;
 			try {
 
 				final TextEdit edit= CodeFormatterUtil.format2(CodeFormatter.K_COMPILATION_UNIT, document.get(), partition.getOffset(), partition.getLength(), 0, TextUtilities.getDefaultLineDelimiter(document), getPreferences());
 				if (edit != null) {
-					Map partitioners= null;
 					if (edit.getChildrenSize() > 20)
 						partitioners= TextUtilities.removeDocumentPartitioners(document);
 
 					edit.apply(document);
-
-					if (partitioners != null)
-						TextUtilities.addDocumentPartitioners(document, partitioners);
 				}
 
 			} catch (MalformedTreeException exception) {
@@ -77,6 +74,9 @@ public class JavaFormattingStrategy extends ContextBasedFormattingStrategy {
 			} catch (BadLocationException exception) {
 				// Can only happen on concurrent document modification - log and bail out
 				JavaPlugin.log(exception);
+			} finally {
+				if (partitioners != null)
+					TextUtilities.addDocumentPartitioners(document, partitioners);
 			}
 		}
  	}
