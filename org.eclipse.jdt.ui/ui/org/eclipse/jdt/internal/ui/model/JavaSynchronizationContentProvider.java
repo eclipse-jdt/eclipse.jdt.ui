@@ -258,7 +258,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 					try {
 						tree.accept(folder.getFullPath(), new IDiffVisitor() {
 
-							public final boolean visit(final IDiff diff) throws CoreException {
+							public final boolean visit(final IDiff diff) {
 								final IResource current= tree.getResource(diff);
 								if (current != null) {
 									final int kind= current.getType();
