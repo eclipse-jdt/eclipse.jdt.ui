@@ -40,4 +40,6 @@ public interface IJUnitHelpContextIds {
 	
 	// Dialogs
 	public static final String TEST_SELECTION_DIALOG= PREFIX + "test_selection_context"; //$NON-NLS-1$
+	public static final String RESULT_COMPARE_DIALOG= PREFIX + "result_compare_context"; //$NON-NLS-1$
+
 }

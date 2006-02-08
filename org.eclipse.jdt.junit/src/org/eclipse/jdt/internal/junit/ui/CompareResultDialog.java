@@ -14,15 +14,20 @@ import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 
-import org.eclipse.compare.CompareConfiguration;
-import org.eclipse.compare.CompareViewerPane;
-import org.eclipse.compare.IEncodedStreamContentAccessor;
-import org.eclipse.compare.ITypedElement;
-import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
-import org.eclipse.compare.structuremergeviewer.DiffNode;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.jface.dialogs.Dialog;
-import org.eclipse.jface.dialogs.DialogSettings;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.StyleRange;
+import org.eclipse.swt.events.DisposeEvent;
+import org.eclipse.swt.events.DisposeListener;
+import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.dialogs.TrayDialog;
@@ -42,27 +47,27 @@ import org.eclipse.jface.text.presentation.PresentationReconciler;
 import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.text.source.SourceViewerConfiguration;
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.custom.StyleRange;
-import org.eclipse.swt.events.ControlEvent;
-import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.DisposeEvent;
-import org.eclipse.swt.events.DisposeListener;
-import org.eclipse.swt.graphics.Image;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
+
+import org.eclipse.ui.PlatformUI;
+
+import org.eclipse.compare.CompareConfiguration;
+import org.eclipse.compare.CompareViewerPane;
+import org.eclipse.compare.IEncodedStreamContentAccessor;
+import org.eclipse.compare.ITypedElement;
+import org.eclipse.compare.contentmergeviewer.TextMergeViewer;
+import org.eclipse.compare.structuremergeviewer.DiffNode;
 
 public class CompareResultDialog extends TrayDialog {
     private static class CompareResultMergeViewer extends TextMergeViewer {
          private CompareResultMergeViewer(Composite parent, int style, CompareConfiguration configuration) {
              super(parent, style, configuration);
          }
+         
+     	protected void createControls(Composite composite) {
+     		super.createControls(composite);
+    		PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJUnitHelpContextIds.RESULT_COMPARE_DIALOG);
+     	}
+         
         protected void configureTextViewer(TextViewer textViewer) {
             if (textViewer instanceof SourceViewer) {
                 ((SourceViewer)textViewer).configure(new CompareResultViewerConfiguration());   
@@ -136,15 +141,6 @@ public class CompareResultDialog extends TrayDialog {
     
     private int fPrefix;
     private int fSuffix;
-    
-    // dialog store id constants
-    private final static String DIALOG_BOUNDS_KEY= "CompareResultDialogBounds"; //$NON-NLS-1$
-    private static final String X= "x"; //$NON-NLS-1$
-    private static final String Y= "y"; //$NON-NLS-1$
-    private static final String WIDTH= "width"; //$NON-NLS-1$
-    private static final String HEIGHT= "height"; //$NON-NLS-1$
-    private IDialogSettings fSettings;
-	protected Rectangle fNewBounds;
 	
 	public CompareResultDialog(Shell parentShell, TestRunInfo failure) {
 		super(parentShell);
@@ -154,81 +150,15 @@ public class CompareResultDialog extends TrayDialog {
         fExpected= failure.getExpected();
         fActual= failure.getActual();
         computePrefixSuffix();
-        fSettings= JUnitPlugin.getDefault().getDialogSettings();
 	}
 	
-	protected Point getInitialSize() {
-		int width= 0;
-		int height= 0;
+	/* (non-Javadoc)
+	 * @see org.eclipse.jface.dialogs.Dialog#getDialogBoundsSettings()
+	 */
+	protected IDialogSettings getDialogBoundsSettings() {
+		return JUnitPlugin.getDefault().getDialogSettingsSection(getClass().getName());
+	}
 		
-		final Shell s= getShell();
-		if (s != null) {
-			s.addControlListener(
-					new ControlListener() {
-						public void controlMoved(ControlEvent arg) {
-							fNewBounds= s.getBounds();
-						}
-						public void controlResized(ControlEvent arg) {
-							fNewBounds= s.getBounds();
-						}
-					}
-			);
-		}
-		IDialogSettings bounds= fSettings.getSection(DIALOG_BOUNDS_KEY); 
-		if (bounds == null) {
-			return super.getInitialSize();
-		}
-		else {
-			try {
-				width= bounds.getInt(WIDTH);
-			} catch (NumberFormatException e) {
-				width= 400;
-			}
-			try {
-				height= bounds.getInt(HEIGHT);
-			} catch (NumberFormatException e) {
-				height= 300;
-			}
-		}	
-		return new Point(width, height);	
-	}
-	
-	protected Point getInitialLocation(Point initialSize) {
-		Point loc= super.getInitialLocation(initialSize);
-		
-		IDialogSettings bounds= fSettings.getSection(DIALOG_BOUNDS_KEY);
-		if (bounds != null) {
-			try {
-				loc.x= bounds.getInt(X);
-			} catch (NumberFormatException e) {
-			}
-			try {
-				loc.y= bounds.getInt(Y);
-			} catch (NumberFormatException e) {
-			}
-		}
-		return loc;
-	}
-	
-	public boolean close() {
-		boolean closed= super.close();
-		if (closed && fNewBounds != null)
-			saveBounds(fNewBounds);
-		return closed;
-	}
-
-	private void saveBounds(Rectangle bounds) {
-		IDialogSettings dialogBounds= fSettings.getSection(DIALOG_BOUNDS_KEY);
-		if (dialogBounds == null) {
-			dialogBounds= new DialogSettings(DIALOG_BOUNDS_KEY);
-			fSettings.addSection(dialogBounds);
-		}
-		dialogBounds.put(X, bounds.x);
-		dialogBounds.put(Y, bounds.y);
-		dialogBounds.put(WIDTH, bounds.width);
-		dialogBounds.put(HEIGHT, bounds.height);
-	}
-	
 	private void computePrefixSuffix() {
 		int end= Math.min(fExpected.length(), fActual.length());
 		int i= 0;
@@ -250,7 +180,8 @@ public class CompareResultDialog extends TrayDialog {
 
     protected void configureShell(Shell newShell) {
 		super.configureShell(newShell);
-		newShell.setText(JUnitMessages.CompareResultDialog_title); 
+		newShell.setText(JUnitMessages.CompareResultDialog_title);
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(newShell, IJUnitHelpContextIds.RESULT_COMPARE_DIALOG);
 	}
 
 	protected void createButtonsForButtonBar(Composite parent) {
