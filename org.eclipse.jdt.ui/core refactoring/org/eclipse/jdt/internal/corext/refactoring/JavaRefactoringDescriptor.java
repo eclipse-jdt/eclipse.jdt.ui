@@ -103,11 +103,4 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	public final Map getArguments() {
 		return fArguments;
 	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public String getNewName() {
-		return (String) fArguments.get(JavaRefactoringDescriptor.NAME);
-	}
 }

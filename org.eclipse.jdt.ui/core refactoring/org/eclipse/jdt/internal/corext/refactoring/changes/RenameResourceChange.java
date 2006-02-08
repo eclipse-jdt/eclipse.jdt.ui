@@ -128,10 +128,7 @@ public class RenameResourceChange extends JDTChange {
 		final Map arguments= new HashMap();
 		arguments.put(JavaRefactoringDescriptor.INPUT, fResourcePath.toPortableString());
 		arguments.put(JavaRefactoringDescriptor.NAME, fNewName);
-		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE;
-		if (getResource().getType() == IResource.PROJECT)
-			flags|= RefactoringDescriptor.PROJECT_CHANGE;
-		return new JavaRefactoringDescriptor(ID_RENAME_RESOURCE, getResource().getProject().getName(), Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { getResource().getFullPath().toString(), fNewName}), fComment, arguments, flags);
+		return new JavaRefactoringDescriptor(ID_RENAME_RESOURCE, getResource().getProject().getName(), Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { getResource().getFullPath().toString(), fNewName}), fComment, arguments, (RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE));
 	}
 
 	public String getNewName() {
