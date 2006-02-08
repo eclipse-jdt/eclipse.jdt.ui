@@ -159,19 +159,22 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			list.add(children[index]);
 //		final IResource resource= JavaModelProvider.getResource(parent);
 //		if (resource != null) {
-//			final IResource[] members= context.getDiffTree().members(resource);
+//			final IResourceDiffTree tree= context.getDiffTree();
+//			final IResource[] members= tree.members(resource);
 //			for (int index= 0; index < members.length; index++) {
 //				final int type= members[index].getType();
-//				if (type == IResource.FOLDER && isInScope(context.getScope(), parent, members[index])) {
-//					final String name= members[index].getName();
-//					if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
-//						list.remove(members[index]);
-//						list.addFirst(new JavaProjectSettings((IJavaProject) parent));
-//					} else if (name.equals(NAME_REFACTORING_FOLDER)) {
-//						final RefactoringHistory history= getRefactorings(context, (IProject) resource, null);
-//						if (!history.isEmpty()) {
+//				if (type == IResource.FOLDER) {
+//					if (isInScope(context.getScope(), parent, members[index])) {
+//						final String name= members[index].getName();
+//						if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
 //							list.remove(members[index]);
-//							list.addFirst(history);
+//							list.addFirst(new JavaProjectSettings((IJavaProject) parent));
+//						} else if (name.equals(NAME_REFACTORING_FOLDER)) {
+//							final RefactoringHistory history= getRefactorings(context, (IProject) resource, null);
+//							if (!history.isEmpty()) {
+//								list.remove(members[index]);
+//								list.addFirst(history);
+//							}
 //						}
 //					}
 //				}
@@ -216,11 +219,16 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			final IResourceDiffTree tree= context.getDiffTree();
 			final IResource[] members= tree.members(resource);
 			for (int index= 0; index < members.length; index++) {
-				final IDiff diff= tree.getDiff(members[index]);
-				if (diff != null) {
-					final int type= members[index].getType();
-					if (type == IResource.FILE && isInScope(context.getScope(), parent, members[index]))
-						set.add(JavaCore.create(members[index]));
+				final int type= members[index].getType();
+				if (type == IResource.FILE) {
+					final IDiff diff= tree.getDiff(members[index]);
+					if (diff != null && isVisible(diff)) {
+						if (isInScope(context.getScope(), parent, members[index])) {
+							final IJavaElement element= JavaCore.create(members[index]);
+							if (element != null)
+								set.add(element);
+						}
+					}
 				}
 			}
 		}
@@ -249,23 +257,36 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			for (int index= 0; index < members.length; index++) {
 				final int type= members[index].getType();
 				final boolean contained= isInScope(context.getScope(), parent, members[index]);
-				if (type == IResource.FILE && contained)
-					set.add(JavaCore.create((IFile) members[index]));
-				else if (type == IResource.FOLDER && contained)
-					set.add(JavaCore.create(members[index]));
+				final boolean visible= isVisible(context, members[index]);
+				if (type == IResource.FILE && contained && visible) {
+					final IJavaElement element= JavaCore.create((IFile) members[index]);
+					if (element != null)
+						set.add(element);
+				} else if (type == IResource.FOLDER && contained && visible) {
+					final IJavaElement element= JavaCore.create(members[index]);
+					if (element != null)
+						set.add(element);
+				}
 				if (type == IResource.FOLDER) {
 					final IFolder folder= (IFolder) members[index];
 					try {
 						tree.accept(folder.getFullPath(), new IDiffVisitor() {
 
 							public final boolean visit(final IDiff diff) {
-								final IResource current= tree.getResource(diff);
-								if (current != null) {
-									final int kind= current.getType();
-									if (kind == IResource.FILE)
-										set.add(JavaCore.create(current.getParent()));
-									else
-										set.add(JavaCore.create(current));
+								if (isVisible(diff)) {
+									final IResource current= tree.getResource(diff);
+									if (current != null) {
+										final int kind= current.getType();
+										if (kind == IResource.FILE) {
+											final IJavaElement element= JavaCore.create(current.getParent());
+											if (element != null)
+												set.add(element);
+										} else {
+											final IJavaElement element= JavaCore.create(current);
+											if (element != null)
+												set.add(element);
+										}
+									}
 								}
 								return true;
 							}
@@ -300,11 +321,13 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			final IResourceDiffTree tree= context.getDiffTree();
 			final IResource[] members= tree.members(resource);
 			for (int index= 0; index < members.length; index++) {
-				final IDiff diff= tree.getDiff(members[index]);
-				if (diff != null) {
-					final int type= members[index].getType();
-					if (type == IResource.FILE && isInScope(context.getScope(), parent, members[index]))
-						set.add(members[index]);
+				final int type= members[index].getType();
+				if (type == IResource.FILE) {
+					final IDiff diff= tree.getDiff(members[index]);
+					if (diff != null && isVisible(diff)) {
+						if (isInScope(context.getScope(), parent, members[index]))
+							set.add(members[index]);
+					}
 				}
 			}
 		}
