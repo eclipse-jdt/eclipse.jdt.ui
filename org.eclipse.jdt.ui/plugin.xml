@@ -4757,102 +4757,102 @@
    </extension>
 
    <extension
-         point="org.eclipse.ltk.core.refactoring.refactoringCreators">
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameResourceRefactoringInstanceCreator"
+         point="org.eclipse.ltk.core.refactoring.refactoringContributions">
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameResourceRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.resource"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameCompilationUnitRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameCompilationUnitRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.compilationunit"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameEnumConstRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameEnumConstRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.enum.constant"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameFieldRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameFieldRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.field"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameJavaProjectRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameJavaProjectRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.java.project"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameLocalVariableRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameLocalVariableRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.local.variable"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameMethodRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameMethodRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.method"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenamePackageRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenamePackageRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.package"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameSourceFolderRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameSourceFolderRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.source.folder"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeParameterRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeParameterRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.type.parameter"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.RenameTypeRefactoringContribution"
             id="org.eclipse.jdt.ui.rename.type"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.ChangeMethodSignatureRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.ChangeMethodSignatureRefactoringContribution"
             id="org.eclipse.jdt.ui.change.method.signature"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.MoveMethodRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.MoveMethodRefactoringContribution"
             id="org.eclipse.jdt.ui.move.method"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.MoveStaticMembersRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.MoveStaticMembersRefactoringContribution"
             id="org.eclipse.jdt.ui.move.static"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractInterfaceRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractInterfaceRefactoringContribution"
             id="org.eclipse.jdt.ui.extract.interface"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.UseSupertypeRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.UseSupertypeRefactoringContribution"
             id="org.eclipse.jdt.ui.use.supertype"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.PullUpRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.PullUpRefactoringContribution"
             id="org.eclipse.jdt.ui.pull.up"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.PushDownRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.PushDownRefactoringContribution"
             id="org.eclipse.jdt.ui.push.down"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.ConvertAnonymousRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.ConvertAnonymousRefactoringContribution"
             id="org.eclipse.jdt.ui.convert.anonymous"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.MoveMemberTypeRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.MoveMemberTypeRefactoringContribution"
             id="org.eclipse.jdt.ui.move.inner"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.InlineMethodRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.InlineMethodRefactoringContribution"
             id="org.eclipse.jdt.ui.inline.method"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.InlineTempRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.InlineTempRefactoringContribution"
             id="org.eclipse.jdt.ui.inline.temp"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.InlineConstantRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.InlineConstantRefactoringContribution"
             id="org.eclipse.jdt.ui.inline.constant"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractMethodRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractMethodRefactoringContribution"
             id="org.eclipse.jdt.ui.extract.method"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractTempRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractTempRefactoringContribution"
             id="org.eclipse.jdt.ui.extract.temp"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractConstantRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.ExtractConstantRefactoringContribution"
             id="org.eclipse.jdt.ui.extract.constant"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceParameterRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceParameterRefactoringContribution"
             id="org.eclipse.jdt.ui.introduce.parameter"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceFactoryRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceFactoryRefactoringContribution"
             id="org.eclipse.jdt.ui.introduce.factory"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceIndirectionRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.IntroduceIndirectionRefactoringContribution"
             id="org.eclipse.jdt.ui.introduce.indirection"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.PromoteTempToFieldRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.PromoteTempToFieldRefactoringContribution"
             id="org.eclipse.jdt.ui.promote.temp"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.SelfEncapsulateRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.SelfEncapsulateRefactoringContribution"
             id="org.eclipse.jdt.ui.self.encapsulate"/>
-      <creator
-            class="org.eclipse.jdt.internal.corext.refactoring.scripting.InferTypeArgumentsRefactoringInstanceCreator"
+      <contribution
+            class="org.eclipse.jdt.internal.corext.refactoring.scripting.InferTypeArgumentsRefactoringContribution"
             id="org.eclipse.jdt.ui.infer.typearguments"/>
    </extension>
 
@@ -4959,7 +4959,7 @@
             adaptableType="org.eclipse.jdt.internal.ui.model.JavaModelProvider"
             class="org.eclipse.jdt.internal.ui.model.JavaModelAdapterFactory">
          <adapter type="org.eclipse.team.core.mapping.IResourceMappingMerger"/>
-         <adapter type="org.eclipse.team.ui.mapping.ICompareAdapter"/>
+         <adapter type="org.eclipse.team.ui.mapping.ISynchronizationCompareAdapter"/>
       </factory>
       <factory
             adaptableType="org.eclipse.ltk.core.refactoring.history.RefactoringHistory"
@@ -5014,7 +5014,7 @@
                <instanceof value="org.eclipse.ltk.core.refactoring.history.RefactoringHistory"/>
                <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy"/>
                <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptor"/>
-               <instanceof value="org.eclipse.team.core.mapping.IResourceMappingScope"/>
+               <instanceof value="org.eclipse.team.core.mapping.ISynchronizationScope"/>
                <instanceof value="org.eclipse.team.core.mapping.ISynchronizationContext"/>
             </or>
          </enablement>

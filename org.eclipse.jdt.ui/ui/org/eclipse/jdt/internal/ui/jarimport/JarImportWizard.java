@@ -49,7 +49,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
-import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryControlConfiguration;
 
@@ -60,6 +59,8 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -280,19 +281,19 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 		final RefactoringStatus status= new RefactoringStatus();
 		if (refactoring instanceof IInitializableRefactoringComponent) {
 			final IInitializableRefactoringComponent component= (IInitializableRefactoringComponent) refactoring;
-			final RefactoringArguments arguments= RefactoringCore.getRefactoringInstanceCreator().createArguments(descriptor);
-			if (arguments instanceof GenericRefactoringArguments) {
-				final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
-				String value= generic.getAttribute(RefactoringDescriptor.INPUT);
+			final RefactoringArguments arguments= RefactoringCore.getRefactoringContributionManager().createArguments(descriptor);
+			if (arguments instanceof JavaRefactoringArguments) {
+				final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
+				String value= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
 				if (value != null && !"".equals(value)) //$NON-NLS-1$
-					generic.setAttribute(RefactoringDescriptor.INPUT, getTransformedInputValue(value));
+					generic.setAttribute(JavaRefactoringDescriptor.INPUT, getTransformedInputValue(value));
 				int count= 1;
-				String attribute= RefactoringDescriptor.ELEMENT + count;
+				String attribute= JavaRefactoringDescriptor.ELEMENT + count;
 				while ((value= generic.getAttribute(attribute)) != null) {
 					if (!"".equals(value)) //$NON-NLS-1$
 						generic.setAttribute(attribute, getTransformedInputValue(value));
 					count++;
-					attribute= RefactoringDescriptor.ELEMENT + count;
+					attribute= JavaRefactoringDescriptor.ELEMENT + count;
 				}
 				status.merge(component.initialize(generic));
 			} else

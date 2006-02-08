@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.binary.StubCreationOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -301,10 +302,10 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 	 * executed. The refactoring itself is in an uninitialized state at the time
 	 * of the method call. This implementation initializes the refactoring based
 	 * on the refactoring arguments stored in the descriptor. All handles
-	 * provided in the {@link RefactoringDescriptor#INPUT} or
-	 * {@link RefactoringDescriptor#ELEMENT} attributes are converted to match
-	 * the project layout of the client. This method may be called from non-UI
-	 * threads.
+	 * provided in the {@link JavaRefactoringDescriptor#INPUT} or
+	 * {@link JavaRefactoringDescriptor#ELEMENT} attributes are converted to
+	 * match the project layout of the client. This method may be called from
+	 * non-UI threads.
 	 * <p>
 	 * Subclasses may extend this method to perform any special processing.
 	 * </p>
@@ -325,14 +326,12 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 	 * {@inheritDoc}
 	 */
 	protected final RefactoringStatus aboutToPerformRefactoring(final Refactoring refactoring, final RefactoringDescriptor descriptor, final IProgressMonitor monitor) {
-		monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 120);
-		final RefactoringStatus status= super.aboutToPerformRefactoring(refactoring, descriptor, new SubProgressMonitor(monitor, 20, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
+		monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 100);
+		final RefactoringStatus status= new RefactoringStatus();
 		try {
-			if (!status.hasFatalError()) {
-				status.merge(createTypeStubs(refactoring, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
-				if (!status.hasFatalError())
-					status.merge(aboutToPerformRefactoring(refactoring, descriptor));
-			}
+			status.merge(createTypeStubs(refactoring, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
+			if (!status.hasFatalError())
+				status.merge(aboutToPerformRefactoring(refactoring, descriptor));
 		} finally {
 			monitor.done();
 		}
