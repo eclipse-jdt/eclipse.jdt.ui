@@ -57,7 +57,7 @@ public abstract class JavaRefactoringContribution extends RefactoringContributio
 	/**
 	 * {@inheritDoc}
 	 */
-	public final Map getArguments(final RefactoringDescriptor descriptor) {
+	public final Map retrieveArguments(final RefactoringDescriptor descriptor) {
 		Assert.isNotNull(descriptor);
 		if (descriptor instanceof JavaRefactoringDescriptor)
 			return ((JavaRefactoringDescriptor) descriptor).getArguments();
