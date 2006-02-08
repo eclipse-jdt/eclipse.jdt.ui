@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 
 import java.util.ArrayList;
 
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.core.resources.IStorage;
@@ -19,7 +20,6 @@ import org.eclipse.core.resources.IStorage;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.util.SafeRunnable;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.ILabelDecorator;
@@ -31,7 +31,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 
 public class JavaUILabelProvider implements ILabelProvider, IColorProvider {
 	
-	protected ListenerList fListeners = new ListenerList(1);
+	protected ListenerList fListeners = new ListenerList();
 	
 	protected JavaElementImageProvider fImageLabelProvider;
 	protected StorageLabelProvider fStorageLabelProvider;

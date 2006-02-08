@@ -10,13 +10,14 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.typehierarchy;
 
+import org.eclipse.core.runtime.ListenerList;
+
 import org.eclipse.swt.events.FocusEvent;
 import org.eclipse.swt.events.FocusListener;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Widget;
 
 import org.eclipse.jface.util.Assert;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.IPostSelectionProvider;
 import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.ISelectionChangedListener;
@@ -26,7 +27,7 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.StructuredViewer;
 
 /**
- * A selection provider for viewparts with more that one viewer.
+ * A selection provider for view parts with more that one viewer.
  * Tracks the focus of the viewers to provide the correct selection.
  */
 public class SelectionProviderMediator implements IPostSelectionProvider {
@@ -50,7 +51,7 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	     * @see FocusListener#focusLost
 	     */
 	    public void focusLost(FocusEvent e) {
-	    	// do not reset due to focus behaviour on GTK
+	    	// do not reset due to focus behavior on GTK
 	    	//fViewerInFocus= null;
 	    }
 	}
@@ -76,8 +77,8 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 		Assert.isNotNull(viewers);
 		fViewers= viewers;
 		InternalListener listener= new InternalListener();
-		fSelectionChangedListeners= new ListenerList(4);
-		fPostSelectionChangedListeners= new ListenerList(4);
+		fSelectionChangedListeners= new ListenerList();
+		fPostSelectionChangedListeners= new ListenerList();
 		fViewerInFocus= viewerInFocus;	
 
 		for (int i= 0; i < fViewers.length; i++) {
@@ -113,7 +114,7 @@ public class SelectionProviderMediator implements IPostSelectionProvider {
 	}
 	
 	final void propagateFocusChanged(StructuredViewer viewer) {
-		if (viewer != fViewerInFocus) { // Ok to compare by idendity
+		if (viewer != fViewerInFocus) { // OK to compare by identity
 			fViewerInFocus= viewer;
 			fireSelectionChanged();
 			firePostSelectionChanged();
