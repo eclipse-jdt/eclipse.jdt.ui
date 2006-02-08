@@ -19,6 +19,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
+import java.util.regex.Pattern;
 
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -88,6 +89,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
 public class StubUtility {
 	
 			
+	private static final String VALUE_OF_SEMICOLON= String.valueOf(';');
+	private static final Pattern SEMICOLON_PATTERN= Pattern.compile(VALUE_OF_SEMICOLON);
+
 	private static final String[] EMPTY= new String[0];
 	
 	private static final Set VALID_TYPE_BODY_TEMPLATES;
@@ -1007,7 +1011,7 @@ public class StubUtility {
 	private static ImportRewrite configureImportRewrite(ImportRewrite rewrite) {
 		IJavaProject project= rewrite.getCompilationUnit().getJavaProject();
 		String order= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IMPORTORDER, project);
-		rewrite.setImportOrder(order.split(String.valueOf(';')));
+		rewrite.setImportOrder(SEMICOLON_PATTERN.split(order, 0));
 
 		String thres= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, project);
 		try {

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -288,7 +289,7 @@ public class ScopeAnalyzer {
 			ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(selector);
 			if (parentTypeBinding != null) {			
 				ITypeBinding binding= getQualifier(selector);
-				if (binding == null && parentTypeBinding != null) {
+				if (binding == null) {
 					addLocalDeclarations(selector, flags);
 					addTypeDeclarations(parentTypeBinding, flags);
 				} else {
@@ -305,6 +306,61 @@ public class ScopeAnalyzer {
 		}
 	}		
 	
+	public boolean isDeclaredInScope(IBinding declaration, SimpleName selector, int flags) {
+		try {
+			// special case for switch on enum
+			if (selector.getLocationInParent() == SwitchCase.EXPRESSION_PROPERTY) {
+				ITypeBinding binding= ((SwitchStatement) selector.getParent().getParent()).getExpression().resolveTypeBinding();
+				if (binding != null && binding.isEnum()) {
+					return hasEnumContants(declaration, binding);
+				}
+			}
+			
+			ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(selector);
+			if (parentTypeBinding != null) {			
+				ITypeBinding binding= getQualifier(selector);
+				if (binding == null) {
+					addLocalDeclarations(selector, flags);
+					if (hasFlag(CHECK_VISIBILITY, flags)) {
+						filterNonVisible(parentTypeBinding);
+					}
+					for (Iterator iter= fRequestor.iterator(); iter.hasNext();) {
+						IBinding element= (IBinding)iter.next();
+						if (hasFlag(METHODS, flags)) {
+							if (((IMethodBinding)element).getMethodDeclaration() == declaration)
+								return true;
+						} else {
+							if (element == declaration)
+								return true;
+						}
+					}
+					fRequestor.clear();
+					addTypeDeclarations(parentTypeBinding, flags);
+				} else {
+					addInherited(binding, flags);
+				}
+				
+
+				if (hasFlag(CHECK_VISIBILITY, flags)) {
+					filterNonVisible(parentTypeBinding);
+				}
+				for (Iterator iter= fRequestor.iterator(); iter.hasNext();) {
+					IBinding element= (IBinding)iter.next();
+					if (hasFlag(METHODS, flags)) {
+						if (((IMethodBinding)element).getMethodDeclaration() == declaration)
+							return true;
+					} else {
+						if (element == declaration)
+							return true;
+					}
+				}
+			}
+			return false;
+		} finally {
+			clearLists();			
+		}
+	}
+	
 	private IVariableBinding[] getEnumContants(ITypeBinding binding) {
 		IVariableBinding[] declaredFields= binding.getDeclaredFields();
 		ArrayList res= new ArrayList(declaredFields.length);
@@ -315,6 +371,16 @@ public class ScopeAnalyzer {
 			}
 		}
 		return (IVariableBinding[]) res.toArray(new IVariableBinding[res.size()]);
+	}
+	
+	private boolean hasEnumContants(IBinding declaration, ITypeBinding binding) {
+		IVariableBinding[] declaredFields= binding.getDeclaredFields();
+		for (int i= 0; i < declaredFields.length; i++) {
+			IVariableBinding curr= declaredFields[i];
+			if (curr == declaration)
+				return true;
+		}
+		return false;
 	}
 
 	public IBinding[] getDeclarationsInScope(int offset, int flags) {

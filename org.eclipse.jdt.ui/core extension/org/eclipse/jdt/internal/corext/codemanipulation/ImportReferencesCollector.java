@@ -93,7 +93,8 @@ public class ImportReferencesCollector extends GenericVisitor {
 			return true;
 		}
 		int nodeStart= node.getStartPosition();
-		return nodeStart + node.getLength() > fSubRange.getOffset() && (fSubRange.getOffset() + fSubRange.getLength()) >  nodeStart;
+		int offset= fSubRange.getOffset();
+		return nodeStart + node.getLength() > offset && (offset + fSubRange.getLength()) >  nodeStart;
 	}
 	
 	
@@ -147,12 +148,8 @@ public class ImportReferencesCollector extends GenericVisitor {
 			if (varBinding.isField()) {
 				ITypeBinding declaringClass= varBinding.getDeclaringClass();
 				if (declaringClass != null && !declaringClass.isLocal()) {
-					IBinding[] declarationsInScope= new ScopeAnalyzer(getASTRoot(name)).getDeclarationsInScope(name.getStartPosition(), ScopeAnalyzer.VARIABLES);
-					for (int i= 0; i < declarationsInScope.length; i++) {
-						if (declarationsInScope[i] == binding) {
+					if (new ScopeAnalyzer(getASTRoot(name)).isDeclaredInScope(binding, (SimpleName)name, ScopeAnalyzer.VARIABLES))
 							return;
-						}
-					}
 					fStaticImports.add(name);
 				}
 			}
@@ -160,13 +157,8 @@ public class ImportReferencesCollector extends GenericVisitor {
 			IMethodBinding methodBinding= ((IMethodBinding) binding).getMethodDeclaration();
 			ITypeBinding declaringClass= methodBinding.getDeclaringClass();
 			if (declaringClass != null && !declaringClass.isLocal()) {
-				IBinding[] declarationsInScope= new ScopeAnalyzer(getASTRoot(name)).getDeclarationsInScope(name.getStartPosition(), ScopeAnalyzer.METHODS);
-				for (int i= 0; i < declarationsInScope.length; i++) {
-					IMethodBinding curr= (IMethodBinding) declarationsInScope[i];
-					if (curr.getMethodDeclaration() == methodBinding) {
+				if (new ScopeAnalyzer(getASTRoot(name)).isDeclaredInScope(methodBinding, (SimpleName)name, ScopeAnalyzer.METHODS))
 						return;
-					}
-				}
 				fStaticImports.add(name);
 			}
 		}
