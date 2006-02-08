@@ -285,7 +285,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					return (IMarker[])result.toArray(new IMarker[result.size()]);
 				}
 			}
-			return super.findOtherMarkers(markers);
+			return new IMarker[0];
 		}
 		
 		private IProblemLocation getProblemLocation(IMarker marker, ICompilationUnit cu) {
