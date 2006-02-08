@@ -18,7 +18,7 @@ import org.eclipse.core.resources.mapping.ResourceMapping;
 
 import org.eclipse.team.core.mapping.IResourceMappingMerger;
 
-import org.eclipse.team.ui.mapping.ICompareAdapter;
+import org.eclipse.team.ui.mapping.ISynchronizationCompareAdapter;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 
@@ -36,7 +36,7 @@ public final class JavaModelAdapterFactory implements IAdapterFactory {
 		if (adaptable instanceof JavaModelProvider) {
 			if (adapter == IResourceMappingMerger.class)
 				return new JavaModelMerger((ModelProvider) adaptable);
-			else if (adapter == ICompareAdapter.class)
+			else if (adapter == ISynchronizationCompareAdapter.class)
 				return new JavaCompareAdapter();
 		} else if (adaptable instanceof RefactoringHistory) {
 			if (adapter == ResourceMapping.class)
@@ -59,6 +59,6 @@ public final class JavaModelAdapterFactory implements IAdapterFactory {
 	 * {@inheritDoc}
 	 */
 	public Class[] getAdapterList() {
-		return new Class[] { IResourceMappingMerger.class, ResourceMapping.class, ICompareAdapter.class, IResource.class};
+		return new Class[] { IResourceMappingMerger.class, ResourceMapping.class, ISynchronizationCompareAdapter.class, IResource.class};
 	}
 }

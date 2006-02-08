@@ -322,7 +322,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 * Returns whether the element has some children in the current scope.
 	 * 
 	 * @param scope
-	 *            the resource mapping scope
+	 *            the synchronization scope
 	 * @param element
 	 *            the element
 	 * @param resource
