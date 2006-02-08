@@ -25,6 +25,8 @@ import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.DialogSettings;
 import org.eclipse.jface.dialogs.IDialogConstants;
 import org.eclipse.jface.dialogs.IDialogSettings;
+import org.eclipse.jface.dialogs.TrayDialog;
+
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
@@ -56,7 +58,7 @@ import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-public class CompareResultDialog extends Dialog {
+public class CompareResultDialog extends TrayDialog {
     private static class CompareResultMergeViewer extends TextMergeViewer {
          private CompareResultMergeViewer(Composite parent, int style, CompareConfiguration configuration) {
              super(parent, style, configuration);
