@@ -76,6 +76,8 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 
 	public static class CorrectionMarkerResolution extends WorkbenchMarkerResolution {
 
+		private static final IMarker[] NO_MARKERS= new IMarker[0];
+
 		private ICompilationUnit fCompilationUnit;
 		private int fOffset;
 		private int fLength;
@@ -237,8 +239,8 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					monitor.worked(1);
 				}
 
-				cleanUp.endCleanUp();	
 			}
+			cleanUp.endCleanUp();	
 		}
 
 		/* (non-Javadoc)
@@ -285,7 +287,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 					return (IMarker[])result.toArray(new IMarker[result.size()]);
 				}
 			}
-			return new IMarker[0];
+			return NO_MARKERS;
 		}
 		
 		private IProblemLocation getProblemLocation(IMarker marker, ICompilationUnit cu) {
