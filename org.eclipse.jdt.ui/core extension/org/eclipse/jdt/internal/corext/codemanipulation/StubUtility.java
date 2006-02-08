@@ -88,9 +88,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
 
 public class StubUtility {
 	
-			
-	private static final String VALUE_OF_SEMICOLON= String.valueOf(';');
-	private static final Pattern SEMICOLON_PATTERN= Pattern.compile(VALUE_OF_SEMICOLON);
+	private static final Pattern SEMICOLON_PATTERN= Pattern.compile(";"); //$NON-NLS-1$
 
 	private static final String[] EMPTY= new String[0];
 	
