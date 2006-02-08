@@ -41,7 +41,6 @@ public abstract class ResizableDialog extends TrayDialog {
 	private Rectangle fNewBounds;
 	private IDialogSettings fSettings;
 
-
 	public ResizableDialog(Shell parent, ResourceBundle bundle) {
 		super(parent);
 		setShellStyle(getShellStyle() | SWT.RESIZE  | SWT.MAX);
