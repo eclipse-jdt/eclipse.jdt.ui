@@ -384,7 +384,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 
 		// Add JLS3 rule for /@\s*interface/ and /@\s*\w+/
 		token= getToken(ANNOTATION_COLOR_KEY);
-		AnnotationRule atInterfaceRule= new AnnotationRule(getToken(IJavaColorConstants.JAVA_KEYWORD), token, JavaCore.VERSION_1_5, version); //$NON-NLS-1$
+		AnnotationRule atInterfaceRule= new AnnotationRule(getToken(IJavaColorConstants.JAVA_KEYWORD), token, JavaCore.VERSION_1_5, version);
 		rules.add(atInterfaceRule);
 		fVersionDependentRules.add(atInterfaceRule);
 
