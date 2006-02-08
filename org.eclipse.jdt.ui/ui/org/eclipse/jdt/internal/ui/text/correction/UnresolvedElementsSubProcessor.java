@@ -415,7 +415,7 @@ public class UnresolvedElementsSubProcessor {
 					ITypeBinding varType= curr.getType();
 					if (varType != null) {
 						if (guessedType != null && guessedType != objectBinding) { // too many result with object
-							// var type is compatible with the guessed type
+							// variable type is compatible with the guessed type
 							if (!isWriteAccess && canAssign(varType, guessedType)
 									|| isWriteAccess && canAssign(guessedType, varType)) {
 								relevance += 2; // unresolved variable can be assign to this variable
@@ -513,7 +513,7 @@ public class UnresolvedElementsSubProcessor {
 
 		int kind= evauateTypeKind(selectedNode, cu.getJavaProject());
 
-		while (selectedNode.getParent() instanceof QualifiedName) {
+		while (selectedNode.getLocationInParent() == QualifiedName.NAME_PROPERTY) {
 			selectedNode= selectedNode.getParent();
 		}
 
@@ -535,6 +535,9 @@ public class UnresolvedElementsSubProcessor {
 		addSimilarTypeProposals(kind, cu, node, 3, proposals);
 
 		// add type
+		while (node.getParent() instanceof QualifiedName) {
+			node= (Name) node.getParent();
+		}
 		addNewTypeProposals(cu, node, kind, 0, proposals);
 	}
 

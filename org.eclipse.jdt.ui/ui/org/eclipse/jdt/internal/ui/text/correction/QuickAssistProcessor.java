@@ -800,9 +800,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		}
 	}
 
-	private boolean getRemoveBlockProposals(IInvocationContext context, ASTNode coveringNode, Collection resultingCollections) {
+	private static boolean getRemoveBlockProposals(IInvocationContext context, ASTNode coveringNode, Collection resultingCollections) {
 		IFix[] fixes= ControlStatementsFix.createRemoveBlockFix(context.getASTRoot(), coveringNode);
 		if (fixes != null) {
+			if (resultingCollections == null) {
+				return true;
+			}
 			ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS);
 			for (int i= 0; i < fixes.length; i++) {
 				IFix fix= fixes[i];
