@@ -16,7 +16,7 @@ import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
 
-import org.eclipse.ltk.core.refactoring.IRefactoringContribution;
+import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
@@ -25,12 +25,12 @@ import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
  * 
  * @since 3.2
  */
-public abstract class JavaRefactoringContribution implements IRefactoringContribution {
+public abstract class JavaRefactoringContribution extends RefactoringContribution {
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public RefactoringArguments createArguments(final RefactoringDescriptor descriptor) {
+	public final RefactoringArguments createArguments(final RefactoringDescriptor descriptor) {
 		Assert.isNotNull(descriptor);
 		final JavaRefactoringArguments arguments= new JavaRefactoringArguments();
 		if (descriptor instanceof JavaRefactoringDescriptor) {
@@ -50,14 +50,14 @@ public abstract class JavaRefactoringContribution implements IRefactoringContrib
 	/**
 	 * {@inheritDoc}
 	 */
-	public RefactoringDescriptor createDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
+	public final RefactoringDescriptor createDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
 		return new JavaRefactoringDescriptor(id, project, description, comment, arguments, flags);
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	public Map getArguments(final RefactoringDescriptor descriptor) {
+	public final Map getArguments(final RefactoringDescriptor descriptor) {
 		Assert.isNotNull(descriptor);
 		if (descriptor instanceof JavaRefactoringDescriptor)
 			return ((JavaRefactoringDescriptor) descriptor).getArguments();
