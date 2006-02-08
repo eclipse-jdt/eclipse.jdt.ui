@@ -115,22 +115,22 @@ public class MoveMembersWizard extends RefactoringWizard {
 			fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(composite, getRefactoring(), getMoveProcessor().getMembersToMove().length > 1);
 			GridData data= new GridData();
 			data.horizontalSpan= 2;
-			fLeaveDelegateCheckBox.setLayoutData(data);
-			fDeprecateDelegateCheckBox= new Button(composite, SWT.CHECK);
-			data= new GridData();
-			data.horizontalAlignment= GridData.FILL;
-			data.horizontalIndent= (layout.marginWidth + fDeprecateDelegateCheckBox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
-			data.horizontalSpan= 2;
-			fDeprecateDelegateCheckBox.setLayoutData(data);
-			fDeprecateDelegateCheckBox.setText(DelegateUIHelper.getDeprecateDelegateCheckBoxTitle());
-			fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(getMoveProcessor()));
-			getMoveProcessor().setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
-			fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
-				public void widgetSelected(SelectionEvent e) {
-					getMoveProcessor().setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
-				}
-			});
 			if (fLeaveDelegateCheckBox != null) {
+				fLeaveDelegateCheckBox.setLayoutData(data);
+				fDeprecateDelegateCheckBox= new Button(composite, SWT.CHECK);
+				data= new GridData();
+				data.horizontalAlignment= GridData.FILL;
+				data.horizontalIndent= (layout.marginWidth + fDeprecateDelegateCheckBox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
+				data.horizontalSpan= 2;
+				fDeprecateDelegateCheckBox.setLayoutData(data);
+				fDeprecateDelegateCheckBox.setText(DelegateUIHelper.getDeprecateDelegateCheckBoxTitle());
+				fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(getMoveProcessor()));
+				getMoveProcessor().setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+				fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+					public void widgetSelected(SelectionEvent e) {
+						getMoveProcessor().setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+					}
+				});
 				fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
 				fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
 					public void widgetSelected(SelectionEvent e) {

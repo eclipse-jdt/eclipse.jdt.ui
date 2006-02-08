@@ -96,22 +96,22 @@ public class ChangeSignatureWizard extends RefactoringWizard {
 
 				createParameterExceptionsFolder(composite);
 				fLeaveDelegateCheckBox= DelegateUIHelper.generateLeaveDelegateCheckbox(composite, getRefactoring(), false);
-				fDeprecateDelegateCheckBox= new Button(composite, SWT.CHECK);
-				GridData data= new GridData();
-				data.horizontalAlignment= GridData.FILL;
-				data.horizontalIndent= (layout.marginWidth + fDeprecateDelegateCheckBox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
-				data.horizontalSpan= 2;
-				fDeprecateDelegateCheckBox.setLayoutData(data);
-				fDeprecateDelegateCheckBox.setText(DelegateUIHelper.getDeprecateDelegateCheckBoxTitle());
-				final ChangeSignatureRefactoring refactoring= getChangeMethodSignatureRefactoring();
-				fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(refactoring));
-				refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
-				fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
-					public void widgetSelected(SelectionEvent e) {
-						refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
-					}
-				});
 				if (fLeaveDelegateCheckBox != null) {
+					fDeprecateDelegateCheckBox= new Button(composite, SWT.CHECK);
+					GridData data= new GridData();
+					data.horizontalAlignment= GridData.FILL;
+					data.horizontalIndent= (layout.marginWidth + fDeprecateDelegateCheckBox.computeSize(SWT.DEFAULT, SWT.DEFAULT).x);
+					data.horizontalSpan= 2;
+					fDeprecateDelegateCheckBox.setLayoutData(data);
+					fDeprecateDelegateCheckBox.setText(DelegateUIHelper.getDeprecateDelegateCheckBoxTitle());
+					final ChangeSignatureRefactoring refactoring= getChangeMethodSignatureRefactoring();
+					fDeprecateDelegateCheckBox.setSelection(DelegateUIHelper.loadDeprecateDelegateSetting(refactoring));
+					refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+					fDeprecateDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
+						public void widgetSelected(SelectionEvent e) {
+							refactoring.setDeprecateDelegates(fDeprecateDelegateCheckBox.getSelection());
+						}
+					});
 					fDeprecateDelegateCheckBox.setEnabled(fLeaveDelegateCheckBox.getSelection());
 					fLeaveDelegateCheckBox.addSelectionListener(new SelectionAdapter() {
 						public void widgetSelected(SelectionEvent e) {
