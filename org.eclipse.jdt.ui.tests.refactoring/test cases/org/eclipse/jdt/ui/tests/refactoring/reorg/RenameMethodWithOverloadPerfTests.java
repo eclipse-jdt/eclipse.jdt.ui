@@ -23,6 +23,7 @@ import org.eclipse.jdt.internal.corext.refactoring.rename.RenameVirtualMethodPro
 
 import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringPerformanceTestSetup;
 
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerformanceTestCase {
@@ -67,7 +68,7 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 		IMethod method= cunit.findPrimaryType().getMethod("setString", new String[] {"QString;"});
 		RenameVirtualMethodProcessor processor= new RenameVirtualMethodProcessor(method);
 		processor.setNewElementName("set");
-		executeRefactoring(new RenameRefactoring(processor), measure);
+		executeRefactoring(new RenameRefactoring(processor), measure, RefactoringStatus.FATAL);
 	}
 	
 	private ICompilationUnit generateSources(int numberOfCus, int numberOfRefs) throws Exception {
@@ -95,7 +96,7 @@ public class RenameMethodWithOverloadPerfTests extends RepeatingRefactoringPerfo
 		buf.append("import def.A;\n");
 		buf.append("public class Ref" + index + " {\n");
 		buf.append("    public void ref(A a) {\n");
-		buf.append("        String s= \"Eclipse\");\n");
+		buf.append("        String s= \"Eclipse\";\n");
 		for (int i= 0; i < numberOfRefs; i++) {
 			buf.append("        a.set(s);\n");
 			buf.append("        a.setString(s);\n");
