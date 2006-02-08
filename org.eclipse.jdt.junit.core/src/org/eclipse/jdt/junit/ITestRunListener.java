@@ -77,11 +77,11 @@ package org.eclipse.jdt.junit;
 	/**
 	 * An individual test has failed with a stack trace.
 	 * 
-	 * @param testId a unique Id identifying the test
- 	 * @param testName the name of the test that failed
 	 * @param status the outcome of the test; one of 
 	 * {@link #STATUS_ERROR STATUS_ERROR} or
 	 * {@link #STATUS_FAILURE STATUS_FAILURE}
+	 * @param testId a unique Id identifying the test
+ 	 * @param testName the name of the test that failed
 	 * @param trace the stack trace
 	 */
 	public void testFailed(int status, String testId, String testName, String trace);	
