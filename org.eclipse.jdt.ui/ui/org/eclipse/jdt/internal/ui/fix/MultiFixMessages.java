@@ -79,8 +79,8 @@ public class MultiFixMessages extends NLS {
 	
 	public static String PotentialProgrammingProblemsCleanUp_AddSerialId_section_name;
 	public static String PotentialProgrammingProblemsCleanUp_Generated_radioButton_name;
-	public static String PotentialProgrammingProblemsCleanUp_Random_radioButton_name;
 	public static String PotentialProgrammingProblemsCleanUp_RandomSerialId_description;
+	public static String PotentialProgrammingProblemsCleanUp_Default_radioButton_name;
 	
 	public static String ControlStatementsCleanUp_useBlocks_checkBoxLabel;
 	public static String ControlStatementsCleanUp_convertLoops_checkBoxLabel;

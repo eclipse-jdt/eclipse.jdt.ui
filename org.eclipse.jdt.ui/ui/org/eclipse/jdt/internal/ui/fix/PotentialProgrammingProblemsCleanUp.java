@@ -78,7 +78,7 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 	public static final int ADD_RANDOM_SERIAL_VERSION_ID= 4;
 
 	private static final int DEFAULT_FLAG= 0;
-	private static final String SECTION_NAME= "CleanUp_PotentialProgrammingProblems"; //$NON-NLS-1$
+	private static final String SECTION_NAME= "CleanUp_PotentialProgrammingProblems0"; //$NON-NLS-1$
 	private static final Random RANDOM_NUMBER_GENERATOR= new Random();
 
 	private ISerialVersionFixContext fContext;
@@ -138,9 +138,9 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 		button.setText(MultiFixMessages.PotentialProgrammingProblemsCleanUp_AddSerialId_section_name);
 		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
-		int[] flags= new int[] {ADD_CALCULATED_SERIAL_VERSION_ID, ADD_RANDOM_SERIAL_VERSION_ID};		
+		int[] flags= new int[] {ADD_CALCULATED_SERIAL_VERSION_ID, ADD_DEFAULT_SERIAL_VERSION_ID};		
 		final int[] uiFlags= new int[] {1073741824, 536870912};
-		String[] labels= new String[] {MultiFixMessages.PotentialProgrammingProblemsCleanUp_Generated_radioButton_name, MultiFixMessages.PotentialProgrammingProblemsCleanUp_Random_radioButton_name};
+		String[] labels= new String[] {MultiFixMessages.PotentialProgrammingProblemsCleanUp_Generated_radioButton_name, MultiFixMessages.PotentialProgrammingProblemsCleanUp_Default_radioButton_name};
 		createSubGroup(parent, button, SWT.RADIO, flags, labels, uiFlags, false);
 
 		return parent;
