@@ -31,9 +31,9 @@ import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.wizard.Wizard;
 
 import org.eclipse.ui.IActionBars;
+import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchSite;
@@ -170,7 +170,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		/**
 		 * {@inheritDoc}
 		 */
-		protected Wizard createWizard() throws CoreException {
+		protected INewWizard createWizard() throws CoreException {
 			CPListElement newEntrie= new CPListElement(fSelectedProject, IClasspathEntry.CPE_SOURCE);
 			fAddSourceFolderWizard= new AddSourceFolderWizard(CPListElement.createFromExisting(fSelectedProject), newEntrie, getOutputLocation(fSelectedProject), false);
 			return fAddSourceFolderWizard;
@@ -207,7 +207,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		/**
 		 * {@inheritDoc}
 		 */
-		protected Wizard createWizard() throws CoreException {
+		protected INewWizard createWizard() throws CoreException {
 			CPListElement newEntrie= new CPListElement(fSelectedProject, IClasspathEntry.CPE_SOURCE);
 			fAddSourceFolderWizard= new AddSourceFolderWizard(CPListElement.createFromExisting(fSelectedProject), newEntrie, getOutputLocation(fSelectedProject), true);
 			return fAddSourceFolderWizard;
@@ -246,7 +246,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
 		/**
 		 * {@inheritDoc}
 		 */
-		protected Wizard createWizard() throws CoreException {
+		protected INewWizard createWizard() throws CoreException {
 			CPListElement[] existingEntries= CPListElement.createFromExisting(fSelectedProject);
 			CPListElement elementToEdit= findElement(fSelectedElement, existingEntries);
 			fEditFilterWizard= new EditFilterWizard(existingEntries, elementToEdit, getOutputLocation(fSelectedProject));

@@ -28,8 +28,8 @@ import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.ISelection;
-import org.eclipse.jface.wizard.Wizard;
 
+import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.IWorkbenchWindowPulldownDelegate2;
 import org.eclipse.ui.PlatformUI;
@@ -100,8 +100,8 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 		/* (non-Javadoc)
 		 * @see org.eclipse.jdt.internal.ui.wizards.AbstractOpenWizardAction#createWizard()
 		 */
-		protected Wizard createWizard() throws CoreException {
-			return (Wizard) CoreUtility.createExtension(fConfigurationElement, ATT_CLASS);
+		protected INewWizard createWizard() throws CoreException {
+			return (INewWizard) CoreUtility.createExtension(fConfigurationElement, ATT_CLASS);
 		}
 	}
 	

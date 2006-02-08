@@ -14,8 +14,8 @@ package org.eclipse.jdt.ui.actions;
 import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.viewers.IStructuredSelection;
-import org.eclipse.jface.wizard.Wizard;
 
+import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.ui.wizards.NewInterfaceWizardPage;
@@ -66,7 +66,7 @@ public class OpenNewInterfaceWizardAction extends AbstractOpenWizardAction {
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.ui.actions.AbstractOpenWizardAction#createWizard()
 	 */
-	protected final Wizard createWizard() throws CoreException {
+	protected final INewWizard createWizard() throws CoreException {
 		return new NewInterfaceCreationWizard(fPage);
 	}
 }

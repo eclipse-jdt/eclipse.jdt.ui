@@ -29,7 +29,8 @@ import org.eclipse.jface.util.IPropertyChangeListener;
 import org.eclipse.jface.util.PropertyChangeEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.Wizard;
+
+import org.eclipse.ui.INewWizard;
 
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.IJavaProject;
@@ -66,7 +67,7 @@ public class SourceContainerWorkbookPage extends BuildPathBasePage {
 		/**
 		 * {@inheritDoc}
 		 */
-		protected Wizard createWizard() throws CoreException {
+		protected INewWizard createWizard() throws CoreException {
 			return fWizard;
 		}
 

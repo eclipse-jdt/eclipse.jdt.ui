@@ -24,11 +24,10 @@ import org.eclipse.jface.viewers.ISelection;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.window.Window;
-import org.eclipse.jface.wizard.Wizard;
 import org.eclipse.jface.wizard.WizardDialog;
 
+import org.eclipse.ui.INewWizard;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.IWorkbenchWizard;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.NewProjectAction;
 
@@ -72,10 +71,8 @@ public abstract class AbstractOpenWizardAction extends Action {
 			return;
 		}
 		try {
-			Wizard wizard= createWizard();
-			if (wizard instanceof IWorkbenchWizard) {
-				((IWorkbenchWizard)wizard).init(PlatformUI.getWorkbench(), getSelection());
-			}
+			INewWizard wizard= createWizard();
+			wizard.init(PlatformUI.getWorkbench(), getSelection());
 			
 			WizardDialog dialog= new WizardDialog(shell, wizard);
 			if (shell != null) {
@@ -101,7 +98,7 @@ public abstract class AbstractOpenWizardAction extends Action {
 	 * @return returns the created wizard.
 	 * @throws CoreException exception is thrown when the creation was not successful.
 	 */
-	abstract protected Wizard createWizard() throws CoreException;
+	abstract protected INewWizard createWizard() throws CoreException;
 	
 	/**
 	 * Returns the configured selection. If no selection has been configured using {@link #setSelection(IStructuredSelection)},
