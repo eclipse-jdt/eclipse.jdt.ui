@@ -24,6 +24,7 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JDTChange;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -125,12 +126,12 @@ public class RenameResourceChange extends JDTChange {
 
 	public RefactoringDescriptor getRefactoringDescriptor() {
 		final Map arguments= new HashMap();
-		arguments.put(RefactoringDescriptor.INPUT, fResourcePath.toPortableString());
-		arguments.put(RefactoringDescriptor.NAME, fNewName);
+		arguments.put(JavaRefactoringDescriptor.INPUT, fResourcePath.toPortableString());
+		arguments.put(JavaRefactoringDescriptor.NAME, fNewName);
 		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE;
 		if (getResource().getType() == IResource.PROJECT)
 			flags|= RefactoringDescriptor.PROJECT_CHANGE;
-		return new RefactoringDescriptor(ID_RENAME_RESOURCE, getResource().getProject().getName(), Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { getResource().getFullPath().toString(), fNewName}), fComment, arguments, flags);
+		return new JavaRefactoringDescriptor(ID_RENAME_RESOURCE, getResource().getProject().getName(), Messages.format(RefactoringCoreMessages.RenameResourceChange_descriptor_description, new String[] { getResource().getFullPath().toString(), fNewName}), fComment, arguments, flags);
 	}
 
 	public String getNewName() {

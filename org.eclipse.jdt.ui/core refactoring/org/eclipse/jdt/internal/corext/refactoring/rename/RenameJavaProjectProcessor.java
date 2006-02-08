@@ -22,7 +22,6 @@ import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RenameArguments;
 import org.eclipse.osgi.util.NLS;
@@ -31,6 +30,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -174,8 +174,8 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 	}
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		if (arguments instanceof GenericRefactoringArguments) {
-			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+		if (arguments instanceof JavaRefactoringArguments) {
+			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
 			final String path= generic.getAttribute(ATTRIBUTE_PATH);
 			if (path != null) {
 				final IResource resource= ResourcesPlugin.getWorkspace().getRoot().findMember(new Path(path));

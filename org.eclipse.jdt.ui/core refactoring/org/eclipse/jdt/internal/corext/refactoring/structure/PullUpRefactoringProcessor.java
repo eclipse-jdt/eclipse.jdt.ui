@@ -37,7 +37,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.osgi.util.NLS;
 
@@ -92,6 +91,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
@@ -932,25 +933,25 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 
 				public final RefactoringDescriptor getRefactoringDescriptor() {
 					final Map arguments= new HashMap();
-					arguments.put(RefactoringDescriptor.INPUT, fTargetType.getHandleIdentifier());
+					arguments.put(JavaRefactoringDescriptor.INPUT, fTargetType.getHandleIdentifier());
 					if (fDeclaringType != null)
-						arguments.put(RefactoringDescriptor.ELEMENT + 1, fDeclaringType.getHandleIdentifier());
+						arguments.put(JavaRefactoringDescriptor.ELEMENT + 1, fDeclaringType.getHandleIdentifier());
 					arguments.put(ATTRIBUTE_PULL, new Integer(fMembersToMove.length).toString());
 					for (int offset= 0; offset < fMembersToMove.length; offset++)
-						arguments.put(RefactoringDescriptor.ELEMENT + (offset + 2), fMembersToMove[offset].getHandleIdentifier());
+						arguments.put(JavaRefactoringDescriptor.ELEMENT + (offset + 2), fMembersToMove[offset].getHandleIdentifier());
 					arguments.put(ATTRIBUTE_DELETE, new Integer(fMethodsToDelete.length).toString());
 					for (int offset= 0; offset < fMethodsToDelete.length; offset++)
-						arguments.put(RefactoringDescriptor.ELEMENT + (offset + fMembersToMove.length + 2), fMethodsToDelete[offset].getHandleIdentifier());
+						arguments.put(JavaRefactoringDescriptor.ELEMENT + (offset + fMembersToMove.length + 2), fMethodsToDelete[offset].getHandleIdentifier());
 					arguments.put(ATTRIBUTE_ABSTRACT, new Integer(fMethodsToDeclareAbstract.length).toString());
 					for (int offset= 0; offset < fMethodsToDeclareAbstract.length; offset++)
-						arguments.put(RefactoringDescriptor.ELEMENT + (offset + fMembersToMove.length + fMethodsToDelete.length + 2), fMethodsToDeclareAbstract[offset].getHandleIdentifier());
+						arguments.put(JavaRefactoringDescriptor.ELEMENT + (offset + fMembersToMove.length + fMethodsToDelete.length + 2), fMethodsToDeclareAbstract[offset].getHandleIdentifier());
 					arguments.put(ATTRIBUTE_STUBS, Boolean.valueOf(fCreateMethodStubs).toString());
 					String project= null;
 					final IType declaring= getDeclaringType();
 					final IJavaProject javaProject= declaring.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_PULL_UP, project, fMembersToMove.length == 1 ? NLS.bind(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fTargetType, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : NLS.bind(RefactoringCoreMessages.PullUpRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fTargetType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					return new JavaRefactoringDescriptor(ID_PULL_UP, project, fMembersToMove.length == 1 ? NLS.bind(RefactoringCoreMessages.PullUpRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fTargetType, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : NLS.bind(RefactoringCoreMessages.PullUpRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fTargetType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 				}
 			};
 		} finally {
@@ -1430,9 +1431,9 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 	 * {@inheritDoc}
 	 */
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
-		if (arguments instanceof GenericRefactoringArguments) {
-			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
-			String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+		if (arguments instanceof JavaRefactoringArguments) {
+			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
+			String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
@@ -1440,8 +1441,8 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 				else
 					fTargetType= (IType) element;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
-			handle= generic.getAttribute(RefactoringDescriptor.ELEMENT + 1);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
+			handle= generic.getAttribute(JavaRefactoringDescriptor.ELEMENT + 1);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
@@ -1487,7 +1488,7 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 			final RefactoringStatus status= new RefactoringStatus();
 			List elements= new ArrayList();
 			for (int index= 0; index < pullCount; index++) {
-				final String attribute= RefactoringDescriptor.ELEMENT + (index + 2);
+				final String attribute= JavaRefactoringDescriptor.ELEMENT + (index + 2);
 				handle= generic.getAttribute(attribute);
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 					final IJavaElement element= JavaCore.create(handle);
@@ -1501,7 +1502,7 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 			fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
 			elements= new ArrayList();
 			for (int index= 0; index < deleteCount; index++) {
-				final String attribute= RefactoringDescriptor.ELEMENT + (pullCount + index + 2);
+				final String attribute= JavaRefactoringDescriptor.ELEMENT + (pullCount + index + 2);
 				handle= generic.getAttribute(attribute);
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 					final IJavaElement element= JavaCore.create(handle);
@@ -1515,7 +1516,7 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 			fMethodsToDelete= (IMethod[]) elements.toArray(new IMethod[elements.size()]);
 			elements= new ArrayList();
 			for (int index= 0; index < abstractCount; index++) {
-				final String attribute= RefactoringDescriptor.ELEMENT + (pullCount + abstractCount + index + 2);
+				final String attribute= JavaRefactoringDescriptor.ELEMENT + (pullCount + abstractCount + index + 2);
 				handle= generic.getAttribute(attribute);
 				if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 					final IJavaElement element= JavaCore.create(handle);

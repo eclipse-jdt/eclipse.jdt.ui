@@ -28,7 +28,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.osgi.util.NLS;
 
@@ -63,6 +62,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -218,7 +219,7 @@ public class InlineTempRefactoring extends CommentRefactoring implements IInitia
 			
 				public final RefactoringDescriptor getRefactoringDescriptor() {
 					final Map arguments= new HashMap();
-					arguments.put(RefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
+					arguments.put(JavaRefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
 					arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 					String project= null;
 					IJavaProject javaProject= fCu.getJavaProject();
@@ -231,7 +232,7 @@ public class InlineTempRefactoring extends CommentRefactoring implements IInitia
 						text= BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED);
 					else
 						text= '{' + JavaElementLabels.ELLIPSIS_STRING + '}';
-					return new RefactoringDescriptor(ID_INLINE_TEMP, project, Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), text}), getComment(), arguments, RefactoringDescriptor.NONE);
+					return new JavaRefactoringDescriptor(ID_INLINE_TEMP, project, Messages.format(RefactoringCoreMessages.InlineTempRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), text}), getComment(), arguments, RefactoringDescriptor.NONE);
 				}
 			}; 
 			inlineTemp(result, new SubProgressMonitor(pm, 1));
@@ -366,8 +367,8 @@ public class InlineTempRefactoring extends CommentRefactoring implements IInitia
 	}
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof GenericRefactoringArguments) {
-			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+		if (arguments instanceof JavaRefactoringArguments) {
+			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
 			final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
 			if (selection != null) {
 				int offset= -1;
@@ -384,7 +385,7 @@ public class InlineTempRefactoring extends CommentRefactoring implements IInitia
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
-			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
@@ -398,7 +399,7 @@ public class InlineTempRefactoring extends CommentRefactoring implements IInitia
 						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INLINE_TEMP));
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 		return new RefactoringStatus();

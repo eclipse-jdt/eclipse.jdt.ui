@@ -45,7 +45,6 @@ import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextFileChange;
-import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.osgi.util.NLS;
@@ -102,6 +101,8 @@ import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.StatementRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -438,8 +439,8 @@ public class ExtractMethodRefactoring extends CommentRefactoring implements IIni
 
 			public final RefactoringDescriptor getRefactoringDescriptor() {
 				final Map arguments= new HashMap();
-				arguments.put(RefactoringDescriptor.INPUT, fCUnit.getHandleIdentifier());
-				arguments.put(RefactoringDescriptor.NAME, fMethodName);
+				arguments.put(JavaRefactoringDescriptor.INPUT, fCUnit.getHandleIdentifier());
+				arguments.put(JavaRefactoringDescriptor.NAME, fMethodName);
 				arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
 				arguments.put(ATTRIBUTE_DESTINATION, new Integer(fDestinationIndex).toString());
@@ -464,7 +465,7 @@ public class ExtractMethodRefactoring extends CommentRefactoring implements IIni
 					final MethodDeclaration node= (MethodDeclaration) enclosing;
 					method= node.resolveBinding();
 				}
-				return new RefactoringDescriptor(ID_EXTRACT_METHOD, project, Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_descriptor_description, new String[] {getSignature(), method != null ? BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED) : '{' + JavaElementLabels.ELLIPSIS_STRING + '}', BindingLabelProvider.getBindingLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
+				return new JavaRefactoringDescriptor(ID_EXTRACT_METHOD, project, Messages.format(RefactoringCoreMessages.ExtractMethodRefactoring_descriptor_description, new String[] {getSignature(), method != null ? BindingLabelProvider.getBindingLabel(method, JavaElementLabels.ALL_FULLY_QUALIFIED) : '{' + JavaElementLabels.ELLIPSIS_STRING + '}', BindingLabelProvider.getBindingLabel(type, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
 			}
 		};
 		result.setSaveMode(TextFileChange.KEEP_SAVE_STATE);
@@ -944,8 +945,8 @@ public class ExtractMethodRefactoring extends CommentRefactoring implements IIni
 	}
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof GenericRefactoringArguments) {
-			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+		if (arguments instanceof JavaRefactoringArguments) {
+			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
 			final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
 			if (selection != null) {
 				int offset= -1;
@@ -962,7 +963,7 @@ public class ExtractMethodRefactoring extends CommentRefactoring implements IIni
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
-			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
@@ -976,7 +977,7 @@ public class ExtractMethodRefactoring extends CommentRefactoring implements IIni
 					}
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
 			final String visibility= generic.getAttribute(ATTRIBUTE_VISIBILITY);
 			if (visibility != null && !"".equals(visibility)) {//$NON-NLS-1$
 				int flag= 0;
@@ -987,11 +988,11 @@ public class ExtractMethodRefactoring extends CommentRefactoring implements IIni
 				}
 				fVisibility= flag;
 			}
-			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
+			final String name= generic.getAttribute(JavaRefactoringDescriptor.NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				fMethodName= name;
 			else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
 			final String destination= generic.getAttribute(ATTRIBUTE_DESTINATION);
 			if (destination != null && !"".equals(destination)) {//$NON-NLS-1$
 				int index= 0;

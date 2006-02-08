@@ -33,6 +33,7 @@ import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -150,9 +151,9 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 
 	public RefactoringDescriptor getRefactoringDescriptor() {
 		final Map arguments= new HashMap();
-		arguments.put(RefactoringDescriptor.INPUT, getResourcePath().toPortableString());
-		arguments.put(RefactoringDescriptor.NAME, getNewName());
+		arguments.put(JavaRefactoringDescriptor.INPUT, getResourcePath().toPortableString());
+		arguments.put(JavaRefactoringDescriptor.NAME, getNewName());
 		arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-		return new RefactoringDescriptor(ID_RENAME_JAVA_PROJECT, getResource().getProject().getName(), Messages.format(RefactoringCoreMessages.RenameJavaProjectChange_descriptor_description, new String[] { getOldName(), getNewName()}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE | RefactoringDescriptor.PROJECT_CHANGE);
+		return new JavaRefactoringDescriptor(ID_RENAME_JAVA_PROJECT, getResource().getProject().getName(), Messages.format(RefactoringCoreMessages.RenameJavaProjectChange_descriptor_description, new String[] { getOldName(), getNewName()}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE | RefactoringDescriptor.PROJECT_CHANGE);
 	}
 }

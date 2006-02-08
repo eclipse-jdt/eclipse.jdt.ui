@@ -36,7 +36,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.osgi.util.NLS;
 
@@ -65,6 +64,8 @@ import org.eclipse.jdt.core.dom.TypeLiteral;
 
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
@@ -534,11 +535,11 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 				public final RefactoringDescriptor getRefactoringDescriptor() {
 					final Map arguments= new HashMap();
 					for (int index= 0; index < fElements.length; index++)
-						arguments.put(RefactoringDescriptor.ELEMENT + (index + 1), fElements[index].getHandleIdentifier());
+						arguments.put(JavaRefactoringDescriptor.ELEMENT + (index + 1), fElements[index].getHandleIdentifier());
 					arguments.put(ATTRIBUTE_CLONE, Boolean.valueOf(fAssumeCloneReturnsSameType).toString());
 					arguments.put(ATTRIBUTE_LEAVE, Boolean.valueOf(fLeaveUnconstrainedRaw).toString());
 					final IJavaProject project= getSingleProject();
-					return new RefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, project != null ? project.getElementName() : null, project != null ? NLS.bind(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description, getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					return new JavaRefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, project != null ? project.getElementName() : null, project != null ? NLS.bind(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description, getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 				}
 			}; 
 			return result;
@@ -562,8 +563,8 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 	}
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof GenericRefactoringArguments) {
-			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+		if (arguments instanceof JavaRefactoringArguments) {
+			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
 			final String clone= generic.getAttribute(ATTRIBUTE_CLONE);
 			if (clone != null) {
 				fAssumeCloneReturnsSameType= Boolean.valueOf(clone).booleanValue();
@@ -577,7 +578,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 			int count= 1;
 			final List elements= new ArrayList();
 			String value= null;
-			String attribute= RefactoringDescriptor.ELEMENT + count;
+			String attribute= JavaRefactoringDescriptor.ELEMENT + count;
 			final RefactoringStatus status= new RefactoringStatus();
 			while ((value= generic.getAttribute(attribute)) != null) {
 				final IJavaElement element= JavaCore.create(value);
@@ -586,7 +587,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 				else
 					elements.add(element);
 				count++;
-				attribute= RefactoringDescriptor.ELEMENT + count;
+				attribute= JavaRefactoringDescriptor.ELEMENT + count;
 			}
 			fElements= (IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]);
 			if (elements.isEmpty())

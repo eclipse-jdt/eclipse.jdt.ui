@@ -38,7 +38,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.osgi.util.NLS;
@@ -67,6 +66,8 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
@@ -349,7 +350,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		
 			public final RefactoringDescriptor getRefactoringDescriptor() {
 				final Map arguments= new HashMap();
-				arguments.put(RefactoringDescriptor.INPUT, fInitialCUnit.getHandleIdentifier());
+				arguments.put(JavaRefactoringDescriptor.INPUT, fInitialCUnit.getHandleIdentifier());
 				arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_DELETE, Boolean.valueOf(fDeleteSource).toString());
 				arguments.put(ATTRIBUTE_MODE, new Integer(fCurrentMode == Mode.INLINE_ALL ? 1 : 0).toString());
@@ -361,7 +362,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 				int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
 				if (!Modifier.isPrivate(binding.getModifiers()))
 					flags|= RefactoringDescriptor.MULTI_CHANGE;
-				return new RefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringClass(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+				return new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringClass(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
 			}
 		}; 
 	}
@@ -402,7 +403,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		try {
 			node= checkNode(NodeFinder.perform(root, offset, length, unit));
 		} catch(JavaModelException e) {
-			node = null;
+			// Do nothing
 		}
 		if (node != null)
 			return node;
@@ -535,8 +536,8 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 	}
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof GenericRefactoringArguments) {
-			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
+		if (arguments instanceof JavaRefactoringArguments) {
+			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
 			final String delete= generic.getAttribute(ATTRIBUTE_DELETE);
 			if (delete != null) {
 				fDeleteSource= Boolean.valueOf(delete).booleanValue();
@@ -568,7 +569,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 	public RefactoringSessionDescriptor createDeprecationResolution() {
 		Assert.isNotNull(fMethod);
 		final Map arguments= new HashMap();
-		arguments.put(RefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
+		arguments.put(JavaRefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
 		arguments.put(ATTRIBUTE_DELETE, Boolean.TRUE.toString());
 		arguments.put(ATTRIBUTE_MODE, String.valueOf(1));
 		String project= null;
@@ -582,7 +583,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
-		final RefactoringDescriptor descriptor= new RefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_deprecation_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED)}), RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment, arguments, flags);
+		final RefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_deprecation_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED)}), RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment, arguments, flags);
 		return new RefactoringSessionDescriptor(new RefactoringDescriptor[] { descriptor}, RefactoringSessionDescriptor.VERSION_1_0, RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment);
 	}
 }

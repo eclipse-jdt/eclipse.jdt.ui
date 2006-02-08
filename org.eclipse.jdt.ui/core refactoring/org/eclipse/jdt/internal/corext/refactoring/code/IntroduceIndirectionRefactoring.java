@@ -31,7 +31,6 @@ import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 import org.eclipse.jdt.core.Flags;
@@ -86,6 +85,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -735,15 +736,15 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 		
 			public RefactoringDescriptor getRefactoringDescriptor() {
 				final Map arguments= new HashMap();
-				arguments.put(RefactoringDescriptor.INPUT, fTargetMethod.getHandleIdentifier());
-				arguments.put(RefactoringDescriptor.NAME, fIntermediaryMethodName);
-				arguments.put(RefactoringDescriptor.ELEMENT + 1, fIntermediaryClass.getHandleIdentifier());
+				arguments.put(JavaRefactoringDescriptor.INPUT, fTargetMethod.getHandleIdentifier());
+				arguments.put(JavaRefactoringDescriptor.NAME, fIntermediaryMethodName);
+				arguments.put(JavaRefactoringDescriptor.ELEMENT + 1, fIntermediaryClass.getHandleIdentifier());
 				arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 				String project= null;
 				IJavaProject javaProject= fTargetMethod.getJavaProject();
 				if (javaProject != null && fTargetMethod.isBinary())
 					project= javaProject.getElementName();
-				return new RefactoringDescriptor(ID_INTRODUCE_INDIRECTION, project, Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(fTargetMethod.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, (JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE));
+				return new JavaRefactoringDescriptor(ID_INTRODUCE_INDIRECTION, project, Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(fTargetMethod.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, (JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE));
 			}
 		};
 		result.addAll(fTextChangeManager.getAllChanges());
@@ -1197,7 +1198,7 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 			else
 				node= checkNode(NodeFinder.perform(root, offset, length));
 		} catch (JavaModelException e) {
-			node= null;
+			// Do nothing
 		}
 		if (node != null)
 			return node;
@@ -1300,14 +1301,14 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 	}
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof GenericRefactoringArguments) {
-			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
-			String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+		if (arguments instanceof JavaRefactoringArguments) {
+			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
+			String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
 				fTargetMethod= (IMethod) JavaCore.create(handle);
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INTRODUCE_INDIRECTION));
-			handle= generic.getAttribute(RefactoringDescriptor.ELEMENT + 1);
+			handle= generic.getAttribute(JavaRefactoringDescriptor.ELEMENT + 1);
 			if (handle != null) {
 				fIntermediaryClass= (IType) JavaCore.create(handle);
 			} else
@@ -1317,11 +1318,11 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 				fUpdateReferences= Boolean.valueOf(references).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REFERENCES));
-			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
+			final String name= generic.getAttribute(JavaRefactoringDescriptor.NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				return setIntermediaryMethodName(name);
 			else
-				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
+				return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
 		} else
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.InitializableRefactoring_inacceptable_arguments);
 	}

@@ -42,7 +42,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
-import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringParticipant;
 import org.eclipse.ltk.core.refactoring.participants.SharableParticipants;
@@ -94,6 +93,8 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
@@ -320,10 +321,10 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 
 				public final RefactoringDescriptor getRefactoringDescriptor() {
 					final Map arguments= new HashMap();
-					arguments.put(RefactoringDescriptor.INPUT, fSubType.getHandleIdentifier());
-					arguments.put(RefactoringDescriptor.NAME, fSuperName);
+					arguments.put(JavaRefactoringDescriptor.INPUT, fSubType.getHandleIdentifier());
+					arguments.put(JavaRefactoringDescriptor.NAME, fSuperName);
 					for (int index= 0; index < fMembers.length; index++)
-						arguments.put(RefactoringDescriptor.ELEMENT + (index + 1), fMembers[index].getHandleIdentifier());
+						arguments.put(JavaRefactoringDescriptor.ELEMENT + (index + 1), fMembers[index].getHandleIdentifier());
 					arguments.put(ATTRIBUTE_ABSTRACT, Boolean.valueOf(fAbstract).toString());
 					arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fComments).toString());
 					arguments.put(ATTRIBUTE_PUBLIC, Boolean.valueOf(fPublic).toString());
@@ -333,7 +334,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					final IJavaProject javaProject= fSubType.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					return new RefactoringDescriptor(ID_EXTRACT_INTERFACE, project, Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { fSuperName, JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					return new JavaRefactoringDescriptor(ID_EXTRACT_INTERFACE, project, Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { fSuperName, JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 				}
 			};
 			final IFile file= ResourceUtil.getFile(fSubType.getCompilationUnit());
@@ -1223,9 +1224,9 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 	 * {@inheritDoc}
 	 */
 	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof GenericRefactoringArguments) {
-			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
-			String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+		if (arguments instanceof JavaRefactoringArguments) {
+			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
+			String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
@@ -1233,15 +1234,15 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				else
 					fSubType= (IType) element;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
-			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
+			final String name= generic.getAttribute(JavaRefactoringDescriptor.NAME);
 			if (name != null) {
 				fSuperName= name;
 				final RefactoringStatus status= checkTypeName(name);
 				if (status.hasError())
 					return status;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
 			final String deferred= generic.getAttribute(ATTRIBUTE_ABSTRACT);
 			if (deferred != null) {
 				fAbstract= Boolean.valueOf(deferred).booleanValue();
@@ -1269,7 +1270,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
 			int count= 1;
 			final List elements= new ArrayList();
-			String attribute= RefactoringDescriptor.ELEMENT + count;
+			String attribute= JavaRefactoringDescriptor.ELEMENT + count;
 			final RefactoringStatus status= new RefactoringStatus();
 			while ((handle= generic.getAttribute(attribute)) != null) {
 				final IJavaElement element= JavaCore.create(handle);
@@ -1278,7 +1279,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 				else
 					elements.add(element);
 				count++;
-				attribute= RefactoringDescriptor.ELEMENT + count;
+				attribute= JavaRefactoringDescriptor.ELEMENT + count;
 			}
 			fMembers= (IMember[]) elements.toArray(new IMember[elements.size()]);
 			if (elements.isEmpty())

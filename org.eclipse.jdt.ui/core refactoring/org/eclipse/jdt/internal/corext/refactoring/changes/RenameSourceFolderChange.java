@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -129,12 +130,12 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 
 	public RefactoringDescriptor getRefactoringDescriptor() {
 		final Map arguments= new HashMap();
-		arguments.put(RefactoringDescriptor.INPUT, getResourcePath().toPortableString());
-		arguments.put(RefactoringDescriptor.NAME, getNewName());
+		arguments.put(JavaRefactoringDescriptor.INPUT, getResourcePath().toPortableString());
+		arguments.put(JavaRefactoringDescriptor.NAME, getNewName());
 		String project= null;
 		final IProject container= getResource().getProject();
 		if (container != null)
 			project= container.getName();
-		return new RefactoringDescriptor(ID_RENAME_SOURCE_FOLDER, project, Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { getResourcePath().toString(), getNewName()}), getComment(), arguments, RefactoringDescriptor.NONE);
+		return new JavaRefactoringDescriptor(ID_RENAME_SOURCE_FOLDER, project, Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { getResourcePath().toString(), getNewName()}), getComment(), arguments, RefactoringDescriptor.NONE);
 	}
 }

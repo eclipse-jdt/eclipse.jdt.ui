@@ -36,7 +36,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.TextChange;
-import org.eclipse.ltk.core.refactoring.participants.GenericRefactoringArguments;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.osgi.util.NLS;
 
@@ -102,6 +101,8 @@ import org.eclipse.jdt.internal.corext.dom.Selection;
 import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.ExceptionInfo;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.ParameterInfo;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -1138,8 +1139,8 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			return new DynamicValidationStateChange(RefactoringCoreMessages.ChangeSignatureRefactoring_restructure_parameters, fChangeManager.getAllChanges()) {
 				public RefactoringDescriptor getRefactoringDescriptor() {
 					final Map arguments= new HashMap();
-					arguments.put(RefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
-					arguments.put(RefactoringDescriptor.NAME, fMethodName);
+					arguments.put(JavaRefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
+					arguments.put(JavaRefactoringDescriptor.NAME, fMethodName);
 					arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
 					arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
 					if (fReturnTypeInfo.isTypeNameChanged())
@@ -1174,7 +1175,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 					count= 1;
 					for (final Iterator iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
 						final ExceptionInfo info= (ExceptionInfo) iterator.next();
-						arguments.put(RefactoringDescriptor.ELEMENT + count, info.getType().getHandleIdentifier());
+						arguments.put(JavaRefactoringDescriptor.ELEMENT + count, info.getType().getHandleIdentifier());
 						arguments.put(ATTRIBUTE_KIND + count, new Integer(info.getKind()).toString());
 						count++;
 					}
@@ -1190,7 +1191,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 						JavaPlugin.log(exception);
 					}
 					try {
-						return new RefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), getComment(), arguments, flags);
+						return new JavaRefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), getComment(), arguments, flags);
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 						return null;
@@ -2376,9 +2377,9 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 	}
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
-		if (arguments instanceof GenericRefactoringArguments) {
-			final GenericRefactoringArguments generic= (GenericRefactoringArguments) arguments;
-			final String handle= generic.getAttribute(RefactoringDescriptor.INPUT);
+		if (arguments instanceof JavaRefactoringArguments) {
+			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
+			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
 				if (element == null || !element.exists())
@@ -2394,15 +2395,15 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 					}
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.INPUT));
-			final String name= generic.getAttribute(RefactoringDescriptor.NAME);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
+			final String name= generic.getAttribute(JavaRefactoringDescriptor.NAME);
 			if (name != null) {
 				fMethodName= name;
 				final RefactoringStatus status= Checks.checkMethodName(fMethodName);
 				if (status.hasError())
 					return status;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, RefactoringDescriptor.NAME));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
 			final String type= generic.getAttribute(ATTRIBUTE_RETURN);
 			if (type != null && !"".equals(type)) //$NON-NLS-1$
 				fReturnTypeInfo= new ReturnTypeInfo(type);
@@ -2465,7 +2466,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			}
 			count= 1;
 			fExceptionInfos= new ArrayList(2);
-			attribute= RefactoringDescriptor.ELEMENT + count;
+			attribute= JavaRefactoringDescriptor.ELEMENT + count;
 			while ((value= generic.getAttribute(attribute)) != null) {
 				ExceptionInfo info= null;
 				final String kind= generic.getAttribute(ATTRIBUTE_KIND + count);
@@ -2485,7 +2486,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 				if (info != null)
 					fExceptionInfos.add(info);
 				count++;
-				attribute= RefactoringDescriptor.ELEMENT + count;
+				attribute= JavaRefactoringDescriptor.ELEMENT + count;
 			}
 			final String deprecate= generic.getAttribute(ATTRIBUTE_DEPRECATE);
 			if (deprecate != null) {
