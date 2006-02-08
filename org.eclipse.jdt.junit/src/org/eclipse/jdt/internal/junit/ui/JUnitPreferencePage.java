@@ -55,17 +55,19 @@ import org.eclipse.jface.viewers.ITableLabelProvider;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.SelectionChangedEvent;
 import org.eclipse.jface.viewers.Viewer;
+import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPreferencePage;
 import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.model.WorkbenchViewerSorter;
+import org.eclipse.ui.progress.IProgressService;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
 import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.ui.IJavaElementSearchConstants;
@@ -328,7 +330,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	}
 
 	/*
-	 * Create a group to contain the step filter related widgetry
+	 * Create a group to contain the step filter related widgets
 	 */
 	private void createStackFilterPreferences(Composite composite) {
 		Composite container= new Composite(composite, SWT.NONE);
@@ -573,7 +575,7 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 	}
 
 	/*
-	 * Cleanup all widgetry & resources used by the in-place editing
+	 * Cleanup all widgets & resources used by the in-place editing
 	 */
 	private void cleanupEditor() {
 		if (fEditorText == null)
@@ -650,20 +652,12 @@ public class JUnitPreferencePage extends PreferencePage implements IWorkbenchPre
 
 	private void addPackage() {
 		Shell shell= getShell();
-		ElementListSelectionDialog dialog= null;
-		try {
-			dialog= JUnitPlugin.createAllPackagesDialog(shell, null, true);
-		} catch (JavaModelException jme) {
-			String title= JUnitMessages.JUnitPreferencePage_addpackagedialog_title; 
-			String message= JUnitMessages.JUnitPreferencePage_addpackagedialog_error_message; 
-			ExceptionHandler.handle(jme, shell, title, message);
-			return;
-		}
-
+		IProgressService context= PlatformUI.getWorkbench().getProgressService();
+		IJavaSearchScope createWorkspaceScope= SearchEngine.createWorkspaceScope();
+		SelectionDialog dialog= JavaUI.createPackageDialog(shell, context, createWorkspaceScope, true, true, ""); //$NON-NLS-1$
 		dialog.setTitle(JUnitMessages.JUnitPreferencePage_addpackagedialog_title); 
 		dialog.setMessage(JUnitMessages.JUnitPreferencePage_addpackagedialog_message); 
-		dialog.setMultipleSelection(true);
-		if (dialog.open() == IDialogConstants.CANCEL_ID)
+		if (dialog.open() != Window.OK)
 			return;
 
 		Object[] packages= dialog.getResult();

@@ -13,33 +13,27 @@
 
 package org.eclipse.jdt.internal.junit.ui;
 
-import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.util.AbstractSet;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.core.resources.IWorkspaceRoot;
-import org.eclipse.core.resources.ResourcesPlugin;
-
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.operation.IRunnableWithProgress;
+import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.IWorkbench;
@@ -47,8 +41,6 @@ import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
 import org.eclipse.ui.PartInitException;
-import org.eclipse.ui.PlatformUI;
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
 
 import org.eclipse.debug.core.DebugPlugin;
@@ -58,14 +50,8 @@ import org.eclipse.debug.core.ILaunchListener;
 import org.eclipse.debug.core.ILaunchManager;
 
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
-import org.eclipse.jdt.core.JavaModelException;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
 
 import org.eclipse.jdt.junit.ITestRunListener;
 
@@ -304,75 +290,11 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	}
 
 	public static Display getDisplay() {
-//		Shell shell= getActiveWorkbenchShell();
-//		if (shell != null) {
-//			return shell.getDisplay();
-//		}
 		Display display= Display.getCurrent();
 		if (display == null) {
 			display= Display.getDefault();
 		}
 		return display;
-	}
-	/**
-	 * Utility method to create and return a selection dialog that allows
-	 * selection of a specific Java package.  Empty packages are not returned.
-	 * If Java Projects are provided, only packages found within those projects
-	 * are included.  If no Java projects are provided, all Java projects in the
-	 * workspace are considered.
-	 */
-	public static ElementListSelectionDialog createAllPackagesDialog(Shell shell, IJavaProject[] originals, final boolean includeDefaultPackage) throws JavaModelException {
-		final List packageList= new ArrayList();
-		if (originals == null) {
-			IWorkspaceRoot wsroot= ResourcesPlugin.getWorkspace().getRoot();
-			IJavaModel model= JavaCore.create(wsroot);
-			originals= model.getJavaProjects();
-		}
-		final IJavaProject[] projects= originals;
-		final JavaModelException[] exception= new JavaModelException[1];
-		
-		IRunnableWithProgress r= new IRunnableWithProgress() {
-			public void run(IProgressMonitor pm) {
-				try {
-					Set packageNameSet= new HashSet();
-					pm.beginTask(JUnitMessages.JUnitPlugin_searching, projects.length); 
-					for (int i= 0; i < projects.length; i++) {
-						IPackageFragment[] pkgs= projects[i].getPackageFragments();
-						for (int j= 0; j < pkgs.length; j++) {
-							IPackageFragment pkg= pkgs[j];
-							if (!pkg.hasChildren() && (pkg.getNonJavaResources().length > 0))
-								continue;
-
-							String pkgName= pkg.getElementName();
-							if (!includeDefaultPackage && pkgName.length() == 0)
-								continue;
-
-							if (packageNameSet.add(pkgName))
-								packageList.add(pkg);
-						}
-						pm.worked(1);
-					}
-					pm.done();
-				} catch (JavaModelException jme) {
-					exception[0]= jme;
-				}
-			}
-		};
-		try {
-			PlatformUI.getWorkbench().getProgressService().busyCursorWhile(r);
-		} catch (InvocationTargetException e) {
-			JUnitPlugin.log(e);
-		} catch (InterruptedException e) {
-			JUnitPlugin.log(e);
-		}
-		if (exception[0] != null)
-			throw exception[0];
-
-		int flags= JavaElementLabelProvider.SHOW_DEFAULT;
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(shell, new JavaElementLabelProvider(flags));
-		dialog.setIgnoreCase(false);
-		dialog.setElements(packageList.toArray()); // XXX inefficient
-		return dialog;
 	}
 
 	/**
@@ -418,7 +340,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	}
 
 	/**
-	 * Returns an array of all TestRun listeners
+	 * @return an array of all TestRun listeners
 	 */
 	public List getTestRunListeners() {
 		if (fTestRunListeners == null) {
@@ -428,7 +350,8 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	}
 
 	/**
-	 * Returns an array of all JUnit launch config types
+	 * Returns an array of all JUnit launch configuration types
+	 * @return an array of all JUnit launch configuration types
 	 */
 	public List getJUnitLaunchConfigTypeIDs() {
 		if (fJUnitLaunchConfigTypeIDs == null) {
@@ -439,6 +362,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 
 	/**
 	 * Adds a TestRun listener to the collection of listeners
+	 * @param newListener the listener to add
 	 */
 	public void addTestRunListener(ITestRunListener newListener) {
 		if (fTestRunListeners == null) 
@@ -454,6 +378,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 
 	/**
 	 * Removes a TestRun listener to the collection of listeners
+	 * @param newListener the listener to remove
 	 */
 	public void removeTestRunListener(ITestRunListener newListener) {
 		if (fTestRunListeners != null) 
@@ -462,6 +387,15 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 
 	public static boolean isStopped() {
 		return fIsStopped;
+	}
+	
+	public IDialogSettings getDialogSettingsSection(String name) {
+		IDialogSettings dialogSettings= getDialogSettings();
+		IDialogSettings section= dialogSettings.getSection(name);
+		if (section == null) {
+			section= dialogSettings.addNewSection(name);
+		}
+		return section;
 	}
 
 }
