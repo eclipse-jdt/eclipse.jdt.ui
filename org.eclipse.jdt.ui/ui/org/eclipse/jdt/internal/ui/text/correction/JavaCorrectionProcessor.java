@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IMarker;
@@ -288,13 +289,13 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 		public void process(ContributedProcessorDescriptor[] desc) {
 			for (int i= 0; i < desc.length; i++) {
 				fDescriptor= desc[i];
-				Platform.run(this);
+				SafeRunner.run(this);
 			}
 		}
 
 		public void process(ContributedProcessorDescriptor desc) {
 			fDescriptor= desc;
-			Platform.run(this);
+			SafeRunner.run(this);
 		}
 
 		public void run() throws Exception {
