@@ -166,13 +166,8 @@ public class OrganizeImportsOperation implements IWorkspaceRunnable {
 			}
 			
 			if (typeBinding.isMember()) {
-				IBinding[] visibleTypes= fAnalyzer.getDeclarationsInScope(ref, ScopeAnalyzer.TYPES);
-				for (int i= 0; i < visibleTypes.length; i++) {
-					ITypeBinding curr= ((ITypeBinding) visibleTypes[i]).getTypeDeclaration();
-					if (curr == typeBinding) {
-						return false;
-					}
-				}
+				if (fAnalyzer.isDeclaredInScope(typeBinding, ref, ScopeAnalyzer.TYPES))
+					return false;
 			}
 			return true;				
 		}

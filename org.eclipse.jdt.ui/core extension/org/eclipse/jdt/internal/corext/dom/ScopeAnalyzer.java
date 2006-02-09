@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.ArrayList;
 import java.util.HashSet;
-import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.jdt.core.dom.AST;
@@ -55,6 +54,8 @@ import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
  */
 public class ScopeAnalyzer {
 	
+	private static final IBinding[] NO_BINDING= new IBinding[0];
+
 	/**
 	 * Flag to specify that method should be reported.
 	 */
@@ -74,30 +75,61 @@ public class ScopeAnalyzer {
 	 * Flag to specify that only visible elements should be added.
 	 */		
 	public static final int CHECK_VISIBILITY= 16;
+	
+	private static interface IBindingRequestor {
+		boolean acceptBinding(IBinding binding);
+	}
+	
+	private static class DefaultBindingRequestor implements IBindingRequestor {
 		
-	private ArrayList fRequestor;
-	private HashSet fNamesAdded;
+		private final List fResult;
+		private final HashSet fNamesAdded;
+		private final int fFlags;
+		private final ITypeBinding fParentTypeBinding;
+		
+		public DefaultBindingRequestor(ITypeBinding parentTypeBinding, int flags) {
+			fParentTypeBinding= parentTypeBinding;
+			fFlags= flags;
+			fResult= new ArrayList();
+			fNamesAdded= new HashSet();
+		}
+		
+		public DefaultBindingRequestor() {
+			this(null, 0);
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean acceptBinding(IBinding binding) {
+			if (hasFlag(CHECK_VISIBILITY, fFlags)) {
+				if (!isVisible(binding, fParentTypeBinding)) {
+					return false;
+				}
+			}
+			String signature= getSignature(binding);
+			if (signature != null && fNamesAdded.add(signature)) { // avoid duplicated results from inheritance
+				fResult.add(binding);
+			}
+			return false;
+		}
+
+		public List getResult() {
+			return fResult;
+		}
+		
+	}
+
 	private HashSet fTypesVisited;
 	
 	private CompilationUnit fRoot;
 	
 	public ScopeAnalyzer(CompilationUnit root) {
-		fRequestor= new ArrayList();
-		fNamesAdded= new HashSet();
 		fTypesVisited= new HashSet();
 		fRoot= root;
 	}
 	
-	protected void addResult(IBinding binding) {
-		String signature= getSignature(binding);
-		if (signature != null && fNamesAdded.add(signature)) { // avoid duplicated results from inheritance
-			fRequestor.add(binding);
-		}			
-	}
-	
 	private void clearLists() {
-		fRequestor.clear();
-		fNamesAdded.clear();
 		fTypesVisited.clear();
 	}
 	
@@ -136,14 +168,15 @@ public class ScopeAnalyzer {
 	 * @param binding The type binding
 	 * @param flags Flags defining the elements to report
 	 */
-	private void addInherited(ITypeBinding binding, int flags) {
+	private boolean addInherited(ITypeBinding binding, int flags, IBindingRequestor requestor) {
 		if (!fTypesVisited.add(binding)) {
-			return;
+			return false;
 		}
 		if (hasFlag(VARIABLES, flags)) {
 			IVariableBinding[] variableBindings= binding.getDeclaredFields();
 			for (int i= 0; i < variableBindings.length; i++) {
-				addResult(variableBindings[i]);
+				if (requestor.acceptBinding(variableBindings[i]))
+					return true;
 			}
 		}
 		
@@ -152,7 +185,8 @@ public class ScopeAnalyzer {
 			for (int i= 0; i < methodBindings.length; i++) {
 				IMethodBinding curr= methodBindings[i];
 				if (!curr.isSynthetic() && !curr.isConstructor()) {
-					addResult(curr);		
+					if (requestor.acceptBinding(curr))
+						return true;
 				}
 			}
 		}
@@ -161,22 +195,27 @@ public class ScopeAnalyzer {
 			ITypeBinding[] typeBindings= binding.getDeclaredTypes();
 			for (int i= 0; i < typeBindings.length; i++) {
 				ITypeBinding curr= typeBindings[i];
-				addResult(curr);			
+				if (requestor.acceptBinding(curr))
+					return true;			
 			}
 		}		
 		
 		
 		ITypeBinding superClass= binding.getSuperclass();
 		if (superClass != null) {
-			addInherited(superClass, flags); // recursive
+			if (addInherited(superClass, flags, requestor)) // recursive
+				return true;
 		} else if (binding.isArray()) {
-			addInherited(fRoot.getAST().resolveWellKnownType("java.lang.Object"), flags); //$NON-NLS-1$
+			if (addInherited(fRoot.getAST().resolveWellKnownType("java.lang.Object"), flags, requestor)) //$NON-NLS-1$
+				return true;
 		}
 		
 		ITypeBinding[] interfaces= binding.getInterfaces(); // includes looking for methods: abstract, unimplemented methods
 		for (int i= 0; i < interfaces.length; i++) {
-			addInherited(interfaces[i], flags); // recursive 
-		}			
+			if (addInherited(interfaces[i], flags, requestor)) // recursive
+				return true;
+		}
+		return false;
 	}
 		
 	
@@ -185,50 +224,58 @@ public class ScopeAnalyzer {
 	 * @param binding The type binding
 	 * @param flags Flags defining the elements to report
 	 */
-	private void addTypeDeclarations(ITypeBinding binding, int flags) {
+	private boolean addTypeDeclarations(ITypeBinding binding, int flags, IBindingRequestor requestor) {
 		if (hasFlag(TYPES, flags) && !binding.isAnonymous()) {
-			addResult(binding);
+			if (requestor.acceptBinding(binding))
+				return true;
 			
 			ITypeBinding[] typeParameters= binding.getTypeParameters();
 			for (int i= 0; i < typeParameters.length; i++) {
-				addResult(typeParameters[i]);
+				if (requestor.acceptBinding(typeParameters[i]))
+					return true;
 			}
 		}
 		
-		addInherited(binding, flags); // add inherited 
+		addInherited(binding, flags, requestor); // add inherited 
 		
 		if (binding.isLocal()) {
-			addOuterDeclarationsForLocalType(binding, flags);
+			addOuterDeclarationsForLocalType(binding, flags, requestor);
 		} else {
 			ITypeBinding declaringClass= binding.getDeclaringClass();
 			if (declaringClass != null) {
-				addTypeDeclarations(declaringClass, flags); // Recursively add inherited 
+				if (addTypeDeclarations(declaringClass, flags, requestor)) // Recursively add inherited
+					return true;
 			} else if (hasFlag(TYPES, flags)) {
 				if (fRoot.findDeclaringNode(binding) != null) {
 					List types= fRoot.types();
 					for (int i= 0; i < types.size(); i++) {
-						addResult(((AbstractTypeDeclaration) types.get(i)).resolveBinding());
+						if (requestor.acceptBinding(((AbstractTypeDeclaration) types.get(i)).resolveBinding()))
+							return true;
 					}
 				}
 			}
 		}
+		return false;
 	}
 	
-	private void addOuterDeclarationsForLocalType(ITypeBinding localBinding, int flags) {
+	private boolean addOuterDeclarationsForLocalType(ITypeBinding localBinding, int flags, IBindingRequestor requestor) {
 		ASTNode node= fRoot.findDeclaringNode(localBinding);
 		if (node == null) {
-			return;
+			return false;
 		}
 		
 		if (node instanceof AbstractTypeDeclaration || node instanceof AnonymousClassDeclaration) {
-			addLocalDeclarations(node.getParent(), flags);
+			if (addLocalDeclarations(node.getParent(), flags, requestor))
+				return true;
 			
 			ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(node.getParent());
 			if (parentTypeBinding != null) {
-				addTypeDeclarations(parentTypeBinding, flags);
+				if (addTypeDeclarations(parentTypeBinding, flags, requestor))
+					return true;
 			}
 			
 		}
+		return false;
 	}
 	
 	private static ITypeBinding getBinding(Expression node) {
@@ -289,22 +336,63 @@ public class ScopeAnalyzer {
 			ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(selector);
 			if (parentTypeBinding != null) {			
 				ITypeBinding binding= getQualifier(selector);
+				DefaultBindingRequestor requestor= new DefaultBindingRequestor(parentTypeBinding, flags);
 				if (binding == null) {
-					addLocalDeclarations(selector, flags);
-					addTypeDeclarations(parentTypeBinding, flags);
+					addLocalDeclarations(selector, flags, requestor);
+					addTypeDeclarations(parentTypeBinding, flags, requestor);
 				} else {
-					addInherited(binding, flags);
+					addInherited(binding, flags, requestor);
 				}
 
-				if (hasFlag(CHECK_VISIBILITY, flags)) {
-					filterNonVisible(parentTypeBinding);
-				}
+				List result= requestor.getResult();
+				return (IBinding[]) result.toArray(new IBinding[result.size()]);
 			}
-			return (IBinding[]) fRequestor.toArray(new IBinding[fRequestor.size()]);
+			return NO_BINDING;
 		} finally {
 			clearLists();			
 		}
-	}		
+	}
+	
+	private static class SearchRequestor implements IBindingRequestor {
+		
+		private final int fFlags;
+		private final ITypeBinding fParentTypeBinding;
+		private final IBinding fToSearch;
+		private boolean fFound;
+		
+		public SearchRequestor(IBinding toSearch, ITypeBinding parentTypeBinding, int flag) {
+			fFlags= flag;
+			fToSearch= toSearch;
+			fParentTypeBinding= parentTypeBinding;
+			fFound= false;
+		}
+		
+		public boolean acceptBinding(IBinding binding) {
+			if (fFound)
+				return true;
+			
+			if (hasFlag(CHECK_VISIBILITY, fFlags)) {
+				if (!isVisible(binding, fParentTypeBinding)) {
+					return false;
+				}
+			}
+			if (hasFlag(METHODS, fFlags)) {
+				if (((IMethodBinding)binding).getMethodDeclaration() == fToSearch)
+					fFound= true;
+			} else if (hasFlag(TYPES, fFlags)) {
+				if (((ITypeBinding) binding).getTypeDeclaration() == fToSearch)
+					fFound= true;
+			} else {
+				if (binding == fToSearch)
+					fFound= true;
+			}
+			return fFound;
+		}
+		
+		public boolean found() {
+			return fFound;
+		}
+	}
 	
 	public boolean isDeclaredInScope(IBinding declaration, SimpleName selector, int flags) {
 		try {
@@ -319,45 +407,23 @@ public class ScopeAnalyzer {
 			ITypeBinding parentTypeBinding= Bindings.getBindingOfParentType(selector);
 			if (parentTypeBinding != null) {			
 				ITypeBinding binding= getQualifier(selector);
+				SearchRequestor requestor= new SearchRequestor(declaration, parentTypeBinding, flags);
 				if (binding == null) {
-					addLocalDeclarations(selector, flags);
-					if (hasFlag(CHECK_VISIBILITY, flags)) {
-						filterNonVisible(parentTypeBinding);
-					}
-					for (Iterator iter= fRequestor.iterator(); iter.hasNext();) {
-						IBinding element= (IBinding)iter.next();
-						if (hasFlag(METHODS, flags)) {
-							if (((IMethodBinding)element).getMethodDeclaration() == declaration)
-								return true;
-						} else {
-							if (element == declaration)
-								return true;
-						}
-					}
-					fRequestor.clear();
-					addTypeDeclarations(parentTypeBinding, flags);
+					addLocalDeclarations(selector, flags, requestor);
+					if (requestor.found())
+						return true;
+					addTypeDeclarations(parentTypeBinding, flags, requestor);
+					if (requestor.found())
+						return true;
 				} else {
-					addInherited(binding, flags);
-				}
-				
-
-				if (hasFlag(CHECK_VISIBILITY, flags)) {
-					filterNonVisible(parentTypeBinding);
-				}
-				for (Iterator iter= fRequestor.iterator(); iter.hasNext();) {
-					IBinding element= (IBinding)iter.next();
-					if (hasFlag(METHODS, flags)) {
-						if (((IMethodBinding)element).getMethodDeclaration() == declaration)
-							return true;
-					} else {
-						if (element == declaration)
-							return true;
-					}
+					addInherited(binding, flags, requestor);
+					if (requestor.found())
+						return true;
 				}
 			}
 			return false;
 		} finally {
-			clearLists();			
+			clearLists();
 		}
 	}
 	
@@ -396,30 +462,19 @@ public class ScopeAnalyzer {
 		}
 		
 		try {
-			addLocalDeclarations(node, offset, flags);
-			ITypeBinding binding= Bindings.getBindingOfParentType(node);				
+			ITypeBinding binding= Bindings.getBindingOfParentType(node);
+			DefaultBindingRequestor requestor= new DefaultBindingRequestor(binding, flags);
+			addLocalDeclarations(node, offset, flags, requestor);			
 			if (binding != null) {
-				addTypeDeclarations(binding, flags);
+				addTypeDeclarations(binding, flags, requestor);
 			}
-			
-			if (hasFlag(CHECK_VISIBILITY, flags)) {
-				filterNonVisible(binding);
-			}
-			return (IBinding[]) fRequestor.toArray(new IBinding[fRequestor.size()]);
+			List result= requestor.getResult();
+			return (IBinding[]) result.toArray(new IBinding[result.size()]);
 		} finally {
 			clearLists();			
 		}
 	}
 	
-	private void filterNonVisible(ITypeBinding binding) {
-		// remove non-visible declarations
-		for (int i= fRequestor.size() - 1; i >= 0; i--) {
-			if (!isVisible((IBinding) fRequestor.get(i), binding)) {
-				fRequestor.remove(i);
-			}
-		}
-	}
-
 	private static ITypeBinding getDeclaringType(IBinding binding) {
 		switch (binding.getKind()) {
 			case IBinding.VARIABLE:
@@ -491,10 +546,13 @@ public class ScopeAnalyzer {
 			}
 
 			if (declaration instanceof Block) {
-				DeclarationsAfterVisitor visitor= new DeclarationsAfterVisitor(node.getStartPosition(), flags);
+				DefaultBindingRequestor requestor= new DefaultBindingRequestor();
+				DeclarationsAfterVisitor visitor= new DeclarationsAfterVisitor(node.getStartPosition(), flags, requestor);
 				declaration.accept(visitor);
+				List result= requestor.getResult();
+				return (IBinding[])result.toArray(new IBinding[result.size()]);
 			}
-			return (IBinding[]) fRequestor.toArray(new IBinding[fRequestor.size()]);
+			return NO_BINDING;
 		} finally {
 			clearLists();			
 		}
@@ -505,10 +563,14 @@ public class ScopeAnalyzer {
 		
 		private int fPosition;
 		private int fFlags;
+		private final IBindingRequestor fRequestor;
+		private boolean fBreak;
 		
-		public ScopeAnalyzerVisitor(int position, int flags) {
+		public ScopeAnalyzerVisitor(int position, int flags, IBindingRequestor requestor) {
 			fPosition= position;
 			fFlags= flags;
+			fRequestor= requestor;
+			fBreak= false;
 		}
 		
 		private boolean isInside(ASTNode node) {
@@ -538,9 +600,9 @@ public class ScopeAnalyzer {
 		 */
 		public boolean visit(TypeParameter node) {
 			if (hasFlag(TYPES, fFlags) && node.getStartPosition() < fPosition) {
-				addResult(node.getName().resolveBinding());
+				fBreak= fRequestor.acceptBinding(node.getName().resolveBinding());
 			}
-			return true;
+			return !fBreak;
 		}
 				
 		public boolean visit(SwitchCase node) {
@@ -553,7 +615,9 @@ public class ScopeAnalyzer {
 					for (int i= 0; i < declaredFields.length; i++) {
 						IVariableBinding curr= declaredFields[i];
 						if (curr.isEnumConstant()) {
-							addResult(curr);
+							fBreak= fRequestor.acceptBinding(curr);
+							if (fBreak)
+								return false;
 						}
 					}
 				}
@@ -562,11 +626,11 @@ public class ScopeAnalyzer {
 		}
 		
 		public boolean visit(Initializer node) {
-			return isInside(node);
+			return !fBreak && isInside(node);
 		}		
 		
 		public boolean visit(Statement node) {
-			return isInside(node);
+			return !fBreak && isInside(node);
 		}
 		
 		public boolean visit(ASTNode node) {
@@ -582,9 +646,9 @@ public class ScopeAnalyzer {
 		
 		public boolean visit(VariableDeclaration node) {
 			if (hasFlag(VARIABLES, fFlags) && node.getStartPosition() < fPosition) {
-				addResult(node.resolveBinding());					
+				fBreak= fRequestor.acceptBinding(node.resolveBinding());					
 			}
-			return true;
+			return !fBreak;
 		}
 		
 		public boolean visit(VariableDeclarationStatement node) {
@@ -616,16 +680,19 @@ public class ScopeAnalyzer {
 		public boolean visit(TypeDeclarationStatement node) {
 			if (hasFlag(TYPES, fFlags) && node.getStartPosition() + node.getLength() < fPosition) {
 				if (node.getAST().apiLevel() == AST.JLS2) {
-					addResult(node.getTypeDeclaration().resolveBinding());
+					fBreak= fRequestor.acceptBinding(node.getTypeDeclaration().resolveBinding());
 				} else {
-					addResult(node.getDeclaration().getName().resolveBinding());
+					fBreak= fRequestor.acceptBinding(node.getDeclaration().getName().resolveBinding());
 				}
 				return false;
 			}
-			return isInside(node);
+			return !fBreak && isInside(node);
 		}
 		
 		private void visitBackwards(List list) {
+			if (fBreak)
+				return;
+			
 			for (int i= list.size() - 1; i >= 0; i--) {
 				ASTNode curr= (ASTNode) list.get(i);
 				if (curr.getStartPosition() <  fPosition) {
@@ -636,21 +703,25 @@ public class ScopeAnalyzer {
 	}
 	
 	private class DeclarationsAfterVisitor extends HierarchicalASTVisitor {
-		private int fPosition;
-		private int fFlags;
+		private final int fPosition;
+		private final int fFlags;
+		private final IBindingRequestor fRequestor;
+		private boolean fBreak;
 		
-		public DeclarationsAfterVisitor(int position, int flags) {
+		public DeclarationsAfterVisitor(int position, int flags, IBindingRequestor requestor) {
 			fPosition= position;
 			fFlags= flags;
+			fRequestor= requestor;
+			fBreak= false;
 		}
 		
 		public boolean visit(ASTNode node) {
-			return true;
+			return !fBreak;
 		}
 		
 		public boolean visit(VariableDeclaration node) {
 			if (hasFlag(VARIABLES, fFlags) && fPosition < node.getStartPosition()) {
-				addResult(node.resolveBinding());		
+				fBreak= fRequestor.acceptBinding(node.resolveBinding());		
 			}
 			return false;
 		}
@@ -662,28 +733,30 @@ public class ScopeAnalyzer {
 		public boolean visit(TypeDeclarationStatement node) {
 			if (hasFlag(TYPES, fFlags) && fPosition < node.getStartPosition()) {
 				if (node.getAST().apiLevel() == AST.JLS2) {
-					addResult(node.getTypeDeclaration().resolveBinding());
+					fBreak= fRequestor.acceptBinding(node.getTypeDeclaration().resolveBinding());
 				} else {
-					addResult(node.getDeclaration().getName().resolveBinding());
+					fBreak= fRequestor.acceptBinding(node.getDeclaration().getName().resolveBinding());
 				}
 			}
 			return false;
 		}
 	}
 	
-	private void addLocalDeclarations(ASTNode node, int flags) {
-		addLocalDeclarations(node, node.getStartPosition(), flags);
+	private boolean addLocalDeclarations(ASTNode node, int flags, IBindingRequestor requestor) {
+		return addLocalDeclarations(node, node.getStartPosition(), flags, requestor);
 	}
 	
 	
-	private void addLocalDeclarations(ASTNode node, int offset, int flags) {
+	private boolean addLocalDeclarations(ASTNode node, int offset, int flags, IBindingRequestor requestor) {
 		if (hasFlag(VARIABLES, flags) || hasFlag(TYPES, flags)) {
 			BodyDeclaration declaration= ASTResolving.findParentBodyDeclaration(node);
 			if (declaration instanceof MethodDeclaration || declaration instanceof Initializer) {		
-				ScopeAnalyzerVisitor visitor= new ScopeAnalyzerVisitor(offset, flags);
+				ScopeAnalyzerVisitor visitor= new ScopeAnalyzerVisitor(offset, flags, requestor);
 				declaration.accept(visitor);
+				return visitor.fBreak;
 			}
 		}
+		return false;
 	}
 	
 }
