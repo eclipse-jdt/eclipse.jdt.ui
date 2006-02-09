@@ -45,7 +45,6 @@ import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
@@ -167,9 +166,6 @@ public class PotentialProgrammingProblemsFix extends AbstractFix {
 		if (unit == null)
 			return null;
 		
-		if (!JavaModelUtil.isEditable(unit))
-			return null;
-		
 		final SimpleName simpleName= getSimpleTypeName(compilationUnit, problem);
 		if (simpleName == null)
 			return null;
@@ -186,9 +182,6 @@ public class PotentialProgrammingProblemsFix extends AbstractFix {
 	private static SerialVersionHashBatchOperation createSerialVersionHashOperation(CompilationUnit compilationUnit, IProblemLocation[] problems, ISerialVersionFixContext context) {
 		final ICompilationUnit unit= (ICompilationUnit)compilationUnit.getJavaElement();
 		if (unit == null)
-			return null;
-		
-		if (!JavaModelUtil.isEditable(unit))
 			return null;
 		
 		List simpleNames= new ArrayList();

@@ -20,7 +20,10 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.MultiStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
+import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
@@ -28,6 +31,8 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.dialogs.ErrorDialog;
 
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.Position;
@@ -42,9 +47,12 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
 
+import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.PerformChangeOperation;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.CorrectionEngine;
@@ -58,7 +66,11 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.refactoring.Checks;
+import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
+import org.eclipse.jdt.internal.corext.refactoring.composite.MultiStateCompilationUnitChange;
 
+import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
@@ -194,6 +206,10 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 								return;
 							
 							allChanges.initializeValidationData(new SubProgressMonitor(pm, 1));
+							
+							if (!validChanges(allChanges))
+								return;
+							
 							PerformChangeOperation op= new PerformChangeOperation(allChanges);
 							op.setUndoManager(RefactoringCore.getUndoManager(), allChanges.getName());
 							try {
@@ -213,6 +229,48 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 				} 
 			} finally {
 				pm.done();
+			}
+		}
+
+		private boolean validChanges(CompositeChange change) {
+			RefactoringStatus result= new RefactoringStatus();
+			List files= new ArrayList();
+			try {
+				findFilesToBeModified(change, files);
+			} catch (JavaModelException e) {
+				JavaPlugin.log(e);
+				return false;
+			}
+			result.merge(Checks.validateModifiesFiles((IFile[])files.toArray(new IFile[files.size()]), JavaPlugin.getActiveWorkbenchShell().getShell()));
+			if (result.hasFatalError()) {
+				RefactoringStatusEntry[] entries= result.getEntries();
+				IStatus status;
+				if (entries.length > 1) {
+					status= new MultiStatus(JavaUI.ID_PLUGIN, 0, result.getMessageMatchingSeverity(RefactoringStatus.ERROR), null);
+					for (int i= 0; i < entries.length; i++) {
+						((MultiStatus)status).add(new Status(entries[i].getSeverity(), JavaUI.ID_PLUGIN, 0, entries[i].getMessage(), null));
+					}
+				} else {
+					RefactoringStatusEntry entry= entries[0];
+					status= new Status(entry.getSeverity(), JavaUI.ID_PLUGIN, 0, entry.getMessage(), null);
+				}
+				ErrorDialog.openError(JavaPlugin.getActiveWorkbenchShell().getShell(), CorrectionMessages.CorrectionMarkerResolutionGenerator__multiFixErrorDialog_Titel, CorrectionMessages.CorrectionMarkerResolutionGenerator_multiFixErrorDialog_description, status);
+				return false;
+			}
+			return true;
+		}
+		
+		private void findFilesToBeModified(CompositeChange change, List result) throws JavaModelException {
+			Change[] children= change.getChildren();
+			for (int i=0;i < children.length;i++) {
+				Change child= children[i];
+				if (child instanceof CompositeChange) {
+					findFilesToBeModified((CompositeChange)child, result);
+				} else if (child instanceof MultiStateCompilationUnitChange) {
+					result.add(((MultiStateCompilationUnitChange)child).getCompilationUnit().getCorrespondingResource());
+				} else if (child instanceof CompilationUnitChange) {
+					result.add(((CompilationUnitChange)child).getCompilationUnit().getCorrespondingResource());
+				}
 			}
 		}
 
