@@ -31,6 +31,8 @@ import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.IOpenEventListener;
 import org.eclipse.jface.util.OpenStrategy;
 
+import org.eclipse.jdt.internal.junit.model.TestCaseElement;
+
 /**
  * A pane that shows a stack trace of a failed test.
  */
@@ -42,7 +44,7 @@ public class FailureTrace implements IMenuListener {
 	private TestRunnerViewPart fTestRunner;
 	private String fInputTrace;
 	private final Clipboard fClipboard;
-    private TestRunInfo fFailure;
+    private TestCaseElement fFailure;
     private CompareResultsAction fCompareAction;
 	private final FailureTableDisplay fFailureTableDisplay;
 
@@ -148,22 +150,22 @@ public class FailureTrace implements IMenuListener {
 	
 	/**
 	 * Shows a TestFailure
-	 * @param failure the failed test
+	 * @param test the failed test
 	 */
-	public void showFailure(TestRunInfo failure) {	
-	    fFailure= failure;
+	public void showFailure(TestCaseElement test) {	
+	    fFailure= test;
 	    String trace= ""; //$NON-NLS-1$
-	    updateEnablement(failure);
-	    if (failure != null) 
-	        trace= failure.getTrace();
+	    updateEnablement(test);
+	    if (test != null) 
+	        trace= test.getTrace();
 		if (fInputTrace == trace)
 			return;
 		fInputTrace= trace;
 		updateTable(trace);
 	}
 
-	public void updateEnablement(TestRunInfo failure) {
-		fCompareAction.setEnabled(failure != null && failure.isComparisonFailure());
+	public void updateEnablement(TestCaseElement test) {
+		fCompareAction.setEnabled(test != null && test.isComparisonFailure());
 	}
 
 	private void updateTable(String trace) {
@@ -203,7 +205,7 @@ public class FailureTrace implements IMenuListener {
 		fInputTrace= null;
 	}
 
-    public TestRunInfo getFailedTest() {
+    public TestCaseElement getFailedTest() {
         return fFailure;
     }
 

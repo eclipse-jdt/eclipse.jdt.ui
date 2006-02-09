@@ -14,9 +14,7 @@
 package org.eclipse.jdt.internal.junit.ui;
 
 import java.net.URL;
-import java.util.AbstractSet;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
 
@@ -30,32 +28,20 @@ import org.eclipse.core.runtime.Path;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 
-import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.resource.ImageDescriptor;
 
 import org.eclipse.ui.IWorkbench;
 import org.eclipse.ui.IWorkbenchPage;
-import org.eclipse.ui.IWorkbenchPart;
 import org.eclipse.ui.IWorkbenchWindow;
-import org.eclipse.ui.PartInitException;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-
-import org.eclipse.debug.core.DebugPlugin;
-import org.eclipse.debug.core.ILaunch;
-import org.eclipse.debug.core.ILaunchConfiguration;
-import org.eclipse.debug.core.ILaunchListener;
-import org.eclipse.debug.core.ILaunchManager;
-
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.junit.ITestRunListener;
 
-import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+import org.eclipse.jdt.internal.junit.model.JUnitModel;
 
 import org.osgi.framework.Bundle;
 import org.osgi.framework.BundleContext;
@@ -63,7 +49,9 @@ import org.osgi.framework.BundleContext;
 /**
  * The plug-in runtime class for the JUnit plug-in.
  */
-public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
+public class JUnitPlugin extends AbstractUIPlugin {
+	//TODO: move to org.eclipse.jdt.internal.junit
+	
 	/**
 	 * The single instance of this plug-in runtime class.
 	 */
@@ -90,18 +78,13 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 
 	private static final IPath ICONS_PATH= new Path("$nl$/icons/full"); //$NON-NLS-1$
 	
-
-	/**
-	 * Use to track new launches. We need to do this
-	 * so that we only attach a TestRunner once to a launch.
-	 * Once a test runner is connected it is removed from the set.
-	 */
-	private AbstractSet fTrackedLaunches= new HashSet(20);
+	private final JUnitModel fJUnitModel= new JUnitModel();
+	
 
 	/**
 	 * List storing the registered test run listeners
 	 */
-	private List fTestRunListeners;
+	private List/*<ITestRunListener>*/ fTestRunListeners;
 
 	/**
 	 * List storing the registered JUnit launch configuration types
@@ -161,7 +144,7 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 
 	public static ImageDescriptor getImageDescriptor(String relativePath) {
 		IPath path= ICONS_PATH.append(relativePath);
-		return createImageDescriptor(getDefault().getBundle(), path);
+		return createImageDescriptor(getDefault().getBundle(), path, true);
 	}
 	
 	/*
@@ -175,126 +158,91 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 		return ImageDescriptor.getMissingImageDescriptor();
 	}
 	
-
-	/*
-	 * @see ILaunchListener#launchRemoved(ILaunch)
+	/**
+	 * Sets the three image descriptors for enabled, disabled, and hovered to an action. The actions
+	 * are retrieved from the *lcl16 folders.
+	 * 
+	 * @param action the action
+	 * @param iconName the icon name
 	 */
-	public void launchRemoved(final ILaunch launch) {
-		fTrackedLaunches.remove(launch);
-		getDisplay().asyncExec(new Runnable() {
-			public void run() {
-				TestRunnerViewPart testRunnerViewPart= findTestRunnerViewPartInActivePage();
-				if (testRunnerViewPart != null && testRunnerViewPart.isCreated() && launch.equals(testRunnerViewPart.getLastLaunch()))
-					testRunnerViewPart.reset();
-			}
-		});
+	public static void setLocalImageDescriptors(IAction action, String iconName) {
+		setImageDescriptors(action, "lcl16", iconName); //$NON-NLS-1$
 	}
 
+	private static void setImageDescriptors(IAction action, String type, String relPath) {
+		ImageDescriptor id= createImageDescriptor("d" + type, relPath, false); //$NON-NLS-1$
+		if (id != null)
+			action.setDisabledImageDescriptor(id);
+	
+		/*
+		 * id= create("c" + type, relPath, false); //$NON-NLS-1$
+		 * if (id != null)
+		 * 		action.setHoverImageDescriptor(id);
+		 */
+	
+		ImageDescriptor descriptor= createImageDescriptor("e" + type, relPath, true); //$NON-NLS-1$
+		action.setHoverImageDescriptor(descriptor);
+		action.setImageDescriptor(descriptor); 
+	}
+	
 	/*
-	 * @see ILaunchListener#launchAdded(ILaunch)
+	 * Creates an image descriptor for the given prefix and name in the JDT UI bundle. The path can
+	 * contain variables like $NL$.
+	 * If no image could be found, <code>useMissingImageDescriptor</code> decides if either
+	 * the 'missing image descriptor' is returned or <code>null</code>.
+	 * or <code>null</code>.
 	 */
-	public void launchAdded(ILaunch launch) {
-		fTrackedLaunches.add(launch);
+	private static ImageDescriptor createImageDescriptor(String pathPrefix, String imageName, boolean useMissingImageDescriptor) {
+		IPath path= ICONS_PATH.append(pathPrefix).append(imageName);
+		return createImageDescriptor(JUnitPlugin.getDefault().getBundle(), path, useMissingImageDescriptor);
 	}
-
-	public void connectTestRunner(ILaunch launch, IType launchedType, int port) {
-		TestRunnerViewPart testRunnerViewPart= showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
-		if (testRunnerViewPart != null)
-			testRunnerViewPart.startTestRunListening(launchedType, port, launch);
-	}
-
-	private TestRunnerViewPart showTestRunnerViewPartInActivePage(TestRunnerViewPart testRunner) {
-		IWorkbenchPart activePart= null;
-		IWorkbenchPage page= null;
-		try {
-			// TODO: have to force the creation of view part contents 
-			// otherwise the UI will not be updated
-			if (testRunner != null && testRunner.isCreated())
-				return testRunner;
-			page= getActivePage();
-			if (page == null)
-				return null;
-			activePart= page.getActivePart();
-			//	show the result view if it isn't shown yet
-			return (TestRunnerViewPart) page.showView(TestRunnerViewPart.NAME);
-		} catch (PartInitException pie) {
-			log(pie);
-			return null;
-		} finally{
-			//restore focus stolen by the creation of the result view
-			if (page != null && activePart != null)
-				page.activate(activePart);
-		}
-	}
-
-	private TestRunnerViewPart findTestRunnerViewPartInActivePage() {
-		IWorkbenchPage page= getActivePage();
-		if (page == null)
-			return null;
-		return (TestRunnerViewPart) page.findView(TestRunnerViewPart.NAME);
-	}
-
-	/*
-	 * @see ILaunchListener#launchChanged(ILaunch)
+	
+	/**
+	 * Creates an image descriptor for the given path in a bundle. The path can
+	 * contain variables like $NL$. If no image could be found,
+	 * <code>useMissingImageDescriptor</code> decides if either the 'missing
+	 * image descriptor' is returned or <code>null</code>.
+	 * 
+	 * @param bundle
+	 * @param path
+	 * @param useMissingImageDescriptor
+	 * @return an {@link ImageDescriptor}, or <code>null</code> iff there's
+	 *         no image at the given location and
+	 *         <code>useMissingImageDescriptor</code> is <code>true</code>
 	 */
-	public void launchChanged(final ILaunch launch) {
-		if (!fTrackedLaunches.contains(launch))
-			return;
-
-		ILaunchConfiguration config= launch.getLaunchConfiguration();
-		IType launchedType= null;
-		int port= -1;
-		if (config != null) {
-			// test whether the launch defines the JUnit attributes
-			String portStr= launch.getAttribute(JUnitBaseLaunchConfiguration.PORT_ATTR);
-			String typeStr= launch.getAttribute(JUnitBaseLaunchConfiguration.TESTTYPE_ATTR);
-			if (portStr != null && typeStr != null) {
-				port= Integer.parseInt(portStr);
-				IJavaElement element= JavaCore.create(typeStr);
-				if (element instanceof IType)
-					launchedType= (IType) element;
-			}
+	private static ImageDescriptor createImageDescriptor(Bundle bundle, IPath path, boolean useMissingImageDescriptor) {
+		URL url= Platform.find(bundle, path);
+		if (url != null) {
+			return ImageDescriptor.createFromURL(url);
 		}
-		if (launchedType != null) {
-			fTrackedLaunches.remove(launch);
-			final int finalPort= port;
-			final IType finalType= launchedType;
-			getDisplay().asyncExec(new Runnable() {
-				public void run() {
-					connectTestRunner(launch, finalType, finalPort);
-				}
-			});
+		if (useMissingImageDescriptor) {
+			return ImageDescriptor.getMissingImageDescriptor();
 		}
+		return null;
 	}
-
+	
 	/**
 	 * @see AbstractUIPlugin#start(BundleContext)
 	 */
 	public void start(BundleContext context) throws Exception {
 		super.start(context);
-		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
-		launchManager.addLaunchListener(this);
+		fJUnitModel.start();
 	}
 
 	/**
 	 * @see AbstractUIPlugin#stop(BundleContext)
 	 */
 	public void stop(BundleContext context) throws Exception {
+		fIsStopped= true;
 		try {
-			fIsStopped= true;
-			ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
-			launchManager.removeLaunchListener(this);
+			fJUnitModel.stop();
 		} finally {
 			super.stop(context);
 		}
 	}
-
-	public static Display getDisplay() {
-		Display display= Display.getCurrent();
-		if (display == null) {
-			display= Display.getDefault();
-		}
-		return display;
+	
+	public static JUnitModel getModel() {
+		return getDefault().fJUnitModel;
 	}
 
 	/**
@@ -350,10 +298,9 @@ public class JUnitPlugin extends AbstractUIPlugin implements ILaunchListener {
 	}
 
 	/**
-	 * Returns an array of all JUnit launch configuration types
-	 * @return an array of all JUnit launch configuration types
+	 * @return a list of all JUnit launch configuration types
 	 */
-	public List getJUnitLaunchConfigTypeIDs() {
+	public List/*<String>*/ getJUnitLaunchConfigTypeIDs() {
 		if (fJUnitLaunchConfigTypeIDs == null) {
 			loadLaunchConfigTypeIDs();
 		}

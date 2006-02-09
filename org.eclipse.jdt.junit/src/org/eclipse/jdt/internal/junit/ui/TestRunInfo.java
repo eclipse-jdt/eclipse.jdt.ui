@@ -81,10 +81,16 @@ public class TestRunInfo extends Object {
 		return fTrace;
 	}
 
+	/**
+	 * @param status one of the status constants in {@link org.eclipse.jdt.junit.ITestRunListener}
+	 */
 	public void setStatus(int status) {
 		fStatus= status;
 	}
 
+	/**
+	 * @return one of the status constants in {@link org.eclipse.jdt.junit.ITestRunListener}
+	 */
 	public int getStatus() {
 		return fStatus;
 	}

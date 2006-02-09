@@ -1,0 +1,92 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+package org.eclipse.jdt.internal.junit.ui;
+
+import org.eclipse.swt.graphics.Image;
+
+import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
+
+import org.eclipse.jdt.internal.junit.model.TestCaseElement;
+import org.eclipse.jdt.internal.junit.model.TestElement;
+import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
+import org.eclipse.jdt.internal.junit.model.TestElement.Status;
+
+public class TestSessionLabelProvider extends LabelProvider {
+	
+	private final TestRunnerViewPart fTestRunnerPart;
+	private int fLayoutMode;
+	
+	public TestSessionLabelProvider(TestRunnerViewPart testRunnerPart) {
+		fTestRunnerPart= testRunnerPart;
+		fLayoutMode= TestRunnerViewPart.LAYOUT_HIERARCHICAL;
+	}
+	
+	public String getText(Object element) {
+		if (element instanceof TestCaseElement) {
+			if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
+				return ((TestCaseElement) element).getTestMethodName();
+			} else {
+				return ((TestCaseElement) element).getTestMethodName() + " - " + ((TestCaseElement) element).getClassName();
+			}
+			
+		} else if (element instanceof TestElement) {
+			return ((TestElement) element).getTestName();
+			
+		} else {
+			throw new IllegalArgumentException(String.valueOf(element));
+		}
+	}
+	
+	public Image getImage(Object element) {
+		if (element instanceof TestCaseElement) {
+			Status status= ((TestCaseElement) element).getStatus();
+			if (status == Status.NOT_RUN)
+				return fTestRunnerPart.fTestIcon;
+			else if (status == Status.RUNNING)
+				return fTestRunnerPart.fTestRunningIcon;
+			else if (status == Status.OK)
+				return fTestRunnerPart.fTestOkIcon;
+			else if (status == Status.ERROR)
+				return fTestRunnerPart.fTestErrorIcon;
+			else if (status == Status.FAILURE)
+				return fTestRunnerPart.fTestFailIcon;
+			else
+				throw new IllegalStateException(element.toString());
+			
+		} else if (element instanceof TestSuiteElement) {
+			Status status= ((TestSuiteElement) element).getStatus();
+			if (status == Status.NOT_RUN)
+				return fTestRunnerPart.fSuiteIcon;
+			else if (status == Status.RUNNING)
+				return fTestRunnerPart.fSuiteRunningIcon;
+			else if (status == Status.OK)
+				return fTestRunnerPart.fSuiteOkIcon;
+			else if (status == Status.ERROR)
+				return fTestRunnerPart.fSuiteErrorIcon;
+			else if (status == Status.FAILURE)
+				return fTestRunnerPart.fSuiteFailIcon;
+			else
+				throw new IllegalStateException(element.toString());
+		
+		} else {
+			throw new IllegalArgumentException(String.valueOf(element));
+		}
+	}
+
+	public void setLayout(int layoutMode) {
+		if (layoutMode != fLayoutMode) {
+			fLayoutMode= layoutMode;
+			fireLabelProviderChanged(new LabelProviderChangedEvent(this));
+		}
+	}
+}

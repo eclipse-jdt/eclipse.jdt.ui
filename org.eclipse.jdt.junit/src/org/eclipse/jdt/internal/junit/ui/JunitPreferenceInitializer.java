@@ -32,5 +32,6 @@ public class JunitPreferenceInitializer extends AbstractPreferenceInitializer {
 		String active= JUnitPreferencesConstants.serializeList(filters);
 		prefs.setDefault(JUnitPreferencesConstants.PREF_ACTIVE_FILTERS_LIST, active);
 		prefs.setDefault(JUnitPreferencesConstants.PREF_INACTIVE_FILTERS_LIST, ""); //$NON-NLS-1$
+		prefs.setDefault(JUnitPreferencesConstants.MAX_TEST_RUNS, 10);
 	}
 }

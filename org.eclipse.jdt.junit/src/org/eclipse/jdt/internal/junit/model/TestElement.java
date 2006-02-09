@@ -1,0 +1,143 @@
+/*******************************************************************************
+ * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * All rights reserved. This program and the accompanying materials
+ * are made available under the terms of the Eclipse Public License v1.0
+ * which accompanies this distribution, and is available at
+ * http://www.eclipse.org/legal/epl-v10.html
+ *
+ * Contributors:
+ *     IBM Corporation - initial API and implementation
+ *******************************************************************************/
+
+package org.eclipse.jdt.internal.junit.model;
+
+import org.eclipse.jface.util.Assert;
+
+import org.eclipse.jdt.junit.ITestRunListener;
+
+
+public abstract class TestElement {
+	public final static class Status {
+		public static final Status RUNNING= new Status("RUNNING", 0, 3); //$NON-NLS-1$
+		public static final Status ERROR= new Status("ERROR", 1, /*1*/ITestRunListener.STATUS_ERROR); //$NON-NLS-1$
+		public static final Status FAILURE= new Status("FAILURE", 2, /*2*/ITestRunListener.STATUS_FAILURE); //$NON-NLS-1$
+		public static final Status OK= new Status("OK", 3, /*0*/ITestRunListener.STATUS_OK); //$NON-NLS-1$
+		public static final Status NOT_RUN= new Status("NOT_RUN", 4, 4); //$NON-NLS-1$
+		
+		private static final Status[] OLD_CODE= { OK, ERROR, FAILURE};
+		
+		private final String fName;
+		private final int fPriority;
+		private final int fOldCode;
+		
+		private Status(String name, int priority, int oldCode) {
+			fName= name;
+			fPriority= priority;
+			fOldCode= oldCode;
+		}
+		
+		/**
+		 * @return a priority, smaller number is higher priority
+		 */
+		public int getPriority() {
+			return fPriority;
+		}
+		
+		public int getOldCode() {
+			return fOldCode;
+		}
+		
+		public String toString() {
+			return fName;
+		}
+
+		/**
+		 * @param oldStatus one of {@link ITestRunListener}'s STATUS_* constants
+		 * @return the Status
+		 */
+		public static Status convert(int oldStatus) {
+			return OLD_CODE[oldStatus];
+		}
+
+		/**
+		 * @return <code>true</code> iff this is a {@link #FAILURE} or an {@link #ERROR}
+		 */
+		public boolean isFailure() {
+			return this == FAILURE || this == ERROR;
+		}
+	}
+	
+	private final TestSuiteElement fParent;
+	private final String fId;
+	private final String fTestName;
+
+	/**
+	 * @param parent the parent, can be <code>null</code>
+	 * @param id the test id
+	 * @param testName the test name
+	 */
+	public TestElement(TestSuiteElement parent, String id, String testName) {
+		Assert.isNotNull(id);
+		Assert.isNotNull(testName);
+		fParent= parent;
+		fId= id;
+		fTestName= testName;
+		if (parent != null)
+			parent.addChild(this);
+	}
+	
+	/**
+	 * @return the parent suite, or <code>null</code> for the root
+	 */
+	public TestSuiteElement getParent() {
+		return fParent;
+	}
+	
+	public String getId() {
+		return fId;
+	}
+	
+	public String getTestName() {
+		return fTestName;
+	}
+	
+	/**
+	 * @return one of the STATUS_* constants
+	 */
+	public abstract Status getStatus();
+	
+//	/* (non-Javadoc)
+//	 * @see java.lang.Object#equals(java.lang.Object)
+//	 */
+//	public boolean equals(Object obj) {
+//		if (obj == this)
+//			return true;
+//		if (obj == null)
+//			return false;
+//		if (obj.getClass() != getClass())
+//			return false;
+//		
+//		TestElement other= (TestElement) obj;
+//		boolean equals= fId.equals(other.fId);
+//		if (equals == true)
+//			JUnitPlugin.log(new IllegalStateException("unexpected equality, identical root: " + (other.getRoot() == getRoot())));  //$NON-NLS-1$
+//		return equals;
+//	}
+//	
+//	/* (non-Javadoc)
+//	 * @see java.lang.Object#hashCode()
+//	 */
+//	public int hashCode() {
+//		return fId.hashCode();
+//	}
+
+	public TestRoot getRoot() {
+		return getParent().getRoot();
+	}
+	
+	public String toString() {
+		return getTestName() + ": " + getStatus(); //$NON-NLS-1$
+	}
+
+	
+}

@@ -10,7 +10,7 @@
  *     Julien Ruaux: jruaux@octo.com 
  * 	   Vincent Massol: vmassol@octo.com 
  *******************************************************************************/
-package org.eclipse.jdt.internal.junit.ui;
+package org.eclipse.jdt.internal.junit.model;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -28,6 +28,7 @@ import org.eclipse.core.runtime.Platform;
 import org.eclipse.jdt.junit.ITestRunListener;
 
 import org.eclipse.jdt.internal.junit.runner.MessageIds;
+import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 
 /**
  * The client side of the RemoteTestRunner. Handles the
@@ -277,13 +278,14 @@ public class RemoteTestRunnerClient {
 	/**
 	 * Start listening to a test run. Start a server connection that
 	 * the RemoteTestRunner can connect to.
+	 * 
+	 * @param listeners 
+	 * @param port 
 	 */
-	public synchronized void startListening(
-		ITestRunListener[] listeners,
-		int port) {
-		fListeners = listeners;
-		fPort = port;
-		ServerConnection connection = new ServerConnection(port);
+	public synchronized void startListening(ITestRunListener[] listeners, int port) {
+		fListeners= listeners;
+		fPort= port;
+		ServerConnection connection= new ServerConnection(port);
 		connection.start();
 	}
 	
@@ -388,7 +390,8 @@ public class RemoteTestRunnerClient {
 	}
 
 	/**
-	 * Returns an array with two elements. The first one is the testId, the second one the testName.
+	 * @param arg test name
+	 * @return an array with two elements. The first one is the testId, the second one the testName.
 	 */
 	String[] extractTestId(String arg) {
 		String[] result= new String[2];
@@ -414,8 +417,8 @@ public class RemoteTestRunnerClient {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
 				public void run() {
-				    if (listener instanceof ITestRunListener3 ) 
-				        ((ITestRunListener3) listener).testReran(testId,
+				    if (listener instanceof ITestRunListener2 ) 
+				        ((ITestRunListener2) listener).testReran(testId,
 								className, testName, statusCode, trace,
 								fExpectedResult.toString(), fActualResult.toString());
 				    else
@@ -518,8 +521,8 @@ public class RemoteTestRunnerClient {
 			final ITestRunListener listener= fListeners[i];
 			Platform.run(new ListenerSafeRunnable() { 
 				public void run() {
-				    if (listener instanceof ITestRunListener3 )
-				        ((ITestRunListener3)listener).testFailed(fFailureKind, fFailedTestId, 
+				    if (listener instanceof ITestRunListener2 )
+				        ((ITestRunListener2)listener).testFailed(fFailureKind, fFailedTestId, 
 				        		fFailedTest, fFailedTrace.toString(), fExpectedResult.toString(), fActualResult.toString());
 				    else
 				        listener.testFailed(fFailureKind, fFailedTestId, fFailedTest, fFailedTrace.toString());

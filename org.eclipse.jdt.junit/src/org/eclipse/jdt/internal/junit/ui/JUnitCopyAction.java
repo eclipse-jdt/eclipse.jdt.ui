@@ -24,6 +24,8 @@ import org.eclipse.swt.dnd.Transfer;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.SelectionListenerAction;
 
+import org.eclipse.jdt.internal.junit.model.TestElement;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.util.Assert;
 
@@ -35,7 +37,7 @@ public class JUnitCopyAction extends SelectionListenerAction {
 	
 	private final Clipboard fClipboard;
 
-	private TestRunInfo fTestInfo;
+	private TestElement fTestElement;
 
 	/**
 	 * Constructor for CopyTraceAction.
@@ -56,8 +58,8 @@ public class JUnitCopyAction extends SelectionListenerAction {
 	public void run() {
 		String trace= fView.getTrace();
 		String source;
-		if (trace == null && fTestInfo != null) {
-			source = fTestInfo.getTestName();
+		if (trace == null && fTestElement != null) {
+			source = fTestElement.getTestName();
 		} else {
 			source = convertLineTerminators(trace);
 		}
@@ -78,8 +80,8 @@ public class JUnitCopyAction extends SelectionListenerAction {
 	}
 
 
-	public void handleTestSelected(TestRunInfo testInfo) {
-		fTestInfo = testInfo;
+	public void handleTestSelected(TestElement test) {
+		fTestElement= test;
 	}
 	
 	private String convertLineTerminators(String in) {

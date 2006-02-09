@@ -8,15 +8,17 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.junit.ui;
+
+package org.eclipse.jdt.internal.junit.model;
 
 
-/**
- * Extends ITestRunListener2 with a call back to trace the test contents
- */
-public interface ITestRunListener3 extends ITestRunListener2 {
+public interface ITestRunSessionListener {
 
-    public void testFailed(int status, String testId, String testName, String trace, String expected, String actual);
+	/**
+	 * @param testRunSession the new session, or <code>null</code>
+	 */
+	void sessionAdded(TestRunSession testRunSession);
 
-	public void testReran(String testId, String className, String testName, int statusCode, String trace, String expectedResult, String actualResult);
+	void sessionRemoved(TestRunSession testRunSession);
+
 }
