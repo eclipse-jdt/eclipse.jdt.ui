@@ -57,49 +57,63 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 
 /**
  * A proposal for quick fixes and quick assist that work on a single compilation unit.
- * Either a compilation unit change is directly passed in the constructor or method {@link #addEdits(IDocument, TextEdit)} is overridden
- * to provide the text changes that are applied to the document when the proposal is
- * evaluated.
+ * Either a {@link TextChange text change} is directly passed in the constructor or method
+ * {@link #addEdits(IDocument, TextEdit)} is overridden to provide the text edits that are
+ * applied to the document when the proposal is evaluated.
  * <p>
  * The proposal takes care of the preview of the changes as proposal information.
  * </p>
- * @since 3.0
+ * @since 3.2
  */
 public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 
 	private ICompilationUnit fCompilationUnit;
 
 	/**
-	 * Constructs a compilation unit correction proposal.
+	 * Constructs a correction proposal working on a compilation unit with a given text change
+	 * 
+	 * @param name the name that is displayed in the proposal selection dialog.
+	 * @param cu the compilation unit on that the change works.
+	 * @param change the change that is executed when the proposal is applied or <code>null</code>
+	 * if implementors override {@link #addEdits(IDocument, TextEdit)} to provide
+	 * the text edits or {@link #createTextChange()} to provide a text change.
+	 * @param relevance the relevance of this proposal.
+	 * @param image the image that is displayed for this proposal or <code>null</code> if no
+	 * image is desired.
+	 */
+	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance, Image image) {
+		super(name, change, relevance, image);
+		if (cu == null) {
+			throw new IllegalArgumentException("Compilation unit must not be null"); //$NON-NLS-1$
+		}
+		fCompilationUnit= cu;
+	}
+	
+	/**
+	 * Constructs a correction proposal working on a compilation unit.
+	 * <p>Users have to override {@link #addEdits(IDocument, TextEdit)} to provide
+	 * the text edits or {@link #createTextChange()} to provide a text change.
+	 * </p>
+	 * 
 	 * @param name The name that is displayed in the proposal selection dialog.
 	 * @param cu The compilation unit on that the change works.
 	 * @param relevance The relevance of this proposal.
 	 * @param image The image that is displayed for this proposal or <code>null</code> if no
 	 * image is desired.
 	 */
-	public CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image) {
+	protected CUCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image) {
 		this(name, cu, null, relevance, image);
 	}
 
 	/**
-	 * Constructs a compilation unit correction proposal.
-	 * @param name The name that is displayed in the proposal selection dialog.
-	 * @param change The change that is executed when the proposal is applied.
-	 * @param relevance The relevance of this proposal.
-	 * @param image The image that is displayed for this proposal or <code>null</code> if no
-	 * image is desired.
-	 */
-	public CUCorrectionProposal(String name, ICompilationUnit cu, TextChange change, int relevance, Image image) {
-		super(name, change, relevance, image);
-		fCompilationUnit= cu;
-	}
-
-	/**
-	 * Called when the <code>CompilationUnitChange</code> is initialized. Subclasses can override to
-	 * add text edits to root edit of the change. Implementors must not access the proposal, e.g getting the change.
-	 * @param document Content of the underlying compilation unit. To be accessed read only.
+	 * Called when the {@link CompilationUnitChange} is initialized. Subclasses can override to
+	 * add text edits to the root edit of the change. Implementors must not access the proposal,
+	 * e.g getting the change.
+	 * <p>The default implementation does not add any edits</p>
+	 * 
+	 * @param document content of the underlying compilation unit. To be accessed read only.
 	 * @param editRoot The root edit to add all edits to
-	 * @throws CoreException
+	 * @throws CoreException can be thrown if adding the edits is failing.
 	 */
 	protected void addEdits(IDocument document, TextEdit editRoot) throws CoreException {
 		if (false) {
@@ -228,15 +242,9 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 				}
 			}
 			performChange(part, document);
-
-			rememberSelection();
 		} catch (CoreException e) {
 			ExceptionHandler.handle(e, CorrectionMessages.CUCorrectionProposal_error_title, CorrectionMessages.CUCorrectionProposal_error_message);
 		}
-	}
-
-	protected void rememberSelection() throws CoreException {
-		//Do nothing
 	}
 
 	private boolean performValidateEdit(ICompilationUnit unit) {
@@ -250,7 +258,14 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 		return true;
 	}
 	
-
+	/**
+	 * Creates the text change for this proposal.
+	 * This method is only called once and only when no text change has been passed in
+	 * {@link #CUCorrectionProposal(String, ICompilationUnit, TextChange, int, Image)}.
+	 * 
+	 * @return returns the created text change.
+	 * @throws CoreException thrown if the creation of the text change failed.
+	 */
 	protected TextChange createTextChange() throws CoreException {
 		ICompilationUnit cu= getCompilationUnit();
 		String name= getDisplayString();
@@ -290,7 +305,8 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	
 	/**
 	 * Gets the text change that is invoked when the change is applied.
-	 * @return Returns a text change
+	 * 
+	 * @return returns the text change that is invoked when the change is applied.
 	 * @throws CoreException throws an exception if accessing the change failed
 	 */
 	public final TextChange getTextChange() throws CoreException {
@@ -298,15 +314,19 @@ public class CUCorrectionProposal extends ChangeCorrectionProposal  {
 	}
 
 	/**
-	 * Returns the compilationUnit.
-	 * @return ICompilationUnit
+	 * The compilation unit on that the change works.
+	 * 
+	 * @return the compilation unit on that the change works.
 	 */
 	public final ICompilationUnit getCompilationUnit() {
 		return fCompilationUnit;
 	}
 
 	/**
-	 * @return Returns the preview of the changed compilation unit
+	 * Creates a preview of the content of the compilation unit after applying the change.
+	 * 
+	 * @return returns the preview of the changed compilation unit.
+	 * @throws CoreException thrown if the creation of the change failed.
 	 */
 	public String getPreviewContent() throws CoreException {
 		return getTextChange().getPreviewContent(new NullProgressMonitor());

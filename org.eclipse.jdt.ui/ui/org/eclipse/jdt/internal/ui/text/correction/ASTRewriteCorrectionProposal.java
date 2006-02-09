@@ -32,10 +32,11 @@ import org.eclipse.jdt.internal.ui.JavaUIStatus;
 
 /**
  * A proposal for quick fixes and quick assists that works on a AST rewriter.
- * Either a rewriter is directly passed in the constructor or method {@link #getRewrite()} is overridden
- * to provide the AST rewriter that is evaluated to the document when the proposal is
- * applied.
- * @since 3.0
+ * Either a rewriter is directly passed in the constructor or method {@link #getRewrite()}
+ * is overridden to provide the AST rewriter that is evaluated to the document when the
+ * proposal is applied.
+ * 
+ * @since 3.2
  */
 public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
@@ -44,10 +45,11 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 
 	/**
 	 * Constructs a AST rewrite correction proposal.
-	 * @param name The display name of the proposal.
-	 * @param cu The compilation unit that is modified.
-	 * @param rewrite The AST rewrite that is invoked when the proposal is applied
-	 *  <code>null</code> can be passed if {@link #getRewrite()} is overridden.
+	 * 
+	 * @param name the display name of the proposal.
+	 * @param cu the compilation unit that is modified.
+	 * @param rewrite the AST rewrite that is invoked when the proposal is applied or
+	 *  <code>null</code> if {@link #getRewrite()} is overridden.
 	 * @param relevance The relevance of this proposal.
 	 * @param image The image that is displayed for this proposal or <code>null</code> if no
 	 * image is desired.
@@ -58,7 +60,7 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	}
 
 	/**
-	 * Returns the import rewriter used for this compilation unit.
+	 * Returns the import rewriter used for this compilation unit. <code>
 	 */
 	public ImportRewrite getImportRewrite() {
 		return fImportRewrite;
@@ -102,8 +104,9 @@ public class ASTRewriteCorrectionProposal extends CUCorrectionProposal {
 	/**
 	 * Returns the rewriter that has been passed in the constructor. Implementors can override this
 	 * method to create the rewriter lazy. This method will only be called once.
-	 * @return Returns the rewriter to be used.
-	 * @throws CoreException A core exception is thrown when the could not be created.
+	 * 
+	 * @return returns the rewriter to be used.
+	 * @throws CoreException an exception is thrown when the rewriter could not be created.
 	 */
 	protected ASTRewrite getRewrite() throws CoreException {
 		if (fRewrite == null) {

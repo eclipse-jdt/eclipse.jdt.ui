@@ -16,6 +16,10 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ui.IEditorPart;
+
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
@@ -25,23 +29,28 @@ import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 	
 	private final String fTypeName;
-	private final ICompilationUnit fCu;
-	private final SimpleName fNode;
 	private final String fQualifierName;
 
 	public AddImportCorrectionProposal(String name, ICompilationUnit cu, int relevance, Image image, String qualifierName, String typeName, SimpleName node) {
 		super(name, cu, ASTRewrite.create(node.getAST()), relevance, image);
 		fTypeName= typeName;
-		fCu= cu;
-		fNode= node;
 		fQualifierName= qualifierName;
 	}
 	
 	public String getQualifiedTypeName() {
 		return fQualifierName + '.' + fTypeName;
 	}
+	
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.text.correction.ChangeCorrectionProposal#performChange(org.eclipse.ui.IEditorPart, org.eclipse.jface.text.IDocument)
+	 */
+	protected void performChange(IEditorPart activeEditor, IDocument document) throws CoreException {
+		super.performChange(activeEditor, document);
+		rememberSelection();
+	}
+	
 
-	protected void rememberSelection() throws CoreException {
+	private void rememberSelection() throws CoreException {
 		QualifiedTypeNameHistory.remember(getQualifiedTypeName());
 	}
 

@@ -32,8 +32,6 @@ import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.NullChange;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.internal.corext.Assert;
-
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -43,7 +41,8 @@ import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
  * Implementation of a Java completion proposal to be used for quick fix and quick assist
  * proposals that invoke a {@link Change}. The proposal offers a proposal information but no context
  * information.
- * @since 3.0
+ * 
+ * @since 3.2
  */
 public class ChangeCorrectionProposal implements IJavaCompletionProposal, ICommandAccess {
 
@@ -55,6 +54,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/**
 	 * Constructs a change correction proposal.
+	 * 
 	 * @param name The name that is displayed in the proposal selection dialog.
 	 * @param change The change that is executed when the proposal is applied or <code>null</code>
 	 * if the change will be created by implementors of {@link #createChange()}.
@@ -63,7 +63,9 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	 * image is desired.
 	 */
 	public ChangeCorrectionProposal(String name, Change change, int relevance, Image image) {
-		Assert.isNotNull(name);
+		if (name == null) {
+			throw new IllegalArgumentException("Name must not be null"); //$NON-NLS-1$
+		}
 		fName= name;
 		fChange= change;
 		fRelevance= relevance;
@@ -84,6 +86,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/**
 	 * Performs the change associated with this proposal.
+	 * 
 	 * @param activeEditor The editor currently active or <code>null</code> if no
 	 * editor is active.
 	 * @param document The document of the editor currently active or <code>null</code> if
@@ -183,6 +186,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/**
 	 * Sets the proposal's image or <code>null</code> if no image is desired.
+	 * 
 	 * @param image the desired image.
 	 */
 	public void setImage(Image image) {
@@ -191,7 +195,8 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/**
 	 * Returns the change that will be executed when the proposal is applied.
-	 * @return returns a Change
+	 * 
+	 * @return returns the change for this proposal.
 	 */
 	public final Change getChange() throws CoreException {
 		if (fChange == null) {
@@ -201,9 +206,12 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	}
 
 	/**
-	 * Creates the change for this proposal. This method is only called once and only when the change has
-	 * been initialized with <code>null</code> in {@link #ChangeCorrectionProposal(String, Change, int, Image)}.
+	 * Creates the text change for this proposal.
+	 * This method is only called once and only when no text change has been passed in
+ 	 * {@link #ChangeCorrectionProposal(String, Change, int, Image)}.
+ 	 * 
 	 * @return returns the created change.
+	 * @throws CoreException thrown if the creation of the change failed.
 	 */
 	protected Change createChange() throws CoreException {
 		return new NullChange();
@@ -211,10 +219,13 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	
 	/**
 	 * Sets the display name.
-	 * @param name The name to set
+	 * 
+	 * @param name the name to set
 	 */
 	public void setDisplayName(String name) {
-		Assert.isNotNull(name);
+		if (name == null) {
+			throw new IllegalArgumentException("Name must not be null"); //$NON-NLS-1$
+		}
 		fName= name;
 	}
 
@@ -227,7 +238,7 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 
 	/**
 	 * Sets the relevance.
-	 * @param relevance The relevance to set
+	 * @param relevance the relevance to set
 	 */
 	public void setRelevance(int relevance) {
 		fRelevance= relevance;
@@ -241,8 +252,10 @@ public class ChangeCorrectionProposal implements IJavaCompletionProposal, IComma
 	}
 	
 	/**
-	 * Set the proposal id to allow assigning a shortcut to the correction proposal
-	 * @param commandId The proposal id for this proposal
+	 * Set the proposal id to allow assigning a shortcut to the correction proposal.
+	 * 
+	 * @param commandId The proposal id for this proposal or <code>null</code> if no command
+	 * should be assigned to this proposal.
 	 */
 	public void setCommandId(String commandId) {
 		fCommandId= commandId;
