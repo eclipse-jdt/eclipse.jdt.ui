@@ -80,6 +80,7 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContext;
 import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
+import org.eclipse.jdt.ui.CodeStyleConfiguration;
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -999,39 +1000,12 @@ public class StubUtility {
 	
 
 	public static ImportRewrite createImportRewrite(ICompilationUnit cu, boolean restoreExistingImports) throws JavaModelException {
-		return configureImportRewrite(ImportRewrite.create(cu, restoreExistingImports));
+		return CodeStyleConfiguration.createImportRewrite(cu, restoreExistingImports);
 	}
 	
 	public static ImportRewrite createImportRewrite(CompilationUnit astRoot, boolean restoreExistingImports) {
-		return configureImportRewrite(ImportRewrite.create(astRoot, restoreExistingImports));
+		return CodeStyleConfiguration.createImportRewrite(astRoot, restoreExistingImports);
 	}
-	
-	private static ImportRewrite configureImportRewrite(ImportRewrite rewrite) {
-		IJavaProject project= rewrite.getCompilationUnit().getJavaProject();
-		String order= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_IMPORTORDER, project);
-		rewrite.setImportOrder(SEMICOLON_PATTERN.split(order, 0));
-
-		String thres= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, project);
-		try {
-			int num= Integer.parseInt(thres);
-			if (num == 0)
-				num= 1;
-			rewrite.setOnDemandImportThreshold(num);
-		} catch (NumberFormatException e) {
-			// ignore
-		}
-		String thresStatic= PreferenceConstants.getPreference(PreferenceConstants.ORGIMPORTS_STATIC_ONDEMANDTHRESHOLD, project);
-		try {
-			int num= Integer.parseInt(thresStatic);
-			if (num == 0)
-				num= 1;
-			rewrite.setStaticOnDemandImportThreshold(num);
-		} catch (NumberFormatException e) {
-			// ignore
-		}
-		return rewrite;
-	}
-	
 	
 	
 }
