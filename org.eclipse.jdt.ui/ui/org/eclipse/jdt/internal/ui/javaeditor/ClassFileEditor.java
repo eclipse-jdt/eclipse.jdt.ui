@@ -559,6 +559,14 @@ public class ClassFileEditor extends JavaEditor implements ClassFileDocumentProv
 	public boolean isEditable() {
 		return false;
 	}
+	
+	/*
+	 * @see org.eclipse.ui.texteditor.AbstractTextEditor#isEditorInputReadOnly()
+	 * @since 3.2
+	 */
+	public boolean isEditorInputReadOnly() {
+		return true;
+	}
 
 	/**
 	 * Translates the given editor input into an <code>ExternalClassFileEditorInput</code>
