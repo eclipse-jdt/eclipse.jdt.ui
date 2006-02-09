@@ -37,7 +37,7 @@ public final class JavaModelAdapterFactory implements IAdapterFactory {
 			if (adapter == IResourceMappingMerger.class)
 				return new JavaModelMerger((ModelProvider) adaptable);
 			else if (adapter == ISynchronizationCompareAdapter.class)
-				return new JavaCompareAdapter();
+				return new JavaSynchronizationCompareAdapter();
 		} else if (adaptable instanceof RefactoringHistory) {
 			if (adapter == ResourceMapping.class)
 				return new JavaRefactoringHistoryResourceMapping((RefactoringHistory) adaptable);

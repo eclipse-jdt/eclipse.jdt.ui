@@ -17,14 +17,14 @@ import org.eclipse.compare.structuremergeviewer.ICompareInput;
 import org.eclipse.team.core.mapping.ISynchronizationContext;
 
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
-import org.eclipse.ltk.ui.refactoring.model.AbstractRefactoringCompareAdapter;
+import org.eclipse.ltk.ui.refactoring.model.AbstractSynchronizationCompareAdapter;
 
 /**
- * Java-aware refactoring compare adapter.
+ * Java-aware synchronization compare adapter.
  * 
  * @since 3.2
  */
-public final class JavaCompareAdapter extends AbstractRefactoringCompareAdapter {
+public final class JavaSynchronizationCompareAdapter extends AbstractSynchronizationCompareAdapter {
 
 	/**
 	 * {@inheritDoc}

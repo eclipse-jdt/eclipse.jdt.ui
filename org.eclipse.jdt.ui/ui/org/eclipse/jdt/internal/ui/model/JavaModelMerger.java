@@ -17,7 +17,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.ModelProvider;
 
-import org.eclipse.ltk.ui.refactoring.model.AbstractRefactoringModelMerger;
+import org.eclipse.ltk.ui.refactoring.model.AbstractResourceMappingMerger;
 
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
@@ -33,7 +33,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.2
  */
-public final class JavaModelMerger extends AbstractRefactoringModelMerger {
+public final class JavaModelMerger extends AbstractResourceMappingMerger {
 
 	/**
 	 * Creates a new java model merger.
