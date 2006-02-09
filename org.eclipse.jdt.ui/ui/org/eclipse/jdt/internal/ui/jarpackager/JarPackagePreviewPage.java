@@ -30,7 +30,6 @@ import org.eclipse.jface.wizard.WizardPage;
 import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 import org.eclipse.ltk.ui.refactoring.RefactoringUI;
 import org.eclipse.ltk.ui.refactoring.history.IRefactoringHistoryControl;
@@ -109,18 +108,18 @@ public class JarPackagePreviewPage extends WizardPage implements IJarPackageWiza
 	}
 
 	/**
-	 * Retrieves the refactoring history to preview.
+	 * Returns the refactoring history to preview.
 	 * 
 	 * @return the refactoring history, or <code>null</code>
 	 */
-	protected RefactoringHistory retrieveRefactoringHistory() {
-		final RefactoringHistory[] history= { null };
+	protected RefactoringHistory getRefactoringHistory() {
+		final RefactoringHistory[] history= { null};
 		final IProject[] projects= fJarPackageData.getRefactoringProjects();
 		try {
 			getContainer().run(false, true, new IRunnableWithProgress() {
 
 				public void run(final IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-					history[0]= JarPackagerUtil.retrieveHistory(projects, 0, Long.MAX_VALUE, fJarPackageData.isExportStructuralOnly() ? RefactoringDescriptor.STRUCTURAL_CHANGE : RefactoringDescriptor.NONE, monitor);
+					history[0]= JarPackagerUtil.getRefactoringHistory(projects, 0, Long.MAX_VALUE, fJarPackageData.isExportStructuralOnly() ? RefactoringDescriptor.STRUCTURAL_CHANGE : RefactoringDescriptor.NONE, monitor);
 				}
 			});
 		} catch (InvocationTargetException exception) {
@@ -136,13 +135,15 @@ public class JarPackagePreviewPage extends WizardPage implements IJarPackageWiza
 	 */
 	public final void setVisible(boolean visible) {
 		super.setVisible(visible);
-		if (visible && fJarPackageData.isRefactoringAware()) {
-			final RefactoringHistory history= retrieveRefactoringHistory();
-			if (history != null) {
-				fHistoryControl.setInput(history);
-				fHistoryControl.setCheckedDescriptors(fJarPackageData.getRefactoringDescriptors());
-			}
-		} else
-			fJarPackageData.setRefactoringDescriptors(new RefactoringDescriptorProxy[0]);
+		if (fJarPackageData.isRefactoringAware()) {
+			if (visible) {
+				final RefactoringHistory history= getRefactoringHistory();
+				if (history != null) {
+					fHistoryControl.setInput(history);
+					fHistoryControl.setCheckedDescriptors(fJarPackageData.getRefactoringDescriptors());
+				}
+			} else
+				fHistoryControl.setInput(null);
+		}
 	}
 }

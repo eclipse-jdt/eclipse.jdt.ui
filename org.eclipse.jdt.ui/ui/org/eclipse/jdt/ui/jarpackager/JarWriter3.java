@@ -109,7 +109,7 @@ public class JarWriter3 {
 			final Object[] projects= fJarPackage.getRefactoringProjects();
 			if (fJarPackage.isRefactoringAware() && projects != null && projects.length > 0) {
 				Assert.isTrue(fJarPackage.areDirectoryEntriesIncluded());
-				final IPath path= new Path(JarPackagerUtil.getRefactoringsEntryName());
+				final IPath path= new Path(JarPackagerUtil.getRefactoringsEntry());
 				addDirectories(path.removeLastSegments(1));
 				addHistory(fJarPackage, path, new NullProgressMonitor());
 			}
@@ -285,7 +285,7 @@ public class JarWriter3 {
 			file= File.createTempFile("history", null); //$NON-NLS-1$
 			output= new BufferedOutputStream(new FileOutputStream(file));
 			try {
-				RefactoringCore.getRefactoringHistoryService().writeRefactoringDescriptors(proxies, output, RefactoringDescriptor.NONE, false, monitor);
+				RefactoringCore.getHistoryService().writeRefactoringDescriptors(proxies, output, RefactoringDescriptor.NONE, false, monitor);
 				try {
 					output.close();
 					output= null;

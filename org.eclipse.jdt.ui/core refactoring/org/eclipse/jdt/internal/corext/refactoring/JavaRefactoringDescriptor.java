@@ -12,11 +12,18 @@ package org.eclipse.jdt.internal.corext.refactoring;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
+import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringContribution;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 /**
  * Descriptor object of a java refactoring.
@@ -66,41 +73,89 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	/** The map of arguments (element type: &lt;String, String&gt;) */
 	private final Map fArguments;
 
+	/** The refactoring contribution, or <code>null</code> */
+	private JavaRefactoringContribution fContribution;
+
+	/**
+	 * Creates a new java refactoring descriptor.
+	 * 
+	 * @param contribution
+	 *            the refactoring contribution, or <code>null</code>
+	 * @param id
+	 *            the unique id of the refactoring
+	 * @param project
+	 *            the project name, or <code>null</code>
+	 * @param description
+	 *            the description
+	 * @param comment
+	 *            the comment, or <code>null</code>
+	 * @param arguments
+	 *            the argument map
+	 * @param flags
+	 *            the flags
+	 */
+	public JavaRefactoringDescriptor(final JavaRefactoringContribution contribution, final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
+		super(id, project, description, comment, flags);
+		Assert.isNotNull(arguments);
+		fContribution= contribution;
+		fArguments= Collections.unmodifiableMap(new HashMap(arguments));
+	}
+
 	/**
 	 * Creates a new java refactoring descriptor.
 	 * 
 	 * @param id
 	 *            the unique id of the refactoring
 	 * @param project
-	 *            the non-empty name of the project associated with this
-	 *            refactoring, or <code>null</code>
+	 *            the project name, or <code>null</code>
 	 * @param description
-	 *            a non-empty human-readable description of the particular
-	 *            refactoring instance
+	 *            the description
 	 * @param comment
-	 *            the comment associated with the refactoring, or
-	 *            <code>null</code> for no commment
+	 *            the comment, or <code>null</code>
 	 * @param arguments
-	 *            the argument map (element type: &lt;String, String&gt;). The
-	 *            keys of the arguments are required to be non-empty strings
-	 *            which must not contain spaces. The values must be non-empty
-	 *            strings
+	 *            the argument map
 	 * @param flags
-	 *            the flags of the refactoring descriptor
+	 *            the flags
 	 */
 	public JavaRefactoringDescriptor(final String id, final String project, final String description, final String comment, final Map arguments, final int flags) {
-		super(id, project, description, comment, flags);
-		Assert.isNotNull(arguments);
-		fArguments= Collections.unmodifiableMap(new HashMap(arguments));
+		this(null, id, project, description, comment, arguments, flags);
 	}
 
 	/**
-	 * Returns the arguments describing the refactoring, in no particular order.
-	 * 
-	 * @return the argument map (element type: &lt;String, String&gt;). The
-	 *         resulting map cannot be modified.
+	 * {@inheritDoc}
 	 */
-	public final Map getArguments() {
+	public RefactoringArguments createArguments() {
+		final JavaRefactoringArguments arguments= new JavaRefactoringArguments();
+		for (final Iterator iterator= fArguments.entrySet().iterator(); iterator.hasNext();) {
+			final Map.Entry entry= (Entry) iterator.next();
+			final String name= (String) entry.getKey();
+			final String value= (String) entry.getValue();
+			if (name != null && !"".equals(name) && value != null) //$NON-NLS-1$
+				arguments.setAttribute(name, value);
+		}
+		return arguments;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Refactoring createRefactoring() throws CoreException {
+		if (fContribution != null)
+			return fContribution.createRefactoring(this);
+		final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(getID());
+		if (contribution instanceof JavaRefactoringContribution) {
+			fContribution= (JavaRefactoringContribution) contribution;
+			return fContribution.createRefactoring(this);
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the argument map
+	 * 
+	 * @return the argument map.
+	 */
+	public Map getArguments() {
 		return fArguments;
 	}
 }

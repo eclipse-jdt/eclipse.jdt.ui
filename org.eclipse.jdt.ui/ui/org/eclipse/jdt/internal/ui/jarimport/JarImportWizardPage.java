@@ -348,7 +348,7 @@ public final class JarImportWizardPage extends WizardPage {
 					return;
 				}
 				fJarImportData.setRefactoringFileLocation(URIUtil.toURI(path));
-				ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntryName());
+				ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntry());
 				if (entry == null) {
 					setMessage(JarImportMessages.JarImportWizardPage_no_refactorings, INFORMATION);
 					setPageComplete(true);
@@ -357,7 +357,7 @@ public final class JarImportWizardPage extends WizardPage {
 				InputStream stream= null;
 				try {
 					stream= zip.getInputStream(entry);
-					fJarImportData.setRefactoringHistory(RefactoringCore.getRefactoringHistoryService().readRefactoringHistory(stream, JavaRefactorings.JAR_IMPORTABLE));
+					fJarImportData.setRefactoringHistory(RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactorings.JAR_IMPORTABLE));
 				} catch (IOException exception) {
 					setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
 					setPageComplete(false);

@@ -32,8 +32,8 @@ import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 
@@ -54,7 +54,7 @@ public final class InlineMethodRefactoringContribution extends JavaRefactoringCo
 		int selectionLength= -1;
 		ICompilationUnit unit= null;
 		CompilationUnit node= null;
-		final RefactoringArguments arguments= createArguments(descriptor);
+		final RefactoringArguments arguments= descriptor.createArguments();
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
 			final String selection= generic.getAttribute(InlineMethodRefactoring.ATTRIBUTE_SELECTION);

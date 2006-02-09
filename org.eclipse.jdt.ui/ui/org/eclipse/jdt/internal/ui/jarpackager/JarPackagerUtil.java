@@ -77,7 +77,7 @@ public class JarPackagerUtil {
 	 * 
 	 * @since 3.2
 	 */
-	public static String getRefactoringsEntryName() {
+	public static String getRefactoringsEntry() {
 		return REFACTORINGS_ENTRY;
 	}
 
@@ -106,21 +106,6 @@ public class JarPackagerUtil {
 		if (parent == null)
 			return false;
 		return queryDialog(parent, JarPackagerMessages.JarPackage_confirmReplace_title, Messages.format(JarPackagerMessages.JarPackage_confirmReplace_message, filePath)); 
-	}
-
-	/**
-	 * Checks if the manifest file can be overwritten.
-	 * If the JAR package setting does not allow to overwrite the manifest
-	 * then a dialog will ask the user again.
-	 * 
-	 * @param	parent	the parent for the dialog,
-	 * 			or <code>null</code> if no dialog should be presented
-	 * @return	<code>true</code> if it is OK to create the JAR
-	 */
-	static boolean canOverwrite(Shell parent, IFile file) {
-		if (file.isAccessible())
-			return true;
-		return askForOverwritePermission(parent, file.getFullPath().toString());
 	}
 
 	/**
@@ -268,10 +253,10 @@ public class JarPackagerUtil {
 	 *            the progress monitor to use, or <code>null</code>
 	 * @return the refactoring history, or <code>null</code>
 	 */
-	public static RefactoringHistory retrieveHistory(final IProject[] projects, final long start, final long end, final int filter, final IProgressMonitor monitor) {
+	public static RefactoringHistory getRefactoringHistory(final IProject[] projects, final long start, final long end, final int filter, final IProgressMonitor monitor) {
 		Assert.isNotNull(projects);
 		if (start >= 0 && end >= start) {
-			final IRefactoringHistoryService service= RefactoringCore.getRefactoringHistoryService();
+			final IRefactoringHistoryService service= RefactoringCore.getHistoryService();
 			try {
 				service.connect();
 				return service.getRefactoringHistory(projects, start, end, JavaRefactorings.JAR_IMPORTABLE | filter, monitor);

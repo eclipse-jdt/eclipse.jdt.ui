@@ -119,12 +119,12 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 								ZipFile zip= null;
 								try {
 									zip= new ZipFile(file, ZipFile.OPEN_READ);
-									ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntryName());
+									ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntry());
 									if (entry != null) {
 										InputStream stream= null;
 										try {
 											stream= zip.getInputStream(entry);
-											final RefactoringHistory existing= RefactoringCore.getRefactoringHistoryService().readRefactoringHistory(stream, JavaRefactorings.JAR_IMPORTABLE);
+											final RefactoringHistory existing= RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactorings.JAR_IMPORTABLE);
 											if (existing != null)
 												fHistoryDelta= incoming.removeAll(existing).getDescriptors();
 										} finally {
@@ -281,7 +281,7 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 		final RefactoringStatus status= new RefactoringStatus();
 		if (refactoring instanceof IInitializableRefactoringComponent) {
 			final IInitializableRefactoringComponent component= (IInitializableRefactoringComponent) refactoring;
-			final RefactoringArguments arguments= RefactoringCore.getRefactoringContributionManager().createArguments(descriptor);
+			final RefactoringArguments arguments= descriptor.createArguments();
 			if (arguments instanceof JavaRefactoringArguments) {
 				final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
 				String value= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
