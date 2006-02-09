@@ -20,9 +20,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
-import org.eclipse.jdt.internal.corext.util.TypeInfoUtil;
+import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 
 public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 	
@@ -44,9 +42,7 @@ public class AddImportCorrectionProposal extends ASTRewriteCorrectionProposal {
 	}
 
 	protected void rememberSelection() throws CoreException {
-		TypeInfo info= TypeInfoUtil.searchTypeInfo(fCu.getJavaProject(), fNode, getQualifiedTypeName());
-		if (info != null)
-			TypeInfoHistory.remember(info);
+		QualifiedTypeNameHistory.remember(getQualifiedTypeName());
 	}
 
 }

@@ -33,9 +33,7 @@ import org.eclipse.jdt.core.dom.rewrite.ImportRewrite;
 import org.eclipse.jdt.internal.corext.codemanipulation.ContextSensitiveImportRewriteContext;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
-import org.eclipse.jdt.internal.corext.util.TypeInfoUtil;
+import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.text.java.JavaContentAssistInvocationContext;
@@ -197,9 +195,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		if (lhs != null && rhs != null)
 			JavaPlugin.getDefault().getContentAssistHistory().remember(lhs, rhs);
 		
-		TypeInfo info= TypeInfoUtil.searchTypeInfo(fCompilationUnit.getJavaProject(), null, getQualifiedTypeName());
-		if (info != null)
-			TypeInfoHistory.remember(info);
+		QualifiedTypeNameHistory.remember(getQualifiedTypeName());
 	}
 
 	/**
@@ -307,7 +303,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		 * not override other relevance factors such as if the type is already imported etc.
 		 */
 		float rhsHistoryRank= fInvocationContext.getHistoryRelevance(getQualifiedTypeName());
-		float typeHistoryRank= TypeInfoHistory.getDefault().getNormalizedPosition(getQualifiedTypeName());
+		float typeHistoryRank= QualifiedTypeNameHistory.getDefault().getNormalizedPosition(getQualifiedTypeName());
 
 		int recencyBoost= Math.round((rhsHistoryRank + typeHistoryRank) * 5);
 		int rhsBoost= rhsHistoryRank > 0.0f ? 50 : 0;

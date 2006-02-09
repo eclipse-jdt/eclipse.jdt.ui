@@ -34,18 +34,10 @@ public class TypeInfoHistory extends History {
 	private static final String NODE_MODIFIERS= "modifiers";  //$NON-NLS-1$
 	
 	private static final char[][] EMPTY_ENCLOSING_NAMES= new char[0][0];
-	private static TypeInfoHistory fgInstance;
 	
 	private final TypeInfoFactory fTypeInfoFactory;
 	
-	public static TypeInfoHistory getDefault() {
-		if (fgInstance == null)
-			fgInstance= new TypeInfoHistory("TypeInfoHistory.xml"); //$NON-NLS-1$
-		
-		return fgInstance;
-	}
-	
-	public TypeInfoHistory(String fileName) {
+	protected TypeInfoHistory(String fileName) {
 		super(fileName, NODE_ROOT, NODE_TYPE_INFO);
 		fTypeInfoFactory= new TypeInfoFactory();
 		load();
@@ -128,16 +120,6 @@ public class TypeInfoHistory extends History {
 			names.add(name.toCharArray());
 		}
 		return (char[][])names.toArray(new char[names.size()][]);
-	}
-
-	public static int getBoost(String fullyQualifiedTypeName, int min, int max) {
-		float position= getDefault().getNormalizedPosition(fullyQualifiedTypeName);
-		int dist= max - min;
-		return Math.round(position * dist) + min;
-	}
-
-	public static void remember(TypeInfo typeInfo) {
-		getDefault().accessed(typeInfo);
 	}
 
 }

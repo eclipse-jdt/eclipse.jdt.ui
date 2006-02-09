@@ -79,8 +79,8 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
-import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 
 import org.eclipse.jdt.ui.JavaElementImageDescriptor;
 import org.eclipse.jdt.ui.JavaElementLabels;
@@ -604,7 +604,7 @@ public class UnresolvedElementsSubProcessor {
 			String[] arg= { simpleName, packName };
 			String label= Messages.format(CorrectionMessages.UnresolvedElementsSubProcessor_importtype_description, arg);
 			Image image= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_IMPDECL);
-			int boost= TypeInfoHistory.getBoost(fullName, 0, maxProposals);
+			int boost= QualifiedTypeNameHistory.getBoost(fullName, 0, maxProposals);
 			proposal= new AddImportCorrectionProposal(label, cu, relevance + 100 + boost, image, packName, simpleName, (SimpleName)node);
 			proposal.setCommandId(ADD_IMPORT_ID);
 		} else {

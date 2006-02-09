@@ -67,8 +67,8 @@ import org.eclipse.jdt.internal.corext.template.java.CodeTemplateContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaContextType;
 import org.eclipse.jdt.internal.corext.template.java.JavaDocContextType;
 import org.eclipse.jdt.internal.corext.util.OpenTypeHistory;
+import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 import org.eclipse.jdt.internal.corext.util.TypeFilter;
-import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.JavaUI;
@@ -539,7 +539,7 @@ public class JavaPlugin extends AbstractUIPlugin {
 				fMembersOrderPreferenceCache= null;
 			}
 			
-			TypeInfoHistory.getDefault().save();
+			QualifiedTypeNameHistory.getDefault().save();
 			
 			// must add here to guarantee that it is the first in the listener list
 

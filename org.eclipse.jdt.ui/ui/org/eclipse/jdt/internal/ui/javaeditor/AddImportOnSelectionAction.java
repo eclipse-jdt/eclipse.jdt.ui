@@ -49,8 +49,9 @@ import org.eclipse.jdt.core.ICompilationUnit;
 
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.AddImportsOperation.IChooseImportQuery;
+import org.eclipse.jdt.internal.corext.util.History;
+import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 
@@ -73,7 +74,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			if (((String)o1).equals(o2))
 				return 0;
 			
-			TypeInfoHistory history= TypeInfoHistory.getDefault();
+			History history= QualifiedTypeNameHistory.getDefault();
 			
 			int pos1= history.getPosition(o1);
 			int pos2= history.getPosition(o2);
@@ -231,7 +232,7 @@ public class AddImportOnSelectionAction extends Action implements IUpdate {
 			if (dialog.open() == Window.OK) {
 				fIsShowing= false;
 				TypeInfo result= (TypeInfo) dialog.getFirstResult();
-				TypeInfoHistory.remember(result);
+				QualifiedTypeNameHistory.remember(result.getFullyQualifiedName());
 				return result;
 			}
 			fIsShowing= false;

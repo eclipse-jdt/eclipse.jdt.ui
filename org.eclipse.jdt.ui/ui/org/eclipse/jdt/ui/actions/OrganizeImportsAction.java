@@ -72,10 +72,11 @@ import org.eclipse.jdt.internal.corext.ValidateEditException;
 import org.eclipse.jdt.internal.corext.codemanipulation.CodeGenerationSettings;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation;
 import org.eclipse.jdt.internal.corext.codemanipulation.OrganizeImportsOperation.IChooseImportQuery;
+import org.eclipse.jdt.internal.corext.util.History;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.QualifiedTypeNameHistory;
 import org.eclipse.jdt.internal.corext.util.TypeInfo;
-import org.eclipse.jdt.internal.corext.util.TypeInfoHistory;
 
 import org.eclipse.jdt.ui.IWorkingCopyManager;
 import org.eclipse.jdt.ui.JavaUI;
@@ -139,7 +140,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 			if (((String)o1).equals(o2))
 				return 0;
 			
-			TypeInfoHistory history= TypeInfoHistory.getDefault();
+			History history= QualifiedTypeNameHistory.getDefault();
 			
 			int pos1= history.getPosition(o1);
 			int pos2= history.getPosition(o2);
@@ -563,7 +564,7 @@ public class OrganizeImportsAction extends SelectionDispatchAction {
 				Object[] array= (Object[]) res[i];
 				if (array.length > 0) {
 					result[i]= (TypeInfo) array[0];
-					TypeInfoHistory.remember(result[i]);
+					QualifiedTypeNameHistory.remember(result[i].getFullyQualifiedName());
 				}
 			}
 		}
