@@ -81,6 +81,8 @@ public class QuickFixTest extends TestCase {
 		suite.addTest(ConvertIterableLoopQuickFixTest.allTests());
 		suite.addTest(AdvancedQuickAssistTest.allTests());
 		suite.addTest(CleanUpTest.allTests());
+		suite.addTest(QuickFixEnablementTest.allTests());
+		
 		return new ProjectTestSetup(suite);
 	}
 
