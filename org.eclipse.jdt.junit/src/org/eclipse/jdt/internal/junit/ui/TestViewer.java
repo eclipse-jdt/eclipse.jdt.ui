@@ -36,7 +36,6 @@ import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 
-import org.eclipse.jdt.internal.junit.model.ITestSessionListener;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestRoot;
@@ -47,52 +46,6 @@ import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 
 public class TestViewer {
 	
-	private final class SessionListener implements ITestSessionListener {
-		public void sessionStarted(int testCount) {
-			registerViewerRefresh();
-		}
-
-		public void sessionEnded(long elapsedTime) {
-			fAutoScrollTarget= null;
-		}
-
-		public void sessionStopped(long elapsedTime) {
-			fAutoScrollTarget= null;
-		}
-
-		public void sessionTerminated() {
-			fAutoScrollTarget= null;
-		}
-
-		public void testAdded(TestElement testElement) {
-			//TODO: performance: would only need to refresh parent of added element
-			registerViewerRefresh();
-		}
-
-		public void testStarted(TestCaseElement testCaseElement) {
-			fAutoScrollTarget= testCaseElement;
-			registerViewerUpdate(testCaseElement);
-		}
-
-		public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
-			//TODO: autoExpand?
-			registerViewerUpdate(testCaseElement);
-		}
-
-		public void testFailed(TestCaseElement testCaseElement, Status status, String trace, String expected, String actual) {
-			if (fTestRunnerPart.isAutoScroll()) {
-				synchronized (this) {
-					fAutoExpand.add(fTestSessionContentProvider.getParent(testCaseElement));
-				}
-			}
-			registerViewerUpdate(testCaseElement);
-		}
-
-		public void testEnded(TestCaseElement testCaseElement) {
-			registerViewerUpdate(testCaseElement);
-		}
-	}
-
 	private final class FailuresOnlyFilter extends ViewerFilter {
 		public boolean select(Viewer viewer, Object parentElement, Object element) {
 			if (! (element instanceof TestElement))
@@ -120,7 +73,6 @@ public class TestViewer {
 	private int fLayoutMode;
 	
 	private TestRunSession fTestRunSession;
-	private SessionListener fTestSessionListener;
 	
 	private boolean fNeedRefresh;
 	private HashSet/*<TestElement>*/ fNeedUpdate;
@@ -178,17 +130,8 @@ public class TestViewer {
 	}
 
 	public synchronized void setActiveSession(TestRunSession testRunSession) {
-		if (fTestRunSession != null) {
-			fTestRunSession.removeTestSessionListener(fTestSessionListener);
-			fTestSessionListener= null;
-		}
-		
 		fTestRunSession= testRunSession;
 		registerViewerRefresh();
-		if (testRunSession != null) {
-			fTestSessionListener= new SessionListener();
-			fTestRunSession.addTestSessionListener(fTestSessionListener);
-		}
 	}
 
 	void handleDefaultSelected(MouseEvent e) {
@@ -327,26 +270,6 @@ public class TestViewer {
 		fTreeViewer.reveal(current);
 	}
 
-	private synchronized void registerViewerRefresh() {
-		fNeedRefresh= true;
-		fNeedUpdate.clear();
-		fAutoClose.clear();
-		clearAutoExpand();
-	}
-	
-	private synchronized void registerViewerUpdate(final TestElement testElement) {
-		// update all parents too:
-		TestElement element= testElement;
-		do {
-			fNeedUpdate.add(element);
-			element= element.getParent();
-		} while (element != null);
-	}
-
-	private synchronized void clearAutoExpand() {
-		fAutoExpand.clear();
-	}
-
 	public void selectFailure(boolean showNext) {
 		ITreeSelection selection= (ITreeSelection) fTreeViewer.getSelection();
 		TestElement selected= (TestElement) selection.getFirstElement();
@@ -362,7 +285,6 @@ public class TestViewer {
 		
 		if (next != null)
 			fTreeViewer.setSelection(new StructuredSelection(next), true);
-		
 	}
 	
 	private static class ReverseList extends AbstractList {
@@ -416,6 +338,34 @@ public class TestViewer {
 			}
 		}
 		return null;
+	}
+
+	public synchronized void registerViewerRefresh() {
+		fNeedRefresh= true;
+		fNeedUpdate.clear();
+		fAutoClose.clear();
+		clearAutoExpand();
+	}
+	
+	public synchronized void registerViewerUpdate(final TestElement testElement) {
+		// update all parents too:
+		TestElement element= testElement;
+		do {
+			fNeedUpdate.add(element);
+			element= element.getParent();
+		} while (element != null);
+	}
+
+	public synchronized void clearAutoExpand() {
+		fAutoExpand.clear();
+	}
+	
+	public void registerAutoScrollTarget(TestCaseElement testCaseElement) {
+		fAutoScrollTarget= testCaseElement;
+	}
+
+	public synchronized void registerFailedForAutoScroll(TestCaseElement testCaseElement) {
+		fAutoExpand.add(fTestSessionContentProvider.getParent(testCaseElement));
 	}
 }
  

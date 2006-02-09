@@ -48,7 +48,8 @@ public abstract class ViewHistory {
 	
 	
 	/**
-	 * @return an unmodifiable list of history entries, can be empty
+	 * @return An unmodifiable list of history entries, can be empty. The list
+	 *         is sorted by age, youngest first.
 	 */
 	public abstract List getHistoryEntries();
 	

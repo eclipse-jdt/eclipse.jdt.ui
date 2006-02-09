@@ -88,7 +88,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 		private boolean addEntryMenuItems(List entries) {
 			boolean checkOthers= true;
 			int min= Math.min(entries.size(), RESULTS_IN_DROP_DOWN);
-			for (int i= min - 1; i > 0; i--) { // reverse order: youngest first
+			for (int i= 0; i < min; i++) {
 				Object entry= entries.get(i);
 				HistoryAction action= new HistoryAction(entry);
 				boolean check= entry.equals(fHistory.getCurrentEntry());

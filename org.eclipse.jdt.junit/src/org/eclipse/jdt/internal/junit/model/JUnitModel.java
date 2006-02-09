@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.junit.model;
 
 import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.LinkedList;
 import java.util.List;
 
 import org.eclipse.core.runtime.ListenerList;
@@ -106,6 +107,8 @@ public final class JUnitModel {
 		}
 
 		private void connectTestRunner(ILaunch launch, IType launchedType, int port) {
+			showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
+			
 			//TODO: Do notifications have to be sent in UI thread? 
 			// Check concurrent access to fTestRunSessions (no problem inside asyncExec())
 			int count= fTestRunSessions.size();
@@ -116,10 +119,9 @@ public final class JUnitModel {
 			}
 			
 			TestRunSession testRunSession= new TestRunSession(launchedType, port, launch);
-			fTestRunSessions.add(testRunSession);
+			fTestRunSessions.addFirst(testRunSession);
 			notifyTestRunSessionAdded(testRunSession);
 			
-			showTestRunnerViewPartInActivePage(findTestRunnerViewPartInActivePage());
 		}
 
 		private TestRunnerViewPart showTestRunnerViewPartInActivePage(TestRunnerViewPart testRunner) {
@@ -167,7 +169,10 @@ public final class JUnitModel {
 	}
 
 	private final ListenerList fTestRunSessionListeners= new ListenerList();
-	private final ArrayList fTestRunSessions= new ArrayList();
+	/**
+	 * Active test run sessions, youngest first.
+	 */
+	private final LinkedList/*<TestRunSession>*/ fTestRunSessions= new LinkedList();
 	private final ILaunchListener fLaunchListener= new JUnitLaunchListener();
 
 	/**
@@ -199,7 +204,7 @@ public final class JUnitModel {
 	/**
 	 * @return a list of active {@link TestRunSession}s. The list is a copy of
 	 *         the internal data structure and modifications do not affect the
-	 *         global list of active sessions.
+	 *         global list of active sessions. The list is sorted by age, youngest first.  
 	 */
 	public List getTestRunSessions() {
 		return new ArrayList(fTestRunSessions);

@@ -419,6 +419,8 @@ public class TestRunnerViewPart extends ViewPart {
 	
 	private class TestSessionListener implements ITestSessionListener {
 		public void sessionStarted(final int testCount){
+			fTestViewer.registerViewerRefresh();
+			
 			reset(testCount);
 			fShowOnErrorOnly= getShowOnErrorOnly();
 //			fExecutedTests++;
@@ -436,6 +438,8 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		public void sessionEnded(long elapsedTime){
+			fTestViewer.registerAutoScrollTarget(null);
+			
 //			fExecutedTests--;
 			String[] keys= {elapsedTimeAsString(elapsedTime)};
 			String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_finish, keys); 
@@ -469,18 +473,25 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		public void sessionStopped(final long elapsedTime) {
+			fTestViewer.registerAutoScrollTarget(null);
+
 			String msg= JUnitMessages.TestRunnerViewPart_message_stopped; 
 			setInfoMessage(msg);
 			handleStopped();
 		}
 
 		public void sessionTerminated() {
+			fTestViewer.registerAutoScrollTarget(null);
+
 			String msg= JUnitMessages.TestRunnerViewPart_message_terminated; 
 			showMessage(msg);
 			handleStopped(); 
 		}
 
 		public void testStarted(TestCaseElement testCaseElement) {
+			fTestViewer.registerAutoScrollTarget(testCaseElement);
+			fTestViewer.registerViewerUpdate(testCaseElement);
+
 			fTestIsRunning= true;
 //			postStartTest(testId, testName);
 			// reveal the part when the first test starts
@@ -499,11 +510,12 @@ public class TestRunnerViewPart extends ViewPart {
 			setInfoMessage(status); 
 		}
 
-		public void testEnded(TestCaseElement testCaseElement){
-			postEndTest(testCaseElement);
-		}
-
 		public void testFailed(TestCaseElement testCaseElement, TestElement.Status status, String trace, String expected, String actual) {
+			if (isAutoScroll()) {
+				fTestViewer.registerFailedForAutoScroll(testCaseElement);
+			}
+			fTestViewer.registerViewerUpdate(testCaseElement);
+
 			String testId= testCaseElement.getId();
 			String testName= testCaseElement.getTestName();
 			
@@ -538,7 +550,15 @@ public class TestRunnerViewPart extends ViewPart {
 			}
 		}
 		
+		public void testEnded(TestCaseElement testCaseElement){
+			fTestViewer.registerViewerUpdate(testCaseElement);
+
+			postEndTest(testCaseElement);
+		}
+
 		public void testReran(TestCaseElement testCaseElement, TestElement.Status status, String trace, String expectedResult, String actualResult) {
+			fTestViewer.registerViewerUpdate(testCaseElement); //TODO: autoExpand?
+			
 //TODO: !!! run update job!!!
 			String testId= testCaseElement.getId();
 			String className= testCaseElement.getClassName();
@@ -579,7 +599,8 @@ public class TestRunnerViewPart extends ViewPart {
 		
 		
 		public void testAdded(TestElement testElement) {
-			// TODO revive batched updating
+			fTestViewer.registerViewerRefresh(); //TODO: performance: would only need to refresh parent of added element
+
 //			synchronized(fTreeEntryQueue) {
 //				fTreeEntryQueue.add(treeEntry);
 //				if (!fQueueDrainRequestOutstanding) {
@@ -1262,10 +1283,30 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	private void refreshCounters() {
-		fCounterPanel.setErrorValue(fTestRunSession.getErrorCount());
-		fCounterPanel.setFailureValue(fTestRunSession.getFailureCount());
-		fCounterPanel.setRunValue(fTestRunSession.getStartedCount());
-		fProgressBar.refresh(hasErrorsOrFailures());
+		int startedCount;
+		int totalCount;
+		int errorCount;
+		int failureCount;
+		boolean hasErrorsOrFailures;
+		
+		if (fTestRunSession != null) {
+			startedCount= fTestRunSession.getStartedCount();
+			totalCount= fTestRunSession.getTotalCount();
+			errorCount= fTestRunSession.getErrorCount();
+			failureCount= fTestRunSession.getFailureCount();
+			hasErrorsOrFailures= hasErrorsOrFailures();
+		} else {
+			startedCount= 0;
+			totalCount= 0;
+			errorCount= 0;
+			failureCount= 0;
+			hasErrorsOrFailures= false;
+		}
+		fCounterPanel.setRunValue(startedCount);
+		fCounterPanel.setTotal(totalCount);
+		fCounterPanel.setErrorValue(errorCount);
+		fCounterPanel.setFailureValue(failureCount);
+		fProgressBar.refresh(hasErrorsOrFailures);
 	}
 	
 	protected void postShowTestResultsView() {
