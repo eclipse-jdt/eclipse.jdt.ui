@@ -18,10 +18,10 @@ import org.eclipse.jdt.astview.ASTViewPlugin;
 
 import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
-import org.eclipse.jdt.core.dom.IResolvedAnnotation;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
@@ -205,7 +205,7 @@ public class Binding extends ASTAttribute {
 					break;
 			}
 			try {
-				IResolvedAnnotation[] annotations= fBinding.getAnnotations();
+				IAnnotationBinding[] annotations= fBinding.getAnnotations();
 				res.add(new ResolvedAnnotationProperty(this, "ANNOTATIONS", annotations)); //$NON-NLS-1$
 			} catch (RuntimeException e) {
 				String label= "Error in IBinding#getAnnotations() for \"" + fBinding.getKey() + "\"";

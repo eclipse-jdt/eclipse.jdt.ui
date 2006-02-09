@@ -107,8 +107,9 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IResolvedAnnotation;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
@@ -1297,14 +1298,28 @@ public class ASTView extends ViewPart implements IShowInSource {
 			if (declaring != null) {
 				fViewer.reveal(declaring);
 				fViewer.setSelection(new StructuredSelection(declaring));
+			} else {
+				fViewer.getTree().getDisplay().beep();
+			}
+			return;
+		} else if (obj instanceof ResolvedMemberValuePair) {
+			IMemberValuePairBinding pair= ((ResolvedMemberValuePair) obj).getPair();
+			ASTNode declaring= fRoot.findDeclaringNode(pair);
+			if (declaring != null) {
+				fViewer.reveal(declaring);
+				fViewer.setSelection(new StructuredSelection(declaring));
+			} else {
+				fViewer.getTree().getDisplay().beep();
 			}
 			return;
 		} else if (obj instanceof ResolvedAnnotation) {
-			IResolvedAnnotation annotation= ((ResolvedAnnotation) obj).getAnnotation();
+			IAnnotationBinding annotation= ((ResolvedAnnotation) obj).getAnnotation();
 			ASTNode declaring= fRoot.findDeclaringNode(annotation);
 			if (declaring != null) {
 				fViewer.reveal(declaring);
 				fViewer.setSelection(new StructuredSelection(declaring));
+			} else {
+				fViewer.getTree().getDisplay().beep();
 			}
 			return;
 		} else if (obj instanceof ProblemNode) {

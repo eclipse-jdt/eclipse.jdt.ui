@@ -12,16 +12,16 @@ package org.eclipse.jdt.astview.views;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jdt.core.dom.IResolvedAnnotation;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 
 public class ResolvedAnnotation extends ASTAttribute {
 
 
 	private final Object fParent;
 	private final String fName;
-	private final IResolvedAnnotation fAnnotation;
+	private final IAnnotationBinding fAnnotation;
 
-	public ResolvedAnnotation(Object parent, String name, IResolvedAnnotation annotation) {
+	public ResolvedAnnotation(Object parent, String name, IAnnotationBinding annotation) {
 		fParent= parent;
 		fName= name + ": " + annotation.toString();
 		fAnnotation= annotation;
@@ -47,7 +47,7 @@ public class ResolvedAnnotation extends ASTAttribute {
 		return null;
 	}
 
-	public IResolvedAnnotation getAnnotation() {
+	public IAnnotationBinding getAnnotation() {
 		return fAnnotation;
 	}
 

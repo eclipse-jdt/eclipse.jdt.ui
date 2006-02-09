@@ -28,9 +28,9 @@ import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.EnumConstantDeclaration;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.IResolvedAnnotation;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
@@ -127,7 +127,7 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 				IVariableBinding binding= ((SuperFieldAccess) expression).resolveFieldBinding();
 				res.add(createBinding(expression, binding));
 			} else if (expression instanceof Annotation) {
-				IResolvedAnnotation binding= ((Annotation) expression).resolveAnnotation();
+				IAnnotationBinding binding= ((Annotation) expression).resolveAnnotationBinding();
 				res.add(createResolvedAnnotation(expression, binding));
 			}
 			// Expression attributes:
@@ -231,7 +231,7 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 		return new Binding(parent, label, binding, true);
 	}
 	
-	private Object createResolvedAnnotation(ASTNode parent, IResolvedAnnotation annotation) {
+	private Object createResolvedAnnotation(ASTNode parent, IAnnotationBinding annotation) {
 		String label= "> resolved annotation"; //$NON-NLS-1$
 		return new ResolvedAnnotation(parent, label, annotation);
 	}

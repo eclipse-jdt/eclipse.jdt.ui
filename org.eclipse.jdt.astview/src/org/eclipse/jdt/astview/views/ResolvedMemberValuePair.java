@@ -12,15 +12,15 @@ package org.eclipse.jdt.astview.views;
 
 import org.eclipse.swt.graphics.Image;
 
-import org.eclipse.jdt.core.dom.IResolvedMemberValuePair;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 
 public class ResolvedMemberValuePair extends ASTAttribute {
 
 	private final ASTAttribute fParent;
 	private final String fName;
-	private final IResolvedMemberValuePair fPair;
+	private final IMemberValuePairBinding fPair;
 
-	public ResolvedMemberValuePair(ASTAttribute parent, String name, IResolvedMemberValuePair pair) {
+	public ResolvedMemberValuePair(ASTAttribute parent, String name, IMemberValuePairBinding pair) {
 		fParent= parent;
 		fName= name + ": " + pair.toString();
 		fPair= pair;
@@ -39,7 +39,7 @@ public class ResolvedMemberValuePair extends ASTAttribute {
 		return res;
 	}
 
-	public IResolvedMemberValuePair getPair() {
+	public IMemberValuePairBinding getPair() {
 		return fPair;
 	}
 	

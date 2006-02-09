@@ -13,9 +13,9 @@ package org.eclipse.jdt.astview.views;
 
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IResolvedAnnotation;
-import org.eclipse.jdt.core.dom.IResolvedMemberValuePair;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 
@@ -162,11 +162,11 @@ public class ResolvedAnnotationProperty extends ASTAttribute {
 		} else if (value instanceof String) {
 			res= new ResolvedAnnotationProperty(parent, name, "\"" + (String) value + "\"");
 			
-		} else if (value instanceof IResolvedAnnotation) {
-			res= new ResolvedAnnotation(parent, name, (IResolvedAnnotation) value);
+		} else if (value instanceof IAnnotationBinding) {
+			res= new ResolvedAnnotation(parent, name, (IAnnotationBinding) value);
 			
-		} else if (value instanceof IResolvedMemberValuePair) {
-			res= new ResolvedMemberValuePair(parent, name, (IResolvedMemberValuePair) value);
+		} else if (value instanceof IMemberValuePairBinding) {
+			res= new ResolvedMemberValuePair(parent, name, (IMemberValuePairBinding) value);
 			
 		} else if (value instanceof Object[]) {
 			res= new ResolvedAnnotationProperty(parent, name, (Object[]) value);
