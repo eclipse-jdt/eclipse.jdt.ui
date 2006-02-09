@@ -114,7 +114,7 @@ public final class JavaModelUtil {
 	 * Finds a type by its qualified type name (dot separated).
 	 * @param jproject The java project to search in
 	 * @param fullyQualifiedName The fully qualified name (type name with enclosing type names and package (all separated by dots))
-	 * @param owner the workingcopy owner
+	 * @param owner the working copy owner
 	 * @return The type found, or null if not existing
 	 */	
 	public static IType findType(IJavaProject jproject, String fullyQualifiedName, WorkingCopyOwner owner) throws JavaModelException {
@@ -402,7 +402,7 @@ public final class JavaModelUtil {
 	 * This searches for a method with the same name and signature. Parameter types are only
 	 * compared by the simple name, no resolving for the fully qualified type name is done.
 	 * Constructors are only compared by parameters, not the name.
-	 * NOTE: For finding overrideen methods or for finding the declaraing method, use {@link MethodOverrideTester}
+	 * NOTE: For finding overridden methods or for finding the declaring method, use {@link MethodOverrideTester}
 	 * @param hierarchy The hierarchy containing the type
 	 * 	@param type The type to start the search from
 	 * @param name The name of the method to find
@@ -845,13 +845,19 @@ public final class JavaModelUtil {
 		}
 	}
 	
+	/**
+	 * @return returns if version 1 is less than version 2.
+	 */
+	public static boolean isVersionLessThan(String version1, String version2) {
+		return version1.compareTo(version2) < 0;
+	}
+	
 	public static boolean is50OrHigher(String compliance) {
-		return JavaCore.VERSION_1_5.equals(compliance) || JavaCore.VERSION_1_6.equals(compliance);
+		return !isVersionLessThan(compliance, JavaCore.VERSION_1_5);
 	}
 	
 	public static boolean is50OrHigher(IJavaProject project) {
-		String compliance= project.getOption(JavaCore.COMPILER_COMPLIANCE, true);
-		return is50OrHigher(compliance);
+		return is50OrHigher(project.getOption(JavaCore.COMPILER_COMPLIANCE, true));
 	}
 	
 	public static boolean is50OrHigherJRE(IJavaProject project) throws CoreException {
@@ -886,7 +892,7 @@ public final class JavaModelUtil {
 	}
 
 	/**
-	 * Compute a new name for a compilation unt, given the name of the new main type.
+	 * Compute a new name for a compilation unit, given the name of the new main type.
 	 * This query tries to maintain the existing extension (e.g. ".java").
 	 * 
 	 * @param cu a compilation unit
@@ -935,7 +941,7 @@ public final class JavaModelUtil {
 			throw new CoreException(JavaUIStatus.createError(IStatus.ERROR, e));
 		} finally {
 			try {
-				if (session != null) {
+				if (session != null && document != null) {
 					((IDocumentExtension4)document).stopRewriteSession(session);
 				}
 			} finally {

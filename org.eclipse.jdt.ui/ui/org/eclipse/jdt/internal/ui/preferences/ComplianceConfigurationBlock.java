@@ -408,30 +408,25 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 		String target= getValue(PREF_CODEGEN_TARGET_PLATFORM);
 		
 		// compliance must not be smaller than source or target
-		if (isLessThan(compliance, source)) {
+		if (JavaModelUtil.isVersionLessThan(compliance, source)) {
 			status.setError(PreferencesMessages.ComplianceConfigurationBlock_src_greater_compliance); 
 			return status;
 		}
 		
-		if (isLessThan(compliance, target)) {
+		if (JavaModelUtil.isVersionLessThan(compliance, target)) {
 			status.setError(PreferencesMessages.ComplianceConfigurationBlock_classfile_greater_compliance); 
 			return status;
 		}
 		
 		// target must not be smaller than source
-		if (!VERSION_1_3.equals(source) && isLessThan(source, target)) {
+		if (!VERSION_1_3.equals(source) && JavaModelUtil.isVersionLessThan(source, target)) {
 			status.setError(PreferencesMessages.ComplianceConfigurationBlock_classfile_greater_source); 
 			return status;
 		}
 		
 		return status;
 	}
-	
-	
-	private static boolean isLessThan(String version1, String version2) {
-		return version1.compareTo(version2) < 0;
-	}
-		
+			
 	
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.preferences.OptionsConfigurationBlock#useProjectSpecificSettings(boolean)
@@ -487,7 +482,7 @@ public class ComplianceConfigurationBlock extends OptionsConfigurationBlock {
 	private void updateInlineJSREnableState() {
 		String target= getValue(PREF_CODEGEN_TARGET_PLATFORM);
 		
-		boolean enabled= isLessThan(target, VERSION_1_5);
+		boolean enabled= JavaModelUtil.isVersionLessThan(target, VERSION_1_5);
 		Button checkBox= getCheckBox(PREF_CODEGEN_INLINE_JSR_BYTECODE);
 		checkBox.setEnabled(enabled);
 		
