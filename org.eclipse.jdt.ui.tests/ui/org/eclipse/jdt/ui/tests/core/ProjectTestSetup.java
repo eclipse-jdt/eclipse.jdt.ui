@@ -11,8 +11,6 @@
 
 package org.eclipse.jdt.ui.tests.core;
 
-import java.util.Map;
-
 import junit.extensions.TestSetup;
 import junit.framework.Test;
 
@@ -39,7 +37,7 @@ public class ProjectTestSetup extends TestSetup {
 	
 	public static IJavaProject getProject() {
 		IProject project= ResourcesPlugin.getWorkspace().getRoot().getProject(PROJECT_NAME);
-		return JavaCore.create(project);
+		return  JavaCore.create(project);
 	}
 	
 	public static IClasspathEntry[] getDefaultClasspath() {
@@ -71,9 +69,8 @@ public class ProjectTestSetup extends TestSetup {
 		
 		fJProject= JavaProjectHelper.createJavaProject(PROJECT_NAME, "bin");
 		fJProject.setRawClasspath(getDefaultClasspath(), null);
-		Map options= fJProject.getOptions(false);
-		JavaProjectHelper.set15CompilerOptions(options);
-		fJProject.setOptions(options);
+		
+		TestOptions.initializeProjectOptions(fJProject);
 		
 		JavaCore.setOptions(TestOptions.getDefaultOptions());
 		TestOptions.initializeCodeGenerationOptions();

@@ -16,7 +16,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
-import java.util.Collections;
 import java.util.Map;
 import java.util.zip.ZipFile;
 
@@ -285,7 +284,6 @@ public class JavaProjectHelper {
 						resources[i].delete(true, null);
 					}
 				}
-				jproject.setOptions(Collections.EMPTY_MAP);
 			}
 		};
 		ResourcesPlugin.getWorkspace().run(runnable, null);
