@@ -10,8 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.testplugin;
 
+import java.util.HashMap;
 import java.util.Hashtable;
+import java.util.Map;
 
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 
@@ -53,6 +56,13 @@ public class TestOptions {
 		store.setValue(PreferenceConstants.ORGIMPORTS_ONDEMANDTHRESHOLD, 99);
 		store.setValue(PreferenceConstants.ORGIMPORTS_IGNORELOWERCASE, true);
 	}
+	
+	public static void initializeProjectOptions(IJavaProject project) {
+		Map options= new HashMap();
+		JavaProjectHelper.set15CompilerOptions(options);
+		project.setOptions(options);
+	}
+	
 }
 
 class TestFormatterOptions {
