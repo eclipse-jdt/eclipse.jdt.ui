@@ -233,10 +233,6 @@ public class TestViewer {
 			return;
 		}
 		
-		TestCaseElement current= fAutoScrollTarget;
-		if (current == null)
-			return;
-		
 		synchronized (this) {
 			for (Iterator iter= fAutoExpand.iterator(); iter.hasNext();) {
 				TestSuiteElement suite= (TestSuiteElement) iter.next();
@@ -245,11 +241,12 @@ public class TestViewer {
 			clearAutoExpand();
 		}
 		
+		TestCaseElement current= fAutoScrollTarget;
 		fAutoScrollTarget= null;
 		
-		TestSuiteElement parent= (TestSuiteElement) fTestSessionContentProvider.getParent(current);
+		TestSuiteElement parent= current == null ? null : (TestSuiteElement) fTestSessionContentProvider.getParent(current);
 		if (fAutoClose.isEmpty() || ! fAutoClose.getLast().equals(parent)) {
-			// we're in a new branch
+			// we're in a new branch, so let's close old OK branches:
 			for (ListIterator iter= fAutoClose.listIterator(fAutoClose.size()); iter.hasPrevious();) {
 				TestSuiteElement previousAutoOpened= (TestSuiteElement) iter.previous();
 				if (previousAutoOpened.equals(parent))
@@ -267,7 +264,8 @@ public class TestViewer {
 				parent= (TestSuiteElement) fTestSessionContentProvider.getParent(parent);
 			}
 		}
-		fTreeViewer.reveal(current);
+		if (current != null)
+			fTreeViewer.reveal(current);
 	}
 
 	public void selectFailure(boolean showNext) {
