@@ -107,9 +107,7 @@ import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.ASTRequestor;
 import org.eclipse.jdt.core.dom.CompilationUnit;
-import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
-import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.actions.ShowInPackageViewAction;
@@ -139,9 +137,6 @@ public class ASTView extends ViewPart implements IShowInSource {
 				Object element= iter.next();
 				if (element instanceof JavaElement)
 					externalSelection.add(((JavaElement) element).getJavaElement());
-				else {
-					//TODO: support for other node types?
-				}
 			}
 			return new StructuredSelection(externalSelection);
 		}
@@ -1272,8 +1267,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 		ISelection selection = fViewer.getSelection();
 		Object obj = ((IStructuredSelection) selection).getFirstElement();
 
-		boolean isTrippleClick= (obj == fPreviousDouble);
-		fPreviousDouble= isTrippleClick ? null : obj;
+		boolean isTripleClick= (obj == fPreviousDouble);
+		fPreviousDouble= isTripleClick ? null : obj;
 		
 		if (obj instanceof ExceptionAttribute) {
 			RuntimeException exception= ((ExceptionAttribute) obj).getException();
@@ -1287,11 +1282,13 @@ public class ASTView extends ViewPart implements IShowInSource {
 		ASTNode node= null;
 		if (obj instanceof ASTNode) {
 			node= (ASTNode) obj;
+			
 		} else if (obj instanceof NodeProperty) {
 			Object val= ((NodeProperty) obj).getNode();
 			if (val instanceof ASTNode) {
 				node= (ASTNode) val;
 			}
+			
 		} else if (obj instanceof Binding) {
 			IBinding binding= ((Binding) obj).getBinding();
 			ASTNode declaring= fRoot.findDeclaringNode(binding);
@@ -1302,30 +1299,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 				fViewer.getTree().getDisplay().beep();
 			}
 			return;
-		} else if (obj instanceof ResolvedMemberValuePair) {
-			IMemberValuePairBinding pair= ((ResolvedMemberValuePair) obj).getPair();
-			ASTNode declaring= fRoot.findDeclaringNode(pair);
-			if (declaring != null) {
-				fViewer.reveal(declaring);
-				fViewer.setSelection(new StructuredSelection(declaring));
-			} else {
-				fViewer.getTree().getDisplay().beep();
-			}
-			return;
-		} else if (obj instanceof ResolvedAnnotation) {
-			IAnnotationBinding annotation= ((ResolvedAnnotation) obj).getAnnotation();
-			ASTNode declaring= fRoot.findDeclaringNode(annotation);
-			if (declaring != null) {
-				fViewer.reveal(declaring);
-				fViewer.setSelection(new StructuredSelection(declaring));
-			} else {
-				fViewer.getTree().getDisplay().beep();
-			}
-			return;
+			
 		} else if (obj instanceof ProblemNode) {
 			ProblemNode problemNode= (ProblemNode) obj;
 			EditorUtility.selectInEditor(fEditor, problemNode.getOffset(), problemNode.getLength());
 			return;
+			
 		} else if (obj instanceof JavaElement) {
 			IJavaElement javaElement= ((JavaElement) obj).getJavaElement();
 			if (javaElement instanceof IPackageFragment) {
@@ -1346,8 +1325,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 		}
 		
 		if (node != null) {
-			int offset= isTrippleClick ? fRoot.getExtendedStartPosition(node) : node.getStartPosition();
-			int length= isTrippleClick ? fRoot.getExtendedLength(node) : node.getLength();
+			int offset= isTripleClick ? fRoot.getExtendedStartPosition(node) : node.getStartPosition();
+			int length= isTripleClick ? fRoot.getExtendedLength(node) : node.getLength();
 
 			EditorUtility.selectInEditor(fEditor, offset, length);
 		}

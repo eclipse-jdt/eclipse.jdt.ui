@@ -20,6 +20,7 @@ import org.eclipse.jdt.core.Flags;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.IAnnotationBinding;
 import org.eclipse.jdt.core.dom.IBinding;
+import org.eclipse.jdt.core.dom.IMemberValuePairBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
@@ -93,12 +94,14 @@ public class Binding extends ASTAttribute {
 					Object constVal= variableBinding.getConstantValue();
 					res.add(new BindingProperty(this, "CONSTANT VALUE", constVal == null ? "null" : constVal.toString(), true)); //$NON-NLS-1$ //$NON-NLS-2$
 					break;
+					
 				case IBinding.PACKAGE:
 					IPackageBinding packageBinding= (IPackageBinding) fBinding;
 					res.add(new BindingProperty(this, "IS UNNAMED", packageBinding.isUnnamed(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), true)); //$NON-NLS-1$
 					break;
+					
 				case IBinding.TYPE:
 					ITypeBinding typeBinding= (ITypeBinding) fBinding;
 					int typeKind= getTypeKind(typeBinding);
@@ -168,6 +171,7 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "IS SYNTHETIC", fBinding.isSynthetic(), isNonPrimitive)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), isRefType)); //$NON-NLS-1$
 					break;
+					
 				case IBinding.METHOD:
 					IMethodBinding methodBinding= (IMethodBinding) fBinding;
 					res.add(new BindingProperty(this, "IS CONSTRUCTOR", methodBinding.isConstructor(), true)); //$NON-NLS-1$
@@ -193,20 +197,33 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "IS DEPRECATED", fBinding.isDeprecated(), true)); //$NON-NLS-1$
 					
 					res.add(new BindingProperty(this, "IS ANNOTATION MEMBER", methodBinding.isAnnotationMember(), true)); //$NON-NLS-1$
-					res.add(ResolvedAnnotationProperty.convertValue(this, "DEFAULT VALUE", methodBinding.getDefaultValue()));
+					res.add(Binding.createValueAttribute(this, "DEFAULT VALUE", methodBinding.getDefaultValue()));
 					
 					int parameterCount= methodBinding.getParameterTypes().length;
-					ResolvedAnnotationProperty[] parametersAnnotations= new ResolvedAnnotationProperty[parameterCount];
+					GeneralAttribute[] parametersAnnotations= new GeneralAttribute[parameterCount];
 					for (int i= 0; i < parameterCount; i++) {
-						parametersAnnotations[i]= new ResolvedAnnotationProperty(this, "Parameter " + String.valueOf(i), methodBinding.getParameterAnnotations(i));
+						parametersAnnotations[i]= new GeneralAttribute(this, "Parameter " + String.valueOf(i), methodBinding.getParameterAnnotations(i));
 					}
-					res.add(new ResolvedAnnotationProperty(this, "PARAMETER ANNOTATIONS", parametersAnnotations));
-
+					res.add(new GeneralAttribute(this, "PARAMETER ANNOTATIONS", parametersAnnotations));
+					break;
+					
+				case IBinding.ANNOTATION:
+					IAnnotationBinding annotationBinding= (IAnnotationBinding) fBinding;
+					res.add(new Binding(this, "ANNOTATION TYPE", annotationBinding.getAnnotationType(), true));
+					res.add(new BindingProperty(this, "DECLARED MEMBER VALUE PAIRS", annotationBinding.getDeclaredMemberValuePairs(), true));
+					res.add(new BindingProperty(this, "ALL MEMBER VALUE PAIRS", annotationBinding.getAllMemberValuePairs(), true));
+					break;
+					
+				case IBinding.MEMBER_VALUE_PAIR:
+					IMemberValuePairBinding memberValuePairBinding= (IMemberValuePairBinding) fBinding;
+					res.add(new Binding(this, "METHOD BINDING", memberValuePairBinding.getMethodBinding(), true));
+					res.add(new BindingProperty(this, "IS DEFAULT", memberValuePairBinding.isDefault(), true));
+					res.add(Binding.createValueAttribute(this, "VALUE", memberValuePairBinding.getValue()));
 					break;
 			}
 			try {
 				IAnnotationBinding[] annotations= fBinding.getAnnotations();
-				res.add(new ResolvedAnnotationProperty(this, "ANNOTATIONS", annotations)); //$NON-NLS-1$
+				res.add(new BindingProperty(this, "ANNOTATIONS", annotations, true)); //$NON-NLS-1$
 			} catch (RuntimeException e) {
 				String label= "Error in IBinding#getAnnotations() for \"" + fBinding.getKey() + "\"";
 				res.add(new Error(this, label, e));
@@ -294,6 +311,10 @@ public class Binding extends ASTAttribute {
 					}
 					buf.append(')');
 					break;
+				case IBinding.ANNOTATION:
+				case IBinding.MEMBER_VALUE_PAIR:
+					buf.append(fBinding.toString());
+					break;
 			}
 			
 		} else {
@@ -349,6 +370,30 @@ public class Binding extends ASTAttribute {
 	 * @see java.lang.Object#hashCode()
 	 */
 	public int hashCode() {
-		return (fParent != null ? fParent.hashCode() : 0) + (fBinding != null ? fBinding.getKey().hashCode() : 0);
+		int result= fParent != null ? fParent.hashCode() : 0;
+		result+= (fBinding != null && fBinding.getKey() != null ? fBinding.getKey().hashCode() : 0);
+		return result;
+	}
+
+	/**
+	 * Creates an {@link ASTAttribute} for a value from
+	 * {@link IMemberValuePairBinding#getValue()} or from
+	 * {@link IMethodBinding#getDefaultValue()}.
+	 */
+	public static ASTAttribute createValueAttribute(ASTAttribute parent, String name, Object value) {
+		ASTAttribute res;
+		if (value instanceof IBinding) {
+			res= new Binding(parent, name, (IBinding) value, true);
+			
+		} else if (value instanceof String) {
+			res= new GeneralAttribute(parent, name, "\"" + (String) value + "\"");
+			
+		} else if (value instanceof Object[]) {
+			res= new GeneralAttribute(parent, name, (Object[]) value);
+			
+		} else {
+			res= new GeneralAttribute(parent, name, value);
+		}
+		return res;
 	}
 }

@@ -32,7 +32,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	private int fSelectionStart;
 	private int fSelectionLength;
 	
-	private final Color fBlue, fRed, fDarkGray, fYellow, fDarkGreen, fDarkRed, fLightRed, fDarkYellow;
+	private final Color fBlue, fRed, fDarkGray, fYellow, fDarkGreen, fDarkRed, fLightRed;
 	private final Font fBold;
 	private final Font fAllocatedBoldItalic;
 	
@@ -49,7 +49,6 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		fDarkGreen= display.getSystemColor(SWT.COLOR_DARK_GREEN);
 		fDarkRed= display.getSystemColor(SWT.COLOR_DARK_RED);
 		fLightRed= new Color(display, 255, 190, 190);
-		fDarkYellow= display.getSystemColor(SWT.COLOR_DARK_YELLOW);
 		
 		fBold= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
 		FontData[] fontData= fBold.getFontData();
@@ -139,8 +138,6 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 				return fRed;
 			}
 			return fDarkGreen;
-		} else if (element instanceof ResolvedAnnotationProperty || element instanceof ResolvedAnnotation || element instanceof ResolvedMemberValuePair) {
-			return fDarkYellow;
 		}
 		return fDarkRed; // all extra properties
 	}

@@ -33,6 +33,11 @@ public class TrayContentProvider implements ITreeContentProvider {
 	 */
 	public Object[] getChildren(Object parentElement) {
 		ArrayList result= new ArrayList();
+		if (parentElement instanceof ExceptionAttribute)
+			return EMPTY;
+		
+		addObjectComparisons(result, parentElement);
+		
 		if (parentElement instanceof Binding) {
 			Binding trayElement= (Binding) parentElement;
 			IBinding trayBinding= trayElement.getBinding();
@@ -43,8 +48,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 			if (trayBinding instanceof IMethodBinding)
 				addMethodBindingComparions(result, trayElement);
 			
-		} else if (! (parentElement instanceof ExceptionAttribute)){
-			addObjectComparisons(result, parentElement);
+		} else {
 		}
 		
 		return result.toArray();
@@ -53,10 +57,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 	private void addObjectComparisons(ArrayList result, Object trayElement) {
 		class IdentityProperty extends DynamicAttributeProperty {
 			public IdentityProperty(Object parent) {
-				super(parent);
-			}
-			protected String getName() {
-				return "* == this: ";
+				super(parent, "* == this: ");
 			}
 			protected String executeQuery(Object viewerObject, Object trayObject) {
 				return Boolean.toString(viewerObject == trayObject);
@@ -66,10 +67,7 @@ public class TrayContentProvider implements ITreeContentProvider {
 		
 		class EqualsProperty extends DynamicAttributeProperty {
 			public EqualsProperty(Object parent) {
-				super(parent);
-			}
-			protected String getName() {
-				return "*.equals(this): ";
+				super(parent, "*.equals(this): ");
 			}
 			protected String executeQuery(Object viewerObject, Object trayObject) {
 				if (viewerObject != null)
@@ -82,35 +80,6 @@ public class TrayContentProvider implements ITreeContentProvider {
 	}
 
 	private void addBindingComparisons(ArrayList result, Binding trayElement) {
-		class IdentityProperty extends DynamicBindingProperty {
-			public IdentityProperty(Binding parent) {
-				super(parent);
-			}
-			protected String getName() {
-				return "* == this: "; //$NON-NLS-1$
-			}
-			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
-				return Boolean.toString(viewerBinding == trayBinding);
-			}
-		} 
-		result.add(new IdentityProperty(trayElement));
-		
-		class EqualsProperty extends DynamicBindingProperty {
-			public EqualsProperty(Binding parent) {
-				super(parent);
-			}
-			protected String getName() {
-				return "*.equals(this): "; //$NON-NLS-1$
-			}
-			protected String executeQuery(IBinding viewerBinding, IBinding trayBinding) {
-				if (viewerBinding != null)
-					return Boolean.toString(viewerBinding.equals(trayBinding));
-				else
-					return "* is null"; //$NON-NLS-1$
-			}
-		} 
-		result.add(new EqualsProperty(trayElement));
-		
 		class IsEqualToProperty extends DynamicBindingProperty {
 			public IsEqualToProperty(Binding parent) {
 				super(parent);

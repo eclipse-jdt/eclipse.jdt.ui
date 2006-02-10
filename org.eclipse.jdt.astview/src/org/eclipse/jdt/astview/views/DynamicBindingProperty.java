@@ -22,7 +22,7 @@ public abstract class DynamicBindingProperty extends ExceptionAttribute {
 	private final Binding fParent;
 	
 	private Binding fViewerElement;
-	private String fLabel;
+	private String fLabel= "<unknown>";
 	
 	public DynamicBindingProperty(Binding parent) {
 		fParent= parent;

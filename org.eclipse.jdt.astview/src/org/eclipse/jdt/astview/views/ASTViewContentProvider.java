@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.ImportDeclaration;
 import org.eclipse.jdt.core.dom.MemberRef;
+import org.eclipse.jdt.core.dom.MemberValuePair;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.MethodRef;
@@ -128,11 +129,11 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 				res.add(createBinding(expression, binding));
 			} else if (expression instanceof Annotation) {
 				IAnnotationBinding binding= ((Annotation) expression).resolveAnnotationBinding();
-				res.add(createResolvedAnnotation(expression, binding));
+				res.add(createBinding(expression, binding));
 			}
 			// Expression attributes:
-			res.add(new LeafAttribute(expression, "Boxing: " + expression.resolveBoxing() + "; Unboxing: " + expression.resolveUnboxing())); //$NON-NLS-1$ //$NON-NLS-2$
-			res.add(new LeafAttribute(expression, "ConstantExpressionValue", expression.resolveConstantExpressionValue())); //$NON-NLS-1$
+			res.add(new GeneralAttribute(expression, "Boxing: " + expression.resolveBoxing() + "; Unboxing: " + expression.resolveUnboxing())); //$NON-NLS-1$ //$NON-NLS-2$
+			res.add(new GeneralAttribute(expression, "ConstantExpressionValue", expression.resolveConstantExpressionValue())); //$NON-NLS-1$
 		
 		// references:
 		} else if (node instanceof ConstructorInvocation) {
@@ -149,9 +150,6 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 			res.add(createBinding(node, binding));
 		} else if (node instanceof Type) {
 			IBinding binding= ((Type) node).resolveBinding();
-			res.add(createBinding(node, binding));
-		} else if (node instanceof TypeParameter) {
-			IBinding binding= ((TypeParameter) node).resolveBinding();
 			res.add(createBinding(node, binding));
 			
 		// declarations:
@@ -180,6 +178,12 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 			res.add(createBinding(node, binding));
 		} else if (node instanceof PackageDeclaration) {
 			IBinding binding= ((PackageDeclaration) node).resolveBinding();
+			res.add(createBinding(node, binding));
+		} else if (node instanceof TypeParameter) {
+			IBinding binding= ((TypeParameter) node).resolveBinding();
+			res.add(createBinding(node, binding));
+		} else if (node instanceof MemberValuePair) {
+			IBinding binding= ((MemberValuePair) node).resolveMemberValuePairBinding();
 			res.add(createBinding(node, binding));
 		}
  		
@@ -219,6 +223,12 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 				case IBinding.PACKAGE:
 					label= "> package binding"; //$NON-NLS-1$
 					break;
+				case IBinding.ANNOTATION:
+					label= "> annotation binding"; //$NON-NLS-1$
+					break;
+				case IBinding.MEMBER_VALUE_PAIR:
+					label= "> member value pair binding"; //$NON-NLS-1$
+					break;
 				default:
 					label= "> unknown binding"; //$NON-NLS-1$
 			}
@@ -229,11 +239,6 @@ public class ASTViewContentProvider implements ITreeContentProvider {
 	private Object createExpressionTypeBinding(ASTNode parent, ITypeBinding binding) {
 		String label= "> (Expression) type binding"; //$NON-NLS-1$
 		return new Binding(parent, label, binding, true);
-	}
-	
-	private Object createResolvedAnnotation(ASTNode parent, IAnnotationBinding annotation) {
-		String label= "> resolved annotation"; //$NON-NLS-1$
-		return new ResolvedAnnotation(parent, label, annotation);
 	}
 	
 	public boolean hasChildren(Object parent) {

@@ -21,12 +21,14 @@ public abstract class DynamicAttributeProperty extends ExceptionAttribute {
 
 	protected static final String N_A= "N/A"; //$NON-NLS-1$
 	private final Object fParent;
+	private final String fName;
 	
 	private Object fViewerElement;
 	private String fLabel= "<unknown>";
 	
-	public DynamicAttributeProperty(Object parentAttribute) {
+	public DynamicAttributeProperty(Object parentAttribute, String name) {
 		fParent= parentAttribute;
+		fName= name;
 	}
 
 	public Object getParent() {
@@ -44,7 +46,7 @@ public abstract class DynamicAttributeProperty extends ExceptionAttribute {
 		fViewerElement= viewerAttribute;
 		fException= null;
 		Object trayObject= unwrapAttribute(fParent);
-		StringBuffer buf= new StringBuffer(getName());
+		StringBuffer buf= new StringBuffer(fName);
 		if (viewerAttribute != null) {
 			Object viewerObject= unwrapAttribute(viewerAttribute);
 			try {
@@ -67,7 +69,6 @@ public abstract class DynamicAttributeProperty extends ExceptionAttribute {
 		fLabel= buf.toString();
 	}
 
-	//TODO: make complete
 	private String objectToString(Object object) {
 		if (object instanceof IBinding) {
 			return ((IBinding) object).getKey();
@@ -76,6 +77,10 @@ public abstract class DynamicAttributeProperty extends ExceptionAttribute {
 		}
 	}
 
+	/**
+	 * @param attribute an attribute
+	 * @return the object inside the attribute, or <code>null</code> iff none
+	 */
 	public static Object unwrapAttribute(Object attribute) {
 		if (attribute instanceof Binding) {
 			return ((Binding) attribute).getBinding();
@@ -83,10 +88,6 @@ public abstract class DynamicAttributeProperty extends ExceptionAttribute {
 			return ((JavaElement) attribute).getJavaElement();
 		} else if (attribute instanceof ASTNode) {
 			return attribute;
-		} else if (attribute instanceof ResolvedAnnotation) {
-			return ((ResolvedAnnotation) attribute).getAnnotation();
-		} else if (attribute instanceof ResolvedMemberValuePair) {
-			return ((ResolvedMemberValuePair) attribute).getPair();
 		} else {
 			return null;
 		}
@@ -102,11 +103,6 @@ public abstract class DynamicAttributeProperty extends ExceptionAttribute {
 	 * @return this property's result
 	 */
 	protected abstract String executeQuery(Object viewerObject, Object trayObject);
-
-	/**
-	 * @return a description of the dynamic property
-	 */
-	protected abstract String getName();
 
 	public String getLabel() {
 		return fLabel;

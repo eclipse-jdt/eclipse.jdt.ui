@@ -14,27 +14,54 @@ package org.eclipse.jdt.astview.views;
 import org.eclipse.swt.graphics.Image;
 
 
-public class LeafAttribute extends ASTAttribute {
-
+public class GeneralAttribute extends ASTAttribute {
+	
 	private final Object fParent;
 	private final String fLabel;
+	private final Object[] fChildren;
 	
-	public LeafAttribute(Object parent, String name, Object value) {
+	public GeneralAttribute(Object parent, String name, Object value) {
 		fParent= parent;
-		fLabel= name + ": " + String.valueOf(value); //$NON-NLS-1$
+		fLabel= name + ": " + String.valueOf(value);
+		fChildren= EMPTY;
 	}
 	
-	public LeafAttribute(Object parent, String label) {
+	public GeneralAttribute(Object parent, String label) {
 		fParent= parent;
 		fLabel= label;
+		fChildren= EMPTY;
 	}
 	
+	public GeneralAttribute(Object parent, String name, Object[] children) {
+		fParent= parent;
+		if (children == null) {
+			fLabel= name + ": null";
+			fChildren= EMPTY;
+		} else if (children.length == 0) {
+			fLabel= name + " (0)";
+			fChildren= EMPTY;
+		} else {
+			fChildren= createChildren(children);
+			fLabel= name + " (" + String.valueOf(fChildren.length) + ')';
+		}
+	}
+	
+	private Object[] createChildren(Object[] children) {
+		ASTAttribute[] res= new ASTAttribute[children.length];
+		for (int i= 0; i < res.length; i++) {
+			Object child= children[i];
+			String name= String.valueOf(i);
+			res[i]= Binding.createValueAttribute(this, name, child);
+		}
+		return res;
+	}
+
 	public Object getParent() {
 		return fParent;
 	}
 
 	public Object[] getChildren() {
-		return EMPTY;
+		return fChildren;
 	}
 
 	public String getLabel() {
@@ -55,7 +82,7 @@ public class LeafAttribute extends ASTAttribute {
 			return false;
 		}
 		
-		LeafAttribute other= (LeafAttribute) obj;
+		GeneralAttribute other= (GeneralAttribute) obj;
 		if (fParent == null) {
 			if (other.fParent != null)
 				return false;
