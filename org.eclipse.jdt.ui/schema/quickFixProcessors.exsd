@@ -9,7 +9,7 @@
          This extension point allows to add a Quick Fix processor to offer new Quick Fixes on Java problems.
 &lt;p&gt;
 Since 3.2 an extension can specify which problem marker types it can handle. It will only get problems of these types to process.
-If no handled marker type are specified, the processor will only get problems of types org.eclipse.jdt.core.problem, org.eclipse.jdt.core.buildpath_problem and org.eclipse.jdt.core.task (for compatibility reasons).
+If no handled marker type are specified, the processor will only get problems of types org.eclipse.jdt.core.problem, org.eclipse.jdt.core.buildpath_problem and org.eclipse.jdt.core.task (compatible to the behaviour prior to 3.2).
 &lt;/p&gt;
 &lt;p&gt;
 This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Properties to test on are:
