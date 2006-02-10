@@ -874,6 +874,8 @@ public class JarPackageData {
 	 * @return a JarWriter3
 	 * @see JarWriter3
 	 * @throws CoreException if an unexpected exception happens
+	 * 
+	 * @since 3.2
 	 */
 	public JarWriter3 createJarWriter3(Shell parent) throws CoreException {
 		return new JarWriter3(this, parent);

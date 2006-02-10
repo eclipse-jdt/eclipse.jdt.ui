@@ -74,14 +74,16 @@ public class FindImplementOccurrencesAction extends SelectionDispatchAction {
 	
 	//---- Text Selection ----------------------------------------------------------------------
 	
-	/*
-	 * @see org.eclipse.jdt.ui.actions.SelectionDispatchAction#selectionChanged(org.eclipse.jface.text.ITextSelection)
+	/**
+	 * {@inheritDoc}
 	 */
 	public void selectionChanged(ITextSelection selection) {
 	}
 	
-	/* (non-JavaDoc)
-	 * Method declared in SelectionDispatchAction.
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @since 3.2
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(getMember(selection) != null);

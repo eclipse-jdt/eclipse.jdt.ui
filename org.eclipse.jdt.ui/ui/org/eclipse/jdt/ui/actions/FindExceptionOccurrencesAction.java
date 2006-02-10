@@ -75,14 +75,16 @@ public class FindExceptionOccurrencesAction extends SelectionDispatchAction {
 	
 	//---- Text Selection ----------------------------------------------------------------------
 	
-	/* (non-JavaDoc)
-	 * Method declared in SelectionDispatchAction.
+	/**
+	 * {@inheritDoc}
 	 */
 	public void selectionChanged(ITextSelection selection) {
 	}
 	
-	/* (non-JavaDoc)
-	 * Method declared in SelectionDispatchAction.
+	/**
+	 * {@inheritDoc}
+	 * 
+	 * @since 3.2
 	 */
 	public void selectionChanged(IStructuredSelection selection) {
 		setEnabled(getMember(selection) != null);

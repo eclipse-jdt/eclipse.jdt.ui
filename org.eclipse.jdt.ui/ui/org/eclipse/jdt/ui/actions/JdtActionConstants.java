@@ -356,6 +356,8 @@ public class JdtActionConstants {
 	/**
 	 * Refactor menu: name of standard Introduce Indirection global action
 	 * (value <code>"org.eclipse.jdt.ui.actions.IntroduceIndirection"</code>).
+	 * 
+	 * @since 3.2
 	 */
 	public static final String INTRODUCE_INDIRECTION= "org.eclipse.jdt.ui.actions.IntroduceIndirection"; //$NON-NLS-1$
 
