@@ -10,7 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.dnd;
 
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 
 import org.eclipse.swt.dnd.DND;
 import org.eclipse.swt.dnd.DropTargetEvent;
@@ -85,7 +85,7 @@ public class DelegatingDropAdapter implements DropTargetListener {
 		// operation change. otherwise the new listener would get a dragEnter
 		// followed by a dragOperationChanged with the exact same event.
 		if (newListener != null && newListener == oldListener) {
-			Platform.run(new SafeRunnable() {
+			SafeRunner.run(new SafeRunnable() {
 				public void run() throws Exception {
 					newListener.dragOperationChanged(event);
 				}
@@ -111,7 +111,7 @@ public class DelegatingDropAdapter implements DropTargetListener {
 		// drag over. otherwise the new listener would get a dragEnter
 		// followed by a dragOver with the exact same event.
 		if (newListener != null && newListener == oldListener) {
-			Platform.run(new SafeRunnable() {
+			SafeRunner.run(new SafeRunnable() {
 				public void run() throws Exception {
 					newListener.dragOver(event);
 				}
@@ -129,7 +129,7 @@ public class DelegatingDropAdapter implements DropTargetListener {
 	public void drop(final DropTargetEvent event) {
 		updateCurrentListener(event);
 		if (getCurrentListener() != null) {
-			Platform.run(new SafeRunnable() {
+			SafeRunner.run(new SafeRunnable() {
 				public void run() throws Exception {
 					getCurrentListener().drop(event);
 				}
@@ -146,7 +146,7 @@ public class DelegatingDropAdapter implements DropTargetListener {
 	 */
 	public void dropAccept(final DropTargetEvent event) {
 		if (getCurrentListener() != null) {
-			Platform.run(new SafeRunnable() {
+			SafeRunner.run(new SafeRunnable() {
 				public void run() throws Exception {
 					getCurrentListener().dropAccept(event);
 				}
@@ -209,7 +209,7 @@ public class DelegatingDropAdapter implements DropTargetListener {
 		if (fCurrentListener == listener)
 			return false;
 		if (fCurrentListener != null) {
-			Platform.run(new SafeRunnable() {
+			SafeRunner.run(new SafeRunnable() {
 				public void run() throws Exception {
 					fCurrentListener.dragLeave(event);
 				}
@@ -217,7 +217,7 @@ public class DelegatingDropAdapter implements DropTargetListener {
 		}
 		fCurrentListener= listener;
 		if (fCurrentListener != null) {
-			Platform.run(new SafeRunnable() {
+			SafeRunner.run(new SafeRunnable() {
 				public void run() throws Exception {
 					fCurrentListener.dragEnter(event);
 				}

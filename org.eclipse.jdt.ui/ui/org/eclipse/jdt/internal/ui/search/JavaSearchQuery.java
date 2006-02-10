@@ -15,7 +15,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.PerformanceStats;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
@@ -104,7 +104,7 @@ public class JavaSearchQuery implements ISearchQuery {
 					}
 				};
 				
-				Platform.run(runnable);
+				SafeRunner.run(runnable);
 				totalTicks+= ticks[i];
 			}
 			monitor.beginTask(SearchMessages.JavaSearchQuery_task_label, totalTicks); 
@@ -162,8 +162,7 @@ public class JavaSearchQuery implements ISearchQuery {
 					}
 				};
 				
-				Platform.run(runnable);
-
+				SafeRunner.run(runnable);
 			}
 			
 		} catch (CoreException e) {

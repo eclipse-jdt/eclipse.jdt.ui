@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.SafeRunnable;
@@ -126,7 +127,7 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 			}
 			
 		};
-		Platform.run(code);
+		SafeRunner.run(code);
 		return result[0];
 	}
 	
@@ -254,7 +255,7 @@ public class FilterDescriptor implements Comparable, IPluginContribution {
 			if (FILTER_TAG.equals(element.getName())) {
 
 				final FilterDescriptor[] desc= new FilterDescriptor[1];
-				Platform.run(new SafeRunnable(FilterMessages.FilterDescriptor_filterDescriptionCreationError_message) { 
+				SafeRunner.run(new SafeRunnable(FilterMessages.FilterDescriptor_filterDescriptionCreationError_message) { 
 					public void run() throws Exception {
 						desc[0]= new FilterDescriptor(element);
 					}

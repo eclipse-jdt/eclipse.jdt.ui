@@ -13,7 +13,7 @@ package org.eclipse.jdt.internal.ui.viewsupport;
 import java.util.ArrayList;
 
 import org.eclipse.core.runtime.ListenerList;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 
 import org.eclipse.core.resources.IStorage;
 
@@ -254,7 +254,7 @@ public class JavaUILabelProvider implements ILabelProvider, IColorProvider {
         Object[] listeners = fListeners.getListeners();
         for (int i = 0; i < listeners.length; ++i) {
             final ILabelProviderListener l = (ILabelProviderListener) listeners[i];
-            Platform.run(new SafeRunnable() {
+            SafeRunner.run(new SafeRunnable() {
                 public void run() {
                     l.labelProviderChanged(event);
                 }

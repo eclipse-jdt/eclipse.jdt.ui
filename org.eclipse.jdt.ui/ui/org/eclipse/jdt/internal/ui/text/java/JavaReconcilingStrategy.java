@@ -17,7 +17,7 @@ import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.text.Assert;
@@ -79,7 +79,7 @@ public class JavaReconcilingStrategy implements IReconcilingStrategy, IReconcili
 		try {
 			final ICompilationUnit unit= fManager.getWorkingCopy(fEditor.getEditorInput(), false);
 			if (unit != null) {
-				Platform.run(new ISafeRunnable() {
+				SafeRunner.run(new ISafeRunnable() {
 					public void run() {
 						try {
 							

@@ -120,7 +120,7 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			ASTNode declaration= root.findDeclaringNode(decl);
 			rewrite= ASTRewrite.create(root.getAST());
 			rewrite.remove(declaration, null);
-		} else { // variable
+		} else if (binding.getKind() == IBinding.VARIABLE) {
 			// needs full AST
 			CompilationUnit completeRoot= JavaPlugin.getDefault().getASTProvider().getAST(getCompilationUnit(), ASTProvider.WAIT_YES, null);
 
@@ -137,6 +137,8 @@ public class RemoveDeclarationCorrectionProposal extends ASTRewriteCorrectionPro
 			if (declaringNode instanceof SingleVariableDeclaration) {
 				removeParamTag(rewrite, (SingleVariableDeclaration) declaringNode);
 			}
+		} else {
+			throw new IllegalArgumentException("Unexpected binding"); //$NON-NLS-1$
 		}
 		return rewrite;
 	}

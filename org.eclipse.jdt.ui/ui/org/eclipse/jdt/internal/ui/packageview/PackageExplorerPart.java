@@ -22,7 +22,7 @@ import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.PerformanceStats;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
@@ -120,7 +120,6 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.IPackagesViewPart;
@@ -1667,9 +1666,6 @@ public class PackageExplorerPart extends ViewPart
     			element2= null;
     			break;
     	}
-    	if (element2.getElementType() == IJavaElement.COMPILATION_UNIT) {
-    		element2= JavaModelUtil.toOriginal((ICompilationUnit)element2);
-    	}
     	return element2;
     }
 
@@ -1717,7 +1713,7 @@ public class PackageExplorerPart extends ViewPart
 	}
 
 	private void createWorkingSetModel() {
-		Platform.run(new ISafeRunnable() {
+		SafeRunner.run(new ISafeRunnable() {
 			public void run() throws Exception {
 				fWorkingSetModel= fMemento != null 
 				? new WorkingSetModel(fMemento) 

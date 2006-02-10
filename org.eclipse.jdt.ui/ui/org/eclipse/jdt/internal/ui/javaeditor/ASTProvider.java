@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.jface.text.Assert;
@@ -584,7 +585,7 @@ public final class ASTProvider {
 
 		final CompilationUnit root[]= new CompilationUnit[1]; 
 		
-		Platform.run(new ISafeRunnable() {
+		SafeRunner.run(new ISafeRunnable() {
 			public void run() {
 				try {
 					root[0]= (CompilationUnit)parser.createAST(progressMonitor);

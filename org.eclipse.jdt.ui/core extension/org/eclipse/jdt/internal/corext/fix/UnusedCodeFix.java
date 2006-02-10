@@ -161,7 +161,7 @@ public class UnusedCodeFix extends AbstractFix {
 				ITypeBinding decl= ((ITypeBinding) binding).getTypeDeclaration();
 				ASTNode declaration= root.findDeclaringNode(decl);
 				rewrite.remove(declaration, group);
-			} else { // variable
+			} else if (binding.getKind() == IBinding.VARIABLE) {
 				SimpleName nameNode= (SimpleName) NodeFinder.perform(completeRoot, simpleName.getStartPosition(), simpleName.getLength());
 				SimpleName[] references= LinkedNodeFinder.findByBinding(completeRoot, nameNode.resolveBinding());
 				for (int i= 0; i < references.length; i++) {
@@ -173,6 +173,8 @@ public class UnusedCodeFix extends AbstractFix {
 				if (declaringNode instanceof SingleVariableDeclaration) {
 					removeParamTag(rewrite, (SingleVariableDeclaration) declaringNode, group);
 				}
+			} else {
+				// unexpected
 			}
 		}
 		

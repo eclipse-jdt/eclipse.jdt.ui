@@ -19,6 +19,7 @@ import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionRegistry;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 
 import org.eclipse.jface.util.Assert;
 import org.eclipse.jface.util.SafeRunnable;
@@ -63,7 +64,7 @@ public class RefactoringElementFilterDescriptor implements IPluginContribution {
 				continue;
 			
 			final boolean[] filtered= new boolean[1];
-			Platform.run(new SafeRunnable() {
+			SafeRunner.run(new SafeRunnable() {
 				public void run() throws Exception {
 					filtered[0]= filter.filter(cu);
 				}
@@ -93,7 +94,7 @@ public class RefactoringElementFilterDescriptor implements IPluginContribution {
 			if (FILTER_TAG.equals(element.getName())) {
 
 				final RefactoringElementFilterDescriptor[] desc= new RefactoringElementFilterDescriptor[1];
-				Platform.run(new SafeRunnable(RefactoringCoreMessages.RefactoringElementFilterDescriptor_filterDescriptionCreationError_message) { 
+				SafeRunner.run(new SafeRunnable(RefactoringCoreMessages.RefactoringElementFilterDescriptor_filterDescriptionCreationError_message) { 
 					public void run() throws Exception {
 						desc[0]= new RefactoringElementFilterDescriptor(element);
 					}
@@ -132,7 +133,7 @@ public class RefactoringElementFilterDescriptor implements IPluginContribution {
 				super.handleException(e);
 			}
 		};
-		Platform.run(code);
+		SafeRunner.run(code);
 		return fRefactoringElementFilter;
 	}
 	
