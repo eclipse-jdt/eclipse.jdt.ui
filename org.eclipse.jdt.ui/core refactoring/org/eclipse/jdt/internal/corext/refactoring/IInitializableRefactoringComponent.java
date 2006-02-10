@@ -8,8 +8,10 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.ltk.core.refactoring;
+package org.eclipse.jdt.internal.corext.refactoring;
 
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 

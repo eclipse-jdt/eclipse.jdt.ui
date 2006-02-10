@@ -11,6 +11,9 @@
 package org.eclipse.jdt.internal.ui.model;
 
 import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.mapping.ResourceMapping;
+
+import org.eclipse.ui.IMemento;
 
 import org.eclipse.compare.structuremergeviewer.ICompareInput;
 
@@ -36,5 +39,21 @@ public final class JavaSynchronizationCompareAdapter extends AbstractSynchroniza
 		if (resource != null)
 			return super.asCompareInput(context, resource);
 		return null;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public ResourceMapping[] restore(final IMemento memento) {
+		// TODO: implement
+
+		return new ResourceMapping[0];
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void save(final ResourceMapping[] mappings, final IMemento memento) {
+		// TODO: implement
 	}
 }

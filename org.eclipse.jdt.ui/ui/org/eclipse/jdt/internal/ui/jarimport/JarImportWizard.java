@@ -42,7 +42,6 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 
-import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
@@ -59,6 +58,7 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
+import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
@@ -279,9 +279,9 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 	 */
 	protected RefactoringStatus aboutToPerformRefactoring(final Refactoring refactoring, final RefactoringDescriptor descriptor) {
 		final RefactoringStatus status= new RefactoringStatus();
-		if (refactoring instanceof IInitializableRefactoringComponent) {
-			final IInitializableRefactoringComponent component= (IInitializableRefactoringComponent) refactoring;
-			final RefactoringArguments arguments= descriptor.createArguments();
+		if (descriptor instanceof JavaRefactoringDescriptor) {
+			final JavaRefactoringDescriptor extended= (JavaRefactoringDescriptor) descriptor;
+			final RefactoringArguments arguments= extended.createArguments();
 			if (arguments instanceof JavaRefactoringArguments) {
 				final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
 				String value= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
@@ -295,7 +295,11 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 					count++;
 					attribute= JavaRefactoringDescriptor.ELEMENT + count;
 				}
-				status.merge(component.initialize(generic));
+				if (refactoring instanceof IInitializableRefactoringComponent) {
+					final IInitializableRefactoringComponent component= (IInitializableRefactoringComponent) refactoring;
+					status.merge(component.initialize(generic));
+				} else
+					status.addFatalError(MessageFormat.format(JarImportMessages.PerformRefactoringsOperation_init_error, new String[] { descriptor.getDescription()}));
 			} else
 				status.addFatalError(MessageFormat.format(JarImportMessages.PerformRefactoringsOperation_init_error, new String[] { descriptor.getDescription()}));
 		} else

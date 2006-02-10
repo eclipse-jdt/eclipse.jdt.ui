@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.ResourceMapping;
@@ -32,8 +33,8 @@ import org.eclipse.jface.viewers.ITreeContentProvider;
 import org.eclipse.team.core.diff.IDiff;
 import org.eclipse.team.core.diff.IDiffVisitor;
 import org.eclipse.team.core.mapping.IResourceDiffTree;
-import org.eclipse.team.core.mapping.IResourceMappingScope;
 import org.eclipse.team.core.mapping.ISynchronizationContext;
+import org.eclipse.team.core.mapping.ISynchronizationScope;
 
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 import org.eclipse.ltk.ui.refactoring.model.AbstractSynchronizationContentProvider;
@@ -56,7 +57,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public final class JavaSynchronizationContentProvider extends AbstractSynchronizationContentProvider {
 
 	/** The refactorings folder */
-//	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
+	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
 
 	/**
 	 * Returns the diffs associated with the element.
@@ -157,29 +158,29 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		final LinkedList list= new LinkedList();
 		for (int index= 0; index < children.length; index++)
 			list.add(children[index]);
-//		final IResource resource= JavaModelProvider.getResource(parent);
-//		if (resource != null) {
-//			final IResourceDiffTree tree= context.getDiffTree();
-//			final IResource[] members= tree.members(resource);
-//			for (int index= 0; index < members.length; index++) {
-//				final int type= members[index].getType();
-//				if (type == IResource.FOLDER) {
-//					if (isInScope(context.getScope(), parent, members[index])) {
-//						final String name= members[index].getName();
-//						if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
-//							list.remove(members[index]);
-//							list.addFirst(new JavaProjectSettings((IJavaProject) parent));
-//						} else if (name.equals(NAME_REFACTORING_FOLDER)) {
-//							final RefactoringHistory history= getRefactorings(context, (IProject) resource, null);
-//							if (!history.isEmpty()) {
-//								list.remove(members[index]);
-//								list.addFirst(history);
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
+		final IResource resource= JavaModelProvider.getResource(parent);
+		if (resource != null) {
+			final IResourceDiffTree tree= context.getDiffTree();
+			final IResource[] members= tree.members(resource);
+			for (int index= 0; index < members.length; index++) {
+				final int type= members[index].getType();
+				if (type == IResource.FOLDER) {
+					if (isInScope(context.getScope(), parent, members[index])) {
+						final String name= members[index].getName();
+						if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
+							list.remove(members[index]);
+							list.addFirst(new JavaProjectSettings((IJavaProject) parent));
+						} else if (name.equals(NAME_REFACTORING_FOLDER)) {
+							final RefactoringHistory history= getRefactorings(context, (IProject) resource, null);
+							if (!history.isEmpty()) {
+								list.remove(members[index]);
+								list.addFirst(history);
+							}
+						}
+					}
+				}
+			}
+		}
 		return list.toArray(new Object[list.size()]);
 	}
 
@@ -269,31 +270,27 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 				}
 				if (type == IResource.FOLDER) {
 					final IFolder folder= (IFolder) members[index];
-					try {
-						tree.accept(folder.getFullPath(), new IDiffVisitor() {
+					tree.accept(folder.getFullPath(), new IDiffVisitor() {
 
-							public final boolean visit(final IDiff diff) {
-								if (isVisible(diff)) {
-									final IResource current= tree.getResource(diff);
-									if (current != null) {
-										final int kind= current.getType();
-										if (kind == IResource.FILE) {
-											final IJavaElement element= JavaCore.create(current.getParent());
-											if (element != null)
-												set.add(element);
-										} else {
-											final IJavaElement element= JavaCore.create(current);
-											if (element != null)
-												set.add(element);
-										}
+						public final boolean visit(final IDiff diff) {
+							if (isVisible(diff)) {
+								final IResource current= tree.getResource(diff);
+								if (current != null) {
+									final int kind= current.getType();
+									if (kind == IResource.FILE) {
+										final IJavaElement element= JavaCore.create(current.getParent());
+										if (element != null)
+											set.add(element);
+									} else {
+										final IJavaElement element= JavaCore.create(current);
+										if (element != null)
+											set.add(element);
 									}
 								}
-								return true;
 							}
-						}, IResource.DEPTH_INFINITE);
-					} catch (CoreException exception) {
-						JavaPlugin.log(exception);
-					}
+							return true;
+						}
+					}, IResource.DEPTH_INFINITE);
 				}
 			}
 			return set.toArray(new Object[set.size()]);
@@ -353,7 +350,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 * @return <code>true</code> if it has some children, <code>false</code>
 	 *         otherwise
 	 */
-	private boolean hasChildrenInScope(final IResourceMappingScope scope, final Object element, final IResource resource) {
+	private boolean hasChildrenInScope(final ISynchronizationScope scope, final Object element, final IResource resource) {
 		final IResource[] roots= scope.getRoots();
 		final IPath path= resource.getFullPath();
 		if (element instanceof IPackageFragment) {
@@ -372,7 +369,7 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	/**
 	 * {@inheritDoc}
 	 */
-	protected boolean isInScope(final IResourceMappingScope scope, final Object parent, final Object element) {
+	protected boolean isInScope(final ISynchronizationScope scope, final Object parent, final Object element) {
 		final IResource resource= JavaModelProvider.getResource(element);
 		if (resource == null)
 			return false;

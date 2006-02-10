@@ -925,11 +925,12 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String RefactoringElementFilterDescriptor_filterCreationError_message;
 
 	public static String StubCreationOperation_creating_type_stubs;
-	
-	static {
-		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
-	}
 
 	public static String InlineConstantRefactoring_deprecation_comment;
 	public static String InlineMethodRefactoring_deprecation_comment;
+	public static String JavaRefactoringDescriptor_initialization_error;
+
+	static {
+		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
+	}
 }

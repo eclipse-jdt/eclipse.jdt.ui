@@ -54,7 +54,11 @@ public final class InlineMethodRefactoringContribution extends JavaRefactoringCo
 		int selectionLength= -1;
 		ICompilationUnit unit= null;
 		CompilationUnit node= null;
-		final RefactoringArguments arguments= descriptor.createArguments();
+		RefactoringArguments arguments= null;
+		if (descriptor instanceof JavaRefactoringDescriptor) {
+			final JavaRefactoringDescriptor extended= (JavaRefactoringDescriptor) descriptor;
+			arguments= extended.createArguments();
+		}
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
 			final String selection= generic.getAttribute(InlineMethodRefactoring.ATTRIBUTE_SELECTION);

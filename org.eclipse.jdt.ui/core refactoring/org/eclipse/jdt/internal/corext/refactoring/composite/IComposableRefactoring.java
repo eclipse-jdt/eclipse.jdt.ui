@@ -10,11 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.composite;
 
-import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+
+import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
 
 /**
  * Interface for refactorings which can be composed as a composite refactoring.

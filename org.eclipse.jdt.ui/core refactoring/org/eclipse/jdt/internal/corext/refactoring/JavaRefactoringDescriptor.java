@@ -23,7 +23,10 @@ import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 /**
  * Descriptor object of a java refactoring.
@@ -122,7 +125,21 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Creates refactoring arguments for this refactoring descriptor.
+	 * <p>
+	 * This method is used by the refactoring framework to create refactoring
+	 * arguments for the refactoring instance represented by this refactoring
+	 * descriptor. The result of this method is used as argument to initialize a
+	 * refactoring.
+	 * </p>
+	 * <p>
+	 * Note: this method must not be used outside the refactoring framework.
+	 * </p>
+	 * 
+	 * @return the refactoring arguments, or <code>null</code> if this
+	 *         refactoring descriptor represents the unknown refactoring, or if
+	 *         no refactoring contribution is available for this refactoring
+	 *         descriptor
 	 */
 	public RefactoringArguments createArguments() {
 		final JavaRefactoringArguments arguments= new JavaRefactoringArguments();
@@ -157,5 +174,16 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public Map getArguments() {
 		return fArguments;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public RefactoringStatus initialize(final Refactoring refactoring) {
+		if (refactoring instanceof IInitializableRefactoringComponent) {
+			final IInitializableRefactoringComponent component= (IInitializableRefactoringComponent) refactoring;
+			return component.initialize(createArguments());
+		}
+		return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_initialization_error, getID()));
 	}
 }
