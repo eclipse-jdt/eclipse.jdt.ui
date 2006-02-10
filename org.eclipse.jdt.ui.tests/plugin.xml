@@ -122,6 +122,7 @@
       <quickFixProcessor
             name="%exampleQuickFixProcessor.name"
             class="org.eclipse.jdt.ui.examples.MyQuickFixProcessor"
+            requiredSourceLevel="1.5"
             id="org.eclipse.jdt.ui.examples.MyQuickFixProcessor">
          <enablement>
 	           <with variable="compilationUnit">
@@ -132,14 +133,9 @@
 	                     property="org.eclipse.jdt.internal.ui.matchesPattern">
 	               </test>
 	            </adapt>
-	           </with>
-	           <with variable="sourceCompliance">
-	              <or>
-	                 <equals value="'1.5'"/>
-	                 <equals value="'1.6'"/>
-	               </or>
-	           </with>      
+	           </with>  
          </enablement>
+
       </quickFixProcessor>
    </extension>
    <extension

@@ -30,7 +30,7 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.runtime.jobs.ISchedulingRule;
@@ -90,6 +90,7 @@ import org.eclipse.jdt.core.IProblemRequestor;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
+import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
 
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
@@ -318,6 +319,15 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			 */
 			public ICompilationUnit getCompilationUnit() {
 				return fCompilationUnit;
+			}
+
+			/*
+			 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getMarkerType()
+			 */
+			public String getMarkerType() {
+				if (fProblem instanceof CategorizedProblem)
+					return ((CategorizedProblem) fProblem).getMarkerType();
+				return null;
 			}
 		}
 
@@ -1098,7 +1108,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			final IProgressMonitor subMonitor1= getSubProgressMonitor(monitor, 50);
 
 			try {
-				Platform.run(new ISafeRunnable() {
+				SafeRunner.run(new ISafeRunnable() {
 					public void run() {
 						try {
 							info.fCopy.reconcile(ICompilationUnit.NO_AST, false, null, subMonitor1);

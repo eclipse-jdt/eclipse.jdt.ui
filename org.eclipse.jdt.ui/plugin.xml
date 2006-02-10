@@ -155,6 +155,9 @@
             name="%spellingQuickFixProcessor"
             class="org.eclipse.jdt.internal.ui.text.spelling.WordQuickFixProcessor"
             id= "org.eclipse.jdt.ui.text.correction.spelling.QuickFixProcessor">
+            <handledMarkerTypes>
+                <markerType id="org.eclipse.jdt.internal.spelling"/>
+	        </handledMarkerTypes>
       </quickFixProcessor>
    </extension>
    <extension

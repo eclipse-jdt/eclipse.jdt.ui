@@ -14,15 +14,19 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 
-import org.eclipse.jdt.core.compiler.IProblem;
+import org.eclipse.jdt.core.compiler.CategorizedProblem;
 
 /**
  * Spelling problem to be accepted by problem requesters.
  *
  * @since 3.1
  */
-public class CoreSpellingProblem implements IProblem {
+public class CoreSpellingProblem extends CategorizedProblem {
 
+	// spelling 'marker type' name. Only virtual as spelling problems are never persisted in markers. 
+	// marker type is used in the quickFixProcessor extension point
+	public static final String MARKER_TYPE= "org.eclipse.jdt.internal.spelling"; //$NON-NLS-1$
+	
 	/** The end offset of the problem */
 	private int fSourceEnd= 0;
 
@@ -171,5 +175,19 @@ public class CoreSpellingProblem implements IProblem {
 	 */
 	public void setSourceLineNumber(int lineNumber) {
 		fLineNumber= lineNumber;
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.core.compiler.CategorizedProblem#getCategoryID()
+	 */
+	public int getCategoryID() {
+		return CAT_JAVADOC;
+	}
+	
+	/*
+	 * @see org.eclipse.jdt.core.compiler.CategorizedProblem#getMarkerType()
+	 */
+	public String getMarkerType() {
+		return MARKER_TYPE;
 	}
 }

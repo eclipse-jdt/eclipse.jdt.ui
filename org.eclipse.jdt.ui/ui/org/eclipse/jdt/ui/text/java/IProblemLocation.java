@@ -39,8 +39,17 @@ public interface IProblemLocation {
 	int getLength();
 
 	/**
-	 * Returns the id of problem. See {@link org.eclipse.jdt.core.compiler.IProblem} for
-	 * id definitions.
+	 * Returns the marker type of this problem.
+	 *
+	 * @return The marker type of the problem.
+	 * @since 3.2
+	 */
+	String getMarkerType();
+	
+	/**
+	 * Returns the id of problem. Note that problem ids are defined per problem marker type.
+	 * See {@link org.eclipse.jdt.core.compiler.IProblem} for id definitions for problems of type
+	 * <code>org.eclipse.jdt.core.problem</code> and <code>org.eclipse.jdt.core.task</code>.
 	 *
 	 * @return The id of the problem.
 	 */

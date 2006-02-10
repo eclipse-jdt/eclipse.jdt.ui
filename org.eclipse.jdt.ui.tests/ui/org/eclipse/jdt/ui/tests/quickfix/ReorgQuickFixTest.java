@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -647,7 +648,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
+		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true, IJavaModelMarker.TASK_MARKER);
 		ArrayList proposals= collectCorrections(context, problem);
 		
 		
@@ -680,7 +681,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
+		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true, IJavaModelMarker.TASK_MARKER);
 		ArrayList proposals= collectCorrections(context, problem);
 		
 		assertNumberOfProposals(proposals, 1);
@@ -712,7 +713,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
+		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true, IJavaModelMarker.TASK_MARKER);
 		ArrayList proposals= collectCorrections(context, problem);
 		
 		assertNumberOfProposals(proposals, 1);
@@ -745,7 +746,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
+		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true, IJavaModelMarker.TASK_MARKER);
 		ArrayList proposals= collectCorrections(context, problem);
 		
 		assertNumberOfProposals(proposals, 1);
@@ -778,7 +779,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
+		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true, IJavaModelMarker.TASK_MARKER);
 		ArrayList proposals= collectCorrections(context, problem);
 		
 		assertNumberOfProposals(proposals, 1);
@@ -812,7 +813,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
+		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true, IJavaModelMarker.TASK_MARKER);
 		ArrayList proposals= collectCorrections(context, problem);
 		
 		assertNumberOfProposals(proposals, 1);
@@ -844,7 +845,7 @@ public class ReorgQuickFixTest extends QuickFixTest {
 		
 		String str= "TODO: XXX";
 		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(str), 0);
-		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true);
+		ProblemLocation problem= new ProblemLocation(buf.toString().indexOf(str), str.length(), IProblem.Task, new String[0], true, IJavaModelMarker.TASK_MARKER);
 		ArrayList proposals= collectCorrections(context, problem);
 		
 		assertNumberOfProposals(proposals, 1);

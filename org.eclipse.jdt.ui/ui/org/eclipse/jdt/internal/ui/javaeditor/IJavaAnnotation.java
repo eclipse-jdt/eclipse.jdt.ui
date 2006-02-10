@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.javaeditor;
 import java.util.Iterator;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.compiler.CategorizedProblem;
 
 
 /**
@@ -93,11 +94,31 @@ public interface IJavaAnnotation {
 
 	/**
 	 * Returns the compilation unit corresponding to the document on which the annotation is set
-	 * or <code>null</code> if no corresponding co0mpilationunit exists.
+	 * or <code>null</code> if no corresponding compilation unit exists.
 	 */
 	ICompilationUnit getCompilationUnit();
 
+	/**
+	 * Returns the problem arguments or <code>null</code> if no problem arguments can be evaluated.
+	 * 
+	 * @return returns the problem arguments or <code>null</code> if no problem
+	 *  arguments can be evaluated.
+	 */
 	String[] getArguments();
 
+	/**
+	 * Returns the problem id or <code>-1</code> if no problem id can be evaluated.
+	 * 
+	 * @return returns the problem id or <code>-1</code>
+	 */
 	int getId();
+
+	/**
+	 * Returns the marker type associated to this problem or <code>null<code> if no marker type
+	 * can be evaluated. See also {@link CategorizedProblem#getMarkerType()}.
+	 * 
+	 * @return the type of the marker which would be associated to the problem or
+	 * <code>null<code> if no marker type can be evaluated. 
+	 */
+	String getMarkerType();
 }

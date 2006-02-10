@@ -106,7 +106,7 @@ public class QuickFixTest extends TestCase {
 	
 	public static void assertCorrectContext(IInvocationContext context, ProblemLocation problem) {
 		if (problem.getProblemId() != 0) {
-			if (!JavaCorrectionProcessor.hasCorrections(context.getCompilationUnit(), problem.getProblemId())) {
+			if (!JavaCorrectionProcessor.hasCorrections(context.getCompilationUnit(), problem.getProblemId(), problem.getMarkerType())) {
 				assertTrue("Problem type not marked with light bulb: " + problem, false);
 			}
 		}
@@ -244,7 +244,7 @@ public class QuickFixTest extends TestCase {
 			context= new AssistContext(cu, offset, length);
 		}
 		
-		ProblemLocation problem= new ProblemLocation(offset, length, curr.getID(), curr.getArguments(), curr.isError());
+		ProblemLocation problem= new ProblemLocation(curr);
 		ArrayList proposals= collectCorrections(context, problem);
 		if (!proposals.isEmpty()) {
 			assertCorrectContext(context, problem);

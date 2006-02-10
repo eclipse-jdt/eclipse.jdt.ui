@@ -7,6 +7,13 @@
       </appInfo>
       <documentation>
          This extension point allows to add a Quick Assist processor to offer new Quick Assists in the Java editor.
+This extenion point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Properties to test on are:
+&lt;dl&gt;
+&lt;li&gt;compilationUnit: type ICompilationUnit; the compilation unit the quick assist is applied on&lt;/li&gt;
+
+&lt;li&gt;projectNatures: type Collection; all project natures of the current project&lt;/li&gt;
+&lt;li&gt;sourceLevel: type String; the source compliance of the current project&lt;/li&gt;
+&lt;/dl&gt;
       </documentation>
    </annotation>
 
@@ -46,9 +53,9 @@
 
    <element name="quickAssistProcessor">
       <complexType>
-         <all>
+         <sequence>
             <element ref="enablement"/>
-         </all>
+         </sequence>
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>

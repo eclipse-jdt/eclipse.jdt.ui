@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import org.eclipse.jdt.core.IJavaModelMarker;
+import org.eclipse.jdt.core.compiler.CategorizedProblem;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -30,6 +32,7 @@ public class ProblemLocation implements IProblemLocation {
 	private final int fOffset;
 	private final int fLength;
 	private final boolean fIsError;
+	private final String fMarkerType;
 
 	public ProblemLocation(int offset, int length, IJavaAnnotation annotation) {
 		fId= annotation.getId();
@@ -37,14 +40,18 @@ public class ProblemLocation implements IProblemLocation {
 		fOffset= offset;
 		fLength= length;
 		fIsError= JavaMarkerAnnotation.ERROR_ANNOTATION_TYPE.equals(annotation.getType());
+		
+		String markerType= annotation.getMarkerType();
+		fMarkerType= markerType != null ? markerType : IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER;
 	}
 
-	public ProblemLocation(int offset, int length, int id, String[] arguments, boolean isError) {
+	public ProblemLocation(int offset, int length, int id, String[] arguments, boolean isError, String markerType) {
 		fId= id;
 		fArguments= arguments;
 		fOffset= offset;
 		fLength= length;
 		fIsError= isError;
+		fMarkerType= markerType;
 	}
 	
 	public ProblemLocation(IProblem problem) {
@@ -53,6 +60,7 @@ public class ProblemLocation implements IProblemLocation {
 		fOffset= problem.getSourceStart();
 		fLength= problem.getSourceEnd() - fOffset + 1;
 		fIsError= problem.isError();
+		fMarkerType= problem instanceof CategorizedProblem ? ((CategorizedProblem) problem).getMarkerType() : IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER;
 	}
 
 
@@ -91,6 +99,13 @@ public class ProblemLocation implements IProblemLocation {
 		return fIsError;
 	}
 
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.ui.text.java.IProblemLocation#getMarkerType()
+	 */
+	public String getMarkerType() {
+		return fMarkerType;
+	}
+	
 	/*
 	 * (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.ui.text.correction.IProblemLocation#getCoveringNode(org.eclipse.jdt.core.dom.CompilationUnit)
@@ -156,4 +171,6 @@ public class ProblemLocation implements IProblemLocation {
 
 		return buf.toString();
 	}
+
+
 }

@@ -44,6 +44,7 @@ import org.eclipse.ui.IMarkerResolution;
 import org.eclipse.ui.IMarkerResolutionGenerator;
 import org.eclipse.ui.IMarkerResolutionGenerator2;
 import org.eclipse.ui.texteditor.ITextEditor;
+import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import org.eclipse.ui.views.markers.WorkbenchMarkerResolution;
 
@@ -156,7 +157,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 							ICompilationUnit cu= getCompilationUnit(marker);
 							
 							if (cu != null) {
-								IProblemLocation location= getProblemLocation(marker, cu);
+								IProblemLocation location= CorrectionMarkerResolutionGenerator.createFromMarker(marker, cu);
 								if (location != null) {
 									if (!problemLocations.containsKey(cu.getPrimary())) {
 										problemLocations.put(cu.getPrimary(), new ArrayList());
@@ -329,7 +330,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 						if (!marker.equals(fMarker)) {
 							ICompilationUnit cu= getCompilationUnit(marker);
 							if (cu != null) {
-								IProblemLocation location= getProblemLocation(marker, cu);
+								IProblemLocation location= createFromMarker(marker, cu);
 								try {
 									IInvocationContext context= new AssistContext(cu,  location.getOffset(), location.getLength());
 									CompilationUnit root= context.getASTRoot();
@@ -347,23 +348,6 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			}
 			return NO_MARKERS;
 		}
-		
-		private IProblemLocation getProblemLocation(IMarker marker, ICompilationUnit cu) {
-			int id= marker.getAttribute(IJavaModelMarker.ID, -1);
-			int start= marker.getAttribute(IMarker.CHAR_START, -1);
-			int end= marker.getAttribute(IMarker.CHAR_END, -1);
-			int severity= marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
-			String[] arguments= CorrectionEngine.getProblemArguments(marker);
-			IProblemLocation location;
-			if (cu != null && id != -1 && start != -1 && end != -1 && arguments != null) {
-				boolean isError= (severity == IMarker.SEVERITY_ERROR);
-				location= new ProblemLocation(start, end - start, id, arguments, isError);
-			} else {
-				location= null;
-			}
-			return location;
-		}
-
 	}
 
 	private static final IMarkerResolution[] NO_RESOLUTIONS= new IMarkerResolution[0];
@@ -393,7 +377,7 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 	private static boolean internalHasResolutions(IMarker marker) {
 		int id= marker.getAttribute(IJavaModelMarker.ID, -1);
 		ICompilationUnit cu= getCompilationUnit(marker);
-		return cu != null && JavaCorrectionProcessor.hasCorrections(cu, id);
+		return cu != null && JavaCorrectionProcessor.hasCorrections(cu, id, MarkerUtilities.getMarkerType(marker));
 	}
 	
 	private static IMarkerResolution[] internalGetResolutions(IMarker marker) {
@@ -469,18 +453,28 @@ public class CorrectionMarkerResolutionGenerator implements IMarkerResolutionGen
 			}
 		} else { // not open in editor
 			ICompilationUnit cu= getCompilationUnit(marker);
+			return createFromMarker(marker, cu);
+		}
+		return null;
+	}
+
+	private static IProblemLocation createFromMarker(IMarker marker, ICompilationUnit cu) {
+		try {
 			int id= marker.getAttribute(IJavaModelMarker.ID, -1);
 			int start= marker.getAttribute(IMarker.CHAR_START, -1);
 			int end= marker.getAttribute(IMarker.CHAR_END, -1);
 			int severity= marker.getAttribute(IMarker.SEVERITY, IMarker.SEVERITY_INFO);
 			String[] arguments= CorrectionEngine.getProblemArguments(marker);
+			String markerType= marker.getType();
 			if (cu != null && id != -1 && start != -1 && end != -1 && arguments != null) {
 				boolean isError= (severity == IMarker.SEVERITY_ERROR);
-				return new ProblemLocation(start, end - start, id, arguments, isError);
+				return new ProblemLocation(start, end - start, id, arguments, isError, markerType);
 			}
+		} catch (CoreException e) {
+			JavaPlugin.log(e);
 		}
 		return null;
 	}
-
+	
 
 }

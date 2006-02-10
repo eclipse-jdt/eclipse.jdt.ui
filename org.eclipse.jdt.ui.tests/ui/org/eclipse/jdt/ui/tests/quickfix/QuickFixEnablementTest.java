@@ -26,6 +26,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
 
 import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
@@ -60,6 +61,7 @@ public class QuickFixEnablementTest extends QuickFixTest {
 
 
 	protected void tearDown() throws Exception {
+		TestOptions.initializeProjectOptions(fJProject1);
 		JavaProjectHelper.clear(fJProject1, ProjectTestSetup.getDefaultClasspath());
 	}
 

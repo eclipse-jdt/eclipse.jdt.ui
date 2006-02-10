@@ -11,6 +11,8 @@
 package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Arrays;
+import java.util.HashSet;
+import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IConfigurationElement;
@@ -23,29 +25,61 @@ import org.eclipse.core.expressions.ExpressionConverter;
 import org.eclipse.core.expressions.ExpressionTagNames;
 
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaModelMarker;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 
-public class ContributedProcessorDescriptor {
+public final class ContributedProcessorDescriptor {
 
-	private IConfigurationElement fConfigurationElement;
+	private final IConfigurationElement fConfigurationElement;
 	private Object fProcessorInstance;
 	private Boolean fStatus;
 	private boolean fLastResult;
+	private String fRequiredSourceLevel;
+	private final Set fHandledMarkerTypes;
 
 	private static final String ID= "id"; //$NON-NLS-1$
 	private static final String CLASS= "class"; //$NON-NLS-1$
-
-	public ContributedProcessorDescriptor(IConfigurationElement element) {
+	
+	private static final String REQUIRED_SOURCE_LEVEL= "requiredSourceLevel"; //$NON-NLS-1$
+	
+	private static final String HANDLED_MARKER_TYPES= "handledMarkerTypes"; //$NON-NLS-1$
+	private static final String MARKER_TYPE= "markerType"; //$NON-NLS-1$
+	
+	public ContributedProcessorDescriptor(IConfigurationElement element, boolean testMarkerTypes) {
 		fConfigurationElement= element;
 		fProcessorInstance= null;
 		fStatus= null; // undefined
 		if (fConfigurationElement.getChildren(ExpressionTagNames.ENABLEMENT).length == 0) {
 			fStatus= Boolean.TRUE;
 		}
+		fRequiredSourceLevel= element.getAttribute(REQUIRED_SOURCE_LEVEL);
+		fHandledMarkerTypes= testMarkerTypes ? getHandledMarkerTypes(element) : null;
+	}
+
+	private Set getHandledMarkerTypes(IConfigurationElement element) {
+		HashSet map= new HashSet(7);
+		IConfigurationElement[] children= element.getChildren(HANDLED_MARKER_TYPES);
+		for (int i= 0; i < children.length; i++) {
+			IConfigurationElement[] types= children[i].getChildren(MARKER_TYPE);
+			for (int k= 0; k < types.length; k++) {
+				String attribute= types[k].getAttribute(ID);
+				if (attribute != null) {
+					map.add(attribute);
+				}
+			}
+		}
+		if (map.isEmpty()) {
+			map.add(IJavaModelMarker.JAVA_MODEL_PROBLEM_MARKER);
+			map.add(IJavaModelMarker.BUILDPATH_PROBLEM_MARKER);
+			map.add(IJavaModelMarker.TASK_MARKER);
+		}
+		return map;
 	}
 
 	public IStatus checkSyntax() {
@@ -58,6 +92,13 @@ public class ContributedProcessorDescriptor {
 	}
 
 	private boolean matches(ICompilationUnit cunit) {
+		if (fRequiredSourceLevel != null) {
+			String current= cunit.getJavaProject().getOption(JavaCore.COMPILER_SOURCE, true);
+			if (JavaModelUtil.isVersionLessThan(current, fRequiredSourceLevel)) {
+				return false;
+			}
+		}
+		
 		if (fStatus != null) {
 			return fStatus.booleanValue();
 		}
@@ -72,7 +113,7 @@ public class ContributedProcessorDescriptor {
 				IJavaProject javaProject= cunit.getJavaProject();
 				String[] natures= javaProject.getProject().getDescription().getNatureIds();
 				evalContext.addVariable("projectNatures", Arrays.asList(natures)); //$NON-NLS-1$
-				evalContext.addVariable("sourceCompliance", javaProject.getOption(JavaCore.COMPILER_SOURCE, true)); //$NON-NLS-1$
+				evalContext.addVariable("sourceLevel", javaProject.getOption(JavaCore.COMPILER_SOURCE, true)); //$NON-NLS-1$
 				fLastResult= !(expression.evaluate(evalContext) != EvaluationResult.TRUE);
 				return fLastResult;
 			} catch (CoreException e) {
@@ -92,4 +133,9 @@ public class ContributedProcessorDescriptor {
 		}
 		return null;
 	}
+	
+	public boolean canHandleMarkerType(String markerType) {
+		return fHandledMarkerTypes == null || fHandledMarkerTypes.contains(markerType);
+	}
+	
 }

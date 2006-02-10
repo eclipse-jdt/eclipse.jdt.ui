@@ -7,6 +7,14 @@
       </appInfo>
       <documentation>
          This extension point allows to add a Quick Fix processor to offer new Quick Fixes on Java problems.
+This extenion point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Properties to test on are:
+&lt;dl&gt;
+&lt;li&gt;compilationUnit: type ICompilationUnit; the compilation unit the quick assist is applied on&lt;/li&gt;
+
+&lt;li&gt;projectNatures: type Collection; all project natures of the current project&lt;/li&gt;
+&lt;li&gt;sourceLevel: type String; the source compliance of the current project&lt;/li&gt;
+&lt;/dl&gt;
+
       </documentation>
    </annotation>
 
@@ -46,9 +54,10 @@
 
    <element name="quickFixProcessor">
       <complexType>
-         <all>
+         <sequence>
             <element ref="enablement"/>
-         </all>
+            <element ref="handledMarkerTypes" minOccurs="0" maxOccurs="unbounded"/>
+         </sequence>
          <attribute name="id" type="string" use="required">
             <annotation>
                <documentation>
@@ -66,7 +75,7 @@
                </appInfo>
             </annotation>
          </attribute>
-         <attribute name="class" type="string">
+         <attribute name="class" type="string" use="required">
             <annotation>
                <documentation>
                   the name of the class that implements this Quick Fix processor. The
@@ -77,6 +86,39 @@ with a public 0-argument constructor.
                <appInfo>
                   <meta.attribute kind="java" basedOn="org.eclipse.jdt.ui.text.java.IQuickFixProcessor"/>
                </appInfo>
+            </annotation>
+         </attribute>
+         <attribute name="requiredSourceLevel" type="string">
+            <annotation>
+               <documentation>
+                  Optional attribute to specify the minimal source compliance this processor requires.
+               </documentation>
+            </annotation>
+         </attribute>
+      </complexType>
+   </element>
+
+   <element name="handledMarkerTypes">
+      <annotation>
+         <documentation>
+            Specifies the marker types of the problems this quick fix processor can handle.
+If no handled marker type are specified, the processor will get problems of types org.eclipse.jdt.core.problem, org.eclipse.jdt.core.buildpath_problem and org.eclipse.jdt.core.task.
+         </documentation>
+      </annotation>
+      <complexType>
+         <sequence>
+            <element ref="markerType" minOccurs="1" maxOccurs="unbounded"/>
+         </sequence>
+      </complexType>
+   </element>
+
+   <element name="markerType">
+      <complexType>
+         <attribute name="id" type="string" use="required">
+            <annotation>
+               <documentation>
+                  The marker type id of the marker that can be handled by this processor
+               </documentation>
             </annotation>
          </attribute>
       </complexType>
@@ -96,6 +138,16 @@ with a public 0-argument constructor.
    id=&quot;AdvancedQuickFixProcessor&quot;
    name=&quot;Advanced Quick Fix Processor&quot;
    class=&quot;com.example.AdvancedQuickFixProcessor&quot;&gt;
+   &lt;handledMarkerTypes&gt;
+      &lt;markerType id=&quot;org.eclipse.myplugin.spelling&quot;/&gt;
+   &lt;/handledMarkerTypes&gt;
+   &lt;enablement&gt;
+      &lt;with variable=&quot;projectNatures&quot;&gt;
+         &lt;iterate operator=&quot;or&quot;&gt;
+            &lt;equals value=&quot;org.eclipse.jdt.core.javanature&quot;/&gt;
+         &lt;/iterate&gt;
+      &lt;/with&gt;
+   &lt;/enablement&gt;
   &lt;/quickFixProcessor&gt;
  &lt;/extension&gt;
 &lt;/pre&gt;

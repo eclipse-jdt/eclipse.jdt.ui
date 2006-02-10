@@ -17,6 +17,7 @@ import java.util.Iterator;
 import org.eclipse.core.resources.IMarker;
 
 import org.eclipse.ui.texteditor.MarkerAnnotation;
+import org.eclipse.ui.texteditor.MarkerUtilities;
 
 import org.eclipse.jdt.core.CorrectionEngine;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -145,5 +146,16 @@ public class JavaMarkerAnnotation extends MarkerAnnotation implements IJavaAnnot
 			return (ICompilationUnit)element;
 		}
 		return null;
+	}
+
+	/* (non-Javadoc)
+	 * @see org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation#getMarkerType()
+	 */
+	public String getMarkerType() {
+		IMarker marker= getMarker();
+		if (marker == null  || !marker.exists())
+			return null;
+		
+		return  MarkerUtilities.getMarkerType(getMarker());
 	}
 }

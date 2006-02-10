@@ -65,12 +65,12 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	private static ContributedProcessorDescriptor[] fContributedAssistProcessors= null;
 	private static ContributedProcessorDescriptor[] fContributedCorrectionProcessors= null;
 
-	private static ContributedProcessorDescriptor[] getProcessorDescriptors(String contributionId) {
+	private static ContributedProcessorDescriptor[] getProcessorDescriptors(String contributionId, boolean testMarkerTypes) {
 		IConfigurationElement[] elements= Platform.getExtensionRegistry().getConfigurationElementsFor(JavaUI.ID_PLUGIN, contributionId);
 		ArrayList res= new ArrayList(elements.length);
 
 		for (int i= 0; i < elements.length; i++) {
-			ContributedProcessorDescriptor desc= new ContributedProcessorDescriptor(elements[i]);
+			ContributedProcessorDescriptor desc= new ContributedProcessorDescriptor(elements[i], testMarkerTypes);
 			IStatus status= desc.checkSyntax();
 			if (status.isOK()) {
 				res.add(desc);
@@ -83,25 +83,27 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
 	private static ContributedProcessorDescriptor[] getCorrectionProcessors() {
 		if (fContributedCorrectionProcessors == null) {
-			fContributedCorrectionProcessors= getProcessorDescriptors(QUICKFIX_PROCESSOR_CONTRIBUTION_ID);
+			fContributedCorrectionProcessors= getProcessorDescriptors(QUICKFIX_PROCESSOR_CONTRIBUTION_ID, true);
 		}
 		return fContributedCorrectionProcessors;
 	}
 
 	private static ContributedProcessorDescriptor[] getAssistProcessors() {
 		if (fContributedAssistProcessors == null) {
-			fContributedAssistProcessors= getProcessorDescriptors(QUICKASSIST_PROCESSOR_CONTRIBUTION_ID);
+			fContributedAssistProcessors= getProcessorDescriptors(QUICKASSIST_PROCESSOR_CONTRIBUTION_ID, false);
 		}
 		return fContributedAssistProcessors;
 	}
 
-	public static boolean hasCorrections(ICompilationUnit cu, int problemId) {
+	public static boolean hasCorrections(ICompilationUnit cu, int problemId, String markerType) {
 		ContributedProcessorDescriptor[] processors= getCorrectionProcessors();
 		SafeHasCorrections collector= new SafeHasCorrections(cu, problemId);
 		for (int i= 0; i < processors.length; i++) {
-			collector.process(processors[i]);
-			if (collector.hasCorrections()) {
-				return true;
+			if (processors[i].canHandleMarkerType(markerType)) {
+				collector.process(processors[i]);
+				if (collector.hasCorrections()) {
+					return true;
+				}
 			}
 		}
 		return false;
@@ -119,7 +121,7 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 			if (problemId != -1) {
 				ICompilationUnit cu= javaAnnotation.getCompilationUnit();
 				if (cu != null) {
-					return hasCorrections(cu, problemId);
+					return hasCorrections(cu, problemId, javaAnnotation.getMarkerType());
 				}
 			}
 		}
@@ -322,13 +324,16 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
 	private static class SafeCorrectionCollector extends SafeCorrectionProcessorAccess {
 		private final IInvocationContext fContext;
-		private final IProblemLocation[] fLocations;
 		private final Collection fProposals;
+		private IProblemLocation[] fLocations;
 
-		public SafeCorrectionCollector(IInvocationContext context, IProblemLocation[] locations, Collection proposals) {
+		public SafeCorrectionCollector(IInvocationContext context, Collection proposals) {
 			fContext= context;
-			fLocations= locations;
 			fProposals= proposals;
+		}
+		
+		public void setProblemLocations(IProblemLocation[] locations) {
+			fLocations= locations;
 		}
 
 		public void safeRun(ContributedProcessorDescriptor desc) throws Exception {
@@ -415,10 +420,48 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 
 	public static IStatus collectCorrections(IInvocationContext context, IProblemLocation[] locations, Collection proposals) {
 		ContributedProcessorDescriptor[] processors= getCorrectionProcessors();
-		SafeCorrectionCollector collector= new SafeCorrectionCollector(context, locations, proposals);
-		collector.process(processors);
-
+		SafeCorrectionCollector collector= new SafeCorrectionCollector(context, proposals);
+		for (int i= 0; i < processors.length; i++) {
+			ContributedProcessorDescriptor curr= processors[i];
+			IProblemLocation[] handled= getHandledProblems(locations, curr);
+			if (handled != null) {
+				collector.setProblemLocations(handled);
+				collector.process(curr);
+			}
+		}
 		return collector.getStatus();
+	}
+
+	private static IProblemLocation[] getHandledProblems(IProblemLocation[] locations, ContributedProcessorDescriptor processor) {
+		// implementation tries to avoid creating a new array
+		boolean allHandled= true;
+		ArrayList res= null;
+		for (int i= 0; i < locations.length; i++) {
+			IProblemLocation curr= locations[i];
+			if (processor.canHandleMarkerType(curr.getMarkerType())) {
+				if (!allHandled) { // first handled problem
+					if (res == null) {
+						res= new ArrayList(locations.length - i);
+					}
+					res.add(curr);
+				}
+			} else if (allHandled) { 
+				if (i > 0) { // first non handled problem 
+					res= new ArrayList(locations.length - i);
+					for (int k= 0; k < i; k++) {
+						res.add(locations[k]);
+					}
+				}
+				allHandled= false;
+			}
+		}
+		if (allHandled) {
+			return locations;
+		}
+		if (res == null) {
+			return null;
+		}
+		return (IProblemLocation[]) res.toArray(new IProblemLocation[res.size()]);
 	}
 
 	public static IStatus collectAssists(IInvocationContext context, IProblemLocation[] locations, Collection proposals) {
