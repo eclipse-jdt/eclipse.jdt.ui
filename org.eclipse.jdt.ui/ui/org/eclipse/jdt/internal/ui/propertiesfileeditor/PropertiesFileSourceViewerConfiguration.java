@@ -221,9 +221,12 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 	 * @since 3.2
 	 */
 	public IContentAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
-		ContentAssistant assistant= new PropertiesFileCorrectionAssistant(getEditor());
-		assistant.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
-		return assistant;
+		if (getEditor() != null) {
+			ContentAssistant assistant= new PropertiesFileCorrectionAssistant(getEditor());
+			assistant.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
+			return assistant;
+		}
+		return null;
 	}
 
 	/**
