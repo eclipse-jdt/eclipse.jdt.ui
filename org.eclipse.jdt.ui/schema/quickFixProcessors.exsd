@@ -7,13 +7,19 @@
       </appInfo>
       <documentation>
          This extension point allows to add a Quick Fix processor to offer new Quick Fixes on Java problems.
-This extenion point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Properties to test on are:
+&lt;p&gt;
+Since 3.2 an extension can specify which problem marker types it can handle. It will only get problems of these types to process.
+If no handled marker type are specified, the processor will only get problems of types org.eclipse.jdt.core.problem, org.eclipse.jdt.core.buildpath_problem and org.eclipse.jdt.core.task (for compatibility reasons).
+&lt;/p&gt;
+&lt;p&gt;
+This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Properties to test on are:
 &lt;dl&gt;
 &lt;li&gt;compilationUnit: type ICompilationUnit; the compilation unit the quick assist is applied on&lt;/li&gt;
 
 &lt;li&gt;projectNatures: type Collection; all project natures of the current project&lt;/li&gt;
 &lt;li&gt;sourceLevel: type String; the source compliance of the current project&lt;/li&gt;
 &lt;/dl&gt;
+&lt;/p&gt;
 
       </documentation>
    </annotation>
@@ -137,9 +143,10 @@ If no handled marker type are specified, the processor will get problems of type
   &lt;quickFixProcessor
    id=&quot;AdvancedQuickFixProcessor&quot;
    name=&quot;Advanced Quick Fix Processor&quot;
+   requiredSourceLevel=&quot;1.5&quot;
    class=&quot;com.example.AdvancedQuickFixProcessor&quot;&gt;
    &lt;handledMarkerTypes&gt;
-      &lt;markerType id=&quot;org.eclipse.myplugin.spelling&quot;/&gt;
+      &lt;markerType id=&quot;org.eclipse.myplugin.audits&quot;/&gt;
    &lt;/handledMarkerTypes&gt;
    &lt;enablement&gt;
       &lt;with variable=&quot;projectNatures&quot;&gt;
@@ -160,7 +167,7 @@ If no handled marker type are specified, the processor will get problems of type
          <meta.section type="since"/>
       </appInfo>
       <documentation>
-         3.0
+         Extension point since 3.0. Element &lt;code&gt;handledMarkerTypes&lt;/code&gt; since 3.2.
       </documentation>
    </annotation>
 
@@ -187,7 +194,7 @@ If no handled marker type are specified, the processor will get problems of type
          <meta.section type="copyright"/>
       </appInfo>
       <documentation>
-         Copyright (c) 2001, 2004 IBM Corporation and others.&lt;br&gt;
+         Copyright (c) 2001, 2006 IBM Corporation and others.&lt;br&gt;
 All rights reserved. This program and the accompanying materials are made available under the terms of the Eclipse Public License v1.0 which accompanies this distribution, and is available at &lt;a href=&quot;http://www.eclipse.org/legal/epl-v10.html&quot;&gt;http://www.eclipse.org/legal/epl-v10.html&lt;/a&gt;
       </documentation>
    </annotation>

@@ -7,7 +7,7 @@
       </appInfo>
       <documentation>
          This extension point allows to add a Quick Assist processor to offer new Quick Assists in the Java editor.
-This extenion point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Properties to test on are:
+This extension point supports the &lt;code&gt;enablement&lt;/code&gt; tag. Properties to test on are:
 &lt;dl&gt;
 &lt;li&gt;compilationUnit: type ICompilationUnit; the compilation unit the quick assist is applied on&lt;/li&gt;
 
@@ -109,8 +109,16 @@ with a public 0-argument constructor.
   &lt;quickAssistProcessor
    id=&quot;AdvancedQuickAssistProcessor&quot;
    name=&quot;Advanced Quick Assist Processor&quot;
+   requiredSourceLevel=&quot;1.5&quot;  
    class=&quot;com.example.AdvancedQuickAssistProcessor&quot;&gt;
   &lt;/quickAssistProcessor&gt;
+   &lt;enablement&gt;
+      &lt;with variable=&quot;projectNatures&quot;&gt;
+         &lt;iterate operator=&quot;or&quot;&gt;
+            &lt;equals value=&quot;org.eclipse.jdt.core.javanature&quot;/&gt;
+         &lt;/iterate&gt;
+      &lt;/with&gt;
+   &lt;/enablement&gt;
  &lt;/extension&gt;
 &lt;/pre&gt;
 &lt;/p&gt;
