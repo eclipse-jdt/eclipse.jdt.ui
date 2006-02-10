@@ -5050,4 +5050,96 @@
       </objectContribution>
    </extension>
 
+
+    <!-- CommonNavigator -->
+	
+	<extension
+			point="org.eclipse.ui.navigator.viewer">
+		<viewerContentBinding
+				viewerId="org.eclipse.ui.navigator.resourceContent">
+			<includes>
+				<contentExtension pattern="org.eclipse.jdt.java.ui.javaContent" />
+			</includes>
+		</viewerContentBinding>
+	</extension>
+	
+	<extension
+			point="org.eclipse.ui.navigator.navigatorContent">
+		<navigatorContent
+				activeByDefault="true"
+				contentProvider="org.eclipse.jdt.internal.ui.navigator.JavaNavigatorContentProvider"
+				icon="$nl$/icons/full/obj16/java_model.gif"
+				id="org.eclipse.jdt.java.ui.javaContent"
+				labelProvider="org.eclipse.jdt.internal.ui.navigator.JavaNavigatorLabelProvider"
+				name="%commonNavigatorContentName"
+				priority="high">
+			<triggerPoints>
+				<or>
+					<adapt
+							type="org.eclipse.core.resources.IProject" >
+						<test
+							property="org.eclipse.core.resources.projectNature"
+							value="org.eclipse.jdt.core.javanature" />
+					</adapt>
+					<instanceof
+							value="org.eclipse.core.resources.IWorkspaceRoot" />
+					<instanceof
+							value="org.eclipse.core.resources.IFolder" />
+					<instanceof
+							value="org.eclipse.core.resources.IFile" />
+					<instanceof
+							value="org.eclipse.jdt.core.IJavaProject" />
+					<instanceof
+							value="org.eclipse.jdt.core.IJavaElement" />
+					<instanceof
+							value="org.eclipse.jdt.internal.core.JarEntryFile" />
+					<instanceof
+							value="org.eclipse.jdt.core.IClassFile" />
+					<instanceof
+							value="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer" />
+<!--
+					<instanceof
+							value="org.eclipse.jdt.internal.ui.workingsets.WorkingSetModel" />
+-->
+				</or>
+			</triggerPoints>
+			<possibleChildren>
+				<or>
+					<adapt
+							type="org.eclipse.core.resources.IProject" >
+					</adapt>
+					<instanceof
+							value="org.eclipse.core.resources.IWorkspaceRoot" />
+					<instanceof
+							value="org.eclipse.core.resources.IFolder" />
+					<instanceof
+							value="org.eclipse.core.resources.IFile" />
+					<instanceof
+							value="org.eclipse.jdt.core.IJavaProject" />
+					<instanceof
+							value="org.eclipse.jdt.core.IJavaElement" />
+					<instanceof
+							value="org.eclipse.jdt.internal.core.JarEntryFile" />
+					<instanceof
+							value="org.eclipse.jdt.core.IClassFile" />
+					<instanceof
+							value="org.eclipse.jdt.internal.ui.packageview.ClassPathContainer" />
+				</or>
+			</possibleChildren>
+			<actionProvider
+					class="org.eclipse.jdt.internal.ui.navigator.PackageExplorerActionProvider">
+				<enablement>
+					<adapt
+							type="org.eclipse.jdt.core.IJavaElement" />
+				</enablement>
+			</actionProvider>
+			<override
+					policy="InvokeAlwaysRegardlessOfSuppressedExt"
+					suppressedExtensionId="org.eclipse.ui.navigator.resourceContent"/>
+			<commonSorter
+					class="org.eclipse.jdt.ui.JavaElementSorter"
+					id="org.eclipse.jdt.ui.javaElementSorter"/>
+		</navigatorContent>
+	</extension>
+     
 </plugin>

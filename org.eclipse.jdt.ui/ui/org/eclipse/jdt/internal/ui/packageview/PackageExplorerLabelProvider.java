@@ -33,7 +33,7 @@ public class PackageExplorerLabelProvider extends AppearanceAwareLabelProvider {
 	private boolean fIsFlatLayout;
 	private PackageExplorerProblemsDecorator fProblemDecorator;
 
-	PackageExplorerLabelProvider(long textFlags, int imageFlags, PackageExplorerContentProvider cp) {
+	public PackageExplorerLabelProvider(long textFlags, int imageFlags, PackageExplorerContentProvider cp) {
 		super(textFlags, imageFlags);
 		fProblemDecorator= new PackageExplorerProblemsDecorator();
 		addLabelDecorator(fProblemDecorator);

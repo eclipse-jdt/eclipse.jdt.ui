@@ -76,14 +76,22 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 	private PackageFragmentProvider fPackageFragmentProvider= new PackageFragmentProvider();
 	
 	private int fPendingChanges;
-	PackageExplorerPart fPart;
+	//PackageExplorerPart fPart;
+	
+	/**
+	 * Creates a new content provider for Java elements.
+	 */
+	public PackageExplorerContentProvider(boolean provideMembers) {
+		super(provideMembers);	
+		//fPart= part;
+	}
 	
 	/**
 	 * Creates a new content provider for Java elements.
 	 */
 	public PackageExplorerContentProvider(PackageExplorerPart part, boolean provideMembers) {
 		super(provideMembers);	
-		fPart= part;
+		//fPart= part;
 	}
 	
 	/* package */ PackageFragmentProvider getPackageFragmentProvider() {
@@ -607,7 +615,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		return isParent(root, parent);
 	}
 
-	/* package */ void postRefresh(final List toRefresh, final boolean updateLabels) {
+	protected void postRefresh(final List toRefresh, final boolean updateLabels) {
 		postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();
@@ -620,7 +628,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		});
 	}
 
-	private void postAdd(final Object parent, final Object element) {
+	protected void postAdd(final Object parent, final Object element) {
 		postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();
@@ -633,7 +641,7 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		});
 	}
 
-	private void postRemove(final Object element) {
+	protected void postRemove(final Object element) {
 		postRunnable(new Runnable() {
 			public void run() {
 				Control ctrl= fViewer.getControl();
@@ -644,10 +652,17 @@ public class PackageExplorerContentProvider extends StandardJavaElementContentPr
 		});
 	}
 
-	private void postProjectStateChanged(final Object root) {
+	protected void postProjectStateChanged(final Object root) {
 		postRunnable(new Runnable() {
 			public void run() {
-				fPart.projectStateChanged(root);
+				//fPart.projectStateChanged(root); 
+				Control ctrl= fViewer.getControl();
+				if (ctrl != null && !ctrl.isDisposed()) {
+					fViewer.refresh(root, true);
+					// trigger a syntetic selection change so that action refresh their
+					// enable state.
+					fViewer.setSelection(fViewer.getSelection());
+				}
 			}
 		});
 	}

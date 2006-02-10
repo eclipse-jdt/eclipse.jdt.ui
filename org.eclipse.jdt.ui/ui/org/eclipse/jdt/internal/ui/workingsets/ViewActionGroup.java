@@ -45,7 +45,12 @@ public class ViewActionGroup extends ActionGroup {
 
 	public ViewActionGroup(int mode, IPropertyChangeListener changeListener, IWorkbenchPartSite site) {
 		fChangeListener= changeListener;
-		fFilterActionGroup= new WorkingSetFilterActionGroup(site, changeListener);
+		if(fChangeListener == null) {
+			fChangeListener = new IPropertyChangeListener() {
+				public void propertyChange(PropertyChangeEvent event) {}
+			};
+		}
+		fFilterActionGroup= new WorkingSetFilterActionGroup(site, fChangeListener);
 		fShowActionGroup= new WorkingSetShowActionGroup(site);
 		fMode= mode;
 		if (showWorkingSets())
@@ -70,14 +75,22 @@ public class ViewActionGroup extends ActionGroup {
 	 */
 	public void fillActionBars(IActionBars actionBars) {
 		super.fillActionBars(actionBars);
-		fMenuManager= actionBars.getMenuManager();
-		IMenuManager showMenu= new MenuManager(WorkingSetMessages.ViewActionGroup_show_label); 
-		fillShowMenu(showMenu);
-		fMenuManager.add(showMenu);
-		fMenuManager.add(new Separator(IWorkingSetActionGroup.ACTION_GROUP));
+		if(fMenuManager == null) {
+			fMenuManager= actionBars.getMenuManager();
+			fillViewMenu(fMenuManager);
+		}
+
 		if (fActiveActionGroup == null)
 			fActiveActionGroup= fFilterActionGroup;
 		((ActionGroup)fActiveActionGroup).fillActionBars(actionBars);
+	}
+	
+	private void fillViewMenu(IMenuManager menu) { 
+		
+		IMenuManager showMenu= new MenuManager(WorkingSetMessages.ViewActionGroup_show_label); 
+		fillShowMenu(showMenu);
+		menu.add(showMenu);
+		menu.add(new Separator(IWorkingSetActionGroup.ACTION_GROUP));
 	}
 	
 	private void fillShowMenu(IMenuManager menu) {
@@ -116,7 +129,8 @@ public class ViewActionGroup extends ActionGroup {
 		}
 		fActiveActionGroup.fillViewMenu(fMenuManager);
 		fMenuManager.updateAll(true);
-		fChangeListener.propertyChange(event);
+		if(fChangeListener != null)
+			fChangeListener.propertyChange(event);
 	}
 	
 	public WorkingSetFilterActionGroup getFilterGroup() {

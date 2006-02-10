@@ -37,12 +37,13 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  */
 public class MultiActionGroup extends ActionGroup {
 	
+	public IAction[] NO_ACTIONS = new IAction[0];
+	
 	private IAction[] fActions; 
 	
 	private int fCurrentSelection;
 	private MenuItem[] fItems;
 
-	
 	/**
 	 * Creates a new action group with a given set of actions.
 	 * 
@@ -53,13 +54,32 @@ public class MultiActionGroup extends ActionGroup {
 	 */
 	public MultiActionGroup(IAction[] actions, int currentSelection) {
 		super();
-		
+		setActions(actions, currentSelection);
+	}
+	
+	/**
+	 * Creates a new action group. Clients using this constructor must set the actions
+	 * immediately after creating the multi action group by calling {@link #setActions(IAction[], int)}.
+	 */
+	protected MultiActionGroup() {
+		super();
+	}
+	
+	/**
+	 * Sets the given actions.
+	 * 
+	 * @param actions			the actions for this multi group, at least one
+	 * @param currentSelection	decides which action is selected in the menu on start up.
+	 * 							Denotes the location in the actions array of the current
+	 * 							selected state. It cannot be null.
+	 */
+	protected final void setActions(IAction[] actions, int currentSelection) {
 		fCurrentSelection= currentSelection;
-		fActions= actions;
+		fActions = actions;
 	}
 
 	/**
-	 * Add the actions to the given menu manager.
+	 * Adds the actions to the given menu manager.
 	 */
 	protected void addActions(IMenuManager viewMenu) {
 
