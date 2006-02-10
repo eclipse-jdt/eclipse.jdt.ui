@@ -17,11 +17,16 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
-import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Layout;
+import org.eclipse.swt.widgets.TabFolder;
+import org.eclipse.swt.widgets.TabItem;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogSettings;
@@ -193,19 +198,55 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		private ICleanUp[] createAllCleanUps() {
 			IDialogSettings section= getCleanUpWizardSettings();
 			
-			ICleanUp[] result= new ICleanUp[6];
+			ICleanUp[] result= new ICleanUp[7];
 			result[0]= new CodeStyleCleanUp(section);
 			result[1]= new ControlStatementsCleanUp(section);
 			result[2]= new UnusedCodeCleanUp(section);
 			result[3]= new Java50CleanUp(section);
 			result[4]= new StringCleanUp(section);
 			result[5]= new PotentialProgrammingProblemsCleanUp(section);
+			result[6]= new UnnecessaryCodeCleanUp(section);
 			
 			return result;
 		}
 	}
 	
 	private class SelectCleanUpPage extends UserInputWizardPage {
+		
+		private class TabFolderLayout extends Layout {
+
+			protected Point computeSize (Composite composite, int wHint, int hHint, boolean flushCache) {
+				if (wHint != SWT.DEFAULT && hHint != SWT.DEFAULT)
+					return new Point(wHint, hHint);
+					
+				Control [] children = composite.getChildren ();
+				int count = children.length;
+				int maxWidth = 0, maxHeight = 0;
+				for (int i=0; i<count; i++) {
+					Control child = children [i];
+					Point pt = child.computeSize (SWT.DEFAULT, SWT.DEFAULT, flushCache);
+					maxWidth = Math.max (maxWidth, pt.x);
+					maxHeight = Math.max (maxHeight, pt.y);
+				}
+				
+				if (wHint != SWT.DEFAULT)
+					maxWidth= wHint;
+				if (hHint != SWT.DEFAULT)
+					maxHeight= hHint;
+				
+				return new Point(maxWidth, maxHeight);	
+				
+			}
+			
+			protected void layout (Composite composite, boolean flushCache) {
+				Rectangle rect= composite.getClientArea();
+			
+				Control[] children = composite.getChildren();
+				for (int i = 0; i < children.length; i++) {
+					children[i].setBounds(rect);
+				}
+			}
+		}
 		
 		private ICleanUp[] fCleanUps;
 		
@@ -214,28 +255,17 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 		
 		public void createControl(Composite parent) {
-			ScrolledComposite scrolled= new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
-			scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-			scrolled.setLayout(new GridLayout(1, false));
-			scrolled.setExpandHorizontal(true);
-			scrolled.setExpandVertical(true);
-
+			TabFolder tabFolder= new TabFolder(parent, SWT.NONE);
+			tabFolder.setLayout(new TabFolderLayout());
+			tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
-			Composite composite= new Composite(scrolled, SWT.NONE);
-			composite.setLayout(new GridLayout(1, false));
-			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			createGroups(tabFolder);
 			
-			createGroups(composite);
-			scrolled.setContent(composite);
-			
-			scrolled.setMinSize(composite.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-	
-			setControl(scrolled);
-			
-			Dialog.applyDialogFont(scrolled);
+			setControl(tabFolder);
+			Dialog.applyDialogFont(tabFolder);
 		}
 		
-		private void createGroups(Composite parent) {
+		private void createGroups(TabFolder parent) {
 			CleanUpRefactoring refactoring= (CleanUpRefactoring)getRefactoring();
 			IJavaProject[] projects= refactoring.getProjects();
 			final IJavaProject project;
@@ -247,69 +277,96 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			IDialogSettings section= getCleanUpWizardSettings();
 			
-			fCleanUps= new ICleanUp[6];
+			fCleanUps= new ICleanUp[7];
 			
-			//Code Style Group
-			Composite group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description);
+			ScrolledComposite codeStyleTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description);
+			Composite codeStyle= fillCodeStyleTab(codeStyleTab, project, section);
+			codeStyleTab.setContent(codeStyle);
+			codeStyleTab.setMinSize(codeStyle.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 			
-			Label accesses= new Label(group, SWT.NONE);
-			accesses.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-			accesses.setText(MultiFixMessages.CleanUpRefactoringWizard_memberAccesses_sectionDescription);
+			ScrolledComposite unnecessaryCodeTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_UnnecessaryCode_tabLabel);
+			Composite unnecessaryCode= fillUnnecessaryCodeTab(unnecessaryCodeTab, project, section);
+			unnecessaryCodeTab.setContent(unnecessaryCode);
+			unnecessaryCodeTab.setMinSize(unnecessaryCode.computeSize(SWT.DEFAULT, SWT.DEFAULT));
 			
-			Composite composite= new Composite(group, SWT.NONE);
-			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-			GridLayout layout= new GridLayout(1, false);
-			layout.marginHeight= 0;
-			layout.marginWidth= 0;
-			composite.setLayout(layout);
+			ScrolledComposite missingCodeTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_MissingCode_tabLabel);
+			Composite missingCode= fillMissingCodeTab(missingCodeTab, project, section);
+			missingCodeTab.setContent(missingCode);
+			missingCodeTab.setMinSize(missingCode.computeSize(SWT.DEFAULT, SWT.DEFAULT));
+
+		}
+		
+		private Composite fillCodeStyleTab(Composite parent, final IJavaProject project, IDialogSettings settings) {
+			Composite composite= new Composite(parent, SWT.NONE);
+			composite.setLayout(new GridLayout(1, false));
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+
+			Composite group= createGroup(composite, MultiFixMessages.CleanUpRefactoringWizard_memberAccesses_sectionDescription);
 			
-			fCleanUps[0]= new CodeStyleCleanUp(section);
-			fCleanUps[0].createConfigurationControl(composite, project);
+			fCleanUps[0]= new CodeStyleCleanUp(settings);
+			fCleanUps[0].createConfigurationControl(group, project);
+
+			group= createGroup(composite, MultiFixMessages.CleanUpRefactoringWizard_controlStatements_sectionDescription);
 			
-			Label statements= new Label(group, SWT.NONE);
-			statements.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-			statements.setText(MultiFixMessages.CleanUpRefactoringWizard_controlStatements_sectionDescription);
+			fCleanUps[1]= new ControlStatementsCleanUp(settings);
+			fCleanUps[1].createConfigurationControl(group, project);
 			
-			composite= new Composite(group, SWT.NONE);
-			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-			layout= new GridLayout(1, false);
-			layout.marginHeight= 0;
-			layout.marginWidth= 0;
-			composite.setLayout(layout);
-			
-			fCleanUps[1]= new ControlStatementsCleanUp(section);
-			fCleanUps[1].createConfigurationControl(composite, project);
+			return composite;
+		}
+		
+		private Composite fillUnnecessaryCodeTab(ScrolledComposite parent, final IJavaProject project, IDialogSettings section) {
+			Composite composite= new Composite(parent, SWT.NONE);
+			composite.setLayout(new GridLayout(1, false));
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			//Unused Code Group
-			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description);
-			
-			Label remove= new Label(group, SWT.NONE);
-			remove.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
-			remove.setText(MultiFixMessages.CleanUpRefactoringWizard_Remove_sectionTitle);
-			
-			composite= new Composite(group, SWT.NONE);
-			composite.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-			layout= new GridLayout(1, false);
-			layout.marginHeight= 0;
-			layout.marginWidth= 0;
-			composite.setLayout(layout);
+			Composite group= createGroup(composite, MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description);
 			
 			fCleanUps[2]= new UnusedCodeCleanUp(section);
-			fCleanUps[2].createConfigurationControl(composite, project);
-			fCleanUps[5]= new StringCleanUp(section);
-			fCleanUps[5].createConfigurationControl(composite, project);
+			fCleanUps[2].createConfigurationControl(group, project);
+			
+			group= createGroup(composite, MultiFixMessages.CleanUpRefactoringWizard_UnnecessaryCode_section );
+			
+			fCleanUps[5]= new UnnecessaryCodeCleanUp(section);
+			fCleanUps[5].createConfigurationControl(group, project);
+			
+			fCleanUps[6]= new StringCleanUp(section);
+			fCleanUps[6].createConfigurationControl(group, project);
+			
+			return composite;
+		}
+
+		private Composite fillMissingCodeTab(ScrolledComposite parent, final IJavaProject project, IDialogSettings section) {
+			Composite composite= new Composite(parent, SWT.NONE);
+			composite.setLayout(new GridLayout(1, false));
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			//Java50Fix Group
-			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_Annotations_sectionName);
+			Composite group= createGroup(composite, MultiFixMessages.CleanUpRefactoringWizard_Annotations_sectionName);
 			fCleanUps[3]= new Java50CleanUp(section);
 			fCleanUps[3].createConfigurationControl(group, project);
 
 			//Potential Programming Problems Group
-			group= createGroup(parent, MultiFixMessages.CleanUpRefactoringWizard_PotentialProgrammingProblems_description);
+			group= createGroup(composite, MultiFixMessages.CleanUpRefactoringWizard_PotentialProgrammingProblems_description);
 			fCleanUps[4]= new PotentialProgrammingProblemsCleanUp(section);
 			fCleanUps[4].createConfigurationControl(group, project);
+			
+			return composite;
 		}
-		
+
+		private ScrolledComposite createTab(TabFolder parent, String label) {
+			TabItem csTab= new TabItem(parent, SWT.NONE);
+			csTab.setText(label);
+			
+			ScrolledComposite scrolled= new ScrolledComposite(parent, SWT.H_SCROLL | SWT.V_SCROLL);
+			scrolled.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			scrolled.setLayout(new GridLayout(1, false));
+			scrolled.setExpandHorizontal(true);
+			scrolled.setExpandVertical(true);			
+			csTab.setControl(scrolled);
+			return scrolled;
+		}
+
 		private Composite createGroup(Composite parent, String description) {
 			
 			Group group= new Group(parent, SWT.NONE);

@@ -19,7 +19,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -126,27 +125,17 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
 		
-		indent(addCheckBox(parent, QUALIFY_FIELD_ACCESS, MultiFixMessages.CodeStyleCleanUp_useThis_checkBoxLabel));
+		addCheckBox(parent, QUALIFY_FIELD_ACCESS, MultiFixMessages.CodeStyleCleanUp_useThis_checkBoxLabel);
 		
+		Button button= new Button(parent, SWT.CHECK);
+		button.setText(MultiFixMessages.CodeStyleCleanUp_useDeclaring_checkBoxLabel);
+		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 
-			Button button= new Button(parent, SWT.CHECK);
-			button.setText(MultiFixMessages.CodeStyleCleanUp_useDeclaring_checkBoxLabel);
-			button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		indent(button);
-			
-		Composite sub= new Composite(parent, SWT.NONE);
-		sub.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		GridLayout layout= new GridLayout(1, false);
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		sub.setLayout(layout);
-		indent(sub);
-		
-			final int[] flags= new int[] {CHANGE_NON_STATIC_ACCESS_TO_STATIC, CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT, QUALIFY_STATIC_FIELD_ACCESS};
-			final int[] uiFlags= new int[] {1073741824, 536870912, 268435456};
-			final String[] labels= new String[] {MultiFixMessages.CodeStyleCleanUp_changeNonStatic_checkBoxLabel, MultiFixMessages.CodeStyleCleanUp_changeIndirect_checkBoxLabel, MultiFixMessages.CodeStyleCleanUp_addStaticQualifier_checkBoxLabel};
-		
-			createSubGroup(sub, button, SWT.CHECK, flags, labels, uiFlags, true);
+		final int[] flags= new int[] {CHANGE_NON_STATIC_ACCESS_TO_STATIC, CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT, QUALIFY_STATIC_FIELD_ACCESS};
+		final int[] uiFlags= new int[] {1073741824, 536870912, 268435456};
+		final String[] labels= new String[] {MultiFixMessages.CodeStyleCleanUp_changeNonStatic_checkBoxLabel, MultiFixMessages.CodeStyleCleanUp_changeIndirect_checkBoxLabel, MultiFixMessages.CodeStyleCleanUp_addStaticQualifier_checkBoxLabel};
+	
+		createSubGroup(parent, button, SWT.CHECK, flags, labels, uiFlags, true);
 		
 		return parent;
 	}

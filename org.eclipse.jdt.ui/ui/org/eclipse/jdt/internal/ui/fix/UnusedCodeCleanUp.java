@@ -20,7 +20,6 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
@@ -74,11 +73,6 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 	 */
 	public static final int REMOVE_UNUSED_LOCAL_VARIABLES= 32;
 	
-	/**
-	 * Removes unused casts.
-	 */
-	public static final int REMOVE_UNUSED_CAST= 64;
-	
 	private static final int DEFAULT_FLAG= REMOVE_UNUSED_IMPORTS;
 	private static final String SECTION_NAME= "CleanUp_UnusedCode"; //$NON-NLS-1$
 	
@@ -101,7 +95,7 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				isFlag(REMOVE_UNUSED_PRIVATE_TYPES), 
 				isFlag(REMOVE_UNUSED_LOCAL_VARIABLES), 
 				isFlag(REMOVE_UNUSED_IMPORTS),
-				isFlag(REMOVE_UNUSED_CAST));
+				false);
 	}
 	
 
@@ -119,7 +113,7 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				isFlag(REMOVE_UNUSED_PRIVATE_TYPES), 
 				isFlag(REMOVE_UNUSED_LOCAL_VARIABLES), 
 				isFlag(REMOVE_UNUSED_IMPORTS),
-				isFlag(REMOVE_UNUSED_CAST));
+				false);
 	}
 
 	public Map getRequiredOptions() {
@@ -133,40 +127,27 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 		
 		if (isFlag(REMOVE_UNUSED_LOCAL_VARIABLES))
 			options.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.WARNING);
-		
-		if (isFlag(REMOVE_UNUSED_CAST))
-			options.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.WARNING);
 
 		return options;
 	}
 
-	public Control createConfigurationControl(Composite composite, IJavaProject project) {
+	public Control createConfigurationControl(Composite parent, IJavaProject project) {
 
-		indent(addCheckBox(composite, REMOVE_UNUSED_IMPORTS, MultiFixMessages.UnusedCodeCleanUp_unusedImports_checkBoxLabel));
+		addCheckBox(parent, REMOVE_UNUSED_IMPORTS, MultiFixMessages.UnusedCodeCleanUp_unusedImports_checkBoxLabel);
 		
-			Button button= new Button(composite, SWT.CHECK);
-			button.setText(MultiFixMessages.UnusedCodeCleanUp_unusedPrivateMembers_checkBoxLabel);
-			button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		indent(button);
-			
-		Composite sub= new Composite(composite, SWT.NONE);
-		sub.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
-		GridLayout layout= new GridLayout(1, false);
-		layout.marginHeight= 0;
-		layout.marginWidth= 0;
-		sub.setLayout(layout);
-		indent(sub);
+		Button button= new Button(parent, SWT.CHECK);
+		button.setText(MultiFixMessages.UnusedCodeCleanUp_unusedPrivateMembers_checkBoxLabel);
+		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
 		
-			final int[] flags= new int[] {REMOVE_UNUSED_PRIVATE_TYPES, REMOVE_UNUSED_PRIVATE_CONSTRUCTORS, REMOVE_UNUSED_PRIVATE_METHODS, REMOVE_UNUSED_PRIVATE_FIELDS};
-			final int[] uiFlags= new int[] {1073741824, 536870912, 268435456, 134217728};
-			final String[] labels= new String[] {MultiFixMessages.UnusedCodeCleanUp_unusedTypes_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedConstructors_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedMethods_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedFields_checkBoxLabel};
+		final int[] flags= new int[] {REMOVE_UNUSED_PRIVATE_TYPES, REMOVE_UNUSED_PRIVATE_CONSTRUCTORS, REMOVE_UNUSED_PRIVATE_METHODS, REMOVE_UNUSED_PRIVATE_FIELDS};
+		final int[] uiFlags= new int[] {1073741824, 536870912, 268435456, 134217728};
+		final String[] labels= new String[] {MultiFixMessages.UnusedCodeCleanUp_unusedTypes_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedConstructors_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedMethods_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedFields_checkBoxLabel};
+	
+		createSubGroup(parent, button, SWT.CHECK, flags, labels, uiFlags, false);
 		
-			createSubGroup(sub, button, SWT.CHECK, flags, labels, uiFlags, false);
+		addCheckBox(parent, REMOVE_UNUSED_LOCAL_VARIABLES, MultiFixMessages.UnusedCodeCleanUp_unusedLocalVariables_checkBoxLabel);	
 		
-		indent(addCheckBox(composite, REMOVE_UNUSED_LOCAL_VARIABLES, MultiFixMessages.UnusedCodeCleanUp_unusedLocalVariables_checkBoxLabel));	
-		indent(addCheckBox(composite, REMOVE_UNUSED_CAST, MultiFixMessages.UnusedCodeCleanUp_unnecessaryCasts_checkBoxLabel));
-		
-		return composite;
+		return parent;
 	}
 
 	public void saveSettings(IDialogSettings settings) {
@@ -190,8 +171,6 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 			result.add(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedField_description);
 		if (isFlag(REMOVE_UNUSED_LOCAL_VARIABLES))
 			result.add(MultiFixMessages.UnusedCodeMultiFix_RemoveUnusedVariable_description);
-		if (isFlag(REMOVE_UNUSED_CAST))
-			result.add(MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
 
@@ -211,11 +190,6 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 				isFlag(REMOVE_UNUSED_LOCAL_VARIABLES)) 
 		{
 			UnusedCodeFix fix= UnusedCodeFix.createUnusedMemberFix(compilationUnit, problem);
-			if (fix != null)
-				return true;
-		}
-		if (isFlag(REMOVE_UNUSED_CAST)) {
-			IFix fix= UnusedCodeFix.createRemoveUnusedCastFix(compilationUnit, problem);
 			if (fix != null)
 				return true;
 		}
@@ -246,8 +220,6 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 			result+= getNumberOfProblems(problems, IProblem.UnusedPrivateField);
 		if (isFlag(REMOVE_UNUSED_LOCAL_VARIABLES))
 			result+= getNumberOfProblems(problems, IProblem.LocalVariableIsNeverUsed);
-		if (isFlag(REMOVE_UNUSED_CAST))
-			result+= getNumberOfProblems(problems, IProblem.UnnecessaryCast);
 		return result;
 	}
 

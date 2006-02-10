@@ -28,51 +28,43 @@ import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
-import org.eclipse.jdt.internal.corext.fix.StringFix;
+import org.eclipse.jdt.internal.corext.fix.UnusedCodeFix;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
-/**
- * Create fixes which can solve problems in connection with Strings
- * @see org.eclipse.jdt.internal.corext.fix.StringFix
- *
- */
-public class StringCleanUp extends AbstractCleanUp {
+public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 	
 	/**
-	 * Add '$NON-NLS$' tags to non externalized strings.<p>
-	 * i.e.:<pre><code>
-	 * 	 String s= ""; -> String s= ""; //$NON-NLS-1$</code></pre>  
+	 * Removes unused casts.
 	 */
-	public static final int ADD_MISSING_NLS_TAG= 1;
+	public static final int REMOVE_UNUSED_CAST= 1;
 	
-	/**
-	 * Remove unnecessary '$NON-NLS$' tags.<p>
-	 * i.e.:<pre><code>
-	 *   String s; //$NON-NLS-1$ -> String s;</code></pre>
-	 */
-	public static final int REMOVE_UNNECESSARY_NLS_TAG= 2;
+	private static final int DEFAULT_FLAG= REMOVE_UNUSED_CAST;
+	private static final String SECTION_NAME= "CleanUp_UnnecessaryCode"; //$NON-NLS-1$
 	
-	private static final int DEFAULT_FLAG= REMOVE_UNNECESSARY_NLS_TAG;
-	private static final String SECTION_NAME= "CleanUp_NLSTag"; //$NON-NLS-1$
-
-	public StringCleanUp(int flag) {
+	public UnnecessaryCodeCleanUp(int flag) {
 		super(flag);
 	}
 
-	public StringCleanUp(IDialogSettings settings) {
+	public UnnecessaryCodeCleanUp(IDialogSettings settings) {
 		super(getSection(settings, SECTION_NAME), DEFAULT_FLAG);
 	}
-
+	
 	public IFix createFix(CompilationUnit compilationUnit) throws CoreException {
 		if (compilationUnit == null)
 			return null;
-
-		return StringFix.createCleanUp(compilationUnit, 
-				isFlag(ADD_MISSING_NLS_TAG), 
-				isFlag(REMOVE_UNNECESSARY_NLS_TAG));
+		
+		return UnusedCodeFix.createCleanUp(compilationUnit, 
+				false, 
+				false, 
+				false, 
+				false, 
+				false, 
+				false,
+				isFlag(REMOVE_UNUSED_CAST));
 	}
 	
+
 	/**
 	 * {@inheritDoc}
 	 */
@@ -80,49 +72,56 @@ public class StringCleanUp extends AbstractCleanUp {
 		if (compilationUnit == null)
 			return null;
 		
-		return StringFix.createCleanUp(compilationUnit, problems,
-				isFlag(ADD_MISSING_NLS_TAG), 
-				isFlag(REMOVE_UNNECESSARY_NLS_TAG));
+		return UnusedCodeFix.createCleanUp(compilationUnit, problems,
+				false, 
+				false, 
+				false, 
+				false, 
+				false, 
+				false,
+				isFlag(REMOVE_UNUSED_CAST));
 	}
 
 	public Map getRequiredOptions() {
-		Map result= new Hashtable();
-		
-		if (isFlag(ADD_MISSING_NLS_TAG) || isFlag(REMOVE_UNNECESSARY_NLS_TAG))
-			result.put(JavaCore.COMPILER_PB_NON_NLS_STRING_LITERAL, JavaCore.WARNING);
-		
-		return result;
+		Map options= new Hashtable();
+
+		if (isFlag(REMOVE_UNUSED_CAST))
+			options.put(JavaCore.COMPILER_PB_UNNECESSARY_TYPE_CHECK, JavaCore.WARNING);
+
+		return options;
 	}
 
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
 
-		addCheckBox(parent, REMOVE_UNNECESSARY_NLS_TAG, MultiFixMessages.StringCleanUp_RemoveNLSTag_label);
+		addCheckBox(parent, REMOVE_UNUSED_CAST, MultiFixMessages.UnusedCodeCleanUp_unnecessaryCasts_checkBoxLabel);
 		
 		return parent;
 	}
-	
+
 	public void saveSettings(IDialogSettings settings) {
 		super.saveSettings(getSection(settings, SECTION_NAME));
 	}
-
+	
 	/**
 	 * {@inheritDoc}
 	 */
 	public String[] getDescriptions() {
 		List result= new ArrayList();
-		if (isFlag(ADD_MISSING_NLS_TAG))
-			result.add(MultiFixMessages.StringMultiFix_AddMissingNonNls_description);
-		if (isFlag(REMOVE_UNNECESSARY_NLS_TAG))
-			result.add(MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description);
+		if (isFlag(REMOVE_UNUSED_CAST))
+			result.add(MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
 
 	/**
 	 * {@inheritDoc}
-	 * @throws CoreException 
 	 */
 	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
-		return StringFix.createFix(compilationUnit, problem, isFlag(REMOVE_UNNECESSARY_NLS_TAG), isFlag(ADD_MISSING_NLS_TAG)) != null;
+		if (isFlag(REMOVE_UNUSED_CAST)) {
+			IFix fix= UnusedCodeFix.createRemoveUnusedCastFix(compilationUnit, problem);
+			if (fix != null)
+				return true;
+		}
+		return false;
 	}
 
 	/**
@@ -131,13 +130,9 @@ public class StringCleanUp extends AbstractCleanUp {
 	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 		int result= 0;
 		IProblem[] problems= compilationUnit.getProblems();
-		if (isFlag(ADD_MISSING_NLS_TAG))
-			result+= getNumberOfProblems(problems, IProblem.NonExternalizedStringLiteral);
-		
-		if (isFlag(REMOVE_UNNECESSARY_NLS_TAG))
-			result+= getNumberOfProblems(problems, IProblem.UnnecessaryNLSTag);
-		
+		if (isFlag(REMOVE_UNUSED_CAST))
+			result+= getNumberOfProblems(problems, IProblem.UnnecessaryCast);
 		return result;
 	}
-	
+
 }

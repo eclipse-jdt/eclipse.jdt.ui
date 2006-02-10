@@ -54,6 +54,7 @@ import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
+import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
@@ -999,7 +1000,7 @@ public class CleanUpTest extends QuickFixTest {
 		refactoring.addCompilationUnit(cu1);
 		refactoring.addCompilationUnit(cu2);
 		
-		ICleanUp cleanUp= new UnusedCodeCleanUp(UnusedCodeCleanUp.REMOVE_UNUSED_CAST);
+		ICleanUp cleanUp= new UnnecessaryCodeCleanUp(UnnecessaryCodeCleanUp.REMOVE_UNUSED_CAST);
 		refactoring.addCleanUp(cleanUp);
 		
 		buf= new StringBuffer();
