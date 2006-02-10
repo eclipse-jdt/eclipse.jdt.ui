@@ -86,6 +86,13 @@ with a public 0-argument constructor.
                </appInfo>
             </annotation>
          </attribute>
+         <attribute name="requiredSourceLevel" type="string">
+            <annotation>
+               <documentation>
+                  Optional attribute to specify the minimal source compliance this processor requires.
+               </documentation>
+            </annotation>
+         </attribute>
       </complexType>
    </element>
 
