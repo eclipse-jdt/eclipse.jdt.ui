@@ -419,13 +419,15 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 
 		return null;
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getQuickAssistAssistant(org.eclipse.jface.text.source.ISourceViewer)
 	 * @since 3.2
 	 */
 	public IContentAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
-		return new JavaCorrectionAssistant(getEditor());
+		if (getEditor() != null)
+			return new JavaCorrectionAssistant(getEditor());
+		return null;
 	}
 
 	/*
