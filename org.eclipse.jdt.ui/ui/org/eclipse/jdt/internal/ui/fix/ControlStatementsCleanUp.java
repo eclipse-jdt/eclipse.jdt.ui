@@ -59,6 +59,8 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	private static final int DEFAULT_FLAG= 0;
 	private static final String SECTION_NAME= "CleanUp_ControlStatements"; //$NON-NLS-1$
 
+	private Button[] fButtons;
+
 	public ControlStatementsCleanUp(int flag) {
 		super(flag);
 	}
@@ -103,23 +105,69 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	 * {@inheritDoc}
 	 */
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
+		fButtons= new Button[4];
 		
 		Button button= new Button(parent, SWT.CHECK);
 		button.setText(MultiFixMessages.ControlStatementsCleanUp_useBlocks_checkBoxLabel);
 		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		fButtons[0]= button;
 
 		final int[] flags= new int[] {ADD_BLOCK_TO_CONTROL_STATEMENTS, REMOVE_UNNECESSARY_BLOCKS};
 		final int[] uiFlags= new int[] {1073741824, 536870912};
 		final String[] labels= new String[] {MultiFixMessages.ControlStatementsCleanUp_always_checkBoxLabel, MultiFixMessages.ControlStatementsCleanUp_removeIfPossible_checkBoxLabel};
 
-		createSubGroup(parent, button, SWT.RADIO, flags, labels, uiFlags, false);
+		Button[] buttons= createSubGroup(parent, button, SWT.RADIO, flags, labels, uiFlags, false);
+		for (int i= 0; i < buttons.length; i++) {
+			fButtons[i+1]= buttons[i];
+		}
 			
 		Button box1= addCheckBox(parent, CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP, MultiFixMessages.ControlStatementsCleanUp_convertLoops_checkBoxLabel);
 		if (project != null && !JavaModelUtil.is50OrHigher(project)) {
 			box1.setEnabled(false);
 		}
+		fButtons[3]= box1;
 		
 		return parent;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void select(int flags) {
+		if (fButtons == null)
+			return;
+
+		if (((flags & ADD_BLOCK_TO_CONTROL_STATEMENTS) != 0) && ((flags & REMOVE_UNNECESSARY_BLOCKS) != 0)) {
+			setFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS, fButtons[1].getSelection());
+			setFlag(REMOVE_UNNECESSARY_BLOCKS, fButtons[2].getSelection());
+			fButtons[0].setSelection(true);
+			fButtons[1].setEnabled(true);
+			fButtons[2].setEnabled(true);
+		} else if ((flags & ADD_BLOCK_TO_CONTROL_STATEMENTS) != 0) {
+			setFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS, true);
+			setFlag(REMOVE_UNNECESSARY_BLOCKS, false);
+			fButtons[0].setSelection(true);
+			fButtons[1].setSelection(true);
+			fButtons[2].setSelection(false);
+			fButtons[1].setEnabled(true);
+			fButtons[2].setEnabled(true);
+		} else if ((flags & REMOVE_UNNECESSARY_BLOCKS) != 0) {
+			setFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS, false);
+			setFlag(REMOVE_UNNECESSARY_BLOCKS, true);
+			fButtons[0].setSelection(true);
+			fButtons[1].setSelection(false);
+			fButtons[2].setSelection(true);
+			fButtons[1].setEnabled(true);
+			fButtons[2].setEnabled(true);
+		} else {
+			setFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS, false);
+			setFlag(REMOVE_UNNECESSARY_BLOCKS, false);
+			fButtons[0].setSelection(false);
+			fButtons[1].setEnabled(false);
+			fButtons[2].setEnabled(false);
+		}
+		if (fButtons[3].isEnabled())
+			enableButton(flags, CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP, fButtons[3]);
 	}
 
 	/**
@@ -147,6 +195,13 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	 */
 	public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 		return -1;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getDefaultFlag() {
+		return DEFAULT_FLAG;
 	}
 
 }

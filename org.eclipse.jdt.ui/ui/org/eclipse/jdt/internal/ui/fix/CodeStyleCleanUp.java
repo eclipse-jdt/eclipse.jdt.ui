@@ -82,6 +82,8 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 	private static final int DEFAULT_FLAG= CHANGE_NON_STATIC_ACCESS_TO_STATIC | CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT;
 	private static final String SECTION_NAME= "CleanUp_CodeStyle"; //$NON-NLS-1$
 
+	private Button[] fButtons;
+
 	public CodeStyleCleanUp(int flag) {
 		super(flag);
 	}
@@ -124,20 +126,52 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 	}
 
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
+		fButtons= new Button[5];
 		
-		addCheckBox(parent, QUALIFY_FIELD_ACCESS, MultiFixMessages.CodeStyleCleanUp_useThis_checkBoxLabel);
+		fButtons[0]= addCheckBox(parent, QUALIFY_FIELD_ACCESS, MultiFixMessages.CodeStyleCleanUp_useThis_checkBoxLabel);
 		
 		Button button= new Button(parent, SWT.CHECK);
 		button.setText(MultiFixMessages.CodeStyleCleanUp_useDeclaring_checkBoxLabel);
 		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
+		fButtons[1]= button;
 
 		final int[] flags= new int[] {CHANGE_NON_STATIC_ACCESS_TO_STATIC, CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT, QUALIFY_STATIC_FIELD_ACCESS};
 		final int[] uiFlags= new int[] {1073741824, 536870912, 268435456};
 		final String[] labels= new String[] {MultiFixMessages.CodeStyleCleanUp_changeNonStatic_checkBoxLabel, MultiFixMessages.CodeStyleCleanUp_changeIndirect_checkBoxLabel, MultiFixMessages.CodeStyleCleanUp_addStaticQualifier_checkBoxLabel};
 	
-		createSubGroup(parent, button, SWT.CHECK, flags, labels, uiFlags, true);
+		Button[] buttons= createSubGroup(parent, button, SWT.CHECK, flags, labels, uiFlags, true);
+		for (int i= 0; i < buttons.length; i++) {
+			fButtons[i+2]= buttons[i];
+		}
 		
 		return parent;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void select(int flags) {
+		if (fButtons == null)
+			return;
+
+		enableButton(flags, QUALIFY_FIELD_ACCESS, fButtons[0]);
+		enableButton(flags, CHANGE_NON_STATIC_ACCESS_TO_STATIC, fButtons[2]);
+		enableButton(flags, CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT, fButtons[3]);
+		enableButton(flags, QUALIFY_STATIC_FIELD_ACCESS, fButtons[4]);
+		
+		if (	isFlag(CHANGE_NON_STATIC_ACCESS_TO_STATIC) ||
+				isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT) ||
+				isFlag(QUALIFY_STATIC_FIELD_ACCESS)) {
+			fButtons[1].setSelection(true);
+			fButtons[2].setEnabled(true);
+			fButtons[3].setEnabled(true);
+			fButtons[4].setEnabled(true);
+		} else {
+			fButtons[1].setSelection(false);
+			fButtons[2].setEnabled(false);
+			fButtons[3].setEnabled(false);
+			fButtons[4].setEnabled(false);
+		}
 	}
 
 	public void saveSettings(IDialogSettings settings) {
@@ -205,6 +239,13 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 			}
 		}
 		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getDefaultFlag() {
+		return DEFAULT_FLAG;
 	}
 	
 }

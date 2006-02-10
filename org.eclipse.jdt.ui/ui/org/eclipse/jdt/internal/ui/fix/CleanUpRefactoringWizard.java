@@ -17,10 +17,13 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.ScrolledComposite;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
@@ -293,23 +296,28 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			Composite missingCode= fillMissingCodeTab(missingCodeTab, project, section);
 			missingCodeTab.setContent(missingCode);
 			missingCodeTab.setMinSize(missingCode.computeSize(SWT.DEFAULT, SWT.DEFAULT));
-
 		}
 		
 		private Composite fillCodeStyleTab(Composite parent, final IJavaProject project, IDialogSettings settings) {
 			Composite composite= new Composite(parent, SWT.NONE);
 			composite.setLayout(new GridLayout(1, false));
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
-
-			Composite group= createGroup(composite, MultiFixMessages.CleanUpRefactoringWizard_memberAccesses_sectionDescription);
+			
+			Composite groups= new Composite(composite, SWT.NONE);
+			groups.setLayout(new GridLayout(1, false));
+			groups.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			Composite group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_memberAccesses_sectionDescription);
 			
 			fCleanUps[0]= new CodeStyleCleanUp(settings);
 			fCleanUps[0].createConfigurationControl(group, project);
 
-			group= createGroup(composite, MultiFixMessages.CleanUpRefactoringWizard_controlStatements_sectionDescription);
+			group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_controlStatements_sectionDescription);
 			
 			fCleanUps[1]= new ControlStatementsCleanUp(settings);
 			fCleanUps[1].createConfigurationControl(group, project);
+
+			addEnableButtonsGroup(composite, new ICleanUp[] {fCleanUps[0], fCleanUps[1]});
 			
 			return composite;
 		}
@@ -319,19 +327,25 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			composite.setLayout(new GridLayout(1, false));
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
+			Composite groups= new Composite(composite, SWT.NONE);
+			groups.setLayout(new GridLayout(1, false));
+			groups.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
 			//Unused Code Group
-			Composite group= createGroup(composite, MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description);
+			Composite group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description);
 			
 			fCleanUps[2]= new UnusedCodeCleanUp(section);
 			fCleanUps[2].createConfigurationControl(group, project);
 			
-			group= createGroup(composite, MultiFixMessages.CleanUpRefactoringWizard_UnnecessaryCode_section );
+			group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_UnnecessaryCode_section );
 			
 			fCleanUps[5]= new UnnecessaryCodeCleanUp(section);
 			fCleanUps[5].createConfigurationControl(group, project);
 			
 			fCleanUps[6]= new StringCleanUp(section);
 			fCleanUps[6].createConfigurationControl(group, project);
+			
+			addEnableButtonsGroup(composite, new ICleanUp[] {fCleanUps[2], fCleanUps[5], fCleanUps[6]});
 			
 			return composite;
 		}
@@ -341,17 +355,71 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			composite.setLayout(new GridLayout(1, false));
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
+			Composite groups= new Composite(composite, SWT.NONE);
+			groups.setLayout(new GridLayout(1, false));
+			groups.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
 			//Java50Fix Group
-			Composite group= createGroup(composite, MultiFixMessages.CleanUpRefactoringWizard_Annotations_sectionName);
+			Composite group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_Annotations_sectionName);
 			fCleanUps[3]= new Java50CleanUp(section);
 			fCleanUps[3].createConfigurationControl(group, project);
 
 			//Potential Programming Problems Group
-			group= createGroup(composite, MultiFixMessages.CleanUpRefactoringWizard_PotentialProgrammingProblems_description);
+			group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_PotentialProgrammingProblems_description);
 			fCleanUps[4]= new PotentialProgrammingProblemsCleanUp(section);
 			fCleanUps[4].createConfigurationControl(group, project);
+
+			addEnableButtonsGroup(composite, new ICleanUp[] {fCleanUps[3], fCleanUps[4]});
 			
 			return composite;
+		}
+		
+
+		private void addEnableButtonsGroup(Composite parent, final ICleanUp[] cleanUps) {
+			Composite down= new Composite(parent, SWT.NONE);
+			down.setLayout(new GridLayout(2, false));
+			down.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
+			
+			Composite space= new Composite(down, SWT.NONE);
+			space.setLayout(new GridLayout(1, true));
+			space.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			Composite buttons= new Composite(down, SWT.NONE);
+			buttons.setLayout(new GridLayout(3, true));
+			buttons.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+			
+			Button all= new Button(buttons, SWT.PUSH);
+			all.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			all.setText(MultiFixMessages.CleanUpRefactoringWizard_EnableAllButton_label);
+			all.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					for (int i= 0; i < cleanUps.length; i++) {
+						cleanUps[i].select(65535);
+					}
+				}	
+			});
+			
+			Button none= new Button(buttons, SWT.PUSH);
+			none.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			none.setText(MultiFixMessages.CleanUpRefactoringWizard_DisableAllButton_label);
+			none.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					for (int i= 0; i < cleanUps.length; i++) {
+						cleanUps[i].select(0);
+					}
+				}	
+			});
+			
+			Button def= new Button(buttons, SWT.PUSH);
+			def.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			def.setText(MultiFixMessages.CleanUpRefactoringWizard_EnableDefaultsButton_label);
+			def.addSelectionListener(new SelectionAdapter() {
+				public void widgetSelected(SelectionEvent e) {
+					for (int i= 0; i < cleanUps.length; i++) {
+						cleanUps[i].select(cleanUps[i].getDefaultFlag());
+					}
+				}	
+			});
 		}
 
 		private ScrolledComposite createTab(TabFolder parent, String label) {

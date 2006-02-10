@@ -105,7 +105,7 @@ public abstract class AbstractCleanUp implements ICleanUp {
 		return button;
 	}
 	
-	protected Button[] createSubGroup(Composite parent, Button controlButton, final int style, final int[] flags, final String[] labels, final int[] uiFlags, boolean isVertical) {
+	protected Button[] createSubGroup(Composite parent, final Button controlButton, final int style, final int[] flags, final String[] labels, final int[] uiFlags, boolean isVertical) {
 		Composite sub= new Composite(parent, SWT.NONE);
 		sub.setLayoutData(new GridData(SWT.FILL, SWT.TOP, true, false));
 		GridLayout layout= new GridLayout(isVertical?1:flags.length, false);
@@ -128,6 +128,17 @@ public abstract class AbstractCleanUp implements ICleanUp {
 				public void widgetSelected(SelectionEvent e) {
 					boolean isSelected= ((Button)e.getSource()).getSelection();
 					setFlag(uiFlags[index], isSelected);
+					if (style == SWT.RADIO)
+						return;
+					
+					for (int j= 0; j < flags.length; j++) {
+						if (isFlag(flags[j]))
+							return;
+					}
+					for (int j= 0; j < buttons.length; j++) {
+						buttons[j].setEnabled(false);
+						controlButton.setSelection(false);
+					}
 				}
 				
 			});
@@ -199,6 +210,16 @@ public abstract class AbstractCleanUp implements ICleanUp {
 	protected void indent(Control control) {
 		GridData data= (GridData)control.getLayoutData();
 		data.horizontalIndent= INDENT_WIDTH;
+	}
+	
+	protected void enableButton(int flags, int flag, Button button) {
+		if ((flags & flag) != 0) {
+			button.setSelection(true);
+			setFlag(flag, true);
+		} else {
+			button.setSelection(false);
+			setFlag(flag, false);
+		}
 	}
 	
 	protected int getNumberOfProblems(IProblem[] problems, int problemId) {

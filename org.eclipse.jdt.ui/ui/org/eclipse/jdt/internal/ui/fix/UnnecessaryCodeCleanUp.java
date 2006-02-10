@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -41,6 +42,8 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 	
 	private static final int DEFAULT_FLAG= REMOVE_UNUSED_CAST;
 	private static final String SECTION_NAME= "CleanUp_UnnecessaryCode"; //$NON-NLS-1$
+
+	private Button fButton;
 	
 	public UnnecessaryCodeCleanUp(int flag) {
 		super(flag);
@@ -93,9 +96,19 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
 
-		addCheckBox(parent, REMOVE_UNUSED_CAST, MultiFixMessages.UnusedCodeCleanUp_unnecessaryCasts_checkBoxLabel);
+		fButton= addCheckBox(parent, REMOVE_UNUSED_CAST, MultiFixMessages.UnusedCodeCleanUp_unnecessaryCasts_checkBoxLabel);
 		
 		return parent;
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public void select(int flag) {
+		if (fButton == null)
+			return;
+
+		enableButton(flag, REMOVE_UNUSED_CAST, fButton);
 	}
 
 	public void saveSettings(IDialogSettings settings) {
@@ -133,6 +146,13 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 		if (isFlag(REMOVE_UNUSED_CAST))
 			result+= getNumberOfProblems(problems, IProblem.UnnecessaryCast);
 		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getDefaultFlag() {
+		return DEFAULT_FLAG;
 	}
 
 }

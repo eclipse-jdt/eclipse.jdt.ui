@@ -132,4 +132,8 @@ public interface ICleanUp {
 	 */
 	public abstract int maximalNumberOfFixes(CompilationUnit compilationUnit);
 
+	public abstract void select(int flag);
+
+	public abstract int getDefaultFlag();
+
 }

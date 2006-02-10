@@ -123,6 +123,11 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 				return 0;
 			}
+			public void select(int flag) {
+			}
+			public int getDefaultFlag() {
+				return 0;
+			}
 		});
 		tagAsSummary("Code clean up - no fix", Dimension.ELAPSED_PROCESS);
 		

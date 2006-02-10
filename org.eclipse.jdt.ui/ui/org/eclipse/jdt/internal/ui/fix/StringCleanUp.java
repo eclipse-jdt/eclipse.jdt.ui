@@ -17,6 +17,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 
@@ -55,6 +56,8 @@ public class StringCleanUp extends AbstractCleanUp {
 	
 	private static final int DEFAULT_FLAG= REMOVE_UNNECESSARY_NLS_TAG;
 	private static final String SECTION_NAME= "CleanUp_NLSTag"; //$NON-NLS-1$
+
+	private Button fUnnecessaryNLSTagButton;
 
 	public StringCleanUp(int flag) {
 		super(flag);
@@ -96,9 +99,19 @@ public class StringCleanUp extends AbstractCleanUp {
 
 	public Control createConfigurationControl(Composite parent, IJavaProject project) {
 
-		addCheckBox(parent, REMOVE_UNNECESSARY_NLS_TAG, MultiFixMessages.StringCleanUp_RemoveNLSTag_label);
+		fUnnecessaryNLSTagButton= addCheckBox(parent, REMOVE_UNNECESSARY_NLS_TAG, MultiFixMessages.StringCleanUp_RemoveNLSTag_label);
 		
 		return parent;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void select(int flag) {
+		if (fUnnecessaryNLSTagButton == null)
+			return;
+
+		enableButton(flag, REMOVE_UNNECESSARY_NLS_TAG, fUnnecessaryNLSTagButton);
 	}
 	
 	public void saveSettings(IDialogSettings settings) {
@@ -138,6 +151,13 @@ public class StringCleanUp extends AbstractCleanUp {
 			result+= getNumberOfProblems(problems, IProblem.UnnecessaryNLSTag);
 		
 		return result;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public int getDefaultFlag() {
+		return DEFAULT_FLAG;
 	}
 	
 }
