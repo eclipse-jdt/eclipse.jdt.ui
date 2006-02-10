@@ -38,7 +38,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Shell;
 
-import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.dialogs.ErrorDialog;
@@ -135,7 +134,6 @@ import org.eclipse.jdt.internal.ui.text.SmartBackspaceManager;
 import org.eclipse.jdt.internal.ui.text.Symbols;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 import org.eclipse.jdt.internal.ui.text.correction.CorrectionCommandInstaller;
-import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
 
 
@@ -145,12 +143,6 @@ import org.eclipse.jdt.internal.ui.text.java.IJavaReconcilingListener;
  */
 public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilingListener {
 	private static final boolean CODE_ASSIST_DEBUG= "true".equalsIgnoreCase(Platform.getDebugOption("org.eclipse.jdt.ui/debug/ResultCollector"));  //$NON-NLS-1$//$NON-NLS-2$
-
-	/**
-	 * Text operation code for requesting correction assist to show correction
-	 * proposals for the current position.
-	 */
-	public static final int CORRECTIONASSIST_PROPOSALS= 50;
 
 	/**
 	 * Text operation code for requesting common prefix completion.
@@ -166,7 +158,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 		private List fTextConverters;
 		private boolean fIgnoreTextConverters= false;
-		private JavaCorrectionAssistant fCorrectionAssistant;
 
 		public AdaptedSourceViewer(Composite parent, IVerticalRuler verticalRuler, IOverviewRuler overviewRuler, boolean showAnnotationsOverview, int styles, IPreferenceStore store) {
 			super(parent, verticalRuler, overviewRuler, showAnnotationsOverview, styles, store);
@@ -194,8 +185,9 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					}
 					setStatusLineErrorMessage(msg);
 					return;
-				case CORRECTIONASSIST_PROPOSALS:
-					msg= fCorrectionAssistant.showPossibleCompletions();
+				case QUICK_ASSIST:
+					// XXX: We can get rid of this once the SourceViewer has a way to update the status line
+					msg= fQuickAssistAssistant.showPossibleCompletions();
 					setStatusLineErrorMessage(msg);
 					return;
 				case UNDO:
@@ -211,28 +203,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			}
 
 			super.doOperation(operation);
-		}
-
-		/*
-		 * @see ITextOperationTarget#canDoOperation(int)
-		 */
-		public boolean canDoOperation(int operation) {
-			if (operation == CORRECTIONASSIST_PROPOSALS)
-				return isEditable();
-
-			return super.canDoOperation(operation);
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.source.ISourceViewerExtension2#unconfigure()
-		 * @since 3.0
-		 */
-		public void unconfigure() {
-			if (fCorrectionAssistant != null) {
-				fCorrectionAssistant.uninstall();
-				fCorrectionAssistant= null;
-			}
-			super.unconfigure();
 		}
 
 		public void insertTextConverter(ITextConverter textConverter, int index) {
@@ -294,15 +264,6 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 			if (PlatformUI.getWorkbench().getHelpSystem().isContextHelpDisplayed())
 				return false;
 			return super.requestWidgetToken(requester, priority);
-		}
-
-		/*
-		 * @see org.eclipse.jface.text.source.ISourceViewer#configure(org.eclipse.jface.text.source.SourceViewerConfiguration)
-		 */
-		public void configure(SourceViewerConfiguration configuration) {
-			super.configure(configuration);
-			fCorrectionAssistant= new JavaCorrectionAssistant(CompilationUnitEditor.this);
-			fCorrectionAssistant.install(this);
 		}
 
 		/*
@@ -1170,7 +1131,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * Mutex for the reconciler. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=63898
 	 * for a description of the problem.
 	 * <p>
-	 * TODO remove once the underlying problem (https://bugs.eclipse.org/bugs/show_bug.cgi?id=66176) is solved.
+	 * XXX remove once the underlying problem (https://bugs.eclipse.org/bugs/show_bug.cgi?id=66176) is solved.
 	 * </p>
 	 */
 	private final Object fReconcilerLock= new Object();
@@ -1202,13 +1163,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 
 		super.createActions();
 
-		Action action= new TextOperationAction(JavaEditorMessages.getBundleForConstructedKeys(), "CorrectionAssistProposal.", this, CORRECTIONASSIST_PROPOSALS); //$NON-NLS-1$
-		action.setActionDefinitionId(IJavaEditorActionDefinitionIds.CORRECTION_ASSIST_PROPOSALS);
-		setAction("CorrectionAssistProposal", action); //$NON-NLS-1$
-		markAsStateDependentAction("CorrectionAssistProposal", true); //$NON-NLS-1$
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(action, IJavaHelpContextIds.QUICK_FIX_ACTION);
-
-		action= new ContentAssistAction(JavaEditorMessages.getBundleForConstructedKeys(), "ContentAssistProposal.", this); //$NON-NLS-1$
+		IAction action= new ContentAssistAction(JavaEditorMessages.getBundleForConstructedKeys(), "ContentAssistProposal.", this); //$NON-NLS-1$
 		action.setActionDefinitionId(ITextEditorActionDefinitionIds.CONTENT_ASSIST_PROPOSALS);
 		setAction("ContentAssistProposal", action); //$NON-NLS-1$
 		markAsStateDependentAction("ContentAssistProposal", true); //$NON-NLS-1$
@@ -1358,7 +1313,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * @see JavaEditor#getCorrespondingElement(IJavaElement)
 	 */
 	protected IJavaElement getCorrespondingElement(IJavaElement element) {
-		// TODO: With new working copy story: original == working copy.
+		// XXX: With new working copy story: original == working copy.
 		// Note that the previous code could result in a reconcile as side effect. Should check if that
 		// is still required.
 		return element;
@@ -1928,7 +1883,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 	 * Returns the mutex for the reconciler. See https://bugs.eclipse.org/bugs/show_bug.cgi?id=63898
 	 * for a description of the problem.
 	 * <p>
-	 * TODO remove once the underlying problem (https://bugs.eclipse.org/bugs/show_bug.cgi?id=66176) is solved.
+	 * XXX remove once the underlying problem (https://bugs.eclipse.org/bugs/show_bug.cgi?id=66176) is solved.
 	 * </p>
 	 * @return the lock reconcilers may use to synchronize on
 	 */

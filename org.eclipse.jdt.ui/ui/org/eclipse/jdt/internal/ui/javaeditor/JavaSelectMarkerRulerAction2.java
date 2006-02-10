@@ -18,6 +18,7 @@ import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.VerticalRulerEvent;
 
 import org.eclipse.ui.ISelectionListener;
@@ -63,7 +64,7 @@ public class JavaSelectMarkerRulerAction2 extends SelectAnnotationRulerAction {
 
 		if (isQuickFixTarget(annotation)) {
 			ITextOperationTarget operation= (ITextOperationTarget) getTextEditor().getAdapter(ITextOperationTarget.class);
-			final int opCode= CompilationUnitEditor.CORRECTIONASSIST_PROPOSALS;
+			final int opCode= ISourceViewer.QUICK_ASSIST;
 			if (operation != null && operation.canDoOperation(opCode)) {
 				getTextEditor().selectAndReveal(position.getOffset(), position.getLength());
 				operation.doOperation(opCode);

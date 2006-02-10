@@ -84,8 +84,10 @@ public interface IJavaEditorActionDefinitionIds extends ITextEditorActionDefinit
 	/**
 	 * Action definition ID of the edit -> correction assist proposal action
 	 * (value <code>"org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals"</code>).
+	 * 
+	 * @deprecated As of 3.2, replaced by {@link ITextEditorActionDefinitionIds#QUICK_ASSIST}
 	 */
-	public static final String CORRECTION_ASSIST_PROPOSALS= "org.eclipse.jdt.ui.edit.text.java.correction.assist.proposals"; //$NON-NLS-1$
+	public static final String CORRECTION_ASSIST_PROPOSALS= QUICK_ASSIST;
 		
 
 	/**

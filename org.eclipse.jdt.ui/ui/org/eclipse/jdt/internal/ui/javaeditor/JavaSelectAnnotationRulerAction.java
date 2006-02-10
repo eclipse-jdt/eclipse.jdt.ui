@@ -16,13 +16,15 @@ import java.util.ResourceBundle;
 import org.eclipse.swt.widgets.Event;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextOperationTarget;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationAccessExtension;
+import org.eclipse.jface.text.source.ISourceViewer;
 import org.eclipse.jface.text.source.IVerticalRulerInfo;
-import org.eclipse.ui.editors.text.EditorsUI;
+
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.texteditor.AbstractMarkerAnnotationModel;
 import org.eclipse.ui.texteditor.AnnotationPreference;
@@ -30,7 +32,11 @@ import org.eclipse.ui.texteditor.AnnotationPreferenceLookup;
 import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.ui.texteditor.ITextEditorExtension;
 import org.eclipse.ui.texteditor.SelectMarkerRulerAction;
+
+import org.eclipse.ui.editors.text.EditorsUI;
+
 import org.eclipse.jdt.ui.PreferenceConstants;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
@@ -83,7 +89,7 @@ public class JavaSelectAnnotationRulerAction extends SelectMarkerRulerAction {
 
 		if (fHasCorrection) {
 			ITextOperationTarget operation= (ITextOperationTarget) fTextEditor.getAdapter(ITextOperationTarget.class);
-			final int opCode= CompilationUnitEditor.CORRECTIONASSIST_PROPOSALS;
+			final int opCode= ISourceViewer.QUICK_ASSIST;
 			if (operation != null && operation.canDoOperation(opCode)) {
 				fTextEditor.selectAndReveal(fPosition.getOffset(), fPosition.getLength());
 				operation.doOperation(opCode);

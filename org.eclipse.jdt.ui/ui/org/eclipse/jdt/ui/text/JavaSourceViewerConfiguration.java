@@ -88,6 +88,7 @@ import org.eclipse.jdt.internal.ui.text.JavaReconciler;
 import org.eclipse.jdt.internal.ui.text.PreferencesAdapter;
 import org.eclipse.jdt.internal.ui.text.SingleTokenJavaScanner;
 import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingStrategy;
+import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.java.ContentAssistProcessor;
 import org.eclipse.jdt.internal.ui.text.java.JavaAutoIndentStrategy;
 import org.eclipse.jdt.internal.ui.text.java.JavaCodeScanner;
@@ -417,6 +418,14 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 		}
 
 		return null;
+	}
+	
+	/*
+	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getQuickAssistAssistant(org.eclipse.jface.text.source.ISourceViewer)
+	 * @since 3.2
+	 */
+	public IContentAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
+		return new JavaCorrectionAssistant(getEditor());
 	}
 
 	/*
