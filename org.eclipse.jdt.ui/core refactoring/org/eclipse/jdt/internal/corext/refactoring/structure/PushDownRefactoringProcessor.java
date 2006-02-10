@@ -33,6 +33,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.CheckConditionsContext;
@@ -637,7 +638,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 		try {
 			return new DynamicValidationStateChange(RefactoringCoreMessages.PushDownRefactoring_change_name, fChangeManager.getAllChanges()) {
 
-				public final RefactoringDescriptor getRefactoringDescriptor() {
+				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
 					if (fDeclaringType != null)
 						arguments.put(JavaRefactoringDescriptor.INPUT, fDeclaringType.getHandleIdentifier());

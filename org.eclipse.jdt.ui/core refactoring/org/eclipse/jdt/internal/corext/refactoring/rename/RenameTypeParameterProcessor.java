@@ -21,6 +21,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -268,7 +269,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 			if (change != null) {
 				final CompositeChange composite= new CompositeChange("", new Change[] { change}) { //$NON-NLS-1$
 
-					public RefactoringDescriptor getRefactoringDescriptor() {
+					public final ChangeDescriptor getDescriptor() {
 						final Map arguments= new HashMap();
 						arguments.put(JavaRefactoringDescriptor.INPUT, fTypeParameter.getParent().getHandleIdentifier());
 						arguments.put(JavaRefactoringDescriptor.NAME, getNewElementName());

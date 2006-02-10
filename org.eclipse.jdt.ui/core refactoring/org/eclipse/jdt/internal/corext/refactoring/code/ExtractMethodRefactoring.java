@@ -41,6 +41,7 @@ import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -437,7 +438,7 @@ public class ExtractMethodRefactoring extends CommentRefactoring implements IIni
 		fRewriter= ASTRewrite.create(declaration.getAST());
 		final CompilationUnitChange result= new CompilationUnitChange(RefactoringCoreMessages.ExtractMethodRefactoring_change_name, fCUnit) {
 
-			public final RefactoringDescriptor getRefactoringDescriptor() {
+			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
 				arguments.put(JavaRefactoringDescriptor.INPUT, fCUnit.getHandleIdentifier());
 				arguments.put(JavaRefactoringDescriptor.NAME, fMethodName);

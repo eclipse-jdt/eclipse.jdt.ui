@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -1137,7 +1138,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
 			return new DynamicValidationStateChange(RefactoringCoreMessages.ChangeSignatureRefactoring_restructure_parameters, fChangeManager.getAllChanges()) {
-				public RefactoringDescriptor getRefactoringDescriptor() {
+				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
 					arguments.put(JavaRefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
 					arguments.put(JavaRefactoringDescriptor.NAME, fMethodName);

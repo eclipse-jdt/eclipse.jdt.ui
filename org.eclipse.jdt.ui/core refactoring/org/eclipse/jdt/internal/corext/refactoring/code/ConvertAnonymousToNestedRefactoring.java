@@ -39,6 +39,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -480,7 +481,7 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 	private Change createChange(CompilationUnitRewrite rewrite) throws CoreException {
 		TextChange change= new CompilationUnitChange(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name, fCu) {
 
-			public final RefactoringDescriptor getRefactoringDescriptor() {
+			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
 				arguments.put(JavaRefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
 				arguments.put(JavaRefactoringDescriptor.NAME, fClassName);

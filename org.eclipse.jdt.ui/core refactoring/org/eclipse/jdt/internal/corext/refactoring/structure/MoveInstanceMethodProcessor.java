@@ -42,6 +42,7 @@ import org.eclipse.jface.text.Region;
 import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -1572,7 +1573,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				return changes[0];
 			return new DynamicValidationStateChange(RefactoringCoreMessages.MoveInstanceMethodRefactoring_name, changes) {
 
-				public final RefactoringDescriptor getRefactoringDescriptor() {
+				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
 					arguments.put(JavaRefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
 					arguments.put(JavaRefactoringDescriptor.NAME, fMethodName);

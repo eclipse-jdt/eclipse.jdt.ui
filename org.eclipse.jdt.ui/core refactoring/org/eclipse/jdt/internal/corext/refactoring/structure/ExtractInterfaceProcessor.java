@@ -38,6 +38,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -319,7 +320,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 			monitor.setTaskName(RefactoringCoreMessages.ExtractInterfaceProcessor_creating);
 			final DynamicValidationStateChange change= new DynamicValidationStateChange(RefactoringCoreMessages.ExtractInterfaceRefactoring_name, fChangeManager.getAllChanges()) {
 
-				public final RefactoringDescriptor getRefactoringDescriptor() {
+				public ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
 					arguments.put(JavaRefactoringDescriptor.INPUT, fSubType.getHandleIdentifier());
 					arguments.put(JavaRefactoringDescriptor.NAME, fSuperName);

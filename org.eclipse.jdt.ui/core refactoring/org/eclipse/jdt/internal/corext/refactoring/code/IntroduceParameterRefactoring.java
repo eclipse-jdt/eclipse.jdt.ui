@@ -29,9 +29,9 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.jface.text.TextSelection;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
@@ -498,8 +498,8 @@ public class IntroduceParameterRefactoring extends CommentRefactoring implements
 		}
 		return new CompositeChange(RefactoringCoreMessages.IntroduceParameterRefactoring_name, new Change[] {result}) {
 		
-			public final RefactoringDescriptor getRefactoringDescriptor() {
-				final RefactoringDescriptor descriptor= getChildren()[0].getRefactoringDescriptor();
+			public final ChangeDescriptor getDescriptor() {
+				final ChangeDescriptor descriptor= getChildren()[0].getDescriptor();
 				if (descriptor instanceof JavaRefactoringDescriptor) {
 					final JavaRefactoringDescriptor extended= (JavaRefactoringDescriptor) descriptor;
 					final Map arguments= new HashMap();
@@ -512,7 +512,7 @@ public class IntroduceParameterRefactoring extends CommentRefactoring implements
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					return new JavaRefactoringDescriptor(ID_INTRODUCE_PARAMETER, descriptor.getProject(), NLS.bind(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)}), getComment(), arguments, descriptor.getFlags());
+					return new JavaRefactoringDescriptor(ID_INTRODUCE_PARAMETER, extended.getProject(), NLS.bind(RefactoringCoreMessages.IntroduceParameterRefactoring_descriptor_description, new String[] { fParameter.getNewName(), signature, ASTNodes.asString(fSelectedExpression)}), getComment(), arguments, extended.getFlags());
 				}
 				return null;
 			}

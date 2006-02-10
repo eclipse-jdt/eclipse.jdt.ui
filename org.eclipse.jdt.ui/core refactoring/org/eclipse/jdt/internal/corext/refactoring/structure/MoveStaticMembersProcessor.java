@@ -37,6 +37,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
@@ -690,7 +691,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		monitor.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, 5); 
 		fChange= new DynamicValidationStateChange(RefactoringCoreMessages.MoveMembersRefactoring_move_members) {
 
-			public final RefactoringDescriptor getRefactoringDescriptor() {
+			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
 				arguments.put(JavaRefactoringDescriptor.INPUT, fDestinationType.getHandleIdentifier());
 				arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());

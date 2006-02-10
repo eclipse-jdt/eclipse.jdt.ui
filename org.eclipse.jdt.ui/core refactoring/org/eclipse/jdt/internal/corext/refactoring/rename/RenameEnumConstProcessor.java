@@ -17,6 +17,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -108,7 +109,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 		if (change != null) {
 			final CompositeChange composite= new CompositeChange("", new Change[] { change}) { //$NON-NLS-1$
 
-				public final RefactoringDescriptor getRefactoringDescriptor() {
+				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
 					final IField field= getField();
 					arguments.put(JavaRefactoringDescriptor.INPUT, field.getHandleIdentifier());

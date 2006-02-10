@@ -23,6 +23,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.TextChange;
@@ -191,7 +192,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 				fChanges= changes.length;
 				return new DynamicValidationStateChange(RefactoringCoreMessages.UseSupertypeWherePossibleRefactoring_name, fChangeManager.getAllChanges()) {
 
-					public final RefactoringDescriptor getRefactoringDescriptor() {
+					public final ChangeDescriptor getDescriptor() {
 						final Map arguments= new HashMap();
 						arguments.put(JavaRefactoringDescriptor.INPUT, fSubType.getHandleIdentifier());
 						arguments.put(JavaRefactoringDescriptor.ELEMENT + 1, fSuperType.getHandleIdentifier());

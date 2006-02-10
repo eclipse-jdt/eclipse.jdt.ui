@@ -33,6 +33,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -384,7 +385,7 @@ public class SelfEncapsulateFieldRefactoring extends CommentRefactoring implemen
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		final DynamicValidationStateChange result= new DynamicValidationStateChange(getName()) {
 
-			public final RefactoringDescriptor getRefactoringDescriptor() {
+			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
 				arguments.put(JavaRefactoringDescriptor.INPUT, fField.getHandleIdentifier());
 				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());

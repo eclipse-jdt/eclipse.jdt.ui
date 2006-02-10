@@ -29,6 +29,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -1055,7 +1056,7 @@ public class IntroduceFactoryRefactoring extends CommentRefactoring implements I
 		pm.beginTask(RefactoringCoreMessages.IntroduceFactory_createChanges, fAllCallsTo.length); 
 		final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.IntroduceFactory_name) {
 		
-			public final RefactoringDescriptor getRefactoringDescriptor() {
+			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
 				arguments.put(JavaRefactoringDescriptor.INPUT, fCUHandle.getHandleIdentifier());
 				arguments.put(JavaRefactoringDescriptor.NAME, fNewMethodName);

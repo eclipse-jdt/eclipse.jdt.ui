@@ -31,6 +31,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
@@ -595,7 +596,7 @@ public class ExtractConstantRefactoring extends CommentRefactoring implements II
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		return new CompositeChange(RefactoringCoreMessages.ExtractConstantRefactoring_name, new Change[] {fChange}) {
 		
-			public final RefactoringDescriptor getRefactoringDescriptor() {
+			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
 				arguments.put(JavaRefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
 				arguments.put(JavaRefactoringDescriptor.NAME, fConstantName);

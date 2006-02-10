@@ -38,6 +38,7 @@ import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.IResourceMapper;
@@ -1004,7 +1005,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 			monitor.beginTask(RefactoringCoreMessages.RenameTypeRefactoring_creating_change, 4);
 			final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges) {
 
-				public RefactoringDescriptor getRefactoringDescriptor() {
+				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
 					arguments.put(JavaRefactoringDescriptor.INPUT, fType.getHandleIdentifier());
 					arguments.put(JavaRefactoringDescriptor.NAME, getNewElementName());

@@ -26,6 +26,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
@@ -360,7 +361,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			if (change != null) {
 				final CompositeChange composite= new CompositeChange("", new Change[] { change}) { //$NON-NLS-1$
 
-					public RefactoringDescriptor getRefactoringDescriptor() {
+					public final ChangeDescriptor getDescriptor() {
 						final Map arguments= new HashMap();
 						arguments.put(JavaRefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
 						arguments.put(JavaRefactoringDescriptor.NAME, getNewElementName());

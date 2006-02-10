@@ -33,6 +33,7 @@ import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
@@ -931,7 +932,7 @@ public final class PullUpRefactoringProcessor extends HierarchyProcessor {
 		try {
 			return new DynamicValidationStateChange(RefactoringCoreMessages.PullUpRefactoring_Pull_Up, fChangeManager.getAllChanges()) {
 
-				public final RefactoringDescriptor getRefactoringDescriptor() {
+				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
 					arguments.put(JavaRefactoringDescriptor.INPUT, fTargetType.getHandleIdentifier());
 					if (fDeclaringType != null)

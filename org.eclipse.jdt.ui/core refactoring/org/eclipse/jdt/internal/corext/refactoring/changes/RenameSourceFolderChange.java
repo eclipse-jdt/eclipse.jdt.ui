@@ -22,6 +22,7 @@ import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -128,7 +129,7 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 		return result;
 	}
 
-	public RefactoringDescriptor getRefactoringDescriptor() {
+	public final ChangeDescriptor getDescriptor() {
 		final Map arguments= new HashMap();
 		arguments.put(JavaRefactoringDescriptor.INPUT, getResourcePath().toPortableString());
 		arguments.put(JavaRefactoringDescriptor.NAME, getNewName());

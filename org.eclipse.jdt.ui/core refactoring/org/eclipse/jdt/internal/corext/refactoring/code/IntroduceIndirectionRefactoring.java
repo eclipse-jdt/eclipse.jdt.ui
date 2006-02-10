@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.SubProgressMonitor;
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
@@ -732,9 +733,9 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 	// ******************** CHANGE CREATION ***********************
 
 	public Change createChange(IProgressMonitor pm) throws CoreException, OperationCanceledException {
-		CompositeChange result= new CompositeChange(RefactoringCoreMessages.IntroduceIndirectionRefactoring_introduce_indirection) {
+		final CompositeChange result= new CompositeChange(RefactoringCoreMessages.IntroduceIndirectionRefactoring_introduce_indirection) {
 		
-			public RefactoringDescriptor getRefactoringDescriptor() {
+			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
 				arguments.put(JavaRefactoringDescriptor.INPUT, fTargetMethod.getHandleIdentifier());
 				arguments.put(JavaRefactoringDescriptor.NAME, fIntermediaryMethodName);

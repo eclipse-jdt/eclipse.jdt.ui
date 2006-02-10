@@ -20,6 +20,7 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -63,10 +64,7 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 	public String getName() {
 		return Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_name, new String[]{getOldName(), getNewName()}); 
 	}
-	
-	/*
-	 * @see AbstractRenameChange#createUndoChange()
-	 */
+
 	protected Change createUndoChange(long stampToRestore) throws JavaModelException{
 		return new RenameCompilationUnitChange(createNewPath(), getNewName(), getOldName(), getComment(), stampToRestore);
 	}
@@ -77,10 +75,7 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 			cu.rename(getNewName(), false, pm);
 	}
 
-	/*
-	 * @see org.eclipse.ltk.core.refactoring.Change#getRefactoringDescriptor()
-	 */
-	public RefactoringDescriptor getRefactoringDescriptor() {
+	public final ChangeDescriptor getDescriptor() {
 		final Map arguments= new HashMap();
 		arguments.put(JavaRefactoringDescriptor.INPUT, getResourcePath().toPortableString());
 		arguments.put(JavaRefactoringDescriptor.NAME, getNewName());

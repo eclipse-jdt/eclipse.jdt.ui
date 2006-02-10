@@ -23,6 +23,7 @@ import org.eclipse.core.resources.IProjectDescription;
 import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -149,7 +150,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 		return  getProject().getReferencingProjects();
 	}
 
-	public RefactoringDescriptor getRefactoringDescriptor() {
+	public final ChangeDescriptor getDescriptor() {
 		final Map arguments= new HashMap();
 		arguments.put(JavaRefactoringDescriptor.INPUT, getResourcePath().toPortableString());
 		arguments.put(JavaRefactoringDescriptor.NAME, getNewName());

@@ -26,13 +26,14 @@ import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.ISafeRunnable;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
-import org.eclipse.core.runtime.Platform;
+import org.eclipse.core.runtime.SafeRunner;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.IInitializableRefactoringComponent;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
@@ -184,7 +185,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 							batchMonitor.subTask(source.getElementName());
 							ast.setProperty(RefactoringASTParser.SOURCE_PROPERTY, source);
 	
-							Platform.run(new ISafeRunnable() {
+							SafeRunner.run(new ISafeRunnable() {
 								public void run() throws Exception {
 									IProblem[] problems= ast.getProblems();
 									for (int p= 0; p < problems.length; p++) {
@@ -532,7 +533,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 		try {
 			DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.InferTypeArgumentsRefactoring_name, fChangeManager.getAllChanges()) {
 			
-				public final RefactoringDescriptor getRefactoringDescriptor() {
+				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
 					for (int index= 0; index < fElements.length; index++)
 						arguments.put(JavaRefactoringDescriptor.ELEMENT + (index + 1), fElements[index].getHandleIdentifier());

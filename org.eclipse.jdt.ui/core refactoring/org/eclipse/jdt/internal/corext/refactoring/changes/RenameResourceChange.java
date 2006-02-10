@@ -21,6 +21,7 @@ import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
+import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -124,7 +125,7 @@ public class RenameResourceChange extends JDTChange {
 		return getResource();
 	}
 
-	public RefactoringDescriptor getRefactoringDescriptor() {
+	public final ChangeDescriptor getDescriptor() {
 		final Map arguments= new HashMap();
 		arguments.put(JavaRefactoringDescriptor.INPUT, fResourcePath.toPortableString());
 		arguments.put(JavaRefactoringDescriptor.NAME, fNewName);
