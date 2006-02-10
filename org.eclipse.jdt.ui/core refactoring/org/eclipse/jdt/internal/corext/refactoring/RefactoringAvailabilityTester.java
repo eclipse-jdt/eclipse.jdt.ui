@@ -51,7 +51,6 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgUtils;
-import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 
@@ -278,13 +277,16 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isExtractInterfaceAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (selection.size() == 1) {
-			IType type= null;
 			Object first= selection.getFirstElement();
-			if (first instanceof IType)
-				type= (IType) first;
-			if (first instanceof ICompilationUnit)
-				type= JavaElementUtil.getMainType((ICompilationUnit) first);
-			return type != null && isExtractInterfaceAvailable(type);
+			if (first instanceof IType) {
+				return isExtractInterfaceAvailable((IType) first);
+			} else if (first instanceof ICompilationUnit) {
+				ICompilationUnit unit= (ICompilationUnit)first;
+				if (!unit.exists() || unit.isReadOnly())
+					return false;
+				
+				return true;
+			}
 		}
 		return false;
 	}
@@ -410,6 +412,13 @@ public final class RefactoringAvailabilityTester {
 			Object element= iter.next();
 			if (! (element instanceof IJavaElement))
 				return false;
+			if (element instanceof ICompilationUnit) {
+				ICompilationUnit unit= (ICompilationUnit)element;
+				if (!unit.exists() || unit.isReadOnly())
+					return false;
+				
+				return true;
+			}
 			if (! isInferTypeArgumentsAvailable((IJavaElement) element))
 				return false;
 		}
@@ -564,13 +573,10 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isMoveInnerAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (selection.size() == 1) {
-			IType type= null;
 			Object first= selection.getFirstElement();
-			if (first instanceof IType)
-				type= (IType) first;
-			if (first instanceof ICompilationUnit)
-				type= JavaElementUtil.getMainType((ICompilationUnit) first);
-			return type != null && isMoveInnerAvailable(type);
+			if (first instanceof IType) {
+				return isMoveInnerAvailable((IType)first);
+			}
 		}
 		return false;
 	}
@@ -928,13 +934,16 @@ public final class RefactoringAvailabilityTester {
 
 	public static boolean isUseSuperTypeAvailable(final IStructuredSelection selection) throws JavaModelException {
 		if (selection.size() == 1) {
-			IType type= null;
 			final Object first= selection.getFirstElement();
-			if (first instanceof IType)
-				type= (IType) first;
-			if (first instanceof ICompilationUnit)
-				type= JavaElementUtil.getMainType((ICompilationUnit) first);
-			return type != null && isUseSuperTypeAvailable(type);
+			if (first instanceof IType) {
+				return isUseSuperTypeAvailable((IType)first);
+			} else if (first instanceof ICompilationUnit) {
+				ICompilationUnit unit= (ICompilationUnit)first;
+				if (!unit.exists() || unit.isReadOnly())
+					return false;
+				
+				return true;
+			}
 		}
 		return false;
 	}
