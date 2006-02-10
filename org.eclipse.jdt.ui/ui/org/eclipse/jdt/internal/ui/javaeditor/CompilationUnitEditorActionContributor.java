@@ -26,7 +26,7 @@ import org.eclipse.ui.texteditor.RetargetTextEditorAction;
 import org.eclipse.jdt.ui.IContextMenuConstants;
 import org.eclipse.jdt.ui.actions.JdtActionConstants;
 
-public class CompilationUnitEditorActionContributor extends BasicEditorActionContributor {
+public class CompilationUnitEditorActionContributor extends BasicCompilationUnitEditorActionContributor {
 
 	private RetargetTextEditorAction fToggleInsertModeAction;
 
