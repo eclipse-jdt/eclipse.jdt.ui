@@ -134,7 +134,7 @@ overridden</li>
         <ul>
           <li>getContainerLabel()</li>
         </ul>
-        <li>methods that open the delection dialogs can now be
+        <li>methods that open the selection dialogs can now be
 overridden</li>
         <ul>
           <li>chooseContainer()</li>
@@ -181,6 +181,39 @@ AddUnimplementedConstructorsAction.createRunnable(CompilationUnit
 astRoot,
 ITypeBinding type, IMethodBinding[] methodToOverride, int insertPos,
 boolean createComments, int visibility, boolean omitSuper)</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">New API to get a ImportRewrite
+configured with the JDT.UI preference settings.<br>
+      <ul>
+        <li>CodeStyleConfiguration.createImportRewrite(...)</li>
+      </ul>
+      </td>
+    </tr>
+    <tr>
+      <td style="vertical-align: top;">New API to allow QuickFix and
+QuickAssist processors to work on (non-jdt.core) problems contributed
+by reconcile participants.<br>
+      <ul>
+        <li>Extensions of quickFixProcessors can now specify which
+marker types
+they can handle: new element &lt;handledMarkerTypes&gt;. Processors
+will only receive problems of specified types. If no handled marker
+type are specified, the processor will
+only get problems of types org.eclipse.jdt.core.problem,
+org.eclipse.jdt.core.buildpath_problem and org.eclipse.jdt.core.task;
+this is compatible to the behavior prior to 3.2.</li>
+        <li>New API added on IProblemLocation:
+IProblemLocation.getMarkerType() <br>
+        </li>
+        <li>For historical reasons, IQuickFixProcessor.hasCorrections
+only gets the problem ID, but not the problem marker type. The possible
+marker types are defined by the extension. To avoid any conflicts on
+the ID, extenders are recommended to implement a processor per marker
+type. <br>
+        </li>
       </ul>
       </td>
     </tr>
