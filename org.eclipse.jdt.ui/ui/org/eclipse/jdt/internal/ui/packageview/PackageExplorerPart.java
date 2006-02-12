@@ -277,29 +277,6 @@ public class PackageExplorerPart extends ViewPart
 			}
 			return list.toArray();
 		}
-		/*
-		 * @see AbstractTreeViewer#isExpandable(java.lang.Object)
-		 */
-		public boolean isExpandable(Object parent) {
-			if (isFlatLayout())
-				return super.isExpandable(parent);
-			if (parent instanceof IJavaProject) // workaround for bug 78053: Package Explorer shouldn't fetch any children on startup
-				return super.isExpandable(parent);
-			
-			ViewerFilter[] filters= getFilters();
-			Object[] children= ((ITreeContentProvider)getContentProvider()).getChildren(parent);
-			for (int i = 0; i < children.length; i++) {
-				Object object= children[i];
-				
-				if (isEssential(object))
-					return true;
-				
-				object= filter(object, parent, filters);
-				if (object != null)
-					return true;
-			}
-			return false;
-		}
 		
 		// Sends the object through the given filters
 		private Object filter(Object object, Object parent, ViewerFilter[] filters) {
