@@ -156,15 +156,24 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	/**
 	 * {@inheritDoc}
 	 */
-	public Refactoring createRefactoring() throws CoreException {
+	public Refactoring createRefactoring(final RefactoringStatus status) throws CoreException {
+		Refactoring refactoring= null;
 		if (fContribution != null)
-			return fContribution.createRefactoring(this);
-		final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(getID());
-		if (contribution instanceof JavaRefactoringContribution) {
-			fContribution= (JavaRefactoringContribution) contribution;
-			return fContribution.createRefactoring(this);
+			refactoring= fContribution.createRefactoring(this);
+		else {
+			final RefactoringContribution contribution= RefactoringCore.getRefactoringContribution(getID());
+			if (contribution instanceof JavaRefactoringContribution) {
+				fContribution= (JavaRefactoringContribution) contribution;
+				refactoring= fContribution.createRefactoring(this);
+			}
 		}
-		return null;
+		if (refactoring != null) {
+			if (refactoring instanceof IInitializableRefactoringComponent)
+				status.merge(((IInitializableRefactoringComponent) refactoring).initialize(createArguments()));
+			else
+				status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_initialization_error, getID())));
+		}
+		return refactoring;
 	}
 
 	/**
@@ -177,13 +186,11 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	}
 
 	/**
-	 * {@inheritDoc}
+	 * Returns the refactoring contribution.
+	 * 
+	 * @return the refactoring contribution, or <code>null</code>
 	 */
-	public RefactoringStatus initialize(final Refactoring refactoring) {
-		if (refactoring instanceof IInitializableRefactoringComponent) {
-			final IInitializableRefactoringComponent component= (IInitializableRefactoringComponent) refactoring;
-			return component.initialize(createArguments());
-		}
-		return RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_initialization_error, getID()));
+	public JavaRefactoringContribution getContribution() {
+		return fContribution;
 	}
 }

@@ -23,6 +23,7 @@ import org.eclipse.core.filesystem.EFS;
 import org.eclipse.core.filesystem.IFileStore;
 import org.eclipse.core.filesystem.URIUtil;
 
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
@@ -36,12 +37,14 @@ import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.Refactoring;
+import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
+import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryWizard;
 
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -52,10 +55,15 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringContribution;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.binary.StubCreationOperation;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.jarimport.JarImportMessages;
@@ -225,6 +233,12 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 	/** Has the wizard been cancelled? */
 	protected boolean fCancelled= false;
 
+	/** The current refactoring arguments, or <code>null</code> */
+	private RefactoringArguments fCurrentArguments= null;
+
+	/** The current refactoring to be initialized, or <code>null</code> */
+	private IInitializableRefactoringComponent fCurrentRefactoring= null;
+
 	/** The java project or <code>null</code> */
 	protected IJavaProject fJavaProject= null;
 
@@ -298,44 +312,68 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 	}
 
 	/**
-	 * Hook method which is called before the a refactoring of the history is
-	 * executed. The refactoring itself is in an uninitialized state at the time
-	 * of the method call. This implementation initializes the refactoring based
-	 * on the refactoring arguments stored in the descriptor. All handles
-	 * provided in the {@link JavaRefactoringDescriptor#INPUT} or
-	 * {@link JavaRefactoringDescriptor#ELEMENT} attributes are converted to
-	 * match the project layout of the client. This method may be called from
-	 * non-UI threads.
-	 * <p>
-	 * Subclasses may extend this method to perform any special processing.
-	 * </p>
-	 * <p>
-	 * Returning a status of severity {@link RefactoringStatus#FATAL} will
-	 * terminate the execution of the refactorings.
-	 * </p>
-	 * 
-	 * @param refactoring
-	 *            the refactoring about to be executed
-	 * @param descriptor
-	 *            the refactoring descriptor
-	 * @return a status describing the outcome of the initialization
-	 */
-	protected abstract RefactoringStatus aboutToPerformRefactoring(Refactoring refactoring, RefactoringDescriptor descriptor);
-
-	/**
 	 * {@inheritDoc}
 	 */
-	protected final RefactoringStatus aboutToPerformRefactoring(final Refactoring refactoring, final RefactoringDescriptor descriptor, final IProgressMonitor monitor) {
-		monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 100);
+	protected RefactoringStatus aboutToPerformRefactoring(final Refactoring refactoring, final RefactoringDescriptor descriptor, final IProgressMonitor monitor) {
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
-			status.merge(createTypeStubs(refactoring, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
-			if (!status.hasFatalError())
-				status.merge(aboutToPerformRefactoring(refactoring, descriptor));
+			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 100);
+			if (!status.hasFatalError()) {
+				status.merge(createTypeStubs(refactoring, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
+				if (!status.hasFatalError()) {
+					if (fCurrentRefactoring != null && fCurrentArguments != null)
+						status.merge(fCurrentRefactoring.initialize(fCurrentArguments));
+				}
+			}
 		} finally {
 			monitor.done();
 		}
 		return status;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	protected Refactoring createRefactoring(final RefactoringDescriptor descriptor, final RefactoringStatus status) throws CoreException {
+		Assert.isNotNull(descriptor);
+		Refactoring refactoring= null;
+		if (descriptor instanceof JavaRefactoringDescriptor) {
+			final JavaRefactoringDescriptor javaDescriptor= (JavaRefactoringDescriptor) descriptor;
+			JavaRefactoringContribution contribution= javaDescriptor.getContribution();
+			if (contribution != null)
+				refactoring= contribution.createRefactoring(descriptor);
+			else {
+				final RefactoringContribution refactoringContribution= RefactoringCore.getRefactoringContribution(javaDescriptor.getID());
+				if (refactoringContribution instanceof JavaRefactoringContribution) {
+					contribution= (JavaRefactoringContribution) refactoringContribution;
+					refactoring= contribution.createRefactoring(descriptor);
+				}
+			}
+			if (refactoring != null) {
+				final RefactoringArguments arguments= javaDescriptor.createArguments();
+				if (arguments instanceof JavaRefactoringArguments) {
+					final JavaRefactoringArguments javaArguments= (JavaRefactoringArguments) arguments;
+					String value= javaArguments.getAttribute(JavaRefactoringDescriptor.INPUT);
+					if (value != null && !"".equals(value)) //$NON-NLS-1$
+						javaArguments.setAttribute(JavaRefactoringDescriptor.INPUT, getTransformedValue(value));
+					int count= 1;
+					String attribute= JavaRefactoringDescriptor.ELEMENT + count;
+					while ((value= javaArguments.getAttribute(attribute)) != null) {
+						if (!"".equals(value)) //$NON-NLS-1$
+							javaArguments.setAttribute(attribute, getTransformedValue(value));
+						count++;
+						attribute= JavaRefactoringDescriptor.ELEMENT + count;
+					}
+				}
+				if (refactoring instanceof IInitializableRefactoringComponent) {
+					fCurrentRefactoring= (IInitializableRefactoringComponent) refactoring;
+					fCurrentArguments= arguments;
+				} else
+					status.merge(RefactoringStatus.createFatalErrorStatus(Messages.format(RefactoringCoreMessages.JavaRefactoringDescriptor_initialization_error, javaDescriptor.getID())));
+			}
+			return refactoring;
+		}
+		return null;
 	}
 
 	/**
@@ -450,6 +488,38 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 	 * @return the refactoring history to perform, or <code>null</code>
 	 */
 	protected abstract RefactoringHistory getRefactoringHistory();
+
+	/**
+	 * Returns the transformed input value of the specified value.
+	 * 
+	 * @param value
+	 *            the value to transform
+	 * @return the transformed value, or the original one
+	 */
+	private String getTransformedValue(final String value) {
+		if (fSourceFolder != null) {
+			final IJavaElement target= JavaCore.create(fSourceFolder);
+			if (target instanceof IPackageFragmentRoot) {
+				final IPackageFragmentRoot extended= (IPackageFragmentRoot) target;
+				final String targetIdentifier= extended.getHandleIdentifier();
+				String sourceIdentifier= null;
+				final IJavaElement element= JavaCore.create(value);
+				if (element != null) {
+					final IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
+					if (root != null)
+						sourceIdentifier= root.getHandleIdentifier();
+					else {
+						final IJavaProject project= element.getJavaProject();
+						if (project != null)
+							sourceIdentifier= project.getHandleIdentifier();
+					}
+					if (sourceIdentifier != null)
+						return targetIdentifier + element.getHandleIdentifier().substring(sourceIdentifier.length());
+				}
+			}
+		}
+		return value;
+	}
 
 	/**
 	 * {@inheritDoc}

@@ -57,12 +57,16 @@ import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 /**
  * Utility methods for JAR Import/Export.
  */
-public class JarPackagerUtil {
+public final class JarPackagerUtil {
 
 	static final String JAR_EXTENSION= "jar"; //$NON-NLS-1$
 	static final String DESCRIPTION_EXTENSION= "jardesc"; //$NON-NLS-1$
 
 	private static final String REFACTORINGS_ENTRY= "META-INF/REFACTORINGS.XML"; //$NON-NLS-1$
+
+	private JarPackagerUtil() {
+		// Do nothing
+	}
 
 	public static boolean askToCreateDirectory(final Shell parent, File directory) {
 		if (parent == null)

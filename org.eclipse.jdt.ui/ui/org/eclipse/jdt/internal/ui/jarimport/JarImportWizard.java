@@ -14,7 +14,6 @@ import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URI;
-import java.text.MessageFormat;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
 
@@ -42,25 +41,17 @@ import org.eclipse.jface.wizard.IWizardPage;
 import org.eclipse.ui.IImportWizard;
 import org.eclipse.ui.IWorkbench;
 
-import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
-import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryControlConfiguration;
 
 import org.eclipse.jdt.core.IClasspathEntry;
-import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComponent;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
-import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -277,39 +268,6 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 	/**
 	 * {@inheritDoc}
 	 */
-	protected RefactoringStatus aboutToPerformRefactoring(final Refactoring refactoring, final RefactoringDescriptor descriptor) {
-		final RefactoringStatus status= new RefactoringStatus();
-		if (descriptor instanceof JavaRefactoringDescriptor) {
-			final JavaRefactoringDescriptor extended= (JavaRefactoringDescriptor) descriptor;
-			final RefactoringArguments arguments= extended.createArguments();
-			if (arguments instanceof JavaRefactoringArguments) {
-				final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-				String value= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
-				if (value != null && !"".equals(value)) //$NON-NLS-1$
-					generic.setAttribute(JavaRefactoringDescriptor.INPUT, getTransformedInputValue(value));
-				int count= 1;
-				String attribute= JavaRefactoringDescriptor.ELEMENT + count;
-				while ((value= generic.getAttribute(attribute)) != null) {
-					if (!"".equals(value)) //$NON-NLS-1$
-						generic.setAttribute(attribute, getTransformedInputValue(value));
-					count++;
-					attribute= JavaRefactoringDescriptor.ELEMENT + count;
-				}
-				if (refactoring instanceof IInitializableRefactoringComponent) {
-					final IInitializableRefactoringComponent component= (IInitializableRefactoringComponent) refactoring;
-					status.merge(component.initialize(generic));
-				} else
-					status.addFatalError(MessageFormat.format(JarImportMessages.PerformRefactoringsOperation_init_error, new String[] { descriptor.getDescription()}));
-			} else
-				status.addFatalError(MessageFormat.format(JarImportMessages.PerformRefactoringsOperation_init_error, new String[] { descriptor.getDescription()}));
-		} else
-			status.addFatalError(MessageFormat.format(JarImportMessages.PerformRefactoringsOperation_init_error, new String[] { descriptor.getDescription()}));
-		return status;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
 	protected void addUserDefinedPages() {
 		fImportPage= new JarImportWizardPage(fImportData, fImportWizard);
 		addPage(fImportPage);
@@ -414,38 +372,6 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 				return parent.getChild(EFS.getStore(location).getName()).toURI();
 		}
 		return uri;
-	}
-
-	/**
-	 * Returns the transformed input value of the specified value.
-	 * 
-	 * @param value
-	 *            the value to transform
-	 * @return the transformed value, or the original one
-	 */
-	private String getTransformedInputValue(final String value) {
-		if (fSourceFolder != null) {
-			final IJavaElement target= JavaCore.create(fSourceFolder);
-			if (target instanceof IPackageFragmentRoot) {
-				final IPackageFragmentRoot extended= (IPackageFragmentRoot) target;
-				final String targetIdentifier= extended.getHandleIdentifier();
-				String sourceIdentifier= null;
-				final IJavaElement element= JavaCore.create(value);
-				if (element != null) {
-					final IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
-					if (root != null)
-						sourceIdentifier= root.getHandleIdentifier();
-					else {
-						final IJavaProject project= element.getJavaProject();
-						if (project != null)
-							sourceIdentifier= project.getHandleIdentifier();
-					}
-					if (sourceIdentifier != null)
-						return targetIdentifier + element.getHandleIdentifier().substring(sourceIdentifier.length());
-				}
-			}
-		}
-		return value;
 	}
 
 	/**
