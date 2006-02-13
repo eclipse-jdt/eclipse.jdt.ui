@@ -305,12 +305,14 @@ public class TestViewer {
 		TestElement selected= (TestElement) selection.getFirstElement();
 		TestElement next;
 		
-		if (selected instanceof TestCaseElement) {
-			next= getNextFailureSibling(selected, showNext);
-		} else {
-			if (selected == null)
-				selected= fTestRunSession.getTestRoot();
+		if (selected == null) {
+			next= getNextChildFailure(fTestRunSession.getTestRoot(), showNext);
+		} else if (selected instanceof TestSuiteElement) {
 			next= getNextChildFailure((TestSuiteElement) selected, showNext);
+			if (next == null)
+				next= getNextFailureSibling(selected, showNext);
+		} else {
+			next= getNextFailureSibling(selected, showNext);
 		}
 		
 		if (next != null)

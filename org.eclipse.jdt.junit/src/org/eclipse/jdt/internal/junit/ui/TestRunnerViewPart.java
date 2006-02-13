@@ -1385,7 +1385,7 @@ action enablement
 		toolBar.add(fScrollLockAction);
 		toolBar.add(new Separator());
 		toolBar.add(fRerunLastTestAction);
-//		toolBar.add(fRerunLastFailedFirstAction); // not ported yet.
+		toolBar.add(fRerunLastFailedFirstAction);
 		toolBar.add(fStopAction);
 		toolBar.add(fViewHistory.createHistoryDropDownAction());
 		

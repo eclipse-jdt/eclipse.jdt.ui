@@ -18,11 +18,11 @@ import org.eclipse.jdt.junit.ITestRunListener;
 
 public abstract class TestElement {
 	public final static class Status {
-		public static final Status RUNNING= new Status("RUNNING", 0, 3); //$NON-NLS-1$
-		public static final Status ERROR= new Status("ERROR", 1, /*1*/ITestRunListener.STATUS_ERROR); //$NON-NLS-1$
+		public static final Status RUNNING= new Status("RUNNING", 0,   3); //$NON-NLS-1$
+		public static final Status ERROR=   new Status("ERROR",   1, /*1*/ITestRunListener.STATUS_ERROR); //$NON-NLS-1$
 		public static final Status FAILURE= new Status("FAILURE", 2, /*2*/ITestRunListener.STATUS_FAILURE); //$NON-NLS-1$
-		public static final Status OK= new Status("OK", 3, /*0*/ITestRunListener.STATUS_OK); //$NON-NLS-1$
-		public static final Status NOT_RUN= new Status("NOT_RUN", 4, 4); //$NON-NLS-1$
+		public static final Status OK=      new Status("OK",      3, /*0*/ITestRunListener.STATUS_OK); //$NON-NLS-1$
+		public static final Status NOT_RUN= new Status("NOT_RUN", 4,   4); //$NON-NLS-1$
 		
 		private static final Status[] OLD_CODE= { OK, ERROR, FAILURE};
 		
@@ -101,36 +101,8 @@ public abstract class TestElement {
 		return fTestName;
 	}
 	
-	/**
-	 * @return one of the STATUS_* constants
-	 */
 	public abstract Status getStatus();
 	
-//	/* (non-Javadoc)
-//	 * @see java.lang.Object#equals(java.lang.Object)
-//	 */
-//	public boolean equals(Object obj) {
-//		if (obj == this)
-//			return true;
-//		if (obj == null)
-//			return false;
-//		if (obj.getClass() != getClass())
-//			return false;
-//		
-//		TestElement other= (TestElement) obj;
-//		boolean equals= fId.equals(other.fId);
-//		if (equals == true)
-//			JUnitPlugin.log(new IllegalStateException("unexpected equality, identical root: " + (other.getRoot() == getRoot())));  //$NON-NLS-1$
-//		return equals;
-//	}
-//	
-//	/* (non-Javadoc)
-//	 * @see java.lang.Object#hashCode()
-//	 */
-//	public int hashCode() {
-//		return fId.hashCode();
-//	}
-
 	public TestRoot getRoot() {
 		return getParent().getRoot();
 	}

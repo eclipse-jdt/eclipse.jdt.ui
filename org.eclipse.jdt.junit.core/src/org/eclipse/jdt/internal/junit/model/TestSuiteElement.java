@@ -32,12 +32,10 @@ public class TestSuiteElement extends TestElement {
 		return (TestElement[]) fChildren.toArray(new TestElement[fChildren.size()]);
 	}
 	
-	/**
-	 * @return one of the STATUS_* constants
-	 */
 	public Status getStatus() {
 		//TODO: Cache failure count in hierarchy? Recheck behavior when introducing filters
 		Status highest= Status.NOT_RUN;
+		boolean hasNotRun= false;
 		TestElement[] children= (TestElement[]) fChildren.toArray(new TestElement[fChildren.size()]); // copy list to avoid concurreny problems
 		for (int i= 0; i < children.length; i++) {
 			TestElement testElement= children[i];
@@ -45,10 +43,15 @@ public class TestSuiteElement extends TestElement {
 			
 			if (childStatus == Status.RUNNING)
 				return Status.RUNNING;
+			if (childStatus == Status.NOT_RUN)
+				hasNotRun= true;
 			else if (childStatus.getPriority() < highest.getPriority())
 				highest= childStatus;
 		}
-		return highest;
+		if (hasNotRun && highest != Status.NOT_RUN)
+			return Status.RUNNING;
+		else
+			return highest;
 	}
 
 	public String toString() {
