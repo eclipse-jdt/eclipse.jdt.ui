@@ -40,14 +40,11 @@ import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
-import org.eclipse.ui.ISharedImages;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.PreferencesUtil;
 import org.eclipse.ui.part.FileEditorInput;
 import org.eclipse.ui.progress.IProgressService;
-
-import org.eclipse.ui.ide.IDE;
 
 import org.eclipse.ltk.core.refactoring.CompositeChange;
 
@@ -291,8 +288,7 @@ public class ReorgCorrectionsSubProcessor {
 			super(label, null, relevance, null);
 			fProject= project;
 			fReferencedType= referencedType;
-			ISharedImages images= JavaPlugin.getDefault().getWorkbench().getSharedImages();
-			setImage(images.getImage(IDE.SharedImages.IMG_OBJ_PROJECT));
+			setImage(JavaPluginImages.get(JavaPluginImages.IMG_OBJS_ACCESSRULES_ATTRIB));
 		}
 		public void apply(IDocument document) {
 			Map data= null;

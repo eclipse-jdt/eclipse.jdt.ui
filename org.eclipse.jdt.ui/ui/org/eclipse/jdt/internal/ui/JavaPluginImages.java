@@ -140,6 +140,8 @@ public class JavaPluginImages {
 	public static final String IMG_OBJS_FIXABLE_PROBLEM= NAME_PREFIX + "quickfix_warning_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_FIXABLE_ERROR= NAME_PREFIX + "quickfix_error_obj.gif"; //$NON-NLS-1$
 
+	public static final String IMG_OBJS_ACCESSRULES_ATTRIB= NAME_PREFIX + "access_restriction_attrib.gif"; //$NON-NLS-1$
+	
 	public static final String IMG_OBJS_REFACTORING_FATAL= NAME_PREFIX + "fatalerror_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_REFACTORING_ERROR= NAME_PREFIX + "error_obj.gif"; //$NON-NLS-1$
 	public static final String IMG_OBJS_REFACTORING_WARNING= NAME_PREFIX + "warning_obj.gif"; //$NON-NLS-1$
@@ -272,7 +274,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OBJS_SOURCE_ATTACH_ATTRIB= createUnManaged(T_OBJ, "source_attach_attrib.gif"); //$NON-NLS-1$
 	public static final ImageDescriptor DESC_OBJS_JAVADOC_LOCATION_ATTRIB= createUnManaged(T_OBJ, "javadoc_location_attrib.gif"); //$NON-NLS-1$
 
-	public static final ImageDescriptor DESC_OBJS_ACCESSRULES_ATTRIB= createUnManaged(T_OBJ, "access_restriction_attrib.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OBJS_ACCESSRULES_ATTRIB= createManagedFromKey(T_OBJ, IMG_OBJS_ACCESSRULES_ATTRIB);
 	public static final ImageDescriptor DESC_OBJS_NATIVE_LIB_PATH_ATTRIB= createUnManaged(T_OBJ, "native_lib_path_attrib.gif"); //$NON-NLS-1$
 	
 	public static final ImageDescriptor DESC_OBJS_REFACTORING_FATAL= createManagedFromKey(T_OBJ, IMG_OBJS_REFACTORING_FATAL);
