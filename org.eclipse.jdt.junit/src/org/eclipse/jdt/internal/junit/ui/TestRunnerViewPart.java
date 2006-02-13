@@ -19,12 +19,9 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.NumberFormat;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
-import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -41,7 +38,6 @@ import org.eclipse.swt.custom.ViewForm;
 import org.eclipse.swt.dnd.Clipboard;
 import org.eclipse.swt.events.ControlEvent;
 import org.eclipse.swt.events.ControlListener;
-import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
@@ -140,28 +136,8 @@ public class TestRunnerViewPart extends ViewPart {
 	 * The current layout mode with FailuresOnlyFilter disabled.
 	 */
 	private int fLayoutAll= LAYOUT_HIERARCHICAL; 
-	/**
-	 * Map storing TestInfos for each executed test keyed by
-	 * the test name.
-	 */
-	private Map fTestInfos= new HashMap();
-	/**
-	 * The first failure of a test run. Used to reveal the
-	 * first failed tests at the end of a run.
-	 * @deprecated
-	 */
-	private List fFailures= new ArrayList();
 	
-	/** 
-	 * Queue used for processing Tree Entries
-	 */
-	private List fTreeEntryQueue= new ArrayList();
-	/**
-	 * Indicates an instance of TreeEntryQueueDrainer is already running, or scheduled to
-	 */
-	private boolean fQueueDrainRequestOutstanding;
-
-	private boolean fTestIsRunning= false;
+//	private boolean fTestIsRunning= false;
 
 	protected JUnitProgressBar fProgressBar;
 	protected ProgressImages fProgressImages;
@@ -169,25 +145,13 @@ public class TestRunnerViewPart extends ViewPart {
 	protected CounterPanel fCounterPanel;
 	protected boolean fShowOnErrorOnly= false;
 	protected Clipboard fClipboard;
-	protected volatile String fStatus;
+	protected volatile String fInfoMessage;
 
-	/** 
-	 * The tab that shows the stack trace of a failure
-	 */
 	private FailureTrace fFailureTrace;
-//	/** 
-//	 * The collection of ITestRunTabs
-//	 * @deprecated
-//	 */
-//	protected Vector fTestRunTabs = new Vector();
-//	/**
-//	 * The currently active run tab
-//	 * @deprecated
-//	 */
-//	private TestRunTab fActiveRunTab;
+	
 	private TestViewer fTestViewer;
 	/**
-	 * Is the UI disposed
+	 * Is the UI disposed?
 	 */
 	private boolean fIsDisposed= false;
 	
@@ -211,7 +175,7 @@ public class TestRunnerViewPart extends ViewPart {
 	private ActivateOnErrorAction fActivateOnErrorAction;
 	private IMenuListener fViewMenuListener;
 
-	private TestRunSession fTestRunSession; //TODO: make multi-sessionable
+	private TestRunSession fTestRunSession;
 	private TestSessionListener fTestSessionListener;
 	
 	private RunnerViewHistory fViewHistory;
@@ -347,13 +311,7 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 
 		public void setActiveEntry(Object entry) {
-			if (entry != null) {
-				TestRunSession session= (TestRunSession) entry;
-				setActiveTestRunSession(session);
-				setContentDescription(session.getTestRunName());
-			} else {
-				reset();
-			}
+			setActiveTestRunSession((TestRunSession) entry);
 		}
 
 		public void setHistoryEntries(List remainingEntries, Object activeEntry) {
@@ -408,53 +366,44 @@ public class TestRunnerViewPart extends ViewPart {
 
 	private class TestRunSessionListener implements ITestRunSessionListener {
 		public void sessionAdded(TestRunSession testRunSession) {
-			startTestRunListening(testRunSession);
+			setActiveTestRunSession(testRunSession);
+			setContentDescription(Messages.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ fTestRunSession.getTestRunName() }));
 		}
 		public void sessionRemoved(TestRunSession testRunSession) {
 			if (testRunSession.equals(fTestRunSession)) {
-				reset();
+				setActiveTestRunSession(null);
 			}
 		}
 	}
 	
 	private class TestSessionListener implements ITestSessionListener {
-		public void sessionStarted(final int testCount){
+		public void sessionStarted(){
 			fTestViewer.registerViewerRefresh();
-			
-			reset(testCount);
 			fShowOnErrorOnly= getShowOnErrorOnly();
-//			fExecutedTests++;
-			stopUpdateJobs();
-			fUpdateJob= new UpdateUIJob(JUnitMessages.TestRunnerViewPart_jobName); 
-			fJUnitIsRunningJob= new JUnitIsRunningJob(JUnitMessages.TestRunnerViewPart_wrapperJobName);
-			fJUnitIsRunningLock= Platform.getJobManager().newLock(); 
-			// acquire lock while a test run is running
-			// the lock is released when the test run terminates
-			// the wrapper job will wait on this lock.
-			fJUnitIsRunningLock.acquire();
-			getProgressService().schedule(fJUnitIsRunningJob);
-			fUpdateJob.schedule(REFRESH_INTERVAL);
+			
+			startUpdateJobs();
+			
+			fStopAction.setEnabled(true);
 			fRerunLastTestAction.setEnabled(true);
 		}
 
 		public void sessionEnded(long elapsedTime){
 			fTestViewer.registerAutoScrollTarget(null);
 			
-//			fExecutedTests--;
 			String[] keys= {elapsedTimeAsString(elapsedTime)};
 			String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_finish, keys); 
 			if (hasErrorsOrFailures())
-				postError(msg);
+				registerInfoMessage(msg);
 			else
-				setInfoMessage(msg);
+				registerInfoMessage(msg);
 				
 			postSyncRunnable(new Runnable() {				
 				public void run() {
-					if(isDisposed()) 
+					if (isDisposed()) 
 						return;	
 					fStopAction.setEnabled(lastLaunchIsKeptAlive());
 					fRerunLastFailedFirstAction.setEnabled(hasErrorsOrFailures());
-					if (fFailures.size() > 0) {
+					if (hasErrorsOrFailures()) {
 						selectFirstFailure();
 					}
 					updateViewIcon();
@@ -462,10 +411,6 @@ public class TestRunnerViewPart extends ViewPart {
 						fDirtyListener= new DirtyListener();
 						JavaCore.addElementChangedListener(fDirtyListener);
 					}
-//					for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
-//						TestRunTab v= (TestRunTab) e.nextElement();
-//						v.aboutToEnd();
-//					}
 					warnOfContentChange();
 				}
 			});	
@@ -476,7 +421,7 @@ public class TestRunnerViewPart extends ViewPart {
 			fTestViewer.registerAutoScrollTarget(null);
 
 			String msg= JUnitMessages.TestRunnerViewPart_message_stopped; 
-			setInfoMessage(msg);
+			registerInfoMessage(msg);
 			handleStopped();
 		}
 
@@ -484,7 +429,7 @@ public class TestRunnerViewPart extends ViewPart {
 			fTestViewer.registerAutoScrollTarget(null);
 
 			String msg= JUnitMessages.TestRunnerViewPart_message_terminated; 
-			showMessage(msg);
+			registerInfoMessage(msg);
 			handleStopped(); 
 		}
 
@@ -492,22 +437,13 @@ public class TestRunnerViewPart extends ViewPart {
 			fTestViewer.registerAutoScrollTarget(testCaseElement);
 			fTestViewer.registerViewerUpdate(testCaseElement);
 
-			fTestIsRunning= true;
-//			postStartTest(testId, testName);
-			// reveal the part when the first test starts
-//			if (!fShowOnErrorOnly && fExecutedTests == 1) 
 			if (!fShowOnErrorOnly && fTestRunSession.getStartedCount() == 1) 
 				postShowTestResultsView();
 				
-//			TestRunInfo testInfo= getTestInfo(testId);
-//			if (testInfo == null) {
-//				testInfo= new TestRunInfo(testId, testName);
-//				fTestInfos.put(testId, testInfo);
-//			}
 			String className= testCaseElement.getClassName();
 			String method= testCaseElement.getTestMethodName();		
 			String status= Messages.format(JUnitMessages.TestRunnerViewPart_message_started, new String[] { className, method }); 
-			setInfoMessage(status); 
+			registerInfoMessage(status); 
 		}
 
 		public void testFailed(TestCaseElement testCaseElement, TestElement.Status status, String trace, String expected, String actual) {
@@ -516,27 +452,6 @@ public class TestRunnerViewPart extends ViewPart {
 			}
 			fTestViewer.registerViewerUpdate(testCaseElement);
 
-			String testId= testCaseElement.getId();
-			String testName= testCaseElement.getTestName();
-			
-		    TestRunInfo testInfo= getTestInfo(testId);
-		    if (testInfo == null) {
-		        testInfo= new TestRunInfo(testId, testName);
-		        fTestInfos.put(testId, testInfo);
-		    }
-		    testInfo.setTrace(trace);
-		    testInfo.setStatus(status.getOldCode());
-		    if (expected != null && expected.length() != 0) {
-				testInfo.setExpected(expected.substring(0, expected.length()-1));
-			}
-		    if (actual != null && actual.length() != 0)
-		        testInfo.setActual(actual.substring(0, actual.length()-1));
-		    
-//		    if (status == ITestRunListener.STATUS_ERROR)
-//		        fErrorCount++;
-//		    else
-//		        fFailureCount++;
-		    fFailures.add(testInfo);
 		    // show the view on the first error only
 		    if (fShowOnErrorOnly && (getErrorsPlusFailures() == 1)) 
 		        postShowTestResultsView();
@@ -544,16 +459,14 @@ public class TestRunnerViewPart extends ViewPart {
 		    // [Bug 35590] JUnit window doesn't report errors from junit.extensions.TestSetup [JUnit]
 		    // when a failure occurs in test setup then no test is running
 		    // to update the views we artificially signal the end of a test run
-		    if (!fTestIsRunning) {
-				fTestIsRunning= false;
-				testEnded(testCaseElement);
-			}
+//		    if (!fTestIsRunning) {
+//				fTestIsRunning= false;
+//				testEnded(testCaseElement);
+//			}
 		}
 		
 		public void testEnded(TestCaseElement testCaseElement){
 			fTestViewer.registerViewerUpdate(testCaseElement);
-
-			postEndTest(testCaseElement);
 		}
 
 		public void testReran(TestCaseElement testCaseElement, TestElement.Status status, String trace, String expectedResult, String actualResult) {
@@ -566,51 +479,81 @@ public class TestRunnerViewPart extends ViewPart {
 			
 			if (status == TestElement.Status.ERROR) {
 				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_error, new String[]{testName, className}); 
-				postError(msg); 
+				registerInfoMessage(msg); 
 			} else if (status == TestElement.Status.FAILURE) {
 				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_failure, new String[]{testName, className}); 
-				postError(msg);
+				registerInfoMessage(msg);
 			} else {
 				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_success, new String[]{testName, className}); 
-				setInfoMessage(msg);
+				registerInfoMessage(msg);
 			}
-			TestRunInfo info1= getTestInfo(testId);
-			updateTest(info1, status.getOldCode());
-			postSyncRunnable(new Runnable() {
-				public void run() {
-					refreshCounters();
-//					for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
-//						TestRunTab v= (TestRunTab) e.nextElement();
-//						v.endRerunTest(testId);
-//					}
-				}
-			});
+//			TestRunInfo info1= getTestInfo(testId);
+//			updateTest(info1, status.getOldCode());
+//			postSyncRunnable(new Runnable() {
+//				public void run() {
+//					refreshCounters();
+////					for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
+////						TestRunTab v= (TestRunTab) e.nextElement();
+////						v.endRerunTest(testId);
+////					}
+//				}
+//			});
+//			
+//			if (info1.getTrace() == null || !info1.getTrace().equals(trace)) {
+//				info1.setTrace(trace);
+////TODO				showFailure(info);
+//			}
 			
-			if (info1.getTrace() == null || !info1.getTrace().equals(trace)) {
-				info1.setTrace(trace);
-//TODO				showFailure(info);
-			}
-			
-			TestRunInfo info= getTestInfo(testId);
-			info.setActual(actualResult);
-			info.setExpected(expectedResult);
+//			TestRunInfo info= getTestInfo(testId);
+//			info.setActual(actualResult);
+//			info.setExpected(expectedResult);
 //			fFailureTrace.updateEnablement(info);
 		}
 		
 		
 		public void testAdded(TestElement testElement) {
 			fTestViewer.registerViewerRefresh(); //TODO: performance: would only need to refresh parent of added element
-
-//			synchronized(fTreeEntryQueue) {
-//				fTreeEntryQueue.add(treeEntry);
-//				if (!fQueueDrainRequestOutstanding) {
-//					fQueueDrainRequestOutstanding= true;
-//					if (!isDisposed())
-//						getDisplay().asyncExec(new TreeEntryQueueDrainer());
-//				}
-//			}
 		}
 	}
+	
+	private class UpdateUIJob extends UIJob {
+		private boolean fRunning= true; 
+		
+		public UpdateUIJob(String name) {
+			super(name);
+			setSystem(true);
+		}
+		public IStatus runInUIThread(IProgressMonitor monitor) {
+			if (!isDisposed()) {
+				processChangesInUI();
+			}
+			schedule(REFRESH_INTERVAL);
+			return Status.OK_STATUS;
+		}
+		
+		public void stop() {
+			fRunning= false;
+		}
+		public boolean shouldSchedule() {
+			return fRunning;
+		}
+	}
+
+	private class JUnitIsRunningJob extends Job {
+		public JUnitIsRunningJob(String name) {
+			super(name);
+			setSystem(true);
+		}
+		public IStatus run(IProgressMonitor monitor) {
+			// wait until the test run terminates
+			fJUnitIsRunningLock.acquire();
+			return Status.OK_STATUS;
+		}
+		public boolean belongsTo(Object family) {
+			return family == TestRunnerViewPart.FAMILY_JUNIT_RUN;
+		}
+	}
+
 
 	private class StopAction extends Action {
 		public StopAction() {
@@ -738,25 +681,6 @@ public class TestRunnerViewPart extends ViewPart {
 					return false;
 			}
 			return true;			
-		}
-	}
-	
-	private class TreeEntryQueueDrainer implements Runnable {
-		public void run() {
-			while (true) {
-				String treeEntry;
-				synchronized (fTreeEntryQueue) {
-					if (fTreeEntryQueue.isEmpty() || isDisposed()) {
-						fQueueDrainRequestOutstanding= false;
-						return;
-					}
-					treeEntry= (String)fTreeEntryQueue.remove(0);
-				}
-//				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
-//					TestRunTab v= (TestRunTab)e.nextElement();
-//					v.newTreeEntry(treeEntry);
-//				}
-			}
 		}
 	}
 	
@@ -893,11 +817,63 @@ public class TestRunnerViewPart extends ViewPart {
 	public void stopTest() {
 		if (fTestRunSession != null) {
 			fTestRunSession.stopTestRun();
-			fTestSessionListener= null;
 		}
-		stopUpdateJobs();
 	}
 
+	private void startUpdateJobs() {
+		postSyncRunnable(new Runnable() {
+			public void run() {
+				processChangesInUI();
+			}
+		});
+		
+		if (fUpdateJob != null) {
+			return;
+		}
+		fJUnitIsRunningJob= new JUnitIsRunningJob(JUnitMessages.TestRunnerViewPart_wrapperJobName);
+		fJUnitIsRunningLock= Platform.getJobManager().newLock(); 
+		// acquire lock while a test run is running
+		// the lock is released when the test run terminates
+		// the wrapper job will wait on this lock.
+		fJUnitIsRunningLock.acquire();
+		getProgressService().schedule(fJUnitIsRunningJob);
+		
+		fUpdateJob= new UpdateUIJob(JUnitMessages.TestRunnerViewPart_jobName); 
+		fUpdateJob.schedule(REFRESH_INTERVAL);
+	}
+	
+	private void stopUpdateJobs() {
+		if (fUpdateJob != null) {
+			fUpdateJob.stop();
+			fUpdateJob= null;
+		}
+		if (fJUnitIsRunningJob != null && fJUnitIsRunningLock != null) {
+			fJUnitIsRunningLock.release();
+			fJUnitIsRunningJob= null;
+		}
+		postSyncRunnable(new Runnable() {
+			public void run() {
+				processChangesInUI();
+			}
+		});
+	}
+	
+	private void processChangesInUI() {
+		doShowInfoMessage();
+		refreshCounters();
+		
+		if (! fPartIsVisible)
+			updateViewTitleProgress();
+		else {
+			updateViewIcon();
+		}
+		boolean hasErrorsOrFailures= hasErrorsOrFailures();
+		fNextAction.setEnabled(hasErrorsOrFailures);
+		fPreviousAction.setEnabled(hasErrorsOrFailures);
+		
+		fTestViewer.processChangesInUI();
+	}
+	
 	/**
 	 * Stops the currently running test and shuts down the RemoteTestRunner
 	 */
@@ -905,8 +881,7 @@ public class TestRunnerViewPart extends ViewPart {
 		if (lastLaunchIsKeptAlive()) {
 			// prompt for terminating the existing run
 			if (MessageDialog.openQuestion(getSite().getShell(), JUnitMessages.TestRunnerViewPart_terminate_title, JUnitMessages.TestRunnerViewPart_terminate_message)) {  
-				if (fTestRunSession != null)
-					fTestRunSession.stopTestRun();
+				stopTest(); // TODO: wait for termination
 			}
 		}
 		if (fTestRunSession != null && fTestRunSession.getLaunch().getLaunchConfiguration() != null) {
@@ -965,12 +940,13 @@ public class TestRunnerViewPart extends ViewPart {
 		try {
 			File file= File.createTempFile("testFailures", ".txt"); //$NON-NLS-1$ //$NON-NLS-2$
 			file.deleteOnExit();
+			TestCaseElement[] failures= fTestRunSession.getAllFailedTestCaseElements();
 			BufferedWriter bw= null;
 			try {
 				bw= new BufferedWriter(new FileWriter(file));
-				for (int i= 0; i < fFailures.size(); i++) {
-					TestRunInfo testInfo= (TestRunInfo)fFailures.get(i);
-					bw.write(testInfo.getTestName());
+				for (int i= 0; i < failures.length; i++) {
+					TestCaseElement testCaseElement= failures[i];
+					bw.write(testCaseElement.getTestName());
 					bw.newLine();
 				}
 			} finally {
@@ -1000,47 +976,8 @@ public class TestRunnerViewPart extends ViewPart {
 		fTestViewer.selectFailure(false);
 	}
 
-	public void showTest(TestRunInfo test) {
-//		fModelTab.setSelectedTest(test.getTestId());
-//		handleTestSelected(test.getTestId());
-//		new OpenTestAction(this, test.getClassName(), test.getTestMethodName(), false).run();
-	}
-
-	
-	public void reset(){
-		reset(0);
-		setContentDescription(" "); //$NON-NLS-1$
-		clearStatus();
-		resetViewIcon();
-		
-		setActiveTestRunSession(null);
-	}
-
-	private void stopUpdateJobs() {
-		if (fUpdateJob != null) {
-			fUpdateJob.stop();
-			fUpdateJob= null;
-		}
-		if (fJUnitIsRunningJob != null && fJUnitIsRunningLock != null) {
-			fJUnitIsRunningLock.release();
-			fJUnitIsRunningJob= null;
-		}
-	}
-
 	protected void selectFirstFailure() {
-//		TestRunInfo firstFailure= (TestRunInfo)fFailures.get(0);
-//		if (firstFailure != null && fModelTab.getSelectedTestId() == null) {
-//			fModelTab.setSelectedTest(firstFailure.getTestId());
-//			handleTestSelected(firstFailure.getTestId());
-//		}
-	}
-
-	private void updateViewIcon() {
-		if (hasErrorsOrFailures()) 
-			fViewImage= fTestRunFailIcon;
-		else 
-			fViewImage= fTestRunOKIcon;
-		firePropertyChange(IWorkbenchPart.PROP_TITLE);	
+		fTestViewer.selectFirstFailure();
 	}
 
 	private boolean hasErrorsOrFailures() {
@@ -1048,7 +985,10 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	private int getErrorsPlusFailures() {
-		return fTestRunSession.getErrorCount() + fTestRunSession.getFailureCount();
+		if (fTestRunSession == null)
+			return 0;
+		else
+			return fTestRunSession.getErrorCount() + fTestRunSession.getFailureCount();
 	}
 	
 	private String elapsedTimeAsString(long runTime) {
@@ -1058,12 +998,11 @@ public class TestRunnerViewPart extends ViewPart {
 	private void handleStopped() {
 		postSyncRunnable(new Runnable() {				
 			public void run() {
-				if(isDisposed()) 
+				if (isDisposed()) 
 					return;	
 				resetViewIcon();
 				fStopAction.setEnabled(false);
 				fRerunLastFailedFirstAction.setEnabled(hasErrorsOrFailures());
-				fProgressBar.stopped();
 			}
 		});	
 		stopUpdateJobs();
@@ -1074,103 +1013,109 @@ public class TestRunnerViewPart extends ViewPart {
 		firePropertyChange(IWorkbenchPart.PROP_TITLE);
 	}
 
-	private void showMessage(String msg) {
-		//showInformation(msg);
-		postError(msg);
+	private void updateViewIcon() {
+		if (hasErrorsOrFailures()) 
+			fViewImage= fTestRunFailIcon;
+		else 
+			fViewImage= fTestRunOKIcon;
+		firePropertyChange(IWorkbenchPart.PROP_TITLE);	
 	}
 
-	private void updateTest(final TestRunInfo info, final int status) {
-//		if (status == info.getStatus())
-//			return;
-//		if (info.getStatus() == ITestRunListener.STATUS_OK) {
-//			if (status == ITestRunListener.STATUS_FAILURE) 
-//				fFailureCount++;
-//			else if (status == ITestRunListener.STATUS_ERROR)
-//				fErrorCount++;
-//		} else if (info.getStatus() == ITestRunListener.STATUS_ERROR) {
-//			if (status == ITestRunListener.STATUS_OK) 
-//				fErrorCount--;
-//			else if (status == ITestRunListener.STATUS_FAILURE) {
-//				fErrorCount--;
-//				fFailureCount++;
-//			}
-//		} else if (info.getStatus() == ITestRunListener.STATUS_FAILURE) {
-//			if (status == ITestRunListener.STATUS_OK) 
-//				fFailureCount--;
-//			else if (status == ITestRunListener.STATUS_ERROR) {
-//				fFailureCount--;
-//				fErrorCount++;
-//			}
-//		}			
-//		info.setStatus(status);	
-//		postSyncRunnable(new Runnable() {
-//			public void run() {
-//				//refreshCounters();
-//				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
-//					TestRunTab v= (TestRunTab) e.nextElement();
-//					v.testStatusChanged(info);
-//				}
-//			}
-//		});
+	private void updateViewTitleProgress() {
+		if (fTestRunSession != null) {
+			if (fTestRunSession.isRunning()) {
+				Image progress= fProgressImages.getImage(
+						fTestRunSession.getStartedCount(),
+						fTestRunSession.getTotalCount(),
+						fTestRunSession.getErrorCount(),
+						fTestRunSession.getFailureCount());
+				if (progress != fViewImage) {
+					fViewImage= progress;
+					firePropertyChange(IWorkbenchPart.PROP_TITLE);
+				}
+			} else if (fTestRunSession.isStopped()) {
+				resetViewIcon();
+			} else {
+				updateViewIcon();
+			}
+		} else {
+			resetViewIcon();
+		}
 	}
 	
-	public void startTestRunListening(TestRunSession testRunSession) {
-		aboutToLaunch();
-		
-		stopTest();
-		
-		setActiveTestRunSession(testRunSession);
-		setContentDescription(Messages.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ fTestRunSession.getTestRunName() }));
-	}
-
 	private void setActiveTestRunSession(TestRunSession testRunSession) {
+/*
+- State:
+fTestRunSession
+fTestSessionListener
+Jobs
+fTestViewer.processChangesInUI();
+- UI:
+fCounterPanel
+fProgressBar
+setContentDescription / fInfoMessage
+setTitleToolTip
+view icons
+statusLine
+fFailureTrace
+
+action enablement
+ */
+		if (fTestRunSession == testRunSession)
+			return;
+		
+		if (fTestRunSession != null && fTestSessionListener != null) {
+			fTestRunSession.removeTestSessionListener(fTestSessionListener);
+			fTestSessionListener= null;
+		}
+		
 		fTestRunSession= testRunSession;
+		fTestViewer.setActiveSession(testRunSession);
+		
 		if (testRunSession == null) {
 			setTitleToolTip(null);
+			resetViewIcon();
+			clearStatus();
+			fFailureTrace.clear();
+			
+			registerInfoMessage(" "); //$NON-NLS-1$
+			stopUpdateJobs();
+			
+			fStopAction.setEnabled(false);
+			fRerunLastFailedFirstAction.setEnabled(false);
+			fRerunLastTestAction.setEnabled(false);
+			
 		} else {
+			fTestRunSession= testRunSession;
 			fTestSessionListener= new TestSessionListener();
 			fTestRunSession.addTestSessionListener(fTestSessionListener);
+			
 			setTitleToolTip(fTestRunSession.getTestRunName());
-		}
-		fTestViewer.setActiveSession(fTestRunSession);
-		postSyncRunnable(new Runnable() {
-			public void run() {
-				fTestViewer.processChangesInUI();
+			clearStatus();
+			fFailureTrace.clear();
+			registerInfoMessage(fTestRunSession.getTestRunName());
+			
+			fRerunLastFailedFirstAction.setEnabled(hasErrorsOrFailures());
+			fRerunLastTestAction.setEnabled(true);
+			
+			if (fTestRunSession.isRunning()) {
+				startUpdateJobs();
 				
-				if (fTestRunSession == null) {
-					fStopAction.setEnabled(false);
-					fRerunLastTestAction.setEnabled(false);
-					fRerunLastFailedFirstAction.setEnabled(false);
-					fNextAction.setEnabled(false);
-					fPreviousAction.setEnabled(false);
-				} else {
-					fRerunLastTestAction.setEnabled(true);
-					boolean hasErrorsOrFailures= hasErrorsOrFailures();
-					fRerunLastFailedFirstAction.setEnabled(hasErrorsOrFailures);
-					fNextAction.setEnabled(hasErrorsOrFailures);
-					fPreviousAction.setEnabled(hasErrorsOrFailures);
-					
-					fCounterPanel.setTotal(fTestRunSession.getTotalCount());
-				}
+				fStopAction.setEnabled(true);
 				
-				refreshCounters();
+			} else /* old or fresh session: don't want jobs at this stage */ {
+				stopUpdateJobs();
+				
+				fStopAction.setEnabled(false);
 			}
-		});
-
-	}
-
-	protected void aboutToLaunch() {
-		String msg= JUnitMessages.TestRunnerViewPart_message_launching; 
-		//showInformation(msg);
-		setInfoMessage(msg);
-		fViewImage= fOriginalViewImage;
-		firePropertyChange(IWorkbenchPart.PROP_TITLE);
+		}
 	}
 
 	public synchronized void dispose(){
 		fIsDisposed= true;
-		JUnitPlugin.getModel().removeTestRunSessionListener(fTestRunSessionListener);
-		stopTest();
+		if (fTestRunSessionListener != null)
+			JUnitPlugin.getModel().removeTestRunSessionListener(fTestRunSessionListener);
+		
 		if (fProgressImages != null)
 			fProgressImages.dispose();
 		getViewSite().getPage().removePartListener(fPartListener);
@@ -1202,111 +1147,53 @@ public class TestRunnerViewPart extends ViewPart {
 		fSuiteFailIcon.dispose();
 	}
 
-	protected void start(final int total) {
-		resetProgressBar(total);
-		fCounterPanel.setTotal(total);
-		fCounterPanel.setRunValue(0);	
-	}
-
-	private void resetProgressBar(final int total) {
-		fProgressBar.reset();
-		fProgressBar.setMaximum(total);
-	}
-
 	private void postSyncRunnable(Runnable r) {
 		if (!isDisposed())
 			getDisplay().syncExec(r);
 	}
 
-	private void aboutToStart() {
-		postSyncRunnable(new Runnable() {
-			public void run() {
-				if (!isDisposed()) {
-//					for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
-//						TestRunTab v= (TestRunTab) e.nextElement();
-//						v.aboutToStart();
-//					}
-					fNextAction.setEnabled(false);
-					fPreviousAction.setEnabled(false);
-				}
-			}
-		});
-	}
-	
-	private void postEndTest(TestCaseElement testCaseElement) {
-		postSyncRunnable(new Runnable() {
-			public void run() {
-				if(isDisposed()) 
-					return;
-				handleEndTest();
-//				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
-//					TestRunTab v= (TestRunTab) e.nextElement();
-//					v.endTest(testId);
-//				}
-				
-				if (hasErrorsOrFailures()) {
-					fNextAction.setEnabled(true);
-					fPreviousAction.setEnabled(true);
-				}
-			}
-		});	
-	}
-
-	private void postStartTest(TestCaseElement testCaseElement) {
-		postSyncRunnable(new Runnable() {
-			public void run() {
-				if(isDisposed()) 
-					return;
-//				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
-//					TestRunTab v= (TestRunTab) e.nextElement();
-//					v.startTest(testId);
-//				}
-			}
-		});	
-	}
-
-	private void handleEndTest() {
-		fTestIsRunning= false;
-		//refreshCounters();
-		fProgressBar.step(getErrorsPlusFailures());
-		if (!fPartIsVisible) 
-			updateViewTitleProgress();
-	}
-
-	private void updateViewTitleProgress() {
-		Image progress= fProgressImages.getImage(fTestRunSession.getStartedCount(), fTestRunSession.getTotalCount(), fTestRunSession.getErrorCount(),
-				fTestRunSession.getFailureCount());
-		if (progress != fViewImage) {
-			fViewImage= progress;
-			firePropertyChange(IWorkbenchPart.PROP_TITLE);
-		}
-	}
-
 	private void refreshCounters() {
+		 // TODO: Inefficient. Either
+		// - keep a boolean fHasTestRun and update only on changes, or
+		// - improve components to only redraw on changes (once!).
+		
 		int startedCount;
 		int totalCount;
 		int errorCount;
 		int failureCount;
 		boolean hasErrorsOrFailures;
+		boolean stopped;
 		
 		if (fTestRunSession != null) {
 			startedCount= fTestRunSession.getStartedCount();
 			totalCount= fTestRunSession.getTotalCount();
 			errorCount= fTestRunSession.getErrorCount();
 			failureCount= fTestRunSession.getFailureCount();
-			hasErrorsOrFailures= hasErrorsOrFailures();
+			hasErrorsOrFailures= errorCount + failureCount > 0;
+			stopped= fTestRunSession.isStopped();
 		} else {
 			startedCount= 0;
 			totalCount= 0;
 			errorCount= 0;
 			failureCount= 0;
 			hasErrorsOrFailures= false;
+			stopped= false;
 		}
-		fCounterPanel.setRunValue(startedCount);
+		
 		fCounterPanel.setTotal(totalCount);
+		fCounterPanel.setRunValue(startedCount);
 		fCounterPanel.setErrorValue(errorCount);
 		fCounterPanel.setFailureValue(failureCount);
-		fProgressBar.refresh(hasErrorsOrFailures);
+		
+		int ticksDone;
+		if (startedCount == 0)
+			ticksDone= 0;
+		else if (startedCount == totalCount && ! fTestRunSession.isRunning())
+			ticksDone= totalCount;
+		else
+			ticksDone= startedCount - 1;
+		
+		fProgressBar.reset(hasErrorsOrFailures, stopped, ticksDone, totalCount);
 	}
 	
 	protected void postShowTestResultsView() {
@@ -1341,121 +1228,17 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 	}
 	
-	class UpdateUIJob extends UIJob {
-		private boolean fRunning= true; 
-		
-		public UpdateUIJob(String name) {
-			super(name);
-			setSystem(true);
-		}
-		public IStatus runInUIThread(IProgressMonitor monitor) {
-			if (!isDisposed()) { 
-				doShowStatus();
-				refreshCounters();
-				fTestViewer.processChangesInUI();
-			}
-			schedule(REFRESH_INTERVAL);
-			return Status.OK_STATUS;
-		}
-		
-		public void stop() {
-			postSyncRunnable(new Runnable() {
-				public void run() {
-					fTestViewer.processChangesInUI();
-				}
-			});
-			fRunning= false;
-		}
-		public boolean shouldSchedule() {
-			return fRunning;
+	protected void doShowInfoMessage() {
+		if (fInfoMessage != null) {
+			setContentDescription(fInfoMessage);
+			fInfoMessage= null;
 		}
 	}
 
-	class JUnitIsRunningJob extends Job {
-		public JUnitIsRunningJob(String name) {
-			super(name);
-			setSystem(true);
-		}
-		public IStatus run(IProgressMonitor monitor) {
-			// wait until the test run terminates
-			fJUnitIsRunningLock.acquire();
-			return Status.OK_STATUS;
-		}
-		public boolean belongsTo(Object family) {
-			return family == TestRunnerViewPart.FAMILY_JUNIT_RUN;
-		}
+	protected void registerInfoMessage(String message) {
+		fInfoMessage= message;
 	}
-
-	protected void doShowStatus() {
-		setContentDescription(fStatus);
-	}
-
-	protected void setInfoMessage(final String message) {
-		fStatus= message;
-	}
-
-	protected void postError(final String message) {
-		fStatus= message;
-	}
-
-	protected void showInformation(final String info){
-		postSyncRunnable(new Runnable() {
-			public void run() {
-				if (!isDisposed())
-					fFailureTrace.setInformation(info);
-			}
-		});
-	}
-
-//	protected TestViewer createTestRunTabs(Composite parent) {
-//		CTabFolder tabFolder= new CTabFolder(parent, SWT.TOP);
-//		tabFolder.setLayoutData(new GridData(GridData.FILL_BOTH | GridData.GRAB_VERTICAL));
-//
-//		loadTestRunTabs(tabFolder);
-//		tabFolder.setSelection(0);				
-//		fActiveRunTab= (TestRunTab)fTestRunTabs.firstElement();		
-//				
-//		tabFolder.addSelectionListener(new SelectionAdapter() {
-//			public void widgetSelected(SelectionEvent event) {
-//				testTabChanged(event);
-//			}
-//		});
-//		return tabFolder;
-//	}
-
-//	private void loadTestRunTabs(CTabFolder tabFolder) {
-//		IExtensionPoint extensionPoint= Platform.getExtensionRegistry().getExtensionPoint(ID_EXTENSION_POINT_TESTRUN_TABS);
-//		if (extensionPoint == null) {
-//			return;
-//		}
-//		IConfigurationElement[] configs= extensionPoint.getConfigurationElements();
-//		MultiStatus status= new MultiStatus(JUnitPlugin.PLUGIN_ID, IStatus.OK, "Could not load some testRunTabs extension points", null); //$NON-NLS-1$ 	
-//
-//		for (int i= 0; i < configs.length; i++) {
-//			try {
-//				TestRunTab testRunTab= (TestRunTab) configs[i].createExecutableExtension("class"); //$NON-NLS-1$
-//				testRunTab.createTabControl(tabFolder, fClipboard, this);
-//				fTestRunTabs.addElement(testRunTab);
-//			} catch (CoreException e) {
-//				status.add(e.getStatus());
-//			}
-//		}
-//		if (!status.isOK()) {
-//			JUnitPlugin.log(status);
-//		}
-//	}
-
-	private void testTabChanged(SelectionEvent event) {
-//		for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
-//			TestRunTab v= (TestRunTab) e.nextElement();
-//			if (((CTabFolder) event.widget).getSelection().getText() == v.getName()){
-//				v.setSelectedTest(fActiveRunTab.getSelectedTestId());
-//				fActiveRunTab= v;
-//				fActiveRunTab.activate();
-//			}
-//		}
-	}
-
+	
 	private SashForm createSashForm(Composite parent) {
 		fSashForm= new SashForm(parent, SWT.VERTICAL);
 		
@@ -1488,38 +1271,16 @@ public class TestRunnerViewPart extends ViewPart {
 		return fSashForm;
 	}
 
-	private void reset(final int testCount) {
-		postSyncRunnable(new Runnable() {
-			public void run() {
-				if (isDisposed()) 
-					return;
-				fCounterPanel.reset();
-				fFailureTrace.clear();
-				fProgressBar.reset();
-				fStopAction.setEnabled(true);
-				clearStatus();
-				start(testCount);
-			}
-		});
-//		fExecutedTests= 0;
-//		fFailureCount= 0;
-//		fErrorCount= 0;
-//		fTestCount= testCount;
-		aboutToStart();
-		fTestInfos.clear();
-		fFailures= new ArrayList();
-	}
-
 	private void clearStatus() {
 		getStatusLine().setMessage(null);
 		getStatusLine().setErrorMessage(null);
 	}
-
-    public void setFocus() {
-//    	if (fActiveRunTab != null)
-//    		fActiveRunTab.setFocus();
-    }
-
+	
+	public void setFocus() {
+		if (fTestViewer != null)
+			fTestViewer.getTreeViewer().getTree().setFocus();
+	}
+	
 	public void createPartControl(Composite parent) {	
 		fParent= parent;
 		addResizeListener(parent);
@@ -1530,7 +1291,7 @@ public class TestRunnerViewPart extends ViewPart {
 		gridLayout.marginHeight= 0;
 		parent.setLayout(gridLayout);
 		
-		createViewHistory();
+		fViewHistory= new RunnerViewHistory();
 		configureToolBar();
 		
 		fCounterComposite= createProgressCountPanel(parent);
@@ -1556,21 +1317,6 @@ public class TestRunnerViewPart extends ViewPart {
 		
 		fTestRunSessionListener= new TestRunSessionListener();
 		JUnitPlugin.getModel().addTestRunSessionListener(fTestRunSessionListener);
-	}
-
-	private void createViewHistory() {
-		fViewHistory= new RunnerViewHistory();
-//		addTestRunSessionListener(new ITestRunSessionListener() {
-//			public void newActiveSession(TestRunSession testRunSession) {
-//				if (testRunSession == null) {
-//					combo.setItems(new String[0]);
-//				} else {
-//					combo.setItems(new String[] { fTestRunSession.getLaunch().getLaunchConfiguration().getName() });
-//					combo.select(0);
-//				}
-//			}
-//		});
-		
 	}
 
 	private void addResizeListener(Composite parent) {
@@ -1700,26 +1446,6 @@ public class TestRunnerViewPart extends ViewPart {
 		return composite;
 	}
 
-	public TestRunInfo getTestInfo(String testId) {
-		if (testId == null)
-			return null;
-		return (TestRunInfo) fTestInfos.get(testId);
-	}
-
-	public void handleTestSelected(String testId) {
-		handleTestSelected(getTestInfo(testId));
-	}
-
-	public void handleTestSelected(TestRunInfo testInfo) {
-//		if (testInfo == null) {
-//			showFailure(null); 
-//		} else {
-//			showFailure(testInfo);
-//		}
-//		
-//		fCopyAction.handleTestSelected(testInfo);
-	}
-
 	public void handleTestSelected(TestElement test) {
 		if (test instanceof TestCaseElement) {
 			showFailure((TestCaseElement) test);
@@ -1758,7 +1484,8 @@ public class TestRunnerViewPart extends ViewPart {
 	private Display getDisplay() {
 		return getViewSite().getShell().getDisplay();
 	}
-	/**
+	
+	/*
 	 * @see IWorkbenchPart#getTitleImage()
 	 */
 	public Image getTitleImage() {
@@ -1797,7 +1524,6 @@ public class TestRunnerViewPart extends ViewPart {
 
 	public void rerunTest(String testId, String className, String testName, String launchMode) {
 		DebugUITools.saveAndBuildBeforeLaunch();
-		postRerunTest(testId);
 		try {
 			boolean couldLaunch= fTestRunSession.rerunTest(testId, className, testName, launchMode);
 			if (! couldLaunch) 
@@ -1812,19 +1538,6 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 	}
 
-	private void postRerunTest(final String testId) {
-//		postSyncRunnable(new Runnable() {
-//			public void run() {
-//				if(isDisposed()) 
-//					return;
-//				for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
-//					TestRunTab v= (TestRunTab) e.nextElement();
-//					v.rerunTest(testId);
-//				}
-//			}
-//		});	
-	}
-	
 	public void warnOfContentChange() {
 		IWorkbenchSiteProgressService service= getProgressService();
 		if (service != null) 
@@ -1880,5 +1593,9 @@ public class TestRunnerViewPart extends ViewPart {
 			fLayoutAll= mode;
 		}
 		fTestViewer.setShowFailuresOnly(failuresOnly, mode);
+	}
+
+	TestCaseElement[] getAllFailures() {
+		return fTestRunSession.getAllFailedTestCaseElements();
 	}
 }

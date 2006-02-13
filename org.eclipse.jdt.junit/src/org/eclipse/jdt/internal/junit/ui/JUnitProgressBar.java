@@ -82,6 +82,17 @@ public class JUnitProgressBar extends Canvas {
 		redraw();
 	}
 	
+	public void reset(boolean hasErrors, boolean stopped, int ticksDone, int maximum) {
+		boolean noChange= fError == hasErrors && fStopped == stopped && fCurrentTickCount == ticksDone && fMaxTickCount == maximum;
+		fError= hasErrors;
+		fStopped= stopped;
+		fCurrentTickCount= ticksDone;
+		fColorBarWidth= scale(ticksDone);
+		fMaxTickCount= maximum;
+		if (! noChange)
+			redraw();
+	}
+	
 	private void paintStep(int startX, int endX) {
 		GC gc = new GC(this);	
 		setStatusColor(gc);

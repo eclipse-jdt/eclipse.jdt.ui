@@ -65,7 +65,7 @@ public abstract class OpenEditorAction extends Action {
 			return;
 		}
 		if (textEditor == null) {
-			fTestRunner.setInfoMessage(JUnitMessages.OpenEditorAction_message_cannotopen); 
+			fTestRunner.registerInfoMessage(JUnitMessages.OpenEditorAction_message_cannotopen); 
 			return;
 		}
 		reveal(textEditor);

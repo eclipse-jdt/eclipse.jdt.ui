@@ -19,10 +19,8 @@ import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 public interface ITestSessionListener {
  	/**
  	 * A test run has started.
- 	 * 
- 	 * @param testCount the number of individual tests that will be run
  	 */
-	public void sessionStarted(int testCount);
+	public void sessionStarted();
 	/**
  	 * A test run has ended.
 	 *

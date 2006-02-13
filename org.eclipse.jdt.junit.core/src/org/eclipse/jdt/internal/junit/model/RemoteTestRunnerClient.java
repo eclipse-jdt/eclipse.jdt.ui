@@ -173,7 +173,7 @@ public class RemoteTestRunnerClient {
 	            fExpectedResult.setLength(0);
 	            return fDefaultState;
 	        }
-	        fFailedTrace.append(message + '\n');
+	        fFailedTrace.append(message).append('\n');
 	        return this;
 	    }
 	}
@@ -268,7 +268,7 @@ public class RemoteTestRunnerClient {
 			} catch (SocketException e) {
 				notifyTestRunTerminated();
 			} catch (IOException e) {
-				System.out.println(e);
+				JUnitPlugin.log(e);
 				// fall through
 			}
 			shutDown();

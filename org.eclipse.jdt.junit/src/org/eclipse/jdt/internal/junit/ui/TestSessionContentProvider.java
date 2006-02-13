@@ -96,12 +96,11 @@ public class TestSessionContentProvider implements ITreeContentProvider {
 				List selected= ((IStructuredSelection) fViewer.getSelection()).toList();
 				fViewer.refresh();
 				fViewer.setSelection(new StructuredSelection(selected), true);
-
 			}
 		}
 	}
 
 	public void dispose() {
-		
+		fViewer= null;
 	}
 }

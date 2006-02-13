@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
+import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
 import org.eclipse.jdt.internal.junit.ui.JUnitPreferencesConstants;
 import org.eclipse.jdt.internal.junit.ui.TestRunnerViewPart;
@@ -111,17 +112,17 @@ public final class JUnitModel {
 			
 			//TODO: Do notifications have to be sent in UI thread? 
 			// Check concurrent access to fTestRunSessions (no problem inside asyncExec())
-			int count= fTestRunSessions.size();
 			int maxCount= JUnitPlugin.getDefault().getPreferenceStore().getInt(JUnitPreferencesConstants.MAX_TEST_RUNS);
-			for (int i= count - 1; i >= maxCount - 1; i--) {
-				TestRunSession session= (TestRunSession) fTestRunSessions.remove(i);
+			int toDelete= fTestRunSessions.size() - maxCount;
+			while (toDelete > 0) {
+				toDelete--;
+				TestRunSession session= (TestRunSession) fTestRunSessions.removeLast();
 				notifyTestRunSessionRemoved(session);
 			}
 			
 			TestRunSession testRunSession= new TestRunSession(launchedType, port, launch);
 			fTestRunSessions.addFirst(testRunSession);
 			notifyTestRunSessionAdded(testRunSession);
-			
 		}
 
 		private TestRunnerViewPart showTestRunnerViewPartInActivePage(TestRunnerViewPart testRunner) {
@@ -168,6 +169,56 @@ public final class JUnitModel {
 		}
 	}
 
+	private static final class LegacyTestRunSessionListener implements ITestRunSessionListener {
+		private TestRunSession fActiveTestRunSession;
+		private ITestSessionListener fTestSessionListener;
+		
+		LegacyTestRunSessionListener() {
+			List testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+		}
+		
+		public void sessionAdded(TestRunSession testRunSession) {
+			// Only serve one legacy ITestRunListener at a time, since they cannot distinguish between different concurrent test sessions:
+			if (fActiveTestRunSession != null)
+				return;
+			
+			fActiveTestRunSession= testRunSession;
+			
+			fTestSessionListener= new ITestSessionListener() {
+				public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
+				}
+				public void testFailed(TestCaseElement testCaseElement, Status status, String trace, String expected, String actual) {
+				}
+				public void testEnded(TestCaseElement testCaseElement) {
+				}
+				public void testStarted(TestCaseElement testCaseElement) {
+				}
+				public void testAdded(TestElement testElement) {
+				}
+				public void sessionStarted() {
+				}
+				public void sessionTerminated() {
+					sessionRemoved(fActiveTestRunSession);
+				}
+				public void sessionStopped(long elapsedTime) {
+					sessionRemoved(fActiveTestRunSession);
+				}
+				public void sessionEnded(long elapsedTime) {
+					sessionRemoved(fActiveTestRunSession);
+				}
+			};
+			fActiveTestRunSession.addTestSessionListener(fTestSessionListener);
+		}
+
+		public void sessionRemoved(TestRunSession testRunSession) {
+			if (fActiveTestRunSession == testRunSession) {
+				fActiveTestRunSession.removeTestSessionListener(fTestSessionListener);
+				fTestSessionListener= null;
+				fActiveTestRunSession= null;
+			}
+		}
+	}
+	
 	private final ListenerList fTestRunSessionListeners= new ListenerList();
 	/**
 	 * Active test run sessions, youngest first.
@@ -181,6 +232,8 @@ public final class JUnitModel {
 	public void start() {
 		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
 		launchManager.addLaunchListener(fLaunchListener);
+		
+		addTestRunSessionListener(new LegacyTestRunSessionListener());
 	}
 
 	/**
@@ -213,6 +266,9 @@ public final class JUnitModel {
 	/**
 	 * Removes the given {@link TestRunSession} and notifies all registered
 	 * {@link ITestRunSessionListener}s.
+	 * <p>
+	 * <b>To be called in the UI thread only!</b>
+	 * </p>
 	 * 
 	 * @param testRunSession the session to remove
 	 */
@@ -224,17 +280,19 @@ public final class JUnitModel {
 	}
 	
 	private void notifyTestRunSessionRemoved(TestRunSession testRunSession) {
-		 Object[] listeners = fTestRunSessionListeners.getListeners();
-		 for (int i = 0; i < listeners.length; ++i) {
-		 	((ITestRunSessionListener) listeners[i]).sessionRemoved(testRunSession);
-		 }
+		testRunSession.stopTestRun();
+		
+		Object[] listeners = fTestRunSessionListeners.getListeners();
+		for (int i = 0; i < listeners.length; ++i) {
+			((ITestRunSessionListener) listeners[i]).sessionRemoved(testRunSession);
+		}
 	}
 	
 	private void notifyTestRunSessionAdded(TestRunSession testRunSession) {
-		 Object[] listeners = fTestRunSessionListeners.getListeners();
-		 for (int i = 0; i < listeners.length; ++i) {
-		 	((ITestRunSessionListener) listeners[i]).sessionAdded(testRunSession);
-		 }
+		Object[] listeners = fTestRunSessionListeners.getListeners();
+		for (int i = 0; i < listeners.length; ++i) {
+			((ITestRunSessionListener) listeners[i]).sessionAdded(testRunSession);
+		}
 	}
 
 }

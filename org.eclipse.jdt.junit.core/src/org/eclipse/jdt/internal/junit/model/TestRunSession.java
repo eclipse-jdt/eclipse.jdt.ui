@@ -65,23 +65,28 @@ public class TestRunSession {
 	private List/*<IncompleteTestSuite>*/ fIncompleteTestSuites;
 	
  	/**
- 	 * Number of tests started during this test run
+ 	 * Number of tests started during this test run.
  	 */
 	volatile int fStartedCount;
 	/**
-	 * Number of errors during this test run
+	 * Number of errors during this test run.
 	 */
 	volatile int fErrorCount;
 	/**
-	 * Number of failures during this test run
+	 * Number of failures during this test run.
 	 */
 	volatile int fFailureCount;
 	/**
-	 * Total number of tests to run
+	 * Total number of tests to run.
 	 */
 	volatile int fTotalCount;
-	
+	/**
+	 * Start time in millis.
+	 */
 	volatile long fStartTime;
+	volatile boolean fIsRunning;
+	
+	volatile boolean fIsStopped;
 	
 
 	public TestRunSession(IType launchedType, int port, ILaunch launch) {
@@ -123,6 +128,10 @@ public class TestRunSession {
 		return fLaunch;
 	}
 	
+	public String getTestRunName() {
+		return fLaunch.getLaunchConfiguration().getName();
+	}
+	
 	public int getErrorCount() {
 		return fErrorCount;
 	}
@@ -142,6 +151,13 @@ public class TestRunSession {
 	public long getStartTime() {
 		return fStartTime;
 	}
+	
+	/**
+	 * @return <code>true</code> iff the session has been stopped or terminated
+	 */
+	public boolean isStopped() {
+		return fIsStopped;
+	}
 
 	public void addTestSessionListener(ITestSessionListener listener) {
 		fSessionListeners.add(listener);
@@ -151,11 +167,8 @@ public class TestRunSession {
 		fSessionListeners.remove(listener);
 	}
 	
-	public TestElement getTestElement(String id) {
-		return (TestElement) fIdToTest.get(id);
-	}
-
 	public void stopTestRun() {
+		fIsStopped= true;
 		fTestRunnerClient.stopTest();
 	}
 
@@ -163,6 +176,13 @@ public class TestRunSession {
 		return fTestRunnerClient.isRunning() && ILaunchManager.DEBUG_MODE.equals(getLaunch().getLaunchMode());
 	}
 
+	/**
+	 * @return <code>true</code> iff this session has been started, but not ended nor stopped nor terminated
+	 */
+	public boolean isRunning() {
+		return fIsRunning;
+	}
+	
 	/**
 	 * @param testId 
 	 * @param className 
@@ -203,6 +223,10 @@ public class TestRunSession {
 		return false;
 	}
 	
+	private TestElement getTestElement(String id) {
+		return (TestElement) fIdToTest.get(id);
+	}
+
 	private TestElement addTreeEntry(String treeEntry) {
 		// format: testId","testName","isSuite","testcount
 		int index0= treeEntry.indexOf(',');
@@ -276,7 +300,7 @@ public class TestRunSession {
 	 * {@link RemoteTestRunnerClient} and translates them into high-level model
 	 * events (broadcasted to {@link ITestSessionListener}s).
 	 */
-	private class TestSessionNotifier implements ITestRunListener2 {
+	private class TestSessionNotifier implements ITestRunListener, ITestRunListener2 {
 		
 		public void testRunStarted(int testCount) {
 			fIncompleteTestSuites= new ArrayList();
@@ -287,20 +311,46 @@ public class TestRunSession {
 			fTotalCount= testCount;
 			
 			fStartTime= System.currentTimeMillis();
+			fIsRunning= true;
 			
 			Object[] listeners= fSessionListeners.getListeners();
 			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).sessionStarted(testCount);
+				((ITestSessionListener) listeners[i]).sessionStarted();
 			}
 		}
 	
 		public void testRunEnded(long elapsedTime) {
+			fIsRunning= false;
+			
 			Object[] listeners= fSessionListeners.getListeners();
 			for (int i= 0; i < listeners.length; ++i) {
 				((ITestSessionListener) listeners[i]).sessionEnded(elapsedTime);
 			}
 		}
 	
+		public void testRunStopped(long elapsedTime) {
+			fIsRunning= false;
+			fIsStopped= true;
+			
+			Object[] listeners= fSessionListeners.getListeners();
+			for (int i= 0; i < listeners.length; ++i) {
+				((ITestSessionListener) listeners[i]).sessionStopped(elapsedTime);
+			}
+		}
+	
+		public void testRunTerminated() {
+			fIsRunning= false;
+			fIsStopped= true;
+			
+			Object[] listeners= fSessionListeners.getListeners();
+			for (int i= 0; i < listeners.length; ++i) {
+				((ITestSessionListener) listeners[i]).sessionTerminated();
+			}
+		}
+	
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.junit.model.ITestRunListener2#testTreeEntry(java.lang.String)
+		 */
 		public void testTreeEntry(String description) {
 			TestElement testElement= addTreeEntry(description);
 			
@@ -310,6 +360,48 @@ public class TestRunSession {
 			}
 		}
 	
+		public void testStarted(String testId, String testName) {
+			TestElement testElement= getTestElement(testId);
+			if (! (testElement instanceof TestCaseElement)) {
+				logUnexpectedTest(testId, testElement);
+				return;
+			}
+			TestCaseElement testCaseElement= (TestCaseElement) testElement;
+			setStatus(testCaseElement, Status.RUNNING);
+			
+			fStartedCount++;
+			
+			Object[] listeners= fSessionListeners.getListeners();
+			for (int i= 0; i < listeners.length; ++i) {
+				((ITestSessionListener) listeners[i]).testStarted(testCaseElement);
+			}
+		}
+	
+		public void testEnded(String testId, String testName) {
+			TestElement testElement= getTestElement(testId);
+			if (! (testElement instanceof TestCaseElement)) {
+				logUnexpectedTest(testId, testElement);
+				return;
+			}
+			TestCaseElement testCaseElement= (TestCaseElement) testElement;
+
+			if (testCaseElement.getStatus() == Status.RUNNING)
+				setStatus(testCaseElement, Status.OK);
+			
+			Object[] listeners= fSessionListeners.getListeners();
+			for (int i= 0; i < listeners.length; ++i) {
+				((ITestSessionListener) listeners[i]).testEnded(testCaseElement);
+			}
+		}
+		
+		
+		public void testFailed(int status, String testId, String testName, String trace) {
+			testFailed(status, testId, testName, trace, null, null);
+		}
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.junit.model.ITestRunListener2#testFailed(int, java.lang.String, java.lang.String, java.lang.String, java.lang.String, java.lang.String)
+		 */
 		public void testFailed(int statusCode, String testId, String testName, String trace, String expected, String actual) {
 			TestElement testElement= getTestElement(testId);
 			if (! (testElement instanceof TestCaseElement)) {
@@ -333,10 +425,13 @@ public class TestRunSession {
 			}
 		}
 	
-		public void testFailed(int status, String testId, String testName, String trace) {
-			testFailed(status, testId, testName, trace, null, null);
+		public void testReran(String testId, String testClass, String testName, int status, String trace) {
+			testReran(testId, testClass, testName, status, trace, "", ""); //$NON-NLS-1$ //$NON-NLS-2$
 		}
-	
+		
+		/* (non-Javadoc)
+		 * @see org.eclipse.jdt.internal.junit.model.ITestRunListener2#testReran(java.lang.String, java.lang.String, java.lang.String, int, java.lang.String, java.lang.String, java.lang.String)
+		 */
 		public void testReran(String testId, String className, String testName, int statusCode, String trace, String expectedResult, String actualResult) {
 			TestElement testElement= getTestElement(testId);
 			if (! (testElement instanceof TestCaseElement)) {
@@ -379,58 +474,6 @@ public class TestRunSession {
 			}
 		}
 	
-		public void testReran(String testId, String testClass, String testName, int status, String trace) {
-			testReran(testId, testClass, testName, status, trace, "", ""); //$NON-NLS-1$ //$NON-NLS-2$
-		}
-		
-		public void testRunStopped(long elapsedTime) {
-			Object[] listeners= fSessionListeners.getListeners();
-			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).sessionStopped(elapsedTime);
-			}
-		}
-	
-		public void testRunTerminated() {
-			Object[] listeners= fSessionListeners.getListeners();
-			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).sessionTerminated();
-			}
-		}
-	
-		public void testStarted(String testId, String testName) {
-			TestElement testElement= getTestElement(testId);
-			if (! (testElement instanceof TestCaseElement)) {
-				logUnexpectedTest(testId, testElement);
-				return;
-			}
-			TestCaseElement testCaseElement= (TestCaseElement) testElement;
-			setStatus(testCaseElement, Status.RUNNING);
-			
-			fStartedCount++;
-			
-			Object[] listeners= fSessionListeners.getListeners();
-			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).testStarted(testCaseElement);
-			}
-		}
-	
-		public void testEnded(String testId, String testName) {
-			TestElement testElement= getTestElement(testId);
-			if (! (testElement instanceof TestCaseElement)) {
-				logUnexpectedTest(testId, testElement);
-				return;
-			}
-			TestCaseElement testCaseElement= (TestCaseElement) testElement;
-
-			if (testCaseElement.getStatus() == Status.RUNNING)
-				setStatus(testCaseElement, Status.OK);
-			
-			Object[] listeners= fSessionListeners.getListeners();
-			for (int i= 0; i < listeners.length; ++i) {
-				((ITestSessionListener) listeners[i]).testEnded(testCaseElement);
-			}
-		}
-		
 		private void setStatus(TestCaseElement testCaseElement, Status status) {
 			testCaseElement.setStatus(status);
 		}
@@ -454,8 +497,24 @@ public class TestRunSession {
 		}
 	}
 
-	public String getTestRunName() {
-		return fLaunch.getLaunchConfiguration().getName();
+	public TestCaseElement[] getAllFailedTestCaseElements() {
+		ArrayList failures= new ArrayList();
+		addFailures(failures, getTestRoot());
+		return (TestCaseElement[]) failures.toArray(new TestCaseElement[failures.size()]);
 	}
 
+	private void addFailures(ArrayList failures, TestElement testElement) {
+		if (testElement instanceof TestCaseElement) {
+			TestCaseElement testCaseElement= (TestCaseElement) testElement;
+			if (testCaseElement.getStatus().isFailure()) {
+				failures.add(testCaseElement);
+			}
+		} else {
+			TestSuiteElement testSuiteElement= (TestSuiteElement) testElement;
+			TestElement[] children= testSuiteElement.getChildren();
+			for (int i= 0; i < children.length; i++) {
+				addFailures(failures, children[i]);
+			}
+		}
+	}
 }

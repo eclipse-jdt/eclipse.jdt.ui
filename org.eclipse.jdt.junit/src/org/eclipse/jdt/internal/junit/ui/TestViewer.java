@@ -62,6 +62,19 @@ public class TestViewer {
 		}
 	}
 
+	private static class ReverseList extends AbstractList {
+		private final List fList;
+		public ReverseList(List list) {
+			fList= list;
+		}
+		public Object get(int index) {
+			return fList.get(fList.size() - index - 1);
+		}
+		public int size() {
+			return fList.size();
+		}
+	}
+	
 	private final TestRunnerViewPart fTestRunnerPart;
 	
 	private final TreeViewer fTreeViewer;
@@ -131,6 +144,7 @@ public class TestViewer {
 
 	public synchronized void setActiveSession(TestRunSession testRunSession) {
 		fTestRunSession= testRunSession;
+		registerAutoScrollTarget(null);
 		registerViewerRefresh();
 	}
 
@@ -170,19 +184,24 @@ public class TestViewer {
 
 	public void setShowFailuresOnly(boolean failuresOnly, int layoutMode) {
 		fLayoutMode= layoutMode;
-		fTestSessionContentProvider.setLayout(layoutMode);
-		fTestSessionLabelProvider.setLayout(layoutMode);
-		if (failuresOnly) {
-			if (! isShowFailuresOnly()) {
-				fFailuresOnlyFilter= new FailuresOnlyFilter();
-				fTreeViewer.addFilter(fFailuresOnlyFilter);
+		try {
+			fTreeViewer.getTree().setRedraw(false);
+			fTestSessionContentProvider.setLayout(layoutMode);
+			fTestSessionLabelProvider.setLayout(layoutMode);
+			if (failuresOnly) {
+				if (!isShowFailuresOnly()) {
+					fFailuresOnlyFilter= new FailuresOnlyFilter();
+					fTreeViewer.addFilter(fFailuresOnlyFilter);
+				}
+			} else {
+				if (isShowFailuresOnly()) {
+					fTreeViewer.removeFilter(fFailuresOnlyFilter);
+					fFailuresOnlyFilter= null;
+				}
 			}
-		} else {
-			if (isShowFailuresOnly()) {
-				fTreeViewer.removeFilter(fFailuresOnlyFilter);
-				fFailuresOnlyFilter= null;
-			}
-		}
+		} finally {
+			fTreeViewer.getTree().setRedraw(true);
+		}		
 	}
 	
 	private boolean isShowFailuresOnly() {
@@ -193,26 +212,17 @@ public class TestViewer {
 	 * To be called periodically by the TestRunnerViewPart (in the UI thread).
 	 */
 	public void processChangesInUI() {
-		boolean needRefresh;
-		synchronized (this) {
-			if (isShowFailuresOnly()) { //TODO: performance: add/remove elements, don't refresh
-				needRefresh= true;
-			} else {
-				needRefresh= fNeedRefresh;
-			}
+		TestRoot testRoot;
+		if (fTestRunSession != null) {
+			testRoot= fTestRunSession.getTestRoot();
+		} else {
+			testRoot= null;
+			fNeedRefresh= true;
 		}
 		
-		if (needRefresh) {
+		if (fNeedRefresh) {
 			registerViewerRefresh();
 			fNeedRefresh= false;
-			TestRoot testRoot;
-			synchronized (this) {
-				if (fTestRunSession != null) {
-					testRoot= fTestRunSession.getTestRoot();
-				} else {
-					testRoot= null;
-				}
-			}
 			fTreeViewer.setInput(testRoot);
 			
 		} else {
@@ -221,7 +231,23 @@ public class TestViewer {
 				toUpdate= fNeedUpdate.toArray();
 				fNeedUpdate.clear();
 			}
-			fTreeViewer.update(toUpdate, null);
+			if (isShowFailuresOnly() && testRoot != null) {
+				for (int i= 0; i < toUpdate.length; i++) {
+					TestElement testElement= (TestElement) toUpdate[i];
+					if (testElement instanceof TestCaseElement) {
+						if (testElement.getStatus().isFailure()) {
+							if (fTreeViewer.testFindItem(testElement) == null)
+								fTreeViewer.add(testRoot, testElement);
+							else
+								fTreeViewer.update(testElement, null);
+						} else {
+							fTreeViewer.remove(testElement);
+						}
+					}
+				}
+			} else {
+				fTreeViewer.update(toUpdate, null);
+			}
 		}
 		autoScrollInUI();
 	}
@@ -268,6 +294,12 @@ public class TestViewer {
 			fTreeViewer.reveal(current);
 	}
 
+	public void selectFirstFailure() {
+		TestCaseElement firstFailure= getNextChildFailure(fTestRunSession.getTestRoot(), true);
+		if (firstFailure != null)
+			fTreeViewer.setSelection(new StructuredSelection(firstFailure), true);
+	}
+	
 	public void selectFailure(boolean showNext) {
 		ITreeSelection selection= (ITreeSelection) fTreeViewer.getSelection();
 		TestElement selected= (TestElement) selection.getFirstElement();
@@ -283,19 +315,6 @@ public class TestViewer {
 		
 		if (next != null)
 			fTreeViewer.setSelection(new StructuredSelection(next), true);
-	}
-	
-	private static class ReverseList extends AbstractList {
-		private final List fList;
-		public ReverseList(List list) {
-			fList= list;
-		}
-		public Object get(int index) {
-			return fList.get(fList.size() - index - 1);
-		}
-		public int size() {
-			return fList.size();
-		}
 	}
 	
 	private TestCaseElement getNextFailureSibling(TestElement current, boolean showNext) {

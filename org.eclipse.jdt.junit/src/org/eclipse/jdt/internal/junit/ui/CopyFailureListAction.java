@@ -23,22 +23,21 @@ import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 
+import org.eclipse.jdt.internal.junit.model.TestCaseElement;
+
 /**
- * Copies the names of the methods that failed to the clipboard.
+ * Copies the names of the methods that failed and their traces to the clipboard.
  */
 public class CopyFailureListAction extends Action {
-	private FailureTab fView;
 	
 	private final Clipboard fClipboard;
+	private final TestRunnerViewPart fRunner;
 		
-	/**
-	 * Constructor for CopyFailureListAction.
-	 */
-	public CopyFailureListAction(TestRunnerViewPart runner, FailureTab view, Clipboard clipboard) {
-		super(JUnitMessages.CopyFailureList_action_label);  
-		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPYFAILURELIST_ACTION);
-		fView= view;
+	public CopyFailureListAction(TestRunnerViewPart runner, Clipboard clipboard) {
+		super(JUnitMessages.CopyFailureList_action_label);
+		fRunner= runner;  
 		fClipboard= clipboard;
+		PlatformUI.getWorkbench().getHelpSystem().setHelp(this, IJUnitHelpContextIds.COPYFAILURELIST_ACTION);
 	}
 
 	/*
@@ -47,16 +46,43 @@ public class CopyFailureListAction extends Action {
 	public void run() {
 		TextTransfer plainTextTransfer = TextTransfer.getInstance();
 					
-		try{
+		try {
 			fClipboard.setContents(
-				new String[] { fView.getAllFailedTestNames() }, 
-				new Transfer[]{ plainTextTransfer });
-		}  catch (SWTError e){
+					new String[] { getAllFailureTraces() }, 
+					new Transfer[] { plainTextTransfer });
+		} catch (SWTError e){
 			if (e.code != DND.ERROR_CANNOT_SET_CLIPBOARD) 
 				throw e;
 			if (MessageDialog.openQuestion(JavaPlugin.getActiveWorkbenchShell(), JUnitMessages.CopyFailureList_problem, JUnitMessages.CopyFailureList_clipboard_busy))  
 				run();
 		}
 	}
+	
+	public String getAllFailureTraces() {
+		StringBuffer buf= new StringBuffer();
+		TestCaseElement[] failures= fRunner.getAllFailures();
+		
+		String lineDelim= System.getProperty("line.separator", "\n");  //$NON-NLS-1$//$NON-NLS-2$
+		for (int i= 0; i < failures.length; i++) {
+			TestCaseElement failure= failures[i];
+			buf.append(failure.getTestName()).append(lineDelim);
+			String failureTrace= failure.getTrace();
+			if (failureTrace != null) {
+				int start= 0;
+				while (start < failureTrace.length()) {
+					int idx= failureTrace.indexOf('\n', start);
+					if (idx != -1) {
+						String line= failureTrace.substring(start, idx - 1);
+						buf.append(line).append(lineDelim);
+						start= idx + 1;
+					} else {
+						start= Integer.MAX_VALUE;
+					}
+				}
+			}
+		}
+		return buf.toString();
+	}
+
 
 }
