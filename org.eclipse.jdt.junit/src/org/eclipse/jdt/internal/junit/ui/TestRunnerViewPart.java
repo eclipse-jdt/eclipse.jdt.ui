@@ -281,21 +281,21 @@ public class TestRunnerViewPart extends ViewPart {
 	private class RunnerViewHistory extends ViewHistory {
 
 		public void configureHistoryListAction(IAction action) {
-			action.setText("&History...");
+			action.setText(JUnitMessages.TestRunnerViewPart_history);
 			JUnitPlugin.setLocalImageDescriptors(action, "history_list.gif"); //$NON-NLS-1$
 		}
 
 		public void configureHistoryDropDownAction(IAction action) {
-			action.setToolTipText("Test Run History...");
+			action.setToolTipText(JUnitMessages.TestRunnerViewPart_test_run_history);
 			JUnitPlugin.setLocalImageDescriptors(action, "history_list.gif"); //$NON-NLS-1$
 		}
 
 		public String getHistoryListDialogTitle() {
-			return "Test Runs";
+			return JUnitMessages.TestRunnerViewPart_test_runs;
 		}
 
 		public String getHistoryListDialogMessage() {
-			return "&Select a test run:";
+			return JUnitMessages.TestRunnerViewPart_select_test_run;
 		}
 
 		public Shell getShell() {
@@ -346,14 +346,16 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public String getText(Object element) {
 			TestRunSession session= (TestRunSession) element;
-			if (session.getStartTime() == 0)
+			if (session.getStartTime() == 0) {
 				return session.getTestRunName();
-			else
-				return session.getTestRunName() + " (" + DateFormat.getDateTimeInstance().format(new Date(session.getStartTime())) + ")";
+			} else {
+				String startTime= DateFormat.getDateTimeInstance().format(new Date(session.getStartTime()));
+				return Messages.format(JUnitMessages.TestRunnerViewPart_testName_startTime, new Object[] { session.getTestRunName(), startTime });
+			}
 		}
 
 		public String getMaxEntriesMessage() {
-			return "&Maximum count of remembered test runs:";
+			return JUnitMessages.TestRunnerViewPart_max_remembered;
 		}
 
 		public int getMaxEntries() {
@@ -689,8 +691,8 @@ public class TestRunnerViewPart extends ViewPart {
 	
 	private class FailuresOnlyFilterAction extends Action {
 		public FailuresOnlyFilterAction() {
-			super("Show Failures only", AS_CHECK_BOX);
-			setToolTipText("Show Failures only");
+			super(JUnitMessages.TestRunnerViewPart_show_failures_only, AS_CHECK_BOX);
+			setToolTipText(JUnitMessages.TestRunnerViewPart_show_failures_only);
 			setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/failures.gif")); //$NON-NLS-1$
 		}
 
@@ -703,7 +705,7 @@ public class TestRunnerViewPart extends ViewPart {
 		private final int fMode;
 
 		public ToggleLayoutAction(int mode) {
-			super(mode == LAYOUT_FLAT ? "&Flat Layout" : "&Hierarchical Layout", IAction.AS_RADIO_BUTTON);
+			super(mode == LAYOUT_FLAT ? JUnitMessages.TestRunnerViewPart_flat_layout : JUnitMessages.TestRunnerViewPart_hierarchical_layout, IAction.AS_RADIO_BUTTON);
 			fMode= mode;
 			ImageDescriptor imageDescriptor;
 			if (mode == LAYOUT_FLAT) {

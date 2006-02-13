@@ -32,7 +32,10 @@ import org.eclipse.jface.window.Window;
 
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.internal.corext.util.Messages;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 import org.eclipse.jdt.internal.ui.dialogs.StatusInfo;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -73,7 +76,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 					doDoubleClicked();
 				}				
 			};
-			String[] buttonLabels= new String[] { "&Remove" };
+			String[] buttonLabels= new String[] { JavaUIMessages.HistoryListAction_remove };
 			LabelProvider labelProvider= new TestRunLabelProvider();
 			fHistoryList= new ListDialogField(adapter, buttonLabels, labelProvider);
 			fHistoryList.setLabelText(fHistory.getHistoryListDialogMessage());
@@ -107,7 +110,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 					if (valid)
 						updateStatus(StatusInfo.OK_STATUS);
 					else
-						updateStatus(new StatusInfo(StatusInfo.ERROR, "Please enter a positive integer smaller than " + MAX_MAX_ENTRIES));
+						updateStatus(new StatusInfo(StatusInfo.ERROR, Messages.format(JavaUIMessages.HistoryListAction_max_entries_constraint, Integer.toString(MAX_MAX_ENTRIES))));
 				}
 			});
 			fMaxEntriesField.setText(Integer.toString(fHistory.getMaxEntries()));

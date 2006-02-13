@@ -25,6 +25,7 @@ import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.util.Assert;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.JavaUIMessages;
 
 /*package*/ class HistoryDropDownAction extends Action {
 
@@ -46,7 +47,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 
 	private class ClearAction extends Action {
 		public ClearAction() {
-			setText("&Clear History");
+			setText(JavaUIMessages.HistoryDropDownAction_clear_history);
 			JavaPluginImages.setLocalImageDescriptors(this, "removea_exc.gif"); //$NON-NLS-1$
 		}
 		

@@ -16,6 +16,7 @@ import org.eclipse.swt.graphics.Image;
 import org.eclipse.jface.viewers.LabelProvider;
 import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
+import org.eclipse.jdt.internal.junit.Messages;
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
 import org.eclipse.jdt.internal.junit.model.TestSuiteElement;
@@ -33,10 +34,12 @@ public class TestSessionLabelProvider extends LabelProvider {
 	
 	public String getText(Object element) {
 		if (element instanceof TestCaseElement) {
+			String testMethodName= ((TestCaseElement) element).getTestMethodName();
 			if (fLayoutMode == TestRunnerViewPart.LAYOUT_HIERARCHICAL) {
-				return ((TestCaseElement) element).getTestMethodName();
+				return testMethodName;
 			} else {
-				return ((TestCaseElement) element).getTestMethodName() + " - " + ((TestCaseElement) element).getClassName();
+				String className= ((TestCaseElement) element).getClassName();
+				return Messages.format(JUnitMessages.TestSessionLabelProvider_testMethodName_className, new Object[] { testMethodName, className });
 			}
 			
 		} else if (element instanceof TestElement) {

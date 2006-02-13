@@ -186,6 +186,16 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_toggle_horizontal_label;
 	public static String TestRunnerViewPart_toggle_vertical_label;
 	public static String TestRunnerViewPart_wrapperJobName;
+	public static String TestRunnerViewPart_history;
+	public static String TestRunnerViewPart_test_run_history;
+	public static String TestRunnerViewPart_test_runs;
+	public static String TestRunnerViewPart_select_test_run;
+	public static String TestRunnerViewPart_testName_startTime;
+	public static String TestRunnerViewPart_max_remembered;
+	public static String TestRunnerViewPart_show_failures_only;
+	public static String TestRunnerViewPart_flat_layout;
+	public static String TestRunnerViewPart_hierarchical_layout;
+	
 	public static String TestSearchEngine_message_searching;
 
 	public static String TypeRenameParticipant_change_name;
@@ -198,4 +208,6 @@ public final class JUnitMessages extends NLS {
 	private JUnitMessages() {
 		// Do not instantiate
 	}
+
+	public static String TestSessionLabelProvider_testMethodName_className;
 }
