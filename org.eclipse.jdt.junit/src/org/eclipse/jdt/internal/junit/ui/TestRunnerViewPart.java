@@ -326,6 +326,9 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public ImageDescriptor getImageDescriptor(Object element) {
 			TestRunSession session= (TestRunSession) element;
+			if (session.isStopped())
+				return fSuiteIconDescriptor;
+				
 			TestElement.Status status= session.getTestRoot().getStatus();
 			if (status == TestElement.Status.NOT_RUN)
 				return fSuiteIconDescriptor;
@@ -1014,7 +1017,9 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	private void updateViewIcon() {
-		if (hasErrorsOrFailures()) 
+		if (fTestRunSession == null || fTestRunSession.isStopped() || fTestRunSession.isRunning())
+			fViewImage= fOriginalViewImage;
+		else if (hasErrorsOrFailures())
 			fViewImage= fTestRunFailIcon;
 		else 
 			fViewImage= fTestRunOKIcon;
@@ -1033,8 +1038,6 @@ public class TestRunnerViewPart extends ViewPart {
 					fViewImage= progress;
 					firePropertyChange(IWorkbenchPart.PROP_TITLE);
 				}
-			} else if (fTestRunSession.isStopped()) {
-				resetViewIcon();
 			} else {
 				updateViewIcon();
 			}
