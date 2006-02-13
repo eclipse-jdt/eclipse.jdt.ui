@@ -45,6 +45,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 /*package*/ class HistoryListAction extends Action {
 	
 	private class HistoryListDialog extends StatusDialog {
+		private static final int MAX_MAX_ENTRIES= 100;
 		private ListDialogField fHistoryList;
 		private StringDialogField fMaxEntriesField;
 		private int fMaxEntries;
@@ -99,14 +100,14 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 					boolean valid;
 					try {
 						fMaxEntries= Integer.parseInt(maxString);
-						valid= fMaxEntries > 0 && fMaxEntries < 100;
+						valid= fMaxEntries > 0 && fMaxEntries < MAX_MAX_ENTRIES;
 					} catch (NumberFormatException e) {
 						valid= false;
 					}
 					if (valid)
-						updateStatus(new StatusInfo());
+						updateStatus(StatusInfo.OK_STATUS);
 					else
-						updateStatus(new StatusInfo(StatusInfo.ERROR, "Please enter a positive integer smaller than 100"));
+						updateStatus(new StatusInfo(StatusInfo.ERROR, "Please enter a positive integer smaller than " + MAX_MAX_ENTRIES));
 				}
 			});
 			fMaxEntriesField.setText(Integer.toString(fHistory.getMaxEntries()));
