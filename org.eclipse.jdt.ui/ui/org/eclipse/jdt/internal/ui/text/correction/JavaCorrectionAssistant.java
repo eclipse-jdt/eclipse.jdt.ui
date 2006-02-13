@@ -31,7 +31,8 @@ import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
+import org.eclipse.jface.text.quickassist.QuickAssistAssistant;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
@@ -52,7 +53,7 @@ import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 
 
-public class JavaCorrectionAssistant extends ContentAssistant {
+public class JavaCorrectionAssistant extends QuickAssistAssistant {
 
 	private ITextViewer fViewer;
 	private ITextEditor fEditor;
@@ -72,12 +73,8 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 
 		JavaCorrectionProcessor processor= new JavaCorrectionProcessor(this);
 
-		setContentAssistProcessor(processor, IDocument.DEFAULT_CONTENT_TYPE);
+		setQuickAssistProcessor(processor);
 
-		enableAutoActivation(false);
-		enableAutoInsert(false);
-
-		setContextInformationPopupOrientation(CONTEXT_INFO_ABOVE);
 		setInformationControlCreator(getInformationControlCreator());
 
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
@@ -134,6 +131,11 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		super.uninstall();
 	}
 
+	/*
+	 * @see org.eclipse.jface.text.quickassist.QuickAssistAssistant#showPossibleQuickAssists()
+	 * @since 3.2
+	 */
+
 	/**
 	 * Show completions at caret position. If current
 	 * position does not contain quick fixes look for
@@ -141,15 +143,15 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	 * to right and restarting at end of line if the
 	 * beginning of the line is reached.
 	 *
-	 * @see org.eclipse.jface.text.contentassist.IContentAssistant#showPossibleCompletions()
+	 * @see IQuickAssistAssistant#showPossibleQuickAssists()
 	 */
-	public String showPossibleCompletions() {
+	public String showPossibleQuickAssists() {
 		fPosition= null;
 		fCurrentAnnotations= null;
 		
 		if (fViewer == null || fViewer.getDocument() == null)
 			// Let superclass deal with this
-			return super.showPossibleCompletions();
+			return super.showPossibleQuickAssists();
 
 
 		ArrayList resultingAnnotations= new ArrayList(20);
@@ -170,7 +172,7 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 		}
 		fCurrentAnnotations= (Annotation[]) resultingAnnotations.toArray(new Annotation[resultingAnnotations.size()]);
 
-		return super.showPossibleCompletions();
+		return super.showPossibleQuickAssists();
 	}
 	
 	
@@ -330,5 +332,4 @@ public class JavaCorrectionAssistant extends ContentAssistant {
 	public Annotation[] getAnnotationsAtOffset() {
 		return fCurrentAnnotations;
 	}
-	
 }

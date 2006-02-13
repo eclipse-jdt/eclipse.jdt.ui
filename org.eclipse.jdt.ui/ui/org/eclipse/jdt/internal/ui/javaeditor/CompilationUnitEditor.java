@@ -187,7 +187,7 @@ public class CompilationUnitEditor extends JavaEditor implements IJavaReconcilin
 					return;
 				case QUICK_ASSIST:
 					// XXX: We can get rid of this once the SourceViewer has a way to update the status line
-					msg= fQuickAssistAssistant.showPossibleCompletions();
+					msg= fQuickAssistAssistant.showPossibleQuickAssists();
 					setStatusLineErrorMessage(msg);
 					return;
 				case UNDO:

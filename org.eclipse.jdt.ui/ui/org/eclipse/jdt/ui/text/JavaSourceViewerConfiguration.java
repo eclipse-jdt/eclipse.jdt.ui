@@ -43,6 +43,7 @@ import org.eclipse.jface.text.information.IInformationProvider;
 import org.eclipse.jface.text.information.InformationPresenter;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
+import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.rules.DefaultDamagerRepairer;
 import org.eclipse.jface.text.rules.RuleBasedScanner;
@@ -424,7 +425,7 @@ public class JavaSourceViewerConfiguration extends TextSourceViewerConfiguration
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getQuickAssistAssistant(org.eclipse.jface.text.source.ISourceViewer)
 	 * @since 3.2
 	 */
-	public IContentAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
+	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
 		if (getEditor() != null)
 			return new JavaCorrectionAssistant(getEditor());
 		return null;

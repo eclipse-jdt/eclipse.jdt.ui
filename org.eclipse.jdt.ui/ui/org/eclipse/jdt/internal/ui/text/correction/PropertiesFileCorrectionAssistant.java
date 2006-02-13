@@ -12,16 +12,16 @@ package org.eclipse.jdt.internal.ui.text.correction;
 
 import java.util.Iterator;
 
-import org.eclipse.swt.graphics.Color;
-import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.RGB;
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 
 import org.eclipse.core.filebuffers.FileBuffers;
 import org.eclipse.core.filebuffers.ITextFileBufferManager;
+
+import org.eclipse.swt.graphics.Color;
+import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -34,7 +34,7 @@ import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
-import org.eclipse.jface.text.contentassist.ContentAssistant;
+import org.eclipse.jface.text.quickassist.QuickAssistAssistant;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
@@ -48,7 +48,6 @@ import org.eclipse.jdt.ui.text.IColorManager;
 import org.eclipse.jdt.ui.text.JavaTextTools;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.propertiesfileeditor.IPropertiesFilePartitions;
 import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
 
 
@@ -57,7 +56,7 @@ import org.eclipse.jdt.internal.ui.text.HTMLTextPresenter;
  *
  * @since 3.1
  */
-public class PropertiesFileCorrectionAssistant extends ContentAssistant {
+public class PropertiesFileCorrectionAssistant extends QuickAssistAssistant {
 
 	private ITextViewer fViewer;
 	private ITextEditor fEditor;
@@ -71,14 +70,8 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 		Assert.isNotNull(editor);
 		fEditor= editor;
 
-		PropertiesFileCorrectionProcessor processor= new PropertiesFileCorrectionProcessor(this);
-		setContentAssistProcessor(processor, IPropertiesFilePartitions.PROPERTY_VALUE);
-		setContentAssistProcessor(processor, IPropertiesFilePartitions.COMMENT);
+		setQuickAssistProcessor(new PropertiesFileCorrectionProcessor(this));
 
-		enableAutoActivation(false);
-		enableAutoInsert(false);
-
-		setContextInformationPopupOrientation(CONTEXT_INFO_ABOVE);
 		setInformationControlCreator(getInformationControlCreator());
 
 		JavaTextTools textTools= JavaPlugin.getDefault().getJavaTextTools();
@@ -140,7 +133,7 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 	public String showPossibleCompletions() {
 		if (fViewer == null || fViewer.getDocument() == null)
 			// Let superclass deal with this
-			return super.showPossibleCompletions();
+			return super.showPossibleQuickAssists();
 
 		Point selectedRange= fViewer.getSelectedRange();
 		fPosition= null;
@@ -153,7 +146,7 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 				fViewer.revealRange(invocationOffset, 0);
 			}
 		}
-		return super.showPossibleCompletions();
+		return super.showPossibleQuickAssists();
 	}
 
 	/**
@@ -297,4 +290,5 @@ public class PropertiesFileCorrectionAssistant extends ContentAssistant {
 	public boolean isUpdatedOffset() {
 		return fPosition != null;
 	}
+	
 }

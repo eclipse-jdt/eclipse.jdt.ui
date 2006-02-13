@@ -26,9 +26,8 @@ import org.eclipse.core.resources.IMarker;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
-import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
+import org.eclipse.jface.text.quickassist.IQuickAssistProcessor;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
@@ -41,10 +40,10 @@ import org.eclipse.ui.texteditor.SimpleMarkerAnnotation;
 
 import org.eclipse.ui.ide.IDE;
 
+import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
-import org.eclipse.jdt.ui.text.java.CompletionProposalComparator;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
@@ -56,7 +55,7 @@ import org.eclipse.jdt.internal.ui.text.spelling.WordQuickFixProcessor;
  *
  * @since 3.1
  */
-public class PropertiesFileCorrectionProcessor implements IContentAssistProcessor {
+public class PropertiesFileCorrectionProcessor implements IQuickAssistProcessor {
 
 	private static String fgErrorMessage;
 	private static WordQuickFixProcessor fgWordQuickFixProcessor= new WordQuickFixProcessor();
@@ -103,7 +102,10 @@ public class PropertiesFileCorrectionProcessor implements IContentAssistProcesso
 	/*
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
-	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
+	public ICompletionProposal[] computeQuickAssistProposals(IQuickAssistInvocationContext quickAssistContext) {
+		ITextViewer viewer= quickAssistContext.getTextViewer();
+		int documentOffset= quickAssistContext.getSelectionOffset();
+
 		IEditorPart part= fAssistant.getEditor();
 
 		int length= viewer != null ? viewer.getSelectedRange().y : 0;
@@ -211,37 +213,26 @@ public class PropertiesFileCorrectionProcessor implements IContentAssistProcesso
 	}
 
 	/*
-	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
-	 */
-	public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
-		return null;
-	}
-
-	/*
-	 * @see IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
-	 */
-	public char[] getCompletionProposalAutoActivationCharacters() {
-		return null;
-	}
-
-	/*
-	 * @see IContentAssistProcessor#getContextInformationAutoActivationCharacters()
-	 */
-	public char[] getContextInformationAutoActivationCharacters() {
-		return null;
-	}
-
-	/*
-	 * @see IContentAssistProcessor#getContextInformationValidator()
-	 */
-	public IContextInformationValidator getContextInformationValidator() {
-		return null;
-	}
-
-	/*
 	 * @see IContentAssistProcessor#getErrorMessage()
 	 */
 	public String getErrorMessage() {
 		return fgErrorMessage;
 	}
+
+	/*
+	 * @see org.eclipse.jface.text.quickassist.IQuickAssistProcessor#canFix(org.eclipse.jface.text.source.Annotation)
+	 * @since 3.2
+	 */
+	public boolean canFix(Annotation annotation) {
+		return annotation != null && "org.eclipse.ui.workbench.texteditor.spelling".equals(annotation.getType()); //$NON-NLS-1$
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.quickassist.IQuickAssistProcessor#canAssist(org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext)
+	 * @since 3.2
+	 */
+	public boolean canAssist(IQuickAssistInvocationContext invocationContext) {
+		return false;
+	}
+
 }

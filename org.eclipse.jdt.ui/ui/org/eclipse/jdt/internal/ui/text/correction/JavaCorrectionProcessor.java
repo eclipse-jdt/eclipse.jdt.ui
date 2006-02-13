@@ -30,9 +30,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.contentassist.ContentAssistEvent;
 import org.eclipse.jface.text.contentassist.ICompletionListener;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
-import org.eclipse.jface.text.contentassist.IContentAssistProcessor;
-import org.eclipse.jface.text.contentassist.IContextInformation;
-import org.eclipse.jface.text.contentassist.IContextInformationValidator;
+import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
 
@@ -57,7 +55,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.IJavaAnnotation;
 
 
-public class JavaCorrectionProcessor implements IContentAssistProcessor {
+public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassist.IQuickAssistProcessor {
 
 	private static final String QUICKFIX_PROCESSOR_CONTRIBUTION_ID= "quickFixProcessors"; //$NON-NLS-1$
 	private static final String QUICKASSIST_PROCESSOR_CONTRIBUTION_ID= "quickAssistProcessors"; //$NON-NLS-1$
@@ -189,7 +187,10 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	/*
 	 * @see IContentAssistProcessor#computeCompletionProposals(ITextViewer, int)
 	 */
-	public ICompletionProposal[] computeCompletionProposals(ITextViewer viewer, int documentOffset) {
+	public ICompletionProposal[] computeQuickAssistProposals(IQuickAssistInvocationContext quickAssistContext) {
+		ITextViewer viewer= quickAssistContext.getTextViewer();
+		int documentOffset= quickAssistContext.getSelectionOffset();
+		
 		IEditorPart part= fAssistant.getEditor();
 
 		ICompilationUnit cu= JavaUI.getWorkingCopyManager().getWorkingCopy(part.getEditorInput());
@@ -473,37 +474,28 @@ public class JavaCorrectionProcessor implements IContentAssistProcessor {
 	}
 
 	/*
-	 * @see IContentAssistProcessor#computeContextInformation(ITextViewer, int)
-	 */
-	public IContextInformation[] computeContextInformation(ITextViewer viewer, int documentOffset) {
-		return null;
-	}
-
-	/*
-	 * @see IContentAssistProcessor#getCompletionProposalAutoActivationCharacters()
-	 */
-	public char[] getCompletionProposalAutoActivationCharacters() {
-		return null;
-	}
-
-	/*
-	 * @see IContentAssistProcessor#getContextInformationAutoActivationCharacters()
-	 */
-	public char[] getContextInformationAutoActivationCharacters() {
-		return null;
-	}
-
-	/*
-	 * @see IContentAssistProcessor#getContextInformationValidator()
-	 */
-	public IContextInformationValidator getContextInformationValidator() {
-		return null;
-	}
-
-	/*
 	 * @see IContentAssistProcessor#getErrorMessage()
 	 */
 	public String getErrorMessage() {
 		return fErrorMessage;
 	}
+
+	/*
+	 * @see org.eclipse.jface.text.quickassist.IQuickAssistProcessor#canFix(org.eclipse.jface.text.source.Annotation)
+	 * @since 3.2
+	 */
+	public boolean canFix(Annotation annotation) {
+		return hasCorrections(annotation);
+	}
+
+	/*
+	 * @see org.eclipse.jface.text.quickassist.IQuickAssistProcessor#canAssist(org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext)
+	 * @since 3.2
+	 */
+	public boolean canAssist(IQuickAssistInvocationContext invocationContext) {
+		if (invocationContext instanceof IInvocationContext)
+			return hasAssists((IInvocationContext)invocationContext);
+		return false;
+	}
+	
 }

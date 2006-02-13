@@ -23,11 +23,10 @@ import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextDoubleClickStrategy;
-import org.eclipse.jface.text.contentassist.ContentAssistant;
-import org.eclipse.jface.text.contentassist.IContentAssistant;
 import org.eclipse.jface.text.hyperlink.IHyperlinkDetector;
 import org.eclipse.jface.text.presentation.IPresentationReconciler;
 import org.eclipse.jface.text.presentation.PresentationReconciler;
+import org.eclipse.jface.text.quickassist.IQuickAssistAssistant;
 import org.eclipse.jface.text.reconciler.IReconciler;
 import org.eclipse.jface.text.reconciler.IReconcilingStrategy;
 import org.eclipse.jface.text.reconciler.MonoReconciler;
@@ -215,17 +214,14 @@ public class PropertiesFileSourceViewerConfiguration extends TextSourceViewerCon
 			return fDocumentPartitioning;
 		return super.getConfiguredDocumentPartitioning(sourceViewer);
 	}
-	
+
 	/*
 	 * @see org.eclipse.jface.text.source.SourceViewerConfiguration#getQuickAssistAssistant(org.eclipse.jface.text.source.ISourceViewer)
 	 * @since 3.2
 	 */
-	public IContentAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
-		if (getEditor() != null) {
-			ContentAssistant assistant= new PropertiesFileCorrectionAssistant(getEditor());
-			assistant.setDocumentPartitioning(getConfiguredDocumentPartitioning(sourceViewer));
-			return assistant;
-		}
+	public IQuickAssistAssistant getQuickAssistAssistant(ISourceViewer sourceViewer) {
+		if (getEditor() != null)
+			return new PropertiesFileCorrectionAssistant(getEditor());
 		return null;
 	}
 
