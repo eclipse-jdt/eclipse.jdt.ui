@@ -15,12 +15,10 @@ import org.eclipse.swt.SWT;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.util.PropertyChangeEvent;
 
-import org.eclipse.jface.text.source.IAnnotationAccess;
 import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IPageLayout;
 import org.eclipse.ui.part.IShowInTargetList;
-import org.eclipse.ui.texteditor.DefaultMarkerAnnotationAccess;
 
 import org.eclipse.ui.editors.text.TextEditor;
 
@@ -64,13 +62,6 @@ public class PropertiesFileEditor extends TextEditor {
 		fOpenAction= new OpenAction(this);
 		fOpenAction.setActionDefinitionId(IJavaEditorActionDefinitionIds.OPEN_EDITOR);
 		setAction(JdtActionConstants.OPEN, fOpenAction);
-	}
-
-	/*
-	 * @see TextEditor#createAnnotationAccess()
-	 */
-	protected IAnnotationAccess createAnnotationAccess() {
-		return new DefaultMarkerAnnotationAccess();
 	}
 
 	/*
