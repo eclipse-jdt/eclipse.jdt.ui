@@ -285,6 +285,12 @@ public interface ISharedImages {
 	public static final String IMG_OBJS_ANNOTATION_PRIVATE= JavaPluginImages.IMG_OBJS_ANNOTATION_PRIVATE;
 	
 	/**
+	 * Key to access the shared image or image descriptor for javadoc tags.
+	 * @since 3.2
+	 */
+	public static final String IMG_OBJS_JAVADOCTAG= JavaPluginImages.IMG_OBJS_JAVADOCTAG;
+	
+	/**
 	 * Returns the shared image managed under the given key.
 	 * <p>
 	 * Note that clients <b>must not</b> dispose the image returned by this method.
