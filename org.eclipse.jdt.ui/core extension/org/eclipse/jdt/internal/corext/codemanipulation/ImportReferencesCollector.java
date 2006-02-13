@@ -146,9 +146,10 @@ public class ImportReferencesCollector extends GenericVisitor {
 		if (binding instanceof IVariableBinding) {
 			IVariableBinding varBinding= (IVariableBinding) binding;
 			if (varBinding.isField()) {
+				varBinding= varBinding.getVariableDeclaration();
 				ITypeBinding declaringClass= varBinding.getDeclaringClass();
 				if (declaringClass != null && !declaringClass.isLocal()) {
-					if (new ScopeAnalyzer(getASTRoot(name)).isDeclaredInScope(binding, (SimpleName)name, ScopeAnalyzer.VARIABLES))
+					if (new ScopeAnalyzer(getASTRoot(name)).isDeclaredInScope(varBinding, (SimpleName)name, ScopeAnalyzer.VARIABLES))
 							return;
 					fStaticImports.add(name);
 				}

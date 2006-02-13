@@ -359,38 +359,47 @@ public class ScopeAnalyzer {
 		private final ITypeBinding fParentTypeBinding;
 		private final IBinding fToSearch;
 		private boolean fFound;
+		private boolean fIsVisible;
 		
 		public SearchRequestor(IBinding toSearch, ITypeBinding parentTypeBinding, int flag) {
 			fFlags= flag;
 			fToSearch= toSearch;
 			fParentTypeBinding= parentTypeBinding;
 			fFound= false;
+			fIsVisible= true;
 		}
 		
 		public boolean acceptBinding(IBinding binding) {
 			if (fFound)
 				return true;
 			
-			if (hasFlag(CHECK_VISIBILITY, fFlags)) {
-				if (!isVisible(binding, fParentTypeBinding)) {
-					return false;
+			if (binding == fToSearch) {
+				fFound= true;
+			} else {
+				switch (binding.getKind()) {
+					case IBinding.TYPE:
+						fFound= ((ITypeBinding) binding).getTypeDeclaration() == fToSearch;
+						break;
+					case IBinding.VARIABLE:
+						fFound= ((IVariableBinding) binding).getVariableDeclaration() == fToSearch;
+						break;
+					case IBinding.METHOD:
+						fFound= ((IMethodBinding) binding).getMethodDeclaration() == fToSearch;
+						break;
 				}
 			}
-			if (hasFlag(METHODS, fFlags)) {
-				if (((IMethodBinding)binding).getMethodDeclaration() == fToSearch)
-					fFound= true;
-			} else if (hasFlag(TYPES, fFlags)) {
-				if (((ITypeBinding) binding).getTypeDeclaration() == fToSearch)
-					fFound= true;
-			} else {
-				if (binding == fToSearch)
-					fFound= true;
+			if (fFound && hasFlag(CHECK_VISIBILITY, fFlags)) {
+				fIsVisible= ScopeAnalyzer.isVisible(binding, fParentTypeBinding);
 			}
 			return fFound;
 		}
 		
 		public boolean found() {
 			return fFound;
+		}
+
+		public boolean isVisible() {
+			return fIsVisible;
 		}
 	}
 	
@@ -411,14 +420,14 @@ public class ScopeAnalyzer {
 				if (binding == null) {
 					addLocalDeclarations(selector, flags, requestor);
 					if (requestor.found())
-						return true;
+						return requestor.isVisible();
 					addTypeDeclarations(parentTypeBinding, flags, requestor);
 					if (requestor.found())
-						return true;
+						return requestor.isVisible();
 				} else {
 					addInherited(binding, flags, requestor);
 					if (requestor.found())
-						return true;
+						return requestor.isVisible();
 				}
 			}
 			return false;

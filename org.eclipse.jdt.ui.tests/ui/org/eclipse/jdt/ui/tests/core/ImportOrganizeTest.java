@@ -1876,6 +1876,46 @@ public class ImportOrganizeTest extends CoreTests {
 		assertEqualString(cu.getSource(), buf.toString());
 	}
 	
+	public void testStaticImports_bug113770() throws Exception {
+		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
+
+		IPackageFragment pack0= sourceFolder.createPackageFragment("pack0", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("public abstract class Test<M>\n");
+		buf.append("{\n");
+		buf.append("        private static Map<Object, Object[]> facetMap;\n");
+		buf.append("\n");
+		buf.append("        public void getFacets() {\n");
+		buf.append("                facetMap.get(null);\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack0.createCompilationUnit("Test.java", buf.toString(), false, null);
+
+
+		String[] order= new String[] {};
+		IChooseImportQuery query= createQuery("Test", new String[] {}, new int[] {});
+
+		OrganizeImportsOperation op= createOperation(cu, order, 99, false, true, true, query);
+		op.run(null);
+
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("\n");
+		buf.append("import java.util.Map;\n");
+		buf.append("\n");
+		buf.append("public abstract class Test<M>\n");
+		buf.append("{\n");
+		buf.append("        private static Map<Object, Object[]> facetMap;\n");
+		buf.append("\n");
+		buf.append("        public void getFacets() {\n");
+		buf.append("                facetMap.get(null);\n");
+		buf.append("        }\n");
+		buf.append("}\n");
+		assertEqualString(cu.getSource(), buf.toString());
+	}
+	
 	public void testStaticImports_bug81589() throws Exception {
 		IPackageFragmentRoot sourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");
 
