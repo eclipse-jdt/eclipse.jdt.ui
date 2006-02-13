@@ -104,7 +104,15 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 
 	protected final boolean isImportCompletion() {
 		char[] completion= fProposal.getCompletion();
-		return completion.length > 0 && completion[completion.length - 1] == ';';
+		if (completion.length == 0)
+			return false;
+		
+		char last= completion[completion.length - 1];
+		/*
+		 * Proposals end in a semicolon when completing types in normal imports or when completing
+		 * static members, in a period when completing types in static imports.
+		 */
+		return last == ';' || last == '.';
 	}
 
 	private ImportRewrite createImportRewrite() {
