@@ -673,7 +673,9 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 				List declarationFragments= element.fragments();
 				for (Iterator iterator= declarationFragments.iterator(); iterator.hasNext();) {
 					VariableDeclarationFragment fragment= (VariableDeclarationFragment)iterator.next();
-					doInferCollectionFromExpression(fragment.getInitializer());
+					Expression initializer= fragment.getInitializer();
+					if (initializer != null)
+						doInferCollectionFromExpression(initializer);
 				}
 			} else if (next instanceof Assignment) {
 				Assignment assignemnt= (Assignment)next;

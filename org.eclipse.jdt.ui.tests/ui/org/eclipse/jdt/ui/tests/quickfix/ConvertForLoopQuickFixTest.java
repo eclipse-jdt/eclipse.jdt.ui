@@ -991,6 +991,26 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 	}
+	
+	public void testBug127346() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        for (int[] arr= new int[7]; 1 < arr.length;) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, cu);
+
+		assertNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+	}
+	
 	private List fetchConvertingProposal(StringBuffer buf, ICompilationUnit cu) throws Exception {
 		int offset= buf.toString().indexOf("for");
 		AssistContext context= getCorrectionContext(cu, offset, 0);
