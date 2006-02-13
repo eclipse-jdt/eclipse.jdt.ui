@@ -24,6 +24,7 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
+import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
@@ -155,6 +156,6 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 		arguments.put(JavaRefactoringDescriptor.INPUT, getResourcePath().toPortableString());
 		arguments.put(JavaRefactoringDescriptor.NAME, getNewName());
 		arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-		return new JavaRefactoringDescriptor(ID_RENAME_JAVA_PROJECT, getResource().getProject().getName(), Messages.format(RefactoringCoreMessages.RenameJavaProjectChange_descriptor_description, new String[] { getOldName(), getNewName()}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE);
+		return new RefactoringChangeDescriptor(new JavaRefactoringDescriptor(ID_RENAME_JAVA_PROJECT, getResource().getProject().getName(), Messages.format(RefactoringCoreMessages.RenameJavaProjectChange_descriptor_description, new String[] { getOldName(), getNewName()}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.BREAKING_CHANGE));
 	}
 }
