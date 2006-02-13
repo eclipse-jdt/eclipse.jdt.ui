@@ -57,6 +57,7 @@ import org.eclipse.jface.text.DefaultLineTracker;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ILineTracker;
 import org.eclipse.jface.text.Position;
+import org.eclipse.jface.text.quickassist.IQuickFixableAnnotation;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.AnnotationModel;
 import org.eclipse.jface.text.source.AnnotationModelEvent;
@@ -120,7 +121,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		/**
 		 * Annotation representing an <code>IProblem</code>.
 		 */
-		static public class ProblemAnnotation extends Annotation implements IJavaAnnotation, IAnnotationPresentation {
+		static public class ProblemAnnotation extends Annotation implements IJavaAnnotation, IAnnotationPresentation, IQuickFixableAnnotation {
 
 			public static final String SPELLING_ANNOTATION_TYPE= "org.eclipse.ui.workbench.texteditor.spelling"; //$NON-NLS-1$
 
@@ -169,6 +170,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			private Image fImage;
 			private boolean fQuickFixImagesInitialized= false;
 			private int fLayer= IAnnotationAccessExtension.DEFAULT_LAYER;
+			private boolean fIsQuickFixable;
+			private boolean fIsQuickFixableStateSet= false;
 
 
 			public ProblemAnnotation(IProblem problem, ICompilationUnit cu) {
@@ -204,7 +207,9 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			private void initializeImages() {
 				// http://bugs.eclipse.org/bugs/show_bug.cgi?id=18936
 				if (!fQuickFixImagesInitialized) {
-					if (isProblem() && indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(this)) { // no light bulb for tasks
+					if (!isQuickFixableStateSet())
+						setQuickFixable(isProblem() && indicateQuixFixableProblems() && JavaCorrectionProcessor.hasCorrections(this)); // no light bulb for tasks
+					if (isQuickFixable()) {
 						if (!fgQuickFixImagesInitialized) {
 							fgQuickFixImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_PROBLEM);
 							fgQuickFixErrorImage= JavaPluginImages.get(JavaPluginImages.IMG_OBJS_FIXABLE_ERROR);
@@ -328,6 +333,32 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				if (fProblem instanceof CategorizedProblem)
 					return ((CategorizedProblem) fProblem).getMarkerType();
 				return null;
+			}
+
+			/*
+			 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#setQuickFixable(boolean)
+			 * @since 3.2
+			 */
+			public void setQuickFixable(boolean state) {
+				fIsQuickFixable= state;
+				fIsQuickFixableStateSet= true;
+			}
+
+			/*
+			 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#isQuickFixableStateSet()
+			 * @since 3.2
+			 */
+			public boolean isQuickFixableStateSet() {
+				return fIsQuickFixableStateSet;
+			}
+
+			/*
+			 * @see org.eclipse.jface.text.quickassist.IQuickFixableAnnotation#isQuickFixable()
+			 * @since 3.2
+			 */
+			public boolean isQuickFixable() {
+				Assert.isTrue(isQuickFixableStateSet());
+				return fIsQuickFixable;
 			}
 		}
 
