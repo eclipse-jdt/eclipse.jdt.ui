@@ -77,8 +77,8 @@ public class JUnitProgressBar extends Canvas {
 		fError= false;
 		fStopped= false;
 		fCurrentTickCount= 0;
-		fColorBarWidth= 0;
 		fMaxTickCount= 0;
+		fColorBarWidth= 0;
 		redraw();
 	}
 	
@@ -87,8 +87,8 @@ public class JUnitProgressBar extends Canvas {
 		fError= hasErrors;
 		fStopped= stopped;
 		fCurrentTickCount= ticksDone;
-		fColorBarWidth= scale(ticksDone);
 		fMaxTickCount= maximum;
+		fColorBarWidth= scale(ticksDone);
 		if (! noChange)
 			redraw();
 	}
