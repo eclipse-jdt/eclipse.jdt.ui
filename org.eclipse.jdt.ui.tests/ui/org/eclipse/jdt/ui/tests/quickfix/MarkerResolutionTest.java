@@ -27,6 +27,7 @@ import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
+import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -50,6 +51,40 @@ import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
 public class MarkerResolutionTest extends QuickFixTest {
+	
+	
+	private static final class TextViewerContext implements IQuickAssistInvocationContext {
+
+		private ITextViewer fTextViewer;
+		private int fSelectionOffset;
+		
+		TextViewerContext(ITextViewer textViewer, int offset) {
+			fTextViewer= textViewer;
+			fSelectionOffset= offset;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext#getSelectionOffset()
+		 */
+		public int getSelectionOffset() {
+			return fSelectionOffset;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext#getSelectionLength()
+		 */
+		public int getSelectionLength() {
+			return -1;
+		}
+
+		/*
+		 * @see org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext#getTextViewer()
+		 */
+		public ITextViewer getTextViewer() {
+			return fTextViewer;
+		}
+	}
+
 	
 	private static final Class THIS= MarkerResolutionTest.class;
 	
@@ -135,7 +170,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 		try {
 			JavaCorrectionAssistant assistant= new JavaCorrectionAssistant(javaEditor);
 			JavaCorrectionProcessor processor= new JavaCorrectionProcessor(assistant);
-			ICompletionProposal[] proposals= processor.computeCompletionProposals(viewer, 0);
+			ICompletionProposal[] proposals= processor.computeQuickAssistProposals(new TextViewerContext(viewer, 0));
 			
 			assertNumberOf("proposals", proposals.length, 1);
 			assertCorrectLabels(Arrays.asList(proposals));
@@ -183,7 +218,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 			
 			JavaCorrectionAssistant assistant= new JavaCorrectionAssistant((ITextEditor) part);
 			JavaCorrectionProcessor processor= new JavaCorrectionProcessor(assistant);
-			ICompletionProposal[] proposals= processor.computeCompletionProposals(null, markerPos + 1);
+			ICompletionProposal[] proposals= processor.computeQuickAssistProposals(new TextViewerContext(null, markerPos + 1));
 			
 			assertNumberOf("proposals", proposals.length, 1);
 			assertCorrectLabels(Arrays.asList(proposals));	
