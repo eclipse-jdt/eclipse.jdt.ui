@@ -186,14 +186,19 @@ public class TestViewer {
 		fLayoutMode= layoutMode;
 		try {
 			fTreeViewer.getTree().setRedraw(false);
-			fTestSessionContentProvider.setLayout(layoutMode);
-			fTestSessionLabelProvider.setLayout(layoutMode);
+			
+			//avoid realizing all TreeItems in flat mode!
 			if (failuresOnly) {
 				if (!isShowFailuresOnly()) {
 					fFailuresOnlyFilter= new FailuresOnlyFilter();
 					fTreeViewer.addFilter(fFailuresOnlyFilter);
 				}
+				fTestSessionContentProvider.setLayout(layoutMode);
+				fTestSessionLabelProvider.setLayout(layoutMode);
+				
 			} else {
+				fTestSessionContentProvider.setLayout(layoutMode);
+				fTestSessionLabelProvider.setLayout(layoutMode);
 				if (isShowFailuresOnly()) {
 					fTreeViewer.removeFilter(fFailuresOnlyFilter);
 					fFailuresOnlyFilter= null;
