@@ -69,6 +69,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 	private static final Key PREF_CODEASSIST_PREFIX_COMPLETION= getJDTUIKey(PreferenceConstants.CODEASSIST_PREFIX_COMPLETION);
 	private static final Key PREF_CODEASSIST_FORBIDDEN_REFERENCE_CHECK= getJDTCoreKey(JavaCore.CODEASSIST_FORBIDDEN_REFERENCE_CHECK);
 	private static final Key PREF_CODEASSIST_DISCOURAGED_REFERENCE_CHECK= getJDTCoreKey(JavaCore.CODEASSIST_DISCOURAGED_REFERENCE_CHECK);
+	private static final Key PREF_CODEASSIST_DEPRECATION_CHECK= getJDTCoreKey(JavaCore.CODEASSIST_DEPRECATION_CHECK);
 	private static final Key PREF_CODEASSIST_CAMEL_CASE_MATCH= getJDTCoreKey(JavaCore.CODEASSIST_CAMEL_CASE_MATCH);
 
 	private static Key[] getAllKeys() {
@@ -88,6 +89,7 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 				PREF_CODEASSIST_PREFIX_COMPLETION,
 				PREF_CODEASSIST_FORBIDDEN_REFERENCE_CHECK,
 				PREF_CODEASSIST_DISCOURAGED_REFERENCE_CHECK,
+				PREF_CODEASSIST_DEPRECATION_CHECK,
 				PREF_CODEASSIST_CAMEL_CASE_MATCH,
 		};	
 	}
@@ -217,6 +219,9 @@ class CodeAssistConfigurationBlock extends OptionsConfigurationBlock {
 		
 		label= PreferencesMessages.CodeAssistConfigurationBlock_hideDiscouraged_label;
 		addCheckBox(composite, label, PREF_CODEASSIST_DISCOURAGED_REFERENCE_CHECK, enabledDisabled, 0);
+		
+		label= PreferencesMessages.CodeAssistConfigurationBlock_hideDeprecated_label;
+		addCheckBox(composite, label, PREF_CODEASSIST_DEPRECATION_CHECK, enabledDisabled, 0);
 		
 		label= PreferencesMessages.CodeAssistConfigurationBlock_matchCamelCase_label;
 		addCheckBox(composite, label, PREF_CODEASSIST_CAMEL_CASE_MATCH, enabledDisabled, 0);
