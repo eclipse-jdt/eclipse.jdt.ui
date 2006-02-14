@@ -101,6 +101,20 @@ public abstract class TestElement {
 		return fTestName;
 	}
 	
+	// TODO: Format of testName is highly underspecified. See RemoteTestRunner#getTestName(Test).
+	
+	public String getClassName() {
+		return extractClassName(getTestName());
+	}
+	
+	private String extractClassName(String testNameString) {
+		int index= testNameString.indexOf('(');
+		if (index < 0) 
+			return testNameString;
+		testNameString= testNameString.substring(index + 1);
+		return testNameString.substring(0, testNameString.indexOf(')'));
+	}
+	
 	public abstract Status getStatus();
 	
 	public TestRoot getRoot() {
@@ -110,6 +124,4 @@ public abstract class TestElement {
 	public String toString() {
 		return getTestName() + ": " + getStatus(); //$NON-NLS-1$
 	}
-
-	
 }

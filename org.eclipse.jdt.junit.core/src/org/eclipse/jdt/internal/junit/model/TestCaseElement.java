@@ -62,12 +62,6 @@ public class TestCaseElement extends TestElement {
 		return fExpected != null && fActual != null;
 	}
 	
-	// TODO: Format of testName is highly underspecified. See RemoteTestRunner#getTestName(Test).
-
-	public String getClassName() {
-		return extractClassName(getTestName());
-	}
-	
 	public String getTestMethodName() {
 		int index= getTestName().indexOf('(');
 		if (index > 0)
@@ -76,15 +70,5 @@ public class TestCaseElement extends TestElement {
 		if(index > 0)
 			return getTestName().substring(0, index);
 		return getTestName();
-	}
-	
-	private String extractClassName(String testNameString) {
-		if (testNameString == null) 
-			return null;
-		int index= testNameString.indexOf('(');
-		if (index < 0) 
-			return testNameString;
-		testNameString= testNameString.substring(index + 1);
-		return testNameString.substring(0, testNameString.indexOf(')'));
 	}
 }

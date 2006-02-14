@@ -27,7 +27,13 @@ import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.SelectionListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.widgets.Composite;
+import org.eclipse.swt.widgets.Menu;
 
+import org.eclipse.jface.action.Action;
+import org.eclipse.jface.action.IMenuListener;
+import org.eclipse.jface.action.IMenuManager;
+import org.eclipse.jface.action.MenuManager;
+import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.viewers.AbstractTreeViewer;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeSelection;
@@ -35,6 +41,14 @@ import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
 import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
+
+import org.eclipse.ui.IWorkbenchActionConstants;
+
+import org.eclipse.debug.core.ILaunchManager;
+
+import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.junit.model.TestCaseElement;
 import org.eclipse.jdt.internal.junit.model.TestElement;
@@ -74,6 +88,18 @@ public class TestViewer {
 			return fList.size();
 		}
 	}
+	
+	private class ExpandAllAction extends Action {
+		public ExpandAllAction() {
+			setText(JUnitMessages.ExpandAllAction_text);  
+			setToolTipText(JUnitMessages.ExpandAllAction_tooltip);  
+		}
+		
+		public void run(){
+			fTreeViewer.expandAll();
+		}
+	}
+
 	
 	private final TestRunnerViewPart fTestRunnerPart;
 	
@@ -136,8 +162,71 @@ public class TestViewer {
 		fNeedUpdate= new HashSet();
 		fAutoClose= new LinkedList();
 		fAutoExpand= new HashSet();
+		
+		initMenu();
 	}
 	
+	private void initMenu() {
+		MenuManager menuMgr= new MenuManager("#PopupMenu"); //$NON-NLS-1$
+		menuMgr.setRemoveAllWhenShown(true);
+		menuMgr.addMenuListener(new IMenuListener() {
+			public void menuAboutToShow(IMenuManager manager) {
+				handleMenuAboutToShow(manager);
+			}
+		});
+		fTestRunnerPart.getSite().registerContextMenu(menuMgr, fTreeViewer);
+		Menu menu= menuMgr.createContextMenu(fTreeViewer.getTree());
+		fTreeViewer.getTree().setMenu(menu);
+	}
+
+	
+	void handleMenuAboutToShow(IMenuManager manager) {
+		IStructuredSelection selection= (IStructuredSelection) fTreeViewer.getSelection();
+		if (! selection.isEmpty()) {
+			TestElement testElement= (TestElement) selection.getFirstElement();
+			
+			String testLabel= testElement.getTestName();
+			String className= testElement.getClassName();
+			if (testElement instanceof TestSuiteElement) {	
+				manager.add(new OpenTestAction(fTestRunnerPart, testLabel));
+				manager.add(new Separator());
+				if (testClassExists(className) && !fTestRunnerPart.lastLaunchIsKeptAlive()) {
+					manager.add(new RerunAction(fTestRunnerPart, testElement.getId(), className, null, ILaunchManager.RUN_MODE));
+					manager.add(new RerunAction(fTestRunnerPart, testElement.getId(), className, null, ILaunchManager.DEBUG_MODE));
+				}
+			} else {
+				TestCaseElement testCaseElement= (TestCaseElement) testElement;
+				String testMethodName= testCaseElement.getTestMethodName();
+				manager.add(new OpenTestAction(fTestRunnerPart, className, testMethodName));
+				manager.add(new Separator());
+				if (fTestRunnerPart.lastLaunchIsKeptAlive()) {
+					manager.add(new RerunAction(fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
+					
+				} else {
+					manager.add(new RerunAction(fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.RUN_MODE));
+					manager.add(new RerunAction(fTestRunnerPart, testElement.getId(), className, testMethodName, ILaunchManager.DEBUG_MODE));
+				} 
+			}
+			manager.add(new Separator());
+			manager.add(new ExpandAllAction());
+
+		}
+		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
+		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS + "-end")); //$NON-NLS-1$
+	}
+	
+	private boolean testClassExists(String className) {
+		IJavaProject project= fTestRunnerPart.getLaunchedProject();
+		try {
+			IType type= project.findType(className);
+			return type != null;
+		} catch (JavaModelException e) {
+			// fall through
+		}
+		return false;
+	}
+
+
 	public TreeViewer getTreeViewer() {
 		return fTreeViewer;
 	}

@@ -477,21 +477,24 @@ public class TestRunnerViewPart extends ViewPart {
 		public void testReran(TestCaseElement testCaseElement, TestElement.Status status, String trace, String expectedResult, String actualResult) {
 			fTestViewer.registerViewerUpdate(testCaseElement); //TODO: autoExpand?
 			
-//TODO: !!! run update job!!!
 			String testId= testCaseElement.getId();
 			String className= testCaseElement.getClassName();
 			String testName= testCaseElement.getTestName();
 			
-			if (status == TestElement.Status.ERROR) {
-				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_error, new String[]{testName, className}); 
-				registerInfoMessage(msg); 
-			} else if (status == TestElement.Status.FAILURE) {
-				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_failure, new String[]{testName, className}); 
-				registerInfoMessage(msg);
-			} else {
-				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_success, new String[]{testName, className}); 
-				registerInfoMessage(msg);
-			}
+//			if (status == TestElement.Status.ERROR) {
+//				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_error, new String[]{testName, className}); 
+//				registerInfoMessage(msg); 
+//			} else if (status == TestElement.Status.FAILURE) {
+//				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_failure, new String[]{testName, className}); 
+//				registerInfoMessage(msg);
+//			} else {
+//				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_success, new String[]{testName, className}); 
+//				registerInfoMessage(msg);
+//			}
+			
+			postSyncProcessChanges();
+			showFailure(testCaseElement);
+			
 //			TestRunInfo info1= getTestInfo(testId);
 //			updateTest(info1, status.getOldCode());
 //			postSyncRunnable(new Runnable() {
@@ -826,11 +829,7 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	private void startUpdateJobs() {
-		postSyncRunnable(new Runnable() {
-			public void run() {
-				processChangesInUI();
-			}
-		});
+		postSyncProcessChanges();
 		
 		if (fUpdateJob != null) {
 			return;
@@ -856,11 +855,7 @@ public class TestRunnerViewPart extends ViewPart {
 			fJUnitIsRunningLock.release();
 			fJUnitIsRunningJob= null;
 		}
-		postSyncRunnable(new Runnable() {
-			public void run() {
-				processChangesInUI();
-			}
-		});
+		postSyncProcessChanges();
 	}
 	
 	private void processChangesInUI() {
@@ -1531,16 +1526,30 @@ action enablement
 		DebugUITools.saveAndBuildBeforeLaunch();
 		try {
 			boolean couldLaunch= fTestRunSession.rerunTest(testId, className, testName, launchMode);
-			if (! couldLaunch) 
+			if (! couldLaunch) {
 				MessageDialog.openInformation(getSite().getShell(),
 						JUnitMessages.TestRunnerViewPart_cannotrerun_title,
 						JUnitMessages.TestRunnerViewPart_cannotrerurn_message);
+			} else if (fTestRunSession.isKeptAlive()) {
+				TestCaseElement testCaseElement= (TestCaseElement) fTestRunSession.getTestElement(testId);
+				testCaseElement.setStatus(TestElement.Status.RUNNING);
+				fTestViewer.registerViewerUpdate(testCaseElement);
+				postSyncProcessChanges();
+			}
 
 		} catch (CoreException e) {
 			ErrorDialog.openError(getSite().getShell(), 
 				JUnitMessages.TestRunnerViewPart_error_cannotrerun, e.getMessage(), e.getStatus() 
 			);
 		}
+	}
+
+	private void postSyncProcessChanges() {
+		postSyncRunnable(new Runnable() {
+			public void run() {
+				processChangesInUI();
+			}
+		});
 	}
 
 	public void warnOfContentChange() {

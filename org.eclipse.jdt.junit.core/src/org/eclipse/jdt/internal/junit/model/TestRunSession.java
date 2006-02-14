@@ -193,6 +193,12 @@ public class TestRunSession {
 	 */
 	public boolean rerunTest(String testId, String className, String testName, String launchMode) throws CoreException {
 		if (isKeptAlive()) {
+			Status status= ((TestCaseElement) getTestElement(testId)).getStatus();
+			if (status == Status.ERROR) {
+				fErrorCount--;
+			} else if (status == Status.FAILURE) {
+				fFailureCount--;
+			}
 			fTestRunnerClient.rerunTest(testId, className, testName);
 			return true;
 			
@@ -223,7 +229,7 @@ public class TestRunSession {
 		return false;
 	}
 	
-	private TestElement getTestElement(String id) {
+	public TestElement getTestElement(String id) {
 		return (TestElement) fIdToTest.get(id);
 	}
 
@@ -411,7 +417,7 @@ public class TestRunSession {
 			TestCaseElement test= (TestCaseElement) testElement;
 
 			Status status= Status.convert(statusCode);
-			setStatus(test, status, trace, expected, actual);
+			setStatus(test, status, trace, nullifyEmpty(expected), nullifyEmpty(actual));
 			
 			if (statusCode == ITestRunListener.STATUS_ERROR) {
 				fErrorCount++;
@@ -423,6 +429,10 @@ public class TestRunSession {
 			for (int i= 0; i < listeners.length; ++i) {
 				((ITestSessionListener) listeners[i]).testFailed(test, status, trace, expected, actual);
 			}
+		}
+
+		private String nullifyEmpty(String string) {
+			return string.length() == 0 ? null : string;
 		}
 	
 		public void testReran(String testId, String testClass, String testName, int status, String trace) {
@@ -440,32 +450,35 @@ public class TestRunSession {
 			}
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
 			
-			//TODO: convert
-			int oldStatus= testCaseElement.getStatus().getOldCode();
-			if (statusCode == oldStatus)
-				return;
-			if (oldStatus == ITestRunListener.STATUS_OK) {
-				if (statusCode == ITestRunListener.STATUS_FAILURE) 
-					fFailureCount++;
-				else if (statusCode == ITestRunListener.STATUS_ERROR)
-					fErrorCount++;
-			} else if (oldStatus == ITestRunListener.STATUS_ERROR) {
-				if (statusCode == ITestRunListener.STATUS_OK) 
-					fErrorCount--;
-				else if (statusCode == ITestRunListener.STATUS_FAILURE) {
-					fErrorCount--;
-					fFailureCount++;
-				}
-			} else if (oldStatus == ITestRunListener.STATUS_FAILURE) {
-				if (statusCode == ITestRunListener.STATUS_OK) 
-					fFailureCount--;
-				else if (statusCode == ITestRunListener.STATUS_ERROR) {
-					fFailureCount--;
-					fErrorCount++;
-				}
-			}			
+//			int oldStatus= testCaseElement.getStatus().getOldCode();
+//			if (statusCode == oldStatus)
+//				return;
+//			if (oldStatus == ITestRunListener.STATUS_OK) {
+//				if (statusCode == ITestRunListener.STATUS_FAILURE) 
+//					fFailureCount++;
+//				else if (statusCode == ITestRunListener.STATUS_ERROR)
+//					fErrorCount++;
+//			} else if (oldStatus == ITestRunListener.STATUS_ERROR) {
+//				if (statusCode == ITestRunListener.STATUS_OK) 
+//					fErrorCount--;
+//				else if (statusCode == ITestRunListener.STATUS_FAILURE) {
+//					fErrorCount--;
+//					fFailureCount++;
+//				}
+//			} else if (oldStatus == ITestRunListener.STATUS_FAILURE) {
+//				if (statusCode == ITestRunListener.STATUS_OK) 
+//					fFailureCount--;
+//				else if (statusCode == ITestRunListener.STATUS_ERROR) {
+//					fFailureCount--;
+//					fErrorCount++;
+//				}
+//			}			
 			Status status= Status.convert(statusCode);
-			testCaseElement.setStatus(status, trace, expectedResult, actualResult);
+			if (status == Status.ERROR)
+				fErrorCount++;
+			else if (status == Status.FAILURE)
+				fFailureCount++;
+			testCaseElement.setStatus(status, trace, nullifyEmpty(expectedResult), nullifyEmpty(actualResult));
 			
 			Object[] listeners= fSessionListeners.getListeners();
 			for (int i= 0; i < listeners.length; ++i) {
