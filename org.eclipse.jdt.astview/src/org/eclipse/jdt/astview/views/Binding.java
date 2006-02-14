@@ -181,7 +181,6 @@ public class Binding extends ASTAttribute {
 					res.add(new BindingProperty(this, "MODIFIERS", Flags.toString(fBinding.getModifiers()), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "PARAMETER TYPES", methodBinding.getParameterTypes(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "IS VARARGS", methodBinding.isVarargs(), true)); //$NON-NLS-1$
-					res.add(new BindingProperty(this, "IS OVERRIDING", methodBinding.isOverriding(), true)); //$NON-NLS-1$
 					res.add(new BindingProperty(this, "EXCEPTION TYPES", methodBinding.getExceptionTypes(), true)); //$NON-NLS-1$
 					
 					StringBuffer genericsM= new StringBuffer("GENERICS:"); //$NON-NLS-1$
