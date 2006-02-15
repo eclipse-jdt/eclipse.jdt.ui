@@ -917,8 +917,14 @@ public class TestRunnerViewPart extends ViewPart {
 				ILaunchConfiguration launchConfiguration= fTestRunSession.getLaunch().getLaunchConfiguration();
 				if (launchConfiguration != null) {
 					try {
-						String name= launchConfiguration.getName(); 
-						String configName= Messages.format(JUnitMessages.TestRunnerViewPart_rerunFailedFirstLaunchConfigName, name); 
+						String oldName= launchConfiguration.getName(); 
+						String oldFailuresFilename= launchConfiguration.getAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, (String) null);
+						String configName;
+						if (oldFailuresFilename != null) {
+							configName= oldName;
+						} else {
+							configName= Messages.format(JUnitMessages.TestRunnerViewPart_rerunFailedFirstLaunchConfigName, oldName); 
+						}
 						ILaunchConfigurationWorkingCopy tmp= launchConfiguration.copy(configName); 
 						tmp.setAttribute(JUnitBaseLaunchConfiguration.FAILURES_FILENAME_ATTR, createFailureNamesFile());
 						tmp.launch(fTestRunSession.getLaunch().getLaunchMode(), null);	
