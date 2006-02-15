@@ -12,14 +12,18 @@ package org.eclipse.jdt.ui.refactoring;
 
 import java.lang.reflect.InvocationTargetException;
 
-import org.eclipse.swt.widgets.Shell;
-
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.swt.widgets.Shell;
+
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.operation.IRunnableContext;
+
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
@@ -56,11 +60,6 @@ import org.eclipse.jdt.internal.ui.refactoring.RefactoringExecutionHelper;
 import org.eclipse.jdt.internal.ui.refactoring.UserInterfaceStarter;
 import org.eclipse.jdt.internal.ui.refactoring.reorg.RenameUserInterfaceManager;
 
-import org.eclipse.ltk.core.refactoring.RefactoringCore;
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
-import org.eclipse.ltk.core.refactoring.participants.RenameRefactoring;
-
 /**
  * Central access point to execute rename refactorings.
  * <p>
@@ -93,7 +92,7 @@ public class RenameSupport {
 	public IStatus preCheck() throws CoreException {
 		ensureChecked();
 		if (fPreCheckStatus.hasFatalError())
-			return asStatus(fPreCheckStatus.getEntryMatchingSeverity(RefactoringStatus.FATAL));
+			return fPreCheckStatus.getEntryMatchingSeverity(RefactoringStatus.FATAL).toStatus();
 		else
 			return new Status(IStatus.OK, JavaPlugin.getPluginId(), 0, "", null); //$NON-NLS-1$
 	}
@@ -417,28 +416,5 @@ public class RenameSupport {
 	private void showInformation(Shell parent, RefactoringStatus status) {
 		String message= status.getMessageMatchingSeverity(RefactoringStatus.FATAL);
 		MessageDialog.openInformation(parent, JavaUIMessages.RenameSupport_dialog_title, message); 
-	}
-	
-	private static IStatus asStatus(RefactoringStatusEntry entry) {
-		int statusSeverity= IStatus.ERROR;
-		switch (entry.getSeverity()) {
-			case RefactoringStatus.OK :
-				statusSeverity= IStatus.OK;
-				break;
-			case RefactoringStatus.INFO :
-				statusSeverity= IStatus.INFO;
-				break;
-			case RefactoringStatus.WARNING :
-			case RefactoringStatus.ERROR :
-				statusSeverity= IStatus.WARNING;
-				break;
-		}
-		String pluginId= entry.getPluginId();
-		int code= entry.getCode();
-		if (pluginId == null) {
-			pluginId= JavaPlugin.getPluginId();
-			code= IStatus.ERROR;
-		}
-		return new Status(statusSeverity, pluginId, code, entry.getMessage(), null);
 	}
 }
