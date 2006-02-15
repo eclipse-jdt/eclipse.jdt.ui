@@ -16,18 +16,17 @@ import java.util.Hashtable;
 import junit.framework.Test;
 import junit.framework.TestSuite;
 
-import org.eclipse.jdt.testplugin.JavaProjectHelper;
-import org.eclipse.jdt.testplugin.TestOptions;
+import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IMarker;
-import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.jface.preference.IPreferenceStore;
+
 import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.ITextViewer;
 import org.eclipse.jface.text.contentassist.ICompletionProposal;
 import org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext;
+import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorPart;
 import org.eclipse.ui.texteditor.ITextEditor;
@@ -42,7 +41,6 @@ import org.eclipse.jdt.core.formatter.DefaultCodeFormatterConstants;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.ui.examples.AddTestMarkersAction;
-import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.EditorUtility;
@@ -50,16 +48,21 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaEditor;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionAssistant;
 import org.eclipse.jdt.internal.ui.text.correction.JavaCorrectionProcessor;
 
+import org.eclipse.jdt.testplugin.JavaProjectHelper;
+import org.eclipse.jdt.testplugin.TestOptions;
+
+import org.eclipse.jdt.ui.tests.core.ProjectTestSetup;
+
 public class MarkerResolutionTest extends QuickFixTest {
 	
 	
 	private static final class TextViewerContext implements IQuickAssistInvocationContext {
 
-		private ITextViewer fTextViewer;
+		private ISourceViewer fSourceViewer;
 		private int fOffset;
 		
-		TextViewerContext(ITextViewer textViewer, int offset) {
-			fTextViewer= textViewer;
+		TextViewerContext(ISourceViewer sourceViewer, int offset) {
+			fSourceViewer= sourceViewer;
 			fOffset= offset;
 		}
 
@@ -78,10 +81,10 @@ public class MarkerResolutionTest extends QuickFixTest {
 		}
 
 		/*
-		 * @see org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext#getTextViewer()
+		 * @see org.eclipse.jface.text.quickassist.IQuickAssistInvocationContext#getSourceViewer()
 		 */
-		public ITextViewer getTextViewer() {
-			return fTextViewer;
+		public ISourceViewer getSourceViewer() {
+			return fSourceViewer;
 		}
 	}
 
@@ -165,7 +168,7 @@ public class MarkerResolutionTest extends QuickFixTest {
 		IEditorPart part= EditorUtility.openInEditor(cu);
 		
 		JavaEditor javaEditor= (JavaEditor) part;
-		ITextViewer viewer= javaEditor.getViewer();
+		ISourceViewer viewer= javaEditor.getViewer();
 		
 		try {
 			JavaCorrectionAssistant assistant= new JavaCorrectionAssistant(javaEditor);

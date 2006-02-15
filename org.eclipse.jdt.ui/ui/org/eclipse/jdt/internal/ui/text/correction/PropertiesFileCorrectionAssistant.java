@@ -37,6 +37,7 @@ import org.eclipse.jface.text.Position;
 import org.eclipse.jface.text.quickassist.QuickAssistAssistant;
 import org.eclipse.jface.text.source.Annotation;
 import org.eclipse.jface.text.source.IAnnotationModel;
+import org.eclipse.jface.text.source.ISourceViewer;
 
 import org.eclipse.ui.IEditorInput;
 import org.eclipse.ui.IEditorPart;
@@ -107,9 +108,9 @@ public class PropertiesFileCorrectionAssistant extends QuickAssistAssistant {
 	/*
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistant#install(org.eclipse.jface.text.ITextViewer)
 	 */
-	public void install(ITextViewer textViewer) {
-		super.install(textViewer);
-		fViewer= textViewer;
+	public void install(ISourceViewer sourceViewer) {
+		super.install(sourceViewer);
+		fViewer= sourceViewer;
 	}
 
 
