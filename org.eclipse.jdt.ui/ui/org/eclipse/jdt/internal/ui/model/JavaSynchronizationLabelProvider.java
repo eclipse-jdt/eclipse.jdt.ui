@@ -63,7 +63,7 @@ public final class JavaSynchronizationLabelProvider extends AbstractSynchronizat
 		if (element instanceof IPackageFragment) {
 			final IPackageFragment fragment= (IPackageFragment) element;
 			final IResource resource= fragment.getResource();
-			if (!resource.exists()) {
+			if (resource == null || !resource.exists()) {
 				if (fPackageImage == null)
 					fPackageImage= JavaPluginImages.DESC_OBJS_PACKAGE.createImage();
 				return fPackageImage;
