@@ -261,7 +261,8 @@ public class JavaFormatter {
 			
 			internalFormat(document, context);
 			convertLineDelimiters(document);
-			trimStart(document, context);
+			if (!isReplacedAreaEmpty(context))
+				trimStart(document);
 			
 			tracker.updateBuffer();
 		} catch (MalformedTreeException e) {
@@ -299,21 +300,30 @@ public class JavaFormatter {
 		}
 	}
 
-	private void trimStart(IDocument document, TemplateContext context) throws BadLocationException {
-		// don't trim the buffer if the replacement area is empty
-		// case: surrounding empty lines with block
-		if (context instanceof DocumentTemplateContext) {
-			DocumentTemplateContext dtc= (DocumentTemplateContext) context;
-			if (dtc.getStart() == dtc.getCompletionOffset())
-				if (dtc.getDocument().get(dtc.getStart(), dtc.getEnd() - dtc.getStart()).trim().length() == 0)
-					return;
-		}
-
+	private void trimStart(IDocument document) throws BadLocationException {
 		int i= 0;
 		while ((i != document.getLength()) && Character.isWhitespace(document.getChar(i)))
 			i++;
 		
 		document.replace(0, i, ""); //$NON-NLS-1$
+	}
+
+	private boolean isReplacedAreaEmpty(TemplateContext context) {
+		// don't trim the buffer if the replacement area is empty
+		// case: surrounding empty lines with block
+		if (context instanceof DocumentTemplateContext) {
+			DocumentTemplateContext dtc= (DocumentTemplateContext) context;
+			if (dtc.getStart() == dtc.getCompletionOffset())
+				try {
+					if (dtc.getDocument().get(dtc.getStart(), dtc.getEnd() - dtc.getStart()).trim().length() == 0)
+						return true;
+				} catch (BadLocationException x) {
+					// ignore - this may happen when the document was modified after the initial invocation, and the
+					// context does not track the changes properly - don't trim in that case
+					return true;
+				}
+		}
+		return false;
 	}
 
 	private void format(IDocument doc, CompilationUnitContext context) throws BadLocationException {
