@@ -5027,6 +5027,13 @@
             </or>
          </enablement>
          <actionProvider class="org.eclipse.ltk.ui.refactoring.model.RefactoringSynchronizationActionProvider"/>
+         <commonSorter
+               class="org.eclipse.jdt.ui.JavaElementSorter"
+               id="org.eclipse.jdt.ui.JavaElementSorter">
+            <parentExpression>
+               <adapt type="org.eclipse.jdt.core.IJavaElement"/>
+            </parentExpression>
+         </commonSorter>
       </navigatorContent>
    </extension>
    <extension

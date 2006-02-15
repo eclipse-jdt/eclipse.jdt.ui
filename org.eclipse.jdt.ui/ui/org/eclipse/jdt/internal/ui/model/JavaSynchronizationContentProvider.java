@@ -43,6 +43,7 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.util.JavaElementResourceMapping;
 
@@ -155,8 +156,18 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	 */
 	private Object[] getJavaProjectChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
 		final LinkedList list= new LinkedList();
-		for (int index= 0; index < children.length; index++)
+		for (int index= 0; index < children.length; index++) {
+			if (children[index] instanceof IPackageFragment) {
+				final IPackageFragment fragment= (IPackageFragment) children[index];
+				try {
+					if (!fragment.hasChildren())
+						continue;
+				} catch (JavaModelException exception) {
+					JavaPlugin.log(exception);
+				}
+			}
 			list.add(children[index]);
+		}
 //		final IResource resource= JavaModelProvider.getResource(parent);
 //		if (resource != null) {
 //			final IResourceDiffTree tree= context.getDiffTree();
