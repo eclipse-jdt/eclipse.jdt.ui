@@ -189,7 +189,7 @@ public class JavaCorrectionProcessor implements org.eclipse.jface.text.quickassi
 	 */
 	public ICompletionProposal[] computeQuickAssistProposals(IQuickAssistInvocationContext quickAssistContext) {
 		ITextViewer viewer= quickAssistContext.getTextViewer();
-		int documentOffset= quickAssistContext.getSelectionOffset();
+		int documentOffset= quickAssistContext.getOffset();
 		
 		IEditorPart part= fAssistant.getEditor();
 

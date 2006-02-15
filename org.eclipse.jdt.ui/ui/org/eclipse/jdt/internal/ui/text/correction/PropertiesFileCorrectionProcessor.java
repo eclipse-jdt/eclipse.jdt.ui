@@ -104,7 +104,7 @@ public class PropertiesFileCorrectionProcessor implements IQuickAssistProcessor 
 	 */
 	public ICompletionProposal[] computeQuickAssistProposals(IQuickAssistInvocationContext quickAssistContext) {
 		ITextViewer viewer= quickAssistContext.getTextViewer();
-		int documentOffset= quickAssistContext.getSelectionOffset();
+		int documentOffset= quickAssistContext.getOffset();
 
 		IEditorPart part= fAssistant.getEditor();
 
