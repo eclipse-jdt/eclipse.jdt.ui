@@ -335,6 +335,14 @@ public class ProjectsWorkbookPage extends BuildPathBasePage {
 		String key= elem.getKey();
 		if (key.equals(CPListElement.ACCESSRULES)) {
 			showAccessRestrictionDialog(elem.getParent());
+		} else if (key.equals(CPListElement.NATIVE_LIB_PATH)) {
+			CPListElement selElement=  elem.getParent();
+			NativeLibrariesDialog dialog= new NativeLibrariesDialog(getShell(), selElement);
+			if (dialog.open() == Window.OK) {
+				selElement.setAttribute(CPListElement.NATIVE_LIB_PATH, dialog.getNativeLibraryPath());
+				fProjectsList.refresh();
+				fClassPathList.dialogFieldChanged(); // validate
+			}
 		}
 	}
 	
