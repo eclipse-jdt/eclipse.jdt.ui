@@ -169,6 +169,8 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 
 			// insert template string
 			IDocument document= viewer.getDocument();
+			if (end > document.getLength())
+				end= offset;
 			String templateString= templateBuffer.getString();
 			document.replace(start, end - start, templateString);
 
