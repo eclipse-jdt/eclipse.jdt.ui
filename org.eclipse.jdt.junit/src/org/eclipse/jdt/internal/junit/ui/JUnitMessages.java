@@ -175,7 +175,7 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_rerunaction_tooltip;
 	public static String TestRunnerViewPart_rerunfailuresaction_label;
 	public static String TestRunnerViewPart_rerunfailuresaction_tooltip;
-	public static String TestRunnerViewPart_rerunLaunchConfigName;
+	public static String TestRunnerViewPart_rerunFailedFirstLaunchConfigName;
 	public static String TestRunnerViewPart_stopaction_text;
 	public static String TestRunnerViewPart_stopaction_tooltip;
 	public static String TestRunnerViewPart_terminate_message;
