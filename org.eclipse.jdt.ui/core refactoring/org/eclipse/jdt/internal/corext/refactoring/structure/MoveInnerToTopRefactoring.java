@@ -773,9 +773,9 @@ public class MoveInnerToTopRefactoring extends CommentRefactoring implements IIn
 			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
 				arguments.put(JavaRefactoringDescriptor.INPUT, fType.getHandleIdentifier());
-				if (fEnclosingInstanceFieldName != null)
+				if (fEnclosingInstanceFieldName != null && !"".equals(fEnclosingInstanceFieldName)) //$NON-NLS-1$
 					arguments.put(ATTRIBUTE_FIELD_NAME, fEnclosingInstanceFieldName);
-				if (fNameForEnclosingInstanceConstructorParameter != null)
+				if (fNameForEnclosingInstanceConstructorParameter != null && !"".equals(fNameForEnclosingInstanceConstructorParameter)) //$NON-NLS-1$
 					arguments.put(ATTRIBUTE_PARAMETER_NAME, fNameForEnclosingInstanceConstructorParameter);
 				arguments.put(ATTRIBUTE_FIELD, Boolean.valueOf(fCreateInstanceField).toString());
 				arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fMarkInstanceFieldAsFinal).toString());
