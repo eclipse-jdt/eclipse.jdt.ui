@@ -4287,9 +4287,9 @@
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.buildpath"
         priority="100"/>
-    <markerGroupingEntry id="org.eclipse.jdt.ui.category.fatalerrors"
+    <markerGroupingEntry id="org.eclipse.jdt.ui.category.nonoptional"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
-        label="%MarkerCategory.fatalerrors"
+        label="%MarkerCategory.nonoptional"
         priority="90"/>
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.documentation"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
@@ -4298,11 +4298,11 @@
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.codestyle"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.codestyle"
-        priority="70"/>
+        priority="50"/>
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.potential"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.potential"
-        priority="50"/>
+        priority="70"/>
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.restrictedAPI"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.restrictedAPI"
@@ -4321,19 +4321,20 @@
         priority="10"/>
     <markerAttributeGrouping markerType="org.eclipse.jdt.core.problem" attribute="categoryId">
         <markerAttributeMapping value="10" markerGroupingEntry="org.eclipse.jdt.ui.category.buildpath"/>
-        <markerAttributeMapping value="20" markerGroupingEntry="org.eclipse.jdt.ui.category.fatalerrors"/>
-        <markerAttributeMapping value="30" markerGroupingEntry="org.eclipse.jdt.ui.category.fatalerrors"/>
-        <markerAttributeMapping value="40" markerGroupingEntry="org.eclipse.jdt.ui.category.fatalerrors"/>
-        <markerAttributeMapping value="50" markerGroupingEntry="org.eclipse.jdt.ui.category.fatalerrors"/>
-        <markerAttributeMapping value="60" markerGroupingEntry="org.eclipse.jdt.ui.category.documentation"/>
-        <markerAttributeMapping value="70" markerGroupingEntry="org.eclipse.jdt.ui.category.codestyle"/>
-        <markerAttributeMapping value="80" markerGroupingEntry="org.eclipse.jdt.ui.category.potential"/>
+        <markerAttributeMapping value="20" markerGroupingEntry="org.eclipse.jdt.ui.category.nonoptional"/>
+        <markerAttributeMapping value="30" markerGroupingEntry="org.eclipse.jdt.ui.category.nonoptional"/>
+        <markerAttributeMapping value="40" markerGroupingEntry="org.eclipse.jdt.ui.category.nonoptional"/>
+        <markerAttributeMapping value="50" markerGroupingEntry="org.eclipse.jdt.ui.category.nonoptional"/>
+        <markerAttributeMapping value="60" markerGroupingEntry="org.eclipse.jdt.ui.category.nonoptional"/>
+        <markerAttributeMapping value="70" markerGroupingEntry="org.eclipse.jdt.ui.category.documentation"/>
+        <markerAttributeMapping value="80" markerGroupingEntry="org.eclipse.jdt.ui.category.codestyle"/>
         <markerAttributeMapping value="90" markerGroupingEntry="org.eclipse.jdt.ui.category.potential"/>
-        <markerAttributeMapping value="100" markerGroupingEntry="org.eclipse.jdt.ui.category.deprecation"/>
-        <markerAttributeMapping value="110" markerGroupingEntry="org.eclipse.jdt.ui.category.potential"/>
-        <markerAttributeMapping value="120" markerGroupingEntry="org.eclipse.jdt.ui.category.generictypes"/>
-        <markerAttributeMapping value="130" markerGroupingEntry="org.eclipse.jdt.ui.category.nls"/>
-        <markerAttributeMapping value="140" markerGroupingEntry="org.eclipse.jdt.ui.category.restrictedAPI"/>
+        <markerAttributeMapping value="100" markerGroupingEntry="org.eclipse.jdt.ui.category.potential"/>
+        <markerAttributeMapping value="110" markerGroupingEntry="org.eclipse.jdt.ui.category.deprecation"/>
+        <markerAttributeMapping value="120" markerGroupingEntry="org.eclipse.jdt.ui.category.potential"/>
+        <markerAttributeMapping value="130" markerGroupingEntry="org.eclipse.jdt.ui.category.generictypes"/>
+        <markerAttributeMapping value="140" markerGroupingEntry="org.eclipse.jdt.ui.category.nls"/>
+        <markerAttributeMapping value="150" markerGroupingEntry="org.eclipse.jdt.ui.category.restrictedAPI"/>
      </markerAttributeGrouping>
      <markerAttributeGrouping markerType="org.eclipse.jdt.core.buildpath_problem"
         defaultGroupingEntry="org.eclipse.jdt.ui.category.buildpath"/>
