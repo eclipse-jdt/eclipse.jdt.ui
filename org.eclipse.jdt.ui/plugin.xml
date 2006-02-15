@@ -4287,9 +4287,9 @@
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
         label="%MarkerCategory.buildpath"
         priority="100"/>
-    <markerGroupingEntry id="org.eclipse.jdt.ui.category.nonoptional"
+    <markerGroupingEntry id="org.eclipse.jdt.ui.category.fatal"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
-        label="%MarkerCategory.nonoptional"
+        label="%MarkerCategory.fatal"
         priority="90"/>
     <markerGroupingEntry id="org.eclipse.jdt.ui.category.documentation"
         markerGrouping="org.eclipse.jdt.ui.java_marker_category"
@@ -4325,11 +4325,11 @@
         priority="10"/>
     <markerAttributeGrouping markerType="org.eclipse.jdt.core.problem" attribute="categoryId">
         <markerAttributeMapping value="10" markerGroupingEntry="org.eclipse.jdt.ui.category.buildpath"/>
-        <markerAttributeMapping value="20" markerGroupingEntry="org.eclipse.jdt.ui.category.nonoptional"/>
-        <markerAttributeMapping value="30" markerGroupingEntry="org.eclipse.jdt.ui.category.nonoptional"/>
-        <markerAttributeMapping value="40" markerGroupingEntry="org.eclipse.jdt.ui.category.nonoptional"/>
-        <markerAttributeMapping value="50" markerGroupingEntry="org.eclipse.jdt.ui.category.nonoptional"/>
-        <markerAttributeMapping value="60" markerGroupingEntry="org.eclipse.jdt.ui.category.nonoptional"/>
+        <markerAttributeMapping value="20" markerGroupingEntry="org.eclipse.jdt.ui.category.fatal"/>
+        <markerAttributeMapping value="30" markerGroupingEntry="org.eclipse.jdt.ui.category.fatal"/>
+        <markerAttributeMapping value="40" markerGroupingEntry="org.eclipse.jdt.ui.category.fatal"/>
+        <markerAttributeMapping value="50" markerGroupingEntry="org.eclipse.jdt.ui.category.fatal"/>
+        <markerAttributeMapping value="60" markerGroupingEntry="org.eclipse.jdt.ui.category.fatal"/>
         <markerAttributeMapping value="70" markerGroupingEntry="org.eclipse.jdt.ui.category.documentation"/>
         <markerAttributeMapping value="80" markerGroupingEntry="org.eclipse.jdt.ui.category.codestyle"/>
         <markerAttributeMapping value="90" markerGroupingEntry="org.eclipse.jdt.ui.category.potential"/>
