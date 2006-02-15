@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.astview.views;
 
+import java.util.ArrayList;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jdt.core.compiler.CategorizedProblem;
@@ -40,11 +42,17 @@ public class ProblemNode extends ASTAttribute {
 	 */
 	public Object[] getChildren() {
 		String[] arguments= fProblem.getArguments();
-		Object[] children= new Object[arguments.length];
-		for (int i= 0; i < arguments.length; i++) {
-			children[i]= new GeneralAttribute(this, String.valueOf(i), arguments[i]);
+		ArrayList children= new ArrayList();
+		
+		children.add(new GeneralAttribute(this, "ID", getErrorLabel()));
+		if (fProblem instanceof CategorizedProblem) {
+			children.add(new GeneralAttribute(this, "CATEGORY ID", getCategoryCode()));
+			children.add(new GeneralAttribute(this, "MARKER TYPE", ((CategorizedProblem) fProblem).getMarkerType()));
 		}
-		return children;
+		for (int i= 0; i < arguments.length; i++) {
+			children.add(new GeneralAttribute(this, "ARGUMENT " + i, arguments[i]));
+		}
+		return children.toArray();
 	}
 
 	/* (non-Javadoc)
@@ -52,7 +60,6 @@ public class ProblemNode extends ASTAttribute {
 	 */
 	public String getLabel() {
 		StringBuffer buf= new StringBuffer();
-		int id= fProblem.getID();
 		int offset= fProblem.getSourceStart();
 		int length= fProblem.getSourceEnd() + 1 - offset;
 		
@@ -61,43 +68,108 @@ public class ProblemNode extends ASTAttribute {
 		if (fProblem.isWarning())
 			buf.append("W");
 		buf.append('[').append(offset).append(", ").append(length).append(']').append(' ');
-		buf.append(fProblem.getMessage()).append(' ');
-		buf.append("(").append(getErrorCode(id)).append(" = 0x").append(Integer.toHexString(id)).append(" = ").append(id).append(") ");
-		if (fProblem instanceof CategorizedProblem) {
-			buf.append(", category id: ").append(((CategorizedProblem) fProblem).getCategoryID());
-		}
+		buf.append(fProblem.getMessage());
+		
 		return buf.toString();
 	}
 	
-	private String getErrorCode(int code) {
+	private String getErrorLabel() {
+		int id= fProblem.getID();
 		StringBuffer buf= new StringBuffer();
 			
-		if ((code & IProblem.TypeRelated) != 0) {
+		if ((id & IProblem.TypeRelated) != 0) {
 			buf.append("TypeRelated + "); //$NON-NLS-1$
 		}
-		if ((code & IProblem.FieldRelated) != 0) {
+		if ((id & IProblem.FieldRelated) != 0) {
 			buf.append("FieldRelated + "); //$NON-NLS-1$
 		}
-		if ((code & IProblem.ConstructorRelated) != 0) {
+		if ((id & IProblem.ConstructorRelated) != 0) {
 			buf.append("ConstructorRelated + "); //$NON-NLS-1$
 		}
-		if ((code & IProblem.MethodRelated) != 0) {
+		if ((id & IProblem.MethodRelated) != 0) {
 			buf.append("MethodRelated + "); //$NON-NLS-1$
 		}
-		if ((code & IProblem.ImportRelated) != 0) {
+		if ((id & IProblem.ImportRelated) != 0) {
 			buf.append("ImportRelated + "); //$NON-NLS-1$
 		}
-		if ((code & IProblem.Internal) != 0) {
+		if ((id & IProblem.Internal) != 0) {
 			buf.append("Internal + "); //$NON-NLS-1$
 		}
-		if ((code & IProblem.Syntax) != 0) {
+		if ((id & IProblem.Syntax) != 0) {
 			buf.append("Syntax + "); //$NON-NLS-1$
 		}
-		if ((code & IProblem.Javadoc) != 0) {
+		if ((id & IProblem.Javadoc) != 0) {
 			buf.append("Javadoc + "); //$NON-NLS-1$
 		}
-		buf.append(code & IProblem.IgnoreCategoriesMask);
-			
+		buf.append(id & IProblem.IgnoreCategoriesMask);
+		
+		buf.append(" = 0x").append(Integer.toHexString(id)).append(" = ").append(id);
+		
+		return buf.toString();
+	}
+	
+	private String getCategoryCode() {
+		CategorizedProblem categorized= (CategorizedProblem) fProblem;
+		int categoryID= categorized.getCategoryID();
+		StringBuffer buf= new StringBuffer();
+		
+		switch (categoryID) {
+			case CategorizedProblem.CAT_UNSPECIFIED:
+				buf.append("Unspecified");
+				break;
+				
+			case CategorizedProblem.CAT_BUILDPATH:
+				buf.append("Buildpath");
+				break;
+			case CategorizedProblem.CAT_SYNTAX:
+				buf.append("Syntax");
+				break;
+			case CategorizedProblem.CAT_IMPORT:
+				buf.append("Import");
+				break;
+			case CategorizedProblem.CAT_TYPE:
+				buf.append("Type");
+				break;
+			case CategorizedProblem.CAT_MEMBER:
+				buf.append("Member");
+				break;
+			case CategorizedProblem.CAT_INTERNAL:
+				buf.append("Internal");
+				break;
+			case CategorizedProblem.CAT_JAVADOC:
+				buf.append("Javadoc");
+				break;
+			case CategorizedProblem.CAT_CODE_STYLE:
+				buf.append("Code Style");
+				break;
+			case CategorizedProblem.CAT_POTENTIAL_PROGRAMMING_PROBLEM:
+				buf.append("Potential Programming Problem");
+				break;
+			case CategorizedProblem.CAT_NAME_SHADOWING_CONFLICT:
+				buf.append("Name Shadowing Conflict");
+				break;
+			case CategorizedProblem.CAT_DEPRECATION:
+				buf.append("Deprecation");
+				break;
+			case CategorizedProblem.CAT_UNNECESSARY_CODE:
+				buf.append("Unnecessary Code");
+				break;
+			case CategorizedProblem.CAT_UNCHECKED_RAW:
+				buf.append("Unchecked Raw");
+				break;
+			case CategorizedProblem.CAT_NLS:
+				buf.append("NLS");
+				break;
+			case CategorizedProblem.CAT_RESTRICTION:
+				buf.append("Restriction");
+				break;
+			default:
+				buf.append("<UNKNOWN CATEGORY>");
+				break;
+		}
+		
+		buf.append(" = ").append(categoryID);
+
 		return buf.toString();
 	}
 	
