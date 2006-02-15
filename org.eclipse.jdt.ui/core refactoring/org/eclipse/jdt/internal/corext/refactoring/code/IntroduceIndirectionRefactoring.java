@@ -315,6 +315,10 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 		return fIntermediaryMethodName;
 	}
 
+	/**
+	 * @param fullyQualifiedTypeName
+	 * @return status for type name. Use {@link #setIntermediaryMethodName(String)} to check for overridden methods.
+	 */
 	public RefactoringStatus setIntermediaryClassName(String fullyQualifiedTypeName) {
 		IType target= null;
 
@@ -342,7 +346,7 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 
 		fIntermediaryClass= target;
 
-		return checkOverloading();
+		return new RefactoringStatus();
 	}
 
 	/**

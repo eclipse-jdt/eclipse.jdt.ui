@@ -62,7 +62,7 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 	
 	private Combo fIntermediaryTypeName;
 	private static final int INTERMEDIARY_TYPE_COUNT= 10;
-	private static List fgIntemediaryTypes= new ArrayList(INTERMEDIARY_TYPE_COUNT);
+	private static List fgIntermediaryTypes= new ArrayList(INTERMEDIARY_TYPE_COUNT);
 
 	/**
 	 * Constructor for IntroduceIndirectionInputPage.
@@ -82,7 +82,8 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 	private Combo createIntermediaryTypeCombo(Composite composite) {
 		final Combo textCombo= new Combo(composite, SWT.SINGLE | SWT.BORDER);
 		textCombo.setLayoutData(new GridData(GridData.FILL_HORIZONTAL));
-		textCombo.setItems((String[]) fgIntemediaryTypes.toArray(new String[fgIntemediaryTypes.size()]));
+		textCombo.setItems((String[]) fgIntermediaryTypes.toArray(new String[fgIntermediaryTypes.size()]));
+		textCombo.setVisibleItemCount(INTERMEDIARY_TYPE_COUNT);
 		
 		JavaTypeCompletionProcessor processor= new JavaTypeCompletionProcessor(false, false, true);
 		processor.setPackageFragment(getIntroduceIndirectionRefactoring().getInvocationPackage()); 
@@ -140,26 +141,24 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 		fIntermediaryTypeName.setText(getIntroduceIndirectionRefactoring().getIntermediaryClassName());
 
 		fIntermediaryMethodName.addModifyListener(new ModifyListener() {
-
 			public void modifyText(ModifyEvent e) {
 				validateInput();
 			}
 		});
+		
 		enableReferencesCheckBox.addSelectionListener(new SelectionAdapter() {
-
 			public void widgetSelected(SelectionEvent e) {
 				getIntroduceIndirectionRefactoring().setEnableUpdateReferences(enableReferencesCheckBox.getSelection());
 			}
 		});
 
 		fIntermediaryTypeName.addModifyListener(new ModifyListener() {
-
 			public void modifyText(ModifyEvent e) {
 				validateInput();
 			}
 		});
+		
 		browseTypes.addSelectionListener(new SelectionAdapter() {
-
 			public void widgetSelected(SelectionEvent e) {
 				IType intermediaryType= chooseIntermediaryClass();
 
@@ -211,8 +210,8 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 
 	private void validateInput() {
 		RefactoringStatus merged= new RefactoringStatus();
-		merged.merge(getIntroduceIndirectionRefactoring().setIntermediaryMethodName(fIntermediaryMethodName.getText()));
 		merged.merge(getIntroduceIndirectionRefactoring().setIntermediaryClassName(fIntermediaryTypeName.getText()));
+		merged.merge(getIntroduceIndirectionRefactoring().setIntermediaryMethodName(fIntermediaryMethodName.getText()));
 
 		setPageComplete(!merged.hasError());
 		int severity= merged.getSeverity();
@@ -236,8 +235,8 @@ public class IntroduceIndirectionInputPage extends UserInputWizardPage {
 
 	private void storeIntermediaryTypeName() {
 		String destination= fIntermediaryTypeName.getText();
-		if (!fgIntemediaryTypes.remove(destination) && fgIntemediaryTypes.size() >= INTERMEDIARY_TYPE_COUNT)
-			fgIntemediaryTypes.remove(fgIntemediaryTypes.size() - 1);
-		fgIntemediaryTypes.add(0, destination);
+		if (!fgIntermediaryTypes.remove(destination) && fgIntermediaryTypes.size() >= INTERMEDIARY_TYPE_COUNT)
+			fgIntermediaryTypes.remove(fgIntermediaryTypes.size() - 1);
+		fgIntermediaryTypes.add(0, destination);
 	}
 }
