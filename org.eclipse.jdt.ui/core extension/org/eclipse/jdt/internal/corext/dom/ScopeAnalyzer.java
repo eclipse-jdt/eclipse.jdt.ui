@@ -463,7 +463,7 @@ public class ScopeAnalyzer {
 		fRoot.accept(finder);
 		ASTNode node= finder.getCoveringNode();
 		if (node == null) {
-			return null;
+			return NO_BINDING;
 		}
 
 		if (node instanceof SimpleName) {
