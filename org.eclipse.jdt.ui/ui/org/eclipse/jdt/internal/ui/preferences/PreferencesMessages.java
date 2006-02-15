@@ -724,6 +724,7 @@ public final class PreferencesMessages extends NLS {
 	public static String ComplianceConfigurationBlock_classfile_greater_source;
 	public static String ProblemSeveritiesConfigurationBlock_pb_parameter_assignment;
 	public static String ProblemSeveritiesConfigurationBlock_pb_null_reference;
+	public static String ProblemSeveritiesConfigurationBlock_pb_fall_through_case;
 	public static String CodeAssistConfigurationBlock_hideDeprecated_label;
 
 }
