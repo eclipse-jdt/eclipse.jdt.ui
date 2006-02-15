@@ -6,7 +6,7 @@
          <meta.schema plugin="org.eclipse.jdt.ui" id="javaCompletionProposalSorters" name="Java Completion Proposal Sorters"/>
       </appInfo>
       <documentation>
-         This extension point allows to contribute sorters and filters that may modify the completion proposals displayed in the Java editor.
+         This extension point allows to contribute sorters that may modify the completion proposal ordering in the Java editor.
       </documentation>
    </annotation>
 

@@ -163,6 +163,7 @@
  <package name="org.eclipse.jdt.ui.text.java">
    <type name="IInvocationContext" implement="false"/>
    <type name="IProblemLocation" implement="false"/>
+   <type name="JavaContentAssistInvocationContext" subclass="false"/>
  </package>
 
  <package name="org.eclipse.jdt.ui.text.java.hover">
