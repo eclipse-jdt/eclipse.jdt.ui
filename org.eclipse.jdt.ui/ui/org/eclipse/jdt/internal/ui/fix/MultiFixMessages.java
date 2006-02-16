@@ -92,6 +92,7 @@ public class MultiFixMessages extends NLS {
 	public static String ControlStatementsCleanUp_convertLoops_checkBoxLabel;
 	public static String ControlStatementsCleanUp_always_checkBoxLabel;
 	public static String ControlStatementsCleanUp_removeIfPossible_checkBoxLabel;
+	public static String ControlStatementsCleanUp_RemoveUnnecessaryBlocks_description;
 	
 	static {
 		// initialize resource bundle
