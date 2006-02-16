@@ -120,7 +120,7 @@ public class GenerateBuildPathActionGroup extends ActionGroup {
     
 	private static class NoActionAvailable extends Action {
 		public NoActionAvailable() {
-			setEnabled(true);
+			setEnabled(false);
 			setText(NewWizardMessages.GenerateBuildPathActionGroup_no_action_available); 
 		}
 	}
