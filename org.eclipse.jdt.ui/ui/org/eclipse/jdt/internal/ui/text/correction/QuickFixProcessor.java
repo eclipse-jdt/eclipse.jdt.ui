@@ -176,7 +176,8 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.UnsafeTypeConversion:
 			case IProblem.UndefinedAnnotationMember:
 			case IProblem.MissingValueForAnnotationMember:
-			//case IProblem.NonGenericType:
+			case IProblem.FallthroughCase:
+			case IProblem.NonGenericType:
 				return true;
 			default:
 				if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
@@ -505,6 +506,9 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.RawTypeReference:
 			case IProblem.UnsafeRawMethodInvocation:
 				LocalCorrectionsSubProcessor.addTypePrametersToRawTypeReference(context, problem, proposals);
+				break;
+			case IProblem.FallthroughCase:
+				LocalCorrectionsSubProcessor.addFallThroughProposals(context, problem, proposals);
 				break;
 			default:
 		}

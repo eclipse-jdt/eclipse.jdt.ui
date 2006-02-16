@@ -71,6 +71,8 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
 import org.eclipse.jdt.core.dom.Statement;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
+import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.SwitchStatement;
 import org.eclipse.jdt.core.dom.TryStatement;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
@@ -913,5 +915,20 @@ public class LocalCorrectionsSubProcessor {
 			}
 		};
 		proposals.add(proposal);
+	}
+	
+	public static void addFallThroughProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) {
+		ASTNode selectedNode= problem.getCoveringNode(context.getASTRoot());
+		if (selectedNode instanceof SwitchCase && selectedNode.getParent() instanceof SwitchStatement) {
+			AST ast= selectedNode.getAST();
+			ASTRewrite rewrite= ASTRewrite.create(ast);
+			ListRewrite listRewrite= rewrite.getListRewrite(selectedNode.getParent(), SwitchStatement.STATEMENTS_PROPERTY);
+			listRewrite.insertBefore(ast.newBreakStatement(), selectedNode, null);
+			
+			String label= CorrectionMessages.LocalCorrectionsSubProcessor_insert_break_statement;
+			Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+			ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 5, image);
+			proposals.add(proposal);
+		}
 	}
 }
