@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.corext.fix;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.Iterator;
 import java.util.List;
@@ -279,6 +280,42 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 	}
 	
+	private static class RemoveAllCastOperation extends AbstractFixRewriteOperation {
+
+		private final HashSet fUnnecessaryCasts;
+
+		public RemoveAllCastOperation(HashSet unnecessaryCasts) {
+			fUnnecessaryCasts= unnecessaryCasts;
+		}
+
+		/**
+		 * {@inheritDoc}
+		 */
+		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			TextEditGroup group= new TextEditGroup(FixMessages.UnusedCodeFix_RemoveCast_description);
+			while (fUnnecessaryCasts.size() > 0) {
+				CastExpression castExpression= (CastExpression)fUnnecessaryCasts.iterator().next();
+				fUnnecessaryCasts.remove(castExpression);
+				CastExpression down= castExpression;
+				while (fUnnecessaryCasts.contains(down.getExpression())) {
+					down= (CastExpression)down.getExpression();
+					fUnnecessaryCasts.remove(down);
+				}
+				
+				ASTNode move= rewrite.createMoveTarget(down.getExpression());
+				
+				CastExpression top= castExpression;
+				while (fUnnecessaryCasts.contains(top.getParent())) {
+					top= (CastExpression)top.getParent();
+					fUnnecessaryCasts.remove(top);
+				}
+				
+				rewrite.replace(top, move, group);
+			}
+		}
+	}
+	
 	public static UnusedCodeFix createRemoveUnusedImportFix(CompilationUnit compilationUnit, IProblemLocation problem) {
 		int id= problem.getProblemId();
 		if (id == IProblem.UnusedImport || id == IProblem.DuplicateImport || id == IProblem.ConflictingImport ||
@@ -368,6 +405,7 @@ public class UnusedCodeFix extends AbstractFix {
 
 		List/*<IFixRewriteOperation>*/ result= new ArrayList();
 		Hashtable/*<ASTNode, List>*/ variableDeclarations= new Hashtable();
+		HashSet/*/CastExpression>*/ unnecessaryCasts= new HashSet();
 		for (int i= 0; i < problems.length; i++) {
 			IProblemLocation problem= problems[i];
 			int id= problem.getProblemId();
@@ -419,7 +457,7 @@ public class UnusedCodeFix extends AbstractFix {
 				}
 
 				if (curr instanceof CastExpression) {
-					result.add(new RemoveCastOperation((CastExpression)curr, selectedNode));
+					unnecessaryCasts.add(curr);
 				}
 			}
 		}
@@ -428,6 +466,8 @@ public class UnusedCodeFix extends AbstractFix {
 			List names= (List)variableDeclarations.get(node);
 			result.add(new RemoveUnusedMemberOperation((SimpleName[])names.toArray(new SimpleName[names.size()])));
 		}
+		if (unnecessaryCasts.size() > 0)
+			result.add(new RemoveAllCastOperation(unnecessaryCasts));
 		
 		if (result.size() == 0)
 			return null;
