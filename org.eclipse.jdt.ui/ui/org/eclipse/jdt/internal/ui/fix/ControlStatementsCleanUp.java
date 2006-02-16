@@ -124,6 +124,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 		Button box1= addCheckBox(parent, CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP, MultiFixMessages.ControlStatementsCleanUp_convertLoops_checkBoxLabel);
 		if (project != null && !JavaModelUtil.is50OrHigher(project)) {
 			box1.setEnabled(false);
+			box1.setSelection(false);
 		}
 		fButtons[3]= box1;
 		

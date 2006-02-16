@@ -141,6 +141,9 @@ public class Java50CleanUp extends AbstractCleanUp {
 			boxes[0].setEnabled(false);
 			boxes[1].setEnabled(false);
 			button.setEnabled(false);
+			boxes[0].setSelection(false);
+			boxes[1].setSelection(false);
+			button.setSelection(false);
 		}
 		
 		return parent;
