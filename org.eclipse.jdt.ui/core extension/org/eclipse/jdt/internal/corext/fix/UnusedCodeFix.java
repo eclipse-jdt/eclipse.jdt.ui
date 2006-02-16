@@ -266,6 +266,9 @@ public class UnusedCodeFix extends AbstractFix {
 		 */
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			
+			TextEditGroup group= new TextEditGroup(FixMessages.UnusedCodeFix_RemoveCast_description);
+			textEditGroups.add(group);
+			
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 
 			CastExpression cast= fCast;
@@ -273,9 +276,9 @@ public class UnusedCodeFix extends AbstractFix {
 			ASTNode placeholder= rewrite.createCopyTarget(expression);
 
 			if (ASTNodes.needsParentheses(expression)) {
-				rewrite.replace(fCast, placeholder, null);
+				rewrite.replace(fCast, placeholder, group);
 			} else {
-				rewrite.replace(fSelectedNode, placeholder, null);
+				rewrite.replace(fSelectedNode, placeholder, group);
 			}
 		}
 	}
@@ -293,7 +296,10 @@ public class UnusedCodeFix extends AbstractFix {
 		 */
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
+			
 			TextEditGroup group= new TextEditGroup(FixMessages.UnusedCodeFix_RemoveCast_description);
+			textEditGroups.add(group);
+			
 			while (fUnnecessaryCasts.size() > 0) {
 				CastExpression castExpression= (CastExpression)fUnnecessaryCasts.iterator().next();
 				fUnnecessaryCasts.remove(castExpression);
