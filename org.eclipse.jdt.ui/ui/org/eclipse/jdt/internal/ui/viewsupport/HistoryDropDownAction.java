@@ -87,6 +87,10 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 		}
 
 		private boolean addEntryMenuItems(List entries) {
+			if (entries.isEmpty()) {
+				return false;
+			}
+			
 			boolean checkOthers= true;
 			int min= Math.min(entries.size(), RESULTS_IN_DROP_DOWN);
 			for (int i= 0; i < min; i++) {
@@ -94,7 +98,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 				HistoryAction action= new HistoryAction(entry);
 				boolean check= entry.equals(fHistory.getCurrentEntry());
 				action.setChecked(check);
-				if (action.isChecked())
+				if (check)
 					checkOthers= false;
 				addActionToMenu(fMenu, action);
 			}
