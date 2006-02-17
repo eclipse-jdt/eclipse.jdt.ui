@@ -30,6 +30,10 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.actions.ActionGroup;
 import org.eclipse.ui.actions.CloseResourceAction;
+
+/*
+ * XXX: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=128386
+ */
 import org.eclipse.ui.internal.ide.actions.CloseUnrelatedProjectsAction;
 
 import org.eclipse.ui.ide.IDEActionFactory;
@@ -68,8 +72,13 @@ public class ProjectActionGroup extends ActionGroup {
 		
 		fCloseAction= new CloseResourceAction(shell);
 		fCloseAction.setActionDefinitionId("org.eclipse.ui.project.closeProject"); //$NON-NLS-1$
+		
+		/*
+		 * XXX: see https://bugs.eclipse.org/bugs/show_bug.cgi?id=128386
+		 */
 		fCloseUnrelatedAction= new CloseUnrelatedProjectsAction(shell);
 		fCloseUnrelatedAction.setActionDefinitionId("org.eclipse.ui.project.closeUnrelatedProjects"); //$NON-NLS-1$
+		
 		fOpenAction= new OpenProjectAction(fSite);
 		fOpenAction.setActionDefinitionId("org.eclipse.ui.project.openProject"); //$NON-NLS-1$
 		if (selection instanceof IStructuredSelection) {
