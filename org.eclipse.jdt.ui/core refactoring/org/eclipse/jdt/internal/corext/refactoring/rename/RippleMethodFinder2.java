@@ -170,7 +170,7 @@ public class RippleMethodFinder2 {
 		if (partitioning.size() == 1)
 			return (IMethod[]) fDeclarations.toArray(new IMethod[fDeclarations.size()]);
 		
-		//Multiple partititions; must look out for nasty marriage cases
+		//Multiple partitions; must look out for nasty marriage cases
 		//(types inheriting method from two ancestors, but without redeclaring it).
 		IType methodTypeRep= fUnionFind.find(fMethod.getDeclaringType());
 		List/*<IType>*/ relatedTypes= (List) partitioning.get(methodTypeRep);
@@ -184,7 +184,7 @@ public class RippleMethodFinder2 {
 		}
 		
 		//Definition: An alien type is a type that is not a related type. The set of
-		// alien types diminishes as new types become related (aka marry a relatedType).
+		// alien types diminishes as new types become related (a.k.a marry a relatedType).
 		
 		List/*<IMethod>*/ alienDeclarations= new ArrayList(fDeclarations);
 		fDeclarations= null;
