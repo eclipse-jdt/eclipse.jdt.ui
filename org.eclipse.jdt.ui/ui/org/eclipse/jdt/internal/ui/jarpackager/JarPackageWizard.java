@@ -292,4 +292,11 @@ public class JarPackageWizard extends Wizard implements IExportWizard {
 	void setInitializeFromJarPackage(boolean state) {
 		fInitializeFromJarPackage= state;
 	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean canFinish() {
+		return !fJarPackage.isRefactoringAware() || fJarPackage.getRefactoringDescriptors().length > 0;
+	}
 }

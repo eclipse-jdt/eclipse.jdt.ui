@@ -47,7 +47,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.2
  */
-public class JarPackagePreviewPage extends WizardPage implements IJarPackageWizardPage {
+final class JarPackagePreviewPage extends WizardPage implements IJarPackageWizardPage {
 
 	/** The page name */
 	private final static String PAGE_NAME= "jarPreviewWizardPage"; //$NON-NLS-1$
@@ -93,6 +93,7 @@ public class JarPackagePreviewPage extends WizardPage implements IJarPackageWiza
 
 			public final void checkStateChanged(final CheckStateChangedEvent event) {
 				fJarPackageData.setRefactoringDescriptors(fHistoryControl.getCheckedDescriptors());
+				getContainer().updateButtons();
 			}
 		});
 		setControl(composite);
