@@ -450,29 +450,6 @@ public class TestRunSession {
 			}
 			TestCaseElement testCaseElement= (TestCaseElement) testElement;
 			
-//			int oldStatus= testCaseElement.getStatus().getOldCode();
-//			if (statusCode == oldStatus)
-//				return;
-//			if (oldStatus == ITestRunListener.STATUS_OK) {
-//				if (statusCode == ITestRunListener.STATUS_FAILURE) 
-//					fFailureCount++;
-//				else if (statusCode == ITestRunListener.STATUS_ERROR)
-//					fErrorCount++;
-//			} else if (oldStatus == ITestRunListener.STATUS_ERROR) {
-//				if (statusCode == ITestRunListener.STATUS_OK) 
-//					fErrorCount--;
-//				else if (statusCode == ITestRunListener.STATUS_FAILURE) {
-//					fErrorCount--;
-//					fFailureCount++;
-//				}
-//			} else if (oldStatus == ITestRunListener.STATUS_FAILURE) {
-//				if (statusCode == ITestRunListener.STATUS_OK) 
-//					fFailureCount--;
-//				else if (statusCode == ITestRunListener.STATUS_ERROR) {
-//					fFailureCount--;
-//					fErrorCount++;
-//				}
-//			}			
 			Status status= Status.convert(statusCode);
 			if (status == Status.ERROR)
 				fErrorCount++;

@@ -476,48 +476,9 @@ public class TestRunnerViewPart extends ViewPart {
 
 		public void testReran(TestCaseElement testCaseElement, TestElement.Status status, String trace, String expectedResult, String actualResult) {
 			fTestViewer.registerViewerUpdate(testCaseElement); //TODO: autoExpand?
-			
-			String testId= testCaseElement.getId();
-			String className= testCaseElement.getClassName();
-			String testName= testCaseElement.getTestName();
-			
-//			if (status == TestElement.Status.ERROR) {
-//				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_error, new String[]{testName, className}); 
-//				registerInfoMessage(msg); 
-//			} else if (status == TestElement.Status.FAILURE) {
-//				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_failure, new String[]{testName, className}); 
-//				registerInfoMessage(msg);
-//			} else {
-//				String msg= Messages.format(JUnitMessages.TestRunnerViewPart_message_success, new String[]{testName, className}); 
-//				registerInfoMessage(msg);
-//			}
-			
 			postSyncProcessChanges();
 			showFailure(testCaseElement);
-			
-//			TestRunInfo info1= getTestInfo(testId);
-//			updateTest(info1, status.getOldCode());
-//			postSyncRunnable(new Runnable() {
-//				public void run() {
-//					refreshCounters();
-////					for (Enumeration e= fTestRunTabs.elements(); e.hasMoreElements();) {
-////						TestRunTab v= (TestRunTab) e.nextElement();
-////						v.endRerunTest(testId);
-////					}
-//				}
-//			});
-//			
-//			if (info1.getTrace() == null || !info1.getTrace().equals(trace)) {
-//				info1.setTrace(trace);
-////TODO				showFailure(info);
-//			}
-			
-//			TestRunInfo info= getTestInfo(testId);
-//			info.setActual(actualResult);
-//			info.setExpected(expectedResult);
-//			fFailureTrace.updateEnablement(info);
 		}
-		
 		
 		public void testAdded(TestElement testElement) {
 			fTestViewer.registerViewerRefresh(); //TODO: performance: would only need to refresh parent of added element
