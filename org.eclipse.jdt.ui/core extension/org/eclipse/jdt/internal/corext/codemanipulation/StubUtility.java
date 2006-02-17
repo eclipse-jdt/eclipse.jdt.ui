@@ -19,7 +19,6 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.StringTokenizer;
-import java.util.regex.Pattern;
 
 import org.eclipse.text.edits.DeleteEdit;
 import org.eclipse.text.edits.MalformedTreeException;
@@ -89,8 +88,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.ProjectTemplateStore;
 
 public class StubUtility {
 	
-	private static final Pattern SEMICOLON_PATTERN= Pattern.compile(";"); //$NON-NLS-1$
-
 	private static final String[] EMPTY= new String[0];
 	
 	private static final Set VALID_TYPE_BODY_TEMPLATES;
@@ -1006,6 +1003,5 @@ public class StubUtility {
 	public static ImportRewrite createImportRewrite(CompilationUnit astRoot, boolean restoreExistingImports) {
 		return CodeStyleConfiguration.createImportRewrite(astRoot, restoreExistingImports);
 	}
-	
 	
 }
