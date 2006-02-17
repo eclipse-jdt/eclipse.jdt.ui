@@ -22,6 +22,7 @@ import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.Region;
@@ -169,7 +170,14 @@ public class QuickTemplateProcessor implements IQuickAssistProcessor {
 					proposal.setDisplayString(Messages.format(CorrectionMessages.QuickTemplateProcessor_surround_label, arg));
 					result.add(proposal);
 				} else {
-					TemplateProposal proposal= new TemplateProposal(currentTemplate, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE));
+					TemplateProposal proposal= new TemplateProposal(currentTemplate, context, region, JavaPluginImages.get(JavaPluginImages.IMG_OBJS_TEMPLATE)) {
+						/**
+						 * {@inheritDoc}
+						 */
+						public boolean validate(IDocument doc, int off, DocumentEvent event) {
+							return false;
+						}
+					};
 					String[] arg= new String[] { currentTemplate.getName(), currentTemplate.getDescription() };
 					proposal.setDisplayString(Messages.format(CorrectionMessages.QuickTemplateProcessor_surround_label, arg));
 					result.add(proposal);

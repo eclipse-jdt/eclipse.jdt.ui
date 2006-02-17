@@ -29,6 +29,7 @@ import org.eclipse.jface.dialogs.MessageDialog;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IRegion;
 import org.eclipse.jface.text.ITextViewer;
@@ -320,5 +321,11 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 	private void openErrorDialog(Shell shell, Exception e) {
 		MessageDialog.openError(shell, TemplateContentAssistMessages.TemplateEvaluator_error_title, e.getMessage());
 	}
-
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean validate(IDocument document, int offset, DocumentEvent event) {
+		return false;
+	}
 }
