@@ -102,6 +102,9 @@ public class ScopeAnalyzer {
 		 * {@inheritDoc}
 		 */
 		public boolean acceptBinding(IBinding binding) {
+			if (binding == null)
+				return false;
+			
 			if (hasFlag(CHECK_VISIBILITY, fFlags)) {
 				if (!isVisible(binding, fParentTypeBinding)) {
 					return false;
@@ -372,6 +375,9 @@ public class ScopeAnalyzer {
 		public boolean acceptBinding(IBinding binding) {
 			if (fFound)
 				return true;
+			
+			if (binding == null)
+				return false;
 			
 			if (binding == fToSearch) {
 				fFound= true;

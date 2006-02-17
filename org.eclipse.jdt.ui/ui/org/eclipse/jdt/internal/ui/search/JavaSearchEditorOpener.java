@@ -214,7 +214,7 @@ public class JavaSearchEditorOpener {
 	}
 	
 	private void setReusedEditor(IEditorPart editor) {
-		if (fReusedEditorWatcher == null && editor != null) {
+		if (fReusedEditorWatcher == null) {
 			fReusedEditorWatcher= new ReusedEditorWatcher();
 		}
 		fReusedEditorWatcher.initialize(editor);
