@@ -16,16 +16,19 @@ public class JavaElementProperty extends JEAttribute {
 	private final JEAttribute fParent;
 	private final String fName;
 	private final String fValue;
+	private final Object fValueObject;
 
 	public JavaElementProperty(JEAttribute parent, String name) {
 		fParent= parent;
 		fName= name;
 		fValue= null;
+		fValueObject= null;
 	}
 
 	public JavaElementProperty(JEAttribute parent, String name, Object value) {
 		fParent= parent;
 		fName= name;
+		fValueObject= value;
 		if (value instanceof String)
 			fValue= "\"" + value + "\"";
 		else
@@ -37,6 +40,11 @@ public class JavaElementProperty extends JEAttribute {
 		return fParent;
 	}
 
+	@Override
+	public Object getWrappedObject() {
+		return fValueObject;
+	}
+	
 	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)

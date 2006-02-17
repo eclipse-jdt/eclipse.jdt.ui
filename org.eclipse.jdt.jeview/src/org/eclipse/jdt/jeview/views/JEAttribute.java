@@ -22,6 +22,8 @@ public abstract class JEAttribute {
 	public abstract JEAttribute[] getChildren();
 	public abstract String getLabel();
 	
+	public abstract Object getWrappedObject();
+	
 	@Override
 	public abstract boolean equals(Object obj);
 	

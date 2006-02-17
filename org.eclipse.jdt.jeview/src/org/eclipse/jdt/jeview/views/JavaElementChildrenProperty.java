@@ -59,6 +59,11 @@ public abstract class JavaElementChildrenProperty extends JEAttribute {
 	}
 	
 	@Override
+	public Object getWrappedObject() {
+		return getChildren().length;
+	}
+	
+	@Override
 	public JEAttribute[] getChildren() {
 		try {
 			return computeChildren();

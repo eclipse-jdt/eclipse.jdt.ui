@@ -83,5 +83,9 @@ public class Error extends JEAttribute {
 	public Exception getException() {
 		return fException;
 	}
-
+	
+	@Override
+	public Object getWrappedObject() {
+		return fException;
+	}
 }

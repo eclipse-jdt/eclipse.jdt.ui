@@ -14,19 +14,27 @@ package org.eclipse.jdt.jeview.views;
 import java.util.Collection;
 import java.util.List;
 
+import org.eclipse.core.resources.IResource;
+
 import org.eclipse.jdt.core.IJavaElement;
 
 
 public class JERoot extends JEAttribute {
 
-	private final List<JavaElement> fJavaElements;
+	private final List<JEAttribute> fJEAttributes;
 
-	public JERoot(Collection<? extends IJavaElement> javaElements) {
-		fJavaElements= new Mapper<IJavaElement, JavaElement>() {
-			@Override public JavaElement map(IJavaElement element) {
-				return new JavaElement(null, element);
+	public JERoot(Collection<?> javaElementsOrResources) {
+		fJEAttributes= new Mapper<Object, JEAttribute>() {
+			@Override public JEAttribute map(Object element) {
+				if (element instanceof IJavaElement)
+					return new JavaElement(null, (IJavaElement) element);
+				else if (element instanceof IResource)
+					return new JEResource(null, null, (IResource) element);
+				else
+					throw new IllegalArgumentException(String.valueOf(element));
+				
 			}
-		}.mapToList(javaElements);
+		}.mapToList(javaElementsOrResources);
 		
 //		fJavaElements= Mapper.build(javaElements, new Mapper<IJavaElement, JavaElement>() {
 //			@Override public JavaElement map(IJavaElement element) {
@@ -47,17 +55,22 @@ public class JERoot extends JEAttribute {
 
 	@Override
 	public JEAttribute[] getChildren() {
-		return fJavaElements.toArray(new JavaElement[fJavaElements.size()]);
+		return fJEAttributes.toArray(new JEAttribute[fJEAttributes.size()]);
 	}
 
+	@Override
+	public Object getWrappedObject() {
+		return null;
+	}
+	
 	@Override
 	public String getLabel() {
 		StringBuffer buf = new StringBuffer("root: ");
 		boolean first= true;
-		for (JavaElement je : fJavaElements) {
+		for (JEAttribute att : fJEAttributes) {
 			if (! first)
 				buf.append(", ");
-			buf.append(je.getLabel());
+			buf.append(att.getLabel());
 			first= false;
 		}
 		return buf.toString();
@@ -72,12 +85,12 @@ public class JERoot extends JEAttribute {
 		}
 		
 		JERoot other= (JERoot) obj;
-		return fJavaElements.equals(other.fJavaElements);
+		return fJEAttributes.equals(other.fJEAttributes);
 	}
 	
 	@Override
 	public int hashCode() {
-		return fJavaElements.hashCode();
+		return fJEAttributes.hashCode();
 	}
 
 }

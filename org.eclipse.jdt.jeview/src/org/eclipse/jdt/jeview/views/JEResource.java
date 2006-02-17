@@ -22,16 +22,16 @@ import org.eclipse.core.resources.IResource;
 
 import org.eclipse.jface.util.Assert;
 
+import org.eclipse.jdt.core.JavaCore;
+
 
 public class JEResource extends JEAttribute {
 	
-	private final JEAttribute fParent;
-	private final String fName;
+	private final JEAttribute fParent; // can be null
+	private final String fName; // can be null
 	private IResource fResource;
 	
 	JEResource(JEAttribute parent, String name, IResource resource) {
-		Assert.isNotNull(parent);
-		Assert.isNotNull(name);
 		Assert.isNotNull(resource);
 		fParent= parent;
 		fName= name;
@@ -52,13 +52,17 @@ public class JEResource extends JEAttribute {
 		}
 		
 		JEResource other= (JEResource) obj;
-		if (! fParent.equals(other.fParent)) {
+		if (fParent == null) {
+			if (other.fParent != null)
+				return false;
+		} else if (! fParent.equals(other.fParent)) {
 			return false;
 		}
-		if (! fName.equals(other.fName)) {
-			return false;
-		}
-		if (! fResource.equals(other.fResource)) {
+		
+		if (fName == null) {
+			if (other.fName != null)
+				return false;
+		} else if (! fName.equals(other.fName)) {
 			return false;
 		}
 		
@@ -67,7 +71,14 @@ public class JEResource extends JEAttribute {
 	
 	@Override
 	public int hashCode() {
-		return fParent.hashCode() + fName.hashCode() + fResource.hashCode();
+		return (fParent != null ? fParent.hashCode() : 0)
+				+ (fName != null ? fName.hashCode() : 0)
+				+ fResource.hashCode();
+	}
+	
+	@Override
+	public Object getWrappedObject() {
+		return fResource;
 	}
 	
 	public IResource getResource() {
@@ -83,6 +94,8 @@ public class JEResource extends JEAttribute {
 			result.add(new JEResource(this, "PARENT", parent));
 		else
 			result.add(new JavaElementProperty(this, "PARENT", parent));
+		
+		result.add(new JavaElement(this, "JavaCore.create(..)", JavaCore.create(fResource)));
 		
 		if (fResource instanceof IContainer) {
 			final IContainer container= (IContainer) fResource;
@@ -117,7 +130,10 @@ public class JEResource extends JEAttribute {
 
 	@Override
 	public String getLabel() {
-		return fName +  ": " + fResource.getName();
+		String label= fResource.getName();
+		if (fName != null)
+			label= fName +  ": " + label;
+		return label;
 	}
 
 	public static JEAttribute compute(JEAttribute parent, String name, Callable<IResource> computer) {

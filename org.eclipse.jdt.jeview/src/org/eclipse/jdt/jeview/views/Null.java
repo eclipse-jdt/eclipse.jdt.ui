@@ -37,6 +37,11 @@ public class Null extends JEAttribute {
 	}
 
 	@Override
+	public Object getWrappedObject() {
+		return null;
+	}
+	
+	@Override
 	public String getLabel() {
 		return fName + ": null";
 	}

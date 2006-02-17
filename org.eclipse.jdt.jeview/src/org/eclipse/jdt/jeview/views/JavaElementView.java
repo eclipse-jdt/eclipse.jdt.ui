@@ -20,6 +20,7 @@ import java.util.Set;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.IFile;
@@ -44,7 +45,6 @@ import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.resource.ImageDescriptor;
-import org.eclipse.jface.util.ListenerList;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
 import org.eclipse.jface.viewers.ISelection;
@@ -118,6 +118,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	private Action fCreateFromHandleAction;
 	private Action fRefreshAction;
 	TreeCopyAction fCopyAction;
+	private Action fCompareAction;
 	private Action fPropertiesAction;
 	Action fDoubleClickAction;
 	
@@ -220,19 +221,19 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	}
 
 	void reset() {
-		setInput(getJavaModel());
+		setSingleInput(getJavaModel());
 	}
 
 	private IJavaModel getJavaModel() {
 		return JavaCore.create(JEViewPlugin.getWorkspace().getRoot());
 	}
 
-	void setInput(IJavaElement javaElement) {
-		setInput(Collections.singleton(javaElement));
+	void setSingleInput(Object javaElementOrResource) {
+		setInput(Collections.singleton(javaElementOrResource));
 	}
 	
-	void setInput(Collection<? extends IJavaElement> javaElements) {
-		fInput= new JERoot(javaElements);
+	void setInput(Collection<?> javaElementsOrResources) {
+		fInput= new JERoot(javaElementsOrResources);
 		fViewer.setInput(fInput);
 		ITreeContentProvider tcp= (ITreeContentProvider) fViewer.getContentProvider();
 		Object[] elements= tcp.getElements(fInput);
@@ -286,6 +287,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		// Other plug-ins can contribute there actions here
 		manager.add(new Separator(IWorkbenchActionConstants.MB_ADDITIONS));
 		manager.add(new Separator());
+		addCompareActionOrNot(manager);
 		manager.add(fPropertiesAction);
 	}
 
@@ -299,6 +301,15 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					fFocusAction.setText("Fo&cus On '" + name + '\'');
 					manager.add(fFocusAction);
 				}
+			}
+		}
+	}
+	
+	private void addCompareActionOrNot(IMenuManager manager) {
+		if (fViewer.getSelection() instanceof IStructuredSelection) {
+			IStructuredSelection structuredSelection= (IStructuredSelection) fViewer.getSelection();
+			if (structuredSelection.size() == 2) {
+				manager.add(fCompareAction);
 			}
 		}
 	}
@@ -335,7 +346,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				if (resolved.length == 0)
 					return;
 				
-				setInput(resolved[0]);
+				setSingleInput(resolved[0]);
 			}
 		};
 		fCodeSelectAction.setToolTipText("Set input from current editor's selection (codeSelect)");
@@ -362,7 +373,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				if (resolved == null)
 					return;
 				
-				setInput(resolved);
+				setSingleInput(resolved);
 			}
 		};
 		fElementAtAction.setToolTipText("Set input from current editor's selection location (getElementAt)");
@@ -374,14 +385,14 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					return;
 				String handleIdentifier= dialog.getValue();
 				IJavaElement javaElement= JavaCore.create(handleIdentifier);
-				setInput(javaElement);
+				setSingleInput(javaElement);
 			}
 		};
 		
 		fFocusAction= new Action() {
 			@Override public void run() {
 				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
-				setInput(((JavaElement) selected).getJavaElement());
+				setSingleInput(((JavaElement) selected).getJavaElement());
 			}
 		};
 		fFocusAction.setToolTipText("Focus on Selection");
@@ -407,7 +418,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		
 		fCopyAction= new TreeCopyAction(new Tree[] {fViewer.getTree()});
 		
-		fPropertiesAction= new Action("Properties", JEPluginImages.IMG_PROPERTIES) {
+		fPropertiesAction= new Action("&Properties", JEPluginImages.IMG_PROPERTIES) {
 			@Override
 			public void run() {
 				String viewId = IPageLayout.ID_PROP_SHEET;
@@ -481,6 +492,23 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 				}
 			}
 		};
+		
+		fCompareAction= new Action() {
+			@Override public void run() {
+				Object[] selection= ((IStructuredSelection) fViewer.getSelection()).toArray();
+				Object first= ((JEAttribute) selection[0]).getWrappedObject();
+				Object second= ((JEAttribute) selection[1]).getWrappedObject();
+				boolean identical= first == second;
+				boolean equals1= first != null && first.equals(second);
+				boolean equals2= second != null && second.equals(first);
+				boolean inconsistentEquals= equals1 != equals2;
+				
+				String msg= "==: " + identical + "\nequals(..): " + (inconsistentEquals ? "INCONSISTENT" : equals1);
+				MessageDialog.openInformation(fViewer.getTree().getShell(), "Comparison", msg);
+			}
+		};
+		fCompareAction.setText("C&ompare with Each Other...");
+
 	}
 
 	
@@ -577,14 +605,16 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		if (selection instanceof IStructuredSelection) {
 			IStructuredSelection structuredSelection= ((IStructuredSelection) selection);
 			if (structuredSelection.size() >= 1) {
-				Set<IJavaElement> input= new LinkedHashSet<IJavaElement>();
+				Set<Object> input= new LinkedHashSet<Object>();
 				for (Iterator iter = structuredSelection.iterator(); iter.hasNext();) {
 					Object first= iter.next();
 					if (first instanceof IJavaElement) {
-						input.add((IJavaElement) first);
+						input.add(first);
 					} else if (first instanceof IResource) {
 						IJavaElement je= JavaCore.create((IResource) first);
-						if (je != null) {
+						if (je == null) {
+							input.add(first);
+						} else {
 							input.add(je);
 						}
 					}
@@ -598,9 +628,9 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		
 		Object input= context.getInput();
 		if (input instanceof IEditorInput) {
-			IJavaElement elementOfInput= getElementOfInput((IEditorInput)context.getInput());
+			Object elementOfInput= getElementOfInput((IEditorInput)context.getInput());
 			if (elementOfInput != null) {
-				setInput(elementOfInput);
+				setSingleInput(elementOfInput);
 				return true;
 			}
 		}
@@ -608,20 +638,21 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		return false;
 	}
 	
-	IJavaElement getElementOfInput(IEditorInput input) {
+	Object getElementOfInput(IEditorInput input) {
 		Object adapted= input.getAdapter(IClassFile.class);
-		if (adapted != null)
-			return (IClassFile) adapted;
+		if (adapted != null) {
+			return adapted;
+		}
 		
 		if (input instanceof IFileEditorInput) {
 			IFile file= ((IFileEditorInput)input).getFile();
 			IJavaElement javaElement= JavaCore.create(file);
-			if (javaElement != null)
+			if (javaElement != null) {
 				return javaElement;
+			} else {
+				return file;
+			}
 		}
-		
-//		if (input instanceof JarEntryEditorInput)
-//			return ((JarEntryEditorInput)input).getStorage();
 		return null;
 	}
 	

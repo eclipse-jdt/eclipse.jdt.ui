@@ -103,6 +103,11 @@ public class JavaElement extends JEAttribute {
 	}
 
 	@Override
+	public Object getWrappedObject() {
+		return fJavaElement;
+	}
+	
+	@Override
 	public String getLabel() {
 		StringBuffer sb= new StringBuffer();
 		if (fName != null)

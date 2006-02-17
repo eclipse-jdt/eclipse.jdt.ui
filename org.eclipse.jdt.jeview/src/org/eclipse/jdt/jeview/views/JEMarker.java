@@ -59,6 +59,11 @@ public class JEMarker extends JEAttribute {
 	}
 	
 	@Override
+	public Object getWrappedObject() {
+		return fMarker;
+	}
+	
+	@Override
 	public boolean equals(Object obj) {
 		if (this == obj)
 			return true;
