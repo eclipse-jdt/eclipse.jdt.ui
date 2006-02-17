@@ -96,12 +96,7 @@ public abstract class AbstractJavaEditorTextHover implements IJavaEditorTextHove
 		ICodeAssist resolve= getCodeAssist();
 		if (resolve != null) {
 			try {
-				IJavaElement[] result= null;
-
-				synchronized (resolve) {
-					result= resolve.codeSelect(hoverRegion.getOffset(), hoverRegion.getLength());
-				}
-
+				IJavaElement[] result= resolve.codeSelect(hoverRegion.getOffset(), hoverRegion.getLength());
 				if (result == null)
 					return null;
 

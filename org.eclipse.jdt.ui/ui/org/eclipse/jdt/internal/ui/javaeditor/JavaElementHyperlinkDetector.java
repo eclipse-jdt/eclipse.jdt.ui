@@ -67,9 +67,7 @@ public class JavaElementHyperlinkDetector implements IHyperlinkDetector {
 		try {
 
 			IJavaElement[] elements= null;
-			synchronized (input) {
-				elements= ((ICodeAssist) input).codeSelect(offset, 0);
-			}
+			elements= ((ICodeAssist) input).codeSelect(offset, 0);
 
 			IDocument document= fTextEditor.getDocumentProvider().getDocument(fTextEditor.getEditorInput());
 
