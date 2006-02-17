@@ -55,7 +55,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.2
  */
-public final class StubCreationOperation implements IWorkspaceRunnable {
+public class StubCreationOperation implements IWorkspaceRunnable {
 
 	/** The internal string buffer */
 	private final StringBuffer fBuffer= new StringBuffer(2048);
@@ -463,6 +463,56 @@ public final class StubCreationOperation implements IWorkspaceRunnable {
 	}
 
 	/**
+	 * Creates a new compilation unit with the given contents.
+	 * 
+	 * @param store
+	 *            the file store
+	 * @param name
+	 *            the name of the compilation unit
+	 * @param content
+	 *            the content of the compilation unit
+	 * @param monitor
+	 *            the progress monitor to use
+	 * @throws CoreException
+	 *             if an error occurs while creating the compilation unit
+	 */
+	protected void createCompilationUnit(final IFileStore store, final String name, final String content, final IProgressMonitor monitor) throws CoreException {
+		OutputStream stream= null;
+		try {
+			stream= new BufferedOutputStream(store.getChild(name).openOutputStream(EFS.NONE, new SubProgressMonitor(monitor, 1)));
+			try {
+				stream.write(content.getBytes());
+			} catch (IOException exception) {
+				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, exception.getLocalizedMessage(), exception));
+			}
+		} finally {
+			if (stream != null) {
+				try {
+					stream.close();
+				} catch (IOException exception) {
+					// Do nothing
+				}
+			}
+		}
+	}
+
+	/**
+	 * Creates a package fragment with the given name.
+	 * 
+	 * @param store
+	 *            the file store
+	 * @param name
+	 *            the name of the package
+	 * @param monitor
+	 *            the progress monitor to use
+	 * @throws CoreException
+	 *             if an error occurs while creating the package fragment
+	 */
+	protected void createPackageFragment(final IFileStore store, final String name, final IProgressMonitor monitor) throws CoreException {
+		store.mkdir(EFS.NONE, monitor);
+	}
+
+	/**
 	 * Runs the stub generation on the specified class file.
 	 * 
 	 * @param file
@@ -475,7 +525,6 @@ public final class StubCreationOperation implements IWorkspaceRunnable {
 	 *             if an error occurs
 	 */
 	private void run(final IClassFile file, final IFileStore parent, final IProgressMonitor monitor) throws CoreException {
-		OutputStream stream= null;
 		try {
 			monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, 2);
 			final IType type= file.getType();
@@ -484,32 +533,20 @@ public final class StubCreationOperation implements IWorkspaceRunnable {
 				return;
 			if (type.isMember())
 				return;
-			stream= new BufferedOutputStream(parent.getChild(name + ".java").openOutputStream(0, new SubProgressMonitor(monitor, 1))); //$NON-NLS-1$
 			fBuffer.append("package "); //$NON-NLS-1$
 			fBuffer.append(file.getParent().getElementName());
 			fBuffer.append(";"); //$NON-NLS-1$
 			appendTypeDeclaration(type, new SubProgressMonitor(monitor, 1));
-			try {
-				stream.write(fBuffer.toString().getBytes());
-			} catch (IOException exception) {
-				throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, exception.getLocalizedMessage(), exception));
-			}
+			createCompilationUnit(parent, name + ".java", fBuffer.toString(), monitor); //$NON-NLS-1$
 		} finally {
-			if (stream != null) {
-				try {
-					stream.close();
-				} catch (IOException exception) {
-					// Do nothing
-				}
-			}
 			monitor.done();
 		}
 	}
 
-	/*
-	 * @see org.eclipse.core.resources.IWorkspaceRunnable#run(org.eclipse.core.runtime.IProgressMonitor)
+	/**
+	 * {@inheritDoc}
 	 */
-	public final void run(IProgressMonitor monitor) throws CoreException {
+	public void run(IProgressMonitor monitor) throws CoreException {
 		if (monitor == null)
 			monitor= new NullProgressMonitor();
 		monitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, 100 * fPackages.size());
@@ -523,7 +560,9 @@ public final class StubCreationOperation implements IWorkspaceRunnable {
 				subMonitor.beginTask(RefactoringCoreMessages.StubCreationOperation_creating_type_stubs, size * 50);
 				final String name= fragment.getElementName();
 				IFileStore store= EFS.getStore(fOutputURI);
+				String pack= ""; //$NON-NLS-1$
 				if (!"".equals(name)) { //$NON-NLS-1$
+					pack= name;
 					buffer.setLength(0);
 					buffer.append(name);
 					final int length= buffer.length();
@@ -533,7 +572,7 @@ public final class StubCreationOperation implements IWorkspaceRunnable {
 					}
 					store= store.getChild(new Path(buffer.toString()));
 					if (!store.fetchInfo(EFS.NONE, new SubProgressMonitor(subMonitor, 10)).exists())
-						store.mkdir(EFS.NONE, new SubProgressMonitor(subMonitor, 10));
+						createPackageFragment(store, pack, new SubProgressMonitor(subMonitor, 10));
 					else
 						subMonitor.worked(10);
 				}

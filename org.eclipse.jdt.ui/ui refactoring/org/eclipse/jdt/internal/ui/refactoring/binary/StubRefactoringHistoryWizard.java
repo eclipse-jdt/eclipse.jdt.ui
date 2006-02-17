@@ -52,6 +52,7 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 
@@ -389,7 +390,7 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 		try {
 			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 240);
 			final IPackageFragmentRoot root= getPackageFragmentRoot();
-			if (root != null && fSourceFolder != null) {
+			if (root != null && fSourceFolder != null && fJavaProject != null) {
 				try {
 					final SubProgressMonitor subMonitor= new SubProgressMonitor(monitor, 40, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL);
 					final IJavaElement[] elements= root.getChildren();
@@ -405,9 +406,22 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 						subMonitor.done();
 					}
 					if (!list.isEmpty()) {
+						fProcessedFragments.addAll(list);
 						final URI uri= fSourceFolder.getRawLocationURI();
 						if (uri != null) {
-							final StubCreationOperation operation= new StubCreationOperation(uri, list, true);
+							final IPackageFragmentRoot sourceFolder= fJavaProject.getPackageFragmentRoot(fSourceFolder);
+							final StubCreationOperation operation= new StubCreationOperation(uri, list, true) {
+
+								private IPackageFragment fFragment= null;
+
+								protected final void createCompilationUnit(final IFileStore store, final String name, final String content, final IProgressMonitor pm) throws CoreException {
+									fFragment.createCompilationUnit(name, content, true, pm);
+								}
+
+								protected final void createPackageFragment(final IFileStore store, final String name, final IProgressMonitor pm) throws CoreException {
+									fFragment= sourceFolder.createPackageFragment(name, true, pm);
+								}
+							};
 							try {
 								operation.run(new SubProgressMonitor(monitor, 150, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 							} finally {
