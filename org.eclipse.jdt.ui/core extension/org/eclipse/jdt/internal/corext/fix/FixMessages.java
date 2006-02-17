@@ -62,6 +62,9 @@ public class FixMessages extends NLS {
 	public static String ControlStatementsFix_removeIfElseBlock_proposalDescription;
 	public static String ControlStatementsFix_removeBrackets_proposalDescription;
 
+	public static String ExpressionsFix_addParanoiacParenthesis_description;
+	public static String ExpressionsFix_removeUnnecessaryParenthesis_description;
+
 	static {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, FixMessages.class);

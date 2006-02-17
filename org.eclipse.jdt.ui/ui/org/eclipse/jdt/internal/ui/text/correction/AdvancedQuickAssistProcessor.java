@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
 import org.eclipse.jdt.core.dom.BooleanLiteral;
@@ -77,6 +76,8 @@ import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.fix.ExpressionsFix;
+import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -86,6 +87,7 @@ import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 
 /**
  */
@@ -629,87 +631,18 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		if (nodes.isEmpty())
 			return false;
-		//
-		final AST ast= covering.getAST();
-		final ASTRewrite rewrite= ASTRewrite.create(ast);
-		// check sub-expressions in fully covered nodes
-		final ArrayList changedNodes= new ArrayList();
-		for (Iterator I= nodes.iterator(); I.hasNext();) {
-			ASTNode covered= (ASTNode) I.next();
-			covered.accept(new ASTVisitor() {
-				public void postVisit(ASTNode node) {
-					if (!(node instanceof ParenthesizedExpression)) {
-						return;
-					}
-					ParenthesizedExpression parenthesizedExpression= (ParenthesizedExpression) node;
-					Expression expression= parenthesizedExpression.getExpression();
-					while (expression instanceof ParenthesizedExpression) {
-						expression= ((ParenthesizedExpression) expression).getExpression();
-					}
-					// check case when this expression is cast expression and parent is method invocation with this expression as expression
-					if ((parenthesizedExpression.getExpression() instanceof CastExpression)
-						&& (parenthesizedExpression.getParent() instanceof MethodInvocation)) {
-						MethodInvocation parentMethodInvocation = (MethodInvocation) parenthesizedExpression.getParent();
-						if (parentMethodInvocation.getExpression() == parenthesizedExpression)
-							return;
-					}
-					// if this is part of another expression, check for this and parent precedences
-					if (parenthesizedExpression.getParent() instanceof Expression) {
-						Expression parentExpression= (Expression) parenthesizedExpression.getParent();
-						int expressionPrecedence= getExpressionPrecedence(expression);
-						int parentPrecedence= getExpressionPrecedence(parentExpression);
-						if ((expressionPrecedence > parentPrecedence)
-							&& !(parenthesizedExpression.getParent() instanceof ParenthesizedExpression)) {
-							return;
-						}
-						// check for case when precedences for expression and parent are same
-						if ((expressionPrecedence == parentPrecedence) && (parentExpression instanceof InfixExpression)) {
-							InfixExpression parentInfix= (InfixExpression) parentExpression;
-							Operator parentOperator= parentInfix.getOperator();
-							// check for PLUS with String
-							if (parentOperator == InfixExpression.Operator.PLUS) {
-								if (isStringExpression(parentInfix.getLeftOperand())
-									|| isStringExpression(parentInfix.getRightOperand())) {
-									return;
-								}
-								for (Iterator J= parentInfix.extendedOperands().iterator(); J.hasNext();) {
-									Expression operand= (Expression) J.next();
-									if (isStringExpression(operand)) {
-										return;
-									}
-								}
-							}
-							// check for /, %, -
-							if ((parentOperator == InfixExpression.Operator.DIVIDE)
-								|| (parentOperator == InfixExpression.Operator.REMAINDER)
-								|| parentOperator == InfixExpression.Operator.MINUS) {
-								if (parentInfix.getLeftOperand() != parenthesizedExpression)
-									return;
-							}
-						}
-					}
-					// remove parenthesis around expression
-					rewrite.replace(parenthesizedExpression, rewrite.createMoveTarget(expression), null);
-					changedNodes.add(node);
-				}
-			});
-		}
-		//
-		if (changedNodes.isEmpty())
+		
+		IFix fix= ExpressionsFix.createRemoveUnnecessaryParenthesisFix(context.getASTRoot(), (ASTNode[])nodes.toArray(new ASTNode[nodes.size()]));
+		if (fix == null)
 			return false;
-		if (resultingCollections == null) {
+		
+		if (resultingCollections == null)
 			return true;
-		}
-		// add correction proposal
-		String label= CorrectionMessages.AdvancedQuickAssistProcessor_removeParenthesis_description;
+		
 		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_REMOVE);
-		ASTRewriteCorrectionProposal proposal= new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(), rewrite, 1, image);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(ExpressionsCleanUp.REMOVE_UNNECESSARY_PARENTHESIS), 1, image, context);
 		resultingCollections.add(proposal);
 		return true;
-	}
-	private static boolean isStringExpression(Expression expression) {
-		ITypeBinding binding = expression.resolveTypeBinding();
-		return binding.getQualifiedName().equals("java.lang.String"); //$NON-NLS-1$
 	}
 	private static int getExpressionPrecedence(Expression expression) {
 		if (expression instanceof PostfixExpression) {
@@ -778,69 +711,24 @@ public class AdvancedQuickAssistProcessor implements IQuickAssistProcessor {
 		}
 		return -1;
 	}
+	
 	private static boolean getAddParanoidalParenthesisProposals(IInvocationContext context, ASTNode covering, ArrayList coveredNodes,
-			Collection resultingCollections) {
-		if (coveredNodes.isEmpty())
+			Collection resultingCollections) throws CoreException {
+		
+		IFix fix= ExpressionsFix.createAddParanoidalParenthesisFix(context.getASTRoot(), (ASTNode[])coveredNodes.toArray(new ASTNode[coveredNodes.size()]));
+		if (fix == null)
 			return false;
-		//
-		final AST ast = covering.getAST();
-		final ASTRewrite rewrite = ASTRewrite.create(ast);
-		// check sub-expressions in fully covered nodes
-		final ArrayList changedNodes = new ArrayList();
-		for (Iterator I = coveredNodes.iterator(); I.hasNext();) {
-			ASTNode covered = (ASTNode) I.next();
-			covered.accept(new ASTVisitor() {
-				public void postVisit(ASTNode node) {
-					// check that parent is && or ||
-					if (!(node.getParent() instanceof InfixExpression))
-						return;
-					InfixExpression parentExpression = (InfixExpression) node.getParent();
-					InfixExpression.Operator parentOperator = parentExpression.getOperator();
-					if ((parentOperator != InfixExpression.Operator.CONDITIONAL_AND)
-							&& (parentOperator != InfixExpression.Operator.CONDITIONAL_OR)) {
-						return;
-					}
-					// we want to add parenthesis around arithmetic operators and instanceof
-					boolean needParenthesis = false;
-					if (node instanceof InfixExpression) {
-						InfixExpression expression = (InfixExpression) node;
-						InfixExpression.Operator operator = expression.getOperator();
-						needParenthesis = (operator == InfixExpression.Operator.LESS)
-								|| (operator == InfixExpression.Operator.GREATER)
-								|| (operator == InfixExpression.Operator.LESS_EQUALS)
-								|| (operator == InfixExpression.Operator.GREATER_EQUALS)
-								|| (operator == InfixExpression.Operator.EQUALS)
-								|| (operator == InfixExpression.Operator.NOT_EQUALS);
-					}
-					if (node instanceof InstanceofExpression) {
-						needParenthesis = true;
-					}
-					if (!needParenthesis) {
-						return;
-					}
-					// add parenthesis around expression
-					ParenthesizedExpression parenthesizedExpression = ast.newParenthesizedExpression();
-					Expression expressionPlaceholder = (Expression) rewrite.createCopyTarget(node);
-					parenthesizedExpression.setExpression(expressionPlaceholder);
-					rewrite.replace(node, parenthesizedExpression, null);
-					changedNodes.add(node);
-				}
-			});
-		}
-		//
-		if (changedNodes.isEmpty())
-			return false;
-		if (resultingCollections == null) {
+		
+		if (resultingCollections == null)
 			return true;
-		}
+
 		// add correction proposal
-		String label = CorrectionMessages.AdvancedQuickAssistProcessor_addParethesis_description;
 		Image image = JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-		ASTRewriteCorrectionProposal proposal = new ASTRewriteCorrectionProposal(label, context.getCompilationUnit(),
-				rewrite, 1, image);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, new ExpressionsCleanUp(ExpressionsCleanUp.ADD_PARANOIC_PARENTHESIS), 1, image, context);
 		resultingCollections.add(proposal);
 		return true;
 	}
+	
 	private static ArrayList getFullyCoveredNodes(IInvocationContext context, ASTNode coveringNode) {
 		final ArrayList coveredNodes = new ArrayList();
 		final int selectionBegin = context.getSelectionOffset();

@@ -201,7 +201,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		private ICleanUp[] createAllCleanUps() {
 			IDialogSettings section= getCleanUpWizardSettings();
 			
-			ICleanUp[] result= new ICleanUp[7];
+			ICleanUp[] result= new ICleanUp[8];
 			result[0]= new CodeStyleCleanUp(section);
 			result[1]= new ControlStatementsCleanUp(section);
 			result[2]= new UnusedCodeCleanUp(section);
@@ -209,6 +209,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			result[4]= new StringCleanUp(section);
 			result[5]= new PotentialProgrammingProblemsCleanUp(section);
 			result[6]= new UnnecessaryCodeCleanUp(section);
+			result[7]= new ExpressionsCleanUp(section);
 			
 			return result;
 		}
@@ -280,7 +281,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			IDialogSettings section= getCleanUpWizardSettings();
 			
-			fCleanUps= new ICleanUp[7];
+			fCleanUps= new ICleanUp[8];
 			
 			ScrolledComposite codeStyleTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description);
 			Composite codeStyle= fillCodeStyleTab(codeStyleTab, project, section);
@@ -316,8 +317,13 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			fCleanUps[1]= new ControlStatementsCleanUp(settings);
 			fCleanUps[1].createConfigurationControl(group, project);
+			
+			group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_expressions_sectionDescription);
+			
+			fCleanUps[2]= new ExpressionsCleanUp(settings);
+			fCleanUps[2].createConfigurationControl(group, project);
 
-			addEnableButtonsGroup(composite, new ICleanUp[] {fCleanUps[0], fCleanUps[1]});
+			addEnableButtonsGroup(composite, new ICleanUp[] {fCleanUps[0], fCleanUps[1], fCleanUps[2]});
 			
 			return composite;
 		}
@@ -334,18 +340,18 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			//Unused Code Group
 			Composite group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_UnusedCodeSection_description);
 			
-			fCleanUps[2]= new UnusedCodeCleanUp(section);
-			fCleanUps[2].createConfigurationControl(group, project);
+			fCleanUps[3]= new UnusedCodeCleanUp(section);
+			fCleanUps[3].createConfigurationControl(group, project);
 			
 			group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_UnnecessaryCode_section );
 			
-			fCleanUps[5]= new UnnecessaryCodeCleanUp(section);
-			fCleanUps[5].createConfigurationControl(group, project);
-			
-			fCleanUps[6]= new StringCleanUp(section);
+			fCleanUps[6]= new UnnecessaryCodeCleanUp(section);
 			fCleanUps[6].createConfigurationControl(group, project);
 			
-			addEnableButtonsGroup(composite, new ICleanUp[] {fCleanUps[2], fCleanUps[5], fCleanUps[6]});
+			fCleanUps[7]= new StringCleanUp(section);
+			fCleanUps[7].createConfigurationControl(group, project);
+			
+			addEnableButtonsGroup(composite, new ICleanUp[] {fCleanUps[3], fCleanUps[6], fCleanUps[7]});
 			
 			return composite;
 		}
@@ -361,15 +367,15 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			//Java50Fix Group
 			Composite group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_Annotations_sectionName);
-			fCleanUps[3]= new Java50CleanUp(section);
-			fCleanUps[3].createConfigurationControl(group, project);
+			fCleanUps[4]= new Java50CleanUp(section);
+			fCleanUps[4].createConfigurationControl(group, project);
 
 			//Potential Programming Problems Group
 			group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_PotentialProgrammingProblems_description);
-			fCleanUps[4]= new PotentialProgrammingProblemsCleanUp(section);
-			fCleanUps[4].createConfigurationControl(group, project);
+			fCleanUps[5]= new PotentialProgrammingProblemsCleanUp(section);
+			fCleanUps[5].createConfigurationControl(group, project);
 
-			addEnableButtonsGroup(composite, new ICleanUp[] {fCleanUps[3], fCleanUps[4]});
+			addEnableButtonsGroup(composite, new ICleanUp[] {fCleanUps[4], fCleanUps[5]});
 			
 			return composite;
 		}

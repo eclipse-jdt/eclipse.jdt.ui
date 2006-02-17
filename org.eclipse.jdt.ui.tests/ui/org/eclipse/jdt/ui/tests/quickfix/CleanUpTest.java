@@ -50,6 +50,7 @@ import org.eclipse.jdt.ui.PreferenceConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.fix.CodeStyleCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
+import org.eclipse.jdt.internal.ui.fix.ExpressionsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 import org.eclipse.jdt.internal.ui.fix.Java50CleanUp;
 import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
@@ -4119,6 +4120,110 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("        return (Integer) getNumber();\n");
 		buf.append("    }\n");
 		buf.append("    private Number getNumber() {return null;}\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testAddParenthesis01() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(int i) {\n");
+		buf.append("        if (i == 0 || i == 1)\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        \n");
+		buf.append("        while (i > 0 && i < 10)\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        \n");
+		buf.append("        boolean b= i != -1 && i > 10 && i < 100 || i > 20;\n");
+		buf.append("        \n");
+		buf.append("        do ; while (i > 5 && b || i < 100 && i > 90);\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+
+		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS);
+		ICleanUp cleanUp2= new ExpressionsCleanUp(ExpressionsCleanUp.ADD_PARANOIC_PARENTHESIS);
+		refactoring.addCleanUp(cleanUp1);
+		refactoring.addCleanUp(cleanUp2);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(int i) {\n");
+		buf.append("        if ((i == 0) || (i == 1)) {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        while ((i > 0) && (i < 10)) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        boolean b= ((i != -1) && (i > 10) && (i < 100)) || (i > 20);\n");
+		buf.append("        \n");
+		buf.append("        do {\n");
+		buf.append("            ;\n");
+		buf.append("        } while (((i > 5) && b) || ((i < 100) && (i > 90)));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testRemoveParenthesis01() throws Exception {
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(int i) {\n");
+		buf.append("        if ((i == 0) || (i == 1)) {\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        while ((i > 0) && (i < 10)) {\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        boolean b= ((i != -1) && (i > 10) && (i < 100)) || (i > 20);\n");
+		buf.append("        \n");
+		buf.append("        do {\n");
+		buf.append("            ;\n");
+		buf.append("        } while (((i > 5) && b) || ((i < 100) && (i > 90)));\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+
+		ICleanUp cleanUp1= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS);
+		ICleanUp cleanUp2= new ExpressionsCleanUp(ExpressionsCleanUp.REMOVE_UNNECESSARY_PARENTHESIS);
+		refactoring.addCleanUp(cleanUp1);
+		refactoring.addCleanUp(cleanUp2);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E {\n");
+		buf.append("    void foo(int i) {\n");
+		buf.append("        if (i == 0 || i == 1)\n");
+		buf.append("            System.out.println(i);\n");
+		buf.append("        \n");
+		buf.append("        while (i > 0 && i < 10)\n");
+		buf.append("            System.out.println(1);\n");
+		buf.append("        \n");
+		buf.append("        boolean b= i != -1 && i > 10 && i < 100 || i > 20;\n");
+		buf.append("        \n");
+		buf.append("        do; while (i > 5 && b || i < 100 && i > 90);\n");
+		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();
 		
