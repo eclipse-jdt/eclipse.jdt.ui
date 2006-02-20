@@ -47,13 +47,6 @@ public class CompilationUnitDocumentProviderTest extends TestCase {
 		super(name);
 	}
 			
-	/**
-	 * Creates a new test Java project.
-	 */	
-	protected void setUp() throws Exception {
-		fJavaProject= JavaProjectHelper.createJavaProject("P", "bin");
-	}
-
 	private void setupProject() throws CoreException, JavaModelException {
 		fJavaProject= JavaProjectHelper.createJavaProject("P", "bin");
 

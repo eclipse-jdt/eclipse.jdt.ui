@@ -40,13 +40,6 @@ public class MethodInsertionFormattedCompletionTest extends AbstractCompletionTe
 	}
 	
 	/*
-	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#setUp()
-	 */
-	protected void setUp() throws Exception {
-		super.setUp();
-	}
-	
-	/*
 	 * @see org.eclipse.jdt.text.tests.contentassist.AbstractCompletionTest#configureCoreOptions(java.util.Hashtable)
 	 */
 	protected void configureCoreOptions(Hashtable options) {
