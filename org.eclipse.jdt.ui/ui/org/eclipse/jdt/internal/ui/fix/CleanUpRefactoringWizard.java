@@ -28,6 +28,7 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Group;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Layout;
 import org.eclipse.swt.widgets.TabFolder;
 import org.eclipse.swt.widgets.TabItem;
@@ -572,6 +573,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		
 		private ICleanUp[] fCleanUps;
 		private List fConfigurationGroups;
+		private int fTotalCleanUpsCount, fSelectedCleanUpsCount;
+		private Label fStatusLine;
 		
 		public SelectCleanUpPage(String name) {
 			super(name);
@@ -579,14 +582,23 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 		
 		public void createControl(Composite parent) {
-			TabFolder tabFolder= new TabFolder(parent, SWT.NONE);
+			Composite composite= new Composite(parent, SWT.NONE);
+			composite.setLayout(new GridLayout(1, true));
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			TabFolder tabFolder= new TabFolder(composite, SWT.NONE);
 			tabFolder.setLayout(new TabFolderLayout());
 			tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
+			fStatusLine= new Label(composite, SWT.NONE);
+			fStatusLine.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
+			
 			createGroups(tabFolder);
 			
-			setControl(tabFolder);
-			Dialog.applyDialogFont(tabFolder);
+			fStatusLine.setText(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_statusLineText, new Object[] {new Integer(fSelectedCleanUpsCount), new Integer(fTotalCleanUpsCount)}));
+			
+			setControl(composite);
+			Dialog.applyDialogFont(composite);
 		}
 		
 		private void createGroups(TabFolder parent) {
@@ -670,6 +682,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				addEnableButtonsGroup(composite, flagConfigurationButtons, new FlagConfigurationGroup[] {blockGroup, parenthesisGroup}, new FlagConfigurationButton[0]);
 			}
 			
+			addSelectionCounter(flagConfigurationButtons);
+			
 			fCleanUps[0]= codeStyleCleanUp;
 			fCleanUps[1]= controlStatementsCleanUp;
 			fCleanUps[2]= expressionsCleanUp;
@@ -717,6 +731,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {imports, types, contructors, methods, locals, fields, casts, nlsTags};
 			addEnableButtonsGroup(composite, flagConfigurationButtons, new FlagConfigurationGroup[0], new FlagConfigurationButton[0]);
+			
+			addSelectionCounter(flagConfigurationButtons);
 
 			fCleanUps[3]= unusedCodeCleanUp;
 			fCleanUps[6]= unnecessaryCodeCleanUp;
@@ -766,6 +782,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				addEnableButtonsGroup(composite, flagConfigurationButtons, new FlagConfigurationGroup[] {serial}, new FlagConfigurationButton[0]);
 			}
 			
+			addSelectionCounter(flagConfigurationButtons);
+			
 			fCleanUps[4]= java50CleanUp;
 			fCleanUps[5]= potentialProgrammingProblemsCleanUp;
 			
@@ -773,6 +791,26 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			fConfigurationGroups.add(serial);
 			
 			return composite;
+		}
+		
+		private void addSelectionCounter(FlagConfigurationButton[] configs) {
+			for (int i= 0; i < configs.length; i++) {
+				FlagConfigurationButton config= configs[i];
+				if (config.getCleanUp().isFlag(config.getFlag()))
+					fSelectedCleanUpsCount++;
+				config.addSelectionChangeListener(new ISelectionChangeListener() {
+					public void selectionChanged(ICleanUp cleanUp, int flag, boolean selection) {
+						if (selection) {
+							fSelectedCleanUpsCount++;
+						} else {
+							fSelectedCleanUpsCount--;
+						}
+						fStatusLine.setText(Messages.format(MultiFixMessages.CleanUpRefactoringWizard_statusLineText, new Object[] {new Integer(fSelectedCleanUpsCount), new Integer(fTotalCleanUpsCount)}));
+					}
+					
+				});
+			}
+			fTotalCleanUpsCount+=configs.length;
 		}
 
 		private void addEnableButtonsGroup(Composite parent, final FlagConfigurationButton[] configButtons, final FlagConfigurationGroup[] radioGroups, final FlagConfigurationButton[] disabledButtons) {
