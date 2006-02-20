@@ -15,9 +15,6 @@ import java.util.Map;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -68,17 +65,6 @@ public interface ICleanUp {
 	 * @return The options as map or null
 	 */
 	public abstract Map getRequiredOptions();
-	
-	/**
-	 * Create a control to configure the options for this multi-fix
-	 * in a UI.
-	 * 
-	 * @param parent The composite in which the result is contained in
-	 * @param project The project within compilation units are going to be fixed
-	 * 					or null if multiple projects.
-	 * @return The control, not null.
-	 */
-	public abstract Control createConfigurationControl(Composite parent, IJavaProject project);
 
 	/**
 	 * Persist current settings of this in <code>settings</code>
@@ -132,8 +118,26 @@ public interface ICleanUp {
 	 */
 	public abstract int maximalNumberOfFixes(CompilationUnit compilationUnit);
 
-	public abstract void select(int flag);
-
+	/**
+	 * Default flags for this clean up.
+	 * 
+	 * @return Default flags for this clean up >= 0
+	 */
 	public abstract int getDefaultFlag();
+
+	/**
+	 * Set flag with id to b.
+	 * 
+	 * @param id The id of the flag to set
+	 * @param b The value for the flag
+	 */
+	public void setFlag(int id, boolean b);
+
+	/**
+	 * Is flag with id enabled?
+	 * 
+	 * @return True if flag with id is enabled
+	 */
+	public boolean isFlag(int id);
 
 }

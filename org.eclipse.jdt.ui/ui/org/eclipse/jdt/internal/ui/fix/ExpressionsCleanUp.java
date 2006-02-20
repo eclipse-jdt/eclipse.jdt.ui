@@ -17,15 +17,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.jface.dialogs.IDialogSettings;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
@@ -57,8 +50,6 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 	private static final int DEFAULT_FLAG= 0;
 	private static final String SECTION_NAME= "CleanUp_Expressions"; //$NON-NLS-1$
 
-	private Button[] fButtons;
-
 	public ExpressionsCleanUp(int flag) {
 		super(flag);
 	}
@@ -85,64 +76,6 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 
 	public Map getRequiredOptions() {
 		return new Hashtable();
-	}
-
-	public Control createConfigurationControl(Composite parent, IJavaProject project) {
-		fButtons= new Button[3];
-		
-		Button button= new Button(parent, SWT.CHECK);
-		button.setText(MultiFixMessages.ExpressionsCleanUp_parenthesisAroundConditions_checkBoxLabel);
-		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		fButtons[0]= button;
-
-		final int[] flags= new int[] {ADD_PARANOIC_PARENTHESIS, REMOVE_UNNECESSARY_PARENTHESIS};
-		final int[] uiFlags= new int[] {1073741824, 536870912};
-		final String[] labels= new String[] {MultiFixMessages.ExpressionsCleanUp_addParanoiac_checkBoxLabel, MultiFixMessages.ExpressionsCleanUp_removeUnnecessary_checkBoxLabel};
-	
-		Button[] buttons= createSubGroup(parent, button, SWT.RADIO, flags, labels, uiFlags, false);
-		for (int i= 0; i < buttons.length; i++) {
-			fButtons[i+1]= buttons[i];
-		}
-		
-		return parent;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public void select(int flags) {
-		if (fButtons == null)
-			return;
-		
-		if (((flags & ADD_PARANOIC_PARENTHESIS) != 0) && ((flags & REMOVE_UNNECESSARY_PARENTHESIS) != 0)) {
-			setFlag(ADD_PARANOIC_PARENTHESIS, fButtons[1].getSelection());
-			setFlag(REMOVE_UNNECESSARY_PARENTHESIS, fButtons[2].getSelection());
-			fButtons[0].setSelection(true);
-			fButtons[1].setEnabled(true);
-			fButtons[2].setEnabled(true);
-		} else if ((flags & ADD_PARANOIC_PARENTHESIS) != 0) {
-			setFlag(ADD_PARANOIC_PARENTHESIS, true);
-			setFlag(REMOVE_UNNECESSARY_PARENTHESIS, false);
-			fButtons[0].setSelection(true);
-			fButtons[1].setSelection(true);
-			fButtons[2].setSelection(false);
-			fButtons[1].setEnabled(true);
-			fButtons[2].setEnabled(true);
-		} else if ((flags & REMOVE_UNNECESSARY_PARENTHESIS) != 0) {
-			setFlag(ADD_PARANOIC_PARENTHESIS, false);
-			setFlag(REMOVE_UNNECESSARY_PARENTHESIS, true);
-			fButtons[0].setSelection(true);
-			fButtons[1].setSelection(false);
-			fButtons[2].setSelection(true);
-			fButtons[1].setEnabled(true);
-			fButtons[2].setEnabled(true);
-		} else {
-			setFlag(ADD_PARANOIC_PARENTHESIS, false);
-			setFlag(REMOVE_UNNECESSARY_PARENTHESIS, false);
-			fButtons[0].setSelection(false);
-			fButtons[1].setEnabled(false);
-			fButtons[2].setEnabled(false);
-		}
 	}
 
 	public void saveSettings(IDialogSettings settings) {

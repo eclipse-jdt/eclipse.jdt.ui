@@ -19,12 +19,6 @@ import java.util.Random;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -83,8 +77,6 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 
 	private ISerialVersionFixContext fContext;
 
-	private Button[] fButtons;
-
 	public PotentialProgrammingProblemsCleanUp(int flag) {
 		super(flag);
 	}
@@ -129,66 +121,6 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 				isFlag(ADD_RANDOM_SERIAL_VERSION_ID))
 			options.put(JavaCore.COMPILER_PB_MISSING_SERIAL_VERSION, JavaCore.WARNING);
 		return options;
-	}
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public Control createConfigurationControl(Composite parent, IJavaProject project) {
-		fButtons= new Button[3];
-		
-		Button button= new Button(parent, SWT.CHECK);
-		button.setText(MultiFixMessages.PotentialProgrammingProblemsCleanUp_AddSerialId_section_name);
-		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		fButtons[0]= button;
-		
-		int[] flags= new int[] {ADD_CALCULATED_SERIAL_VERSION_ID, ADD_DEFAULT_SERIAL_VERSION_ID};		
-		final int[] uiFlags= new int[] {1073741824, 536870912};
-		String[] labels= new String[] {MultiFixMessages.PotentialProgrammingProblemsCleanUp_Generated_radioButton_name, MultiFixMessages.PotentialProgrammingProblemsCleanUp_Default_radioButton_name};
-		Button[] buttons= createSubGroup(parent, button, SWT.RADIO, flags, labels, uiFlags, false);
-		for (int i= 0; i < buttons.length; i++) {
-			fButtons[i+1]= buttons[i];
-		}
-		
-		return parent;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public void select(int flags) {
-		if (fButtons == null)
-			return;
-
-		if (((flags & ADD_CALCULATED_SERIAL_VERSION_ID) != 0) && ((flags & ADD_DEFAULT_SERIAL_VERSION_ID) != 0)) {
-			setFlag(ADD_CALCULATED_SERIAL_VERSION_ID, fButtons[1].getSelection());
-			setFlag(ADD_DEFAULT_SERIAL_VERSION_ID, fButtons[2].getSelection());
-			fButtons[0].setSelection(true);
-			fButtons[1].setEnabled(true);
-			fButtons[2].setEnabled(true);
-		} else if ((flags & ADD_CALCULATED_SERIAL_VERSION_ID) != 0) {
-			setFlag(ADD_CALCULATED_SERIAL_VERSION_ID, true);
-			setFlag(ADD_DEFAULT_SERIAL_VERSION_ID, false);
-			fButtons[0].setSelection(true);
-			fButtons[1].setSelection(true);
-			fButtons[2].setSelection(false);
-			fButtons[1].setEnabled(true);
-			fButtons[2].setEnabled(true);
-		} else if ((flags & ADD_DEFAULT_SERIAL_VERSION_ID) != 0) {
-			setFlag(ADD_CALCULATED_SERIAL_VERSION_ID, false);
-			setFlag(ADD_DEFAULT_SERIAL_VERSION_ID, true);
-			fButtons[0].setSelection(true);
-			fButtons[1].setSelection(false);
-			fButtons[2].setSelection(true);
-			fButtons[1].setEnabled(true);
-			fButtons[2].setEnabled(true);
-		} else {
-			setFlag(ADD_CALCULATED_SERIAL_VERSION_ID, false);
-			setFlag(ADD_DEFAULT_SERIAL_VERSION_ID, false);
-			fButtons[0].setSelection(false);
-			fButtons[1].setEnabled(false);
-			fButtons[2].setEnabled(false);
-		}
 	}
 
 	public void saveSettings(IDialogSettings settings) {

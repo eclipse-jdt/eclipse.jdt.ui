@@ -17,22 +17,14 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.jface.dialogs.IDialogSettings;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.Java50Fix;
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 
@@ -74,8 +66,6 @@ public class Java50CleanUp extends AbstractCleanUp {
 	
 	private static final int DEFAULT_FLAG= ADD_DEPRECATED_ANNOTATION | ADD_OVERRIDE_ANNOATION;
 	private static final String SECTION_NAME= "CleanUp_Java50"; //$NON-NLS-1$
-
-	private Button[] fButtons;
 	
 	public Java50CleanUp(int flag) {
 		super(flag);
@@ -120,56 +110,6 @@ public class Java50CleanUp extends AbstractCleanUp {
 			options.put(JavaCore.COMPILER_PB_RAW_TYPE_REFERENCE, JavaCore.WARNING);
 				
 		return options;
-	}
-
-	public Control createConfigurationControl(Composite parent, IJavaProject project) {
-		fButtons= new Button[3];
-		Button button= new Button(parent, SWT.CHECK);
-		button.setText(MultiFixMessages.Java50CleanUp_addMissingAnnotations_checkBoxLabel);
-		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		fButtons[0]= button;
-		
-		int[] flags= new int[] {ADD_OVERRIDE_ANNOATION, ADD_DEPRECATED_ANNOTATION};
-		int[] uiFlags= new int[] {1073741824, 536870912};
-		String[] labels= new String[] {MultiFixMessages.Java50CleanUp_override_checkBoxLabel, MultiFixMessages.Java50CleanUp_deprecated_checkBoxLabel};
-		
-		Button[] boxes= createSubGroup(parent, button, SWT.CHECK, flags, labels, uiFlags, true);
-		for (int i= 0; i < boxes.length; i++) {
-			fButtons[i + 1]= boxes[i];
-		}
-		if (project != null && !JavaModelUtil.is50OrHigher(project)) {
-			boxes[0].setEnabled(false);
-			boxes[1].setEnabled(false);
-			button.setEnabled(false);
-			boxes[0].setSelection(false);
-			boxes[1].setSelection(false);
-			button.setSelection(false);
-		}
-		
-		return parent;
-	}
-	
-
-	/**
-	 * {@inheritDoc}
-	 */
-	public void select(int flags) {
-		if (fButtons == null)
-			return;
-
-		if (fButtons[0].isEnabled()) {
-			enableButton(flags, ADD_OVERRIDE_ANNOATION, fButtons[1]);
-			enableButton(flags, ADD_DEPRECATED_ANNOTATION, fButtons[2]);
-			if (isFlag(ADD_DEPRECATED_ANNOTATION) || isFlag(ADD_OVERRIDE_ANNOATION)) {
-				fButtons[0].setSelection(true);
-				fButtons[1].setEnabled(true);
-				fButtons[2].setEnabled(true);
-			} else {
-				fButtons[0].setSelection(false);
-				fButtons[1].setEnabled(false);
-				fButtons[2].setEnabled(false);
-			}
-		}
 	}
 	
 	public void saveSettings(IDialogSettings settings) {

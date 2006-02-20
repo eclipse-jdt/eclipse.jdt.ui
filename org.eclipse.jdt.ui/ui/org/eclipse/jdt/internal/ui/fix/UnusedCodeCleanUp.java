@@ -18,15 +18,8 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.CoreException;
 
-import org.eclipse.swt.SWT;
-import org.eclipse.swt.layout.GridData;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.jface.dialogs.IDialogSettings;
 
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -75,8 +68,6 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 	
 	private static final int DEFAULT_FLAG= REMOVE_UNUSED_IMPORTS;
 	private static final String SECTION_NAME= "CleanUp_UnusedCode"; //$NON-NLS-1$
-
-	private Button[] fButtons;
 	
 	public UnusedCodeCleanUp(int flag) {
 		super(flag);
@@ -131,60 +122,6 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 			options.put(JavaCore.COMPILER_PB_UNUSED_LOCAL, JavaCore.WARNING);
 
 		return options;
-	}
-
-	public Control createConfigurationControl(Composite parent, IJavaProject project) {
-		fButtons= new Button[7];
-
-		fButtons[0]= addCheckBox(parent, REMOVE_UNUSED_IMPORTS, MultiFixMessages.UnusedCodeCleanUp_unusedImports_checkBoxLabel);
-		
-		Button button= new Button(parent, SWT.CHECK);
-		button.setText(MultiFixMessages.UnusedCodeCleanUp_unusedPrivateMembers_checkBoxLabel);
-		button.setLayoutData(new GridData(SWT.LEFT, SWT.CENTER, true, false));
-		fButtons[1]= button;
-		
-		final int[] flags= new int[] {REMOVE_UNUSED_PRIVATE_TYPES, REMOVE_UNUSED_PRIVATE_CONSTRUCTORS, REMOVE_UNUSED_PRIVATE_METHODS, REMOVE_UNUSED_PRIVATE_FIELDS};
-		final int[] uiFlags= new int[] {1073741824, 536870912, 268435456, 134217728};
-		final String[] labels= new String[] {MultiFixMessages.UnusedCodeCleanUp_unusedTypes_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedConstructors_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedMethods_checkBoxLabel, MultiFixMessages.UnusedCodeCleanUp_unusedFields_checkBoxLabel};
-	
-		Button[] buttons= createSubGroup(parent, button, SWT.CHECK, flags, labels, uiFlags, false);
-		for (int i= 0; i < buttons.length; i++) {
-			fButtons[i+2]= buttons[i];
-		}
-		
-		fButtons[6]= addCheckBox(parent, REMOVE_UNUSED_LOCAL_VARIABLES, MultiFixMessages.UnusedCodeCleanUp_unusedLocalVariables_checkBoxLabel);	
-		
-		return parent;
-	}
-	
-	/**
-	 * {@inheritDoc}
-	 */
-	public void select(int flags) {
-		if (fButtons == null)
-			return;
-
-		enableButton(flags, REMOVE_UNUSED_IMPORTS, fButtons[0]);
-		enableButton(flags, REMOVE_UNUSED_PRIVATE_TYPES, fButtons[2]);
-		enableButton(flags, REMOVE_UNUSED_PRIVATE_CONSTRUCTORS, fButtons[3]);
-		enableButton(flags, REMOVE_UNUSED_PRIVATE_METHODS, fButtons[4]);
-		enableButton(flags, REMOVE_UNUSED_PRIVATE_FIELDS, fButtons[5]);
-		enableButton(flags, REMOVE_UNUSED_LOCAL_VARIABLES, fButtons[6]);
-		
-		if (	isFlag(REMOVE_UNUSED_PRIVATE_TYPES) ||
-				isFlag(REMOVE_UNUSED_PRIVATE_CONSTRUCTORS) ||
-				isFlag(REMOVE_UNUSED_PRIVATE_METHODS) ||
-				isFlag(REMOVE_UNUSED_PRIVATE_FIELDS)) {
-			fButtons[1].setSelection(true);
-			for (int i= 2; i < 6; i++) {
-				fButtons[i].setEnabled(true);
-			}
-		} else {
-			fButtons[1].setSelection(false);
-			for (int i= 2; i < 6; i++) {
-				fButtons[i].setEnabled(false);
-			}
-		}
 	}
 
 	public void saveSettings(IDialogSettings settings) {

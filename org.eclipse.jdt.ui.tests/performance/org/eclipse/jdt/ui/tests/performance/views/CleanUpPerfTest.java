@@ -21,9 +21,6 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
-import org.eclipse.swt.widgets.Composite;
-import org.eclipse.swt.widgets.Control;
-
 import org.eclipse.jface.dialogs.IDialogSettings;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -107,7 +104,6 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 		cleanUpRefactoring.addCleanUp(new ICleanUp() {
 			public IFix createFix(CompilationUnit compilationUnit) throws CoreException {return null;}
 			public Map getRequiredOptions() {return null;}
-			public Control createConfigurationControl(Composite parent, IJavaProject project) {return null;}
 			public void saveSettings(IDialogSettings settings) {}
 			public String[] getDescriptions() {return null;}
 			public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
@@ -123,10 +119,13 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			public int maximalNumberOfFixes(CompilationUnit compilationUnit) {
 				return 0;
 			}
-			public void select(int flag) {
-			}
 			public int getDefaultFlag() {
 				return 0;
+			}
+			public void setFlag(int flag, boolean b) {
+			}
+			public boolean isFlag(int flag) {
+				return true;
 			}
 		});
 		tagAsSummary("Code clean up - no fix", Dimension.ELAPSED_PROCESS);
