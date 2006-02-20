@@ -52,9 +52,10 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 import org.eclipse.jdt.internal.ui.refactoring.binary.StubRefactoringHistoryWizard;
 
@@ -115,7 +116,7 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 										InputStream stream= null;
 										try {
 											stream= zip.getInputStream(entry);
-											final RefactoringHistory existing= RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactorings.JAR_IMPORTABLE);
+											final RefactoringHistory existing= RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.JAR_IMPORTABLE);
 											if (existing != null)
 												fHistoryDelta= incoming.removeAll(existing).getDescriptors();
 										} finally {
@@ -250,6 +251,7 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 				return JarImportMessages.JarImportWizard_workspace_caption;
 			}
 		});
+		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_IMPORTER);
 	}
 
 	/**

@@ -60,7 +60,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.ui.JavaElementLabelProvider;
 import org.eclipse.jdt.ui.JavaElementSorter;
@@ -69,7 +69,6 @@ import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.filters.EmptyPackageFilter;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
@@ -117,7 +116,6 @@ public final class JarImportWizardPage extends WizardPage {
 			setTitle(JarImportMessages.JarImportWizardPage_page_replace_title);
 			setDescription(JarImportMessages.JarImportWizardPage_page_replace_description);
 		}
-		setImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_IMPORTER);
 	}
 
 	/**
@@ -357,7 +355,7 @@ public final class JarImportWizardPage extends WizardPage {
 				InputStream stream= null;
 				try {
 					stream= zip.getInputStream(entry);
-					fJarImportData.setRefactoringHistory(RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactorings.JAR_IMPORTABLE));
+					fJarImportData.setRefactoringHistory(RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.JAR_IMPORTABLE));
 				} catch (IOException exception) {
 					setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
 					setPageComplete(false);
