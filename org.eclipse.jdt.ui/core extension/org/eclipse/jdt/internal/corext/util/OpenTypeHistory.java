@@ -22,7 +22,11 @@ import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
+import org.eclipse.core.runtime.jobs.IJobChangeEvent;
 import org.eclipse.core.runtime.jobs.Job;
+import org.eclipse.core.runtime.jobs.JobChangeAdapter;
+
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.jdt.core.ElementChangedEvent;
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -134,29 +138,12 @@ public class OpenTypeHistory extends History {
 	
 	private static class UpdateJob extends Job {
 		public static final String FAMILY= UpdateJob.class.getName();
-		private UpdateJob fLastJob;
-		public UpdateJob(UpdateJob lastJob) {
+		public UpdateJob() {
 			super(CorextMessages.TypeInfoHistory_consistency_check);
-			fLastJob= lastJob;
 		}
 		protected IStatus run(IProgressMonitor monitor) {
 			OpenTypeHistory history= OpenTypeHistory.getInstance();
-			try {
-				if (fLastJob != null) {
-					boolean joined= false;
-					while (!joined) {
-						try {
-							fLastJob.join();
-							joined= true;
-						} catch (InterruptedException e) {
-						}
-					}
-					fLastJob= null;
-				}
-				history.internalCheckConsistency(monitor);
-			} finally {
-				history.clearUpdateJob(this);
-			}
+			history.internalCheckConsistency(monitor);
 			return new Status(IStatus.OK, JavaPlugin.getPluginId(), IStatus.OK, "", null); //$NON-NLS-1$
 		}
 		public boolean belongsTo(Object family) {
@@ -164,10 +151,19 @@ public class OpenTypeHistory extends History {
 		}
 	}
 	
+	private static class UpdateJobListener extends JobChangeAdapter {
+		public void done(IJobChangeEvent event) {
+			OpenTypeHistory history= OpenTypeHistory.getInstance();
+			event.getJob().removeJobChangeListener(this);
+			history.clearUpdateJob(event.getJob());
+		}
+	}
+	
 	private boolean fNeedsConsistencyCheck;
 	private final IElementChangedListener fDeltaListener;
 	private UpdateJob fUpdateJob;
 	private final TypeInfoFactory fTypeInfoFactory;
+	private final UpdateJobListener fListener= new UpdateJobListener();
 	
 	private static final String FILENAME= "OpenTypeHistory.xml"; //$NON-NLS-1$
 	private static final String NODE_ROOT= "typeInfoHistroy"; //$NON-NLS-1$
@@ -207,8 +203,16 @@ public class OpenTypeHistory extends History {
 		if (fUpdateJob != null) {
 			fUpdateJob.cancel();
 		}
-		fUpdateJob= new UpdateJob(fUpdateJob);
+		fUpdateJob= new UpdateJob();
 		fUpdateJob.setPriority(Job.SHORT);
+		// The update job might initialize parts of the Java model.
+		// (see https://bugs.eclipse.org/bugs/show_bug.cgi?id=128399)
+		// So we have to set a correct rule to avoid deadlocks.
+		fUpdateJob.setRule(JavaCore.create(ResourcesPlugin.getWorkspace().getRoot()).getSchedulingRule());
+		fUpdateJob.addJobChangeListener(fListener);
+		// No need to sync with the old update job since we use
+		// scheduling rules. The new job will run only if the old
+		// one is finished since they have the same scheduling rule.
 		fUpdateJob.schedule();
 	}
 	
@@ -312,7 +316,7 @@ public class OpenTypeHistory extends History {
 		fNeedsConsistencyCheck= false;
 	}
 	
-	private synchronized void clearUpdateJob(UpdateJob toClear) {
+	private synchronized void clearUpdateJob(Job toClear) {
 		if (fUpdateJob == toClear)
 			fUpdateJob= null;
 	}
