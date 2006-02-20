@@ -116,7 +116,7 @@ public class TestModelProvider extends ModelProvider {
 		for (int i= 0; i < children.length; i++) {
 			IResourceDelta child= children[i];
 			IResource resource= child.getResource();
-			if (resource.getName().equals(".settings") && resource.getType() == IResource.FOLDER)
+			if (resource != null && resource.getName().equals(".settings") && resource.getType() == IResource.FOLDER)
 				continue;
 			if (child.getAffectedChildren().length > 0) {
 				result.add(child);
@@ -131,15 +131,28 @@ public class TestModelProvider extends ModelProvider {
 	}
 	
 	private static IResourceDelta[] getActualChildren(IResourceDelta delta, IResourceDelta[] expectedChildren) {
-		if (!IS_COPY_TEST)
-			return delta.getAffectedChildren();
 		List result= new ArrayList();
-		IResourceDelta[] candidates= delta.getAffectedChildren();
-		for (int i= 0; i < candidates.length; i++) {
-			if (contains(expectedChildren, candidates[i])) {
-				result.add(candidates[i]);
-			} else {
-				assertCopySource(candidates[i]);
+		if (!IS_COPY_TEST) {
+			IResourceDelta[] children= delta.getAffectedChildren();
+			for (int i= 0; i < children.length; i++) {
+				IResourceDelta child= children[i];
+				IResource resource= child.getResource();
+				if (resource != null && resource.getName().equals(".settings") && resource.getType() == IResource.FOLDER)
+					continue;
+				result.add(child);
+			}
+		} else {
+			IResourceDelta[] candidates= delta.getAffectedChildren();
+			for (int i= 0; i < candidates.length; i++) {
+				IResourceDelta candidate= candidates[i];
+				IResource resource= candidate.getResource();
+				if (resource != null && resource.getName().equals(".settings") && resource.getType() == IResource.FOLDER)
+					continue;
+				if (contains(expectedChildren, candidate)) {
+					result.add(candidate);
+				} else {
+					assertCopySource(candidate);
+				}
 			}
 		}
 		return (IResourceDelta[]) result.toArray(new IResourceDelta[result.size()]);
