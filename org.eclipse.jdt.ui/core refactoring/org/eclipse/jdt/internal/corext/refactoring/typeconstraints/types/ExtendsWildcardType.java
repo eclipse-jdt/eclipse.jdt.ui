@@ -57,8 +57,10 @@ public final class ExtendsWildcardType extends WildcardType {
 			case ARRAY_TYPE:
 			case STANDARD_TYPE:
 			case PARAMETERIZED_TYPE:
-			case RAW_TYPE:
 				return rhs.canAssignTo(getBound());
+			case RAW_TYPE:
+				// unchecked conversion not allowed here; fix for https://bugs.eclipse.org/bugs/show_bug.cgi?id=127583
+				return ! getBound().isParameterizedType() && rhs.canAssignTo(getBound());
 				
 			case UNBOUND_WILDCARD_TYPE:
 				return getBound().isJavaLangObject();

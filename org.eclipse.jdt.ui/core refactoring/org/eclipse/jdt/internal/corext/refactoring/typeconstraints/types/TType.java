@@ -534,7 +534,7 @@ public abstract class TType {
 	 * <code>rhs</code>. For example if
 	 * <code>List&lt;this&gt;= List&lt;rhs&gt;</code> is a valid assignment.
 	 * 
-	 * @return whether this type is type argument compatible with rhs
+	 * @return <code>true</code> iff <code>this</code> contains <code>rhs</code> according to JLS3 §4.5.1.1
 	 */
 	protected boolean checkTypeArgument(TType rhs) {
 		return this.equals(rhs);
