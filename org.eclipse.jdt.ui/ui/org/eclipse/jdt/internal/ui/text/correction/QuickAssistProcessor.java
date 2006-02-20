@@ -11,6 +11,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.correction;
 
+import java.io.BufferedInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
@@ -18,12 +21,22 @@ import java.util.List;
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.NullProgressMonitor;
 
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IProject;
+
 import org.eclipse.swt.graphics.Image;
 
+import org.eclipse.jface.wizard.WizardDialog;
+
 import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+
+import org.eclipse.ui.PlatformUI;
 
 import org.eclipse.ltk.core.refactoring.DocumentChange;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.TextChange;
+import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -82,7 +95,11 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.ui.text.java.IInvocationContext;
@@ -90,7 +107,10 @@ import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 import org.eclipse.jdt.ui.text.java.IProblemLocation;
 import org.eclipse.jdt.ui.text.java.IQuickAssistProcessor;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
+import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.deprecation.FixDeprecationRefactoringWizard;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
 
@@ -132,8 +152,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getExtractLocalProposal(context, coveringNode, null)
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
 				|| getSurroundWithRunnableProposal(context, coveringNode, null)
-				|| getRemoveBlockProposals(context, coveringNode, null);
-
+				|| getRemoveBlockProposals(context, coveringNode, null)
+				|| getFixDeprecationProposals(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -168,14 +188,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 					getConvertIterableLoopProposal(context, coveringNode, resultingCollections);
 				getSurroundWithRunnableProposal(context, coveringNode, resultingCollections);
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
+				getFixDeprecationProposals(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
 		return null;
 	}
-
-
-
 
 	private boolean noErrorsAtLocation(IProblemLocation[] locations) {
 		if (locations != null) {
@@ -312,6 +330,73 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		resultingCollections.add(proposal);
 		return true;
 
+	}
+
+	private static boolean getFixDeprecationProposals(final IInvocationContext context, final ASTNode node, final Collection resultingCollections) {
+		Name name;
+		if (node instanceof Name)
+			name= (Name) node;
+		else
+			return false;
+		final IBinding binding= name.resolveBinding();
+		if (!binding.isDeprecated())
+			return false;
+		String fileName= null;
+		if (binding instanceof IVariableBinding)
+			fileName= DelegateFieldCreator.getRefactoringScriptName((IVariableBinding) binding);
+		else if (binding instanceof IMethodBinding) {
+			fileName= DelegateMethodCreator.getRefactoringScriptName((IMethodBinding) binding);
+		}
+		if (fileName == null)
+			return false;
+		final ICompilationUnit unit= context.getCompilationUnit();
+		if (unit == null || !unit.exists())
+			return false;
+		final IProject project= unit.getJavaProject().getProject();
+		final IFile file= project.getFolder(DelegateCreator.SCRIPT_FOLDER).getFile(fileName);
+		if (!file.exists())
+			return false;
+		if (resultingCollections == null)
+			return false;
+		final ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.QuickAssistProcessor_fix_deprecation_name, null, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
+
+			private static final int SIZING_WIZARD_HEIGHT= 470;
+
+			private static final int SIZING_WIZARD_WIDTH= 490;
+
+			public final void apply(final IDocument document) {
+				RefactoringHistory history= null;
+				InputStream stream= null;
+				try {
+					stream= new BufferedInputStream(file.getContents(true));
+					history= RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.DEPRECATION_RESOLVING);
+				} catch (CoreException exception) {
+					JavaPlugin.log(exception);
+				} finally {
+					if (stream != null) {
+						try {
+							stream.close();
+						} catch (IOException exception) {
+							JavaPlugin.log(exception);
+						}
+					}
+				}
+				final FixDeprecationRefactoringWizard wizard= new FixDeprecationRefactoringWizard(context.getCompilationUnit(), node.getStartPosition(), node.getLength());
+				final WizardDialog dialog= new WizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
+				if (history != null && !history.isEmpty())
+					wizard.setRefactoringHistory(history);
+				dialog.create();
+				dialog.getShell().setSize(Math.max(SIZING_WIZARD_WIDTH, dialog.getShell().getSize().x), SIZING_WIZARD_HEIGHT);
+				PlatformUI.getWorkbench().getHelpSystem().setHelp(dialog.getShell(), IJavaHelpContextIds.FIX_DEPRECATION_WIZARD_PAGE);
+				dialog.open();
+			}
+
+			public final String getAdditionalProposalInfo() {
+				return CorrectionMessages.QuickAssistProcessor_fix_deprecation_info;
+			}
+		};
+		resultingCollections.add(proposal);
+		return true;
 	}
 
 	private static boolean getSplitVariableProposals(IInvocationContext context, ASTNode node, Collection resultingCollections) {

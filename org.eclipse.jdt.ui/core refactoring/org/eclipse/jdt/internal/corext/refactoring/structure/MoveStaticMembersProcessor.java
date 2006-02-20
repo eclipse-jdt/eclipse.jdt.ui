@@ -101,7 +101,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
@@ -143,6 +142,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	private BodyDeclaration[] fMemberDeclarations;
 	private boolean fDelegateUpdating;
 	private boolean fDelegateDeprecation;
+	private List fDelegateChanges= new ArrayList();
 	private String fComment;
 
 	private static class TypeReferenceFinder extends ASTVisitor {
@@ -677,14 +677,10 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 		pm.done();
 		return result;		
 	}
-	
-	//---- change creation ---------------------------------------
-	
-	/*
-	 * @see IRefactoring#createChange(IProgressMonitor)
-	 */
+
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.done();
+		fChange.addAll((Change[]) fDelegateChanges.toArray(new Change[fDelegateChanges.size()]));
 		return fChange;
 	}
 	
@@ -709,7 +705,7 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_single, JavaElementLabels.getElementLabel(members[0], JavaElementLabels.ALL_FULLY_QUALIFIED));
 				else
 					description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_multi, String.valueOf(members.length));
-				JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_STATIC_MOVE, project, Messages.format(description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+				JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_STATIC_MOVE, project, Messages.format(description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 				return new RefactoringChangeDescriptor(descriptor);
 			}
 		}; 
@@ -934,14 +930,17 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			if (fDelegateUpdating) {
 				if (declaration instanceof MethodDeclaration) {
 
-					DelegateMethodCreator d= new DelegateMethodCreator();
-					d.setDeclaration(declaration);
-					d.setDeclareDeprecated(fDelegateDeprecation);
-					d.setSourceRewrite(fSource);
-					d.setCopy(false);
-					d.setNewLocation(getDestinationBinding());
-					d.prepareDelegate();
-					d.createEdit();
+					DelegateMethodCreator creator= new DelegateMethodCreator();
+					creator.setDeclaration(declaration);
+					creator.setDeclareDeprecated(fDelegateDeprecation);
+					creator.setSourceRewrite(fSource);
+					creator.setCopy(false);
+					creator.setNewLocation(getDestinationBinding());
+					creator.prepareDelegate();
+					creator.createEdit();
+					Change change= creator.createChange();
+					if (change != null)
+						fDelegateChanges.add(change);
 
 					removeImportsOf= ((MethodDeclaration) declaration).getBody();
 					addedDelegate= true;
@@ -958,14 +957,17 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 						// Don't create a delegate without an initializer.
 						result.addInfo(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_no_initializer, frag.getName()), null);
 					} else {
-						DelegateFieldCreator d= new DelegateFieldCreator();
-						d.setDeclaration(declaration);
-						d.setDeclareDeprecated(fDelegateDeprecation);
-						d.setSourceRewrite(fSource);
-						d.setCopy(false);
-						d.setNewLocation(getDestinationBinding());
-						d.prepareDelegate();
-						d.createEdit();
+						DelegateFieldCreator creator= new DelegateFieldCreator();
+						creator.setDeclaration(declaration);
+						creator.setDeclareDeprecated(fDelegateDeprecation);
+						creator.setSourceRewrite(fSource);
+						creator.setCopy(false);
+						creator.setNewLocation(getDestinationBinding());
+						creator.prepareDelegate();
+						creator.createEdit();
+						Change change= creator.createChange();
+						if (change != null)
+							fDelegateChanges.add(change);
 
 						removeImportsOf= frag.getInitializer();
 						addedDelegate= true;

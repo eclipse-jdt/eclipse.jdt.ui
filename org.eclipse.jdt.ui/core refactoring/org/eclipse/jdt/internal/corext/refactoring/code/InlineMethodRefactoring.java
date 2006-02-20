@@ -71,7 +71,6 @@ import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComp
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -98,7 +97,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 public class InlineMethodRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent, IDeprecationResolving {
 
 	public static final String ID_INLINE_METHOD= "org.eclipse.jdt.ui.inline.method"; //$NON-NLS-1$
-	public static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_MODE= "mode"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DELETE= "delete";	 //$NON-NLS-1$
 
@@ -353,7 +351,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
 				arguments.put(JavaRefactoringDescriptor.INPUT, fInitialCUnit.getHandleIdentifier());
-				arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+				arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_DELETE, Boolean.valueOf(fDeleteSource).toString());
 				arguments.put(ATTRIBUTE_MODE, new Integer(fCurrentMode == Mode.INLINE_ALL ? 1 : 0).toString());
 				String project= null;
@@ -572,21 +570,24 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 	public RefactoringSessionDescriptor createDeprecationResolution() {
 		Assert.isNotNull(fMethod);
 		final Map arguments= new HashMap();
-		arguments.put(JavaRefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
-		arguments.put(ATTRIBUTE_DELETE, Boolean.TRUE.toString());
-		arguments.put(ATTRIBUTE_MODE, String.valueOf(1));
+		// Must be set to actual compilation unit
+		arguments.put(JavaRefactoringDescriptor.INPUT, fMethod.getCompilationUnit().getHandleIdentifier());
+		// Must be set to actual selection
+		arguments.put(JavaRefactoringDescriptor.SELECTION, "-1 -1"); //$NON-NLS-1$
+		arguments.put(ATTRIBUTE_DELETE, Boolean.FALSE.toString());
+		arguments.put(ATTRIBUTE_MODE, String.valueOf(0));
 		String project= null;
 		IJavaProject javaProject= fMethod.getJavaProject();
 		if (javaProject != null)
 			project= javaProject.getElementName();
-		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactorings.DEPRECATION_RESOLVING;
+		int flags= RefactoringDescriptor.STRUCTURAL_CHANGE | JavaRefactoringDescriptor.DEPRECATION_RESOLVING;
 		try {
 			if (!Flags.isPrivate(fMethod.getFlags()))
 				flags|= RefactoringDescriptor.MULTI_CHANGE;
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
-		final RefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_deprecation_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED)}), RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment, arguments, flags);
-		return new RefactoringSessionDescriptor(new RefactoringDescriptor[] { descriptor}, RefactoringSessionDescriptor.VERSION_1_0, RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment);
+		final RefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_deprecation_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED) }), RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment, arguments, flags);
+		return new RefactoringSessionDescriptor(new RefactoringDescriptor[] { descriptor }, RefactoringSessionDescriptor.VERSION_1_0, RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment);
 	}
 }

@@ -317,4 +317,6 @@ final class CorrectionMessages extends NLS {
 	public static String CorrectionMarkerResolutionGenerator__multiFixErrorDialog_Titel;
 	public static String CorrectionMarkerResolutionGenerator_multiFixErrorDialog_description;
 	public static String LocalCorrectionsSubProcessor_insert_break_statement;
+	public static String QuickAssistProcessor_fix_deprecation_name;
+	public static String QuickAssistProcessor_fix_deprecation_info;
 }

@@ -10,24 +10,29 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.delegates;
 
+import java.io.ByteArrayOutputStream;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.eclipse.text.edits.TextEdit;
 
-import org.eclipse.core.resources.IFolder;
-import org.eclipse.core.resources.IResource;
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+
+import org.eclipse.core.resources.IProject;
 
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.Document;
 import org.eclipse.jface.text.IDocument;
 
 import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
+import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.GroupCategory;
 import org.eclipse.ltk.core.refactoring.GroupCategorySet;
+import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -37,6 +42,7 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ChildListPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Expression;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.Javadoc;
 import org.eclipse.jdt.core.dom.Name;
@@ -54,8 +60,11 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Strings;
 
+import org.eclipse.jdt.ui.JavaElementLabels;
+
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.JavaPreferencesSettings;
+import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 
 /**
  * <p>
@@ -111,7 +120,8 @@ public abstract class DelegateCreator {
 
 	public static final GroupCategorySet CATEGORY_DELEGATE= new GroupCategorySet(new GroupCategory("org.eclipse.jdt.internal.corext.refactoring.delegates.delegate", RefactoringCoreMessages.DelegateCreator_change_category_title, RefactoringCoreMessages.DelegateCreator_change_category_description)); //$NON-NLS-1$
 
-	public static final String SCRIPT_NAME_PREFIX= "."; //$NON-NLS-1$
+	protected static final String SCRIPT_ENCODING= "utf-8"; //$NON-NLS-1$
+	public static final String SCRIPT_FOLDER= ".deprecations"; //$NON-NLS-1$
 
 	/*
 	 * We are dealing with two CURewrites here: 
@@ -137,6 +147,7 @@ public abstract class DelegateCreator {
 	private ITypeBinding fDestinationTypeBinding;
 	private Type fDestinationType;
 	private ITrackedNodePosition fTrackedPosition;
+	private String fDeprecationScript;
 	
 	private CodeGenerationSettings fPreferences;
 
@@ -322,7 +333,6 @@ public abstract class DelegateCreator {
 	 * 
 	 */
 	public void prepareDelegate() throws JavaModelException {
-
 		Assert.isNotNull(fDelegateRewrite);
 		Assert.isNotNull(fDeclaration);
 
@@ -346,36 +356,14 @@ public abstract class DelegateCreator {
 		if (fDeclareDeprecated) {
 			final RefactoringSessionDescriptor descriptor= createRefactoringScript();
 			if (descriptor != null) {
-				final String name= createRefactoringScriptName();
-				if (name != null) {
-					final IPackageFragment fragment= getRefactoringScriptPackage();
-					if (fragment != null) {
-						final IResource resource= fragment.getResource();
-						if (resource instanceof IFolder) {
-//							final IFolder folder= (IFolder) resource;
-//							final URI uri= folder.getFile(name).getLocationURI();
-//							if (uri != null) {
-//								OutputStream stream= null;
-//								try {
-//									final IFileStore store= EFS.getStore(uri);
-//									if (store != null) {
-//										stream= new BufferedOutputStream(store.openOutputStream(EFS.NONE, null));
-//										RefactoringCore.getRefactoringHistoryService().writeRefactoringSession(descriptor, stream, false);
-//									}
-//								} catch (CoreException exception) {
-//									JavaPlugin.log(exception);
-//								} finally {
-//									if (stream != null) {
-//										try {
-//											stream.close();
-//										} catch (IOException exception) {
-//											// Do nothing
-//										}
-//									}
-//								}
-//							}
-						}
-					}
+				try {
+					final ByteArrayOutputStream stream= new ByteArrayOutputStream(1024);
+					RefactoringCore.getHistoryService().writeRefactoringSession(descriptor, stream, false);
+					fDeprecationScript= stream.toString(SCRIPT_ENCODING);
+				} catch (CoreException exception) {
+					JavaPlugin.log(exception);
+				} catch (UnsupportedEncodingException exception) {
+					Assert.isTrue(false);
 				}
 			}
 			createJavadoc();
@@ -383,26 +371,17 @@ public abstract class DelegateCreator {
 	}
 
 	/**
-	 * Returns the package fragment where to store refactoring scripts.
-	 * 
-	 * This method is only called if isDeclareDeprecated() == true.
-	 * 
-	 * @return the package fragment
-	 */
-	protected abstract IPackageFragment getRefactoringScriptPackage();
-
-	/**
 	 * Creates the name of the refactoring script.
 	 * 
-	 * This name is used by the quick fix infrastructure to find the appropriate script
-	 * to resolve a deprecation message. The name must be unique enough to find the script
-	 * in a package fragment.
+	 * This name is used by the quick fix infrastructure to find the appropriate
+	 * script to resolve a deprecation message. The name must be unique enough
+	 * to find the script in a package fragment.
 	 * 
 	 * This method is only called if isDeclareDeprecated() == true.
 	 * 
 	 * @return the name of the refactoring script
 	 */
-	protected abstract String createRefactoringScriptName();
+	protected abstract String getRefactoringScriptName();
 
 	/**
 	 * Creates the javadoc for the delegate.
@@ -452,11 +431,38 @@ public abstract class DelegateCreator {
 			JavaPlugin.log(e);
 		}
 	}
-	
+
+	/**
+	 * Creates the necessary change to store the deprecation script in the
+	 * project folder.
+	 * 
+	 * @return the change for the deprecation script, or <code>null</code> if
+	 *         no script is created
+	 */
+	public Change createChange() {
+		Assert.isNotNull(fDelegateRewrite);
+		if (fDeprecationScript != null) {
+			final String name= getRefactoringScriptName();
+			if (name != null) {
+				final IPath path= getRefactoringScriptPath(fDelegateRewrite.getCu().getJavaProject().getProject(), name);
+				if (path != null)
+					return new CreateDeprecationScriptChange(path, fDeprecationScript, BindingLabelProvider.getBindingLabel(getDeclarationBinding(), JavaElementLabels.ALL_DEFAULT));
+			}
+		}
+		return null;
+	}
+
+	/**
+	 * Returns the binding of the declaration.
+	 * 
+	 * @return the binding of the declaration
+	 */
+	protected abstract IBinding getDeclarationBinding();
+
 	/**
 	 * Returns a new rewrite with the delegate changes registered. This rewrite
-	 * can be used in-between calls to prepareDelegate() and createEdit() to
-	 * add additional changes to the delegate.
+	 * can be used in-between calls to prepareDelegate() and createEdit() to add
+	 * additional changes to the delegate.
 	 * 
 	 * @return CompilationUnitRewrite the new rewrite
 	 */
@@ -465,6 +471,10 @@ public abstract class DelegateCreator {
 	}
 
 	// ******************* INTERNAL HELPERS ***************************
+
+	private static IPath getRefactoringScriptPath(IProject project, String name) {
+		return project.getFullPath().append(SCRIPT_FOLDER).append(name);
+	}
 
 	private TagElement getDelegateJavadocTag(BodyDeclaration declaration) throws JavaModelException {
 		Assert.isNotNull(declaration);

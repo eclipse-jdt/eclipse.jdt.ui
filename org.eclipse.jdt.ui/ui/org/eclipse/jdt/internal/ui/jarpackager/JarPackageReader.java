@@ -157,6 +157,7 @@ public class JarPackageReader extends Object implements IJarDescriptionReader {
 	private void xmlReadRefactoring(JarPackageData jarPackage, Element element) throws java.io.IOException {
 		if (element.getNodeName().equals("refactoring")) { //$NON-NLS-1$
 			jarPackage.setExportStructuralOnly(getBooleanAttribute(element, "structuralOnly", jarPackage.isExportStructuralOnly())); //$NON-NLS-1$
+			jarPackage.setDeprecationAware(getBooleanAttribute(element, "deprecationInfo", jarPackage.isDeprecationAware())); //$NON-NLS-1$
 		}
 	}
 

@@ -12,6 +12,7 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -24,6 +25,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
@@ -68,7 +70,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
@@ -77,6 +78,7 @@ import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
@@ -116,6 +118,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	private GroupCategorySet fCategorySet;
 	private boolean fDelegateUpdating;
 	private boolean fDelegateDeprecation;
+	private List fDelegateChanges= new ArrayList();
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameFieldProcessor"; //$NON-NLS-1$
 
@@ -197,6 +200,13 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			if (setter != null) {
 				result.rename(setter, new RenameArguments(getNewSetterName(), getUpdateReferences()));
 			}
+		}
+		ResourceModifications modifications= result.getResourceModifications();
+		for (final Iterator iterator= fDelegateChanges.iterator(); iterator.hasNext();) {
+			final Change change= (Change) iterator.next();
+			final Object modified= change.getModifiedElement();
+			if (modified instanceof IResource)
+				modifications.addCreate((IResource) modified);
 		}
 		return result;
 	}
@@ -570,7 +580,11 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		try {
-			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, fChangeManager.getAllChanges()) {
+			final TextChange[] changes= fChangeManager.getAllChanges();
+			final List list= new ArrayList(changes.length + fDelegateChanges.size());
+			list.addAll(Arrays.asList(changes));
+			list.addAll(fDelegateChanges);
+			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, (Change[]) list.toArray(new Change[list.size()])) {
 
 				public ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
@@ -586,7 +600,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 					IJavaProject javaProject= fField.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					int flags= JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
+					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
 					try {
 						if (!Flags.isPrivate(fField.getFlags()))
 							flags|= RefactoringDescriptor.MULTI_CHANGE;
@@ -670,13 +684,16 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				status.addWarning(Messages.format(RefactoringCoreMessages.DelegateCreator_cannot_create_field_delegate_no_initializer, fField
 						.getElementName()), JavaStatusContext.create(fField));
 			} else {
-				DelegateFieldCreator d= new DelegateFieldCreator();
-				d.setDeclareDeprecated(fDelegateDeprecation);
-				d.setDeclaration(fieldDeclaration);
-				d.setNewElementName(getNewElementName());
-				d.setSourceRewrite(rewrite);
-				d.prepareDelegate();
-				d.createEdit();
+				DelegateFieldCreator creator= new DelegateFieldCreator();
+				creator.setDeclareDeprecated(fDelegateDeprecation);
+				creator.setDeclaration(fieldDeclaration);
+				creator.setNewElementName(getNewElementName());
+				creator.setSourceRewrite(rewrite);
+				creator.prepareDelegate();
+				creator.createEdit();
+				Change change= creator.createChange();
+				if (change != null)
+					fDelegateChanges.add(change);
 			}
 		}
 
@@ -697,14 +714,17 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	}
 
 	private void addMethodDelegate(IMethod getter, String newName, CompilationUnitRewrite rewrite) throws JavaModelException {
-		MethodDeclaration m= ASTNodeSearchUtil.getMethodDeclarationNode(getter, rewrite.getRoot());
-		DelegateCreator d= new DelegateMethodCreator();
-		d.setDeclareDeprecated(fDelegateDeprecation);
-		d.setDeclaration(m);
-		d.setNewElementName(newName);
-		d.setSourceRewrite(rewrite);
-		d.prepareDelegate();
-		d.createEdit();
+		MethodDeclaration declaration= ASTNodeSearchUtil.getMethodDeclarationNode(getter, rewrite.getRoot());
+		DelegateCreator creator= new DelegateMethodCreator();
+		creator.setDeclareDeprecated(fDelegateDeprecation);
+		creator.setDeclaration(declaration);
+		creator.setNewElementName(newName);
+		creator.setSourceRewrite(rewrite);
+		creator.prepareDelegate();
+		creator.createEdit();
+		Change change= creator.createChange();
+		if (change != null)
+			fDelegateChanges.add(change);
 	}
 
 	private void addTextEdit(TextChange change, String groupName, TextEdit textEdit) {

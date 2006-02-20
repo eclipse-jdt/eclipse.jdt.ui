@@ -14,7 +14,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -23,8 +22,7 @@ import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.FieldAccess;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
-import org.eclipse.jdt.core.dom.IPackageBinding;
-import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MemberRef;
 import org.eclipse.jdt.core.dom.SimpleName;
@@ -86,6 +84,10 @@ public class DelegateFieldCreator extends DelegateCreator {
 		return VariableDeclarationFragment.INITIALIZER_PROPERTY;
 	}
 
+	protected IBinding getDeclarationBinding() {
+		return fOldFieldFragment.resolveBinding();
+	}
+
 	protected RefactoringSessionDescriptor createRefactoringScript() {
 		final IVariableBinding binding= fOldFieldFragment.resolveBinding();
 		if (binding != null) {
@@ -100,33 +102,30 @@ public class DelegateFieldCreator extends DelegateCreator {
 		return null;
 	}
 
-	protected IPackageFragment getRefactoringScriptPackage() {
+	protected String getRefactoringScriptName() {
 		final IVariableBinding binding= fOldFieldFragment.resolveBinding();
-		if (binding != null) {
-			final ITypeBinding declaring= binding.getDeclaringClass();
-			if (declaring != null) {
-				final IPackageBinding pack= declaring.getPackage();
-				if (pack != null)
-					return (IPackageFragment) pack.getJavaElement();
-			}
-		}
+		if (binding != null)
+			return getRefactoringScriptName(binding);
 		return null;
 	}
 
-	protected String createRefactoringScriptName() {
-		final IVariableBinding binding= fOldFieldFragment.resolveBinding();
-		if (binding != null) {
+	/**
+	 * Returns the refactoring script name associated with the variable binding.
+	 * 
+	 * @param binding
+	 *            the variable binding
+	 * @return the refactoring script name, or <code>null</code>
+	 */
+	public static String getRefactoringScriptName(final IVariableBinding binding) {
+		final IJavaElement element= binding.getDeclaringClass().getJavaElement();
+		if (element instanceof IType) {
+			final IType type= (IType) element;
 			final StringBuffer buffer= new StringBuffer();
-			buffer.append(SCRIPT_NAME_PREFIX);
-			final IJavaElement element= binding.getDeclaringClass().getJavaElement();
-			if (element instanceof IType) {
-				final IType type= (IType) element;
-				buffer.append(type.getFullyQualifiedName());
-				buffer.append('.');
-				buffer.append(binding.getName());
-				buffer.append(".xml"); //$NON-NLS-1$
-				return buffer.toString();
-			}
+			buffer.append(type.getFullyQualifiedName());
+			buffer.append('.');
+			buffer.append(binding.getName());
+			buffer.append(".xml"); //$NON-NLS-1$
+			return buffer.toString();
 		}
 		return null;
 	}

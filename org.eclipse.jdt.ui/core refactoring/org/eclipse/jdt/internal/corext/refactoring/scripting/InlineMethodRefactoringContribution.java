@@ -61,7 +61,7 @@ public final class InlineMethodRefactoringContribution extends JavaRefactoringCo
 		}
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String selection= generic.getAttribute(InlineMethodRefactoring.ATTRIBUTE_SELECTION);
+			final String selection= generic.getAttribute(JavaRefactoringDescriptor.SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -74,7 +74,7 @@ public final class InlineMethodRefactoringContribution extends JavaRefactoringCo
 					selectionStart= offset;
 					selectionLength= length;
 				} else
-					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, InlineMethodRefactoring.ATTRIBUTE_SELECTION}), null));
+					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}), null));
 			}
 			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
@@ -85,7 +85,7 @@ public final class InlineMethodRefactoringContribution extends JavaRefactoringCo
 					if (element instanceof ICompilationUnit) {
 						unit= (ICompilationUnit) element;
 						if (selection == null)
-							throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, InlineMethodRefactoring.ATTRIBUTE_SELECTION), null));
+							throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.SELECTION), null));
 					} else if (element instanceof IMethod) {
 						final IMethod method= (IMethod) element;
 						try {

@@ -16,7 +16,6 @@ import org.eclipse.ltk.core.refactoring.RefactoringSessionDescriptor;
 
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
@@ -26,8 +25,8 @@ import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.ChildPropertyDescriptor;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
 import org.eclipse.jdt.core.dom.ExpressionStatement;
+import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
-import org.eclipse.jdt.core.dom.IPackageBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
 import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.MethodInvocation;
@@ -165,53 +164,54 @@ public class DelegateMethodCreator extends DelegateCreator {
 	/**
 	 * {@inheritDoc}
 	 */
-	protected String createRefactoringScriptName() {
+	protected IBinding getDeclarationBinding() {
 		final MethodDeclaration declaration= (MethodDeclaration) getDeclaration();
-		final IMethodBinding binding= declaration.resolveBinding();
-		if (binding != null) {
-			final StringBuffer buffer= new StringBuffer();
-			buffer.append(SCRIPT_NAME_PREFIX);
-			final IJavaElement element= binding.getDeclaringClass().getJavaElement();
-			if (element instanceof IType) {
-				final IType type= (IType) element;
-				buffer.append(type.getFullyQualifiedName());
-				buffer.append('.');
-				buffer.append(binding.getName());
-				buffer.append('(');
-				final ITypeBinding[] parameters= binding.getParameterTypes();
-				for (int index= 0; index < parameters.length; index++) {
-					if (index != 0)
-						buffer.append(',');
-					final IJavaElement javaElem= parameters[index].getJavaElement();
-					if (javaElem instanceof IType)
-						buffer.append(((IType) javaElem).getFullyQualifiedName());
-					else if (javaElem instanceof ITypeParameter)
-						buffer.append(((ITypeParameter) javaElem).getElementName());
-					else
-						buffer.append(parameters[index].getQualifiedName());
-				}
-				buffer.append(')');
-				buffer.append(".xml"); //$NON-NLS-1$
-				return buffer.toString();
-			}
-		}
-		return null;
+		return declaration.resolveBinding();
 	}
 
 	/**
 	 * {@inheritDoc}
 	 */
-	protected IPackageFragment getRefactoringScriptPackage() {
+	protected String getRefactoringScriptName() {
 		final MethodDeclaration declaration= (MethodDeclaration) getDeclaration();
 		final IMethodBinding binding= declaration.resolveBinding();
-		if (binding != null) {
-			final ITypeBinding declaring= binding.getDeclaringClass();
-			if (declaring != null) {
-				final IPackageBinding pack= declaring.getPackage();
-				if (pack != null) {
-					return (IPackageFragment) pack.getJavaElement();
-				}
+		if (binding != null)
+			return getRefactoringScriptName(binding);
+		return null;
+	}
+
+	/**
+	 * Returns the refactoring script name associated with the method binding.
+	 * 
+	 * @param binding
+	 *            the method binding
+	 * @return the refactoring script name, or <code>null</code>
+	 */
+	public static String getRefactoringScriptName(final IMethodBinding binding) {
+		Assert.isNotNull(binding);
+		final IJavaElement element= binding.getDeclaringClass().getJavaElement();
+		if (element instanceof IType) {
+			final IType type= (IType) element;
+			final StringBuffer buffer= new StringBuffer();
+			buffer.append(type.getFullyQualifiedName());
+			buffer.append('.');
+			buffer.append(binding.getName());
+			buffer.append('(');
+			final ITypeBinding[] parameters= binding.getParameterTypes();
+			for (int index= 0; index < parameters.length; index++) {
+				if (index != 0)
+					buffer.append(',');
+				final IJavaElement javaElem= parameters[index].getJavaElement();
+				if (javaElem instanceof IType)
+					buffer.append(((IType) javaElem).getFullyQualifiedName());
+				else if (javaElem instanceof ITypeParameter)
+					buffer.append(((ITypeParameter) javaElem).getElementName());
+				else
+					buffer.append(parameters[index].getQualifiedName());
 			}
+			buffer.append(')');
+			buffer.append(".xml"); //$NON-NLS-1$
+			return buffer.toString();
 		}
 		return null;
 	}

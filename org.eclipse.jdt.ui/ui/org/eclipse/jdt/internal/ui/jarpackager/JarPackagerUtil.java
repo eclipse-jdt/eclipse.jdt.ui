@@ -47,7 +47,7 @@ import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.ui.JavaUI;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
+import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -62,7 +62,8 @@ public final class JarPackagerUtil {
 	static final String JAR_EXTENSION= "jar"; //$NON-NLS-1$
 	static final String DESCRIPTION_EXTENSION= "jardesc"; //$NON-NLS-1$
 
-	private static final String REFACTORINGS_ENTRY= "META-INF/REFACTORINGS.XML"; //$NON-NLS-1$
+	private static final String META_INF_ENTRY= "META-INF"; //$NON-NLS-1$
+	private static final String REFACTORINGS_ENTRY= META_INF_ENTRY + "/REFACTORINGS.XML"; //$NON-NLS-1$
 
 	private JarPackagerUtil() {
 		// Do nothing
@@ -83,6 +84,30 @@ public final class JarPackagerUtil {
 	 */
 	public static String getRefactoringsEntry() {
 		return REFACTORINGS_ENTRY;
+	}
+
+	/**
+	 * Returns the name of the deprecations zip entry for the specified file.
+	 * 
+	 * @param name
+	 *            the name of the file
+	 * @return the name of the deprecations zip entry
+	 * 
+	 * @since 3.2
+	 */
+	public static String getDeprecationEntry(final String name) {
+		return META_INF_ENTRY + "/" + name; //$NON-NLS-1$
+	}
+
+	/**
+	 * Returns the name of the meta entry.
+	 * 
+	 * @return the name of the meta entry
+	 * 
+	 * @since 3.2
+	 */
+	public static String getMetaEntry() {
+		return META_INF_ENTRY;
 	}
 
 	/**
@@ -263,7 +288,7 @@ public final class JarPackagerUtil {
 			final IRefactoringHistoryService service= RefactoringCore.getHistoryService();
 			try {
 				service.connect();
-				return service.getRefactoringHistory(projects, start, end, JavaRefactorings.JAR_IMPORTABLE | filter, monitor);
+				return service.getRefactoringHistory(projects, start, end, JavaRefactoringDescriptor.JAR_IMPORTABLE | filter, monitor);
 			} finally {
 				service.disconnect();
 			}

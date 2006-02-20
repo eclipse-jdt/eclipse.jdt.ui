@@ -43,6 +43,7 @@ import org.eclipse.core.runtime.Path;
 
 import org.eclipse.core.resources.IContainer;
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
@@ -55,6 +56,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 
+import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -109,12 +111,14 @@ public class JarWriter3 {
 			final Object[] projects= fJarPackage.getRefactoringProjects();
 			if (fJarPackage.isRefactoringAware() && projects != null && projects.length > 0) {
 				Assert.isTrue(fJarPackage.areDirectoryEntriesIncluded());
-				final IPath path= new Path(JarPackagerUtil.getRefactoringsEntry());
-				addDirectories(path.removeLastSegments(1));
-				addHistory(fJarPackage, path, new NullProgressMonitor());
+				final IPath metaPath= new Path(JarPackagerUtil.getMetaEntry());
+				addDirectories(metaPath);
+				addHistory(fJarPackage, new Path(JarPackagerUtil.getRefactoringsEntry()), new NullProgressMonitor());
+				if (fJarPackage.isDeprecationAware())
+					addDeprecations(fJarPackage, projects, new NullProgressMonitor());
 			}
-		} catch (IOException ex) {
-			throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
+		} catch (IOException exception) {
+			throw JarPackagerUtil.createCoreException(exception.getLocalizedMessage(), exception);
 		}
 	}
 	
@@ -253,6 +257,48 @@ public class JarWriter3 {
 	}
 
 	/**
+	 * Creates new JAR file entries containing the deprecation infos.
+	 * 
+	 * @param data
+	 *            the jar package data
+	 * @param projects
+	 *            the projects which are exported
+	 * @param monitor
+	 *            the progress monitor to use
+	 * @throws IOException
+	 *             if the file could not be read
+	 * @throws CoreException
+	 *             if an error occurs while transforming the deprecations
+	 */
+	private void addDeprecations(final JarPackageData data, final Object[] projects, final IProgressMonitor monitor) throws IOException, CoreException {
+		Assert.isNotNull(data);
+		Assert.isNotNull(projects);
+		Assert.isNotNull(monitor);
+		for (int index= 0; index < projects.length; index++) {
+			final IProject project= (IProject) projects[index];
+			final IFolder folder= project.getFolder(DelegateCreator.SCRIPT_FOLDER);
+			if (folder.exists()) {
+				final IResource[] resources= folder.members();
+				for (int offset= 0; offset < resources.length; offset++) {
+					if (resources[offset] instanceof IFile) {
+						final IFile file= (IFile) resources[offset];
+						if (file.getFileExtension().equals("xml")) { //$NON-NLS-1$
+							final URI location= file.getLocationURI();
+							if (location != null) {
+								try {
+									writeMetaData(data, new File(location), new Path(JarPackagerUtil.getDeprecationEntry(file.getName())));
+								} catch (FileNotFoundException exception) {
+									// Does not happen
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	}
+
+	/**
 	 * Creates a new JAR file entry containing the refactoring history.
 	 * 
 	 * @param data
@@ -292,7 +338,7 @@ public class JarWriter3 {
 				} catch (IOException exception) {
 					// Do nothing
 				}
-				writeHistory(data, file, path);
+				writeMetaData(data, file, path);
 			} finally {
 				if (output != null) {
 					try {
@@ -368,8 +414,7 @@ public class JarWriter3 {
 			// part of a project if the project is local as well. So using getLocation
 			// is currently save here.
 			IPath projectLocation= project.getLocation();
-			boolean isInProject= projectLocation != null && projectLocation.isPrefixOf(jarPath);
-			if (isInProject) {
+			if (projectLocation != null && projectLocation.isPrefixOf(jarPath)) {
 				try {
 					jarPath= jarPath.removeFirstSegments(projectLocation.segmentCount());
 					jarPath= jarPath.removeLastSegments(1);
@@ -396,11 +441,6 @@ public class JarWriter3 {
 	 *             used to return information in the status object.
 	 */
 	public void write(IFile resource, IPath destinationPath) throws CoreException {
-		if (!resource.isLocal(IResource.DEPTH_ZERO)) {
-			String message= Messages.format(JarPackagerMessages.JarWriter_error_fileNotAccessible, resource.getFullPath());
-			throw JarPackagerUtil.createCoreException(message, null);
-		}
-
 		try {
 			if (fJarPackage.areDirectoryEntriesIncluded())
 				addDirectories(resource, destinationPath);
@@ -417,20 +457,20 @@ public class JarWriter3 {
 	}
 
 	/**
-	 * Writes the refactoring history file to the JAR file.
+	 * Writes the meta file to the JAR file.
 	 * 
 	 * @param data
 	 *            the jar package data
 	 * @param file
-	 *            the file containing the refactoring history
+	 *            the file containing the meta data
 	 * @param path
-	 *            the path of the refactoring history file within the archive
+	 *            the path of the meta file within the archive
 	 * @throws FileNotFoundException
-	 *             if the history file could not be found
+	 *             if the meta file could not be found
 	 * @throws IOException
 	 *             if an input/output error occurs
 	 */
-	private void writeHistory(final JarPackageData data, final File file, final IPath path) throws FileNotFoundException, IOException, CoreException {
+	private void writeMetaData(final JarPackageData data, final File file, final IPath path) throws FileNotFoundException, IOException, CoreException {
 		Assert.isNotNull(data);
 		Assert.isNotNull(file);
 		Assert.isNotNull(path);

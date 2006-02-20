@@ -930,6 +930,10 @@ public final class RefactoringCoreMessages extends NLS {
 	public static String InlineMethodRefactoring_deprecation_comment;
 	public static String JavaRefactoringDescriptor_initialization_error;
 
+	public static String CreateDeprecationScriptChange_name;
+	public static String CreateDeprecationScriptChange_performing_change;
+	public static String CreateDeprecationScriptChange_unknown_location;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
 	}

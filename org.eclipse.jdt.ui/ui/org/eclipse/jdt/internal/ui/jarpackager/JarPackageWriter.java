@@ -139,6 +139,7 @@ public class JarPackageWriter extends Object implements IJarDescriptionWriter {
 		Element refactoring= document.createElement("refactoring"); //$NON-NLS-1$
 		xmlJarDesc.appendChild(refactoring);
 		refactoring.setAttribute("structuralOnly", "" + jarPackage.isExportStructuralOnly()); //$NON-NLS-1$ //$NON-NLS-2$
+		refactoring.setAttribute("deprecationInfo", "" + jarPackage.isDeprecationAware()); //$NON-NLS-1$ //$NON-NLS-2$
 	}
 
 	private void xmlWriteManifest(JarPackageData jarPackage, Document document, Element xmlJarDesc) throws DOMException {

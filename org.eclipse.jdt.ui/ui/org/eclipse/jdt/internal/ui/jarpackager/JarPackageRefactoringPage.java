@@ -54,7 +54,7 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaUILabelProvider;
  * 
  * @since 3.2
  */
-public final class JarPackageRefactoringPage extends WizardPage implements IJarPackageWizardPage {
+final class JarPackageRefactoringPage extends WizardPage implements IJarPackageWizardPage {
 
 	/** Content provider for projects whose refactorings are exported */
 	private static class RefactoringProjectContentProvider extends WorkbenchContentProvider {
@@ -77,6 +77,9 @@ public final class JarPackageRefactoringPage extends WizardPage implements IJarP
 
 	/** The export structual only dialog settings store */
 	private static final String STORE_EXPORT_STRUCTURAL_ONLY= PAGE_NAME + ".EXPORT_STRUCTURAL_ONLY"; //$NON-NLS-1$
+
+	/** The export deprecation information dialog settings store */
+	private static final String STORE_EXPORT_DEPRECATION_INFO= PAGE_NAME + ".EXPORT_DEPRECATION_INFO"; //$NON-NLS-1$
 
 	/** The jar package data */
 	private final JarPackageData fJarPackageData;
@@ -131,13 +134,22 @@ public final class JarPackageRefactoringPage extends WizardPage implements IJarP
 		final GridLayout layout= new GridLayout();
 		layout.marginHeight= 0;
 		group.setLayout(layout);
-		final Button button= new Button(group, SWT.CHECK | SWT.LEFT);
-		button.setText(JarPackagerMessages.JarPackageRefactoringPage_export_structural_only);
-		button.setSelection(fJarPackageData.isExportStructuralOnly());
-		button.addSelectionListener(new SelectionAdapter() {
+		final Button structural= new Button(group, SWT.CHECK | SWT.LEFT);
+		structural.setText(JarPackagerMessages.JarPackageRefactoringPage_export_structural_only);
+		structural.setSelection(fJarPackageData.isExportStructuralOnly());
+		structural.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(final SelectionEvent event) {
-				fJarPackageData.setExportStructuralOnly(button.getSelection());
+				fJarPackageData.setExportStructuralOnly(structural.getSelection());
+			}
+		});
+		final Button deprecations= new Button(group, SWT.CHECK | SWT.LEFT);
+		deprecations.setText(JarPackagerMessages.JarPackageRefactoringPage_include_deprecation_info0);
+		deprecations.setSelection(fJarPackageData.isDeprecationAware());
+		deprecations.addSelectionListener(new SelectionAdapter() {
+
+			public void widgetSelected(final SelectionEvent event) {
+				fJarPackageData.setDeprecationAware(deprecations.getSelection());
 			}
 		});
 	}
@@ -193,8 +205,10 @@ public final class JarPackageRefactoringPage extends WizardPage implements IJarP
 	 */
 	public void finish() {
 		final IDialogSettings settings= getDialogSettings();
-		if (settings != null)
+		if (settings != null) {
 			settings.put(STORE_EXPORT_STRUCTURAL_ONLY, fJarPackageData.isExportStructuralOnly());
+			settings.put(STORE_EXPORT_DEPRECATION_INFO, fJarPackageData.isDeprecationAware());
+		}
 	}
 
 	/**

@@ -36,6 +36,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.osgi.util.NLS;
@@ -92,6 +93,7 @@ import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.Corext;
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
@@ -113,8 +115,8 @@ import org.eclipse.jdt.internal.corext.refactoring.ReturnTypeInfo;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
 import org.eclipse.jdt.internal.corext.refactoring.StubTypeContext;
 import org.eclipse.jdt.internal.corext.refactoring.TypeContextChecker;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.code.CommentRefactoring;
@@ -174,6 +176,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 	private ITypeHierarchy fCachedTypeHierarchy= null;
 	private boolean fDelegateUpdating;
 	private boolean fDelegateDeprecation;
+	private List fDelegateChanges= new ArrayList();
 
 	/**
 	 * Creates a new change signature refactoring.
@@ -964,7 +967,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 		for (int i= 0; i < problems.length; i++) {
 			IProblem problem= problems[i];
 			if (shouldReport(problem))
-				result.addEntry(JavaRefactorings.createStatusEntry(problem, newCuSource));
+				result.addEntry(new RefactoringStatusEntry((problem.isError() ? RefactoringStatus.ERROR : RefactoringStatus.WARNING), problem.getMessage(), new JavaStringStatusContext(newCuSource, new SourceRange(problem))));
 		}
 		return result;
 	}
@@ -1138,7 +1141,11 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 	public Change createChange(IProgressMonitor pm) {
 		pm.beginTask("", 1); //$NON-NLS-1$
 		try {
-			return new DynamicValidationStateChange(RefactoringCoreMessages.ChangeSignatureRefactoring_restructure_parameters, fChangeManager.getAllChanges()) {
+			final TextChange[] changes= fChangeManager.getAllChanges();
+			final List list= new ArrayList(changes.length + fDelegateChanges.size());
+			list.addAll(Arrays.asList(changes));
+			list.addAll(fDelegateChanges);
+			return new DynamicValidationStateChange(RefactoringCoreMessages.ChangeSignatureRefactoring_restructure_parameters, (Change[]) list.toArray(new Change[list.size()])) {
 				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
 					arguments.put(JavaRefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
@@ -1185,7 +1192,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 					IJavaProject javaProject= fMethod.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					int flags= JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
+					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
 					try {
 						if (!Flags.isPrivate(fMethod.getFlags()))
 							flags|= RefactoringDescriptor.MULTI_CHANGE;
@@ -1795,11 +1802,11 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 
 		private void addDelegate() throws JavaModelException {
 
-			DelegateMethodCreator d= new DelegateMethodCreator();
-			d.setDeclaration(fMethDecl);
-			d.setDeclareDeprecated(fDelegateDeprecation);
-			d.setSourceRewrite(fCuRewrite);
-			d.prepareDelegate();
+			DelegateMethodCreator creator= new DelegateMethodCreator();
+			creator.setDeclaration(fMethDecl);
+			creator.setDeclareDeprecated(fDelegateDeprecation);
+			creator.setSourceRewrite(fCuRewrite);
+			creator.prepareDelegate();
 			
 			/*
 			 * The delegate now contains a call and a javadoc reference to the
@@ -1808,14 +1815,17 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			 * Use ReferenceUpdate() / DocReferenceUpdate() to update these
 			 * references like any other reference.
 			 */
-			final ASTNode delegateInvocation= d.getDelegateInvocation();
+			final ASTNode delegateInvocation= creator.getDelegateInvocation();
 			if (delegateInvocation != null)
 				// may be null if the delegate is an interface method or
 				// abstract -> no body
-				new ReferenceUpdate(delegateInvocation, d.getDelegateRewrite(), fResult).updateNode();
-			new DocReferenceUpdate(d.getJavadocReference(), d.getDelegateRewrite(), fResult).updateNode();
+				new ReferenceUpdate(delegateInvocation, creator.getDelegateRewrite(), fResult).updateNode();
+			new DocReferenceUpdate(creator.getJavadocReference(), creator.getDelegateRewrite(), fResult).updateNode();
 			
-			d.createEdit();
+			creator.createEdit();
+			Change change= creator.createChange();
+			if (change != null)
+				fDelegateChanges.add(change);
 		}
 		
 		/** @return {@inheritDoc} (element type: SingleVariableDeclaration) */

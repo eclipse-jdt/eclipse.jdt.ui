@@ -27,6 +27,7 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
@@ -72,13 +73,13 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
@@ -111,6 +112,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 	private GroupCategorySet fCategorySet;
 	private boolean fDelegateUpdating;
 	private boolean fDelegateDeprecation;
+	protected List fDelegateChanges= new ArrayList();
 	protected boolean fInitialized= false;
 
 	public static final String IDENTIFIER= "org.eclipse.jdt.ui.renameMethodProcessor"; //$NON-NLS-1$
@@ -190,6 +192,13 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		for (Iterator iter= fMethodsToRename.iterator(); iter.hasNext();) {
 			IMethod method= (IMethod) iter.next();
 			result.rename(method, args);
+		}
+		ResourceModifications modifications= result.getResourceModifications();
+		for (final Iterator iterator= fDelegateChanges.iterator(); iterator.hasNext();) {
+			final Change change= (Change) iterator.next();
+			final Object modified= change.getModifiedElement();
+			if (modified instanceof IResource)
+				modifications.addCreate((IResource) modified);
 		}
 		return result;
 	}
@@ -686,7 +695,11 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 
 	public Change createChange(IProgressMonitor monitor) throws CoreException {
 		try {
-			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, fChangeManager.getAllChanges()) {
+			final TextChange[] changes= fChangeManager.getAllChanges();
+			final List list= new ArrayList(changes.length + fDelegateChanges.size());
+			list.addAll(Arrays.asList(changes));
+			list.addAll(fDelegateChanges);
+			return new DynamicValidationStateChange(RefactoringCoreMessages.Change_javaChanges, (Change[]) list.toArray(new Change[list.size()])) {
 
 				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
@@ -699,7 +712,7 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 					IJavaProject javaProject= fMethod.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					int flags= JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
+					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
 					try {
 						if (!Flags.isPrivate(fMethod.getFlags()))
 							flags|= RefactoringDescriptor.MULTI_CHANGE;
@@ -761,6 +774,9 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 						creator.setNewElementName(getNewElementName());
 						creator.prepareDelegate();
 						creator.createEdit();
+						Change change= creator.createChange();
+						if (change != null)
+							fDelegateChanges.add(change);
 					}
 					// Need to handle all delegates first as this
 					// creates a completely new change object.

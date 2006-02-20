@@ -306,6 +306,8 @@ public interface IJavaHelpContextIds {
 	public static final String NEW_PACKAGEROOT_WIZARD_PAGE= PREFIX + "new_packageroot_wizard_page_context"; //$NON-NLS-1$
 	public static final String JARPACKAGER_WIZARD_PAGE= PREFIX + "jar_packager_wizard_page_context"; //$NON-NLS-1$
 	// since 3.2
+	public static final String FIX_DEPRECATION_WIZARD_PAGE= PREFIX + "fix_deprecation_wizard_page_context"; //$NON-NLS-1$
+	// since 3.2
 	public static final String JARIMPORT_WIZARD_PAGE= PREFIX + "jar_import_wizard_page_context"; //$NON-NLS-1$
 	// since 3.2
 	public static final String INCLUSION_EXCLUSION_WIZARD_PAGE= PREFIX + "edit_inclusion_exlusion_filter_wizard_page_context"; //$NON-NLS-1$

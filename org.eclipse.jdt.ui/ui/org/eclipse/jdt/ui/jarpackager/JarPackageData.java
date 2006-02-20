@@ -141,6 +141,9 @@ public class JarPackageData {
 	// Should the exporter only export refactorings causing structural changes?
 	private boolean fRefactoringStructural= true;
 
+	// Should the exporter include deprecation resolving information?
+	private boolean fDeprecationAware= true;
+
 	// The refactoring descriptors to export
 	private RefactoringDescriptorProxy[] fRefactoringDescriptors= {};
 
@@ -1037,6 +1040,21 @@ public class JarPackageData {
 	}
 
 	/**
+	 * Is the JAR package deprecation aware?
+	 * <p>
+	 * This information is used in JAR export.
+	 * </p>
+	 * 
+	 * @return <code>true</code> if it is deprecation aware,
+	 *         <code>false</code> otherwise
+	 * 
+	 * @since 3.2
+	 */
+	public boolean isDeprecationAware() {
+		return fDeprecationAware;
+	}
+
+	/**
 	 * Sets the projects for which refactoring information should be stored.
 	 * <p>
 	 * This information is used for JAR export.
@@ -1067,6 +1085,22 @@ public class JarPackageData {
 	 */
 	public void setRefactoringAware(boolean aware) {
 		fRefactoringAware= aware;
+	}
+
+	/**
+	 * Determines whether the jar package is deprecation aware.
+	 * <p>
+	 * This information is used in JAR export.
+	 * </p>
+	 * 
+	 * @param aware
+	 *            <code>true</code> if it is deprecation aware,
+	 *            <code>false</code> otherwise
+	 * 
+	 * @since 3.2
+	 */
+	public void setDeprecationAware(boolean aware) {
+		fDeprecationAware= aware;
 	}
 
 	/**
