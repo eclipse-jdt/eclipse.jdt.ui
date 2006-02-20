@@ -5058,7 +5058,7 @@
                class="org.eclipse.jdt.internal.ui.actions.JarImportWizardAction"
                definitionId="org.eclipse.jdt.ui.import.jar"
                enablesFor="1"
-               icon="icons/full/obj16/jar_obj.gif"
+               icon="$nl$/icons/full/obj16/jar_obj.gif"
                id="org.eclipse.jdt.ui.import.jar"
                label="%JarImportAction.label"
                menubarPath="replaceWithMenu/replaceWithGroup"
