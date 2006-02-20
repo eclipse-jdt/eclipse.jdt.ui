@@ -120,15 +120,9 @@ public class JarWriter {
 	 * 								in the status object.
 	 */
 	public void write(IFile resource, IPath destinationPath) throws CoreException {
-		ByteArrayOutputStream output= null;
+		ByteArrayOutputStream output= new ByteArrayOutputStream();
 		BufferedInputStream contentStream= null;
-		
 		try {
-			output= new ByteArrayOutputStream();
-			if (!resource.isLocal(IResource.DEPTH_ZERO)) {
-				String message= Messages.format(JarPackagerMessages.JarWriter_error_fileNotAccessible, resource.getFullPath()); 
-				throw JarPackagerUtil.createCoreException(message, null);
-			}
 			contentStream= new BufferedInputStream(resource.getContents(false));
 			int chunkSize= 4096;
 			byte[] readBuffer= new byte[chunkSize];
@@ -139,8 +133,6 @@ public class JarWriter {
 			throw JarPackagerUtil.createCoreException(ex.getLocalizedMessage(), ex);
 		} finally {
 			try {
-				if (output != null)
-					output.close();
 				if (contentStream != null)
 					contentStream.close();
 			} catch (IOException ex) {
@@ -291,8 +283,7 @@ public class JarWriter {
 			// part of a project if the project is local as well. So using getLocation
 			// is currently save here.
 			IPath projectLocation= project.getLocation();
-			boolean isInProject= projectLocation != null && projectLocation.isPrefixOf(jarPath);
-			if (isInProject) {
+			if (projectLocation != null && projectLocation.isPrefixOf(jarPath)) {
 				try {
 					jarPath= jarPath.removeFirstSegments(projectLocation.segmentCount());
 					jarPath= jarPath.removeLastSegments(1);
