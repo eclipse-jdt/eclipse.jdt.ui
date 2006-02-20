@@ -210,11 +210,12 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			}
 			else
 				resource= (IResource)element;
-
-			if (resource.getType() == IResource.FILE)
-				count++;
-			else
-				count += getTotalChildCount((IContainer)resource);
+			if (resource != null) {
+				if (resource.getType() == IResource.FILE)
+					count++;
+				else
+					count+= getTotalChildCount((IContainer) resource);
+			}
 		}
 		
 		if (fJarPackage.areOutputFoldersExported()) {
@@ -293,13 +294,6 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		}
 
 		if (resource.getType() == IResource.FILE) {
-			if (!resource.isLocal(IResource.DEPTH_ZERO))
-				try {
-					resource.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);
-				} catch (CoreException ex) {
-					addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_resourceNotLocal, resource.getFullPath()), ex); 
-					return;
-				}
 			if (!isInJavaProject) {
 				// check if it's a Java resource
 				try {
@@ -323,7 +317,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				}
 			}
 			
-			if (pkgRoot != null) {
+			if (pkgRoot != null && jProject != null) {
 				leadSegmentsToRemove= pkgRoot.getPath().segmentCount();
 				boolean isOnBuildPath;
 				isOnBuildPath= jProject.isOnClasspath(resource);
@@ -334,7 +328,7 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 			IPath destinationPath= resource.getFullPath().removeFirstSegments(leadSegmentsToRemove);
 			
 			boolean isInOutputFolder= false;
-			if (isInJavaProject) {
+			if (isInJavaProject && jProject != null) {
 				try {
 					isInOutputFolder= jProject.getOutputLocation().isPrefixOf(resource.getFullPath());
 				} catch (JavaModelException ex) {
@@ -399,12 +393,14 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 		IResource[] children= null;
 		try {
 			children= container.members();
-		} catch (CoreException e) {
+		} catch (CoreException exception) {
 			// this should never happen because an #isAccessible check is done before #members is invoked
-			addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_errorDuringExport, container.getFullPath()), e); 
+			addWarning(Messages.format(JarPackagerMessages.JarFileExportOperation_errorDuringExport, container.getFullPath()), exception); 
 		}
-		for (int i= 0; i < children.length; i++)
-			exportElement(children[i], progressMonitor);
+		if (children != null) {
+			for (int i= 0; i < children.length; i++)
+				exportElement(children[i], progressMonitor);
+		}
 	}
 
 	private IPackageFragmentRoot findPackageFragmentRoot(IJavaProject jProject, IPath path) throws JavaModelException {
@@ -471,8 +467,6 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 				IPath baseDestinationPath= destinationPath.removeLastSegments(1);
 				while (iter.hasNext()) {
 					IFile file= (IFile)iter.next();
-					if (!resource.isLocal(IResource.DEPTH_ZERO))						
-						file.setLocal(true , IResource.DEPTH_ZERO, progressMonitor);
 					IPath classFilePath= baseDestinationPath.append(file.getName());
 					progressMonitor.subTask(Messages.format(JarPackagerMessages.JarFileExportOperation_exporting, classFilePath.toString())); 
 					fJarWriter.write(file, classFilePath);
@@ -1015,23 +1009,15 @@ public class JarFileExportOperation extends WorkspaceModifyOperation implements 
 
 	protected void saveManifest() throws CoreException, IOException {
 		ByteArrayOutputStream manifestOutput= new ByteArrayOutputStream();
-		ByteArrayInputStream fileInput= null;
-		try {
-			Manifest manifest= fJarPackage.getManifestProvider().create(fJarPackage);
-			manifest.write(manifestOutput);
-			fileInput= new ByteArrayInputStream(manifestOutput.toByteArray());
-			IFile manifestFile= fJarPackage.getManifestFile();
-			if (manifestFile.isAccessible()) {
-				if (fJarPackage.allowOverwrite() || JarPackagerUtil.askForOverwritePermission(fParentShell, manifestFile.getFullPath().toString()))
-					manifestFile.setContents(fileInput, true, true, null);
-			} else
-				manifestFile.create(fileInput, true, null);
-		} finally {
-			if (manifestOutput != null)
-				manifestOutput.close();
-			if (fileInput != null)
-				fileInput.close();
-		}
+		Manifest manifest= fJarPackage.getManifestProvider().create(fJarPackage);
+		manifest.write(manifestOutput);
+		ByteArrayInputStream fileInput= new ByteArrayInputStream(manifestOutput.toByteArray());
+		IFile manifestFile= fJarPackage.getManifestFile();
+		if (manifestFile.isAccessible()) {
+			if (fJarPackage.allowOverwrite() || JarPackagerUtil.askForOverwritePermission(fParentShell, manifestFile.getFullPath().toString()))
+				manifestFile.setContents(fileInput, true, true, null);
+		} else
+			manifestFile.create(fileInput, true, null);
 	}
 	
 	private boolean isAutoBuilding() {

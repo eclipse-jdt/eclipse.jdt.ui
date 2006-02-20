@@ -121,11 +121,6 @@ public class JarWriter2 {
 	 * 								in the status object.
 	 */
 	public void write(IFile resource, IPath destinationPath) throws CoreException {
-		if (!resource.isLocal(IResource.DEPTH_ZERO)) {
-			String message= Messages.format(JarPackagerMessages.JarWriter_error_fileNotAccessible, resource.getFullPath()); 
-			throw JarPackagerUtil.createCoreException(message, null);
-		}
-
 		try {
 			IPath fileLocation= resource.getLocation();
 			File file= null;
@@ -304,8 +299,7 @@ public class JarWriter2 {
 			// part of a project if the project is local as well. So using getLocation
 			// is currently save here.
 			IPath projectLocation= project.getLocation();
-			boolean isInProject= projectLocation != null && projectLocation.isPrefixOf(jarPath);
-			if (isInProject) {
+			if (projectLocation != null && projectLocation.isPrefixOf(jarPath)) {
 				try {
 					jarPath= jarPath.removeFirstSegments(projectLocation.segmentCount());
 					jarPath= jarPath.removeLastSegments(1);

@@ -15,10 +15,7 @@ import java.io.InputStream;
 import java.util.jar.Attributes;
 import java.util.jar.Manifest;
 
-import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 import org.eclipse.core.runtime.CoreException;
-import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.jface.util.Assert;
 
@@ -120,9 +117,6 @@ public class ManifestProvider implements IManifestProvider {
 	}
 
 	private Manifest createSuppliedManifest(JarPackageData jarPackage) throws CoreException, IOException {
-		IFile manifestFile= jarPackage.getManifestFile();
-		if (manifestFile.isLocal(IResource.DEPTH_ZERO))
-			manifestFile.setLocal(true, IResource.DEPTH_ZERO, new NullProgressMonitor());
 		Manifest manifest;
 		// No need to use buffer here because Manifest(...) does
 		InputStream stream= jarPackage.getManifestFile().getContents(false);
