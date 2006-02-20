@@ -12,7 +12,6 @@ package org.eclipse.jdt.internal.corext.refactoring.rename;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
@@ -25,7 +24,6 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
@@ -78,7 +76,6 @@ import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateFieldCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
@@ -200,13 +197,6 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 			if (setter != null) {
 				result.rename(setter, new RenameArguments(getNewSetterName(), getUpdateReferences()));
 			}
-		}
-		ResourceModifications modifications= result.getResourceModifications();
-		for (final Iterator iterator= fDelegateChanges.iterator(); iterator.hasNext();) {
-			final Change change= (Change) iterator.next();
-			final Object modified= change.getModifiedElement();
-			if (modified instanceof IResource)
-				modifications.addCreate((IResource) modified);
 		}
 		return result;
 	}

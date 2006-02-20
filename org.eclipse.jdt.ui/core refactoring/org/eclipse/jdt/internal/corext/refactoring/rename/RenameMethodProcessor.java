@@ -27,7 +27,6 @@ import org.eclipse.core.runtime.OperationCanceledException;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
-import org.eclipse.core.resources.IResource;
 
 import org.eclipse.ltk.core.refactoring.Change;
 import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
@@ -79,7 +78,6 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibili
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateMethodCreator;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
-import org.eclipse.jdt.internal.corext.refactoring.participants.ResourceModifications;
 import org.eclipse.jdt.internal.corext.refactoring.structure.ASTNodeSearchUtil;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDelegateUpdating;
@@ -192,13 +190,6 @@ public abstract class RenameMethodProcessor extends JavaRenameProcessor implemen
 		for (Iterator iter= fMethodsToRename.iterator(); iter.hasNext();) {
 			IMethod method= (IMethod) iter.next();
 			result.rename(method, args);
-		}
-		ResourceModifications modifications= result.getResourceModifications();
-		for (final Iterator iterator= fDelegateChanges.iterator(); iterator.hasNext();) {
-			final Change change= (Change) iterator.next();
-			final Object modified= change.getModifiedElement();
-			if (modified instanceof IResource)
-				modifications.addCreate((IResource) modified);
 		}
 		return result;
 	}

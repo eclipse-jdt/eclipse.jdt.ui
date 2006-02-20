@@ -78,9 +78,8 @@ public class TestModelProvider extends ModelProvider {
 		if ((expectKind & IResourceDelta.ADDED) != 0 && (expectedFlags & IResourceDelta.MOVED_FROM) != 0) {
 			expectedFlags= expectedFlags & ~IResourceDelta.OPEN;
 		}
-// Disabled due to https://bugs.eclipse.org/bugs/show_bug.cgi?id=128629
-//		Assert.assertEquals("Same kind", expectKind, actualKind);
-//		Assert.assertEquals("Same flags", expectedFlags, actualFlags);
+		Assert.assertEquals("Same kind", expectKind, actualKind);
+		Assert.assertEquals("Same flags", expectedFlags, actualFlags);
 		IResourceDelta[] expectedChildren=  getExpectedChildren(expected);
 		IResourceDelta[] actualChildren= getActualChildren(actual, expectedChildren);
 		Assert.assertEquals("Same number of children", expectedChildren.length, actualChildren.length);
@@ -116,7 +115,7 @@ public class TestModelProvider extends ModelProvider {
 		for (int i= 0; i < children.length; i++) {
 			IResourceDelta child= children[i];
 			IResource resource= child.getResource();
-			if (resource != null && resource.getName().equals(".settings") && resource.getType() == IResource.FOLDER)
+			if (resource != null && isIgnorable(resource))
 				continue;
 			if (child.getAffectedChildren().length > 0) {
 				result.add(child);
@@ -129,6 +128,13 @@ public class TestModelProvider extends ModelProvider {
 		}
 		return (IResourceDelta[]) result.toArray(new IResourceDelta[result.size()]);
 	}
+
+	private static boolean isIgnorable(IResource resource) {
+		final String name= resource.getName();
+		if (resource.getType() != IResource.FOLDER)
+			return false;
+		return name.startsWith(".");
+	}
 	
 	private static IResourceDelta[] getActualChildren(IResourceDelta delta, IResourceDelta[] expectedChildren) {
 		List result= new ArrayList();
@@ -137,7 +143,7 @@ public class TestModelProvider extends ModelProvider {
 			for (int i= 0; i < children.length; i++) {
 				IResourceDelta child= children[i];
 				IResource resource= child.getResource();
-				if (resource != null && resource.getName().equals(".settings") && resource.getType() == IResource.FOLDER)
+				if (resource != null && isIgnorable(resource))
 					continue;
 				result.add(child);
 			}
@@ -146,7 +152,7 @@ public class TestModelProvider extends ModelProvider {
 			for (int i= 0; i < candidates.length; i++) {
 				IResourceDelta candidate= candidates[i];
 				IResource resource= candidate.getResource();
-				if (resource != null && resource.getName().equals(".settings") && resource.getType() == IResource.FOLDER)
+				if (resource != null && isIgnorable(resource))
 					continue;
 				if (contains(expectedChildren, candidate)) {
 					result.add(candidate);
@@ -185,8 +191,8 @@ public class TestModelProvider extends ModelProvider {
 	private static void assertCopySource(IResourceDelta delta) {
 		try {
 			delta.accept(new IResourceDeltaVisitor() {
-				public boolean visit(IResourceDelta delta) throws CoreException {
-					Assert.assertTrue("Not a copy delta", (delta.getKind() & ~IResourceDelta.CHANGED) == 0);
+				public boolean visit(IResourceDelta d) throws CoreException {
+					Assert.assertTrue("Not a copy delta", (d.getKind() & ~IResourceDelta.CHANGED) == 0);
 					return true;
 				}
 			});
