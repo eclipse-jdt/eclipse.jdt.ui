@@ -84,7 +84,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine2;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
@@ -663,7 +662,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 					final IJavaProject javaProject= declaring.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PUSH_DOWN, project, fMembersToMove.length == 1 ? NLS.bind(RefactoringCoreMessages.PushDownRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : NLS.bind(RefactoringCoreMessages.PushDownRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PUSH_DOWN, project, fMembersToMove.length == 1 ? NLS.bind(RefactoringCoreMessages.PushDownRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : NLS.bind(RefactoringCoreMessages.PushDownRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 					return new RefactoringChangeDescriptor(descriptor);
 				}
 			};

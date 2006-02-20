@@ -55,7 +55,6 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsModel;
 import org.eclipse.jdt.internal.corext.refactoring.structure.constraints.SuperTypeConstraintsSolver;
@@ -201,7 +200,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 						IJavaProject project= null;
 						if (!fSubType.isBinary())
 							project= fSubType.getJavaProject();
-						JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_USE_SUPERTYPE, project != null ? project.getElementName() : null, Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fSuperType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+						JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_USE_SUPERTYPE, project != null ? project.getElementName() : null, Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fSuperType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 						return new RefactoringChangeDescriptor(descriptor);
 					}
 				};

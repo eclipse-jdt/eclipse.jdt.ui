@@ -40,6 +40,7 @@ import org.eclipse.ltk.core.refactoring.ChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringChangeDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 import org.eclipse.osgi.util.NLS;
@@ -107,8 +108,8 @@ import org.eclipse.jdt.internal.corext.refactoring.IInitializableRefactoringComp
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.RefactoringStatusCodes;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
@@ -128,7 +129,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class ExtractTempRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	public static final String ID_EXTRACT_TEMP= "org.eclipse.jdt.ui.extract.temp"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REPLACE= "replace"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
 
@@ -451,7 +451,7 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 				final Map arguments= new HashMap();
 				arguments.put(JavaRefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
 				arguments.put(JavaRefactoringDescriptor.NAME, fTempName);
-				arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+				arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllOccurrences).toString());
 				arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
 				String project= null;
@@ -487,7 +487,7 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 		for (int i= 0; i < newProblems.length; i++) {
 			IProblem problem= newProblems[i];
 			if (problem.isError())
-				result.addEntry(JavaRefactorings.createStatusEntry(problem, newCuSource));
+				result.addEntry(new RefactoringStatusEntry((problem.isError() ? RefactoringStatus.ERROR : RefactoringStatus.WARNING), problem.getMessage(), new JavaStringStatusContext(newCuSource, new SourceRange(problem))));
 		}
 	}
 	
@@ -961,7 +961,7 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
+			final String selection= generic.getAttribute(JavaRefactoringDescriptor.SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -974,9 +974,9 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 					fSelectionStart= offset;
 					fSelectionLength= length;
 				} else
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}));
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.SELECTION));
 			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);

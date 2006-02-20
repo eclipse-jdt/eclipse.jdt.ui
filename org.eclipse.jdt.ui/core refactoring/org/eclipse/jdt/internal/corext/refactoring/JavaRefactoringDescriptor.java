@@ -36,6 +36,15 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
+	 * Predefined argument called <code>selection</code>.
+	 * <p>
+	 * This argument should be used to describe user input selections within a
+	 * text file. The value of this argument has the format "offset length".
+	 * </p>
+	 */
+	public static final String SELECTION= "selection"; //$NON-NLS-1$
+
+	/**
 	 * Predefined argument called <code>element&lt;Number&gt;</code>.
 	 * <p>
 	 * This argument should be used to describe the elements being refactored.
@@ -78,6 +87,34 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/** The refactoring contribution, or <code>null</code> */
 	private JavaRefactoringContribution fContribution;
+
+	/**
+	 * Constant describing the deprecation resolving flag.
+	 * <p>
+	 * Clients should set this flag to indicate that the refactoring can used to
+	 * resolve deprecation problems of members declared in source.
+	 * </p>
+	 */
+	public static final int DEPRECATION_RESOLVING= 1 << 17;
+
+	/**
+	 * Constant describing the jar deprecation resolving flag.
+	 * <p>
+	 * Clients should set this flag to indicate that the refactoring can used to
+	 * resolve deprecation problems both of binary members contained in JAR
+	 * files and members declared in source.
+	 * </p>
+	 */
+	public static final int JAR_DEPRECATION_RESOLVING= 1 << 18;
+
+	/**
+	 * Constant describing the importable flag.
+	 * <p>
+	 * Clients should set this flag to indicate that the refactoring can be
+	 * imported from a JAR file.
+	 * </p>
+	 */
+	public static final int JAR_IMPORTABLE= 1 << 16;
 
 	/**
 	 * Creates a new java refactoring descriptor.

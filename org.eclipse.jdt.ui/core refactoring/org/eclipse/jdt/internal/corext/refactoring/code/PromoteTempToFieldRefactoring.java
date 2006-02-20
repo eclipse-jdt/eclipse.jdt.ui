@@ -102,7 +102,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 public class PromoteTempToFieldRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	public static final String ID_PROMOTE_TEMP= "org.eclipse.jdt.ui.promote.temp"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_STATIC= "static"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
@@ -630,7 +629,7 @@ public class PromoteTempToFieldRefactoring extends CommentRefactoring implements
 				final Map arguments= new HashMap();
 				arguments.put(JavaRefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
 				arguments.put(JavaRefactoringDescriptor.NAME, fFieldName);
-				arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+				arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
 				arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
 				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
@@ -819,7 +818,7 @@ public class PromoteTempToFieldRefactoring extends CommentRefactoring implements
 		fSelfInitializing= true;
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
+			final String selection= generic.getAttribute(JavaRefactoringDescriptor.SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -832,9 +831,9 @@ public class PromoteTempToFieldRefactoring extends CommentRefactoring implements
 					fSelectionStart= offset;
 					fSelectionLength= length;
 				} else
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}));
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.SELECTION));
 			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);

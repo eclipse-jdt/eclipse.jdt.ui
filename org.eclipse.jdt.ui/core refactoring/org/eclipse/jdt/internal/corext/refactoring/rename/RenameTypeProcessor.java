@@ -93,7 +93,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenameCompilationUnitChange;
@@ -1021,7 +1020,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 					IJavaProject javaProject= fType.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					int flags= JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
+					int flags= JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE;
 					try {
 						if (!Flags.isPrivate(fType.getFlags()))
 							flags|= RefactoringDescriptor.MULTI_CHANGE;

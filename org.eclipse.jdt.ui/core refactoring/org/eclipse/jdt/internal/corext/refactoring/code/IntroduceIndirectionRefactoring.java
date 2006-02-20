@@ -94,7 +94,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.rename.RippleMethodFinder2;
@@ -750,7 +749,7 @@ public class IntroduceIndirectionRefactoring extends CommentRefactoring implemen
 				IJavaProject javaProject= fTargetMethod.getJavaProject();
 				if (javaProject != null && fTargetMethod.isBinary())
 					project= javaProject.getElementName();
-				JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_INDIRECTION, project, Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(fTargetMethod.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, (JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE));
+				JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_INDIRECTION, project, Messages.format(RefactoringCoreMessages.IntroduceIndirectionRefactoring_descriptor_description, new String[] { JavaElementLabels.getTextLabel(fTargetMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getTextLabel(fTargetMethod.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, (JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE));
 				return new RefactoringChangeDescriptor(descriptor);
 			}
 		};

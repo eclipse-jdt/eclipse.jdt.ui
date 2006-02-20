@@ -33,7 +33,6 @@ import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.AbstractJavaElementRenameChange;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.util.ResourceUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -90,6 +89,6 @@ public class RenameCompilationUnitChange extends AbstractJavaElementRenameChange
 				label= unit.getElementName();
 		} else
 			label= getOldName();
-		return new RefactoringChangeDescriptor(new JavaRefactoringDescriptor(ID_RENAME_COMPILATION_UNIT, getResource().getProject().getName(), Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, getNewName()}), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE));
+		return new RefactoringChangeDescriptor(new JavaRefactoringDescriptor(ID_RENAME_COMPILATION_UNIT, getResource().getProject().getName(), Messages.format(RefactoringCoreMessages.RenameCompilationUnitChange_descriptor_description, new String[] { label, getNewName()}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE));
 	}
 }

@@ -98,7 +98,6 @@ import org.eclipse.jdt.internal.corext.refactoring.Checks;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringArguments;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.nls.changes.CreateTextFileChange;
@@ -336,7 +335,7 @@ public final class ExtractInterfaceProcessor extends SuperTypeRefactoringProcess
 					final IJavaProject javaProject= fSubType.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_INTERFACE, project, Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { fSuperName, JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_INTERFACE, project, Messages.format(RefactoringCoreMessages.ExtractInterfaceProcessor_descriptor_description, new String[] { fSuperName, JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 					return new RefactoringChangeDescriptor(descriptor);
 				}
 			};

@@ -119,7 +119,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	private static final String ID_CONVERT_ANONYMOUS= "org.eclipse.jdt.ui.convert.anonymous"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_FINAL= "final"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_STATIC= "static"; //$NON-NLS-1$
@@ -486,7 +485,7 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 				final Map arguments= new HashMap();
 				arguments.put(JavaRefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
 				arguments.put(JavaRefactoringDescriptor.NAME, fClassName);
-				arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+				arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
 				arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
 				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
@@ -1046,7 +1045,7 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 				}
 				fVisibility= flag;
 			}
-			final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
+			final String selection= generic.getAttribute(JavaRefactoringDescriptor.SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -1059,9 +1058,9 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 					fSelectionStart= offset;
 					fSelectionLength= length;
 				} else
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}));
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.SELECTION));
 			final String declareStatic= generic.getAttribute(ATTRIBUTE_STATIC);
 			if (declareStatic != null) {
 				fDeclareStatic= Boolean.valueOf(declareStatic).booleanValue();

@@ -71,7 +71,6 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringSearchEngine;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.RenamePackageChange;
@@ -448,7 +447,7 @@ public class RenamePackageProcessor extends JavaRenameProcessor implements IRefe
 					IJavaProject javaProject= fPackage.getJavaProject();
 					if (javaProject != null)
 						project= javaProject.getElementName();
-					JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_PACKAGE, project, Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description, new String[] { fPackage.getElementName(), getNewElementName()}), getComment(), arguments, JavaRefactorings.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_PACKAGE, project, Messages.format(RefactoringCoreMessages.RenamePackageProcessor_descriptor_description, new String[] { fPackage.getElementName(), getNewElementName()}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 					return new RefactoringChangeDescriptor(descriptor);
 				}
 			};

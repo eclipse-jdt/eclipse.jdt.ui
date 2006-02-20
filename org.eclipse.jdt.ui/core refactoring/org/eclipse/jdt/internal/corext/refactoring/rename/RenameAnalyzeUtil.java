@@ -32,6 +32,7 @@ import org.eclipse.jface.text.Region;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusEntry;
 import org.eclipse.ltk.core.refactoring.TextChange;
 import org.eclipse.ltk.core.refactoring.TextEditChangeGroup;
 
@@ -61,8 +62,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.SearchResultGroup;
-import org.eclipse.jdt.internal.corext.refactoring.base.JavaRefactorings;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
+import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -451,7 +452,7 @@ class RenameAnalyzeUtil {
 		for (int i= 0; i < newProblems.length; i++) {
 			IProblem problem= newProblems[i];
 			if (problem.isError())
-				result.addEntry(JavaRefactorings.createStatusEntry(problem, newCuSource));
+				result.addEntry(new RefactoringStatusEntry((problem.isError() ? RefactoringStatus.ERROR : RefactoringStatus.WARNING), problem.getMessage(), new JavaStringStatusContext(newCuSource, new SourceRange(problem))));
 		}
 		return result;
 	}

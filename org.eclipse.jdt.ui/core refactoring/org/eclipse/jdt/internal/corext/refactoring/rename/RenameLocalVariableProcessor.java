@@ -77,7 +77,6 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public class RenameLocalVariableProcessor extends JavaRenameProcessor implements INameUpdating, IReferenceUpdating {
 
 	public static final String ID_RENAME_LOCAL_VARIABLE= "org.eclipse.jdt.ui.rename.local.variable"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
 
 	private ILocalVariable fLocalVariable;
@@ -367,7 +366,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 						arguments.put(JavaRefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
 						arguments.put(JavaRefactoringDescriptor.NAME, getNewElementName());
 						final ISourceRange range= fLocalVariable.getNameRange();
-						arguments.put(ATTRIBUTE_SELECTION, new Integer(range.getOffset()).toString() + " " + new Integer(range.getLength()).toString()); //$NON-NLS-1$
+						arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(range.getOffset()).toString() + " " + new Integer(range.getLength()).toString()); //$NON-NLS-1$
 						arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 						String project= null;
 						IJavaProject javaProject= fCu.getJavaProject();
@@ -404,7 +403,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
 			if (fCu != null) {
-				final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
+				final String selection= generic.getAttribute(JavaRefactoringDescriptor.SELECTION);
 				if (selection != null) {
 					int offset= -1;
 					int length= -1;
@@ -429,9 +428,9 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 							JavaPlugin.log(exception);
 						}
 					} else
-						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
+						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}));
 				} else
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.SELECTION));
 			}
 			final String references= generic.getAttribute(ATTRIBUTE_REFERENCES);
 			if (references != null) {

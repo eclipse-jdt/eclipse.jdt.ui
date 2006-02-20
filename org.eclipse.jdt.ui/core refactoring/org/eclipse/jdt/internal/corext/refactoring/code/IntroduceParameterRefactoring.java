@@ -89,7 +89,6 @@ import org.eclipse.jdt.internal.ui.actions.SelectionConverter;
 public class IntroduceParameterRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent, IDelegateUpdating {
 
 	public static final String ID_INTRODUCE_PARAMETER= "org.eclipse.jdt.ui.introduce.parameter"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_ARGUMENT= "argument"; //$NON-NLS-1$
 
 	private static final String[] KNOWN_METHOD_NAME_PREFIXES= {"get", "is"}; //$NON-NLS-2$ //$NON-NLS-1$
@@ -508,7 +507,7 @@ public class IntroduceParameterRefactoring extends CommentRefactoring implements
 						final JavaRefactoringDescriptor extended= (JavaRefactoringDescriptor) refDesc;
 						final Map arguments= new HashMap();
 						arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
-						arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+						arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 						arguments.putAll(extended.getArguments());
 						String signature= fChangeSignatureRefactoring.getMethodName();
 						try {
@@ -530,7 +529,7 @@ public class IntroduceParameterRefactoring extends CommentRefactoring implements
 		fArguments= arguments;
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
+			final String selection= generic.getAttribute(JavaRefactoringDescriptor.SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -543,9 +542,9 @@ public class IntroduceParameterRefactoring extends CommentRefactoring implements
 					fSelectionStart= offset;
 					fSelectionLength= length;
 				} else
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}));
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.SELECTION));
 			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);

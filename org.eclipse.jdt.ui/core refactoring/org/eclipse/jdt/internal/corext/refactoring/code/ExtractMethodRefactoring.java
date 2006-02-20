@@ -126,7 +126,6 @@ import org.eclipse.jdt.internal.ui.viewsupport.BindingLabelProvider;
 public class ExtractMethodRefactoring extends CommentRefactoring implements IInitializableRefactoringComponent {
 
 	public static final String ID_EXTRACT_METHOD= "org.eclipse.jdt.ui.extract.method"; //$NON-NLS-1$
-	private static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_VISIBILITY= "visibility"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_DESTINATION= "destination"; //$NON-NLS-1$
 	private static final String ATTRIBUTE_COMMENTS= "comments"; //$NON-NLS-1$
@@ -443,7 +442,7 @@ public class ExtractMethodRefactoring extends CommentRefactoring implements IIni
 				final Map arguments= new HashMap();
 				arguments.put(JavaRefactoringDescriptor.INPUT, fCUnit.getHandleIdentifier());
 				arguments.put(JavaRefactoringDescriptor.NAME, fMethodName);
-				arguments.put(ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+				arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
 				arguments.put(ATTRIBUTE_DESTINATION, new Integer(fDestinationIndex).toString());
 				arguments.put(ATTRIBUTE_EXCEPTIONS, Boolean.valueOf(fThrowRuntimeExceptions).toString());
@@ -950,7 +949,7 @@ public class ExtractMethodRefactoring extends CommentRefactoring implements IIni
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String selection= generic.getAttribute(ATTRIBUTE_SELECTION);
+			final String selection= generic.getAttribute(JavaRefactoringDescriptor.SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -963,9 +962,9 @@ public class ExtractMethodRefactoring extends CommentRefactoring implements IIni
 					fSelectionStart= offset;
 					fSelectionLength= length;
 				} else
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, ATTRIBUTE_SELECTION}));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}));
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SELECTION));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.SELECTION));
 			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaCore.create(handle);
