@@ -1,5 +1,5 @@
 /*******************************************************************************
- * Copyright (c) 2000, 2005 IBM Corporation and others.
+ * Copyright (c) 2000, 2006 IBM Corporation and others.
  * All rights reserved. This program and the accompanying materials
  * are made available under the terms of the Eclipse Public License v1.0
  * which accompanies this distribution, and is available at
@@ -394,7 +394,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		CombinedWordRule combinedWordRule= new CombinedWordRule(wordDetector, token);
 
 		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
-		VersionedWordMatcher j14Matcher= new VersionedWordMatcher(token, "1.4", version); //$NON-NLS-1$
+		VersionedWordMatcher j14Matcher= new VersionedWordMatcher(token, JavaCore.VERSION_1_4, version);
 
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
 		for (int i=0; i<fgJava14Keywords.length; i++)
@@ -404,7 +404,7 @@ public final class JavaCodeScanner extends AbstractJavaScanner {
 		fVersionDependentRules.add(j14Matcher);
 
 		token= getToken(IJavaColorConstants.JAVA_DEFAULT);
-		VersionedWordMatcher j15Matcher= new VersionedWordMatcher(token, "1.5", version); //$NON-NLS-1$
+		VersionedWordMatcher j15Matcher= new VersionedWordMatcher(token, JavaCore.VERSION_1_5, version);
 		token= getToken(IJavaColorConstants.JAVA_KEYWORD);
 		for (int i=0; i<fgJava15Keywords.length; i++)
 			j15Matcher.addWord(fgJava15Keywords[i], token);
