@@ -529,11 +529,14 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * {@inheritDoc}
 	 */
 	public void setVisible(boolean visible) {
-		if (visible)
+		if (visible) {
+			addHandlerAndKeyBindingSupport();
 			open();
-		else {
+		} else {
+			removeHandlerAndKeyBindingSupport();
 			saveDialogBounds(getShell());
 			getShell().setVisible(false);
+			removeHandlerAndKeyBindingSupport();
 		}
 	}
 
@@ -554,12 +557,36 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	public void widgetDisposed(DisposeEvent event) {
 		fTreeViewer= null;
 		fFilterText= null;
+		removeHandlerAndKeyBindingSupport();
+	}
 
+	/**
+	 * 
+	 */
+	protected void addHandlerAndKeyBindingSupport() {
+		// Remember current scope and then set window context.
+		if (fKeyBindingScopes == null) {
+			fKeyBindingScopes= fKeyBindingService.getScopes();
+			fKeyBindingService.setScopes(new String[] { IWorkbenchContextSupport.CONTEXT_ID_WINDOW });
+		}
+
+		// Register action with command support
+		if (fShowViewMenuHandlerSubmission == null) {
+			fShowViewMenuHandlerSubmission= new HandlerSubmission(null, getShell(), null, fShowViewMenuAction.getActionDefinitionId(), new ActionHandler(fShowViewMenuAction), Priority.MEDIUM);
+			PlatformUI.getWorkbench().getCommandSupport().addHandlerSubmission(fShowViewMenuHandlerSubmission);
+		}
+	}
+
+	/**
+	 * 
+	 */
+	protected void removeHandlerAndKeyBindingSupport() {
 		// Remove handler submission
-		PlatformUI.getWorkbench().getCommandSupport().removeHandlerSubmission(fShowViewMenuHandlerSubmission);
+		if (fShowViewMenuHandlerSubmission != null)
+			PlatformUI.getWorkbench().getCommandSupport().removeHandlerSubmission(fShowViewMenuHandlerSubmission);
 
 		// Restore editor's key binding scope
-		if (fKeyBindingScopes != null && fKeyBindingService != null) {
+		if (fKeyBindingService != null && fKeyBindingScopes != null) {
 			fKeyBindingService.setScopes(fKeyBindingScopes);
 			fKeyBindingScopes= null;
 			fKeyBindingService= null;
@@ -726,10 +753,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		IWorkbenchPartSite site= part.getSite();
 		fKeyBindingService= site.getKeyBindingService();
 
-		// Remember current scope and then set window context.
-		fKeyBindingScopes= fKeyBindingService.getScopes();
-		fKeyBindingService.setScopes(new String[] { IWorkbenchContextSupport.CONTEXT_ID_WINDOW });
-
 		// Create show view menu action
 		fShowViewMenuAction= new Action("showViewMenu") { //$NON-NLS-1$
 			/*
@@ -742,9 +765,7 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		fShowViewMenuAction.setEnabled(true);
 		fShowViewMenuAction.setActionDefinitionId("org.eclipse.ui.window.showViewMenu"); //$NON-NLS-1$
 
-		// Register action with command support
-		fShowViewMenuHandlerSubmission= new HandlerSubmission(null, getShell(), null, fShowViewMenuAction.getActionDefinitionId(), new ActionHandler(fShowViewMenuAction), Priority.MEDIUM);
-		PlatformUI.getWorkbench().getCommandSupport().addHandlerSubmission(fShowViewMenuHandlerSubmission);
+		addHandlerAndKeyBindingSupport();
 
 		return fViewMenuButtonComposite;
 	}
