@@ -48,42 +48,52 @@ public class TypeCompletionTest extends AbstractCompletionTest {
 	}
 	
 	public void testImportedType() throws Exception {
-		expectImports("import java.util.Random;\n", "import java.util.Random;\n");
+		addImport("java.util.Random");
+		expectImport("java.util.Random");
 		assertMethodBodyProposal("R|", "Random ", "Random|");
 	}
 	
 	public void testAutoImportType() throws Exception {
-		expectImports("", "\nimport java.util.Random;\n");
+		expectImport("java.util.Random");
 		assertMethodBodyProposal("R|", "Random ", "Random|");
 	}
 	
 	public void testGenericType() throws Exception {
-		expectImports("import java.util.List;\n", "import java.util.List;\n");
+		addImport("java.util.List");
+		expectImport("java.util.List");
 		assertMethodBodyProposal("L|", "List ", "List<|E|>");
 	}
 	
 	public void testAutoImportGenericType() throws Exception {
-		expectImports("", "\nimport java.util.ArrayList;\n");
+		expectImport("java.util.ArrayList");
 		assertMethodBodyProposal("A|", "ArrayList ", "ArrayList<|E|>");
 	}
 	
 	public void testGenericTypeParameterGuessingUnambiguos() throws Exception {
-		expectImports("import java.util.List;\n", "import java.util.ArrayList;\nimport java.util.List;\n");
+		addImport("java.util.List");
+		expectImport("java.util.ArrayList");
+		expectImport("java.util.List");
 		assertMethodBodyProposal("List<String> list= new A|", "ArrayList ", "List<String> list= new ArrayList<String>|");
 	}
 	
 	public void testGenericTypeParameterGuessingExtends() throws Exception {
-		expectImports("import java.util.List;\n", "import java.util.ArrayList;\nimport java.util.List;\n");
+		addImport("java.util.List");
+		expectImport("java.util.ArrayList");
+		expectImport("java.util.List");
 		assertMethodBodyProposal("List<? extends Number> list= new A|", "ArrayList ", "List<? extends Number> list= new ArrayList<|Number|>");
 	}
 	
 	public void testGenericTypeParameterGuessingSuper() throws Exception {
-		expectImports("import java.util.List;\n", "import java.util.ArrayList;\nimport java.util.List;\n");
+		addImport("java.util.List");
+		expectImport("java.util.ArrayList");
+		expectImport("java.util.List");
 		assertMethodBodyProposal("List<? super Number> list= new A|", "ArrayList ", "List<? super Number> list= new ArrayList<|E|>");
 	}
 	
 	public void testGenericTypeParameterGuessingMixed() throws Exception {
-		expectImports("import java.util.Map;\n", "import java.util.HashMap;\nimport java.util.Map;\n");
+		addImport("java.util.Map");
+		expectImport("java.util.HashMap");
+		expectImport("java.util.Map");
 		assertMethodBodyProposal("Map<String, ? extends Number> list= new H|", "HashMap ", "Map<String, ? extends Number> list= new HashMap<String, |Number|>");
 	}
 	

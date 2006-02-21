@@ -125,10 +125,29 @@ public class AbstractCompletionTest extends TestCase {
 		store.setToDefault(PreferenceConstants.CODEASSIST_INSERT_COMPLETION);
 		fCU= null;
 	}
+	
+	protected void addImport(String imp) {
+		imp= normalizeImport(imp);
+		if (fBeforeImports.length() == 0)
+			fBeforeImports= "\n" + imp + "\n";
+		else
+			fBeforeImports += imp + "\n";
+	}
 
-	protected void expectImports(String before, String after) {
-		fBeforeImports= before;
-		fAfterImports= after;
+	protected void expectImport(String imp) {
+		imp= normalizeImport(imp);
+		if (fAfterImports.length() == 0)
+			fAfterImports= "\n" + imp + "\n";
+		else
+			fAfterImports += imp + "\n";
+	}
+	
+	private String normalizeImport(String imp) {
+		if (!imp.startsWith("import "))
+			imp= "import " + imp;
+		if (!imp.endsWith(";"))
+			imp+= ";";
+		return imp;
 	}
 	
 	protected void addMembers(String member) {
@@ -172,6 +191,25 @@ public class AbstractCompletionTest extends TestCase {
 	 * @param selector the prefix to match a proposal with
 	 * @throws CoreException
 	 */
+	protected void assertMemberJavadocProposal(String before, String selector, String expected) throws CoreException {
+		StringBuffer contents= new StringBuffer();
+		IRegion preSelection= assembleMethodJavadocTestCUExtractSelection(contents, before, fBeforeImports);
+		StringBuffer result= new StringBuffer();
+		IRegion expectedSelection= assembleMethodJavadocTestCUExtractSelection(result, expected, fAfterImports);
+		
+		assertProposal(selector, contents, preSelection, result, expectedSelection);
+	}
+	
+	/**
+	 * Creates a CU with a method containing <code>before</code>, then runs
+	 * code assist and applies the first proposal whose display name matches <code>selector</code>
+	 * and asserts that the method's body now has the content of <code>expected</code>.
+	 * 
+	 * @param expected the expected contents of the type javadoc line
+	 * @param javadocLine the contents of the javadoc line before code completion is run
+	 * @param selector the prefix to match a proposal with
+	 * @throws CoreException
+	 */
 	protected void assertTypeBodyProposal(String before, String selector, String expected) throws CoreException {
 		StringBuffer contents= new StringBuffer();
 		IRegion preSelection= assembleClassBodyTestCUExtractSelection(contents, before, fBeforeImports);
@@ -181,6 +219,24 @@ public class AbstractCompletionTest extends TestCase {
 		assertProposal(selector, contents, preSelection, result, expectedSelection);
 	}
 	
+	/**
+	 * Creates a CU with a method containing <code>before</code>, then runs
+	 * code assist and applies the first proposal whose display name matches <code>selector</code>
+	 * and asserts that the method's body now has the content of <code>expected</code>.
+	 * 
+	 * @param expected the expected contents of the type javadoc line
+	 * @param before the contents of the line where before code completion is run
+	 * @param selector the prefix to match a proposal with
+	 * @throws CoreException
+	 */
+	protected void assertTypeJavadocProposal(String before, String selector, String expected) throws CoreException {
+		StringBuffer contents= new StringBuffer();
+		IRegion preSelection= assembleClassJavadocTestCUExtractSelection(contents, before, fBeforeImports);
+		StringBuffer result= new StringBuffer();
+		IRegion expectedSelection= assembleClassJavadocTestCUExtractSelection(result, expected, fAfterImports);
+		
+		assertProposal(selector, contents, preSelection, result, expectedSelection);
+	}
 	/**
 	 * Creates a CU with a method containing <code>before</code>, then runs
 	 * code assist and asserts that there is no proposal starting with selector.
@@ -198,7 +254,7 @@ public class AbstractCompletionTest extends TestCase {
 	}
 
 	private void assertProposal(String selector, StringBuffer contents, IRegion preSelection, StringBuffer result, IRegion expectedSelection) throws CoreException {
-		fCU= createCU(CompletionTestSetup.getTestPackage(), contents.toString());
+		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
 		IDocument doc;
 		ITextSelection postSelection;
@@ -217,7 +273,7 @@ public class AbstractCompletionTest extends TestCase {
 	}
 	
 	private void assertNoProposal(String selector, StringBuffer contents, IRegion preSelection) throws CoreException {
-		fCU= createCU(CompletionTestSetup.getTestPackage(), contents.toString());
+		fCU= createCU(CompletionTestSetup.getAnonymousTestPackage(), contents.toString());
 		fEditor= (JavaEditor) EditorUtility.openInEditor(fCU);
 		try {
 			assertNull(findNamedProposal(selector, fCU, preSelection));
@@ -285,6 +341,62 @@ public class AbstractCompletionTest extends TestCase {
 		return new Region(firstPipe + prefix.length(), secondPipe - firstPipe);
 	}
 	
+	private IRegion assembleClassJavadocTestCUExtractSelection(StringBuffer buffer, String javadocLine, String imports) {
+		String prefix= "package test1;\n" +
+				imports +
+				 "\n" +
+				 "/**\n";
+		String postfix= "\n" +
+				 " */\n" +
+				"public class Completion_" + getName() + "<T> {\n" +
+				"\n" +
+				fMembers +
+				"}\n";
+		StringBuffer lineBuffer= new StringBuffer(javadocLine);
+		int firstPipe= lineBuffer.indexOf(CARET);
+		int secondPipe;
+		if (firstPipe == -1) {
+			firstPipe= lineBuffer.length();
+			secondPipe= firstPipe;
+		} else {
+			lineBuffer.replace(firstPipe, firstPipe + CARET.length(), "");
+			secondPipe= lineBuffer.indexOf(CARET, firstPipe);
+			if (secondPipe ==-1)
+				secondPipe= firstPipe;
+			else
+				lineBuffer.replace(secondPipe, secondPipe + CARET.length(), "");
+		}
+		buffer.append(prefix + lineBuffer + postfix);
+		return new Region(firstPipe + prefix.length(), secondPipe - firstPipe);
+	}
+	
+	private IRegion assembleMethodJavadocTestCUExtractSelection(StringBuffer buffer, String javadocLine, String imports) {
+		String prefix= "package test1;\n" +
+				"\n" +
+				"public class Completion_" + getName() + "<T> {\n" +
+				"	/**\n	";
+		String postfix= "\n" +
+				"	 */\n" +
+				fMembers +
+				"}\n";
+		StringBuffer lineBuffer= new StringBuffer(javadocLine);
+		int firstPipe= lineBuffer.indexOf(CARET);
+		int secondPipe;
+		if (firstPipe == -1) {
+			firstPipe= lineBuffer.length();
+			secondPipe= firstPipe;
+		} else {
+			lineBuffer.replace(firstPipe, firstPipe + CARET.length(), "");
+			secondPipe= lineBuffer.indexOf(CARET, firstPipe);
+			if (secondPipe ==-1)
+				secondPipe= firstPipe;
+			else
+				lineBuffer.replace(secondPipe, secondPipe + CARET.length(), "");
+		}
+		buffer.append(prefix + lineBuffer + postfix);
+		return new Region(firstPipe + prefix.length(), secondPipe - firstPipe);
+	}
+
 	private ICompletionProposal findNonNullProposal(String prefix, ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
 		ICompletionProposal proposal= findNamedProposal(prefix, cu, selection);
 		assertNotNull("no proposal starting with \"" + prefix + "\"", proposal);
@@ -294,22 +406,29 @@ public class AbstractCompletionTest extends TestCase {
 	private ICompletionProposal findNamedProposal(String prefix, ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
 		ICompletionProposal[] proposals= collectProposals(cu, selection);
 		
+		ICompletionProposal found= null;
 		for (int i= 0; i < proposals.length; i++) {
-			if (proposals[i].getDisplayString().startsWith(prefix)) {
-				return proposals[i];
+			String displayString= proposals[i].getDisplayString();
+			if (displayString.startsWith(prefix)) {
+				if (found == null || displayString.equals(prefix))
+					found= proposals[i];
 			}
 		}
-		return null;
+		return found;
 	}
 
 	private ICompletionProposal[] collectProposals(ICompilationUnit cu, IRegion selection) throws JavaModelException, PartInitException {
 		
 		ContentAssistant assistant= new ContentAssistant();
 		assistant.setDocumentPartitioning(IJavaPartitions.JAVA_PARTITIONING);
-		IContentAssistProcessor javaProcessor= new JavaCompletionProcessor(fEditor, assistant, IDocument.DEFAULT_CONTENT_TYPE);
+		IContentAssistProcessor javaProcessor= new JavaCompletionProcessor(fEditor, assistant, getContentType());
 
 		ICompletionProposal[] proposals= javaProcessor.computeCompletionProposals(fEditor.getViewer(), selection.getOffset());
 		return proposals;
+	}
+
+	protected String getContentType() {
+		return IDocument.DEFAULT_CONTENT_TYPE;
 	}
 
 	private void apply(ITextEditor editor, IDocument doc, ICompletionProposal proposal, IRegion selection) {

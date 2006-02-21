@@ -36,6 +36,21 @@ class CompletionTestSetup extends ProjectTestSetup {
 		return fragment;
 	}
 	
+	private static int fAnonymousSoureFolderCounter= 0;
+	public static IPackageFragment getAnonymousTestPackage() throws CoreException {
+		IJavaProject project= getProject();
+		String sourceFolder= "src" + fAnonymousSoureFolderCounter++;
+		IPackageFragmentRoot root= project.getPackageFragmentRoot(sourceFolder);
+		if (!root.exists())
+			root= JavaProjectHelper.addSourceContainer(project, sourceFolder);
+		
+		IPackageFragment fragment= root.getPackageFragment("test1");
+		if (!fragment.exists())
+			fragment= root.createPackageFragment("test1", false, null);
+		
+		return fragment;
+	}
+	
 	public CompletionTestSetup(Test test) {
 		super(test);
 	}
