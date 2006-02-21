@@ -53,6 +53,7 @@ import org.eclipse.jface.text.formatter.IContentFormatter;
 import org.eclipse.jface.text.formatter.IContentFormatterExtension;
 import org.eclipse.jface.text.formatter.IFormattingContext;
 
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
@@ -74,6 +75,7 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
+import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
@@ -678,6 +680,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			setControl(composite);
 			Dialog.applyDialogFont(composite);
+
+			PlatformUI.getWorkbench().getHelpSystem().setHelp(composite, IJavaHelpContextIds.SELECT_CLEAN_UPS_PAGE);
 		}
 		
 		private void createGroups(TabFolder parent) {
@@ -1103,7 +1107,6 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		fShowCleanUpPage= showCleanUpPage;
 		setDefaultPageTitle(MultiFixMessages.CleanUpRefactoringWizard_PageTitle);
 		setWindowTitle(MultiFixMessages.CleanUpRefactoringWizard_WindowTitle);
-		
 	}
 
 	/* (non-Javadoc)

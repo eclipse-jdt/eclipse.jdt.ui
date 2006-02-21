@@ -368,6 +368,7 @@ public interface IJavaHelpContextIds {
 	public static final String USE_SUPERTYPE_WIZARD_PAGE= 						PREFIX + "use_supertype_wizard_page_context"; //$NON-NLS-1$
 	public static final String INLINE_METHOD_WIZARD_PAGE=				PREFIX + "inline_method_wizard_page_context"; //$NON-NLS-1$
 	public static final String INLINE_CONSTANT_WIZARD_PAGE=				PREFIX + "inline_constant_wizard_page_context"; //$NON-NLS-1$
+	public static final String SELECT_CLEAN_UPS_PAGE= 					PREFIX + "select_clean_ups_wizard_page_context"; //$NON-NLS-1$
 	
 	// reused ui-blocks
 	public static final String BUILD_PATH_BLOCK= PREFIX + "build_paths_context"; //$NON-NLS-1$
