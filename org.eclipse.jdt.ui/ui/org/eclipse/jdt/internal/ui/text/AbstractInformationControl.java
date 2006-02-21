@@ -555,17 +555,20 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	 * </p>
 	 */
 	public void widgetDisposed(DisposeEvent event) {
+		removeHandlerAndKeyBindingSupport();
 		fTreeViewer= null;
 		fFilterText= null;
-		removeHandlerAndKeyBindingSupport();
+		fKeyBindingService= null;
 	}
 
 	/**
+	 * Adds handler and key binding support.
 	 * 
+	 * @since 3.2
 	 */
 	protected void addHandlerAndKeyBindingSupport() {
 		// Remember current scope and then set window context.
-		if (fKeyBindingScopes == null) {
+		if (fKeyBindingScopes == null && fKeyBindingService != null) {
 			fKeyBindingScopes= fKeyBindingService.getScopes();
 			fKeyBindingService.setScopes(new String[] { IWorkbenchContextSupport.CONTEXT_ID_WINDOW });
 		}
@@ -578,7 +581,9 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 	}
 
 	/**
+	 * Removes handler and key binding support.
 	 * 
+	 * @since 3.2
 	 */
 	protected void removeHandlerAndKeyBindingSupport() {
 		// Remove handler submission
@@ -589,7 +594,6 @@ public abstract class AbstractInformationControl extends PopupDialog implements 
 		if (fKeyBindingService != null && fKeyBindingScopes != null) {
 			fKeyBindingService.setScopes(fKeyBindingScopes);
 			fKeyBindingScopes= null;
-			fKeyBindingService= null;
 		}
 	}
 
