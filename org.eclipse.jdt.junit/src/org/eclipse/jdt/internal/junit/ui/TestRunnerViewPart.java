@@ -371,8 +371,10 @@ public class TestRunnerViewPart extends ViewPart {
 
 	private class TestRunSessionListener implements ITestRunSessionListener {
 		public void sessionAdded(TestRunSession testRunSession) {
-			setActiveTestRunSession(testRunSession);
-			setContentDescription(Messages.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ fTestRunSession.getTestRunName() }));
+			if (getSite().getWorkbenchWindow() == JUnitPlugin.getActiveWorkbenchWindow()) {
+				setActiveTestRunSession(testRunSession);
+				setContentDescription(Messages.format(JUnitMessages.TestRunnerViewPart_Launching, new Object[]{ fTestRunSession.getTestRunName() }));
+			}
 		}
 		public void sessionRemoved(TestRunSession testRunSession) {
 			if (testRunSession.equals(fTestRunSession)) {
