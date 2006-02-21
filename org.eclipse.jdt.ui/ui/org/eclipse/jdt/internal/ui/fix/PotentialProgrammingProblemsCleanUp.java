@@ -140,6 +140,23 @@ public class PotentialProgrammingProblemsCleanUp extends AbstractCleanUp {
 			result.add(MultiFixMessages.PotentialProgrammingProblemsCleanUp_RandomSerialId_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getPreview() {
+		StringBuffer buf= new StringBuffer();
+		
+		buf.append("class E implements java.io.Serializable{\n"); //$NON-NLS-1$
+		if (isFlag(ADD_CALCULATED_SERIAL_VERSION_ID)) {
+			buf.append("    private static final long serialVersionUID = -391484377137870342L;\n"); //$NON-NLS-1$
+		} else if (isFlag(ADD_DEFAULT_SERIAL_VERSION_ID)) {
+			buf.append("    private static final long serialVersionUID = 1L;\n"); //$NON-NLS-1$
+		}
+		buf.append("}\n"); //$NON-NLS-1$
+		
+		return buf.toString();
+	}
 
 	/**
 	 * {@inheritDoc}

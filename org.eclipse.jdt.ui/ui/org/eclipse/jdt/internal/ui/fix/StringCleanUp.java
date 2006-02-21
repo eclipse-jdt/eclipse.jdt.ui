@@ -105,6 +105,21 @@ public class StringCleanUp extends AbstractCleanUp {
 			result.add(MultiFixMessages.StringMultiFix_RemoveUnnecessaryNonNls_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getPreview() {
+		StringBuffer buf= new StringBuffer();
+		
+		if (isFlag(REMOVE_UNNECESSARY_NLS_TAG)) {
+			buf.append("public String s;"); //$NON-NLS-1$
+		} else {
+			buf.append("public String s; //$NON-NLS-1$"); //$NON-NLS-1$
+		}
+		
+		return buf.toString();
+	}
 
 	/**
 	 * {@inheritDoc}

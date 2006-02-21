@@ -95,6 +95,20 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 		
 		return (String[])result.toArray(new String[result.size()]);
 	}
+	
+	public String getPreview() {
+		StringBuffer buf= new StringBuffer();
+		
+		if (isFlag(ADD_PARANOIC_PARENTHESIS)) {
+			buf.append("boolean b= (((i > 0) && (i < 10)) || (i == 50));\n"); //$NON-NLS-1$
+		} else if (isFlag(REMOVE_UNNECESSARY_PARENTHESIS)) {
+			buf.append("boolean b= i > 0 && i < 10 || i == 50;\n"); //$NON-NLS-1$
+		} else {
+			buf.append("boolean b= (i > 0 && i < 10 || i == 50);\n"); //$NON-NLS-1$
+		}
+		
+		return buf.toString();
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -126,4 +140,5 @@ public class ExpressionsCleanUp extends AbstractCleanUp {
 	public int getDefaultFlag() {
 		return DEFAULT_FLAG;
 	}
+
 }

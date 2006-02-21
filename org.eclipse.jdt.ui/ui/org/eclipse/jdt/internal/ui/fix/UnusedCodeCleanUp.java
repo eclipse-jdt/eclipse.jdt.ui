@@ -151,6 +151,44 @@ public class UnusedCodeCleanUp extends AbstractCleanUp {
 	/**
 	 * {@inheritDoc}
 	 */
+	public String getPreview() {
+		StringBuffer buf= new StringBuffer();
+		
+		if (isFlag(REMOVE_UNUSED_IMPORTS)) {
+		} else {
+			buf.append("import pack.Bar;\n"); //$NON-NLS-1$
+		}
+		buf.append("class Example {\n"); //$NON-NLS-1$
+		if (isFlag(REMOVE_UNUSED_PRIVATE_TYPES)) {
+		} else {
+			buf.append("    private class Sub {}\n"); //$NON-NLS-1$
+		}
+		if (isFlag(REMOVE_UNUSED_PRIVATE_CONSTRUCTORS)) {
+		} else {
+			buf.append("    private Example() {}\n"); //$NON-NLS-1$
+		}
+		if (isFlag(REMOVE_UNUSED_PRIVATE_FIELDS)) {
+		} else {
+			buf.append("    private int fField;\n"); //$NON-NLS-1$
+		}
+		if (isFlag(REMOVE_UNUSED_PRIVATE_METHODS)) {
+		} else {
+			buf.append("    private void foo() {}\n"); //$NON-NLS-1$
+		}
+		buf.append("    public void bar() {\n"); //$NON-NLS-1$
+		if (isFlag(REMOVE_UNUSED_LOCAL_VARIABLES)) {
+		} else {
+			buf.append("        int i= 10;\n"); //$NON-NLS-1$
+		}
+		buf.append("    }\n"); //$NON-NLS-1$
+		buf.append("}\n"); //$NON-NLS-1$
+		
+		return buf.toString();
+	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
 	public boolean canFix(CompilationUnit compilationUnit, IProblemLocation problem) throws CoreException {
 		if (isFlag(REMOVE_UNUSED_IMPORTS)) {
 			UnusedCodeFix fix= UnusedCodeFix.createRemoveUnusedImportFix(compilationUnit, problem);

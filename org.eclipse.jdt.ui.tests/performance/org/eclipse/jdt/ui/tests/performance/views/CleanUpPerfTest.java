@@ -127,6 +127,9 @@ public class CleanUpPerfTest extends JdtPerformanceTestCase {
 			public boolean isFlag(int flag) {
 				return true;
 			}
+			public String getPreview() {
+				return null;
+			}
 		});
 		tagAsSummary("Code clean up - no fix", Dimension.ELAPSED_PROCESS);
 		

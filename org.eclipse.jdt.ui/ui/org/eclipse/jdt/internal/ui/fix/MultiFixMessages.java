@@ -84,6 +84,8 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_EnableDefaultsButton_label;
 	public static String CleanUpRefactoringWizard_expressions_sectionDescription;
 	public static String CleanUpRefactoringWizard_statusLineText;
+	public static String CleanUpRefactoringWizard_formatterException_errorMessage;
+	public static String CleanUpRefactoringWizard_previewLabel_text;
 	
 	public static String PotentialProgrammingProblemsCleanUp_AddSerialId_section_name;
 	public static String PotentialProgrammingProblemsCleanUp_Generated_radioButton_name;

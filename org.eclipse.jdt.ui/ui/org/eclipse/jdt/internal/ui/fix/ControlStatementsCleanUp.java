@@ -105,6 +105,44 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 		
 		return (String[])result.toArray(new String[result.size()]);
 	}
+	
+	public String getPreview() {
+		StringBuffer buf= new StringBuffer();
+		
+		if (isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS)) {
+			buf.append("if (ids.length > 0) {\n"); //$NON-NLS-1$
+			buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
+			buf.append("} else {\n"); //$NON-NLS-1$
+			buf.append("    return;\n"); //$NON-NLS-1$
+			buf.append("}\n"); //$NON-NLS-1$
+		} else if (isFlag(REMOVE_UNNECESSARY_BLOCKS)){
+			buf.append("if (ids.length > 0)\n"); //$NON-NLS-1$
+			buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
+			buf.append("else\n"); //$NON-NLS-1$
+			buf.append("    return;\n"); //$NON-NLS-1$
+			buf.append("\n"); //$NON-NLS-1$
+		} else {
+			buf.append("if (ids.length > 0) {\n"); //$NON-NLS-1$
+			buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
+			buf.append("} else \n"); //$NON-NLS-1$
+			buf.append("    return;\n"); //$NON-NLS-1$
+			buf.append("\n"); //$NON-NLS-1$
+		}
+		buf.append("\n"); //$NON-NLS-1$
+		if (isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP)) {
+			buf.append("for (int element : ids) {\n"); //$NON-NLS-1$
+			buf.append("    double value= element / 2; \n"); //$NON-NLS-1$
+			buf.append("    System.out.println(value);\n"); //$NON-NLS-1$
+			buf.append("}\n"); //$NON-NLS-1$
+		} else {
+			buf.append("for (int i = 0; i < ids.length; i++) {\n"); //$NON-NLS-1$
+			buf.append("    double value= ids[i] / 2; \n"); //$NON-NLS-1$
+			buf.append("    System.out.println(value);\n"); //$NON-NLS-1$
+			buf.append("}\n"); //$NON-NLS-1$
+		}
+		
+		return buf.toString();
+	}
 
 	/**
 	 * {@inheritDoc}
@@ -126,5 +164,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	public int getDefaultFlag() {
 		return DEFAULT_FLAG;
 	}
+
+
 
 }

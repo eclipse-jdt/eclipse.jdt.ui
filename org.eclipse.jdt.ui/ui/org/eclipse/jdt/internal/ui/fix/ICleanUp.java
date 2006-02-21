@@ -140,4 +140,12 @@ public interface ICleanUp {
 	 */
 	public boolean isFlag(int id);
 
+	/**
+	 * A code snippet which complies to the
+	 * current settings.
+	 * 
+	 * @return A code snippet, not null.
+	 */
+	public abstract String getPreview();
+
 }

@@ -129,6 +129,31 @@ public class Java50CleanUp extends AbstractCleanUp {
 			result.add(MultiFixMessages.Java50CleanUp_AddTypeParameters_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getPreview() {
+		StringBuffer buf= new StringBuffer();
+		
+		buf.append("class E {\n"); //$NON-NLS-1$
+		buf.append("    /**\n"); //$NON-NLS-1$
+		buf.append("     * @deprecated\n"); //$NON-NLS-1$
+		buf.append("     */\n"); //$NON-NLS-1$
+		if (isFlag(ADD_DEPRECATED_ANNOTATION)) {
+			buf.append("    @Deprecated\n"); //$NON-NLS-1$
+		}
+		buf.append("    public void foo() {}\n"); //$NON-NLS-1$
+		buf.append("}\n"); //$NON-NLS-1$
+		buf.append("class ESub extends E {\n"); //$NON-NLS-1$
+		if (isFlag(ADD_OVERRIDE_ANNOATION)) {
+			buf.append("    @Override\n"); //$NON-NLS-1$
+		}
+		buf.append("    public void foo() {}\n"); //$NON-NLS-1$
+		buf.append("}\n"); //$NON-NLS-1$
+		
+		return buf.toString();
+	}
 
 	/**
 	 * {@inheritDoc}

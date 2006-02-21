@@ -135,6 +135,50 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 			result.add(MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect);
 		return (String[])result.toArray(new String[result.size()]);
 	}
+	
+	public String getPreview() {
+		StringBuffer buf= new StringBuffer();
+		
+		buf.append("private int value;\n"); //$NON-NLS-1$
+		buf.append("public int getValue() {\n"); //$NON-NLS-1$
+		if (isFlag(QUALIFY_FIELD_ACCESS)) {
+			buf.append("    return this.value;\n"); //$NON-NLS-1$
+		} else {
+			buf.append("    return value;\n"); //$NON-NLS-1$
+		}
+		buf.append("}\n"); //$NON-NLS-1$
+		buf.append("\n"); //$NON-NLS-1$
+		buf.append("class E {\n"); //$NON-NLS-1$
+		buf.append("    public static int NUMBER;\n"); //$NON-NLS-1$
+		buf.append("    public void inc() {\n"); //$NON-NLS-1$
+		if (isFlag(QUALIFY_STATIC_FIELD_ACCESS)) {
+			buf.append("        E.NUMBER++;\n"); //$NON-NLS-1$
+		} else {
+			buf.append("        NUMBER++;\n"); //$NON-NLS-1$
+		}
+		buf.append("    }\n"); //$NON-NLS-1$
+		buf.append("}\n"); //$NON-NLS-1$
+		buf.append("\n"); //$NON-NLS-1$
+		buf.append("class ESub extends E {\n"); //$NON-NLS-1$
+		buf.append("    public void reset() {\n"); //$NON-NLS-1$
+		if (isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT)) {
+			buf.append("        E.NUMBER= 0;\n"); //$NON-NLS-1$
+		} else {
+			buf.append("        ESub.NUMBER= 0;\n"); //$NON-NLS-1$
+		}
+		buf.append("    }\n"); //$NON-NLS-1$
+		buf.append("}\n"); //$NON-NLS-1$
+		buf.append("\n"); //$NON-NLS-1$
+		buf.append("public void dec() {\n"); //$NON-NLS-1$
+		if (isFlag(CHANGE_NON_STATIC_ACCESS_TO_STATIC)) {
+			buf.append("    E.NUMBER--;\n"); //$NON-NLS-1$
+		} else {
+			buf.append("    (new E()).NUMBER--;\n"); //$NON-NLS-1$
+		}
+		buf.append("}\n"); //$NON-NLS-1$
+		
+		return buf.toString();
+	}
 
 	/**
 	 * {@inheritDoc}

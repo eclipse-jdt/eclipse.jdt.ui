@@ -100,6 +100,21 @@ public class UnnecessaryCodeCleanUp extends AbstractCleanUp {
 			result.add(MultiFixMessages.UnusedCodeCleanUp_RemoveUnusedCasts_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
+	
+	/**
+	 * {@inheritDoc}
+	 */
+	public String getPreview() {
+		StringBuffer buf= new StringBuffer();
+		
+		if (isFlag(REMOVE_UNUSED_CAST)) {
+			buf.append("Boolean b= Boolean.TRUE;\n"); //$NON-NLS-1$
+		} else {
+			buf.append("Boolean b= (Boolean) Boolean.TRUE;\n"); //$NON-NLS-1$
+		}
+		
+		return buf.toString();
+	}
 
 	/**
 	 * {@inheritDoc}

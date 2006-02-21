@@ -13,10 +13,15 @@ package org.eclipse.jdt.internal.ui.fix;
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Map;
+
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Status;
 
 import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.custom.ScrolledComposite;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -42,6 +47,12 @@ import org.eclipse.jface.viewers.Viewer;
 import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.wizard.IWizardPage;
 
+import org.eclipse.jface.text.Region;
+import org.eclipse.jface.text.formatter.FormattingContextProperties;
+import org.eclipse.jface.text.formatter.IContentFormatter;
+import org.eclipse.jface.text.formatter.IContentFormatterExtension;
+import org.eclipse.jface.text.formatter.IFormattingContext;
+
 import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
 
 import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
@@ -63,7 +74,10 @@ import org.eclipse.jdt.ui.JavaElementLabels;
 import org.eclipse.jdt.ui.JavaElementSorter;
 import org.eclipse.jdt.ui.StandardJavaElementContentProvider;
 
+import org.eclipse.jdt.internal.ui.IJavaStatusConstants;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.preferences.formatter.JavaPreview;
+import org.eclipse.jdt.internal.ui.text.comment.CommentFormattingContext;
 
 public class CleanUpRefactoringWizard extends RefactoringWizard {
 	
@@ -571,6 +585,71 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			}
 		}
 		
+		private class CleanUpPreview extends JavaPreview {
+
+			private final ICleanUp[] fPreviewCleanUps;
+			private boolean fUpdateBlocked;
+
+			public CleanUpPreview(Composite parent, Map map, ICleanUp[] cleanUps) {
+				super(map, parent);
+				fPreviewCleanUps= cleanUps;
+				fUpdateBlocked= false;
+			}
+
+			/**
+			 * {@inheritDoc}
+			 */
+			protected void doFormatPreview() {
+			
+				StringBuffer buf= new StringBuffer();
+				for (int i= 0; i < fPreviewCleanUps.length; i++) {
+					buf.append(fPreviewCleanUps[i].getPreview());
+					buf.append("\n"); //$NON-NLS-1$
+				}
+				format(buf.toString());
+			}
+			
+			private void format(String text) {
+		        if (text == null) {
+		            fPreviewDocument.set(""); //$NON-NLS-1$
+		            return;
+		        }
+		        fPreviewDocument.set(text);
+				
+				fSourceViewer.setRedraw(false);
+				final IFormattingContext context = new CommentFormattingContext();
+				try {
+					final IContentFormatter formatter =	fViewerConfiguration.getContentFormatter(fSourceViewer);
+					if (formatter instanceof IContentFormatterExtension) {
+						final IContentFormatterExtension extension = (IContentFormatterExtension) formatter;
+						context.setProperty(FormattingContextProperties.CONTEXT_PREFERENCES, fWorkingValues);
+						context.setProperty(FormattingContextProperties.CONTEXT_DOCUMENT, Boolean.valueOf(true));
+						extension.format(fPreviewDocument, context);
+					} else
+						formatter.format(fPreviewDocument, new Region(0, fPreviewDocument.getLength()));
+				} catch (Exception e) {
+					final IStatus status= new Status(IStatus.ERROR, JavaPlugin.getPluginId(), IJavaStatusConstants.INTERNAL_ERROR, 
+						MultiFixMessages.CleanUpRefactoringWizard_formatterException_errorMessage, e); 
+					JavaPlugin.log(status);
+				} finally {
+				    context.dispose();
+				    fSourceViewer.setRedraw(true);
+				}
+			}
+
+			public void resumeUpdate() {
+				fUpdateBlocked= false;
+			}
+
+			public void blockUpdate() {
+				fUpdateBlocked= true;
+			}
+
+			public boolean isUpdateSuspended() {
+				return fUpdateBlocked;
+			}
+		}
+		
 		private ICleanUp[] fCleanUps;
 		private List fConfigurationGroups;
 		private int fTotalCleanUpsCount, fSelectedCleanUpsCount;
@@ -632,13 +711,17 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 		
 		private Composite fillCodeStyleTab(Composite parent, final IJavaProject project, IDialogSettings settings) {
-			Composite composite= new Composite(parent, SWT.NONE);
-			composite.setLayout(new GridLayout(1, false));
+			Composite composite = new SashForm(parent, SWT.HORIZONTAL);
+			composite.setLayout(new GridLayout(2, false));
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
-			Composite groups= new Composite(composite, SWT.NONE);
+			Composite left= new Composite(composite, SWT.NONE);
+			left.setLayout(new GridLayout(1, false));
+			left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+			
+			Composite groups= new Composite(left, SWT.NONE);
 			groups.setLayout(new GridLayout(1, false));
-			groups.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			groups.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 			
 			//Member accesses group
 			CodeStyleCleanUp codeStyleCleanUp= new CodeStyleCleanUp(settings);
@@ -649,7 +732,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			FlagConfigurationButton nonStatic= new FlagConfigurationButton(codeStyleCleanUp, CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC, MultiFixMessages.CodeStyleCleanUp_changeNonStatic_checkBoxLabel, SWT.CHECK);
 			FlagConfigurationButton indirect= new FlagConfigurationButton(codeStyleCleanUp, CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT, MultiFixMessages.CodeStyleCleanUp_changeIndirect_checkBoxLabel, SWT.CHECK);
 			FlagConfigurationButton qualifyStatic= new FlagConfigurationButton(codeStyleCleanUp, CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS, MultiFixMessages.CodeStyleCleanUp_addStaticQualifier_checkBoxLabel, SWT.CHECK);
-			FlagConfigurationGroup staticGroup= new FlagConfigurationGroup(MultiFixMessages.CodeStyleCleanUp_useDeclaring_checkBoxLabel, new FlagConfigurationButton[] {nonStatic, indirect, qualifyStatic}, SWT.CHECK | SWT.VERTICAL, settings);
+			FlagConfigurationGroup staticGroup= new FlagConfigurationGroup(MultiFixMessages.CodeStyleCleanUp_useDeclaring_checkBoxLabel, new FlagConfigurationButton[] {qualifyStatic, indirect, nonStatic}, SWT.CHECK | SWT.VERTICAL, settings);
 			staticGroup.createButton(group);
 
 			//Control statements group
@@ -674,15 +757,19 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			parenthesisGroup.createButton(group);
 			
 			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {addThis, nonStatic, indirect, qualifyStatic, addBlock, removeBlock, convertLoop, addParanoic, removeParanoic};
+			
+			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {codeStyleCleanUp, controlStatementsCleanUp, expressionsCleanUp}, flagConfigurationButtons);
+			
 			if (project != null && !JavaModelUtil.is50OrHigher(project)) {
 				convertLoop.disable();
 				convertLoop.deselect();
-				addEnableButtonsGroup(composite, flagConfigurationButtons, new FlagConfigurationGroup[] {blockGroup, parenthesisGroup}, new FlagConfigurationButton[] {convertLoop});
+				addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[] {blockGroup, parenthesisGroup}, new FlagConfigurationButton[] {convertLoop}, preview);
 			} else {
-				addEnableButtonsGroup(composite, flagConfigurationButtons, new FlagConfigurationGroup[] {blockGroup, parenthesisGroup}, new FlagConfigurationButton[0]);
+				addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[] {blockGroup, parenthesisGroup}, new FlagConfigurationButton[0], preview);
 			}
 			
 			addSelectionCounter(flagConfigurationButtons);
+			
 			
 			fCleanUps[0]= codeStyleCleanUp;
 			fCleanUps[1]= controlStatementsCleanUp;
@@ -696,13 +783,17 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 		
 		private Composite fillUnnecessaryCodeTab(ScrolledComposite parent, final IJavaProject project, IDialogSettings section) {
-			Composite composite= new Composite(parent, SWT.NONE);
+			Composite composite= new SashForm(parent, SWT.HORIZONTAL);
 			composite.setLayout(new GridLayout(1, false));
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
-			Composite groups= new Composite(composite, SWT.NONE);
+			Composite left= new Composite(composite, SWT.NONE);
+			left.setLayout(new GridLayout(1, false));
+			left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+			
+			Composite groups= new Composite(left, SWT.NONE);
 			groups.setLayout(new GridLayout(1, false));
-			groups.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			groups.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 			
 			//Unused code group
 			UnusedCodeCleanUp unusedCodeCleanUp= new UnusedCodeCleanUp(section);
@@ -714,7 +805,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			FlagConfigurationButton contructors= new FlagConfigurationButton(unusedCodeCleanUp, UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_CONSTRUCTORS, MultiFixMessages.UnusedCodeCleanUp_unusedConstructors_checkBoxLabel, SWT.CHECK);
 			FlagConfigurationButton methods= new FlagConfigurationButton(unusedCodeCleanUp, UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_METHODS, MultiFixMessages.UnusedCodeCleanUp_unusedMethods_checkBoxLabel, SWT.CHECK);
 			FlagConfigurationButton fields= new FlagConfigurationButton(unusedCodeCleanUp, UnusedCodeCleanUp.REMOVE_UNUSED_PRIVATE_FIELDS, MultiFixMessages.UnusedCodeCleanUp_unusedFields_checkBoxLabel, SWT.CHECK);
-			FlagConfigurationGroup membersGroup= new FlagConfigurationGroup(MultiFixMessages.UnusedCodeCleanUp_unusedPrivateMembers_checkBoxLabel, new FlagConfigurationButton[] {types, contructors, methods, fields}, SWT.CHECK | SWT.HORIZONTAL, section);
+			FlagConfigurationGroup membersGroup= new FlagConfigurationGroup(MultiFixMessages.UnusedCodeCleanUp_unusedPrivateMembers_checkBoxLabel, new FlagConfigurationButton[] {types, contructors, fields, methods}, SWT.CHECK | SWT.HORIZONTAL, section);
 			membersGroup.createButton(group);
 			FlagConfigurationButton locals= new FlagConfigurationButton(unusedCodeCleanUp, UnusedCodeCleanUp.REMOVE_UNUSED_LOCAL_VARIABLES, MultiFixMessages.UnusedCodeCleanUp_unusedLocalVariables_checkBoxLabel, SWT.CHECK);
 			locals.createButton(group);
@@ -730,7 +821,10 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			nlsTags.createButton(group);
 			
 			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {imports, types, contructors, methods, locals, fields, casts, nlsTags};
-			addEnableButtonsGroup(composite, flagConfigurationButtons, new FlagConfigurationGroup[0], new FlagConfigurationButton[0]);
+			
+			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {unusedCodeCleanUp, unnecessaryCodeCleanUp, stringCleanUp}, flagConfigurationButtons);
+			
+			addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[0], new FlagConfigurationButton[0], preview);
 			
 			addSelectionCounter(flagConfigurationButtons);
 
@@ -744,13 +838,17 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		}
 
 		private Composite fillMissingCodeTab(ScrolledComposite parent, final IJavaProject project, IDialogSettings section) {
-			Composite composite= new Composite(parent, SWT.NONE);
-			composite.setLayout(new GridLayout(1, false));
+			Composite composite= new SashForm(parent, SWT.HORIZONTAL);
+			composite.setLayout(new GridLayout(2, false));
 			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
-			Composite groups= new Composite(composite, SWT.NONE);
+			Composite left= new Composite(composite, SWT.NONE);
+			left.setLayout(new GridLayout(1, false));
+			left.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
+			
+			Composite groups= new Composite(left, SWT.NONE);
 			groups.setLayout(new GridLayout(1, false));
-			groups.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			groups.setLayoutData(new GridData(SWT.FILL, SWT.FILL, false, true));
 			
 			//Java50Fix Group
 			Java50CleanUp java50CleanUp= new Java50CleanUp(section);
@@ -771,15 +869,18 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			serial.createButton(group);
 			
 			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {override, deprecated, hash, defaultId};
+			
+			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {java50CleanUp, potentialProgrammingProblemsCleanUp}, flagConfigurationButtons);
+			
 			if (project != null && !JavaModelUtil.is50OrHigher(project)) {
 				override.deselect();
 				override.disableFlag();
 				deprecated.deselect();
 				deprecated.disableFlag();
 				annotations.disable();
-				addEnableButtonsGroup(composite, flagConfigurationButtons, new FlagConfigurationGroup[] {serial}, new FlagConfigurationButton[] {override, deprecated});
+				addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[] {serial}, new FlagConfigurationButton[] {override, deprecated}, preview);
 			} else {
-				addEnableButtonsGroup(composite, flagConfigurationButtons, new FlagConfigurationGroup[] {serial}, new FlagConfigurationButton[0]);
+				addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[] {serial}, new FlagConfigurationButton[0], preview);
 			}
 			
 			addSelectionCounter(flagConfigurationButtons);
@@ -791,6 +892,36 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			fConfigurationGroups.add(serial);
 			
 			return composite;
+		}
+		
+		private CleanUpPreview addPreview(Composite parent, ICleanUp[] cleanUps, FlagConfigurationButton[] flagConfigurationButtons) {
+			Composite composite= new Composite(parent, SWT.NONE);
+			composite.setLayout(new GridLayout(1, true));
+			composite.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+			
+			Label label= new Label(composite, SWT.NONE);
+			composite.setLayoutData(new GridData(SWT.LEFT, SWT.TOP, false, false));
+			label.setText(MultiFixMessages.CleanUpRefactoringWizard_previewLabel_text);
+			
+			IJavaProject javaProject= ((CleanUpRefactoring)getRefactoring()).getProjects()[0];
+			final CleanUpPreview preview= new CleanUpPreview(composite, javaProject.getOptions(true), cleanUps);
+			
+			GridData gd= new GridData(SWT.FILL, SWT.FILL, true, true);
+			gd.widthHint= 0;
+			gd.heightHint=0;
+			preview.getControl().setLayoutData(gd);
+			
+			preview.update();
+			for (int i= 0; i < flagConfigurationButtons.length; i++) {
+				flagConfigurationButtons[i].addSelectionChangeListener(new ISelectionChangeListener() {
+
+					public void selectionChanged(ICleanUp cleanUp, int flag, boolean selection) {
+						if (!preview.isUpdateSuspended())
+							preview.update();
+					}
+				});
+			}
+			return preview;
 		}
 		
 		private void addSelectionCounter(FlagConfigurationButton[] configs) {
@@ -813,7 +944,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			fTotalCleanUpsCount+=configs.length;
 		}
 
-		private void addEnableButtonsGroup(Composite parent, final FlagConfigurationButton[] configButtons, final FlagConfigurationGroup[] radioGroups, final FlagConfigurationButton[] disabledButtons) {
+		private void addEnableButtonsGroup(Composite parent, final FlagConfigurationButton[] configButtons, final FlagConfigurationGroup[] radioGroups, final FlagConfigurationButton[] disabledButtons, final CleanUpPreview preview) {
 			Composite down= new Composite(parent, SWT.NONE);
 			down.setLayout(new GridLayout(2, false));
 			down.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -831,6 +962,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			all.setText(MultiFixMessages.CleanUpRefactoringWizard_EnableAllButton_label);
 			all.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
+					preview.blockUpdate();
 					for (int i= 0; i < configButtons.length; i++) {
 						FlagConfigurationButton config= configButtons[i];
 						boolean isDisabled= false;
@@ -849,6 +981,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 							}
 						}
 					}
+					preview.resumeUpdate();
+					preview.update();
 				}	
 			});
 			
@@ -857,6 +991,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			none.setText(MultiFixMessages.CleanUpRefactoringWizard_DisableAllButton_label);
 			none.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
+					preview.blockUpdate();
 					for (int i= 0; i < configButtons.length; i++) {
 						FlagConfigurationButton config= configButtons[i];
 						config.disableFlag();
@@ -864,6 +999,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 							config.deselect();
 						}
 					}
+					preview.resumeUpdate();
+					preview.update();
 				}	
 			});
 			
@@ -872,6 +1009,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			def.setText(MultiFixMessages.CleanUpRefactoringWizard_EnableDefaultsButton_label);
 			def.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
+					preview.blockUpdate();
 					for (int i= 0; i < configButtons.length; i++) {
 						FlagConfigurationButton config= configButtons[i];
 						if (!config.isRadio()) {
@@ -890,6 +1028,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 						FlagConfigurationGroup group= radioGroups[i];
 						group.enableDefaults();
 					}
+					preview.resumeUpdate();
+					preview.update();
 				}	
 			});
 		}
