@@ -5036,6 +5036,7 @@
                id="org.eclipse.jdt.ui.JavaElementSorter">
             <parentExpression>
                <adapt type="org.eclipse.jdt.core.IJavaElement"/>
+               <instanceof value="org.eclipse.jdt.internal.ui.model.JavaModelProvider"/>
             </parentExpression>
          </commonSorter>
       </navigatorContent>
