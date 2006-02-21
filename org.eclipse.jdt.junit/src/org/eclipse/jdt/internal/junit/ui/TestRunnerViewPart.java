@@ -427,16 +427,14 @@ public class TestRunnerViewPart extends ViewPart {
 		public void sessionStopped(final long elapsedTime) {
 			fTestViewer.registerAutoScrollTarget(null);
 
-			String msg= JUnitMessages.TestRunnerViewPart_message_stopped; 
-			registerInfoMessage(msg);
+			registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_stopped);
 			handleStopped();
 		}
 
 		public void sessionTerminated() {
 			fTestViewer.registerAutoScrollTarget(null);
 
-			String msg= JUnitMessages.TestRunnerViewPart_message_terminated; 
-			registerInfoMessage(msg);
+			registerInfoMessage(JUnitMessages.TestRunnerViewPart_message_terminated);
 			handleStopped(); 
 		}
 
@@ -787,6 +785,7 @@ public class TestRunnerViewPart extends ViewPart {
 	 */
 	public void stopTest() {
 		if (fTestRunSession != null) {
+			setContentDescription(JUnitMessages.TestRunnerViewPart_message_stopping);
 			fTestRunSession.stopTestRun();
 		}
 	}
