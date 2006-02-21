@@ -399,14 +399,13 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 	 * {@inheritDoc}
 	 */
 	public boolean performFinish() {
-		final boolean result= super.performFinish();
 		if (fNewSettings) {
 			final IDialogSettings settings= JavaPlugin.getDefault().getDialogSettings();
 			IDialogSettings section= settings.getSection(DIALOG_SETTINGS_KEY);
 			section= settings.addNewSection(DIALOG_SETTINGS_KEY);
 			setDialogSettings(section);
 		}
-		return result;
+		return super.performFinish();
 	}
 
 	/**
