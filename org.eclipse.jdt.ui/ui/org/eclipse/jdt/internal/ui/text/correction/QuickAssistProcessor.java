@@ -388,6 +388,12 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				dialog.create();
 				dialog.getShell().setSize(Math.max(SIZING_WIZARD_WIDTH, dialog.getShell().getSize().x), SIZING_WIZARD_HEIGHT);
 				PlatformUI.getWorkbench().getHelpSystem().setHelp(dialog.getShell(), IJavaHelpContextIds.FIX_DEPRECATION_WIZARD_PAGE);
+				dialog.getShell().getDisplay().asyncExec(new Runnable() {
+
+					public final void run() {
+						dialog.showPage(wizard.getNextPage(wizard.getStartingPage()));
+					}
+				});
 				dialog.open();
 			}
 

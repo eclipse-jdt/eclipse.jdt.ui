@@ -101,7 +101,7 @@ public final class FixDeprecationRefactoringWizard extends RefactoringHistoryWiz
 	 *            the selection length
 	 */
 	public FixDeprecationRefactoringWizard(final ICompilationUnit unit, final int offset, final int length) {
-		super(true, DeprecationMessages.FixDeprecationRefactoringWizard_caption, DeprecationMessages.FixDeprecationRefactoringWizard_title, DeprecationMessages.FixDeprecationRefactoringWizard_description);
+		super(false, DeprecationMessages.FixDeprecationRefactoringWizard_caption, DeprecationMessages.FixDeprecationRefactoringWizard_title, DeprecationMessages.FixDeprecationRefactoringWizard_description);
 		Assert.isNotNull(unit);
 		Assert.isTrue(offset >= 0);
 		Assert.isTrue(length >= 0);
