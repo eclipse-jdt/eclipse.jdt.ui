@@ -42,6 +42,7 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 	 */
 	public static final int QUALIFY_FIELD_ACCESS= 1;
 	
+	
 	/**
 	 * Changes non static accesses to static members to static accesses.<p>
 	 * i.e.:<pre><code>
@@ -53,7 +54,7 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 	public static final int CHANGE_NON_STATIC_ACCESS_TO_STATIC= 2;
 	
 	/**
-	 * Qualifies static field accesses with declaring type.<p>
+	 * Qualify static field accesses with declaring type.<p>
 	 * i.e.:<pre><code>
 	 * class E {
 	 *   public static int i;
@@ -71,6 +72,24 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 	 * }</code></pre>
 	 */
 	public static final int CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT= 8;
+
+	/**
+	 * Adds a 'this' qualifier to method accesses.<p>
+	 * i.e.:<pre><code>
+	 *   int method(){};
+	 *   void foo() {method()} -> void foo() {this.method();}</pre></code>
+	 */
+	public static final int QUALIFY_METHOD_ACCESS= 16;
+	
+	/**
+	 * Qualifies static method accesses with declaring type.<p>
+	 * i.e.:<pre><code>
+	 * class E {
+	 *   public static int m();
+	 *   void foo() {m();} -> void foo() {E.m();}
+	 * }</code></pre>
+	 */
+	public static final int QUALIFY_STATIC_METHOD_ACCESS= 32;
 
 	private static final int DEFAULT_FLAG= CHANGE_NON_STATIC_ACCESS_TO_STATIC | CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT;
 	private static final String SECTION_NAME= "CleanUp_CodeStyle"; //$NON-NLS-1$
@@ -91,7 +110,9 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 				isFlag(QUALIFY_FIELD_ACCESS), 
 				isFlag(CHANGE_NON_STATIC_ACCESS_TO_STATIC), 
 				isFlag(QUALIFY_STATIC_FIELD_ACCESS), 
-				isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT));
+				isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT),
+				isFlag(QUALIFY_METHOD_ACCESS),
+				isFlag(QUALIFY_STATIC_METHOD_ACCESS));
 	}
 	
 	/**
@@ -133,6 +154,10 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 			result.add(MultiFixMessages.CodeStyleMultiFix_ChangeNonStaticAccess_description);
 		if (isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT))
 			result.add(MultiFixMessages.CodeStyleMultiFix_ChangeIndirectAccessToStaticToDirect);
+		if (isFlag(QUALIFY_METHOD_ACCESS))
+			result.add(MultiFixMessages.CodeStyleCleanUp_QualifyNonStaticMethod_description);
+		if (isFlag(QUALIFY_STATIC_METHOD_ACCESS)) 
+			result.add(MultiFixMessages.CodeStyleCleanUp_QualifyStaticMethod_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
 	
@@ -148,13 +173,29 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 		}
 		buf.append("}\n"); //$NON-NLS-1$
 		buf.append("\n"); //$NON-NLS-1$
+		buf.append("public boolean hasValue() {\n"); //$NON-NLS-1$
+		if (isFlag(QUALIFY_METHOD_ACCESS)) {
+			buf.append("    return this.getValue() > 0;\n"); //$NON-NLS-1$
+		} else {
+			buf.append("    return getValue() > 0;\n"); //$NON-NLS-1$
+		}
+		buf.append("}\n"); //$NON-NLS-1$
+		buf.append("\n"); //$NON-NLS-1$
 		buf.append("class E {\n"); //$NON-NLS-1$
 		buf.append("    public static int NUMBER;\n"); //$NON-NLS-1$
-		buf.append("    public void inc() {\n"); //$NON-NLS-1$
+		buf.append("    public static void set(int i) {\n"); //$NON-NLS-1$
 		if (isFlag(QUALIFY_STATIC_FIELD_ACCESS)) {
-			buf.append("        E.NUMBER++;\n"); //$NON-NLS-1$
+			buf.append("        E.NUMBER= i;\n"); //$NON-NLS-1$
 		} else {
-			buf.append("        NUMBER++;\n"); //$NON-NLS-1$
+			buf.append("        NUMBER= i;\n"); //$NON-NLS-1$
+		}
+		buf.append("    }\n"); //$NON-NLS-1$
+		buf.append("\n"); //$NON-NLS-1$
+		buf.append("    public void reset() {\n"); //$NON-NLS-1$
+		if (isFlag(QUALIFY_STATIC_METHOD_ACCESS)) {
+			buf.append("        E.set(0);\n"); //$NON-NLS-1$
+		} else {
+			buf.append("        set(0);\n"); //$NON-NLS-1$
 		}
 		buf.append("    }\n"); //$NON-NLS-1$
 		buf.append("}\n"); //$NON-NLS-1$

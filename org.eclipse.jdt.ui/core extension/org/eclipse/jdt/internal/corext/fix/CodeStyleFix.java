@@ -63,14 +63,20 @@ public class CodeStyleFix extends AbstractFix {
 		private final ImportRewrite fImportRewrite;
 		private final boolean fFindUnqualifiedAccesses;
 		private final boolean fFindUnqualifiedStaticAccesses;
+		private final boolean fFindUnqualifiedMethodAccesses;
+		private final boolean fFindUnqualifiedStaticMethodAccesses;
 		
 		public CodeStyleVisitor(CompilationUnit compilationUnit, 
 				boolean findUnqualifiedAccesses, 
-				boolean findUnqualifiedStaticAccesses, 
+				boolean findUnqualifiedStaticAccesses,
+				boolean findUnqualifiedMethodAccesses,
+				boolean findUnqualifiedStaticMethodAccesses,
 				List resultingCollection) throws CoreException {
 			
 			fFindUnqualifiedAccesses= findUnqualifiedAccesses;
 			fFindUnqualifiedStaticAccesses= findUnqualifiedStaticAccesses;
+			fFindUnqualifiedMethodAccesses= findUnqualifiedMethodAccesses;
+			fFindUnqualifiedStaticMethodAccesses= findUnqualifiedStaticMethodAccesses;
 			fImportRewrite= StubUtility.createImportRewrite(compilationUnit, true);
 			fResult= resultingCollection;
 		}
@@ -79,7 +85,7 @@ public class CodeStyleFix extends AbstractFix {
 		 * {@inheritDoc}
 		 */
 		public boolean visit(TypeDeclaration node) {
-			if (!fFindUnqualifiedStaticAccesses && node.isInterface())
+			if (!fFindUnqualifiedStaticAccesses && !fFindUnqualifiedStaticMethodAccesses && node.isInterface())
 				return false;
 			
 			return super.visit(node);
@@ -104,6 +110,24 @@ public class CodeStyleFix extends AbstractFix {
 			}
 			return false;
 		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean visit(MethodInvocation node) {
+			if (!fFindUnqualifiedMethodAccesses && !fFindUnqualifiedStaticMethodAccesses)
+				return true;
+			
+			if (node.getExpression() != null)
+				return false;
+			
+			IBinding binding= node.getName().resolveBinding();
+			if (!(binding instanceof IMethodBinding))
+				return false;
+			
+			handleMethod(node.getName(), (IMethodBinding)binding);
+			return false;
+		}
 
 		private void handleSimpleName(SimpleName node) {
 			ASTNode firstExpression= node.getParent();
@@ -126,34 +150,58 @@ public class CodeStyleFix extends AbstractFix {
 			if (!(binding instanceof IVariableBinding))
 				return;
 			
-			IVariableBinding varbinding= ((IVariableBinding) binding);
+			handleVariable(node, (IVariableBinding) binding);
+		}
+
+		private void handleVariable(SimpleName node, IVariableBinding varbinding) {
 			if (!varbinding.isField())
 				return;
 
+			ITypeBinding declaringClass= varbinding.getDeclaringClass();
 			if (Modifier.isStatic(varbinding.getModifiers())) {
 				if (fFindUnqualifiedStaticAccesses) {
 					Initializer initializer= (Initializer) ASTNodes.getParent(node, Initializer.class);
 					//Do not qualify assignments to static final fields in static initializers (would result in compile error)
+					StructuralPropertyDescriptor parentDescription= node.getLocationInParent();
 					if (initializer != null && Modifier.isStatic(initializer.getModifiers())
 							&& Modifier.isFinal(varbinding.getModifiers()) && parentDescription == Assignment.LEFT_HAND_SIDE_PROPERTY)
 						return;
 						
 					//Do not qualify static fields if defined inside an anonymous class
-					if (varbinding.getDeclaringClass().isAnonymous())
+					if (declaringClass.isAnonymous())
 						return;
-					
-	
-					fResult.add(new AddStaticQualifierOperation(varbinding, node));
+
+					fResult.add(new AddStaticQualifierOperation(declaringClass, node));
 				}
 			} else if (fFindUnqualifiedAccesses){
-				String qualifier= getQualifier(varbinding, fImportRewrite, node);
+				String qualifier= getNonStaticQualifier(declaringClass, fImportRewrite, node);
 				if (qualifier == null)
 					return;
 
 				fResult.add(new AddThisQualifierOperation(qualifier, node));
 			}
-		}
+		}		
 
+		private void handleMethod(SimpleName node, IMethodBinding binding) {
+			ITypeBinding declaringClass= binding.getDeclaringClass();
+			if (Modifier.isStatic(binding.getModifiers())) {
+				if (fFindUnqualifiedStaticMethodAccesses) {
+					//Do not qualify static fields if defined inside an anonymous class
+					if (declaringClass.isAnonymous())
+						return;
+
+					fResult.add(new AddStaticQualifierOperation(declaringClass, node));
+				}
+			} else {
+				if (fFindUnqualifiedMethodAccesses) {
+					String qualifier= getNonStaticQualifier(declaringClass, fImportRewrite, node);
+					if (qualifier == null)
+						return;
+
+					fResult.add(new AddThisQualifierOperation(qualifier, node));
+				}
+			}
+		}
 	}
 
 	private final static class AddThisQualifierOperation implements IFixRewriteOperation {
@@ -184,12 +232,12 @@ public class CodeStyleFix extends AbstractFix {
 	
 	private final static class AddStaticQualifierOperation extends AbstractFixRewriteOperation {
 
-		private final IVariableBinding fBinding;
 		private final SimpleName fName;
+		private final ITypeBinding fDeclaringClass;
 		
-		public AddStaticQualifierOperation(IVariableBinding binding, SimpleName name) {
+		public AddStaticQualifierOperation(ITypeBinding declaringClass, SimpleName name) {
 			super();
-			fBinding= binding;
+			fDeclaringClass= declaringClass;
 			fName= name;
 		}
 
@@ -199,8 +247,7 @@ public class CodeStyleFix extends AbstractFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			CompilationUnit compilationUnit= cuRewrite.getRoot();
-			ITypeBinding declaringClass= fBinding.getDeclaringClass();
-			Type qualifier= importType(declaringClass, fName, cuRewrite.getImportRewrite(), compilationUnit);
+			Type qualifier= importType(fDeclaringClass, fName, cuRewrite.getImportRewrite(), compilationUnit);
 			TextEditGroup group= new TextEditGroup(Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {fName.getIdentifier(), ASTNodes.asString(qualifier)}));
 			textEditGroups.add(group);
 			rewrite.replace(fName, compilationUnit.getAST().newQualifiedType(qualifier, (SimpleName)rewrite.createMoveTarget(fName)), group);
@@ -277,17 +324,19 @@ public class CodeStyleFix extends AbstractFix {
 	}
 	
 	public static CodeStyleFix createCleanUp(CompilationUnit compilationUnit, 
-			boolean addThisQualifier, 
+			boolean addThisQualifier,
 			boolean changeNonStaticAccessToStatic, 
 			boolean qualifyStaticFieldAccess,
-			boolean changeIndirectStaticAccessToDirect) throws CoreException {
+			boolean changeIndirectStaticAccessToDirect,
+			boolean qualifyMethodAccess,
+			boolean qualifyStaticMethodAccess) throws CoreException {
 		
-		if (!addThisQualifier && !changeNonStaticAccessToStatic && !qualifyStaticFieldAccess && !changeIndirectStaticAccessToDirect)
+		if (!addThisQualifier && !changeNonStaticAccessToStatic && !qualifyStaticFieldAccess && !changeIndirectStaticAccessToDirect && !qualifyMethodAccess && !qualifyStaticMethodAccess)
 			return null;
 
 		List/*<IFixRewriteOperation>*/ operations= new ArrayList(); 
-		if (addThisQualifier || qualifyStaticFieldAccess) {
-			CodeStyleVisitor codeStyleVisitor= new CodeStyleVisitor(compilationUnit, addThisQualifier, qualifyStaticFieldAccess, operations);
+		if (addThisQualifier || qualifyStaticFieldAccess || qualifyMethodAccess || qualifyStaticMethodAccess) {
+			CodeStyleVisitor codeStyleVisitor= new CodeStyleVisitor(compilationUnit, addThisQualifier, qualifyStaticFieldAccess, qualifyMethodAccess, qualifyStaticMethodAccess, operations);
 			compilationUnit.accept(codeStyleVisitor);
 		}
 		
@@ -398,7 +447,7 @@ public class CodeStyleFix extends AbstractFix {
 			accessBinding= fieldAccess.getName().resolveBinding();
 		}
         
-		if (accessBinding != null) {
+		if (accessBinding != null && qualifier != null) {
 			ToStaticAccessOperation declaring= null;
 			ITypeBinding declaringTypeBinding= getDeclaringTypeBinding(accessBinding);
 			if (declaringTypeBinding != null) {
@@ -456,26 +505,33 @@ public class CodeStyleFix extends AbstractFix {
 		if (Modifier.isStatic(binding.getModifiers())) {
 			qualifier= imports.addImport(declaringClass);
 		} else {
-			ITypeBinding parentType= Bindings.getBindingOfParentType(name);
-			ITypeBinding currType= parentType;
-			while (currType != null && !Bindings.isSuperType(declaringClass, currType)) {
-				currType= currType.getDeclaringClass();
-			}
-			if (currType != parentType) {
-				if (currType.isAnonymous())
-					//If we access a field of a super class of an anonymous class
-					//then we can only qualify with 'this' but not with outer.this
-					//see bug 115277
-					return null;
-				
-				String outer= imports.addImport(currType);
-				qualifier= outer + ".this"; //$NON-NLS-1$
-			} else {
-				qualifier= "this"; //$NON-NLS-1$
-			}
+			qualifier= getNonStaticQualifier(declaringClass, imports, name);
 		}
 
 		return qualifier;
+	}
+	
+	private static String getNonStaticQualifier(ITypeBinding declaringClass, ImportRewrite imports, SimpleName name) {
+		ITypeBinding parentType= Bindings.getBindingOfParentType(name);
+		ITypeBinding currType= parentType;
+		while (currType != null && !Bindings.isSuperType(declaringClass, currType)) {
+			currType= currType.getDeclaringClass();
+		}
+		if (currType != parentType) {
+			if (currType == null)
+				return null;
+			
+			if (currType.isAnonymous())
+				//If we access a field of a super class of an anonymous class
+				//then we can only qualify with 'this' but not with outer.this
+				//see bug 115277
+				return null;
+			
+			String outer= imports.addImport(currType);
+			return outer + ".this"; //$NON-NLS-1$
+		} else {
+			return "this"; //$NON-NLS-1$
+		}
 	}
 	
 	private static SimpleName getName(CompilationUnit compilationUnit, IProblemLocation problem) {
