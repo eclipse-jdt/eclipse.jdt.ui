@@ -17,6 +17,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
+import org.eclipse.core.runtime.OperationCanceledException;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -677,6 +678,8 @@ public class JavaOutlineInformationControl extends AbstractInformationControl {
 			try {
 				th= SuperTypeHierarchyCache.getTypeHierarchy(type, getProgressMonitor());
 			} catch (JavaModelException e) {
+				return null;
+			} catch (OperationCanceledException e) {
 				return null;
 			}
 			fTypeHierarchies.put(type, th);
