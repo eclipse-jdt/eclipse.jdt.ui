@@ -27,7 +27,7 @@ public class ExternalizeWizard extends RefactoringWizard {
 
 	public ExternalizeWizard(NLSRefactoring refactoring) {
 		super(refactoring,CHECK_INITIAL_CONDITIONS_ON_OPEN | WIZARD_BASED_USER_INTERFACE);
-		setDefaultPageTitle(Messages.format(NLSUIMessages.ExternalizeWizard_page_title, refactoring.getCu().getElementName())); 
+		setDefaultPageTitle(Messages.format(NLSUIMessages.ExternalizeWizardPage_title, refactoring.getCu().getElementName())); 
 		setWindowTitle(NLSUIMessages.ExternalizeWizard_name);
 		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_EXTERNALIZE_STRINGS);
 	}

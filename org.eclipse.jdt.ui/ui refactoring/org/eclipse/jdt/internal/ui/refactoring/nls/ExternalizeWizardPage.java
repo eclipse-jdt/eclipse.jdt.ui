@@ -525,6 +525,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 		fNLSRefactoring= nlsRefactoring;
 		fAccessorChoices= null;
 
+		setDescription(NLSUIMessages.ExternalizeWizardPage_description);
 		createDefaultExternalization(fSubstitutions, nlsRefactoring.getPrefix());
 	}
 
@@ -865,7 +866,7 @@ class ExternalizeWizardPage extends UserInputWizardPage {
 			fSourceViewer.getControl().setLayoutData(gd);
 
 		} catch (JavaModelException e) {
-			ExceptionHandler.handle(e, NLSUIMessages.ExternalizeWizardPage_title, NLSUIMessages.ExternalizeWizardPage_exception); 
+			ExceptionHandler.handle(e, NLSUIMessages.ExternalizeWizardPage_exception_title, NLSUIMessages.ExternalizeWizardPage_exception_message); 
 		}
 	}
 

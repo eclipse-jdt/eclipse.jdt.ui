@@ -25,9 +25,10 @@ final class NLSUIMessages extends NLS {
 
 	public static String ExternalizeWizard_name;
 	public static String ExternalizeWizard_select;
-	public static String ExternalizeWizard_page_title;
 	public static String ExternalizeWizardPage_title;
-	public static String ExternalizeWizardPage_exception;
+	public static String ExternalizeWizardPage_description;
+	public static String ExternalizeWizardPage_exception_title;
+	public static String ExternalizeWizardPage_exception_message;
 	public static String ExternalizeWizardPage_common_prefix;
 	public static String ExternalizeWizardPage_context;
 	public static String ExternalizeWizardPage_strings_to_externalize;
