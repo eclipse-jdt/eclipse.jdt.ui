@@ -345,7 +345,7 @@ abstract class AbstractInfoView extends ViewPart implements ISelectionListener, 
 				else
 					return null;
 			} else if (selection instanceof IStructuredSelection) {
-				element= element= SelectionUtil.getSingleElement(selection);
+				element= SelectionUtil.getSingleElement(selection);
 			} else {
 				return null;
 			}
