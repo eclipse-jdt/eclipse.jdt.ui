@@ -69,7 +69,7 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 				if (!Character.isWhitespace(firstLine.charAt(0)))
 					sourceLines[0]= firstLine;
 
-				source= source= Strings.concatenate(sourceLines, delim);
+				source= Strings.concatenate(sourceLines, delim);
 
 				return source;
 
