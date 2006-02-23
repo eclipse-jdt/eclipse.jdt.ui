@@ -10,10 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.template.contentassist;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.DisposeEvent;
 import org.eclipse.swt.events.DisposeListener;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IInformationControlCreatorExtension;
@@ -25,14 +27,26 @@ final public class TemplateInformationControlCreator implements IInformationCont
 
 	private SourceViewerInformationControl fControl;
 
-	public TemplateInformationControlCreator()  {
+	/**
+	 * The orientation to be used by this hover.
+	 * Allowed values are: SWT#RIGHT_TO_LEFT or SWT#LEFT_TO_RIGHT
+	 * @since 3.2
+	 */
+	private int fOrientation;
+
+	/**
+	 * @param orientation the orientation, allowed values are: SWT#RIGHT_TO_LEFT or SWT#LEFT_TO_RIGHT
+	 */
+	public TemplateInformationControlCreator(int orientation)  {
+		Assert.isLegal(orientation == SWT.RIGHT_TO_LEFT || orientation == SWT.LEFT_TO_RIGHT);
+		fOrientation= orientation;
 	}
 
 	/*
 	 * @see org.eclipse.jface.text.IInformationControlCreator#createInformationControl(org.eclipse.swt.widgets.Shell)
 	 */
 	public IInformationControl createInformationControl(Shell parent) {
-		fControl= new SourceViewerInformationControl(parent);
+		fControl= new SourceViewerInformationControl(parent, fOrientation, SWT.NONE);
 		fControl.addDisposeListener(new DisposeListener() {
 			public void widgetDisposed(DisposeEvent e) {
 				fControl= null;

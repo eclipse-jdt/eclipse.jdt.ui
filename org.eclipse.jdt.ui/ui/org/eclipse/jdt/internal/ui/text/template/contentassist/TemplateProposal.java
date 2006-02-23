@@ -14,6 +14,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.Status;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
@@ -49,6 +50,7 @@ import org.eclipse.jface.text.templates.TemplateException;
 import org.eclipse.jface.text.templates.TemplateVariable;
 
 import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.part.IWorkbenchPartOrientation;
 import org.eclipse.ui.texteditor.link.EditorLinkedModeUI;
 
 import org.eclipse.jdt.internal.corext.Assert;
@@ -425,7 +427,13 @@ public class TemplateProposal implements IJavaCompletionProposal, ICompletionPro
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getInformationControlCreator()
 	 */
 	public IInformationControlCreator getInformationControlCreator() {
-		return new TemplateInformationControlCreator();
+		int orientation;
+		IEditorPart editor= getJavaEditor();
+		if (editor instanceof IWorkbenchPartOrientation)
+			orientation= ((IWorkbenchPartOrientation)editor).getOrientation();
+		else
+			orientation= SWT.LEFT_TO_RIGHT;
+		return new TemplateInformationControlCreator(orientation);
 	}
 
 	/*

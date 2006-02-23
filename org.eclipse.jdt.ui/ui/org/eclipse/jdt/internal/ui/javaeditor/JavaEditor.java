@@ -1717,7 +1717,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 		fProjectionSupport.addSummarizableAnnotationType("org.eclipse.ui.workbench.texteditor.warning"); //$NON-NLS-1$
 		fProjectionSupport.setHoverControlCreator(new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell shell) {
-				return new SourceViewerInformationControl(shell);
+				return new SourceViewerInformationControl(shell, getOrientation(), SWT.NONE);
 			}
 		});
 		fProjectionSupport.install();
@@ -3466,7 +3466,7 @@ public abstract class JavaEditor extends AbstractDecoratedTextEditor implements 
 	 * @see org.eclipse.ui.texteditor.AbstractDecoratedTextEditor#createChangeHover()
 	 */
 	protected LineChangeHover createChangeHover() {
-		return new JavaChangeHover(IJavaPartitions.JAVA_PARTITIONING);
+		return new JavaChangeHover(IJavaPartitions.JAVA_PARTITIONING, getOrientation());
 	}
 
 	protected boolean isPrefQuickDiffAlwaysOn() {

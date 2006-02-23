@@ -10,9 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.text.Assert;
 import org.eclipse.jface.text.BadLocationException;
 import org.eclipse.jface.text.IDocument;
 import org.eclipse.jface.text.IInformationControl;
@@ -38,14 +40,24 @@ public class JavaChangeHover extends LineChangeHover  {
 	private String fPartitioning;
 	/** The last created information control. */
 	private int fLastScrollIndex= 0;
+	
+	/**
+	 * The orientation to be used by this hover.
+	 * Allowed values are: SWT#RIGHT_TO_LEFT or SWT#LEFT_TO_RIGHT
+	 * @since 3.2
+	 */
+	private int fOrientation;
 
 	/**
 	 * Creates a new change hover for the given document partitioning.
 	 *
 	 * @param partitioning the document partitioning
+	 * @param orientation the orientation, allowed values are: SWT#RIGHT_TO_LEFT or SWT#LEFT_TO_RIGHT
 	 */
-	public JavaChangeHover(String partitioning) {
+	public JavaChangeHover(String partitioning, int orientation) {
+		Assert.isLegal(orientation == SWT.RIGHT_TO_LEFT || orientation == SWT.LEFT_TO_RIGHT);
 		fPartitioning= partitioning;
+		fOrientation= orientation;
 	}
 
 	/*
@@ -61,7 +73,7 @@ public class JavaChangeHover extends LineChangeHover  {
 	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				fInformationControl= new ChangeHoverInformationControl(parent, fPartition);
+				fInformationControl= new ChangeHoverInformationControl(parent, fOrientation, fPartition);
 				fInformationControl.setHorizontalScrollPixel(fLastScrollIndex);
 				return fInformationControl;
 			}

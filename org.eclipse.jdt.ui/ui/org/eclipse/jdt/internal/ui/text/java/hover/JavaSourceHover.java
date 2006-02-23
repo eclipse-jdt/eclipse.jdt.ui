@@ -23,6 +23,9 @@ import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.ITextHoverExtension;
 import org.eclipse.jface.text.information.IInformationProviderExtension2;
 
+import org.eclipse.ui.IEditorPart;
+import org.eclipse.ui.part.IWorkbenchPartOrientation;
+
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.ILocalVariable;
 import org.eclipse.jdt.core.IMember;
@@ -115,7 +118,11 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				return new SourceViewerInformationControl(parent, getTooltipAffordanceString());
+				IEditorPart editor= getEditor(); 
+				int shellStyle= SWT.NONE;
+				if (editor instanceof IWorkbenchPartOrientation)
+					shellStyle |= ((IWorkbenchPartOrientation)editor).getOrientation();
+				return new SourceViewerInformationControl(parent, shellStyle, SWT.NONE, getTooltipAffordanceString());
 			}
 		};
 	}
@@ -127,8 +134,11 @@ public class JavaSourceHover extends AbstractJavaEditorTextHover implements ITex
 	public IInformationControlCreator getInformationPresenterControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				int shellStyle= SWT.RESIZE | SWT.TOOL;
 				int style= SWT.V_SCROLL | SWT.H_SCROLL;
+				int shellStyle= SWT.RESIZE | SWT.TOOL;
+				IEditorPart editor= getEditor(); 
+				if (editor instanceof IWorkbenchPartOrientation)
+					shellStyle |= ((IWorkbenchPartOrientation)editor).getOrientation();
 				return new SourceViewerInformationControl(parent, shellStyle, style);
 			}
 		};
