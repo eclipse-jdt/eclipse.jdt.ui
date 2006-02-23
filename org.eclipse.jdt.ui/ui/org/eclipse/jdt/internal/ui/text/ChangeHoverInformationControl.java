@@ -31,11 +31,11 @@ import org.eclipse.jdt.ui.text.IJavaPartitions;
 import org.eclipse.jdt.internal.ui.text.java.hover.SourceViewerInformationControl;
 
 /**
- * Source viewer used to display quick diff hovers.
+ * Specialized source viewer information control used to display quick diff hovers.
  *
  * @since 3.0
  */
-public class CustomSourceInformationControl extends SourceViewerInformationControl {
+class ChangeHoverInformationControl extends SourceViewerInformationControl {
 
 	/** The font name for the viewer font - the same as the java editor's. */
 	private static final String SYMBOLIC_FONT_NAME= "org.eclipse.jdt.ui.editors.textfont"; //$NON-NLS-1$
@@ -45,7 +45,7 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 	/** The maximum height of the control, set in <code>setSizeConstraints(int, int)</code>. */
 	int fMaxHeight= Integer.MAX_VALUE;
 
-	/** The partition type to be used as the starting partition type by the paritition scanner. */
+	/** The partition type to be used as the starting partition type by the partition scanner. */
 	private String fPartition;
 	/** The horizontal scroll index. */
 	private int fHorizontalScrollPixel;
@@ -64,7 +64,7 @@ public class CustomSourceInformationControl extends SourceViewerInformationContr
 	 * @param parent the shell that is the parent of this hover / control
 	 * @param partition the initial partition type to be used for the underlying viewer
 	 */
-	public CustomSourceInformationControl(Shell parent, String partition) {
+	public ChangeHoverInformationControl(Shell parent, String partition) {
 		super(parent);
 		setViewerFont();
 		setStartingPartitionType(partition);

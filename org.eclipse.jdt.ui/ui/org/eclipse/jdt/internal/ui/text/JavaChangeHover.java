@@ -30,10 +30,10 @@ import org.eclipse.jface.text.source.LineChangeHover;
  */
 public class JavaChangeHover extends LineChangeHover  {
 
-	/** The last computet partition type. */
-	String fPartition;
+	/** The last computed partition type. */
+	private String fPartition;
 	/** The last created information control. */
-	CustomSourceInformationControl fInformationControl;
+	private ChangeHoverInformationControl fInformationControl;
 	/** The document partitioning to be used by this hover. */
 	private String fPartitioning;
 	/** The last created information control. */
@@ -61,7 +61,7 @@ public class JavaChangeHover extends LineChangeHover  {
 	public IInformationControlCreator getHoverControlCreator() {
 		return new IInformationControlCreator() {
 			public IInformationControl createInformationControl(Shell parent) {
-				fInformationControl= new CustomSourceInformationControl(parent, fPartition);
+				fInformationControl= new ChangeHoverInformationControl(parent, fPartition);
 				fInformationControl.setHorizontalScrollPixel(fLastScrollIndex);
 				return fInformationControl;
 			}
