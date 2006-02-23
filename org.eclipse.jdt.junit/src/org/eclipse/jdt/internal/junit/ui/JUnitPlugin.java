@@ -19,6 +19,7 @@ import java.util.Iterator;
 import java.util.List;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IConfigurationElement;
 import org.eclipse.core.runtime.IExtensionPoint;
 import org.eclipse.core.runtime.IPath;
@@ -147,17 +148,6 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		return createImageDescriptor(getDefault().getBundle(), path, true);
 	}
 	
-	/*
-	 * Since 3.1.1. Load from icon paths with $NL$
-	 */
-	public static ImageDescriptor createImageDescriptor(Bundle bundle, IPath path) {
-		URL url= Platform.find(bundle, path);
-		if (url != null) {
-			return ImageDescriptor.createFromURL(url);
-		}
-		return ImageDescriptor.getMissingImageDescriptor();
-	}
-	
 	/**
 	 * Sets the three image descriptors for enabled, disabled, and hovered to an action. The actions
 	 * are retrieved from the *lcl16 folders.
@@ -173,12 +163,6 @@ public class JUnitPlugin extends AbstractUIPlugin {
 		ImageDescriptor id= createImageDescriptor("d" + type, relPath, false); //$NON-NLS-1$
 		if (id != null)
 			action.setDisabledImageDescriptor(id);
-	
-		/*
-		 * id= create("c" + type, relPath, false); //$NON-NLS-1$
-		 * if (id != null)
-		 * 		action.setHoverImageDescriptor(id);
-		 */
 	
 		ImageDescriptor descriptor= createImageDescriptor("e" + type, relPath, true); //$NON-NLS-1$
 		action.setHoverImageDescriptor(descriptor);
@@ -211,7 +195,7 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	 *         <code>useMissingImageDescriptor</code> is <code>true</code>
 	 */
 	private static ImageDescriptor createImageDescriptor(Bundle bundle, IPath path, boolean useMissingImageDescriptor) {
-		URL url= Platform.find(bundle, path);
+		URL url= FileLocator.find(bundle, path, null);
 		if (url != null) {
 			return ImageDescriptor.createFromURL(url);
 		}

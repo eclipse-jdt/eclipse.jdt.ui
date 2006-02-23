@@ -212,4 +212,6 @@ public final class JUnitMessages extends NLS {
 	public static String TestSessionLabelProvider_testMethodName_className;
 
 	public static String TestRunnerViewPart_message_stopping;
+
+	public static String TestRunnerViewPart_clear_history_label;
 }

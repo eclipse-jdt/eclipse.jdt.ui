@@ -172,6 +172,9 @@ public class TestRunSession {
 		fTestRunnerClient.stopTest();
 	}
 
+	/**
+	 * @return <code>true</code> iff the runtime VM of this test session is still alive 
+	 */
 	public boolean isKeptAlive() {
 		return fTestRunnerClient.isRunning() && ILaunchManager.DEBUG_MODE.equals(getLaunch().getLaunchMode());
 	}

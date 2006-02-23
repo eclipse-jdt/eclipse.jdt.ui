@@ -15,6 +15,8 @@ import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
 
+import org.eclipse.core.runtime.IStatus;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.layout.GridData;
@@ -66,7 +68,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 		private void createHistoryList() {
 			IListAdapter adapter= new IListAdapter() {
 				public void customButtonPressed(ListDialogField field, int index) {
-					doCustomButtonPressed();
+					doCustomButtonPressed(index);
 				}
 				public void selectionChanged(ListDialogField field) {
 					doSelectionChanged();
@@ -76,7 +78,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 					doDoubleClicked();
 				}				
 			};
-			String[] buttonLabels= new String[] { JavaUIMessages.HistoryListAction_remove };
+			String[] buttonLabels= new String[] { JavaUIMessages.HistoryListAction_remove, JavaUIMessages.HistoryListAction_remove_all };
 			LabelProvider labelProvider= new TestRunLabelProvider();
 			fHistoryList= new ListDialogField(adapter, buttonLabels, labelProvider);
 			fHistoryList.setLabelText(fHistory.getHistoryListDialogMessage());
@@ -110,7 +112,7 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 					if (valid)
 						updateStatus(StatusInfo.OK_STATUS);
 					else
-						updateStatus(new StatusInfo(StatusInfo.ERROR, Messages.format(JavaUIMessages.HistoryListAction_max_entries_constraint, Integer.toString(MAX_MAX_ENTRIES))));
+						updateStatus(new StatusInfo(IStatus.ERROR, Messages.format(JavaUIMessages.HistoryListAction_max_entries_constraint, Integer.toString(MAX_MAX_ENTRIES))));
 				}
 			});
 			fMaxEntriesField.setText(Integer.toString(fHistory.getMaxEntries()));
@@ -141,9 +143,19 @@ import org.eclipse.jdt.internal.ui.wizards.dialogfields.StringDialogField;
 			return composite;
 		}
 
-		private void doCustomButtonPressed() {
-			fHistoryList.removeElements(fHistoryList.getSelectedElements());
-			fHistoryList.selectFirstElement();
+		private void doCustomButtonPressed(int index) {
+			switch (index) {
+				case 0: // remove
+					fHistoryList.removeElements(fHistoryList.getSelectedElements());
+					fHistoryList.selectFirstElement();
+					break;
+
+				case 1: // remove all
+					fHistoryList.removeAllElements();
+					
+				default:
+					break;
+			}
 		}
 		
 		private void doDoubleClicked() {

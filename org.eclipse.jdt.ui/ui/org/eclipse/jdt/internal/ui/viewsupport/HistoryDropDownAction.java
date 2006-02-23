@@ -11,7 +11,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.viewsupport;
 
-import java.util.Collections;
 import java.util.List;
 
 import org.eclipse.swt.SWT;
@@ -24,19 +23,22 @@ import org.eclipse.jface.action.ActionContributionItem;
 import org.eclipse.jface.action.IMenuCreator;
 import org.eclipse.jface.util.Assert;
 
-import org.eclipse.jdt.internal.ui.JavaPluginImages;
-import org.eclipse.jdt.internal.ui.JavaUIMessages;
-
 /*package*/ class HistoryDropDownAction extends Action {
 
 	private class HistoryAction extends Action {
 		private final Object fElement;
 
-		public HistoryAction(Object element) {
+		public HistoryAction(Object element, int accelerator) {
 			Assert.isNotNull(element);
 			fElement= element;
 
-			setText(fHistory.getText(element));
+			String label= fHistory.getText(element);
+		    if (accelerator < 10) {
+		    		//add the numerical accelerator
+			    label= new StringBuffer().append('&').append(accelerator).append(' ').append(label).toString();
+			}
+
+			setText(label);
 			setImageDescriptor(fHistory.getImageDescriptor(element));
 		}
 
@@ -45,17 +47,6 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 		}
 	}
 
-	private class ClearAction extends Action {
-		public ClearAction() {
-			setText(JavaUIMessages.HistoryDropDownAction_clear_history);
-			JavaPluginImages.setLocalImageDescriptors(this, "removea_exc.gif"); //$NON-NLS-1$
-		}
-		
-		public void run() {
-			fHistory.setHistoryEntries(Collections.EMPTY_LIST, null);
-		}
-	}
-	
 	private class HistoryMenuCreator implements IMenuCreator {
 
 		public Menu getMenu(Menu parent) {
@@ -75,9 +66,9 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 				new MenuItem(fMenu, SWT.SEPARATOR);
 			}
 			
-			if (entries.size() > 0) {
-				Action clear= new ClearAction();
-				addActionToMenu(fMenu, clear);
+			Action clearAction= fHistory.getClearAction();
+			if (clearAction != null) {
+				addActionToMenu(fMenu, clearAction);
 			}
 			Action others= new HistoryListAction(fHistory);
 			others.setChecked(checkOthers);
@@ -95,7 +86,7 @@ import org.eclipse.jdt.internal.ui.JavaUIMessages;
 			int min= Math.min(entries.size(), RESULTS_IN_DROP_DOWN);
 			for (int i= 0; i < min; i++) {
 				Object entry= entries.get(i);
-				HistoryAction action= new HistoryAction(entry);
+				HistoryAction action= new HistoryAction(entry, i + 1);
 				boolean check= entry.equals(fHistory.getCurrentEntry());
 				action.setChecked(check);
 				if (check)

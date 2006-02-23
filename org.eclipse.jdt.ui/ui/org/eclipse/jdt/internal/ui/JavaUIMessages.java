@@ -178,6 +178,6 @@ public final class JavaUIMessages extends NLS {
 
 	public static String HistoryListAction_remove;
 	public static String HistoryListAction_max_entries_constraint;
-	public static String HistoryDropDownAction_clear_history;
+	public static String HistoryListAction_remove_all;
 
 }

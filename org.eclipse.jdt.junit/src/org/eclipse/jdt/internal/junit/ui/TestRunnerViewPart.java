@@ -289,6 +289,10 @@ public class TestRunnerViewPart extends ViewPart {
 			action.setToolTipText(JUnitMessages.TestRunnerViewPart_test_run_history);
 			JUnitPlugin.setLocalImageDescriptors(action, "history_list.gif"); //$NON-NLS-1$
 		}
+		
+		public Action getClearAction() {
+			return new ClearAction();
+		}
 
 		public String getHistoryListDialogTitle() {
 			return JUnitMessages.TestRunnerViewPart_test_runs;
@@ -378,7 +382,12 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 		public void sessionRemoved(TestRunSession testRunSession) {
 			if (testRunSession.equals(fTestRunSession)) {
-				setActiveTestRunSession(null);
+				List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
+				if (! testRunSessions.isEmpty()) {
+					setActiveTestRunSession((TestRunSession) testRunSessions.get(0));
+				} else {
+					setActiveTestRunSession(null);
+				}
 			}
 		}
 	}
@@ -523,14 +532,46 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 	}
 
+	private class ClearAction extends Action {
+		public ClearAction() {
+			setText(JUnitMessages.TestRunnerViewPart_clear_history_label);
+			JUnitPlugin.setLocalImageDescriptors(this, "removea_exc.gif"); //$NON-NLS-1$
+			
+			boolean enabled= false;
+			List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
+			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
+				TestRunSession testRunSession= (TestRunSession) iter.next();
+				if (! testRunSession.isRunning()) {
+					enabled= true;
+					break;
+				}
+			}
+			setEnabled(enabled);
+		}
+		
+		public void run() {
+			List testRunSessions= getRunningSessions();
+			Object first= testRunSessions.isEmpty() ? null : testRunSessions.get(0);
+			fViewHistory.setHistoryEntries(testRunSessions, first);
+		}
+
+		private List getRunningSessions() {
+			List testRunSessions= JUnitPlugin.getModel().getTestRunSessions();
+			for (Iterator iter= testRunSessions.iterator(); iter.hasNext();) {
+				TestRunSession testRunSession= (TestRunSession) iter.next();
+				if (! testRunSession.isRunning()) {
+					iter.remove();
+				}
+			}
+			return testRunSessions;
+		}
+	}
 
 	private class StopAction extends Action {
 		public StopAction() {
 			setText(JUnitMessages.TestRunnerViewPart_stopaction_text);
 			setToolTipText(JUnitMessages.TestRunnerViewPart_stopaction_tooltip);
-			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/stop.gif")); //$NON-NLS-1$
-			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/stop.gif")); //$NON-NLS-1$
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/stop.gif")); //$NON-NLS-1$
+			JUnitPlugin.setLocalImageDescriptors(this, "stop.gif"); //$NON-NLS-1$
 		}
 
 		public void run() {
@@ -543,9 +584,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public RerunLastAction() {
 			setText(JUnitMessages.TestRunnerViewPart_rerunaction_label); 
 			setToolTipText(JUnitMessages.TestRunnerViewPart_rerunaction_tooltip); 
-			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/relaunch.gif")); //$NON-NLS-1$
-			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunch.gif")); //$NON-NLS-1$
+			JUnitPlugin.setLocalImageDescriptors(this, "relaunch.gif"); //$NON-NLS-1$
 			setEnabled(false);
 		}
 		
@@ -558,9 +597,7 @@ public class TestRunnerViewPart extends ViewPart {
 		public RerunLastFailedFirstAction() {
 			setText(JUnitMessages.TestRunnerViewPart_rerunfailuresaction_label);  
 			setToolTipText(JUnitMessages.TestRunnerViewPart_rerunfailuresaction_tooltip);  
-			setDisabledImageDescriptor(JUnitPlugin.getImageDescriptor("dlcl16/relaunchf.gif")); //$NON-NLS-1$
-			setHoverImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunchf.gif")); //$NON-NLS-1$
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/relaunchf.gif")); //$NON-NLS-1$
+			JUnitPlugin.setLocalImageDescriptors(this, "relaunchf.gif"); //$NON-NLS-1$
 			setEnabled(false);
 		}
 		
@@ -785,7 +822,9 @@ public class TestRunnerViewPart extends ViewPart {
 	 */
 	public void stopTest() {
 		if (fTestRunSession != null) {
-			setContentDescription(JUnitMessages.TestRunnerViewPart_message_stopping);
+			if (fTestRunSession.isRunning()) {
+				setContentDescription(JUnitMessages.TestRunnerViewPart_message_stopping);
+			}
 			fTestRunSession.stopTestRun();
 		}
 	}
@@ -1074,7 +1113,7 @@ action enablement
 			} else /* old or fresh session: don't want jobs at this stage */ {
 				stopUpdateJobs();
 				
-				fStopAction.setEnabled(false);
+				fStopAction.setEnabled(fTestRunSession.isKeptAlive());
 			}
 		}
 	}

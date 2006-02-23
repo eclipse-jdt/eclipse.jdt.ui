@@ -15,6 +15,7 @@ import java.util.List;
 
 import org.eclipse.swt.widgets.Shell;
 
+import org.eclipse.jface.action.Action;
 import org.eclipse.jface.action.IAction;
 import org.eclipse.jface.resource.ImageDescriptor;
 
@@ -40,6 +41,11 @@ public abstract class ViewHistory {
 	 */
 	public abstract void configureHistoryDropDownAction(IAction action);
 	
+	/**
+	 * @return action to clear history entries, or <code>null</code>
+	 */
+	public abstract Action getClearAction();
+
 	public abstract String getHistoryListDialogTitle();
 
 	public abstract String getHistoryListDialogMessage();
@@ -81,6 +87,9 @@ public abstract class ViewHistory {
 	 */
 	public abstract String getText(Object element);
 	
+	/**
+	 * @return a history drop down action, ready for inclusion in a view toolbar
+	 */
 	public final IAction createHistoryDropDownAction() {
 		return new HistoryDropDownAction(this);
 	}
