@@ -19,6 +19,7 @@ import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.SearchMatch;
 import org.eclipse.jdt.core.search.SearchPattern;
 
 import org.eclipse.jdt.ui.search.ElementQuerySpecification;
@@ -80,6 +81,7 @@ abstract class MatchFilter {
 	
 	public abstract String getID();
 	
+	private static final MatchFilter POTENTIAL_FILTER= new PotentialFilter(); 
 	private static final MatchFilter IMPORT_FILTER= new ImportFilter(); 
 	private static final MatchFilter JAVADOC_FILTER= new JavadocFilter(); 
 	private static final MatchFilter READ_FILTER= new ReadFilter(); 
@@ -88,6 +90,7 @@ abstract class MatchFilter {
 	private static final MatchFilter ERASURE_FILTER= new ErasureMatchFilter(); 
 	
 	private static final MatchFilter[] ALL_FILTERS= new MatchFilter[] {
+			POTENTIAL_FILTER,
 			IMPORT_FILTER,
 			JAVADOC_FILTER,
 			READ_FILTER,
@@ -109,6 +112,32 @@ abstract class MatchFilter {
 	}
 
 
+}
+
+class PotentialFilter extends MatchFilter {
+	public boolean filters(JavaElementMatch match) {
+		return match.getAccuracy() == SearchMatch.A_INACCURATE;
+	}
+	
+	public String getName() {
+		return SearchMessages.MatchFilter_PotentialFilter_name; 
+	}
+	
+	public String getActionLabel() {
+		return SearchMessages.MatchFilter_PotentialFilter_actionLabel; 
+	}
+	
+	public String getDescription() {
+		return SearchMessages.MatchFilter_PotentialFilter_description; 
+	}
+	
+	public boolean isApplicable(JavaSearchQuery query) {
+		return true;
+	}
+	
+	public String getID() {
+		return "filter_potential"; //$NON-NLS-1$
+	}
 }
 
 class ImportFilter extends MatchFilter {

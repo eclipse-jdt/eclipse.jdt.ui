@@ -214,4 +214,7 @@ public final class SearchMessages extends NLS {
 	}
 
 	public static String JavaSearchQuery_error_element_does_not_exist;
+	public static String MatchFilter_PotentialFilter_name;
+	public static String MatchFilter_PotentialFilter_actionLabel;
+	public static String MatchFilter_PotentialFilter_description;
 }
