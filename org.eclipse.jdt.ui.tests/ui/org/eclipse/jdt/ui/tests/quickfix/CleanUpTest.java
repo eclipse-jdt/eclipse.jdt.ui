@@ -3018,6 +3018,43 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 	
+	public void testCodeStyleBug129115() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private static int NUMBER;\n");
+		buf.append("    public void reset() {\n");
+		buf.append("        NUMBER= 0;\n");
+		buf.append("    }\n");
+		buf.append("    enum MyEnum {\n");
+		buf.append("        STATE_1, STATE_2, STATE_3\n");
+		buf.append("      };\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    private static int NUMBER;\n");
+		buf.append("    public void reset() {\n");
+		buf.append("        E1.NUMBER= 0;\n");
+		buf.append("    }\n");
+		buf.append("    enum MyEnum {\n");
+		buf.append("        STATE_1, STATE_2, STATE_3\n");
+		buf.append("      };\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
 	public void testJava50ForLoop01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
