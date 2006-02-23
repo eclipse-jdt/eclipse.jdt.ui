@@ -4291,5 +4291,157 @@ public class CleanUpTest extends QuickFixTest {
 		
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
-
+	
+	public void testRemoveQualifier01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int foo;\n");
+		buf.append("    public void setFoo(int foo) {\n");
+		buf.append("        this.foo= foo;\n");
+		buf.append("    }\n");
+		buf.append("    public int getFoo() {\n");
+		buf.append("        return this.foo;\n");
+		buf.append("    }   \n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.REMOVE_THIS_FIELD_QUALIFIER);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int foo;\n");
+		buf.append("    public void setFoo(int foo) {\n");
+		buf.append("        this.foo= foo;\n");
+		buf.append("    }\n");
+		buf.append("    public int getFoo() {\n");
+		buf.append("        return foo;\n");
+		buf.append("    }   \n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testRemoveQualifier02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int foo() {return 0;}\n");
+		buf.append("    public int getFoo() {\n");
+		buf.append("        return this.foo();\n");
+		buf.append("    }   \n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.REMOVE_THIS_METHOD_QUALIFIER);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int foo() {return 0;}\n");
+		buf.append("    public int getFoo() {\n");
+		buf.append("        return foo();\n");
+		buf.append("    }   \n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testRemoveQualifier03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int foo;\n");
+		buf.append("    public int bar;\n");
+		buf.append("    public class E1Inner {\n");
+		buf.append("        private int bar;\n");
+		buf.append("        public int getFoo() {\n");
+		buf.append("            E1.this.bar= this.bar;\n");
+		buf.append("            return E1.this.foo;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.REMOVE_THIS_FIELD_QUALIFIER);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int foo;\n");
+		buf.append("    public int bar;\n");
+		buf.append("    public class E1Inner {\n");
+		buf.append("        private int bar;\n");
+		buf.append("        public int getFoo() {\n");
+		buf.append("            E1.this.bar= bar;\n");
+		buf.append("            return foo;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testRemoveQualifier04() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int foo() {return 0;}\n");
+		buf.append("    public int bar() {return 0;}\n");
+		buf.append("    public class E1Inner {\n");
+		buf.append("        private int bar() {return 1;}\n");
+		buf.append("        public int getFoo() {\n");
+		buf.append("            E1.this.bar(); \n");
+		buf.append("            this.bar();\n");
+		buf.append("            return E1.this.foo();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new CodeStyleCleanUp(CodeStyleCleanUp.REMOVE_THIS_METHOD_QUALIFIER);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public int foo() {return 0;}\n");
+		buf.append("    public int bar() {return 0;}\n");
+		buf.append("    public class E1Inner {\n");
+		buf.append("        private int bar() {return 1;}\n");
+		buf.append("        public int getFoo() {\n");
+		buf.append("            E1.this.bar(); \n");
+		buf.append("            bar();\n");
+		buf.append("            return foo();\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
 }

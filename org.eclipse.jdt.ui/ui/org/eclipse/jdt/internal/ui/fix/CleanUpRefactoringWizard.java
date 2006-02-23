@@ -731,10 +731,15 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			CodeStyleCleanUp codeStyleCleanUp= new CodeStyleCleanUp(settings);
 			Composite group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_memberAccesses_sectionDescription);
 			
-			FlagConfigurationButton addThisField= new FlagConfigurationButton(codeStyleCleanUp, CodeStyleCleanUp.QUALIFY_FIELD_ACCESS, MultiFixMessages.CleanUpRefactoringWizard_qualifyNonStaticField_checkBoxLabel, SWT.CHECK);
-			FlagConfigurationButton addThisMethod= new FlagConfigurationButton(codeStyleCleanUp, CodeStyleCleanUp.QUALIFY_METHOD_ACCESS, MultiFixMessages.CleanUpRefactoringWizard_qualifyNonStaticMethod_checkBoxLabel, SWT.CHECK);
-			FlagConfigurationGroup  addThisGroup= new FlagConfigurationGroup(MultiFixMessages.CodeStyleCleanUp_useThis_checkBoxLabel, new FlagConfigurationButton[] {addThisField, addThisMethod}, SWT.CHECK | SWT.VERTICAL, settings);
+			FlagConfigurationButton addThisField= new FlagConfigurationButton(codeStyleCleanUp, CodeStyleCleanUp.QUALIFY_FIELD_ACCESS, MultiFixMessages.CleanUpRefactoringWizard_qualifyNonStaticField_checkBoxLabel, SWT.RADIO);
+			FlagConfigurationButton removeThisField= new FlagConfigurationButton(codeStyleCleanUp, CodeStyleCleanUp.REMOVE_THIS_FIELD_QUALIFIER, MultiFixMessages.CleanUpRefactoringWizard_removeThis_checkBoxLabel, SWT.RADIO);
+			FlagConfigurationGroup  addThisGroup= new FlagConfigurationGroup(MultiFixMessages.CodeStyleCleanUp_useThis_checkBoxLabel, new FlagConfigurationButton[] {addThisField, removeThisField}, SWT.RADIO | SWT.HORIZONTAL, settings);
 			addThisGroup.createButton(group);
+			FlagConfigurationButton addThisMethod= new FlagConfigurationButton(codeStyleCleanUp, CodeStyleCleanUp.QUALIFY_METHOD_ACCESS, MultiFixMessages.CleanUpRefactoringWizard_qualifyNonStaticMethod_checkBoxLabel, SWT.RADIO);
+			FlagConfigurationButton removeThisMethod= new FlagConfigurationButton(codeStyleCleanUp, CodeStyleCleanUp.REMOVE_THIS_METHOD_QUALIFIER, MultiFixMessages.CleanUpRefactoringWizard_removeMethodThis_checkBoxLabel, SWT.RADIO);
+			FlagConfigurationGroup addThisMethodGroup= new FlagConfigurationGroup(MultiFixMessages.CleanUpRefactoringWizard_addMethodThis_checkBoxLabel, new FlagConfigurationButton[] {addThisMethod, removeThisMethod}, SWT.RADIO | SWT.HORIZONTAL, settings);
+			addThisMethodGroup.createButton(group);
+			
 			FlagConfigurationButton nonStatic= new FlagConfigurationButton(codeStyleCleanUp, CodeStyleCleanUp.CHANGE_NON_STATIC_ACCESS_TO_STATIC, MultiFixMessages.CodeStyleCleanUp_changeNonStatic_checkBoxLabel, SWT.CHECK);
 			FlagConfigurationButton indirect= new FlagConfigurationButton(codeStyleCleanUp, CodeStyleCleanUp.CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT, MultiFixMessages.CodeStyleCleanUp_changeIndirect_checkBoxLabel, SWT.CHECK);
 			FlagConfigurationButton qualifyStatic= new FlagConfigurationButton(codeStyleCleanUp, CodeStyleCleanUp.QUALIFY_STATIC_FIELD_ACCESS, MultiFixMessages.CodeStyleCleanUp_addStaticQualifier_checkBoxLabel, SWT.CHECK);
@@ -763,16 +768,17 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			FlagConfigurationGroup parenthesisGroup= new FlagConfigurationGroup(MultiFixMessages.ExpressionsCleanUp_parenthesisAroundConditions_checkBoxLabel, new FlagConfigurationButton[] {addParanoic, removeParanoic}, SWT.RADIO | SWT.HORIZONTAL, settings);
 			parenthesisGroup.createButton(group);
 			
-			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {addThisField, addThisMethod, nonStatic, indirect, qualifyStatic, qualifyStaticMethod, addBlock, removeBlock, convertLoop, addParanoic, removeParanoic};
+			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {addThisField, removeThisField, addThisMethod, removeThisMethod, nonStatic, indirect, qualifyStatic, qualifyStaticMethod, addBlock, removeBlock, convertLoop, addParanoic, removeParanoic};
+			FlagConfigurationGroup[] radioButtonGroups= new FlagConfigurationGroup[] {blockGroup, parenthesisGroup, addThisGroup, addThisMethodGroup};
 			
 			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {codeStyleCleanUp, controlStatementsCleanUp, expressionsCleanUp}, flagConfigurationButtons);
 			
 			if (project != null && !JavaModelUtil.is50OrHigher(project)) {
 				convertLoop.disable();
 				convertLoop.deselect();
-				addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[] {blockGroup, parenthesisGroup}, new FlagConfigurationButton[] {convertLoop}, preview);
+				addEnableButtonsGroup(left, flagConfigurationButtons, radioButtonGroups, new FlagConfigurationButton[] {convertLoop}, preview);
 			} else {
-				addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[] {blockGroup, parenthesisGroup}, new FlagConfigurationButton[0], preview);
+				addEnableButtonsGroup(left, flagConfigurationButtons, radioButtonGroups, new FlagConfigurationButton[0], preview);
 			}
 			
 			addSelectionCounter(flagConfigurationButtons);
@@ -783,6 +789,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			fCleanUps[2]= expressionsCleanUp;
 			
 			fConfigurationGroups.add(addThisGroup);
+			fConfigurationGroups.add(addThisMethodGroup);
 			fConfigurationGroups.add(staticGroup);
 			fConfigurationGroups.add(blockGroup);
 			fConfigurationGroups.add(parenthesisGroup);

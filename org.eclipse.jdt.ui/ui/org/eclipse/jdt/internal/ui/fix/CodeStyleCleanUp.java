@@ -90,6 +90,22 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 	 * }</code></pre>
 	 */
 	public static final int QUALIFY_STATIC_METHOD_ACCESS= 32;
+	
+	/**
+	 * Removes 'this' qualifier to field accesses.<p>
+	 * i.e.:<pre><code>
+	 *   int fField;
+	 *   void foo() {this.fField= 10;} -> void foo() {fField= 10;}</pre></code>
+	 */
+	public static final int REMOVE_THIS_FIELD_QUALIFIER= 64;
+
+	/**
+	 * Removes 'this' qualifier to method accesses.<p>
+	 * i.e.:<pre><code>
+	 *   int method(){};
+	 *   void foo() {this.method()} -> void foo() {method();}</pre></code>
+	 */
+	public static final int REMOVE_THIS_METHOD_QUALIFIER=128;
 
 	private static final int DEFAULT_FLAG= CHANGE_NON_STATIC_ACCESS_TO_STATIC | CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT;
 	private static final String SECTION_NAME= "CleanUp_CodeStyle"; //$NON-NLS-1$
@@ -112,7 +128,9 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 				isFlag(QUALIFY_STATIC_FIELD_ACCESS), 
 				isFlag(CHANGE_INDIRECT_STATIC_ACCESS_TO_DIRECT),
 				isFlag(QUALIFY_METHOD_ACCESS),
-				isFlag(QUALIFY_STATIC_METHOD_ACCESS));
+				isFlag(QUALIFY_STATIC_METHOD_ACCESS),
+				isFlag(REMOVE_THIS_FIELD_QUALIFIER),
+				isFlag(REMOVE_THIS_METHOD_QUALIFIER));
 	}
 	
 	/**
@@ -158,6 +176,10 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 			result.add(MultiFixMessages.CodeStyleCleanUp_QualifyNonStaticMethod_description);
 		if (isFlag(QUALIFY_STATIC_METHOD_ACCESS)) 
 			result.add(MultiFixMessages.CodeStyleCleanUp_QualifyStaticMethod_description);
+		if (isFlag(REMOVE_THIS_FIELD_QUALIFIER))
+			result.add(MultiFixMessages.CodeStyleCleanUp_removeFieldThis_description);
+		if (isFlag(REMOVE_THIS_METHOD_QUALIFIER))
+			result.add(MultiFixMessages.CodeStyleCleanUp_removeMethodThis_description);
 		return (String[])result.toArray(new String[result.size()]);
 	}
 	
@@ -165,19 +187,23 @@ public class CodeStyleCleanUp extends AbstractCleanUp {
 		StringBuffer buf= new StringBuffer();
 		
 		buf.append("private int value;\n"); //$NON-NLS-1$
-		buf.append("public int getValue() {\n"); //$NON-NLS-1$
+		buf.append("public int get() {\n"); //$NON-NLS-1$
 		if (isFlag(QUALIFY_FIELD_ACCESS)) {
-			buf.append("    return this.value;\n"); //$NON-NLS-1$
+			buf.append("    return this.value + this.value;\n"); //$NON-NLS-1$
+		} else if (isFlag(REMOVE_THIS_FIELD_QUALIFIER)) {
+			buf.append("    return value + value;\n"); //$NON-NLS-1$
 		} else {
-			buf.append("    return value;\n"); //$NON-NLS-1$
+			buf.append("    return this.value + value;\n"); //$NON-NLS-1$
 		}
 		buf.append("}\n"); //$NON-NLS-1$
 		buf.append("\n"); //$NON-NLS-1$
-		buf.append("public boolean hasValue() {\n"); //$NON-NLS-1$
+		buf.append("public int getZero() {\n"); //$NON-NLS-1$
 		if (isFlag(QUALIFY_METHOD_ACCESS)) {
-			buf.append("    return this.getValue() > 0;\n"); //$NON-NLS-1$
+			buf.append("    return this.get() - this.get();\n"); //$NON-NLS-1$
+		} else if (isFlag(REMOVE_THIS_METHOD_QUALIFIER)) {
+			buf.append("    return get() - get();\n"); //$NON-NLS-1$
 		} else {
-			buf.append("    return getValue() > 0;\n"); //$NON-NLS-1$
+			buf.append("    return this.get() - get();\n"); //$NON-NLS-1$
 		}
 		buf.append("}\n"); //$NON-NLS-1$
 		buf.append("\n"); //$NON-NLS-1$

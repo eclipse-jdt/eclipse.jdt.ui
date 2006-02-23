@@ -54,6 +54,7 @@ public class FixMessages extends NLS {
 	public static String CodeStyleFix_ChangeIfToBlock_desription;
 	public static String CodeStyleFix_ChangeElseToBlock_description;
 	public static String CodeStyleFix_ChangeControlToBlock_description;
+	public static String CodeStyleFix_removeThis_groupDescription;
 	
 	public static String SerialVersion_group_description;
 	

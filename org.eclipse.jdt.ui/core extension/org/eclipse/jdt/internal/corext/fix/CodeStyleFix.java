@@ -35,6 +35,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StructuralPropertyDescriptor;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SwitchCase;
+import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -45,6 +46,7 @@ import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
+import org.eclipse.jdt.internal.corext.dom.ScopeAnalyzer;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -203,6 +205,94 @@ public class CodeStyleFix extends AbstractFix {
 			}
 		}
 	}
+	
+	private static class ThisQualifierVisitor extends GenericVisitor {
+		
+		private final CompilationUnit fCompilationUnit;
+		private final List fOperations;
+		private final boolean fRemoveFieldQualifiers;
+		private final boolean fRemoveMethodQualifiers;
+		
+		public ThisQualifierVisitor(boolean removeFieldQualifiers,
+									boolean removeMethodQualifiers,
+									CompilationUnit compilationUnit,
+									List result) {
+			fRemoveFieldQualifiers= removeFieldQualifiers;
+			fRemoveMethodQualifiers= removeMethodQualifiers;
+			fCompilationUnit= compilationUnit;
+			fOperations= result;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean visit(final FieldAccess node) {
+			if (!fRemoveFieldQualifiers)
+				return true;
+			
+			Expression expression= node.getExpression();
+			if (!(expression instanceof ThisExpression))
+				return true;
+			
+			final SimpleName name= node.getName();
+			if (hasConflict(expression.getStartPosition(), name, ScopeAnalyzer.VARIABLES))
+				return true;
+			
+			fOperations.add(new AbstractFixRewriteOperation() {
+				public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+					ASTRewrite rewrite= cuRewrite.getASTRewrite();
+					
+					TextEditGroup group= new TextEditGroup(FixMessages.CodeStyleFix_removeThis_groupDescription);
+					textEditGroups.add(group);
+					
+					rewrite.replace(node, rewrite.createCopyTarget(name), group);
+				}
+			});
+			return super.visit(node);
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
+		public boolean visit(final MethodInvocation node) {
+			if (!fRemoveMethodQualifiers)
+				return true;
+			
+			Expression expression= node.getExpression();
+			if (!(expression instanceof ThisExpression)) 
+				return true;
+			
+			final SimpleName name= node.getName();
+			if (hasConflict(expression.getStartPosition(), name, ScopeAnalyzer.METHODS))
+				return true;
+			
+			fOperations.add(new AbstractFixRewriteOperation() {
+				public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
+					ASTRewrite rewrite= cuRewrite.getASTRewrite();
+					
+					TextEditGroup group= new TextEditGroup(FixMessages.CodeStyleFix_removeThis_groupDescription);
+					textEditGroups.add(group);
+					
+					MethodInvocation invocation= node.getAST().newMethodInvocation();
+					invocation.setName((SimpleName)rewrite.createCopyTarget(node.getName()));
+					
+					rewrite.replace(node, invocation, group);
+				}
+			});
+			return super.visit(node);
+		}
+		
+		private boolean hasConflict(int startPosition, SimpleName name, int flag) {
+			ScopeAnalyzer analyzer= new ScopeAnalyzer(fCompilationUnit);
+			IBinding[] declarationsInScope= analyzer.getDeclarationsInScope(startPosition, flag);
+			for (int i= 0; i < declarationsInScope.length; i++) {
+				IBinding decl= declarationsInScope[i];
+				if (decl.getName().equals(name.getIdentifier()) && name.resolveBinding() != decl)
+					return true;
+			}
+			return false;
+		}
+	}
 
 	private final static class AddThisQualifierOperation implements IFixRewriteOperation {
 
@@ -329,9 +419,11 @@ public class CodeStyleFix extends AbstractFix {
 			boolean qualifyStaticFieldAccess,
 			boolean changeIndirectStaticAccessToDirect,
 			boolean qualifyMethodAccess,
-			boolean qualifyStaticMethodAccess) throws CoreException {
+			boolean qualifyStaticMethodAccess,
+			boolean removeFieldQualifier,
+			boolean removeMethodQualifier) throws CoreException {
 		
-		if (!addThisQualifier && !changeNonStaticAccessToStatic && !qualifyStaticFieldAccess && !changeIndirectStaticAccessToDirect && !qualifyMethodAccess && !qualifyStaticMethodAccess)
+		if (!addThisQualifier && !changeNonStaticAccessToStatic && !qualifyStaticFieldAccess && !changeIndirectStaticAccessToDirect && !qualifyMethodAccess && !qualifyStaticMethodAccess && !removeFieldQualifier && !removeMethodQualifier)
 			return null;
 
 		List/*<IFixRewriteOperation>*/ operations= new ArrayList(); 
@@ -353,6 +445,11 @@ public class CodeStyleFix extends AbstractFix {
 					}
 				}
 			}
+		}
+		
+		if (removeFieldQualifier || removeMethodQualifier) {
+			ThisQualifierVisitor visitor= new ThisQualifierVisitor(removeFieldQualifier, removeMethodQualifier, compilationUnit, operations);
+			compilationUnit.accept(visitor);
 		}
 
 		if (operations.isEmpty())

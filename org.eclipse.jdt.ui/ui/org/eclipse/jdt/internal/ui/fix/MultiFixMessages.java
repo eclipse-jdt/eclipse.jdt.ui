@@ -51,6 +51,8 @@ public class MultiFixMessages extends NLS {
 	public static String CodeStyleCleanUp_addStaticQualifier_checkBoxLabel;
 	public static String CodeStyleCleanUp_QualifyNonStaticMethod_description;
 	public static String CodeStyleCleanUp_QualifyStaticMethod_description;
+	public static String CodeStyleCleanUp_removeFieldThis_description;
+	public static String CodeStyleCleanUp_removeMethodThis_description;
 	
 	public static String Java50MultiFix_AddMissingDeprecated_description;
 	public static String Java50MultiFix_AddMissingOverride_description;
@@ -91,7 +93,10 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_qualifyNonStaticField_checkBoxLabel;
 	public static String CleanUpRefactoringWizard_qualifyNonStaticMethod_checkBoxLabel;
 	public static String CleanUpRefactoringWizard_qualifyStaticMethod_checkBoxLabel;
-	
+	public static String CleanUpRefactoringWizard_removeThis_checkBoxLabel;
+	public static String CleanUpRefactoringWizard_removeMethodThis_checkBoxLabel;
+	public static String CleanUpRefactoringWizard_addMethodThis_checkBoxLabel;
+
 	public static String PotentialProgrammingProblemsCleanUp_AddSerialId_section_name;
 	public static String PotentialProgrammingProblemsCleanUp_Generated_radioButton_name;
 	public static String PotentialProgrammingProblemsCleanUp_RandomSerialId_description;
