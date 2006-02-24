@@ -158,14 +158,14 @@ public class ExampleProjectCreationOperation implements IRunnableWithProgress {
 	}
 	
 	private Bundle getContributingPlugin(IConfigurationElement configurationElement) {
-		String namespace= configurationElement.getNamespace();
+		String namespace= configurationElement.getContributor().getName();
 		return Platform.getBundle(namespace);
 	}
 
 	private ZipFile getZipFileFromPluginDir(String pluginRelativePath, Bundle pluginDescriptor) throws CoreException {
 		try {
 			URL starterURL= pluginDescriptor.getEntry(pluginRelativePath);
-			return new ZipFile(Platform.asLocalURL(starterURL).getFile());
+			return new ZipFile(FileLocator.toFileURL(starterURL).getFile());
 		} catch (IOException e) {
 			String message= pluginRelativePath + ": " + e.getMessage(); //$NON-NLS-1$
 			Status status= new Status(IStatus.ERROR, ExampleProjectsPlugin.getPluginId(), IStatus.ERROR, message, e);

@@ -14,13 +14,12 @@ import java.net.URL;
 
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Platform;
 import org.eclipse.core.runtime.Status;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.ui.plugin.AbstractUIPlugin;
-
 import org.osgi.framework.Bundle;
 
 /**
@@ -56,7 +55,7 @@ public class ExampleProjectsPlugin extends AbstractUIPlugin {
 	 * Since 3.1.1. Load from icon paths with $NL$
 	 */
 	public static ImageDescriptor createImageDescriptor(Bundle bundle, IPath path) {
-		URL url= Platform.find(bundle, path);
+		URL url= FileLocator.find(bundle, path, null);
 		if (url != null) {
 			return ImageDescriptor.createFromURL(url);
 		}

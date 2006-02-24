@@ -58,7 +58,7 @@ public class ExampleProjectCreationWizard extends Wizard implements INewWizard, 
 	private void initializeDefaultPageImageDescriptor(IConfigurationElement pageConfigElement) {
 		String banner= pageConfigElement.getAttribute("banner"); //$NON-NLS-1$
 		if (banner != null) {
-			Bundle bundle= Platform.getBundle(pageConfigElement.getNamespace());
+			Bundle bundle= Platform.getBundle(pageConfigElement.getContributor().getName());
 			setDefaultPageImageDescriptor(ExampleProjectsPlugin.createImageDescriptor(bundle, new Path(banner)));
 		}
 	}
