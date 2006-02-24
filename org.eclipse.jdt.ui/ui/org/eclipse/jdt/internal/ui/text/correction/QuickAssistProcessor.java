@@ -339,7 +339,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		else
 			return false;
 		final IBinding binding= name.resolveBinding();
-		if (!binding.isDeprecated())
+		if (binding == null || !binding.isDeprecated())
 			return false;
 		String fileName= null;
 		if (binding instanceof IVariableBinding)
