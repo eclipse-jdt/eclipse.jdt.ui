@@ -11,6 +11,7 @@
 package org.eclipse.jdt.internal.ui.model;
 
 import java.util.HashSet;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Set;
 
@@ -21,6 +22,7 @@ import org.eclipse.core.runtime.NullProgressMonitor;
 
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.ResourcesPlugin;
 import org.eclipse.core.resources.mapping.ResourceMapping;
@@ -28,6 +30,10 @@ import org.eclipse.core.resources.mapping.ResourceMappingContext;
 import org.eclipse.core.resources.mapping.ResourceTraversal;
 
 import org.eclipse.jface.viewers.ITreeContentProvider;
+
+import org.eclipse.ui.navigator.IPipelinedTreeContentProvider;
+import org.eclipse.ui.navigator.PipelinedShapeModification;
+import org.eclipse.ui.navigator.PipelinedViewerUpdate;
 
 import org.eclipse.team.core.diff.IDiff;
 import org.eclipse.team.core.diff.IDiffVisitor;
@@ -54,10 +60,10 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
  * 
  * @since 3.2
  */
-public final class JavaSynchronizationContentProvider extends AbstractSynchronizationContentProvider {
+public final class JavaSynchronizationContentProvider extends AbstractSynchronizationContentProvider implements IPipelinedTreeContentProvider {
 
 	/** The refactorings folder */
-//	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
+	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
 
 	/**
 	 * Returns the diffs associated with the element.
@@ -117,6 +123,79 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	private Object fModelRoot= null;
 
 	/**
+	 * Returns the java element associated with the project.
+	 * 
+	 * @param project
+	 *            the project
+	 * @return the associated java element, or <code>null</code> if the
+	 *         project is not a java project
+	 */
+	private IJavaElement asJavaProject(final IProject project) {
+		try {
+			if (project.getDescription().hasNature(JavaCore.NATURE_ID))
+				return JavaCore.create(project);
+		} catch (CoreException exception) {
+			JavaPlugin.log(exception);
+		}
+		return null;
+	}
+
+	/**
+	 * Converts the shape modification to use java elements.
+	 * 
+	 * @param modification
+	 *            the shape modification to convert
+	 */
+	private void convertToJavaElements(final PipelinedShapeModification modification) {
+		final Object parent= modification.getParent();
+		if (parent instanceof IResource) {
+			final IJavaElement project= asJavaProject(((IResource) parent).getProject());
+			if (project != null) {
+				modification.getChildren().clear();
+				return;
+			}
+		}
+		if (parent instanceof ISynchronizationContext || parent instanceof ISynchronizationScope) {
+			final Set result= new HashSet();
+			for (final Iterator iterator= modification.getChildren().iterator(); iterator.hasNext();) {
+				final Object element= iterator.next();
+				if (element instanceof IProject) {
+					final IJavaElement project= asJavaProject((IProject) element);
+					if (project != null) {
+						iterator.remove();
+						result.add(project);
+					}
+				}
+			}
+			modification.getChildren().addAll(result);
+		}
+	}
+
+	/**
+	 * Converts the viewer update to use java elements.
+	 * 
+	 * @param update
+	 *            the viewer update to convert
+	 * @return <code>true</code> if any elements have been converted,
+	 *         <code>false</code> otherwise
+	 */
+	private boolean convertToJavaElements(final PipelinedViewerUpdate update) {
+		final Set result= new HashSet();
+		for (final Iterator iterator= update.getRefreshTargets().iterator(); iterator.hasNext();) {
+			final Object element= iterator.next();
+			if (element instanceof IProject) {
+				final IJavaElement project= asJavaProject((IProject) element);
+				if (project != null) {
+					iterator.remove();
+					result.add(project);
+				}
+			}
+		}
+		update.getRefreshTargets().addAll(result);
+		return !result.isEmpty();
+	}
+
+	/**
 	 * {@inheritDoc}
 	 */
 	protected Object[] getChildrenInContext(final ISynchronizationContext context, final Object parent, final Object[] children) {
@@ -168,29 +247,29 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			}
 			list.add(children[index]);
 		}
-//		final IResource resource= JavaModelProvider.getResource(parent);
-//		if (resource != null) {
-//			final IResourceDiffTree tree= context.getDiffTree();
-//			final IResource[] members= tree.members(resource);
-//			for (int index= 0; index < members.length; index++) {
-//				final int type= members[index].getType();
-//				if (type == IResource.FOLDER) {
-//					if (isInScope(context.getScope(), parent, members[index])) {
-//						final String name= members[index].getName();
-//						if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
-//							list.remove(members[index]);
-//							list.addFirst(new JavaProjectSettings((IJavaProject) parent));
-//						} else if (name.equals(NAME_REFACTORING_FOLDER)) {
-//							final RefactoringHistory history= getRefactorings(context, (IProject) resource, null);
-//							if (!history.isEmpty()) {
-//								list.remove(members[index]);
-//								list.addFirst(history);
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
+		final IResource resource= JavaModelProvider.getResource(parent);
+		if (resource != null) {
+			final IResourceDiffTree tree= context.getDiffTree();
+			final IResource[] members= tree.members(resource);
+			for (int index= 0; index < members.length; index++) {
+				final int type= members[index].getType();
+				if (type == IResource.FOLDER) {
+					if (isInScope(context.getScope(), parent, members[index])) {
+						final String name= members[index].getName();
+						if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
+							list.remove(members[index]);
+							list.addFirst(new JavaProjectSettings((IJavaProject) parent));
+						} else if (name.equals(NAME_REFACTORING_FOLDER)) {
+							final RefactoringHistory history= getRefactorings(context, (IProject) resource, null);
+							if (!history.isEmpty()) {
+								list.remove(members[index]);
+								list.addFirst(history);
+							}
+						}
+					}
+				}
+			}
+		}
 		return list.toArray(new Object[list.size()]);
 	}
 
@@ -309,6 +388,42 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public void getPipelinedChildren(final Object parent, final Set children) {
+		if (parent instanceof ISynchronizationContext || parent instanceof ISynchronizationScope) {
+			final Set result= new HashSet(children.size());
+			for (final Iterator iterator= children.iterator(); iterator.hasNext();) {
+				final Object element= iterator.next();
+				if (element instanceof IProject) {
+					final IJavaElement java= asJavaProject((IProject) element);
+					if (java != null) {
+						iterator.remove();
+						result.add(java);
+					}
+				}
+			}
+			children.addAll(result);
+		}
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public void getPipelinedElements(final Object element, final Set elements) {
+		getPipelinedChildren(element, elements);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public Object getPipelinedParent(final Object element, final Object parent) {
+		if (element instanceof IJavaElement)
+			return getParent(element);
+		return parent;
+	}
+
+	/**
 	 * Returns the project settings children in the current scope.
 	 * 
 	 * @param context
@@ -374,6 +489,36 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 				return true;
 		}
 		return false;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public PipelinedShapeModification interceptAdd(final PipelinedShapeModification modification) {
+		convertToJavaElements(modification);
+		return modification;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean interceptRefresh(final PipelinedViewerUpdate update) {
+		return convertToJavaElements(update);
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public PipelinedShapeModification interceptRemove(final PipelinedShapeModification modification) {
+		convertToJavaElements(modification);
+		return modification;
+	}
+
+	/**
+	 * {@inheritDoc}
+	 */
+	public boolean interceptUpdate(PipelinedViewerUpdate anUpdateSynchronization) {
+		return convertToJavaElements(anUpdateSynchronization);
 	}
 
 	/**

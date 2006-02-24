@@ -4996,6 +4996,7 @@
          point="org.eclipse.team.ui.teamContentProviders">
       <teamContentProvider
             contentExtensionId="org.eclipse.jdt.ui.javaModelContent"
+            icon="$nl$/icons/full/obj16/java_model_obj.gif"
             modelProviderId="org.eclipse.jdt.ui.modelProvider"/>
    </extension>
    
@@ -5015,12 +5016,12 @@
       <navigatorContent
             activeByDefault="true"
             contentProvider="org.eclipse.jdt.internal.ui.model.JavaSynchronizationContentProvider"
-            icon="$nl$/icons/full/obj16/java_model.gif"
+            icon="$nl$/icons/full/obj16/java_model_obj.gif"
             id="org.eclipse.jdt.ui.javaModelContent"
             labelProvider="org.eclipse.jdt.internal.ui.model.JavaSynchronizationLabelProvider"
             name="%JavaModelContent.name"
             priority="normal">
-         <enablement>
+         <triggerPoints>
             <or>
                <instanceof value="org.eclipse.jdt.internal.ui.model.JavaModelProvider"/>
                <instanceof value="org.eclipse.ltk.core.refactoring.history.RefactoringHistory"/>
@@ -5028,8 +5029,9 @@
                <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptor"/>
                <instanceof value="org.eclipse.team.core.mapping.ISynchronizationScope"/>
                <instanceof value="org.eclipse.team.core.mapping.ISynchronizationContext"/>
+               <instanceof value="org.eclipse.jdt.core.IJavaElement" />
             </or>
-         </enablement>
+         </triggerPoints>
          <actionProvider class="org.eclipse.ltk.ui.refactoring.model.RefactoringSynchronizationActionProvider"/>
          <commonSorter
                class="org.eclipse.jdt.ui.JavaElementSorter"
@@ -5039,6 +5041,12 @@
                <instanceof value="org.eclipse.jdt.internal.ui.model.JavaModelProvider"/>
             </parentExpression>
          </commonSorter>
+         <override
+               policy="InvokeAlwaysRegardlessOfSuppressedExt"
+               suppressedExtensionId="org.eclipse.team.ui.resourceContent"/>
+         <possibleChildren>
+         	<instanceof value="org.eclipse.jdt.core.IJavaElement" />
+		 </possibleChildren>
       </navigatorContent>
    </extension>
    <extension
