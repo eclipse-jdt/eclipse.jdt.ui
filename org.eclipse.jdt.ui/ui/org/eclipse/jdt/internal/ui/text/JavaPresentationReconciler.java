@@ -42,6 +42,7 @@ public class JavaPresentationReconciler extends PresentationReconciler {
 		if (document != fLastDocument) {
 			setDocumentToDamagers(document);
 			setDocumentToRepairers(document);
+			fLastDocument= document;
 		}
 		return createPresentation(damage, document);
 	}
