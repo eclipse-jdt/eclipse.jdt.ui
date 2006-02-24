@@ -133,7 +133,7 @@ public class NewTestSuiteCreationWizard extends JUnitWizard {
 	}
 	
 	protected void initializeDefaultPageImageDescriptor() {
-		setDefaultPageImageDescriptor(JUnitPlugin.getImageDescriptor("wizban/newtest_wiz.gif")); //$NON-NLS-1$
+		setDefaultPageImageDescriptor(JUnitPlugin.getImageDescriptor("wizban/newtest_wiz.png")); //$NON-NLS-1$
 	}
 
 	public IRunnableWithProgress getRunnableSave(final IEditorPart cu_ep) {
