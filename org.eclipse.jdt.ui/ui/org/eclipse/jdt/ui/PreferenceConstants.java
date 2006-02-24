@@ -715,6 +715,7 @@ public class PreferenceConstants {
 	 * 
 	 * @see org.eclipse.jface.resource.StringConverter
 	 * @see org.eclipse.jface.preference.PreferenceConverter
+	 * @deprecated As of 3.2, use {@link AbstractTextEditor#PREFERENCE_COLOR_FIND_SCOPE} instead}
 	 */
 	public final static String EDITOR_FIND_SCOPE_COLOR= AbstractTextEditor.PREFERENCE_COLOR_FIND_SCOPE;
 
@@ -3429,8 +3430,6 @@ public class PreferenceConstants {
 		store.setDefault(PreferenceConstants.EDITOR_MATCHING_BRACKETS, true);
 		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, new RGB(192, 192,192));
 
-		PreferenceConverter.setDefault(store, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR, new RGB(185, 176 , 180));
-
 		store.setDefault(PreferenceConstants.EDITOR_CORRECTION_INDICATION, true);
 		store.setDefault(PreferenceConstants.EDITOR_SYNC_OUTLINE_ON_CURSOR_MOVE, true);
 
@@ -3623,6 +3622,7 @@ public class PreferenceConstants {
 		store.setToDefault(PreferenceConstants.EDITOR_FOREGROUND_DEFAULT_COLOR); // global
 		store.setToDefault(PreferenceConstants.EDITOR_BACKGROUND_COLOR); // global
 		store.setToDefault(PreferenceConstants.EDITOR_BACKGROUND_DEFAULT_COLOR); // global
+		store.setToDefault(PreferenceConstants.EDITOR_FIND_SCOPE_COLOR); // global
 		store.setToDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_FOREGROUND_DEFAULT_COLOR); // global
 		store.setToDefault(AbstractDecoratedTextEditorPreferenceConstants.EDITOR_SELECTION_BACKGROUND_DEFAULT_COLOR); // global
 

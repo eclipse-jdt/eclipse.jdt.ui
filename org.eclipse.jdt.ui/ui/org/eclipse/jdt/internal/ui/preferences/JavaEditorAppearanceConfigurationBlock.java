@@ -51,7 +51,6 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 
 	private final String[][] fAppearanceColorListModel= new String[][] {
 			{PreferencesMessages.JavaEditorPreferencePage_matchingBracketsHighlightColor2, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR, null}, 
-			{PreferencesMessages.JavaEditorPreferencePage_findScopeColor2, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR, null}, 
 			{PreferencesMessages.JavaEditorPreferencePage_backgroundForCompletionProposals, PreferenceConstants.CODEASSIST_PROPOSALS_BACKGROUND, null }, 
 			{PreferencesMessages.JavaEditorPreferencePage_foregroundForCompletionProposals, PreferenceConstants.CODEASSIST_PROPOSALS_FOREGROUND, null }, 
 			{PreferencesMessages.JavaEditorPreferencePage_backgroundForMethodParameters, PreferenceConstants.CODEASSIST_PARAMETERS_BACKGROUND, null }, 
@@ -79,7 +78,6 @@ class JavaEditorAppearanceConfigurationBlock extends AbstractConfigurationBlock 
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_MATCHING_BRACKETS_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_MATCHING_BRACKETS));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_QUICKASSIST_LIGHTBULB));
-		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.STRING, PreferenceConstants.EDITOR_FIND_SCOPE_COLOR));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SMART_HOME_END));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_SUB_WORD_NAVIGATION));
 		overlayKeys.add(new OverlayPreferenceStore.OverlayKey(OverlayPreferenceStore.BOOLEAN, PreferenceConstants.EDITOR_EVALUTE_TEMPORARY_PROBLEMS));

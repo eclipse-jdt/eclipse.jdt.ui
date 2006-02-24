@@ -162,7 +162,6 @@ public final class PreferencesMessages extends NLS {
 	public static String JavaEditorPreferencePage_matchingBracketsHighlightColor2;
 	public static String JavaEditorPreferencePage_currentLineHighlighColor;
 	public static String JavaEditorPreferencePage_printMarginColor2;
-	public static String JavaEditorPreferencePage_findScopeColor2;
 	public static String JavaEditorPreferencePage_appearanceOptions;
 	public static String JavaEditorPreferencePage_typing_tabTitle;
 	public static String JavaEditorPreferencePage_typing_description;
