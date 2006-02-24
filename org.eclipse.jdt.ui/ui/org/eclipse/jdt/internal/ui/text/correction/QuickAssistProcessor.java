@@ -357,7 +357,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (!file.exists())
 			return false;
 		if (resultingCollections == null)
-			return false;
+			return true;
 		final ChangeCorrectionProposal proposal= new ChangeCorrectionProposal(CorrectionMessages.QuickAssistProcessor_fix_deprecation_name, null, 2, JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE)) {
 
 			private static final int SIZING_WIZARD_HEIGHT= 470;
