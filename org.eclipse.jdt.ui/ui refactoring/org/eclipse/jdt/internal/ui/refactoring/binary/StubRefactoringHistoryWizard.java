@@ -217,7 +217,7 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 	 *            the classpath entry
 	 * @return the location URI
 	 */
-	protected static URI getLocationURI(final IClasspathEntry entry) {
+	public static URI getLocationURI(final IClasspathEntry entry) {
 		final IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
 		final IPath path= entry.getPath();
 		URI location= null;

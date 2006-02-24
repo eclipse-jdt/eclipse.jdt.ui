@@ -13,6 +13,7 @@ package org.eclipse.jdt.internal.ui.jarimport;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.URI;
 import java.util.HashSet;
 import java.util.Set;
 import java.util.zip.ZipEntry;
@@ -71,6 +72,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.filters.EmptyPackageFilter;
 import org.eclipse.jdt.internal.ui.jarpackager.JarPackagerUtil;
+import org.eclipse.jdt.internal.ui.refactoring.binary.StubRefactoringHistoryWizard;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 
 /**
@@ -352,6 +354,12 @@ public final class JarImportWizardPage extends WizardPage {
 					setPageComplete(true);
 					return;
 				}
+				handleTimeStampChanged();
+				if (fJarImportData.getExistingTimeStamp() > entry.getTime()) {
+					setMessage(JarImportMessages.JarImportWizardPage_version_warning, WARNING);
+					setPageComplete(true);
+					return;
+				}
 				InputStream stream= null;
 				try {
 					stream= zip.getInputStream(entry);
@@ -399,6 +407,35 @@ public final class JarImportWizardPage extends WizardPage {
 					setErrorMessage(JarImportMessages.JarImportWizardPage_select_single_jar);
 					setPageComplete(false);
 				}
+			}
+		}
+	}
+
+	/**
+	 * Handles the time stamp changed event.
+	 */
+	protected void handleTimeStampChanged() {
+		final IPackageFragmentRoot root= fJarImportData.getPackageFragmentRoot();
+		if (root != null) {
+			try {
+				final URI uri= StubRefactoringHistoryWizard.getLocationURI(root.getRawClasspathEntry());
+				if (uri != null) {
+					final File file= new File(uri);
+					if (file.exists()) {
+						ZipFile zip= null;
+						try {
+							zip= new ZipFile(file, ZipFile.OPEN_READ);
+							ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntry());
+							if (entry != null) {
+								fJarImportData.setExistingTimeStamp(entry.getTime());
+							}
+						} catch (IOException exception) {
+							// Just leave it
+						}
+					}
+				}
+			} catch (CoreException exception) {
+				JavaPlugin.log(exception);
 			}
 		}
 	}

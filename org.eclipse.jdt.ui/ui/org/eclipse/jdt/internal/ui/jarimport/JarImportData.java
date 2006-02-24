@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.jarimport;
 
 import java.net.URI;
 
+import org.eclipse.core.runtime.Assert;
+
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 
 import org.eclipse.jdt.core.IPackageFragmentRoot;
@@ -19,13 +21,16 @@ import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.ui.jarpackager.JarPackageData;
 
 /**
- * Modul for a JAR file which includes refactoring information to import.
+ * Module for a JAR file which includes refactoring information to import.
  * 
  * @since 3.2
  */
 public final class JarImportData extends JarPackageData {
 
-	/** The location of the new Jar file to import, or <code>null</code> */
+	/** The time stamp of the existing jar file, or <code>-1</code> if not available */
+	private long fExistingStamp= -1;
+
+	/** The location of the new jar file to import, or <code>null</code> */
 	private URI fJarFileLocation= null;
 
 	/** The package fragment root to update, or <code>null</code> */
@@ -36,6 +41,15 @@ public final class JarImportData extends JarPackageData {
 
 	/** Should the jar file be renamed to the new file name? */
 	private boolean fRenameJarFile= true;
+
+	/**
+	 * Returns the time stamp of the existing jar file.
+	 * 
+	 * @return the time stamp, or <code>-1</code> if not available
+	 */
+	public long getExistingTimeStamp() {
+		return fExistingStamp;
+	}
 
 	/**
 	 * Returns the package fragment root to update.
@@ -72,6 +86,17 @@ public final class JarImportData extends JarPackageData {
 	 */
 	public boolean isRenameJarFile() {
 		return fRenameJarFile;
+	}
+
+	/**
+	 * Sets the time stamp of the existing jar file.
+	 * 
+	 * @param stamp
+	 *            the time stamp, or <code>-1</code> if not available
+	 */
+	public void setExistingTimeStamp(final long stamp) {
+		Assert.isLegal(stamp >= -1);
+		fExistingStamp= stamp;
 	}
 
 	/**
