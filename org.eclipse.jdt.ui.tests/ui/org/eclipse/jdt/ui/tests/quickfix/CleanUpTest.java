@@ -57,6 +57,7 @@ import org.eclipse.jdt.internal.ui.fix.PotentialProgrammingProblemsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.StringCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnnecessaryCodeCleanUp;
 import org.eclipse.jdt.internal.ui.fix.UnusedCodeCleanUp;
+import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 import org.eclipse.jdt.internal.ui.javaeditor.ASTProvider;
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
@@ -4474,6 +4475,191 @@ public class CleanUpTest extends QuickFixTest {
 		buf.append("            bar();\n");
 		buf.append("            return foo();\n");
 		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testAddFinal01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int i= 0;\n");
+		buf.append("    public void foo(int j, int k) {\n");
+		buf.append("        int h, v;\n");
+		buf.append("        v= 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS | VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_LOCAL_VARIABLES | VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_PARAMETERS);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private final int i= 0;\n");
+		buf.append("    public void foo(final int j, final int k) {\n");
+		buf.append("        final int h;\n");
+		buf.append("        int v;\n");
+		buf.append("        v= 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testAddFinal02() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private Object obj1;\n");
+		buf.append("    protected Object obj2;\n");
+		buf.append("    Object obj3;\n");
+		buf.append("    public Object obj4;\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private final Object obj1;\n");
+		buf.append("    protected Object obj2;\n");
+		buf.append("    Object obj3;\n");
+		buf.append("    public Object obj4;\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testAddFinal03() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int i = 0;\n");
+		buf.append("    public void foo() throws Exception {\n");
+		buf.append("    }\n");
+		buf.append("    public void bar(int j) {\n");
+		buf.append("        int k;\n");
+		buf.append("        try {\n");
+		buf.append("            foo();\n");
+		buf.append("        } catch (Exception e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_LOCAL_VARIABLES);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int i = 0;\n");
+		buf.append("    public void foo() throws Exception {\n");
+		buf.append("    }\n");
+		buf.append("    public void bar(int j) {\n");
+		buf.append("        final int k;\n");
+		buf.append("        try {\n");
+		buf.append("            foo();\n");
+		buf.append("        } catch (final Exception e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}	
+	
+	public void testAddFinal04() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int i = 0;\n");
+		buf.append("    public void foo() throws Exception {\n");
+		buf.append("    }\n");
+		buf.append("    public void bar(int j) {\n");
+		buf.append("        int k;\n");
+		buf.append("        try {\n");
+		buf.append("            foo();\n");
+		buf.append("        } catch (Exception e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_PARAMETERS);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    private int i = 0;\n");
+		buf.append("    public void foo() throws Exception {\n");
+		buf.append("    }\n");
+		buf.append("    public void bar(final int j) {\n");
+		buf.append("        int k;\n");
+		buf.append("        try {\n");
+		buf.append("            foo();\n");
+		buf.append("        } catch (Exception e) {\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
+	public void testAddFinal05() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 0;\n");
+		buf.append("        if (i > 1 || i == 1 && i > 1)\n");
+		buf.append("            ;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_LOCAL_VARIABLES);
+		refactoring.addCleanUp(cleanUp);
+		refactoring.addCleanUp(new ExpressionsCleanUp(ExpressionsCleanUp.ADD_PARANOIC_PARENTHESIS));
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        final int i= 0;\n");
+		buf.append("        if ((i > 1) || ((i == 1) && (i > 1)))\n");
+		buf.append("            ;\n");
 		buf.append("    }\n");
 		buf.append("}\n");
 		String expected1= buf.toString();

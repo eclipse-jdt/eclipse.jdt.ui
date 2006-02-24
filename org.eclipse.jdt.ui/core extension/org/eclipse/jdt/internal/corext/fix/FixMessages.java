@@ -65,6 +65,9 @@ public class FixMessages extends NLS {
 
 	public static String ExpressionsFix_addParanoiacParenthesis_description;
 	public static String ExpressionsFix_removeUnnecessaryParenthesis_description;
+	
+	public static String VariableDeclarationFix_changeModifierToFinal_description;
+	public static String VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
 
 	static {
 		// initialize resource bundle

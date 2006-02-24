@@ -95,6 +95,7 @@ import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
+import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 import org.eclipse.jdt.internal.corext.refactoring.code.ExtractTempRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.delegates.DelegateCreator;
@@ -113,6 +114,7 @@ import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.deprecation.FixDeprecationRefactoringWizard;
 import org.eclipse.jdt.internal.ui.fix.ControlStatementsCleanUp;
 import org.eclipse.jdt.internal.ui.fix.ICleanUp;
+import org.eclipse.jdt.internal.ui.fix.VariableDeclarationCleanUp;
 
 /**
   */
@@ -153,7 +155,8 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				|| getConvertIterableLoopProposal(context, coveringNode, null)
 				|| getSurroundWithRunnableProposal(context, coveringNode, null)
 				|| getRemoveBlockProposals(context, coveringNode, null)
-				|| getFixDeprecationProposals(context, coveringNode, null);
+				|| getFixDeprecationProposals(context, coveringNode, null)
+				|| getMakeVariableDeclarationFinalProposals(context, coveringNode, null);
 		}
 		return false;
 	}
@@ -189,6 +192,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 				getSurroundWithRunnableProposal(context, coveringNode, resultingCollections);
 				getRemoveBlockProposals(context, coveringNode, resultingCollections);
 				getFixDeprecationProposals(context, coveringNode, resultingCollections);
+				getMakeVariableDeclarationFinalProposals(context, coveringNode, resultingCollections);
 			}
 			return (IJavaCompletionProposal[]) resultingCollections.toArray(new IJavaCompletionProposal[resultingCollections.size()]);
 		}
@@ -1295,5 +1299,20 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			node= parent;
 		}
 		return null;
+	}
+	
+	private boolean getMakeVariableDeclarationFinalProposals(IInvocationContext context, ASTNode node, ArrayList resultingCollections) {
+		IFix fix= VariableDeclarationFix.createChangeModifierToFinalFix(context.getASTRoot(), node);
+		if (fix == null)
+			return false;
+		
+		if (resultingCollections == null)
+			return true;
+
+		Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
+		VariableDeclarationCleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS | VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_LOCAL_VARIABLES | VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_PARAMETERS);
+		FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 5, image, context);
+		resultingCollections.add(proposal);
+		return true;
 	}
 }

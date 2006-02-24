@@ -224,7 +224,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 		private ICleanUp[] createAllCleanUps() {
 			IDialogSettings section= getCleanUpWizardSettings();
 			
-			ICleanUp[] result= new ICleanUp[8];
+			ICleanUp[] result= new ICleanUp[9];
 			result[0]= new CodeStyleCleanUp(section);
 			result[1]= new ControlStatementsCleanUp(section);
 			result[2]= new UnusedCodeCleanUp(section);
@@ -233,6 +233,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			result[5]= new PotentialProgrammingProblemsCleanUp(section);
 			result[6]= new UnnecessaryCodeCleanUp(section);
 			result[7]= new ExpressionsCleanUp(section);
+			result[8]= new VariableDeclarationCleanUp(section);
 			
 			return result;
 		}
@@ -696,7 +697,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			IDialogSettings section= getCleanUpWizardSettings();
 			
-			fCleanUps= new ICleanUp[8];
+			fCleanUps= new ICleanUp[9];
 			
 			ScrolledComposite codeStyleTab= createTab(parent, MultiFixMessages.CleanUpRefactoringWizard_CodeStyleSection_description);
 			Composite codeStyle= fillCodeStyleTab(codeStyleTab, project, section);
@@ -768,10 +769,20 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			FlagConfigurationGroup parenthesisGroup= new FlagConfigurationGroup(MultiFixMessages.ExpressionsCleanUp_parenthesisAroundConditions_checkBoxLabel, new FlagConfigurationButton[] {addParanoic, removeParanoic}, SWT.RADIO | SWT.HORIZONTAL, settings);
 			parenthesisGroup.createButton(group);
 			
-			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {addThisField, removeThisField, addThisMethod, removeThisMethod, nonStatic, indirect, qualifyStatic, qualifyStaticMethod, addBlock, removeBlock, convertLoop, addParanoic, removeParanoic};
+			//Variable declaration group
+			VariableDeclarationCleanUp varDeclCleanUp= new VariableDeclarationCleanUp(settings);
+			group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_variableDeclaration_groupDescription);
+			
+			FlagConfigurationButton addFinalField= new FlagConfigurationButton(varDeclCleanUp, VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_FIELDS, MultiFixMessages.CleanUpRefactoringWizard_addFinalFields_checkBoxLabel, SWT.CHECK);
+			FlagConfigurationButton addFinalParam= new FlagConfigurationButton(varDeclCleanUp, VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_PARAMETERS, MultiFixMessages.CleanUpRefactoringWizard_addFinalParameters_checkBoxLabel, SWT.CHECK);
+			FlagConfigurationButton addFinalLocal= new FlagConfigurationButton(varDeclCleanUp, VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_LOCAL_VARIABLES, MultiFixMessages.CleanUpRefactoringWizard_addFinalLocals_checkBoxLabel, SWT.CHECK);
+			FlagConfigurationGroup addFinalGroup= new FlagConfigurationGroup(MultiFixMessages.CleanUpRefactoringWizard_changeToFinal_checkBoxLabel, new FlagConfigurationButton[] {addFinalField, addFinalParam, addFinalLocal}, SWT.CHECK | SWT.HORIZONTAL, settings);
+			addFinalGroup.createButton(group);
+			
+			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {addThisField, removeThisField, addThisMethod, removeThisMethod, nonStatic, indirect, qualifyStatic, qualifyStaticMethod, addBlock, removeBlock, convertLoop, addParanoic, removeParanoic, addFinalField, addFinalParam, addFinalLocal};
 			FlagConfigurationGroup[] radioButtonGroups= new FlagConfigurationGroup[] {blockGroup, parenthesisGroup, addThisGroup, addThisMethodGroup};
 			
-			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {codeStyleCleanUp, controlStatementsCleanUp, expressionsCleanUp}, flagConfigurationButtons);
+			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {codeStyleCleanUp, controlStatementsCleanUp, expressionsCleanUp, varDeclCleanUp}, flagConfigurationButtons);
 			
 			if (project != null && !JavaModelUtil.is50OrHigher(project)) {
 				convertLoop.disable();
@@ -786,13 +797,15 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			fCleanUps[0]= codeStyleCleanUp;
 			fCleanUps[1]= controlStatementsCleanUp;
-			fCleanUps[2]= expressionsCleanUp;
+			fCleanUps[3]= expressionsCleanUp;
+			fCleanUps[2]= varDeclCleanUp;
 			
 			fConfigurationGroups.add(addThisGroup);
 			fConfigurationGroups.add(addThisMethodGroup);
 			fConfigurationGroups.add(staticGroup);
 			fConfigurationGroups.add(blockGroup);
 			fConfigurationGroups.add(parenthesisGroup);
+			fConfigurationGroups.add(addFinalGroup);
 			
 			return composite;
 		}
@@ -843,9 +856,9 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			addSelectionCounter(flagConfigurationButtons);
 
-			fCleanUps[3]= unusedCodeCleanUp;
-			fCleanUps[6]= unnecessaryCodeCleanUp;
-			fCleanUps[7]= stringCleanUp;
+			fCleanUps[4]= unusedCodeCleanUp;
+			fCleanUps[7]= unnecessaryCodeCleanUp;
+			fCleanUps[8]= stringCleanUp;
 			
 			fConfigurationGroups.add(membersGroup);
 			
@@ -900,8 +913,8 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			addSelectionCounter(flagConfigurationButtons);
 			
-			fCleanUps[4]= java50CleanUp;
-			fCleanUps[5]= potentialProgrammingProblemsCleanUp;
+			fCleanUps[5]= java50CleanUp;
+			fCleanUps[6]= potentialProgrammingProblemsCleanUp;
 			
 			fConfigurationGroups.add(annotations);
 			fConfigurationGroups.add(serial);

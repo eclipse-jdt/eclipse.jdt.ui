@@ -96,6 +96,11 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_removeThis_checkBoxLabel;
 	public static String CleanUpRefactoringWizard_removeMethodThis_checkBoxLabel;
 	public static String CleanUpRefactoringWizard_addMethodThis_checkBoxLabel;
+	public static String CleanUpRefactoringWizard_variableDeclaration_groupDescription;
+	public static String CleanUpRefactoringWizard_addFinalFields_checkBoxLabel;
+	public static String CleanUpRefactoringWizard_addFinalParameters_checkBoxLabel;
+	public static String CleanUpRefactoringWizard_addFinalLocals_checkBoxLabel;
+	public static String CleanUpRefactoringWizard_changeToFinal_checkBoxLabel;
 
 	public static String PotentialProgrammingProblemsCleanUp_AddSerialId_section_name;
 	public static String PotentialProgrammingProblemsCleanUp_Generated_radioButton_name;
@@ -113,6 +118,10 @@ public class MultiFixMessages extends NLS {
 	public static String ExpressionsCleanUp_removeUnnecessary_checkBoxLabel;
 	public static String ExpressionsCleanUp_addParanoiac_description;
 	public static String ExpressionsCleanUp_removeUnnecessary_description;
+	
+	public static String VariableDeclarationCleanUp_AddFinalField_description;
+	public static String VariableDeclarationCleanUp_AddFinalParameters_description;
+	public static String VariableDeclarationCleanUp_AddFinalLocals_description;
 	
 	static {
 		// initialize resource bundle
