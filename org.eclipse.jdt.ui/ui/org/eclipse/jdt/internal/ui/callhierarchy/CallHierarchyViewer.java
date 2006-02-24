@@ -21,6 +21,7 @@ import org.eclipse.swt.widgets.Tree;
 import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.viewers.IOpenListener;
+import org.eclipse.jface.viewers.ISelectionProvider;
 import org.eclipse.jface.viewers.OpenEvent;
 import org.eclipse.jface.viewers.StructuredSelection;
 import org.eclipse.jface.viewers.TreeViewer;
@@ -109,13 +110,13 @@ class CallHierarchyViewer extends TreeViewer {
     /**
      * Attaches a contextmenu listener to the tree
      */
-    void initContextMenu(IMenuListener menuListener, String popupId, IWorkbenchPartSite viewSite) {
+    void initContextMenu(IMenuListener menuListener, IWorkbenchPartSite viewSite, ISelectionProvider selectionProvider) {
         MenuManager menuMgr= new MenuManager();
         menuMgr.setRemoveAllWhenShown(true);
         menuMgr.addMenuListener(menuListener);
         Menu menu= menuMgr.createContextMenu(getTree());
         getTree().setMenu(menu);
-        viewSite.registerContextMenu(popupId, menuMgr, this);
+        viewSite.registerContextMenu(menuMgr, selectionProvider);
     }
 
     /**

@@ -367,6 +367,14 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         fSelectionProviderMediator.addSelectionChangedListener(new StatusBarUpdater(slManager));
         getSite().setSelectionProvider(fSelectionProviderMediator);
 
+        fCallHierarchyViewer.initContextMenu(
+        		new IMenuListener() {
+		            public void menuAboutToShow(IMenuManager menu) {
+		                fillCallHierarchyViewerContextMenu(menu);
+		            }
+		        }, getSite(), fSelectionProviderMediator);
+
+        
         fClipboard= new Clipboard(parent.getDisplay());
         
         makeActions();
@@ -758,12 +766,6 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
         fCallHierarchyViewer.addKeyListener(createKeyListener());
         fCallHierarchyViewer.addSelectionChangedListener(this);
-
-        fCallHierarchyViewer.initContextMenu(new IMenuListener() {
-                public void menuAboutToShow(IMenuManager menu) {
-                    fillCallHierarchyViewerContextMenu(menu);
-                }
-            }, ID_CALL_HIERARCHY, getSite());
     }
 
     /**
