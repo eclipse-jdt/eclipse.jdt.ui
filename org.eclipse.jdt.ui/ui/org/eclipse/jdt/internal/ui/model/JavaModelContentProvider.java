@@ -10,6 +10,8 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.model;
 
+import org.eclipse.jdt.core.ICompilationUnit;
+
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 
@@ -33,7 +35,9 @@ public final class JavaModelContentProvider extends StandardJavaElementContentPr
 	 * {@inheritDoc}
 	 */
 	public Object[] getChildren(final Object element) {
-		if (element instanceof JavaProjectSettings)
+		if (element instanceof ICompilationUnit)
+			return NO_CHILDREN;
+		else if (element instanceof JavaProjectSettings)
 			return NO_CHILDREN;
 		else if (element instanceof RefactoringHistory)
 			return ((RefactoringHistory) element).getDescriptors();
@@ -45,7 +49,9 @@ public final class JavaModelContentProvider extends StandardJavaElementContentPr
 	 * {@inheritDoc}
 	 */
 	public boolean hasChildren(final Object element) {
-		if (element instanceof JavaProjectSettings)
+		if (element instanceof ICompilationUnit)
+			return false;
+		else if (element instanceof JavaProjectSettings)
 			return true;
 		else if (element instanceof RefactoringHistory)
 			return true;
