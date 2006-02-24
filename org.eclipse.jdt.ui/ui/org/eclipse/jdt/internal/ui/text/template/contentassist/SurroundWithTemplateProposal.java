@@ -71,7 +71,6 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 		private final Template fTemplate;
 		private final IJavaProject fCurrentProject;
 		private ITrackedNodePosition fNewBodyPosition;
-		private ITrackedNodePosition fInsertedTemplatePosition;
 		private ASTNode fTemplateNode;
 		
 		public SurroundWithTemplate(IInvocationContext context, Statement[] selectedNodes, Template template) {
@@ -144,10 +143,6 @@ public class SurroundWithTemplateProposal extends TemplateProposal {
 			}
 			
 			return false;
-		}
-
-		public ITrackedNodePosition getInsertedTemplatePosition() {
-			return fInsertedTemplatePosition;
 		}
 		
 	}
