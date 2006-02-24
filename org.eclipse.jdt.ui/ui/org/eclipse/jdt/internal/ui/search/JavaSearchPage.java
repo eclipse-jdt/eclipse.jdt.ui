@@ -149,7 +149,7 @@ public class JavaSearchPage extends DialogPage implements ISearchPage, IJavaSear
 			if (workingSets != null) {
 				String[] wsIds= new String[workingSets.length];
 				for (int i= 0; i < workingSets.length; i++) {
-					wsIds[i]= workingSets[i].getId();
+					wsIds[i]= workingSets[i].getName();
 				}
 				settings.put("workingSets", wsIds); //$NON-NLS-1$
 			} else {
