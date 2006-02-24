@@ -25,7 +25,6 @@ import org.eclipse.jdt.ui.actions.CCPActionGroup;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.navigator.IExtensionStateConstants.Values;
-import org.eclipse.jdt.internal.ui.workingsets.ViewActionGroup;
 
 public class PackageExplorerActionProvider extends CommonActionProvider { 
 
@@ -35,7 +34,7 @@ public class PackageExplorerActionProvider extends CommonActionProvider {
 
 	private static final String TAG_LAYOUT = "layout"; //$NON-NLS-1$
 
-	private ViewActionGroup fViewActionGroup;
+//	private ViewActionGroup fViewActionGroup;
 
 	private CommonLayoutActionGroup fLayoutActionGroup;
 
@@ -47,8 +46,8 @@ public class PackageExplorerActionProvider extends CommonActionProvider {
 
 	public void fillActionBars(IActionBars actionBars) {
 		if (!fHasFilledViewMenu) {
-			if(fViewActionGroup != null)
-				fViewActionGroup.fillActionBars(actionBars);
+//			if(fViewActionGroup != null)
+//				fViewActionGroup.fillActionBars(actionBars);
 			fLayoutActionGroup.fillActionBars(actionBars);
 			fHasFilledViewMenu = true;
 		}

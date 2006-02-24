@@ -46,7 +46,6 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 	private CompletionProposalComparator fComparator;
 	private ILabelProvider fLabelProvider;
 
-	private String fErrorMessage;
 	private char[] fProposalAutoActivationSet;
 
 	/**
@@ -106,7 +105,7 @@ public class JavaPackageCompletionProcessor implements IContentAssistProcessor, 
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
 	 */
 	public String getErrorMessage() {
-		return fErrorMessage;
+		return null;
 	}
 
 	/*

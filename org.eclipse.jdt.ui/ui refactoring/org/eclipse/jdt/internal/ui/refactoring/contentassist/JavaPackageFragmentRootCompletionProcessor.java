@@ -51,7 +51,6 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 	private IPackageFragmentRoot fPackageFragmentRoot;
 	private CompletionProposalComparator fComparator;
 
-	private String fErrorMessage;
 	private char[] fProposalAutoActivationSet;
 
 	/**
@@ -103,7 +102,7 @@ public class JavaPackageFragmentRootCompletionProcessor implements IContentAssis
 	 * @see org.eclipse.jface.text.contentassist.IContentAssistProcessor#getErrorMessage()
 	 */
 	public String getErrorMessage() {
-		return fErrorMessage;
+		return null;
 	}
 
 	/*
