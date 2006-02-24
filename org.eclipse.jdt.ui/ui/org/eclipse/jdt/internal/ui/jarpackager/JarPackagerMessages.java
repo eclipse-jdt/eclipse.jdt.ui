@@ -308,10 +308,6 @@ public final class JarPackagerMessages extends NLS {
 
 	public static String JarPackageWizardPage_refactorings_text;
 
-	public static String JarPackageWizardPage_saveAsDialog_message;
-
-	public static String JarPackageWizardPage_saveAsDialog_title;
-
 	public static String JarPackageWizardPage_title;
 
 	public static String JarPackageWizardPage_whatToExport_label;

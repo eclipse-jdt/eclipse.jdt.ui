@@ -15,15 +15,16 @@ import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
 
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.IStatus;
+import org.eclipse.core.runtime.Path;
+
 import org.eclipse.core.resources.IFile;
 import org.eclipse.core.resources.IFolder;
 import org.eclipse.core.resources.IProject;
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IWorkspace;
 import org.eclipse.core.resources.ResourcesPlugin;
-import org.eclipse.core.runtime.IPath;
-import org.eclipse.core.runtime.IStatus;
-import org.eclipse.core.runtime.Path;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.BusyIndicator;
@@ -37,7 +38,6 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 import org.eclipse.swt.widgets.TreeItem;
 
 import org.eclipse.jface.dialogs.Dialog;
@@ -48,12 +48,10 @@ import org.eclipse.jface.viewers.DecoratingLabelProvider;
 import org.eclipse.jface.viewers.ICheckStateListener;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.ITreeContentProvider;
-import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
-import org.eclipse.ui.dialogs.SaveAsDialog;
-import org.eclipse.ui.dialogs.WizardExportResourcesPage;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.WizardExportResourcesPage;
 
 import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathEntry;
@@ -97,7 +95,6 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 	private Button		fCompressCheckbox;
 	private Button		fOverwriteCheckbox;
 	private Button		fIncludeDirectoryEntriesCheckbox;
-	private Text		fDescriptionFileText;
 	private boolean	fInitiallySelecting= true;
 
 	// dialog store id constants
@@ -435,23 +432,6 @@ class JarPackageWizardPage extends WizardExportResourcesPage implements IJarPack
 				handleDestinationBrowseButtonPressed();
 			}
 		});
-	}
-
-	/**
-	 *	Open an appropriate destination browser so that the user can specify a source
-	 *	to import from
-	 */
-	protected void handleDescriptionFileBrowseButtonPressed() {
-		SaveAsDialog dialog= new SaveAsDialog(getContainer().getShell());
-		dialog.create();
-		dialog.getShell().setText(JarPackagerMessages.JarPackageWizardPage_saveAsDialog_title); 
-		dialog.setMessage(JarPackagerMessages.JarPackageWizardPage_saveAsDialog_message); 
-		dialog.setOriginalFile(createFileHandle(fJarPackage.getDescriptionLocation()));
-		if (dialog.open() == Window.OK) {
-			IPath path= dialog.getResult();
-			path= path.removeFileExtension().addFileExtension(JarPackagerUtil.DESCRIPTION_EXTENSION);
-			fDescriptionFileText.setText(path.toString());
-		}
 	}
 
 	/**
