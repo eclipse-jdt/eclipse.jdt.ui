@@ -1134,7 +1134,7 @@ public class JarPackageData {
 	}
 
 	/**
-	 * Determines wether the jar packager exports only refactorings causing
+	 * Determines whether the jar packager exports only refactorings causing
 	 * structural changes.
 	 * <p>
 	 * This information is used for JAR export.
