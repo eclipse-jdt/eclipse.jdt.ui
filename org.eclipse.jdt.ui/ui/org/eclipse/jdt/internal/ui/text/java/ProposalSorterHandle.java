@@ -69,8 +69,6 @@ public final class ProposalSorterHandle {
 	private final IConfigurationElement fElement;
 	/** The computer, if instantiated, <code>null</code> otherwise. */
 	private AbstractProposalSorter fSorter;
-	/** The first error message in the most recent operation, or <code>null</code>. */
-	private String fLastError;
 
 	/**
 	 * Creates a new descriptor.
@@ -275,12 +273,12 @@ public final class ProposalSorterHandle {
 	}
 	
 	/**
-	 * Returns the error message from the described extension.
+	 * Returns the error message from the described extension, <code>null</code> for no error.
 	 * 
-	 * @return the error message from the described extension
+	 * @return the error message from the described extension, <code>null</code> for no error
 	 */
 	public String getErrorMessage() {
-		return fLastError;
+		return null;
 	}
 	
 }
