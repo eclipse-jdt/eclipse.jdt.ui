@@ -20,7 +20,7 @@
             %JUnitProjectExampleCreationWizard.description
          </description>
          <projectsetup
-         	   banner="$nl$/icons/full/wizban/newjprjex_wiz.gif"
+         	   banner="$nl$/icons/full/wizban/newjprjex_wiz.png"
          	   encoding="ISO-8859-1"
                pagetitle="%JUnitProjectExampleCreationWizard.pagetitle"
                name="JUnit"
