@@ -937,4 +937,6 @@ public final class RefactoringCoreMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringCoreMessages.class);
 	}
+
+	public static String RenameJavaProjectProcessor_folder_already_exists;
 }

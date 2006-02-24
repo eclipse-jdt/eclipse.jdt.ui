@@ -74,7 +74,7 @@ public class RenameJavaProjectChange extends AbstractJavaElementRenameChange {
 			IProject project= getProject();
 			if (project != null){
 				IProjectDescription description = project.getDescription();
-				description.setName(createNewPath().segment(0));
+				description.setName(getNewName());
 				project.move(description, IResource.FORCE | IResource.SHALLOW, new SubProgressMonitor(pm, 1));
 			}
 		} finally{

@@ -10,6 +10,11 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring.rename;
 
+import java.net.URI;
+
+import org.eclipse.core.filesystem.EFS;
+import org.eclipse.core.filesystem.IFileStore;
+
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IPath;
 import org.eclipse.core.runtime.IProgressMonitor;
@@ -135,6 +140,8 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 		
 		if (projectNameAlreadyExists(newName))
 			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameJavaProjectRefactoring_already_exists); 
+		if (projectFolderAlreadyExists(newName))
+			return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.RenameJavaProjectProcessor_folder_already_exists); 
 		
 		return new RefactoringStatus();
 	}
@@ -158,9 +165,19 @@ public class RenameJavaProjectProcessor extends JavaRenameProcessor implements I
 	}
 	
 	private boolean projectNameAlreadyExists(String newName){
-		return fProject.getJavaModel().getJavaProject(newName).exists();
+		return ResourcesPlugin.getWorkspace().getRoot().getProject(newName).exists();
 	}
 
+	private boolean projectFolderAlreadyExists(String newName) throws CoreException {
+		boolean isNotInWorkpace= fProject.getProject().getDescription().getLocationURI() != null;
+		if (isNotInWorkpace)
+			return false; // projects outside of the workspace are not renamed
+		URI locationURI= fProject.getProject().getLocationURI();
+		IFileStore projectStore= EFS.getStore(locationURI);
+		IFileStore newProjectStore= projectStore.getParent().getChild(newName);
+		return newProjectStore.fetchInfo().exists();
+	}
+	
 	//--- changes 
 	
 	public Change createChange(IProgressMonitor pm) throws CoreException {
