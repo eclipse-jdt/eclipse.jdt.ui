@@ -222,7 +222,7 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
 
             return;
         }
-        if ((method != null) && !method.equals(fShownMethod)) {
+        if (! method.equals(fShownMethod)) {
             addHistoryEntry(method);
         }
 
