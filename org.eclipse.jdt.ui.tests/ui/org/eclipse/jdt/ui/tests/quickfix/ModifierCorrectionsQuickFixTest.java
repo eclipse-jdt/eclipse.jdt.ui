@@ -1484,8 +1484,9 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		buf.append("import java.util.ArrayList;\n");
 		buf.append("import java.util.List;\n");
 		buf.append("public class E {\n");
-		buf.append("    final List<String> a= null, y= a;\n");
+		buf.append("    final List<String> a= null;\n");
 		buf.append("    List<String> x= a;\n");
+		buf.append("    final List<String> y= a;\n");
 		buf.append("    public void foo() {\n");
 		buf.append("        x= new ArrayList<String>();\n");
 		buf.append("    }\n");
@@ -2517,5 +2518,49 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, expected);
 		}
 
+	public void testMakeFinalBug129165() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"serial\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 1, j= i + 1, h= j + 1;\n");
+		buf.append("        Serializable ser= new Serializable() {\n");
+		buf.append("            public void bar() {\n");
+		buf.append("                System.out.println(j);\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+		assertNumberOfProposals(proposals, 1);
+		assertCorrectLabels(proposals);
+		
+		CUCorrectionProposal proposal= (CUCorrectionProposal) proposals.get(0);
+		String preview= getPreviewContent(proposal);
+
+		buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.io.Serializable;\n");
+		buf.append("public class E {\n");
+		buf.append("    @SuppressWarnings(\"serial\")\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        int i= 1;\n");
+		buf.append("        final int j= i + 1;\n");
+		buf.append("        int h= j + 1;\n");
+		buf.append("        Serializable ser= new Serializable() {\n");
+		buf.append("            public void bar() {\n");
+		buf.append("                System.out.println(j);\n");
+		buf.append("            }\n");
+		buf.append("        };\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		assertEqualString(preview, buf.toString());
+	}
 	
 }
