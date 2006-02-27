@@ -18,6 +18,7 @@ import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.search.IJavaSearchConstants;
 import org.eclipse.jdt.core.search.IJavaSearchScope;
@@ -58,6 +59,7 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 	public static final int F_REMOVE_DUPLICATES= 1;
 	public static final int F_SHOW_PARENTS= 2;
 	public static final int F_HIDE_DEFAULT_PACKAGE= 4;
+	public static final int F_HIDE_EMPTY_INNER= 8;
 	
 
 	/** The dialog location. */
@@ -73,8 +75,8 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 	 * Creates a package selection dialog.
 	 * @param parent the parent shell
 	 * @param context the runnable context to run the search in
-	 * @param flags a combination of <code>F_REMOVE_DUPLICATES</code>, <code>F_SHOW_PARENTS</code>
-	 * and  <code>F_HIDE_DEFAULT_PACKAGE</code>
+	 * @param flags a combination of <code>F_REMOVE_DUPLICATES</code>, <code>F_SHOW_PARENTS</code>,
+	 *  <code>F_HIDE_DEFAULT_PACKAGE</code> and  <code>F_HIDE_EMPTY_INNER</code>
 	 * @param scope the scope defining the available packages.
 	 */
 	public PackageSelectionDialog(Shell parent, IRunnableContext context, int flags, IJavaSearchScope scope) {
@@ -107,12 +109,19 @@ public class PackageSelectionDialog extends ElementListSelectionDialog {
 						private final boolean fAddDefault= (fFlags & F_HIDE_DEFAULT_PACKAGE) == 0;
 						private final boolean fDuplicates= (fFlags & F_REMOVE_DUPLICATES) == 0;
 						private final boolean fIncludeParents= (fFlags & F_SHOW_PARENTS) != 0;
+						private final boolean fHideEmptyInner= (fFlags & F_HIDE_EMPTY_INNER) != 0;
 
 						public void acceptSearchMatch(SearchMatch match) throws CoreException {
 							IJavaElement enclosingElement= (IJavaElement) match.getElement();
 							String name= enclosingElement.getElementName();
 							if (fAddDefault || name.length() > 0) {
 								if (fDuplicates || fSet.add(name)) {
+									if (fHideEmptyInner) {
+										IPackageFragment pkg= (IPackageFragment) enclosingElement;
+										if (pkg.getCompilationUnits().length == 0 && pkg.getClassFiles().length == 0) {
+											return;
+										}
+									}
 									packageList.add(enclosingElement);
 									if (fIncludeParents) {
 										addParentPackages(enclosingElement, name);

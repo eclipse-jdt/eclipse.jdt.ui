@@ -10,40 +10,27 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.packageview;
 
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
-
-import org.eclipse.core.resources.IWorkspaceRoot;
-
 import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.action.Action;
 import org.eclipse.jface.dialogs.MessageDialog;
 import org.eclipse.jface.viewers.IStructuredSelection;
 import org.eclipse.jface.viewers.StructuredSelection;
-import org.eclipse.jface.viewers.StructuredViewer;
-import org.eclipse.jface.viewers.ViewerFilter;
 
-import org.eclipse.ui.dialogs.ElementListSelectionDialog;
-import org.eclipse.ui.dialogs.SelectionDialog;
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.SelectionDialog;
+import org.eclipse.ui.progress.IProgressService;
 
-import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.IJavaModel;
-import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
-import org.eclipse.jdt.core.IPackageFragmentRoot;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.dialogs.PackageSelectionDialog;
 
 class GotoPackageAction extends Action {
 	
@@ -71,43 +58,16 @@ class GotoPackageAction extends Action {
 	}
 	
 	private SelectionDialog createAllPackagesDialog(Shell shell) throws JavaModelException{
-		ElementListSelectionDialog dialog= new ElementListSelectionDialog(
-			shell, 
-			new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_ROOT|JavaElementLabelProvider.SHOW_POST_QUALIFIED)
-		);
+		IProgressService progressService= PlatformUI.getWorkbench().getProgressService();
+		IJavaSearchScope scope= SearchEngine.createWorkspaceScope();
+		int flag= PackageSelectionDialog.F_HIDE_EMPTY_INNER;
+		PackageSelectionDialog dialog= new PackageSelectionDialog(shell, progressService, flag, scope);
+		dialog.setFilter(""); //$NON-NLS-1$
 		dialog.setIgnoreCase(false);
-		dialog.setElements(collectPackages()); // XXX inefficient
+		dialog.setMultipleSelection(false);		
 		return dialog;
 	}
-	
-	private Object[] collectPackages() throws JavaModelException {
-		IWorkspaceRoot wsroot= JavaPlugin.getWorkspace().getRoot();
-		IJavaModel model= JavaCore.create(wsroot);
-		IJavaProject[] projects= model.getJavaProjects();
-		Set set= new HashSet(); 
-		List allPackages= new ArrayList();
-		for (int i= 0; i < projects.length; i++) {
-			IPackageFragmentRoot[] roots= projects[i].getPackageFragmentRoots();	
-			for (int j= 0; j < roots.length; j++) {
-				IPackageFragmentRoot root= roots[j];
-		 		if (!isFiltered(root) && !set.contains(root)) {
-					set.add(root);
-					IJavaElement[] packages= root.getChildren();
-					appendPackages(allPackages, packages);
-				}
-			}
-		}
-		return allPackages.toArray();
-	}
-	
-	private void appendPackages(List all, IJavaElement[] packages) {
-		for (int i= 0; i < packages.length; i++) {
-			IJavaElement element= packages[i];
-			if (!isFiltered(element))
-				all.add(element); 
-		}
-	}
-		
+				
 	private void gotoPackage(IPackageFragment p) {
 		fPackageExplorer.selectReveal(new StructuredSelection(p));
 		if (!p.equals(getSelectedElement())) {
@@ -125,15 +85,4 @@ class GotoPackageAction extends Action {
 		return PackagesMessages.GotoPackage_dialog_title; 
 	}
 	
-	private boolean isFiltered(Object element) {
-		StructuredViewer viewer= fPackageExplorer.getViewer();
-		ViewerFilter[] filters= viewer.getFilters();
-		if (filters != null) {
-			for (int i = 0; i < filters.length; i++) {
-				if (!filters[i].select(viewer, viewer.getInput(), element))
-					return true;
-			}
-		}
-		return false;
-	}
 }
