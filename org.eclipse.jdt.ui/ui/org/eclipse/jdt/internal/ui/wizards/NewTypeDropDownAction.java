@@ -91,7 +91,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 		private ImageDescriptor getIconFromConfig(IConfigurationElement config) {
 			String iconName = config.getAttribute(ATT_ICON);
 			if (iconName != null) {
-				Bundle bundle= Platform.getBundle(config.getNamespace());	
+				Bundle bundle= Platform.getBundle(config.getContributor().getName());	
 				return JavaPluginImages.createImageDescriptor(bundle, new Path(iconName), true);
 			}
 			return null;
@@ -198,6 +198,7 @@ public class NewTypeDropDownAction extends Action implements IMenuCreator, IWork
 	 * @see org.eclipse.ui.IWorkbenchWindowActionDelegate#init(org.eclipse.ui.IWorkbenchWindow)
 	 */
 	public void init(IWorkbenchWindow window) {
+		fWizardShell= window.getShell();
 	}
 	
 	/* (non-Javadoc)
