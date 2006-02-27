@@ -157,10 +157,10 @@ public class ProfileStore {
 	 * and are all updated to the latest version.
 	 * @throws CoreException
 	 */
-	public static List readProfiles(IScopeContext instanceScope) throws CoreException {
-		List res= readProfilesFromPreferences(PREF_FORMATTER_PROFILES, instanceScope);
+	public static List readProfiles(IScopeContext scope) throws CoreException {
+		List res= readProfilesFromPreferences(scope);
 		if (res == null) {
-			return readOldForCompatibility(instanceScope);
+			return readOldForCompatibility(scope);
 		}
 		return res;
 	}
@@ -183,8 +183,8 @@ public class ProfileStore {
 		}
 	}
 	
-	private static List readProfilesFromPreferences(String key, IScopeContext instanceScope) throws CoreException {
-		String string= instanceScope.getNode(JavaUI.ID_PLUGIN).get(key, null);
+	public static List readProfilesFromPreferences(IScopeContext scope) throws CoreException {
+		String string= scope.getNode(JavaUI.ID_PLUGIN).get(PREF_FORMATTER_PROFILES, null);
 		if (string != null && string.length() > 0) {
 			byte[] bytes;
 			try {

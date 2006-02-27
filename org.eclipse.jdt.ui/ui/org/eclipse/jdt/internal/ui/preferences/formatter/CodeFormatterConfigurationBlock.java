@@ -19,6 +19,7 @@ import java.util.Observable;
 import java.util.Observer;
 
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 
 import org.eclipse.core.resources.IProject;
@@ -116,8 +117,11 @@ public class CodeFormatterConfigurationBlock {
 				case ProfileManager.PROFILE_DELETED_EVENT:
 				case ProfileManager.PROFILE_RENAMED_EVENT:
 					updateProfiles();
+					updateSelection();
+					break;
 				case ProfileManager.SELECTION_CHANGED_EVENT:
 					updateSelection();
+					break;
 			}
 		}
 		
@@ -367,6 +371,14 @@ public class CodeFormatterConfigurationBlock {
 		    profiles= ProfileStore.readProfiles(fInstanceScope);
 		} catch (CoreException e) {
 			JavaPlugin.log(e);
+		}
+		if (profiles == null) {
+			try {
+				// bug 129427
+			    profiles= ProfileStore.readProfilesFromPreferences(new DefaultScope());
+			} catch (CoreException e) {
+				JavaPlugin.log(e);
+			}
 		}
 		
 		if (profiles == null) 

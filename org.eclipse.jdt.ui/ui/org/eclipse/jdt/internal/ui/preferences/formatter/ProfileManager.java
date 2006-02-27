@@ -18,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Observable;
 
+import org.eclipse.core.runtime.preferences.DefaultScope;
 import org.eclipse.core.runtime.preferences.IEclipsePreferences;
 import org.eclipse.core.runtime.preferences.IScopeContext;
 import org.eclipse.core.runtime.preferences.InstanceScope;
@@ -354,18 +355,22 @@ public class ProfileManager extends Observable {
 		
 		IScopeContext instanceScope= fPreferencesAccess.getInstanceScope(); 
 		String profileId= instanceScope.getNode(JavaUI.ID_PLUGIN).get(PROFILE_KEY, null);
-		
-		// fix for bug 89739
-		if (profileId == null) { // no profile set, or always inherited from default
-			profileId= DEFAULT_PROFILE; // use eclipse as default
-			IEclipsePreferences node= instanceScope.getNode(JavaCore.PLUGIN_ID);
-			if (node != null) {
-				String tabSetting= node.get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, null);
-				if (JavaCore.SPACE.equals(tabSetting)) {
-					profileId= JAVA_PROFILE;
+		if (profileId == null) {
+			// request from bug 129427
+			profileId= new DefaultScope().getNode(JavaUI.ID_PLUGIN).get(PROFILE_KEY, null);
+			// fix for bug 89739
+			if (DEFAULT_PROFILE.equals(profileId)) { // default default: 
+				IEclipsePreferences node= instanceScope.getNode(JavaCore.PLUGIN_ID);
+				if (node != null) {
+					String tabSetting= node.get(DefaultCodeFormatterConstants.FORMATTER_TAB_CHAR, null);
+					if (JavaCore.SPACE.equals(tabSetting)) {
+						profileId= JAVA_PROFILE;
+					}
 				}
 			}
 		}
+		
+
 		
 		Profile profile= (Profile) fProfiles.get(profileId);
 		if (profile == null) {
