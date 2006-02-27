@@ -63,6 +63,7 @@ import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.participants.JavaProcessors;
+import org.eclipse.jdt.internal.corext.refactoring.rename.RenameAnalyzeUtil.LocalAnalyzePackage;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.INameUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IReferenceUpdating;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
@@ -239,7 +240,7 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 
 	private void initAST() throws JavaModelException {
 		if (!fIsComposite)
-			fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true);
+			fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, null, true, true, null);
 		ISourceRange sourceRange= fLocalVariable.getNameRange();
 		ASTNode name= NodeFinder.perform(fCompilationUnitNode, sourceRange);
 		if (name == null)
@@ -271,8 +272,10 @@ public class RenameLocalVariableProcessor extends JavaRenameProcessor implements
 			if (result.hasFatalError())
 				return result;
 			createEdits();
-			if (!fIsComposite)
-				result.merge(RenameAnalyzeUtil.analyzeLocalRenames(new RenameAnalyzeUtil.LocalAnalyzePackage[] { fLocalAnalyzePackage }, fChange, fCompilationUnitNode));
+			if (!fIsComposite) {
+				LocalAnalyzePackage[] localAnalyzePackages= new RenameAnalyzeUtil.LocalAnalyzePackage[] { fLocalAnalyzePackage };
+				result.merge(RenameAnalyzeUtil.analyzeLocalRenames(localAnalyzePackages, fChange, fCompilationUnitNode, true));
+			}
 			return result;
 		} finally {
 			pm.done();

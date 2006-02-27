@@ -419,6 +419,10 @@ public class RenameTempTests extends RefactoringTest{
 		helper1("param");
 	}
 	
+	public void test61() throws Exception{
+		helper1("x");
+	}
+	
 // -----
 	public void testFail0() throws Exception{
 		if (BUG_checkDeclInNestedClass) {

@@ -1393,7 +1393,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				}
 				current++;
 			}
-			status.merge(RenameAnalyzeUtil.analyzeLocalRenames(analyzePackages, textChange, currentResolvedCU));
+			status.merge(RenameAnalyzeUtil.analyzeLocalRenames(analyzePackages, textChange, currentResolvedCU, false));
 		}
 
 		/*

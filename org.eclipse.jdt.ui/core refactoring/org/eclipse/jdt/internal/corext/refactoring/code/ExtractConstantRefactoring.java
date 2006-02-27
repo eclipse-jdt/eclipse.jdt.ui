@@ -362,6 +362,7 @@ public class ExtractConstantRefactoring extends CommentRefactoring implements II
 			pm.worked(1);
 	
 			fCuRewrite= new CompilationUnitRewrite(fCu);
+			fCuRewrite.setStatementsRecovery(true);
 	
 			result.merge(checkSelection(new SubProgressMonitor(pm, 5)));
 			if (result.hasFatalError())
@@ -527,7 +528,7 @@ public class ExtractConstantRefactoring extends CommentRefactoring implements II
 			pm.worked(1);
 			
 			String newCuSource= fChange.getPreviewContent(new NullProgressMonitor());
-			CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, fCu, true, null);
+			CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, fCu, true, true, null);
 			
 			IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCuRewrite.getRoot());
 			for (int i= 0; i < newProblems.length; i++) {

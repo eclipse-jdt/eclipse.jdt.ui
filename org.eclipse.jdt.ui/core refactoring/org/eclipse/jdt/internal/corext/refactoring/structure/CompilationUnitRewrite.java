@@ -57,6 +57,7 @@ public class CompilationUnitRewrite {
 	private ImportRewrite fImportRewrite; // lazily initialized
 	private ImportRemover fImportRemover; // lazily initialized
 	private boolean fResolveBindings= true;
+	private boolean fStatementsRecovery= false;
 	private final WorkingCopyOwner fOwner;
 
 	public CompilationUnitRewrite(ICompilationUnit cu) {
@@ -96,6 +97,23 @@ public class CompilationUnitRewrite {
 	 */
 	public void setResolveBindings(boolean resolve) {
 		fResolveBindings= resolve;
+	}
+	
+	/**
+	 * Requests that the compiler should perfom statements recovery.
+	 * To be effective, this method must be called before any
+	 * of {@link #getRoot()},{@link #getASTRewrite()},
+	 * {@link #getImportRemover()}. This method has no effect if the target object
+	 * has been created with {@link #CompilationUnitRewrite(ICompilationUnit, CompilationUnit)}.
+	 * <p>
+	 * Defaults to <b><code>false</code></b> (do not perform statements recovery).
+	 * </p>
+	 * 
+	 * @param statementsRecovery whether statements recovery should be performed
+	 * @see org.eclipse.jdt.core.dom.ASTParser#setStatementsRecovery(boolean)
+	 */
+	public void setStatementsRecovery(boolean statementsRecovery) {
+		fStatementsRecovery= statementsRecovery;
 	}
 	
 	public void clearASTRewrite() {
@@ -140,7 +158,7 @@ public class CompilationUnitRewrite {
 		cuChange.setEdit(multiEdit);
 		return attachChange(cuChange, monitor);
 	}
-
+	
 	/**
 	 * Attaches the changes of this compilation unit rewrite to the given CU Change. The given
 	 * change <b>must</b> either have no root edit, or a MultiTextEdit as a root edit.
@@ -148,6 +166,7 @@ public class CompilationUnitRewrite {
 	 * this compilation unit.
 	 *  
 	 * @param cuChange existing CompilationUnitChange with a MultiTextEdit root or no root at all.
+	 * @param monitor the progress monitor or <code>null</code>
 	 * @return a change combining the changes of this rewrite and the given rewrite.
 	 * @throws CoreException
 	 */
@@ -206,7 +225,7 @@ public class CompilationUnitRewrite {
 
 	public CompilationUnit getRoot() {
 		if (fRoot == null)
-			fRoot= new RefactoringASTParser(AST.JLS3).parse(fCu, fOwner, fResolveBindings, null);
+			fRoot= new RefactoringASTParser(AST.JLS3).parse(fCu, fOwner, fResolveBindings, fStatementsRecovery, null);
 		return fRoot;
 	}
 	

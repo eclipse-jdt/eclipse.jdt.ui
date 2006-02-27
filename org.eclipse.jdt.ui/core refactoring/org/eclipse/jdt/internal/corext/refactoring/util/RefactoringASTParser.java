@@ -43,7 +43,12 @@ public class RefactoringASTParser {
 	}
 
 	public CompilationUnit parse(ICompilationUnit unit, WorkingCopyOwner owner, boolean resolveBindings, IProgressMonitor pm) {
+		return parse(unit, owner, resolveBindings, false, pm);
+	}
+
+	public CompilationUnit parse(ICompilationUnit unit, WorkingCopyOwner owner, boolean resolveBindings, boolean statementsRecovery, IProgressMonitor pm) {
 		fParser.setResolveBindings(resolveBindings);
+		fParser.setStatementsRecovery(statementsRecovery);
 		fParser.setSource(unit);
 		if (owner != null)
 			fParser.setWorkingCopyOwner(owner);
@@ -56,12 +61,14 @@ public class RefactoringASTParser {
 	/**
 	 * @param newCuSource the source
 	 * @param originalCu the compilation unit to get the name and project from
-	 * @param resolveBindings <code>true</code> is bindings are to be resolved
+	 * @param resolveBindings whether bindings are to be resolved
+	 * @param statementsRecovery whether statements recovery should be enabled
 	 * @param pm an {@link IProgressMonitor}, or <code>null</code>
 	 * @return the parsed CompilationUnit
 	 */
-	public CompilationUnit parse(String newCuSource, ICompilationUnit originalCu, boolean resolveBindings, IProgressMonitor pm) {
+	public CompilationUnit parse(String newCuSource, ICompilationUnit originalCu, boolean resolveBindings, boolean statementsRecovery, IProgressMonitor pm) {
 		fParser.setResolveBindings(resolveBindings);
+		fParser.setStatementsRecovery(statementsRecovery);
 		fParser.setSource(newCuSource.toCharArray());
 		fParser.setUnitName(originalCu.getElementName());
 		fParser.setProject(originalCu.getJavaProject());

@@ -482,7 +482,7 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 
 	private void checkNewSource(TextChange change, RefactoringStatus result) throws CoreException {
 		String newCuSource= change.getPreviewContent(new NullProgressMonitor());
-		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, fCu, true, null);
+		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, fCu, true, true, null);
 		IProblem[] newProblems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fCompilationUnitNode);
 		for (int i= 0; i < newProblems.length; i++) {
 			IProblem problem= newProblems[i];
@@ -507,7 +507,7 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 			if (!fCu.isStructureKnown())
 				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_syntax_error); 
 
-			CompilationUnit rootNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true, new SubProgressMonitor(pm, 3));
+			CompilationUnit rootNode= new RefactoringASTParser(AST.JLS3).parse(fCu, null, true, true, new SubProgressMonitor(pm, 3));
 			
 			result.merge(checkActivationBasics(rootNode, new SubProgressMonitor(pm, 3)));
 			if ((!result.hasFatalError()) && isLiteralNodeSelected())

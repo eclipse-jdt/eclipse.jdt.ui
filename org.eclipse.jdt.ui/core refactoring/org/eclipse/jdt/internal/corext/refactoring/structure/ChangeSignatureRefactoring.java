@@ -961,7 +961,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 		ICompilationUnit cu= getCu();
 		TextChange change= fChangeManager.get(cu);
 		String newCuSource= change.getPreviewContent(new NullProgressMonitor());
-		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, cu, true, null);
+		CompilationUnit newCUNode= new RefactoringASTParser(AST.JLS3).parse(newCuSource, cu, true, false, null);
 		IProblem[] problems= RefactoringAnalyzeUtil.getIntroducedCompileProblems(newCUNode, fBaseCuRewrite.getRoot());
 		RefactoringStatus result= new RefactoringStatus();
 		for (int i= 0; i < problems.length; i++) {
