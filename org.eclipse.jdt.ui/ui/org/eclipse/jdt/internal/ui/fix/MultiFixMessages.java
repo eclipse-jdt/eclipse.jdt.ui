@@ -101,6 +101,8 @@ public class MultiFixMessages extends NLS {
 	public static String CleanUpRefactoringWizard_addFinalParameters_checkBoxLabel;
 	public static String CleanUpRefactoringWizard_addFinalLocals_checkBoxLabel;
 	public static String CleanUpRefactoringWizard_changeToFinal_checkBoxLabel;
+	public static String CleanUpRefactoringWizard_NonStaticAccesses_groupDescription;
+	public static String CleanUpRefactoringWizard_StaticAccesses_groupDescription;
 
 	public static String PotentialProgrammingProblemsCleanUp_AddSerialId_section_name;
 	public static String PotentialProgrammingProblemsCleanUp_Generated_radioButton_name;
@@ -127,5 +129,6 @@ public class MultiFixMessages extends NLS {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, MultiFixMessages.class);
 	}
+
 
 }
