@@ -118,7 +118,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	private ImportRewrite createImportRewrite() {
 		if (fCompilationUnit != null && allowAddingImports()) {
 			try {
-				CompilationUnit cu= createASTRoot(fCompilationUnit);
+				CompilationUnit cu= getASTRoot(fCompilationUnit);
 				if (cu == null) {
 					ImportRewrite rewrite= StubUtility.createImportRewrite(fCompilationUnit, true);
 					fImportContext= null;
@@ -135,7 +135,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		return null;
 	}
 
-	private CompilationUnit createASTRoot(ICompilationUnit compilationUnit) {
+	private CompilationUnit getASTRoot(ICompilationUnit compilationUnit) {
 		return JavaPlugin.getDefault().getASTProvider().getAST(compilationUnit, ASTProvider.WAIT_NO, new NullProgressMonitor());
 	}
 
