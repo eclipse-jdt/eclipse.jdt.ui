@@ -954,6 +954,8 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 		
 		try {
 			final IStorage storage= sei.getStorage();
+			if (storage.getName() == null || storage.getFullPath() == null)
+				return null;
 			
 			WorkingCopyOwner woc= new WorkingCopyOwner() {
 				/*
