@@ -357,14 +357,10 @@ public class ExtractConstantRefactoring extends CommentRefactoring implements II
 				return result;
 			pm.worked(1);
 	
-			if (!fCu.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractConstantRefactoring_syntax_error); 
-			pm.worked(1);
-	
 			fCuRewrite= new CompilationUnitRewrite(fCu);
 			fCuRewrite.setStatementsRecovery(true);
 	
-			result.merge(checkSelection(new SubProgressMonitor(pm, 5)));
+			result.merge(checkSelection(new SubProgressMonitor(pm, 6)));
 			if (result.hasFatalError())
 				return result;
 			
