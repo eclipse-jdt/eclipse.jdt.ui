@@ -1586,6 +1586,10 @@ public class ExtractMethodTests extends AbstractSelectionTestCase {
 		errorTest();
 	}
 	
+	public void test803() throws Exception {
+		errorTest();
+	}
+	
 	//---- Test parameter name changes
 	
 	private void invalidParameterNameTest(String[] newNames) throws Exception {
