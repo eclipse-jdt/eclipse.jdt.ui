@@ -159,9 +159,12 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 
 
 	/**
-	 * This method is <code>public</code> for test purposes only.
+	 * Constructs a new document adapter.
+	 *
+	 * @since 3.2
 	 */
 	public DocumentAdapter(IOpenable owner, IPath path) {
+		Assert.isLegal(path != null);
 		
 		fOwner= owner;
 		fPath= path;
@@ -170,7 +173,7 @@ public class DocumentAdapter implements IBuffer, IDocumentListener {
 	}
 	
 	/**
-	 * This method is <code>public</code> for test purposes only.
+	 * Constructs a new document adapter.
 	 */
 	public DocumentAdapter(IOpenable owner, IFile file) {
 
