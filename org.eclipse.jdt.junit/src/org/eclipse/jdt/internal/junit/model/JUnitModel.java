@@ -281,6 +281,8 @@ public final class JUnitModel {
 	
 	private void notifyTestRunSessionRemoved(TestRunSession testRunSession) {
 		testRunSession.stopTestRun();
+		ILaunchManager launchManager= DebugPlugin.getDefault().getLaunchManager();
+		launchManager.removeLaunch(testRunSession.getLaunch());
 		
 		Object[] listeners = fTestRunSessionListeners.getListeners();
 		for (int i = 0; i < listeners.length; ++i) {
