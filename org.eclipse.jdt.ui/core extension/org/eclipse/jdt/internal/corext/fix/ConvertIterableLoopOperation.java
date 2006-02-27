@@ -55,6 +55,8 @@ import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewr
 import org.eclipse.jdt.internal.corext.refactoring.structure.ImportRemover;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
+import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
+
 /**
  * Operation to convert for loops over iterables to enhanced for loops.
  * 
@@ -180,8 +182,13 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 	private ITypeBinding getIterableType(final ITypeBinding iterator) {
 		if (iterator != null) {
 			final ITypeBinding[] bindings= iterator.getTypeArguments();
-			if (bindings.length > 0)
-				return bindings[0];
+			if (bindings.length > 0) {
+				ITypeBinding arg= bindings[0];
+				if (arg.isWildcardType()) {
+					arg= ASTResolving.normalizeWildcardType(arg, true, fRoot.getAST());
+				}
+				return arg;
+			}
 		}
 		return fRoot.getAST().resolveWellKnownType("java.lang.Object"); //$NON-NLS-1$
 	}
