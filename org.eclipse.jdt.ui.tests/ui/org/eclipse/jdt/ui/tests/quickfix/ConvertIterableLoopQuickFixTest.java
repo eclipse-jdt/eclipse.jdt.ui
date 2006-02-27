@@ -544,4 +544,75 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 
 		assertCorrectLabels(proposals);
 	}
+	
+
+	public void testWildcard1() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("a", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class A {\n");
+		buf.append("  void f(List<? super Number> x){\n");
+		buf.append("    for (Iterator<? super Number> iter = x.iterator(); iter.hasNext();) {\n");
+		buf.append("    }\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, unit);
+
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class A {\n");
+		buf.append("  void f(List<? super Number> x){\n");
+		buf.append("    for (Object number : x) {\n");
+		buf.append("    }\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview, expected);
+	}
+	
+	public void testWildcard2() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("a", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class A {\n");
+		buf.append("  void f(List<? extends Number> x){\n");
+		buf.append("    for (Iterator<? extends Number> iter = x.iterator(); iter.hasNext();) {\n");
+		buf.append("    }\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		ICompilationUnit unit= pack.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, unit);
+
+		assertNotNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+
+		String preview= getPreviewContent(fConvertLoopProposal);
+
+		buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class A {\n");
+		buf.append("  void f(List<? extends Number> x){\n");
+		buf.append("    for (Number number : x) {\n");
+		buf.append("    }\n");
+		buf.append("  }\n");
+		buf.append("}\n");
+		String expected= buf.toString();
+		assertEqualString(preview, expected);
+	}
 }
