@@ -138,16 +138,9 @@ public class CompilationUnitRewrite {
 		CompilationUnitChange cuChange= new CompilationUnitChange(fCu.getElementName(), fCu);
 		MultiTextEdit multiEdit= new MultiTextEdit();
 		cuChange.setEdit(multiEdit);
-		return attachChange(cuChange);
+		return attachChange(cuChange, monitor);
 	}
-	
-	/**
-	 * @deprecated Use {@link #attachChange(CompilationUnitChange, IProgressMonitor)} instead
-	 */
-	public CompilationUnitChange attachChange(CompilationUnitChange cuChange) throws CoreException {
-		return attachChange(cuChange, null);
-	}
-	
+
 	/**
 	 * Attaches the changes of this compilation unit rewrite to the given CU Change. The given
 	 * change <b>must</b> either have no root edit, or a MultiTextEdit as a root edit.
