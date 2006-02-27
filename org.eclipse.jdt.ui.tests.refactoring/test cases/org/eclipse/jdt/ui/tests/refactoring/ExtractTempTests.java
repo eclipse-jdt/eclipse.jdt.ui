@@ -593,6 +593,15 @@ public class ExtractTempTests extends RefactoringTest {
 		helper1(9, 32, 9, 44, true, false, "asList", "asList");
 	}
 	
+	public void test93() throws Exception { // syntax error
+		helper1(6, 28, 6, 34, true, false, "bla", "string");
+	}
+	
+	public void test94() throws Exception {
+		//test for bug 19851, syntax error
+		helper1(6, 9, 6, 24, false, false, "temp", "toString");
+	}
+	
 	public void testZeroLengthSelection0() throws Exception {
 //		printTestDisabledMessage("test for bug 30146");
 		helper1(4, 18, 4, 18, true, false, "temp", "j");
@@ -695,10 +704,11 @@ public class ExtractTempTests extends RefactoringTest {
 		failHelper1(3, 9, 3, 41, false, false, "temp", RefactoringStatus.FATAL);
 	}	
 	
-	public void testFail21() throws Exception{
-		//test for bug 19851
-		failHelper1(6, 9, 6, 24, false, false, "temp", RefactoringStatus.FATAL);
-	}	
+//removed - allowed now (see bug 53243)
+//	public void testFail21() throws Exception{
+//		//test for bug 19851
+//		failHelper1(6, 9, 6, 24, false, false, "temp", RefactoringStatus.FATAL);
+//	}	
 
 	public void testFail22() throws Exception{
 //		printTestDisabledMessage("test for bug 21815");

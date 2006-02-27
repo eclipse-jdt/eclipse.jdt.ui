@@ -504,9 +504,6 @@ public class ExtractTempRefactoring extends CommentRefactoring implements IIniti
 			if (result.hasFatalError())
 				return result;
 
-			if (!fCu.isStructureKnown())
-				return RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.ExtractTempRefactoring_syntax_error); 
-
 			CompilationUnit rootNode= new RefactoringASTParser(AST.JLS3).parse(fCu, null, true, true, new SubProgressMonitor(pm, 3));
 			
 			result.merge(checkActivationBasics(rootNode, new SubProgressMonitor(pm, 3)));
