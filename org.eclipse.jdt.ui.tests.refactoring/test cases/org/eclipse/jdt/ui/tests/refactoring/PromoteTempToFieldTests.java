@@ -616,6 +616,14 @@ public class PromoteTempToFieldTests extends RefactoringTest{
         assertEquals("sortByDefiningTypeAction", ref.getFieldName());
 	}
 	
+	public void test23() throws Exception{ //syntax error
+		int accessModifier= Modifier.PRIVATE;
+		int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;
+		boolean declareFinal= false;
+		boolean declareStatic= false;
+		passHelper(5, 31, 5, 31, "fCount", declareStatic, declareFinal, initializeIn, accessModifier);
+	}
+	
 	public void testGenerics01() throws Exception {
         int accessModifier= Modifier.PRIVATE;
         int initializeIn= PromoteTempToFieldRefactoring.INITIALIZE_IN_FIELD;

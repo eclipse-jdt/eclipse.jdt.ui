@@ -406,7 +406,7 @@ public class PromoteTempToFieldRefactoring extends CommentRefactoring implements
     }
     
 	private void initAST(IProgressMonitor pm){
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true, pm);
+		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, null, true, true, pm);
 		fTempDeclarationNode= TempDeclarationFinder.findTempDeclaration(fCompilationUnitNode, fSelectionStart, fSelectionLength);
 	}
 
