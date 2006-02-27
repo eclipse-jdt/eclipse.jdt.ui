@@ -69,7 +69,6 @@ import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.SuperConstructorInvocation;
 import org.eclipse.jdt.core.dom.SuperFieldAccess;
 import org.eclipse.jdt.core.dom.SuperMethodInvocation;
-import org.eclipse.jdt.core.dom.ThisExpression;
 import org.eclipse.jdt.core.dom.Type;
 import org.eclipse.jdt.core.dom.TypeDeclaration;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
@@ -196,8 +195,7 @@ public class ModifierCorrectionSubProcessor {
 					excludedModifiers= Modifier.FINAL;
 					break;
 				default:
-					Assert.isTrue(false, "not supported"); //$NON-NLS-1$
-					return;
+					throw new IllegalArgumentException("not supported"); //$NON-NLS-1$
 			}
 			ICompilationUnit targetCU= isLocalVar ? cu : ASTResolving.findCompilationUnitForBinding(cu, context.getASTRoot(), typeBinding.getTypeDeclaration());
 			if (targetCU != null) {
@@ -205,10 +203,8 @@ public class ModifierCorrectionSubProcessor {
 				proposals.add(new ModifierChangeCompletionProposal(label, targetCU, bindingDecl, selectedNode, includedModifiers, excludedModifiers, relevance, image));
 			}
 		}
-		if (kind == TO_VISIBLE && bindingDecl.getKind() == IBinding.VARIABLE /* &&Modifier.isPrivate(bindingDecl.getModifiers())*/) {
-			if (selectedNode instanceof SimpleName || selectedNode instanceof FieldAccess && ((FieldAccess) selectedNode).getExpression() instanceof ThisExpression) {
-				UnresolvedElementsSubProcessor.getVariableProposals(context, problem, proposals);
-			}
+		if (kind == TO_VISIBLE && bindingDecl.getKind() == IBinding.VARIABLE) {
+			UnresolvedElementsSubProcessor.getVariableProposals(context, problem, (IVariableBinding) bindingDecl, proposals);
 		}
 	}
 

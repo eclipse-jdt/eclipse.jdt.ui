@@ -101,7 +101,7 @@ public class UnresolvedElementsSubProcessor {
 	
 	private static final String ADD_IMPORT_ID= "org.eclipse.jdt.ui.correction.addImport"; //$NON-NLS-1$
 
-	public static void getVariableProposals(IInvocationContext context, IProblemLocation problem, Collection proposals) throws CoreException {
+	public static void getVariableProposals(IInvocationContext context, IProblemLocation problem, IVariableBinding resolvedField, Collection proposals) throws CoreException {
 
 		ICompilationUnit cu= context.getCompilationUnit();
 
@@ -229,12 +229,15 @@ public class UnresolvedElementsSubProcessor {
 		// similar variables
 		addSimilarVariableProposals(cu, astRoot, binding, simpleName, isWriteAccess, proposals);
 
-		// new fields
-		addNewFieldProposals(cu, astRoot, binding, declaringTypeBinding, simpleName, isWriteAccess, proposals);
-
-		// new parameters and local variables
-		if (binding == null) {
-			addNewVariableProposals(cu, node, simpleName, proposals);
+		if (resolvedField == null || binding == null || resolvedField.getDeclaringClass() != binding.getTypeDeclaration() && Modifier.isPrivate(resolvedField.getModifiers())) {
+			
+			// new fields
+			addNewFieldProposals(cu, astRoot, binding, declaringTypeBinding, simpleName, isWriteAccess, proposals);
+			
+			// new parameters and local variables
+			if (binding == null) {
+				addNewVariableProposals(cu, node, simpleName, proposals);
+			}
 		}
 	}
 
@@ -524,6 +527,8 @@ public class UnresolvedElementsSubProcessor {
 			Type elementType= ((ArrayType) selectedNode).getElementType();
 			if (elementType.isSimpleType()) {
 				node= ((SimpleType) elementType).getName();
+			} else {
+				return;
 			}
 		} else if (selectedNode instanceof Name) {
 			node= (Name) selectedNode;

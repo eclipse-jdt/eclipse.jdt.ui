@@ -260,7 +260,7 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 				break;
 			case IProblem.UndefinedField:
 			case IProblem.UndefinedName:
-				UnresolvedElementsSubProcessor.getVariableProposals(context, problem, proposals);
+				UnresolvedElementsSubProcessor.getVariableProposals(context, problem, null, proposals);
 				break;
 			case IProblem.AmbiguousType:
 			case IProblem.JavadocAmbiguousType:
