@@ -253,7 +253,7 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
     }
 
     private void initAST(IProgressMonitor pm) {
-		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, true, pm);
+		fCompilationUnitNode= new RefactoringASTParser(AST.JLS3).parse(fCu, null, true, true, pm);
 		fAnonymousInnerClassNode= getAnonymousInnerClass(NodeFinder.perform(fCompilationUnitNode, fSelectionStart, fSelectionLength));
 		if (fAnonymousInnerClassNode != null) {
 			final AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(fAnonymousInnerClassNode, AbstractTypeDeclaration.class);

@@ -330,6 +330,10 @@ public class ConvertAnonymousToNestedTests extends RefactoringTest {
     		helper1(6, 14, 6, 14, true, "Inner", Modifier.PRIVATE);   
     }
 
+    public void test30() throws Exception{ // 2 syntax errors
+    	helper1(5, 32, 5, 32, true, true, "Greeter", Modifier.PRIVATE);   
+    }
+    
 	public void testGenerics0() throws Exception{
 		helper1(5, 20, 5, 20, true, "Inner", Modifier.PRIVATE);
 	}
