@@ -975,7 +975,7 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 			if (cpEntries == null || cpEntries.length == 0)
 				cpEntries= new IClasspathEntry[] { JavaRuntime.getDefaultJREContainerEntry() };
 
-			ICompilationUnit cu= woc.newWorkingCopy(storage.getName(), cpEntries, null, getProgressMonitor());
+			final ICompilationUnit cu= woc.newWorkingCopy(storage.getName(), cpEntries, null, getProgressMonitor());
 			if (setContents) {
 				int READER_CHUNK_SIZE= 2048;
 				int BUFFER_SIZE= 8 * READER_CHUNK_SIZE;
@@ -994,6 +994,10 @@ public class CompilationUnitDocumentProvider extends TextFileDocumentProvider im
 				}
 				cu.getBuffer().setContents(buffer.toString());
 			}
+			
+			if (!isModifiable(element))
+				JavaModelUtil.reconcile(cu);
+			
 			return cu;
 		} catch (CoreException ex) {
 			return null;

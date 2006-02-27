@@ -60,8 +60,6 @@ import org.eclipse.jdt.core.compiler.IScanner;
 import org.eclipse.jdt.core.compiler.ITerminalSymbols;
 import org.eclipse.jdt.core.compiler.InvalidInputException;
 
-import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
-
 import org.eclipse.jdt.ui.PreferenceConstants;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
@@ -779,18 +777,7 @@ public class DefaultJavaFoldingStructureProvider implements IJavaFoldingStructur
 	private IJavaElement getInputElement() {
 		if (fEditor == null)
 			return null;
-		
-		IJavaElement javaElement= EditorUtility.getEditorInputJavaElement(fEditor, false);
-		if (javaElement instanceof ICompilationUnit) {
-			ICompilationUnit unit= (ICompilationUnit) javaElement;
-			try {
-				JavaModelUtil.reconcile(unit);
-			} catch (JavaModelException x) {
-				JavaPlugin.log(x);
-			}
-		}
-		
-		return javaElement;
+		return EditorUtility.getEditorInputJavaElement(fEditor, false);
 	}
 
 	private void initializePreferences() {
