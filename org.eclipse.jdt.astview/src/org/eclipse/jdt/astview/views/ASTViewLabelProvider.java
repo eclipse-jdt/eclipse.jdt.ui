@@ -22,6 +22,7 @@ import org.eclipse.jface.resource.JFaceResources;
 import org.eclipse.jface.viewers.IColorProvider;
 import org.eclipse.jface.viewers.IFontProvider;
 import org.eclipse.jface.viewers.LabelProvider;
+import org.eclipse.jface.viewers.LabelProviderChangedEvent;
 
 import org.eclipse.ui.PlatformUI;
 
@@ -32,9 +33,12 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	private int fSelectionStart;
 	private int fSelectionLength;
 	
-	private final Color fBlue, fRed, fDarkGray, fYellow, fDarkGreen, fDarkRed, fLightRed;
+	private final Color fBlue, fRed, fDarkGray, fDarkGreen, fDarkRed;
 	private final Font fBold;
+	
+	//to dispose:
 	private final Font fAllocatedBoldItalic;
+	private final Color fLightBlue, fLightRed;
 	
 	public ASTViewLabelProvider() {
 		fSelectionStart= -1;
@@ -45,9 +49,10 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 		fRed= display.getSystemColor(SWT.COLOR_RED);
 		fDarkGray= display.getSystemColor(SWT.COLOR_DARK_GRAY);
 		fBlue= display.getSystemColor(SWT.COLOR_DARK_BLUE);
-		fYellow= display.getSystemColor(SWT.COLOR_YELLOW);
 		fDarkGreen= display.getSystemColor(SWT.COLOR_DARK_GREEN);
 		fDarkRed= display.getSystemColor(SWT.COLOR_DARK_RED);
+		
+		fLightBlue= new Color(display, 232, 242, 254); // default for AbstractDecoratedTextEditorPreferenceConstants.EDITOR_CURRENT_LINE_COLOR
 		fLightRed= new Color(display, 255, 190, 190);
 		
 		fBold= PlatformUI.getWorkbench().getThemeManager().getCurrentTheme().getFontRegistry().getBold(JFaceResources.DEFAULT_FONT);
@@ -61,8 +66,9 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	public void setSelectedRange(int start, int length) {
 		fSelectionStart= start;
 		fSelectionLength= length;
+		 // could be made more efficient by only updating selected node and parents (of old and new selection)
+		fireLabelProviderChanged(new LabelProviderChangedEvent(this));
 	}
-	
 
 	public String getText(Object obj) {
 		StringBuffer buf= new StringBuffer();
@@ -150,7 +156,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 			return fLightRed;
 		}
 		if (fSelectionStart != -1 && isInside(element)) {
-			return fYellow;
+			return fLightBlue;
 		}
 		return null;
 	}
@@ -212,6 +218,7 @@ public class ASTViewLabelProvider extends LabelProvider implements IColorProvide
 	
 	public void dispose() {
 		super.dispose();
+		fLightBlue.dispose();
 		fLightRed.dispose();
 		fAllocatedBoldItalic.dispose();
 	}

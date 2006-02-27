@@ -385,7 +385,11 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private final static String SETTINGS_JLS= "jls"; //$NON-NLS-1$
 
 	
+	private SashForm fSash;
 	private TreeViewer fViewer;
+	private ASTViewLabelProvider fASTLabelProvider;
+	private TreeViewer fTray;
+	
 	private DrillDownAdapter fDrillDownAdapter;
 	private Action fFocusAction;
 	private Action fRefreshAction;
@@ -399,6 +403,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private TreeCopyAction fCopyAction;
 	private Action fDoubleClickAction;
 	private Action fLinkWithEditor;
+	private Action fAddToTrayAction;
+	private Action fDeleteAction;
 	
 	private ASTLevelToggle[] fASTVersionToggleActions;
 	private int fCurrentASTLevel;
@@ -410,6 +416,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private IOpenable fOpenable;
 	private CompilationUnit fRoot;
 	private IDocument fCurrentDocument;
+	private ArrayList fTrayRoots;
 	
 	private boolean fDoLinkWithEditor;
 	private boolean fCreateBindings;
@@ -419,13 +426,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private Object fPreviousDouble;
 	
 	private ListenerMix fSuperListener;
-
-	private SashForm fSash;
-	private TreeViewer fTray;
-	private ArrayList fTrayRoots;
-	private Action fAddToTrayAction;
 	private ISelectionChangedListener fTrayUpdater;
-	private Action fDeleteAction;
+
 	private IDialogSettings fDialogSettings;
 
 	
@@ -538,6 +540,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 			ASTNode node= NodeFinder.perform(root, offset, length);
 			if (node != null) {
 				fViewer.getTree().setRedraw(false);
+				fASTLabelProvider.setSelectedRange(node.getStartPosition(), node.getLength());
 				fViewer.setSelection(new StructuredSelection(node), true);
 				fViewer.getTree().setRedraw(true);
 			}
@@ -564,6 +567,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		setASTUptoDate(root != null);
 		fClearAction.setEnabled(root != null);
 		fResolveBindingKeyAction.setEnabled(root != null);
+		fPreviousDouble= null; // avoid leaking AST
 	}
 	
 	private CompilationUnit createAST(IOpenable input, int astLevel) throws JavaModelException, CoreException {
@@ -574,7 +578,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		if (input instanceof ICompilationUnit && (getCurrentInputKind() == ASTInputKindAction.USE_RECONCILE)) {
 			ICompilationUnit wc= ((ICompilationUnit) input).getWorkingCopy(
 					new WorkingCopyOwner() {/*useless subclass*/},
-					new IProblemRequestor() { //TODO: strange: don't get bindings when supplying null as problemRequestor
+					new IProblemRequestor() { //strange: don't get bindings when supplying null as problemRequestor
 						public void acceptProblem(IProblem problem) {/*not interested*/}
 						public void beginReporting() {/*not interested*/}
 						public void endReporting() {/*not interested*/}
@@ -673,7 +677,8 @@ public class ASTView extends ViewPart implements IShowInSource {
 		fViewer = new TreeViewer(fSash, SWT.MULTI | SWT.H_SCROLL | SWT.V_SCROLL);
 		fDrillDownAdapter = new DrillDownAdapter(fViewer);
 		fViewer.setContentProvider(new ASTViewContentProvider());
-		fViewer.setLabelProvider(new ASTViewLabelProvider());
+		fASTLabelProvider= new ASTViewLabelProvider();
+		fViewer.setLabelProvider(fASTLabelProvider);
 		fViewer.addSelectionChangedListener(fSuperListener);
 		fViewer.addDoubleClickListener(fSuperListener);
 		fViewer.addFilter(new ViewerFilter() {
@@ -1084,7 +1089,12 @@ public class ASTView extends ViewPart implements IShowInSource {
 	}
 
 	protected void handleEditorPostSelectionChanged(IWorkbenchPart part, ISelection selection) {
-		if (!fDoLinkWithEditor || !(selection instanceof ITextSelection)) {
+		if (!(selection instanceof ITextSelection)) {
+			return;
+		}
+		ITextSelection textSelection= (ITextSelection) selection;
+		fASTLabelProvider.setSelectedRange(textSelection.getOffset(), textSelection.getLength());
+		if (!fDoLinkWithEditor) {
 			return;
 		}
 		if (fRoot == null || part != fEditor) {
