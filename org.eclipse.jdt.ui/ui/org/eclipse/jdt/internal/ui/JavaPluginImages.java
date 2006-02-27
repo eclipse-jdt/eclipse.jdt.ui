@@ -384,6 +384,7 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_WIZBAN_EXPORT_JAVADOC= createUnManaged(T_WIZBAN, "export_javadoc_wiz.png");//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_EXTERNALIZE_STRINGS= createUnManaged(T_WIZBAN, "extstr_wiz.png");//$NON-NLS-1$
 	public static final ImageDescriptor DESC_WIZBAN_ADD_LIBRARY= createUnManaged(T_WIZBAN, "addlibrary_wiz.png");//$NON-NLS-1$
+	public static final ImageDescriptor DESC_WIZBAN_CLEAN_UP= createUnManaged(T_WIZBAN, "cleanup_wiz.png"); //$NON-NLS-1$
 
 		
 	public static final ImageDescriptor DESC_TOOL_SHOW_EMPTY_PKG= createUnManaged(T_ETOOL, "show_empty_pkg.gif"); 		//$NON-NLS-1$
