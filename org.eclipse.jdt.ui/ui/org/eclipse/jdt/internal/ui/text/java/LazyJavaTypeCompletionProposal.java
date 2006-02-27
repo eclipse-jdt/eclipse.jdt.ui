@@ -302,7 +302,7 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 	protected int computeRelevance() {
 		/*
 		 * There are two histories: the RHS history remembers types used for the current expected
-		 * type (right hand side), while the type history remembers recently used types in general).
+		 * type (left hand side), while the type history remembers recently used types in general).
 		 * 
 		 * The presence of an RHS ranking is a much more precise sign for relevance as it proves the
 		 * subtype relationship between the proposed type and the expected type.
