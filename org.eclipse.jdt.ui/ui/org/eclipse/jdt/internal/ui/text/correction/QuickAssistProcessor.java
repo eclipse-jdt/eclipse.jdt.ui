@@ -905,7 +905,7 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 			for (int i= 0; i < fixes.length; i++) {
 				IFix fix= fixes[i];
 				Image image= JavaPluginImages.get(JavaPluginImages.IMG_CORRECTION_CHANGE);
-				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 10, image, context);
+				FixCorrectionProposal proposal= new FixCorrectionProposal(fix, cleanUp, 0, image, context);
 				resultingCollections.add(proposal);
 			}
 			return true;
