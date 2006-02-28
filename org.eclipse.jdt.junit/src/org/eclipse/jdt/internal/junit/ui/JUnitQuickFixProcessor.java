@@ -34,7 +34,7 @@ public class JUnitQuickFixProcessor implements IQuickFixProcessor {
 	public IJavaCompletionProposal[] getCorrections(final IInvocationContext context, IProblemLocation[] locations)  {
 		if (isJUnitProblem(context, locations))
 			return new IJavaCompletionProposal[] { new JUnitAddLibraryProposal(context) };
-		return new IJavaCompletionProposal[] {};
+		return null;
 	}
 
 	private boolean isJUnitProblem(IInvocationContext context, IProblemLocation[] locations) {
