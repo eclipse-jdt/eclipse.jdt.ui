@@ -761,15 +761,16 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {addBlock, removeBlock, convertLoop, addParanoic, removeParanoic, addFinalField, addFinalParam, addFinalLocal};
 			FlagConfigurationGroup[] radioButtonGroups= new FlagConfigurationGroup[] {blockGroup, parenthesisGroup};
+			FlagConfigurationGroup[] checkBoxGroup= new FlagConfigurationGroup[] {addFinalGroup};
 			
 			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {controlStatementsCleanUp, expressionsCleanUp, varDeclCleanUp}, flagConfigurationButtons);
 			
 			if (project != null && !JavaModelUtil.is50OrHigher(project)) {
 				convertLoop.disable();
 				convertLoop.deselect();
-				addEnableButtonsGroup(left, flagConfigurationButtons, radioButtonGroups, new FlagConfigurationButton[] {convertLoop}, preview);
+				addEnableButtonsGroup(left, flagConfigurationButtons, radioButtonGroups, checkBoxGroup, new FlagConfigurationButton[] {convertLoop}, preview);
 			} else {
-				addEnableButtonsGroup(left, flagConfigurationButtons, radioButtonGroups, new FlagConfigurationButton[0], preview);
+				addEnableButtonsGroup(left, flagConfigurationButtons, radioButtonGroups, checkBoxGroup, new FlagConfigurationButton[0], preview);
 			}
 			
 			addSelectionCounter(flagConfigurationButtons);
@@ -825,7 +826,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {codeStyleCleanUp}, flagConfigurationButtons);
 			
-			addEnableButtonsGroup(left, flagConfigurationButtons, radioButtonGroups, new FlagConfigurationButton[0], preview);
+			addEnableButtonsGroup(left, flagConfigurationButtons, radioButtonGroups, new FlagConfigurationGroup[] {staticGroup}, new FlagConfigurationButton[0], preview);
 			
 			addSelectionCounter(flagConfigurationButtons);
 			
@@ -880,7 +881,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			
 			CleanUpPreview preview= addPreview(composite, new ICleanUp[] {unusedCodeCleanUp, unnecessaryCodeCleanUp, stringCleanUp}, flagConfigurationButtons);
 			
-			addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[0], new FlagConfigurationButton[0], preview);
+			addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[0], new FlagConfigurationGroup[] {membersGroup}, new FlagConfigurationButton[0], preview);
 			
 			addSelectionCounter(flagConfigurationButtons);
 
@@ -934,9 +935,9 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 				deprecated.deselect();
 				deprecated.disableFlag();
 				annotations.disable();
-				addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[] {serial}, new FlagConfigurationButton[] {override, deprecated}, preview);
+				addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[] {serial}, new FlagConfigurationGroup[] {annotations},  new FlagConfigurationButton[] {override, deprecated}, preview);
 			} else {
-				addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[] {serial}, new FlagConfigurationButton[0], preview);
+				addEnableButtonsGroup(left, flagConfigurationButtons, new FlagConfigurationGroup[] {serial}, new FlagConfigurationGroup[] {annotations}, new FlagConfigurationButton[0], preview);
 			}
 			
 			addSelectionCounter(flagConfigurationButtons);
@@ -1000,7 +1001,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			fTotalCleanUpsCount+=configs.length;
 		}
 
-		private void addEnableButtonsGroup(Composite parent, final FlagConfigurationButton[] configButtons, final FlagConfigurationGroup[] radioGroups, final FlagConfigurationButton[] disabledButtons, final CleanUpPreview preview) {
+		private void addEnableButtonsGroup(Composite parent, final FlagConfigurationButton[] configButtons, final FlagConfigurationGroup[] radioGroups, final FlagConfigurationGroup[] checkBoxGroups, final FlagConfigurationButton[] disabledButtons, final CleanUpPreview preview) {
 			Composite down= new Composite(parent, SWT.NONE);
 			down.setLayout(new GridLayout(2, false));
 			down.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false));
@@ -1037,6 +1038,12 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 							}
 						}
 					}
+					for (int i= 0; i < checkBoxGroups.length; i++) {
+						checkBoxGroups[i].select();
+					}
+					for (int i= 0; i < radioGroups.length; i++) {
+						radioGroups[i].select();
+					}
 					preview.resumeUpdate();
 					preview.update();
 				}	
@@ -1054,6 +1061,13 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 						if (!config.isRadio()) {
 							config.deselect();
 						}
+					}
+					for (int i= 0; i < radioGroups.length; i++) {
+						FlagConfigurationGroup group= radioGroups[i];
+						group.deselect();
+					}
+					for (int i= 0; i < checkBoxGroups.length; i++) {
+						checkBoxGroups[i].deselect();
 					}
 					preview.resumeUpdate();
 					preview.update();
@@ -1083,6 +1097,9 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 					for (int i= 0; i < radioGroups.length; i++) {
 						FlagConfigurationGroup group= radioGroups[i];
 						group.enableDefaults();
+					}
+					for (int i= 0; i < checkBoxGroups.length; i++) {
+						checkBoxGroups[i].enableDefaults();
 					}
 					preview.resumeUpdate();
 					preview.update();
