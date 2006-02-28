@@ -458,12 +458,6 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 					config.addSelectionChangeListener(new ISelectionChangeListener() {
 						public void selectionChanged(ICleanUp cleanUp, int flag, boolean selection) {
 							setFlag(flag, selection);
-							
-							if (hasSelectedButtons()) {
-								select();
-							} else {
-								deselect();
-							}
 						}
 					});
 				}
@@ -674,7 +668,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			tabFolder.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
 			
 			fStatusLine= new Label(composite, SWT.NONE);
-			fStatusLine.setLayoutData(new GridData(SWT.LEFT, SWT.BOTTOM, false, false));
+			fStatusLine.setLayoutData(new GridData(SWT.FILL, SWT.BOTTOM, false, false));
 			
 			createGroups(tabFolder);
 			
