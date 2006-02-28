@@ -29,7 +29,7 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 
 import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
-import org.eclipse.jdt.internal.corext.fix.VariableDeclarationRewrite;
+import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 
 public class ModifierChangeCompletionProposal extends LinkedCorrectionProposal {
 

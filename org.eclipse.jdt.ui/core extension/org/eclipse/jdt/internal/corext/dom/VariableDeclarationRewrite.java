@@ -8,7 +8,7 @@
  * Contributors:
  *     IBM Corporation - initial API and implementation
  *******************************************************************************/
-package org.eclipse.jdt.internal.corext.fix;
+package org.eclipse.jdt.internal.corext.dom;
 
 import java.util.Arrays;
 import java.util.Iterator;
@@ -30,7 +30,6 @@ import org.eclipse.jdt.core.dom.VariableDeclarationStatement;
 import org.eclipse.jdt.core.dom.rewrite.ASTRewrite;
 import org.eclipse.jdt.core.dom.rewrite.ListRewrite;
 
-import org.eclipse.jdt.internal.corext.dom.ModifierRewrite;
 
 public class VariableDeclarationRewrite {
 
