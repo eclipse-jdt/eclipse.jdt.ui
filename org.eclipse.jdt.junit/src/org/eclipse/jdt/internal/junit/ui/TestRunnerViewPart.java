@@ -1021,7 +1021,7 @@ public class TestRunnerViewPart extends ViewPart {
 	}
 
 	private void updateViewIcon() {
-		if (fTestRunSession == null || fTestRunSession.isStopped() || fTestRunSession.isRunning())
+		if (fTestRunSession == null || fTestRunSession.isStopped() || fTestRunSession.isRunning() || fTestRunSession.getStartedCount() == 0)
 			fViewImage= fOriginalViewImage;
 		else if (hasErrorsOrFailures())
 			fViewImage= fTestRunFailIcon;
