@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.workingsets;
 
 import org.eclipse.core.resources.IResource;
 import org.eclipse.core.resources.IStorage;
+
+import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.IAdaptable;
 import org.eclipse.core.runtime.IPath;
 
@@ -123,6 +125,8 @@ public class WorkingSetFilter extends ViewerFilter {
 	}
 	
 	public boolean isEnclosing(IJavaElement element) {
+		Assert.isNotNull(element);
+		
 		IAdaptable[] cachedWorkingSet= fCachedWorkingSet;
 		if (cachedWorkingSet == null)
 			cachedWorkingSet= fWorkingSet.getElements();
@@ -136,7 +140,7 @@ public class WorkingSetFilter extends ViewerFilter {
 			if (scopeElement != null) {
 				// compare Java elements
 				IJavaElement searchedElement= element;
-				while (scopeElement != null && searchedElement != null) {
+				while (searchedElement != null) {
 					if (searchedElement.equals(scopeElement))
 						return true;
 					else {
@@ -154,7 +158,7 @@ public class WorkingSetFilter extends ViewerFilter {
 						}
 					}
 				}
-				while (scopeElement != null && element != null) {
+				while (scopeElement != null) {
 					if (element.equals(scopeElement))
 						return true;
 					else

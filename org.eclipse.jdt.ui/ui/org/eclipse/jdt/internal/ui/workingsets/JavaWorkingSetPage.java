@@ -301,7 +301,7 @@ public class JavaWorkingSetPage extends WizardPage implements IWorkingSetPage {
 			}
 		}
 		
-		if (infoMessage == null && !hasCheckedElement())
+		if (!hasCheckedElement())
 			infoMessage= WorkingSetMessages.JavaWorkingSetPage_warning_resourceMustBeChecked;
 
 		setMessage(infoMessage, INFORMATION);
