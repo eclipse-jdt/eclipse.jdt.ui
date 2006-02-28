@@ -397,6 +397,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 	private Action fStatementsRecoveryAction;
 	private Action fFilterNonRelevantAction;
 	private Action fResolveBindingKeyAction;
+	private Action fCreateBindingFromElementAction;
 	private Action fCollapseAction;
 	private Action fExpandAction;
 	private Action fClearAction;
@@ -815,6 +816,7 @@ public class ASTView extends ViewPart implements IShowInSource {
 		manager.add(fFilterNonRelevantAction);
 		manager.add(new Separator());
 		manager.add(fResolveBindingKeyAction);
+		manager.add(fCreateBindingFromElementAction);
 		manager.add(new Separator());
 		manager.add(fLinkWithEditor);
 		
@@ -918,6 +920,14 @@ public class ASTView extends ViewPart implements IShowInSource {
 		};
 		fResolveBindingKeyAction.setToolTipText("Resolve Binding Key..."); //$NON-NLS-1$
 		fResolveBindingKeyAction.setEnabled(false);
+		
+		fCreateBindingFromElementAction= new Action("&Create Binding from Element Handle...", IAction.AS_PUSH_BUTTON) { //$NON-NLS-1$
+			public void run() {
+				performCreateBindingFromElement();
+			}
+		};
+		fCreateBindingFromElementAction.setToolTipText("Create Binding from Element Handle..."); //$NON-NLS-1$
+		fCreateBindingFromElementAction.setEnabled(true);
 		
 		fFocusAction = new Action() {
 			public void run() {
@@ -1267,6 +1277,33 @@ public class ASTView extends ViewPart implements IShowInSource {
 			fViewer.add(viewerInput, item);
 			fViewer.setSelection(new StructuredSelection(item), true);
 		}
+	}
+	
+	protected void performCreateBindingFromElement() {
+		InputDialog dialog= new InputDialog(getSite().getShell(), "Create Binding from Java Element", "IJavaElement#getHandleIdentifier():", "", null);
+		if (dialog.open() != Window.OK)
+			return;
+		
+		String handleIdentifier= dialog.getValue();
+		IJavaElement handle= JavaCore.create(handleIdentifier);
+		
+		Object viewerInput= fViewer.getInput();
+		ASTAttribute item;
+		if (handle == null) {
+			item= new Error(viewerInput, "handleIdentifier not resolved: " + handleIdentifier, null);
+		} else if (! handle.exists()) {
+			item= new Error(viewerInput, "element does not exist: " + handleIdentifier, null);
+		} else if (handle.getJavaProject() == null) {
+			item= new Error(viewerInput, "getJavaProject() is null: " + handleIdentifier, null);
+		} else {
+			IJavaProject project= handle.getJavaProject();
+			ASTParser parser= ASTParser.newParser(fCurrentASTLevel);
+			parser.setProject(project);
+			IBinding[] bindings= parser.createBindings(new IJavaElement[] { handle }, null);
+			item= new Binding(viewerInput, handleIdentifier, bindings[0], true);
+		}
+		fViewer.add(viewerInput, item);
+		fViewer.setSelection(new StructuredSelection(item), true);
 	}
 	
 	protected void performDoubleClick() {
