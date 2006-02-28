@@ -37,6 +37,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.IDialogSettings;
 import org.eclipse.jface.util.TransferDragSourceListener;
@@ -524,10 +525,12 @@ public class CallHierarchyViewPart extends ViewPart implements ICallHierarchyVie
         }
 
         viewMenu.add(new Separator());
-
+        
+        MenuManager layoutSubMenu= new MenuManager(CallHierarchyMessages.CallHierarchyViewPart_layout_menu);
         for (int i = 0; i < fToggleOrientationActions.length; i++) {
-            viewMenu.add(fToggleOrientationActions[i]);
+        	layoutSubMenu.add(fToggleOrientationActions[i]);
         }
+        viewMenu.add(layoutSubMenu);
     }
 
     /**

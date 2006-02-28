@@ -109,4 +109,6 @@ public final class CallHierarchyMessages extends NLS {
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, CallHierarchyMessages.class);
 	}
+
+	public static String CallHierarchyViewPart_layout_menu;
 }
