@@ -214,4 +214,6 @@ public final class JUnitMessages extends NLS {
 	public static String TestRunnerViewPart_message_stopping;
 
 	public static String TestRunnerViewPart_clear_history_label;
+
+	public static String TestRunnerViewPart_layout_menu;
 }

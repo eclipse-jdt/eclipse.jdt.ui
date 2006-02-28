@@ -54,6 +54,7 @@ import org.eclipse.jface.action.IMenuListener;
 import org.eclipse.jface.action.IMenuManager;
 import org.eclipse.jface.action.IStatusLineManager;
 import org.eclipse.jface.action.IToolBarManager;
+import org.eclipse.jface.action.MenuManager;
 import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
@@ -170,8 +171,7 @@ public class TestRunnerViewPart extends ViewPart {
 	private Action fFailuresOnlyFilterAction;
 	private ScrollLockAction fScrollLockAction;
 	private ToggleOrientationAction[] fToggleOrientationActions;
-	private ToggleLayoutAction fLayoutFlatAction;
-	private ToggleLayoutAction fLayoutHierarchicalAction;
+	private ShowTestHierarchyAction fShowTestHierarchyAction;
 	private ActivateOnErrorAction fActivateOnErrorAction;
 	private IMenuListener fViewMenuListener;
 
@@ -702,23 +702,16 @@ public class TestRunnerViewPart extends ViewPart {
 		}
 	}
 
-	private class ToggleLayoutAction extends Action {
-		private final int fMode;
+	private class ShowTestHierarchyAction extends Action {
 
-		public ToggleLayoutAction(int mode) {
-			super(mode == LAYOUT_FLAT ? JUnitMessages.TestRunnerViewPart_flat_layout : JUnitMessages.TestRunnerViewPart_hierarchical_layout, IAction.AS_RADIO_BUTTON);
-			fMode= mode;
-			ImageDescriptor imageDescriptor;
-			if (mode == LAYOUT_FLAT) {
-				imageDescriptor= JUnitPlugin.getImageDescriptor("elcl16/flatLayout.gif"); //$NON-NLS-1$
-			} else {
-				imageDescriptor= JUnitPlugin.getImageDescriptor("elcl16/hierarchicalLayout.gif"); //$NON-NLS-1$
-			}
-			setImageDescriptor(imageDescriptor);
+		public ShowTestHierarchyAction() {
+			super(JUnitMessages.TestRunnerViewPart_hierarchical_layout, IAction.AS_CHECK_BOX);
+			setImageDescriptor(JUnitPlugin.getImageDescriptor("elcl16/hierarchicalLayout.gif")); //$NON-NLS-1$
 		}
 		
 		public void run() {
-			setLayoutMode(fMode);
+			int mode= isChecked() ? LAYOUT_HIERARCHICAL : LAYOUT_FLAT; 
+			setLayoutMode(mode);
 		}
 	}
 	
@@ -1383,8 +1376,7 @@ action enablement
 				new ToggleOrientationAction(this, VIEW_ORIENTATION_HORIZONTAL),
 				new ToggleOrientationAction(this, VIEW_ORIENTATION_AUTOMATIC)};
 		
-		fLayoutFlatAction= new ToggleLayoutAction(LAYOUT_FLAT);
-		fLayoutHierarchicalAction= new ToggleLayoutAction(LAYOUT_HIERARCHICAL);
+		fShowTestHierarchyAction= new ShowTestHierarchyAction();
 		
 		toolBar.add(fNextAction);
 		toolBar.add(fPreviousAction);
@@ -1396,10 +1388,20 @@ action enablement
 		toolBar.add(fStopAction);
 		toolBar.add(fViewHistory.createHistoryDropDownAction());
 		
-		for (int i = 0; i < fToggleOrientationActions.length; ++i) {
-			viewMenu.add(fToggleOrientationActions[i]);
-		}
+		
+		viewMenu.add(fShowTestHierarchyAction);
 		viewMenu.add(new Separator());
+		
+		MenuManager layoutSubMenu= new MenuManager(JUnitMessages.TestRunnerViewPart_layout_menu);
+		for (int i = 0; i < fToggleOrientationActions.length; ++i) {
+			layoutSubMenu.add(fToggleOrientationActions[i]);
+		}
+		viewMenu.add(layoutSubMenu);
+		viewMenu.add(new Separator());
+		
+		viewMenu.add(fFailuresOnlyFilterAction);
+		
+		
 		fActivateOnErrorAction= new ActivateOnErrorAction();
 		viewMenu.add(fActivateOnErrorAction);
 		fViewMenuListener= new IMenuListener() {
@@ -1407,9 +1409,7 @@ action enablement
 				fActivateOnErrorAction.update();
 			}
 		};
-		viewMenu.add(new Separator());
-		viewMenu.add(fLayoutFlatAction);
-		viewMenu.add(fLayoutHierarchicalAction);
+
 		viewMenu.addMenuListener(fViewMenuListener);
 
 		actionBars.updateActionBars();
@@ -1605,8 +1605,7 @@ action enablement
 	}
 	
 	private void setLayoutMode(int mode) {
-		fLayoutFlatAction.setChecked(mode == LAYOUT_FLAT);
-		fLayoutHierarchicalAction.setChecked(mode == LAYOUT_HIERARCHICAL);
+		fShowTestHierarchyAction.setChecked(mode == LAYOUT_HIERARCHICAL);
 		boolean failuresOnly= fFailuresOnlyFilterAction.isChecked();
 		if (failuresOnly) {
 			fLayoutFailures= mode;
