@@ -56,6 +56,22 @@
 			</objectClass>
 		</enablement>
 	</decorator>	
+	<decorator
+		label="%InterfaceIndicatorLabelDecorator.label"
+		lightweight="true"
+		location="TOP_LEFT"
+		state="false"
+		class="org.eclipse.jdt.internal.ui.InterfaceIndicatorLabelDecorator"
+		id="org.eclipse.jdt.ui.interface.decorator">
+		<description>
+			%InterfaceIndicatorLabelDecorator.description
+		</description>
+		<enablement>
+			<objectClass
+				name="org.eclipse.jdt.core.ICompilationUnit">
+			</objectClass>
+		</enablement>
+	</decorator>
 </extension>
 
    <extension point="org.eclipse.core.runtime.adapters">

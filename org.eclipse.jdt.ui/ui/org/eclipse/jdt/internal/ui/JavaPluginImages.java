@@ -354,6 +354,9 @@ public class JavaPluginImages {
 	public static final ImageDescriptor DESC_OVR_CONSTRUCTOR= createUnManaged(T_OVR, "constr_ovr.gif");			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_DEPRECATED= createUnManaged(T_OVR, "deprecated.gif");			//$NON-NLS-1$
 	public static final ImageDescriptor DESC_OVR_FOCUS= createUnManaged(T_OVR, "focus_ovr.gif"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_ANNOTATION= createUnManaged(T_OVR, "annotation_over.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_ENUM= createUnManaged(T_OVR, "enum_over.png"); //$NON-NLS-1$
+	public static final ImageDescriptor DESC_OVR_INTERFACE= createUnManaged(T_OVR, "interface_over.png"); //$NON-NLS-1$
 
     // Call Hierarchy
     public static final ImageDescriptor DESC_OVR_RECURSIVE= createUnManaged(T_OVR, "recursive_co.gif");              //$NON-NLS-1$
