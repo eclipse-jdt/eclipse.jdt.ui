@@ -50,6 +50,7 @@ import org.eclipse.jdt.internal.ui.util.ViewerPane;
 import org.eclipse.jdt.internal.ui.wizards.NewWizardMessages;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.BuildPathBasePage;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElement;
+import org.eclipse.jdt.internal.ui.wizards.buildpaths.CPListElementAttribute;
 import org.eclipse.jdt.internal.ui.wizards.buildpaths.newsourcepage.DialogPackageExplorerActionGroup.DialogExplorerActionContext;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.DialogField;
 import org.eclipse.jdt.internal.ui.wizards.dialogfields.IDialogFieldListener;
@@ -315,9 +316,18 @@ public class NewSourceContainerWorkbookPage extends BuildPathBasePage implements
 		List cpEntries= new ArrayList();
 		
 		for (int i= 0; i < selection.size(); i++) {
-			CPListElement element= (CPListElement) selection.get(i);
-			if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
-				cpEntries.add(element);
+			Object obj= selection.get(i);
+			if (obj instanceof CPListElement) {
+				CPListElement element= (CPListElement) obj;
+				if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+					cpEntries.add(element);
+				}
+			} else if (obj instanceof CPListElementAttribute) {
+				CPListElementAttribute attribute= (CPListElementAttribute)obj;
+				CPListElement element= attribute.getParent();
+				if (element.getEntryKind() == IClasspathEntry.CPE_SOURCE) {
+					cpEntries.add(element);
+				}
 			}
 		}
 		
