@@ -1074,6 +1074,17 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 		if (selectedStatements == null)
 			return false;
 		
+		IProblem[] problems= context.getASTRoot().getProblems();
+		for (int i= 0; i < problems.length; i++) {
+			IProblem problem= problems[i];
+			if (problem.getID() == IProblem.UnnecessaryElse) {
+				int selectionOffset= context.getSelectionOffset();
+				int selectionLength= context.getSelectionLength();
+				if (problem.getSourceStart() == selectionOffset && problem.getSourceEnd() + 1 == selectionOffset + selectionLength)
+					return false;
+			}
+		}
+		
 		if (resultingCollections == null)
 			return true;
 		

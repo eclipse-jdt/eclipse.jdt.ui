@@ -4743,6 +4743,39 @@ public class AssistQuickFixTest extends QuickFixTest {
 		assertExpectedExistInProposals(proposals, new String[] {expected1.toString()});	
 	}
 	
+	public void testSurroundWithRunnableBug129876() throws Exception {
+		Hashtable options= JavaCore.getOptions();
+		options.put(JavaCore.COMPILER_PB_UNNECESSARY_ELSE, JavaCore.WARNING);
+		JavaCore.setOptions(options);
+		
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public void foo() {\n");
+		buf.append("        if (true) {\n");
+		buf.append("            return;\n");
+		buf.append("        } else {   \n");
+		buf.append(";\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		StringBuffer selection= new StringBuffer();
+		selection.append("{   \n");
+		selection.append(";\n");
+		selection.append("            return;\n");
+		selection.append("        }");
+		
+		AssistContext context= getCorrectionContext(cu, buf.toString().indexOf(selection.toString()), selection.toString().length());
+		List proposals= collectAssists(context, false);
+		
+		assertNumberOfProposals(proposals, 8);
+		assertCorrectLabels(proposals);	
+	}
+	
 	public void testMakeFinal01() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
 		StringBuffer buf= new StringBuffer();
