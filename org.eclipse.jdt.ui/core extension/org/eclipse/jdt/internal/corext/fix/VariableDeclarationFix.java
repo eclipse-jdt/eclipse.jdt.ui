@@ -24,6 +24,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IVariableBinding;
+import org.eclipse.jdt.core.dom.MethodDeclaration;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.SingleVariableDeclaration;
@@ -307,6 +308,15 @@ public class VariableDeclarationFix extends AbstractFix {
 		
 		if (varbinding.isField() && !Modifier.isPrivate(varbinding.getModifiers())) 
 			return false;
+		
+		if (varbinding.isParameter()) {
+			ASTNode varDecl= declNode.getParent();
+			if (varDecl instanceof MethodDeclaration) {
+				MethodDeclaration declaration= (MethodDeclaration)varDecl;
+				if (declaration.getBody() == null)
+					return false;
+			}
+		}
 		
 		return true;
 	}

@@ -4667,4 +4667,43 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 	
+	public void testAddFinalBug129807() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public interface I {\n");
+		buf.append("        void foo(int i);\n");
+		buf.append("    }\n");
+		buf.append("    public class IImpl implements I {\n");
+		buf.append("        public void foo(int i) {}\n");
+		buf.append("    }\n");
+		buf.append("    public abstract void bar(int i, String s);\n");
+		buf.append("    public void foobar(int i, int j) {}\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new VariableDeclarationCleanUp(VariableDeclarationCleanUp.ADD_FINAL_MODIFIER_PARAMETERS);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public interface I {\n");
+		buf.append("        void foo(int i);\n");
+		buf.append("    }\n");
+		buf.append("    public class IImpl implements I {\n");
+		buf.append("        public void foo(final int i) {}\n");
+		buf.append("    }\n");
+		buf.append("    public abstract void bar(int i, String s);\n");
+		buf.append("    public void foobar(final int i, final int j) {}\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
 }
