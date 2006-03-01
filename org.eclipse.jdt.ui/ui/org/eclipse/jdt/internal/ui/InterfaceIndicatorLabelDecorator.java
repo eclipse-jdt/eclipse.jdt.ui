@@ -10,6 +10,9 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.eclipse.core.runtime.ListenerList;
 
 import org.eclipse.swt.graphics.Image;
@@ -32,6 +35,7 @@ import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
 public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILightweightLabelDecorator {
 	
@@ -41,7 +45,12 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 		 * {@inheritDoc}
 		 */
 		public void elementChanged(ElementChangedEvent event) {
-			handleDelta(event.getDelta());
+			List changed= new ArrayList();
+			processDelta(event.getDelta(), changed);
+			if (changed.size() == 0)
+				return;
+			
+			fireChange((IJavaElement[])changed.toArray(new IJavaElement[changed.size()]));
 		}
 		
 	}
@@ -162,22 +171,75 @@ public class InterfaceIndicatorLabelDecorator implements ILabelDecorator, ILight
 		return null;
 	}
 
-	private void handleDelta(IJavaElementDelta delta) {
-		IJavaElement element= delta.getElement();
-		if (!(element instanceof ICompilationUnit))
-			return;
-		
-		if (delta.getKind() != IJavaElementDelta.CHANGED)
-			return;
-		
+	private void fireChange(IJavaElement[] elements) {
 		if (fListeners != null && !fListeners.isEmpty()) {
-			LabelProviderChangedEvent event1= new LabelProviderChangedEvent(this, element);
+			LabelProviderChangedEvent event= new LabelProviderChangedEvent(this, elements);
 			Object[] listeners= fListeners.getListeners();
 			for (int i= 0; i < listeners.length; i++) {
-				((ILabelProviderListener) listeners[i]).labelProviderChanged(event1);
+				((ILabelProviderListener) listeners[i]).labelProviderChanged(event);
 			}
 		}
+	}
+	
+	private void processDelta(IJavaElementDelta delta, List result) {
+		IJavaElement elem= delta.getElement();
 		
+		boolean isChanged= delta.getKind() == IJavaElementDelta.CHANGED;
+		boolean isRemoved= delta.getKind() == IJavaElementDelta.REMOVED;
+		int flags= delta.getFlags();
+		
+		switch (elem.getElementType()) {
+			case IJavaElement.JAVA_PROJECT:
+				if (isRemoved || (isChanged && 
+						(flags & IJavaElementDelta.F_CLOSED) != 0)) {
+					return;
+				}
+				processChildrenDelta(delta, result);
+				return;
+			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				if (isRemoved || (isChanged && (
+						(flags & IJavaElementDelta.F_ARCHIVE_CONTENT_CHANGED) != 0 ||
+						(flags & IJavaElementDelta.F_REMOVED_FROM_CLASSPATH) != 0))) {
+					return;
+				}
+				processChildrenDelta(delta, result);
+				return;
+			case IJavaElement.PACKAGE_FRAGMENT:
+				if (isRemoved)
+					return;
+				processChildrenDelta(delta, result);
+				return;
+			case IJavaElement.TYPE:
+			case IJavaElement.CLASS_FILE:
+				return;
+			case IJavaElement.JAVA_MODEL:
+				processChildrenDelta(delta, result);
+				return;
+			case IJavaElement.COMPILATION_UNIT:
+				// Not the primary compilation unit. Ignore it 
+				if (!JavaModelUtil.isPrimary((ICompilationUnit) elem)) {
+					return;
+				}
+
+				if (isChanged &&  ((flags & IJavaElementDelta.F_CONTENT) != 0 || (flags & IJavaElementDelta.F_FINE_GRAINED) != 0)) {
+					if (delta.getAffectedChildren().length == 0)
+						return;
+					
+					result.add(elem);
+				}
+				return;
+			default:
+				// fields, methods, imports ect
+				return;
+		}	
+	}
+	
+	private boolean processChildrenDelta(IJavaElementDelta delta, List result) {
+		IJavaElementDelta[] children= delta.getAffectedChildren();
+		for (int i= 0; i < children.length; i++) {
+			processDelta(children[i], result);
+		}
+		return false;
 	}
 
 }
