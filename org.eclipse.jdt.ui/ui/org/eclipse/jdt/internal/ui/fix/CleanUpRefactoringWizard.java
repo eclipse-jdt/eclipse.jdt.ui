@@ -733,8 +733,9 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			Composite group= createGroup(groups, MultiFixMessages.CleanUpRefactoringWizard_controlStatements_sectionDescription);
 			
 			FlagConfigurationButton addBlock= new FlagConfigurationButton(controlStatementsCleanUp, ControlStatementsCleanUp.ADD_BLOCK_TO_CONTROL_STATEMENTS, MultiFixMessages.ControlStatementsCleanUp_always_checkBoxLabel, SWT.RADIO);
+			FlagConfigurationButton removeBlockReturn= new FlagConfigurationButton(controlStatementsCleanUp, ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS_CONTAINING_RETURN_OR_THROW, MultiFixMessages.CleanUpRefactoringWizard_NoBlockForReturnOrThrow_checkBoxLabel, SWT.RADIO);
 			FlagConfigurationButton removeBlock= new FlagConfigurationButton(controlStatementsCleanUp, ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS, MultiFixMessages.ControlStatementsCleanUp_removeIfPossible_checkBoxLabel, SWT.RADIO);
-			FlagConfigurationGroup blockGroup= new FlagConfigurationGroup(MultiFixMessages.ControlStatementsCleanUp_useBlocks_checkBoxLabel, new FlagConfigurationButton[] {addBlock, removeBlock}, SWT.RADIO | SWT.HORIZONTAL, settings);
+			FlagConfigurationGroup blockGroup= new FlagConfigurationGroup(MultiFixMessages.ControlStatementsCleanUp_useBlocks_checkBoxLabel, new FlagConfigurationButton[] {addBlock, removeBlockReturn, removeBlock}, SWT.RADIO | SWT.VERTICAL, settings);
 			blockGroup.createButton(group);
 		
 			FlagConfigurationButton convertLoop= new FlagConfigurationButton(controlStatementsCleanUp, ControlStatementsCleanUp.CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP, MultiFixMessages.ControlStatementsCleanUp_convertLoops_checkBoxLabel, SWT.CHECK);
@@ -759,7 +760,7 @@ public class CleanUpRefactoringWizard extends RefactoringWizard {
 			FlagConfigurationGroup addFinalGroup= new FlagConfigurationGroup(MultiFixMessages.CleanUpRefactoringWizard_changeToFinal_checkBoxLabel, new FlagConfigurationButton[] {addFinalField, addFinalParam, addFinalLocal}, SWT.CHECK | SWT.HORIZONTAL, settings);
 			addFinalGroup.createButton(group);
 			
-			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {addBlock, removeBlock, convertLoop, addParanoic, removeParanoic, addFinalField, addFinalParam, addFinalLocal};
+			FlagConfigurationButton[] flagConfigurationButtons= new FlagConfigurationButton[] {addBlock, removeBlock, removeBlockReturn, convertLoop, addParanoic, removeParanoic, addFinalField, addFinalParam, addFinalLocal};
 			FlagConfigurationGroup[] radioButtonGroups= new FlagConfigurationGroup[] {blockGroup, parenthesisGroup};
 			FlagConfigurationGroup[] checkBoxGroup= new FlagConfigurationGroup[] {addFinalGroup};
 			

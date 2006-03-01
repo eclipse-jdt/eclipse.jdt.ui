@@ -4706,4 +4706,65 @@ public class CleanUpTest extends QuickFixTest {
 		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
 	}
 	
+	public void testRemoveBlockReturnThrows01() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public void foo(Object obj) {\n");
+		buf.append("        if (obj == null) {\n");
+		buf.append("            throw new IllegalArgumentException();\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        if (obj.hashCode() > 0) {\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        if (obj.hashCode() < 0) {\n");
+		buf.append("            System.out.println(\"\");\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        if (obj.toString() != null) {\n");
+		buf.append("            System.out.println(obj.toString());\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println(\"\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu1= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+		
+		CleanUpRefactoring refactoring= new CleanUpRefactoring();
+		refactoring.addCompilationUnit(cu1);
+		
+		ICleanUp cleanUp= new ControlStatementsCleanUp(ControlStatementsCleanUp.REMOVE_UNNECESSARY_BLOCKS_CONTAINING_RETURN_OR_THROW);
+		refactoring.addCleanUp(cleanUp);
+		
+		buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public abstract class E {\n");
+		buf.append("    public void foo(Object obj) {\n");
+		buf.append("        if (obj == null)\n");
+		buf.append("            throw new IllegalArgumentException();\n");
+		buf.append("        \n");
+		buf.append("        if (obj.hashCode() > 0)\n");
+		buf.append("            return;\n");
+		buf.append("        \n");
+		buf.append("        if (obj.hashCode() < 0) {\n");
+		buf.append("            System.out.println(\"\");\n");
+		buf.append("            return;\n");
+		buf.append("        }\n");
+		buf.append("        \n");
+		buf.append("        if (obj.toString() != null) {\n");
+		buf.append("            System.out.println(obj.toString());\n");
+		buf.append("        } else {\n");
+		buf.append("            System.out.println(\"\");\n");
+		buf.append("        }\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		String expected1= buf.toString();
+		
+		assertRefactoringResultAsExpected(refactoring, new String[] {expected1});
+	}
+	
 }

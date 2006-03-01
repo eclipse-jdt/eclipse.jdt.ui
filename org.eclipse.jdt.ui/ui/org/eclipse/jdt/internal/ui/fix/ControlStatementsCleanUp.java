@@ -44,12 +44,21 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 	/**
 	 * Remove unnecessary blocks in control statement bodies.<p>
 	 * i.e.:<pre><code>
-	 *   if (b) {foo();} -> if (b) foo();
+	 *   if (b) {foo();} -> if (b) foo();</code></pre>
 	 */
 	public static final int REMOVE_UNNECESSARY_BLOCKS= 4;
+	
+	/**
+	 * Remove unnecessary blocks in control statement bodies if they contain
+	 * a single return or throw statement.<p>
+	 * i.e.:<pre><code>
+	 *   if (b) {return;} -> if (b) return;</code></pre>
+	 */
+	public static final int REMOVE_UNNECESSARY_BLOCKS_CONTAINING_RETURN_OR_THROW= 8;
 
 	private static final int DEFAULT_FLAG= 0;
 	private static final String SECTION_NAME= "CleanUp_ControlStatements"; //$NON-NLS-1$
+
 
 	public ControlStatementsCleanUp(int flag) {
 		super(flag);
@@ -69,6 +78,7 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 		return ControlStatementsFix.createCleanUp(compilationUnit,
 				isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS),
 				isFlag(REMOVE_UNNECESSARY_BLOCKS),
+				isFlag(REMOVE_UNNECESSARY_BLOCKS_CONTAINING_RETURN_OR_THROW),
 				isFlag(CONVERT_FOR_LOOP_TO_ENHANCED_FOR_LOOP));
 	}
 
@@ -102,6 +112,8 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 			result.add(MultiFixMessages.Java50CleanUp_ConvertToEnhancedForLoop_description);
 		if (isFlag(REMOVE_UNNECESSARY_BLOCKS))
 			result.add(MultiFixMessages.ControlStatementsCleanUp_RemoveUnnecessaryBlocks_description);
+		if (isFlag(REMOVE_UNNECESSARY_BLOCKS_CONTAINING_RETURN_OR_THROW))
+			result.add(MultiFixMessages.ControlStatementsCleanUp_RemoveUnnecessaryBlocksWithReturnOrThrow_description);
 		
 		return (String[])result.toArray(new String[result.size()]);
 	}
@@ -110,18 +122,40 @@ public class ControlStatementsCleanUp extends AbstractCleanUp {
 		StringBuffer buf= new StringBuffer();
 		
 		if (isFlag(ADD_BLOCK_TO_CONTROL_STATEMENTS)) {
+			buf.append("if (obj == null) {\n"); //$NON-NLS-1$
+			buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
+			buf.append("}\n"); //$NON-NLS-1$
+			
 			buf.append("if (ids.length > 0) {\n"); //$NON-NLS-1$
 			buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
 			buf.append("} else {\n"); //$NON-NLS-1$
 			buf.append("    return;\n"); //$NON-NLS-1$
 			buf.append("}\n"); //$NON-NLS-1$
 		} else if (isFlag(REMOVE_UNNECESSARY_BLOCKS)){
+			buf.append("if (obj == null)\n"); //$NON-NLS-1$
+			buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
+			buf.append("\n"); //$NON-NLS-1$
+			
 			buf.append("if (ids.length > 0)\n"); //$NON-NLS-1$
 			buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
 			buf.append("else\n"); //$NON-NLS-1$
 			buf.append("    return;\n"); //$NON-NLS-1$
 			buf.append("\n"); //$NON-NLS-1$
+		} else if (isFlag(REMOVE_UNNECESSARY_BLOCKS_CONTAINING_RETURN_OR_THROW)) {
+			buf.append("if (obj == null)\n"); //$NON-NLS-1$
+			buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
+			buf.append("\n"); //$NON-NLS-1$
+			
+			buf.append("if (ids.length > 0) {\n"); //$NON-NLS-1$
+			buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
+			buf.append("} else \n"); //$NON-NLS-1$
+			buf.append("    return;\n"); //$NON-NLS-1$
+			buf.append("\n"); //$NON-NLS-1$
 		} else {
+			buf.append("if (obj == null) {\n"); //$NON-NLS-1$
+			buf.append("    throw new IllegalArgumentException();\n"); //$NON-NLS-1$
+			buf.append("}\n"); //$NON-NLS-1$
+			
 			buf.append("if (ids.length > 0) {\n"); //$NON-NLS-1$
 			buf.append("    System.out.println(ids[0]);\n"); //$NON-NLS-1$
 			buf.append("} else \n"); //$NON-NLS-1$
