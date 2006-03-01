@@ -67,9 +67,14 @@
 			%InterfaceIndicatorLabelDecorator.description
 		</description>
 		<enablement>
-			<objectClass
-				name="org.eclipse.jdt.core.ICompilationUnit">
-			</objectClass>
+			<or>
+				<objectClass
+					name="org.eclipse.jdt.core.ICompilationUnit">
+				</objectClass>
+				<objectClass
+					name="org.eclipse.jdt.core.IClassFile">
+				</objectClass>
+			</or>
 		</enablement>
 	</decorator>
 </extension>
