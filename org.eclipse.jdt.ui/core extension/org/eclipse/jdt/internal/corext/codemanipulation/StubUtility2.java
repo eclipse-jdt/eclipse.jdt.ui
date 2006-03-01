@@ -526,7 +526,7 @@ public final class StubUtility2 {
 				decl.setJavadoc(javadoc);
 			}
 		}
-		if (settings.overrideAnnotation && JavaModelUtil.is50OrHigher(unit.getJavaProject())) {
+		if (settings != null && settings.overrideAnnotation && JavaModelUtil.is50OrHigher(unit.getJavaProject())) {
 			addOverrideAnnotation(rewrite, decl, binding);
 		}
 		return decl;
