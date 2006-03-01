@@ -184,5 +184,9 @@
 		<description>In/Out Project (jdt.ui.tests)</description>
     </wizard>	 
 </extension>
+   <extension
+         point="org.eclipse.jdt.junit.testRunListeners">
+      <testRunListener class="org.eclipse.jdt.junit.tests.TestRunListener"/>
+   </extension>
    
 </plugin>

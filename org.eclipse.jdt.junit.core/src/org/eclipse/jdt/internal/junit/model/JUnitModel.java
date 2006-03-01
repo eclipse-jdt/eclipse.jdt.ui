@@ -34,6 +34,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 
+import org.eclipse.jdt.junit.ITestRunListener;
+
 import org.eclipse.jdt.internal.junit.launcher.JUnitBaseLaunchConfiguration;
 import org.eclipse.jdt.internal.junit.model.TestElement.Status;
 import org.eclipse.jdt.internal.junit.ui.JUnitPlugin;
@@ -173,10 +175,6 @@ public final class JUnitModel {
 		private TestRunSession fActiveTestRunSession;
 		private ITestSessionListener fTestSessionListener;
 		
-		LegacyTestRunSessionListener() {
-			List testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
-		}
-		
 		public void sessionAdded(TestRunSession testRunSession) {
 			// Only serve one legacy ITestRunListener at a time, since they cannot distinguish between different concurrent test sessions:
 			if (fActiveTestRunSession != null)
@@ -185,26 +183,70 @@ public final class JUnitModel {
 			fActiveTestRunSession= testRunSession;
 			
 			fTestSessionListener= new ITestSessionListener() {
-				public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
-				}
-				public void testFailed(TestCaseElement testCaseElement, Status status, String trace, String expected, String actual) {
-				}
-				public void testEnded(TestCaseElement testCaseElement) {
-				}
-				public void testStarted(TestCaseElement testCaseElement) {
-				}
 				public void testAdded(TestElement testElement) {
 				}
+				
 				public void sessionStarted() {
+					ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					for (int i= 0; i < testRunListeners.length; i++) {
+						ITestRunListener testRunListener= testRunListeners[i];
+						testRunListener.testRunStarted(fActiveTestRunSession.getTotalCount());
+					}
 				}
 				public void sessionTerminated() {
+					ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					for (int i= 0; i < testRunListeners.length; i++) {
+						ITestRunListener testRunListener= testRunListeners[i];
+						testRunListener.testRunTerminated();
+					}
 					sessionRemoved(fActiveTestRunSession);
 				}
 				public void sessionStopped(long elapsedTime) {
+					ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					for (int i= 0; i < testRunListeners.length; i++) {
+						ITestRunListener testRunListener= testRunListeners[i];
+						testRunListener.testRunStopped(elapsedTime);
+					}
 					sessionRemoved(fActiveTestRunSession);
 				}
 				public void sessionEnded(long elapsedTime) {
+					ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					for (int i= 0; i < testRunListeners.length; i++) {
+						ITestRunListener testRunListener= testRunListeners[i];
+						testRunListener.testRunEnded(elapsedTime);
+					}
 					sessionRemoved(fActiveTestRunSession);
+				}
+				public void testStarted(TestCaseElement testCaseElement) {
+					ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					for (int i= 0; i < testRunListeners.length; i++) {
+						ITestRunListener testRunListener= testRunListeners[i];
+						testRunListener.testStarted(testCaseElement.getId(), testCaseElement.getTestName());
+					}
+				}
+				
+				public void testFailed(TestCaseElement testCaseElement, Status status, String trace, String expected, String actual) {
+					ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					for (int i= 0; i < testRunListeners.length; i++) {
+						ITestRunListener testRunListener= testRunListeners[i];
+						testRunListener.testFailed(status.getOldCode(), testCaseElement.getId(), testCaseElement.getTestName(), trace);
+					}
+				}
+				
+				public void testEnded(TestCaseElement testCaseElement) {
+					ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					for (int i= 0; i < testRunListeners.length; i++) {
+						ITestRunListener testRunListener= testRunListeners[i];
+						testRunListener.testEnded(testCaseElement.getId(), testCaseElement.getTestName());
+					}
+				}
+				
+				public void testReran(TestCaseElement testCaseElement, Status status, String trace, String expectedResult, String actualResult) {
+					ITestRunListener[] testRunListeners= JUnitPlugin.getDefault().getTestRunListeners();
+					for (int i= 0; i < testRunListeners.length; i++) {
+						ITestRunListener testRunListener= testRunListeners[i];
+						testRunListener.testReran(testCaseElement.getId(), testCaseElement.getClassName(), testCaseElement.getTestMethodName(), status.getOldCode(), trace);
+					}
 				}
 			};
 			fActiveTestRunSession.addTestSessionListener(fTestSessionListener);

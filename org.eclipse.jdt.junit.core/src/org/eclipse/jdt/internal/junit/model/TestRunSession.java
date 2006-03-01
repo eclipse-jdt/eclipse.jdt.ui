@@ -100,18 +100,7 @@ public class TestRunSession {
 		fIdToTest= new HashMap();
 		
 		fTestRunnerClient= new RemoteTestRunnerClient();
-		
-		ArrayList allListeners= new ArrayList();
-		allListeners.add(new TestSessionNotifier());
-		/*
-		 * TODO: problem with concurrent test runs -> should only ever send
-		 * notifications for one TestRunSession at a time (don't notify for
-		 * other concurrent TestRunSessions)
-		 */
-		allListeners.addAll(JUnitPlugin.getDefault().getTestRunListeners()); // serve legacy listeners
-		
-		ITestRunListener[] listenersArray= (ITestRunListener[]) allListeners.toArray(new ITestRunListener[allListeners.size()]);
-		fTestRunnerClient.startListening(listenersArray, port);
+		fTestRunnerClient.startListening(new ITestRunListener[] { new TestSessionNotifier() }, port);
 
 		fSessionListeners= new ListenerList();
 	}

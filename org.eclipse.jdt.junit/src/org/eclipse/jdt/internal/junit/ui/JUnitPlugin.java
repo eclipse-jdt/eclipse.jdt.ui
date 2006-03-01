@@ -274,11 +274,11 @@ public class JUnitPlugin extends AbstractUIPlugin {
 	/**
 	 * @return an array of all TestRun listeners
 	 */
-	public List getTestRunListeners() {
+	public ITestRunListener[] getTestRunListeners() {
 		if (fTestRunListeners == null) {
 			loadTestRunListeners();
 		}
-		return fTestRunListeners;
+		return (ITestRunListener[]) fTestRunListeners.toArray(new ITestRunListener[fTestRunListeners.size()]);
 	}
 
 	/**
