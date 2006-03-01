@@ -87,19 +87,21 @@ public class LazyJavaTypeCompletionProposal extends LazyJavaCompletionProposal {
 		 if (fProposal.getKind() == CompletionProposal.TYPE_REF &&  fInvocationContext.getCoreContext().isInJavadocText())
 			 return getSimpleTypeName();
 		
+		String qualifiedTypeName= getQualifiedTypeName();
+		if (qualifiedTypeName.indexOf('.') == -1) {
+			return qualifiedTypeName; // not a qualified type name, no need to import
+		}
+		 
 		fImportRewrite= createImportRewrite();
 		if (fImportRewrite != null) {
-			return fImportRewrite.addImport(getQualifiedTypeName(), fImportContext);
+			return fImportRewrite.addImport(qualifiedTypeName, fImportContext);
 		}
 		
-		if (fCompilationUnit != null) {
-			if (JavaModelUtil.isImplicitImport(Signature.getQualifier(getQualifiedTypeName()), fCompilationUnit))
-				return getSimpleTypeName();
-			else
-				return getQualifiedTypeName();
+		if (fCompilationUnit != null && JavaModelUtil.isImplicitImport(Signature.getQualifier(qualifiedTypeName), fCompilationUnit)) {
+			return Signature.getSimpleName(qualifiedTypeName);
 		}
 		
-		return getQualifiedTypeName();
+		return qualifiedTypeName;
 	}
 
 	protected final boolean isImportCompletion() {
