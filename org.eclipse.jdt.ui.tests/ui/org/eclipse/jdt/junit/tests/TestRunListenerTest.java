@@ -62,7 +62,7 @@ public class TestRunListenerTest extends TestCase {
 		IPackageFragment pack= root.createPackageFragment("pack", true, null);
 		ICompilationUnit aTestCase= pack.createCompilationUnit("ATestCase.java", source, true, null);
 		
-		TestRunListener.reset();
+		TestRunListener.startListening();
 		
 		ILaunchManager lm = DebugPlugin.getDefault().getLaunchManager();
 		lm.addLaunchListener(new ILaunchesListener2() {
@@ -97,11 +97,11 @@ public class TestRunListenerTest extends TestCase {
 		
 		new DisplayHelper(){
 			protected boolean condition() {
-				return TestRunListener.getMessages().size() >= expectedSequence.length;
+				return TestRunListener.getMessageCount() >= expectedSequence.length;
 			}
 		}.waitForCondition(Display.getCurrent(), 5*1000, 100);
 		
-		List messages= TestRunListener.getMessages();
+		List messages= TestRunListener.endListening();
 		StringBuffer actual= new StringBuffer();
 		for (Iterator iter= messages.iterator(); iter.hasNext();) {
 			actual.append(iter.next()).append('\n');

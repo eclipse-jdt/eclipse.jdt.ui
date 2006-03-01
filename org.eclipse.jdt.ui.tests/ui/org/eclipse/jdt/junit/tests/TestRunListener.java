@@ -18,67 +18,83 @@ import org.eclipse.jdt.junit.ITestRunListener;
 
 public class TestRunListener implements ITestRunListener {
 
-	private static ArrayList/*<String>*/ fgLog= new ArrayList();
+	private static ArrayList/*<String>*/ fgLog;
 	
-	public static void reset() {
+	public static void startListening() {
 		fgLog= new ArrayList();
 	}
 	
-	public static List getMessages() {
-		return fgLog;
+	public static int getMessageCount() {
+		return fgLog.size();
+	}
+	
+	public static List endListening() {
+		ArrayList result= fgLog;
+		fgLog= null;
+		return result;
 	}
 
+// ---
+	
 	public void testRunStarted(int testCount) {
-		fgLog.add(testRunStartedMessage(testCount));
+		if (fgLog != null)
+			fgLog.add(testRunStartedMessage(testCount));
 	}
 	public static String testRunStartedMessage(int testCount) {
 		return "testRunStarted(" + testCount + ")";
 	}
 
 	public void testRunEnded(long elapsedTime) {
-		fgLog.add(testRunEndedMessage());
+		if (fgLog != null)
+			fgLog.add(testRunEndedMessage());
 	}
 	public static String testRunEndedMessage() {
 		return "testRunEnded(" + ")";
 	}
 	
 	public void testRunStopped(long elapsedTime) {
-		fgLog.add(testRunStoppedMessage());
+		if (fgLog != null)
+			fgLog.add(testRunStoppedMessage());
 	}
 	public static String testRunStoppedMessage() {
 		return "testRunStopped(" + ")";
 	}
 
 	public void testStarted(String testId, String testName) {
-		fgLog.add(testStartedMessage(testId, testName));
+		if (fgLog != null)
+			fgLog.add(testStartedMessage(testId, testName));
 	}
 	public static String testStartedMessage(String testId, String testName) {
 		return "testStarted(" + testId + "," + testName + ")";
 	}
 
 	public void testEnded(String testId, String testName) {
-		fgLog.add(testEndedMessage(testId, testName));
+		if (fgLog != null)
+			fgLog.add(testEndedMessage(testId, testName));
 	}
 	public static String testEndedMessage(String testId, String testName) {
 		return "testEnded(" + testId + "," + testName + ")";
 	}
 
 	public void testFailed(int status, String testId, String testName, String trace) {
-		fgLog.add(testFailedMessage(status, testId, testName));
+		if (fgLog != null)
+			fgLog.add(testFailedMessage(status, testId, testName));
 	}
 	public static String testFailedMessage(int status, String testId, String testName) {
 		return "testFailed(" + status + "," + testId + "," + testName + ")";
 	}
 
 	public void testRunTerminated() {
-		fgLog.add(testRunTerminatedMessage());
+		if (fgLog != null)
+			fgLog.add(testRunTerminatedMessage());
 	}
 	public static String testRunTerminatedMessage() {
 		return "testRunTerminated(" + ")";
 	}
 
 	public void testReran(String testId, String testClass, String testName, int status, String trace) {
-		fgLog.add(testReranMessage(testId, testClass, testName, status, trace));
+		if (fgLog != null)
+			fgLog.add(testReranMessage(testId, testClass, testName, status, trace));
 	}
 	public static String testReranMessage(String testId, String testClass, String testName, int status, String trace) {
 		return "testFailed(" + testId + "," + testClass + "," + testName + "," + status + "," + escapeLinebreaks(trace) + ")";
