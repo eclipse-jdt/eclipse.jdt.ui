@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Platform;
 
@@ -302,7 +303,7 @@ public class JavadocView extends AbstractInfoView {
 			return;
 
 		try {
-			fStyleSheetURL= Platform.asLocalURL(fStyleSheetURL);
+			fStyleSheetURL= FileLocator.toFileURL(fStyleSheetURL);
 		} catch (IOException ex) {
 			JavaPlugin.log(ex);
 		}

@@ -14,6 +14,7 @@ import java.io.IOException;
 import java.io.Reader;
 import java.net.URL;
 
+import org.eclipse.core.runtime.FileLocator;
 import org.eclipse.core.runtime.Platform;
 
 import org.eclipse.swt.SWT;
@@ -168,7 +169,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 			fStyleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
 			if (fStyleSheetURL != null) {
 				try {
-					fStyleSheetURL= Platform.asLocalURL(fStyleSheetURL);
+					fStyleSheetURL= FileLocator.toFileURL(fStyleSheetURL);
 				} catch (IOException ex) {
 					JavaPlugin.log(ex);
 				}
