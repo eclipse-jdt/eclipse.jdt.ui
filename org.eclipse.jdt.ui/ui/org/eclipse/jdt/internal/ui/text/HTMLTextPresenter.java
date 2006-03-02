@@ -13,12 +13,14 @@ package org.eclipse.jdt.internal.ui.text;
 
 
 import java.io.IOException;
-import java.io.Reader;
 import java.io.StringReader;
 import java.util.Iterator;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.graphics.Drawable;
+import org.eclipse.swt.graphics.Font;
+import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.widgets.Display;
 
@@ -38,6 +40,15 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 	private int fCounter;
 	private boolean fEnforceUpperLineLimit;
 
+	/**
+	 * Enables using bold font in order not to clip the text.
+	 * <p>
+	 * <em>Enabling this is a hack.</em>
+	 * 
+	 * @since 3.2
+	 */
+	private boolean fUseBoldFont= false;
+
 	public HTMLTextPresenter(boolean enforceUpperLineLimit) {
 		super();
 		fEnforceUpperLineLimit= enforceUpperLineLimit;
@@ -47,7 +58,7 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 		this(true);
 	}
 
-	protected Reader createReader(String hoverInfo, TextPresentation presentation) {
+	protected HTML2TextReader createReader(String hoverInfo, TextPresentation presentation) {
 		return new HTML2TextReader(new StringReader(hoverInfo), presentation);
 	}
 
@@ -113,6 +124,17 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 			return null;
 
 		GC gc= new GC(drawable);
+		
+		Font font= null;
+		if (fUseBoldFont) {
+			font= gc.getFont();
+			FontData[] fontData= font.getFontData();
+			for (int i= 0; i < fontData.length; i++)
+				fontData[i].setStyle(SWT.BOLD);
+			font= new Font(gc.getDevice(), fontData);
+			gc.setFont(font);
+		}
+		
 		try {
 
 			StringBuffer buffer= new StringBuffer();
@@ -171,10 +193,12 @@ public class HTMLTextPresenter implements DefaultInformationControl.IInformation
 			return null;
 
 		} finally {
+			if (font != null)
+				font.dispose();	
 			gc.dispose();
 		}
 	}
-
+	
 	private String trim(StringBuffer buffer, TextPresentation presentation) {
 
 		int length= buffer.length();
