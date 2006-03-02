@@ -417,7 +417,7 @@ public abstract class DelegateCreator {
 
 			ASTNode placeholder= fOriginalRewrite.getASTRewrite().createStringPlaceholder(newSource, fDeclaration.getNodeType());
 
-			CategorizedTextEditGroup groupDescription= fOriginalRewrite.createCategorizedGroupDescription(RefactoringCoreMessages.DelegateCreator_create_delegate, CATEGORY_DELEGATE);
+			CategorizedTextEditGroup groupDescription= fOriginalRewrite.createCategorizedGroupDescription(getTextEditGroupLabel(), CATEGORY_DELEGATE);
 			ListRewrite bodyDeclarationsListRewrite= fOriginalRewrite.getASTRewrite().getListRewrite(fDeclaration.getParent(), getTypeBodyDeclarationsProperty());
 			if (fCopy)
 				if (fInsertBefore)
@@ -431,6 +431,8 @@ public abstract class DelegateCreator {
 			JavaPlugin.log(e);
 		}
 	}
+
+	protected abstract String getTextEditGroupLabel();
 
 	/**
 	 * Creates the necessary change to store the deprecation script in the

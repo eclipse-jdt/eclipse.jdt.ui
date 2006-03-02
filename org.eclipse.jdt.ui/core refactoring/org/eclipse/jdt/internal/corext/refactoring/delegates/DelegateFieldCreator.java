@@ -29,6 +29,7 @@ import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.VariableDeclarationFragment;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineConstantRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.structure.MoveStaticMembersProcessor;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDeprecationResolving;
@@ -128,6 +129,10 @@ public class DelegateFieldCreator extends DelegateCreator {
 			return buffer.toString();
 		}
 		return null;
+	}
+
+	protected String getTextEditGroupLabel() {
+		return RefactoringCoreMessages.DelegateFieldCreator_text_edit_group_label;
 	}
 
 	// ******************* INTERNAL HELPERS ***************************

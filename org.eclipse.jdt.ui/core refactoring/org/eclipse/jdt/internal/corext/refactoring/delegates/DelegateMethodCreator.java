@@ -41,6 +41,7 @@ import org.eclipse.jdt.core.dom.Type;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.code.InlineMethodRefactoring;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDeprecationResolving;
 
@@ -290,5 +291,9 @@ public class DelegateMethodCreator extends DelegateCreator {
 		final ReturnStatement statement= invocation.getAST().newReturnStatement();
 		statement.setExpression(invocation);
 		return statement;
+	}
+
+	protected String getTextEditGroupLabel() {
+		return RefactoringCoreMessages.DelegateMethodCreator_text_edit_group_field;
 	}
 }
