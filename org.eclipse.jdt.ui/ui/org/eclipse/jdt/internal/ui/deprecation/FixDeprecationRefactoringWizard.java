@@ -24,22 +24,23 @@ import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.history.RefactoringHistory;
 import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryControlConfiguration;
-import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryWizard;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
+import org.eclipse.jdt.internal.ui.refactoring.binary.StubRefactoringHistoryWizard;
 
 /**
  * Refactoring wizard to fix deprecations using a refactoring script.
  * 
  * @since 3.2
  */
-public final class FixDeprecationRefactoringWizard extends RefactoringHistoryWizard {
+public final class FixDeprecationRefactoringWizard extends StubRefactoringHistoryWizard {
 
 	/** Proxy which encapsulates a refactoring history */
 	private final class RefactoringHistoryProxy extends RefactoringHistory {
@@ -85,6 +86,9 @@ public final class FixDeprecationRefactoringWizard extends RefactoringHistoryWiz
 
 	/** The selection offset */
 	private final int fOffset;
+
+	/** The package fragment root, or <code>null</code> */
+	private IPackageFragmentRoot fPackageFragmentRoot;
 
 	/** The refactoring history, or <code>null</code> */
 	private RefactoringHistory fRefactoringHistory= null;
@@ -167,6 +171,13 @@ public final class FixDeprecationRefactoringWizard extends RefactoringHistoryWiz
 	}
 
 	/**
+	 * {@inheritDoc}
+	 */
+	public IPackageFragmentRoot getPackageFragmentRoot() {
+		return fPackageFragmentRoot;
+	}
+
+	/**
 	 * Returns the refactoring history to apply.
 	 * 
 	 * @return the refactoring history to apply, or <code>null</code>
@@ -187,6 +198,16 @@ public final class FixDeprecationRefactoringWizard extends RefactoringHistoryWiz
 			setDialogSettings(section);
 		}
 		return result;
+	}
+
+	/**
+	 * Sets the package fragment root.
+	 * 
+	 * @param root
+	 *            the package fragment root
+	 */
+	public void setPackageFragmentRoot(final IPackageFragmentRoot root) {
+		fPackageFragmentRoot= root;
 	}
 
 	/**

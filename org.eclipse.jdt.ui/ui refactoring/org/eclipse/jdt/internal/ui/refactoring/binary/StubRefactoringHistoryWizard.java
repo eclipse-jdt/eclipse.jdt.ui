@@ -147,7 +147,7 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 												if (entry.getEntryKind() == IClasspathEntry.CPE_LIBRARY) {
 													final URI location= getLocationURI(entry);
 													if (uri.equals(location))
-														status.addFatalError(MessageFormat.format(JarImportMessages.JarImportWizard_error_shared_jar, new String[] { current.getJavaProject().getElementName() }));
+														status.addFatalError(MessageFormat.format(JarImportMessages.JarImportWizard_error_shared_jar, new String[] { current.getJavaProject().getElementName()}));
 												}
 											}
 											subsubMonitor.worked(1);
@@ -229,16 +229,16 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 	}
 
 	/** Is auto build enabled? */
-	private boolean fAutoBuild= true;
+	protected boolean fAutoBuild= true;
 
 	/** Has the wizard been cancelled? */
 	protected boolean fCancelled= false;
 
 	/** The current refactoring arguments, or <code>null</code> */
-	private RefactoringArguments fCurrentArguments= null;
+	protected RefactoringArguments fCurrentArguments= null;
 
 	/** The current refactoring to be initialized, or <code>null</code> */
-	private IInitializableRefactoringComponent fCurrentRefactoring= null;
+	protected IInitializableRefactoringComponent fCurrentRefactoring= null;
 
 	/** The java project or <code>null</code> */
 	protected IJavaProject fJavaProject= null;
@@ -247,10 +247,27 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 	 * The packages which already have been processed (element type:
 	 * &lt;IPackageFragment&gt;)
 	 */
-	private final Collection fProcessedFragments= new HashSet();
+	protected final Collection fProcessedFragments= new HashSet();
 
 	/** The temporary source folder, or <code>null</code> */
 	protected IFolder fSourceFolder= null;
+
+	/**
+	 * Creates a new stub refactoring history wizard.
+	 * 
+	 * @param overview
+	 *            <code>true</code> to show an overview of the refactorings,
+	 *            <code>false</code> otherwise
+	 * @param caption
+	 *            the wizard caption
+	 * @param title
+	 *            the wizard title
+	 * @param description
+	 *            the wizard description
+	 */
+	protected StubRefactoringHistoryWizard(final boolean overview, final String caption, final String title, final String description) {
+		super(overview, caption, title, description);
+	}
 
 	/**
 	 * Creates a new stub refactoring history wizard.
@@ -276,11 +293,11 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 			fSourceFolder= null;
 			fProcessedFragments.clear();
 			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 500);
-			final IPackageFragmentRoot root= getPackageFragmentRoot();
-			if (root != null) {
-				status.merge(checkPackageFragmentRoots(root, new SubProgressMonitor(monitor, 90, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
-				if (!status.hasFatalError()) {
-					status.merge(super.aboutToPerformHistory(new SubProgressMonitor(monitor, 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
+			status.merge(super.aboutToPerformHistory(new SubProgressMonitor(monitor, 10, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
+			if (!status.hasFatalError()) {
+				final IPackageFragmentRoot root= getPackageFragmentRoot();
+				if (root != null) {
+					status.merge(checkPackageFragmentRoots(root, new SubProgressMonitor(monitor, 90, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
 					if (!status.hasFatalError()) {
 						final IJavaProject project= root.getJavaProject();
 						if (project != null) {
@@ -319,12 +336,10 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 		final RefactoringStatus status= new RefactoringStatus();
 		try {
 			monitor.beginTask(JarImportMessages.JarImportWizard_prepare_import, 100);
+			status.merge(createTypeStubs(refactoring, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
 			if (!status.hasFatalError()) {
-				status.merge(createTypeStubs(refactoring, new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL)));
-				if (!status.hasFatalError()) {
-					if (fCurrentRefactoring != null && fCurrentArguments != null)
-						status.merge(fCurrentRefactoring.initialize(fCurrentArguments));
-				}
+				if (fCurrentRefactoring != null && fCurrentArguments != null)
+					status.merge(fCurrentRefactoring.initialize(fCurrentArguments));
 			}
 		} finally {
 			monitor.done();
@@ -354,17 +369,19 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 				final RefactoringArguments arguments= javaDescriptor.createArguments();
 				if (arguments instanceof JavaRefactoringArguments) {
 					final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-					final String project= fJavaProject.getElementName();
-					String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
-					if (handle != null && !"".equals(handle)) //$NON-NLS-1$
-						extended.setAttribute(JavaRefactoringDescriptor.INPUT, getTransformedHandle(project, handle));
-					int count= 1;
-					String attribute= JavaRefactoringDescriptor.ELEMENT + count;
-					while ((handle= extended.getAttribute(attribute)) != null) {
-						if (!"".equals(handle)) //$NON-NLS-1$
-							extended.setAttribute(attribute, getTransformedHandle(project, handle));
-						count++;
-						attribute= JavaRefactoringDescriptor.ELEMENT + count;
+					if (fJavaProject != null) {
+						final String project= fJavaProject.getElementName();
+						String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+						if (handle != null && !"".equals(handle)) //$NON-NLS-1$
+							extended.setAttribute(JavaRefactoringDescriptor.INPUT, getTransformedHandle(project, handle));
+						int count= 1;
+						String attribute= JavaRefactoringDescriptor.ELEMENT + count;
+						while ((handle= extended.getAttribute(attribute)) != null) {
+							if (!"".equals(handle)) //$NON-NLS-1$
+								extended.setAttribute(attribute, getTransformedHandle(project, handle));
+							count++;
+							attribute= JavaRefactoringDescriptor.ELEMENT + count;
+						}
 					}
 				}
 				if (refactoring instanceof IInitializableRefactoringComponent) {
