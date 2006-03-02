@@ -718,7 +718,7 @@ public class TestRunnerViewPart extends ViewPart {
 	private class ActivateOnErrorAction extends Action {
 		public ActivateOnErrorAction() {
 			super(JUnitMessages.TestRunnerViewPart_activate_on_failure_only, IAction.AS_CHECK_BOX);
-			setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/failures.gif")); //$NON-NLS-1$
+			//setImageDescriptor(JUnitPlugin.getImageDescriptor("obj16/failures.gif")); //$NON-NLS-1$
 			update();
 		}
 		public void update() {
