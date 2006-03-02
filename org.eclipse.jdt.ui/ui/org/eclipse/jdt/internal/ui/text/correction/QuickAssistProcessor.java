@@ -385,10 +385,11 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 						}
 					}
 				}
-				final FixDeprecationRefactoringWizard wizard= new FixDeprecationRefactoringWizard(context.getCompilationUnit(), node.getStartPosition(), node.getLength());
+				if (history == null || history.isEmpty())
+					return;
+				final FixDeprecationRefactoringWizard wizard= new FixDeprecationRefactoringWizard(history.getDescriptors().length > 1, context.getCompilationUnit(), node.getStartPosition(), node.getLength());
 				final WizardDialog dialog= new WizardDialog(JavaPlugin.getActiveWorkbenchShell(), wizard);
-				if (history != null && !history.isEmpty())
-					wizard.setRefactoringHistory(history);
+				wizard.setRefactoringHistory(history);
 				dialog.create();
 				dialog.getShell().setSize(Math.max(SIZING_WIZARD_WIDTH, dialog.getShell().getSize().x), SIZING_WIZARD_HEIGHT);
 				PlatformUI.getWorkbench().getHelpSystem().setHelp(dialog.getShell(), IJavaHelpContextIds.FIX_DEPRECATION_WIZARD_PAGE);
