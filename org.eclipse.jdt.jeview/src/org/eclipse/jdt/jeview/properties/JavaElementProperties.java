@@ -195,6 +195,11 @@ public class JavaElementProperties implements IPropertySource {
 				return getSourceRangeString(((IMember) element).getNameRange());
 			}
 		});
+		addProperty(new Property(IMember.class, "javadocRange") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				return getSourceRangeString(((IMember) element).getJavadocRange());
+			}
+		});
 		addProperty(new Property(IMember.class, "flags") {
 			@Override public Object compute(IJavaElement element) throws JavaModelException {
 				return getFlagsString(((IMember) element).getFlags());
@@ -203,6 +208,11 @@ public class JavaElementProperties implements IPropertySource {
 		addProperty(new Property(IMember.class, "isBinary") {
 			@Override public Object compute(IJavaElement element) {
 				return ((IMember) element).isBinary();
+			}
+		});
+		addProperty(new Property(IMember.class, "occurrenceCount") {
+			@Override public Object compute(IJavaElement element) {
+				return ((IMember) element).getOccurrenceCount();
 			}
 		});
 		
@@ -418,6 +428,13 @@ public class JavaElementProperties implements IPropertySource {
 		addProperty(new Property(IOpenable.class, "isOpen") {
 			@Override public Object compute(IJavaElement element) {
 				return ((IOpenable) element).isOpen();
+			}
+		});
+		addProperty(new Property(IOpenable.class, "findRecommendedLineSeparator") {
+			@Override public Object compute(IJavaElement element) throws JavaModelException {
+				String lineSeparator= ((IOpenable) element).findRecommendedLineSeparator();
+				lineSeparator= lineSeparator.replace("\r", "\\r").replace("\n", "\\n");
+				return lineSeparator;
 			}
 		});
 	}
