@@ -25,7 +25,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTParser;
@@ -60,8 +59,8 @@ public final class InlineMethodRefactoringContribution extends JavaRefactoringCo
 			arguments= extended.createArguments();
 		}
 		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String selection= generic.getAttribute(JavaRefactoringDescriptor.SELECTION);
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			final String selection= extended.getAttribute(JavaRefactoringDescriptor.SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -76,10 +75,10 @@ public final class InlineMethodRefactoringContribution extends JavaRefactoringCo
 				} else
 					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}), null));
 			}
-			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaCore.create(handle);
-				if (element == null || !element.exists())
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+				if (element == null)
 					throw new CoreException(new Status(IStatus.ERROR, JavaPlugin.getPluginId(), 0, NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, InlineMethodRefactoring.ID_INLINE_METHOD), null));
 				else {
 					if (element instanceof ICompilationUnit) {

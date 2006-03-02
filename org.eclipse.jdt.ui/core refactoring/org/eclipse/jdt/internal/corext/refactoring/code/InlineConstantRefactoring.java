@@ -50,7 +50,6 @@ import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -838,10 +837,6 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 			
 				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
-					arguments.put(JavaRefactoringDescriptor.INPUT, fSelectionCu.getHandleIdentifier());
-					arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-					arguments.put(ATTRIBUTE_REMOVE, Boolean.valueOf(fRemoveDeclaration).toString());
-					arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllReferences).toString());
 					String project= null;
 					IJavaProject javaProject= fSelectionCu.getJavaProject();
 					if (javaProject != null)
@@ -853,7 +848,12 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					return new RefactoringChangeDescriptor(new JavaRefactoringDescriptor(ID_INLINE_CONSTANT, project, Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags));
+					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_CONSTANT, project, Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+					arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fSelectionCu));
+					arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+					arguments.put(ATTRIBUTE_REMOVE, Boolean.valueOf(fRemoveDeclaration).toString());
+					arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllReferences).toString());
+					return new RefactoringChangeDescriptor(descriptor);
 				}
 			}; 
 			result.addAll(fChanges);
@@ -899,8 +899,8 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String selection= generic.getAttribute(JavaRefactoringDescriptor.SELECTION);
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			final String selection= extended.getAttribute(JavaRefactoringDescriptor.SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -915,10 +915,10 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 				} else
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}));
 			}
-			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaCore.create(handle);
-				if (element == null || !element.exists())
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+				if (element == null)
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INLINE_CONSTANT));
 				else {
 					if (element instanceof ICompilationUnit) {
@@ -950,12 +950,12 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			final String replace= generic.getAttribute(ATTRIBUTE_REPLACE);
+			final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
 			if (replace != null) {
 				fReplaceAllReferences= Boolean.valueOf(replace).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REPLACE));
-			final String remove= generic.getAttribute(ATTRIBUTE_REMOVE);
+			final String remove= extended.getAttribute(ATTRIBUTE_REMOVE);
 			if (remove != null)
 				fRemoveDeclaration= Boolean.valueOf(remove).booleanValue();
 			else
@@ -971,12 +971,6 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 
 	public RefactoringSessionDescriptor createDeprecationResolution() {
 		final Map arguments= new HashMap();
-		// Must be set to actual compilation unit
-		arguments.put(JavaRefactoringDescriptor.INPUT, fField.getCompilationUnit().getHandleIdentifier());
-		// Must be set to actual selection
-		arguments.put(JavaRefactoringDescriptor.SELECTION, "-1 -1"); //$NON-NLS-1$
-		arguments.put(ATTRIBUTE_REMOVE, Boolean.FALSE.toString());
-		arguments.put(ATTRIBUTE_REPLACE, Boolean.FALSE.toString());
 		String project= null;
 		IJavaProject javaProject= fField.getJavaProject();
 		if (javaProject != null)
@@ -988,7 +982,13 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
-		final RefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_CONSTANT, project, Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_deprecation_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED) }), RefactoringCoreMessages.InlineConstantRefactoring_deprecation_comment, arguments, flags);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_CONSTANT, project, Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_deprecation_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED) }), RefactoringCoreMessages.InlineConstantRefactoring_deprecation_comment, arguments, flags);
+		// Must be set to actual compilation unit
+		arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fField.getCompilationUnit()));
+		// Must be set to actual selection
+		arguments.put(JavaRefactoringDescriptor.SELECTION, "-1 -1"); //$NON-NLS-1$
+		arguments.put(ATTRIBUTE_REMOVE, Boolean.FALSE.toString());
+		arguments.put(ATTRIBUTE_REPLACE, Boolean.FALSE.toString());
 		return new RefactoringSessionDescriptor(new RefactoringDescriptor[] { descriptor }, RefactoringSessionDescriptor.VERSION_1_0, RefactoringCoreMessages.InlineConstantRefactoring_deprecation_comment);
 	}
 }

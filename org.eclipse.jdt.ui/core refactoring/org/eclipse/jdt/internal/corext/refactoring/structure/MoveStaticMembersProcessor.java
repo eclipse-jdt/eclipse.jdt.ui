@@ -63,7 +63,6 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -686,16 +685,11 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 	
 	private void createChange(List modifiedCus, RefactoringStatus status, IProgressMonitor monitor) throws CoreException {
 		monitor.beginTask(RefactoringCoreMessages.MoveMembersRefactoring_creating, 5); 
+		final IMember[] members= getMembersToMove();
 		fChange= new DynamicValidationStateChange(RefactoringCoreMessages.MoveMembersRefactoring_move_members) {
 
 			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
-				arguments.put(JavaRefactoringDescriptor.INPUT, fDestinationType.getHandleIdentifier());
-				arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
-				arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
-				final IMember[] members= getMembersToMove();
-				for (int index= 0; index < members.length; index++)
-					arguments.put(JavaRefactoringDescriptor.ELEMENT + (index + 1), members[index].getHandleIdentifier());
 				String project= null;
 				final IJavaProject javaProject= getDeclaringType().getJavaProject();
 				if (javaProject != null)
@@ -705,7 +699,12 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 					description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_single, JavaElementLabels.getElementLabel(members[0], JavaElementLabels.ALL_FULLY_QUALIFIED));
 				else
 					description= Messages.format(RefactoringCoreMessages.MoveStaticMembersProcessor_descriptor_description_multi, String.valueOf(members.length));
-				JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_STATIC_MOVE, project, Messages.format(description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_STATIC_MOVE, project, Messages.format(description, new String[] { JavaElementLabels.getElementLabel(fDestinationType, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+				arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fDestinationType));
+				arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
+				arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
+				for (int index= 0; index < members.length; index++)
+					arguments.put(JavaRefactoringDescriptor.ELEMENT + (index + 1), descriptor.elementToHandle(members[index]));
 				return new RefactoringChangeDescriptor(descriptor);
 			}
 		}; 
@@ -1024,11 +1023,11 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaCore.create(handle);
-				if (element == null || !element.exists())
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+				if (element == null || element.getElementType() != IJavaElement.TYPE)
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_STATIC_MOVE));
 				else {
 					fDestinationType= (IType) element;
@@ -1036,12 +1035,12 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			final String delegate= generic.getAttribute(ATTRIBUTE_DELEGATE);
+			final String delegate= extended.getAttribute(ATTRIBUTE_DELEGATE);
 			if (delegate != null) {
 				fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
-			final String deprecate= generic.getAttribute(ATTRIBUTE_DEPRECATE);
+			final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
 			if (deprecate != null) {
 				fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
 			} else
@@ -1050,9 +1049,9 @@ public final class MoveStaticMembersProcessor extends MoveProcessor implements I
 			final List elements= new ArrayList();
 			String attribute= JavaRefactoringDescriptor.ELEMENT + count;
 			final RefactoringStatus status= new RefactoringStatus();
-			while ((handle= generic.getAttribute(attribute)) != null) {
-				final IJavaElement element= JavaCore.create(handle);
-				if (element == null || !element.exists())
+			while ((handle= extended.getAttribute(attribute)) != null) {
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+				if (element == null)
 					status.merge(RefactoringStatus.createWarningStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_STATIC_MOVE)));
 				else
 					elements.add(element);

@@ -48,7 +48,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 import org.eclipse.jdt.core.compiler.IProblem;
@@ -1148,46 +1147,6 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			return new DynamicValidationStateChange(RefactoringCoreMessages.ChangeSignatureRefactoring_restructure_parameters, (Change[]) list.toArray(new Change[list.size()])) {
 				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
-					arguments.put(JavaRefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
-					arguments.put(JavaRefactoringDescriptor.NAME, fMethodName);
-					arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
-					arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
-					if (fReturnTypeInfo.isTypeNameChanged())
-						arguments.put(ATTRIBUTE_RETURN, fReturnTypeInfo.getNewTypeName());
-					try {
-						if (!isVisibilitySameAsInitial())
-							arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
-					} catch (JavaModelException exception) {
-						JavaPlugin.log(exception);
-					}
-					int count= 1;
-					for (final Iterator iterator= fParameterInfos.iterator(); iterator.hasNext();) {
-						final ParameterInfo info= (ParameterInfo) iterator.next();
-						final StringBuffer buffer= new StringBuffer(64);
-						buffer.append(info.getOldTypeName());
-						buffer.append(" "); //$NON-NLS-1$
-						buffer.append(info.getOldName());
-						buffer.append(" "); //$NON-NLS-1$
-						buffer.append(info.getOldIndex());
-						buffer.append(" "); //$NON-NLS-1$
-						buffer.append(info.getNewTypeName());
-						buffer.append(" "); //$NON-NLS-1$
-						buffer.append(info.getNewName());
-						buffer.append(" "); //$NON-NLS-1$
-						buffer.append(info.isDeleted());
-						arguments.put(ATTRIBUTE_PARAMETER + count, buffer.toString());
-						final String value= info.getDefaultValue();
-						if (value != null && !"".equals(value)) //$NON-NLS-1$
-							arguments.put(ATTRIBUTE_DEFAULT + count, value);
-						count++;
-					}
-					count= 1;
-					for (final Iterator iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
-						final ExceptionInfo info= (ExceptionInfo) iterator.next();
-						arguments.put(JavaRefactoringDescriptor.ELEMENT + count, info.getType().getHandleIdentifier());
-						arguments.put(ATTRIBUTE_KIND + count, new Integer(info.getKind()).toString());
-						count++;
-					}
 					String project= null;
 					IJavaProject javaProject= fMethod.getJavaProject();
 					if (javaProject != null)
@@ -1200,7 +1159,47 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 						JavaPlugin.log(exception);
 					}
 					try {
-						JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), getComment(), arguments, flags);
+						final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_CHANGE_METHOD_SIGNATURE, project, Messages.format(RefactoringCoreMessages.ChangeSignatureRefactoring_descriptor_description, new String[] { getOldMethodSignature(), getNewMethodSignature()}), getComment(), arguments, flags);
+						arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fMethod));
+						arguments.put(JavaRefactoringDescriptor.NAME, fMethodName);
+						arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
+						arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
+						if (fReturnTypeInfo.isTypeNameChanged())
+							arguments.put(ATTRIBUTE_RETURN, fReturnTypeInfo.getNewTypeName());
+						try {
+							if (!isVisibilitySameAsInitial())
+								arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
+						} catch (JavaModelException exception) {
+							JavaPlugin.log(exception);
+						}
+						int count= 1;
+						for (final Iterator iterator= fParameterInfos.iterator(); iterator.hasNext();) {
+							final ParameterInfo info= (ParameterInfo) iterator.next();
+							final StringBuffer buffer= new StringBuffer(64);
+							buffer.append(info.getOldTypeName());
+							buffer.append(" "); //$NON-NLS-1$
+							buffer.append(info.getOldName());
+							buffer.append(" "); //$NON-NLS-1$
+							buffer.append(info.getOldIndex());
+							buffer.append(" "); //$NON-NLS-1$
+							buffer.append(info.getNewTypeName());
+							buffer.append(" "); //$NON-NLS-1$
+							buffer.append(info.getNewName());
+							buffer.append(" "); //$NON-NLS-1$
+							buffer.append(info.isDeleted());
+							arguments.put(ATTRIBUTE_PARAMETER + count, buffer.toString());
+							final String value= info.getDefaultValue();
+							if (value != null && !"".equals(value)) //$NON-NLS-1$
+								arguments.put(ATTRIBUTE_DEFAULT + count, value);
+							count++;
+						}
+						count= 1;
+						for (final Iterator iterator= fExceptionInfos.iterator(); iterator.hasNext();) {
+							final ExceptionInfo info= (ExceptionInfo) iterator.next();
+							arguments.put(JavaRefactoringDescriptor.ELEMENT + count, descriptor.elementToHandle(info.getType()));
+							arguments.put(ATTRIBUTE_KIND + count, new Integer(info.getKind()).toString());
+							count++;
+						}
 						return new RefactoringChangeDescriptor(descriptor);
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
@@ -2391,11 +2390,11 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaCore.create(handle);
-				if (element == null || !element.exists())
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+				if (element == null || element.getElementType() != IJavaElement.METHOD)
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_CHANGE_METHOD_SIGNATURE));
 				else {
 					fMethod= (IMethod) element;
@@ -2409,7 +2408,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			final String name= generic.getAttribute(JavaRefactoringDescriptor.NAME);
+			final String name= extended.getAttribute(JavaRefactoringDescriptor.NAME);
 			if (name != null) {
 				fMethodName= name;
 				final RefactoringStatus status= Checks.checkMethodName(fMethodName);
@@ -2417,10 +2416,10 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 					return status;
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
-			final String type= generic.getAttribute(ATTRIBUTE_RETURN);
+			final String type= extended.getAttribute(ATTRIBUTE_RETURN);
 			if (type != null && !"".equals(type)) //$NON-NLS-1$
 				fReturnTypeInfo= new ReturnTypeInfo(type);
-			final String visibility= generic.getAttribute(ATTRIBUTE_VISIBILITY);
+			final String visibility= extended.getAttribute(ATTRIBUTE_VISIBILITY);
 			if (visibility != null && !"".equals(visibility)) {//$NON-NLS-1$
 				int flag= 0;
 				try {
@@ -2434,7 +2433,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			String attribute= ATTRIBUTE_PARAMETER + count;
 			String value= null;
 			fParameterInfos= new ArrayList(3);
-			while ((value= generic.getAttribute(attribute)) != null) {
+			while ((value= extended.getAttribute(attribute)) != null) {
 				ParameterInfo info= null;
 				final StringTokenizer tokenizer= new StringTokenizer(value);
 				if (tokenizer.hasMoreTokens()) {
@@ -2471,7 +2470,7 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
 				} else
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
-				final String result= generic.getAttribute(ATTRIBUTE_DEFAULT + count);
+				final String result= extended.getAttribute(ATTRIBUTE_DEFAULT + count);
 				if (result != null && info != null && !"".equals(result)) //$NON-NLS-1$
 					info.setDefaultValue(result);
 				count++;
@@ -2480,12 +2479,12 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			count= 1;
 			fExceptionInfos= new ArrayList(2);
 			attribute= JavaRefactoringDescriptor.ELEMENT + count;
-			while ((value= generic.getAttribute(attribute)) != null) {
+			while ((value= extended.getAttribute(attribute)) != null) {
 				ExceptionInfo info= null;
-				final String kind= generic.getAttribute(ATTRIBUTE_KIND + count);
+				final String kind= extended.getAttribute(ATTRIBUTE_KIND + count);
 				if (kind != null) {
-					final IJavaElement element= JavaCore.create(value);
-					if (element == null || !element.exists())
+					final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+					if (element == null)
 						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_CHANGE_METHOD_SIGNATURE));
 					else {
 						try {
@@ -2501,12 +2500,12 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 				count++;
 				attribute= JavaRefactoringDescriptor.ELEMENT + count;
 			}
-			final String deprecate= generic.getAttribute(ATTRIBUTE_DEPRECATE);
+			final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
 			if (deprecate != null) {
 				fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
-			final String delegate= generic.getAttribute(ATTRIBUTE_DELEGATE);
+			final String delegate= extended.getAttribute(ATTRIBUTE_DELEGATE);
 			if (delegate != null) {
 				fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
 			} else

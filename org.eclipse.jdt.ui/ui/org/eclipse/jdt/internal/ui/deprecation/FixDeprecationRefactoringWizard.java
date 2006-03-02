@@ -28,7 +28,6 @@ import org.eclipse.ltk.ui.refactoring.history.RefactoringHistoryWizard;
 
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
-import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.refactoring.JavaRefactoringDescriptor;
 
@@ -143,12 +142,16 @@ public final class FixDeprecationRefactoringWizard extends RefactoringHistoryWiz
 	protected Refactoring createRefactoring(final RefactoringDescriptor descriptor, final RefactoringStatus status) throws CoreException {
 		if (descriptor instanceof JavaRefactoringDescriptor) {
 			final JavaRefactoringDescriptor extended= (JavaRefactoringDescriptor) descriptor;
+			String project= extended.getProject();
 			final Map arguments= new HashMap(extended.getArguments());
 			final String handle= (String) arguments.get(JavaRefactoringDescriptor.INPUT);
 			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
-				final IJavaElement element= JavaCore.create(handle);
-				if (element instanceof ICompilationUnit)
-					arguments.put(JavaRefactoringDescriptor.INPUT, fCompilationUnit.getHandleIdentifier());
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(project, handle);
+				if (element != null) {
+					if (element instanceof ICompilationUnit)
+						arguments.put(JavaRefactoringDescriptor.INPUT, JavaRefactoringDescriptor.elementToHandle(project, fCompilationUnit));
+					project= fCompilationUnit.getJavaProject().getElementName();
+				}
 			}
 			final String selection= (String) arguments.get(JavaRefactoringDescriptor.SELECTION);
 			if (selection != null) {
@@ -158,7 +161,7 @@ public final class FixDeprecationRefactoringWizard extends RefactoringHistoryWiz
 				buffer.append(fLength);
 				arguments.put(JavaRefactoringDescriptor.SELECTION, buffer.toString());
 			}
-			return super.createRefactoring(new JavaRefactoringDescriptor(extended.getID(), extended.getProject(), extended.getDescription(), extended.getComment(), arguments, extended.getFlags()), status);
+			return super.createRefactoring(new JavaRefactoringDescriptor(extended.getID(), project, extended.getDescription(), extended.getComment(), arguments, extended.getFlags()), status);
 		}
 		return super.createRefactoring(descriptor, status);
 	}

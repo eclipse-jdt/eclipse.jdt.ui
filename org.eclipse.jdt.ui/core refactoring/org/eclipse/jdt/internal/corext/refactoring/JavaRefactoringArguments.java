@@ -17,7 +17,6 @@ import org.eclipse.core.runtime.Assert;
 
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
-
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
 
 /**
@@ -34,6 +33,20 @@ public final class JavaRefactoringArguments extends RefactoringArguments {
 	/** The attribute map (element type: <code>&lt;String, String&gt;</code>) */
 	private final Map fAttributes= new HashMap(2);
 
+	/** The name of the project, or <code>null</code> for the workspace */
+	private final String fProject;
+
+	/**
+	 * Creates a new java refactoring arguments.
+	 * 
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 */
+	public JavaRefactoringArguments(final String project) {
+		Assert.isLegal(project == null || !"".equals(project)); //$NON-NLS-1$
+		fProject= project;
+	}
+
 	/**
 	 * Returns the attribute with the specified name.
 	 * 
@@ -43,6 +56,15 @@ public final class JavaRefactoringArguments extends RefactoringArguments {
 	 */
 	public String getAttribute(final String name) {
 		return (String) fAttributes.get(name);
+	}
+
+	/**
+	 * Returns the name of the project.
+	 * 
+	 * @return the name of the project, or <code>null</code> for the workspace
+	 */
+	public String getProject() {
+		return fProject;
 	}
 
 	/**

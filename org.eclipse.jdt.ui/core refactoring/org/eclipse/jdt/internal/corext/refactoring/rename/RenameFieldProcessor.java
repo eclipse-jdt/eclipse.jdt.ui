@@ -45,7 +45,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.WorkingCopyOwner;
 import org.eclipse.jdt.core.dom.FieldDeclaration;
@@ -578,14 +577,6 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 				public ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
-					arguments.put(JavaRefactoringDescriptor.INPUT, fField.getHandleIdentifier());
-					arguments.put(JavaRefactoringDescriptor.NAME, getNewElementName());
-					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
-					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
-					arguments.put(ATTRIBUTE_RENAME_GETTER, Boolean.valueOf(fRenameGetter).toString());
-					arguments.put(ATTRIBUTE_RENAME_SETTER, Boolean.valueOf(fRenameSetter).toString());
-					arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
-					arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
 					String project= null;
 					IJavaProject javaProject= fField.getJavaProject();
 					if (javaProject != null)
@@ -597,7 +588,15 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 					} catch (JavaModelException exception) {
 						JavaPlugin.log(exception);
 					}
-					JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_FIELD, project, Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "." + fField.getElementName(), getNewElementName()}), getComment(), arguments, flags); //$NON-NLS-1$
+					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_FIELD, project, Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "." + fField.getElementName(), getNewElementName()}), getComment(), arguments, flags); //$NON-NLS-1$
+					arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fField));
+					arguments.put(JavaRefactoringDescriptor.NAME, getNewElementName());
+					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
+					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
+					arguments.put(ATTRIBUTE_RENAME_GETTER, Boolean.valueOf(fRenameGetter).toString());
+					arguments.put(ATTRIBUTE_RENAME_SETTER, Boolean.valueOf(fRenameSetter).toString());
+					arguments.put(ATTRIBUTE_DELEGATE, Boolean.valueOf(fDelegateUpdating).toString());
+					arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
 					return new RefactoringChangeDescriptor(descriptor);
 				}
 			};
@@ -854,47 +853,47 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaCore.create(handle);
-				if (element == null || !element.exists())
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+				if (element == null || element.getElementType() != IJavaElement.FIELD)
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_FIELD));
 				else
 					fField= (IField) element;
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			final String name= generic.getAttribute(JavaRefactoringDescriptor.NAME);
+			final String name= extended.getAttribute(JavaRefactoringDescriptor.NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				setNewElementName(name);
 			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
-			final String references= generic.getAttribute(ATTRIBUTE_REFERENCES);
+			final String references= extended.getAttribute(ATTRIBUTE_REFERENCES);
 			if (references != null) {
 				fUpdateReferences= Boolean.valueOf(references).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REFERENCES));
-			final String matches= generic.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
+			final String matches= extended.getAttribute(ATTRIBUTE_TEXTUAL_MATCHES);
 			if (matches != null) {
 				fUpdateTextualMatches= Boolean.valueOf(matches).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TEXTUAL_MATCHES));
-			final String getters= generic.getAttribute(ATTRIBUTE_RENAME_GETTER);
+			final String getters= extended.getAttribute(ATTRIBUTE_RENAME_GETTER);
 			if (getters != null) {
 				fRenameGetter= Boolean.valueOf(getters).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_RENAME_GETTER));
-			final String setters= generic.getAttribute(ATTRIBUTE_RENAME_SETTER);
+			final String setters= extended.getAttribute(ATTRIBUTE_RENAME_SETTER);
 			if (setters != null) {
 				fRenameSetter= Boolean.valueOf(setters).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_RENAME_SETTER));
-			final String delegate= generic.getAttribute(ATTRIBUTE_DELEGATE);
+			final String delegate= extended.getAttribute(ATTRIBUTE_DELEGATE);
 			if (delegate != null) {
 				fDelegateUpdating= Boolean.valueOf(delegate).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DELEGATE));
-			final String deprecate= generic.getAttribute(ATTRIBUTE_DEPRECATE);
+			final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
 			if (deprecate != null) {
 				fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
 			} else

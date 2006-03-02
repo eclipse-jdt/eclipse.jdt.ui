@@ -131,13 +131,14 @@ public class RenameSourceFolderChange extends AbstractJavaElementRenameChange {
 	}
 
 	public final ChangeDescriptor getDescriptor() {
-		final Map arguments= new HashMap();
-		arguments.put(JavaRefactoringDescriptor.INPUT, getResourcePath().toPortableString());
-		arguments.put(JavaRefactoringDescriptor.NAME, getNewName());
 		String project= null;
 		final IProject container= getResource().getProject();
 		if (container != null)
 			project= container.getName();
-		return new RefactoringChangeDescriptor(new JavaRefactoringDescriptor(ID_RENAME_SOURCE_FOLDER, project, Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { getResourcePath().toString(), getNewName()}), getComment(), arguments, RefactoringDescriptor.NONE));
+		final Map arguments= new HashMap();
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_SOURCE_FOLDER, project, Messages.format(RefactoringCoreMessages.RenameSourceFolderChange_descriptor_description, new String[] { getResourcePath().toString(), getNewName()}), getComment(), arguments, RefactoringDescriptor.NONE);
+		arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(getSourceFolder()));
+		arguments.put(JavaRefactoringDescriptor.NAME, getNewName());
+		return new RefactoringChangeDescriptor(descriptor);
 	}
 }

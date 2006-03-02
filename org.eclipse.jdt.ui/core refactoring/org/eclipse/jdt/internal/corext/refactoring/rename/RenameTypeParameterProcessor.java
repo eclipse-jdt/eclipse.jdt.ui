@@ -38,7 +38,6 @@ import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeParameter;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
 import org.eclipse.jdt.core.dom.AnnotationTypeDeclaration;
@@ -166,6 +165,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 	}
 
 	private static final String ATTRIBUTE_REFERENCES= "references"; //$NON-NLS-1$
+	private static final String ATTRIBUTE_PARAMETER= "parameter"; //$NON-NLS-1$
 
 	private static final String ID_RENAME_TYPE_PARAMETER= "org.eclipse.jdt.ui.rename.type.parameter"; //$NON-NLS-1$
 
@@ -272,14 +272,15 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 
 					public final ChangeDescriptor getDescriptor() {
 						final Map arguments= new HashMap();
-						arguments.put(JavaRefactoringDescriptor.INPUT, fTypeParameter.getParent().getHandleIdentifier());
-						arguments.put(JavaRefactoringDescriptor.NAME, getNewElementName());
-						arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 						String project= null;
 						IJavaProject javaProject= fTypeParameter.getJavaProject();
 						if (javaProject != null)
 							project= javaProject.getElementName();
-						JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_TYPE_PARAMETER, project, Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description, new String[] { fTypeParameter.getElementName(), JavaElementLabels.getElementLabel(fTypeParameter.getDeclaringMember(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, RefactoringDescriptor.NONE);
+						final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_TYPE_PARAMETER, project, Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description, new String[] { fTypeParameter.getElementName(), JavaElementLabels.getElementLabel(fTypeParameter.getDeclaringMember(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, RefactoringDescriptor.NONE);
+						arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fTypeParameter.getDeclaringMember()));
+						arguments.put(JavaRefactoringDescriptor.NAME, getNewElementName());
+						arguments.put(ATTRIBUTE_PARAMETER, fTypeParameter.getElementName());
+						arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 						return new RefactoringChangeDescriptor(descriptor);
 					}
 				};
@@ -371,22 +372,33 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 
 	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			final String parameter= extended.getAttribute(ATTRIBUTE_PARAMETER);
+			if (parameter == null || "".equals(parameter)) //$NON-NLS-1$
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PARAMETER));
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaCore.create(handle);
-				if (element == null || !element.exists())
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+				if (element == null)
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_TYPE_PARAMETER));
-				else
-					fTypeParameter= (ITypeParameter) element;
+				else {
+					if (element instanceof IMethod)
+						fTypeParameter= ((IMethod) element).getTypeParameter(parameter);
+					else if (element instanceof IType)
+						fTypeParameter= ((IType) element).getTypeParameter(parameter);
+					else
+						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle, JavaRefactoringDescriptor.INPUT}));
+					if (fTypeParameter == null || !fTypeParameter.exists())
+						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_TYPE_PARAMETER));
+				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			final String name= generic.getAttribute(JavaRefactoringDescriptor.NAME);
+			final String name= extended.getAttribute(JavaRefactoringDescriptor.NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				setNewElementName(name);
 			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
-			final String references= generic.getAttribute(ATTRIBUTE_REFERENCES);
+			final String references= extended.getAttribute(ATTRIBUTE_REFERENCES);
 			if (references != null) {
 				fUpdateReferences= Boolean.valueOf(references).booleanValue();
 			} else

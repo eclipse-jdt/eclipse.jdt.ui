@@ -1582,7 +1582,12 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 
 				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
-					arguments.put(JavaRefactoringDescriptor.INPUT, fMethod.getHandleIdentifier());
+					String project= null;
+					final IJavaProject javaProject= fMethod.getJavaProject();
+					if (javaProject != null)
+						project= javaProject.getElementName();
+					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_MOVE_METHOD, project, Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fTarget, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+					arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fMethod));
 					arguments.put(JavaRefactoringDescriptor.NAME, fMethodName);
 					arguments.put(ATTRIBUTE_TARGET_NAME, fTargetName);
 					arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
@@ -1591,11 +1596,6 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					arguments.put(ATTRIBUTE_USE_GETTER, Boolean.valueOf(fUseGetters).toString());
 					arguments.put(ATTRIBUTE_USE_SETTER, Boolean.valueOf(fUseSetters).toString());
 					arguments.put(ATTRIBUTE_TARGET_INDEX, new Integer(getTargetIndex()).toString());
-					String project= null;
-					final IJavaProject javaProject= fMethod.getJavaProject();
-					if (javaProject != null)
-						project= javaProject.getElementName();
-					JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_MOVE_METHOD, project, Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fTarget, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 					return new RefactoringChangeDescriptor(descriptor);
 				}
 			}; 
@@ -2703,11 +2703,11 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	 */
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaCore.create(handle);
-				if (element == null || !element.exists())
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+				if (element == null || element.getElementType() != IJavaElement.METHOD)
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_MOVE_METHOD));
 				else {
 					fMethod= (IMethod) element;
@@ -2715,46 +2715,46 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			final String name= generic.getAttribute(JavaRefactoringDescriptor.NAME);
+			final String name= extended.getAttribute(JavaRefactoringDescriptor.NAME);
 			if (name != null) {
 				final RefactoringStatus status= setMethodName(name);
 				if (status.hasError())
 					return status;
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
-			final String deprecate= generic.getAttribute(ATTRIBUTE_DEPRECATE);
+			final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
 			if (deprecate != null) {
 				fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DEPRECATE));
-			final String remove= generic.getAttribute(ATTRIBUTE_REMOVE);
+			final String remove= extended.getAttribute(ATTRIBUTE_REMOVE);
 			if (remove != null) {
 				fRemove= Boolean.valueOf(remove).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_REMOVE));
-			final String inline= generic.getAttribute(ATTRIBUTE_INLINE);
+			final String inline= extended.getAttribute(ATTRIBUTE_INLINE);
 			if (inline != null) {
 				fInline= Boolean.valueOf(inline).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_INLINE));
-			final String getter= generic.getAttribute(ATTRIBUTE_USE_GETTER);
+			final String getter= extended.getAttribute(ATTRIBUTE_USE_GETTER);
 			if (getter != null)
 				fUseGetters= Boolean.valueOf(getter).booleanValue();
 			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_USE_GETTER));
-			final String setter= generic.getAttribute(ATTRIBUTE_USE_SETTER);
+			final String setter= extended.getAttribute(ATTRIBUTE_USE_SETTER);
 			if (setter != null)
 				fUseSetters= Boolean.valueOf(setter).booleanValue();
 			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_USE_SETTER));
-			final String target= generic.getAttribute(ATTRIBUTE_TARGET_NAME);
+			final String target= extended.getAttribute(ATTRIBUTE_TARGET_NAME);
 			if (target != null) {
 				final RefactoringStatus status= setTargetName(target);
 				if (status.hasError())
 					return status;
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_TARGET_NAME));
-			final String value= generic.getAttribute(ATTRIBUTE_TARGET_INDEX);
+			final String value= extended.getAttribute(ATTRIBUTE_TARGET_INDEX);
 			if (value != null) {
 				try {
 					final int index= Integer.valueOf(value).intValue();

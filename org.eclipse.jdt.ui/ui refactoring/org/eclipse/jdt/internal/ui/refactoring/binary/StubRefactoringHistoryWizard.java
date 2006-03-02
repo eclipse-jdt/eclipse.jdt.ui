@@ -353,15 +353,16 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 			if (refactoring != null) {
 				final RefactoringArguments arguments= javaDescriptor.createArguments();
 				if (arguments instanceof JavaRefactoringArguments) {
-					final JavaRefactoringArguments javaArguments= (JavaRefactoringArguments) arguments;
-					String value= javaArguments.getAttribute(JavaRefactoringDescriptor.INPUT);
-					if (value != null && !"".equals(value)) //$NON-NLS-1$
-						javaArguments.setAttribute(JavaRefactoringDescriptor.INPUT, getTransformedValue(value));
+					final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+					final String project= fJavaProject.getElementName();
+					String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+					if (handle != null && !"".equals(handle)) //$NON-NLS-1$
+						extended.setAttribute(JavaRefactoringDescriptor.INPUT, getTransformedHandle(project, handle));
 					int count= 1;
 					String attribute= JavaRefactoringDescriptor.ELEMENT + count;
-					while ((value= javaArguments.getAttribute(attribute)) != null) {
-						if (!"".equals(value)) //$NON-NLS-1$
-							javaArguments.setAttribute(attribute, getTransformedValue(value));
+					while ((handle= extended.getAttribute(attribute)) != null) {
+						if (!"".equals(handle)) //$NON-NLS-1$
+							extended.setAttribute(attribute, getTransformedHandle(project, handle));
 						count++;
 						attribute= JavaRefactoringDescriptor.ELEMENT + count;
 					}
@@ -504,35 +505,41 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 	protected abstract RefactoringHistory getRefactoringHistory();
 
 	/**
-	 * Returns the transformed input value of the specified value.
+	 * Returns the transformed handle corresponding to the specified input
+	 * handle.
 	 * 
-	 * @param value
-	 *            the value to transform
-	 * @return the transformed value, or the original one
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 * @param handle
+	 *            the handle to transform
+	 * @return the transformed handle, or the original one if nothing needed to
+	 *         be transformed
 	 */
-	private String getTransformedValue(final String value) {
+	private String getTransformedHandle(final String project, final String handle) {
 		if (fSourceFolder != null) {
 			final IJavaElement target= JavaCore.create(fSourceFolder);
 			if (target instanceof IPackageFragmentRoot) {
 				final IPackageFragmentRoot extended= (IPackageFragmentRoot) target;
-				final String targetIdentifier= extended.getHandleIdentifier();
 				String sourceIdentifier= null;
-				final IJavaElement element= JavaCore.create(value);
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(project, handle, false);
 				if (element != null) {
 					final IPackageFragmentRoot root= (IPackageFragmentRoot) element.getAncestor(IJavaElement.PACKAGE_FRAGMENT_ROOT);
 					if (root != null)
 						sourceIdentifier= root.getHandleIdentifier();
 					else {
-						final IJavaProject project= element.getJavaProject();
-						if (project != null)
-							sourceIdentifier= project.getHandleIdentifier();
+						final IJavaProject javaProject= element.getJavaProject();
+						if (javaProject != null)
+							sourceIdentifier= javaProject.getHandleIdentifier();
 					}
-					if (sourceIdentifier != null)
-						return targetIdentifier + element.getHandleIdentifier().substring(sourceIdentifier.length());
+					if (sourceIdentifier != null) {
+						final IJavaElement result= JavaCore.create(extended.getHandleIdentifier() + element.getHandleIdentifier().substring(sourceIdentifier.length()));
+						if (result != null)
+							return JavaRefactoringDescriptor.elementToHandle(project, result);
+					}
 				}
 			}
 		}
-		return value;
+		return handle;
 	}
 
 	/**

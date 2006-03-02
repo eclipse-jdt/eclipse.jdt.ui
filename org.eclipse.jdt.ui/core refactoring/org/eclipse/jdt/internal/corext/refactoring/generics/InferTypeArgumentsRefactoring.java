@@ -44,7 +44,6 @@ import org.eclipse.jdt.core.BindingKey;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -536,12 +535,12 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 			
 				public final ChangeDescriptor getDescriptor() {
 					final Map arguments= new HashMap();
+					final IJavaProject project= getSingleProject();
+					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, project != null ? project.getElementName() : null, project != null ? NLS.bind(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description, getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 					for (int index= 0; index < fElements.length; index++)
-						arguments.put(JavaRefactoringDescriptor.ELEMENT + (index + 1), fElements[index].getHandleIdentifier());
+						arguments.put(JavaRefactoringDescriptor.ELEMENT + (index + 1), descriptor.elementToHandle(fElements[index]));
 					arguments.put(ATTRIBUTE_CLONE, Boolean.valueOf(fAssumeCloneReturnsSameType).toString());
 					arguments.put(ATTRIBUTE_LEAVE, Boolean.valueOf(fLeaveUnconstrainedRaw).toString());
-					final IJavaProject project= getSingleProject();
-					JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, project != null ? project.getElementName() : null, project != null ? NLS.bind(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description, getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 					return new RefactoringChangeDescriptor(descriptor);
 				}
 			}; 
@@ -580,12 +579,12 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_LEAVE));
 			int count= 1;
 			final List elements= new ArrayList();
-			String value= null;
+			String handle= null;
 			String attribute= JavaRefactoringDescriptor.ELEMENT + count;
 			final RefactoringStatus status= new RefactoringStatus();
-			while ((value= generic.getAttribute(attribute)) != null) {
-				final IJavaElement element= JavaCore.create(value);
-				if (element == null || !element.exists())
+			while ((handle= generic.getAttribute(attribute)) != null) {
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(generic.getProject(), handle);
+				if (element == null)
 					status.merge(RefactoringStatus.createWarningStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INFER_TYPE_ARGUMENTS)));
 				else
 					elements.add(element);

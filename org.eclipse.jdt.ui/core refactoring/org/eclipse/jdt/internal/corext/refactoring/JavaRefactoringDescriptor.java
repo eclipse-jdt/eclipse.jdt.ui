@@ -10,14 +10,18 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
 
 import org.eclipse.core.runtime.Assert;
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IPath;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IResource;
+import org.eclipse.core.resources.IWorkspaceRoot;
+import org.eclipse.core.resources.ResourcesPlugin;
 
 import org.eclipse.ltk.core.refactoring.Refactoring;
 import org.eclipse.ltk.core.refactoring.RefactoringContribution;
@@ -25,6 +29,9 @@ import org.eclipse.ltk.core.refactoring.RefactoringCore;
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptor;
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.ltk.core.refactoring.participants.RefactoringArguments;
+
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.JavaCore;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
 
@@ -36,13 +43,13 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
-	 * Predefined argument called <code>selection</code>.
+	 * Constant describing the deprecation resolving flag.
 	 * <p>
-	 * This argument should be used to describe user input selections within a
-	 * text file. The value of this argument has the format "offset length".
+	 * Clients should set this flag to indicate that the refactoring can used to
+	 * resolve deprecation problems of members declared in source.
 	 * </p>
 	 */
-	public static final String SELECTION= "selection"; //$NON-NLS-1$
+	public static final int DEPRECATION_RESOLVING= 1 << 17;
 
 	/**
 	 * Predefined argument called <code>element&lt;Number&gt;</code>.
@@ -61,6 +68,33 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public static final String ELEMENT= "element"; //$NON-NLS-1$
 
+	/** The field identifier */
+	private static final String IDENTIFIER_FIELD= "field"; //$NON-NLS-1$
+
+	/** The initializer identifier */
+	private static final String IDENTIFIER_INITIALIZER= "initializer"; //$NON-NLS-1$
+
+	/** The method identifier */
+	private static final String IDENTIFIER_METHOD= "method"; //$NON-NLS-1$
+
+	/** The package identifier */
+	private static final String IDENTIFIER_PACKAGE= "package"; //$NON-NLS-1$
+
+	/** The project identifier */
+	private static final String IDENTIFIER_PROJECT= "project"; //$NON-NLS-1$
+
+	/** The resource identifier */
+	private static final String IDENTIFIER_RESOURCE= "resource"; //$NON-NLS-1$
+
+	/** The root identifier */
+	private static final String IDENTIFIER_ROOT= "root"; //$NON-NLS-1$
+
+	/** The type identifier */
+	private static final String IDENTIFIER_TYPE= "type"; //$NON-NLS-1$
+
+	/** The unit identifier */
+	private static final String IDENTIFIER_UNIT= "unit"; //$NON-NLS-1$
+
 	/**
 	 * Predefined argument called <code>input</code>.
 	 * <p>
@@ -72,30 +106,6 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * </p>
 	 */
 	public static final String INPUT= "input"; //$NON-NLS-1$
-
-	/**
-	 * Predefined argument called <code>name</code>.
-	 * <p>
-	 * This argument should be used to name the element being refactored. The
-	 * value of this argument may be shown in the user interface.
-	 * </p>
-	 */
-	public static final String NAME= "name"; //$NON-NLS-1$
-
-	/** The map of arguments (element type: &lt;String, String&gt;) */
-	private final Map fArguments;
-
-	/** The refactoring contribution, or <code>null</code> */
-	private JavaRefactoringContribution fContribution;
-
-	/**
-	 * Constant describing the deprecation resolving flag.
-	 * <p>
-	 * Clients should set this flag to indicate that the refactoring can used to
-	 * resolve deprecation problems of members declared in source.
-	 * </p>
-	 */
-	public static final int DEPRECATION_RESOLVING= 1 << 17;
 
 	/**
 	 * Constant describing the jar deprecation resolving flag.
@@ -115,6 +125,159 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * </p>
 	 */
 	public static final int JAR_IMPORTABLE= 1 << 16;
+
+	/**
+	 * Predefined argument called <code>name</code>.
+	 * <p>
+	 * This argument should be used to name the element being refactored. The
+	 * value of this argument may be shown in the user interface.
+	 * </p>
+	 */
+	public static final String NAME= "name"; //$NON-NLS-1$
+
+	/**
+	 * Predefined argument called <code>selection</code>.
+	 * <p>
+	 * This argument should be used to describe user input selections within a
+	 * text file. The value of this argument has the format "offset length".
+	 * </p>
+	 */
+	public static final String SELECTION= "selection"; //$NON-NLS-1$
+
+	/**
+	 * Converts the specified element to an input handle.
+	 * 
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 * @param element
+	 *            the element
+	 * @return a corresponding input handle
+	 */
+	public static String elementToHandle(final String project, final IJavaElement element) {
+		final int type= element.getElementType();
+		switch (type) {
+			case IJavaElement.JAVA_PROJECT:
+				return getHandlePrefix(IDENTIFIER_PROJECT) + element.getElementName();
+			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
+				return resourceToHandle(project, getHandlePrefix(IDENTIFIER_ROOT), element.getResource());
+			case IJavaElement.COMPILATION_UNIT:
+				return resourceToHandle(project, getHandlePrefix(IDENTIFIER_UNIT), element.getResource());
+			case IJavaElement.PACKAGE_FRAGMENT:
+				return resourceToHandle(project, getHandlePrefix(IDENTIFIER_PACKAGE), element.getResource());
+		}
+		return element.getHandleIdentifier();
+	}
+
+	/**
+	 * Returns the handle prefix for the corresponding identifier
+	 * 
+	 * @param identifier
+	 *            the identifier
+	 * @return the handle prefix
+	 */
+	private static String getHandlePrefix(final String identifier) {
+		Assert.isNotNull(identifier);
+		return identifier + "://"; //$NON-NLS-1$
+	}
+
+	/**
+	 * Converts an input handle back to the corresponding java element.
+	 * 
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 * @param handle
+	 *            the input handle
+	 * @return the corresponding java element, or <code>null</code> if no such
+	 *         element exists
+	 */
+	public static IJavaElement handleToElement(final String project, final String handle) {
+		return handleToElement(project, handle, true);
+	}
+
+	/**
+	 * Converts an input handle back to the corresponding java element.
+	 * 
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 * @param handle
+	 *            the input handle
+	 * @param check
+	 *            <code>true</code> to check for existence of the element,
+	 *            <code>false</code> otherwise
+	 * @return the corresponding java element, or <code>null</code> if no such
+	 *         element exists
+	 */
+	public static IJavaElement handleToElement(final String project, final String handle, final boolean check) {
+		IJavaElement element= null;
+		if (handle.startsWith(getHandlePrefix(IDENTIFIER_PROJECT))) {
+			element= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot().getProject(handle.substring(getHandlePrefix(IDENTIFIER_PROJECT).length())));
+		} else if (handle.startsWith(getHandlePrefix(IDENTIFIER_ROOT))) {
+			element= JavaCore.create(handleToResource(project, handle, getHandlePrefix(IDENTIFIER_ROOT)));
+		} else if (handle.startsWith(getHandlePrefix(IDENTIFIER_UNIT))) {
+			element= JavaCore.create(handleToResource(project, handle, getHandlePrefix(IDENTIFIER_UNIT)));
+		} else if (handle.startsWith(getHandlePrefix(IDENTIFIER_PACKAGE))) {
+			element= JavaCore.create(handleToResource(project, handle, getHandlePrefix(IDENTIFIER_PACKAGE)));
+		} else
+			element= JavaCore.create(handle);
+		if (element != null && (!check || element.exists()))
+			return element;
+		return null;
+	}
+
+	/**
+	 * Converts an input handle with the given prefix back to the corresponding
+	 * resource.
+	 * 
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 * @param handle
+	 *            the input handle
+	 * @param prefix
+	 *            the prefix
+	 * 
+	 * @return the corresponding resource, or <code>null</code> if no such
+	 *         resource exists
+	 */
+	private static IResource handleToResource(String project, final String handle, final String prefix) {
+		final IWorkspaceRoot root= ResourcesPlugin.getWorkspace().getRoot();
+		String string= handle;
+		if (handle.startsWith(prefix))
+			string= string.substring(prefix.length());
+		else
+			return null;
+		if ("".equals(string)) //$NON-NLS-1$
+			return null;
+		final IPath path= Path.fromPortableString(string);
+		if (path == null)
+			return null;
+		if (project != null && !"".equals(project)) //$NON-NLS-1$
+			return root.getProject(project).findMember(path);
+		return root.findMember(path);
+	}
+
+	/**
+	 * Converts the specified resource to a portable path with prefix.
+	 * 
+	 * @param project
+	 *            the project, or <code>null</code> for the workspace
+	 * @param prefix
+	 *            the prefix
+	 * @param resource
+	 *            the resource
+	 * 
+	 * @return the prefixed portable path
+	 */
+	private static String resourceToHandle(final String project, final String prefix, final IResource resource) {
+		if (project != null && !"".equals(project)) //$NON-NLS-1$
+			return prefix + resource.getProjectRelativePath().toPortableString();
+		return prefix + resource.getFullPath().toPortableString();
+	}
+
+	/** The map of arguments (element type: &lt;String, String&gt;) */
+	private final Map fArguments;
+
+	/** The refactoring contribution, or <code>null</code> */
+	private JavaRefactoringContribution fContribution;
 
 	/**
 	 * Creates a new java refactoring descriptor.
@@ -138,7 +301,7 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 		super(id, project, description, comment, flags);
 		Assert.isNotNull(arguments);
 		fContribution= contribution;
-		fArguments= Collections.unmodifiableMap(new HashMap(arguments));
+		fArguments= arguments;
 	}
 
 	/**
@@ -179,7 +342,7 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 *         descriptor
 	 */
 	public RefactoringArguments createArguments() {
-		final JavaRefactoringArguments arguments= new JavaRefactoringArguments();
+		final JavaRefactoringArguments arguments= new JavaRefactoringArguments(getProject());
 		for (final Iterator iterator= fArguments.entrySet().iterator(); iterator.hasNext();) {
 			final Map.Entry entry= (Entry) iterator.next();
 			final String name= (String) entry.getKey();
@@ -214,6 +377,18 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	}
 
 	/**
+	 * Converts the specified element to an input handle.
+	 * 
+	 * @param element
+	 *            the element
+	 * @return a corresponding input handle
+	 */
+	public String elementToHandle(final IJavaElement element) {
+		Assert.isNotNull(element);
+		return elementToHandle(getProject(), element);
+	}
+
+	/**
 	 * Returns the argument map
 	 * 
 	 * @return the argument map.
@@ -229,5 +404,46 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public JavaRefactoringContribution getContribution() {
 		return fContribution;
+	}
+
+	/**
+	 * Converts an input handle back to the corresponding java element.
+	 * 
+	 * @param handle
+	 *            the input handle
+	 * @return the corresponding java element, or <code>null</code> if no such
+	 *         element exists
+	 */
+	public IJavaElement handleToElement(final String handle) {
+		Assert.isNotNull(handle);
+		Assert.isLegal(!"".equals(handle)); //$NON-NLS-1$
+		final String project= getProject();
+		return handleToElement(project, handle);
+	}
+
+	/**
+	 * Converts an input handle back to the corresponding resource.
+	 * 
+	 * @param handle
+	 *            the input handle
+	 * @return the corresponding resource, or <code>null</code> if no such
+	 *         resource exists
+	 */
+	public IResource handleToResource(final String handle) {
+		Assert.isNotNull(handle);
+		Assert.isLegal(!"".equals(handle)); //$NON-NLS-1$
+		return handleToResource(getProject(), handle, getHandlePrefix(IDENTIFIER_RESOURCE));
+	}
+
+	/**
+	 * Converts the specified resource to an input handle.
+	 * 
+	 * @param resource
+	 *            the resource
+	 * @return a corresponding input handle
+	 */
+	public String resourceToHandle(final IResource resource) {
+		Assert.isNotNull(resource);
+		return resourceToHandle(getProject(), getHandlePrefix(IDENTIFIER_RESOURCE), resource);
 	}
 }

@@ -50,7 +50,6 @@ import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaConventions;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
@@ -387,18 +386,18 @@ public class SelfEncapsulateFieldRefactoring extends CommentRefactoring implemen
 
 			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
-				arguments.put(JavaRefactoringDescriptor.INPUT, fField.getHandleIdentifier());
+				String project= null;
+				IJavaProject javaProject= fField.getJavaProject();
+				if (javaProject != null)
+					project= javaProject.getElementName();
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_SELF_ENCAPSULATE, project, NLS.bind(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, (JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE));
+				arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fField));
 				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
 				arguments.put(ATTRIBUTE_INSERTION, new Integer(fInsertionIndex).toString());
 				arguments.put(ATTRIBUTE_SETTER, fSetterName);
 				arguments.put(ATTRIBUTE_GETTER, fGetterName);
 				arguments.put(ATTRIBUTE_COMMENTS, Boolean.valueOf(fGenerateJavadoc).toString());
 				arguments.put(ATTRIBUTE_DECLARING, Boolean.valueOf(fEncapsulateDeclaringClass).toString());
-				String project= null;
-				IJavaProject javaProject= fField.getJavaProject();
-				if (javaProject != null)
-					project= javaProject.getElementName();
-				JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_SELF_ENCAPSULATE, project, NLS.bind(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, (JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE));
 				return new RefactoringChangeDescriptor(descriptor);
 			}
 		};
@@ -643,11 +642,11 @@ public class SelfEncapsulateFieldRefactoring extends CommentRefactoring implemen
 
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaCore.create(handle);
-				if (element == null || !element.exists())
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+				if (element == null || element.getElementType() != IJavaElement.FIELD)
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_SELF_ENCAPSULATE));
 				else {
 					fField= (IField) element;
@@ -659,27 +658,27 @@ public class SelfEncapsulateFieldRefactoring extends CommentRefactoring implemen
 				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			String name= generic.getAttribute(ATTRIBUTE_GETTER);
+			String name= extended.getAttribute(ATTRIBUTE_GETTER);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				fGetterName= name;
 			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_GETTER));
-			name= generic.getAttribute(ATTRIBUTE_SETTER);
+			name= extended.getAttribute(ATTRIBUTE_SETTER);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				fSetterName= name;
 			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_SETTER));
-			final String encapsulate= generic.getAttribute(ATTRIBUTE_DECLARING);
+			final String encapsulate= extended.getAttribute(ATTRIBUTE_DECLARING);
 			if (encapsulate != null) {
 				fEncapsulateDeclaringClass= Boolean.valueOf(encapsulate).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_DECLARING));
-			final String matches= generic.getAttribute(ATTRIBUTE_COMMENTS);
+			final String matches= extended.getAttribute(ATTRIBUTE_COMMENTS);
 			if (matches != null) {
 				fGenerateJavadoc= Boolean.valueOf(matches).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_COMMENTS));
-			final String visibility= generic.getAttribute(ATTRIBUTE_VISIBILITY);
+			final String visibility= extended.getAttribute(ATTRIBUTE_VISIBILITY);
 			if (visibility != null && !"".equals(visibility)) {//$NON-NLS-1$
 				int flag= 0;
 				try {
@@ -689,7 +688,7 @@ public class SelfEncapsulateFieldRefactoring extends CommentRefactoring implemen
 				}
 				fVisibility= flag;
 			}
-			final String insertion= generic.getAttribute(ATTRIBUTE_INSERTION);
+			final String insertion= extended.getAttribute(ATTRIBUTE_INSERTION);
 			if (insertion != null && !"".equals(insertion)) {//$NON-NLS-1$
 				int index= 0;
 				try {

@@ -52,7 +52,6 @@ import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.NamingConventions;
 import org.eclipse.jdt.core.dom.AST;
@@ -479,22 +478,24 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 	}
 
 	private Change createChange(CompilationUnitRewrite rewrite) throws CoreException {
+		final ITypeBinding binding= fAnonymousInnerClassNode.resolveBinding();
+		final String[] labels= new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)};
 		TextChange change= new CompilationUnitChange(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_name, fCu) {
 
 			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
-				arguments.put(JavaRefactoringDescriptor.INPUT, fCu.getHandleIdentifier());
+				String project= null;
+				IJavaProject javaProject= fCu.getJavaProject();
+				if (javaProject != null)
+					project= javaProject.getElementName();
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_CONVERT_ANONYMOUS, project, Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description, labels), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
+				arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fCu));
 				arguments.put(JavaRefactoringDescriptor.NAME, fClassName);
 				arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
 				arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
 				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
-				String project= null;
-				IJavaProject javaProject= fCu.getJavaProject();
-				if (javaProject != null)
-					project= javaProject.getElementName();
-				final ITypeBinding binding= fAnonymousInnerClassNode.resolveBinding();
-				return new RefactoringChangeDescriptor(new JavaRefactoringDescriptor(ID_CONVERT_ANONYMOUS, project, Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringMethod(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE));
+				return new RefactoringChangeDescriptor(descriptor);
 			}
 		};
 		try {
@@ -1018,11 +1019,11 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		fSelfInitializing= true;
 		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaCore.create(handle);
-				if (element == null || !element.exists())
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+				if (element == null || element.getElementType() != IJavaElement.COMPILATION_UNIT)
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_CONVERT_ANONYMOUS));
 				else {
 					fCu= (ICompilationUnit) element;
@@ -1030,12 +1031,12 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			final String name= generic.getAttribute(JavaRefactoringDescriptor.NAME);
+			final String name= extended.getAttribute(JavaRefactoringDescriptor.NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				fClassName= name;
 			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
-			final String visibility= generic.getAttribute(ATTRIBUTE_VISIBILITY);
+			final String visibility= extended.getAttribute(ATTRIBUTE_VISIBILITY);
 			if (visibility != null && !"".equals(visibility)) {//$NON-NLS-1$
 				int flag= 0;
 				try {
@@ -1045,7 +1046,7 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 				}
 				fVisibility= flag;
 			}
-			final String selection= generic.getAttribute(JavaRefactoringDescriptor.SELECTION);
+			final String selection= extended.getAttribute(JavaRefactoringDescriptor.SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -1061,12 +1062,12 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}));
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.SELECTION));
-			final String declareStatic= generic.getAttribute(ATTRIBUTE_STATIC);
+			final String declareStatic= extended.getAttribute(ATTRIBUTE_STATIC);
 			if (declareStatic != null) {
 				fDeclareStatic= Boolean.valueOf(declareStatic).booleanValue();
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_STATIC));
-			final String declareFinal= generic.getAttribute(ATTRIBUTE_FINAL);
+			final String declareFinal= extended.getAttribute(ATTRIBUTE_FINAL);
 			if (declareFinal != null) {
 				fDeclareFinal= Boolean.valueOf(declareStatic).booleanValue();
 			} else

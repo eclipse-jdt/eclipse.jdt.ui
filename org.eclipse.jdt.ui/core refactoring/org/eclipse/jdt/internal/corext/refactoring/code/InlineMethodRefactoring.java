@@ -350,10 +350,6 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		
 			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
-				arguments.put(JavaRefactoringDescriptor.INPUT, fInitialCUnit.getHandleIdentifier());
-				arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-				arguments.put(ATTRIBUTE_DELETE, Boolean.valueOf(fDeleteSource).toString());
-				arguments.put(ATTRIBUTE_MODE, new Integer(fCurrentMode == Mode.INLINE_ALL ? 1 : 0).toString());
 				String project= null;
 				IJavaProject javaProject= fInitialCUnit.getJavaProject();
 				if (javaProject != null)
@@ -362,7 +358,11 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 				int flags= RefactoringDescriptor.STRUCTURAL_CHANGE;
 				if (!Modifier.isPrivate(binding.getModifiers()))
 					flags|= RefactoringDescriptor.MULTI_CHANGE;
-				JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringClass(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_descriptor_description, new String[] {BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(binding.getDeclaringClass(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
+				arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fInitialCUnit));
+				arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+				arguments.put(ATTRIBUTE_DELETE, Boolean.valueOf(fDeleteSource).toString());
+				arguments.put(ATTRIBUTE_MODE, new Integer(fCurrentMode == Mode.INLINE_ALL ? 1 : 0).toString());
 				return new RefactoringChangeDescriptor(descriptor);
 			}
 		}; 
@@ -570,12 +570,6 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 	public RefactoringSessionDescriptor createDeprecationResolution() {
 		Assert.isNotNull(fMethod);
 		final Map arguments= new HashMap();
-		// Must be set to actual compilation unit
-		arguments.put(JavaRefactoringDescriptor.INPUT, fMethod.getCompilationUnit().getHandleIdentifier());
-		// Must be set to actual selection
-		arguments.put(JavaRefactoringDescriptor.SELECTION, "-1 -1"); //$NON-NLS-1$
-		arguments.put(ATTRIBUTE_DELETE, Boolean.FALSE.toString());
-		arguments.put(ATTRIBUTE_MODE, String.valueOf(0));
 		String project= null;
 		IJavaProject javaProject= fMethod.getJavaProject();
 		if (javaProject != null)
@@ -587,7 +581,13 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		} catch (JavaModelException exception) {
 			JavaPlugin.log(exception);
 		}
-		final RefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_deprecation_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED) }), RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment, arguments, flags);
+		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_METHOD, project, Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_deprecation_description, new String[] { JavaElementLabels.getTextLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED) }), RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment, arguments, flags);
+		// Must be set to actual compilation unit
+		arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fMethod.getCompilationUnit()));
+		// Must be set to actual selection
+		arguments.put(JavaRefactoringDescriptor.SELECTION, "-1 -1"); //$NON-NLS-1$
+		arguments.put(ATTRIBUTE_DELETE, Boolean.FALSE.toString());
+		arguments.put(ATTRIBUTE_MODE, String.valueOf(0));
 		return new RefactoringSessionDescriptor(new RefactoringDescriptor[] { descriptor }, RefactoringSessionDescriptor.VERSION_1_0, RefactoringCoreMessages.InlineMethodRefactoring_deprecation_comment);
 	}
 }

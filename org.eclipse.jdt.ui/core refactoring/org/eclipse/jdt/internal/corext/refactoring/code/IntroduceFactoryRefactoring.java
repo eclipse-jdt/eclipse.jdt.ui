@@ -41,7 +41,6 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -1054,21 +1053,21 @@ public class IntroduceFactoryRefactoring extends CommentRefactoring implements I
 
 	public Change createChange(IProgressMonitor pm) throws CoreException {
 		pm.beginTask(RefactoringCoreMessages.IntroduceFactory_createChanges, fAllCallsTo.length); 
+		final ITypeBinding binding= fFactoryOwningClass.resolveBinding();
 		final DynamicValidationStateChange result= new DynamicValidationStateChange(RefactoringCoreMessages.IntroduceFactory_name) {
 		
 			public final ChangeDescriptor getDescriptor() {
 				final Map arguments= new HashMap();
-				arguments.put(JavaRefactoringDescriptor.INPUT, fCUHandle.getHandleIdentifier());
-				arguments.put(JavaRefactoringDescriptor.NAME, fNewMethodName);
-				final ITypeBinding binding= fFactoryOwningClass.resolveBinding();
-				arguments.put(JavaRefactoringDescriptor.ELEMENT + 1, binding.getJavaElement().getHandleIdentifier());
-				arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
-				arguments.put(ATTRIBUTE_PROTECT, Boolean.valueOf(fProtectConstructor).toString());
 				String project= null;
 				IJavaProject javaProject= fCUHandle.getJavaProject();
 				if (javaProject != null)
 					project= javaProject.getElementName();
-				JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_FACTORY, project, Messages.format(RefactoringCoreMessages.IntroduceFactory_descriptor_description, new String[] { fNewMethodName, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INTRODUCE_FACTORY, project, Messages.format(RefactoringCoreMessages.IntroduceFactory_descriptor_description, new String[] { fNewMethodName, BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fCtorBinding, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
+				arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fCUHandle));
+				arguments.put(JavaRefactoringDescriptor.NAME, fNewMethodName);
+				arguments.put(JavaRefactoringDescriptor.ELEMENT + 1, descriptor.elementToHandle(binding.getJavaElement()));
+				arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+				arguments.put(ATTRIBUTE_PROTECT, Boolean.valueOf(fProtectConstructor).toString());
 				return new RefactoringChangeDescriptor(descriptor);
 			}
 		}; 
@@ -1270,8 +1269,8 @@ public class IntroduceFactoryRefactoring extends CommentRefactoring implements I
 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
-			final JavaRefactoringArguments generic= (JavaRefactoringArguments) arguments;
-			final String selection= generic.getAttribute(JavaRefactoringDescriptor.SELECTION);
+			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
+			final String selection= extended.getAttribute(JavaRefactoringDescriptor.SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -1287,10 +1286,10 @@ public class IntroduceFactoryRefactoring extends CommentRefactoring implements I
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}));
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.SELECTION));
-			String handle= generic.getAttribute(JavaRefactoringDescriptor.INPUT);
+			String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
 			if (handle != null) {
-				final IJavaElement element= JavaCore.create(handle);
-				if (element == null || !element.exists())
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+				if (element == null || element.getElementType() != IJavaElement.COMPILATION_UNIT)
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INTRODUCE_FACTORY));
 				else {
 					fCUHandle= (ICompilationUnit) element;
@@ -1298,10 +1297,10 @@ public class IntroduceFactoryRefactoring extends CommentRefactoring implements I
 				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			handle= generic.getAttribute(JavaRefactoringDescriptor.ELEMENT + 1);
+			handle= extended.getAttribute(JavaRefactoringDescriptor.ELEMENT + 1);
 			if (handle != null) {
-				final IJavaElement element= JavaCore.create(handle);
-				if (element == null || !element.exists())
+				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
+				if (element == null || element.getElementType() != IJavaElement.TYPE)
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INTRODUCE_FACTORY));
 				else {
 					final IType type= (IType) element;
@@ -1309,12 +1308,12 @@ public class IntroduceFactoryRefactoring extends CommentRefactoring implements I
 				}
 			} else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			final String name= generic.getAttribute(JavaRefactoringDescriptor.NAME);
+			final String name= extended.getAttribute(JavaRefactoringDescriptor.NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				fNewMethodName= name;
 			else
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
-			final String protect= generic.getAttribute(ATTRIBUTE_PROTECT);
+			final String protect= extended.getAttribute(ATTRIBUTE_PROTECT);
 			if (protect != null) {
 				fProtectConstructor= Boolean.valueOf(protect).booleanValue();
 			} else
