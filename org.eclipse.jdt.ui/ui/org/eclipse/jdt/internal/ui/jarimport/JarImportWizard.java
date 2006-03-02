@@ -251,7 +251,7 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 				return JarImportMessages.JarImportWizard_workspace_caption;
 			}
 		});
-		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_JAR_IMPORTER);
+		setDefaultPageImageDescriptor(JavaPluginImages.DESC_WIZBAN_REPLACE_JAR);
 	}
 
 	/**
