@@ -231,7 +231,7 @@ public class AddUnimplementedMethodsTest extends TestCase {
 		RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
 		CompilationUnit unit= parser.parse(testClass.getCompilationUnit(), true);
 		AbstractTypeDeclaration declaration= (AbstractTypeDeclaration) ASTNodes.getParent(NodeFinder.perform(unit, testClass.getNameRange()), AbstractTypeDeclaration.class);
-		assertNotNull("Could not find type declararation node", declaration);
+		assertNotNull("Could not find type declaration node", declaration);
 		ITypeBinding binding= declaration.resolveBinding();
 		assertNotNull("Binding for type declaration could not be resolved", binding);
 		
