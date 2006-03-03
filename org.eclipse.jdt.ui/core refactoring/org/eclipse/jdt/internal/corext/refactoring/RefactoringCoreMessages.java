@@ -941,4 +941,5 @@ public final class RefactoringCoreMessages extends NLS {
 	}
 
 	public static String RenameJavaProjectProcessor_folder_already_exists;
+	public static String MoveInstanceMethodProcessor_present_type_parameter_warning;
 }
