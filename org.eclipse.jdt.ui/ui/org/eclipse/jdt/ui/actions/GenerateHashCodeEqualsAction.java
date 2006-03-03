@@ -269,11 +269,13 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 
 		initialize(type);
 
+		boolean regenerate= false;
 		if (hasHashCodeOrEquals(fTypeBinding)) {
-			MessageDialog.openError(getShell(), ActionMessages.GenerateHashCodeEqualsAction_error_caption, Messages.format(
-					ActionMessages.GenerateHashCodeEqualsAction_already_has_hashCode_equals_error, fTypeBinding.getQualifiedName()));
-			notifyResult(false);
-			return;
+			regenerate= MessageDialog.openConfirm(getShell(), ActionMessages.GenerateHashCodeEqualsAction_error_caption, Messages.format(ActionMessages.GenerateHashCodeEqualsAction_already_has_hashCode_equals_error, fTypeBinding.getQualifiedName()));
+			if (!regenerate) {
+				notifyResult(false);
+				return;
+			}
 		}
 
 		List allFields= new ArrayList();
@@ -346,7 +348,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 				target.beginCompoundChange();
 			try {
 				final GenerateHashCodeEqualsOperation operation= new GenerateHashCodeEqualsOperation(fTypeBinding, selectedBindings, fUnit, dialog
-						.getElementPosition(), settings, true, false);
+						.getElementPosition(), settings, regenerate, true, false);
 				IRunnableContext context= JavaPlugin.getActiveWorkbenchWindow();
 				if (context == null)
 					context= new BusyIndicatorRunnableContext();

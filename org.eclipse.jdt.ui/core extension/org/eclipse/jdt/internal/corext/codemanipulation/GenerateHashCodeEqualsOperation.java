@@ -46,6 +46,7 @@ import org.eclipse.jdt.core.dom.AbstractTypeDeclaration;
 import org.eclipse.jdt.core.dom.ArrayAccess;
 import org.eclipse.jdt.core.dom.Assignment;
 import org.eclipse.jdt.core.dom.Block;
+import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CastExpression;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConditionalExpression;
@@ -184,6 +185,9 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	/** The variable binding keys to implement */
 	private final IVariableBinding[] fFields;
 
+	/** Should the regeneration of the methods be enforced? */
+	private final boolean fForce;
+
 	/** Should the compilation unit content be saved? */
 	private final boolean fSave;
 
@@ -216,13 +220,15 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 	 * @param unit the compilation unit ast node
 	 * @param insert the insertion point, or <code>null</code>
 	 * @param settings the code generation settings to use
+	 * @param force <code>true</code> to force the regeneration of existing methods,
+	 *            <code>false</code> otherwise
 	 * @param apply <code>true</code> if the resulting edit should be applied,
 	 *            <code>false</code> otherwise
 	 * @param save <code>true</code> if the changed compilation unit should be
 	 *            saved, <code>false</code> otherwise
 	 */
 	public GenerateHashCodeEqualsOperation(final ITypeBinding type, final IVariableBinding[] fields, final CompilationUnit unit,
-			final IJavaElement insert, final CodeGenerationSettings settings, final boolean apply, final boolean save) {
+			final IJavaElement insert, final CodeGenerationSettings settings, final boolean force, final boolean apply, final boolean save) {
 		Assert.isNotNull(type);
 		Assert.isNotNull(fields);
 		Assert.isNotNull(unit);
@@ -236,6 +242,7 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 		fApply= apply;
 		fDoubleCount= 0;
 		fRewrite= new CompilationUnitRewrite((ICompilationUnit) fUnit.getJavaElement(), fUnit);
+		fForce= force;
 		fAst= fRewrite.getAST();
 	}
 
@@ -291,23 +298,79 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 						insertion= ASTNodes.getParent(NodeFinder.perform(fRewrite.getRoot(), ((IMethod) fInsert).getNameRange()),
 								MethodDeclaration.class);
 
-					// equals
+					BodyDeclaration toReplace= null;
+					if (fForce) {
+						final List list= (List) declaration.getStructuralProperty(declaration.getBodyDeclarationsProperty());
+						for (final Iterator iterator= list.iterator(); iterator.hasNext();) {
+							final BodyDeclaration bodyDecl= (BodyDeclaration) iterator.next();
+							if (bodyDecl instanceof MethodDeclaration) {
+								final MethodDeclaration method= (MethodDeclaration) bodyDecl;
+								final IMethodBinding binding= method.resolveBinding();
+								if (binding != null && binding.getName().equals(METHODNAME_EQUALS)) {
+									final ITypeBinding[] bindings= binding.getParameterTypes();
+									if (bindings.length == 1 && bindings[0].getQualifiedName().equals(JAVA_LANG_OBJECT)) {
+										toReplace= bodyDecl;
+										break;
+									}
+								}
+							}
+						}
+					}
+					// equals(..)
 					MethodDeclaration equalsMethod= createEqualsMethod();
-					addMethod(rewriter, insertion, equalsMethod);
+					addMethod(rewriter, insertion, equalsMethod, toReplace);
 
 					if (monitor.isCanceled())
 						throw new OperationCanceledException();
 
-					// hashcode
+					toReplace= null;
+					if (fForce) {
+						final List list= (List) declaration.getStructuralProperty(declaration.getBodyDeclarationsProperty());
+						for (final Iterator iterator= list.iterator(); iterator.hasNext();) {
+							final BodyDeclaration bodyDecl= (BodyDeclaration) iterator.next();
+							if (bodyDecl instanceof MethodDeclaration) {
+								final MethodDeclaration method= (MethodDeclaration) bodyDecl;
+								final IMethodBinding binding= method.resolveBinding();
+								if (binding != null && binding.getName().equals(METHODNAME_HASH_CODE)) {
+									final ITypeBinding[] bindings= binding.getParameterTypes();
+									if (bindings.length == 0) {
+										toReplace= bodyDecl;
+										break;
+									}
+								}
+							}
+						}
+					}
+					// hashCode()
 					MethodDeclaration hashCodeMethod= createHashCodeMethod();
-					addMethod(rewriter, equalsMethod, hashCodeMethod);
+					addMethod(rewriter, equalsMethod, hashCodeMethod, toReplace);
 
 					// helpers
 					MethodDeclaration previous= null;
 					for (final Iterator iterator= fCustomHashCodeTypes.iterator(); iterator.hasNext();) {
+						boolean found= false;
 						final ITypeBinding binding= (ITypeBinding) iterator.next();
-						final MethodDeclaration helperDecl= createHashCodeHelper(binding);
-						addHelper(rewriter, previous, helperDecl);
+						final ITypeBinding typeBinding= declaration.resolveBinding();
+						if (typeBinding != null) {
+							final IMethodBinding[] bindings= typeBinding.getDeclaredMethods();
+							for (int index= 0; index < bindings.length; index++) {
+								final IMethodBinding method= bindings[index];
+								final ITypeBinding[] parameters= method.getParameterTypes();
+								if (method.getName().equals(METHODNAME_HASH_CODE) && parameters.length == 1) {
+									final ITypeBinding parameter= parameters[0];
+									if (!parameter.isPrimitive()) {
+										found= parameter.getQualifiedName().equals(JAVA_LANG_OBJECT);
+									} else
+										found= parameter.isEqualTo(binding);
+									if (found)
+										break;
+								}
+							}
+						}
+						if (!found) {
+							final MethodDeclaration helperDecl= createHashCodeHelper(binding);
+							addHelper(rewriter, previous, helperDecl);
+						}
 					}
 
 					// add 'em
@@ -349,11 +412,15 @@ public final class GenerateHashCodeEqualsOperation implements IWorkspaceRunnable
 			rewriter.insertFirst(stub, null);
 	}
 
-	private void addMethod(ListRewrite rewriter, ASTNode insertion, MethodDeclaration stub) {
+	private void addMethod(ListRewrite rewriter, ASTNode insertion, MethodDeclaration stub, BodyDeclaration replace) {
+		if (replace != null) {
+			rewriter.replace(replace, stub, null);
+		} else {
 		if (insertion != null)
 			rewriter.insertBefore(stub, insertion, null);
 		else
 			rewriter.insertLast(stub, null);
+		}
 	}
 
 	// ******************* HASHCODE *******************
