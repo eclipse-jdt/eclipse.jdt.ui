@@ -271,7 +271,7 @@ public final class GenerateHashCodeEqualsAction extends SelectionDispatchAction 
 
 		boolean regenerate= false;
 		if (hasHashCodeOrEquals(fTypeBinding)) {
-			regenerate= MessageDialog.openConfirm(getShell(), ActionMessages.GenerateHashCodeEqualsAction_error_caption, Messages.format(ActionMessages.GenerateHashCodeEqualsAction_already_has_hashCode_equals_error, fTypeBinding.getQualifiedName()));
+			regenerate= MessageDialog.openQuestion(getShell(), ActionMessages.GenerateHashCodeEqualsAction_error_caption, Messages.format(ActionMessages.GenerateHashCodeEqualsAction_already_has_hashCode_equals_error, fTypeBinding.getQualifiedName()));
 			if (!regenerate) {
 				notifyResult(false);
 				return;
