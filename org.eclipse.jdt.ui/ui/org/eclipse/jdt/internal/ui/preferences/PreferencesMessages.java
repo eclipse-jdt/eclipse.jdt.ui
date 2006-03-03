@@ -508,6 +508,7 @@ public final class PreferencesMessages extends NLS {
 	public static String CodeTemplateBlock_filecomment_label;
 	public static String CodeTemplateBlock_methodcomment_label;
 	public static String CodeTemplateBlock_overridecomment_label;
+	public static String CodeTemplateBlock_delegatecomment_label;
 	public static String CodeTemplateBlock_constructorcomment_label;
 	public static String CodeTemplateBlock_gettercomment_label;
 	public static String CodeTemplateBlock_settercomment_label;

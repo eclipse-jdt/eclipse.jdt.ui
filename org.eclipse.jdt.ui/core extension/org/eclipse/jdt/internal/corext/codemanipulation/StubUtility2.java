@@ -346,7 +346,15 @@ public final class StubUtility2 {
 		}
 
 		if (settings.createComments) {
-			String string= CodeGeneration.getMethodComment(unit, qualifiedName, decl, methodBinding, delimiter);
+			/*
+			 * TODO: have API for delegate method comments
+			 * This is an inlined version of {@link CodeGeneration#getMethodComment(ICompilationUnit, String, MethodDeclaration, IMethodBinding, String)}
+			 */
+			methodBinding= methodBinding.getMethodDeclaration();
+			String declaringClassQualifiedName= methodBinding.getDeclaringClass().getQualifiedName();
+			String linkToMethodName= methodBinding.getName();
+			String[] parameterTypesQualifiedNames= StubUtility.getParameterTypeNamesForSeeTag(methodBinding);
+			String string= StubUtility.getMethodComment(unit, qualifiedName, decl, methodBinding.isDeprecated(), linkToMethodName, declaringClassQualifiedName, parameterTypesQualifiedNames, true, delimiter);
 			if (string != null) {
 				Javadoc javadoc= (Javadoc) rewrite.createStringPlaceholder(string, ASTNode.JAVADOC);
 				decl.setJavadoc(javadoc);

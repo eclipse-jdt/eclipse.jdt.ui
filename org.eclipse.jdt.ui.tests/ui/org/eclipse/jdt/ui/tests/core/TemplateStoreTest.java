@@ -71,6 +71,7 @@ public class TemplateStoreTest extends CoreTests {
 		CodeTemplateContextType.METHODCOMMENT_ID,
 		CodeTemplateContextType.CONSTRUCTORCOMMENT_ID,
 		CodeTemplateContextType.OVERRIDECOMMENT_ID,
+		CodeTemplateContextType.DELEGATECOMMENT_ID,
 		CodeTemplateContextType.GETTERCOMMENT_ID,
 		CodeTemplateContextType.SETTERCOMMENT_ID,
 	};

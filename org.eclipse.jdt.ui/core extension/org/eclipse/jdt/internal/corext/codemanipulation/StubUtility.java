@@ -347,12 +347,15 @@ public class StubUtility {
 	 * Don't use this method directly, use CodeGeneration.
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, String, String[], String[], String, String[], IMethod, String)
 	 */
-	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, String[] typeParameterNames, IMethod overridden, String lineDelimiter) throws CoreException {
+	public static String getMethodComment(ICompilationUnit cu, String typeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, String[] typeParameterNames, IMethod target, boolean delegate, String lineDelimiter) throws CoreException {
 		String templateName= CodeTemplateContextType.METHODCOMMENT_ID;
 		if (retTypeSig == null) {
 			templateName= CodeTemplateContextType.CONSTRUCTORCOMMENT_ID;
-		} else if (overridden != null) {
-			templateName= CodeTemplateContextType.OVERRIDECOMMENT_ID;
+		} else if (target != null) {
+			if (delegate)
+				templateName= CodeTemplateContextType.DELEGATECOMMENT_ID;
+			else
+				templateName= CodeTemplateContextType.OVERRIDECOMMENT_ID;
 		}
 		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {
@@ -366,10 +369,13 @@ public class StubUtility {
 		if (retTypeSig != null) {
 			context.setVariable(CodeTemplateContextType.RETURN_TYPE, Signature.toString(retTypeSig));
 		}
-		if (overridden != null) {
-			String overriddenTypeName= overridden.getDeclaringType().getFullyQualifiedName('.');
-			String[] overriddenParamTypeNames= getParameterTypeNamesForSeeTag(overridden);
-			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(overriddenTypeName, methodName, overriddenParamTypeNames));
+		if (target != null) {
+			String targetTypeName= target.getDeclaringType().getFullyQualifiedName('.');
+			String[] targetParamTypeNames= getParameterTypeNamesForSeeTag(target);
+			if (delegate)
+				context.setVariable(CodeTemplateContextType.SEE_TO_TARGET_TAG, getSeeTag(targetTypeName, methodName, targetParamTypeNames));
+			else
+				context.setVariable(CodeTemplateContextType.SEE_TO_OVERRIDDEN_TAG, getSeeTag(targetTypeName, methodName, targetParamTypeNames));
 		}
 		TemplateBuffer buffer;
 		try {
@@ -538,14 +544,16 @@ public class StubUtility {
 	 * Don't use this method directly, use CodeGeneration.
 	 * @see org.eclipse.jdt.ui.CodeGeneration#getMethodComment(ICompilationUnit, String, MethodDeclaration, boolean, String, String[], String)
 	 */
-	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, boolean isDeprecated, String overriddenName, String overriddenMethodDeclaringTypeName, String[] overriddenMethodParameterTypeNames, String lineDelimiter) throws CoreException {
-		
-		boolean isOverridden= overriddenMethodDeclaringTypeName != null && overriddenMethodParameterTypeNames != null;
+	public static String getMethodComment(ICompilationUnit cu, String typeName, MethodDeclaration decl, boolean isDeprecated, String targetName, String targetMethodDeclaringTypeName, String[] targetMethodParameterTypeNames, boolean delegate, String lineDelimiter) throws CoreException {
+		boolean needsTarget= targetMethodDeclaringTypeName != null && targetMethodParameterTypeNames != null;
 		String templateName= CodeTemplateContextType.METHODCOMMENT_ID;
 		if (decl.isConstructor()) {
 			templateName= CodeTemplateContextType.CONSTRUCTORCOMMENT_ID;
-		} else if (isOverridden) {
-			templateName= CodeTemplateContextType.OVERRIDECOMMENT_ID;
+		} else if (needsTarget) {
+			if (delegate)
+				templateName= CodeTemplateContextType.DELEGATECOMMENT_ID;
+			else
+				templateName= CodeTemplateContextType.OVERRIDECOMMENT_ID;
 		}
 		Template template= getCodeTemplate(templateName, cu.getJavaProject());
 		if (template == null) {
@@ -558,9 +566,13 @@ public class StubUtility {
 		if (!decl.isConstructor()) {
 			context.setVariable(CodeTemplateContextType.RETURN_TYPE, ASTNodes.asString(getReturnType(decl)));
 		}
-		if (isOverridden) 
-			context.setVariable(CodeTemplateContextType.SEE_TAG, getSeeTag(overriddenMethodDeclaringTypeName, overriddenName, overriddenMethodParameterTypeNames));
-				
+		if (needsTarget) {
+			if (delegate)
+				context.setVariable(CodeTemplateContextType.SEE_TO_TARGET_TAG, getSeeTag(targetMethodDeclaringTypeName, targetName, targetMethodParameterTypeNames));
+			else
+				context.setVariable(CodeTemplateContextType.SEE_TO_OVERRIDDEN_TAG, getSeeTag(targetMethodDeclaringTypeName, targetName, targetMethodParameterTypeNames));
+		}
+		
 		TemplateBuffer buffer;
 		try {
 			buffer= context.evaluate(template);

@@ -62,7 +62,8 @@ final class JavaTemplateMessages extends NLS {
 	public static String CodeTemplateContextType_variable_description_bodystatement;
 	public static String CodeTemplateContextType_variable_description_returntype;
 	public static String CodeTemplateContextType_variable_description_tags;
-	public static String CodeTemplateContextType_variable_description_seetag;
+	public static String CodeTemplateContextType_variable_description_see_overridden_tag;
+	public static String CodeTemplateContextType_variable_description_see_target_tag;
 	public static String CodeTemplateContextType_variable_description_filename;
 	public static String CodeTemplateContextType_variable_description_filecomment;
 	public static String CodeTemplateContextType_variable_description_packagename;

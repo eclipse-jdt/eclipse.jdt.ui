@@ -263,7 +263,7 @@ public class AddDelegateMethodsAction extends SelectionDispatchAction {
 			link.setText(JavaUIMessages.DelegateMethodDialog_link_message); 
 			link.addSelectionListener(new SelectionAdapter() {
 				public void widgetSelected(SelectionEvent e) {
-					openCodeTempatePage(CodeTemplateContextType.METHODCOMMENT_ID);
+					openCodeTempatePage(CodeTemplateContextType.OVERRIDECOMMENT_ID);
 				}
 			});
 			link.setToolTipText(JavaUIMessages.DelegateMethodDialog_link_tooltip); 

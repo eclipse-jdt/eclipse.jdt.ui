@@ -184,9 +184,9 @@ public class CodeGeneration {
 			String declaringClassQualifiedName= overridden.getDeclaringClass().getQualifiedName();
 			String linkToMethodName= overridden.getName();
 			String[] parameterTypesQualifiedNames= StubUtility.getParameterTypeNamesForSeeTag(overridden);
-			return StubUtility.getMethodComment(cu, declaringTypeName, decl, overridden.isDeprecated(), linkToMethodName, declaringClassQualifiedName, parameterTypesQualifiedNames, lineDelimiter);
+			return StubUtility.getMethodComment(cu, declaringTypeName, decl, overridden.isDeprecated(), linkToMethodName, declaringClassQualifiedName, parameterTypesQualifiedNames, false, lineDelimiter);
 		} else {
-			return StubUtility.getMethodComment(cu, declaringTypeName, decl, false, null, null, null, lineDelimiter);
+			return StubUtility.getMethodComment(cu, declaringTypeName, decl, false, null, null, null, false, lineDelimiter);
 		}
 	}
 
@@ -213,7 +213,7 @@ public class CodeGeneration {
 	 * @throws CoreException Thrown when the evaluation of the code template fails.
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, IMethod overridden, String lineDelimiter) throws CoreException {
-		return StubUtility.getMethodComment(cu, declaringTypeName, methodName, paramNames, excTypeSig, retTypeSig, EMPTY, overridden, lineDelimiter);
+		return StubUtility.getMethodComment(cu, declaringTypeName, methodName, paramNames, excTypeSig, retTypeSig, EMPTY, overridden, false, lineDelimiter);
 	}
 	
 	/**
@@ -241,7 +241,7 @@ public class CodeGeneration {
 	 * @since 3.1
 	 */
 	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, String methodName, String[] paramNames, String[] excTypeSig, String retTypeSig, String[] typeParameterNames, IMethod overridden, String lineDelimiter) throws CoreException {
-		return StubUtility.getMethodComment(cu, declaringTypeName, methodName, paramNames, excTypeSig, retTypeSig, typeParameterNames, overridden, lineDelimiter);
+		return StubUtility.getMethodComment(cu, declaringTypeName, methodName, paramNames, excTypeSig, retTypeSig, typeParameterNames, overridden, false, lineDelimiter);
 	}
 		
 	/**
@@ -263,7 +263,7 @@ public class CodeGeneration {
 		String[] typeParameterNames= StubUtility.getTypeParameterNames(method.getTypeParameters());
 		
 		return StubUtility.getMethodComment(method.getCompilationUnit(), method.getDeclaringType().getElementName(),
-			method.getElementName(), paramNames, method.getExceptionTypes(), retType, typeParameterNames, overridden, lineDelimiter);
+			method.getElementName(), paramNames, method.getExceptionTypes(), retType, typeParameterNames, overridden, false, lineDelimiter);
 	}
 	
 	/**
@@ -292,7 +292,7 @@ public class CodeGeneration {
 	 */
 
 	public static String getMethodComment(ICompilationUnit cu, String declaringTypeName, MethodDeclaration decl, boolean isDeprecated, String overriddenMethodName, String overriddenMethodDeclaringTypeName, String[] overriddenMethodParameterTypeNames, String lineDelimiter) throws CoreException {
-		return StubUtility.getMethodComment(cu, declaringTypeName, decl, isDeprecated, overriddenMethodName, overriddenMethodDeclaringTypeName, overriddenMethodParameterTypeNames, lineDelimiter);
+		return StubUtility.getMethodComment(cu, declaringTypeName, decl, isDeprecated, overriddenMethodName, overriddenMethodDeclaringTypeName, overriddenMethodParameterTypeNames, false, lineDelimiter);
 	}
 
 	/**

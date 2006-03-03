@@ -91,6 +91,13 @@ public class JavadocQuickFixTest extends QuickFixTest {
 		comment.append(" */");
 		StubUtility.setCodeTemplate(CodeTemplateContextType.OVERRIDECOMMENT_ID, comment.toString(), null);
 		
+		comment= new StringBuffer();
+		comment.append("/**\n");
+		comment.append(" * A delegate comment.\n");
+		comment.append(" * ${see_to_target}\n");
+		comment.append(" */");
+		StubUtility.setCodeTemplate(CodeTemplateContextType.DELEGATECOMMENT_ID, comment.toString(), null);
+		
 		fJProject1= ProjectTestSetup.getProject();
 
 		fSourceFolder= JavaProjectHelper.addSourceContainer(fJProject1, "src");

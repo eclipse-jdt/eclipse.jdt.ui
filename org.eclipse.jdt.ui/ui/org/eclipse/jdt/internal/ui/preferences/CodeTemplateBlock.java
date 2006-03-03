@@ -174,10 +174,12 @@ public class CodeTemplateBlock {
 				return 5;
 			} else if (CodeTemplateContextType.OVERRIDECOMMENT_ID.equals(id)) {
 				return 6;
-			} else if (CodeTemplateContextType.GETTERCOMMENT_ID.equals(id)) {
+			} else if (CodeTemplateContextType.DELEGATECOMMENT_ID.equals(id)) {
 				return 7;
-			} else if (CodeTemplateContextType.SETTERCOMMENT_ID.equals(id)) {
+			} else if (CodeTemplateContextType.GETTERCOMMENT_ID.equals(id)) {
 				return 8;
+			} else if (CodeTemplateContextType.SETTERCOMMENT_ID.equals(id)) {
+				return 9;
 			}
 			return 1000;
 		}
@@ -231,7 +233,9 @@ public class CodeTemplateBlock {
 			} else if (CodeTemplateContextType.METHODCOMMENT_ID.equals(id)) {
 				return PreferencesMessages.CodeTemplateBlock_methodcomment_label; 
 			} else if (CodeTemplateContextType.OVERRIDECOMMENT_ID.equals(id)) {
-				return PreferencesMessages.CodeTemplateBlock_overridecomment_label; 
+				return PreferencesMessages.CodeTemplateBlock_overridecomment_label;
+			} else if (CodeTemplateContextType.DELEGATECOMMENT_ID.equals(id)) {
+				return PreferencesMessages.CodeTemplateBlock_delegatecomment_label; 
 			} else if (CodeTemplateContextType.CONSTRUCTORCOMMENT_ID.equals(id)) {
 				return PreferencesMessages.CodeTemplateBlock_constructorcomment_label; 
 			} else if (CodeTemplateContextType.GETTERCOMMENT_ID.equals(id)) {

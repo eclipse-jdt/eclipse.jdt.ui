@@ -50,6 +50,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 	public static final String METHODCOMMENT_CONTEXTTYPE= "methodcomment_context"; //$NON-NLS-1$
 	public static final String CONSTRUCTORCOMMENT_CONTEXTTYPE= "constructorcomment_context"; //$NON-NLS-1$
 	public static final String OVERRIDECOMMENT_CONTEXTTYPE= "overridecomment_context"; //$NON-NLS-1$
+	public static final String DELEGATECOMMENT_CONTEXTTYPE= "delegatecomment_context"; //$NON-NLS-1$
 	public static final String GETTERCOMMENT_CONTEXTTYPE= "gettercomment_context"; //$NON-NLS-1$
 	public static final String SETTERCOMMENT_CONTEXTTYPE= "settercomment_context"; //$NON-NLS-1$
 
@@ -74,6 +75,7 @@ public class CodeTemplateContextType extends TemplateContextType {
 	public static final String METHODCOMMENT_ID= CODETEMPLATES_PREFIX + "method" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String CONSTRUCTORCOMMENT_ID= CODETEMPLATES_PREFIX + "constructor" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String OVERRIDECOMMENT_ID= CODETEMPLATES_PREFIX + "override" + COMMENT_SUFFIX; //$NON-NLS-1$
+	public static final String DELEGATECOMMENT_ID= CODETEMPLATES_PREFIX + "delegate" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String GETTERCOMMENT_ID= CODETEMPLATES_PREFIX + "getter" + COMMENT_SUFFIX; //$NON-NLS-1$
 	public static final String SETTERCOMMENT_ID= CODETEMPLATES_PREFIX + "setter" + COMMENT_SUFFIX; //$NON-NLS-1$
 	
@@ -89,7 +91,8 @@ public class CodeTemplateContextType extends TemplateContextType {
 	
 	public static final String PARAM= "param"; //$NON-NLS-1$
 	public static final String RETURN_TYPE= "return_type"; //$NON-NLS-1$
-	public static final String SEE_TAG= "see_to_overridden"; //$NON-NLS-1$
+	public static final String SEE_TO_OVERRIDDEN_TAG= "see_to_overridden"; //$NON-NLS-1$
+	public static final String SEE_TO_TARGET_TAG= "see_to_target"; //$NON-NLS-1$
 	
 	public static final String TAGS= "tags"; //$NON-NLS-1$
 	
@@ -224,7 +227,14 @@ public class CodeTemplateContextType extends TemplateContextType {
 		} else if (OVERRIDECOMMENT_CONTEXTTYPE.equals(contextName)) {
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingtype)); 
 			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingmethod)); 
-			addResolver(new CodeTemplateVariableResolver(SEE_TAG,  JavaTemplateMessages.CodeTemplateContextType_variable_description_seetag)); 
+			addResolver(new CodeTemplateVariableResolver(SEE_TO_OVERRIDDEN_TAG,  JavaTemplateMessages.CodeTemplateContextType_variable_description_see_overridden_tag)); 
+			addResolver(new TagsVariableResolver());
+			addCompilationUnitVariables();
+			fIsComment= true;
+		} else if (DELEGATECOMMENT_CONTEXTTYPE.equals(contextName)) {
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_TYPE,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingtype)); 
+			addResolver(new CodeTemplateVariableResolver(ENCLOSING_METHOD,  JavaTemplateMessages.CodeTemplateContextType_variable_description_enclosingmethod)); 
+			addResolver(new CodeTemplateVariableResolver(SEE_TO_TARGET_TAG,  JavaTemplateMessages.CodeTemplateContextType_variable_description_see_target_tag)); 
 			addResolver(new TagsVariableResolver());
 			addCompilationUnitVariables();
 			fIsComment= true;
@@ -282,8 +292,6 @@ public class CodeTemplateContextType extends TemplateContextType {
 		}
 		super.validateVariables(variables);
 	}	
-	
-	
 
 	/* (non-Javadoc)
 	 * @see org.eclipse.jdt.internal.corext.template.ContextType#createContext()
@@ -310,11 +318,10 @@ public class CodeTemplateContextType extends TemplateContextType {
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.METHODCOMMENT_CONTEXTTYPE));
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.CONSTRUCTORCOMMENT_CONTEXTTYPE));
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.OVERRIDECOMMENT_CONTEXTTYPE));		
+		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.DELEGATECOMMENT_CONTEXTTYPE));		
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.GETTERCOMMENT_CONTEXTTYPE));		
 		registry.addContextType(new CodeTemplateContextType(CodeTemplateContextType.SETTERCOMMENT_CONTEXTTYPE));		
 	}
-	
-	
 
 	/*
 	 * @see org.eclipse.jdt.internal.corext.template.ContextType#validate(java.lang.String)

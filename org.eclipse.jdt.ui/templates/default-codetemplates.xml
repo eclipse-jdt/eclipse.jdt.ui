@@ -49,6 +49,10 @@
  * ${see_to_overridden}
  */</template>
 
+<template name="delegatecomment" id="org.eclipse.jdt.ui.text.codetemplates.delegatecomment" description="%CodeTemplates.delegatecomment" context="delegatecomment_context" enabled="true">/* %CodeTemplates.delegatecomment.nonjd
+ * ${see_to_target}
+ */</template>
+
 <template name="newtype" id="org.eclipse.jdt.ui.text.codetemplates.newtype" description="%CodeTemplates.newfile" context="newtype_context" enabled="true">${filecomment}
 ${package_declaration}
 
