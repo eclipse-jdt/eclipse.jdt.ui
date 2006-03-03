@@ -993,7 +993,7 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 	}
 	
 	public void testBug127346() throws Exception {
-		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
 		StringBuffer buf= new StringBuffer();
 		buf.append("package test;\n");
 		buf.append("public class E1 {\n");
@@ -1002,7 +1002,51 @@ public class ConvertForLoopQuickFixTest extends QuickFixTest {
 		buf.append("        }\n");
 		buf.append("    }\n");
 		buf.append("}\n");
-		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+		ICompilationUnit cu= pack1.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, cu);
+
+		assertNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+	}
+	
+	public void testBug130139_1() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String[] strings) {\n");
+		buf.append("        int x= 1;\n");
+		buf.append("        for (int i= x; i < strings.length; i++) {\n");
+		buf.append("            System.out.println(strings[i]);\n");
+		buf.append("        }  \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, cu);
+
+		assertNull(fConvertLoopProposal);
+
+		assertCorrectLabels(proposals);
+	}
+	
+	public void testBug130139_2() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("test", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test;\n");
+		buf.append("public class E {\n");
+		buf.append("    public void foo(String[] strings) {\n");
+		buf.append("        for (int i= x(); i < strings.length; i++) {\n");
+		buf.append("            System.out.println(strings[i]);\n");
+		buf.append("        }  \n");
+		buf.append("    }\n");
+		buf.append("    private int x(){\n");
+		buf.append("        return 0;\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("E.java", buf.toString(), false, null);
 
 		List proposals= fetchConvertingProposal(buf, cu);
 

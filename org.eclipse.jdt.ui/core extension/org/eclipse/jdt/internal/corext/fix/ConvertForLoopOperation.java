@@ -362,6 +362,10 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 				if (! "0".equals(number.getToken())) { //$NON-NLS-1$
 					return false;
 				}
+			} else {
+				//variable or method call, most probably not 0...
+				//could also be a constant which is 0, but who would define such a constant?
+				return false;
 			}
 		}
 		return true; // we have to return true also for the cases when we test another variable besides
