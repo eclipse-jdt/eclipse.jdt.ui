@@ -78,7 +78,14 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 
 	protected String fCurrentPerspective;
 	protected IJavaEditorTextHover fImplementation;
-	private boolean fShowInBrowser;
+
+	/**
+	 * The presentation control creator.
+	 * 
+	 * @since 3.2
+	 */
+	private IInformationControlCreator fPresenterControlCreator;
+	
 
 
 	public JavaInformationProvider(IEditorPart editor) {
@@ -130,11 +137,9 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 	 * @see IInformationProvider#getInformation(ITextViewer, IRegion)
 	 */
 	public String getInformation(ITextViewer textViewer, IRegion subject) {
-		fShowInBrowser= false;
 		if (fImplementation != null) {
 			String s= fImplementation.getHoverInfo(textViewer, subject);
 			if (s != null && s.trim().length() > 0) {
-				fShowInBrowser= s.indexOf("<LINK REL=\"stylesheet\" HREF= \"") != -1; //$NON-NLS-1$
 				return s;
 			}
 		}
@@ -147,15 +152,22 @@ public class JavaInformationProvider implements IInformationProvider, IInformati
 	 * @since 3.1
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
-		return new IInformationControlCreator() {
-			public IInformationControl createInformationControl(Shell parent) {
-				int shellStyle= SWT.RESIZE | SWT.TOOL;
-				int style= SWT.V_SCROLL | SWT.H_SCROLL;
-				if (fShowInBrowser && BrowserInformationControl.isAvailable(parent))
-					return new BrowserInformationControl(parent, shellStyle, style);
-				else
-					return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
-			}
-		};
+		if (fPresenterControlCreator == null) {
+			fPresenterControlCreator= new AbstractReusableInformationControlCreator() {
+
+				/*
+				 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
+				 */
+				public IInformationControl doCreateInformationControl(Shell parent) {
+					int shellStyle= SWT.RESIZE | SWT.TOOL;
+					int style= SWT.V_SCROLL | SWT.H_SCROLL;
+					if (BrowserInformationControl.isAvailable(parent))
+						return new BrowserInformationControl(parent, shellStyle, style);
+					else
+						return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
+				}
+			};
+		}
+		return fPresenterControlCreator;
 	}
 }

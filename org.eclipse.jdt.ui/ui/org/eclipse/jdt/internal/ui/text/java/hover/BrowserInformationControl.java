@@ -148,7 +148,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 * @param style the additional styles for the styled text widget
 	 */
 	public BrowserInformationControl(Shell parent, int shellStyle, int style) {
-		this(parent, shellStyle, style, null);
+		this(parent, shellStyle, style, null, false);
 	}
 
 	/**
@@ -161,8 +161,9 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 * @param style the additional styles for the styled text widget
 	 * @param statusFieldText the text to be used in the optional status field
 	 *                         or <code>null</code> if the status field should be hidden
+	 * @param pack if <code>true</code> the shell will be packed before it is shown
 	 */
-	public BrowserInformationControl(Shell parent, int shellStyle, int style, String statusFieldText) {
+	public BrowserInformationControl(Shell parent, int shellStyle, int style, String statusFieldText, boolean pack) {
 		fStatusFieldText= statusFieldText;
 		
 		fShell= new Shell(parent, SWT.NO_FOCUS | SWT.ON_TOP | shellStyle);
@@ -170,7 +171,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		fShell.setBackground(display.getSystemColor(SWT.COLOR_BLACK));
 		fTextLayout= new TextLayout(display);
 		
-		fPack= (shellStyle & SWT.RESIZE) == 0;
+		fPack= pack;
 
 		Composite composite= fShell;
 		GridLayout layout= new GridLayout(1, false);

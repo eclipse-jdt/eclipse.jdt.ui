@@ -10,6 +10,12 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.text.java;
 
+import java.io.IOException;
+import java.net.URL;
+
+import org.eclipse.core.runtime.FileLocator;
+import org.eclipse.core.runtime.Platform;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.StyleRange;
 import org.eclipse.swt.custom.StyledText;
@@ -18,6 +24,7 @@ import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.RGB;
+import org.eclipse.swt.widgets.Shell;
 
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.preference.PreferenceConverter;
@@ -29,6 +36,7 @@ import org.eclipse.jface.text.DefaultPositionUpdater;
 import org.eclipse.jface.text.DocumentCommand;
 import org.eclipse.jface.text.DocumentEvent;
 import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.IInformationControl;
 import org.eclipse.jface.text.IInformationControlCreator;
 import org.eclipse.jface.text.IPositionUpdater;
 import org.eclipse.jface.text.IRegion;
@@ -63,6 +71,11 @@ import org.eclipse.jdt.ui.text.JavaTextTools;
 import org.eclipse.jdt.ui.text.java.IJavaCompletionProposal;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
+import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
+import org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator;
+import org.eclipse.jdt.internal.ui.text.java.hover.BrowserInformationControl;
+
+import org.osgi.framework.Bundle;
 
 /**
  * 
@@ -178,6 +191,19 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	private StyleRange fRememberedStyleRange;
 	private boolean fToggleEating;
 	private ITextViewer fTextViewer;
+	
+	
+	/**
+	 * The control creator.
+	 * 
+	 * @since 3.2
+	 */
+	private IInformationControlCreator fCreator;
+	/**
+	 * The URL of the style sheet (css).
+	 * @since 3.2
+	 */
+	private URL fStyleSheetURL;	
 
 	protected AbstractJavaCompletionProposal() {
 	}
@@ -409,9 +435,38 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 */
 	public String getAdditionalProposalInfo() {
 		if (getProposalInfo() != null) {
-			return getProposalInfo().getInfo();
+			String info= getProposalInfo().getInfo();
+			if (info.length() > 0) {
+				StringBuffer buffer= new StringBuffer();
+				HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheetURL());
+				buffer.append(info);
+				HTMLPrinter.addPageEpilog(buffer);
+				info= buffer.toString();
+			}
+			return info;
 		}
 		return null;
+	}
+	
+	/**
+	 * Returns the style sheet URL.
+	 *
+	 * @since 3.1
+	 */
+	protected URL getStyleSheetURL() {
+		if (fStyleSheetURL == null) {
+
+			Bundle bundle= Platform.getBundle(JavaPlugin.getPluginId());
+			fStyleSheetURL= bundle.getEntry("/JavadocHoverStyleSheet.css"); //$NON-NLS-1$
+			if (fStyleSheetURL != null) {
+				try {
+					fStyleSheetURL= FileLocator.toFileURL(fStyleSheetURL);
+				} catch (IOException ex) {
+					JavaPlugin.log(ex);
+				}
+			}
+		}
+		return fStyleSheetURL;
 	}
 
 	/*
@@ -736,7 +791,18 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	 * @see org.eclipse.jface.text.contentassist.ICompletionProposalExtension3#getInformationControlCreator()
 	 */
 	public IInformationControlCreator getInformationControlCreator() {
-		return null;
+		if (fCreator == null) {
+			fCreator= new AbstractReusableInformationControlCreator() {
+				
+				/*
+				 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
+				 */
+				public IInformationControl doCreateInformationControl(Shell parent) {
+					return new BrowserInformationControl(parent, SWT.NO_TRIM, SWT.NONE, null, false);
+				}
+			};
+		}
+		return fCreator;
 	}
 
 	public String getSortString() {

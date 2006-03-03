@@ -60,11 +60,17 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	private URL fStyleSheetURL;
 	
 	/**
-	 * The control creator.
+	 * The hover control creator.
 	 * 
 	 * @since 3.2
 	 */
-	private IInformationControlCreator fCreator;
+	private IInformationControlCreator fHoverControlCreator;
+	/**
+	 * The presentation control creator.
+	 * 
+	 * @since 3.2
+	 */
+	private IInformationControlCreator fPresenterControlCreator;
 
 
 	/*
@@ -72,17 +78,23 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	 * @since 3.1
 	 */
 	public IInformationControlCreator getInformationPresenterControlCreator() {
-		return new IInformationControlCreator() {
-			public IInformationControl createInformationControl(Shell parent) {
-				int shellStyle= SWT.RESIZE | SWT.TOOL;
-				int style= SWT.V_SCROLL | SWT.H_SCROLL;
-				if (BrowserInformationControl.isAvailable(parent))
-					return new BrowserInformationControl(parent, shellStyle, style);
-				else
-					return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
-			}
+		if (fPresenterControlCreator == null) {
+			fPresenterControlCreator= new AbstractReusableInformationControlCreator() {
 
-		};
+				/*
+				 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
+				 */
+				public IInformationControl doCreateInformationControl(Shell parent) {
+					int shellStyle= SWT.RESIZE | SWT.TOOL;
+					int style= SWT.V_SCROLL | SWT.H_SCROLL;
+					if (BrowserInformationControl.isAvailable(parent))
+						return new BrowserInformationControl(parent, shellStyle, style);
+					else
+						return new DefaultInformationControl(parent, shellStyle, style, new HTMLTextPresenter(false));
+				}
+			};
+		}
+		return fPresenterControlCreator;
 	}
 
 	/*
@@ -90,14 +102,14 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 	 * @since 3.2
 	 */
 	public IInformationControlCreator getHoverControlCreator() {
-		if (fCreator == null) {
-			fCreator= new AbstractReusableInformationControlCreator() {
+		if (fHoverControlCreator == null) {
+			fHoverControlCreator= new AbstractReusableInformationControlCreator() {
 				
 				/*
 				 * @see org.eclipse.jdt.internal.ui.text.java.hover.AbstractReusableInformationControlCreator#doCreateInformationControl(org.eclipse.swt.widgets.Shell)
 				 */
 				public IInformationControl doCreateInformationControl(Shell parent) {
-					return new BrowserInformationControl(parent, SWT.NO_TRIM, SWT.NONE, getTooltipAffordanceString());
+					return new BrowserInformationControl(parent, SWT.NO_TRIM, SWT.NONE, getTooltipAffordanceString(), true);
 				}
 				
 				/*
@@ -112,7 +124,7 @@ public class JavadocHover extends AbstractJavaEditorTextHover implements IInform
 				}
 			};
 		}
-		return fCreator;
+		return fHoverControlCreator;
 	}
 
 	/*

@@ -62,6 +62,6 @@ public abstract class AbstractReusableInformationControlCreator implements IInfo
 	 * @see org.eclipse.jface.text.IInformationControlCreatorExtension#canReplace(org.eclipse.jface.text.IInformationControlCreator)
 	 */
 	public boolean canReplace(IInformationControlCreator creator) {
-		return false;
+		return creator.getClass() == getClass();
 	}
 }
