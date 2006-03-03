@@ -28,6 +28,7 @@ import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -54,7 +55,6 @@ import org.eclipse.jdt.core.search.SearchPattern;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
-import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.refactoring.IRefactoringSearchRequestor;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringScopeFactory;
@@ -97,15 +97,21 @@ abstract class TargetProvider {
 		return new SingleCallTargetProvider(cu, invocation);
 	}
 
-	public static TargetProvider create(ICompilationUnit cu, MethodDeclaration declaration) {
+	public static TargetProvider create(MethodDeclaration declaration) {
 		IMethodBinding method= declaration.resolveBinding();
 		if (method == null)
 			return new ErrorTargetProvider(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.TargetProvider_method_declaration_not_unique));
 		ITypeBinding type= method.getDeclaringClass();
-		if (type.isLocal())
-			return new LocalTypeTargetProvider(cu, declaration);
-		else
+		if (type.isLocal()) {
+			if (! type.isFromSource()) {
+				return new ErrorTargetProvider(RefactoringStatus.createFatalErrorStatus("Cannot inline local method in binary type."));
+			} else {
+				IType declaringClassOfLocal= (IType) type.getDeclaringClass().getJavaElement();
+				return new LocalTypeTargetProvider(declaringClassOfLocal.getCompilationUnit(), declaration);
+			}
+		} else {
 			return new MemberTypeTargetProvider(declaration);
+		}
 	}
 
 	static void fastDone(IProgressMonitor pm) {
@@ -301,9 +307,9 @@ abstract class TargetProvider {
 		private boolean matches(IBinding binding) {
 			if (!(binding instanceof IMethodBinding))
 				return false;
-			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=87777
+			// https://bugs.eclipse.org/bugs/show_bug.cgi?id=130317
 			// return fBinding.isEqualTo(((IMethodBinding)binding).getMethodDeclaration());
-			return Bindings.equals(fBinding, ((IMethodBinding)binding).getMethodDeclaration());
+			return fBinding.getKey().equals(((IMethodBinding)binding).getMethodDeclaration().getKey());
 		}
 	}
 	

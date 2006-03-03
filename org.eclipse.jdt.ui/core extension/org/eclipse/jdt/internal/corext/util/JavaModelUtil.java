@@ -41,16 +41,21 @@ import org.eclipse.jface.text.IDocumentExtension4;
 
 import org.eclipse.jdt.core.ClasspathContainerInitializer;
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.IClasspathContainer;
 import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IField;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.IParent;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaCore;
@@ -1009,5 +1014,24 @@ public final class JavaModelUtil {
 		String typeName= JavaCore.removeJavaLikeExtension(cu.getElementName());
 		String mainTypeName= JavaModelUtil.concatenateName(packageName, typeName);
 		return qualifier.equals(mainTypeName);
+	}
+	
+	/**
+	 * If <code>true</code>, then element can safely be cast to any of
+	 * {@link IParent}, {@link IOpenable}, {@link ISourceReference}, or {@link ICodeAssist}.
+	 * @param element
+	 * @return <code>true</code> iff element is an {@link ICompilationUnit} or an {@link IClassFile}
+	 */
+	public static boolean isTypeContainerUnit(IJavaElement element) {
+		// workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=125504
+		return element instanceof ICompilationUnit || element instanceof IClassFile;
+	}
+	
+	public static IJavaElement getTypeContainerUnit(IMember member) {
+		ICompilationUnit cu= member.getCompilationUnit();
+		if (cu != null)
+			return cu;
+		else
+			return member.getClassFile();
 	}
 }

@@ -23,8 +23,11 @@ import java.util.List;
 import java.util.Map;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.core.refactoring.RefactoringStatusContext;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.compiler.IProblem;
 import org.eclipse.jdt.core.dom.ASTNode;
@@ -121,7 +124,7 @@ class SourceAnalyzer  {
 				if (!ASTNodes.isLabel(node)) {
 					status.addFatalError(
 						RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors, 
-						JavaStatusContext.create(fCUnit, fDeclaration));
+						createJavaStatusContext(fUnit, fDeclaration));
 					return false;
 				}
 			}
@@ -131,7 +134,7 @@ class SourceAnalyzer  {
 			if (node.getQualifier() != null) {
 				status.addFatalError(
 					RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_qualified_this_expressions, 
-					JavaStatusContext.create(fCUnit, node));
+					createJavaStatusContext(fUnit, node));
 				return false;
 			}
 			return true;
@@ -312,7 +315,7 @@ class SourceAnalyzer  {
 		}
 	}
 
-	private ICompilationUnit fCUnit;
+	private IJavaElement fUnit;
 	private MethodDeclaration fDeclaration;
 	private Map fParameters;
 	private Map fNames;
@@ -332,9 +335,9 @@ class SourceAnalyzer  {
 	
 	private boolean fInterruptedExecutionFlow;
 
-	public SourceAnalyzer(ICompilationUnit unit, MethodDeclaration declaration) {
+	public SourceAnalyzer(IJavaElement unit, MethodDeclaration declaration) {
 		super();
-		fCUnit= unit;
+		fUnit= unit;
 		fDeclaration= declaration;
 	}
 	
@@ -344,23 +347,23 @@ class SourceAnalyzer  {
 	
 	public RefactoringStatus checkActivation() throws JavaModelException {
 		RefactoringStatus result= new RefactoringStatus();
-		if (!fCUnit.isStructureKnown()) {
+		if (!fUnit.isStructureKnown()) {
 			result.addFatalError(		
 				RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_syntax_errors, 
-				JavaStatusContext.create(fCUnit));		
+				createJavaStatusContext(fUnit));		
 			return result;
 		}
 		IProblem[] problems= ASTNodes.getProblems(fDeclaration, ASTNodes.NODE_ONLY, ASTNodes.ERROR);
 		if (problems.length > 0) {
 			result.addFatalError(		
 				RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors, 
-				JavaStatusContext.create(fCUnit, fDeclaration));		
+				createJavaStatusContext(fUnit, fDeclaration));		
 			return result;
 		}
 		if (fDeclaration.getBody() == null) {
 			result.addFatalError(
 				RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_abstract_methods,  
-				JavaStatusContext.create(fCUnit, fDeclaration));
+				createJavaStatusContext(fUnit, fDeclaration));
 				return result;
 		}
 		ActivationAnalyzer analyzer= new ActivationAnalyzer();
@@ -375,7 +378,7 @@ class SourceAnalyzer  {
 				if (binding == null) {
 					result.addFatalError(
 						RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_declaration_has_errors, 
-						JavaStatusContext.create(fCUnit, fDeclaration));
+						createJavaStatusContext(fUnit, fDeclaration));
 					return result;
 				}
 				fParameters.put(binding, element.getProperty(ParameterData.PROPERTY));
@@ -389,7 +392,7 @@ class SourceAnalyzer  {
 			if (declaringType == null) {
 				result.addFatalError(
 					RefactoringCoreMessages.InlineMethodRefactoring_SourceAnalyzer_typedeclaration_has_errors, 
-					JavaStatusContext.create(fCUnit));
+					createJavaStatusContext(fUnit));
 				return result;
 			}
 			ITypeBinding[] typeParameters= declaringType.getTypeParameters();
@@ -426,7 +429,7 @@ class SourceAnalyzer  {
 		fTypesToImport= new ArrayList();
 		fStaticsToImport= new ArrayList();
 		ImportReferencesCollector collector= new ImportReferencesCollector(
-			fCUnit.getJavaProject(), null, fTypesToImport, fStaticsToImport);
+			fUnit.getJavaProject(), null, fTypesToImport, fStaticsToImport);
 		body.accept(collector);
 		
 		// Now collect implicit references and name references
@@ -482,5 +485,20 @@ class SourceAnalyzer  {
 	private ASTNode[] getStatements() {
 		List statements= fDeclaration.getBody().statements();
 		return (ASTNode[]) statements.toArray(new ASTNode[statements.size()]);
-	}	
+	}
+	
+	private static RefactoringStatusContext createJavaStatusContext(IJavaElement unit, ASTNode node) {
+		if (unit instanceof ICompilationUnit)
+			return JavaStatusContext.create((ICompilationUnit) unit, node);
+		else
+			return JavaStatusContext.create((IClassFile) unit, node);
+	}
+	
+	private static RefactoringStatusContext createJavaStatusContext(IJavaElement unit) {
+		if (unit instanceof ICompilationUnit)
+			return JavaStatusContext.create((ICompilationUnit) unit);
+		else
+			return JavaStatusContext.create((IClassFile) unit);
+	}
+
 }

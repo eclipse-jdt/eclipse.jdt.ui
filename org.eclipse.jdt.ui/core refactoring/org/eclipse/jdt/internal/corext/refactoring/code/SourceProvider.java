@@ -40,7 +40,8 @@ import org.eclipse.jface.text.TextUtilities;
 
 import org.eclipse.ltk.core.refactoring.RefactoringStatus;
 
-import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.ASTVisitor;
@@ -75,7 +76,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 
 public class SourceProvider {
 
-	private ICompilationUnit fCUnit;
+	private IJavaElement fUnit;
 	private IDocument fDocument;
 	private MethodDeclaration fDeclaration;
 	private SourceAnalyzer fAnalyzer;
@@ -97,9 +98,9 @@ public class SourceProvider {
 		}
 	}
 
-	public SourceProvider(ICompilationUnit unit, MethodDeclaration declaration) {
+	public SourceProvider(IJavaElement unit, MethodDeclaration declaration) {
 		super();
-		fCUnit= unit;
+		fUnit= unit;
 		fDeclaration= declaration;
 		List parameters= fDeclaration.parameters();
 		for (Iterator iter= parameters.iterator(); iter.hasNext();) {
@@ -107,7 +108,7 @@ public class SourceProvider {
 			ParameterData data= new ParameterData(element);
 			element.setProperty(ParameterData.PROPERTY, data);
 		}
-		fAnalyzer= new SourceAnalyzer(fCUnit, fDeclaration);
+		fAnalyzer= new SourceAnalyzer(fUnit, fDeclaration);
 		fReturnValueNeedsLocalVariable= true;
 		fReturnExpressions= new ArrayList();
 	}
@@ -117,7 +118,7 @@ public class SourceProvider {
 	}
 	
 	public void initialize() throws JavaModelException {
-		fDocument= new Document(fCUnit.getBuffer().getContents());
+		fDocument= new Document(((IOpenable) fUnit).getBuffer().getContents());
 		fAnalyzer.initialize();
 		if (hasReturnValue()) {
 			ASTNode last= getLastStatement();
@@ -233,8 +234,8 @@ public class SourceProvider {
 		return (ParameterData)decl.getProperty(ParameterData.PROPERTY);
 	}
 	
-	public ICompilationUnit getCompilationUnit() {
-		return fCUnit;
+	public IJavaElement getTypeContainerUnit() {
+		return fUnit;
 	}
 	
 	public boolean needsReturnedExpressionParenthesis() {
@@ -268,7 +269,7 @@ public class SourceProvider {
 	public TextEdit getDeleteEdit() {
 		final ASTRewrite rewriter= ASTRewrite.create(fDeclaration.getAST());
 		rewriter.remove(fDeclaration, null);
-		return rewriter.rewriteAST(fDocument, fCUnit.getJavaProject().getOptions(true));
+		return rewriter.rewriteAST(fDocument, fUnit.getJavaProject().getOptions(true));
 	}
 	
 	public String[] getCodeBlocks(CallContext context) throws CoreException {
@@ -297,7 +298,7 @@ public class SourceProvider {
 			}
 		}
 
-		final TextEdit dummy= rewriter.rewriteAST(fDocument, fCUnit.getJavaProject().getOptions(true));
+		final TextEdit dummy= rewriter.rewriteAST(fDocument, fUnit.getJavaProject().getOptions(true));
 		int size= ranges.size();
 		RangeMarker[] markers= new RangeMarker[size];
 		for (int i= 0; i < markers.length; i++) {
@@ -323,7 +324,7 @@ public class SourceProvider {
 		try {
 			TextEditProcessor processor= new TextEditProcessor(fDocument, root, TextEdit.CREATE_UNDO | TextEdit.UPDATE_REGIONS);
 			UndoEdit undo= processor.performEdits();
-			String[] result= getBlocks(fCUnit, markers);
+			String[] result= getBlocks(markers);
 			// It is faster to undo the changes than coping the buffer over and over again.
 			processor= new TextEditProcessor(fDocument, undo, TextEdit.UPDATE_REGIONS);
 			processor.performEdits();
@@ -572,13 +573,13 @@ public class SourceProvider {
 		}
 	}
 	
-	private String[] getBlocks(ICompilationUnit unit, RangeMarker[] markers) throws BadLocationException {
+	private String[] getBlocks(RangeMarker[] markers) throws BadLocationException {
 		String[] result= new String[markers.length];
 		for (int i= 0; i < markers.length; i++) {
 			RangeMarker marker= markers[i];
 			String content= fDocument.get(marker.getOffset(), marker.getLength());
 			String lines[]= Strings.convertIntoLines(content);
-			Strings.trimIndentation(lines, unit.getJavaProject(), false);
+			Strings.trimIndentation(lines, fUnit.getJavaProject(), false);
 			result[i]= Strings.concatenate(lines, TextUtilities.getDefaultLineDelimiter(fDocument));
 		}
 		return result;

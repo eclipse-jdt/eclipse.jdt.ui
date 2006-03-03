@@ -102,6 +102,32 @@ public abstract class JavaStatusContext extends RefactoringStatusContext {
 		}
 	}
 
+	private static class ClassFileSourceContext extends JavaStatusContext {
+		private IClassFile fClassFile;
+		private ISourceRange fSourceRange;
+		private ClassFileSourceContext(IClassFile classFile, ISourceRange range) {
+			fClassFile= classFile;
+			fSourceRange= range;
+			if (fSourceRange == null)
+				fSourceRange= new SourceRange(0,0);
+		}
+		public boolean isBinary() {
+			return false;
+		}
+		public ICompilationUnit getCompilationUnit() {
+			return null;
+		}
+		public IClassFile getClassFile() {
+			return fClassFile;
+		}
+		public ISourceRange getSourceRange() {
+			return fSourceRange;
+		}
+		public String toString() {
+			return getSourceRange() + " in " + super.toString(); //$NON-NLS-1$
+		}
+	}
+	
 	/**
 	 * Creates an status entry context for the given member
 	 * 
@@ -197,6 +223,48 @@ public abstract class JavaStatusContext extends RefactoringStatusContext {
 		if (selection != null)
 			range= new SourceRange(selection.getOffset(), selection.getLength());
 		return create(cunit, range);
+	}
+
+	/**
+	 * Creates an status entry context for the given class file.
+	 * 
+	 * @param classFile the class file containing the error
+	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
+	 *  context cannot be created
+	 */
+	public static RefactoringStatusContext create(IClassFile classFile) {
+		return create(classFile, (ISourceRange)null);
+	}
+
+	/**
+	 * Creates an status entry context for the given class file and source range.
+	 * 
+	 * @param classFile the class file containing the error
+	 * @param range the source range that has caused the error or 
+	 *  <code>null</code> if the source range is unknown
+	 * @return the status entry context or <code>null</code> if the
+	 *  context cannot be created
+	 */
+	public static RefactoringStatusContext create(IClassFile classFile, ISourceRange range) {
+		if (classFile == null)
+			return null;
+		return new ClassFileSourceContext(classFile, range);
+	}
+
+	/**
+	 * Creates an status entry context for the given class file and AST node.
+	 * 
+	 * @param classFile the class file containing the error
+	 * @param node an astNode denoting the source range that has caused the error
+	 * 
+	 * @return the status entry context or <code>Context.NULL_CONTEXT</code> if the
+	 *  context cannot be created
+	 */
+	public static RefactoringStatusContext create(IClassFile classFile, ASTNode node) {
+		ISourceRange range= null;
+		if (node != null)
+			range= new SourceRange(node.getStartPosition(), node.getLength());
+		return create(classFile, range);
 	}
 
 	/**

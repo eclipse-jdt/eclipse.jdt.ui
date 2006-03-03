@@ -68,7 +68,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		radio.setSelection(all);
 		radio.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent event) {
-				fRemove.setEnabled(true);
+				fRemove.setEnabled(fRefactoring.canEnableDeleteSource());
 				if (((Button)event.widget).getSelection())
 					changeRefactoring(InlineMethodRefactoring.Mode.INLINE_ALL);
 			}
@@ -79,8 +79,8 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		gd.horizontalIndent= convertWidthInCharsToPixels(3);
 		fRemove.setLayoutData(gd);
 		fRemove.setText(RefactoringMessages.InlineMethodInputPage_delete_declaration); 
-		fRemove.setEnabled(all);
-		fRemove.setSelection(fRefactoring.getDeleteSource());
+		fRemove.setEnabled(all && fRefactoring.canEnableDeleteSource());
+		fRemove.setSelection(fRefactoring.canEnableDeleteSource());
 		fRemove.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				fRefactoring.setDeleteSource(((Button)e.widget).getSelection());

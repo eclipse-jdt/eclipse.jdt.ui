@@ -47,6 +47,7 @@ import org.eclipse.jdt.core.dom.ExpressionStatement;
 import org.eclipse.jdt.core.dom.PrimitiveType;
 import org.eclipse.jdt.core.dom.Statement;
 
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.refactoring.rename.MethodChecks;
 import org.eclipse.jdt.internal.corext.refactoring.reorg.ReorgPolicyFactory;
@@ -444,7 +445,16 @@ public final class RefactoringAvailabilityTester {
 	}
 
 	public static boolean isInlineMethodAvailable(IMethod method) throws JavaModelException {
-		return Checks.isAvailable(method);
+		if (method == null)
+			return false;
+		if (! method.exists())
+			return false;
+		if (! method.isStructureKnown())
+			return false;
+		if (! method.isBinary())
+			return true;
+		else
+			return ! method.isConstructor() && SourceRange.isAvailable(method.getNameRange());
 	}
 
 	public static boolean isInlineMethodAvailable(final IStructuredSelection selection) throws JavaModelException {
@@ -458,7 +468,26 @@ public final class RefactoringAvailabilityTester {
 		final IJavaElement[] elements= selection.resolveElementAtOffset();
 		if (elements.length != 1)
 			return false;
-		return (elements[0] instanceof IMethod) && isInlineMethodAvailable(((IMethod) elements[0]));
+		IJavaElement element= elements[0];
+		if (! (element instanceof IMethod))
+			return false;
+		IMethod method= (IMethod) element;
+		if (! isInlineMethodAvailable((method)))
+			return false;
+		
+		// in binary class, only activate for method declarations
+		IJavaElement enclosingElement= selection.resolveEnclosingElement();
+		if (enclosingElement == null || enclosingElement.getAncestor(IJavaElement.CLASS_FILE) == null)
+			return true;
+		if (! (enclosingElement instanceof IMethod))
+			return false;
+		IMethod enclosingMethod= (IMethod) enclosingElement;
+		if (enclosingMethod.isConstructor())
+			return false;
+		int nameOffset= enclosingMethod.getNameRange().getOffset();
+		int nameLength= enclosingMethod.getNameRange().getLength();
+		return (nameOffset <= selection.getOffset())
+				&& (selection.getOffset() + selection.getLength() <= nameOffset + nameLength);
 	}
 
 	public static boolean isInlineTempAvailable(final ILocalVariable variable) throws JavaModelException {

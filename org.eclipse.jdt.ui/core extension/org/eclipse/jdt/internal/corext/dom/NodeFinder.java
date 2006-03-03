@@ -10,7 +10,10 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.dom;
 
+import org.eclipse.jdt.core.IBuffer;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IOpenable;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.ToolFactory;
@@ -85,6 +88,17 @@ public class NodeFinder extends GenericVisitor {
 	 * @since		3.0
 	 */
 	public static ASTNode perform(ASTNode root, int start, int length, ICompilationUnit source) throws JavaModelException {
+		return performOpenable(root, start, length, source);
+	}
+	
+	/**
+	 * @see #perform(ASTNode, int, int, ICompilationUnit)
+	 */
+	public static ASTNode perform(ASTNode root, int start, int length, IClassFile source) throws JavaModelException {
+		return performOpenable(root, start, length, source);
+	}
+	
+	private static ASTNode performOpenable(ASTNode root, int start, int length, IOpenable source) throws JavaModelException {
 		NodeFinder finder= new NodeFinder(start, length);
 		root.accept(finder);
 		ASTNode result= finder.getCoveredNode();
@@ -92,20 +106,23 @@ public class NodeFinder extends GenericVisitor {
 			return null;
 		Selection selection= Selection.createFromStartLength(start, length);
 		if (selection.covers(result)) {
-			IScanner scanner= ToolFactory.createScanner(false, false, false, false);
-			scanner.setSource(source.getBuffer().getText(start, length).toCharArray());
-			try {
-				int token= scanner.getNextToken();
-				if (token != ITerminalSymbols.TokenNameEOF) {
-					int tStart= scanner.getCurrentTokenStartPosition();
-					if (tStart == result.getStartPosition() - start) {
-						scanner.resetTo(tStart + result.getLength(), length - 1);
-						token= scanner.getNextToken();
-						if (token == ITerminalSymbols.TokenNameEOF)
-							return result;
+			IBuffer buffer= source.getBuffer();
+			if (buffer != null) {
+				IScanner scanner= ToolFactory.createScanner(false, false, false, false);
+				scanner.setSource(buffer.getText(start, length).toCharArray());
+				try {
+					int token= scanner.getNextToken();
+					if (token != ITerminalSymbols.TokenNameEOF) {
+						int tStart= scanner.getCurrentTokenStartPosition();
+						if (tStart == result.getStartPosition() - start) {
+							scanner.resetTo(tStart + result.getLength(), length - 1);
+							token= scanner.getNextToken();
+							if (token == ITerminalSymbols.TokenNameEOF)
+								return result;
+						}
 					}
+				} catch (InvalidInputException e) {
 				}
-			} catch (InvalidInputException e) {
 			}
 		}
 		return finder.getCoveringNode();

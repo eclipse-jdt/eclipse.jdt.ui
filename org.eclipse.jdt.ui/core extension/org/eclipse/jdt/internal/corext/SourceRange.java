@@ -104,5 +104,16 @@ public class SourceRange implements ISourceRange{
     	return    getOffset() <= range.getOffset()
     	       	&& getEndInclusive() >= range.getEndInclusive();
     }
+    
+    /**
+     * Workaround for https://bugs.eclipse.org/bugs/show_bug.cgi?id=130161
+     * (Java Model returns ISourceRanges [-1, 0] if source not available).
+     * 
+     * @param range a source range, can be <code>null</code>
+     * @return <code>true</code> iff range is not null and range.getOffset() is not -1
+     */
+    public static boolean isAvailable(ISourceRange range) {
+    		return range != null && range.getOffset() != -1;
+    }
 }
 

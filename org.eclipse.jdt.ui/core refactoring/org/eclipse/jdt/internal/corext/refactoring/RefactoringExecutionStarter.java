@@ -253,7 +253,7 @@ public final class RefactoringExecutionStarter {
 		return true;
 	}
 
-	public static boolean startInlineMethodRefactoring(final ICompilationUnit unit, final CompilationUnit node, final int offset, final int length, final Shell shell, final boolean activate) throws JavaModelException {
+	public static boolean startInlineMethodRefactoring(final IJavaElement unit, final CompilationUnit node, final int offset, final int length, final Shell shell, final boolean activate) throws JavaModelException {
 		final InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(unit, node, offset, length);
 		if (refactoring == null) {
 			if (activate)

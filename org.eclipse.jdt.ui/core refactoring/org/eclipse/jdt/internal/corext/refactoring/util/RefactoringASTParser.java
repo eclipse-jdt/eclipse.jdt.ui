@@ -15,6 +15,7 @@ import java.util.Map;
 
 import org.eclipse.core.runtime.IProgressMonitor;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
@@ -75,6 +76,15 @@ public class RefactoringASTParser {
 		fParser.setCompilerOptions(getCompilerOptions(originalCu));
 		CompilationUnit newCUNode= (CompilationUnit) fParser.createAST(pm);
 		return newCUNode;
+	}
+	
+	public CompilationUnit parse(IClassFile unit, boolean resolveBindings) {
+		fParser.setResolveBindings(resolveBindings);
+		fParser.setSource(unit);
+		fParser.setCompilerOptions(getCompilerOptions(unit));
+		CompilationUnit result= (CompilationUnit) fParser.createAST(null);
+		result.setProperty(SOURCE_PROPERTY, unit);
+		return result;
 	}
 	
 	public static ICompilationUnit getCompilationUnit(ASTNode node) {

@@ -28,12 +28,14 @@ import org.eclipse.jdt.core.IMember;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.Signature;
 
 import org.eclipse.jdt.internal.corext.Assert;
+import org.eclipse.jdt.internal.corext.SourceRange;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringCoreMessages;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -239,5 +241,13 @@ public class JavaElementUtil {
 		};
 		Arrays.sort(members, comparator);
 		return members;
+	}
+	
+	public static boolean isSourceAvailable(ISourceReference sourceReference) {
+		try {
+			return SourceRange.isAvailable(sourceReference.getSourceRange());
+		} catch (JavaModelException e) {
+			return false;
+		}
 	}
 }

@@ -19,8 +19,12 @@ import org.eclipse.jface.text.ITextSelection;
 import org.eclipse.ui.IWorkbenchSite;
 import org.eclipse.ui.PlatformUI;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceRange;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.CompilationUnit;
@@ -28,6 +32,7 @@ import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringAvailabilityTester;
 import org.eclipse.jdt.internal.corext.refactoring.RefactoringExecutionStarter;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
 import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 
@@ -89,10 +94,9 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	public void run(IStructuredSelection selection) {
 		try {
 			Assert.isTrue(RefactoringAvailabilityTester.isInlineMethodAvailable(selection));
-			Object first= selection.getFirstElement();
-			Assert.isTrue(first instanceof IMethod);
-			IMethod method= (IMethod) first;
-			run(method.getNameRange().getOffset(), method.getNameRange().getLength(), method.getCompilationUnit());
+			IMethod method= (IMethod) selection.getFirstElement();
+			ISourceRange nameRange= method.getNameRange();
+			run(nameRange.getOffset(), nameRange.getLength(), JavaModelUtil.getTypeContainerUnit(method));
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineMethodAction_dialog_title, RefactoringMessages.InlineMethodAction_unexpected_exception); 
 		}
@@ -120,17 +124,26 @@ public class InlineMethodAction extends SelectionDispatchAction {
 	 * Method declared on SelectionDispatchAction
 	 */		
 	public void run(ITextSelection selection) {
-		ICompilationUnit cu= SelectionConverter.getInputAsCompilationUnit(fEditor);
-		if (cu == null)
+		IJavaElement unit= SelectionConverter.getInput(fEditor);
+		if (! JavaModelUtil.isTypeContainerUnit(unit))
 			return;
-		run(selection.getOffset(), selection.getLength(), cu);
+		if (! JavaElementUtil.isSourceAvailable((ISourceReference) unit))
+			return;
+		run(selection.getOffset(), selection.getLength(), unit);
 	}
 
-	private void run(int offset, int length, ICompilationUnit unit) {
+	private void run(int offset, int length, IJavaElement unit) {
 		if (!ActionUtil.isProcessable(getShell(), unit))
 			return;
 		try {
-			RefactoringExecutionStarter.startInlineMethodRefactoring(unit, new RefactoringASTParser(AST.JLS3).parse(unit, true), offset, length, getShell(), true);
+			RefactoringASTParser parser= new RefactoringASTParser(AST.JLS3);
+			CompilationUnit compilationUnit;
+			if (unit instanceof ICompilationUnit) {
+				compilationUnit= parser.parse((ICompilationUnit) unit, true);
+			} else {
+				compilationUnit= parser.parse((IClassFile) unit, true);
+			}
+			RefactoringExecutionStarter.startInlineMethodRefactoring(unit, compilationUnit, offset, length, getShell(), true);
 		} catch (JavaModelException e) {
 			ExceptionHandler.handle(e, getShell(), RefactoringMessages.InlineMethodAction_dialog_title, RefactoringMessages.InlineMethodAction_unexpected_exception); 
 		}
