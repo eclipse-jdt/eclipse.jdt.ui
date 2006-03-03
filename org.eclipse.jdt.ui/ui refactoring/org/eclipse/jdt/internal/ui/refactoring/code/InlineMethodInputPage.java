@@ -81,6 +81,7 @@ public class InlineMethodInputPage extends UserInputWizardPage {
 		fRemove.setText(RefactoringMessages.InlineMethodInputPage_delete_declaration); 
 		fRemove.setEnabled(all && fRefactoring.canEnableDeleteSource());
 		fRemove.setSelection(fRefactoring.canEnableDeleteSource());
+		fRefactoring.setDeleteSource(fRefactoring.canEnableDeleteSource());
 		fRemove.addSelectionListener(new SelectionAdapter() {
 			public void widgetSelected(SelectionEvent e) {
 				fRefactoring.setDeleteSource(((Button)e.widget).getSelection());
