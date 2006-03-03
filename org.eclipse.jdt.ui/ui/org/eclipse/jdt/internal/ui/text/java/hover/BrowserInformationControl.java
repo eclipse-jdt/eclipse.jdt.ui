@@ -327,6 +327,9 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	 * @see IInformationControl#setVisible(boolean)
 	 */
 	public void setVisible(boolean visible) {
+		if (fShell.isVisible() == visible)
+			return;
+		
 		if (visible) {
 			if (fStatusTextField != null) {
 				boolean state= fStatusFieldText != null;
