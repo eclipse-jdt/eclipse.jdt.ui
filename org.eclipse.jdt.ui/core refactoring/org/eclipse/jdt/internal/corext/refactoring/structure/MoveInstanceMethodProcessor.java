@@ -1214,7 +1214,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 			monitor.beginTask("", 1); //$NON-NLS-1$
 			monitor.setTaskName(RefactoringCoreMessages.MoveInstanceMethodProcessor_checking); 
 			final ITypeBinding binding= fTarget.getType();
-			if (binding == null || binding.isTypeVariable() || binding.isParameterizedType())
+			if (binding == null || binding.isTypeVariable())
 				status.merge(RefactoringStatus.createFatalErrorStatus(RefactoringCoreMessages.MoveInstanceMethodProcessor_no_generic_targets, JavaStatusContext.create(fMethod))); 
 		} finally {
 			monitor.done();
@@ -2032,6 +2032,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				}
 			}
 			target= createMethodArguments(rewrites, rewrite, declaration, adjustments, status);
+			createMethodTypeParameters(rewrite, declaration, status);
 			createMethodComment(rewrite, declaration);
 			createMethodBody(rewriter, rewrite, declaration);
 		} finally {
@@ -2039,6 +2040,40 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 				rewriter.clearImportRewrites();
 		}
 		return target;
+	}
+
+	/**
+	 * Creates the necessary changes to remove method type parameters if they match with enclosing type parameters.
+	 * @param rewrite the ast rewrite to use
+	 * @param declaration the method declaration to remove type parameters
+	 * @param status the refactoring status
+	 */
+	protected void createMethodTypeParameters(final ASTRewrite rewrite, final MethodDeclaration declaration, final RefactoringStatus status) {
+		ITypeBinding binding= fTarget.getType();
+		if (binding != null && binding.isParameterizedType()) {
+			final IMethodBinding method= declaration.resolveBinding();
+			if (method != null) {
+				final ITypeBinding[] parameters= method.getTypeParameters();
+				if (parameters.length > 0) {
+					final ListRewrite rewriter= rewrite.getListRewrite(declaration, MethodDeclaration.TYPE_PARAMETERS_PROPERTY);
+					boolean foundStatic= false;
+					while (binding != null && !foundStatic) {
+						if (Flags.isStatic(binding.getModifiers()))
+							foundStatic= true;
+						final ITypeBinding[] bindings= binding.getTypeArguments();
+						for (int index= 0; index < bindings.length; index++) {
+							for (int offset= 0; offset < parameters.length; offset++) {
+								if (parameters[offset].getName().equals(bindings[index].getName())) {
+									rewriter.remove((ASTNode) rewriter.getOriginalList().get(offset), null);
+									status.addWarning(Messages.format("The type parameter ''{0}'' is already present in the target type ''{1}'' and will be removed from the method.", new Object[] { parameters[offset].getName(), BindingLabelProvider.getBindingLabel(binding, JavaElementLabels.ALL_FULLY_QUALIFIED)}), JavaStatusContext.create(fMethod));
+								}
+							}
+						}
+						binding= binding.getDeclaringClass();
+					}
+				}
+			}
+		}
 	}
 
 	/**
