@@ -650,17 +650,23 @@ public class ConvertForLoopOperation extends AbstractLinkedFixRewriteOperation {
 					fCollectionName= ASTNodeFactory.newName(fAst,collectionName.getFullyQualifiedName());
 				}
 			} else if (rightOperand instanceof FieldAccess){
-				// this treats the case when the stop condition is a method call
+				// this treats the case when the stop condition is a method call or field access
 				// which returns an Array on which the "length" field is queried
 				FieldAccess fieldAccess= (FieldAccess) rightOperand;
 				if ("length".equals(fieldAccess.getName().getIdentifier())) { //$NON-NLS-1$
-					fCollectionIsMethodCall= true;
 					if (fieldAccess.getExpression() instanceof MethodInvocation){
+						fCollectionIsMethodCall= true;
 						MethodInvocation methodCall= (MethodInvocation) fieldAccess.getExpression();
 						fMethodInvocation= methodCall;
 						fOldCollectionBinding= methodCall.resolveMethodBinding();
 						fOldCollectionTypeBinding= methodCall.resolveTypeBinding();
 						fCollectionName= ASTNodeFactory.newName(fAst, methodCall.getName().getFullyQualifiedName());
+					} else if (fieldAccess.getExpression() instanceof FieldAccess) {
+						FieldAccess fieldCall= (FieldAccess)fieldAccess.getExpression();
+						fFieldAccess= fieldCall;
+						fOldCollectionBinding= fieldCall.resolveFieldBinding();
+						fOldCollectionTypeBinding= fieldCall.resolveTypeBinding();
+						fCollectionName= ASTNodeFactory.newName(fAst, fieldCall.getName().getFullyQualifiedName());
 					}
 				}
 
