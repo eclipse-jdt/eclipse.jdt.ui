@@ -308,6 +308,18 @@ public class ControlStatementsFix extends AbstractFix {
 			return null;
 		}
 		
+		if (statement instanceof Block) {
+			Block block= (Block)statement;
+			if (block.statements().size() != 1)
+				return null;
+			
+			ASTNode parent= block.getParent();
+			if (!(parent instanceof Statement))
+				return null;
+			
+			statement= (Statement)parent;
+		}
+		
 		if (statement instanceof IfStatement) {
 			String label1= FixMessages.ControlStatementsFix_removeIfBlock_proposalDescription;
 			RemoveBlockOperation op1= createRemoveBlockOperation (statement, IfStatement.THEN_STATEMENT_PROPERTY, false);
