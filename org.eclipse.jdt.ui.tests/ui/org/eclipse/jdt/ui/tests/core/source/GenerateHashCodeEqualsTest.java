@@ -71,7 +71,7 @@ public class GenerateHashCodeEqualsTest extends SourceTestCase {
 
 		AbstractTypeDeclaration decl= ASTNodeSearchUtil.getAbstractTypeDeclarationNode(type, unit);
 		ITypeBinding binding= decl.resolveBinding();
-		GenerateHashCodeEqualsOperation op= new GenerateHashCodeEqualsOperation(binding, fKeys, unit, insertBefore, fSettings, true, true);
+		GenerateHashCodeEqualsOperation op= new GenerateHashCodeEqualsOperation(binding, fKeys, unit, insertBefore, fSettings, false, true, true);
 
 		op.run(new NullProgressMonitor());
 		JavaModelUtil.reconcile(type.getCompilationUnit());
