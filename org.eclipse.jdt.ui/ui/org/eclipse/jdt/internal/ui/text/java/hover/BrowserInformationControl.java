@@ -35,6 +35,7 @@ import org.eclipse.swt.graphics.FontData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.graphics.TextLayout;
+import org.eclipse.swt.graphics.TextStyle;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Composite;
@@ -51,6 +52,7 @@ import org.eclipse.jface.text.IInformationControlExtension3;
 import org.eclipse.jface.text.TextPresentation;
 
 import org.eclipse.jdt.internal.ui.text.HTML2TextReader;
+import org.eclipse.jdt.internal.ui.text.HTMLPrinter;
 import org.eclipse.jdt.internal.ui.text.IInformationControlExtension4;
 
 
@@ -133,6 +135,8 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	private String fInputText;
 	private TextLayout fTextLayout;
 	private boolean fPack;
+
+	private TextStyle fBoldStyle;
 
 	/**
 	 * Creates a default information control with the given shell as parent. The given
@@ -251,7 +255,8 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 			fStatusTextField.setBackground(display.getSystemColor(SWT.COLOR_INFO_BACKGROUND));
 		}
 
-		addDisposeListener(this);
+		addDisposeListener(this);		
+		createTextLayout();
 	}
 
 	/**
@@ -285,7 +290,7 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		fBrowserHasContent= content != null && content.length() > 0;
 
 		if (!fBrowserHasContent)
-			content= ""; //$NON-NLS-1$
+			content= "<html><body ></html>"; //$NON-NLS-1$
 		
 		fInputText= content;
 
@@ -302,37 +307,12 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		
 		if (styles != null) {
 			StringBuffer buffer= new StringBuffer(content);
-			insertStyles(buffer, styles);
+			HTMLPrinter.insertStyles(buffer, styles);
 			content= buffer.toString();
 		}
 		
 		fBrowser.setText(content);
 	
-	}
-
-	private void insertStyles(StringBuffer buffer, String[] styles) {
-		if (styles == null || styles.length == 0)
-			return;
-
-		StringBuffer styleBuf= new StringBuffer(10 * styles.length);
-		for (int i= 0; styles != null && i < styles.length; i++) {
-			styleBuf.append(" style=\""); //$NON-NLS-1$
-			styleBuf.append(styles[i]);
-			styleBuf.append('"');
-		}
-
-		// Find insertion index
-		int index= buffer.indexOf("<body "); //$NON-NLS-1$
-		if (index == -1) {
-			if (buffer.length() > 0)
-				return;
-			buffer.append("<html><body "); //$NON-NLS-1$
-			buffer.append(styleBuf);
-			buffer.append("></html>"); //$NON-NLS-1$
-			return;
-		}
-
-		buffer.insert(index+5, styleBuf);
 	}
 
 	/*
@@ -380,15 +360,13 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		Iterator iter= presentation.getAllStyleRangeIterator();
 		while (iter.hasNext()) {
 			StyleRange sr= (StyleRange)iter.next();
-			fTextLayout.setStyle(sr, sr.start, sr.start + sr.length - 1);
+			if (sr.fontStyle == SWT.BOLD)
+				fTextLayout.setStyle(fBoldStyle, sr.start, sr.start + sr.length - 1);
 		}
-		Font font= fBrowser.getFont();
-		fTextLayout.setFont(font);
-		fTextLayout.setWidth(-1);
 		Rectangle bounds= fTextLayout.getBounds();
 		
-		bounds.width= bounds.width + 10; 
-		bounds.height= bounds.height + 10; 
+		bounds.width= bounds.width + 15; 
+		bounds.height= bounds.height + 25; 
 		
 		if (fStatusFieldText != null) {
 			fTextLayout.setText(fStatusFieldText);
@@ -406,6 +384,34 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 		bounds.height= Math.max(MIN_HEIGHT, bounds.height);
 		
 		setSize(bounds.width, bounds.height);
+		
+	}
+	
+	/**
+	 * Creates and initializes the text layout used
+	 * to compute the size hint.
+	 * 
+	 * @since 3.2
+	 */
+	private void createTextLayout() {
+		fTextLayout= new TextLayout(fBrowser.getDisplay());
+		
+		// Initialize fonts
+		Font font= fBrowser.getFont();
+		fTextLayout.setFont(font);
+		fTextLayout.setWidth(-1);
+		FontData[] fontData= font.getFontData();
+		for (int i= 0; i < fontData.length; i++)
+			fontData[i].setStyle(SWT.BOLD);
+		font= new Font(fShell.getDisplay(), fontData);
+		fBoldStyle= new TextStyle(font, null, null);
+		
+		// Compute and set tab width
+		fTextLayout.setText("    "); //$NON-NLS-1$
+		int tabWidth = fTextLayout.getBounds().width;
+		fTextLayout.setTabs(new int[] {tabWidth});
+
+		fTextLayout.setText(""); //$NON-NLS-1$
 	}
 
 	/*
@@ -414,6 +420,8 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 	public void dispose() {
 		fTextLayout.dispose();
 		fTextLayout= null;
+		fBoldStyle.font.dispose();
+		fBoldStyle= null;
 		if (fShell != null && !fShell.isDisposed())
 			fShell.dispose();
 		else
