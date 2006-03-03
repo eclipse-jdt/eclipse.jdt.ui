@@ -253,6 +253,12 @@ public class JavadocView extends AbstractInfoView {
 		try {
 			fBrowser= new Browser(parent, SWT.NONE);
 			fIsUsingBrowserWidget= true;
+			
+			// Apply background color from style sheet
+			StringBuffer buffer= new StringBuffer(""); //$NON-NLS-1$
+			HTMLPrinter.insertPageProlog(buffer, 0, fStyleSheetURL);
+			setInput(buffer.toString());
+			
 		} catch (SWTError er) {
 
 			/* The Browser widget throws an SWTError if it fails to
