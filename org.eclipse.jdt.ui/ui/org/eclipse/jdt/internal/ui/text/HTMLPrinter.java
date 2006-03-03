@@ -109,7 +109,7 @@ public class HTMLPrinter {
 
 			pageProlog.append("<body text=\"#000000\" bgcolor=\""); //$NON-NLS-1$
 			appendColor(pageProlog, bgRGB);
-			pageProlog.append("\"><font size=-1>"); //$NON-NLS-1$
+			pageProlog.append("\">"); //$NON-NLS-1$
 
 			buffer.insert(position,  pageProlog.toString());
 		}
@@ -141,7 +141,7 @@ public class HTMLPrinter {
 			StringBuffer pageProlog= new StringBuffer(60);
 			pageProlog.append("<html><body text=\"#000000\" bgcolor=\""); //$NON-NLS-1$
 			appendColor(pageProlog, bgRGB);
-			pageProlog.append("\"><font size=-1>"); //$NON-NLS-1$
+			pageProlog.append("\">"); //$NON-NLS-1$
 			buffer.insert(position,  pageProlog.toString());
 		}
 	}
