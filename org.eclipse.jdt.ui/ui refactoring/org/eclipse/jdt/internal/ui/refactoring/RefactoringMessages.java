@@ -456,4 +456,6 @@ public final class RefactoringMessages extends NLS {
 	public static void reloadMessages() {
 		NLS.initializeMessages(BUNDLE_NAME, RefactoringMessages.class);
 	}
+
+	public static String JavaStatusContextViewer_no_source_found0;
 }

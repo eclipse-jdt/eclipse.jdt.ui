@@ -14,7 +14,10 @@ import org.eclipse.core.runtime.CoreException;
 
 import org.eclipse.core.resources.IFile;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IPackageFragmentRoot;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -35,6 +38,7 @@ import org.eclipse.ui.texteditor.IDocumentProvider;
 
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStatusContext;
 import org.eclipse.jdt.internal.corext.refactoring.base.JavaStringStatusContext;
+import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.javaeditor.InternalClassFileEditorInput;
@@ -62,18 +66,27 @@ public class JavaStatusContextViewer extends TextStatusContextViewer {
 		IPreferenceStore store= JavaPlugin.getDefault().getCombinedPreferenceStore();
 		return new JavaSourceViewer(parent, null, null, false, SWT.V_SCROLL | SWT.H_SCROLL | SWT.MULTI | SWT.FULL_SELECTION, store);
 	}
-	
-	/* (non-Javadoc)
-	 * @see org.eclipse.jdt.internal.ui.refactoring.IStatusContextViewer#setInput(java.lang.Object)
-	 */
+
+	private IPackageFragmentRoot getPackageFragmentRoot(IClassFile file) {
+
+		IJavaElement element= file.getParent();
+		while (element != null && element.getElementType() != IJavaElement.PACKAGE_FRAGMENT_ROOT)
+			element= element.getParent();
+
+		return (IPackageFragmentRoot) element;
+	}
+
 	public void setInput(RefactoringStatusContext context) {
 		if (context instanceof JavaStatusContext) {
 			JavaStatusContext jsc= (JavaStatusContext)context;
 			IDocument document= null;
 			if (jsc.isBinary()) {
-				IEditorInput editorInput= new InternalClassFileEditorInput(jsc.getClassFile());
+				IClassFile file= jsc.getClassFile();
+				IEditorInput editorInput= new InternalClassFileEditorInput(file);
 				document= getDocument(JavaPlugin.getDefault().getClassFileDocumentProvider(), editorInput);
-				updateTitle(jsc.getClassFile());
+				if (document.getLength() == 0)
+					document= new Document(Messages.format(RefactoringMessages.JavaStatusContextViewer_no_source_found0, getPackageFragmentRoot(file).getElementName()));
+				updateTitle(file);
 			} else {
 				ICompilationUnit cunit= jsc.getCompilationUnit();
 				if (cunit.isWorkingCopy()) {
