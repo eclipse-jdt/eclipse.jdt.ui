@@ -245,7 +245,7 @@ public class CodeStyleFix extends AbstractFix {
 				public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 					ASTRewrite rewrite= cuRewrite.getASTRewrite();
 					
-					TextEditGroup group= new TextEditGroup(FixMessages.CodeStyleFix_removeThis_groupDescription);
+					TextEditGroup group= createTextEditGroup(FixMessages.CodeStyleFix_removeThis_groupDescription);
 					textEditGroups.add(group);
 					
 					rewrite.replace(node, rewrite.createCopyTarget(name), group);
@@ -273,7 +273,7 @@ public class CodeStyleFix extends AbstractFix {
 				public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 					ASTRewrite rewrite= cuRewrite.getASTRewrite();
 					
-					TextEditGroup group= new TextEditGroup(FixMessages.CodeStyleFix_removeThis_groupDescription);
+					TextEditGroup group= createTextEditGroup(FixMessages.CodeStyleFix_removeThis_groupDescription);
 					textEditGroups.add(group);
 					
 					MethodInvocation invocation= node.getAST().newMethodInvocation();
@@ -297,7 +297,7 @@ public class CodeStyleFix extends AbstractFix {
 		}
 	}
 
-	private final static class AddThisQualifierOperation implements IFixRewriteOperation {
+	private final static class AddThisQualifierOperation extends AbstractFixRewriteOperation {
 
 		private final String fQualifier;
 		private final SimpleName fName;
@@ -316,8 +316,12 @@ public class CodeStyleFix extends AbstractFix {
 		 */
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
-			String groupName= Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {fName.getIdentifier(), fQualifier});
-			TextEditGroup group= new TextEditGroup(groupName);
+			TextEditGroup group;
+			if (fName.resolveBinding() instanceof IMethodBinding) {
+				group= createTextEditGroup(FixMessages.CodeStyleFix_QualifyMethodWithThis_description);
+			} else {
+				group= createTextEditGroup(FixMessages.CodeStyleFix_QualifyFieldWithThis_description);
+			}
 			textEditGroups.add(group);
 			rewrite.replace(fName, rewrite.createStringPlaceholder(fQualifier  + '.' + fName.getIdentifier(), ASTNode.SIMPLE_NAME), group);
 		}		
@@ -341,7 +345,12 @@ public class CodeStyleFix extends AbstractFix {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			CompilationUnit compilationUnit= cuRewrite.getRoot();
 			Type qualifier= importType(fDeclaringClass, fName, cuRewrite.getImportRewrite(), compilationUnit);
-			TextEditGroup group= new TextEditGroup(Messages.format(FixMessages.CodeStyleFix_QualifyWithThis_description, new Object[] {fName.getIdentifier(), ASTNodes.asString(qualifier)}));
+			TextEditGroup group;
+			if (fName.resolveBinding() instanceof IMethodBinding) {
+				group= createTextEditGroup(FixMessages.CodeStyleFix_QualifyMethodWithDeclClass_description);
+			} else {
+				group= createTextEditGroup(FixMessages.CodeStyleFix_QualifyFieldWithDeclClass_description);
+			}
 			textEditGroups.add(group);
 			rewrite.replace(fName, compilationUnit.getAST().newQualifiedType(qualifier, (SimpleName)rewrite.createMoveTarget(fName)), group);
 		}
@@ -367,7 +376,7 @@ public class CodeStyleFix extends AbstractFix {
 		 */
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			Type type= importType(fDeclaringTypeBinding, fQualifier, cuRewrite.getImportRewrite(), cuRewrite.getRoot());
-			TextEditGroup group= new TextEditGroup(Messages.format(FixMessages.CodeStyleFix_ChangeAccessToStatic_description, fDeclaringTypeBinding.getName()));
+			TextEditGroup group= createTextEditGroup(FixMessages.CodeStyleFix_ChangeAccessUsingDeclaring_description);
 			textEditGroups.add(group);
 			cuRewrite.getASTRewrite().replace(fQualifier, type, group);
 		}

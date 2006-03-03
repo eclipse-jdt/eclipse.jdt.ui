@@ -227,7 +227,7 @@ public class ControlStatementsFix extends AbstractFix {
 
 	}
 	
-	private static final class AddBlockOperation implements IFixRewriteOperation {
+	private static final class AddBlockOperation extends AbstractFixRewriteOperation {
 
 		private final ChildPropertyDescriptor fBodyProperty;
 		private final ASTNode fBody;
@@ -253,7 +253,7 @@ public class ControlStatementsFix extends AbstractFix {
 				label = FixMessages.CodeStyleFix_ChangeControlToBlock_description;
 			}
 			
-			TextEditGroup group= new TextEditGroup(label);
+			TextEditGroup group= createTextEditGroup(label);
 			textEditGroups.add(group);
 			
 			ASTNode childPlaceholder= rewrite.createMoveTarget(fBody);
@@ -263,7 +263,7 @@ public class ControlStatementsFix extends AbstractFix {
 		}
 	}
 	
-	private static class RemoveBlockOperation implements IFixRewriteOperation {
+	private static class RemoveBlockOperation extends AbstractFixRewriteOperation {
 
 		private final Block fBlock;
 		private final Statement fStatement;
@@ -281,7 +281,10 @@ public class ControlStatementsFix extends AbstractFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			Statement moveTarget= (Statement)rewrite.createMoveTarget((ASTNode)fBlock.statements().get(0));
-			rewrite.set(fStatement, fChild, moveTarget, null);
+			
+			TextEditGroup group= createTextEditGroup(FixMessages.ControlStatementsFix_removeBrackets_proposalDescription);
+			textEditGroups.add(group);
+			rewrite.set(fStatement, fChild, moveTarget, group);
 		}
 
 	}

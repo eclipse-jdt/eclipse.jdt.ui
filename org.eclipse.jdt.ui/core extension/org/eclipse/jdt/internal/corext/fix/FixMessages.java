@@ -28,6 +28,11 @@ public class FixMessages extends NLS {
 	public static String UnusedCodeFix_RemoveType_description;
 	public static String UnusedCodeFix_RemoveImport_description;
 	public static String UnusedCodeFix_RemoveCast_description;
+	public static String UnusedCodeFix_RemoveUnusedType_description;
+	public static String UnusedCodeFix_RemoveUnusedConstructor_description;
+	public static String UnusedCodeFix_RemoveUnusedPrivateMethod_description;
+	public static String UnusedCodeFix_RemoveUnusedField_description;
+	public static String UnusedCodeFix_RemoveUnusedVariabl_description;
 	
 	public static String Java50Fix_AddMissingAnnotation_description;
 	public static String Java50Fix_AddDeprecated_description;
@@ -55,6 +60,11 @@ public class FixMessages extends NLS {
 	public static String CodeStyleFix_ChangeElseToBlock_description;
 	public static String CodeStyleFix_ChangeControlToBlock_description;
 	public static String CodeStyleFix_removeThis_groupDescription;
+	public static String CodeStyleFix_ChangeAccessUsingDeclaring_description;
+	public static String CodeStyleFix_QualifyMethodWithThis_description;
+	public static String CodeStyleFix_QualifyFieldWithThis_description;
+	public static String CodeStyleFix_QualifyMethodWithDeclClass_description;
+	public static String CodeStyleFix_QualifyFieldWithDeclClass_description;
 	
 	public static String SerialVersion_group_description;
 	
@@ -73,5 +83,6 @@ public class FixMessages extends NLS {
 		// initialize resource bundle
 		NLS.initializeMessages(BUNDLE_NAME, FixMessages.class);
 	}
+
 
 }

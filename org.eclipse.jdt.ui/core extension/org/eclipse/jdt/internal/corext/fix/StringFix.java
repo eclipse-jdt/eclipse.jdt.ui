@@ -20,6 +20,9 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
+import org.eclipse.ltk.core.refactoring.GroupCategory;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.IBuffer;
@@ -112,7 +115,8 @@ public class StringFix implements IFix {
 				if (buffer != null) {
 					TextEdit edit= StringFix.getReplace(problem.getOffset(), problem.getLength(), buffer, false);
 					if (edit != null) {
-						result.add(new TextEditGroup(FixMessages.StringFix_RemoveNonNls_description, edit));
+						String label= FixMessages.StringFix_RemoveNonNls_description;
+						result.add(new CategorizedTextEditGroup(label, edit, new GroupCategorySet(new GroupCategory(label, label, label))));
 					}
 				}
 			}
@@ -128,7 +132,8 @@ public class StringFix implements IFix {
 			TextEdit[] edits= NLSUtil.createNLSEdits(cu, positions);
 			if (edits != null) {
 				for (int j= 0; j < edits.length; j++) {
-					result.add(new TextEditGroup(FixMessages.StringFix_AddNonNls_description, edits[j]));	
+					String label= FixMessages.StringFix_AddNonNls_description;
+					result.add(new CategorizedTextEditGroup(label, edits[j], new GroupCategorySet(new GroupCategory(label, label, label))));	
 				}
 			}
 		}

@@ -230,7 +230,7 @@ public class ExpressionsFix extends AbstractFix {
 		 * {@inheritDoc}
 		 */
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
-			TextEditGroup group= new TextEditGroup(FixMessages.ExpressionsFix_addParanoiacParenthesis_description);
+			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_addParanoiacParenthesis_description);
 			textEditGroups.add(group);
 			
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -259,7 +259,7 @@ public class ExpressionsFix extends AbstractFix {
 		 * {@inheritDoc}
 		 */
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
-			TextEditGroup group= new TextEditGroup(FixMessages.ExpressionsFix_removeUnnecessaryParenthesis_description);
+			TextEditGroup group= createTextEditGroup(FixMessages.ExpressionsFix_removeUnnecessaryParenthesis_description);
 			textEditGroups.add(group);
 			
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();

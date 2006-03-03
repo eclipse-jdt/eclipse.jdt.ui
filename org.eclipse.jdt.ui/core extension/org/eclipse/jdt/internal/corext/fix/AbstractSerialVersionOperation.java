@@ -37,6 +37,7 @@ import org.eclipse.jdt.core.dom.rewrite.ITrackedNodePosition;
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.codemanipulation.StubUtility;
 import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
+import org.eclipse.jdt.internal.corext.fix.LinkedFix.AbstractLinkedFixRewriteOperation;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
 
 import org.eclipse.jdt.ui.CodeGeneration;
@@ -46,7 +47,7 @@ import org.eclipse.jdt.ui.CodeGeneration;
  *
  * @since 3.1
  */
-public abstract class AbstractSerialVersionOperation implements ILinkedFixRewriteOperation {
+public abstract class AbstractSerialVersionOperation extends AbstractLinkedFixRewriteOperation {
 
 	/** The long literal suffix */
 	protected static final String LONG_SUFFIX= "L"; //$NON-NLS-1$
@@ -137,7 +138,7 @@ public abstract class AbstractSerialVersionOperation implements ILinkedFixRewrit
 
 			if (fragment.getInitializer() != null) {
 				
-				final TextEditGroup editGroup= new TextEditGroup(FixMessages.SerialVersion_group_description);
+				final TextEditGroup editGroup= createTextEditGroup(FixMessages.SerialVersion_group_description);
 				textEditGroups.add(editGroup);
 
 				if (node instanceof AbstractTypeDeclaration)

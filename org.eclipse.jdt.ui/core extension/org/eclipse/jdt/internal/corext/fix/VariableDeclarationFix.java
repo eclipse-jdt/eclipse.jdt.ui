@@ -216,7 +216,7 @@ public class VariableDeclarationFix extends AbstractFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			
-			TextEditGroup group= new TextEditGroup(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description);
+			TextEditGroup group= createTextEditGroup(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description);
 			textEditGroups.add(group);
 			
 			if (fDeclaration instanceof VariableDeclarationStatement) {

@@ -111,7 +111,7 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 	}
 	
-	private static class RemoveImportOperation implements IFixRewriteOperation {
+	private static class RemoveImportOperation extends AbstractFixRewriteOperation {
 
 		private final ImportDeclaration fImportDeclaration;
 		
@@ -124,14 +124,14 @@ public class UnusedCodeFix extends AbstractFix {
 		 */
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			ImportDeclaration node= fImportDeclaration;
-			TextEditGroup group= new TextEditGroup(FixMessages.UnusedCodeFix_RemoveImport_description + " " + node.getName()); //$NON-NLS-1$
+			TextEditGroup group= new TextEditGroup(FixMessages.UnusedCodeFix_RemoveImport_description);
 			cuRewrite.getASTRewrite().remove(node, group);
 			textEditGroups.add(group);
 		}
 		
 	}
 	
-	private static class RemoveUnusedMemberOperation implements IFixRewriteOperation {
+	private static class RemoveUnusedMemberOperation extends AbstractFixRewriteOperation {
 
 		private final SimpleName[] fUnusedNames;
 		
@@ -151,8 +151,8 @@ public class UnusedCodeFix extends AbstractFix {
 		private void removeUnusedName(ASTRewrite rewrite, SimpleName simpleName, CompilationUnit completeRoot, List groups) {
 			IBinding binding= simpleName.resolveBinding();
 			CompilationUnit root= (CompilationUnit) simpleName.getRoot();
-			String displayString= getDisplayString(simpleName, binding);
-			TextEditGroup group= new TextEditGroup(displayString);
+			String displayString= getDisplayString(binding);
+			TextEditGroup group= createTextEditGroup(displayString);
 			groups.add(group);
 			if (binding.getKind() == IBinding.METHOD) {
 				IMethodBinding decl= ((IMethodBinding) binding).getMethodDeclaration();
@@ -179,6 +179,27 @@ public class UnusedCodeFix extends AbstractFix {
 			}
 		}
 		
+		private String getDisplayString(IBinding binding) {
+			switch (binding.getKind()) {
+				case IBinding.TYPE:
+					return FixMessages.UnusedCodeFix_RemoveUnusedType_description;
+				case IBinding.METHOD:
+					if (((IMethodBinding) binding).isConstructor()) {
+						return FixMessages.UnusedCodeFix_RemoveUnusedConstructor_description;
+					} else {
+						return FixMessages.UnusedCodeFix_RemoveUnusedPrivateMethod_description;
+					}
+				case IBinding.VARIABLE:
+					if (((IVariableBinding) binding).isField()) {
+						return FixMessages.UnusedCodeFix_RemoveUnusedField_description;
+					} else {
+						return FixMessages.UnusedCodeFix_RemoveUnusedVariabl_description;
+					}
+				default:
+					return ""; //$NON-NLS-1$
+			}
+		}
+
 		private void removeParamTag(ASTRewrite rewrite, SingleVariableDeclaration varDecl, TextEditGroup group) {
 			if (varDecl.getParent() instanceof MethodDeclaration) {
 				Javadoc javadoc= ((MethodDeclaration) varDecl.getParent()).getJavadoc();
@@ -251,7 +272,7 @@ public class UnusedCodeFix extends AbstractFix {
 		}
 	}
 	
-	private static class RemoveCastOperation implements IFixRewriteOperation {
+	private static class RemoveCastOperation extends AbstractFixRewriteOperation {
 
 		private final CastExpression fCast;
 		private final ASTNode fSelectedNode;
@@ -266,7 +287,7 @@ public class UnusedCodeFix extends AbstractFix {
 		 */
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			
-			TextEditGroup group= new TextEditGroup(FixMessages.UnusedCodeFix_RemoveCast_description);
+			TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveCast_description);
 			textEditGroups.add(group);
 			
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
@@ -297,7 +318,7 @@ public class UnusedCodeFix extends AbstractFix {
 		public void rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups) throws CoreException {
 			ASTRewrite rewrite= cuRewrite.getASTRewrite();
 			
-			TextEditGroup group= new TextEditGroup(FixMessages.UnusedCodeFix_RemoveCast_description);
+			TextEditGroup group= createTextEditGroup(FixMessages.UnusedCodeFix_RemoveCast_description);
 			textEditGroups.add(group);
 			
 			while (fUnnecessaryCasts.size() > 0) {

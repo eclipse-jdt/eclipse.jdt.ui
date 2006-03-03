@@ -18,6 +18,9 @@ import org.eclipse.text.edits.TextEditGroup;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.ltk.core.refactoring.CategorizedTextEditGroup;
+import org.eclipse.ltk.core.refactoring.GroupCategory;
+import org.eclipse.ltk.core.refactoring.GroupCategorySet;
 import org.eclipse.ltk.core.refactoring.TextChange;
 
 import org.eclipse.jdt.core.ICompilationUnit;
@@ -40,6 +43,14 @@ public abstract class AbstractFix implements IFix {
 		protected Type importType(final ITypeBinding toImport, final ASTNode accessor, ImportRewrite imports, final CompilationUnit compilationUnit) {
 			ImportRewriteContext importContext= new ContextSensitiveImportRewriteContext(compilationUnit, accessor.getStartPosition(), imports);
 			return imports.addImport(toImport, compilationUnit.getAST(), importContext);
+		}
+		
+		protected TextEditGroup createTextEditGroup(String label) {
+			if (label.length() > 0){
+				return new CategorizedTextEditGroup(label, new GroupCategorySet(new GroupCategory(label, label, label)));
+			} else {
+				return new TextEditGroup(label);
+			}
 		}
 	}
 	

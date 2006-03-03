@@ -436,7 +436,7 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 	 * @see org.eclipse.jdt.internal.corext.fix.LinkedFix.ILinkedFixRewriteOperation#rewriteAST(org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite, java.util.List, java.util.List)
 	 */
 	public ITrackedNodePosition rewriteAST(CompilationUnitRewrite cuRewrite, List textEditGroups, List positionGroups) throws CoreException {
-		TextEditGroup group= new TextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
+		TextEditGroup group= createTextEditGroup(FixMessages.Java50Fix_ConvertToEnhancedForLoop_description);
 		textEditGroups.add(group);
 		clearPositionGroups();
 		ITrackedNodePosition endPosition= rewriteAST(cuRewrite.getRoot().getAST(), cuRewrite.getASTRewrite(), cuRewrite.getImportRewrite(), group);

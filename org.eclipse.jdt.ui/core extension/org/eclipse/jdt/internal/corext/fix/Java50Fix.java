@@ -75,7 +75,7 @@ public class Java50Fix extends LinkedFix {
 	private static final String OVERRIDE= "Override"; //$NON-NLS-1$
 	private static final String DEPRECATED= "Deprecated"; //$NON-NLS-1$
 	
-	private static class AnnotationRewriteOperation implements IFixRewriteOperation {
+	private static class AnnotationRewriteOperation extends AbstractFixRewriteOperation {
 		private final BodyDeclaration fBodyDeclaration;
 		private final String fAnnotation;
 
@@ -92,7 +92,7 @@ public class Java50Fix extends LinkedFix {
 			ListRewrite listRewrite= cuRewrite.getASTRewrite().getListRewrite(fBodyDeclaration, fBodyDeclaration.getModifiersProperty());
 			Annotation newAnnotation= ast.newMarkerAnnotation();
 			newAnnotation.setTypeName(ast.newSimpleName(fAnnotation));
-			TextEditGroup group= new TextEditGroup(Messages.format(FixMessages.Java50Fix_AddMissingAnnotation_description, new String[] {fAnnotation}));
+			TextEditGroup group= createTextEditGroup(Messages.format(FixMessages.Java50Fix_AddMissingAnnotation_description, new String[] {fAnnotation}));
 			textEditGroups.add(group);
 			listRewrite.insertFirst(newAnnotation, group);
 		}
