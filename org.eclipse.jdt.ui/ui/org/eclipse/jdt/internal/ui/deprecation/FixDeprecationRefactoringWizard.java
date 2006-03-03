@@ -151,22 +151,22 @@ public final class FixDeprecationRefactoringWizard extends StubRefactoringHistor
 			final JavaRefactoringDescriptor extended= (JavaRefactoringDescriptor) descriptor;
 			String project= extended.getProject();
 			final Map arguments= new HashMap(extended.getArguments());
-			final String handle= (String) arguments.get(JavaRefactoringDescriptor.INPUT);
+			final String handle= (String) arguments.get(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null && !"".equals(handle)) { //$NON-NLS-1$
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(project, handle);
 				if (element != null) {
 					if (element instanceof ICompilationUnit)
-						arguments.put(JavaRefactoringDescriptor.INPUT, JavaRefactoringDescriptor.elementToHandle(project, fCompilationUnit));
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, JavaRefactoringDescriptor.elementToHandle(project, fCompilationUnit));
 					project= fCompilationUnit.getJavaProject().getElementName();
 				}
 			}
-			final String selection= (String) arguments.get(JavaRefactoringDescriptor.SELECTION);
+			final String selection= (String) arguments.get(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION);
 			if (selection != null) {
 				final StringBuffer buffer= new StringBuffer(8);
 				buffer.append(fOffset);
 				buffer.append(' ');
 				buffer.append(fLength);
-				arguments.put(JavaRefactoringDescriptor.SELECTION, buffer.toString());
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, buffer.toString());
 			}
 			return super.createRefactoring(new JavaRefactoringDescriptor(extended.getID(), project, extended.getDescription(), extended.getComment(), arguments, extended.getFlags()), status);
 		}

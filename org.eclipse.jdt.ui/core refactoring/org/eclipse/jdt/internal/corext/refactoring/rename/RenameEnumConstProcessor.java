@@ -124,8 +124,8 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 						JavaPlugin.log(exception);
 					}
 					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_ENUM_CONSTANT, project, Messages.format(RefactoringCoreMessages.RenameEnumConstProcessor_descriptor_description, new String[] { field.getElementName(), JavaElementLabels.getElementLabel(field.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, flags);
-					arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(field));
-					arguments.put(JavaRefactoringDescriptor.NAME, getNewElementName());
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(field));
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
 					return new RefactoringChangeDescriptor(descriptor);
@@ -143,7 +143,7 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null || element.getElementType() != IJavaElement.FIELD)
@@ -151,12 +151,12 @@ public final class RenameEnumConstProcessor extends RenameFieldProcessor {
 				else
 					fField= (IField) element;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptor.NAME);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
+			final String name= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				setNewElementName(name);
 			else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_NAME));
 			final String references= extended.getAttribute(ATTRIBUTE_REFERENCES);
 			if (references != null) {
 				setUpdateReferences(Boolean.valueOf(references).booleanValue());

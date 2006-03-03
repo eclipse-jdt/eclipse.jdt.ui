@@ -1587,8 +1587,8 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					if (javaProject != null)
 						project= javaProject.getElementName();
 					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_MOVE_METHOD, project, Messages.format(RefactoringCoreMessages.MoveInstanceMethodProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fMethod, JavaElementLabels.ALL_FULLY_QUALIFIED), BindingLabelProvider.getBindingLabel(fTarget, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
-					arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fMethod));
-					arguments.put(JavaRefactoringDescriptor.NAME, fMethodName);
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fMethod));
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fMethodName);
 					arguments.put(ATTRIBUTE_TARGET_NAME, fTargetName);
 					arguments.put(ATTRIBUTE_DEPRECATE, Boolean.valueOf(fDelegateDeprecation).toString());
 					arguments.put(ATTRIBUTE_REMOVE, Boolean.valueOf(fRemove).toString());
@@ -2739,7 +2739,7 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null || element.getElementType() != IJavaElement.METHOD)
@@ -2749,14 +2749,14 @@ public final class MoveInstanceMethodProcessor extends MoveProcessor implements 
 					initialize(fMethod);
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptor.NAME);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
+			final String name= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_NAME);
 			if (name != null) {
 				final RefactoringStatus status= setMethodName(name);
 				if (status.hasError())
 					return status;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_NAME));
 			final String deprecate= extended.getAttribute(ATTRIBUTE_DEPRECATE);
 			if (deprecate != null) {
 				fDelegateDeprecation= Boolean.valueOf(deprecate).booleanValue();

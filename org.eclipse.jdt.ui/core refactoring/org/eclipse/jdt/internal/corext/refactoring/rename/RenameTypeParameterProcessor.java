@@ -277,8 +277,8 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 						if (javaProject != null)
 							project= javaProject.getElementName();
 						final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_TYPE_PARAMETER, project, Messages.format(RefactoringCoreMessages.RenameTypeParameterProcessor_descriptor_description, new String[] { fTypeParameter.getElementName(), JavaElementLabels.getElementLabel(fTypeParameter.getDeclaringMember(), JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, RefactoringDescriptor.NONE);
-						arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fTypeParameter.getDeclaringMember()));
-						arguments.put(JavaRefactoringDescriptor.NAME, getNewElementName());
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fTypeParameter.getDeclaringMember()));
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 						arguments.put(ATTRIBUTE_PARAMETER, fTypeParameter.getElementName());
 						arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 						return new RefactoringChangeDescriptor(descriptor);
@@ -376,7 +376,7 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 			final String parameter= extended.getAttribute(ATTRIBUTE_PARAMETER);
 			if (parameter == null || "".equals(parameter)) //$NON-NLS-1$
 				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, ATTRIBUTE_PARAMETER));
-			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null)
@@ -387,17 +387,17 @@ public final class RenameTypeParameterProcessor extends JavaRenameProcessor impl
 					else if (element instanceof IType)
 						fTypeParameter= ((IType) element).getTypeParameter(parameter);
 					else
-						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle, JavaRefactoringDescriptor.INPUT}));
+						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle, JavaRefactoringDescriptor.ATTRIBUTE_INPUT}));
 					if (fTypeParameter == null || !fTypeParameter.exists())
 						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_RENAME_TYPE_PARAMETER));
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptor.NAME);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
+			final String name= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				setNewElementName(name);
 			else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_NAME));
 			final String references= extended.getAttribute(ATTRIBUTE_REFERENCES);
 			if (references != null) {
 				fUpdateReferences= Boolean.valueOf(references).booleanValue();

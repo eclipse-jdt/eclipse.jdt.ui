@@ -371,16 +371,16 @@ public abstract class StubRefactoringHistoryWizard extends RefactoringHistoryWiz
 					final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
 					if (fJavaProject != null) {
 						final String project= fJavaProject.getElementName();
-						String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+						String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 						if (handle != null && !"".equals(handle)) //$NON-NLS-1$
-							extended.setAttribute(JavaRefactoringDescriptor.INPUT, getTransformedHandle(project, handle));
+							extended.setAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, getTransformedHandle(project, handle));
 						int count= 1;
-						String attribute= JavaRefactoringDescriptor.ELEMENT + count;
+						String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 						while ((handle= extended.getAttribute(attribute)) != null) {
 							if (!"".equals(handle)) //$NON-NLS-1$
 								extended.setAttribute(attribute, getTransformedHandle(project, handle));
 							count++;
-							attribute= JavaRefactoringDescriptor.ELEMENT + count;
+							attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 						}
 					}
 				}

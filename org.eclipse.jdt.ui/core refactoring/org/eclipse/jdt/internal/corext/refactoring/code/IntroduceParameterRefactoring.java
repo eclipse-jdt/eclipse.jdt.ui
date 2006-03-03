@@ -506,7 +506,7 @@ public class IntroduceParameterRefactoring extends CommentRefactoring implements
 						final JavaRefactoringDescriptor extended= (JavaRefactoringDescriptor) refactoringDescriptor;
 						final Map arguments= new HashMap();
 						arguments.put(ATTRIBUTE_ARGUMENT, fParameter.getNewName());
-						arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 						arguments.putAll(extended.getArguments());
 						String signature= fChangeSignatureRefactoring.getMethodName();
 						try {
@@ -528,7 +528,7 @@ public class IntroduceParameterRefactoring extends CommentRefactoring implements
 		fArguments= arguments;
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String selection= extended.getAttribute(JavaRefactoringDescriptor.SELECTION);
+			final String selection= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -541,10 +541,10 @@ public class IntroduceParameterRefactoring extends CommentRefactoring implements
 					fSelectionStart= offset;
 					fSelectionLength= length;
 				} else
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.ATTRIBUTE_SELECTION}));
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.SELECTION));
-			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_SELECTION));
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null || element.getElementType() != IJavaElement.COMPILATION_UNIT)
@@ -552,7 +552,7 @@ public class IntroduceParameterRefactoring extends CommentRefactoring implements
 				else
 					fSourceCU= ((IMethod) element).getCompilationUnit();
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
 			final String name= extended.getAttribute(ATTRIBUTE_ARGUMENT);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				fParameterName= name;

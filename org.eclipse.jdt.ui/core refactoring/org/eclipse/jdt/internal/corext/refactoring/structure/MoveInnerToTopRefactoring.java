@@ -776,7 +776,7 @@ public class MoveInnerToTopRefactoring extends CommentRefactoring implements IIn
 				if (javaProject != null)
 					project= javaProject.getElementName();
 				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_MOVE_INNER, project, Messages.format(RefactoringCoreMessages.MoveInnerToTopRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fType.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, RefactoringDescriptor.MULTI_CHANGE | RefactoringDescriptor.STRUCTURAL_CHANGE);
-				arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fType));
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fType));
 				if (fEnclosingInstanceFieldName != null && !"".equals(fEnclosingInstanceFieldName)) //$NON-NLS-1$
 					arguments.put(ATTRIBUTE_FIELD_NAME, fEnclosingInstanceFieldName);
 				if (fNameForEnclosingInstanceConstructorParameter != null && !"".equals(fNameForEnclosingInstanceConstructorParameter)) //$NON-NLS-1$
@@ -1577,7 +1577,7 @@ public class MoveInnerToTopRefactoring extends CommentRefactoring implements IIn
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null || element.getElementType() != IJavaElement.TYPE)
@@ -1592,7 +1592,7 @@ public class MoveInnerToTopRefactoring extends CommentRefactoring implements IIn
 					}
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
 			final String fieldName= extended.getAttribute(ATTRIBUTE_FIELD_NAME);
 			if (fieldName != null && !"".equals(fieldName)) //$NON-NLS-1$
 				fEnclosingInstanceFieldName= fieldName;

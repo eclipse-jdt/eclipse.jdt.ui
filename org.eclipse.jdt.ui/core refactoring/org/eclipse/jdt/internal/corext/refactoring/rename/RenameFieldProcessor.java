@@ -589,8 +589,8 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 						JavaPlugin.log(exception);
 					}
 					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_FIELD, project, Messages.format(RefactoringCoreMessages.RenameFieldProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED) + "." + fField.getElementName(), getNewElementName()}), getComment(), arguments, flags); //$NON-NLS-1$
-					arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fField));
-					arguments.put(JavaRefactoringDescriptor.NAME, getNewElementName());
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField));
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
 					arguments.put(ATTRIBUTE_TEXTUAL_MATCHES, Boolean.valueOf(fUpdateTextualMatches).toString());
 					arguments.put(ATTRIBUTE_RENAME_GETTER, Boolean.valueOf(fRenameGetter).toString());
@@ -854,7 +854,7 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null || element.getElementType() != IJavaElement.FIELD)
@@ -862,12 +862,12 @@ public class RenameFieldProcessor extends JavaRenameProcessor implements IRefere
 				else
 					fField= (IField) element;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptor.NAME);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
+			final String name= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				setNewElementName(name);
 			else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_NAME));
 			final String references= extended.getAttribute(ATTRIBUTE_REFERENCES);
 			if (references != null) {
 				fUpdateReferences= Boolean.valueOf(references).booleanValue();

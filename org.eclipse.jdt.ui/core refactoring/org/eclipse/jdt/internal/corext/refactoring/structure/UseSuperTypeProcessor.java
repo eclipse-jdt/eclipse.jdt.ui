@@ -197,8 +197,8 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 						if (!fSubType.isBinary())
 							project= fSubType.getJavaProject();
 						final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_USE_SUPERTYPE, project != null ? project.getElementName() : null, Messages.format(RefactoringCoreMessages.UseSuperTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fSuperType, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fSubType, JavaElementLabels.ALL_FULLY_QUALIFIED) }), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
-						arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fSubType));
-						arguments.put(JavaRefactoringDescriptor.ELEMENT + 1, descriptor.elementToHandle(fSuperType));
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSubType));
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1, descriptor.elementToHandle(fSuperType));
 						arguments.put(ATTRIBUTE_INSTANCEOF, Boolean.valueOf(fInstanceOf).toString());
 						return new RefactoringChangeDescriptor(descriptor);
 					}
@@ -395,7 +395,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 	public final RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+			String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null || element.getElementType() != IJavaElement.TYPE)
@@ -403,8 +403,8 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 				else
 					fSubType= (IType) element;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			handle= extended.getAttribute(JavaRefactoringDescriptor.ELEMENT + 1);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
+			handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null || element.getElementType() != IJavaElement.TYPE)
@@ -412,7 +412,7 @@ public final class UseSuperTypeProcessor extends SuperTypeRefactoringProcessor {
 				else
 					fSuperType= (IType) element;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ELEMENT + 1));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + 1));
 			final String instance= extended.getAttribute(ATTRIBUTE_INSTANCEOF);
 			if (instance != null) {
 				fInstanceOf= Boolean.valueOf(instance).booleanValue();

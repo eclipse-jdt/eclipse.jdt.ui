@@ -1019,8 +1019,8 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 						JavaPlugin.log(exception);
 					}
 					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_RENAME_TYPE, project, Messages.format(RefactoringCoreMessages.RenameTypeProcessor_descriptor_description, new String[] { JavaElementLabels.getElementLabel(fType, JavaElementLabels.ALL_FULLY_QUALIFIED), getNewElementName()}), getComment(), arguments, flags);
-					arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fType));
-					arguments.put(JavaRefactoringDescriptor.NAME, getNewElementName());
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fType));
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, getNewElementName());
 					if (fFilePatterns != null && !"".equals(fFilePatterns)) //$NON-NLS-1$
 						arguments.put(ATTRIBUTE_PATTERNS, fFilePatterns);
 					arguments.put(ATTRIBUTE_REFERENCES, Boolean.valueOf(fUpdateReferences).toString());
@@ -1171,7 +1171,7 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null || element.getElementType() != IJavaElement.TYPE)
@@ -1179,12 +1179,12 @@ public class RenameTypeProcessor extends JavaRenameProcessor implements ITextUpd
 				else
 					fType= (IType) element;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptor.NAME);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
+			final String name= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				setNewElementName(name);
 			else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_NAME));
 			final String patterns= extended.getAttribute(ATTRIBUTE_PATTERNS);
 			if (patterns != null && !"".equals(patterns)) //$NON-NLS-1$
 				fFilePatterns= patterns;

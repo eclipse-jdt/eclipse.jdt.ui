@@ -646,9 +646,9 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 						project= javaProject.getElementName();
 					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_PUSH_DOWN, project, fMembersToMove.length == 1 ? NLS.bind(RefactoringCoreMessages.PushDownRefactoring_descriptor_description_full, new String[] { JavaElementLabels.getElementLabel(fMembersToMove[0], JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}) : NLS.bind(RefactoringCoreMessages.PushDownRefactoring_descriptor_description, new String[] { JavaElementLabels.getElementLabel(declaring, JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 					if (fDeclaringType != null)
-						arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fDeclaringType));
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fDeclaringType));
 					for (int index= 0; index < fMembersToMove.length; index++) {
-						arguments.put(JavaRefactoringDescriptor.ELEMENT + (index + 1), descriptor.elementToHandle(fMembersToMove[index]));
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(fMembersToMove[index]));
 						for (int offset= 0; offset < fMemberInfos.length; offset++) {
 							if (fMemberInfos[offset].getMember().equals(fMembersToMove[index])) {
 								switch (fMemberInfos[offset].getAction()) {
@@ -935,7 +935,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+			String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null || element.getElementType() != IJavaElement.TYPE)
@@ -946,7 +946,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 			int count= 1;
 			final List elements= new ArrayList();
 			final List infos= new ArrayList();
-			String attribute= JavaRefactoringDescriptor.ELEMENT + count;
+			String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 			final RefactoringStatus status= new RefactoringStatus();
 			while ((handle= extended.getAttribute(attribute)) != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
@@ -961,7 +961,7 @@ public final class PushDownRefactoringProcessor extends HierarchyProcessor {
 				else
 					infos.add(MemberActionInfo.create((IMember) element, MemberActionInfo.NO_ACTION));
 				count++;
-				attribute= JavaRefactoringDescriptor.ELEMENT + count;
+				attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 			}
 			fMembersToMove= (IMember[]) elements.toArray(new IMember[elements.size()]);
 			fMemberInfos= (MemberActionInfo[]) infos.toArray(new MemberActionInfo[infos.size()]);

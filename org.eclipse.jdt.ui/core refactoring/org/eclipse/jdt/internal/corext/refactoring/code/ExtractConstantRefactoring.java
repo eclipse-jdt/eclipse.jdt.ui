@@ -609,9 +609,9 @@ public class ExtractConstantRefactoring extends CommentRefactoring implements II
 					JavaPlugin.log(exception);
 				}
 				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_EXTRACT_CONSTANT, project, Messages.format(RefactoringCoreMessages.ExtractConstantRefactoring_descriptor_description, new String[] { description + fConstantName, ASTNodes.asString(fSelectedExpression.getAssociatedExpression()) }), getComment(), arguments, flags);
-				arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fCu));
-				arguments.put(JavaRefactoringDescriptor.NAME, fConstantName);
-				arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fConstantName);
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllOccurrences).toString());
 				arguments.put(ATTRIBUTE_QUALIFY, Boolean.valueOf(fQualifyReferencesWithDeclaringClassName).toString());
 				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(JdtFlags.getVisibilityCode(fAccessModifier)).toString());
@@ -847,7 +847,7 @@ public class ExtractConstantRefactoring extends CommentRefactoring implements II
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String selection= extended.getAttribute(JavaRefactoringDescriptor.SELECTION);
+			final String selection= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -860,10 +860,10 @@ public class ExtractConstantRefactoring extends CommentRefactoring implements II
 					fSelectionStart= offset;
 					fSelectionLength= length;
 				} else
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.ATTRIBUTE_SELECTION}));
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.SELECTION));
-			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_SELECTION));
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null || element.getElementType() != IJavaElement.COMPILATION_UNIT)
@@ -871,7 +871,7 @@ public class ExtractConstantRefactoring extends CommentRefactoring implements II
 				else
 					fCu= (ICompilationUnit) element;
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
 			final String visibility= extended.getAttribute(ATTRIBUTE_VISIBILITY);
 			if (visibility != null && !"".equals(visibility)) {//$NON-NLS-1$
 				int flag= 0;
@@ -882,11 +882,11 @@ public class ExtractConstantRefactoring extends CommentRefactoring implements II
 				}
 				fAccessModifier= JdtFlags.getVisibilityString(flag);
 			}
-			final String name= extended.getAttribute(JavaRefactoringDescriptor.NAME);
+			final String name= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				fConstantName= name;
 			else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_NAME));
 			final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
 			if (replace != null) {
 				fReplaceAllOccurrences= Boolean.valueOf(replace).booleanValue();

@@ -849,8 +849,8 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 						JavaPlugin.log(exception);
 					}
 					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_CONSTANT, project, Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getParent(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, flags);
-					arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fSelectionCu));
-					arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fSelectionCu));
+					arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 					arguments.put(ATTRIBUTE_REMOVE, Boolean.valueOf(fRemoveDeclaration).toString());
 					arguments.put(ATTRIBUTE_REPLACE, Boolean.valueOf(fReplaceAllReferences).toString());
 					return new RefactoringChangeDescriptor(descriptor);
@@ -900,7 +900,7 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 	public RefactoringStatus initialize(final RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String selection= extended.getAttribute(JavaRefactoringDescriptor.SELECTION);
+			final String selection= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -913,9 +913,9 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 					fSelectionStart= offset;
 					fSelectionLength= length;
 				} else
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.ATTRIBUTE_SELECTION}));
 			}
-			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null)
@@ -924,7 +924,7 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 					if (element instanceof ICompilationUnit) {
 						fSelectionCu= (ICompilationUnit) element;
 						if (selection == null)
-							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.SELECTION));
+							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_SELECTION));
 					} else if (element instanceof IField) {
 						final IField field= (IField) element;
 						try {
@@ -939,7 +939,7 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 						}
 						fSelectionCu= field.getCompilationUnit();
 					} else
-						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle, JavaRefactoringDescriptor.INPUT}));
+						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { handle, JavaRefactoringDescriptor.ATTRIBUTE_INPUT}));
 					final ASTParser parser= ASTParser.newParser(AST.JLS3);
 					parser.setResolveBindings(true);
 					parser.setSource(fSelectionCu);
@@ -949,7 +949,7 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_input_not_exists, ID_INLINE_CONSTANT));
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
 			final String replace= extended.getAttribute(ATTRIBUTE_REPLACE);
 			if (replace != null) {
 				fReplaceAllReferences= Boolean.valueOf(replace).booleanValue();
@@ -984,9 +984,9 @@ public class InlineConstantRefactoring extends CommentRefactoring implements IIn
 		}
 		final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INLINE_CONSTANT, project, Messages.format(RefactoringCoreMessages.InlineConstantRefactoring_deprecation_description, new String[] { JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED) }), RefactoringCoreMessages.InlineConstantRefactoring_deprecation_comment, arguments, flags);
 		// Must be set to actual compilation unit
-		arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fField.getCompilationUnit()));
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField.getCompilationUnit()));
 		// Must be set to actual selection
-		arguments.put(JavaRefactoringDescriptor.SELECTION, "-1 -1"); //$NON-NLS-1$
+		arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, "-1 -1"); //$NON-NLS-1$
 		arguments.put(ATTRIBUTE_REMOVE, Boolean.FALSE.toString());
 		arguments.put(ATTRIBUTE_REPLACE, Boolean.FALSE.toString());
 		return new RefactoringSessionDescriptor(new RefactoringDescriptor[] { descriptor }, RefactoringSessionDescriptor.VERSION_1_0, RefactoringCoreMessages.InlineConstantRefactoring_deprecation_comment);

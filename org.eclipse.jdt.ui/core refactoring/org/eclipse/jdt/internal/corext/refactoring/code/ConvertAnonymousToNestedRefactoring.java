@@ -489,9 +489,9 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 				if (javaProject != null)
 					project= javaProject.getElementName();
 				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_CONVERT_ANONYMOUS, project, Messages.format(RefactoringCoreMessages.ConvertAnonymousToNestedRefactoring_descriptor_description, labels), getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE);
-				arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fCu));
-				arguments.put(JavaRefactoringDescriptor.NAME, fClassName);
-				arguments.put(JavaRefactoringDescriptor.SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fCu));
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_NAME, fClassName);
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION, new Integer(fSelectionStart).toString() + " " + new Integer(fSelectionLength).toString()); //$NON-NLS-1$
 				arguments.put(ATTRIBUTE_FINAL, Boolean.valueOf(fDeclareFinal).toString());
 				arguments.put(ATTRIBUTE_STATIC, Boolean.valueOf(fDeclareStatic).toString());
 				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
@@ -1020,7 +1020,7 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 		fSelfInitializing= true;
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null || element.getElementType() != IJavaElement.COMPILATION_UNIT)
@@ -1030,12 +1030,12 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 		        	fSettings= JavaPreferencesSettings.getCodeGenerationSettings(fCu.getJavaProject());
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
-			final String name= extended.getAttribute(JavaRefactoringDescriptor.NAME);
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
+			final String name= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_NAME);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				fClassName= name;
 			else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.NAME));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_NAME));
 			final String visibility= extended.getAttribute(ATTRIBUTE_VISIBILITY);
 			if (visibility != null && !"".equals(visibility)) {//$NON-NLS-1$
 				int flag= 0;
@@ -1046,7 +1046,7 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 				}
 				fVisibility= flag;
 			}
-			final String selection= extended.getAttribute(JavaRefactoringDescriptor.SELECTION);
+			final String selection= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_SELECTION);
 			if (selection != null) {
 				int offset= -1;
 				int length= -1;
@@ -1059,9 +1059,9 @@ public class ConvertAnonymousToNestedRefactoring extends CommentRefactoring impl
 					fSelectionStart= offset;
 					fSelectionLength= length;
 				} else
-					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.SELECTION}));
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, new Object[] { selection, JavaRefactoringDescriptor.ATTRIBUTE_SELECTION}));
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.SELECTION));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_SELECTION));
 			final String declareStatic= extended.getAttribute(ATTRIBUTE_STATIC);
 			if (declareStatic != null) {
 				fDeclareStatic= Boolean.valueOf(declareStatic).booleanValue();

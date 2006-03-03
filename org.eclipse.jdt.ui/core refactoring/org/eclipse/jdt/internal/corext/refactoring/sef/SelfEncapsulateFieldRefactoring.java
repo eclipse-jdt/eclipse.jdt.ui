@@ -391,7 +391,7 @@ public class SelfEncapsulateFieldRefactoring extends CommentRefactoring implemen
 				if (javaProject != null)
 					project= javaProject.getElementName();
 				final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_SELF_ENCAPSULATE, project, NLS.bind(RefactoringCoreMessages.SelfEncapsulateFieldRefactoring_descriptor_description, new String[] {JavaElementLabels.getElementLabel(fField, JavaElementLabels.ALL_FULLY_QUALIFIED), JavaElementLabels.getElementLabel(fField.getDeclaringType(), JavaElementLabels.ALL_FULLY_QUALIFIED)}), getComment(), arguments, (JavaRefactoringDescriptor.JAR_IMPORTABLE | RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE));
-				arguments.put(JavaRefactoringDescriptor.INPUT, descriptor.elementToHandle(fField));
+				arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_INPUT, descriptor.elementToHandle(fField));
 				arguments.put(ATTRIBUTE_VISIBILITY, new Integer(fVisibility).toString());
 				arguments.put(ATTRIBUTE_INSERTION, new Integer(fInsertionIndex).toString());
 				arguments.put(ATTRIBUTE_SETTER, fSetterName);
@@ -643,7 +643,7 @@ public class SelfEncapsulateFieldRefactoring extends CommentRefactoring implemen
 	public RefactoringStatus initialize(RefactoringArguments arguments) {
 		if (arguments instanceof JavaRefactoringArguments) {
 			final JavaRefactoringArguments extended= (JavaRefactoringArguments) arguments;
-			final String handle= extended.getAttribute(JavaRefactoringDescriptor.INPUT);
+			final String handle= extended.getAttribute(JavaRefactoringDescriptor.ATTRIBUTE_INPUT);
 			if (handle != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(extended.getProject(), handle);
 				if (element == null || element.getElementType() != IJavaElement.FIELD)
@@ -657,7 +657,7 @@ public class SelfEncapsulateFieldRefactoring extends CommentRefactoring implemen
 					}
 				}
 			} else
-				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.INPUT));
+				return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_argument_not_exist, JavaRefactoringDescriptor.ATTRIBUTE_INPUT));
 			String name= extended.getAttribute(ATTRIBUTE_GETTER);
 			if (name != null && !"".equals(name)) //$NON-NLS-1$
 				fGetterName= name;

@@ -538,7 +538,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 					final IJavaProject project= getSingleProject();
 					final JavaRefactoringDescriptor descriptor= new JavaRefactoringDescriptor(ID_INFER_TYPE_ARGUMENTS, project != null ? project.getElementName() : null, project != null ? NLS.bind(RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description_project, project.getElementName()) : RefactoringCoreMessages.InferTypeArgumentsRefactoring_descriptor_description, getComment(), arguments, RefactoringDescriptor.STRUCTURAL_CHANGE | RefactoringDescriptor.MULTI_CHANGE);
 					for (int index= 0; index < fElements.length; index++)
-						arguments.put(JavaRefactoringDescriptor.ELEMENT + (index + 1), descriptor.elementToHandle(fElements[index]));
+						arguments.put(JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + (index + 1), descriptor.elementToHandle(fElements[index]));
 					arguments.put(ATTRIBUTE_CLONE, Boolean.valueOf(fAssumeCloneReturnsSameType).toString());
 					arguments.put(ATTRIBUTE_LEAVE, Boolean.valueOf(fLeaveUnconstrainedRaw).toString());
 					return new RefactoringChangeDescriptor(descriptor);
@@ -580,7 +580,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 			int count= 1;
 			final List elements= new ArrayList();
 			String handle= null;
-			String attribute= JavaRefactoringDescriptor.ELEMENT + count;
+			String attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 			final RefactoringStatus status= new RefactoringStatus();
 			while ((handle= generic.getAttribute(attribute)) != null) {
 				final IJavaElement element= JavaRefactoringDescriptor.handleToElement(generic.getProject(), handle);
@@ -589,7 +589,7 @@ public class InferTypeArgumentsRefactoring extends CommentRefactoring implements
 				else
 					elements.add(element);
 				count++;
-				attribute= JavaRefactoringDescriptor.ELEMENT + count;
+				attribute= JavaRefactoringDescriptor.ATTRIBUTE_ELEMENT + count;
 			}
 			fElements= (IJavaElement[]) elements.toArray(new IJavaElement[elements.size()]);
 			if (elements.isEmpty())

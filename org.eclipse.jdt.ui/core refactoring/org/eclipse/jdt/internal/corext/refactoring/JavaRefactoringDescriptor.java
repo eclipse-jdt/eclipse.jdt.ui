@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.corext.refactoring;
 
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -43,15 +44,6 @@ import org.eclipse.jdt.internal.corext.util.Messages;
 public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 
 	/**
-	 * Constant describing the deprecation resolving flag.
-	 * <p>
-	 * Clients should set this flag to indicate that the refactoring can used to
-	 * resolve deprecation problems of members declared in source.
-	 * </p>
-	 */
-	public static final int DEPRECATION_RESOLVING= 1 << 17;
-
-	/**
 	 * Predefined argument called <code>element&lt;Number&gt;</code>.
 	 * <p>
 	 * This argument should be used to describe the elements being refactored.
@@ -66,7 +58,52 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * zero-based.
 	 * </p>
 	 */
-	public static final String ELEMENT= "element"; //$NON-NLS-1$
+	public static final String ATTRIBUTE_ELEMENT= "element"; //$NON-NLS-1$
+
+	/**
+	 * Predefined argument called <code>input</code>.
+	 * <p>
+	 * This argument should be used to describe the element being refactored.
+	 * The value of this argument does not necessarily have to uniquely identify
+	 * the input element. However, it must be possible to uniquely identify the
+	 * input element using the value of this argument in conjunction with the
+	 * values of the other user-defined attributes.
+	 * </p>
+	 */
+	public static final String ATTRIBUTE_INPUT= "input"; //$NON-NLS-1$
+
+	/**
+	 * Predefined argument called <code>name</code>.
+	 * <p>
+	 * This argument should be used to name the element being refactored. The
+	 * value of this argument may be shown in the user interface.
+	 * </p>
+	 */
+	public static final String ATTRIBUTE_NAME= "name"; //$NON-NLS-1$
+
+	/**
+	 * Predefined argument called <code>selection</code>.
+	 * <p>
+	 * This argument should be used to describe user input selections within a
+	 * text file. The value of this argument has the format "offset length".
+	 * </p>
+	 */
+	public static final String ATTRIBUTE_SELECTION= "selection"; //$NON-NLS-1$
+
+	/** The version attribute */
+	private static final String ATTRIBUTE_VERSION= "version"; //$NON-NLS-1$
+
+	/** The default package */
+	private static final String DEFAULT_PACKAGE= "(default)"; //$NON-NLS-1$
+
+	/**
+	 * Constant describing the deprecation resolving flag.
+	 * <p>
+	 * Clients should set this flag to indicate that the refactoring can used to
+	 * resolve deprecation problems of members declared in source.
+	 * </p>
+	 */
+	public static final int DEPRECATION_RESOLVING= 1 << 17;
 
 	/** The field identifier */
 	private static final String IDENTIFIER_FIELD= "field"; //$NON-NLS-1$
@@ -96,18 +133,6 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	private static final String IDENTIFIER_UNIT= "unit"; //$NON-NLS-1$
 
 	/**
-	 * Predefined argument called <code>input</code>.
-	 * <p>
-	 * This argument should be used to describe the element being refactored.
-	 * The value of this argument does not necessarily have to uniquely identify
-	 * the input element. However, it must be possible to uniquely identify the
-	 * input element using the value of this argument in conjunction with the
-	 * values of the other user-defined attributes.
-	 * </p>
-	 */
-	public static final String INPUT= "input"; //$NON-NLS-1$
-
-	/**
 	 * Constant describing the jar deprecation resolving flag.
 	 * <p>
 	 * Clients should set this flag to indicate that the refactoring can used to
@@ -126,23 +151,20 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 */
 	public static final int JAR_IMPORTABLE= 1 << 16;
 
-	/**
-	 * Predefined argument called <code>name</code>.
-	 * <p>
-	 * This argument should be used to name the element being refactored. The
-	 * value of this argument may be shown in the user interface.
-	 * </p>
-	 */
-	public static final String NAME= "name"; //$NON-NLS-1$
+	/** The dot separator */
+	private static final char SEPARATOR_DOT= '.';
 
-	/**
-	 * Predefined argument called <code>selection</code>.
-	 * <p>
-	 * This argument should be used to describe user input selections within a
-	 * text file. The value of this argument has the format "offset length".
-	 * </p>
-	 */
-	public static final String SELECTION= "selection"; //$NON-NLS-1$
+	/** The member separator */
+	private static final char SEPARATOR_MEMBER= '#';
+
+	/** The package separator */
+	private static final char SEPARATOR_PACKAGE= '$';
+
+	/** The path separator */
+	private static final char SEPARATOR_PATH= IPath.SEPARATOR;
+
+	/** The version value 1.0 */
+	private static final String VALUE_VERSION_1_0= "1.0"; //$NON-NLS-1$
 
 	/**
 	 * Converts the specified element to an input handle.
@@ -154,8 +176,8 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * @return a corresponding input handle
 	 */
 	public static String elementToHandle(final String project, final IJavaElement element) {
-		final int type= element.getElementType();
-		switch (type) {
+		final int elementType= element.getElementType();
+		switch (elementType) {
 			case IJavaElement.JAVA_PROJECT:
 				return getHandlePrefix(IDENTIFIER_PROJECT) + element.getElementName();
 			case IJavaElement.PACKAGE_FRAGMENT_ROOT:
@@ -164,6 +186,23 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 				return resourceToHandle(project, getHandlePrefix(IDENTIFIER_UNIT), element.getResource());
 			case IJavaElement.PACKAGE_FRAGMENT:
 				return resourceToHandle(project, getHandlePrefix(IDENTIFIER_PACKAGE), element.getResource());
+//			case IJavaElement.TYPE: {
+//				final IType type= (IType) element;
+//				final StringBuffer buffer= new StringBuffer();
+//				buffer.append(getHandlePrefix(IDENTIFIER_TYPE));
+//				if (project == null) {
+//					buffer.append(type.getJavaProject().getElementName());
+//					buffer.append(SEPARATOR_PATH);
+//				}
+//				final IPackageFragment fragment= type.getPackageFragment();
+//				if (fragment.isDefaultPackage())
+//					buffer.append(DEFAULT_PACKAGE);
+//				else
+//					buffer.append(fragment.getElementName());
+//				buffer.append(SEPARATOR_PACKAGE);
+//				buffer.append(type.getTypeQualifiedName(SEPARATOR_PACKAGE));
+//				return buffer.toString();
+//			}
 		}
 		return element.getHandleIdentifier();
 	}
@@ -217,6 +256,49 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 			element= JavaCore.create(handleToResource(project, handle, getHandlePrefix(IDENTIFIER_UNIT)));
 		} else if (handle.startsWith(getHandlePrefix(IDENTIFIER_PACKAGE))) {
 			element= JavaCore.create(handleToResource(project, handle, getHandlePrefix(IDENTIFIER_PACKAGE)));
+//		} else if (handle.startsWith(getHandlePrefix(IDENTIFIER_TYPE))) {
+//			String string= handle.substring(getHandlePrefix(IDENTIFIER_TYPE).length());
+//			String container= project;
+//			if (container == null) {
+//				final int index= string.indexOf(SEPARATOR_PATH);
+//				if (index > 0) {
+//					container= string.substring(0, index);
+//					if (string.length() >= index + 2)
+//						string= string.substring(index + 1);
+//					else
+//						return null;
+//				}
+//			}
+//			if (container == null)
+//				return null;
+//			String fragment= null;
+//			final int index= string.indexOf(SEPARATOR_PACKAGE);
+//			if (index > 0) {
+//				fragment= string.substring(0, index);
+//				if (string.length() >= index + 2)
+//					string= string.substring(index + 1);
+//				else
+//					return null;
+//			}
+//			if (fragment == null)
+//				return null;
+//			final IJavaProject javaProject= JavaCore.create(ResourcesPlugin.getWorkspace().getRoot().getProject(container));
+//			if (javaProject == null || !javaProject.exists())
+//				return null;
+//			final StringBuffer buffer= new StringBuffer(string);
+//			final int length= buffer.length();
+//			for (int offset= 0; offset < length; offset++) {
+//				final char character= buffer.charAt(offset);
+//				if (character == SEPARATOR_PACKAGE && offset < length - 1) {
+//					if (!Character.isDigit(buffer.charAt(offset + 1)))
+//						buffer.setCharAt(offset, SEPARATOR_DOT);
+//				}
+//			}
+//			try {
+//				element= javaProject.findType(fragment, buffer.toString(), new NullProgressMonitor());
+//			} catch (JavaModelException exception) {
+//				JavaPlugin.log(exception);
+//			}
 		} else
 			element= JavaCore.create(handle);
 		if (element != null && (!check || element.exists()))
@@ -394,7 +476,9 @@ public final class JavaRefactoringDescriptor extends RefactoringDescriptor {
 	 * @return the argument map.
 	 */
 	public Map getArguments() {
-		return fArguments;
+		final Map map= new HashMap(fArguments);
+		map.put(ATTRIBUTE_VERSION, VALUE_VERSION_1_0);
+		return map;
 	}
 
 	/**
