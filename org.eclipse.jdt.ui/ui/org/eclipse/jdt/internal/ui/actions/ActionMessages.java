@@ -327,6 +327,14 @@ public final class ActionMessages extends NLS {
 	public static String FindImplementOccurrencesAction_toolTip;
 	public static String QuickMenuAction_menuTextWithShortcut;
 
+	public static String CategoryFilterActionGroup_JavaCategoryFilter_title;
+	public static String CategoryFilterActionGroup_SelectAllCategories;
+	public static String CategoryFilterActionGroup_DeselectAllCategories;
+	public static String CategoryFilterActionGroup_SelectCategoriesDescription;
+	public static String CategoryFilterActionGroup_ShowCategoriesActionDescription;
+	public static String CategoryFilterActionGroup_ShowCategoriesToolTip;
+	public static String CategoryFilterActionGroup_ShowCategoriesLabel;
+
 	static {
 		NLS.initializeMessages(BUNDLE_NAME, ActionMessages.class);
 	}

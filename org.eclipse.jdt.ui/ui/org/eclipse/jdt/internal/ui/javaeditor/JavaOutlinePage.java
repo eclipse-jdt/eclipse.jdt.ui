@@ -119,6 +119,7 @@ import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
 import org.eclipse.jdt.internal.ui.actions.AbstractToggleLinkingAction;
+import org.eclipse.jdt.internal.ui.actions.CategoryFilterActionGroup;
 import org.eclipse.jdt.internal.ui.actions.CompositeActionGroup;
 import org.eclipse.jdt.internal.ui.dnd.DelegatingDropAdapter;
 import org.eclipse.jdt.internal.ui.dnd.JdtViewerDragAdapter;
@@ -908,6 +909,7 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 	 * @since 3.0
 	 */
 	private CustomFiltersActionGroup fCustomFiltersActionGroup;
+	private CategoryFilterActionGroup fCategoryFilterActionGroup;
 
 	public JavaOutlinePage(String contextMenuID, JavaEditor editor) {
 		super();
@@ -1055,6 +1057,12 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 			menu.add(new ClassOnlyAction());
 			menu.add(fToggleLinkingAction);
 		}
+		
+		IMenuManager menuManager= actionBars.getMenuManager();
+		if (menuManager != null) {
+			fCategoryFilterActionGroup= new CategoryFilterActionGroup(fOutlineViewer, "org.eclipse.jdt.ui.JavaOutlinePage", fInput); //$NON-NLS-1$
+			fCategoryFilterActionGroup.contributeToViewMenu(menuManager);
+		}
 	}
 
 	/*
@@ -1160,6 +1168,11 @@ public class JavaOutlinePage extends Page implements IContentOutlinePage, IAdapt
 		if (fMemberFilterActionGroup != null) {
 			fMemberFilterActionGroup.dispose();
 			fMemberFilterActionGroup= null;
+		}
+		
+		if (fCategoryFilterActionGroup != null) {
+			fCategoryFilterActionGroup.dispose();
+			fCategoryFilterActionGroup= null;
 		}
 
 		if (fCustomFiltersActionGroup != null) {
