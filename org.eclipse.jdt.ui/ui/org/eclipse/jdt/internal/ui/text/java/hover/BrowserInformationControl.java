@@ -224,8 +224,13 @@ public class BrowserInformationControl implements IInformationControl, IInformat
 			 */
 			public void changing(LocationEvent event) {
 				String location= event.location;
-				// using the Browser.setText API triggers a location change to "about:blank"
-				if (!"about:blank".equals(location)) //$NON-NLS-1$
+				/*
+				 * Using the Browser.setText API triggers a location change to "about:blank" with
+				 * the mozilla widget. The Browser on carbon uses yet another kind of special
+				 * initialization URLs. 
+				 * TODO remove this code once https://bugs.eclipse.org/bugs/show_bug.cgi?id=130314 is fixed
+				 */
+				if (!"about:blank".equals(location) && !("carbon".equals(SWT.getPlatform()) && location.startsWith("applewebdata:"))) //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
 					event.doit= false;
 			}
 		});
