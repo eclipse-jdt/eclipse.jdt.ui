@@ -44,15 +44,17 @@ import org.eclipse.ltk.core.refactoring.participants.ResourceChangeChecker;
 import org.eclipse.osgi.util.NLS;
 
 import org.eclipse.jdt.core.Flags;
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceReference;
 import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.ITypeHierarchy;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.AST;
 import org.eclipse.jdt.core.dom.ASTNode;
-import org.eclipse.jdt.core.dom.ASTParser;
 import org.eclipse.jdt.core.dom.BodyDeclaration;
 import org.eclipse.jdt.core.dom.CompilationUnit;
 import org.eclipse.jdt.core.dom.ConstructorInvocation;
@@ -76,6 +78,8 @@ import org.eclipse.jdt.internal.corext.refactoring.changes.CompilationUnitChange
 import org.eclipse.jdt.internal.corext.refactoring.changes.DynamicValidationStateChange;
 import org.eclipse.jdt.internal.corext.refactoring.changes.TextChangeCompatibility;
 import org.eclipse.jdt.internal.corext.refactoring.tagging.IDeprecationResolving;
+import org.eclipse.jdt.internal.corext.refactoring.util.JavaElementUtil;
+import org.eclipse.jdt.internal.corext.refactoring.util.RefactoringASTParser;
 import org.eclipse.jdt.internal.corext.refactoring.util.TextChangeManager;
 import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.Messages;
@@ -107,16 +111,25 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		public static final Mode INLINE_SINGLE= new Mode();
 	}
 
-	private ICompilationUnit fInitialCUnit;
+	/**
+	 * ICompilationUnit or IClassFile
+	 */
+	private IJavaElement fInitialUnit;
 	private ASTNode fInitialNode;
 	private TextChangeManager fChangeManager;
 	private SourceProvider fSourceProvider;
 	private TargetProvider fTargetProvider;
+	/**
+	 * must never be true if fInitialUnit instanceof IClassFile
+	 */
 	private boolean fDeleteSource;
 	private Mode fCurrentMode;
 	private Mode fInitialMode;
 	private int fSelectionStart;
 	private int fSelectionLength;
+	/**
+	 * warning: usually null!
+	 */
 	private final IMethod fMethod;
 
 	/**
@@ -129,15 +142,17 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 	 */
 	public InlineMethodRefactoring(IMethod method) {
 		Assert.isNotNull(method);
-		Assert.isTrue(!method.isBinary());
+		Assert.isTrue(!method.isBinary() || JavaElementUtil.isSourceAvailable(method));
 		fMethod= method;
 	}
 
-	private InlineMethodRefactoring(ICompilationUnit unit, ASTNode node, int offset, int length) {
+	private InlineMethodRefactoring(IJavaElement unit, ASTNode node, int offset, int length) {
 		Assert.isNotNull(unit);
+		Assert.isTrue(JavaModelUtil.isTypeContainerUnit(unit));
+		Assert.isTrue(JavaElementUtil.isSourceAvailable((ISourceReference) unit));
 		Assert.isNotNull(node);
 		fMethod= null;
-		fInitialCUnit= unit;
+		fInitialUnit= unit;
 		fInitialNode= node;
 		fSelectionStart= offset;
 		fSelectionLength= length;
@@ -164,33 +179,38 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		fDeleteSource= false;
 	}
 
-	private InlineMethodRefactoring(ICompilationUnit unit, MethodDeclaration node, int offset, int length) {
+	private InlineMethodRefactoring(IJavaElement unit, MethodDeclaration node, int offset, int length) {
 		this(unit, (ASTNode)node, offset, length);
 		fSourceProvider= new SourceProvider(unit, node);
-		fTargetProvider= TargetProvider.create(unit, node);
+		fTargetProvider= TargetProvider.create(node);
 		fInitialMode= fCurrentMode= Mode.INLINE_ALL;
 		fDeleteSource= true;
 	}
 	
 	/**
-	 * Creates a new inline constant refactoring
-	 * @param unit the compilation unit, or <code>null</code> if invoked by scripting
+	 * Creates a new inline method refactoring
+	 * @param unit the compilation unit, class file, or <code>null</code> if invoked by scripting
 	 * @param node the compilation unit node, or <code>null</code> if invoked by scripting
 	 * @param selectionStart
 	 * @param selectionLength
 	 */
-	public static InlineMethodRefactoring create(ICompilationUnit unit, CompilationUnit node, int selectionStart, int selectionLength) {
+	//TODO: scripting will throw NPEs!
+	public static InlineMethodRefactoring create(IJavaElement unit, CompilationUnit node, int selectionStart, int selectionLength) {
 		ASTNode target= getTargetNode(unit, node, selectionStart, selectionLength);
 		if (target == null)
 			return null;
-		if (target.getNodeType() == ASTNode.METHOD_INVOCATION) {
-			return new InlineMethodRefactoring(unit, (MethodInvocation)target, selectionStart, selectionLength);
-		} else if (target.getNodeType() == ASTNode.METHOD_DECLARATION) {
+		if (target.getNodeType() == ASTNode.METHOD_DECLARATION) {
+			
 			return new InlineMethodRefactoring(unit, (MethodDeclaration)target, selectionStart, selectionLength);
-		} else if (target.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
-			return new InlineMethodRefactoring(unit, (SuperMethodInvocation)target, selectionStart, selectionLength);
-		} else if (target.getNodeType() == ASTNode.CONSTRUCTOR_INVOCATION) {
-			return new InlineMethodRefactoring(unit, (ConstructorInvocation)target, selectionStart, selectionLength);
+		} else {
+			ICompilationUnit cu= (ICompilationUnit) unit;
+			if (target.getNodeType() == ASTNode.METHOD_INVOCATION) {
+				return new InlineMethodRefactoring(cu, (MethodInvocation)target, selectionStart, selectionLength);
+			} else if (target.getNodeType() == ASTNode.SUPER_METHOD_INVOCATION) {
+				return new InlineMethodRefactoring(cu, (SuperMethodInvocation)target, selectionStart, selectionLength);
+			} else if (target.getNodeType() == ASTNode.CONSTRUCTOR_INVOCATION) {
+				return new InlineMethodRefactoring(cu, (ConstructorInvocation)target, selectionStart, selectionLength);
+			}
 		}
 		return null;
 	}
@@ -199,11 +219,17 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		return RefactoringCoreMessages.InlineMethodRefactoring_name; 
 	}
 	
+	public boolean canEnableDeleteSource() {
+		return ! (fSourceProvider.getTypeContainerUnit() instanceof IClassFile);
+	}
+	
 	public boolean getDeleteSource() {
 		return fDeleteSource;
 	}
 
 	public void setDeleteSource(boolean remove) {
+		if (remove)
+			Assert.isTrue(canEnableDeleteSource());
 		fDeleteSource= remove;
 	}
 	
@@ -217,10 +243,9 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		Assert.isTrue(getInitialMode() == Mode.INLINE_SINGLE);
 		fCurrentMode= mode;
 		if (mode == Mode.INLINE_SINGLE) {
-			fTargetProvider= TargetProvider.create(fInitialCUnit, (MethodInvocation)fInitialNode);
+			fTargetProvider= TargetProvider.create((ICompilationUnit) fInitialUnit, (MethodInvocation)fInitialNode);
 		} else {
-			fTargetProvider= TargetProvider.create(
-				fSourceProvider.getCompilationUnit(), fSourceProvider.getDeclaration());
+			fTargetProvider= TargetProvider.create(fSourceProvider.getDeclaration());
 		}
 		return fTargetProvider.checkActivation();
 	}
@@ -228,7 +253,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 	public RefactoringStatus checkInitialConditions(IProgressMonitor pm) throws CoreException {
 		RefactoringStatus result= new RefactoringStatus();
 		if (fSourceProvider == null && Invocations.isInvocation(fInitialNode)) {
-			fSourceProvider= resolveSourceProvider(result, fInitialCUnit, fInitialNode);
+			fSourceProvider= resolveSourceProvider(result, fInitialUnit, fInitialNode);
 			if (result.hasFatalError())
 				return result;
 		}
@@ -368,7 +393,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		}; 
 	}
 	
-	private static SourceProvider resolveSourceProvider(RefactoringStatus status, ICompilationUnit unit, ASTNode invocation) throws JavaModelException {
+	private static SourceProvider resolveSourceProvider(RefactoringStatus status, IJavaElement unit, ASTNode invocation) throws JavaModelException {
 		CompilationUnit root= (CompilationUnit)invocation.getRoot();
 		IMethodBinding methodBinding= Invocations.resolveBinding(invocation);
 		if (methodBinding == null) {
@@ -381,37 +406,48 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		}
 		IMethod method= (IMethod)methodBinding.getJavaElement();
 		if (method != null) {
-			ICompilationUnit source= method.getCompilationUnit();
-			if (source == null) {
-				status.addFatalError(Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_error_classFile, method.getElementName())); 
-				return null;
+			CompilationUnit methodDeclarationAstRoot;
+			ICompilationUnit methodCu= method.getCompilationUnit();
+			if (methodCu != null) {
+				methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(methodCu, true);
+			} else {
+				IClassFile classFile= method.getClassFile();
+				if (! JavaElementUtil.isSourceAvailable(classFile)) {
+					String methodLabel= JavaElementLabels.getTextLabel(method, JavaElementLabels.M_FULLY_QUALIFIED | JavaElementLabels.M_PARAMETER_TYPES);
+					status.addFatalError(Messages.format(RefactoringCoreMessages.InlineMethodRefactoring_error_classFile, methodLabel)); 
+					return null;
+				}				
+				methodDeclarationAstRoot= new RefactoringASTParser(AST.JLS3).parse(classFile, true);
 			}
-			ASTParser parser= ASTParser.newParser(AST.JLS3);
-			parser.setSource(source);
-			parser.setResolveBindings(true);
-			CompilationUnit astRoot= (CompilationUnit) parser.createAST(null);
-			ASTNode node= astRoot.findDeclaringNode(methodBinding.getKey());
+			ASTNode node= methodDeclarationAstRoot.findDeclaringNode(methodBinding.getKey());
 			if (node instanceof MethodDeclaration) {
-				return new SourceProvider(source, (MethodDeclaration) node);
+				return new SourceProvider(methodDeclarationAstRoot.getJavaElement(), (MethodDeclaration) node);
 			}
 		}
 		status.addFatalError(RefactoringCoreMessages.InlineMethodRefactoring_error_noMethodDeclaration); 
 		return null;
 	}
 	
-	private static ASTNode getTargetNode(ICompilationUnit unit, CompilationUnit root, int offset, int length) {
+	private static ASTNode getTargetNode(IJavaElement unit, CompilationUnit root, int offset, int length) {
 		ASTNode node= null;
 		try {
-			node= checkNode(NodeFinder.perform(root, offset, length, unit));
+			node= checkNode(findNode(unit, root, offset, length), unit);
 		} catch(JavaModelException e) {
 			// Do nothing
 		}
 		if (node != null)
 			return node;
-		return checkNode(NodeFinder.perform(root, offset, length));
+		return checkNode(NodeFinder.perform(root, offset, length), unit);
+	}
+
+	private static ASTNode findNode(IJavaElement unit, CompilationUnit root, int offset, int length) throws JavaModelException {
+		if (unit instanceof ICompilationUnit)
+			return NodeFinder.perform(root, offset, length, (ICompilationUnit) unit);
+		else
+			return NodeFinder.perform(root, offset, length, (IClassFile) unit);
 	}
 	
-	private static ASTNode checkNode(ASTNode node) {
+	private static ASTNode checkNode(ASTNode node, IJavaElement unit) {
 		if (node == null)
 			return null;
 		if (node.getNodeType() == ASTNode.SIMPLE_NAME) {
@@ -420,11 +456,12 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 			node= ((ExpressionStatement)node).getExpression();
 		}
 		switch(node.getNodeType()) {
-			case ASTNode.METHOD_INVOCATION:
 			case ASTNode.METHOD_DECLARATION:
+					return node;
+			case ASTNode.METHOD_INVOCATION:
 			case ASTNode.SUPER_METHOD_INVOCATION:
 			case ASTNode.CONSTRUCTOR_INVOCATION:
-				return node;
+				return unit instanceof ICompilationUnit ? node : null; // don't start on invocations in binary
 		}
 		return null;
 	}
@@ -438,7 +475,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 				result.add(file);
 		}
 		if (fDeleteSource) {
-			file= getFile(fSourceProvider.getCompilationUnit());
+			file= getFile((ICompilationUnit) fSourceProvider.getTypeContainerUnit());
 			if (file != null && !result.contains(file))
 				result.add(file);
 		}
