@@ -271,7 +271,7 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 	 * {@inheritDoc}
 	 */
 	protected void addUserDefinedPages() {
-		fImportPage= new JarImportWizardPage(fImportData, fImportWizard);
+		fImportPage= new JarImportWizardPage(this, fImportWizard);
 		addPage(fImportPage);
 	}
 
@@ -303,6 +303,15 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 		if (!fCancelled)
 			replaceJarFile(new SubProgressMonitor(monitor, 100, SubProgressMonitor.SUPPRESS_SUBTASK_LABEL));
 		return rename;
+	}
+
+	/**
+	 * Returns the jar import data.
+	 * 
+	 * @return the jar import data
+	 */
+	public JarImportData getImportData() {
+		return fImportData;
 	}
 
 	/**
@@ -405,6 +414,7 @@ public final class JarImportWizard extends StubRefactoringHistoryWizard implemen
 			section= settings.addNewSection(DIALOG_SETTINGS_KEY);
 			setDialogSettings(section);
 		}
+		fImportPage.performFinish();
 		return super.performFinish();
 	}
 

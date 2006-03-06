@@ -36,7 +36,6 @@ import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.FileDialog;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.Text;
 
 import org.eclipse.jface.dialogs.Dialog;
 import org.eclipse.jface.dialogs.IDialogConstants;
@@ -85,14 +84,17 @@ public final class JarImportWizardPage extends WizardPage {
 	/** The jar import wizard page name */
 	private static final String PAGE_NAME= "JarImportWizardPage"; //$NON-NLS-1$
 
+	/** The history dialog setting */
+	protected static final String SETTING_HISTORY= "org.eclipse.jdt.ui.refactoring.jarHistory"; //$NON-NLS-1$
+
 	/** Is the wizard part of an import wizard? */
 	private final boolean fImportWizard;
 
-	/** The jar package data */
-	private final JarImportData fJarImportData;
+	/** The import wizard */
+	private final JarImportWizard fJarImportData;
 
-	/** The location text field */
-	private Text fLocationField= null;
+	/** The location control */
+	private RefactoringLocationControl fLocationControl= null;
 
 	/** The java model viewer */
 	private TreeViewer fTreeViewer= null;
@@ -100,16 +102,16 @@ public final class JarImportWizardPage extends WizardPage {
 	/**
 	 * Creates a new jar import wizard page.
 	 * 
-	 * @param data
-	 *            the jar import data
+	 * @param parent
+	 *            the jar import wizard
 	 * @param wizard
 	 *            <code>true</code> if the wizard is part of an import wizard,
 	 *            <code>false</code> otherwise
 	 */
-	public JarImportWizardPage(final JarImportData data, final boolean wizard) {
+	public JarImportWizardPage(final JarImportWizard parent, final boolean wizard) {
 		super(PAGE_NAME);
-		Assert.isNotNull(data);
-		fJarImportData= data;
+		Assert.isNotNull(parent);
+		fJarImportData= parent;
 		fImportWizard= wizard;
 		if (fImportWizard) {
 			setTitle(JarImportMessages.JarImportWizardPage_page_title);
@@ -246,15 +248,22 @@ public final class JarImportWizardPage extends WizardPage {
 		final Label label= new Label(composite, SWT.NONE);
 		label.setText(JarImportMessages.JarImportWizardPage_location_label);
 		label.setLayoutData(createGridData(GridData.HORIZONTAL_ALIGN_BEGINNING, 1, 0));
-		fLocationField= new Text(composite, SWT.SINGLE | SWT.BORDER);
-		fLocationField.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 1, 0));
-		fLocationField.addModifyListener(new ModifyListener() {
+		fLocationControl= new RefactoringLocationControl(fJarImportData, composite, SETTING_HISTORY);
+		fLocationControl.setLayoutData(createGridData(GridData.FILL_HORIZONTAL, 1, 0));
+		fLocationControl.loadHistory();
+		fLocationControl.getControl().addModifyListener(new ModifyListener() {
 
 			public final void modifyText(final ModifyEvent event) {
 				handleInputChanged();
 			}
 		});
-		fLocationField.setFocus();
+		fLocationControl.getControl().addSelectionListener(new SelectionAdapter() {
+
+			public final void widgetSelected(final SelectionEvent event) {
+				handleInputChanged();
+			}
+		});
+		fLocationControl.setFocus();
 		final Button button= new Button(composite, SWT.PUSH);
 		button.setText(JarImportMessages.JarImportWizardPage_browse_button_label);
 		button.setLayoutData(createGridData(GridData.HORIZONTAL_ALIGN_FILL, 1, 0));
@@ -275,21 +284,22 @@ public final class JarImportWizardPage extends WizardPage {
 	 */
 	protected void createRenameGroup(final Composite parent) {
 		Assert.isNotNull(parent);
+		final JarImportData data= fJarImportData.getImportData();
 		final Button button= new Button(parent, SWT.CHECK);
 		button.setText(JarImportMessages.JarImportWizardPage_replace_jar_file);
-		button.setSelection(!fJarImportData.isRenameJarFile());
+		button.setSelection(!data.isRenameJarFile());
 		button.addSelectionListener(new SelectionAdapter() {
 
 			public void widgetSelected(final SelectionEvent event) {
-				fJarImportData.setRenameJarFile(!button.getSelection());
+				data.setRenameJarFile(!button.getSelection());
 			}
 		});
 		if (fImportWizard && !fTreeViewer.getControl().isEnabled())
 			button.setEnabled(false);
 		if (!fImportWizard) {
-			final GridData data= new GridData();
-			data.horizontalIndent= IDialogConstants.HORIZONTAL_MARGIN;
-			button.setLayoutData(data);
+			final GridData gd= new GridData();
+			gd.horizontalIndent= IDialogConstants.HORIZONTAL_MARGIN;
+			button.setLayoutData(gd);
 		}
 	}
 
@@ -303,15 +313,16 @@ public final class JarImportWizardPage extends WizardPage {
 		file.setFilterExtensions(new String[] { "*.jar", "*.*"}); //$NON-NLS-1$ //$NON-NLS-2$
 		final String path= file.open();
 		if (path != null)
-			fLocationField.setText(path);
+			fLocationControl.setText(path);
 	}
 
 	/**
 	 * Handles the input changed event.
 	 */
 	protected void handleInputChanged() {
-		fJarImportData.setRefactoringHistory(null);
-		fJarImportData.setRefactoringFileLocation(null);
+		final JarImportData data= fJarImportData.getImportData();
+		data.setRefactoringHistory(null);
+		data.setRefactoringFileLocation(null);
 		setErrorMessage(null);
 		setPageComplete(true);
 		handleJarFileChanged();
@@ -326,8 +337,8 @@ public final class JarImportWizardPage extends WizardPage {
 	 * Handles the jar file changed event.
 	 */
 	protected void handleJarFileChanged() {
-		if (fLocationField != null) {
-			final String path= fLocationField.getText();
+		if (fLocationControl != null) {
+			final String path= fLocationControl.getText();
 			if ("".equals(path)) { //$NON-NLS-1$
 				setErrorMessage(JarImportMessages.JarImportWizardPage_empty_location);
 				setPageComplete(false);
@@ -347,7 +358,8 @@ public final class JarImportWizardPage extends WizardPage {
 					setPageComplete(false);
 					return;
 				}
-				fJarImportData.setRefactoringFileLocation(URIUtil.toURI(path));
+				final JarImportData data= fJarImportData.getImportData();
+				data.setRefactoringFileLocation(URIUtil.toURI(path));
 				ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntry());
 				if (entry == null) {
 					setMessage(JarImportMessages.JarImportWizardPage_no_refactorings, INFORMATION);
@@ -355,7 +367,7 @@ public final class JarImportWizardPage extends WizardPage {
 					return;
 				}
 				handleTimeStampChanged();
-				if (fJarImportData.getExistingTimeStamp() > entry.getTime()) {
+				if (data.getExistingTimeStamp() > entry.getTime()) {
 					setMessage(JarImportMessages.JarImportWizardPage_version_warning, WARNING);
 					setPageComplete(true);
 					return;
@@ -363,7 +375,7 @@ public final class JarImportWizardPage extends WizardPage {
 				InputStream stream= null;
 				try {
 					stream= zip.getInputStream(entry);
-					fJarImportData.setRefactoringHistory(RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.JAR_IMPORTABLE));
+					data.setRefactoringHistory(RefactoringCore.getHistoryService().readRefactoringHistory(stream, JavaRefactoringDescriptor.JAR_IMPORTABLE));
 				} catch (IOException exception) {
 					setErrorMessage(JarImportMessages.JarImportWizardPage_no_refactorings);
 					setPageComplete(false);
@@ -398,11 +410,12 @@ public final class JarImportWizardPage extends WizardPage {
 				setPageComplete(false);
 				return;
 			} else {
+				final JarImportData data= fJarImportData.getImportData();
 				final Object element= elements[0];
 				if (element instanceof IPackageFragmentRoot)
-					fJarImportData.setPackageFragmentRoot((IPackageFragmentRoot) element);
+					data.setPackageFragmentRoot((IPackageFragmentRoot) element);
 				else if (element instanceof IPackageFragment) {
-					fJarImportData.setPackageFragmentRoot((IPackageFragmentRoot) ((IJavaElement) element).getParent());
+					data.setPackageFragmentRoot((IPackageFragmentRoot) ((IJavaElement) element).getParent());
 				} else {
 					setErrorMessage(JarImportMessages.JarImportWizardPage_select_single_jar);
 					setPageComplete(false);
@@ -427,7 +440,7 @@ public final class JarImportWizardPage extends WizardPage {
 							zip= new ZipFile(file, ZipFile.OPEN_READ);
 							ZipEntry entry= zip.getEntry(JarPackagerUtil.getRefactoringsEntry());
 							if (entry != null) {
-								fJarImportData.setExistingTimeStamp(entry.getTime());
+								fJarImportData.getImportData().setExistingTimeStamp(entry.getTime());
 							}
 						} catch (IOException exception) {
 							// Just leave it
@@ -438,5 +451,12 @@ public final class JarImportWizardPage extends WizardPage {
 				JavaPlugin.log(exception);
 			}
 		}
+	}
+
+	/**
+	 * Gets called if the wizard is finished.
+	 */
+	public void performFinish() {
+		fLocationControl.saveHistory();
 	}
 }
