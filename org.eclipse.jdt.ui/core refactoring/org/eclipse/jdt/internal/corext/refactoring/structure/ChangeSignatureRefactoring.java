@@ -2434,44 +2434,28 @@ public class ChangeSignatureRefactoring extends CommentRefactoring implements ID
 			String value= null;
 			fParameterInfos= new ArrayList(3);
 			while ((value= extended.getAttribute(attribute)) != null) {
-				ParameterInfo info= null;
-				final StringTokenizer tokenizer= new StringTokenizer(value);
-				if (tokenizer.hasMoreTokens()) {
-					final String oldTypeName= tokenizer.nextToken();
-					if (tokenizer.hasMoreTokens()) {
-						final String oldName= tokenizer.nextToken();
-						if (tokenizer.hasMoreTokens()) {
-							final String oldIndex= tokenizer.nextToken();
-							if (tokenizer.hasMoreTokens()) {
-								final String newTypeName= tokenizer.nextToken();
-								if (tokenizer.hasMoreTokens()) {
-									final String newName= tokenizer.nextToken();
-									if (tokenizer.hasMoreTokens()) {
-										final String deleted= tokenizer.nextToken();
-										try {
-											info= new ParameterInfo(oldTypeName, oldName, Integer.valueOf(oldIndex).intValue());
-											info.setNewTypeName(newTypeName);
-											info.setNewName(newName);
-											if (Boolean.valueOf(deleted).booleanValue())
-												info.markAsDeleted();
-											fParameterInfos.add(info);
-										} catch (NumberFormatException exception) {
-											return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
-										}
-									} else
-										return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
-								} else
-									return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
-							} else
-								return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
-						} else
-							return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
-					} else
-						return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
-				} else
+				StringTokenizer tokenizer= new StringTokenizer(value);
+				if (tokenizer.countTokens() < 6)
 					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
+				String oldTypeName= tokenizer.nextToken();
+				String oldName= tokenizer.nextToken();
+				String oldIndex= tokenizer.nextToken();
+				String newTypeName= tokenizer.nextToken();
+				String newName= tokenizer.nextToken();
+				String deleted= tokenizer.nextToken();
+				ParameterInfo info= null;
+				try {
+					info= new ParameterInfo(oldTypeName, oldName, Integer.valueOf(oldIndex).intValue());
+					info.setNewTypeName(newTypeName);
+					info.setNewName(newName);
+					if (Boolean.valueOf(deleted).booleanValue())
+						info.markAsDeleted();
+					fParameterInfos.add(info);
+				} catch (NumberFormatException exception) {
+					return RefactoringStatus.createFatalErrorStatus(NLS.bind(RefactoringCoreMessages.InitializableRefactoring_illegal_argument, ATTRIBUTE_PARAMETER));
+				}
 				final String result= extended.getAttribute(ATTRIBUTE_DEFAULT + count);
-				if (result != null && info != null && !"".equals(result)) //$NON-NLS-1$
+				if (result != null && !"".equals(result)) //$NON-NLS-1$
 					info.setDefaultValue(result);
 				count++;
 				attribute= ATTRIBUTE_PARAMETER + count;
