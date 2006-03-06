@@ -436,7 +436,7 @@ public abstract class AbstractJavaCompletionProposal implements IJavaCompletionP
 	public String getAdditionalProposalInfo() {
 		if (getProposalInfo() != null) {
 			String info= getProposalInfo().getInfo();
-			if (info.length() > 0) {
+			if (info != null && info.length() > 0) {
 				StringBuffer buffer= new StringBuffer();
 				HTMLPrinter.insertPageProlog(buffer, 0, getStyleSheetURL());
 				buffer.append(info);
