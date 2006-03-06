@@ -97,6 +97,14 @@ class NLSSearchResultRequestor extends SearchRequestor {
 				return;
 		}
 		
+		if (javaElement instanceof ISourceReference) {
+			String source= ((ISourceReference) javaElement).getSource();
+			if (source != null) {
+				if (source.indexOf("NLS.initializeMessages(BUNDLE_NAME") != -1) //$NON-NLS-1$
+					return;
+			}
+		}
+		
 		// found reference to NLS Wrapper - now check if the key is there:
 		Position mutableKeyPosition= new Position(offset, length);
 		//TODO: What to do if argument string not found? Currently adds a match with type name.
@@ -186,25 +194,54 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			scanner.setSource(source.toCharArray());
 			
 			try {
-				int tok= scanner.getNextToken();
-				// skip type and method names:
-				while (tok != ITerminalSymbols.TokenNameEOF && 
-						(tok == ITerminalSymbols.TokenNameIdentifier || tok == ITerminalSymbols.TokenNameDOT)) {
+//				int tok= scanner.getNextToken();
+//				// skip type and method names:
+//				while (tok != ITerminalSymbols.TokenNameEOF && 
+//						(tok == ITerminalSymbols.TokenNameIdentifier || tok == ITerminalSymbols.TokenNameDOT)) {
+//					tok= scanner.getNextToken();
+//				}
+//				// next must be '('
+//				if (tok == ITerminalSymbols.TokenNameEOF || tok != ITerminalSymbols.TokenNameLPAREN)
+//					return null;
+//				tok= scanner.getNextToken();
+//				// next must be key string:
+//				if (tok == ITerminalSymbols.TokenNameEOF || tok != ITerminalSymbols.TokenNameStringLiteral)
+//					return null;
+//				// found it:
+//				int keyStart= scanner.getCurrentTokenStartPosition() + 1;
+//				int keyEnd= scanner.getCurrentTokenEndPosition();
+//				keyPositionResult.setOffset(typeNameStart + keyStart);
+//				keyPositionResult.setLength(keyEnd - keyStart);
+//				return source.substring(keyStart, keyEnd);
+				
+				int tok= scanner.getNextToken(); //ClassName
+				tok= scanner.getNextToken(); //.
+				tok= scanner.getNextToken(); //getString or field
+				String src= new String(scanner.getCurrentTokenSource());
+				if (tok == ITerminalSymbols.TokenNameIdentifier && src.equals("getString")) { //$NON-NLS-1$
+					//Old school
+					// skip type and method names:
+					while (tok != ITerminalSymbols.TokenNameEOF && 
+							(tok == ITerminalSymbols.TokenNameIdentifier || tok == ITerminalSymbols.TokenNameDOT)) {
+						tok= scanner.getNextToken();
+					}
+					// next must be '('
+					if (tok == ITerminalSymbols.TokenNameEOF || tok != ITerminalSymbols.TokenNameLPAREN)
+						return null;
 					tok= scanner.getNextToken();
+					// next must be key string:
+					if (tok == ITerminalSymbols.TokenNameEOF || tok != ITerminalSymbols.TokenNameStringLiteral)
+						return null;
+					// found it:
+					int keyStart= scanner.getCurrentTokenStartPosition() + 1;
+					int keyEnd= scanner.getCurrentTokenEndPosition();
+					keyPositionResult.setOffset(typeNameStart + keyStart);
+					keyPositionResult.setLength(keyEnd - keyStart);
+					return source.substring(keyStart, keyEnd);
+				} else if (tok == ITerminalSymbols.TokenNameIdentifier && !src.equals("class")) { //$NON-NLS-1$
+					//Eclipse style
+					return src;
 				}
-				// next must be '('
-				if (tok == ITerminalSymbols.TokenNameEOF || tok != ITerminalSymbols.TokenNameLPAREN)
-					return null;
-				tok= scanner.getNextToken();
-				// next must be key string:
-				if (tok == ITerminalSymbols.TokenNameEOF || tok != ITerminalSymbols.TokenNameStringLiteral)
-					return null;
-				// found it:
-				int keyStart= scanner.getCurrentTokenStartPosition() + 1;
-				int keyEnd= scanner.getCurrentTokenEndPosition();
-				keyPositionResult.setOffset(typeNameStart + keyStart);
-				keyPositionResult.setLength(keyEnd - keyStart);
-				return source.substring(keyStart, keyEnd);
 			} catch (InvalidInputException e) {
 				return null;
 			}
