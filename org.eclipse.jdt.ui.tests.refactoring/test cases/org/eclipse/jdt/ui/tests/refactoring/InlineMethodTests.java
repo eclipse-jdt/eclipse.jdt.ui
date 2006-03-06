@@ -28,6 +28,7 @@ import junit.framework.TestSuite;
 
 import org.eclipse.core.runtime.CoreException;
 
+import org.eclipse.jdt.core.IClassFile;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IMethod;
 import org.eclipse.jdt.core.IPackageFragment;
@@ -804,4 +805,39 @@ public class InlineMethodTests extends AbstractSelectionTestCase {
 	public void testParameterizedType3() throws Exception {
 		performGenericTest();
 	}
+	
+	/* *********************** Binary Tests ******************************* */
+	
+	public void testBinaryInlineSingle() throws Exception { // uses classes.Target#
+		performTestInlineCall(fgTestSetup.getBinaryPackage(), getName(), COMPARE_WITH_OUTPUT, "binary_out");
+	}
+	
+	public void testBinaryInlineAll() throws Exception { // inlines all classes.Target2#logMessage(..) 
+		String id= getName();
+		ICompilationUnit unit= createCU(fgTestSetup.getBinaryPackage(), id);
+		IType target2type= unit.getJavaProject().findType("classes.Target2");
+		IClassFile target2ClassFile= target2type.getClassFile();
+		IMethod logMessage= target2type.getMethods()[1]; // method 0 is ctor 
+		InlineMethodRefactoring refactoring= InlineMethodRefactoring.create(
+				target2ClassFile,
+				new RefactoringASTParser(AST.JLS3).parse(target2ClassFile, true),
+				logMessage.getNameRange().getOffset(),
+				logMessage.getNameRange().getLength());
+		
+		assertFalse(refactoring.canEnableDeleteSource());
+		refactoring.setCurrentMode(InlineMethodRefactoring.Mode.INLINE_ALL);
+		
+		String out= null;
+		switch (COMPARE_WITH_OUTPUT) {
+			case COMPARE_WITH_OUTPUT:
+				out= getProofedContent("binary_out", id);
+				break;		
+		}
+		performTest(unit, refactoring, COMPARE_WITH_OUTPUT, out, true);
+	}
+	
+	public void testBinaryNoSource() throws Exception {
+		performTestInlineCall(fgTestSetup.getBinaryPackage(), getName(), INVALID_SELECTION, null);
+	}
+
 }

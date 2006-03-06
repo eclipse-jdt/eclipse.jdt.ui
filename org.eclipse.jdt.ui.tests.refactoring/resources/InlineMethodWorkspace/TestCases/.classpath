@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <classpath>
-    <classpathentry kind="src" path=""/>
-    <classpathentry kind="var" path="JRE_LIB" sourcepath="JRE_SRC"/>
-    <classpathentry kind="output" path="bin"/>
+	<classpathentry excluding="binary/|binary_src/" kind="src" path=""/>
+	<classpathentry output="binary" kind="src" path="binary_src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/executionEnvironments/J2SE-1.5"/>
+	<classpathentry kind="output" path="bin"/>
 </classpath>

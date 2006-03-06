@@ -10,10 +10,28 @@
  *******************************************************************************/
 package org.eclipse.jdt.ui.tests.refactoring;
 
+import java.io.IOException;
+import java.net.URL;
+import java.util.Enumeration;
+
 import junit.framework.Test;
 
+import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.Path;
+
+import org.eclipse.core.resources.IFile;
+import org.eclipse.core.resources.IFolder;
+import org.eclipse.core.resources.IProject;
+
+import org.eclipse.jdt.core.IClasspathEntry;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.IPackageFragment;
 import org.eclipse.jdt.core.IPackageFragmentRoot;
+import org.eclipse.jdt.core.JavaCore;
+
+import org.eclipse.jdt.ui.tests.refactoring.infra.RefactoringTestPlugin;
+
+import org.osgi.framework.Bundle;
 
 public class InlineMethodTestSetup extends RefactoringTestSetup {
 
@@ -30,6 +48,7 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 	private IPackageFragment fCast;
 	private IPackageFragment fEnum;
 	private IPackageFragment fGeneric;
+	private IPackageFragment fBinary;
 
 	public InlineMethodTestSetup(Test test) {
 		super(test);
@@ -52,6 +71,19 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 		fCast= root.createPackageFragment("cast_in", true, null);
 		fEnum= root.createPackageFragment("enum_in", true, null);
 		fGeneric= root.createPackageFragment("generic_in", true, null);
+		fBinary= root.createPackageFragment("binary_in", true, null);
+		
+		IJavaProject javaProject= getProject();
+		IProject project= javaProject.getProject();
+		copyFilesFromResources(project, "binary/classes", "*.class");
+		copyFilesFromResources(project, "binary_src/classes", "*.java");
+		
+		IClasspathEntry[] classpath= javaProject.getRawClasspath();
+		IClasspathEntry[] newClasspath= new IClasspathEntry[classpath.length + 1];
+		System.arraycopy(classpath, 0, newClasspath, 0, classpath.length);
+		IClasspathEntry binaryFolder= JavaCore.newLibraryEntry(javaProject.getPath().append("binary"), javaProject.getPath().append("binary_src"), null);
+		newClasspath[classpath.length]= binaryFolder;
+		javaProject.setRawClasspath(newClasspath, null);
 		
 		fImport.createCompilationUnit(
 			"Provider.java",
@@ -113,6 +145,27 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 			
 	}
 
+	private static void copyFilesFromResources(IProject project, String pathInRoot, String filePattern) throws CoreException, IOException {
+		String[] folders= pathInRoot.split("/");
+		IFolder folder= project.getFolder(folders[0]);
+		folder.create(true, true, null);
+		for (int i= 1; i < folders.length; i++) {
+			folder= folder.getFolder(folders[i]);
+			folder.create(true, true, null);
+		}
+		
+		Bundle bundle= RefactoringTestPlugin.getDefault().getBundle();
+		Enumeration/*URL*/ classUrls= bundle.findEntries("/resources/InlineMethodWorkspace/TestCases/" + pathInRoot, filePattern, false);
+		while (classUrls.hasMoreElements()) {
+			URL classUrl= (URL) classUrls.nextElement();
+			String urlFile= classUrl.getFile();
+			String fileName= urlFile.substring(urlFile.lastIndexOf('/') + 1);
+			
+			IFile file= folder.getFile(new Path(fileName));
+			file.create(classUrl.openStream(), true, null);
+		}
+	}
+
 	public IPackageFragment getInvalidPackage() {
 		return fInvalid;
 	}
@@ -163,5 +216,9 @@ public class InlineMethodTestSetup extends RefactoringTestSetup {
 	
 	public IPackageFragment getGenericPackage() {
 		return fGeneric;
+	}
+	
+	public IPackageFragment getBinaryPackage() {
+		return fBinary;
 	}
 }
