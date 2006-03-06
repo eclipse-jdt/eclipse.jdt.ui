@@ -25,6 +25,8 @@ import org.eclipse.ui.texteditor.ITextEditor;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -74,14 +76,24 @@ public class NLSKeyHyperlinkDetector implements IHyperlinkDetector {
 			return null;
 
 		ASTNode node= NodeFinder.perform(ast, region.getOffset(), 1);
-		if (!(node instanceof StringLiteral))
+		if (!(node instanceof StringLiteral)  && !(node instanceof SimpleName))
+			return null;
+		
+		if (node.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY)
 			return null;
 
-		StringLiteral fNLSKeyStringLiteral= (StringLiteral)node;
-		IRegion nlsKeyRegion= new Region(fNLSKeyStringLiteral.getStartPosition(), fNLSKeyStringLiteral.getLength());
+		IRegion nlsKeyRegion= new Region(node.getStartPosition(), node.getLength());
 		AccessorClassReference ref= NLSHintHelper.getAccessorClassReference(ast, nlsKeyRegion);
-		if (ref != null)
-			return new IHyperlink[] {new NLSKeyHyperlink(nlsKeyRegion, fNLSKeyStringLiteral, ref, fTextEditor)};
+		if (ref == null)
+			return null;
+		String keyName= null;
+		if (node instanceof StringLiteral) {
+			keyName= ((StringLiteral)node).getLiteralValue();
+		} else {
+			keyName= ((SimpleName)node).getIdentifier();
+		}
+		if (keyName != null)
+			return new IHyperlink[] {new NLSKeyHyperlink(nlsKeyRegion, keyName, ref, fTextEditor)};
 
 		return null;
 	}

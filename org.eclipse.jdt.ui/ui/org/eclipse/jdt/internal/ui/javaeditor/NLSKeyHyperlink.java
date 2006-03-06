@@ -32,7 +32,6 @@ import org.eclipse.ui.texteditor.ITextEditor;
 
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ITypeBinding;
-import org.eclipse.jdt.core.dom.StringLiteral;
 
 import org.eclipse.jdt.internal.corext.refactoring.nls.AccessorClassReference;
 import org.eclipse.jdt.internal.corext.refactoring.nls.NLSHintHelper;
@@ -52,25 +51,25 @@ public class NLSKeyHyperlink implements IHyperlink {
 	private IRegion fRegion;
 	private AccessorClassReference fAccessorClassReference;
 	private IEditorPart fEditor;
-	private final StringLiteral fKeyStringLiteral;
+	private final String fKeyName;
 
 
 	/**
 	 * Creates a new NLS key hyperlink.
 	 *
 	 * @param region
-	 * @param keyStringLiteral
+	 * @param keyName
 	 * @param ref
 	 * @param editor the editor which contains the hyperlink
 	 */
-	public NLSKeyHyperlink(IRegion region, StringLiteral keyStringLiteral, AccessorClassReference ref, IEditorPart editor) {
+	public NLSKeyHyperlink(IRegion region, String keyName, AccessorClassReference ref, IEditorPart editor) {
 		Assert.isNotNull(region);
-		Assert.isNotNull(keyStringLiteral);
+		Assert.isNotNull(keyName);
 		Assert.isNotNull(ref);
 		Assert.isNotNull(editor);
 
 		fRegion= region;
-		fKeyStringLiteral= keyStringLiteral;
+		fKeyName= keyName;
 		fAccessorClassReference= ref;
 		fEditor= editor;
 	}
@@ -121,10 +120,9 @@ public class NLSKeyHyperlink implements IHyperlink {
 				FindReplaceDocumentAdapter finder= new FindReplaceDocumentAdapter(document);
 				PropertyKeyHyperlinkDetector detector= new PropertyKeyHyperlinkDetector((ITextEditor)editor);
 				int offset= document.getLength() - 1;
-				String keyName= fKeyStringLiteral.getLiteralValue();
 				try {
 					while (!found && offset >= 0) {
-						region= finder.find(offset, keyName, false, true, false, false);
+						region= finder.find(offset, fKeyName, false, true, false, false);
 						if (region == null)
 							offset= -1;
 						else {
@@ -133,14 +131,14 @@ public class NLSKeyHyperlink implements IHyperlink {
 							if (hyperlinks != null) {
 								for (int i= 0; i < hyperlinks.length; i++) {
 									IRegion hyperlinkRegion= hyperlinks[i].getHyperlinkRegion();
-									found= keyName.equals(document.get(hyperlinkRegion.getOffset(), hyperlinkRegion.getLength()));
+									found= fKeyName.equals(document.get(hyperlinkRegion.getOffset(), hyperlinkRegion.getLength()));
 								}
 							} else if (document instanceof IDocumentExtension3) {
 								// Fall back: test using properties file partitioning
 								ITypedRegion partition= null;
 								partition= ((IDocumentExtension3)document).getPartition(IPropertiesFilePartitions.PROPERTIES_FILE_PARTITIONING, region.getOffset(), false);
 								found= IDocument.DEFAULT_CONTENT_TYPE.equals(partition.getType())
-										&& keyName.equals(document.get(partition.getOffset(), partition.getLength()).trim());
+										&& fKeyName.equals(document.get(partition.getOffset(), partition.getLength()).trim());
 							}
 							// Prevent endless loop (panic code, shouldn't be needed)
 							if (offset == region.getOffset())
@@ -159,7 +157,7 @@ public class NLSKeyHyperlink implements IHyperlink {
 				EditorUtility.revealInEditor(editor, region);
 			else {
 				EditorUtility.revealInEditor(editor, 0, 0);
-				showErrorInStatusLine(editor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_keyNotFound, fKeyStringLiteral.getLiteralValue()));
+				showErrorInStatusLine(editor, Messages.format(JavaEditorMessages.Editor_OpenPropertiesFile_error_keyNotFound, fKeyName));
 			}
 		}
 	}
