@@ -63,7 +63,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public final class JavaSynchronizationContentProvider extends AbstractSynchronizationContentProvider implements IPipelinedTreeContentProvider {
 
 	/** The refactorings folder */
-	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
+//	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
 
 	/**
 	 * Returns the diffs associated with the element.
@@ -245,25 +245,25 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			}
 			list.add(children[index]);
 		}
-		final IResource resource= JavaModelProvider.getResource(parent);
-		if (resource != null) {
-			final IResourceDiffTree tree= context.getDiffTree();
-			final IResource[] members= tree.members(resource);
-			for (int index= 0; index < members.length; index++) {
-				final int type= members[index].getType();
-				if (type == IResource.FOLDER) {
-					if (isInScope(context.getScope(), parent, members[index])) {
-						if (members[index].getName().equals(NAME_REFACTORING_FOLDER)) {
-							final RefactoringHistory history= getRefactorings(context, (IProject) resource, null);
-							if (!history.isEmpty()) {
-								list.remove(members[index]);
-								list.addFirst(history);
-							}
-						}
-					}
-				}
-			}
-		}
+//		final IResource resource= JavaModelProvider.getResource(parent);
+//		if (resource != null) {
+//			final IResourceDiffTree tree= context.getDiffTree();
+//			final IResource[] members= tree.members(resource);
+//			for (int index= 0; index < members.length; index++) {
+//				final int type= members[index].getType();
+//				if (type == IResource.FOLDER) {
+//					if (isInScope(context.getScope(), parent, members[index])) {
+//						if (members[index].getName().equals(NAME_REFACTORING_FOLDER)) {
+//							final RefactoringHistory history= getRefactorings(context, (IProject) resource, null);
+//							if (!history.isEmpty()) {
+//								list.remove(members[index]);
+//								list.addFirst(history);
+//							}
+//						}
+//					}
+//				}
+//			}
+//		}
 		return list.toArray(new Object[list.size()]);
 	}
 
