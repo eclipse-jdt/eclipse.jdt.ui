@@ -50,9 +50,11 @@ import org.eclipse.jdt.core.dom.Expression;
 import org.eclipse.jdt.core.dom.IBinding;
 import org.eclipse.jdt.core.dom.IMethodBinding;
 import org.eclipse.jdt.core.dom.ITypeBinding;
+import org.eclipse.jdt.core.dom.IVariableBinding;
 import org.eclipse.jdt.core.dom.MethodInvocation;
 import org.eclipse.jdt.core.dom.Modifier;
 import org.eclipse.jdt.core.dom.Name;
+import org.eclipse.jdt.core.dom.QualifiedName;
 import org.eclipse.jdt.core.dom.SimpleType;
 import org.eclipse.jdt.core.dom.StringLiteral;
 import org.eclipse.jdt.core.dom.TypeLiteral;
@@ -86,22 +88,53 @@ public class NLSHintHelper {
 			return null; // not found
 		}
 		ASTNode parent= nlsStringLiteral.getParent();
-		if (!(parent instanceof MethodInvocation)) {
-			return null;
-		}
 		
-		MethodInvocation methodInvocation= (MethodInvocation) parent;
-		List args= methodInvocation.arguments();
-		if (args.indexOf(nlsStringLiteral) != 0) {
-			return null; // must be first argument in lookup method
-		}
+		ITypeBinding accessorBinding= null;
+		if (parent instanceof MethodInvocation) {
+			MethodInvocation methodInvocation= (MethodInvocation) parent;
+			List args= methodInvocation.arguments();
+			if (args.indexOf(nlsStringLiteral) != 0) {
+				return null; // must be first argument in lookup method
+			}
+				
+			IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
+			if (methodBinding == null || !Modifier.isStatic(methodBinding.getModifiers())) {
+				return null; // only static methods qualify
+			}
+	
+			accessorBinding= methodBinding.getDeclaringClass();
+		} else if (parent instanceof QualifiedName) {
+			QualifiedName name= (QualifiedName)parent;
+			IBinding binding= name.resolveBinding();
+			if (!(binding instanceof IVariableBinding))
+				return null;
 			
-		IMethodBinding methodBinding= methodInvocation.resolveMethodBinding();
-		if (methodBinding == null || !Modifier.isStatic(methodBinding.getModifiers())) {
-			return null; // only static methods qualify
+			IVariableBinding variableBinding= (IVariableBinding)binding;
+			if (!Modifier.isStatic(variableBinding.getModifiers()))
+				return null;
+			
+			accessorBinding= variableBinding.getDeclaringClass();
+		} else if (parent instanceof VariableDeclarationFragment) {
+			VariableDeclarationFragment decl= (VariableDeclarationFragment)parent;
+			if (decl.getInitializer() != null)
+				return null;
+			
+			IBinding binding= decl.resolveBinding();
+			if (!(binding instanceof IVariableBinding))
+				return null;
+			
+			IVariableBinding variableBinding= (IVariableBinding)binding;
+			if (!Modifier.isStatic(variableBinding.getModifiers()))
+				return null;
+			
+			if (!Modifier.isPublic(variableBinding.getModifiers()))
+				return null;
+			
+			accessorBinding= variableBinding.getDeclaringClass();
 		}
-
-		ITypeBinding accessorBinding= methodBinding.getDeclaringClass();
+		if (accessorBinding == null)
+			return null;
+		
 		String resourceBundleName;
 		try {
 			resourceBundleName= getResourceBundleName(accessorBinding);

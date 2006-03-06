@@ -24,6 +24,8 @@ import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaModelException;
 import org.eclipse.jdt.core.dom.ASTNode;
 import org.eclipse.jdt.core.dom.CompilationUnit;
+import org.eclipse.jdt.core.dom.QualifiedName;
+import org.eclipse.jdt.core.dom.SimpleName;
 import org.eclipse.jdt.core.dom.StringLiteral;
 
 import org.eclipse.jdt.internal.corext.dom.NodeFinder;
@@ -86,9 +88,11 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 			return null;
 
 		ASTNode node= NodeFinder.perform(ast, hoverRegion.getOffset(), hoverRegion.getLength());
-		if (!(node instanceof StringLiteral))
+		if (!(node instanceof StringLiteral) && !(node instanceof SimpleName))
 			return null;
-		StringLiteral stringLiteral= (StringLiteral)node;
+		
+		if (node.getLocationInParent() == QualifiedName.QUALIFIER_PROPERTY)
+			return null;
 
 		AccessorClassReference ref= NLSHintHelper.getAccessorClassReference(ast, hoverRegion);
 		if (ref == null)
@@ -107,7 +111,16 @@ public class NLSStringHover extends AbstractJavaEditorTextHover {
 		if (properties == null || properties.isEmpty())
 			return null;
 
-		String value= properties.getProperty(stringLiteral.getLiteralValue(), null);
+		String identifier= null;
+		if (node instanceof StringLiteral) {
+			identifier= ((StringLiteral)node).getLiteralValue();
+		} else {
+			identifier= ((SimpleName)node).getIdentifier();
+		}
+		if (identifier == null)
+			return null;
+		
+		String value= properties.getProperty(identifier, null);
 		if (value != null)
 			value= HTMLPrinter.convertToHTMLContent(value);
 		else
