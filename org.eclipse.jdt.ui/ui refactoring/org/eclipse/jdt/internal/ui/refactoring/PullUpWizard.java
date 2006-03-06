@@ -23,14 +23,6 @@ import java.util.Set;
 import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.SubProgressMonitor;
 
-import org.eclipse.jdt.core.IField;
-import org.eclipse.jdt.core.IMember;
-import org.eclipse.jdt.core.IMethod;
-import org.eclipse.jdt.core.ISourceReference;
-import org.eclipse.jdt.core.IType;
-import org.eclipse.jdt.core.ITypeHierarchy;
-import org.eclipse.jdt.core.JavaModelException;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.custom.SashForm;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -52,9 +44,6 @@ import org.eclipse.jface.dialogs.IMessageProvider;
 import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.preference.IPreferenceStore;
 import org.eclipse.jface.resource.JFaceResources;
-import org.eclipse.jface.text.Document;
-import org.eclipse.jface.text.IDocument;
-import org.eclipse.jface.text.source.SourceViewer;
 import org.eclipse.jface.viewers.ArrayContentProvider;
 import org.eclipse.jface.viewers.CellEditor;
 import org.eclipse.jface.viewers.CheckStateChangedEvent;
@@ -80,7 +69,24 @@ import org.eclipse.jface.viewers.ViewerFilter;
 import org.eclipse.jface.window.Window;
 import org.eclipse.jface.wizard.IWizardPage;
 
+import org.eclipse.jface.text.Document;
+import org.eclipse.jface.text.IDocument;
+import org.eclipse.jface.text.source.SourceViewer;
+
 import org.eclipse.ui.PlatformUI;
+import org.eclipse.ui.dialogs.ContainerCheckedTreeViewer;
+
+import org.eclipse.ltk.core.refactoring.RefactoringStatus;
+import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
+import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
+
+import org.eclipse.jdt.core.IField;
+import org.eclipse.jdt.core.IMember;
+import org.eclipse.jdt.core.IMethod;
+import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.ITypeHierarchy;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.jdt.internal.corext.Assert;
 import org.eclipse.jdt.internal.corext.refactoring.structure.IMemberActionInfo;
@@ -91,6 +97,12 @@ import org.eclipse.jdt.internal.corext.util.JavaModelUtil;
 import org.eclipse.jdt.internal.corext.util.JdtFlags;
 import org.eclipse.jdt.internal.corext.util.Messages;
 
+import org.eclipse.jdt.ui.JavaElementLabelProvider;
+import org.eclipse.jdt.ui.JavaElementSorter;
+import org.eclipse.jdt.ui.PreferenceConstants;
+import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
+import org.eclipse.jdt.ui.text.JavaTextTools;
+
 import org.eclipse.jdt.internal.ui.IJavaHelpContextIds;
 import org.eclipse.jdt.internal.ui.JavaPlugin;
 import org.eclipse.jdt.internal.ui.JavaPluginImages;
@@ -98,16 +110,6 @@ import org.eclipse.jdt.internal.ui.javaeditor.JavaSourceViewer;
 import org.eclipse.jdt.internal.ui.util.ExceptionHandler;
 import org.eclipse.jdt.internal.ui.util.SWTUtil;
 import org.eclipse.jdt.internal.ui.util.TableLayoutComposite;
-
-import org.eclipse.jdt.ui.JavaElementLabelProvider;
-import org.eclipse.jdt.ui.JavaElementSorter;
-import org.eclipse.jdt.ui.PreferenceConstants;
-import org.eclipse.jdt.ui.text.JavaSourceViewerConfiguration;
-import org.eclipse.jdt.ui.text.JavaTextTools;
-
-import org.eclipse.ltk.core.refactoring.RefactoringStatus;
-import org.eclipse.ltk.ui.refactoring.RefactoringWizard;
-import org.eclipse.ltk.ui.refactoring.UserInputWizardPage;
 
 public class PullUpWizard extends RefactoringWizard {
 
@@ -1017,7 +1019,7 @@ public class PullUpWizard extends RefactoringWizard {
 	
 	  private Label fTypeHierarchyLabel;
 	  private SourceViewer fSourceViewer;
-	  private PullUpTreeViewer fTreeViewer;
+	  private ContainerCheckedTreeViewer fTreeViewer;
 	  public static final String PAGE_NAME= "PullUpMethodsInputPage2"; //$NON-NLS-1$
 	
 	  public PullUpInputPage2() {
@@ -1082,8 +1084,7 @@ public class PullUpWizard extends RefactoringWizard {
 
 		private void uncheckAll() {
 			IType root= getTreeViewerInputRoot();
-			fTreeViewer.setSubtreeChecked(root, false);
-			fTreeViewer.setSubtreeGrayed(root, false);
+			fTreeViewer.setChecked(root, false);
 		}
 	
 		private IType getTreeViewerInputRoot() {
@@ -1238,7 +1239,7 @@ public class PullUpWizard extends RefactoringWizard {
 		private void createTreeViewer(Composite composite) {
 			Tree tree= new Tree(composite, SWT.CHECK | SWT.BORDER | SWT.MULTI | SWT.V_SCROLL | SWT.H_SCROLL);
 			tree.setLayoutData(new GridData(GridData.FILL_BOTH));
-			fTreeViewer= new PullUpTreeViewer(tree);
+			fTreeViewer= new ContainerCheckedTreeViewer(tree);
 			fTreeViewer.setLabelProvider(new JavaElementLabelProvider(JavaElementLabelProvider.SHOW_DEFAULT));
 			fTreeViewer.setUseHashlookup(true);
 			fTreeViewer.setSorter(new JavaElementSorter());	
@@ -1254,10 +1255,10 @@ public class PullUpWizard extends RefactoringWizard {
 			});
 		}
 	
-		private void precheckElements(final PullUpTreeViewer treeViewer) {
+		private void precheckElements(final ContainerCheckedTreeViewer treeViewer) {
 			IMember[] members= getPullUpMethodsRefactoring().getPullUpProcessor().getMembersToMove();
 			for (int i= 0; i < members.length; i++) {
-				treeViewer.setCheckState(members[i], true);
+				treeViewer.setChecked(members[i], true);
 			}
 		}
 
