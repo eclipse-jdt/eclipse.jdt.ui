@@ -194,31 +194,17 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			scanner.setSource(source.toCharArray());
 			
 			try {
-//				int tok= scanner.getNextToken();
-//				// skip type and method names:
-//				while (tok != ITerminalSymbols.TokenNameEOF && 
-//						(tok == ITerminalSymbols.TokenNameIdentifier || tok == ITerminalSymbols.TokenNameDOT)) {
-//					tok= scanner.getNextToken();
-//				}
-//				// next must be '('
-//				if (tok == ITerminalSymbols.TokenNameEOF || tok != ITerminalSymbols.TokenNameLPAREN)
-//					return null;
-//				tok= scanner.getNextToken();
-//				// next must be key string:
-//				if (tok == ITerminalSymbols.TokenNameEOF || tok != ITerminalSymbols.TokenNameStringLiteral)
-//					return null;
-//				// found it:
-//				int keyStart= scanner.getCurrentTokenStartPosition() + 1;
-//				int keyEnd= scanner.getCurrentTokenEndPosition();
-//				keyPositionResult.setOffset(typeNameStart + keyStart);
-//				keyPositionResult.setLength(keyEnd - keyStart);
-//				return source.substring(keyStart, keyEnd);
-				
 				int tok= scanner.getNextToken(); //ClassName
-				tok= scanner.getNextToken(); //.
-				tok= scanner.getNextToken(); //getString or field
+				if (tok != ITerminalSymbols.TokenNameIdentifier)
+					return null;
+				tok= scanner.getNextToken();
+				if (tok != ITerminalSymbols.TokenNameDOT)
+					return null;
+				tok= scanner.getNextToken();
+				if (tok != ITerminalSymbols.TokenNameIdentifier)
+					return null;
 				String src= new String(scanner.getCurrentTokenSource());
-				if (tok == ITerminalSymbols.TokenNameIdentifier && src.equals("getString")) { //$NON-NLS-1$
+				if (src.equals("getString")) { //$NON-NLS-1$
 					//Old school
 					// skip type and method names:
 					while (tok != ITerminalSymbols.TokenNameEOF && 
@@ -238,7 +224,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 					keyPositionResult.setOffset(typeNameStart + keyStart);
 					keyPositionResult.setLength(keyEnd - keyStart);
 					return source.substring(keyStart, keyEnd);
-				} else if (tok == ITerminalSymbols.TokenNameIdentifier && !src.equals("class")) { //$NON-NLS-1$
+				} else {
 					//Eclipse style
 					return src;
 				}
