@@ -60,10 +60,18 @@ import org.eclipse.search.core.text.TextSearchMatchAccess;
 import org.eclipse.search.core.text.TextSearchRequestor;
 import org.eclipse.search.core.text.TextSearchScope;
 
+import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
+import org.eclipse.jdt.core.search.IJavaSearchConstants;
+import org.eclipse.jdt.core.search.IJavaSearchScope;
+import org.eclipse.jdt.core.search.SearchEngine;
+import org.eclipse.jdt.core.search.SearchMatch;
+import org.eclipse.jdt.core.search.SearchPattern;
+import org.eclipse.jdt.core.search.SearchRequestor;
 
 import org.eclipse.jdt.internal.corext.util.Messages;
+import org.eclipse.jdt.internal.corext.util.SearchUtils;
 
 import org.eclipse.jdt.ui.JavaUI;
 
@@ -415,7 +423,8 @@ public class PropertyKeyHyperlink implements IHyperlink {
 		final String searchString;
 
 		// XXX: This is a hack to improve the accuracy of matches, see https://bugs.eclipse.org/bugs/show_bug.cgi?id=81140
-		if (useDoubleQuotedKey()) {
+		final boolean useDoubleQuotedKey= useDoubleQuotedKey();
+		if (useDoubleQuotedKey) {
 			StringBuffer buf= new StringBuffer("\""); //$NON-NLS-1$
 			buf.append(fPropertiesKey);
 			buf.append('"');
@@ -427,13 +436,38 @@ public class PropertyKeyHyperlink implements IHyperlink {
 			fEditor.getEditorSite().getWorkbenchWindow().getWorkbench().getProgressService().busyCursorWhile(
 				new IRunnableWithProgress() {
 					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
-						ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey());
+						ResultCollector collector= new ResultCollector(result, useDoubleQuotedKey);
 						TextSearchEngine engine= TextSearchEngine.create();
 						Pattern searchPattern= PatternConstructor.createPattern(searchString, true, false);
 						engine.search(createScope(scope), collector, searchPattern, monitor);
 					}
 				}
 			);
+			
+			if (result.size() == 0 && useDoubleQuotedKey) {
+				//Try without, maybe an eclipse style NLS string
+				fEditor.getEditorSite().getWorkbenchWindow().getWorkbench().getProgressService().busyCursorWhile(new IRunnableWithProgress() {
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						IJavaElement element= JavaCore.create(scope);
+						if (element == null)
+							return;
+						
+						int includeMask = IJavaSearchScope.SOURCES | IJavaSearchScope.APPLICATION_LIBRARIES | IJavaSearchScope.REFERENCED_PROJECTS;
+						IJavaSearchScope javaSearchScope= SearchEngine.createJavaSearchScope(new IJavaElement[] { element }, includeMask);
+
+						SearchPattern pattern= SearchPattern.createPattern(fPropertiesKey, IJavaSearchConstants.FIELD, IJavaSearchConstants.REFERENCES, SearchPattern.R_PATTERN_MATCH | SearchPattern.R_CASE_SENSITIVE);
+						try {
+							new SearchEngine().search(pattern, SearchUtils.getDefaultSearchParticipants(), javaSearchScope, new SearchRequestor() {
+								public void acceptSearchMatch(SearchMatch match) throws CoreException {
+									result.add(new KeyReference((IStorage)match.getResource(), match.getOffset(), match.getLength()));
+								}
+							}, monitor);
+						} catch (CoreException e) {
+							throw new InvocationTargetException(e);
+						}
+					}
+				});
+			}
 		} catch (InvocationTargetException ex) {
 			String message= PropertiesFileEditorMessages.OpenAction_error_messageErrorSearchingKey;
 			showError(new CoreException(new Status(IStatus.ERROR, JavaUI.ID_PLUGIN, IStatus.OK, message, ex.getTargetException())));
