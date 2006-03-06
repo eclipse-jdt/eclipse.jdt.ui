@@ -178,10 +178,11 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.MissingValueForAnnotationMember:
 			case IProblem.FallthroughCase:
 			case IProblem.NonGenericType:
+			case IProblem.UnhandledWarningToken:
 				return true;
 			default:
 				if (JavaModelUtil.is50OrHigher(cu.getJavaProject())) {
-					return ModifierCorrectionSubProcessor.hasSuppressWarningsProposal(problemId);
+					return SuppressWarningsSubProcessor.hasSuppressWarningsProposal(problemId);
 				}
 				return false;
 		}
@@ -510,10 +511,13 @@ public class QuickFixProcessor implements IQuickFixProcessor {
 			case IProblem.FallthroughCase:
 				LocalCorrectionsSubProcessor.addFallThroughProposals(context, problem, proposals);
 				break;
+			case IProblem.UnhandledWarningToken:
+				SuppressWarningsSubProcessor.addUnknownSuppressWarningProposals(context, problem, proposals);
+				break;
 			default:
 		}
 		if (JavaModelUtil.is50OrHigher(context.getCompilationUnit().getJavaProject())) {
-			ModifierCorrectionSubProcessor.addSuppressWarningsProposals(context, problem, proposals);
+			SuppressWarningsSubProcessor.addSuppressWarningsProposals(context, problem, proposals);
 		}
 	}
 }

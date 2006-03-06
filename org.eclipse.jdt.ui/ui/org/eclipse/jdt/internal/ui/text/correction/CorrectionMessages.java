@@ -301,8 +301,8 @@ final class CorrectionMessages extends NLS {
 	public static String ReorgCorrectionsSubProcessor_configure_buildpath_label;
 	public static String ReorgCorrectionsSubProcessor_configure_buildpath_description;
 	public static String QuickAssistProcessor_extract_to_local_description;
-	public static String ModifierCorrectionSubProcessor_suppress_warnings_initializer_label;
-	public static String ModifierCorrectionSubProcessor_suppress_warnings_label;
+	public static String SuppressWarningsSubProcessor_suppress_warnings_initializer_label;
+	public static String SuppressWarningsSubProcessor_suppress_warnings_label;
 	public static String ReorgCorrectionsSubProcessor_accessrules_description;
 	public static String UnresolvedElementsSubProcessor_change_full_type_description;
 	public static String LocalCorrectionsSubProcessor_remove_nls_tag_description;
@@ -319,4 +319,5 @@ final class CorrectionMessages extends NLS {
 	public static String LocalCorrectionsSubProcessor_insert_break_statement;
 	public static String QuickAssistProcessor_fix_deprecation_name;
 	public static String QuickAssistProcessor_fix_deprecation_info;
+	public static String SuppressWarningsSubProcessor_fix_suppress_token_label;
 }
