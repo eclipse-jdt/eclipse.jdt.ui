@@ -120,7 +120,7 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 	}
 
 	private Image getImage(IJavaAnnotation annotation, int imageType, Display display) {
-		if (fCachedImageType == imageType)
+		if ((imageType == QUICKFIX_IMAGE || imageType == QUICKFIX_ERROR_IMAGE) && fCachedImageType == imageType)
 			return fCachedImage;
 
 		Image image= null;
@@ -128,12 +128,17 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 			case OVERLAY_IMAGE:
 				IJavaAnnotation overlay= annotation.getOverlay();
 				image= getManagedImage((Annotation) overlay);
+				fCachedImageType= -1;
 				break;
 			case QUICKFIX_IMAGE:
 				image= getQuickFixImage();
+				fCachedImageType= imageType;
+				fCachedImage= image;
 				break;
 			case QUICKFIX_ERROR_IMAGE:
 				image= getQuickFixErrorImage();
+				fCachedImageType= imageType;
+				fCachedImage= image;
 				break;
 			case GRAY_IMAGE: {
 				ISharedImages sharedImages= PlatformUI.getWorkbench().getSharedImages();
@@ -155,12 +160,11 @@ public class JavaAnnotationImageProvider implements IAnnotationImageProvider {
 					}
 					image= grayImage;
 				}
+				fCachedImageType= -1;
 				break;
 			}
 		}
 
-		fCachedImageType= imageType;
-		fCachedImage= image;
-		return fCachedImage;
+		return image;
 	}
 }
