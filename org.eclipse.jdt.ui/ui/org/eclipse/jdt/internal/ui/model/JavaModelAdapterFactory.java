@@ -46,11 +46,6 @@ public final class JavaModelAdapterFactory implements IAdapterFactory {
 		} else if (adaptable instanceof RefactoringDescriptorProxy) {
 			if (adapter == ResourceMapping.class)
 				return new JavaRefactoringDescriptorResourceMapping((RefactoringDescriptorProxy) adaptable);
-		} else if (adaptable instanceof JavaProjectSettings) {
-			if (adapter == ResourceMapping.class)
-				return new JavaProjectSettingsResourceMapping((JavaProjectSettings) adaptable);
-			else if (adapter == IResource.class)
-				return ((JavaProjectSettings) adaptable).getResource();
 		}
 		return null;
 	}
@@ -59,6 +54,6 @@ public final class JavaModelAdapterFactory implements IAdapterFactory {
 	 * {@inheritDoc}
 	 */
 	public Class[] getAdapterList() {
-		return new Class[] { IResourceMappingMerger.class, ResourceMapping.class, ISynchronizationCompareAdapter.class, IResource.class};
+		return new Class[] { ResourceMapping.class, ISynchronizationCompareAdapter.class, IResource.class};
 	}
 }

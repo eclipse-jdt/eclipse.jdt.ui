@@ -63,7 +63,7 @@ import org.eclipse.jdt.internal.ui.JavaPlugin;
 public final class JavaSynchronizationContentProvider extends AbstractSynchronizationContentProvider implements IPipelinedTreeContentProvider {
 
 	/** The refactorings folder */
-//	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
+	private static final String NAME_REFACTORING_FOLDER= ".refactorings"; //$NON-NLS-1$
 
 	/**
 	 * Returns the diffs associated with the element.
@@ -206,8 +206,6 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			return getPackageFragmentRootChildren(context, parent, elements);
 		else if (parent instanceof IJavaProject)
 			return getJavaProjectChildren(context, parent, elements);
-		else if (parent instanceof JavaProjectSettings)
-			return getProjectSettingsChildren(context, parent, elements);
 		else if (parent instanceof RefactoringHistory)
 			return ((RefactoringHistory) parent).getDescriptors();
 		return elements;
@@ -247,29 +245,25 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 			}
 			list.add(children[index]);
 		}
-//		final IResource resource= JavaModelProvider.getResource(parent);
-//		if (resource != null) {
-//			final IResourceDiffTree tree= context.getDiffTree();
-//			final IResource[] members= tree.members(resource);
-//			for (int index= 0; index < members.length; index++) {
-//				final int type= members[index].getType();
-//				if (type == IResource.FOLDER) {
-//					if (isInScope(context.getScope(), parent, members[index])) {
-//						final String name= members[index].getName();
-//						if (name.equals(JavaProjectSettings.NAME_SETTINGS_FOLDER)) {
-//							list.remove(members[index]);
-//							list.addFirst(new JavaProjectSettings((IJavaProject) parent));
-//						} else if (name.equals(NAME_REFACTORING_FOLDER)) {
-//							final RefactoringHistory history= getRefactorings(context, (IProject) resource, null);
-//							if (!history.isEmpty()) {
-//								list.remove(members[index]);
-//								list.addFirst(history);
-//							}
-//						}
-//					}
-//				}
-//			}
-//		}
+		final IResource resource= JavaModelProvider.getResource(parent);
+		if (resource != null) {
+			final IResourceDiffTree tree= context.getDiffTree();
+			final IResource[] members= tree.members(resource);
+			for (int index= 0; index < members.length; index++) {
+				final int type= members[index].getType();
+				if (type == IResource.FOLDER) {
+					if (isInScope(context.getScope(), parent, members[index])) {
+						if (members[index].getName().equals(NAME_REFACTORING_FOLDER)) {
+							final RefactoringHistory history= getRefactorings(context, (IProject) resource, null);
+							if (!history.isEmpty()) {
+								list.remove(members[index]);
+								list.addFirst(history);
+							}
+						}
+					}
+				}
+			}
+		}
 		return list.toArray(new Object[list.size()]);
 	}
 
@@ -421,39 +415,6 @@ public final class JavaSynchronizationContentProvider extends AbstractSynchroniz
 		if (element instanceof IJavaElement)
 			return getParent(element);
 		return parent;
-	}
-
-	/**
-	 * Returns the project settings children in the current scope.
-	 * 
-	 * @param context
-	 *            the synchronization context
-	 * @param parent
-	 *            the parent element
-	 * @param children
-	 *            the child elements
-	 * @return the project settings children
-	 */
-	private Object[] getProjectSettingsChildren(final ISynchronizationContext context, final Object parent, final Object[] children) {
-		final Set set= new HashSet();
-		for (int index= 0; index < children.length; index++)
-			set.add(children[index]);
-		final IResource resource= JavaModelProvider.getResource(parent);
-		if (resource != null) {
-			final IResourceDiffTree tree= context.getDiffTree();
-			final IResource[] members= tree.members(resource);
-			for (int index= 0; index < members.length; index++) {
-				final int type= members[index].getType();
-				if (type == IResource.FILE) {
-					final IDiff diff= tree.getDiff(members[index]);
-					if (diff != null && isVisible(diff)) {
-						if (isInScope(context.getScope(), parent, members[index]))
-							set.add(members[index]);
-					}
-				}
-			}
-		}
-		return set.toArray(new Object[set.size()]);
 	}
 
 	/**

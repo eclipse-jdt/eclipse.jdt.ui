@@ -5004,12 +5004,6 @@
             class="org.eclipse.jdt.internal.ui.model.JavaModelAdapterFactory">
          <adapter type="org.eclipse.core.resources.mapping.ResourceMapping"/>
       </factory>
-      <factory
-            adaptableType="org.eclipse.jdt.internal.ui.model.JavaProjectSettings"
-            class="org.eclipse.jdt.internal.ui.model.JavaModelAdapterFactory">
-         <adapter type="org.eclipse.core.resources.mapping.ResourceMapping"/>
-         <adapter type="org.eclipse.core.resources.IResource"/>
-      </factory>
    </extension>
    
    <extension
@@ -5053,7 +5047,12 @@
                <instanceof value="org.eclipse.jdt.core.IJavaElement" />
             </or>
          </triggerPoints>
-         <actionProvider class="org.eclipse.ltk.ui.refactoring.model.RefactoringSynchronizationActionProvider"/>
+         <actionProvider class="org.eclipse.ltk.ui.refactoring.model.RefactoringSynchronizationActionProvider">
+            <enablement>
+               <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy"/>
+               <instanceof value="org.eclipse.ltk.core.refactoring.history.RefactoringHistory"/>
+            </enablement>
+         </actionProvider>
          <commonSorter
                class="org.eclipse.jdt.ui.JavaElementSorter"
                id="org.eclipse.jdt.ui.JavaElementSorter">

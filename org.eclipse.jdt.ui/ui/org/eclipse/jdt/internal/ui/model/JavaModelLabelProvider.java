@@ -12,6 +12,8 @@ package org.eclipse.jdt.internal.ui.model;
 
 import org.eclipse.core.runtime.Assert;
 
+import org.eclipse.core.resources.IFolder;
+
 import org.eclipse.swt.graphics.Image;
 
 import org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy;
@@ -31,6 +33,9 @@ import org.eclipse.jdt.internal.ui.viewsupport.JavaElementImageProvider;
  * @since 3.2
  */
 public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
+
+	/** The name of the settings folder */
+	private static final String NAME_SETTINGS_FOLDER= ".settings"; //$NON-NLS-1$
 
 	/** The refactoring history label provider */
 	private final RefactoringHistoryLabelProvider fHistoryLabelProvider= new RefactoringHistoryLabelProvider(new RefactoringHistoryControlConfiguration(null, false, false));
@@ -83,17 +88,20 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 	 * {@inheritDoc}
 	 */
 	public Image getImage(final Object element) {
+		if (element instanceof IFolder) {
+			final IFolder folder= (IFolder) element;
+			if (folder.getName().equals(NAME_SETTINGS_FOLDER)) {
+				if (fSettingsImage == null || fSettingsImage.isDisposed())
+					fSettingsImage= JavaPluginImages.DESC_OBJS_PROJECT_SETTINGS.createImage();
+				return decorateImage(fSettingsImage, element);
+			}
+		}
 		Image image= super.getImage(element);
 		if (image == null) {
 			if (element instanceof RefactoringHistory)
 				image= fHistoryLabelProvider.getImage(element);
 			else if (element instanceof RefactoringDescriptorProxy)
 				image= fHistoryLabelProvider.getImage(element);
-			else if (element instanceof JavaProjectSettings) {
-				if (fSettingsImage == null || fSettingsImage.isDisposed())
-					fSettingsImage= JavaPluginImages.DESC_OBJS_PROJECT_SETTINGS.createImage();
-				image= fSettingsImage;
-			}
 			return decorateImage(image, element);
 		}
 		return image;
@@ -103,15 +111,17 @@ public final class JavaModelLabelProvider extends AppearanceAwareLabelProvider {
 	 * {@inheritDoc}
 	 */
 	public String getText(final Object element) {
+		if (element instanceof IFolder) {
+			final IFolder folder= (IFolder) element;
+			if (folder.getName().equals(NAME_SETTINGS_FOLDER))
+				return decorateText(fPreferencesLabel, element);
+		}
 		String text= super.getText(element);
 		if (text == null || "".equals(text)) { //$NON-NLS-1$
 			if (element instanceof RefactoringHistory)
 				text= fRefactoringsLabel;
 			else if (element instanceof RefactoringDescriptorProxy)
 				text= fHistoryLabelProvider.getText(element);
-			else if (element instanceof JavaProjectSettings) {
-				text= fPreferencesLabel;
-			}
 			return decorateText(text, element);
 		}
 		return text;
