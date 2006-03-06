@@ -2516,7 +2516,41 @@ public class ModifierCorrectionsQuickFixTest extends QuickFixTest {
 		expected[0]= buf.toString();
 
 		assertExpectedExistInProposals(proposals, expected);
-		}
+	}
+	
+	public void testMisspelledSuppressToken() throws Exception {
+		IPackageFragment pack1= fSourceFolder.createPackageFragment("a", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    @SuppressWarnings(\"unusd\")\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit cu= pack1.createCompilationUnit("A.java", buf.toString(), false, null);
+
+		CompilationUnit astRoot= getASTRoot(cu);
+		ArrayList proposals= collectCorrections(cu, astRoot);
+
+		assertCorrectLabels(proposals);
+		assertNumberOfProposals(proposals, 1);
+
+		String[] expected= new String[1];
+		buf= new StringBuffer();
+		buf.append("package a;\n");
+		buf.append("\n");
+		buf.append("public class A {\n");
+		buf.append("    @SuppressWarnings(\"unused\")\n");
+		buf.append("    public static void main(String[] args) {\n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		expected[0]= buf.toString();
+
+		assertExpectedExistInProposals(proposals, expected);
+	}
+
+	
 
 	public void testMakeFinalBug129165() throws Exception {
 		IPackageFragment pack1= fSourceFolder.createPackageFragment("test1", false, null);
