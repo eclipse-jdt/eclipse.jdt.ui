@@ -55,7 +55,7 @@ public abstract class AbstractReusableInformationControlCreator implements IInfo
 	 * @see org.eclipse.jface.text.IInformationControlCreatorExtension#canReuse(org.eclipse.jface.text.IInformationControl)
 	 */
 	public boolean canReuse(IInformationControl control) {
-		return control != null && fInformationControls.containsValue(control);
+		return fInformationControls.containsValue(control);
 	}
 
 	/*
