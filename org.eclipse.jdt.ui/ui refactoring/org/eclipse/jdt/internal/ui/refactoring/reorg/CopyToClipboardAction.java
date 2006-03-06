@@ -10,7 +10,6 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.ui.refactoring.reorg;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;
@@ -237,11 +236,7 @@ public class CopyToClipboardAction extends SelectionDispatchAction{
 			if (location != null) {
 				fileName.add(location.toOSString());
 			} else {
-				// try to put the URI if we don't have a location in the
-				// local file system.
-				URI locationURI= resource.getLocationURI();
-				if (locationURI != null)
-					fileName.add(locationURI);
+				// not a file system path. skip file.
 			}
 		}
 		
