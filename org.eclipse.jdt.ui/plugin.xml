@@ -5017,7 +5017,7 @@
    
    <extension
          point="org.eclipse.ui.navigator.viewer">
-      <viewerContentBinding viewerId="org.eclipse.team.ui.navigatorViewer">
+      <viewerContentBinding viewerId="org.eclipse.team.cvs.ui.workspaceSynchronization">
          <includes>
             <contentExtension
                   isRoot="true"
@@ -5038,35 +5038,47 @@
             priority="normal">
          <triggerPoints>
             <or>
+               <instanceof value="org.eclipse.jdt.core.IJavaElement" />
                <instanceof value="org.eclipse.jdt.internal.ui.model.JavaModelProvider"/>
                <instanceof value="org.eclipse.ltk.core.refactoring.history.RefactoringHistory"/>
                <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy"/>
                <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptor"/>
                <instanceof value="org.eclipse.team.core.mapping.ISynchronizationScope"/>
                <instanceof value="org.eclipse.team.core.mapping.ISynchronizationContext"/>
-               <instanceof value="org.eclipse.jdt.core.IJavaElement" />
             </or>
          </triggerPoints>
-         <actionProvider class="org.eclipse.ltk.ui.refactoring.model.RefactoringSynchronizationActionProvider">
-            <enablement>
-               <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy"/>
-               <instanceof value="org.eclipse.ltk.core.refactoring.history.RefactoringHistory"/>
-            </enablement>
-         </actionProvider>
          <commonSorter
                class="org.eclipse.jdt.ui.JavaElementSorter"
                id="org.eclipse.jdt.ui.JavaElementSorter">
             <parentExpression>
-               <adapt type="org.eclipse.jdt.core.IJavaElement"/>
-               <instanceof value="org.eclipse.jdt.internal.ui.model.JavaModelProvider"/>
+               <or>
+                  <adapt type="org.eclipse.jdt.core.IJavaElement"/>
+                  <instanceof value="org.eclipse.jdt.internal.ui.model.JavaModelProvider"/>
+               </or>
             </parentExpression>
          </commonSorter>
          <override
                policy="InvokeAlwaysRegardlessOfSuppressedExt"
                suppressedExtensionId="org.eclipse.team.ui.resourceContent"/>
          <possibleChildren>
-         	<instanceof value="org.eclipse.jdt.core.IJavaElement" />
+          <or>
+             <instanceof value="org.eclipse.jdt.core.IJavaElement"/>
+             <instanceof value="org.eclipse.core.resources.IFolder"/>
+             <instanceof value="org.eclipse.core.resources.IFile"/>
+             <instanceof value="org.eclipse.ltk.core.refactoring.history.RefactoringHistory"/>
+             <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy"/>
+             <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptor"/>
+          </or>
 		 </possibleChildren>
+         <actionProvider class="org.eclipse.ltk.ui.refactoring.model.RefactoringSynchronizationActionProvider">
+            <enablement>
+               <or>
+                  <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptorProxy"/>
+                  <instanceof value="org.eclipse.ltk.core.refactoring.RefactoringDescriptor"/>
+                  <instanceof value="org.eclipse.ltk.core.refactoring.history.RefactoringHistory"/>
+               </or>
+            </enablement>
+         </actionProvider>
       </navigatorContent>
    </extension>
    <extension
