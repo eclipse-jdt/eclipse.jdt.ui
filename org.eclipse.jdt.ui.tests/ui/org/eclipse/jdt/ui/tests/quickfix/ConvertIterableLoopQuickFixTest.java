@@ -615,4 +615,88 @@ public final class ConvertIterableLoopQuickFixTest extends QuickFixTest {
 		String expected= buf.toString();
 		assertEqualString(preview, expected);
 	}
+	
+	public void testBug129508_1() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(List<Integer> list) {\n");
+		buf.append("       for (Iterator<Integer> iter = list.iterator(); iter.hasNext();) {\n");
+		buf.append("            Integer id = iter.next();\n");
+		buf.append("            iter.remove();\n");
+		buf.append("       } \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, unit);
+		assertNull(fConvertLoopProposal);
+		assertCorrectLabels(proposals);
+	}
+	
+	public void testBug129508_2() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(List<Integer> list) {\n");
+		buf.append("       for (Iterator<Integer> iter = list.iterator(); iter.hasNext();) {\n");
+		buf.append("            Integer id = iter.next();\n");
+		buf.append("            iter.next();\n");
+		buf.append("       } \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, unit);
+		assertNull(fConvertLoopProposal);
+		assertCorrectLabels(proposals);
+	}
+	
+	public void testBug129508_3() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(List<Integer> list) {\n");
+		buf.append("       for (Iterator<Integer> iter = list.iterator(); iter.hasNext();) {\n");
+		buf.append("            Integer id = iter.next();\n");
+		buf.append("            boolean x= iter.hasNext();\n");
+		buf.append("       } \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, unit);
+		assertNull(fConvertLoopProposal);
+		assertCorrectLabels(proposals);
+	}
+	
+	public void testBug129508_4() throws Exception {
+		IPackageFragment pack= fSourceFolder.createPackageFragment("test1", false, null);
+		StringBuffer buf= new StringBuffer();
+		buf.append("package test1;\n");
+		buf.append("import java.util.Iterator;\n");
+		buf.append("import java.util.List;\n");
+		buf.append("public class E1 {\n");
+		buf.append("    public void foo(List<Integer> list) {\n");
+		buf.append("       for (Iterator<Integer> iter = list.iterator(); iter.hasNext();) {\n");
+		buf.append("            Integer id = iter.next();\n");
+		buf.append("            Integer id2= iter.next();\n");
+		buf.append("       } \n");
+		buf.append("    }\n");
+		buf.append("}\n");
+		ICompilationUnit unit= pack.createCompilationUnit("E1.java", buf.toString(), false, null);
+
+		List proposals= fetchConvertingProposal(buf, unit);
+		assertNull(fConvertLoopProposal);
+		assertCorrectLabels(proposals);
+	}
 }

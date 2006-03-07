@@ -350,6 +350,8 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 				}
 			}
 			final Statement statement= fStatement.getBody();
+			final boolean[] otherInvocationThenNext= new boolean[] {false};
+			final int[] nextInvocationCount= new int[] {0};
 			if (statement != null && fIterator != null) {
 				final ITypeBinding iterable= getIterableType(fIterator.getType());
 				statement.accept(new ASTVisitor() {
@@ -393,24 +395,59 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 								if (expression instanceof Name) {
 									final Name qualifier= (Name) expression;
 									final IBinding result= qualifier.resolveBinding();
-									if (result != null && result.equals(fIterator))
-										return visit(left);
+									if (result != null && result.equals(fIterator)) {
+										nextInvocationCount[0]++;
+										return visit(left);	
+									}
 								} else if (expression instanceof FieldAccess) {
 									final FieldAccess qualifier= (FieldAccess) expression;
 									final IBinding result= qualifier.resolveFieldBinding();
-									if (result != null && result.equals(fIterator))
+									if (result != null && result.equals(fIterator)) {
+										nextInvocationCount[0]++;
 										return visit(left);
+									}
 								}
+							} else {
+								return visit(invocation);
 							}
 						} else if (right instanceof NullLiteral)
 							return visit(left);
 						return true;
+					}
+					
+					/**
+					 * {@inheritDoc}
+					 */
+					public boolean visit(MethodInvocation invocation) {
+						final IMethodBinding binding= invocation.resolveMethodBinding();
+						if (binding != null) {
+							final Expression expression= invocation.getExpression();
+							if (expression instanceof Name) {
+								final Name qualifier= (Name) expression;
+								final IBinding result= qualifier.resolveBinding();
+								if (result != null && result.equals(fIterator)) {
+									otherInvocationThenNext[0]= true;
+								}
+							} else if (expression instanceof FieldAccess) {
+								final FieldAccess qualifier= (FieldAccess) expression;
+								final IBinding result= qualifier.resolveFieldBinding();
+								if (result != null && result.equals(fIterator)) {
+									otherInvocationThenNext[0]= true;
+								}
+							}
+						}
+						return false;
 					}
 
 					public final boolean visit(final VariableDeclarationFragment node) {
 						return visit(node.getName(), node.getInitializer());
 					}
 				});
+				if (otherInvocationThenNext[0])
+					return false;
+				
+				if (nextInvocationCount[0] > 1)
+					return false;
 			}
 			final ASTNode root= fStatement.getRoot();
 			if (root != null) {
