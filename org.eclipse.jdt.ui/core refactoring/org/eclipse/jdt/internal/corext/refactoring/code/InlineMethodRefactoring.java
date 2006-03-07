@@ -184,7 +184,7 @@ public class InlineMethodRefactoring extends CommentRefactoring implements IInit
 		fSourceProvider= new SourceProvider(unit, node);
 		fTargetProvider= TargetProvider.create(node);
 		fInitialMode= fCurrentMode= Mode.INLINE_ALL;
-		fDeleteSource= true;
+		fDeleteSource= canEnableDeleteSource();
 	}
 	
 	/**
