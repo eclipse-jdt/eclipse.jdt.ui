@@ -10,10 +10,17 @@
  *******************************************************************************/
 package org.eclipse.jdt.internal.junit.ui;
 
+import java.util.HashSet;
+import java.util.Set;
+
 import org.eclipse.core.runtime.CoreException;
+import org.eclipse.core.runtime.IProgressMonitor;
 
 import org.eclipse.jdt.core.IJavaElement;
+import org.eclipse.jdt.core.IJavaModel;
 import org.eclipse.jdt.core.IJavaProject;
+import org.eclipse.jdt.core.IType;
+import org.eclipse.jdt.core.JavaModelException;
 
 import org.eclipse.swt.widgets.Shell;
 
@@ -33,9 +40,6 @@ public abstract class OpenEditorAction extends Action {
 	protected TestRunnerViewPart fTestRunner;
 	private final boolean fActivate;
 	
-	/**
-	 * Constructor for OpenEditorAction.
-	 */
 	protected OpenEditorAction(TestRunnerViewPart testRunner, String testClassName) {
 		this(testRunner, testClassName, true);
 	}
@@ -86,5 +90,32 @@ public abstract class OpenEditorAction extends Action {
 	protected abstract IJavaElement findElement(IJavaProject project, String className) throws CoreException;
 	
 	protected abstract void reveal(ITextEditor editor);
+
+	protected IType findType(IJavaProject project, String className) throws JavaModelException {
+		return internalFindType(project, className, new HashSet());
+	}
+
+	private IType internalFindType(IJavaProject project, String className, Set/*<IJavaProject>*/ visitedProjects) throws JavaModelException {
+		if (visitedProjects.contains(project))
+			return null;
+		
+		IType type= project.findType(className, (IProgressMonitor) null);
+		if (type != null)
+			return type;
+		
+		//fix for bug 87492: visit required projects explicitly to also find not exported types
+		visitedProjects.add(project);
+		IJavaModel javaModel= project.getJavaModel();
+		String[] requiredProjectNames= project.getRequiredProjectNames();
+		for (int i= 0; i < requiredProjectNames.length; i++) {
+			IJavaProject requiredProject= javaModel.getJavaProject(requiredProjectNames[i]);
+			if (requiredProject.exists()) {
+				type= internalFindType(requiredProject, className, visitedProjects);
+				if (type != null)
+					return type;
+			}
+		}
+		return null;
+	}
 	
 }
