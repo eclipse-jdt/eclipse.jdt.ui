@@ -426,13 +426,21 @@ public final class ConvertIterableLoopOperation extends AbstractLinkedFixRewrite
 								final Name qualifier= (Name) expression;
 								final IBinding result= qualifier.resolveBinding();
 								if (result != null && result.equals(fIterator)) {
-									otherInvocationThenNext[0]= true;
+									if (!binding.getName().equals("next") && !binding.getName().equals("nextElement")) {  //$NON-NLS-1$ //$NON-NLS-2$
+										otherInvocationThenNext[0]= true;
+									} else {
+										nextInvocationCount[0]++;
+									}
 								}
 							} else if (expression instanceof FieldAccess) {
 								final FieldAccess qualifier= (FieldAccess) expression;
 								final IBinding result= qualifier.resolveFieldBinding();
 								if (result != null && result.equals(fIterator)) {
-									otherInvocationThenNext[0]= true;
+									if (!binding.getName().equals("next") && !binding.getName().equals("nextElement")) {  //$NON-NLS-1$ //$NON-NLS-2$
+										otherInvocationThenNext[0]= true;
+									} else {
+										nextInvocationCount[0]++;
+									}
 								}
 							}
 						}
