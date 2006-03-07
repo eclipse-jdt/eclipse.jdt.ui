@@ -100,7 +100,7 @@ class NLSSearchResultRequestor extends SearchRequestor {
 		if (javaElement instanceof ISourceReference) {
 			String source= ((ISourceReference) javaElement).getSource();
 			if (source != null) {
-				if (source.indexOf("NLS.initializeMessages(BUNDLE_NAME") != -1) //$NON-NLS-1$
+				if (source.indexOf("NLS.initializeMessages") != -1) //$NON-NLS-1$
 					return;
 			}
 		}
@@ -194,26 +194,20 @@ class NLSSearchResultRequestor extends SearchRequestor {
 			scanner.setSource(source.toCharArray());
 			
 			try {
-				int tok= scanner.getNextToken(); //ClassName
-				if (tok != ITerminalSymbols.TokenNameIdentifier)
-					return null;
-				tok= scanner.getNextToken();
-				if (tok != ITerminalSymbols.TokenNameDOT)
-					return null;
-				tok= scanner.getNextToken();
-				if (tok != ITerminalSymbols.TokenNameIdentifier)
-					return null;
-				String src= new String(scanner.getCurrentTokenSource());
-				if (src.equals("getString")) { //$NON-NLS-1$
-					//Old school
-					// skip type and method names:
-					while (tok != ITerminalSymbols.TokenNameEOF && 
-							(tok == ITerminalSymbols.TokenNameIdentifier || tok == ITerminalSymbols.TokenNameDOT)) {
-						tok= scanner.getNextToken();
+				String src= null;
+				int tok= scanner.getNextToken();
+				// skip type and method names:
+				while (tok != ITerminalSymbols.TokenNameEOF && 
+						(tok == ITerminalSymbols.TokenNameIdentifier || tok == ITerminalSymbols.TokenNameDOT)) {
+					if (tok == ITerminalSymbols.TokenNameIdentifier) {
+						src= new String(scanner.getCurrentTokenSource());
+					} else {
+						src= null;
 					}
-					// next must be '('
-					if (tok == ITerminalSymbols.TokenNameEOF || tok != ITerminalSymbols.TokenNameLPAREN)
-						return null;
+					tok= scanner.getNextToken();
+				}
+				if (tok == ITerminalSymbols.TokenNameLPAREN) {
+					// Old school
 					tok= scanner.getNextToken();
 					// next must be key string:
 					if (tok == ITerminalSymbols.TokenNameEOF || tok != ITerminalSymbols.TokenNameStringLiteral)
@@ -225,7 +219,6 @@ class NLSSearchResultRequestor extends SearchRequestor {
 					keyPositionResult.setLength(keyEnd - keyStart);
 					return source.substring(keyStart, keyEnd);
 				} else {
-					//Eclipse style
 					return src;
 				}
 			} catch (InvalidInputException e) {
