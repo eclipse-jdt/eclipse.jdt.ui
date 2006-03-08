@@ -10,6 +10,7 @@
  *******************************************************************************/
 package org.eclipse.jdt.jeview.views;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -19,6 +20,7 @@ import java.util.Set;
 
 import org.eclipse.core.runtime.CoreException;
 import org.eclipse.core.runtime.IAdaptable;
+import org.eclipse.core.runtime.IProgressMonitor;
 import org.eclipse.core.runtime.IStatus;
 import org.eclipse.core.runtime.ListenerList;
 import org.eclipse.core.runtime.Status;
@@ -44,6 +46,7 @@ import org.eclipse.jface.action.Separator;
 import org.eclipse.jface.dialogs.ErrorDialog;
 import org.eclipse.jface.dialogs.InputDialog;
 import org.eclipse.jface.dialogs.MessageDialog;
+import org.eclipse.jface.operation.IRunnableWithProgress;
 import org.eclipse.jface.resource.ImageDescriptor;
 import org.eclipse.jface.viewers.DoubleClickEvent;
 import org.eclipse.jface.viewers.IDoubleClickListener;
@@ -68,6 +71,7 @@ import org.eclipse.ui.IViewPart;
 import org.eclipse.ui.IWorkbenchActionConstants;
 import org.eclipse.ui.IWorkbenchPage;
 import org.eclipse.ui.PartInitException;
+import org.eclipse.ui.PlatformUI;
 import org.eclipse.ui.actions.ActionFactory;
 import org.eclipse.ui.part.DrillDownAdapter;
 import org.eclipse.ui.part.IShowInSource;
@@ -89,8 +93,10 @@ import org.eclipse.jdt.core.ICodeAssist;
 import org.eclipse.jdt.core.ICompilationUnit;
 import org.eclipse.jdt.core.IJavaElement;
 import org.eclipse.jdt.core.IJavaModel;
+import org.eclipse.jdt.core.IJavaProject;
 import org.eclipse.jdt.core.ISourceRange;
 import org.eclipse.jdt.core.ISourceReference;
+import org.eclipse.jdt.core.IType;
 import org.eclipse.jdt.core.JavaCore;
 import org.eclipse.jdt.core.JavaModelException;
 
@@ -112,6 +118,7 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 	JERoot fInput;
 	
 	private Action fFocusAction;
+	private Action fFindTypeAction;
 	private Action fResetAction;
 	private Action fCodeSelectAction;
 	private Action fElementAtAction;
@@ -280,8 +287,13 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 		manager.add(fResetAction);
 		manager.add(fRefreshAction);
 		manager.add(new Separator());
+		
+		addFindTypeActionOrNot(manager);
+		manager.add(new Separator());
+		
 		manager.add(fCopyAction);
 		manager.add(new Separator());
+		
 		fDrillDownAdapter.addNavigationActions(manager);
 		manager.add(new Separator());
 		// Other plug-ins can contribute there actions here
@@ -300,6 +312,21 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 					String name= ((JavaElement) first).getJavaElement().getElementName();
 					fFocusAction.setText("Fo&cus On '" + name + '\'');
 					manager.add(fFocusAction);
+				}
+			}
+		}
+	}
+	
+	private void addFindTypeActionOrNot(IMenuManager manager) {
+		if (fViewer.getSelection() instanceof IStructuredSelection) {
+			IStructuredSelection structuredSelection= (IStructuredSelection) fViewer.getSelection();
+			if (structuredSelection.size() == 1) {
+				Object first= structuredSelection.getFirstElement();
+				if (first instanceof JavaElement) {
+					IJavaElement javaElement= ((JavaElement) first).getJavaElement();
+					if (javaElement instanceof IJavaProject) {
+						manager.add(fFindTypeAction);
+					}
 				}
 			}
 		}
@@ -396,6 +423,41 @@ public class JavaElementView extends ViewPart implements IShowInSource, IShowInT
 			}
 		};
 		fFocusAction.setToolTipText("Focus on Selection");
+		
+		fFindTypeAction= new Action() {
+			@Override public void run() {
+				Object selected= ((IStructuredSelection) fViewer.getSelection()).getFirstElement();
+				final IJavaProject project= (IJavaProject) ((JavaElement) selected).getJavaElement();
+				
+				InputDialog dialog= new InputDialog(getSite().getShell(), "IJavaProject#findType(String fullyQualifiedName, IProgressMonitor pm)", "fullyQualifiedName:", "", null);
+				if (dialog.open() != Window.OK)
+					return;
+				final String fullyQualifiedName= dialog.getValue();
+				
+				class Runner implements IRunnableWithProgress {
+					IType type;
+					public void run(IProgressMonitor monitor) throws InvocationTargetException, InterruptedException {
+						try {
+							type= project.findType(fullyQualifiedName, monitor);
+						} catch (JavaModelException e) {
+							throw new InvocationTargetException(e);
+						}
+					}
+				}
+				Runner runner= new Runner();
+				try {
+					PlatformUI.getWorkbench().getProgressService().busyCursorWhile(runner);
+				} catch (InvocationTargetException e) {
+					JEViewPlugin.log(e);
+				} catch (InterruptedException e) {
+					JEViewPlugin.log(e);
+				}
+				JavaElement element= new JavaElement(fInput, fullyQualifiedName, runner.type);
+				fViewer.add(fInput, element);
+				fViewer.setSelection(new StructuredSelection(element));
+			}
+		};
+		fFindTypeAction.setText("findType(..)...");
 		
 		fResetAction= new Action("&Reset View", getJavaModelImageDescriptor()) {
 			@Override public void run() {
