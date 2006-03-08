@@ -192,13 +192,8 @@ class AccessorClassCreator {
 				.append("return '!' + key + '!';").append(lineDelim) //$NON-NLS-1$
 				.append("}").toString(); //$NON-NLS-1$
 
-		String methodBody= CodeGeneration.getMethodBodyContent(fCu, fAccessorClassName, "getString", false, bodyStatement, //$NON-NLS-1$
-				lineDelim);
-		if (methodBody == null) {
-			methodBody= ""; //$NON-NLS-1$
-		}
 		return "public static String getString(String key) {" //$NON-NLS-1$
-				+ lineDelim + methodBody + lineDelim + '}';
+				+ lineDelim + bodyStatement + lineDelim + '}';
 	}
 	
 	private String createStaticInitializer(String lineDelim) throws CoreException {
