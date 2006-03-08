@@ -38,7 +38,6 @@ import org.eclipse.jdt.internal.corext.dom.GenericVisitor;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
 import org.eclipse.jdt.internal.corext.dom.VariableDeclarationRewrite;
 import org.eclipse.jdt.internal.corext.refactoring.structure.CompilationUnitRewrite;
-import org.eclipse.jdt.internal.corext.util.Messages;
 
 import org.eclipse.jdt.internal.ui.text.correction.ASTResolving;
 
@@ -103,7 +102,7 @@ public class VariableDeclarationFix extends AbstractFix {
 			if (fAddFinalFields)
 				return handleFragments(node.fragments(), node);
 			
-			return super.visit(node);
+			return false;
 		}
 		
 		/**
@@ -113,7 +112,7 @@ public class VariableDeclarationFix extends AbstractFix {
 			if (fAddFinalLocals)
 				return handleFragments(node.fragments(), node);
 			
-			return super.visit(node);
+			return false;
 		}
 
 		/**
@@ -121,7 +120,7 @@ public class VariableDeclarationFix extends AbstractFix {
 		 */
 		public boolean visit(VariableDeclarationExpression node) {
 			if (fAddFinalLocals && node.fragments().size() == 1) {
-				ModifierChangeOperation op= createAddFinalOperation(((VariableDeclarationFragment)node.fragments().get(0)).getName(), fCompilationUnit);
+				ModifierChangeOperation op= createAddFinalOperation(((VariableDeclarationFragment)node.fragments().get(0)).getName(), fCompilationUnit, node);
 				if (op == null)
 					return false;
 				
@@ -153,9 +152,21 @@ public class VariableDeclarationFix extends AbstractFix {
 		/**
 		 * {@inheritDoc}
 		 */
+		public boolean visit(VariableDeclarationFragment node) {
+			ModifierChangeOperation op= createAddFinalOperation(node.getName(), fCompilationUnit, node);
+			if (op == null)
+				return false;
+			
+			fResult.add(op);
+			return false;
+		}
+		
+		/**
+		 * {@inheritDoc}
+		 */
 		public boolean visit(SingleVariableDeclaration node) {
 			if (fAddFinalParameters && fAddFinalLocals) {
-				ModifierChangeOperation op= createAddFinalOperation(node.getName(), fCompilationUnit);
+				ModifierChangeOperation op= createAddFinalOperation(node.getName(), fCompilationUnit, node);
 				if (op == null)
 					return false;
 				
@@ -170,7 +181,7 @@ public class VariableDeclarationFix extends AbstractFix {
 				if (!varBinding.isParameter())
 					return false;
 				
-				ModifierChangeOperation op= createAddFinalOperation(node.getName(), fCompilationUnit);
+				ModifierChangeOperation op= createAddFinalOperation(node.getName(), fCompilationUnit, node);
 				if (op == null)
 					return false;
 				
@@ -185,7 +196,7 @@ public class VariableDeclarationFix extends AbstractFix {
 				if (varBinding.isParameter())
 					return false;
 				
-				ModifierChangeOperation op= createAddFinalOperation(node.getName(), fCompilationUnit);
+				ModifierChangeOperation op= createAddFinalOperation(node.getName(), fCompilationUnit, node);
 				if (op == null)
 					return false;
 				
@@ -233,15 +244,30 @@ public class VariableDeclarationFix extends AbstractFix {
 		}
 	}
 	
-	public static IFix createChangeModifierToFinalFix(CompilationUnit compilationUnit, ASTNode node) {
-		if (!(node instanceof SimpleName))
+	public static IFix createChangeModifierToFinalFix(final CompilationUnit compilationUnit, ASTNode[] selectedNodes) {
+		HashSet writtenNames= new HashSet(); 
+		WrittenNamesFinder finder= new WrittenNamesFinder(writtenNames);
+		compilationUnit.accept(finder);
+		List ops= new ArrayList();
+		VariableDeclarationFinder visitor= new VariableDeclarationFinder(true, true, true, compilationUnit, ops, writtenNames);
+		for (int i= 0; i < selectedNodes.length; i++) {
+			ASTNode selectedNode= selectedNodes[i];
+			if (selectedNode instanceof SimpleName) {
+				selectedNode= selectedNode.getParent();
+			}
+			selectedNode.accept(visitor);
+		}
+		if (ops.size() == 0)
 			return null;
 		
-		ModifierChangeOperation op= createAddFinalOperation((SimpleName)node, compilationUnit);
-		if (op == null)
-			return null;
-
-		return new VariableDeclarationFix(Messages.format(FixMessages.VariableDeclarationFix_changeModifierToFinal_description, ((SimpleName)node).getIdentifier()), compilationUnit, new IFixRewriteOperation[] {op});
+		IFixRewriteOperation[] result= (IFixRewriteOperation[])ops.toArray(new IFixRewriteOperation[ops.size()]);
+		String label;
+		if (result.length == 1) {
+			label= FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description;
+		} else {
+			label= FixMessages.VariableDeclarationFix_ChangeMidifiersToFinalWherPossible_description;
+		}
+		return new VariableDeclarationFix(label, compilationUnit, result);
 	}
 	
 	public static IFix createCleanUp(CompilationUnit compilationUnit,
@@ -263,16 +289,15 @@ public class VariableDeclarationFix extends AbstractFix {
 		return new VariableDeclarationFix(FixMessages.VariableDeclarationFix_changeModifierOfUnknownToFinal_description, compilationUnit, (IFixRewriteOperation[])operations.toArray(new IFixRewriteOperation[operations.size()]));
 	}
 	
-	private static ModifierChangeOperation createAddFinalOperation(SimpleName name, CompilationUnit compilationUnit) {
+	private static ModifierChangeOperation createAddFinalOperation(SimpleName name, CompilationUnit compilationUnit, ASTNode decl) {
+		if (decl == null)
+			return null;
+		
 		IBinding binding= name.resolveBinding();
-		if (!canAddFinal(binding, name, compilationUnit.findDeclaringNode(binding)))
+		if (!canAddFinal(binding, name, decl))
 			return null;
 		
 		if (isWrittenOutsideInitializer(compilationUnit, (IVariableBinding)binding))
-			return null;
-
-		ASTNode decl= compilationUnit.findDeclaringNode(binding);
-		if (decl == null)
 			return null;
 		
 		if (decl instanceof SingleVariableDeclaration) {

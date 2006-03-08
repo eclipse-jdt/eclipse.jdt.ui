@@ -1907,7 +1907,7 @@ public class AdvancedQuickAssistTest extends QuickFixTest {
 		List proposals= collectAssists(context, false);
 
 		assertCorrectLabels(proposals);
-		assertNumberOfProposals(proposals, 9);
+		assertNumberOfProposals(proposals, 10);
 
 		String[] expected= new String[7];
 

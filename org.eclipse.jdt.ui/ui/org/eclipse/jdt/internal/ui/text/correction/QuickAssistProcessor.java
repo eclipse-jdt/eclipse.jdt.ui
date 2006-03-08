@@ -93,6 +93,8 @@ import org.eclipse.jdt.internal.corext.dom.ASTNodeFactory;
 import org.eclipse.jdt.internal.corext.dom.ASTNodes;
 import org.eclipse.jdt.internal.corext.dom.Bindings;
 import org.eclipse.jdt.internal.corext.dom.LinkedNodeFinder;
+import org.eclipse.jdt.internal.corext.dom.Selection;
+import org.eclipse.jdt.internal.corext.dom.SelectionAnalyzer;
 import org.eclipse.jdt.internal.corext.fix.ControlStatementsFix;
 import org.eclipse.jdt.internal.corext.fix.IFix;
 import org.eclipse.jdt.internal.corext.fix.VariableDeclarationFix;
@@ -1314,7 +1316,13 @@ public class QuickAssistProcessor implements IQuickAssistProcessor {
 	}
 	
 	private boolean getMakeVariableDeclarationFinalProposals(IInvocationContext context, ASTNode node, ArrayList resultingCollections) {
-		IFix fix= VariableDeclarationFix.createChangeModifierToFinalFix(context.getASTRoot(), node);
+		SelectionAnalyzer analyzer= new SelectionAnalyzer(Selection.createFromStartLength(context.getSelectionOffset(), context.getSelectionLength()), false);
+		context.getASTRoot().accept(analyzer);
+		ASTNode[] selectedNodes= analyzer.getSelectedNodes();
+		if (selectedNodes.length == 0)
+			return false;
+		
+		IFix fix= VariableDeclarationFix.createChangeModifierToFinalFix(context.getASTRoot(), selectedNodes);
 		if (fix == null)
 			return false;
 		
